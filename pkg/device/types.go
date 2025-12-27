@@ -99,12 +99,14 @@ func GenerateUserCode() string {
 	b := make([]byte, 8)
 	_, _ = rand.Read(b)
 	code := make([]byte, 9) // 8 chars + 1 dash
+	// First 4 characters
 	for i := 0; i < 4; i++ {
 		code[i] = chars[int(b[i])%len(chars)]
 	}
 	code[4] = '-'
-	for i := 5; i < 9; i++ {
-		code[i] = chars[int(b[i-1])%len(chars)]
+	// Last 4 characters
+	for i := 0; i < 4; i++ {
+		code[5+i] = chars[int(b[4+i])%len(chars)]
 	}
 	return string(code)
 }

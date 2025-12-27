@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"crypto/rsa"
 	"errors"
 	"sync"
 )
@@ -9,18 +8,18 @@ import (
 // MemoryKeyStore implements KeyProvider in memory
 type MemoryKeyStore struct {
 	mu   sync.RWMutex
-	keys map[string]*rsa.PublicKey // Map "clientID:keyID" -> PublicKey
+	keys map[string]any // Map "clientID:keyID" -> PublicKey (RSA, ECDSA, Ed25519)
 }
 
 // NewMemoryKeyStore creates a new memory key store
 func NewMemoryKeyStore() *MemoryKeyStore {
 	return &MemoryKeyStore{
-		keys: make(map[string]*rsa.PublicKey),
+		keys: make(map[string]any),
 	}
 }
 
 // GetPublicKey retrieves a public key
-func (m *MemoryKeyStore) GetPublicKey(clientID string, keyID string) (*rsa.PublicKey, error) {
+func (m *MemoryKeyStore) GetPublicKey(clientID string, keyID string) (any, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -32,7 +31,7 @@ func (m *MemoryKeyStore) GetPublicKey(clientID string, keyID string) (*rsa.Publi
 }
 
 // RegisterKey registers a public key for a client
-func (m *MemoryKeyStore) RegisterKey(clientID string, keyID string, key *rsa.PublicKey) {
+func (m *MemoryKeyStore) RegisterKey(clientID string, keyID string, key any) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

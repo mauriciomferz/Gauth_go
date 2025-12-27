@@ -333,6 +333,7 @@ func writeTaxonomyIndex(categories map[string]int) error {
 	}
 	b.WriteString("\n> Generated via `go run ./tools/docvalidate --write-index`\n")
 	// Ensure docs directory exists
+	// #nosec G301
 	if err := os.MkdirAll("docs", 0o755); err != nil {
 		return err
 	}

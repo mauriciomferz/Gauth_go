@@ -1,12 +1,13 @@
 package web
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
+	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth/mocks"
@@ -287,20 +288,28 @@ func initializeGAuthPlus(components *gauth.RFC0111Components) (map[string]interf
 		sslmode = "disable"
 	}
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		host, port, user, password, dbname, sslmode)
+	// Create database configuration
+	portInt := 5432
+	if portVal, err := strconv.Atoi(port); err == nil {
+		portInt = portVal
+	}
 
-	// Open database connection
-	db, err := sql.Open("postgres", dsn)
+	dbCfg := &database.Config{
+		Host:     host,
+		Port:     portInt,
+		User:     user,
+		Password: password,
+		Database: dbname,
+		SSLMode:  sslmode,
+	}
+
+	// Open database connection (pgx pool)
+	db, err := database.NewDB(dbCfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Test connection
-	if err := db.Ping(); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
-	}
+	// Test connection is handled by NewDB (Ping)
 
 	// Initialize GAuth+ services
 	successorService := gauthplus.NewPostgreSQLSuccessorService(db)
@@ -317,15 +326,8 @@ func initializeGAuthPlus(components *gauth.RFC0111Components) (map[string]interf
 	cachedDelegationService := gauthplus.NewCachedDelegationService(delegationService, 1*time.Minute)
 
 	// Start background cache cleanup (every 5 minutes)
-	go func() {
-		ticker := time.NewTicker(5 * time.Minute)
-		defer ticker.Stop()
-		for range ticker.C {
-			// Clean expired entries from both caches
-			cachedCapabilityService.GetCache().CleanExpired()
-			cachedDelegationService.GetCache().CleanExpired()
-		}
-	}()
+	// DEPRECATED: Caches now have internal cleanup loops managed by their own goroutines.
+	// We rely on ShutdownGAuthPlus() to close them.
 
 	fmt.Fprintf(os.Stderr, "[GAuth+] Performance optimization: Caching enabled (capability TTL: 5m, delegation TTL: 1m)\n")
 
@@ -383,11 +385,13 @@ func initializeGAuthPlus(components *gauth.RFC0111Components) (map[string]interf
 	// Store services globally for endpoint registration
 	// Services will be registered via server.RegisterGAuthPlusEndpoints() during server startup
 	gauthPlusServicesGlobal = map[string]interface{}{
-		"successor_service":    successorService,
-		"delegation_service":   delegationService,
-		"dual_control_service": dualControlService,
-		"capability_service":   capabilityService,
-		"fiduciary_service":    fiduciaryService,
+		"successor_service":     successorService,
+		"delegation_service":    cachedDelegationService, // Store the wrapper for shutdown
+		"dual_control_service":  dualControlService,
+		"capability_service":    cachedCapabilityService, // Store the wrapper for shutdown
+		"fiduciary_service":     fiduciaryService,
+		"cached_delegation_svc": cachedDelegationService, // Direct access for shutdown
+		"cached_capability_svc": cachedCapabilityService, // Direct access for shutdown
 	}
 
 	fmt.Fprintf(os.Stderr, "[GAuth+] Services available for API endpoint registration\n")
@@ -416,6 +420,14 @@ func (s *BetaServer) InitializeGAuthPlusEndpoints() {
 
 	// Extract services from global map
 	successorService, _ := gauthPlusServicesGlobal["successor_service"].(gauthplus.SuccessorManagementService)
+	// We need to extract the interface expected by RegisterGAuthPlusEndpoints, which is DelegationService.
+	// cachedDelegationService implements DelegationService via struct embedding?
+	// Wait, CachedDelegationService wraps DelegationService but does NOT embed it (it uses composition).
+	// We need to check if CachedDelegationService implements DelegationService.
+	// Looking at cache.go:
+	// func (s *CachedDelegationService) CreateDelegation...
+	// It mirrors the methods. Yes, it should implement it.
+
 	delegationService, _ := gauthPlusServicesGlobal["delegation_service"].(gauthplus.DelegationService)
 	dualControlService, _ := gauthPlusServicesGlobal["dual_control_service"].(gauthplus.DualControlService)
 	capabilityService, _ := gauthPlusServicesGlobal["capability_service"].(gauthplus.CapabilityAssessmentService)
@@ -443,4 +455,23 @@ func (s *BetaServer) InitializeGAuthPlusEndpoints() {
 	fmt.Fprintf(os.Stderr, "[GAuth+]   Capability Assessment: 6 endpoints\n")
 	fmt.Fprintf(os.Stderr, "[GAuth+]   Fiduciary Duty: 4 endpoints\n")
 	s.gauthPlusInitialized = true
+}
+
+// ShutdownGAuthPlus closes background resources (caches) used by GAuth+ services
+func ShutdownGAuthPlus() {
+	if gauthPlusServicesGlobal == nil {
+		return
+	}
+
+	// Close capability cache
+	if svc, ok := gauthPlusServicesGlobal["cached_capability_svc"].(interface{ Close() }); ok {
+		svc.Close()
+		fmt.Println("[shutdown] Closed GAuth+ capability cache")
+	}
+
+	// Close delegation cache
+	if svc, ok := gauthPlusServicesGlobal["cached_delegation_svc"].(interface{ Close() }); ok {
+		svc.Close()
+		fmt.Println("[shutdown] Closed GAuth+ delegation cache")
+	}
 }

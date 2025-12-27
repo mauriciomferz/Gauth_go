@@ -100,6 +100,7 @@ func (t *SSETransport) connectWithRetry(ctx context.Context, attempt int) error 
 
 	// Exponential backoff for reconnection
 	if attempt > 0 {
+		// #nosec G115
 		delay := sseReconnectDelay * time.Duration(1<<uint(attempt-1))
 		if delay > reconnectMaxDelay {
 			delay = reconnectMaxDelay
@@ -145,7 +146,7 @@ func (t *SSETransport) connectWithRetry(ctx context.Context, attempt int) error 
 
 	// Check response status
 	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		err := fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 		t.lastError = err
 		t.lastErrorTime = time.Now()
@@ -159,7 +160,7 @@ func (t *SSETransport) connectWithRetry(ctx context.Context, attempt int) error 
 	// Verify content type
 	contentType := resp.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "text/event-stream") {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return fmt.Errorf("unexpected content type: %s", contentType)
 	}
 
@@ -322,7 +323,7 @@ func (t *SSETransport) Close() error {
 
 	t.connMu.Lock()
 	if t.conn != nil {
-		t.conn.Close()
+		_ = t.conn.Close()
 		t.conn = nil
 	}
 	t.connected = false
@@ -344,7 +345,7 @@ func (t *SSETransport) handleDisconnect(err error) {
 	wasConnected := t.connected
 	t.connected = false
 	if t.conn != nil {
-		t.conn.Close()
+		_ = t.conn.Close()
 		t.conn = nil
 	}
 	t.connMu.Unlock()

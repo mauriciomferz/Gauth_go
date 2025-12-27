@@ -15,19 +15,19 @@ package main
 // Re-run when adding algorithms or changing canonical encoding rules.
 
 import (
-	"crypto/ecdsa"
-	"crypto/ed25519"
-	"crypto/elliptic"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"math/big"
-	"os"
-	"time"
+"crypto/ecdsa"
+"crypto/ed25519"
+"crypto/elliptic"
+"crypto/hmac"
+"crypto/sha256"
+"encoding/hex"
+"encoding/json"
+"fmt"
+"math/big"
+"os"
+"time"
 
-	bls "github.com/herumi/bls-eth-go-binary/bls"
+bls "github.com/herumi/bls-eth-go-binary/bls"
 )
 
 type vector struct {
@@ -180,8 +180,8 @@ func main() {
 		os.Exit(1)
 	}
 	// Include generation metadata header as JSON comment style (not strictly valid JSON) only if stdout is terminal? We'll just print pure JSON.
-	os.Stdout.Write(enc)
+_, _ = os.Stdout.Write(enc)
 
-	// Emit warning to stderr if non-deterministic vectors present.
-	fmt.Fprintf(os.Stderr, "Generated %d crypto vectors at %s\n", len(vectors), time.Now().UTC().Format(time.RFC3339))
+// Emit warning to stderr if non-deterministic vectors present.
+fmt.Fprintf(os.Stderr, "Generated %d crypto vectors at %s\n", len(vectors), time.Now().UTC().Format(time.RFC3339))
 }

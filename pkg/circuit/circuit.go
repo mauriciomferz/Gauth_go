@@ -137,7 +137,7 @@ func (cb *Breaker) onResult(success bool) {
 
 // shouldTrip checks if the circuit should trip to open state
 func (cb *Breaker) shouldTrip() bool {
-	//nolint:gosec // G115: maxFailures is config value, typically small
+	// #nosec G115: maxFailures is config value, typically small
 	return cb.counts.ConsecutiveFailures >= uint32(cb.maxFailures)
 }
 

@@ -18,6 +18,7 @@ type policyChainPersist struct {
 
 // loadState loads the policy chain from disk into the handler's registry.
 func (h *Handler) loadState(path string) error {
+	// #nosec G304
 	b, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {

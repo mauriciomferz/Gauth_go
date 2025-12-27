@@ -70,3 +70,37 @@ func TestControllerSatisfactionProgress(t *testing.T) {
 		t.Fatalf("expected progress to remain 0 when criteria not satisfied, got %f", p3)
 	}
 }
+
+// TestControllerEmergencyRollback verifies phase demotion when mismatch ratio spikes.
+func TestControllerEmergencyRollback(t *testing.T) {
+	mem := imetrics.NewMemory()
+	mem.SetEnvelopeV1SunsetPhase(PhaseBroad)
+	mem.SetEnvelopeV2AdoptionRatio(0.80)
+	mv := MemoryMetricsView{M: mem}
+
+	cfg := ControllerConfig{
+		Enable:                true,
+		AllowRollback:         true,
+		Interval:              50 * time.Millisecond,
+		MaxMismatchRatio:      0.01,
+		RollbackMismatchRatio: 0.05,
+	}
+	ctrl := NewController(cfg, mv)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go ctrl.Start(ctx)
+
+	// Simulate high mismatch ratio
+	// 10 V2 issued, 1 mismatch = 10% ratio > 5% rollback threshold
+	for i := 0; i < 10; i++ {
+		mem.IncEnvelopeV2Issued()
+	}
+	mem.IncEnvelopeDigestMismatch()
+
+	// Wait for evaluation
+	time.Sleep(120 * time.Millisecond)
+
+	if phase := mem.EnvelopeV1SunsetPhase(); phase != PhasePilot {
+		t.Fatalf("expected emergency rollback to Pilot (1), got %d", phase)
+	}
+}

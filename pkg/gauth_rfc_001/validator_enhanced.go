@@ -84,17 +84,27 @@ type EnhancedPoAValidator struct {
 	warningCollector  WarningCollector
 	dailyLimitStore   DailyLimitStore
 	conditionalEngine ConditionalEngine
+	currencyConverter CurrencyConverter
 	validatorChain    []PoAValidator
 	metricsRecorder   ValidationMetricsRecorder
 }
 
-// DailyLimitStore interface for persistent daily transaction limit tracking
-type DailyLimitStore interface {
+// LimitStore interface for persistent transaction limit tracking (Daily, Weekly, Monthly)
+type LimitStore interface {
+	GetPeriodUsage(delegationID, periodKey string) (float64, error)
+	IncrementPeriodUsage(delegationID, periodKey string, amount float64) error
+	ResetPeriodUsage(delegationID, periodKey string) error
+	// Deprecated: Use GetPeriodUsage
 	GetDailyUsage(delegationID, date string) (float64, error)
+	// Deprecated: Use IncrementPeriodUsage
 	IncrementDailyUsage(delegationID, date string, amount float64) error
+	// Deprecated: Use ResetPeriodUsage
 	ResetDailyUsage(delegationID, date string) error
 	ExportDailyLimits(ctx context.Context) (map[string]map[string]float64, error)
 }
+
+// Deprecated: Use LimitStore
+type DailyLimitStore = LimitStore
 
 // ConditionalEngine interface for evaluating complex conditional expressions
 type ConditionalEngine interface {
@@ -135,17 +145,30 @@ func WithWarningCollector(collector WarningCollector) EnhancedValidatorOption {
 	}
 }
 
-// WithDailyLimitStore sets a persistent daily limit store
-func WithDailyLimitStore(store DailyLimitStore) EnhancedValidatorOption {
+// WithLimitStore sets a persistent limit store
+func WithLimitStore(store LimitStore) EnhancedValidatorOption {
 	return func(v *EnhancedPoAValidator) {
 		v.dailyLimitStore = store
 	}
+}
+
+// WithDailyLimitStore sets a persistent daily limit store
+// Deprecated: Use WithLimitStore
+func WithDailyLimitStore(store DailyLimitStore) EnhancedValidatorOption {
+	return WithLimitStore(store)
 }
 
 // WithConditionalEngine sets a conditional evaluation engine
 func WithConditionalEngine(engine ConditionalEngine) EnhancedValidatorOption {
 	return func(v *EnhancedPoAValidator) {
 		v.conditionalEngine = engine
+	}
+}
+
+// WithCurrencyConverter sets a currency converter
+func WithCurrencyConverter(converter CurrencyConverter) EnhancedValidatorOption {
+	return func(v *EnhancedPoAValidator) {
+		v.currencyConverter = converter
 	}
 }
 
@@ -200,10 +223,10 @@ func (v *EnhancedPoAValidator) ValidateWithContext(ctx context.Context, p *Power
 		}
 	}
 
-	// Daily limit validation
-	if err := v.validateDailyLimits(ctx, p); err != nil {
+	// Financial limit validation (Daily, Weekly, Monthly)
+	if err := v.validateFinancialLimits(ctx, p); err != nil {
 		if v.metricsRecorder != nil {
-			v.metricsRecorder.RecordValidationFailure("daily_limits", getPoAScope(p), err.Error())
+			v.metricsRecorder.RecordValidationFailure("financial_limits", getPoAScope(p), err.Error())
 		}
 		return err
 	}
@@ -509,11 +532,24 @@ func (v *EnhancedPoAValidator) validateDelegationDepthSemantics(ctx context.Cont
 	if p.ParentPOAID != "" {
 		// Maximum depth check (environment-based)
 		maxDepthStr := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH")
+		maxDepth := 5
 		if maxDepthStr != "" {
-			if maxDepth, err := strconv.Atoi(maxDepthStr); err == nil && maxDepth > 0 {
-				// Depth validation would require access to parent chain
-				// This is a semantic check that the structure supports depth tracking
-				v.addWarning("delegation_chain", "Delegation has parent - verify depth limits", "parent_id", p.ParentPOAID, "info")
+			if iv, err := strconv.Atoi(maxDepthStr); err == nil && iv > 0 {
+				maxDepth = iv
+			}
+		}
+
+		if p.Depth > maxDepth {
+			v.addWarning("depth_limit_exceeded", "Delegation depth exceeds system limit", "depth", p.Depth, "error")
+		}
+
+		// Check for self-contained restriction (Requirement 12)
+		if limitStr, ok := p.Restrictions["max_delegation_depth"]; ok {
+			if limit, err := strconv.Atoi(limitStr); err == nil {
+				if p.Depth > limit {
+					// This would be weird (self-contradiction), but technically possible if manually constructed
+					v.addWarning("depth_restriction_mismatch", "Current depth exceeds own max_delegation_depth restriction", "depth", p.Depth, "error")
+				}
 			}
 		}
 	}
@@ -525,25 +561,32 @@ func (v *EnhancedPoAValidator) validateDelegationDepthSemantics(ctx context.Cont
 func (v *EnhancedPoAValidator) validateRestrictionSemantics(p *PowerOfAttorney) error {
 	// Define valid restriction keys per RFC0115
 	knownRestrictions := map[string]bool{
-		"currency":          true,
-		"max_amount":        true,
-		"max_daily_amount":  true,
-		"min_amount":        true,
-		"jurisdiction":      true,
-		"signatures":        true,
-		"valid_hours":       true,
-		"valid_weekdays":    true,
-		"time_condition":    true,
-		"ip_whitelist":      true,
-		"geo_restriction":   true,
-		"purpose":           true,
-		"approval_required": true,
+		"currency":           true,
+		"max_amount":         true,
+		"max_daily_amount":   true,
+		"max_weekly_amount":  true, // New
+		"max_monthly_amount": true, // New
+		"min_amount":         true,
+		"jurisdiction":       true,
+		"signatures":         true,
+		"valid_hours":        true,
+		"valid_weekdays":     true,
+		"time_condition":     true,
+		"ip_whitelist":       true,
+		"geo_restriction":    true,
+		"purpose":            true,
+		"approval_required":  true,
 	}
 
 	// Warn about unknown restrictions
-	for key := range p.Restrictions {
-		// Skip condition_ prefixed keys (dynamic conditions)
+	for key, value := range p.Restrictions {
+		// Validating dynamic conditions (Requirement 51)
 		if strings.HasPrefix(key, "condition_") {
+			if v.conditionalEngine != nil {
+				if err := v.conditionalEngine.ValidateConditionSyntax(value); err != nil {
+					v.addWarning("invalid_condition_syntax", fmt.Sprintf("Invalid condition syntax for %s: %v", key, err), "restriction", key, "error")
+				}
+			}
 			continue
 		}
 
@@ -596,7 +639,13 @@ func (v *EnhancedPoAValidator) validateFinancialScope(ctx context.Context, p *Po
 
 	// Enhanced currency validation
 	if currency, exists := p.Restrictions["currency"]; exists {
-		if !v.isValidCurrencyCode(currency) {
+		// Use converter if available
+		if v.currencyConverter != nil {
+			if !v.currencyConverter.IsValidCurrency(currency) {
+				return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("unsupported currency code: %s", currency))
+			}
+		} else if !v.isValidCurrencyCode(currency) {
+			// Fallback to basic validation
 			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid currency code: %s", currency))
 		}
 	}
@@ -620,43 +669,155 @@ func (v *EnhancedPoAValidator) validateFinancialScope(ctx context.Context, p *Po
 	return nil
 }
 
-// validateDailyLimits checks and enforces daily transaction limits
-func (v *EnhancedPoAValidator) validateDailyLimits(ctx context.Context, p *PowerOfAttorney) error {
+// validateFinancialLimits checks and enforces financial limits (Daily, Weekly, Monthly)
+func (v *EnhancedPoAValidator) validateFinancialLimits(ctx context.Context, p *PowerOfAttorney) error {
 	if v.dailyLimitStore == nil {
-		return nil // No daily limit tracking configured
+		return nil // No limit tracking configured
 	}
 
-	dailyLimitStr, hasDailyLimit := p.Restrictions["max_daily_amount"]
-	if !hasDailyLimit {
-		return nil // No daily limit set
+	// Extract requested amount from context
+	var requestedAmount float64
+	if amt := ctx.Value(ctxKeyRequestedAmount); amt != nil {
+		if f, ok := amt.(float64); ok {
+			requestedAmount = f
+		} else if s, ok := amt.(string); ok {
+			requestedAmount, _ = strconv.ParseFloat(s, 64)
+		}
+	} else if amtLegacy := ctx.Value(LegacyCtxRequestedAmount); amtLegacy != nil {
+		if f, ok := amtLegacy.(float64); ok {
+			requestedAmount = f
+		} else if s, ok := amtLegacy.(string); ok {
+			requestedAmount, _ = strconv.ParseFloat(s, 64)
+		}
 	}
 
-	dailyLimit, err := strconv.ParseFloat(dailyLimitStr, 64)
+	// Extract currency from context, fallback to PoA's default_currency, then USD
+	currency := "USD"
+	if c := ctx.Value("currency"); c != nil {
+		if s, ok := c.(string); ok {
+			currency = strings.ToUpper(s)
+		}
+	} else if dc, ok := p.Restrictions["default_currency"]; ok {
+		currency = strings.ToUpper(dc)
+	}
+
+	now := time.Now()
+
+	// 1. Daily Limit
+	if dailyLimitStr, ok := p.Restrictions["max_daily_amount"]; ok {
+		limit, err := strconv.ParseFloat(dailyLimitStr, 64)
+		if err != nil {
+			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_daily_amount: %v", err))
+		}
+
+		// Normalize requested amount to limit currency (if different)
+		limitCurrency := "USD"
+		if lc, ok := p.Restrictions["max_daily_currency"]; ok {
+			limitCurrency = strings.ToUpper(lc)
+		} else if dc, ok := p.Restrictions["default_currency"]; ok {
+			limitCurrency = strings.ToUpper(dc)
+		}
+
+		normalizedAmount := requestedAmount
+		if currency != limitCurrency && v.currencyConverter != nil {
+			var err error
+			normalizedAmount, err = v.currencyConverter.Convert(requestedAmount, currency, limitCurrency)
+			if err != nil {
+				v.addWarning("currency_conversion_failed", "Daily limit check used non-normalized amount", "error", err.Error(), "error")
+			}
+		}
+
+		today := now.Format("2006-01-02")
+		if err := v.checkLimit(p.ID, today, normalizedAmount, limit, "daily"); err != nil {
+			return err
+		}
+	}
+
+	// 2. Weekly Limit
+	if weeklyLimitStr, ok := p.Restrictions["max_weekly_amount"]; ok {
+		limit, err := strconv.ParseFloat(weeklyLimitStr, 64)
+		if err != nil {
+			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_weekly_amount: %v", err))
+		}
+
+		limitCurrency := "USD"
+		if lc, ok := p.Restrictions["max_weekly_currency"]; ok {
+			limitCurrency = strings.ToUpper(lc)
+		} else if dc, ok := p.Restrictions["default_currency"]; ok {
+			limitCurrency = strings.ToUpper(dc)
+		}
+
+		normalizedAmount := requestedAmount
+		if currency != limitCurrency && v.currencyConverter != nil {
+			var err error
+			normalizedAmount, err = v.currencyConverter.Convert(requestedAmount, currency, limitCurrency)
+			if err != nil {
+				v.addWarning("currency_conversion_failed", "Weekly limit check used non-normalized amount", "error", err.Error(), "error")
+			}
+		}
+
+		year, week := now.ISOWeek()
+		weekKey := fmt.Sprintf("%d-W%02d", year, week)
+		if err := v.checkLimit(p.ID, weekKey, normalizedAmount, limit, "weekly"); err != nil {
+			return err
+		}
+	}
+
+	// 3. Monthly Limit
+	if monthlyLimitStr, ok := p.Restrictions["max_monthly_amount"]; ok {
+		limit, err := strconv.ParseFloat(monthlyLimitStr, 64)
+		if err != nil {
+			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_monthly_amount: %v", err))
+		}
+
+		limitCurrency := "USD"
+		if lc, ok := p.Restrictions["max_monthly_currency"]; ok {
+			limitCurrency = strings.ToUpper(lc)
+		} else if dc, ok := p.Restrictions["default_currency"]; ok {
+			limitCurrency = strings.ToUpper(dc)
+		}
+
+		normalizedAmount := requestedAmount
+		if currency != limitCurrency && v.currencyConverter != nil {
+			var err error
+			normalizedAmount, err = v.currencyConverter.Convert(requestedAmount, currency, limitCurrency)
+			if err != nil {
+				v.addWarning("currency_conversion_failed", "Monthly limit check used non-normalized amount", "error", err.Error(), "error")
+			}
+		}
+
+		monthKey := now.Format("2006-01")
+		if err := v.checkLimit(p.ID, monthKey, normalizedAmount, limit, "monthly"); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// checkLimit performs generic limit check
+func (v *EnhancedPoAValidator) checkLimit(delegationID, periodKey string, amount, limit float64, periodType string) error {
+	currentUsage, err := v.dailyLimitStore.GetPeriodUsage(delegationID, periodKey)
 	if err != nil {
-		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_daily_amount: %v", err))
-	}
-
-	today := time.Now().Format("2006-01-02")
-	currentUsage, err := v.dailyLimitStore.GetDailyUsage(p.ID, today)
-	if err != nil {
-		v.addWarning("daily_limit_check_failed", "Could not verify daily usage", "daily_limit", err.Error(), "error")
-		return nil // Don't fail validation, but log warning
+		v.addWarning(fmt.Sprintf("%s_limit_check_failed", periodType), fmt.Sprintf("Could not verify %s usage", periodType), "limit", err.Error(), "error")
+		return nil // Don't fail validation hard on store error, but warn
 	}
 
 	if v.metricsRecorder != nil {
-		exceeded := currentUsage >= dailyLimit
-		v.metricsRecorder.RecordDailyLimitCheck(p.ID, currentUsage, dailyLimit, exceeded)
+		exceeded := (currentUsage + amount) > limit
+		// We reuse RecordDailyLimitCheck for all periods for now, or assume this metric is generic enough
+		// Ideally we would add RecordPeriodLimitCheck to interface but avoiding breaking interface change if not necessary
+		v.metricsRecorder.RecordDailyLimitCheck(delegationID, currentUsage+amount, limit, exceeded)
 	}
 
-	if currentUsage >= dailyLimit {
-		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("daily limit exceeded: %f/%f", currentUsage, dailyLimit))
+	if (currentUsage + amount) > limit {
+		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("%s limit exceeded: current=%f requested=%f limit=%f", periodType, currentUsage, amount, limit))
 	}
 
 	// Warning for approaching limit
-	if currentUsage > dailyLimit*0.8 {
-		v.addWarning("approaching_daily_limit", "Daily usage approaching limit", "usage_percentage", (currentUsage/dailyLimit)*100, "warning")
+	if (currentUsage + amount) > limit*0.8 {
+		v.addWarning(fmt.Sprintf("approaching_%s_limit", periodType), fmt.Sprintf("%s usage approaching limit", strings.Title(periodType)), "usage_percentage", ((currentUsage+amount)/limit)*100, "warning")
 	}
-
 	return nil
 }
 
@@ -803,4 +964,88 @@ func getPoAScope(p *PowerOfAttorney) string {
 		return p.Scope[0]
 	}
 	return fmt.Sprintf("multiple_%d", len(p.Scope))
+}
+
+// EvaluatePoAConditions evaluates all conditional restrictions in a PoA against the provided context.
+// Returns nil if all conditions pass, or an error if any condition fails.
+func (v *EnhancedPoAValidator) EvaluatePoAConditions(ctx context.Context, p *PowerOfAttorney, contextData map[string]interface{}) error {
+	if v.conditionalEngine == nil {
+		// If no engine is configured but conditions exist, we must fail-closed or warn?
+		// RFC says unprocessable critical restrictions must fail. conditions are critical.
+		for key := range p.Restrictions {
+			if strings.HasPrefix(key, "condition_") {
+				return rfc.New(rfc.ErrConfiguration, "conditional restrictions present but no engine configured")
+			}
+		}
+		return nil
+	}
+
+	for key, condition := range p.Restrictions {
+		if strings.HasPrefix(key, "condition_") {
+			result, err := v.conditionalEngine.EvaluateCondition(condition, contextData)
+			if err != nil {
+				// Evaluation error (e.g. missing field) -> Fail closed
+				if v.metricsRecorder != nil {
+					v.metricsRecorder.RecordValidationFailure("conditional", key, err.Error())
+				}
+				return rfc.New(rfc.ErrRestrictionExceeded, fmt.Sprintf("condition evaluation error for %s: %v", key, err))
+			}
+			if !result {
+				// Condition unmet
+				if v.metricsRecorder != nil {
+					v.metricsRecorder.RecordValidationFailure("conditional", key, "false_result")
+				}
+				return rfc.New(rfc.ErrRestrictionExceeded, fmt.Sprintf("condition unmet: %s", key))
+			}
+			if v.metricsRecorder != nil {
+				v.metricsRecorder.RecordValidationSuccess("conditional", key)
+			}
+		}
+	}
+	return nil
+}
+
+// RecordPoAConsumption increments persistent usage counters for a successful transaction.
+func (v *EnhancedPoAValidator) RecordPoAConsumption(ctx context.Context, p *PowerOfAttorney, amount float64, currency string) error {
+	if v.dailyLimitStore == nil {
+		return nil
+	}
+
+	currency = strings.ToUpper(currency)
+	now := time.Now()
+
+	// Helper to normalize and increment
+	updatePeriod := func(limitKey, currencyKey, periodKey string) {
+		if _, ok := p.Restrictions[limitKey]; !ok {
+			return
+		}
+
+		limitCurrency := "USD"
+		if lc, ok := p.Restrictions[currencyKey]; ok {
+			limitCurrency = strings.ToUpper(lc)
+		} else if dc, ok := p.Restrictions["default_currency"]; ok {
+			limitCurrency = strings.ToUpper(dc)
+		}
+
+		normalized := amount
+		if currency != limitCurrency && v.currencyConverter != nil {
+			if n, err := v.currencyConverter.Convert(amount, currency, limitCurrency); err == nil {
+				normalized = n
+			}
+		}
+
+		_ = v.dailyLimitStore.IncrementPeriodUsage(p.ID, periodKey, normalized)
+	}
+
+	// Update Daily
+	updatePeriod("max_daily_amount", "max_daily_currency", now.Format("2006-01-02"))
+
+	// Update Weekly
+	year, week := now.ISOWeek()
+	updatePeriod("max_weekly_amount", "max_weekly_currency", fmt.Sprintf("%d-W%02d", year, week))
+
+	// Update Monthly
+	updatePeriod("max_monthly_amount", "max_monthly_currency", now.Format("2006-01"))
+
+	return nil
 }

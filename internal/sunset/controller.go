@@ -1,6 +1,3 @@
-// Package sunset implements automated lifecycle phase management for deprecating
-// envelope V1 in favor of V2. It evaluates adoption & integrity metrics over
-// sliding windows to promote phases and exposes progress gauges.
 package sunset
 
 import (
@@ -31,6 +28,8 @@ type ControllerConfig struct {
 	SoftDepToSunsetAdoption    float64
 	// Maximum allowed mismatch ratio over the window (mismatches / issued V2) for promotion.
 	MaxMismatchRatio float64
+	// Threshold for automatic rollback (demote phase if mismatch ratio exceeds this).
+	RollbackMismatchRatio float64
 	// Observation window duration (continuous satisfaction needed).
 	Window time.Duration
 	// Evaluation interval.
@@ -43,6 +42,7 @@ type ControllerConfig struct {
 
 // MetricsView abstracts required metric reads for controller (memory implementation satisfies this).
 type MetricsView interface {
+	EnvelopeV1IssuedCount() uint64
 	EnvelopeV2IssuedCount() uint64
 	EnvelopeDigestMismatchCount() uint64
 	EnvelopeV2AdoptionRatio() float64
@@ -91,6 +91,9 @@ func NewController(cfg ControllerConfig, mv MetricsView) *Controller {
 	if cfg.MaxMismatchRatio == 0 {
 		cfg.MaxMismatchRatio = 0.005
 	}
+	if cfg.RollbackMismatchRatio == 0 {
+		cfg.RollbackMismatchRatio = 0.05 // 5% fallback trigger
+	}
 	return &Controller{cfg: cfg, mv: mv}
 }
 
@@ -111,16 +114,38 @@ func (c *Controller) Start(ctx context.Context) {
 	}
 }
 
+// Phase returns the current sunset phase.
+// It relies on the underlying metrics view. Returns PhasePilot (1) if metrics unavailable.
+func (c *Controller) Phase() uint64 {
+	if c.mv == nil {
+		return PhasePilot
+	}
+	p := c.mv.EnvelopeV1SunsetPhase()
+	if p == 0 {
+		return PhasePilot
+	}
+	return p
+}
+
 func (c *Controller) evaluate() {
 	adoption := c.mv.EnvelopeV2AdoptionRatio()
+	if adoption == 0.0 {
+		// Fallback: derive adoption from raw counts if gauge not set
+		v1 := c.mv.EnvelopeV1IssuedCount()
+		v2 := c.mv.EnvelopeV2IssuedCount()
+		total := v1 + v2
+		if total > 0 {
+			adoption = float64(v2) / float64(total)
+		}
+	}
 	mismatches := c.mv.EnvelopeDigestMismatchCount()
 	v2 := c.mv.EnvelopeV2IssuedCount()
-	phase := c.mv.EnvelopeV1SunsetPhase()
+	phase := c.Phase()
 	var mismatchRatio float64
 	if v2 > 0 {
 		mismatchRatio = float64(mismatches) / float64(v2)
 	}
-	//nolint:gosec // G115: phase enum value, small range
+	// #nosec G115: phase enum value, small range
 	threshold := adoptionThresholdForPhase(c.cfg, int(phase))
 	if adoption >= threshold && mismatchRatio <= c.cfg.MaxMismatchRatio {
 		// Start or continue satisfy window
@@ -138,9 +163,9 @@ func (c *Controller) evaluate() {
 		}
 		c.mv.SetSunsetPhaseSatisfactionProgress(prog)
 		if time.Since(c.lastSatisfyStart) >= c.cfg.Window {
-			//nolint:gosec // G115: phase enum value, small range
+			// #nosec G115: phase enum value, small range
 			next := nextPhase(int(phase))
-			//nolint:gosec // G115: phase enum value, small range
+			// #nosec G115: phase enum value, small range
 			if next > int(phase) {
 				c.mv.SetEnvelopeV1SunsetPhase(next)
 				log.Printf("sunset controller: promoted phase %d -> %d (adoption=%.3f mismatch=%.5f)", phase, next, adoption, mismatchRatio)
@@ -148,8 +173,16 @@ func (c *Controller) evaluate() {
 				c.mv.SetSunsetPhaseSatisfactionProgress(0)
 			}
 		}
+	} else if c.cfg.AllowRollback && mismatchRatio > c.cfg.RollbackMismatchRatio && phase > PhasePilot {
+		// Rollback safeguard: if mismatch ratio extremely high, demote phase
+		// #nosec G115
+		prev := int(phase) - 1
+		c.mv.SetEnvelopeV1SunsetPhase(prev)
+		log.Printf("sunset controller: EMERGENCY ROLLBACK phase %d -> %d (mismatch=%.5f)", phase, prev, mismatchRatio)
+		c.lastSatisfyStart = time.Time{}
+		c.mv.SetSunsetPhaseSatisfactionProgress(0)
 	} else {
-		// Reset window if criteria break
+		// Reset window if criteria break (but not in rollback zone)
 		c.lastSatisfyStart = time.Time{}
 		c.mv.SetSunsetPhaseSatisfactionProgress(0)
 	}
@@ -194,6 +227,7 @@ func nextPhase(current int) int {
 // MemoryMetricsView adapts *metrics.Memory to MetricsView.
 type MemoryMetricsView struct{ M *metrics.Memory }
 
+func (v MemoryMetricsView) EnvelopeV1IssuedCount() uint64 { return v.M.EnvelopeV1IssuedCount() }
 func (v MemoryMetricsView) EnvelopeV2IssuedCount() uint64 { return v.M.EnvelopeV2IssuedCount() }
 func (v MemoryMetricsView) EnvelopeDigestMismatchCount() uint64 {
 	return v.M.EnvelopeDigestMismatchCount()

@@ -272,6 +272,7 @@ func (d *Dispatcher) handleDeliveryError(ctx context.Context, job *deliveryJob, 
 	}
 
 	// Schedule retry with exponential backoff
+	// #nosec G115
 	retryDelay := time.Duration(1<<uint(job.delivery.AttemptNumber-1)) * time.Minute
 	nextRetry := time.Now().Add(retryDelay)
 

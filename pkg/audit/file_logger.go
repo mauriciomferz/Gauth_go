@@ -31,7 +31,8 @@ func OpenFileLogger(path string) (*FileLogger, error) {
 	if path == "" {
 		return nil, errors.New("path required")
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	// #nosec G301
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return nil, err
 	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600)

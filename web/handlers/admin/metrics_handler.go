@@ -154,7 +154,7 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 		ErrorRate:        errorRate,
 		CacheHitRate:     0.892, // TODO: Implement cache hit tracking
 		CacheSize:        cacheSize,
-		MemoryUsage:      int64(m.Alloc), // Current allocated memory
+		MemoryUsage:      int64(m.Alloc), // #nosec G115 // Current allocated memory
 		CacheEvictions:   cacheEvicted,
 		AvgTTL:           3600,
 		CompressionRatio: 2.4,

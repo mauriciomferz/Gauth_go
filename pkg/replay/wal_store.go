@@ -28,7 +28,8 @@ type WALStore struct {
 
 // NewWALStore creates a new WALStore backed by the given file path.
 func NewWALStore(path string) (*WALStore, error) {
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	// #nosec G301
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return nil, err
 	}
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0o600)

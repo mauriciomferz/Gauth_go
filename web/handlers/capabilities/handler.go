@@ -85,6 +85,7 @@ func NewHandler() *Handler {
 // LoadFromFile loads capabilities and action mappings from a JSON file.
 // It updates the global registry and local state transactionally.
 func (h *Handler) LoadFromFile(path string) error {
+	// #nosec G304
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return err

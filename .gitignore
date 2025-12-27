@@ -93,7 +93,6 @@ gateway
 key_rotation
 # ledger-verify
 microservices
-multisig-bench
 professional_interfaces_demo
 gauth_rfc_001_protocol_flow
 rfc_0115_poa_definition
@@ -184,7 +183,6 @@ build/*-server
 
 # Documentation artifacts
 CSP_FIXES.md
-web-server
 
 # Build artifacts and backups
 *.bak

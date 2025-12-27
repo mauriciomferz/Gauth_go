@@ -30,8 +30,8 @@ func TestDeviceToken_WithClientAssertion(t *testing.T) {
 	keyStore.RegisterKey(clientID, keyID, publicKey)
 
 	authenticator := &auth.PrivateKeyJWTValidator{
-		KeyProvider: keyStore,
-		TokenURL:    "http://test-server/device/token",
+		KeyProvider:    keyStore,
+		ValidAudiences: []string{"http://test-server/device/token"},
 	}
 
 	// Setup Router

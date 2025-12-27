@@ -17,7 +17,8 @@ func TestStrictMalformedManifest(t *testing.T) {
 	t.Setenv("GAUTH_ENV", "prod")
 	t.Setenv("GAUTH_STRICT_ASSETS", "1")
 	manifestDir := filepath.Join("web", "static", "js")
-	if err := os.MkdirAll(manifestDir, 0o755); err != nil {
+	// #nosec G301
+if err := os.MkdirAll(manifestDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
 	manifestPath := filepath.Join(manifestDir, "asset-manifest.json")
@@ -47,7 +48,8 @@ func TestStrictMissingFieldsManifest(t *testing.T) {
 	t.Setenv("GAUTH_ENV", "prod")
 	t.Setenv("GAUTH_STRICT_ASSETS", "1")
 	manifestDir := filepath.Join("web", "static", "js")
-	if err := os.MkdirAll(manifestDir, 0o755); err != nil {
+	// #nosec G301
+if err := os.MkdirAll(manifestDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}
 	manifestPath := filepath.Join(manifestDir, "asset-manifest.json")

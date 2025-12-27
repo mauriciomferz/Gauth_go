@@ -89,6 +89,7 @@ func (p *FilesystemProvider) Store(key string, value []byte) error {
 	if err != nil {
 		return err
 	}
+	//nolint:gosec // G407: False positive - nonce is generated from crypto/rand on line 80-82
 	ciphertext := gcm.Seal(nil, nonce, value, nil)
 	enc := hex.EncodeToString(nonce) + ":" + hex.EncodeToString(ciphertext)
 	return os.WriteFile(p.pathFor(key), []byte(enc), 0o600)
@@ -190,6 +191,7 @@ func (p *FilesystemProvider) Rotate(newMasterKey []byte) error {
 		if err != nil {
 			return err
 		}
+		//nolint:gosec // G407: False positive - nonceNew is generated from crypto/rand on line 181-184
 		ciphertextNew := gcmNew.Seal(nil, nonceNew, plaintext, nil)
 		enc := hex.EncodeToString(nonceNew) + ":" + hex.EncodeToString(ciphertextNew)
 		if err := os.WriteFile(path, []byte(enc), 0o600); err != nil {

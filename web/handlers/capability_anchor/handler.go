@@ -2,6 +2,7 @@ package capability_anchor
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -36,6 +37,7 @@ type Handler struct {
 	LastHashLen  int
 	LastAge      uint64
 	RegistryHash string // Current registry hash being anchored
+	LastAnchorAt time.Time
 	History      []anchorint.Receipt
 	Observers    []func(anchorint.Receipt)
 }
@@ -108,14 +110,35 @@ func (h *Handler) Anchor(ctx context.Context) (anchorint.Receipt, error) {
 			return anchorint.Receipt{}, err
 		}
 
+		// Requirement 13: Anchoring of hygiene violation counters.
+		// We compute a composite hash of the registry hash and the current hygiene violation counts.
+		compositeHash := hash
+		if h.Metrics != nil {
+			hygiene := h.Metrics.HygieneSnapshot()
+			if len(hygiene) > 0 {
+				b, _ := json.Marshal(hygiene)
+				compositeHash = fmt.Sprintf("%s|hygiene:%x", hash, sha256.Sum256(b))
+			}
+		}
+
 		start := time.Now()
-		receipt, err := provider.Anchor(hash)
+		receipt, err := provider.Anchor(compositeHash)
 		duration := time.Since(start)
 
 		if err == nil {
 			if h.Metrics != nil {
 				h.Metrics.ObserveExternalAnchorLatency(name, duration)
+				h.mu.RLock()
+				last := h.LastAnchorAt
+				h.mu.RUnlock()
+				if !last.IsZero() {
+					h.Metrics.ObserveExternalAnchorInterval(time.Since(last).Seconds())
+				}
 			}
+			h.mu.Lock()
+			h.LastAnchorAt = time.Now()
+			h.mu.Unlock()
+
 			h.UpdateReceipt(receipt)
 			// Persist
 			if h.Store != nil {
@@ -204,6 +227,7 @@ func (h *Handler) GetLastReceipt() anchorint.Receipt {
 
 // Load reads history from file.
 func (h *Handler) Load(path string) error {
+	// #nosec G304
 	b, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {

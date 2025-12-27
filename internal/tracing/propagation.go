@@ -3,9 +3,12 @@ package tracing
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // W3C Trace Context propagation for distributed tracing (sec7.item4)
@@ -129,6 +132,39 @@ func PropagationMiddleware(next http.Handler, tracer *Tracer) http.Handler {
 		tracer.FinishSpan(span)
 		span.SetTag("http.status_code", wrapped.statusCode)
 	})
+}
+
+// GinTracingMiddleware is Gin-compatible middleware for trace propagation
+func GinTracingMiddleware(tracer *Tracer, sampleRatio float64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Probabilistic sampling
+		if sampleRatio > 0 && sampleRatio < 1.0 {
+			// #nosec G404
+			if rand.Float64() > sampleRatio {
+				c.Next()
+				return
+			}
+		}
+
+		// Extract trace context from incoming request headers
+		span, ctx := tracer.StartSpanFromW3C(c.Request.Context(), c.Request.URL.Path, c.Request.Header)
+		span.SetTag("http.method", c.Request.Method)
+		span.SetTag("http.url", c.Request.URL.String())
+		span.SetTag("http.remote_addr", c.ClientIP())
+
+		// Update request context with span
+		c.Request = c.Request.WithContext(ctx)
+
+		// Inject trace context into outgoing response headers (W3C)
+		InjectW3C(ctx, c.Writer.Header())
+
+		// Process request
+		c.Next()
+
+		// Finalize span
+		tracer.FinishSpan(span)
+		span.SetTag("http.status_code", c.Writer.Status())
+	}
 }
 
 // responseWriter wraps http.ResponseWriter to capture status code

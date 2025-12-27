@@ -161,7 +161,7 @@ Implementation lines (approximate):
 
 | Section | Feature | Conformance | Implementation Notes |
 | :--- | :--- | :--- | :--- |
-| **2.2** | Private Key JWT Authentication | ✅ Full | Uses `client_assertion` signed by private key. Implemented in `pkg/auth/client_auth.go` (`PrivateKeyJWTValidator`). |
+| **2.2** | Private Key JWT Authentication | ✅ Full | Uses `client_assertion` signed by private key. Implemented in `pkg/auth/client_auth.go` (`PrivateKeyJWTValidator`). Hardened with JTI replay protection and EdDSA/ECDSA support. |
 | **2.1** | JWT Bearer Token Grant | ✅ Full | `urn:ietf:params:oauth:grant-type:jwt-bearer` supported at `/oauth/token`. |
 | **3** | JWT Format & Processing | ✅ Full | Validates `iss`, `sub`, `aud`, `exp`, `jti`. |
 
@@ -180,3 +180,15 @@ Implementation lines (approximate):
 | RFC9396-6 | Token Response | `ExtendedToken`, `ExtendedTokenService` | web/handlers/token/rfc_integration_test.go | Implemented | Details persisted in token and JWT |
 | RFC9396-7 | Resource Server Validation | `RARValidator`, `ValidateExtendedTokenWithRAR` | pkg/gauth/resource_server_test.go | Implemented | Enforces PoA scope narrowing |
 ```
+
+## OAuth Identity Assertion Authorization Grant (Draft)
+
+| Section | Feature | Conformance | Implementation Notes |
+| :--- | :--- | :--- | :--- |
+| **Draft** | Grant Type | ✅ Minimal | `urn:ietf:params:oauth:grant-type:identity-assertion` supported at `/oauth/token`. |
+| **Draft** | Assertion Validation | ✅ Full | Uses `client_assertion` validation logic (RFC 7523) for ID Token verification. |
+| **Draft** | Access Token Issuance | ✅ Minimal | Mocks token issuance bound to assertion subject. |
+
+**Implementation Status:**
+- `web/handlers/grant_jwt` extended implementation.
+- `test/integration/identity_assertion_test.go` verifies flow.

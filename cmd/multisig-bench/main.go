@@ -147,7 +147,7 @@ func main() {
 	}
 
 	// Deterministic RNG for message content generation (not cryptographic; signing uses ed25519 library RNG implicitly for key generation if needed).
-	//nolint:gosec // G404: weak random acceptable for benchmark message generation
+	// #nosec G404
 	rng := mrand.New(mrand.NewSource(seed))
 	msg := make([]byte, 256)
 	if _, err := rng.Read(msg); err != nil {

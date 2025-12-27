@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
 )
 
@@ -23,14 +24,16 @@ type Handler struct {
 	TokenStore  gnap.TokenStore          // Token lifecycle management
 	RSStore     gnap.ResourceServerStore // RS lifecycle Management (RFC 9767)
 	AuditLogger AuditLogger              // Optional audit logging
-	BaseURL     string                   // Base URL for continuation URIs
-	DefaultWait int                      // Default wait seconds for polling
+	Verif       gauthplus.VerificationService
+	BaseURL     string // Base URL for continuation URIs
+	DefaultWait int    // Default wait seconds for polling
 }
 
 // NewHandler creates a GNAP handler.
-func NewHandler(store gnap.GrantStore, baseURL string) *Handler {
+func NewHandler(store gnap.GrantStore, verif gauthplus.VerificationService, baseURL string) *Handler {
 	return &Handler{
 		Store:       store,
+		Verif:       verif,
 		BaseURL:     strings.TrimSuffix(baseURL, "/"),
 		DefaultWait: 30,
 	}
@@ -129,6 +132,20 @@ func (h *Handler) GrantRequest(c *gin.Context) {
 		return
 	}
 
+	// Validate PoACredentialRef if provided (GAuth Extension)
+	if req.PoACredentialRef != "" && h.Verif != nil {
+		poaVerif, err := h.Verif.VerifyPowerOfAttorney(c.Request.Context(), req.PoACredentialRef)
+		if err != nil || !poaVerif.Valid {
+			c.JSON(http.StatusBadRequest, gnap.GrantResponse{
+				Error: &gnap.GrantError{
+					Code:        gnap.ErrorInvalidRequest,
+					Description: "invalid power_of_attorney_ref",
+				},
+			})
+			return
+		}
+	}
+
 	// Create grant
 	grant, err := h.Store.Create(&req)
 	if err != nil {
@@ -142,7 +159,7 @@ func (h *Handler) GrantRequest(c *gin.Context) {
 	}
 
 	// Build response based on request
-	resp := h.buildGrantResponse(grant, &req)
+	resp := h.buildGrantResponse(c.Request.Context(), grant, &req)
 
 	// Determine HTTP status
 	status := http.StatusOK
@@ -286,7 +303,7 @@ func (h *Handler) TokenRevoke(c *gin.Context) {
 }
 
 // buildGrantResponse constructs response for initial grant request.
-func (h *Handler) buildGrantResponse(grant *gnap.Grant, req *gnap.GrantRequest) *gnap.GrantResponse {
+func (h *Handler) buildGrantResponse(ctx context.Context, grant *gnap.Grant, req *gnap.GrantRequest) *gnap.GrantResponse {
 	resp := &gnap.GrantResponse{}
 
 	// Always include continuation for non-terminal states
@@ -328,6 +345,9 @@ func (h *Handler) buildGrantResponse(grant *gnap.Grant, req *gnap.GrantRequest) 
 		// Issue access token
 		resp.AccessToken = h.issueToken(grant, req)
 	}
+
+	// GAuth extension: Populate PoA info and AuthorizationChain
+	h.linkGAuthContext(ctx, resp, req)
 
 	// Assign client instance ID if not present
 	if req.Client != nil && req.Client.InstanceID == "" {
@@ -397,4 +417,74 @@ func generateShortCode() string {
 		time.Sleep(time.Nanosecond) // Ensure different values
 	}
 	return string(code[:4]) + "-" + string(code[4:])
+}
+
+// linkGAuthContext populates GNAP response with GAuth-specific context.
+func (h *Handler) linkGAuthContext(ctx context.Context, resp *gnap.GrantResponse, req *gnap.GrantRequest) {
+	if h.Verif == nil || req.PoACredentialRef == "" {
+		return
+	}
+
+	// Determine representative action for verification report
+	var action gauthplus.Action
+	if req.AccessToken != nil && len(req.AccessToken.Access) > 0 {
+		ar := req.AccessToken.Access[0]
+		action.Type = "transaction" // Default
+		if ar.Type != "" {
+			action.Type = ar.Type
+		}
+		action.Resource = ar.Identifier
+		if len(ar.Actions) > 0 {
+			action.Operation = ar.Actions[0]
+		}
+	} else {
+		action.Type = "verification"
+		action.Operation = "status_check"
+	}
+
+	// Generate comprehensive verification report
+	report, err := h.Verif.GenerateVerificationReport(ctx, req.PoACredentialRef, action)
+	if err != nil {
+		return
+	}
+
+	// Populate PoA Ref
+	resp.PowerOfAttorney = &gnap.PowerOfAttorneyRef{
+		PoAID:   report.PoAID,
+		Issuer:  report.PoAVerification.IssuerID,
+		Grantee: report.PoAVerification.GranteeID,
+		Scope:   report.PoAVerification.Scope,
+	}
+
+	// Fetch and transform Authorization Chain with enrichment
+	gnapChain := make([]gnap.ChainLink, len(report.ChainOfAuthority))
+	for i, link := range report.ChainOfAuthority {
+		entityType := "human"
+		if !link.IsHuman {
+			entityType = "ai_agent"
+		}
+
+		gnapChain[i] = gnap.ChainLink{
+			Entity:     link.GranteeID,
+			EntityType: entityType,
+			Authority:  link.IssuerID,
+			Verified:   true, // Part of the verified report
+		}
+	}
+	resp.AuthorizationChain = gnapChain
+
+	// Determine compliance level
+	compliance := "basic"
+	if report.OverallValid {
+		compliance = "high"
+		if report.FiduciaryCompliance != nil && !report.FiduciaryCompliance.Compliant {
+			compliance = "degraded"
+		}
+		if report.CapabilityCheck != nil && !report.CapabilityCheck.Sufficient {
+			compliance = "conditional"
+		}
+	} else {
+		compliance = "non_compliant"
+	}
+	resp.ComplianceLevel = compliance
 }

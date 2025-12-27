@@ -27,6 +27,7 @@ func LoadOrGenerateRSAKey() (*rsa.PrivateKey, error) {
 			path = ".keys/jwt_rsa.pem"
 		}
 		// Try load
+		// #nosec G304
 		if b, err := os.ReadFile(path); err == nil {
 			block, _ := pem.Decode(b)
 			if block != nil && block.Type == "RSA PRIVATE KEY" {

@@ -37,7 +37,7 @@ func NewAuthorizationRequestGenerator(subjects, resources, actions []string) *Au
 		Subjects:  subjects,
 		Resources: resources,
 		Actions:   actions,
-		//nolint:gosec // G404: weak random acceptable for load testing
+		// #nosec G404
 		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
@@ -112,7 +112,7 @@ func NewDelegationRequestGenerator(subjects, delegates, resources, actions []str
 		Resources:  resources,
 		Actions:    actions,
 		Operations: []string{"create", "revoke", "verify"},
-		//nolint:gosec // G404: weak random acceptable for load testing
+		// #nosec G404
 		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
@@ -163,7 +163,7 @@ func NewCachePressureGenerator(subjects, resources, actions []string, hotSetSize
 		Subjects:    subjects,
 		Resources:   resources,
 		Actions:     actions,
-		//nolint:gosec // G404: weak random acceptable for load testing
+		// #nosec G404
 		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
@@ -210,7 +210,7 @@ func NewBurstLoadGenerator(baseGen RequestGenerator, burstProb float64, burstMul
 		BurstProbability: burstProb,
 		BurstMultiplier:  burstMult,
 		BaseGenerator:    baseGen,
-		//nolint:gosec // G404: weak random acceptable for load testing
+		// #nosec G404
 		rng: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
@@ -248,6 +248,11 @@ func NewLoadTestSuite() *LoadTestSuite {
 	return &LoadTestSuite{
 		harness: NewLoadTestHarness(),
 	}
+}
+
+// GetHarness returns the underlying test harness.
+func (s *LoadTestSuite) GetHarness() *LoadTestHarness {
+	return s.harness
 }
 
 // RunAuthorizationLoadTest runs a standard authorization load test.

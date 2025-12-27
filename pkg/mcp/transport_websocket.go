@@ -57,7 +57,7 @@ type WebSocketTransport struct {
 }
 
 // NewWebSocketTransport creates a new WebSocket transport
-func NewWebSocketTransport(url string, headers http.Header) *WebSocketTransport {
+func NewWebSocketTransport(url string, headers http.Header) *WebSocketTransport { // #nosec G115
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &WebSocketTransport{
@@ -88,6 +88,7 @@ func (t *WebSocketTransport) connectWithRetry(ctx context.Context, attempt int) 
 
 	// Exponential backoff for reconnection
 	if attempt > 0 {
+		// #nosec G115
 		delay := reconnectBaseDelay * time.Duration(1<<uint(attempt-1))
 		if delay > reconnectMaxDelay {
 			delay = reconnectMaxDelay

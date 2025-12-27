@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 )
 
@@ -24,10 +23,10 @@ type GAuthPlusHandler struct {
 
 // NewGAuthPlusHandler creates a new GAuth+ handler
 func NewGAuthPlusHandler(pool *pgxpool.Pool) *GAuthPlusHandler {
-	// Convert pgxpool to database/sql for service compatibility
-	var db *sql.DB
+	// Wrap pgxpool in database.DB for service compatibility
+	var db *database.DB
 	if pool != nil {
-		db = stdlib.OpenDBFromPool(pool)
+		db = &database.DB{Pool: pool}
 	}
 
 	return &GAuthPlusHandler{

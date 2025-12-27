@@ -437,3 +437,31 @@ func TestMetricsTimestamp(t *testing.T) {
 		}
 	}
 }
+
+func TestRecordDecisionWithReason(t *testing.T) {
+	exporter := NewJSONMetricsExporter("test", "1.0", "host")
+	exporter.RecordDecisionWithReason("verify", "token", "deny", "signature_invalid")
+
+	// Since metricKey format depends on implementation (sorted labels),
+	// we search for a key that contains our metric name and verify labels.
+	found := false
+	for key, val := range exporter.counters {
+		if strings.HasPrefix(key, "decision_reason_total") {
+			found = true
+			if val != 1 {
+				t.Errorf("Expected count 1, got %d", val)
+			}
+			// Parse key or check labels map
+			labels := exporter.labels[key]
+			if labels["action"] != "verify" {
+				t.Errorf("Expected action verify, got %s", labels["action"])
+			}
+			if labels["reason"] != "signature_invalid" {
+				t.Errorf("Expected reason signature_invalid, got %s", labels["reason"])
+			}
+		}
+	}
+	if !found {
+		t.Error("Did not find decision_reason_total metric")
+	}
+}

@@ -17,7 +17,7 @@ func init() {
 
 func TestDiscovery(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
-	handler := NewHandler(store, "http://localhost:8080")
+	handler := NewHandler(store, nil, "http://localhost:8080")
 
 	r := gin.New()
 	handler.RegisterRoutes(r)
@@ -48,7 +48,7 @@ func TestDiscovery(t *testing.T) {
 
 func TestGrantRequest_Simple(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
-	handler := NewHandler(store, "http://localhost:8080")
+	handler := NewHandler(store, nil, "http://localhost:8080")
 
 	r := gin.New()
 	handler.RegisterRoutes(r)
@@ -89,7 +89,7 @@ func TestGrantRequest_Simple(t *testing.T) {
 
 func TestGrantRequest_WithInteraction(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
-	handler := NewHandler(store, "http://localhost:8080")
+	handler := NewHandler(store, nil, "http://localhost:8080")
 
 	r := gin.New()
 	handler.RegisterRoutes(r)
@@ -145,7 +145,7 @@ func TestGrantRequest_WithInteraction(t *testing.T) {
 
 func TestGrantRequest_Invalid(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
-	handler := NewHandler(store, "http://localhost:8080")
+	handler := NewHandler(store, nil, "http://localhost:8080")
 
 	r := gin.New()
 	handler.RegisterRoutes(r)
@@ -165,7 +165,7 @@ func TestGrantRequest_Invalid(t *testing.T) {
 
 func TestContinue_WithToken(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
-	handler := NewHandler(store, "http://localhost:8080")
+	handler := NewHandler(store, nil, "http://localhost:8080")
 
 	r := gin.New()
 	handler.RegisterRoutes(r)
@@ -203,7 +203,7 @@ func TestContinue_WithToken(t *testing.T) {
 
 func TestContinueCancel(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
-	handler := NewHandler(store, "http://localhost:8080")
+	handler := NewHandler(store, nil, "http://localhost:8080")
 
 	r := gin.New()
 	handler.RegisterRoutes(r)

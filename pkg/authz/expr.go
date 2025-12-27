@@ -21,6 +21,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"github.com/mauriciomferz/Gauth_go/pkg/authz/expr"
 )
 
 // ExprLimits defines resource limits for parsing/evaluation.
@@ -442,6 +444,46 @@ func (n *inListNode) eval(ctx map[string]interface{}, limits ExprLimits, ops *in
 	return false, nil
 }
 
+// callNode represents a function call: func(arg1, arg2, ...)
+type callNode struct {
+	funcName string
+	args     []node
+}
+
+func (c *callNode) eval(ctx map[string]interface{}, limits ExprLimits, ops *int, depth int) (interface{}, error) {
+	if depth > limits.MaxDepth {
+		return nil, errors.New("max depth exceeded")
+	}
+	*ops++
+	if *ops > limits.MaxOps {
+		return nil, errors.New("max ops exceeded")
+	}
+
+	// Get function from registry
+	fn, ok := expr.DefaultRegistry.Get(c.funcName)
+	if !ok {
+		return nil, fmt.Errorf("unknown function: %s", c.funcName)
+	}
+
+	// Evaluate arguments
+	evalArgs := make([]interface{}, len(c.args))
+	for i, arg := range c.args {
+		val, err := arg.eval(ctx, limits, ops, depth+1)
+		if err != nil {
+			return nil, fmt.Errorf("error evaluating arg %d of %s: %w", i, c.funcName, err)
+		}
+		evalArgs[i] = val
+	}
+
+	// Call function
+	result, err := fn(evalArgs)
+	if err != nil {
+		return nil, fmt.Errorf("error in %s: %w", c.funcName, err)
+	}
+
+	return result, nil
+}
+
 // comparison helper
 func compareValues(op int, left, right interface{}) (bool, error) {
 	// numeric attempt
@@ -581,6 +623,64 @@ func (p *parser) parsePrimary(depth int) (node, error) {
 		}
 		return inner, nil
 	case tokIdent:
+		// Check if this is a function call (identifier followed by '(')
+		if p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].typ == tokLParen {
+			// This is a function call
+			funcName := t.lit
+			p.consume() // consume identifier
+			p.consume() // consume '('
+
+			// Parse arguments
+			args := []node{}
+			for p.current().typ != tokRParen && p.current().typ != tokEOF {
+				// Parse argument value (identifier, literal, or nested call)
+				argTok := p.current()
+				var arg node
+				switch argTok.typ {
+				case tokIdent:
+					// Could be nested function call or identifier
+					if p.pos+1 < len(p.tokens) && p.tokens[p.pos+1].typ == tokLParen {
+						// Nested function call - use parsePrimary
+						var err error
+						arg, err = p.parsePrimary(depth + 1)
+						if err != nil {
+							return nil, err
+						}
+					} else {
+						arg = &identNode{name: argTok.lit}
+						p.consume()
+					}
+				case tokString:
+					arg = &literalNode{val: argTok.lit}
+					p.consume()
+				case tokNumber:
+					arg = &literalNode{val: argTok.lit}
+					p.consume()
+				case tokBool:
+					arg = &literalNode{val: argTok.lit == boolTrueString}
+					p.consume()
+				default:
+					return nil, fmt.Errorf("unexpected token in function argument: %v", argTok.lit)
+				}
+				args = append(args, arg)
+
+				// Check for comma or closing paren
+				if p.current().typ == tokComma {
+					p.consume()
+					continue
+				}
+			}
+
+			if _, err := p.expect(tokRParen); err != nil {
+				return nil, err
+			}
+
+			// Create callNode and pass through parseMaybeComparison to support comparisons
+			callN := &callNode{funcName: funcName, args: args}
+			return p.parseMaybeComparison(callN, depth+1)
+		}
+
+		// Not a function call, treat as identifier
 		left := &identNode{name: t.lit}
 		p.consume()
 		return p.parseMaybeComparison(left, depth+1)

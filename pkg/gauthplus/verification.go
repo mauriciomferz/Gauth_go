@@ -3,7 +3,11 @@ package gauthplus
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/mauriciomferz/Gauth_go/pkg/registry"
 )
 
 // VerificationResult represents the result of a PoA verification
@@ -37,28 +41,30 @@ type ScopeVerificationResult struct {
 
 // PrincipalStatusResult represents verification of principal's legal capacity
 type PrincipalStatusResult struct {
-	Valid              bool      `json:"valid"`
-	PrincipalID        string    `json:"principal_id"`
-	LegalCapacity      string    `json:"legal_capacity"` // "full", "limited", "incapacitated"
-	EntityType         string    `json:"entity_type"`    // "individual", "corporation", "partnership", etc.
-	Status             string    `json:"status"`         // "active", "dissolved", "suspended"
-	JurisdictionStatus string    `json:"jurisdiction_status"`
-	VerifiedAt         time.Time `json:"verified_at"`
-	ExpiresAt          time.Time `json:"expires_at"`
-	Issues             []string  `json:"issues,omitempty"`
+	Valid              bool         `json:"valid"`
+	PrincipalID        string       `json:"principal_id"`
+	LegalCapacity      string       `json:"legal_capacity"` // "full", "limited", "incapacitated"
+	EntityType         string       `json:"entity_type"`    // "individual", "corporation", "partnership", etc.
+	Status             string       `json:"status"`         // "active", "dissolved", "suspended"
+	JurisdictionStatus string       `json:"jurisdiction_status"`
+	VerifiedAt         time.Time    `json:"verified_at"`
+	ExpiresAt          time.Time    `json:"expires_at"`
+	Attestation        *Attestation `json:"attestation,omitempty"`
+	Issues             []string     `json:"issues,omitempty"`
 }
 
 // PositionVerificationResult represents verification of representative's position
 type PositionVerificationResult struct {
-	Valid            bool      `json:"valid"`
-	RepresentativeID string    `json:"representative_id"`
-	OrganizationID   string    `json:"organization_id"`
-	Position         string    `json:"position"`
-	AuthorizedToAct  bool      `json:"authorized_to_act"`
-	SigningAuthority bool      `json:"signing_authority"`
-	EffectiveDate    time.Time `json:"effective_date"`
-	VerifiedAt       time.Time `json:"verified_at"`
-	Issues           []string  `json:"issues,omitempty"`
+	Valid            bool         `json:"valid"`
+	RepresentativeID string       `json:"representative_id"`
+	OrganizationID   string       `json:"organization_id"`
+	Position         string       `json:"position"`
+	AuthorizedToAct  bool         `json:"authorized_to_act"`
+	SigningAuthority bool         `json:"signing_authority"`
+	EffectiveDate    time.Time    `json:"effective_date"`
+	VerifiedAt       time.Time    `json:"verified_at"`
+	Issues           []string     `json:"issues,omitempty"`
+	Attestation      *Attestation `json:"attestation,omitempty"`
 }
 
 // RevocationStatusResult represents the revocation status of a PoA
@@ -93,10 +99,11 @@ type VerificationReport struct {
 	CapabilityCheck     *CapabilityVerificationCheck `json:"capability_check"`
 
 	// Summary
-	Warnings        []string  `json:"warnings,omitempty"`
-	Recommendations []string  `json:"recommendations,omitempty"`
-	ValidityPeriod  string    `json:"validity_period"`
-	NextReviewDate  time.Time `json:"next_review_date"`
+	Attestations    []Attestation `json:"attestations,omitempty"`
+	Warnings        []string      `json:"warnings,omitempty"`
+	Recommendations []string      `json:"recommendations,omitempty"`
+	ValidityPeriod  string        `json:"validity_period"`
+	NextReviewDate  time.Time     `json:"next_review_date"`
 }
 
 // Action represents an action to be verified
@@ -110,18 +117,23 @@ type Action struct {
 	Metadata  map[string]interface{} `json:"metadata,omitempty"`
 }
 
-// Attestation represents a legal attestation (notary, witness)
+// Attestation represents a legal or compliance attestation
 type Attestation struct {
-	Type          string    `json:"type"` // "notary", "witness", "electronic_signature"
-	AttestorID    string    `json:"attestor_id"`
-	AttestorName  string    `json:"attestor_name"`
-	AttestorRole  string    `json:"attestor_role,omitempty"`
-	Method        string    `json:"method"` // "in_person", "video", "electronic"
-	Timestamp     time.Time `json:"timestamp"`
-	Location      string    `json:"location,omitempty"`
-	CertificateID string    `json:"certificate_id,omitempty"`
-	SignatureHash string    `json:"signature_hash,omitempty"`
-	Verified      bool      `json:"verified"`
+	ID            string                 `json:"id"`
+	Type          string                 `json:"type"` // "notary", "witness", "electronic_signature", "compliance"
+	AttestorID    string                 `json:"attestor_id"`
+	AttestorName  string                 `json:"attestor_name"`
+	AttestorRole  string                 `json:"attestor_role,omitempty"`
+	Provider      string                 `json:"provider,omitempty"`
+	Method        string                 `json:"method"` // "in_person", "video", "electronic"
+	Timestamp     time.Time              `json:"timestamp"`
+	VerifiedAt    time.Time              `json:"verified_at,omitempty"`
+	Location      string                 `json:"location,omitempty"`
+	CertificateID string                 `json:"certificate_id,omitempty"`
+	SignatureHash string                 `json:"signature_hash,omitempty"`
+	Status        string                 `json:"status"` // "pending", "verified", "failed"
+	Verified      bool                   `json:"verified"`
+	Metadata      map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // RestrictionCheck represents a restriction verification
@@ -237,6 +249,8 @@ type VerificationServiceImpl struct {
 	fiduciaryService    FiduciaryDutyService
 	principalVerifier   PrincipalVerifier
 	attestationVerifier AttestationVerifier
+	attestationSigner   AttestationSigner
+	registerService     registry.CommercialRegisterService
 }
 
 // PoAStore interface for accessing PoA data
@@ -356,6 +370,8 @@ func NewVerificationService(
 	fiduciaryService FiduciaryDutyService,
 	principalVerifier PrincipalVerifier,
 	attestationVerifier AttestationVerifier,
+	attestationSigner AttestationSigner,
+	registerService registry.CommercialRegisterService,
 ) VerificationService {
 	return &VerificationServiceImpl{
 		poaStore:            poaStore,
@@ -364,6 +380,8 @@ func NewVerificationService(
 		fiduciaryService:    fiduciaryService,
 		principalVerifier:   principalVerifier,
 		attestationVerifier: attestationVerifier,
+		attestationSigner:   attestationSigner,
+		registerService:     registerService,
 	}
 }
 
@@ -625,23 +643,116 @@ func (v *VerificationServiceImpl) CheckRevocationStatus(ctx context.Context, poa
 
 // VerifyPrincipalStatus verifies the principal's legal capacity
 func (v *VerificationServiceImpl) VerifyPrincipalStatus(ctx context.Context, principalID string) (*PrincipalStatusResult, error) {
-	return v.principalVerifier.VerifyPrincipal(ctx, principalID)
+	res, err := v.principalVerifier.VerifyPrincipal(ctx, principalID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Sign for authoritative attestations (if signer is available)
+	if v.attestationSigner != nil && res.Valid {
+		att := Attestation{
+			ID:         uuid.New().String(),
+			Type:       "compliance",
+			Provider:   v.attestationSigner.SignerID(),
+			VerifiedAt: time.Now(),
+			Status:     "verified",
+			Verified:   true,
+			Metadata: map[string]interface{}{
+				"principal_id": res.PrincipalID,
+				"entity_type":  res.EntityType,
+				"status":       res.Status,
+			},
+		}
+
+		proof, err := v.attestationSigner.Sign(ctx, att)
+		if err == nil {
+			att.Metadata["proof"] = proof
+			res.Attestation = &att
+		}
+	}
+
+	return res, nil
 }
 
 // VerifyRepresentativePosition verifies the representative's position
 func (v *VerificationServiceImpl) VerifyRepresentativePosition(ctx context.Context, repID string, orgID string) (*PositionVerificationResult, error) {
-	// This would integrate with HR systems, organizational charts, etc.
-	// For now, return a basic implementation
-	return &PositionVerificationResult{
-		Valid:            true,
+	if v.registerService == nil {
+		// Fallback to basic implementation if service not available
+		return &PositionVerificationResult{
+			Valid:            true,
+			RepresentativeID: repID,
+			OrganizationID:   orgID,
+			Position:         "authorized_representative",
+			AuthorizedToAct:  true,
+			SigningAuthority: true,
+			EffectiveDate:    time.Now().AddDate(-1, 0, 0),
+			VerifiedAt:       time.Now(),
+		}, nil
+	}
+
+	// Try to verify through commercial register
+	// We need to resolve orgID to a registration number and jurisdiction
+	// For this prototype, we'll assume orgID is structured as "REG-NUMBER:JURISDICTION"
+	var regNum, jurisdiction string
+	sepIdx := strings.LastIndex(orgID, ":")
+	if sepIdx != -1 {
+		regNum = orgID[:sepIdx]
+		jurisdiction = orgID[sepIdx+1:]
+	} else {
+		// If not structured, try default jurisdiction or fail
+		regNum = orgID
+		jurisdiction = "DE" // Default to DE for demo
+	}
+
+	req := &registry.RepresentativeVerificationRequest{
+		RepresentativeName: repID, // Assuming repID is the name for this lookup
+		EntityRegistration: regNum,
+		Jurisdiction:       jurisdiction,
+	}
+
+	res, err := v.registerService.VerifyAuthorizedRepresentative(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("commercial register verification failed: %w", err)
+	}
+
+	result := &PositionVerificationResult{
+		Valid:            res.Verified,
 		RepresentativeID: repID,
 		OrganizationID:   orgID,
-		Position:         "authorized_representative",
-		AuthorizedToAct:  true,
-		SigningAuthority: true,
-		EffectiveDate:    time.Now().AddDate(-1, 0, 0),
-		VerifiedAt:       time.Now(),
-	}, nil
+		Position:         res.Position,
+		AuthorizedToAct:  res.Verified,
+		SigningAuthority: res.SignatureAuthority == "sole" || res.SignatureAuthority == "joint",
+		EffectiveDate:    res.AppointmentDate,
+		VerifiedAt:       res.VerificationDate,
+	}
+
+	if !res.Verified {
+		result.Issues = append(result.Issues, "Representative not found in commercial register or authority could not be confirmed")
+	} else if v.attestationSigner != nil {
+		// Sign the positive verification result
+		att := Attestation{
+			ID:         uuid.New().String(),
+			Type:       "commercial_register",
+			Provider:   v.attestationSigner.SignerID(),
+			VerifiedAt: time.Now(),
+			Status:     "verified",
+			Verified:   true,
+			Metadata: map[string]interface{}{
+				"representative_id": repID,
+				"organization_id":   orgID,
+				"position":          res.Position,
+				"effective_date":    res.AppointmentDate,
+			},
+		}
+
+		proof, err := v.attestationSigner.Sign(ctx, att)
+		if err == nil {
+			att.Metadata["proof"] = proof
+			result.Attestation = &att
+		}
+	}
+
+	return result, nil
 }
 
 // GenerateVerificationReport generates a comprehensive verification report
@@ -683,6 +794,9 @@ func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context
 		report.Warnings = append(report.Warnings, fmt.Sprintf("Could not verify principal status: %v", err))
 	} else {
 		report.PrincipalStatus = principalStatus
+		if principalStatus.Attestation != nil {
+			report.Attestations = append(report.Attestations, *principalStatus.Attestation)
+		}
 	}
 
 	// Verify authorization chain
@@ -691,6 +805,52 @@ func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context
 		report.Warnings = append(report.Warnings, fmt.Sprintf("Could not verify authorization chain: %v", err))
 	} else {
 		report.ChainOfAuthority = chain
+	}
+
+	// Fiduciary Compliance check
+	violations, err := v.fiduciaryService.GetViolations(ctx, poaID, "")
+	if err != nil {
+		report.Warnings = append(report.Warnings, fmt.Sprintf("Could not verify fiduciary compliance: %v", err))
+	} else {
+		report.FiduciaryCompliance = &FiduciaryComplianceCheck{
+			Compliant:      len(violations) == 0,
+			DutiesChecked:  []string{"care", "loyalty", "good_faith"}, // Example duties
+			LastAssessment: time.Now(),
+		}
+		for _, v := range violations {
+			report.FiduciaryCompliance.Violations = append(report.FiduciaryCompliance.Violations, FiduciaryViolation{
+				Duty:        v.DutyType,
+				Description: v.ViolationDescription,
+				Severity:    v.Severity,
+				DetectedAt:  v.DetectedAt,
+			})
+		}
+	}
+
+	// Capability Check
+	capAssessment, err := v.capabilityService.GetLatestAssessment(ctx, poaVerif.GranteeID)
+	if err != nil {
+		report.Warnings = append(report.Warnings, fmt.Sprintf("Could not verify capability assessment: %v", err))
+	} else {
+		// Use CheckCapabilityMatch if we have the PoA for requirements
+		poa, _ := v.poaStore.GetPoA(ctx, poaID)
+		var sufficient bool
+		var deficient []string
+		if poa != nil && poa.CapabilityReqs != nil {
+			sufficient, deficient, _ = v.capabilityService.CheckCapabilityMatch(ctx, poaVerif.GranteeID, poa.CapabilityReqs)
+		} else {
+			sufficient = true // Assume sufficient if no reqs
+		}
+
+		report.CapabilityCheck = &CapabilityVerificationCheck{
+			Sufficient:      sufficient,
+			RequiredLevel:   "N/A", // From PoA if needed
+			ActualLevel:     capAssessment.OverallLevel,
+			RequiredDomains: nil,
+			ActualDomains:   capAssessment.DomainScores,
+			DeficientAreas:  deficient,
+			LastAssessment:  capAssessment.AssessmentDate,
+		}
 	}
 
 	// Overall validity
@@ -783,12 +943,24 @@ func (v *VerificationServiceImpl) VerifyAttestations(ctx context.Context, poaID 
 
 	verifiedAttestations := []Attestation{}
 
+	if v.attestationVerifier == nil {
+		// If no verifier, we can't confirm cryptographic proofs, but we return existing status
+		return poa.Attestations, nil
+	}
+
 	for _, att := range poa.Attestations {
 		verified, err := v.attestationVerifier.Verify(ctx, att)
 		if err == nil {
 			att.Verified = verified
-			verifiedAttestations = append(verifiedAttestations, att)
+			if verified {
+				att.Status = "verified"
+			}
+		} else {
+			// Log error if needed, but continue with others
+			att.Verified = false
+			att.Status = "verification_failed"
 		}
+		verifiedAttestations = append(verifiedAttestations, att)
 	}
 
 	return verifiedAttestations, nil
@@ -796,7 +968,20 @@ func (v *VerificationServiceImpl) VerifyAttestations(ctx context.Context, poaID 
 
 // isHumanEntity checks if an entity ID represents a human (simplified)
 func (v *VerificationServiceImpl) isHumanEntity(entityID string) bool {
-	// This would integrate with entity registry
-	// For now, simple heuristic: humans don't have "AI" or "BOT" prefix
-	return entityID[:3] != "AI-" && entityID[:4] != "BOT-"
+	if v.principalVerifier == nil {
+		// Fallback to simple heuristic: humans don't have "AI" or "BOT" prefix
+		return !strings.HasPrefix(strings.ToUpper(entityID), "AI") &&
+			!strings.HasPrefix(strings.ToUpper(entityID), "BOT")
+	}
+
+	// Use PrincipalVerifier if available
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	res, err := v.principalVerifier.VerifyPrincipal(ctx, entityID)
+	if err != nil {
+		return false
+	}
+
+	return res.EntityType == "individual" || res.EntityType == "human"
 }

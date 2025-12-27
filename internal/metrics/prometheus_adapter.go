@@ -54,7 +54,11 @@ type PrometheusMetrics struct {
 	envelopeV1SunsetPhaseGauge             prom.Gauge       // gauge enumerating sunset phase (0..5)
 	sunsetPhaseSatisfactionGauge           prom.Gauge       // gauge 0..1 satisfaction progress toward next phase promotion window
 	multiSignatureVerifications            prom.Counter
+	multiSignatureSuccess                  prom.Counter
 	multiSignatureVerificationFailures     prom.Counter
+	multiSignatureIssued                   prom.Counter
+	multiSignatureSingleIssued             prom.Counter
+	multiSignatureAdoptionRatio            prom.Gauge
 	multiSignatureWeightFailures           prom.Counter
 	multiSignatureStructuralFailures       prom.Counter
 	multiSignatureDigestFailures           prom.Counter
@@ -74,6 +78,8 @@ type PrometheusMetrics struct {
 	replayHits                             prom.Counter
 	replayMisses                           prom.Counter
 	replayStoreErrors                      prom.Counter
+	malformedJTI                           *prom.CounterVec // labeled by reason (length_invalid, format_invalid, etc.)
+	replayStoreAvailabilityImpact          prom.Counter
 	replayStoreLatency                     prom.Histogram
 	scopeViolations                        prom.Counter
 	restrictionViolations                  prom.Counter
@@ -152,6 +158,7 @@ type PrometheusMetrics struct {
 	externalAnchorReceiptsIntegrityGauge     prom.Gauge
 	externalAnchorReceiptsLastVerifyAgeGauge prom.Gauge
 	externalAnchorReceiptsTotalCounter       prom.Counter
+	externalAnchorIntervalHistogram          prom.Histogram
 	// decision labeled counter (action, resource, outcome)
 	decisionCounter       *prom.CounterVec
 	decisionReasonCounter *prom.CounterVec // labels: action,resource,outcome,reason
@@ -354,8 +361,12 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		envelopeDigestMismatch:                 fqCounter("envelope_digest_mismatch_total", "Canonical digest mismatch detected during envelope verification"),
 		envelopeRawPOAEmbedded:                 fqCounter("envelope_raw_poa_embedded_total", "Delegation tokens issued with embedded RawPOA canonical serialization"),
 		envelopeRawPOATooLarge:                 fqCounter("envelope_raw_poa_too_large_total", "Delegation tokens where RawPOA embedding omitted due to size limit"),
-		multiSignatureVerifications:            fqCounter("multi_signature_verifications_total", "Successful multi-signature threshold verifications"),
+		multiSignatureVerifications:            fqCounter("multi_signature_verifications_total", "Total multi-signature threshold verification attempts"),
+		multiSignatureSuccess:                  fqCounter("multi_signature_success_total", "Successful multi-signature threshold verifications"),
 		multiSignatureVerificationFailures:     fqCounter("multi_signature_verification_failures_total", "Failed multi-signature threshold verifications (generic)"),
+		multiSignatureIssued:                   fqCounter("multi_signature_issued_total", "Delegation tokens issued with multi-signature threshold > 1"),
+		multiSignatureSingleIssued:             fqCounter("multi_signature_single_issued_total", "Delegation tokens issued with single signature"),
+		multiSignatureAdoptionRatio:            fqGauge("multi_signature_adoption_ratio", "Ratio (0..1) of multi-signature vs total issuance over sliding window"),
 		multiSignatureWeightFailures:           fqCounter("multi_signature_weight_failures_total", "Multi-signature weight threshold failures"),
 		multiSignatureStructuralFailures:       fqCounter("multi_signature_structural_failures_total", "Multi-signature structural precondition failures"),
 		multiSignatureDigestFailures:           fqCounter("multi_signature_digest_failures_total", "Multi-signature canonical digest failures"),
@@ -432,12 +443,13 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		hierDigestParentDigestMissing: fqCounter("hier_digest_parent_digest_missing_total", "Hierarchical digest parent digest missing during issuance or validation"),
 		hierDigestVersionMismatch:     fqCounter("hier_digest_version_mismatch_total", "Hierarchical digest expected V4 but observed different version"),
 		// Cascade revocation metrics
-		cascadeRevocationTriggered:  fqCounter("cascade_revocation_triggered_total", "Cascade revocation operations initiated for parent POA"),
-		cascadeDescendantsProcessed: fqCounter("cascade_descendants_processed_total", "Descendant POAs processed during cascade revocation"),
-		cascadeDepthLimitReached:    fqCounter("cascade_depth_limit_reached_total", "Cascade operations hitting configured maximum depth limit"),
-		cascadeBatchProcessed:       fqCounter("cascade_batch_processed_total", "Batches processed during cascade revocation operations"),
-		cascadeMaxDepthReachedGauge: fqGauge("cascade_max_depth_reached", "Maximum cascade depth reached in current session"),
-		cascadeProcessingErrors:     fqCounter("cascade_processing_errors_total", "Errors encountered during cascade descendant processing"),
+		cascadeRevocationTriggered:    fqCounter("cascade_revocation_triggered_total", "Cascade revocation operations initiated for parent POA"),
+		cascadeDescendantsProcessed:   fqCounter("cascade_descendants_processed_total", "Descendant POAs processed during cascade revocation"),
+		cascadeDepthLimitReached:      fqCounter("cascade_depth_limit_reached_total", "Cascade operations hitting configured maximum depth limit"),
+		cascadeBatchProcessed:         fqCounter("cascade_batch_processed_total", "Batches processed during cascade revocation operations"),
+		cascadeMaxDepthReachedGauge:   fqGauge("cascade_max_depth_reached", "Maximum cascade depth reached in current session"),
+		cascadeProcessingErrors:       fqCounter("cascade_processing_errors_total", "Errors encountered during cascade descendant processing"),
+		replayStoreAvailabilityImpact: fqCounter("replay_store_availability_impact_total", "Fail-closed denials due to replay store unavailability"),
 	}
 	// Attestation proof issuance latency histogram
 	attIssue := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "attestation_proof_issue_latency_seconds", Help: "Latency of attestation proof issuance operations", Buckets: opts.Buckets, ConstLabels: labels})
@@ -688,6 +700,16 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 	pm.externalAnchorReceiptsLastVerifyAgeGauge = exrAge
 	exrTot := fqCounter("capability_external_anchor_receipts_total", "Total successful external anchor receipts persisted")
 	pm.externalAnchorReceiptsTotalCounter = exrTot
+	// Requirement 14: external anchor interval histogram
+	eai := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "external_anchor_interval_seconds", Help: "Histogram of intervals between successful external anchor emissions", Buckets: []float64{60, 300, 600, 1800, 3600, 7200, 14400, 28800, 86400}, ConstLabels: labels})
+	if err := reg.Register(eai); err != nil {
+		if are, ok := err.(prom.AlreadyRegisteredError); ok {
+			if h, ok2 := are.ExistingCollector.(prom.Histogram); ok2 {
+				eai = h
+			}
+		}
+	}
+	pm.externalAnchorIntervalHistogram = eai
 	// Capability diff metrics registration
 	pm.capabilityDiffRequests = fqCounter("capability_diff_requests_total", "Capability diff endpoint requests")
 	cdHist := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "capability_diff_latency_seconds", Help: "Latency of capability diff computation", Buckets: opts.Buckets, ConstLabels: labels})
@@ -973,8 +995,14 @@ func (p *PrometheusMetrics) IncEnvelopeRawPOATooLarge() {
 	}
 }
 func (p *PrometheusMetrics) IncMultiSignatureVerifications() { p.multiSignatureVerifications.Inc() }
+func (p *PrometheusMetrics) IncMultiSignatureSuccess()       { p.multiSignatureSuccess.Inc() }
 func (p *PrometheusMetrics) IncMultiSignatureVerificationFailures() {
 	p.multiSignatureVerificationFailures.Inc()
+}
+func (p *PrometheusMetrics) IncMultiSignatureIssued()  { p.multiSignatureIssued.Inc() }
+func (p *PrometheusMetrics) IncSingleSignatureIssued() { p.multiSignatureSingleIssued.Inc() }
+func (p *PrometheusMetrics) SetMultiSignatureAdoptionRatio(r float64) {
+	p.multiSignatureAdoptionRatio.Set(r)
 }
 func (p *PrometheusMetrics) IncMultiSignatureWeightFailures() { p.multiSignatureWeightFailures.Inc() }
 func (p *PrometheusMetrics) IncMultiSignatureStructuralFailures() {
@@ -1018,10 +1046,27 @@ func (p *PrometheusMetrics) IncCombinedAnchorFailures()      { p.combinedAnchorF
 func (p *PrometheusMetrics) IncAnchorFailures()              { p.anchorFailures.Inc() }
 func (p *PrometheusMetrics) IncReplayHits()                  { p.replayHits.Inc() }
 func (p *PrometheusMetrics) IncReplayMisses()                { p.replayMisses.Inc() }
+func (p *PrometheusMetrics) IncReplayStoreAvailabilityImpact() {
+	p.replayStoreAvailabilityImpact.Inc()
+}
+
+func (p *PrometheusMetrics) ObserveCapabilityAnchorInterval(d time.Duration) {
+	if d < 0 {
+		return
+	}
+	p.capabilityAnchorEmissionIntervalHist.Observe(d.Seconds())
+}
+
 func (p *PrometheusMetrics) ObserveValidationLatency(d time.Duration) {
 	p.validationLatency.Observe(d.Seconds())
 }
 func (p *PrometheusMetrics) IncReplayStoreErrors() { p.replayStoreErrors.Inc() }
+func (p *PrometheusMetrics) IncMalformedJTI(reason string) {
+	// Track malformed JTI with labeled counter by reason
+	if p.malformedJTI != nil {
+		p.malformedJTI.WithLabelValues(reason).Inc()
+	}
+}
 func (p *PrometheusMetrics) ObserveReplayStoreLatency(d time.Duration) {
 	p.replayStoreLatency.Observe(d.Seconds())
 }
@@ -1575,6 +1620,19 @@ func (p *PrometheusMetrics) RecordDecisionWithReason(action, resource, outcome, 
 }
 
 // RecordLifecycleTransition records a labeled lifecycle transition.
+func (p *PrometheusMetrics) ObserveExternalAnchorInterval(seconds float64) {
+	if p.externalAnchorIntervalHistogram != nil {
+		p.externalAnchorIntervalHistogram.Observe(seconds)
+	}
+}
+
+func (p *PrometheusMetrics) HygieneSnapshot() map[string]uint64 {
+	// PrometheusMetrics doesn't locally store individual violation counts for retrieval,
+	// it delegates to prometheus.Counter objects.
+	// Returning nil is acceptable here if we only rely on Memory for anchoring snapshots.
+	return nil
+}
+
 func (p *PrometheusMetrics) RecordLifecycleTransition(entityType, oldStatus, newStatus, outcome string) {
 	if oldStatus == "" {
 		oldStatus = "_"

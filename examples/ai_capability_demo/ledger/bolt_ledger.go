@@ -34,7 +34,7 @@ func NewBoltLedger(path string) (*BoltLedger, error) {
 		_, e := tx.CreateBucketIfNotExists(boltBucket)
 		return e
 	}); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, err
 	}
 	// preload roots by iterating entries (cost acceptable for demo small size)
@@ -98,7 +98,7 @@ func (bl *BoltLedger) Size() int {
 	bl.mu.RLock()
 	defer bl.mu.RUnlock()
 	var n int
-	bl.db.View(func(tx *bolt.Tx) error {
+	_ = bl.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(boltBucket)
 		if b != nil {
 			n = b.Stats().KeyN

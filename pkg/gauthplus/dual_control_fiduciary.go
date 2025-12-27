@@ -3,25 +3,25 @@ package gauthplus
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/mauriciomferz/Gauth_go/pkg/database"
 )
 
 const (
 	statusPending = "pending"
 )
 
-// PostgreSQLDualControlService implements DualControlService using PostgreSQL
+// PostgreSQLDualControlService implements DualControlService using PostgreSQL (pgx)
 type PostgreSQLDualControlService struct {
-	db *sql.DB
+	db *database.DB
 }
 
 // NewPostgreSQLDualControlService creates a new dual control service
-func NewPostgreSQLDualControlService(db *sql.DB) *PostgreSQLDualControlService {
+func NewPostgreSQLDualControlService(db *database.DB) *PostgreSQLDualControlService {
 	return &PostgreSQLDualControlService{db: db}
 }
 
@@ -63,7 +63,7 @@ func (s *PostgreSQLDualControlService) RequestApproval(
 		return "", fmt.Errorf("failed to marshal metadata: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, `
+	_, err = s.db.Pool.Exec(ctx, `
 		INSERT INTO dual_control_approvals (
 			id, poa_id, action_type, action_description,
 			requested_by, requested_at, required_approvers,
@@ -130,7 +130,7 @@ func (s *PostgreSQLDualControlService) ApproveAction(
 		decisionFinalizedAt = &now
 	}
 
-	_, err = s.db.ExecContext(ctx, `
+	_, err = s.db.Pool.Exec(ctx, `
 		UPDATE dual_control_approvals
 		SET approved_by = $1,
 		    status = $2,
@@ -194,7 +194,7 @@ func (s *PostgreSQLDualControlService) RejectAction(
 		decisionFinalizedAt = &now
 	}
 
-	_, err = s.db.ExecContext(ctx, `
+	_, err = s.db.Pool.Exec(ctx, `
 		UPDATE dual_control_approvals
 		SET rejected_by = $1,
 		    status = $2,
@@ -220,7 +220,7 @@ func (s *PostgreSQLDualControlService) CheckApprovalStatus(
 	}
 
 	var status string
-	err := s.db.QueryRowContext(ctx, `
+	err := s.db.Pool.QueryRow(ctx, `
 		SELECT status FROM dual_control_approvals WHERE id = $1
 	`, approvalID).Scan(&status)
 
@@ -240,7 +240,7 @@ func (s *PostgreSQLDualControlService) FindApprovalsByPoAAndAction(
 		return []*DualControlApproval{}, nil
 	}
 
-	rows, err := s.db.QueryContext(ctx, `
+	rows, err := s.db.Pool.Query(ctx, `
 		SELECT id, poa_id, action_type, action_description,
 		       requested_by, requested_at, required_approvers,
 		       approval_threshold, status, approved_by, rejected_by,
@@ -259,7 +259,7 @@ func (s *PostgreSQLDualControlService) FindApprovalsByPoAAndAction(
 	for rows.Next() {
 		approval := &DualControlApproval{}
 		var approvedByJSON, rejectedByJSON, metadataJSON []byte
-		var expiresAt sql.NullTime
+		var expiresAt *time.Time
 
 		err := rows.Scan(
 			&approval.ID, &approval.POAID, &approval.ActionType,
@@ -287,9 +287,7 @@ func (s *PostgreSQLDualControlService) FindApprovalsByPoAAndAction(
 			}
 		}
 
-		if expiresAt.Valid {
-			approval.ExpiresAt = &expiresAt.Time
-		}
+		approval.ExpiresAt = expiresAt
 
 		approvals = append(approvals, approval)
 	}
@@ -308,7 +306,7 @@ func (s *PostgreSQLDualControlService) GetPendingApprovals(
 
 	// This query would need to check if approverID is authorized
 	// For simplicity, returning all pending approvals
-	rows, err := s.db.QueryContext(ctx, `
+	rows, err := s.db.Pool.Query(ctx, `
 		SELECT id, poa_id, action_type, action_description,
 		       requested_by, requested_at, required_approvers,
 		       approval_threshold, status, approved_by, rejected_by,
@@ -327,7 +325,7 @@ func (s *PostgreSQLDualControlService) GetPendingApprovals(
 	for rows.Next() {
 		approval := &DualControlApproval{}
 		var approvedByJSON, rejectedByJSON []byte
-		var expiresAt sql.NullTime
+		var expiresAt *time.Time
 
 		err := rows.Scan(
 			&approval.ID, &approval.POAID, &approval.ActionType,
@@ -349,9 +347,7 @@ func (s *PostgreSQLDualControlService) GetPendingApprovals(
 			return nil, fmt.Errorf("failed to unmarshal rejected_by: %w", err)
 		}
 
-		if expiresAt.Valid {
-			approval.ExpiresAt = &expiresAt.Time
-		}
+		approval.ExpiresAt = expiresAt
 
 		approvals = append(approvals, approval)
 	}
@@ -364,9 +360,9 @@ func (s *PostgreSQLDualControlService) GetPendingApprovals(
 func (s *PostgreSQLDualControlService) getApproval(ctx context.Context, approvalID string) (*DualControlApproval, error) {
 	approval := &DualControlApproval{}
 	var approvedByJSON, rejectedByJSON []byte
-	var expiresAt sql.NullTime
+	var expiresAt *time.Time
 
-	err := s.db.QueryRowContext(ctx, `
+	err := s.db.Pool.QueryRow(ctx, `
 		SELECT id, poa_id, action_type, action_description,
 		       requested_by, requested_at, required_approvers,
 		       approval_threshold, status, approved_by, rejected_by,
@@ -394,9 +390,7 @@ func (s *PostgreSQLDualControlService) getApproval(ctx context.Context, approval
 		return nil, fmt.Errorf("failed to unmarshal rejected_by: %w", err)
 	}
 
-	if expiresAt.Valid {
-		approval.ExpiresAt = &expiresAt.Time
-	}
+	approval.ExpiresAt = expiresAt
 
 	return approval, nil
 }
@@ -432,13 +426,13 @@ func (s *PostgreSQLDualControlService) calculateApprovalStatus(approval *DualCon
 	return "pending"
 }
 
-// PostgreSQLFiduciaryDutyService implements FiduciaryDutyService
+// PostgreSQLFiduciaryDutyService implements FiduciaryDutyService (pgx)
 type PostgreSQLFiduciaryDutyService struct {
-	db *sql.DB
+	db *database.DB
 }
 
 // NewPostgreSQLFiduciaryDutyService creates a new fiduciary duty service
-func NewPostgreSQLFiduciaryDutyService(db *sql.DB) *PostgreSQLFiduciaryDutyService {
+func NewPostgreSQLFiduciaryDutyService(db *database.DB) *PostgreSQLFiduciaryDutyService {
 	return &PostgreSQLFiduciaryDutyService{db: db}
 }
 
@@ -469,7 +463,7 @@ func (s *PostgreSQLFiduciaryDutyService) RecordViolation(
 		return fmt.Errorf("failed to marshal evidence: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, `
+	_, err = s.db.Pool.Exec(ctx, `
 		INSERT INTO fiduciary_duty_violations (
 			id, poa_id, agent_id, duty_type, violation_description,
 			severity, detected_at, detected_by, resolution_status,
@@ -517,7 +511,7 @@ func (s *PostgreSQLFiduciaryDutyService) GetViolations(
 
 	query += " ORDER BY detected_at DESC"
 
-	rows, err := s.db.QueryContext(ctx, query, args...)
+	rows, err := s.db.Pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get violations: %w", err)
 	}
@@ -526,9 +520,9 @@ func (s *PostgreSQLFiduciaryDutyService) GetViolations(
 	var violations []*FiduciaryDutyViolation
 	for rows.Next() {
 		violation := &FiduciaryDutyViolation{}
-		var reviewedBy sql.NullString
-		var reviewedAt sql.NullTime
-		var resolutionNotes sql.NullString
+		var reviewedBy *string
+		var reviewedAt *time.Time
+		var resolutionNotes *string
 
 		err := rows.Scan(
 			&violation.ID, &violation.POAID, &violation.AgentID,
@@ -541,14 +535,14 @@ func (s *PostgreSQLFiduciaryDutyService) GetViolations(
 			return nil, fmt.Errorf("failed to scan violation: %w", err)
 		}
 
-		if reviewedBy.Valid {
-			violation.ReviewedBy = reviewedBy.String
+		if reviewedBy != nil {
+			violation.ReviewedBy = *reviewedBy
 		}
-		if reviewedAt.Valid {
-			violation.ReviewedAt = &reviewedAt.Time
+		if reviewedAt != nil {
+			violation.ReviewedAt = reviewedAt
 		}
-		if resolutionNotes.Valid {
-			violation.ResolutionNotes = resolutionNotes.String
+		if resolutionNotes != nil {
+			violation.ResolutionNotes = *resolutionNotes
 		}
 
 		violations = append(violations, violation)
@@ -567,7 +561,7 @@ func (s *PostgreSQLFiduciaryDutyService) ResolveViolation(
 	}
 
 	now := time.Now().UTC()
-	result, err := s.db.ExecContext(ctx, `
+	result, err := s.db.Pool.Exec(ctx, `
 		UPDATE fiduciary_duty_violations
 		SET resolution_status = 'resolved',
 		    reviewed_by = $1,
@@ -581,12 +575,7 @@ func (s *PostgreSQLFiduciaryDutyService) ResolveViolation(
 		return fmt.Errorf("failed to resolve violation: %w", err)
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return fmt.Errorf("no violation found with ID: %s", violationID)
 	}
 
@@ -611,7 +600,7 @@ func (s *PostgreSQLFiduciaryDutyService) GetViolationsBySeverity(
 		return nil, fmt.Errorf("invalid severity: %s", minSeverity)
 	}
 
-	rows, err := s.db.QueryContext(ctx, `
+	rows, err := s.db.Pool.Query(ctx, `
 		SELECT id, poa_id, agent_id, duty_type, violation_description,
 		       severity, detected_at, detected_by, resolution_status,
 		       created_at, updated_at

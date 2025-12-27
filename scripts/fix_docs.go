@@ -1,4 +1,6 @@
-package scripts
+//go:build ignore
+
+package main
 
 import (
 	"bufio"

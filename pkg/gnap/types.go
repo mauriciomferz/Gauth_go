@@ -365,9 +365,10 @@ type PowerOfAttorneyRef struct {
 
 // ChainLink represents one hop in authorization chain.
 type ChainLink struct {
-	Entity    string `json:"entity"`
-	Authority string `json:"authority"`
-	Verified  bool   `json:"verified"`
+	Entity     string `json:"entity"`
+	EntityType string `json:"entity_type,omitempty"` // "human", "ai_agent"
+	Authority  string `json:"authority"`
+	Verified   bool   `json:"verified"`
 }
 
 // --- Key Material Helpers ---

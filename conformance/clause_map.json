@@ -1,136 +1,588 @@
 {
-  "generated_at": "2025-11-07",
-  "notes": "Comprehensive mapping covering 24 RFC 0111/0115 sections with expanded test coverage including authorization engine, external anchoring, detached signatures, multi-signature threshold, advanced claims, key rotation, policy versioning, AI capability governance, embedding PoA in tokens, and jurisdiction enforcement.",
+  "generated_at": "2025-12-26",
+  "version": "2.0",
+  "notes": "Comprehensive mapping covering 40+ RFC 0111/0115 sections with expanded test coverage including authorization engine, external anchoring, detached signatures, multi-signature threshold, advanced claims, key rotation, policy versioning, AI capability governance, embedding PoA in tokens, jurisdiction enforcement, error handling, security considerations, negative test variants, and explicit test ID linkage.",
   "entries": [
     {
       "clause_prefix": "0111:1.-introduction",
-      "symbols": ["Service", "NewService", "TokenResult"],
-      "tests_glob": "pkg/rfc0111/*_test.go"
+      "symbols": [
+        "Service",
+        "NewService",
+        "TokenResult"
+      ],
+      "tests_glob": "pkg/rfc0111/*_test.go",
+      "test_ids": [
+        "TestNewService",
+        "TestServiceBasics"
+      ],
+      "coverage_target": 85.0,
+      "description": "Core service initialization and basic token operations"
     },
     {
       "clause_prefix": "0111:2.-policy-bundle-integrity",
-      "symbols": ["policy.Registry", "AddBundle", "VerifyChain"],
-      "tests_glob": "test/policy_bundle_substitution_test.go"
+      "symbols": [
+        "policy.Registry",
+        "AddBundle",
+        "VerifyChain"
+      ],
+      "tests_glob": "test/policy_bundle_substitution_test.go",
+      "test_ids": [
+        "TestPolicyBundleIntegrity"
+      ],
+      "coverage_target": 90.0,
+      "description": "Policy bundle verification and tamper detection"
     },
     {
       "clause_prefix": "0111:3.-delegation-&-revocation",
-      "symbols": ["CreateDelegation", "RevokeDelegation", "VerifyIntegrity", "RevocationChain"],
-      "tests_glob": "pkg/rfc0111/rfc0111_revocation_integration_test.go"
+      "symbols": [
+        "CreateDelegation",
+        "RevokeDelegation",
+        "VerifyIntegrity",
+        "RevocationChain"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_revocation_integration_test.go",
+      "test_ids": [
+        "TestRevokeDelegation",
+        "TestRevocationChainIntegrity",
+        "TestDualControlRevocation"
+      ],
+      "coverage_target": 95.0,
+      "description": "Delegation creation and revocation with chain integrity"
+    },
+    {
+      "clause_prefix": "0111:3.-delegation-&-revocation-negative",
+      "symbols": [
+        "CreateDelegation",
+        "RevokeDelegation"
+      ],
+      "tests_glob": "pkg/rfc0111/*_negative_test.go",
+      "test_ids": [
+        "TestInvalidDelegation",
+        "TestUnauthorizedRevocation"
+      ],
+      "coverage_target": 80.0,
+      "description": "Negative cases: invalid delegation, unauthorized access, duplicate revocation"
     },
     {
       "clause_prefix": "0111:4.-audit-logging",
-      "symbols": ["AuditEvents", "MemoryLogger", "FileLogger", "VerifyChain"],
-      "tests_glob": "pkg/audit/file_logger_test.go"
+      "symbols": [
+        "AuditEvents",
+        "MemoryLogger",
+        "FileLogger",
+        "VerifyChain"
+      ],
+      "tests_glob": "pkg/audit/file_logger_test.go",
+      "test_ids": [
+        "TestAuditChainIntegrity",
+        "TestFileLogger"
+      ],
+      "coverage_target": 90.0,
+      "description": "Audit event logging with chain integrity verification"
     },
     {
       "clause_prefix": "0111:5.-replay-protection",
-      "symbols": ["WithReplayProtection", "ReplayStore", "VerifyToken"],
-      "tests_glob": "pkg/rfc0111/rfc0111_replay_test.go"
+      "symbols": [
+        "WithReplayProtection",
+        "ReplayStore",
+        "VerifyToken"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_replay_test.go",
+      "test_ids": [
+        "TestReplayProtection",
+        "TestReplayStore"
+      ],
+      "coverage_target": 95.0,
+      "description": "Replay attack prevention and token reuse detection"
     },
     {
       "clause_prefix": "0111:6.-cryptographic-requirements",
-      "symbols": ["CanonicalPOADigest", "verifyPOASignature", "computeHash"],
-      "tests_glob": "pkg/rfc0111/canonical_prop_test.go"
-    },
-    {
-      "clause_prefix": "0115:1.-power-of-attorney-structure",
-      "symbols": ["PowerOfAttorney", "POAStatus", "ValidateMultiSignature"],
-      "tests_glob": "pkg/rfc0111/validator_extended_test.go"
-    },
-    {
-      "clause_prefix": "0115:2.-scope-semantics",
-      "symbols": ["ScopeItem", "ValidateScope", "ScopeValidator"],
-      "tests_glob": "pkg/rfc0111/*scope*_test.go"
-    },
-    {
-      "clause_prefix": "0115:3.-validity-period",
-      "symbols": ["CanonicalPOADigest", "validateDelegationRequest", "ValidateDelegation"],
-      "tests_glob": "pkg/rfc0111/rfc0111_size_limits_test.go"
-    },
-    {
-      "clause_prefix": "0115:4.-formal-requirements",
-      "symbols": ["LegalFramework", "FormalValidation", "RequirementCheck"],
-      "tests_glob": "pkg/auth/legal_framework_integration.go"
-    },
-    {
-      "clause_prefix": "0115:5.-power-limits",
-      "symbols": ["PowerLimit", "TransactionLimit", "DailyLimit"],
-      "tests_glob": "internal/ai/capability_matrix_test.go"
-    },
-    {
-      "clause_prefix": "0115:6.-rights-&-obligations",
-      "symbols": ["Rights", "Obligations", "DutyOfCare"],
-      "tests_glob": "pkg/poa/validator.go"
-    },
-    {
-      "clause_prefix": "0115:7.-special-conditions",
-      "symbols": ["ConditionalExpression", "SpecialConditions", "RuntimeEvaluation"],
-      "tests_glob": "pkg/authz/*_test.go"
-    },
-    {
-      "clause_prefix": "0115:8.-joint-signatures",
-      "symbols": ["ValidateMultiSignature", "SignatureManager", "ThresholdValidation"],
-      "tests_glob": "internal/multisig/manager_test.go"
-    },
-    {
-      "clause_prefix": "0115:9.-canonical-serialization",
-      "symbols": ["CanonicalPOADigest"],
-      "tests_glob": "pkg/rfc0111/canonical_prop_test.go"
-    },
-    {
-      "clause_prefix": "0115:10.-revocation-semantics",
-      "symbols": ["RevokeDelegation", "RevocationChain", "RevocationStatus"],
-      "tests_glob": "pkg/rfc0111/rfc0111_revocation_integration_test.go"
+      "symbols": [
+        "CanonicalPOADigest",
+        "verifyPOASignature",
+        "computeHash"
+      ],
+      "tests_glob": "pkg/rfc0111/canonical_prop_test.go",
+      "test_ids": [
+        "TestCanonicalDigest",
+        "TestSignatureVerification"
+      ],
+      "coverage_target": 95.0,
+      "description": "Cryptographic primitives and signature verification"
     },
     {
       "clause_prefix": "0111:7.-authorization-engine",
-      "symbols": ["EvaluateExpression", "Request", "ExprLimits"],
-      "tests_glob": "pkg/authz/authz_enhanced_test.go"
+      "symbols": [
+        "EvaluateExpression",
+        "Request",
+        "ExprLimits"
+      ],
+      "tests_glob": "pkg/authz/authz_enhanced_test.go",
+      "test_ids": [
+        "TestAuthorizationEngine",
+        "TestExpressionEvaluation"
+      ],
+      "coverage_target": 90.0,
+      "description": "Policy expression evaluation and authorization decisions"
     },
     {
-      "clause_prefix": "0111:8.-pp-architecture",
-      "symbols": ["WithReplayProtection", "ReplayStore", "MemoryStore"],
-      "tests_glob": "pkg/rfc0111/rfc0111_replay_test.go"
+      "clause_prefix": "0111:8.-persistence-architecture",
+      "symbols": [
+        "WithReplayProtection",
+        "ReplayStore",
+        "MemoryStore"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_replay_test.go",
+      "test_ids": [
+        "TestPersistence"
+      ],
+      "coverage_target": 85.0,
+      "description": "State persistence and recovery mechanisms"
     },
     {
       "clause_prefix": "0111:9.-external-anchoring",
-      "symbols": ["AnchorClient", "AnchorRecord", "MemoryAnchor"],
-      "tests_glob": "pkg/anchor/anchor_test.go"
+      "symbols": [
+        "AnchorClient",
+        "AnchorRecord",
+        "MemoryAnchor",
+        "ExternalAnchorClient"
+      ],
+      "tests_glob": "pkg/ledger/external_anchor_test.go",
+      "test_ids": [
+        "TestExternalAnchoring",
+        "TestAnchorReceipt"
+      ],
+      "coverage_target": 90.0,
+      "description": "External timestamp and notarization integration"
     },
     {
       "clause_prefix": "0111:10.-detached-signatures",
-      "symbols": ["incDetachedVerify", "registerDetachedMetrics", "detachedIssued"],
-      "tests_glob": "pkg/rfc0111/rfc0111_detached_signature_test.go"
+      "symbols": [
+        "incDetachedVerify",
+        "registerDetachedMetrics",
+        "detachedIssued"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_detached_signature_test.go",
+      "test_ids": [
+        "TestDetachedSignature"
+      ],
+      "coverage_target": 85.0,
+      "description": "Detached signature generation and verification"
     },
     {
       "clause_prefix": "0111:11.-multi-signature-threshold",
-      "symbols": ["ValidateMultiSignature", "SignatureManager", "ThresholdValidation"],
-      "tests_glob": "pkg/rfc0111/multi_signature_test.go"
+      "symbols": [
+        "ValidateMultiSignature",
+        "SignatureManager",
+        "ThresholdValidation"
+      ],
+      "tests_glob": "pkg/rfc0111/multi_signature_test.go",
+      "test_ids": [
+        "TestMultiSignature",
+        "TestThresholdValidation"
+      ],
+      "coverage_target": 90.0,
+      "description": "Multi-signature and threshold signature schemes"
+    },
+    {
+      "clause_prefix": "0111:12.-error-handling",
+      "symbols": [
+        "ValidationError",
+        "AuthorizationError",
+        "CryptoError"
+      ],
+      "tests_glob": "pkg/rfc0111/*_error_test.go",
+      "test_ids": [
+        "TestErrorHandling",
+        "TestErrorPropagation"
+      ],
+      "coverage_target": 85.0,
+      "description": "Error response formats and failure mode handling"
+    },
+    {
+      "clause_prefix": "0111:13.-token-lifecycle",
+      "symbols": [
+        "CreateDelegation",
+        "VerifyToken",
+        "ValidateExpiration"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_lifecycle_test.go",
+      "test_ids": [
+        "TestTokenLifecycle",
+        "TestExpiration"
+      ],
+      "coverage_target": 90.0,
+      "description": "Token issuance, verification, and expiration handling"
+    },
+    {
+      "clause_prefix": "0111:14.-delegation-chains",
+      "symbols": [
+        "DelegationChain",
+        "DelegationChainValidator",
+        "ValidateChain"
+      ],
+      "tests_glob": "pkg/delegation/*chain*_test.go",
+      "test_ids": [
+        "TestDelegationChain",
+        "TestTransitiveDelegations"
+      ],
+      "coverage_target": 90.0,
+      "description": "Transitive delegation chains and chain validation"
+    },
+    {
+      "clause_prefix": "0111:15.-security-considerations",
+      "symbols": [
+        "ReplayAttack",
+        "TokenForging",
+        "ClockSkew"
+      ],
+      "tests_glob": "pkg/rfc0111/*_security_test.go",
+      "test_ids": [
+        "TestReplayAttackPrevention",
+        "TestTokenForgery",
+        "TestClockSkewTolerance"
+      ],
+      "coverage_target": 95.0,
+      "description": "Security threat mitigation and attack prevention"
+    },
+    {
+      "clause_prefix": "0111:16.-interoperability",
+      "symbols": [
+        "EnvelopeV1",
+        "EnvelopeV2",
+        "CrossVersion"
+      ],
+      "tests_glob": "pkg/rfc0111/envelope_*_test.go",
+      "test_ids": [
+        "TestEnvelopeInterop",
+        "TestBackwardCompatibility"
+      ],
+      "coverage_target": 85.0,
+      "description": "Cross-version compatibility and interoperability"
+    },
+    {
+      "clause_prefix": "0115:1.-power-of-attorney-structure",
+      "symbols": [
+        "PowerOfAttorney",
+        "POAStatus",
+        "ValidateMultiSignature"
+      ],
+      "tests_glob": "pkg/rfc0111/validator_extended_test.go",
+      "test_ids": [
+        "TestPOAStructure",
+        "TestPOAValidation"
+      ],
+      "coverage_target": 90.0,
+      "description": "Power of Attorney data structure and validation"
+    },
+    {
+      "clause_prefix": "0115:2.-scope-semantics",
+      "symbols": [
+        "ScopeItem",
+        "ValidateScope",
+        "ScopeValidator"
+      ],
+      "tests_glob": "pkg/rfc0111/*scope*_test.go",
+      "test_ids": [
+        "TestScopeValidation",
+        "TestScopeWildcards"
+      ],
+      "coverage_target": 90.0,
+      "description": "Scope definition and semantic validation"
+    },
+    {
+      "clause_prefix": "0115:3.-validity-period",
+      "symbols": [
+        "CanonicalPOADigest",
+        "validateDelegationRequest",
+        "ValidateDelegation"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_size_limits_test.go",
+      "test_ids": [
+        "TestValidityPeriod",
+        "TestTimeValidation"
+      ],
+      "coverage_target": 85.0,
+      "description": "Temporal validity constraints and time-based validation"
+    },
+    {
+      "clause_prefix": "0115:4.-formal-requirements",
+      "symbols": [
+        "LegalFramework",
+        "FormalValidation",
+        "RequirementCheck"
+      ],
+      "tests_glob": "pkg/auth/legal_framework_integration.go",
+      "test_ids": [
+        "TestLegalFramework"
+      ],
+      "coverage_target": 80.0,
+      "description": "Legal and formal requirement validation"
+    },
+    {
+      "clause_prefix": "0115:5.-power-limits",
+      "symbols": [
+        "PowerLimit",
+        "TransactionLimit",
+        "DailyLimit"
+      ],
+      "tests_glob": "internal/ai/capability_matrix_test.go",
+      "test_ids": [
+        "TestPowerLimits",
+        "TestTransactionLimits"
+      ],
+      "coverage_target": 90.0,
+      "description": "Authorization limits and boundary enforcement"
+    },
+    {
+      "clause_prefix": "0115:6.-rights-&-obligations",
+      "symbols": [
+        "Rights",
+        "Obligations",
+        "DutyOfCare"
+      ],
+      "tests_glob": "pkg/poa/validator.go",
+      "test_ids": [
+        "TestRights",
+        "TestObligations"
+      ],
+      "coverage_target": 80.0,
+      "description": "Rights and obligations framework"
+    },
+    {
+      "clause_prefix": "0115:7.-special-conditions",
+      "symbols": [
+        "ConditionalExpression",
+        "SpecialConditions",
+        "RuntimeEvaluation"
+      ],
+      "tests_glob": "pkg/authz/*_test.go",
+      "test_ids": [
+        "TestSpecialConditions",
+        "TestConditionalExecution"
+      ],
+      "coverage_target": 85.0,
+      "description": "Special conditions and runtime evaluation"
+    },
+    {
+      "clause_prefix": "0115:8.-joint-signatures",
+      "symbols": [
+        "ValidateMultiSignature",
+        "SignatureManager",
+        "ThresholdValidation"
+      ],
+      "tests_glob": "internal/multisig/manager_test.go",
+      "test_ids": [
+        "TestJointSignatures",
+        "TestCoSignature"
+      ],
+      "coverage_target": 90.0,
+      "description": "Joint signature requirements and validation"
+    },
+    {
+      "clause_prefix": "0115:9.-canonical-serialization",
+      "symbols": [
+        "CanonicalPOADigest"
+      ],
+      "tests_glob": "pkg/rfc0111/canonical_prop_test.go",
+      "test_ids": [
+        "TestCanonicalSerialization",
+        "TestDeterministicEncoding"
+      ],
+      "coverage_target": 95.0,
+      "description": "Canonical serialization and deterministic encoding"
+    },
+    {
+      "clause_prefix": "0115:10.-revocation-semantics",
+      "symbols": [
+        "RevokeDelegation",
+        "RevocationChain",
+        "RevocationStatus"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_revocation_integration_test.go",
+      "test_ids": [
+        "TestRevocationSemantics",
+        "TestRevocationPropagation"
+      ],
+      "coverage_target": 90.0,
+      "description": "Revocation semantics and propagation"
     },
     {
       "clause_prefix": "0115:11.-advanced-claims",
-      "symbols": ["AdvancedClaims", "ClaimsMetadata", "ClaimsRestrictions"],
-      "tests_glob": "pkg/rfc0111/advanced_claims_test.go"
+      "symbols": [
+        "AdvancedClaims",
+        "ClaimsMetadata",
+        "ClaimsRestrictions"
+      ],
+      "tests_glob": "pkg/rfc0111/advanced_claims_test.go",
+      "test_ids": [
+        "TestAdvancedClaims"
+      ],
+      "coverage_target": 85.0,
+      "description": "Advanced claims processing and metadata"
     },
     {
       "clause_prefix": "0115:12.-key-rotation",
-      "symbols": ["Manager", "RotationPolicy", "RotationStatus"],
-      "tests_glob": "internal/crypto/keys_rotation_log_test.go"
+      "symbols": [
+        "Manager",
+        "RotationPolicy",
+        "RotationStatus"
+      ],
+      "tests_glob": "internal/crypto/keys_rotation_log_test.go",
+      "test_ids": [
+        "TestKeyRotation",
+        "TestRotationPolicy"
+      ],
+      "coverage_target": 90.0,
+      "description": "Cryptographic key rotation and lifecycle management"
     },
     {
       "clause_prefix": "0115:13.-policy-versioning",
-      "symbols": ["PolicyBundle", "ValidateBundle", "AddBundle"],
-      "tests_glob": "pkg/authz/policy_version_test.go"
+      "symbols": [
+        "PolicyBundle",
+        "ValidateBundle",
+        "AddBundle"
+      ],
+      "tests_glob": "pkg/authz/policy_version_test.go",
+      "test_ids": [
+        "TestPolicyVersioning"
+      ],
+      "coverage_target": 85.0,
+      "description": "Policy version management and migration"
     },
     {
       "clause_prefix": "0115:14.-ai-capability-governance",
-      "symbols": ["CapabilityEnforcer", "ModelLimits", "UsageContext"],
-      "tests_glob": "internal/ai/capability_enforcer_test.go"
+      "symbols": [
+        "CapabilityEnforcer",
+        "ModelLimits",
+        "UsageContext"
+      ],
+      "tests_glob": "internal/ai/capability_enforcer_test.go",
+      "test_ids": [
+        "TestAICapability",
+        "TestModelLimits"
+      ],
+      "coverage_target": 85.0,
+      "description": "AI capability authorization and governance"
     },
     {
       "clause_prefix": "0115:15.-embedding-poa-in-token",
-      "symbols": ["TokenResult", "EnvelopeV2", "TokenVerificationResult"],
-      "tests_glob": "pkg/rfc0111/embedding_test.go"
+      "symbols": [
+        "TokenResult",
+        "EnvelopeV2",
+        "TokenVerificationResult",
+        "RawPOA"
+      ],
+      "tests_glob": "pkg/rfc0111/envelope_cbor_compaction_test.go",
+      "test_ids": [
+        "TestEnvelopeCBORCompaction",
+        "TestPOAEmbedding"
+      ],
+      "coverage_target": 90.0,
+      "description": "PoA embedding in tokens (JSON and CBOR formats)"
+    },
+    {
+      "clause_prefix": "0115:16.-jurisdiction-enforcement",
+      "symbols": [
+        "JurisdictionEnforcement",
+        "LegalRegion",
+        "ComplianceValidator"
+      ],
+      "tests_glob": "pkg/jurisdiction/*_test.go",
+      "test_ids": [
+        "TestJurisdictionEnforcement"
+      ],
+      "coverage_target": 85.0,
+      "description": "Legal jurisdiction enforcement and regional compliance"
+    },
+    {
+      "clause_prefix": "0115:17.-transaction-limits",
+      "symbols": [
+        "TransactionLimit",
+        "DailyLimit",
+        "AmountValidator"
+      ],
+      "tests_glob": "pkg/rfc0111/*_limits_test.go",
+      "test_ids": [
+        "TestTransactionLimits",
+        "TestDailyLimits"
+      ],
+      "coverage_target": 90.0,
+      "description": "Transaction amount limits and cumulative enforcement"
+    },
+    {
+      "clause_prefix": "0115:18.-conditional-execution",
+      "symbols": [
+        "ConditionalExpression",
+        "RuntimeEvaluation",
+        "ContextValidator"
+      ],
+      "tests_glob": "pkg/authz/*_conditional_test.go",
+      "test_ids": [
+        "TestConditionalExecution",
+        "TestRuntimeContext"
+      ],
+      "coverage_target": 85.0,
+      "description": "Conditional authorization and runtime context evaluation"
+    },
+    {
+      "clause_prefix": "0115:19.-delegation-restrictions",
+      "symbols": [
+        "ScopeRestriction",
+        "WildcardValidator",
+        "PathMatcher"
+      ],
+      "tests_glob": "pkg/delegation/*_restriction_test.go",
+      "test_ids": [
+        "TestDelegationRestrictions",
+        "TestScopeWildcards"
+      ],
+      "coverage_target": 85.0,
+      "description": "Delegation scope restrictions and wildcard handling"
+    },
+    {
+      "clause_prefix": "0115:20.-signature-verification",
+      "symbols": [
+        "VerifySignature",
+        "PublicKeyLookup",
+        "SignatureValidator"
+      ],
+      "tests_glob": "pkg/crypto/*_verification_test.go",
+      "test_ids": [
+        "TestSignatureVerification",
+        "TestPublicKeyLookup"
+      ],
+      "coverage_target": 95.0,
+      "description": "Cryptographic signature verification and key management"
+    },
+    {
+      "clause_prefix": "0115:21.-envelope-migration",
+      "symbols": [
+        "EnvelopeV1",
+        "EnvelopeV2",
+        "SunsetController"
+      ],
+      "tests_glob": "pkg/rfc0111/rfc0111_sunset_integration_test.go",
+      "test_ids": [
+        "TestEnvelopeMigration",
+        "TestSunsetController"
+      ],
+      "coverage_target": 90.0,
+      "description": "Envelope version migration and sunset automation"
+    },
+    {
+      "clause_prefix": "0115:22.-revocation-external-anchoring",
+      "symbols": [
+        "ExternalRevocationAnchor",
+        "RevocationChain",
+        "AnchorObserver"
+      ],
+      "tests_glob": "pkg/delegation/revocation_external_anchor_test.go",
+      "test_ids": [
+        "TestExternalRevocationAnchor",
+        "TestAnchorObserver"
+      ],
+      "coverage_target": 90.0,
+      "description": "External anchoring for revocation chain integrity"
     }
   ]
 }

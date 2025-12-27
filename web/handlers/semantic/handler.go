@@ -2,6 +2,7 @@ package semantic
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,9 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/mauriciomferz/Gauth_go/internal/anchor"
+	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
 )
 
 // RFC0111Service abstracts the external PoA service
@@ -40,6 +44,18 @@ type Handler struct {
 	persistencePath string
 	prevHash        string
 
+	// Ledger storage for archival rotation
+	Ledger ledger.Store
+	// External anchoring provider
+	AnchorProvider    anchor.Provider
+	LastAnchorReceipt anchor.Receipt
+
+	// Last archival/anchoring timestamps
+	LastArchive     time.Time
+	ArchiveInterval time.Duration
+	LastAnchor      time.Time
+	AnchorInterval  time.Duration
+
 	// External deps
 	Service RFC0111Service
 	Metrics Metrics
@@ -63,6 +79,8 @@ func NewHandler(service RFC0111Service, metrics Metrics, persistencePath string)
 		ewma:            make(map[string]*anomalyPersist),
 		scores:          make(map[string]float64),
 		WarmupSamples:   10,
+		ArchiveInterval: 1 * time.Hour,
+		AnchorInterval:  24 * time.Hour,
 	}
 }
 
@@ -83,7 +101,7 @@ func (h *Handler) Update() {
 	}
 
 	h.mu.Lock()
-	defer h.mu.Unlock()
+	// Manual unlock later to avoid deadlock/panic with archival calls
 
 	if ss != nil && os.Getenv("GAUTH_SEMANTIC_HISTORY_DISABLE") != "1" {
 		now := time.Now()
@@ -130,6 +148,77 @@ func (h *Handler) Update() {
 	if err := h.saveLocked(); err != nil {
 		fmt.Fprintf(os.Stderr, "[semantic] save failed: %v\n", err)
 	}
+
+	shouldArchive := h.Ledger != nil && (h.LastArchive.IsZero() || time.Since(h.LastArchive) >= h.ArchiveInterval)
+	shouldAnchor := h.AnchorProvider != nil && h.Ledger != nil && (h.LastAnchor.IsZero() || time.Since(h.LastAnchor) >= h.AnchorInterval)
+	h.mu.Unlock()
+
+	if shouldArchive {
+		h.archiveToLedger()
+	}
+
+	if shouldAnchor {
+		h.anchorLedgerTip()
+	}
+}
+
+// archiveToLedger appends current EWMA state to persistent ledger.
+func (h *Handler) archiveToLedger() {
+	h.mu.Lock()
+	if h.Ledger == nil {
+		h.mu.Unlock()
+		return
+	}
+	// Take a snapshot of current EWMA state
+	metadata := make(map[string]interface{})
+	for k, v := range h.ewma {
+		metadata[k] = v
+	}
+	h.mu.Unlock()
+
+	entry := &ledger.Entry{
+		ID:       fmt.Sprintf("semantic-%d", time.Now().Unix()),
+		TS:       time.Now().UTC(),
+		Type:     "semantic_snapshot",
+		Subject:  "ewma_stats",
+		Object:   "semantic_handler",
+		Metadata: metadata,
+	}
+
+	if err := h.Ledger.Append(context.Background(), entry); err != nil {
+		fmt.Fprintf(os.Stderr, "[semantic] archival failed: %v\n", err)
+		return
+	}
+
+	h.mu.Lock()
+	h.LastArchive = time.Now()
+	h.mu.Unlock()
+}
+
+// anchorLedgerTip push latest ledger hash to external anchor provider.
+func (h *Handler) anchorLedgerTip() {
+	h.mu.Lock()
+	if h.Ledger == nil || h.AnchorProvider == nil {
+		h.mu.Unlock()
+		return
+	}
+	h.mu.Unlock()
+
+	tip := ledger.ChainTip(h.Ledger)
+	if tip == "" {
+		return
+	}
+
+	receipt, err := h.AnchorProvider.Anchor(tip)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "[semantic] anchoring failed: %v\n", err)
+		return
+	}
+
+	h.mu.Lock()
+	h.LastAnchorReceipt = receipt
+	h.LastAnchor = time.Now()
+	h.mu.Unlock()
 }
 
 // appendHistory appends a snapshot to the history, handling pruning.

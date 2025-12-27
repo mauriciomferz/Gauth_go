@@ -61,7 +61,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	twoPhase, err := revocation.NewTwoPhaseRevocation(oracle, redisAddrs, logger)
 	if err != nil {
 		log.Printf("[revocation] Failed to initialize two-phase revocation: %v", err)
-		oracle.Close()
+		_ = oracle.Close()
 		return &RevocationService{enabled: false}
 	}
 
@@ -76,8 +76,8 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	optimistic, err := revocation.NewOptimisticRevocation(redisAddrs, oracle, logger)
 	if err != nil {
 		log.Printf("[revocation] Failed to initialize optimistic revocation: %v", err)
-		twoPhase.Close()
-		oracle.Close()
+		_ = twoPhase.Close()
+		_ = oracle.Close()
 		return &RevocationService{enabled: false}
 	}
 
@@ -108,9 +108,9 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	circuit, err := revocation.NewCircuitBreaker(redisAddrs, config, logger)
 	if err != nil {
 		log.Printf("[revocation] Failed to initialize circuit breaker: %v", err)
-		optimistic.Close()
-		twoPhase.Close()
-		oracle.Close()
+		_ = optimistic.Close()
+		_ = twoPhase.Close()
+		_ = oracle.Close()
 		return &RevocationService{enabled: false}
 	}
 

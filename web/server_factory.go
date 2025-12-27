@@ -3,6 +3,8 @@ package web
 import (
 	"bytes"
 	"context"
+	"crypto/ed25519"
+	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -20,7 +22,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/prometheus/client_golang/prometheus"
 	otel "go.opentelemetry.io/otel"
 	stdoutmetric "go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
@@ -49,8 +50,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	gnapPkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
+	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
 	"github.com/mauriciomferz/Gauth_go/pkg/redis"
+	"github.com/mauriciomferz/Gauth_go/pkg/registry"
 	"github.com/mauriciomferz/Gauth_go/pkg/scim"
 	a2aHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/a2a"
 	adminHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/admin"
@@ -189,6 +192,22 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		keyProvider:         nil, // default to nil; expected to be injected or initialized via options
 	}
 
+	// Tracing initialization: primary enable flag GAUTH_TRACING_ENABLED or legacy GAUTH_OTEL_ENABLE.
+	if os.Getenv("GAUTH_TRACING_ENABLED") == "1" || os.Getenv("GAUTH_OTEL_ENABLE") == "1" {
+		if tp, err := tracing.NewTracerProvider(tracing.Config{ServiceName: "gauth-beta"}); err == nil {
+			s.tracerProvider = tp
+			fmt.Fprintln(os.Stderr, "[tracing] enabled spans")
+			// Sampling ratio (0..1). Ratio <=0 interpreted as ALWAYS SAMPLE per ADR.
+			if raw := os.Getenv("GAUTH_TRACING_SAMPLE_RATIO"); raw != "" {
+				if v, err := strconv.ParseFloat(raw, 64); err == nil && v >= 0 && v <= 1 {
+					s.tracerSampleRatio = v
+				}
+			}
+			// Wire global tracing middleware to Gin
+			r.Use(tracing.GinTracingMiddleware(s.tracerProvider.Tracer(), s.tracerSampleRatio))
+		}
+	}
+
 	// Redis Initialization
 	if os.Getenv("GAUTH_SKIP_REDIS") == "1" {
 		fmt.Fprintln(os.Stderr, "[redis] initialization skipped via GAUTH_SKIP_REDIS")
@@ -283,6 +302,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					if writeErr := os.WriteFile(s.capAnchorFilePath, data, 0600); writeErr == nil {
 						if mem, ok := s.metrics.(*metrics.Memory); ok {
 							mem.IncCapabilityAnchorEmitted()
+							// #nosec G115
 							mem.SetCapabilityAnchorLastWriteUnix(uint64(time.Now().Unix()))
 							// Emit algorithm facet metrics for all registered algorithms
 							for _, algInfo := range crypto.ListAlgorithms() {
@@ -421,6 +441,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	if s.authorizer == nil {
 		s.authorizer = authz.NewMemoryAuthorizer()
 	}
+	// Wire obligation executor for persistence and failure taxonomy (Epic 4)
+	s.authorizer.SetObligationExecutor(&authz.AuditObligationExecutor{Audit: s.audit})
 	// Initialize Authz Handler
 	s.authzAPI = authzHandlers.NewAPI(s.authorizer, s.policyHandler, s.metrics)
 	s.authzAPI.RegisterRoutes(s.router)
@@ -584,7 +606,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			cwd, _ := os.Getwd()
 			abs = filepath.Join(cwd, abs)
 		}
-		if err := os.MkdirAll(filepath.Dir(abs), 0o755); err == nil {
+		// #nosec G301
+		if err := os.MkdirAll(filepath.Dir(abs), 0o750); err == nil {
 			s.capAnchorFilePath = abs
 			fmt.Fprintf(os.Stderr, "[cap-anchor] file path configured path=%s\n", abs)
 		}
@@ -647,7 +670,36 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	gnapTokenStore := gnapPkg.NewMemoryTokenStore()
 	gnapRSStore := gnapPkg.NewMemoryResourceServerStore() // RFC 9767 Support
 	gnapBaseURL := envFallback("GAUTH_GNAP_BASE_URL", "http://localhost:8080")
-	gnapHandler := gnapHandlers.NewHandler(gnapStore, gnapBaseURL)
+
+	// Create VerificationService for GNAP-GAuth integration (nil for now - wire later with DB services)
+	// Create VerificationService for GNAP-GAuth integration
+	var gnapVerificationService gauthplus.VerificationService
+
+	if s.db != nil {
+		poaStore := gauthplus.NewPostgreSQLPoAStore(s.db)
+		delSvc := gauthplus.NewPostgreSQLDelegationService(s.db)
+		capSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(s.db)
+		fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(s.db)
+		principalVerifier := gauthplus.NewDefaultPrincipalVerifier()
+		attestationVerifier := gauthplus.NewDefaultAttestationVerifier()
+
+		// Generate a temporary key for the Verification Service Authority (Phase 11)
+		// In production, this would be retrieved from a secure KeyStore/KMS
+		_, verifPrivKey, _ := ed25519.GenerateKey(crand.Reader)
+		attestationSigner := gauthplus.NewDefaultAttestationSigner("gauthplus-local-authority", verifPrivKey)
+
+		// Register the public key in the verifier for local bridge support
+		attestationVerifier.RegisterKey("gauthplus-local-authority", verifPrivKey.Public().(ed25519.PublicKey))
+
+		registerService := registry.NewMockCommercialRegisterService()
+
+		gnapVerificationService = gauthplus.NewVerificationService(
+			poaStore, delSvc, capSvc, fidSvc, principalVerifier, attestationVerifier, attestationSigner, registerService,
+		)
+		fmt.Println("GAuth+ VerificationService wired with PostgreSQL storage and Hardened Verifiers")
+	}
+
+	gnapHandler := gnapHandlers.NewHandler(gnapStore, gnapVerificationService, gnapBaseURL)
 	gnapHandler.TokenStore = gnapTokenStore
 	gnapHandler.RSStore = gnapRSStore
 	gnapHandler.RegisterRoutes(s.router)
@@ -655,8 +707,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// RFC 7523 Client Authentication
 	clientKeyStore := auth.NewMemoryKeyStore()
 	clientAuthenticator := &auth.PrivateKeyJWTValidator{
-		KeyProvider: clientKeyStore,
-		TokenURL:    envFallback("GAUTH_TOKEN_ENDPOINT", "http://localhost:8080/device/token"),
+		KeyProvider:    clientKeyStore,
+		ValidAudiences: []string{envFallback("GAUTH_TOKEN_ENDPOINT", "http://localhost:8080/device/token")},
+		Replay:         s.replayStore,
 	}
 
 	// RFC 8628 Device Authorization Grant
@@ -813,6 +866,21 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	} else {
 		s.semanticHandler = semantic.NewHandler(nil, nil, "")
+	}
+
+	// Semantic ledger path (optional) GAUTH_SEMANTIC_LEDGER_PATH (Item 8)
+	if slp := os.Getenv("GAUTH_SEMANTIC_LEDGER_PATH"); slp != "" {
+		if strings.HasPrefix(slp, "~") {
+			if home, err := os.UserHomeDir(); err == nil {
+				slp = filepath.Join(home, strings.TrimPrefix(slp, "~"))
+			}
+		}
+		if ls, err := ledger.NewBoltStore(slp); err == nil {
+			s.semanticHandler.Ledger = ls
+			fmt.Fprintf(os.Stderr, "[semantics] ledger initialized path=%s\n", slp)
+		} else {
+			fmt.Fprintf(os.Stderr, "[semantics] ledger failed: %v\n", err)
+		}
 	}
 
 	// Receipt store persistence path (optional) GAUTH_NOTARY_RECEIPT_PERSIST_PATH
@@ -1025,7 +1093,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			gauthPlusHandler.RegisterRoutes(adminGroup)
 
 			// GAuth+ Public API (v1) - Create services sharing the pool
-			gplusDB := stdlib.OpenDBFromPool(dbPool)
+			gplusDB := &database.DB{Pool: dbPool}
 			succSvc := gauthplus.NewPostgreSQLSuccessorService(gplusDB)
 			delSvc := gauthplus.NewPostgreSQLDelegationService(gplusDB)
 			dualSvc := gauthplus.NewPostgreSQLDualControlService(gplusDB)
@@ -1303,8 +1371,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					case <-s.stopCh:
 						fmt.Fprintln(os.Stderr, "[metrics] autosave loop stopping")
 						return
-						//nolint:gosec // G404: weak random acceptable for metrics autosave jitter
-					case <-time.After(time.Duration(float64(intervalSec)*(0.9+rand.Float64()*0.2)) * time.Second): //nolint:gosec // G404: weak random acceptable for metrics autosave jitter
+					case <-time.After(time.Duration(float64(intervalSec)*(0.9+rand.Float64()*0.2)) * time.Second): // #nosec G404
 						if saveErr := mm.Save(); saveErr != nil {
 							fmt.Fprintf(os.Stderr, "[metrics] autosave error: %v\n", saveErr)
 						} else {
@@ -1315,20 +1382,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}()
 		}
 	}
-	// Tracing initialization: primary enable flag GAUTH_TRACING_ENABLED or legacy GAUTH_OTEL_ENABLE.
-	if os.Getenv("GAUTH_TRACING_ENABLED") == "1" || os.Getenv("GAUTH_OTEL_ENABLE") == "1" {
-		if tp, err := tracing.NewTracerProvider(tracing.Config{ServiceName: "gauth-beta"}); err == nil {
-			s.tracerProvider = tp
-			fmt.Fprintln(os.Stderr, "[tracing] enabled spans")
-			// Sampling ratio (0..1). Ratio <=0 interpreted as ALWAYS SAMPLE per ADR.
-			if raw := os.Getenv("GAUTH_TRACING_SAMPLE_RATIO"); raw != "" {
-				if v, err := strconv.ParseFloat(raw, 64); err == nil && v >= 0 && v <= 1 {
-					s.tracerSampleRatio = v
-				}
-			}
-		}
-	}
-	// Update token handler's tracer now that tracerProvider is initialized
+	// Update token handler's tracer
 	if s.tracerProvider != nil && s.tokenHandler != nil {
 		s.tokenHandler.Tracer = &tokenTracerAdapter{tp: s.tracerProvider}
 		s.tokenHandler.TracerRatio = s.tracerSampleRatio
@@ -1625,6 +1679,32 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	if s.capabilitiesHandler != nil {
 		adapter := &auditChainAnchorAdapter{client: s.anchorClient}
 		s.capabilitiesHandler.SetAnchorClient(adapter)
+	}
+
+	// External anchoring for capability registry (RFC-3161 TSA)
+	// Enable via GAUTH_CAPABILITY_TSA_URL environment variable
+	if tsaURL := os.Getenv("GAUTH_CAPABILITY_TSA_URL"); tsaURL != "" && s.capabilitiesHandler != nil {
+		// Create RFC-3161 provider
+		rfc3161Provider := ledger.NewRFC3161Provider(tsaURL)
+
+		// Create external anchor client with RFC-3161 provider
+		// No receipt store for now (in-memory only)
+		externalClient := ledger.NewExternalAnchorClient(rfc3161Provider, nil)
+
+		if externalClient != nil {
+			// Create and set the NotaryAdapter to bridge ledger to capabilities
+			tsaAdapter := capabilities.NewNotaryAdapter(externalClient)
+			if tsaAdapter != nil {
+				s.capabilitiesHandler.SetAnchorClient(tsaAdapter)
+				fmt.Fprintf(os.Stderr, "[capabilities] External TSA anchoring enabled url=%s\n", tsaURL)
+			}
+		}
+	}
+
+	// External anchoring for semantics (optional) GAUTH_SEMANTIC_ANCHOR_ENABLE (Item 8)
+	if os.Getenv("GAUTH_SEMANTIC_ANCHOR_ENABLE") == "1" && s.anchorClient != nil && s.semanticHandler != nil {
+		s.semanticHandler.AnchorProvider = &capAnchorProviderAdapter{client: s.anchorClient}
+		fmt.Fprintf(os.Stderr, "[semantics] external anchoring enabled\n")
 	}
 
 	// Wire Audit Chaining (Revocation Audit Hook)

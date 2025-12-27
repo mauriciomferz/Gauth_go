@@ -81,7 +81,8 @@ func NewExportService(repo *Repository, exportDir string) *ExportService {
 	}
 
 	// Create export directory if it doesn't exist
-	if err := os.MkdirAll(exportDir, 0755); err != nil {
+	// #nosec G301
+	if err := os.MkdirAll(exportDir, 0750); err != nil {
 		// Log error but continue - exports will fail later
 	}
 

@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/ecdsa"
+	"crypto/ed25519"
 	"crypto/rsa"
 	"errors"
 	"fmt"
@@ -16,13 +18,19 @@ type ClientAuthenticator interface {
 
 // KeyProvider defines how to retrieve public keys for a client
 type KeyProvider interface {
-	GetPublicKey(clientID string, keyID string) (*rsa.PublicKey, error)
+	GetPublicKey(clientID string, keyID string) (any, error)
+}
+
+// ReplayStore defines the interface for checking and recording token JTI for replay protection
+type ReplayStore interface {
+	CheckAndStore(jti string) error
 }
 
 // PrivateKeyJWTValidator implements RFC 7523 client authentication
 type PrivateKeyJWTValidator struct {
-	KeyProvider KeyProvider
-	TokenURL    string // The Audience (aud) the JWT should be issued for
+	KeyProvider    KeyProvider
+	ValidAudiences []string    // The allowed Audiences (aud) the JWT should be issued for
+	Replay         ReplayStore // Optional replay protection
 }
 
 // RFC 7523 Constants
@@ -63,17 +71,33 @@ func (v *PrivateKeyJWTValidator) Authenticate(clientID string, clientAssertion s
 		return fmt.Errorf("invalid subject: expected %s, got %s", clientID, sub)
 	}
 
-	// Verify AUD (Audience) matches Token Endpoint URL
+	// Verify AUD (Audience) matches one of the allowed audiences
 	aud, _ := claims.GetAudience()
 	audValid := false
 	for _, a := range aud {
-		if a == v.TokenURL {
-			audValid = true
+		for _, validAud := range v.ValidAudiences {
+			if a == validAud {
+				audValid = true
+				break
+			}
+		}
+		if audValid {
 			break
 		}
 	}
 	if !audValid {
-		return fmt.Errorf("invalid audience: expected %s", v.TokenURL)
+		return fmt.Errorf("invalid audience: expected one of %v", v.ValidAudiences)
+	}
+
+	// Verify JTI (Replay Protection)
+	if v.Replay != nil {
+		jti, _ := claims["jti"].(string)
+		if jti == "" {
+			return errors.New("missing 'jti' claim for replay protection")
+		}
+		if err := v.Replay.CheckAndStore(jti); err != nil {
+			return fmt.Errorf("replay check failed: %v", err)
+		}
 	}
 
 	// Verify Expiration
@@ -96,7 +120,20 @@ func (v *PrivateKeyJWTValidator) Authenticate(clientID string, clientAssertion s
 
 	// Re-parse WITH signature verification
 	_, err = jwt.Parse(clientAssertion, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+		switch token.Method.(type) {
+		case *jwt.SigningMethodRSA:
+			if _, ok := pubKey.(*rsa.PublicKey); !ok {
+				return nil, errors.New("key type mismatch: expected RSA public key")
+			}
+		case *jwt.SigningMethodECDSA:
+			if _, ok := pubKey.(*ecdsa.PublicKey); !ok {
+				return nil, errors.New("key type mismatch: expected ECDSA public key")
+			}
+		case *jwt.SigningMethodEd25519:
+			if _, ok := pubKey.(ed25519.PublicKey); !ok {
+				return nil, errors.New("key type mismatch: expected Ed25519 public key")
+			}
+		default:
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return pubKey, nil

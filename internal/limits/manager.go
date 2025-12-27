@@ -60,7 +60,8 @@ func InitFromEnv() (*Manager, error) {
 	// Ensure directory exists when persistence enabled.
 	if !disable {
 		if dir := filepath.Dir(path); dir != "." && dir != "" {
-			if err := os.MkdirAll(dir, 0o755); err != nil {
+			// #nosec G301
+			if err := os.MkdirAll(dir, 0o750); err != nil {
 				return nil, fmt.Errorf("limits: mkdir %s: %w", dir, err)
 			}
 		}

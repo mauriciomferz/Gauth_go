@@ -39,9 +39,11 @@ type LifecycleRecorder interface {
 	RecordEvent(entityType, entityID, oldStatus, newStatus, outcome, reason string, latencyNS int64)
 }
 
-// JWKSETagUpdater allows updating the server's JWKS ETag
+// JWKSETagUpdater allows updating the server's JWKS metadata for discovery
 type JWKSETagUpdater interface {
 	UpdateJWKSETag(etag string)
+	UpdateJWKSSignature(sig string)
+	UpdateDeprecationSchedule(schedule map[string]time.Time)
 }
 
 // CapabilityEnforcer abstracts capability checking
@@ -128,6 +130,6 @@ func (h *Handler) ShouldTrace() bool {
 		// Treat <= 0 as "trace everything" to match legacy behavior
 		return true
 	}
-	//nolint:gosec // weak random acceptable
+	// #nosec G404
 	return rand.Float64() < h.TracerRatio
 }

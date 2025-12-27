@@ -29,8 +29,8 @@ func TestJWTBearerGrant_Success(t *testing.T) {
 	keyStore.RegisterKey(clientID, keyID, publicKey)
 
 	authenticator := &auth.PrivateKeyJWTValidator{
-		KeyProvider: keyStore,
-		TokenURL:    "http://test-server/oauth/token",
+		KeyProvider:    keyStore,
+		ValidAudiences: []string{"http://test-server/oauth/token"},
 	}
 
 	// Setup Handler

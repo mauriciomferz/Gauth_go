@@ -13,7 +13,7 @@ import (
 
 // TestPDPCache_GetSet tests basic cache operations
 func TestPDPCache_GetSet(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 5*time.Minute)
+	cache := pdp.NewInMemoryCache(10, 5*time.Minute)
 	ctx := context.Background()
 
 	req := pdp.Request{
@@ -33,16 +33,16 @@ func TestPDPCache_GetSet(t *testing.T) {
 	}
 
 	// Cache miss on first Get
-	_, found := cache.Get(req)
+	_, found, _ := cache.Get(ctx, req)
 	if found {
 		t.Errorf("Expected cache miss on first Get, got hit")
 	}
 
 	// Set decision
-	cache.Set(req, decision)
+	_ = cache.Set(ctx, req, decision)
 
 	// Cache hit on second Get
-	cachedDec, found := cache.Get(req)
+	cachedDec, found, _ := cache.Get(ctx, req)
 	if !found {
 		t.Fatalf("Expected cache hit after Set, got miss")
 	}
@@ -76,7 +76,7 @@ func TestPDPCache_GetSet(t *testing.T) {
 
 // TestPDPCache_LRUEviction tests capacity-based eviction
 func TestPDPCache_LRUEviction(t *testing.T) {
-	cache := pdp.NewPDPCache(3, 1*time.Hour) // Small capacity
+	cache := pdp.NewInMemoryCache(3, 1*time.Hour) // Small capacity
 
 	decisions := []struct {
 		req pdp.Request
@@ -98,12 +98,12 @@ func TestPDPCache_LRUEviction(t *testing.T) {
 
 	// Fill cache to capacity
 	for _, d := range decisions {
-		cache.Set(d.req, d.dec)
+		_ = cache.Set(context.Background(), d.req, d.dec)
 	}
 
 	// Verify all cached
 	for _, d := range decisions {
-		_, found := cache.Get(d.req)
+		_, found, _ := cache.Get(context.Background(), d.req)
 		if !found {
 			t.Errorf("Expected to find %s in cache", d.req.Subject)
 		}
@@ -120,24 +120,24 @@ func TestPDPCache_LRUEviction(t *testing.T) {
 	// Add fourth entry (should evict oldest - alice)
 	req4 := pdp.Request{Subject: "dave", Action: "read", Resource: "doc4", Time: time.Now()}
 	dec4 := pdp.Decision{Allow: true, Reason: "policy4"}
-	cache.Set(req4, dec4)
+	_ = cache.Set(context.Background(), req4, dec4)
 
 	// Verify alice evicted
-	_, found := cache.Get(decisions[0].req)
+	_, found, _ := cache.Get(context.Background(), decisions[0].req)
 	if found {
 		t.Errorf("Expected alice to be evicted (LRU)")
 	}
 
 	// Verify others still cached
 	for i := 1; i < len(decisions); i++ {
-		_, found2 := cache.Get(decisions[i].req)
+		_, found2, _ := cache.Get(context.Background(), decisions[i].req)
 		if !found2 {
 			t.Errorf("Expected to find %s in cache after eviction", decisions[i].req.Subject)
 		}
 	}
 
 	// Verify dave cached
-	_, found = cache.Get(req4)
+	_, found, _ = cache.Get(context.Background(), req4)
 	if !found {
 		t.Errorf("Expected to find dave in cache")
 	}
@@ -153,7 +153,7 @@ func TestPDPCache_LRUEviction(t *testing.T) {
 
 // TestPDPCache_TTLExpiration tests time-based expiration
 func TestPDPCache_TTLExpiration(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 100*time.Millisecond) // Short TTL
+	cache := pdp.NewInMemoryCache(10, 100*time.Millisecond) // Short TTL
 
 	req := pdp.Request{
 		Subject:  "alice",
@@ -164,10 +164,10 @@ func TestPDPCache_TTLExpiration(t *testing.T) {
 	decision := pdp.Decision{Allow: true, Reason: "policy1"}
 
 	// Cache decision
-	cache.Set(req, decision)
+	_ = cache.Set(context.Background(), req, decision)
 
 	// Verify cached
-	_, found := cache.Get(req)
+	_, found, _ := cache.Get(context.Background(), req)
 	if !found {
 		t.Fatalf("Expected cache hit immediately after Set")
 	}
@@ -176,7 +176,7 @@ func TestPDPCache_TTLExpiration(t *testing.T) {
 	time.Sleep(150 * time.Millisecond)
 
 	// Verify expired (cache miss)
-	_, found = cache.Get(req)
+	_, found, _ = cache.Get(context.Background(), req)
 	if found {
 		t.Errorf("Expected cache miss after TTL expiration")
 	}
@@ -192,7 +192,7 @@ func TestPDPCache_TTLExpiration(t *testing.T) {
 
 // TestPDPCache_InvalidateAll tests full cache invalidation
 func TestPDPCache_InvalidateAll(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(10, 1*time.Hour)
 
 	requests := []pdp.Request{
 		{Subject: "alice", Action: "read", Resource: "doc1", Time: time.Now()},
@@ -203,12 +203,12 @@ func TestPDPCache_InvalidateAll(t *testing.T) {
 	// Cache decisions
 	for _, req := range requests {
 		dec := pdp.Decision{Allow: true, Reason: "policy"}
-		cache.Set(req, dec)
+		_ = cache.Set(context.Background(), req, dec)
 	}
 
 	// Verify all cached
 	for _, req := range requests {
-		_, found := cache.Get(req)
+		_, found, _ := cache.Get(context.Background(), req)
 		if !found {
 			t.Errorf("Expected to find %s in cache", req.Subject)
 		}
@@ -220,11 +220,11 @@ func TestPDPCache_InvalidateAll(t *testing.T) {
 	}
 
 	// Invalidate all
-	cache.InvalidateAll()
+	_ = cache.InvalidateAll(context.Background())
 
 	// Verify all evicted
 	for _, req := range requests {
-		_, found := cache.Get(req)
+		_, found, _ := cache.Get(context.Background(), req)
 		if found {
 			t.Errorf("Expected %s to be invalidated", req.Subject)
 		}
@@ -241,7 +241,7 @@ func TestPDPCache_InvalidateAll(t *testing.T) {
 
 // TestPDPCache_InvalidateSubject tests subject-specific invalidation
 func TestPDPCache_InvalidateSubject(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(10, 1*time.Hour)
 
 	requests := []pdp.Request{
 		{Subject: "alice", Action: "read", Resource: "doc1", Time: time.Now()},
@@ -252,22 +252,22 @@ func TestPDPCache_InvalidateSubject(t *testing.T) {
 	// Cache decisions
 	for _, req := range requests {
 		dec := pdp.Decision{Allow: true, Reason: "policy"}
-		cache.Set(req, dec)
+		_ = cache.Set(context.Background(), req, dec)
 	}
 
 	// Invalidate alice
-	cache.InvalidateSubject("alice")
+	_ = cache.InvalidateSubject(context.Background(), "alice")
 
 	// Verify alice entries invalidated
 	for i := 0; i < 2; i++ {
-		_, found := cache.Get(requests[i])
+		_, found, _ := cache.Get(context.Background(), requests[i])
 		if found {
 			t.Errorf("Expected alice request %d to be invalidated", i)
 		}
 	}
 
 	// Verify bob entry still cached
-	_, found := cache.Get(requests[2])
+	_, found, _ := cache.Get(context.Background(), requests[2])
 	if !found {
 		t.Errorf("Expected bob request to remain cached")
 	}
@@ -283,7 +283,7 @@ func TestPDPCache_InvalidateSubject(t *testing.T) {
 
 // TestPDPCache_InvalidateResource tests resource-specific invalidation
 func TestPDPCache_InvalidateResource(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(10, 1*time.Hour)
 
 	requests := []pdp.Request{
 		{Subject: "alice", Action: "read", Resource: "doc123", Time: time.Now()},
@@ -294,22 +294,22 @@ func TestPDPCache_InvalidateResource(t *testing.T) {
 	// Cache decisions
 	for _, req := range requests {
 		dec := pdp.Decision{Allow: true, Reason: "policy"}
-		cache.Set(req, dec)
+		_ = cache.Set(context.Background(), req, dec)
 	}
 
 	// Invalidate doc123
-	cache.InvalidateResource("doc123")
+	_ = cache.InvalidateResource(context.Background(), "doc123")
 
 	// Verify doc123 entries invalidated
 	for i := 0; i < 2; i++ {
-		_, found := cache.Get(requests[i])
+		_, found, _ := cache.Get(context.Background(), requests[i])
 		if found {
 			t.Errorf("Expected doc123 request %d to be invalidated", i)
 		}
 	}
 
 	// Verify doc456 entry still cached
-	_, found := cache.Get(requests[2])
+	_, found, _ := cache.Get(context.Background(), requests[2])
 	if !found {
 		t.Errorf("Expected doc456 request to remain cached")
 	}
@@ -325,7 +325,7 @@ func TestPDPCache_InvalidateResource(t *testing.T) {
 
 // TestPDPCache_InvalidateAction tests action-specific invalidation
 func TestPDPCache_InvalidateAction(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(10, 1*time.Hour)
 
 	requests := []pdp.Request{
 		{Subject: "alice", Action: "read", Resource: "doc1", Time: time.Now()},
@@ -336,22 +336,22 @@ func TestPDPCache_InvalidateAction(t *testing.T) {
 	// Cache decisions
 	for _, req := range requests {
 		dec := pdp.Decision{Allow: true, Reason: "policy"}
-		cache.Set(req, dec)
+		_ = cache.Set(context.Background(), req, dec)
 	}
 
 	// Invalidate read action
-	cache.InvalidateAction("read")
+	_ = cache.InvalidateAction(context.Background(), "read")
 
 	// Verify read entries invalidated
 	for i := 0; i < 2; i++ {
-		_, found := cache.Get(requests[i])
+		_, found, _ := cache.Get(context.Background(), requests[i])
 		if found {
 			t.Errorf("Expected read request %d to be invalidated", i)
 		}
 	}
 
 	// Verify write entry still cached
-	_, found := cache.Get(requests[2])
+	_, found, _ := cache.Get(context.Background(), requests[2])
 	if !found {
 		t.Errorf("Expected write request to remain cached")
 	}
@@ -367,7 +367,7 @@ func TestPDPCache_InvalidateAction(t *testing.T) {
 
 // TestPDPCache_ThreadSafety tests concurrent cache access
 func TestPDPCache_ThreadSafety(t *testing.T) {
-	cache := pdp.NewPDPCache(100, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(100, 1*time.Hour)
 
 	const numGoroutines = 10
 	const numOpsPerGoroutine = 100
@@ -391,7 +391,7 @@ func TestPDPCache_ThreadSafety(t *testing.T) {
 					},
 				}
 				dec := pdp.Decision{Allow: true, Reason: "policy"}
-				cache.Set(req, dec)
+				_ = cache.Set(context.Background(), req, dec)
 			}
 		}(i)
 	}
@@ -412,21 +412,21 @@ func TestPDPCache_ThreadSafety(t *testing.T) {
 
 // TestPDPCache_Metrics tests hit rate calculations
 func TestPDPCache_Metrics(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(10, 1*time.Hour)
 
 	req := pdp.Request{Subject: "alice", Action: "read", Resource: "doc123", Time: time.Now()}
 	dec := pdp.Decision{Allow: true, Reason: "policy"}
 
 	// 1 miss
-	cache.Get(req)
+	_, _, _ = cache.Get(context.Background(), req)
 
 	// 1 set
-	cache.Set(req, dec)
+	_ = cache.Set(context.Background(), req, dec)
 
 	// 3 hits
-	cache.Get(req)
-	cache.Get(req)
-	cache.Get(req)
+	_, _, _ = cache.Get(context.Background(), req)
+	_, _, _ = cache.Get(context.Background(), req)
+	_, _, _ = cache.Get(context.Background(), req)
 
 	metrics := cache.GetMetrics()
 	if metrics.Lookups != 4 {
@@ -447,7 +447,7 @@ func TestPDPCache_Metrics(t *testing.T) {
 
 // TestInMemoryEngine_WithCache tests engine integration
 func TestInMemoryEngine_WithCache(t *testing.T) {
-	cache := pdp.NewPDPCache(10, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(10, 1*time.Hour)
 
 	// Create engine with simple policy
 	policy := pdp.Policy{
@@ -526,7 +526,7 @@ func TestInMemoryEngine_WithCache(t *testing.T) {
 
 // BenchmarkPDPCache_GetHit benchmarks cache hit performance
 func BenchmarkPDPCache_GetHit(b *testing.B) {
-	cache := pdp.NewPDPCache(1000, 1*time.Hour)
+	cache := pdp.NewInMemoryCache(1000, 1*time.Hour)
 
 	req := pdp.Request{
 		Subject:  "alice",
@@ -537,11 +537,11 @@ func BenchmarkPDPCache_GetHit(b *testing.B) {
 	dec := pdp.Decision{Allow: true, Reason: "policy"}
 
 	// Prime cache
-	cache.Set(req, dec)
+	_ = cache.Set(context.Background(), req, dec)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, found := cache.Get(req)
+		_, found, _ := cache.Get(context.Background(), req)
 		if !found {
 			b.Fatalf("Expected cache hit")
 		}
@@ -550,7 +550,7 @@ func BenchmarkPDPCache_GetHit(b *testing.B) {
 
 // BenchmarkPDPCache_SetEviction benchmarks cache set with eviction
 func BenchmarkPDPCache_SetEviction(b *testing.B) {
-	cache := pdp.NewPDPCache(100, 1*time.Hour) // Small capacity to force evictions
+	cache := pdp.NewInMemoryCache(100, 1*time.Hour) // Small capacity to force evictions
 
 	baseTime := time.Now()
 	dec := pdp.Decision{Allow: true, Reason: "policy"}
@@ -566,6 +566,6 @@ func BenchmarkPDPCache_SetEviction(b *testing.B) {
 				"iteration": fmt.Sprintf("%d", i), // Force unique cache key
 			},
 		}
-		cache.Set(req, dec)
+		_ = cache.Set(context.Background(), req, dec)
 	}
 }

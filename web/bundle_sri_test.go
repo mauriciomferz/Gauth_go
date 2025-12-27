@@ -13,6 +13,7 @@ func TestApplyBundleSubstitutionSRI(t *testing.T) {
 	defer t.Setenv("GAUTH_ENV", origEnv)
 	t.Setenv("GAUTH_ENV", "prod")
 	manifestDir := filepath.Join("web", "static", "js")
+	// #nosec G301
 	if err := os.MkdirAll(manifestDir, 0o755); err != nil {
 		t.Fatalf("mkdir: %v", err)
 	}

@@ -19,6 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto/batch"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -367,4 +368,86 @@ func (b *boltStore) EnableAnchorFile(path string, interval time.Duration) error 
 		}
 	}
 	return nil
+}
+
+// VerifyChainParallel performs parallel signature verification using batch verifier.
+// It still verifies the hash chain sequentially (required by design) but offloads
+// signature checks to a worker pool.
+func (b *boltStore) VerifyChainParallel(ctx context.Context) (*VerificationResult, error) {
+	res := &VerificationResult{}
+
+	// Configuration
+	const batchSize = 1000 // Process signatures in chunks of 1000
+
+	err := b.db.View(func(tx *bolt.Tx) error {
+		entriesB := tx.Bucket([]byte(bucketEntries))
+		if entriesB == nil {
+			return errors.New("ledger: missing entries bucket")
+		}
+
+		c := entriesB.Cursor()
+		var prev string
+
+		var sigBatch []batch.Item
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			var e Entry
+			if err := json.Unmarshal(v, &e); err != nil {
+				return err
+			}
+
+			// 1. Hash Chain Verification (Sequential)
+			canon, err := canonicalWithoutHash(&e)
+			if err != nil {
+				return err
+			}
+			h := sha256.Sum256(append([]byte(prev), canon...))
+			expected := fmt.Sprintf("%x", h[:])
+
+			if res.Count == 0 {
+				res.FirstHash = expected
+			}
+			if expected != e.Hash {
+				res.Mismatches++
+			}
+
+			// 2. Queue Signature for Parallel Verification
+			if e.Signature != nil && len(b.pubKey) == ed25519.PublicKeySize {
+				payload := append([]byte(prev), canon...)
+				sigBytes, err := base64.StdEncoding.DecodeString(e.Signature.SigBase64)
+				if err != nil || len(sigBytes) != ed25519.SignatureSize {
+					res.Mismatches++ // Malformed signature counts as mismatch
+				} else {
+					sigBatch = append(sigBatch, batch.Item{
+						PublicKey: b.pubKey,
+						Message:   payload,
+						Signature: sigBytes,
+					})
+				}
+			}
+
+			// Process Batch if full
+			if len(sigBatch) >= batchSize {
+				if err := batch.VerifyBatchEd25519(ctx, sigBatch); err != nil {
+					return fmt.Errorf("batch signature verification failed: %w", err)
+				}
+				sigBatch = sigBatch[:0] // Reset
+			}
+
+			prev = e.Hash
+			res.Count++
+		}
+
+		// Process remaining batch
+		if len(sigBatch) > 0 {
+			if err := batch.VerifyBatchEd25519(ctx, sigBatch); err != nil {
+				return fmt.Errorf("batch signature verification failed: %w", err)
+			}
+		}
+
+		res.LastHash = prev
+		return nil
+	})
+
+	return res, err
 }

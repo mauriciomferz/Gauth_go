@@ -28,8 +28,11 @@ import (
 // RawPOAItem canonical minimal fields for delegation chain.
 type RawPOAItem struct {
 	ID        string            `cbor:"id"`
+	Version   int               `cbor:"ver,omitempty"`
 	Issuer    string            `cbor:"iss"`
 	Subject   string            `cbor:"sub"`
+	Scope     []string          `cbor:"scope,omitempty"`
+	Status    string            `cbor:"status,omitempty"`
 	Timestamp int64             `cbor:"ts"`
 	Claims    map[string]string `cbor:"claims,omitempty"`
 	Signature []byte            `cbor:"sig"`
@@ -102,7 +105,7 @@ func EncodeRawPOAChain(items []RawPOAItem) ([]byte, error) {
 			return nil, errors.New("item too large to encode")
 		}
 		var lenBuf [4]byte
-		//nolint:gosec // G115: length already validated against uint32 max
+		// #nosec G115: length already validated against uint32 max
 		binary.BigEndian.PutUint32(lenBuf[:], uint32(len(b)))
 		out.Write(lenBuf[:])
 		out.Write(b)
@@ -129,6 +132,15 @@ func marshalCBORItem(it RawPOAItem) ([]byte, error) {
 		pairsCount++
 	}
 	if len(it.Claims) > 0 {
+		pairsCount++
+	}
+	if it.Version > 0 {
+		pairsCount++
+	}
+	if len(it.Scope) > 0 {
+		pairsCount++
+	}
+	if it.Status != "" {
 		pairsCount++
 	}
 	// encode map length
@@ -178,6 +190,27 @@ func marshalCBORItem(it RawPOAItem) ([]byte, error) {
 	// sig
 	writeText("sig")
 	writeBytes(it.Signature)
+	if it.Version > 0 {
+		writeText("ver")
+		writeInt(int64(it.Version))
+	}
+	if it.Status != "" {
+		writeText("status")
+		writeText(it.Status)
+	}
+	if len(it.Scope) > 0 {
+		writeText("scope")
+		// encode array of strings
+		sCount := len(it.Scope)
+		if sCount < 24 {
+			buf.WriteByte(0x80 | byte(sCount))
+		} else {
+			return nil, errors.New("scope too large")
+		}
+		for _, s := range it.Scope {
+			writeText(s)
+		}
+	}
 	if len(it.PrevHash) > 0 {
 		writeText("prev_hash")
 		writeBytes(it.PrevHash)
@@ -453,6 +486,37 @@ func unmarshalMinimal(b []byte) (*RawPOAItem, error) {
 				return nil, err
 			}
 			it.Algo = v
+		case "ver":
+			v, err := readInt()
+			if err != nil {
+				return nil, err
+			}
+			it.Version = int(v)
+		case "status":
+			v, err := readText()
+			if err != nil {
+				return nil, err
+			}
+			it.Status = v
+		case "scope":
+			// nested array of strings
+			if pos >= len(b) {
+				return nil, errors.New("scope trunc")
+			}
+			h := b[pos]
+			pos++
+			if h>>5 != 4 {
+				return nil, errors.New("scope not array")
+			}
+			sCount := int(h & 0x1F)
+			it.Scope = make([]string, 0, sCount)
+			for j := 0; j < sCount; j++ {
+				s, err := readText()
+				if err != nil {
+					return nil, err
+				}
+				it.Scope = append(it.Scope, s)
+			}
 		case "ts":
 			v, err := readInt()
 			if err != nil {
@@ -613,6 +677,36 @@ func unmarshalMinimalAt(b []byte, count int) (*RawPOAItem, int, error) {
 				return nil, 0, err
 			}
 			it.Algo = v
+		case "ver":
+			v, err := readInt()
+			if err != nil {
+				return nil, 0, err
+			}
+			it.Version = int(v)
+		case "status":
+			v, err := readText()
+			if err != nil {
+				return nil, 0, err
+			}
+			it.Status = v
+		case "scope":
+			if pos >= len(b) {
+				return nil, 0, errors.New("scope trunc")
+			}
+			h := b[pos]
+			pos++
+			if h>>5 != 4 {
+				return nil, 0, errors.New("scope not array")
+			}
+			sCount := int(h & 0x1F)
+			it.Scope = make([]string, 0, sCount)
+			for j := 0; j < sCount; j++ {
+				s, err := readText()
+				if err != nil {
+					return nil, 0, err
+				}
+				it.Scope = append(it.Scope, s)
+			}
 		case "ts":
 			v, err := readInt()
 			if err != nil {
@@ -660,4 +754,11 @@ func unmarshalMinimalAt(b []byte, count int) (*RawPOAItem, int, error) {
 }
 
 // MarshalRawPOAItem exposes the minimal encoder for testing continuity (exported helper).
-func MarshalRawPOAItem(it RawPOAItem) ([]byte, error) { return marshalCBORItem(it) }
+func MarshalRawPOAItem(it RawPOAItem) ([]byte, error) {
+	return marshalCBORItem(it)
+}
+
+// UnmarshalRawPOAItem exposes the minimal decoder for internal/external consumers (exported helper).
+func UnmarshalRawPOAItem(b []byte) (*RawPOAItem, error) {
+	return unmarshalMinimal(b)
+}

@@ -50,6 +50,9 @@ type LoadTestResult struct {
 	Throughput      float64
 }
 
+// RequestExecutor performs the actual request.
+type RequestExecutor func(ctx context.Context, request interface{}) (interface{}, error)
+
 // LoadTestHarness orchestrates load tests.
 type LoadTestHarness struct {
 	mu sync.RWMutex
@@ -69,6 +72,7 @@ type LoadTestHarness struct {
 	// Configuration
 	maxConcurrency int
 	reportInterval time.Duration
+	executor       RequestExecutor
 }
 
 // NewLoadTestHarness creates a new load test harness.
@@ -79,6 +83,13 @@ func NewLoadTestHarness() *LoadTestHarness {
 		responseTimes:  make([]time.Duration, 0, 10000),
 		errors:         make([]error, 0),
 	}
+}
+
+// SetExecutor sets the request executor function.
+func (h *LoadTestHarness) SetExecutor(executor RequestExecutor) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.executor = executor
 }
 
 // Run executes a load test scenario.
@@ -210,6 +221,11 @@ func (h *LoadTestHarness) executeRequest(ctx context.Context, userID, iteration 
 
 // performRequest executes the actual request (to be customized per test).
 func (h *LoadTestHarness) performRequest(ctx context.Context, request interface{}) (interface{}, error) {
+	// Use custom executor if configured
+	if h.executor != nil {
+		return h.executor(ctx, request)
+	}
+
 	// This is a hook for custom request execution
 	// In real tests, this would call the actual service
 

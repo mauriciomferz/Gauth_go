@@ -338,9 +338,9 @@ func TestEnhancedPoAValidator_WithDailyLimits(t *testing.T) {
 	// Should now fail validation
 	result2 := validator.ValidateWithResult(context.Background(), poa)
 	if result2.Valid {
-		t.Error("ValidateWithResult() expected failure when daily limit exceeded")
+		t.Fatalf("ValidateWithResult() expected failure when daily limit exceeded")
 	}
-	if !strings.Contains(result2.Error.Error(), "daily limit exceeded") {
+	if result2.Error == nil || !strings.Contains(result2.Error.Error(), "daily limit exceeded") {
 		t.Errorf("ValidateWithResult() error = %v, want daily limit exceeded error", result2.Error)
 	}
 }

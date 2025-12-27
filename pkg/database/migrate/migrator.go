@@ -32,28 +32,28 @@ func NewMigrator(databaseURL string) (*Migrator, error) {
 
 	// Test connection
 	if err := db.Ping(); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
 	// Create driver instance
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to create postgres driver: %w", err)
 	}
 
 	// Create source from embedded filesystem
 	sourceDriver, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to create source driver: %w", err)
 	}
 
 	// Create migrate instance
 	m, err := migrate.NewWithInstance("iofs", sourceDriver, "postgres", driver)
 	if err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to create migrate instance: %w", err)
 	}
 

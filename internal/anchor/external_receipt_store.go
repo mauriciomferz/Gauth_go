@@ -22,41 +22,6 @@ import (
 	"time"
 )
 
-// Verification status constants (mirrors notary receipt store & metrics integrity statuses)
-const (
-	externalReceiptStatusOK       = "ok"
-	externalReceiptStatusMismatch = "mismatch"
-	externalReceiptStatusEmpty    = "empty"
-)
-
-// ExternalAnchorReceipt is the base receipt emitted by external anchor providers.
-// Success is implicit (we only persist successful attempts).
-// Timestamp stored with nanosecond precision UTC.
-// Version reserved for future schema evolution (start at 1).
-// LatencySeconds records observed provider operation latency.
-// Provider normalized label (e.g. tsa-stub) matching metrics.
-// Hash is provider-returned anchored hash (could be identical to capability registry hash or provider-specific digest).
-// NOTE: We do not persist failure attempts to keep audit small; failures recorded via metrics.
-// Extensible in future (e.g. provider signature, certificate chain, anchor ledger reference).
-// json field order stable via struct marshal for deterministic hashing.
-type ExternalAnchorReceipt struct {
-	Hash           string  `json:"hash"`
-	Timestamp      string  `json:"timestamp"`
-	Provider       string  `json:"provider"`
-	Version        int     `json:"version"`
-	LatencySeconds float64 `json:"latency_seconds"`
-}
-
-// StoredExternalAnchorReceipt extends ExternalAnchorReceipt with hash-chain linkage.
-// PrevHash is previous entry's chain hash (empty for first).
-// ChainHash is sha256(prev_hash || canonical_json(base_with_prev_hash)).
-// We exclude chain_hash from the canonical payload used for hashing.
-type StoredExternalAnchorReceipt struct {
-	ExternalAnchorReceipt
-	PrevHash  string `json:"prev_hash"`
-	ChainHash string `json:"chain_hash"`
-}
-
 // ExternalReceiptStore concurrency-safe store.
 type ExternalReceiptStore struct {
 	mu               sync.RWMutex
@@ -181,7 +146,7 @@ func (rs *ExternalReceiptStore) VerifyIncremental() (string, int, string) {
 	if n == 0 {
 		rs.lastVerifiedLen = 0
 		rs.headVerifiedHash = ""
-		return externalReceiptStatusEmpty, -1, ""
+		return ExternalReceiptStatusEmpty, -1, ""
 	}
 	start := 0
 	if rs.lastVerifiedLen > 0 && rs.lastVerifiedLen <= n {
@@ -207,16 +172,16 @@ func (rs *ExternalReceiptStore) VerifyIncremental() (string, int, string) {
 		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
 		enc, err := json.Marshal(base)
 		if err != nil {
-			return externalReceiptStatusMismatch, i, rs.headHash
+			return ExternalReceiptStatusMismatch, i, rs.headHash
 		}
 		h := sha256.Sum256(append([]byte(e.PrevHash), enc...))
 		expected := fmt.Sprintf("%x", h[:])
 		if expected != e.ChainHash || (i == 0 && e.PrevHash != "") || (i > 0 && e.PrevHash != prev) {
-			return externalReceiptStatusMismatch, i, rs.headHash
+			return ExternalReceiptStatusMismatch, i, rs.headHash
 		}
 		prev = e.ChainHash
 	}
 	rs.lastVerifiedLen = n
 	rs.headVerifiedHash = rs.entries[n-1].ChainHash
-	return externalReceiptStatusOK, -1, rs.headVerifiedHash
+	return ExternalReceiptStatusOK, -1, rs.headVerifiedHash
 }

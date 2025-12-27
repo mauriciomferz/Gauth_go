@@ -776,10 +776,26 @@ func (s *BetaServer) registerLimitsDiagnostics(r *gin.Engine) {
 // It is idempotent: multiple calls have no additional effect.
 // UpdateJWKSETag updates the stored JWKS ETag for discovery endpoint
 func (s *BetaServer) UpdateJWKSETag(etag string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.jwksETag = etag
 	if s.jwksLastRotated.IsZero() {
 		s.jwksLastRotated = time.Now()
 	}
+}
+
+// UpdateJWKSSignature updates the stored JWKS signature for discovery endpoint
+func (s *BetaServer) UpdateJWKSSignature(sig string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.jwksSignature = sig
+}
+
+// UpdateDeprecationSchedule updates the stored deprecation schedule for discovery endpoint
+func (s *BetaServer) UpdateDeprecationSchedule(schedule map[string]time.Time) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.deprecationSchedule = schedule
 }
 
 // Shutdown is now defined in server_lifecycle.go
@@ -1114,7 +1130,8 @@ func (s *BetaServer) appendCapabilityAudit(e *AuditEntry) {
 		}{Payload: enc, PrevHash: s.capabilitiesHandler.GetAuditPrevHash(), Hash: curHash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
 		if wb, werr := json.Marshal(wrapper); werr == nil {
 			dir := filepath.Dir(s.capabilitiesHandler.GetAuditPersistPath())
-			if mkErr := os.MkdirAll(dir, 0o755); mkErr != nil {
+			// #nosec G301
+			if mkErr := os.MkdirAll(dir, 0o750); mkErr != nil {
 				fmt.Fprintf(os.Stderr, "[cap-audit] mkdir failed path=%s err=%v\n", dir, mkErr)
 			} else if awErr := os.WriteFile(s.capabilitiesHandler.GetAuditPersistPath(), wb, 0o600); awErr != nil {
 				fmt.Fprintf(os.Stderr, "[cap-audit] write failed path=%s err=%v\n", s.capabilitiesHandler.GetAuditPersistPath(), awErr)
@@ -1965,11 +1982,23 @@ func (s *BetaServer) routes() {
 			actionCaps = append(actionCaps, gin.H{"action": act, "required": actMappings[act]})
 		}
 		cfg := gin.H{
-			"version":              "beta",
-			"schema_version":       DiscoverySchemaVersion,
-			"future_version":       DiscoveryFutureVersion,
-			"deprecated_fields":    []string{},
-			"deprecated_after":     func() string { return os.Getenv("GAUTH_DEPRECATED_AFTER") }(),
+			"version":           "beta",
+			"schema_version":    DiscoverySchemaVersion,
+			"future_version":    DiscoveryFutureVersion,
+			"deprecated_fields": []string{},
+			"deprecated_after":  func() string { return os.Getenv("GAUTH_DEPRECATED_AFTER") }(),
+			"deprecation_schedule": func() gin.H {
+				s.mu.RLock()
+				defer s.mu.RUnlock()
+				if len(s.deprecationSchedule) == 0 {
+					return nil
+				}
+				res := gin.H{}
+				for k, v := range s.deprecationSchedule {
+					res[k] = v.Format(time.RFC3339)
+				}
+				return res
+			}(),
 			"sunset_after":         func() string { return os.Getenv("GAUTH_SUNSET_AFTER") }(),
 			"implementation":       "GAuth Demo",
 			"issuer":               os.Getenv("GAUTH_ISSUER"),
@@ -1995,6 +2024,12 @@ func (s *BetaServer) routes() {
 			"jwks_etag": func() string {
 				if jwtEnabled || os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
 					return s.jwksETag
+				}
+				return ""
+			}(),
+			"jwks_signature": func() string {
+				if jwtEnabled || os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+					return s.jwksSignature
 				}
 				return ""
 			}(),
@@ -2141,6 +2176,7 @@ func (s *BetaServer) routes() {
 		var data []byte
 		var err error
 		for _, p := range paths {
+			// #nosec G304
 			data, err = os.ReadFile(p)
 			if err == nil {
 				break
@@ -2165,6 +2201,7 @@ func (s *BetaServer) routes() {
 		var data []byte
 		var err error
 		for _, p := range paths {
+			// #nosec G304
 			data, err = os.ReadFile(p)
 			if err == nil {
 				break
@@ -2200,6 +2237,7 @@ func (s *BetaServer) routes() {
 		var data []byte
 		var err error
 		for _, p := range paths {
+			// #nosec G304
 			data, err = os.ReadFile(p)
 			if err == nil {
 				break
@@ -2224,6 +2262,7 @@ func (s *BetaServer) routes() {
 		var data []byte
 		var err error
 		for _, p := range paths {
+			// #nosec G304
 			data, err = os.ReadFile(p)
 			if err == nil {
 				break
@@ -3006,7 +3045,8 @@ func (s *BetaServer) routes() {
 	protocolFlowHandler := func(c *gin.Context) {
 		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
-				path := wd + "/web/templates/protocol-flow.html"
+				path := filepath.Join(wd, "web", "templates", "protocol-flow.html")
+				// #nosec G304
 				if b, err := os.ReadFile(path); err == nil {
 					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 					c.Header("Pragma", "no-cache")
@@ -3044,7 +3084,8 @@ func (s *BetaServer) routes() {
 
 		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
-				path := wd + "/web/templates/poa-visualization.html"
+				path := filepath.Join(wd, "web", "templates", "poa-visualization.html")
+				// #nosec G304
 				if b, err := os.ReadFile(path); err == nil {
 					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 					c.Header("Pragma", "no-cache")
@@ -3070,7 +3111,8 @@ func (s *BetaServer) routes() {
 	// Serve gauth1.html (GAuth 1.0 Dashboard)
 	s.router.GET("/gauth1.html", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := wd + "/web/static_ui/gauth1.html"
+			path := filepath.Join(wd, "web", "static_ui", "gauth1.html")
+			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 				c.Header("Pragma", "no-cache")
@@ -3090,7 +3132,8 @@ func (s *BetaServer) routes() {
 	// Serve gauth1.html at /ui/ path as well
 	s.router.GET("/ui/gauth1.html", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := wd + "/web/static_ui/gauth1.html"
+			path := filepath.Join(wd, "web", "static_ui", "gauth1.html")
+			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Content-Type", "text/html")
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -3111,7 +3154,8 @@ func (s *BetaServer) routes() {
 	// Serve gauth1.css
 	s.router.GET("/ui/gauth1.css", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := wd + "/web/static_ui/gauth1.css"
+			path := filepath.Join(wd, "web", "static_ui", "gauth1.css")
+			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Content-Type", "text/css")
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -3129,7 +3173,8 @@ func (s *BetaServer) routes() {
 	// Serve gauth1.js
 	s.router.GET("/ui/gauth1.js", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := wd + "/web/static_ui/gauth1.js"
+			path := filepath.Join(wd, "web", "static_ui", "gauth1.js")
+			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Content-Type", "application/javascript")
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -3148,7 +3193,8 @@ func (s *BetaServer) routes() {
 	if !s.routeRegistered("/api/openapi/gauth.yaml") {
 		s.router.GET("/api/openapi/gauth.yaml", func(c *gin.Context) {
 			if wd, err := os.Getwd(); err == nil {
-				path := wd + "/api/openapi/gauth.yaml"
+				path := filepath.Join(wd, "api", "openapi", "gauth.yaml")
+				// #nosec G304
 				if b, err := os.ReadFile(path); err == nil {
 					c.Header("Content-Type", "application/x-yaml")
 					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -3295,7 +3341,8 @@ func (s *BetaServer) routes() {
 	s.router.GET("/demo.html", func(c *gin.Context) {
 		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
-				path := wd + "/web/templates/demo.html"
+				path := filepath.Join(wd, "web", "templates", "demo.html")
+				// #nosec G304
 				if b, err := os.ReadFile(path); err == nil {
 					c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 					c.Header("Pragma", "no-cache")
@@ -3379,6 +3426,7 @@ func (s *BetaServer) routes() {
 			seen[r] = struct{}{}
 			full := filepath.Join(r, "web", "static", "js", "pages", name)
 			tried = append(tried, full)
+			// #nosec G304
 			b, err := os.ReadFile(full)
 			if err == nil {
 				fmt.Fprintf(os.Stderr, "[debug] served pages script %s (root=%s bytes=%d)\n", name, r, len(b))
@@ -3444,6 +3492,7 @@ func (s *BetaServer) routes() {
 			var foundPath string
 			for _, r := range uniqueRoots {
 				candidate := filepath.Join(r, "web", "static", "js", an)
+				// #nosec G304
 				if b, err := os.ReadFile(candidate); err == nil && len(b) > 0 {
 					found = true
 					foundPath = candidate
@@ -3465,7 +3514,8 @@ func (s *BetaServer) routes() {
 	// Import map explicit route (same rationale)
 	s.router.GET("/static/js/importmap.json", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			full := wd + "/web/static/js/importmap.json"
+			full := filepath.Join(wd, "web", "static", "js", "importmap.json")
+			// #nosec G304
 			if b, err := os.ReadFile(full); err == nil {
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 				c.Header("Pragma", "no-cache")
@@ -3485,11 +3535,14 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[debug] dev mode: serving static JS from disk: %s\n", jsPath)
 			s.router.GET("/static/js/:file", func(c *gin.Context) {
 				name := c.Param("file")
-				if name == "" || strings.Contains(name, "..") || strings.Contains(name, "/") {
+				// Sanitize path
+				safeName := filepath.Clean(name)
+				if safeName == "" || strings.Contains(safeName, "..") || strings.Contains(safeName, "/") {
 					c.String(400, "invalid file")
 					return
 				}
-				fullPath := jsPath + "/" + name
+				fullPath := filepath.Join(jsPath, safeName)
+				// #nosec G304
 				b, err := os.ReadFile(fullPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "[debug] JS file read error file=%s err=%v\n", fullPath, err)
@@ -3523,6 +3576,7 @@ func (s *BetaServer) routes() {
 				var found bool
 				for _, r := range unique {
 					candidate := filepath.Join(r, "web", "static", "js", "pages", name)
+					// #nosec G304
 					if b, err := os.ReadFile(candidate); err == nil && len(b) > 0 {
 						found = true
 						break
@@ -3549,11 +3603,14 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[debug] dev mode: serving static CSS from disk: %s\n", cssPath)
 			s.router.GET("/static/css/:file", func(c *gin.Context) {
 				name := c.Param("file")
-				if name == "" || strings.Contains(name, "..") || strings.Contains(name, "/") {
+				// Sanitize path
+				safeName := filepath.Clean(name)
+				if safeName == "" || strings.Contains(safeName, "..") || strings.Contains(safeName, "/") {
 					c.String(400, "invalid file")
 					return
 				}
-				fullPath := cssPath + "/" + name
+				fullPath := filepath.Join(cssPath, safeName)
+				// #nosec G304
 				b, err := os.ReadFile(fullPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "[debug] CSS file read error file=%s err=%v\n", fullPath, err)
@@ -3572,11 +3629,14 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[debug] dev modules disk path: %s\\n", modulesPath)
 			serveModule := func(c *gin.Context) {
 				name := c.Param("file")
-				if name == "" {
+				// Sanitize path
+				safeName := filepath.Clean(name)
+				if safeName == "" || strings.Contains(safeName, "..") || strings.Contains(safeName, "/") {
 					c.String(400, "missing file")
 					return
 				}
-				full := modulesPath + "/" + name
+				full := filepath.Join(modulesPath, safeName)
+				// #nosec G304
 				b, err := os.ReadFile(full)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "[debug] module read error file=%s err=%v\\n", full, err)
@@ -3633,14 +3693,14 @@ func (s *BetaServer) routes() {
 
 	// Serve documentation files from docs directory
 	s.router.GET("/docs/*filepath", func(c *gin.Context) {
-		filepath := c.Param("filepath")
-		if filepath == "" {
+		fpath := c.Param("filepath")
+		if fpath == "" {
 			c.String(400, "missing filepath")
 			return
 		}
 		// Remove leading slash
-		if filepath[0] == '/' {
-			filepath = filepath[1:]
+		if fpath[0] == '/' {
+			fpath = fpath[1:]
 		}
 
 		// Get working directory
@@ -3650,10 +3710,23 @@ func (s *BetaServer) routes() {
 			return
 		}
 
+		// Sanitize path
+		safePath := filepath.Clean(fpath)
+		if strings.Contains(safePath, "..") {
+			c.String(400, "invalid path")
+			return
+		}
+
 		// Construct full path
-		fullPath := wd + "/docs/" + filepath
+		fullPath := filepath.Join(wd, "docs", safePath)
+		// Ensure it is still within docs dir
+		if !strings.HasPrefix(fullPath, filepath.Join(wd, "docs")) {
+			c.String(400, "access denied")
+			return
+		}
 
 		// Read file
+		// #nosec G304
 		content, err := os.ReadFile(fullPath)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[docs] file not found: %s (error: %v)\n", fullPath, err)
@@ -3664,15 +3737,15 @@ func (s *BetaServer) routes() {
 		// Determine content type based on extension
 		contentType := "text/plain; charset=utf-8"
 		switch {
-		case len(filepath) > 3 && filepath[len(filepath)-3:] == ".md":
+		case len(fpath) > 3 && fpath[len(fpath)-3:] == ".md":
 			contentType = "text/markdown; charset=utf-8"
-		case len(filepath) > 5 && filepath[len(filepath)-5:] == ".html":
+		case len(fpath) > 5 && fpath[len(fpath)-5:] == ".html":
 			contentType = "text/html; charset=utf-8"
-		case len(filepath) > 4 && filepath[len(filepath)-4:] == ".pdf":
+		case len(fpath) > 4 && fpath[len(fpath)-4:] == ".pdf":
 			contentType = "application/pdf"
 		}
 
-		fmt.Fprintf(os.Stderr, "[docs] serving %s (%d bytes)\n", filepath, len(content))
+		fmt.Fprintf(os.Stderr, "[docs] serving %s (%d bytes)\n", fpath, len(content))
 		c.Data(200, contentType, content)
 	})
 }
@@ -4130,6 +4203,18 @@ type AuditLog struct {
 	dbLogger *audit.DatabaseLogger
 	// Hook for audit chaining (capability audit anchor)
 	OnEntry func(*AuditEntry)
+}
+
+func (l *AuditLog) Log(ctx context.Context, entry interface{}) error {
+	switch e := entry.(type) {
+	case *audit.Event:
+		l.AppendEntry(e.ID, e.Timestamp, e.Subject, e.Action, e.Object, e.Result, e.Metadata)
+	case *audit.AuditEvent:
+		l.AppendEntry(e.ID, e.Timestamp, e.UserID, e.Action, e.ResourceID, e.Status, e.BeforeState)
+	case *AuditEntry:
+		l.Append(e)
+	}
+	return nil
 }
 
 func NewAuditLog(capacity int) *AuditLog {

@@ -144,6 +144,11 @@ func NewTracerProvider(cfg Config) (*TracerProvider, error) {
 	return &TracerProvider{tracer: NewTracer(cfg.ServiceName)}, nil
 }
 
+// Tracer returns the underlying tracer.
+func (p *TracerProvider) Tracer() *Tracer {
+	return p.tracer
+}
+
 // Attribute is a generic key/value used for span tagging.
 type Attribute struct {
 	Key   string

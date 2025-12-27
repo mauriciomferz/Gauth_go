@@ -1,0 +1,4146 @@
+{
+	"Golang errors": {
+		"/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/opa-integration/main.go": [
+			{
+				"line": 5,
+				"column": 2,
+				"error": "\"encoding/json\" imported and not used"
+			},
+			{
+				"line": 7,
+				"column": 2,
+				"error": "\"log\" imported and not used"
+			},
+			{
+				"line": 9,
+				"column": 2,
+				"error": "\"time\" imported and not used"
+			},
+			{
+				"line": 11,
+				"column": 2,
+				"error": "could not import github.com/open-policy-agent/opa/rego (invalid package name: \"\")"
+			},
+			{
+				"line": 52,
+				"column": 2,
+				"error": "declared and not used: results"
+			},
+			{
+				"line": 316,
+				"column": 1,
+				"error": "missing return"
+			},
+			{
+				"line": 316,
+				"column": 3,
+				"error": "expected ';', found fmt"
+			},
+			{
+				"line": 316,
+				"column": 388,
+				"error": "expected declaration, found 'return'"
+			}
+		]
+	},
+	"Issues": [
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/admin/metrics_handler.go",
+			"code": "156: \t\tCacheSize:        cacheSize,\n157: \t\tMemoryUsage:      int64(m.Alloc), // Current allocated memory\n158: \t\tCacheEvictions:   cacheEvicted,\n",
+			"line": "157",
+			"column": "26",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/replay_store_bolt.go",
+			"code": "125: \t\t\t// #nosec G115: converting stored timestamp, safe for Unix time values\n126: \t\t\texpiry := int64(binary.BigEndian.Uint64(existing))\n127: \t\t\tif now \u003c expiry {\n",
+			"line": "126",
+			"column": "19",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/notary/notary.go",
+			"code": "169: \t} else {\n170: \t\tseed = int64(binary.LittleEndian.Uint64(buf[:]))\n171: \t}\n",
+			"line": "170",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1732: \t\t\t// #nosec G115: buf[rank] is nanosecond duration, safe conversion\n1733: \t\t\treturn time.Duration(buf[rank])\n1734: \t\t}\n",
+			"line": "1733",
+			"column": "24",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1698: \t\t// #nosec G115: tot/vc cannot overflow, both are nanosecond counts\n1699: \t\tavg = time.Duration(tot / vc)\n1700: \t}\n",
+			"line": "1699",
+			"column": "22",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "760: \t\t// #nosec G115: converting stored nanosecond sample, safe range\n761: \t\treturn time.Duration(buf[rank])\n762: \t}\n",
+			"line": "761",
+			"column": "23",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/anchor/anchor.go",
+			"code": "103: \t\t} else {\n104: \t\t\tseed = int64(binary.LittleEndian.Uint64(buf[:]))\n105: \t\t}\n",
+			"line": "104",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/deployer/deploy.go",
+			"code": "92: \t}\n93: \tauth.Nonce = big.NewInt(int64(nonce))\n94: \tauth.Value = big.NewInt(0)      // in wei\n",
+			"line": "93",
+			"column": "31",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go",
+			"code": "4629: \tif s.sunsetController != nil {\n4630: \t\tphase = int(s.sunsetController.Phase())\n4631: \t}\n",
+			"line": "4630",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/blockchain/ethereum_adapter.go",
+			"code": "504: \n505: \tconfirmations := int(currentBlock - receipt.BlockNumber.Uint64())\n506: \n",
+			"line": "505",
+			"column": "22",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion uint64 -\u003e int",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/sunset/controller.go",
+			"code": "177: \t\t// Rollback safeguard: if mismatch ratio extremely high, demote phase\n178: \t\tprev := int(phase) - 1\n179: \t\tc.mv.SetEnvelopeV1SunsetPhase(prev)\n",
+			"line": "178",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go",
+			"code": "302: \t\t\t\t\t\t\tmem.IncCapabilityAnchorEmitted()\n303: \t\t\t\t\t\t\tmem.SetCapabilityAnchorLastWriteUnix(uint64(time.Now().Unix()))\n304: \t\t\t\t\t\t\t// Emit algorithm facet metrics for all registered algorithms\n",
+			"line": "303",
+			"column": "51",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/policy/api.go",
+			"code": "552: \t\tsegmentMid := (low + ub) / 2\n553: \t\tapproxSum += uint64(segmentMid) * cnt\n554: \t\tb.WriteString(fmt.Sprintf(\"gauth_policy_eval_latency_ns_bucket{le=\\\"%d\\\"} %d\\n\", ub, cumulative))\n",
+			"line": "553",
+			"column": "22",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go",
+			"code": "4895: \t\t\t// #nosec G115: Unix timestamp always positive, safe conversion\n4896: \t\t\tcur := uint64(now.Unix()) // #nosec G115: Unix timestamp\n4897: \t\t\tif prev != 0 \u0026\u0026 cur \u003e prev {\n",
+			"line": "4896",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go",
+			"code": "4861: \t\t\t// #nosec G115: Unix timestamp always positive, safe conversion\n4862: \t\t\tcur := uint64(now.Unix()) // #nosec G115: Unix timestamp\n4863: \t\t\tif prev != 0 \u0026\u0026 cur \u003e prev {\n",
+			"line": "4862",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/replay_store_bolt.go",
+			"code": "134: \t\t// #nosec G115: timestamp conversion, safe for Unix time values\n135: \t\tbinary.BigEndian.PutUint64(value, uint64(expiresAt))\n136: \t\treturn bucket.Put(key, value)\n",
+			"line": "135",
+			"column": "43",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1635: \t// #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations\n1636: \tns := uint64(d.Nanoseconds())\n1637: \tm.lifecycleLatencyMu.Lock()\n",
+			"line": "1636",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1441: \t// Store latency in validation reservoir for simplicity (reuse existing infrastructure)\n1442: \tns := uint64(d.Nanoseconds())\n1443: \tatomic.AddUint64(\u0026m.validationCount, 1)\n",
+			"line": "1442",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1305: \t// #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations\n1306: \tns := uint64(d.Nanoseconds())\n1307: \tatomic.AddUint64(\u0026m.obligationLatencyCount, 1)\n",
+			"line": "1306",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1253: \t// #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations\n1254: \tns := uint64(d.Nanoseconds())\n1255: \tatomic.AddUint64(\u0026m.multiSignatureAggregateLatencyCount, 1)\n",
+			"line": "1254",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1095: \t// #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations\n1096: \tns := uint64(d.Nanoseconds())\n1097: \tatomic.AddUint64(\u0026m.attestationProofIssueLatencyCount, 1)\n",
+			"line": "1096",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1078: \t// #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations\n1079: \tns := uint64(d.Nanoseconds())\n1080: \tatomic.AddUint64(\u0026m.attestationProofVerificationLatencyCount, 1)\n",
+			"line": "1079",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1029: \t// #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations\n1030: \tns := uint64(d.Nanoseconds())\n1031: \tatomic.AddUint64(\u0026m.validationCount, 1)\n",
+			"line": "1030",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1016: \t// #nosec G115: duration.Nanoseconds() validated non-negative above\n1017: \tns := uint64(d.Nanoseconds())\n1018: \tatomic.AddUint64(\u0026m.replayStoreLatencyCount, 1)\n",
+			"line": "1017",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "921: \t// #nosec G115: Unix timestamp always positive\n922: \tatomic.StoreUint64(\u0026m.lastPersistUnix, uint64(time.Now().Unix()))\n923: \treturn nil\n",
+			"line": "922",
+			"column": "47",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "826: \t// #nosec G115: duration.Nanoseconds() validated non-negative above\n827: \tns := uint64(d.Nanoseconds())\n828: \tatomic.AddUint64(\u0026m.capabilityDiffLatencyCount, 1)\n",
+			"line": "827",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "806: \t// #nosec G115: duration nanoseconds always non-negative\n807: \tns := uint64(d.Nanoseconds())\n808: \tatomic.AddUint64(\u0026m.replayWALSnapshotDurationCount, 1)\n",
+			"line": "807",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "789: \t// #nosec G115: duration nanoseconds always non-negative\n790: \tns := uint64(d.Nanoseconds())\n791: \tatomic.AddUint64(\u0026m.replayWALFlushLatencyCount, 1)\n",
+			"line": "790",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int64 -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "687: \t// #nosec G115: duration nanoseconds always non-negative\n688: \tns := uint64(d.Nanoseconds())\n689: \tatomic.AddUint64(\u0026m.cascadeProcessingLatencyCount, 1)\n",
+			"line": "688",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1662: \t// #nosec G115: reservoir size is fixed at 64, safe conversion\n1663: \tpos := lr.writes \u0026 uint64(len(lr.samples)-1) // ring position\n1664: \tlr.samples[pos] = ns\n",
+			"line": "1663",
+			"column": "27",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1459: \tatomic.StoreUint64(\u0026m.capabilityEnforceAllowed, uint64(enforcement))\n1460: \tatomic.StoreUint64(\u0026m.capabilityEnforceDenied, uint64(violation))\n1461: }\n",
+			"line": "1460",
+			"column": "55",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1458: \t// Store as simple gauges (reuse capability counters for simplicity)\n1459: \tatomic.StoreUint64(\u0026m.capabilityEnforceAllowed, uint64(enforcement))\n1460: \tatomic.StoreUint64(\u0026m.capabilityEnforceDenied, uint64(violation))\n",
+			"line": "1459",
+			"column": "56",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "1182: \t// #nosec G115: phase validated non-negative, small enum value\n1183: \tatomic.StoreUint64(\u0026m.envelopeV1SunsetPhase, uint64(phase))\n1184: }\n",
+			"line": "1183",
+			"column": "53",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "781: // #nosec G115: WAL pending count, always non-negative\n782: func (m *Memory) SetReplayWALPending(n int) { atomic.StoreUint64(\u0026m.replayWALPending, uint64(n)) }\n783: \n",
+			"line": "782",
+			"column": "93",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint64",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "667: \t// #nosec G115: node count, always non-negative\n668: \tatomic.StoreUint64(\u0026m.delegationGraphNodeCount, uint64(n))\n669: }\n",
+			"line": "668",
+			"column": "56",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint32",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/poa/stream/raw_poa_stream.go",
+			"code": "108: \t\t// #nosec G115: length already validated against uint32 max\n109: \t\tbinary.BigEndian.PutUint32(lenBuf[:], uint32(len(b)))\n110: \t\tout.Write(lenBuf[:])\n",
+			"line": "109",
+			"column": "47",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint32",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/circuit/circuit.go",
+			"code": "140: \t// #nosec G115: maxFailures is config value, typically small\n141: \treturn cb.counts.ConsecutiveFailures \u003e= uint32(cb.maxFailures)\n142: }\n",
+			"line": "141",
+			"column": "48",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/webhook/dispatcher.go",
+			"code": "274: \t// Schedule retry with exponential backoff\n275: \tretryDelay := time.Duration(1\u003c\u003cuint(job.delivery.AttemptNumber-1)) * time.Minute\n276: \tnextRetry := time.Now().Add(retryDelay)\n",
+			"line": "275",
+			"column": "37",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_websocket.go",
+			"code": "90: \tif attempt \u003e 0 {\n91: \t\tdelay := reconnectBaseDelay * time.Duration(1\u003c\u003cuint(attempt-1))\n92: \t\tif delay \u003e reconnectMaxDelay {\n",
+			"line": "91",
+			"column": "54",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_sse.go",
+			"code": "102: \tif attempt \u003e 0 {\n103: \t\tdelay := sseReconnectDelay * time.Duration(1\u003c\u003cuint(attempt-1))\n104: \t\tif delay \u003e reconnectMaxDelay {\n",
+			"line": "103",
+			"column": "53",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e uint",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/arbitration/webhook.go",
+			"code": "212: \t\t\t// #nosec G115: small retry attempt value, safe conversion\n213: \t\t\tbackoff := w.config.RetryBackoff * time.Duration(1\u003c\u003cuint(attempt))\n214: \t\t\tselect {\n",
+			"line": "213",
+			"column": "60",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e int32",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/kms_client_aws.go",
+			"code": "110: \t\tKeyId:               aws.String(keyID),\n111: \t\tPendingWindowInDays: aws.Int32(int32(pendingWindowInDays)),\n112: \t})\n",
+			"line": "111",
+			"column": "39",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "190",
+				"url": "https://cwe.mitre.org/data/definitions/190.html"
+			},
+			"rule_id": "G115",
+			"details": "integer overflow conversion int -\u003e int32",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/kms_client_aws.go",
+			"code": "81: \tinput := \u0026kms.ListKeysInput{\n82: \t\tLimit: aws.Int32(int32(params.Limit)),\n83: \t}\n",
+			"line": "82",
+			"column": "25",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go",
+			"code": "1341: \t\t\t\t\t\t//nolint:gosec // G404: weak random acceptable for metrics autosave jitter\n1342: \t\t\t\t\tcase \u003c-time.After(time.Duration(float64(intervalSec)*(0.9+rand.Float64()*0.2)) * time.Second): //nolint:gosec // G404: weak random acceptable for metrics autosave jitter\n1343: \t\t\t\t\t\tif saveErr := mm.Save(); saveErr != nil {\n",
+			"line": "1342",
+			"column": "64",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/handler.go",
+			"code": "131: \t//nolint:gosec // weak random acceptable\n132: \treturn rand.Float64() \u003c h.TracerRatio\n133: }\n",
+			"line": "132",
+			"column": "9",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/examples/api.go",
+			"code": "273: \tfor i := range b {\n274: \t\tb[i] = letters[rand.Intn(len(letters))]\n275: \t}\n",
+			"line": "274",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/capability_diff_endpoint.go",
+			"code": "102: \t\t//nolint:gosec // G404: weak random acceptable for trace sampling decision\n103: \t\tif s.tracerProvider != nil \u0026\u0026 (s.tracerSampleRatio \u003c= 0 || rand.Float64() \u003c s.tracerSampleRatio) {\n104: \t\t\t_, span = s.tracerProvider.StartSpan(c.Request.Context(), \"capability.diff\")\n",
+			"line": "103",
+			"column": "62",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/loadtest/authorization_loadtest.go",
+			"code": "213: \t\t//nolint:gosec // G404: weak random acceptable for load testing\n214: \t\trng: rand.New(rand.NewSource(time.Now().UnixNano())),\n215: \t}\n",
+			"line": "214",
+			"column": "8",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/loadtest/authorization_loadtest.go",
+			"code": "166: \t\t//nolint:gosec // G404: weak random acceptable for load testing\n167: \t\trng: rand.New(rand.NewSource(time.Now().UnixNano())),\n168: \t}\n",
+			"line": "167",
+			"column": "8",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/loadtest/authorization_loadtest.go",
+			"code": "115: \t\t//nolint:gosec // G404: weak random acceptable for load testing\n116: \t\trng: rand.New(rand.NewSource(time.Now().UnixNano())),\n117: \t}\n",
+			"line": "116",
+			"column": "8",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/loadtest/authorization_loadtest.go",
+			"code": "40: \t\t//nolint:gosec // G404: weak random acceptable for load testing\n41: \t\trng: rand.New(rand.NewSource(time.Now().UnixNano())),\n42: \t}\n",
+			"line": "41",
+			"column": "8",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/tracing/propagation.go",
+			"code": "142: \t\t\t//nolint:gosec // G404: weak random acceptable for sampling\n143: \t\t\tif rand.Float64() \u003e sampleRatio {\n144: \t\t\t\tc.Next()\n",
+			"line": "143",
+			"column": "7",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/notary/notary.go",
+			"code": "171: \t}\n172: \treturn \u0026ExternalStubNotarizer{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: fp, providerName: name, rnd: rand.New(rand.NewSource(seed))}\n173: }\n",
+			"line": "172",
+			"column": "177",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/anchor/anchor.go",
+			"code": "107: \tsrc := rand.NewSource(seed)\n108: \treturn \u0026TSAStubProvider{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: failProb, providerTag: \"tsa-stub\", rnd: rand.New(src)}\n109: }\n",
+			"line": "108",
+			"column": "182",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "267: \t\t\t\t\tj := time.Duration(rand.Intn(jitterSeconds*1000)) * time.Millisecond // 0..jitterSeconds\n268: \t\t\t\t\tif rand.Intn(2) == 0 {\n269: \t\t\t\t\t\trefreshDelay += j\n",
+			"line": "268",
+			"column": "9",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "266: \t\t\t\tif jitterSeconds \u003e 0 {\n267: \t\t\t\t\tj := time.Duration(rand.Intn(jitterSeconds*1000)) * time.Millisecond // 0..jitterSeconds\n268: \t\t\t\t\tif rand.Intn(2) == 0 {\n",
+			"line": "267",
+			"column": "25",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "338",
+				"url": "https://cwe.mitre.org/data/definitions/338.html"
+			},
+			"rule_id": "G404",
+			"details": "Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/multisig-bench/main.go",
+			"code": "150: \t//nolint:gosec // G404: weak random acceptable for benchmark message generation\n151: \trng := mrand.New(mrand.NewSource(seed))\n152: \tmsg := make([]byte, 256)\n",
+			"line": "151",
+			"column": "9",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "1204",
+				"url": "https://cwe.mitre.org/data/definitions/1204.html"
+			},
+			"rule_id": "G407",
+			"details": "Use of hardcoded IV/nonce for encryption by passing hardcoded slice/array",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/secrets/provider.go",
+			"code": "192: \t\t}\n193: \t\tciphertextNew := gcmNew.Seal(nil, nonceNew, plaintext, nil)\n194: \t\tenc := hex.EncodeToString(nonceNew) + \":\" + hex.EncodeToString(ciphertextNew)\n",
+			"line": "193",
+			"column": "31",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "1204",
+				"url": "https://cwe.mitre.org/data/definitions/1204.html"
+			},
+			"rule_id": "G407",
+			"details": "Use of hardcoded IV/nonce for encryption by passing hardcoded slice/array",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/secrets/provider.go",
+			"code": "91: \t}\n92: \tciphertext := gcm.Seal(nil, nonce, value, nil)\n93: \tenc := hex.EncodeToString(nonce) + \":\" + hex.EncodeToString(ciphertext)\n",
+			"line": "92",
+			"column": "24",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "200",
+				"url": "https://cwe.mitre.org/data/definitions/200.html"
+			},
+			"rule_id": "G108",
+			"details": "Profiling endpoint is automatically exposed on /debug/pprof",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/web-server/main.go",
+			"code": "9: \t\"net/http\"\n10: \t_ \"net/http/pprof\" // Enable pprof HTTP handlers\n11: \t\"os\"\n",
+			"line": "10",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "170: \t//nolint:gosec // G101: demo constant, not real credentials\n171: \tdevSecretDemo = \"dev-secret-demo-00000000000000000000000000000000\"\n172: \t// Lifecycle / decision reason literals (standardized with JSON Schemas)\n",
+			"line": "171",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/api.go",
+			"code": "258: \t\t\tif secret == \"\" {\n259: \t\t\t\tsecret = \"dev-secret-demo-00000000000000000000000000000000\"\n260: \t\t\t}\n",
+			"line": "259",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/api.go",
+			"code": "149: \t\t\tif secret == \"\" {\n150: \t\t\t\tsecret = \"dev-secret-demo-00000000000000000000000000000000\"\n151: \t\t\t}\n",
+			"line": "150",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/rfc0111/subscription_handlers.go",
+			"code": "635: \tif secret == \"\" {\n636: \t\tsecret = \"dev-secret-demo-00000000000000000000000000000000\"\n637: \t}\n",
+			"line": "636",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/grant_jwt/handler.go",
+			"code": "12: const (\n13: \tGrantTypeJWTBearer = \"urn:ietf:params:oauth:grant-type:jwt-bearer\"\n14: )\n",
+			"line": "13",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/subscribers/repository.go",
+			"code": "405: \t// Get token statistics\n406: \ttokenQuery := `\n407: \t\tSELECT \n408: \t\t\tCOUNT(*) AS total_tokens,\n409: \t\t\tCOUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at \u003e NOW()) AS active_tokens,\n410: \t\t\tCOUNT(*) FILTER (WHERE revoked_at IS NOT NULL) AS revoked_tokens,\n411: \t\t\tMAX(last_used_at) AS last_activity\n412: \t\tFROM tokens\n413: \t\tWHERE tenant_id = $1\n414: \t`\n415: \n",
+			"line": "406-414",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/oidc/types.go",
+			"code": "234: const (\n235: \tProofMethodOIDCIDToken  = \"oidc_id_token\" // GAuth-issued ID token\n236: \tProofMethodOIDCExternal = \"oidc_external\" // External provider (Google, Okta, etc.)\n",
+			"line": "235",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/oidc/token_validation_enhanced.go",
+			"code": "118: \tErrExpiredToken          = \"expired_token\"\n119: \tErrTokenNotYetValid      = \"token_not_yet_valid\"\n120: \tErrInvalidIssuer         = \"invalid_issuer\"\n",
+			"line": "119",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go",
+			"code": "85: \tEventTypeGNAPTokenRotate   EventType = \"gnap_token_rotate\"\n86: \tEventTypeGNAPTokenRevoke   EventType = \"gnap_token_revoke\"\n87: \tEventTypeObligation        EventType = \"obligation\"\n",
+			"line": "86",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go",
+			"code": "84: \tEventTypeGNAPTokenIssue    EventType = \"gnap_token_issue\"\n85: \tEventTypeGNAPTokenRotate   EventType = \"gnap_token_rotate\"\n86: \tEventTypeGNAPTokenRevoke   EventType = \"gnap_token_revoke\"\n",
+			"line": "85",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "HIGH",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "798",
+				"url": "https://cwe.mitre.org/data/definitions/798.html"
+			},
+			"rule_id": "G101",
+			"details": "Potential hardcoded credentials",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go",
+			"code": "83: \tEventTypeGNAPGrantDenied   EventType = \"gnap_grant_denied\"\n84: \tEventTypeGNAPTokenIssue    EventType = \"gnap_token_issue\"\n85: \tEventTypeGNAPTokenRotate   EventType = \"gnap_token_rotate\"\n",
+			"line": "84",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "676",
+				"url": "https://cwe.mitre.org/data/definitions/676.html"
+			},
+			"rule_id": "G114",
+			"details": "Use of net/http serve function that has no support for setting timeouts",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "2241: \n2242: \tlog.Fatal(http.ListenAndServe(\":\"+port, router))\n2243: }\n",
+			"line": "2242",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "676",
+				"url": "https://cwe.mitre.org/data/definitions/676.html"
+			},
+			"rule_id": "G114",
+			"details": "Use of net/http serve function that has no support for setting timeouts",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/web-server/main.go",
+			"code": "68: \t\t\tlog.Printf(\"[pprof]   - All profiles: http://localhost%s/debug/pprof/\\n\", pprofAddr)\n69: \t\t\tif err := http.ListenAndServe(pprofAddr, nil); err != nil {\n70: \t\t\t\tlog.Printf(\"[pprof] Server failed: %v\\n\", err)\n",
+			"line": "69",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "676",
+				"url": "https://cwe.mitre.org/data/definitions/676.html"
+			},
+			"rule_id": "G114",
+			"details": "Use of net/http serve function that has no support for setting timeouts",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/mock-server/main.go",
+			"code": "29: \tfmt.Printf(\"Starting GAuth %s on port %s\\n\", version, port)\n30: \tif err := http.ListenAndServe(\":\"+port, nil); err != nil {\n31: \t\tfmt.Printf(\"Server failed: %v\\n\", err)\n",
+			"line": "30",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3656: \t\t// Read file\n3657: \t\tcontent, err := os.ReadFile(fullPath)\n3658: \t\tif err != nil {\n",
+			"line": "3657",
+			"column": "19",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3579: \t\t\t\tfull := modulesPath + \"/\" + name\n3580: \t\t\t\tb, err := os.ReadFile(full)\n3581: \t\t\t\tif err != nil {\n",
+			"line": "3580",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3556: \t\t\t\tfullPath := cssPath + \"/\" + name\n3557: \t\t\t\tb, err := os.ReadFile(fullPath)\n3558: \t\t\t\tif err != nil {\n",
+			"line": "3557",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3525: \t\t\t\t\tcandidate := filepath.Join(r, \"web\", \"static\", \"js\", \"pages\", name)\n3526: \t\t\t\t\tif b, err := os.ReadFile(candidate); err == nil \u0026\u0026 len(b) \u003e 0 {\n3527: \t\t\t\t\t\tfound = true\n",
+			"line": "3526",
+			"column": "19",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3492: \t\t\t\tfullPath := jsPath + \"/\" + name\n3493: \t\t\t\tb, err := os.ReadFile(fullPath)\n3494: \t\t\t\tif err != nil {\n",
+			"line": "3493",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3468: \t\t\tfull := wd + \"/web/static/js/importmap.json\"\n3469: \t\t\tif b, err := os.ReadFile(full); err == nil {\n3470: \t\t\t\tc.Header(\"Cache-Control\", \"no-cache, no-store, must-revalidate\")\n",
+			"line": "3469",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3446: \t\t\t\tcandidate := filepath.Join(r, \"web\", \"static\", \"js\", an)\n3447: \t\t\t\tif b, err := os.ReadFile(candidate); err == nil \u0026\u0026 len(b) \u003e 0 {\n3448: \t\t\t\t\tfound = true\n",
+			"line": "3447",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3381: \t\t\ttried = append(tried, full)\n3382: \t\t\tb, err := os.ReadFile(full)\n3383: \t\t\tif err == nil {\n",
+			"line": "3382",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3298: \t\t\t\tpath := wd + \"/web/templates/demo.html\"\n3299: \t\t\t\tif b, err := os.ReadFile(path); err == nil {\n3300: \t\t\t\t\tc.Header(\"Cache-Control\", \"no-cache, no-store, must-revalidate\")\n",
+			"line": "3299",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3151: \t\t\t\tpath := wd + \"/api/openapi/gauth.yaml\"\n3152: \t\t\t\tif b, err := os.ReadFile(path); err == nil {\n3153: \t\t\t\t\tc.Header(\"Content-Type\", \"application/x-yaml\")\n",
+			"line": "3152",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3132: \t\t\tpath := wd + \"/web/static_ui/gauth1.js\"\n3133: \t\t\tif b, err := os.ReadFile(path); err == nil {\n3134: \t\t\t\tc.Header(\"Content-Type\", \"application/javascript\")\n",
+			"line": "3133",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3114: \t\t\tpath := wd + \"/web/static_ui/gauth1.css\"\n3115: \t\t\tif b, err := os.ReadFile(path); err == nil {\n3116: \t\t\t\tc.Header(\"Content-Type\", \"text/css\")\n",
+			"line": "3115",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3093: \t\t\tpath := wd + \"/web/static_ui/gauth1.html\"\n3094: \t\t\tif b, err := os.ReadFile(path); err == nil {\n3095: \t\t\t\tc.Header(\"Content-Type\", \"text/html\")\n",
+			"line": "3094",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3073: \t\t\tpath := wd + \"/web/static_ui/gauth1.html\"\n3074: \t\t\tif b, err := os.ReadFile(path); err == nil {\n3075: \t\t\t\tc.Header(\"Cache-Control\", \"no-cache, no-store, must-revalidate\")\n",
+			"line": "3074",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3047: \t\t\t\tpath := wd + \"/web/templates/poa-visualization.html\"\n3048: \t\t\t\tif b, err := os.ReadFile(path); err == nil {\n3049: \t\t\t\t\tc.Header(\"Cache-Control\", \"no-cache, no-store, must-revalidate\")\n",
+			"line": "3048",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "3009: \t\t\t\tpath := wd + \"/web/templates/protocol-flow.html\"\n3010: \t\t\t\tif b, err := os.ReadFile(path); err == nil {\n3011: \t\t\t\t\tc.Header(\"Cache-Control\", \"no-cache, no-store, must-revalidate\")\n",
+			"line": "3010",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "2226: \t\tfor _, p := range paths {\n2227: \t\t\tdata, err = os.ReadFile(p)\n2228: \t\t\tif err == nil {\n",
+			"line": "2227",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "2202: \t\tfor _, p := range paths {\n2203: \t\t\tdata, err = os.ReadFile(p)\n2204: \t\t\tif err == nil {\n",
+			"line": "2203",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "2167: \t\tfor _, p := range paths {\n2168: \t\t\tdata, err = os.ReadFile(p)\n2169: \t\t\tif err == nil {\n",
+			"line": "2168",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "2143: \t\tfor _, p := range paths {\n2144: \t\t\tdata, err = os.ReadFile(p)\n2145: \t\t\tif err == nil {\n",
+			"line": "2144",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/keys.go",
+			"code": "29: \t\t// Try load\n30: \t\tif b, err := os.ReadFile(path); err == nil {\n31: \t\t\tblock, _ := pem.Decode(b)\n",
+			"line": "30",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/policy/persistence.go",
+			"code": "20: func (h *Handler) loadState(path string) error {\n21: \tb, err := os.ReadFile(path)\n22: \tif err != nil {\n",
+			"line": "21",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/capability_anchor/handler.go",
+			"code": "229: func (h *Handler) Load(path string) error {\n230: \tb, err := os.ReadFile(path)\n231: \tif err != nil {\n",
+			"line": "230",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/capabilities/handler.go",
+			"code": "87: func (h *Handler) LoadFromFile(path string) error {\n88: \tb, err := os.ReadFile(path)\n89: \tif err != nil {\n",
+			"line": "88",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/capabilities/api.go",
+			"code": "158: \t}\n159: \tb, err := os.ReadFile(path)\n160: \tif err != nil {\n",
+			"line": "159",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/audit/basic.go",
+			"code": "55: \t}\n56: \tb, err := os.ReadFile(path)\n57: \tif err != nil {\n",
+			"line": "56",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/anchor/basic.go",
+			"code": "117: \t}\n118: \tb, err := os.ReadFile(path)\n119: \tif err != nil {\n",
+			"line": "118",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/tools/docvalidate/main.go",
+			"code": "143: func validateFile(path string) fileResult {\n144: \tcontent, err := os.ReadFile(path)\n145: \tif err != nil {\n",
+			"line": "144",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/openapi_guard/main.go",
+			"code": "36: \tfor _, p := range paths {\n37: \t\tb, err := os.ReadFile(p)\n38: \t\tif err == nil {\n",
+			"line": "37",
+			"column": "13",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/gapmatrix/gen_gap_matrix.go",
+			"code": "185: func parseCuratedMarkdown(p string) (map[string]parsedRequirement, map[string]parsedRequirement, error) {\n186: \tf, err := os.Open(p)\n187: \tif err != nil {\n",
+			"line": "186",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/gapmatrix/gen_gap_matrix.go",
+			"code": "167: \tvar cf capabilitiesFile\n168: \tb, err := os.ReadFile(p)\n169: \tif err != nil {\n",
+			"line": "168",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/gapmatrix/gen_gap_matrix.go",
+			"code": "126: func readCSV(p string) ([]gapRow, error) {\n127: \tf, err := os.Open(p)\n128: \tif err != nil {\n",
+			"line": "127",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/fix_docs.go",
+			"code": "89: \t// Read file\n90: \tcontent, err := ioutil.ReadFile(path)\n91: \tif err != nil {\n",
+			"line": "90",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/fix_docs.go",
+			"code": "55: \tfmt.Printf(\"Fixing MISSING header: %s\\n\", filepath.Base(path))\n56: \tcontent, err := ioutil.ReadFile(path)\n57: \tif err != nil {\n",
+			"line": "56",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/replay/wal_store.go",
+			"code": "103: \ttmp := w.path + \".snapshot.tmp\"\n104: \tf, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)\n105: \tif err != nil {\n",
+			"line": "104",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/replay/wal_store.go",
+			"code": "33: \t}\n34: \tf, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0o600)\n35: \tif err != nil {\n",
+			"line": "34",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/jwe_config.go",
+			"code": "273: \n274: \tfile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)\n275: \tif err != nil {\n",
+			"line": "274",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/jwe_config.go",
+			"code": "248: \n249: \tfile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)\n250: \tif err != nil {\n",
+			"line": "249",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/jwe_config.go",
+			"code": "188: func LoadRSAPrivateKey(path string) (*rsa.PrivateKey, error) {\n189: \tpemData, err := os.ReadFile(path)\n190: \tif err != nil {\n",
+			"line": "189",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/jwe_config.go",
+			"code": "157: func LoadRSAPublicKey(path string) (*rsa.PublicKey, error) {\n158: \tpemData, err := os.ReadFile(path)\n159: \tif err != nil {\n",
+			"line": "158",
+			"column": "18",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go",
+			"code": "620: \t}\n621: \tb, err := os.ReadFile(path)\n622: \tif err != nil {\n",
+			"line": "621",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/rotation_audit_sink.go",
+			"code": "43: \n44: \tfile, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)\n45: \tif err != nil {\n",
+			"line": "44",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/keys.go",
+			"code": "387: \t}\n388: \tf, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)\n389: \tif err != nil {\n",
+			"line": "388",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/keys.go",
+			"code": "324: \tprevHash := \"\"\n325: \tif b, err := os.ReadFile(path); err == nil {\n326: \t\tlines := bytes.Split(b, []byte{'\\n'})\n",
+			"line": "325",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/file_keystore.go",
+			"code": "332: func (f *FileKeyStore) readKeyFile(path string) (*FileKeyData, error) {\n333: \tdata, err := os.ReadFile(path)\n334: \tif err != nil {\n",
+			"line": "333",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/persistence.go",
+			"code": "54: \n55: \tdata, err := os.ReadFile(path)\n56: \tif err != nil {\n",
+			"line": "55",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go",
+			"code": "47: \tf.Close()\n48: \tf, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o600)\n49: \tif err != nil {\n",
+			"line": "48",
+			"column": "11",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go",
+			"code": "36: \t}\n37: \tf, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600)\n38: \tif err != nil {\n",
+			"line": "37",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/export.go",
+			"code": "201: \t// Create file\n202: \tfile, err := os.Create(filePath)\n203: \tif err != nil {\n",
+			"line": "202",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go",
+			"code": "84: \tif fi, err := os.Stat(path); err == nil \u0026\u0026 fi.Size() \u003e 0 {\n85: \t\tb, err := os.ReadFile(path)\n86: \t\tif err != nil {\n",
+			"line": "85",
+			"column": "13",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/specgen/specgen.go",
+			"code": "59: \t// Read spec file\n60: \tdata, err := os.ReadFile(specPath)\n61: \tif err != nil {\n",
+			"line": "60",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/security/audit.go",
+			"code": "68: \t\t\tlogPath := os.Getenv(\"GAUTH_AUDIT_LOG_FILE\")\n69: \t\t\tfile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)\n70: \t\t\tif err != nil {\n",
+			"line": "69",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/secrets/provider.go",
+			"code": "151: \t\t// read \u0026 decrypt with old key\n152: \t\traw, err := os.ReadFile(path)\n153: \t\tif err != nil {\n",
+			"line": "152",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/secrets/provider.go",
+			"code": "39: \tif masterKey == nil {\n40: \t\tif b, err := os.ReadFile(keyPath); err == nil {\n41: \t\t\tmk, err2 := hex.DecodeString(strings.TrimSpace(string(b)))\n",
+			"line": "40",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/rfc/ingest.go",
+			"code": "43: func ParseRFCFile(path string, rfcID string) ([]Clause, error) {\n44: \tf, err := os.Open(path)\n45: \tif err != nil {\n",
+			"line": "44",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/replay/wal_store.go",
+			"code": "23: func NewWALStore(path string) (*WALStore, error) {\n24: \tf, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0600)\n25: \tif err != nil {\n",
+			"line": "24",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/notary/rotation_v2.go",
+			"code": "282: func LoadWeightsConfig(path string) (*WeightsConfig, error) {\n283: \tb, err := os.ReadFile(path)\n284: \tif err != nil {\n",
+			"line": "283",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go",
+			"code": "927: func (m *Memory) loadFromFile(path string) error {\n928: \tdata, err := os.ReadFile(path)\n929: \tif err != nil {\n",
+			"line": "928",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/jurisdiction/enforcement.go",
+			"code": "150: func (e *EnforcementEngine) loadRulesFromFile(path string) error {\n151: \tb, err := os.ReadFile(path)\n152: \tif err != nil {\n",
+			"line": "151",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/conformance/harnesslib/scan.go",
+			"code": "20: func ScanFile(path, rfc string) ([]Clause, error) {\n21: \tf, err := os.Open(path)\n22: \tif err != nil {\n",
+			"line": "21",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/conformance/harnesslib/history.go",
+			"code": "26: func LoadHistory(path string) ([]HistoryEntry, error) {\n27: \tf, err := os.Open(path)\n28: \tif err != nil {\n",
+			"line": "27",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/conformance/harnesslib/analyze.go",
+			"code": "118: \tfor _, gf := range goFiles {\n119: \t\tsrc, err := os.ReadFile(gf)\n120: \t\tif err != nil {\n",
+			"line": "119",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/conformance/harnesslib/analyze.go",
+			"code": "79: \t}\n80: \tb, err := os.ReadFile(path)\n81: \tif err != nil {\n",
+			"line": "80",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/verify/verify.go",
+			"code": "123: \tif path != \"\" {\n124: \t\tb, err := os.ReadFile(path)\n125: \t\tif err != nil {\n",
+			"line": "124",
+			"column": "13",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/validate-gaps/main.go",
+			"code": "98: func loadGapMatrix(path string) ([]GapEntry, error) {\n99: \tf, err := os.Open(path)\n100: \tif err != nil {\n",
+			"line": "99",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/rotation-verify/main.go",
+			"code": "96: func loadArtifact(path string) (*notary.WeightedRotationArtifact, error) {\n97: \tb, err := os.ReadFile(path)\n98: \tif err != nil {\n",
+			"line": "97",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/rfc-verify/main.go",
+			"code": "295: \n296: \t\tdata, _ := os.ReadFile(path)\n297: \t\tif strings.Contains(string(data), term) {\n",
+			"line": "296",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/rfc-verify/main.go",
+			"code": "257: \t\t\t// Quick checking\n258: \t\t\tdata, _ := os.ReadFile(path)\n259: \t\t\tif strings.Contains(string(data), sym) {\n",
+			"line": "258",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/rfc-verify/main.go",
+			"code": "100: func parseMap(path string) ([]RfcItem, error) {\n101: \tf, err := os.Open(path)\n102: \tif err != nil {\n",
+			"line": "101",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/coverage/main.go",
+			"code": "139: func processTestFile(path string, markers map[string][]TestRef) error {\n140: \tf, err := os.Open(path)\n141: \tif err != nil {\n",
+			"line": "140",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/coverage/main.go",
+			"code": "86: \n87: \tb, err := os.ReadFile(templatePath)\n88: \tif err != nil {\n",
+			"line": "87",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/conformance/main.go",
+			"code": "237: \t// Open file for appending (create if doesn't exist)\n238: \tf, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)\n239: \tif err != nil {\n",
+			"line": "238",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/auditor/main.go",
+			"code": "602: func auditRotationV2File(path, expectedPrev string) (interface{}, error) {\n603: \tb, err := os.ReadFile(path)\n604: \tif err != nil {\n",
+			"line": "603",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/auditor/main.go",
+			"code": "546: func auditLocalPOA(path string) (interface{}, error) {\n547: \tdata, err := os.ReadFile(path)\n548: \tif err != nil {\n",
+			"line": "547",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "22",
+				"url": "https://cwe.mitre.org/data/definitions/22.html"
+			},
+			"rule_id": "G304",
+			"details": "Potential file inclusion via variable",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/auditor/main.go",
+			"code": "264: func auditLocalAttestation(path string) (interface{}, error) {\n265: \tdata, err := os.ReadFile(path)\n266: \tif err != nil {\n",
+			"line": "265",
+			"column": "15",
+			"nosec": false,
+			"suppressions": null,
+			"autofix": "Consider using os.Root to scope file access under a fixed root (Go \u003e=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal."
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "MEDIUM",
+			"cwe": {
+				"id": "88",
+				"url": "https://cwe.mitre.org/data/definitions/88.html"
+			},
+			"rule_id": "G107",
+			"details": "Potential HTTP request made with variable url",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/verify/verify.go",
+			"code": "159: \t\t//nolint:gosec // G107: URL from user-provided base flag, validated by caller\n160: \t\tresp, err := http.Get(url)\n161: \t\tif err != nil {\n",
+			"line": "160",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go",
+			"code": "605: \t\t}\n606: \t\tif err := os.MkdirAll(filepath.Dir(abs), 0o755); err == nil {\n607: \t\t\ts.capAnchorFilePath = abs\n",
+			"line": "606",
+			"column": "13",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_clean.go",
+			"code": "1116: \t\t\tdir := filepath.Dir(s.capabilitiesHandler.GetAuditPersistPath())\n1117: \t\t\tif mkErr := os.MkdirAll(dir, 0o755); mkErr != nil {\n1118: \t\t\t\tfmt.Fprintf(os.Stderr, \"[cap-audit] mkdir failed path=%s err=%v\\n\", dir, mkErr)\n",
+			"line": "1117",
+			"column": "16",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/tools/docvalidate/main.go",
+			"code": "335: \t// Ensure docs directory exists\n336: \tif err := os.MkdirAll(\"docs\", 0o755); err != nil {\n337: \t\treturn err\n",
+			"line": "336",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/replay/wal_store.go",
+			"code": "30: func NewWALStore(path string) (*WALStore, error) {\n31: \tif err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {\n32: \t\treturn nil, err\n",
+			"line": "31",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/policy/store_file.go",
+			"code": "39: \t}\n40: \tif err := os.MkdirAll(filepath.Dir(f.path), 0o755); err != nil {\n41: \t\treturn err\n",
+			"line": "40",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go",
+			"code": "33: \t}\n34: \tif err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {\n35: \t\treturn nil, err\n",
+			"line": "34",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/export.go",
+			"code": "83: \t// Create export directory if it doesn't exist\n84: \tif err := os.MkdirAll(exportDir, 0755); err != nil {\n85: \t\t// Log error but continue - exports will fail later\n",
+			"line": "84",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/anchor/anchor.go",
+			"code": "123: \t// Ensure directory exists\n124: \tif err := os.MkdirAll(filepath.Dir(m.persistPath), 0o755); err != nil {\n125: \t\treturn err\n",
+			"line": "124",
+			"column": "12",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G301",
+			"details": "Expect directory permissions to be 0750 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/limits/manager.go",
+			"code": "62: \t\tif dir := filepath.Dir(path); dir != \".\" \u0026\u0026 dir != \"\" {\n63: \t\t\tif err := os.MkdirAll(dir, 0o755); err != nil {\n64: \t\t\t\treturn nil, fmt.Errorf(\"limits: mkdir %s: %w\", dir, err)\n",
+			"line": "63",
+			"column": "14",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G306",
+			"details": "Expect WriteFile permissions to be 0600 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/fix_docs.go",
+			"code": "133: \t\t\tnewContent := strings.Join(newLines, \"\\n\")\n134: \t\t\tioutil.WriteFile(path, []byte(newContent), 0644)\n135: \t\t\treturn\n",
+			"line": "134",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "276",
+				"url": "https://cwe.mitre.org/data/definitions/276.html"
+			},
+			"rule_id": "G306",
+			"details": "Expect WriteFile permissions to be 0600 or less",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/fix_docs.go",
+			"code": "77: \tnewContent := append([]byte(header), content...)\n78: \tioutil.WriteFile(path, newContent, 0644)\n79: }\n",
+			"line": "78",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "118",
+				"url": "https://cwe.mitre.org/data/definitions/118.html"
+			},
+			"rule_id": "G602",
+			"details": "slice index out of range",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/device/types.go",
+			"code": "106: \tfor i := 5; i \u003c 9; i++ {\n107: \t\tcode[i] = chars[int(b[i-1])%len(chars)]\n108: \t}\n",
+			"line": "107",
+			"column": "24",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "294: \t// Set one node to pending for demo\n295: \tgraph.UpdateNodeStatus(aiClient2.ID, \"pending\") //nolint:errcheck\n296: \n",
+			"line": "295",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "260: \t})\n261: \tgraph.SetNodePosition(resource2.ID, 3, 0, 6) //nolint:errcheck\n262: \n",
+			"line": "261",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "255: \t})\n256: \tgraph.SetNodePosition(resource1.ID, -3, 0, 6) //nolint:errcheck\n257: \n",
+			"line": "256",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "249: \t})\n250: \tgraph.SetNodePosition(aiClient2.ID, 3, 0, 4) //nolint:errcheck\n251: \n",
+			"line": "250",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "244: \t})\n245: \tgraph.SetNodePosition(aiClient1.ID, -3, 0, 4) //nolint:errcheck\n246: \n",
+			"line": "245",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "238: \t})\n239: \tgraph.SetNodePosition(agent2.ID, 3, 0, 2) //nolint:errcheck\n240: \n",
+			"line": "239",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "233: \t})\n234: \tgraph.SetNodePosition(agent1.ID, -3, 0, 2) //nolint:errcheck\n235: \n",
+			"line": "234",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/visualization.go",
+			"code": "227: \t})\n228: \tgraph.SetNodePosition(principal.ID, 0, 0, 0) //nolint:errcheck\n229: \n",
+			"line": "228",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_lifecycle.go",
+			"code": "116: \tif s.semanticHandler != nil {\n117: \t\ts.semanticHandler.Save()\n118: \t}\n",
+			"line": "117",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_lifecycle.go",
+			"code": "113: \tif s.violationHandler != nil {\n114: \t\ts.violationHandler.Save()\n115: \t}\n",
+			"line": "114",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/rfc0111_init.go",
+			"code": "300: \tif err := db.Ping(); err != nil {\n301: \t\tdb.Close()\n302: \t\treturn nil, fmt.Errorf(\"failed to ping database: %w\", err)\n",
+			"line": "301",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/revocation.go",
+			"code": "112: \t\ttwoPhase.Close()\n113: \t\toracle.Close()\n114: \t\treturn \u0026RevocationService{enabled: false}\n",
+			"line": "113",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/revocation.go",
+			"code": "111: \t\toptimistic.Close()\n112: \t\ttwoPhase.Close()\n113: \t\toracle.Close()\n",
+			"line": "112",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/revocation.go",
+			"code": "110: \t\tlog.Printf(\"[revocation] Failed to initialize circuit breaker: %v\", err)\n111: \t\toptimistic.Close()\n112: \t\ttwoPhase.Close()\n",
+			"line": "111",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/revocation.go",
+			"code": "79: \t\ttwoPhase.Close()\n80: \t\toracle.Close()\n81: \t\treturn \u0026RevocationService{enabled: false}\n",
+			"line": "80",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/revocation.go",
+			"code": "78: \t\tlog.Printf(\"[revocation] Failed to initialize optimistic revocation: %v\", err)\n79: \t\ttwoPhase.Close()\n80: \t\toracle.Close()\n",
+			"line": "79",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/revocation.go",
+			"code": "63: \t\tlog.Printf(\"[revocation] Failed to initialize two-phase revocation: %v\", err)\n64: \t\toracle.Close()\n65: \t\treturn \u0026RevocationService{enabled: false}\n",
+			"line": "64",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/protocol_flow.go",
+			"code": "191: \tif allCompleted {\n192: \t\tm.UpdateStepStatus(sessionID, stepID, \"completed\") //nolint:errcheck\n193: \t}\n",
+			"line": "192",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go",
+			"code": "741: \t\t\t\tvar nb [16]byte\n742: \t\t\t\trand.Read(nb[:])\n743: \t\t\t\tatt.Nonce = base64.RawStdEncoding.EncodeToString(nb[:])\n",
+			"line": "742",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go",
+			"code": "604: \t\t}\n605: \t\tf.Close()\n606: \t\th.anchorPrevHash = anchor[\"hash\"].(string)\n",
+			"line": "605",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go",
+			"code": "484: \t\t}\n485: \t\tf.Close()\n486: \t\th.auditPrevHash = entry[\"hash\"].(string)\n",
+			"line": "485",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/fix_docs.go",
+			"code": "133: \t\t\tnewContent := strings.Join(newLines, \"\\n\")\n134: \t\t\tioutil.WriteFile(path, []byte(newContent), 0644)\n135: \t\t\treturn\n",
+			"line": "134",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/scripts/fix_docs.go",
+			"code": "77: \tnewContent := append([]byte(header), content...)\n78: \tioutil.WriteFile(path, newContent, 0644)\n79: }\n",
+			"line": "78",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/oidc/storage_postgres.go",
+			"code": "42: \tif err := storage.initSchema(ctx); err != nil {\n43: \t\tdb.Close()\n44: \t\treturn nil, fmt.Errorf(\"failed to initialize schema: %w\", err)\n",
+			"line": "43",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_websocket.go",
+			"code": "315: \tif t.conn != nil {\n316: \t\tt.conn.Close()\n317: \t\tt.conn = nil\n",
+			"line": "316",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_websocket.go",
+			"code": "292: \t\t_ = t.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, \"\")) // Best effort close\n293: \t\tt.conn.Close()\n294: \t\tt.conn = nil\n",
+			"line": "293",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "139: \t\tt.stdout.Close()\n140: \t\tt.stderr.Close()\n141: \t\treturn fmt.Errorf(\"MCP server process did not exit gracefully\")\n",
+			"line": "140",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "138: \t\t_ = t.cmd.Process.Kill() // Best effort cleanup\n139: \t\tt.stdout.Close()\n140: \t\tt.stderr.Close()\n",
+			"line": "139",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "133: \t\tt.stdout.Close()\n134: \t\tt.stderr.Close()\n135: \t\treturn err\n",
+			"line": "134",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "132: \t\t// Process exited\n133: \t\tt.stdout.Close()\n134: \t\tt.stderr.Close()\n",
+			"line": "133",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "50: \t\tstdout.Close()\n51: \t\tstderr.Close()\n52: \t\treturn nil, fmt.Errorf(\"failed to start MCP server process: %w\", err)\n",
+			"line": "51",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "49: \t\tstdin.Close()\n50: \t\tstdout.Close()\n51: \t\tstderr.Close()\n",
+			"line": "50",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "48: \tif err := cmd.Start(); err != nil {\n49: \t\tstdin.Close()\n50: \t\tstdout.Close()\n",
+			"line": "49",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "42: \t\tstdin.Close()\n43: \t\tstdout.Close()\n44: \t\treturn nil, fmt.Errorf(\"failed to create stderr pipe: %w\", err)\n",
+			"line": "43",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "41: \tif err != nil {\n42: \t\tstdin.Close()\n43: \t\tstdout.Close()\n",
+			"line": "42",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_stdio.go",
+			"code": "35: \tif err != nil {\n36: \t\tstdin.Close()\n37: \t\treturn nil, fmt.Errorf(\"failed to create stdout pipe: %w\", err)\n",
+			"line": "36",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_sse.go",
+			"code": "346: \tif t.conn != nil {\n347: \t\tt.conn.Close()\n348: \t\tt.conn = nil\n",
+			"line": "347",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_sse.go",
+			"code": "324: \tif t.conn != nil {\n325: \t\tt.conn.Close()\n326: \t\tt.conn = nil\n",
+			"line": "325",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_sse.go",
+			"code": "161: \tif !strings.HasPrefix(contentType, \"text/event-stream\") {\n162: \t\tresp.Body.Close()\n163: \t\treturn fmt.Errorf(\"unexpected content type: %s\", contentType)\n",
+			"line": "162",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/transport_sse.go",
+			"code": "147: \tif resp.StatusCode != http.StatusOK {\n148: \t\tresp.Body.Close()\n149: \t\terr := fmt.Errorf(\"unexpected status code: %d\", resp.StatusCode)\n",
+			"line": "148",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/connection_pool.go",
+			"code": "412: \t\tfor _, client := range pool.clients {\n413: \t\t\tclient.client.Close()\n414: \t\t}\n",
+			"line": "413",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/connection_pool.go",
+			"code": "312: \n313: \tclient.client.Close()\n314: \tpool.activeCount--\n",
+			"line": "313",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/replay_store_bolt.go",
+			"code": "89: \tif err != nil {\n90: \t\tdb.Close()\n91: \t\treturn nil, fmt.Errorf(\"replay_store: create bucket: %w\", err)\n",
+			"line": "90",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth/pip/database_pip.go",
+			"code": "212: \tif err := db.PingContext(ctx); err != nil {\n213: \t\tdb.Close()\n214: \t\treturn nil, fmt.Errorf(\"failed to ping database: %w\", err)\n",
+			"line": "213",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/store/indexed_store.go",
+			"code": "134: \tif err != nil {\n135: \t\tdb.Close()\n136: \t\treturn nil, err\n",
+			"line": "135",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/database/migrate/migrator.go",
+			"code": "55: \tif err != nil {\n56: \t\tdb.Close()\n57: \t\treturn nil, fmt.Errorf(\"failed to create migrate instance: %w\", err)\n",
+			"line": "56",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/database/migrate/migrator.go",
+			"code": "48: \tif err != nil {\n49: \t\tdb.Close()\n50: \t\treturn nil, fmt.Errorf(\"failed to create source driver: %w\", err)\n",
+			"line": "49",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/database/migrate/migrator.go",
+			"code": "41: \tif err != nil {\n42: \t\tdb.Close()\n43: \t\treturn nil, fmt.Errorf(\"failed to create postgres driver: %w\", err)\n",
+			"line": "42",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/database/migrate/migrator.go",
+			"code": "34: \tif err := db.Ping(); err != nil {\n35: \t\tdb.Close()\n36: \t\treturn nil, fmt.Errorf(\"failed to ping database: %w\", err)\n",
+			"line": "35",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/hsm_keystore.go",
+			"code": "234: \tif err != nil {\n235: \t\th.ctx.FindObjectsFinal(session)\n236: \t\treturn nil, err\n",
+			"line": "235",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/hsm_keystore.go",
+			"code": "115: \t}\n116: \th.ctx.Finalize()\n117: }\n",
+			"line": "116",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/hsm_keystore.go",
+			"code": "113: \t\th.ctx.Logout(session)\n114: \t\th.ctx.CloseSession(session)\n115: \t}\n",
+			"line": "114",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/hsm_keystore.go",
+			"code": "112: \tfor session := range h.sessions {\n113: \t\th.ctx.Logout(session)\n114: \t\th.ctx.CloseSession(session)\n",
+			"line": "113",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/hsm_keystore.go",
+			"code": "96: \t\tif err := p.Login(session, pkcs11.CKU_USER, config.Pin); err != nil {\n97: \t\t\tp.CloseSession(session)\n98: \t\t\treturn nil, fmt.Errorf(\"hsm: login failed: %w\", err)\n",
+			"line": "97",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/file_keystore.go",
+			"code": "421: \t\t\t\t(keyData.ArchivedAt != nil \u0026\u0026 now.Sub(*keyData.ArchivedAt) \u003e 30*24*time.Hour) {\n422: \t\t\t\tos.Remove(path)\n423: \t\t\t}\n",
+			"line": "422",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/crypto/file_keystore.go",
+			"code": "292: \t// Clean up test file\n293: \tos.Remove(testFile)\n294: \treturn nil\n",
+			"line": "293",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/obligation.go",
+			"code": "55: \t// Persist the result to the audit ledger\n56: \te.PersistAudit(ob, ctx, err)\n57: \n",
+			"line": "56",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go",
+			"code": "46: \t// Reopen in append mode to avoid rewriting existing content.\n47: \tf.Close()\n48: \tf, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o600)\n",
+			"line": "47",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/file_logger.go",
+			"code": "42: \tif err2 := fl.load(); err2 != nil {\n43: \t\tf.Close()\n44: \t\treturn nil, fmt.Errorf(\"load: %w\", err)\n",
+			"line": "43",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/specgen/specgen.go",
+			"code": "56: \t// Ensure JWT route inclusion before server creation\n57: \tos.Setenv(\"GAUTH_USE_JWT_LIB\", \"1\")\n58: \tbs := webpkg.NewBetaServer(\"0\")\n",
+			"line": "57",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/policy/version_store.go",
+			"code": "79: \tif err != nil {\n80: \t\tdb.Close()\n81: \t\treturn nil, err\n",
+			"line": "80",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/collectors/json.go",
+			"code": "88: \t}\n89: \tf.Close()\n90: \treturn nil\n",
+			"line": "89",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/token_management/multi_region/cmd/main.go",
+			"code": "52: \tkey := make([]byte, 32)\n53: \trand.Read(key)\n54: \tjwtSigner := token.NewJWTSigner(key, token.RS256)\n",
+			"line": "53",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/jwe/auth_server.go",
+			"code": "48: \tgauth.SaveRSAPrivateKey(privateKey, privateKeyPath)\n49: \tgauth.SaveRSAPublicKey(publicKey, publicKeyPath)\n50: \n",
+			"line": "49",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/jwe/auth_server.go",
+			"code": "47: \n48: \tgauth.SaveRSAPrivateKey(privateKey, privateKeyPath)\n49: \tgauth.SaveRSAPublicKey(publicKey, publicKeyPath)\n",
+			"line": "48",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/errors/middleware/internal/middleware.go",
+			"code": "38: \tw.Header().Set(\"Content-Type\", \"application/json\")\n39: \tjson.NewEncoder(w).Encode(auditResp)\n40: }\n",
+			"line": "39",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/audit/main.go",
+			"code": "124: \t}\n125: \tlogger.Log(ctx, accessChain)\n126: \tfmt.Printf(\"Demo event chain for session %s (no audit logic)\\n\", chainID)\n",
+			"line": "125",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/audit/main.go",
+			"code": "116: \t}\n117: \tlogger.Log(ctx, loginChain)\n118: \t// accessChain (demo)\n",
+			"line": "117",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/audit/main.go",
+			"code": "74: \t}\n75: \tlogger.Log(ctx, revokeEvent)\n76: \tfmt.Printf(\"Logged token revocation\\n\")\n",
+			"line": "75",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/audit/main.go",
+			"code": "64: \t}\n65: \tlogger.Log(ctx, tokenEvent)\n66: \tfmt.Printf(\"Logged token creation\\n\")\n",
+			"line": "65",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/audit/main.go",
+			"code": "36: \t}\n37: \tlogger.Log(ctx, loginEvent)\n38: \tfmt.Printf(\"Logged successful login for user123\\n\")\n",
+			"line": "37",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "2118: \t\t\t\tc.Writer.Write(b)\n2119: \t\t\t\tc.Writer.Write([]byte(\"\\n\"))\n2120: \t\t\t}\n",
+			"line": "2119",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "2117: \t\t\t\tb, _ := json.Marshal(r)\n2118: \t\t\t\tc.Writer.Write(b)\n2119: \t\t\t\tc.Writer.Write([]byte(\"\\n\"))\n",
+			"line": "2118",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "2111: \t\t\t\tline := fmt.Sprintf(\"%d,%s,%t,%s,%s,%s,%s,%s,%s,%d,%s\\n\", r.ID, r.Action, r.Allowed, r.EntityType, escapeCSV(r.Jurisdictions), escapeCSV(r.Missing), escapeCSV(r.AppliedPolicies), escapeCSV(r.POAID), escapeCSV(r.POADigest), r.POAVersion, r.CreatedAt)\n2112: \t\t\t\tc.Writer.Write([]byte(line))\n2113: \t\t\t}\n",
+			"line": "2112",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "2108: \t\t\tc.Header(\"Content-Type\", \"text/csv; charset=utf-8\")\n2109: \t\t\tc.Writer.Write([]byte(\"id,action,allowed,entity_type,jurisdictions,missing,applied_policies,poa_id,poa_digest,poa_version,created_at\\n\"))\n2110: \t\t\tfor _, r := range records {\n",
+			"line": "2109",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "1777: \t\t\t\t\tc.Writer.Write(b)\n1778: \t\t\t\t\tc.Writer.Write([]byte(\"\\n\"))\n1779: \t\t\t\t}\n",
+			"line": "1778",
+			"column": "6",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "1776: \t\t\t\t\tb, _ := json.Marshal(e)\n1777: \t\t\t\t\tc.Writer.Write(b)\n1778: \t\t\t\t\tc.Writer.Write([]byte(\"\\n\"))\n",
+			"line": "1777",
+			"column": "6",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "1770: \t\t\t\t\tline := fmt.Sprintf(\"%d,%s,%s,%s,%s,%s,%s\\n\", e.ID, e.At.Format(time.RFC3339Nano), e.Type, escapeCSV(e.POAID), escapeCSV(e.Actor), e.PrevHash, e.EntryHash)\n1771: \t\t\t\t\tc.Writer.Write([]byte(line))\n1772: \t\t\t\t}\n",
+			"line": "1771",
+			"column": "6",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/main.go",
+			"code": "1767: \t\t\t\tc.Header(\"Content-Type\", \"text/csv; charset=utf-8\")\n1768: \t\t\t\tc.Writer.Write([]byte(\"id,at,type,poa_id,actor,prev_hash,entry_hash\\n\"))\n1769: \t\t\t\tfor _, e := range entries {\n",
+			"line": "1768",
+			"column": "5",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/bolt_ledger.go",
+			"code": "100: \tvar n int\n101: \tbl.db.View(func(tx *bolt.Tx) error {\n102: \t\tb := tx.Bucket(boltBucket)\n103: \t\tif b != nil {\n104: \t\t\tn = b.Stats().KeyN\n105: \t\t}\n106: \t\treturn nil\n107: \t})\n108: \treturn n\n",
+			"line": "101-107",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/bolt_ledger.go",
+			"code": "36: \t}); err != nil {\n37: \t\tdb.Close()\n38: \t\treturn nil, err\n",
+			"line": "37",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/examples/ai_capability_demo/ledger/audit_ledger.go",
+			"code": "68: \tif err := db.Update(func(tx *bolt.Tx) error { _, e := tx.CreateBucketIfNotExists(auditBucket); return e }); err != nil {\n69: \t\tdb.Close()\n70: \t\treturn nil, err\n",
+			"line": "69",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/snapshot/main.go",
+			"code": "73: \t\t}\n74: \t\tf.Close()\n75: \t\tout := struct {\n",
+			"line": "74",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/snapshot/main.go",
+			"code": "70: \t\t\tfmt.Fprintf(os.Stderr, \"error: verify snapshot: %v\\n\", err)\n71: \t\t\tf.Close()\n72: \t\t\tos.Exit(11)\n",
+			"line": "71",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/snapshot/main.go",
+			"code": "64: \t\t\tfmt.Fprintf(os.Stderr, \"error: parse snapshot JSON: %v\\n\", err)\n65: \t\t\tf.Close()\n66: \t\t\tos.Exit(10)\n",
+			"line": "65",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/snapshot/main.go",
+			"code": "58: \t\t\tfmt.Fprintf(os.Stderr, \"error: read snapshot: %v\\n\", err)\n59: \t\t\tf.Close()\n60: \t\t\tos.Exit(9)\n",
+			"line": "59",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/gen-crypto-vectors/main.go",
+			"code": "182: \t// Include generation metadata header as JSON comment style (not strictly valid JSON) only if stdout is terminal? We'll just print pure JSON.\n183: \tos.Stdout.Write(enc)\n184: \n",
+			"line": "183",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/gauth-server/main.go",
+			"code": "41: \t\t}\n42: \t\tresp.Body.Close()\n43: \t\tfmt.Printf(\"unhealthy status: %d\\n\", resp.StatusCode)\n",
+			"line": "42",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/gauth-server/main.go",
+			"code": "37: \t\tif resp.StatusCode \u003e= 200 \u0026\u0026 resp.StatusCode \u003c 300 {\n38: \t\t\tresp.Body.Close()\n39: \t\t\tfmt.Println(\"OK\")\n",
+			"line": "38",
+			"column": "4",
+			"nosec": false,
+			"suppressions": null
+		}
+	],
+	"Stats": {
+		"files": 757,
+		"lines": 208927,
+		"nosec": 2,
+		"found": 251
+	},
+	"GosecVersion": "dev"
+}

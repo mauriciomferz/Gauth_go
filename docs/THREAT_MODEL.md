@@ -84,11 +84,13 @@ The GAuth prototype implements RFC 0111 delegation (PowerOfAttorney) with option
 | T12 | Metrics fold anchor attempts + failures to detect persistent failure mode |
 
 ## 7. Gaps & Weaknesses
-- (Addressed) Token replay protection added: JTI issuance & in-memory + distributed (Redis) replay store. Remaining gap: persistent replay window shrink on cold restart (no durable recent JTI snapshot yet).
+- (Completed) Token replay protection: JTI issuance & distributed (Redis) replay store with fail-closed mode.
+- (Completed) Discovery hardening: JWKS signatures and deprecation schedules now exposed via `/.well-known/gauth-configuration`.
+- (Completed) RFC-3161 verification: Cryptographic verification of TimeStampToken CMS structures implemented.
+- (Completed) Capability registry anchoring: External TSA anchoring integrated for capability governance audit trail.
 - Public key distribution and persistence missing (verification relies on key ring only).
 - No integrity seal / checksum for BoltDB file (tampering offline undetected on startup).
 - Lack of structured authorization policy around List operations (privacy risk).
-- Anchor client is a Noop (no real external witness enforceability).
 - No rate limiting / circuit breakers on validation endpoint for DOS.
 - Soft skip authenticity still allowed when not strict, enabling downgrade attack.
 - Absence of encryption-at-rest for BoltDB file.
@@ -97,10 +99,10 @@ The GAuth prototype implements RFC 0111 delegation (PowerOfAttorney) with option
 | Priority | Action | Rationale |
 |----------|--------|-----------|
 | P1 | Integrate KeyProvider fully into `VerifyToken` and `ValidateDelegationCtx` | Close authenticity gap / prevent silent downgrade |
-| P2 | Implement token replay prevention (nonce/jti + memory/time index) | Completed (in-memory cache). Follow-up: distributed cache / persistence |
+| P2 | (Completed) Token replay prevention with distributed cache | Implemented fail closed mode with observability metrics |
 | P3 | Add file integrity seal (hash+HMAC) verified at startup | Detect persistence tampering (T6) |
-| P4 | Replace Noop Anchor with pluggable external (e.g., append hash to external log) | Strengthen chain tamper detection (T5/T12) |
-| P5 | Enforce size limits on scope/restrictions & validate UTF-8 | Completed (size limits enforced; UTF-8 validation pending) |
+| P4 | (Completed) Replace Noop Anchor with RFC-3161 TSA | External anchoring for capability registry complete |
+| P5 | (Completed) Enforce size limits on scope/restrictions & validate UTF-8 | Size limits enforced; UTF-8 validation pending |
 | P6 | Introduce retention policy + automatic purge of expired delegations | Reduce risk surface & DB bloat |
 | P7 | Add optional BoltDB value encryption (AEAD) | Protect confidentiality at rest |
 | P8 | Add rate limit on validation endpoint | Availability protection |

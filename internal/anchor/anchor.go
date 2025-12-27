@@ -101,11 +101,12 @@ func NewTSAStubProviderSeeded(minMs, maxMs int, failProb float64, seed int64) *T
 			// Fallback to time-based seed only if crypto/rand fails
 			seed = time.Now().UnixNano()
 		} else {
+			// #nosec G115
 			seed = int64(binary.LittleEndian.Uint64(buf[:]))
 		}
 	}
 	src := rand.NewSource(seed)
-	return &TSAStubProvider{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: failProb, providerTag: "tsa-stub", rnd: rand.New(src)}
+	return &TSAStubProvider{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: failProb, providerTag: "tsa-stub", rnd: rand.New(src)} // #nosec G404
 }
 
 // NewTSAStubProviderFromEnv builds a stub provider reading GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED if present.
@@ -138,7 +139,7 @@ func (p *TSAStubProvider) Anchor(hash string) (Receipt, error) {
 	// Simulate latency
 	span := p.minLatency
 	if p.maxLatency > p.minLatency {
-		delta := p.rnd.Int63n(int64(p.maxLatency - p.minLatency))
+		delta := p.rnd.Int63n(int64(p.maxLatency - p.minLatency)) // #nosec G115
 		span += time.Duration(delta)
 	}
 	time.Sleep(span)

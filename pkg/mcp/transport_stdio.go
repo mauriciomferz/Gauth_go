@@ -33,22 +33,22 @@ func NewStdioTransport(ctx context.Context, command string, args ...string) (*St
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		stdin.Close()
+		_ = stdin.Close()
 		return nil, fmt.Errorf("failed to create stdout pipe: %w", err)
 	}
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		stdin.Close()
-		stdout.Close()
+		_ = stdin.Close()
+		_ = stdout.Close()
 		return nil, fmt.Errorf("failed to create stderr pipe: %w", err)
 	}
 
 	// Start process
 	if err := cmd.Start(); err != nil {
-		stdin.Close()
-		stdout.Close()
-		stderr.Close()
+		_ = stdin.Close()
+		_ = stdout.Close()
+		_ = stderr.Close()
 		return nil, fmt.Errorf("failed to start MCP server process: %w", err)
 	}
 
@@ -130,14 +130,14 @@ func (t *StdioTransport) Close() error {
 	select {
 	case err := <-done:
 		// Process exited
-		t.stdout.Close()
-		t.stderr.Close()
+		_ = t.stdout.Close()
+		_ = t.stderr.Close()
 		return err
 	case <-context.Background().Done():
 		// Timeout - force kill
 		_ = t.cmd.Process.Kill() // Best effort cleanup
-		t.stdout.Close()
-		t.stderr.Close()
+		_ = t.stdout.Close()
+		_ = t.stderr.Close()
 		return fmt.Errorf("MCP server process did not exit gracefully")
 	}
 }

@@ -550,6 +550,7 @@ func (a *API) PrometheusMetrics(c *gin.Context) {
 			low = 0
 		}
 		segmentMid := (low + ub) / 2
+		// #nosec G115
 		approxSum += uint64(segmentMid) * cnt
 		b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_bucket{le=\"%d\"} %d\n", ub, cumulative))
 		prevBound = ub

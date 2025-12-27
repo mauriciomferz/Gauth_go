@@ -1301,6 +1301,47 @@ func VerifyMultiSig(p *ProofOfAuthorization, kp internalCrypto.KeyProvider) (int
 		return 0, false, p.Threshold
 	}
 	msg := buildPoASigningPayload(p)
+
+	// Aggregated BLS mode
+	if p.SigMode == "bls12-381-agg" {
+		if len(p.Signatures) != 1 {
+			return 0, false, p.Threshold
+		}
+		aggSig, err := base64.RawStdEncoding.DecodeString(p.Signatures[0])
+		if err != nil {
+			return 0, false, p.Threshold
+		}
+
+		var pubKeys [][]byte
+		for _, kid := range p.SignerKids {
+			if kp == nil {
+				return 0, false, p.Threshold
+			}
+			pk, alg, err := kp.PublicKey(kid)
+			if err != nil {
+				return 0, false, p.Threshold
+			}
+			// Strict algorithm check
+			if alg != "BLS12-381" {
+				return 0, false, p.Threshold
+			}
+			pubKeys = append(pubKeys, pk)
+		}
+
+		// Verify aggregated signature
+		// Domain tag must match what acts as signer domain.
+		// For now hardcoding GAUTH_BLS_SIG_V1 as per provider default
+		prov := internalCrypto.NewBLSProvider("GAUTH_BLS_SIG_V1")
+		if err := prov.VerifyAggregated(pubKeys, msg, aggSig); err != nil {
+			return 0, false, p.Threshold
+		}
+
+		// If verification passes, implies ALL listed keys signed it.
+		// So valid count is total keys.
+		valid := len(p.SignerKids)
+		return valid, valid >= p.Threshold, p.Threshold
+	}
+
 	valid := 0
 	for i, sigB64 := range p.Signatures {
 		if i >= len(p.SignerKids) {
@@ -1317,6 +1358,7 @@ func VerifyMultiSig(p *ProofOfAuthorization, kp internalCrypto.KeyProvider) (int
 			continue
 		}
 
+		// In standard mode, verification uses VerifyWith which handles alg check internally
 		if err := kp.VerifyWith(msg, sigBytes, kid); err == nil {
 			valid++
 		}

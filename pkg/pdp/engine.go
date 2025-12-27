@@ -156,7 +156,7 @@ type InMemoryEngine struct {
 	// P2.1: Advice channel for non-mandatory recommendations
 	adviceChannel AdviceChannel
 	// P2.13: Decision caching (sec2.item5)
-	cache *PDPCache
+	cache DecisionCache
 }
 
 // NewInMemoryEngine creates a new PDP engine with provided combining strategy.
@@ -194,11 +194,11 @@ func (e *InMemoryEngine) WithAdviceChannel(ch AdviceChannel) *InMemoryEngine {
 	return e
 }
 
-// WithCache configures decision caching with LRU+TTL eviction.
+// WithCache configures decision caching with LRU+TTL eviction or Redis.
 // P2.13 (sec2.item5): Enables 10-100x performance improvement for repeated requests.
 //
 // Parameters:
-//   - cache: PDPCache instance (nil disables caching)
+//   - cache: DecisionCache instance (nil disables caching)
 //
 // Configuration via environment:
 //   - GAUTH_PDP_CACHE_SIZE: Max entries (default 1000, 0=disabled)
@@ -206,9 +206,9 @@ func (e *InMemoryEngine) WithAdviceChannel(ch AdviceChannel) *InMemoryEngine {
 //
 // Example:
 //
-//	cache := pdp.NewPDPCacheFromEnv()
+//	cache := pdp.NewInMemoryCacheFromEnv()
 //	engine := pdp.NewInMemoryEngine(strategy).WithCache(cache)
-func (e *InMemoryEngine) WithCache(cache *PDPCache) *InMemoryEngine {
+func (e *InMemoryEngine) WithCache(cache DecisionCache) *InMemoryEngine {
 	e.cache = cache
 	return e
 }
@@ -224,7 +224,10 @@ func (e *InMemoryEngine) AddPolicy(p Policy) { e.policies = append(e.policies, p
 //   - Administrative operations
 func (e *InMemoryEngine) InvalidateCache() {
 	if e.cache != nil {
-		e.cache.InvalidateAll()
+		// As this is a best-effort invalidation often called outside request context,
+		// we use Background context.
+		// In future we might propagate context for tracing.
+		_ = e.cache.InvalidateAll(context.Background())
 	}
 }
 
@@ -236,7 +239,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 
 	// P2.13: Check cache before policy evaluation
 	if e.cache != nil {
-		if cachedDec, found := e.cache.Get(req); found {
+		if cachedDec, found, _ := e.cache.Get(ctx, req); found {
 			// Cache hit - return immediately
 			e.decisions++
 			e.recordLatency(time.Since(start))
@@ -416,7 +419,7 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 			dec.Metadata = make(map[string]string)
 		}
 		dec.Metadata["cache_hit"] = "false"
-		e.cache.Set(req, dec)
+		_ = e.cache.Set(ctx, req, dec)
 	}
 
 	return dec, nil

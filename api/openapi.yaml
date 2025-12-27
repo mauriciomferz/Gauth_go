@@ -49,6 +49,12 @@ tags:
     description: Public blockchain verification endpoints (no authentication required)
   - name: Admin & Monitoring
     description: System administration and monitoring endpoints
+  - name: Semantic Metrics (Beta)
+    description: Prototype RFC0111 semantic counters and anomaly detection
+  - name: Violation Metrics (Beta)
+    description: Prototype violation counters and persistence integrity
+  - name: Capability Anchoring (Beta)
+    description: Prototype capability registry anchoring and notarization
 
 security:
   - BearerAuth: []
@@ -1002,6 +1008,23 @@ paths:
                   error:
                     type: string
 
+  # System Discovery
+  /api/v1/discovery:
+    get:
+      tags:
+        - System Discovery
+      summary: System capabilities discovery
+      description: Returns static capability and configuration discovery document
+      operationId: getDiscovery
+      security: []
+      responses:
+        '200':
+          description: Discovery document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveryResponse'
+
   # Admin & Monitoring
   /health:
     get:
@@ -1201,25 +1224,183 @@ paths:
                   entries:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        timestamp:
-                          type: string
-                          format: date-time
-                        user_id:
-                          type: string
-                        action:
-                          type: string
-                        resource_id:
-                          type: string
-                        details:
-                          type: object
+                      $ref: '#/components/schemas/AuditLogEntry'
                   total:
                     type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+                  has_more:
+                    type: boolean
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+
+  # Beta & Prototype Endpoints
+  /api/v1/beta/metrics/poa/semantics:
+    get:
+      tags:
+        - Semantic Metrics (Beta)
+      summary: List semantic counters
+      description: Returns prototype RFC0111 semantic counters and active anomalies
+      operationId: getSemanticCounters
+      responses:
+        '200':
+          description: Semantic counters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticCountersResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/beta/metrics/poa/semantics/prometheus:
+    get:
+      tags:
+        - Semantic Metrics (Beta)
+      summary: Prometheus semantic metrics
+      description: Returns semantic counters and anomaly scores in Prometheus format
+      operationId: getSemanticMetricsPrometheus
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /api/v1/beta/metrics/poa/semantics/verify:
+    get:
+      tags:
+        - Semantic Metrics (Beta)
+      summary: Verify semantic persistence
+      description: Performs integrity verification for semantic persistence and ledger
+      operationId: verifySemanticPersistence
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticVerifyResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/beta/metrics/violations:
+    get:
+      tags:
+        - Violation Metrics (Beta)
+      summary: List violation counters
+      description: Returns prototype violation counters and anomaly rates
+      operationId: getViolationCounters
+      responses:
+        '200':
+          description: Violation counters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViolationCountersResponse'
+
+  /api/v1/beta/metrics/violations/prometheus:
+    get:
+      tags:
+        - Violation Metrics (Beta)
+      summary: Prometheus violation metrics
+      operationId: getViolationMetricsPrometheus
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /api/v1/beta/metrics/violations/verify:
+    get:
+      tags:
+        - Violation Metrics (Beta)
+      summary: Verify violation persistence
+      operationId: verifyViolationPersistence
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityVerifyResponse'
+
+  /api/v1/beta/capabilities/anchor:
+    post:
+      tags:
+        - Capability Anchoring (Beta)
+      summary: Trigger capability anchoring
+      description: Manually triggers anchoring of current capability registry hash
+      operationId: triggerCapabilityAnchor
+      responses:
+        '200':
+          description: Anchoring result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnchorActionResult'
+        '403':
+          description: Anchoring disabled
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/beta/capabilities/anchor/latest:
+    get:
+      tags:
+        - Capability Anchoring (Beta)
+      summary: Get latest anchor
+      operationId: getLatestCapabilityAnchor
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestAnchorResponse'
+
+  /api/v1/beta/capabilities/anchor/material:
+    get:
+      tags:
+        - Capability Anchoring (Beta)
+      summary: Get anchor material
+      description: Returns the raw anchor artifact or signed wrapper
+      operationId: getCapabilityAnchorMaterial
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/v1/beta/capabilities/anchor/status:
+    get:
+      tags:
+        - Capability Anchoring (Beta)
+      summary: Get anchoring status
+      description: Returns anchoring health, staleness, and notarization status
+      operationId: getCapabilityAnchorStatus
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnchorStatusResponse'
+
+  /api/v1/beta/capabilities/anchor/metrics/prometheus:
+    get:
+      tags:
+        - Capability Anchoring (Beta)
+      summary: Prometheus anchoring metrics
+      operationId: getAnchorMetricsPrometheus
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
 
 components:
   securitySchemes:
@@ -1627,6 +1808,8 @@ components:
           type: object
         is_valid:
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/CapabilityMetadata'
 
     CreateFiduciaryRequest:
       type: object
@@ -1712,49 +1895,256 @@ components:
               blockchain_state:
                 type: object
 
+    GAuthError:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        error_code:
+          type: string
+
+    DiscoveryResponse:
+      type: object
+      properties:
+        schema_version:
+          type: integer
+        digest_domains:
+          type: array
+          items:
+            type: string
+        active_digest_domain:
+          type: string
+        token_algorithms:
+          type: array
+          items:
+            type: string
+        replay_strict_mode:
+          type: boolean
+        poa_version_current:
+          type: integer
+        capabilities_hash:
+          type: string
+        rotation_tip_hash:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        max_delegation_depth:
+          type: integer
+
+    AuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        user_id:
+          type: string
+        action:
+          type: string
+        resource_id:
+          type: string
+        details:
+          type: object
+    
+    AuditLogPage:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogEntry'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        has_more:
+          type: boolean
+
+    CapabilityMetadata:
+      type: object
+      properties:
+        schema_version:
+          type: integer
+        recovery_mode:
+          type: boolean
+        registry_hash:
+          type: string
+
   responses:
     BadRequest:
       description: Bad request - Invalid input
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-              details:
-                type: object
+            $ref: '#/components/schemas/GAuthError'
 
     Unauthorized:
       description: Unauthorized - Authentication required
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Authentication required"
+            $ref: '#/components/schemas/GAuthError'
 
     NotFound:
       description: Not found - Resource does not exist
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Resource not found"
+            $ref: '#/components/schemas/GAuthError'
 
     InternalServerError:
       description: Internal server error
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-              request_id:
-                type: string
+            $ref: '#/components/schemas/GAuthError'
+
+    SemanticCountersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        counters:
+          type: object
+          additionalProperties:
+            type: integer
+        wired:
+          type: boolean
+
+    SemanticVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: string
+        integrity:
+          type: string
+        stats:
+          type: object
+          properties:
+            ewma_entries:
+              type: integer
+            active_anomalies:
+              type: integer
+        ledger:
+          type: object
+          properties:
+            wired:
+              type: boolean
+        anchoring:
+          type: object
+          properties:
+            wired:
+              type: boolean
+            last_anchor:
+              type: string
+              format: date-time
+            last_receipt:
+              type: object
+
+    ViolationCountersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+        counters:
+          type: object
+          additionalProperties:
+            type: integer
+        total:
+          type: integer
+        anomaly:
+          type: object
+          properties:
+            rate_per_minute_60s:
+              type: number
+            rate_per_minute_300s:
+              type: number
+            surge_60s:
+              type: boolean
+
+    IntegrityVerifyResponse:
+      type: object
+      properties:
+        integrity:
+          type: string
+        details:
+          type: object
+
+    AnchorActionResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        hash:
+          type: string
+        anchored_at:
+          type: string
+          format: date-time
+        total:
+          type: integer
+        previous_hash:
+          type: string
+        registry_last_changed_at:
+          type: string
+          format: date-time
+
+    LatestAnchorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        anchored:
+          type: boolean
+        latest:
+          type: object
+          properties:
+            hash:
+              type: string
+            anchored_at:
+              type: string
+              format: date-time
+        total:
+          type: integer
+        capability_registry_hash:
+          type: string
+
+    AnchorStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        configured:
+          type: boolean
+        last_write:
+          type: string
+          format: date-time
+        registry_hash:
+          type: string
+        age_seconds:
+          type: integer
+        stale:
+          type: boolean
+        notarization_receipt:
+          type: object
+        external_anchor_receipt:
+          type: object

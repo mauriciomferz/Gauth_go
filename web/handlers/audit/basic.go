@@ -53,6 +53,7 @@ func verifyHandler(c *gin.Context, d Deps) {
 		c.JSON(http.StatusOK, gin.H{"success": true, "configured": false})
 		return
 	}
+	// #nosec G304
 	b, err := os.ReadFile(path)
 	if err != nil {
 		respondError(c, http.StatusInternalServerError, "capabilities_audit_read_failed", "read_failed", "failed reading capability audit file", "rfc111:capabilities_audit_verify", nil)

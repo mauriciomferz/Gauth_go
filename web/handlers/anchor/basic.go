@@ -115,6 +115,7 @@ func materialHandler(c *gin.Context, d Deps) {
 		c.JSON(http.StatusOK, gin.H{"success": true, "configured": false, "emitted": false, "registry_hash": d.CapabilityRegistryHash()})
 		return
 	}
+	// #nosec G304
 	b, err := os.ReadFile(path)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "read_failed", "detail": err.Error()})

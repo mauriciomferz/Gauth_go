@@ -90,9 +90,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create transactor: %v", err)
 	}
-	auth.Nonce = big.NewInt(int64(nonce))
-	auth.Value = big.NewInt(0)      // in wei
-	auth.GasLimit = uint64(3000000) // 3M gas limit
+	auth.Nonce = big.NewInt(int64(nonce)) // #nosec G115
+	auth.Value = big.NewInt(0)            // in wei
+	auth.GasLimit = uint64(3000000)       // 3M gas limit
 	auth.GasPrice = gasPrice
 
 	log.Printf("Deploying from: %s", fromAddress.Hex())

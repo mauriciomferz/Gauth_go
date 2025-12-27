@@ -293,6 +293,14 @@ func (o *OpenTelemetryCollector) IncObligationsExecuted() {
 	o.incCounter("gauth.obligations.executed")
 }
 
+func (o *OpenTelemetryCollector) IncCapabilityRegistryHashChanged() {
+	o.incCounter("gauth.capability.registry_hash_changed")
+}
+
+func (o *OpenTelemetryCollector) ObserveCapabilityAnchorInterval(d time.Duration) {
+	o.recordDuration("gauth.capability.anchor_interval", d)
+}
+
 func (o *OpenTelemetryCollector) IncObligationsFailed() {
 	o.incCounter("gauth.obligations.failed")
 }
@@ -335,6 +343,10 @@ func (o *OpenTelemetryCollector) IncReplayStoreWriteFailures() {
 
 func (o *OpenTelemetryCollector) ObserveReplayStoreWriteLatency(d time.Duration) {
 	o.recordDuration("gauth.replay_store.write_latency", d)
+}
+
+func (o *OpenTelemetryCollector) IncReplayStoreAvailabilityImpact() {
+	o.incCounter("gauth.replay_store.availability_impact")
 }
 
 // Multi-signature metrics
@@ -505,3 +517,15 @@ func (o *OpenTelemetryCollector) IncDistributedTraceCompleted()                 
 func (o *OpenTelemetryCollector) IncDistributedTraceFailed()                                 {}
 func (o *OpenTelemetryCollector) ObserveDistributedTraceLatency(d time.Duration)             {}
 func (o *OpenTelemetryCollector) SetDistributedTraceActiveSpans(count int)                   {}
+
+func (o *OpenTelemetryCollector) ObserveExternalAnchorInterval(seconds float64) {
+	histo, err := o.getOrCreateHistogram("gauth.external_anchor.interval")
+	if err != nil {
+		return
+	}
+	histo.Record(o.ctx, seconds)
+}
+
+func (o *OpenTelemetryCollector) HygieneSnapshot() map[string]uint64 {
+	return nil
+}

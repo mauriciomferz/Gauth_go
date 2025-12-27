@@ -54,12 +54,18 @@ func NewBoltDailyLimitStore(dbPath string) (*BoltDailyLimitStore, error) {
 }
 
 // GetDailyUsage retrieves the current usage for a delegation on a specific date
+// Deprecated: Use GetPeriodUsage instead
 func (s *BoltDailyLimitStore) GetDailyUsage(delegationID, date string) (float64, error) {
+	return s.GetPeriodUsage(delegationID, date)
+}
+
+// GetPeriodUsage retrieves the usage for a specific period key (e.g. date, week, month)
+func (s *BoltDailyLimitStore) GetPeriodUsage(delegationID, periodKey string) (float64, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	if delegationData, exists := s.data[delegationID]; exists {
-		if usage, exists := delegationData[date]; exists {
+		if usage, exists := delegationData[periodKey]; exists {
 			return usage, nil
 		}
 	}
@@ -68,7 +74,13 @@ func (s *BoltDailyLimitStore) GetDailyUsage(delegationID, date string) (float64,
 }
 
 // IncrementDailyUsage adds to the daily usage for a delegation
+// Deprecated: Use IncrementPeriodUsage instead
 func (s *BoltDailyLimitStore) IncrementDailyUsage(delegationID, date string, amount float64) error {
+	return s.IncrementPeriodUsage(delegationID, date, amount)
+}
+
+// IncrementPeriodUsage adds to the usage for a delegation in a specific period
+func (s *BoltDailyLimitStore) IncrementPeriodUsage(delegationID, periodKey string, amount float64) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -76,19 +88,19 @@ func (s *BoltDailyLimitStore) IncrementDailyUsage(delegationID, date string, amo
 		s.data[delegationID] = make(map[string]float64)
 	}
 
-	s.data[delegationID][date] += amount
+	s.data[delegationID][periodKey] += amount
 
 	// Persist to disk
 	return s.saveToDisk()
 }
 
-// ResetDailyUsage resets the usage for a delegation on a specific date
-func (s *BoltDailyLimitStore) ResetDailyUsage(delegationID, date string) error {
+// ResetPeriodUsage resets the usage for a delegation in a specific period
+func (s *BoltDailyLimitStore) ResetPeriodUsage(delegationID, periodKey string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if delegationData, exists := s.data[delegationID]; exists {
-		delete(delegationData, date)
+		delete(delegationData, periodKey)
 		if len(delegationData) == 0 {
 			delete(s.data, delegationID)
 		}
@@ -96,6 +108,12 @@ func (s *BoltDailyLimitStore) ResetDailyUsage(delegationID, date string) error {
 
 	// Persist to disk
 	return s.saveToDisk()
+}
+
+// ResetDailyUsage resets the usage for a delegation on a specific date
+// Deprecated: Use ResetPeriodUsage instead
+func (s *BoltDailyLimitStore) ResetDailyUsage(delegationID, date string) error {
+	return s.ResetPeriodUsage(delegationID, date)
 }
 
 // ExportDailyLimits exports all daily limit data for analysis
@@ -232,15 +250,31 @@ func (e *SimpleConditionalEngine) EvaluateCondition(condition string, context ma
 // evaluateSingleCondition evaluates a single conditional expression
 func (e *SimpleConditionalEngine) evaluateSingleCondition(condition string, context map[string]interface{}) (bool, error) {
 	// Parse condition: "field operator value"
-	parts := strings.Fields(condition)
+	// Use custom splitter to handle quoted values
+	parts, err := e.splitConditionParts(condition)
+	if err != nil {
+		return false, err
+	}
 	if len(parts) != 3 {
 		return false, fmt.Errorf("invalid condition format: expected 'field operator value'")
 	}
 
 	field, operator, expectedValue := parts[0], parts[1], parts[2]
 
+	// Strip quotes from expected value if present
+	if len(expectedValue) >= 2 && strings.HasPrefix(expectedValue, "\"") && strings.HasSuffix(expectedValue, "\"") {
+		expectedValue = expectedValue[1 : len(expectedValue)-1]
+	}
+
 	actualValue, exists := context[field]
 	if !exists {
+		// Special handling: if checking for existence (e.g. != "") allow missing fields to define "empty"
+		if operator == "!=" && expectedValue == "" {
+			return false, nil // field missing is equivalent to empty, so != "" is false (it IS empty)
+		}
+		if operator == "==" && expectedValue == "" {
+			return true, nil // field missing is equivalent to empty
+		}
 		return false, fmt.Errorf("field %s not found in context", field)
 	}
 
@@ -269,6 +303,35 @@ func (e *SimpleConditionalEngine) evaluateSingleCondition(condition string, cont
 	default:
 		return false, fmt.Errorf("unsupported operator: %s", operator)
 	}
+}
+
+// splitConditionParts splits a condition string into field, operator, value, respecting quotes
+func (e *SimpleConditionalEngine) splitConditionParts(s string) ([]string, error) {
+	var parts []string
+	var current strings.Builder
+	inQuote := false
+
+	for i := 0; i < len(s); i++ {
+		char := s[i]
+		if char == '"' {
+			inQuote = !inQuote
+			current.WriteByte(char)
+		} else if char == ' ' && !inQuote {
+			if current.Len() > 0 {
+				parts = append(parts, current.String())
+				current.Reset()
+			}
+		} else {
+			current.WriteByte(char)
+		}
+	}
+	if inQuote {
+		return nil, fmt.Errorf("unbalanced quotes in condition")
+	}
+	if current.Len() > 0 {
+		parts = append(parts, current.String())
+	}
+	return parts, nil
 }
 
 // compareNumbers compares numeric values
@@ -356,7 +419,11 @@ func (e *SimpleConditionalEngine) ValidateConditionSyntax(condition string) erro
 
 	for _, part := range parts {
 		part = strings.TrimSpace(part)
-		fields := strings.Fields(part)
+		// Use custom splitter for syntax check too
+		fields, err := e.splitConditionParts(part)
+		if err != nil {
+			return err
+		}
 		if len(fields) != 3 {
 			return fmt.Errorf("invalid condition part: '%s' (expected 'field operator value')", part)
 		}

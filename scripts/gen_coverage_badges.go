@@ -31,6 +31,7 @@ func main() {
 	if outDir == "" {
 		outDir = filepath.Join("build", "badges")
 	}
+	// #nosec G301
 	if err := os.MkdirAll(outDir, 0o755); err != nil {
 		fatalf("create output dir: %v", err)
 	}

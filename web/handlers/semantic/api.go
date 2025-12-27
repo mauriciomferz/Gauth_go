@@ -122,6 +122,13 @@ func (a *API) HandleVerify(c *gin.Context) {
 	integrity, _ := a.Handler.VerifyPersistence()
 
 	ewma, scores := a.Handler.Stats()
+	a.Handler.mu.Lock()
+	ledgerWired := a.Handler.Ledger != nil
+	anchorWired := a.Handler.AnchorProvider != nil
+	lastAnchor := a.Handler.LastAnchor
+	lastReceipt := a.Handler.LastAnchorReceipt
+	a.Handler.mu.Unlock()
+
 	c.JSON(200, gin.H{
 		"success":   true,
 		"status":    "ok",
@@ -129,6 +136,14 @@ func (a *API) HandleVerify(c *gin.Context) {
 		"stats": gin.H{
 			"ewma_entries":     ewma,
 			"active_anomalies": scores,
+		},
+		"ledger": gin.H{
+			"wired": ledgerWired,
+		},
+		"anchoring": gin.H{
+			"wired":        anchorWired,
+			"last_anchor":  lastAnchor.Format(time.RFC3339),
+			"last_receipt": lastReceipt,
 		},
 	})
 }

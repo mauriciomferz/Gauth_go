@@ -68,6 +68,8 @@ func (s *BetaServer) Run() error {
 		if km := s.getKeyManager(); km != nil {
 			km.Stop()
 		}
+		// Shut down GAuth+ components (caches)
+		ShutdownGAuthPlus()
 		return srv.Shutdown(ctx)
 
 	case err := <-errCh:
@@ -124,6 +126,9 @@ func (s *BetaServer) Shutdown() {
 	// Note: Model Limits handler doesn't have explicit Save() in interface usually?
 	// Checking server_clean.go logic.
 	// It says "Flush limits persistence".
+
+	// Shut down GAuth+ components (caches)
+	ShutdownGAuthPlus()
 }
 
 // getKeyManager helper used in Run()

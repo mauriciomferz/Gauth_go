@@ -332,6 +332,13 @@ func (s *CachedCapabilityService) GetCache() *CapabilityCache {
 	return s.cache
 }
 
+// Close gracefully shuts down the underlying cache
+func (s *CachedCapabilityService) Close() {
+	if s.cache != nil {
+		s.cache.Close()
+	}
+}
+
 // CachedDelegationService wraps a DelegationService with caching
 type CachedDelegationService struct {
 	service DelegationService
@@ -404,4 +411,11 @@ func (s *CachedDelegationService) CheckMaxDepthExceeded(ctx context.Context, sou
 // GetCache returns the underlying cache for direct access (e.g., cleanup)
 func (s *CachedDelegationService) GetCache() *DelegationChainCache {
 	return s.cache
+}
+
+// Close gracefully shuts down the underlying cache
+func (s *CachedDelegationService) Close() {
+	if s.cache != nil {
+		s.cache.Close()
+	}
 }

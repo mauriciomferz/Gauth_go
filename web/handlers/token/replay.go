@@ -1,6 +1,7 @@
 package token
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"sync"
@@ -9,6 +10,16 @@ import (
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/pkg/replay"
 )
+
+// CheckAndStore implements auth.ReplayStore to provide replay protection.
+func (r *ReplayNonceStore) CheckAndStore(jti string) error {
+	now := time.Now()
+	if r.Seen(jti, now) {
+		return fmt.Errorf("replay detected: JTI %s already seen", jti)
+	}
+	r.Record(jti, now)
+	return nil
+}
 
 // ReplayNonceStore provides minimal in-memory nonce/JTI replay protection for token issuance.
 // Not production-ready: single-process only, periodic TTL sweep on access.

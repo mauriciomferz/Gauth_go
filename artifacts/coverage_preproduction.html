@@ -23403,7 +23403,7 @@ func (w *WebhookClient) Send(ctx context.Context, payload WebhookPayload) error 
 
                 // Exponential backoff before retry
                 if attempt &lt; w.config.MaxRetries </span><span class="cov7" title="8">{
-                        //nolint:gosec // G115: small retry attempt value, safe conversion
+                        // #nosec G115: small retry attempt value, safe conversion
                         backoff := w.config.RetryBackoff * time.Duration(1&lt;&lt;uint(attempt))
                         select </span>{
                         case &lt;-ctx.Done():<span class="cov1" title="1">
@@ -30218,7 +30218,7 @@ func (m *Memory) SetEvidenceHashesPerPOA(poaID string, n int) <span class="cov0"
 // Delegation graph metrics
 func (m *Memory) IncDelegationGraphExports() <span class="cov0" title="0">{ atomic.AddUint64(&amp;m.delegationGraphExports, 1) }</span>
 func (m *Memory) SetDelegationGraphNodeCount(n int) <span class="cov0" title="0">{
-        //nolint:gosec // G115: node count, always non-negative
+        // #nosec G115: node count, always non-negative
         atomic.StoreUint64(&amp;m.delegationGraphNodeCount, uint64(n))
 }</span>
 
@@ -30238,7 +30238,7 @@ func (m *Memory) ObserveCascadeProcessingLatency(d time.Duration) <span class="c
         if d &lt; 0 </span><span class="cov0" title="0">{
                 return
         }</span>
-        //nolint:gosec // G115: duration nanoseconds always non-negative
+        // #nosec G115: duration nanoseconds always non-negative
         <span class="cov0" title="0">ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.cascadeProcessingLatencyCount, 1)
         atomic.AddUint64(&amp;m.cascadeProcessingLatencyTotalNS, ns)
@@ -30300,7 +30300,7 @@ func (m *Memory) ValidationLatencyPercentiles() (p50, p95, p99 time.Duration) <s
                 <span class="cov0" title="0">if rank &gt;= len(buf) </span><span class="cov0" title="0">{
                         rank = len(buf) - 1
                 }</span>
-                //nolint:gosec // G115: converting stored nanosecond sample, safe range
+                // #nosec G115: converting stored nanosecond sample, safe range
                 <span class="cov0" title="0">return time.Duration(buf[rank])</span>
         }
         <span class="cov0" title="0">p50 = pick(0.50)
@@ -30321,7 +30321,7 @@ func NewMemory() *Memory <span class="cov6" title="2">{ return &amp;Memory{} }</
 
 // SetReplayWALPending sets current pending WAL entries gauge.
 //
-//nolint:gosec // G115: WAL pending count, always non-negative
+// #nosec G115: WAL pending count, always non-negative
 func (m *Memory) SetReplayWALPending(n int) <span class="cov0" title="0">{ atomic.StoreUint64(&amp;m.replayWALPending, uint64(n)) }</span>
 
 // ObserveReplayWALFlushLatency records WAL flush latency.
@@ -30329,7 +30329,7 @@ func (m *Memory) ObserveReplayWALFlushLatency(d time.Duration) <span class="cov0
         if d &lt; 0 </span><span class="cov0" title="0">{
                 return
         }</span>
-        //nolint:gosec // G115: duration nanoseconds always non-negative
+        // #nosec G115: duration nanoseconds always non-negative
         <span class="cov0" title="0">ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.replayWALFlushLatencyCount, 1)
         atomic.AddUint64(&amp;m.replayWALFlushLatencyTotalNS, ns)
@@ -30346,7 +30346,7 @@ func (m *Memory) ObserveReplayWALSnapshotDuration(d time.Duration) <span class="
         if d &lt; 0 </span><span class="cov0" title="0">{
                 return
         }</span>
-        //nolint:gosec // G115: duration nanoseconds always non-negative
+        // #nosec G115: duration nanoseconds always non-negative
         <span class="cov0" title="0">ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.replayWALSnapshotDurationCount, 1)
         atomic.AddUint64(&amp;m.replayWALSnapshotDurationTotalNS, ns)
@@ -30366,7 +30366,7 @@ func (m *Memory) ObserveCapabilityDiffLatency(d time.Duration) <span class="cov0
         if d &lt; 0 </span><span class="cov0" title="0">{
                 return
         }</span>
-        //nolint:gosec // G115: duration.Nanoseconds() validated non-negative above
+        // #nosec G115: duration.Nanoseconds() validated non-negative above
         <span class="cov0" title="0">ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.capabilityDiffLatencyCount, 1)
         atomic.AddUint64(&amp;m.capabilityDiffLatencyTotalNS, ns)
@@ -30461,7 +30461,7 @@ func (m *Memory) Save() error <span class="cov0" title="0">{
                 return err
         }</span>
         // Mark last successful persistence time.
-        //nolint:gosec // G115: Unix timestamp always positive
+        // #nosec G115: Unix timestamp always positive
         <span class="cov0" title="0">atomic.StoreUint64(&amp;m.lastPersistUnix, uint64(time.Now().Unix()))
         return nil</span>
 }
@@ -30557,7 +30557,7 @@ func (m *Memory) ObserveReplayStoreLatency(d time.Duration) <span class="cov0" t
         if d &lt; 0 </span><span class="cov0" title="0">{
                 return
         }</span>
-        //nolint:gosec // G115: duration.Nanoseconds() validated non-negative above
+        // #nosec G115: duration.Nanoseconds() validated non-negative above
         <span class="cov0" title="0">ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.replayStoreLatencyCount, 1)
         atomic.AddUint64(&amp;m.replayStoreLatencyTotalNS, ns)
@@ -30570,7 +30570,7 @@ func (m *Memory) ObserveReplayStoreLatency(d time.Duration) <span class="cov0" t
 }
 
 func (m *Memory) ObserveValidationLatency(d time.Duration) <span class="cov6" title="2">{
-        //nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
+        // #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations
         ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.validationCount, 1)
         atomic.AddUint64(&amp;m.validationTotalNS, ns)
@@ -30619,7 +30619,7 @@ func (m *Memory) IncAttestationProofDigestMismatch() <span class="cov0" title="0
         atomic.AddUint64(&amp;m.attestationProofDigestMismatch, 1)
 }</span>
 func (m *Memory) ObserveAttestationProofVerificationLatency(d time.Duration) <span class="cov0" title="0">{
-        //nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
+        // #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations
         ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.attestationProofVerificationLatencyCount, 1)
         atomic.AddUint64(&amp;m.attestationProofVerificationLatencyTotalNS, ns)
@@ -30636,7 +30636,7 @@ func (m *Memory) ObserveAttestationProofVerificationLatency(d time.Duration) <sp
 
 // ObserveAttestationProofIssueLatency records issuance latency.
 func (m *Memory) ObserveAttestationProofIssueLatency(d time.Duration) <span class="cov0" title="0">{
-        //nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
+        // #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations
         ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.attestationProofIssueLatencyCount, 1)
         atomic.AddUint64(&amp;m.attestationProofIssueLatencyTotalNS, ns)
@@ -30723,7 +30723,7 @@ func (m *Memory) SetEnvelopeV1SunsetPhase(phase int) <span class="cov0" title="0
         if phase &lt; 0 </span><span class="cov0" title="0">{
                 phase = 0
         }</span>
-        //nolint:gosec // G115: phase validated non-negative, small enum value
+        // #nosec G115: phase validated non-negative, small enum value
         <span class="cov0" title="0">atomic.StoreUint64(&amp;m.envelopeV1SunsetPhase, uint64(phase))</span>
 }
 
@@ -30789,7 +30789,7 @@ func (m *Memory) ObserveMultiSignatureBatchSize(size int) <span class="cov0" tit
 }
 
 func (m *Memory) ObserveMultiSignatureAggregateLatency(d time.Duration) <span class="cov0" title="0">{
-        //nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
+        // #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations
         ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.multiSignatureAggregateLatencyCount, 1)
         atomic.AddUint64(&amp;m.multiSignatureAggregateLatencyTotalNS, ns)
@@ -30826,7 +30826,7 @@ func (m *Memory) IncExternalAnchorForcedFailures() <span class="cov0" title="0">
 func (m *Memory) IncObligationsExecuted() <span class="cov0" title="0">{ atomic.AddUint64(&amp;m.obligationsExecuted, 1) }</span>
 func (m *Memory) IncObligationsFailed()   <span class="cov0" title="0">{ atomic.AddUint64(&amp;m.obligationsFailed, 1) }</span>
 func (m *Memory) ObserveObligationLatency(d time.Duration) <span class="cov0" title="0">{
-        //nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
+        // #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations
         ns := uint64(d.Nanoseconds())
         atomic.AddUint64(&amp;m.obligationLatencyCount, 1)
         atomic.AddUint64(&amp;m.obligationLatencyTotalNS, ns)
@@ -31092,7 +31092,7 @@ func (m *Memory) ObserveLifecycleTransitionLatency(entityType, outcome string, d
         <span class="cov0" title="0">if outcome == "" </span><span class="cov0" title="0">{
                 outcome = unknownOutcome
         }</span>
-        //nolint:gosec // G115: duration.Nanoseconds() returns int64, safe for positive durations
+        // #nosec G115: duration.Nanoseconds() returns int64, safe for positive durations
         <span class="cov0" title="0">ns := uint64(d.Nanoseconds())
         m.lifecycleLatencyMu.Lock()
         if m.lifecycleLatencyTotals == nil </span><span class="cov0" title="0">{
@@ -31119,7 +31119,7 @@ func (m *Memory) ObserveLifecycleTransitionLatency(entityType, outcome string, d
                 lr = &amp;latencyReservoir{samples: make([]uint64, 64)}
                 m.lifecycleLatencyRes[key] = lr
         }</span>
-        //nolint:gosec // G115: reservoir size is fixed at 64, safe conversion
+        // #nosec G115: reservoir size is fixed at 64, safe conversion
         <span class="cov0" title="0">pos := lr.writes &amp; uint64(len(lr.samples)-1) // ring position
         lr.samples[pos] = ns
         lr.writes++
@@ -31155,14 +31155,14 @@ func (m *Memory) Snapshot() (delegations uint64, validations uint64, totalLatenc
         mn := atomic.LoadUint64(&amp;m.validationMinNS)
         var avg time.Duration
         if vc &gt; 0 </span><span class="cov1" title="1">{
-                //nolint:gosec // G115: tot/vc cannot overflow, both are nanosecond counts
+                // #nosec G115: tot/vc cannot overflow, both are nanosecond counts
                 avg = time.Duration(tot / vc)
         }</span>
 
         // Copy reservoir snapshot (lock-free; approximate)
         // Determine effective sample size (cannot exceed vc nor reservoir size)
         <span class="cov10" title="3">sampleSize := vc
-        //nolint:gosec // G115: reservoir size is small constant (128), safe conversion
+        // #nosec G115: reservoir size is small constant (128), safe conversion
         if sampleSize &gt; uint64(len(m.reservoir)) </span><span class="cov0" title="0">{
                 sampleSize = uint64(len(m.reservoir))
         }</span>
@@ -31189,7 +31189,7 @@ func (m *Memory) Snapshot() (delegations uint64, validations uint64, totalLatenc
                         <span class="cov10" title="3">if rank &gt;= len(buf) </span><span class="cov0" title="0">{
                                 rank = len(buf) - 1
                         }</span>
-                        //nolint:gosec // G115: buf[rank] is nanosecond duration, safe conversion
+                        // #nosec G115: buf[rank] is nanosecond duration, safe conversion
                         <span class="cov10" title="3">return time.Duration(buf[rank])</span>
                 }
                 <span class="cov1" title="1">p50 = pick(0.50)
@@ -41912,7 +41912,7 @@ func (c *Controller) evaluate() <span class="cov9" title="8">{
         if v2 &gt; 0 </span><span class="cov9" title="8">{
                 mismatchRatio = float64(mismatches) / float64(v2)
         }</span>
-        //nolint:gosec // G115: phase enum value, small range
+        // #nosec G115: phase enum value, small range
         <span class="cov9" title="8">threshold := adoptionThresholdForPhase(c.cfg, int(phase))
         if adoption &gt;= threshold &amp;&amp; mismatchRatio &lt;= c.cfg.MaxMismatchRatio </span><span class="cov7" title="5">{
                 // Start or continue satisfy window
@@ -41930,9 +41930,9 @@ func (c *Controller) evaluate() <span class="cov9" title="8">{
                 }</span>
                 <span class="cov7" title="5">c.mv.SetSunsetPhaseSatisfactionProgress(prog)
                 if time.Since(c.lastSatisfyStart) &gt;= c.cfg.Window </span><span class="cov1" title="1">{
-                        //nolint:gosec // G115: phase enum value, small range
+                        // #nosec G115: phase enum value, small range
                         next := nextPhase(int(phase))
-                        //nolint:gosec // G115: phase enum value, small range
+                        // #nosec G115: phase enum value, small range
                         if next &gt; int(phase) </span><span class="cov1" title="1">{
                                 c.mv.SetEnvelopeV1SunsetPhase(next)
                                 log.Printf("sunset controller: promoted phase %d -&gt; %d (adoption=%.3f mismatch=%.5f)", phase, next, adoption, mismatchRatio)
@@ -48103,7 +48103,7 @@ func (cb *Breaker) onResult(success bool) <span class="cov0" title="0">{
 
 // shouldTrip checks if the circuit should trip to open state
 func (cb *Breaker) shouldTrip() bool <span class="cov0" title="0">{
-        //nolint:gosec // G115: maxFailures is config value, typically small
+        // #nosec G115: maxFailures is config value, typically small
         return cb.counts.ConsecutiveFailures &gt;= uint32(cb.maxFailures)
 }</span>
 
@@ -57514,7 +57514,7 @@ func (s *BoltReplayStore) CheckAndRecord(jti string) error <span class="cov10" t
 
                 // Check if JTI exists and is not expired
                 if existing != nil </span><span class="cov5" title="3">{
-                        //nolint:gosec // G115: converting stored timestamp, safe for Unix time values
+                        // #nosec G115: converting stored timestamp, safe for Unix time values
                         expiry := int64(binary.BigEndian.Uint64(existing))
                         if now &lt; expiry </span><span class="cov3" title="2">{
                                 return fmt.Errorf("replay detected: jti=%s already used", jti)
@@ -57523,7 +57523,7 @@ func (s *BoltReplayStore) CheckAndRecord(jti string) error <span class="cov10" t
 
                 // Record new JTI with expiration timestamp
                 <span class="cov9" title="8">value := make([]byte, 8)
-                //nolint:gosec // G115: timestamp conversion, safe for Unix time values
+                // #nosec G115: timestamp conversion, safe for Unix time values
                 binary.BigEndian.PutUint64(value, uint64(expiresAt))
                 return bucket.Put(key, value)</span>
         })
@@ -63753,7 +63753,7 @@ func EncodeRawPOAChain(items []RawPOAItem) ([]byte, error) <span class="cov4" ti
                         return nil, errors.New("item too large to encode")
                 }</span>
                 <span class="cov5" title="14">var lenBuf [4]byte
-                //nolint:gosec // G115: length already validated against uint32 max
+                // #nosec G115: length already validated against uint32 max
                 binary.BigEndian.PutUint32(lenBuf[:], uint32(len(b)))
                 out.Write(lenBuf[:])
                 out.Write(b)</span>

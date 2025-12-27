@@ -126,6 +126,12 @@ func (m *mockCollector) IncExternalAnchorForcedFailuresProvider(provider string)
 func (m *mockCollector) ObserveExternalAnchorLatency(provider string, d time.Duration) {}
 func (m *mockCollector) SetExternalAnchorLastHashLen(n int)                            {}
 func (m *mockCollector) SetExternalAnchorAgeSeconds(age uint64)                        {}
+func (m *mockCollector) IncMultiSignatureSuccess()                                     {}
+func (m *mockCollector) IncMultiSignatureIssued()                                      {}
+func (m *mockCollector) IncSingleSignatureIssued()                                     {}
+func (m *mockCollector) SetMultiSignatureAdoptionRatio(r float64)                      {}
+func (m *mockCollector) ObserveExternalAnchorInterval(seconds float64)                 {}
+func (m *mockCollector) HygieneSnapshot() map[string]uint64                            { return nil }
 func (m *mockCollector) IncObligationsExecuted()                                       {}
 func (m *mockCollector) IncObligationsFailed()                                         {}
 func (m *mockCollector) ObserveObligationLatency(d time.Duration)                      {}

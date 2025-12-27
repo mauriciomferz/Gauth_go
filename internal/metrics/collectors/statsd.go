@@ -446,3 +446,11 @@ func (s *StatsDCollector) IncDistributedTraceCompleted()                        
 func (s *StatsDCollector) IncDistributedTraceFailed()                                 {}
 func (s *StatsDCollector) ObserveDistributedTraceLatency(d time.Duration)             {}
 func (s *StatsDCollector) SetDistributedTraceActiveSpans(count int)                   {}
+
+func (s *StatsDCollector) ObserveExternalAnchorInterval(seconds float64) {
+	_ = s.client.Histogram("gauth.external_anchor.interval", seconds, nil, 1.0)
+}
+
+func (s *StatsDCollector) HygieneSnapshot() map[string]uint64 {
+	return nil
+}

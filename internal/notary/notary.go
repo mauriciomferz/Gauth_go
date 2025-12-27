@@ -167,9 +167,10 @@ func NewExternalStub() *ExternalStubNotarizer {
 		// Fallback to time-based seed only if crypto/rand fails
 		seed = time.Now().UnixNano()
 	} else {
+		// #nosec G115: int64 seed overflow is acceptable for RNG
 		seed = int64(binary.LittleEndian.Uint64(buf[:]))
 	}
-	return &ExternalStubNotarizer{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: fp, providerName: name, rnd: rand.New(rand.NewSource(seed))}
+	return &ExternalStubNotarizer{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: fp, providerName: name, rnd: rand.New(rand.NewSource(seed))} // #nosec G404
 }
 
 // Notarize simulates a network call with random latency and probabilistic failure.

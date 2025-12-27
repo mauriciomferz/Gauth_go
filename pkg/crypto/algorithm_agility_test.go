@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/rsa"
+	"fmt"
 	"strings"
 	"sync"
 	"testing"
@@ -428,12 +429,12 @@ func TestAlgorithmRegistry_BasicOperations(t *testing.T) {
 
 	// Check default algorithms are registered
 	algorithms := registry.ListAlgorithms()
-	if len(algorithms) != 3 {
-		t.Errorf("Expected 3 default algorithms, got %d", len(algorithms))
+	if len(algorithms) != 4 {
+		t.Errorf("Expected 4 default algorithms, got %d", len(algorithms))
 	}
 
 	// Get each default algorithm
-	for _, algID := range []string{AlgorithmEd25519, AlgorithmRSAPSS, AlgorithmECDSAP256} {
+	for _, algID := range []string{AlgorithmEd25519, AlgorithmRSAPSS, AlgorithmECDSAP256, AlgorithmBLS} {
 		provider, err := registry.Get(algID)
 		if err != nil {
 			t.Errorf("Failed to get algorithm '%s': %v", algID, err)
@@ -517,7 +518,7 @@ func TestAlgorithmRegistry_ConcurrentAccess(t *testing.T) {
 // TestAlgorithmRegistry_DefaultRegistry tests the global default registry.
 func TestAlgorithmRegistry_DefaultRegistry(t *testing.T) {
 	// Verify default algorithms are available
-	for _, algID := range []string{AlgorithmEd25519, AlgorithmRSAPSS, AlgorithmECDSAP256} {
+	for _, algID := range []string{AlgorithmEd25519, AlgorithmRSAPSS, AlgorithmECDSAP256, AlgorithmBLS} {
 		provider, err := DefaultRegistry.Get(algID)
 		if err != nil {
 			t.Errorf("Failed to get algorithm '%s' from DefaultRegistry: %v", algID, err)
@@ -608,6 +609,61 @@ func TestSignatureConsistency(t *testing.T) {
 				if err != nil {
 					t.Errorf("Verify iteration %d failed: %v", i, err)
 				}
+			}
+		})
+	}
+}
+
+// TestVerifyBatch tests batch verification logic for all providers.
+func TestVerifyBatch(t *testing.T) {
+	providers := []SignatureAlgorithm{
+		&Ed25519Provider{},
+		NewRSAPSSProvider(2048),
+		&ECDSAP256Provider{},
+	}
+
+	for _, provider := range providers {
+		t.Run(provider.AlgorithmID(), func(t *testing.T) {
+			count := 5
+			pubKeys := make([]interface{}, count)
+			messages := make([][]byte, count)
+			signatures := make([][]byte, count)
+
+			for i := 0; i < count; i++ {
+				priv, pub, err := provider.GenerateKey()
+				if err != nil {
+					t.Fatalf("GenerateKey failed: %v", err)
+				}
+				pubKeys[i] = pub
+				messages[i] = []byte(fmt.Sprintf("message-%d", i))
+				sig, err := provider.Sign(priv, messages[i])
+				if err != nil {
+					t.Fatalf("Sign failed: %v", err)
+				}
+				signatures[i] = sig
+			}
+
+			// 1. Valid Batch
+			if err := provider.VerifyBatch(pubKeys, messages, signatures); err != nil {
+				t.Errorf("Valid batch failed: %v", err)
+			}
+
+			// 2. Corrupted Signature
+			corruptedSigs := make([][]byte, count)
+			copy(corruptedSigs, signatures)
+			// Copy the signature slice to avoid mutating original
+			corruptedSig := make([]byte, len(signatures[0]))
+			copy(corruptedSig, signatures[0])
+			corruptedSig[0] ^= 0xFF
+			corruptedSigs[0] = corruptedSig
+
+			if err := provider.VerifyBatch(pubKeys, messages, corruptedSigs); err == nil {
+				t.Error("Expected failure with corrupted signature")
+			}
+
+			// 3. Length Mismatch
+			if err := provider.VerifyBatch(pubKeys[:count-1], messages, signatures); err == nil {
+				t.Error("Expected failure with mismatching public keys count")
 			}
 		})
 	}

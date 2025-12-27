@@ -37,12 +37,15 @@ type RevocationEvent struct {
 type RevocationReason string
 
 const (
-	RevocationReasonCompromise     RevocationReason = "compromise"         // key/material compromise suspected
-	RevocationReasonUserRequest    RevocationReason = "user_request"       // end-user voluntary revocation
-	RevocationReasonGrantorRevoked RevocationReason = "revoked_by_grantor" // grantor explicitly revoked
-	RevocationReasonPolicyExpired  RevocationReason = "policy_expired"     // policy condition invalidated (e.g., org membership)
-	RevocationReasonSuperseded     RevocationReason = "superseded"         // replaced by a new delegation / rotation
-	RevocationReasonAbuse          RevocationReason = "abuse_detected"     // abuse / anomaly detection triggered
+	RevocationReasonCompromise     RevocationReason = "compromise"               // key/material compromise suspected
+	RevocationReasonUserRequest    RevocationReason = "user_request"             // end-user voluntary revocation
+	RevocationReasonGrantorRevoked RevocationReason = "revoked_by_grantor"       // grantor explicitly revoked
+	RevocationReasonPolicyExpired  RevocationReason = "policy_expired"           // policy condition invalidated (e.g., org membership)
+	RevocationReasonSuperseded     RevocationReason = "superseded"               // replaced by a new delegation / rotation
+	RevocationReasonAbuse          RevocationReason = "abuse_detected"           // abuse / anomaly detection triggered
+	RevocationReasonSuspended      RevocationReason = "suspended"                // delegation temporarily suspended
+	RevocationReasonActivated      RevocationReason = "activated"                // delegation reactivated/resumed
+	RevocationReasonPartialScope   RevocationReason = "partial_scope_revocation" // specific scopes revoked
 )
 
 // validateReason enforces known reasons; empty reason is allowed (becomes grantor_revoked default).
@@ -52,7 +55,8 @@ func validateReason(r string) string {
 	}
 	switch RevocationReason(r) {
 	case RevocationReasonCompromise, RevocationReasonUserRequest, RevocationReasonGrantorRevoked,
-		RevocationReasonPolicyExpired, RevocationReasonSuperseded, RevocationReasonAbuse:
+		RevocationReasonPolicyExpired, RevocationReasonSuperseded, RevocationReasonAbuse,
+		RevocationReasonSuspended, RevocationReasonActivated, RevocationReasonPartialScope:
 		return r
 	default:
 		return string(RevocationReasonGrantorRevoked) // fallback to safe generic reason

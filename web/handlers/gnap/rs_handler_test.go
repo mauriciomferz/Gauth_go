@@ -18,7 +18,7 @@ func TestRegisterRS(t *testing.T) {
 	// Setup
 	store := gnap.NewMemoryGrantStore()
 	rsStore := gnap.NewMemoryResourceServerStore()
-	h := NewHandler(store, "http://localhost")
+	h := NewHandler(store, nil, "http://localhost")
 	h.RSStore = rsStore
 
 	r := gin.New()
@@ -61,7 +61,7 @@ func TestIntrospectRS(t *testing.T) {
 	store := gnap.NewMemoryGrantStore()
 	rsStore := gnap.NewMemoryResourceServerStore() // Needed for handler validity
 	tokenStore := gnap.NewMemoryTokenStore()
-	h := NewHandler(store, "http://localhost")
+	h := NewHandler(store, nil, "http://localhost")
 	h.RSStore = rsStore
 	h.TokenStore = tokenStore
 

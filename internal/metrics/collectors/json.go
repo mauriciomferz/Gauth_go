@@ -615,3 +615,11 @@ func (j *JSONCollector) SetCascadeMaxDepthReached(depth int) {
 func (j *JSONCollector) IncCascadeProcessingErrors() {
 	j.incrementCounter("cascade_processing_errors")
 }
+
+func (j *JSONCollector) ObserveExternalAnchorInterval(seconds float64) {
+	j.recordHistogram("external_anchor_interval_seconds", seconds)
+}
+
+func (j *JSONCollector) HygieneSnapshot() map[string]uint64 {
+	return nil
+}

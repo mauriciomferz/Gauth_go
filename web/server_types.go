@@ -156,8 +156,11 @@ type BetaServer struct {
 	lifecycleEvents map[string][]*LifecycleEvent // key: entityType+":"+id -> slice (append-only capped)
 	lifecycleCap    int
 	// JWKS metadata tracking for discovery integrity
+	jwksSignature   string
 	jwksETag        string
 	jwksLastRotated time.Time
+	// Deprecation metadata (Discovery Hardening RFC compliance)
+	deprecationSchedule map[string]time.Time
 	// Capability governance fields
 	// SLA freshness tracking for capability anchor (stale detection)
 	// Capability audit hash chain persistence (tracking capability-related audit entries: create, revoke, enforce)

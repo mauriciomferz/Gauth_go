@@ -18,6 +18,7 @@ type JSONMetricsExporter struct {
 	reasonTaxonomy  map[string]ReasonCategory
 	includeReasons  bool
 	includeMetadata bool
+	noop            // Embed noop to satisfy Metrics interface
 }
 
 // MetricsMetadata provides context about the metrics collection
@@ -358,55 +359,76 @@ func (e *JSONMetricsExporter) updateHistogramBuckets(hist *HistogramData, value 
 // initializeReasonTaxonomy creates the standard reason taxonomy
 func initializeReasonTaxonomy() map[string]ReasonCategory {
 	return map[string]ReasonCategory{
-		"policy_allow": {
-			Category:    "allow",
+		ReasonPolicyAllow: {
+			Category:    OutcomeAllow,
 			Description: "Authorization granted by policy evaluation",
 			Examples:    []string{"policy_match", "explicit_grant", "role_authorized"},
 		},
-		"policy_deny": {
-			Category:    "deny",
+		ReasonPolicyDeny: {
+			Category:    OutcomeDeny,
 			Description: "Authorization denied by policy evaluation",
 			Examples:    []string{"policy_mismatch", "explicit_deny", "role_unauthorized"},
 		},
-		"scope_violation": {
-			Category:    "deny",
+		ReasonScopeViolation: {
+			Category:    OutcomeDeny,
 			Description: "Request exceeds authorized scope",
 			Examples:    []string{"resource_out_of_scope", "action_not_permitted", "sector_mismatch"},
 		},
-		"temporal_violation": {
-			Category:    "deny",
+		ReasonTemporalViolation: {
+			Category:    OutcomeDeny,
 			Description: "Time-based constraint violation",
 			Examples:    []string{"token_expired", "not_yet_valid", "outside_hours"},
 		},
-		"delegation_exceeded": {
-			Category:    "deny",
+		ReasonDelegationExceeded: {
+			Category:    OutcomeDeny,
 			Description: "Delegation chain or depth limit exceeded",
 			Examples:    []string{"max_depth_exceeded", "delegation_revoked", "chain_broken"},
 		},
-		"signature_invalid": {
-			Category:    "deny",
+		ReasonSignatureInvalid: {
+			Category:    OutcomeDeny,
 			Description: "Cryptographic signature validation failed",
 			Examples:    []string{"signature_mismatch", "key_not_found", "algorithm_unsupported"},
 		},
-		"replay_detected": {
-			Category:    "deny",
+		ReasonReplayDetected: {
+			Category:    OutcomeDeny,
 			Description: "Token replay attack detected",
 			Examples:    []string{"jti_reused", "nonce_duplicate", "clock_skew_excessive"},
 		},
-		"revocation": {
-			Category:    "deny",
+		ReasonRevocation: {
+			Category:    OutcomeDeny,
 			Description: "Token or delegation has been revoked",
 			Examples:    []string{"token_revoked", "delegation_revoked", "key_rotated"},
 		},
-		"capability_insufficient": {
-			Category:    "deny",
+		ReasonCapabilityInsufficient: {
+			Category:    OutcomeDeny,
 			Description: "AI agent lacks required capability",
 			Examples:    []string{"model_limit_exceeded", "capability_not_granted", "approval_required"},
 		},
-		"jurisdiction_violation": {
-			Category:    "deny",
+		ReasonJurisdictionViolation: {
+			Category:    OutcomeDeny,
 			Description: "Jurisdiction or compliance constraint violated",
 			Examples:    []string{"region_restricted", "gdpr_violation", "cross_border_denied"},
 		},
 	}
+}
+
+// RecordDecision implements Metrics interface
+func (e *JSONMetricsExporter) RecordDecision(action string, resource string, outcome string, d time.Duration) {
+	labels := map[string]string{
+		"action":   action,
+		"resource": resource,
+		"outcome":  outcome,
+	}
+	e.RecordCounter("decision_total", 1, labels)
+}
+
+// RecordDecisionWithReason implements Metrics interface
+func (e *JSONMetricsExporter) RecordDecisionWithReason(action string, resource string, outcome string, reason string) {
+	labels := map[string]string{
+		"action":   action,
+		"resource": resource,
+		"outcome":  outcome,
+		"reason":   reason,
+	}
+	e.RecordCounter("decision_reason_total", 1, labels)
 }

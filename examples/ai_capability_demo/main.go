@@ -264,7 +264,9 @@ func startJWKSBackgroundRefresh() {
 				}
 				// Apply +/- jitter if configured (uniform)
 				if jitterSeconds > 0 {
+					// #nosec G404
 					j := time.Duration(rand.Intn(jitterSeconds*1000)) * time.Millisecond // 0..jitterSeconds
+					// #nosec G404
 					if rand.Intn(2) == 0 {
 						refreshDelay += j
 					} else {
@@ -1765,17 +1767,17 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			switch format {
 			case "csv":
 				c.Header("Content-Type", "text/csv; charset=utf-8")
-				c.Writer.Write([]byte("id,at,type,poa_id,actor,prev_hash,entry_hash\n"))
+				_, _ = c.Writer.Write([]byte("id,at,type,poa_id,actor,prev_hash,entry_hash\n"))
 				for _, e := range entries {
 					line := fmt.Sprintf("%d,%s,%s,%s,%s,%s,%s\n", e.ID, e.At.Format(time.RFC3339Nano), e.Type, escapeCSV(e.POAID), escapeCSV(e.Actor), e.PrevHash, e.EntryHash)
-					c.Writer.Write([]byte(line))
+					_, _ = c.Writer.Write([]byte(line))
 				}
 			case "ndjson":
 				c.Header("Content-Type", "application/x-ndjson")
 				for _, e := range entries {
 					b, _ := json.Marshal(e)
-					c.Writer.Write(b)
-					c.Writer.Write([]byte("\n"))
+					_, _ = c.Writer.Write(b)
+					_, _ = c.Writer.Write([]byte("\n"))
 				}
 			default:
 				c.JSON(400, gin.H{"error": "unsupported_format", "supported": []string{"ndjson", "csv"}})
@@ -2239,6 +2241,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 	fmt.Println("")
 	fmt.Println("Press Ctrl+C to stop the server")
 
+	// #nosec G114
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 

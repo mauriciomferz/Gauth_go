@@ -239,6 +239,15 @@ type ResourceLimits struct {
 
 	// CostCurrency specifies currency for cost limits
 	CostCurrency string `json:"cost_currency,omitempty"`
+
+	// MaxNodes limits the total number of nodes in a generated structure
+	MaxNodes int `json:"max_nodes,omitempty"`
+
+	// MaxDepth limits the depth of a tree/graph structure
+	MaxDepth int `json:"max_depth,omitempty"`
+
+	// MaxWidth limits the branching factor or width at any level
+	MaxWidth int `json:"max_width,omitempty"`
 }
 
 // Validate performs complete validation of power limit set
@@ -485,6 +494,18 @@ func (rl *ResourceLimits) Validate() error {
 
 	if rl.MaxCostPerDay < 0 {
 		return fmt.Errorf("max cost per day cannot be negative")
+	}
+
+	if rl.MaxNodes < 0 {
+		return fmt.Errorf("max nodes cannot be negative")
+	}
+
+	if rl.MaxDepth < 0 {
+		return fmt.Errorf("max depth cannot be negative")
+	}
+
+	if rl.MaxWidth < 0 {
+		return fmt.Errorf("max width cannot be negative")
 	}
 
 	return nil

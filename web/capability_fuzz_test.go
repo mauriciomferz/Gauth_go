@@ -109,7 +109,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		// Derive deterministic pseudo-random source from input bytes to avoid time-dependent flakiness.
 		// This stabilizes fuzz behavior across reruns while still exploring varied mutations based on corpus evolution.
 		h := sha256.Sum256(input)
-		//nolint:gosec // G115: deterministic seed from SHA256 hash, bounded by uint64 range
+		// #nosec G115: deterministic seed from SHA256 hash, bounded by uint64 range
 		seedInt := int64(binary.LittleEndian.Uint64(h[:8]))
 		//nolint:gosec // G404: weak random acceptable for fuzz test mutation
 		r := rand.New(rand.NewSource(seedInt))

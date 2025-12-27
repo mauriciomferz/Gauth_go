@@ -21,7 +21,7 @@ func TestRFC9767_RSConnection(t *testing.T) {
 	// without me checking the struct definition again...
 	// Wait, the handler struct has TokenStore field.
 
-	handler := gnaphandler.NewHandler(grantStore, "http://localhost:8080")
+	handler := gnaphandler.NewHandler(grantStore, nil, "http://localhost:8080")
 	handler.RSStore = rsStore
 	// TokenStore is nil by default, but introspect endpoint checks for it.
 	// We need to verify if handler.IntrospectRS checks for TokenStore presence before the "gauth_gnap_" mock check.
@@ -52,7 +52,7 @@ func TestRFC9767_FullFlow(t *testing.T) {
 	grantStore := gnap.NewMemoryGrantStore()
 	rsStore := gnap.NewMemoryResourceServerStore()
 
-	handler := gnaphandler.NewHandler(grantStore, "http://localhost:8080")
+	handler := gnaphandler.NewHandler(grantStore, nil, "http://localhost:8080")
 	handler.RSStore = rsStore
 	handler.TokenStore = &mockTokenStore{} // Use dummy to pass nil check
 

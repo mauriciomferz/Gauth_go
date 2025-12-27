@@ -66,7 +66,12 @@ func main() {
 			log.Printf("[pprof]   - Heap profile: http://localhost%s/debug/pprof/heap\n", pprofAddr)
 			log.Printf("[pprof]   - Goroutines: http://localhost%s/debug/pprof/goroutine\n", pprofAddr)
 			log.Printf("[pprof]   - All profiles: http://localhost%s/debug/pprof/\n", pprofAddr)
-			if err := http.ListenAndServe(pprofAddr, nil); err != nil {
+			server := &http.Server{
+				Addr:         pprofAddr,
+				ReadTimeout:  30 * time.Second,
+				WriteTimeout: 30 * time.Second,
+			}
+			if err := server.ListenAndServe(); err != nil {
 				log.Printf("[pprof] Server failed: %v\n", err)
 			}
 		}()

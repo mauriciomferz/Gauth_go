@@ -482,7 +482,7 @@ func (h *Handler) writeAudit(modelID, kind string, provided, limit int, windowSt
 		if _, err := f.Write(append(final, byte('\n'))); err != nil {
 			fmt.Fprintf(os.Stderr, "[model-limits] audit write failed: %v\n", err)
 		}
-		f.Close()
+		_ = f.Close()
 		h.auditPrevHash = entry["hash"].(string)
 		h.auditEntryCount++
 		go h.EmitAttestation("audit_append")
@@ -602,7 +602,7 @@ func (h *Handler) AnchorAuditIfNeeded() {
 		if _, err := f.Write(append(final, byte('\n'))); err != nil {
 			fmt.Fprintf(os.Stderr, "[model-limits] anchor write failed: %v\n", err)
 		}
-		f.Close()
+		_ = f.Close()
 		h.anchorPrevHash = anchor["hash"].(string)
 		go h.EmitAttestation("anchor_commit")
 	}
@@ -739,7 +739,7 @@ func (h *Handler) MaybeAugmentAndSign(att ModelLimitsAttestation) ModelLimitsAtt
 		if active := h.KeyManager.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
 			if att.Nonce == "" {
 				var nb [16]byte
-				rand.Read(nb[:])
+				_, _ = rand.Read(nb[:])
 				att.Nonce = base64.RawStdEncoding.EncodeToString(nb[:])
 			}
 			unsigned := att

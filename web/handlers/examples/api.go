@@ -1,6 +1,9 @@
+// Package examples provides HTTP handlers for example execution.
 package examples
 
 import (
+	cryptorand "crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -27,6 +30,7 @@ type API struct {
 	Jobs       *JobManager
 	Examples   []*ExampleMeta
 	examplesMu sync.RWMutex
+	rng        *rand.Rand // Secure random for job IDs
 }
 
 // NewAPI creates a new examples API.
@@ -34,8 +38,20 @@ func NewAPI(jobs *JobManager) *API {
 	if jobs == nil {
 		jobs = NewJobManager(200) // Default capacity
 	}
+	// Initialize secure RNG for job ID generation
+	var buf [8]byte
+	var seed int64
+	if _, err := cryptorand.Read(buf[:]); err != nil {
+		// Fallback to time-based seed only if crypto/rand fails
+		seed = time.Now().UnixNano()
+	} else {
+		// #nosec G115: int64 seed overflow from uint64 bytes is fine for RNG seeding
+		seed = int64(binary.LittleEndian.Uint64(buf[:]))
+	}
 	api := &API{
 		Jobs: jobs,
+		// #nosec G404
+		rng: rand.New(rand.NewSource(seed)),
 	}
 	api.seedExamples()
 	return api
@@ -80,7 +96,7 @@ func (a *API) Run(c *gin.Context) {
 		c.JSON(400, gin.H{"success": false, "message": "missing id"})
 		return
 	}
-	job := &ExampleJob{ID: randomNonce(8), ExampleID: req.ID, State: JobQueued, CreatedAt: time.Now()}
+	job := &ExampleJob{ID: a.randomNonce(8), ExampleID: req.ID, State: JobQueued, CreatedAt: time.Now()}
 	a.Jobs.AddJob(job)
 	a.Jobs.SetJobState(job.ID, JobRunning, "", "")
 	a.Jobs.AppendLog(job.ID, "Starting example "+req.ID)
@@ -267,11 +283,13 @@ func escapeSSEData(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, "\n", " "), "\r", " ")
 }
 
-func randomNonce(n int) string {
+// randomNonce generates a secure random nonce for job IDs.
+// Uses crypto/rand-seeded RNG to ensure unpredictability.
+func (a *API) randomNonce(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyz0123456789"
 	b := make([]byte, n)
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		b[i] = letters[a.rng.Intn(len(letters))]
 	}
 	return string(b)
 }

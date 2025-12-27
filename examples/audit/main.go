@@ -34,7 +34,7 @@ func main() {
 		"ip_address": "192.168.1.100",
 		"user_agent": "Mozilla/5.0",
 	}
-	logger.Log(ctx, loginEvent)
+	_ = logger.Log(ctx, loginEvent)
 	fmt.Printf("Logged successful login for user123\n")
 
 	// Failed login attempt (stubbed, see TODO)
@@ -62,7 +62,7 @@ func main() {
 		"expires_in": "3600",
 		"scope":      "read write",
 	}
-	logger.Log(ctx, tokenEvent)
+	_ = logger.Log(ctx, tokenEvent)
 	fmt.Printf("Logged token creation\n")
 
 	// Token revocation (demo)
@@ -72,7 +72,7 @@ func main() {
 	revokeEvent.Metadata = map[string]interface{}{
 		"ip_address": "192.168.1.100",
 	}
-	logger.Log(ctx, revokeEvent)
+	_ = logger.Log(ctx, revokeEvent)
 	fmt.Printf("Logged token revocation\n")
 
 	// 3. Search audit logs (stubbed)

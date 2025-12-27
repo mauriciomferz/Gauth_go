@@ -1,6 +1,10 @@
 package compliance
 
-import "context"
+import (
+	"context"
+	"crypto/ed25519"
+	"fmt"
+)
 
 // Attestation represents a compliance attestation proof for a flow or action.
 type Attestation struct {
@@ -8,7 +12,8 @@ type Attestation struct {
 	FlowID       string
 	Jurisdiction Jurisdiction
 	Entity       EntityType
-	Proof        []byte // cryptographic proof or signed statement
+	SignerID     string
+	Proof        []byte // cryptographic signature
 	Timestamp    int64
 	Verified     bool
 }
@@ -16,14 +21,61 @@ type Attestation struct {
 // AttestationVerifier verifies attestation proofs.
 type AttestationVerifier interface {
 	Verify(att Attestation) (bool, error)
+	RegisterKey(signerID string, pubKey ed25519.PublicKey)
 }
 
-// DefaultAttestationVerifier is a stub implementation.
-type DefaultAttestationVerifier struct{}
+// AttestationSigner creates attestation proofs.
+type AttestationSigner interface {
+	Sign(id, flowID string, ts int64) ([]byte, error)
+	SignerID() string
+}
+
+// Ed25519Signer implements AttestationSigner.
+type Ed25519Signer struct {
+	id      string
+	privKey ed25519.PrivateKey
+}
+
+func NewEd25519Signer(id string, privKey ed25519.PrivateKey) *Ed25519Signer {
+	return &Ed25519Signer{id: id, privKey: privKey}
+}
+
+func (s *Ed25519Signer) Sign(id, flowID string, ts int64) ([]byte, error) {
+	msg := fmt.Sprintf("%s:%s:%d", id, flowID, ts)
+	return ed25519.Sign(s.privKey, []byte(msg)), nil
+}
+
+func (s *Ed25519Signer) SignerID() string {
+	return s.id
+}
+
+// DefaultAttestationVerifier is a robust implementation.
+type DefaultAttestationVerifier struct {
+	trustedKeys map[string]ed25519.PublicKey
+}
+
+func NewDefaultAttestationVerifier() *DefaultAttestationVerifier {
+	return &DefaultAttestationVerifier{
+		trustedKeys: make(map[string]ed25519.PublicKey),
+	}
+}
+
+func (v *DefaultAttestationVerifier) RegisterKey(signerID string, pubKey ed25519.PublicKey) {
+	v.trustedKeys[signerID] = pubKey
+}
 
 func (v *DefaultAttestationVerifier) Verify(att Attestation) (bool, error) {
-	// TODO: Implement real verification logic
-	return att.Verified, nil
+	pubKey, ok := v.trustedKeys[att.SignerID]
+	if !ok {
+		return false, fmt.Errorf("unknown signer: %s", att.SignerID)
+	}
+
+	msg := fmt.Sprintf("%s:%s:%d", att.ID, att.FlowID, att.Timestamp)
+	if !ed25519.Verify(pubKey, []byte(msg), att.Proof) {
+		return false, fmt.Errorf("invalid signature for attestation %s", att.ID)
+	}
+
+	return true, nil
 }
 
 // ArbitrationMetadata holds metadata for dispute resolution.

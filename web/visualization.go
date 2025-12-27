@@ -225,40 +225,40 @@ func createDemoComplexGraph(c *gin.Context) {
 		"type":         "organization",
 		"jurisdiction": "US",
 	})
-	graph.SetNodePosition(principal.ID, 0, 0, 0) //nolint:errcheck
+	_ = graph.SetNodePosition(principal.ID, 0, 0, 0)
 
 	// Create authorizers
 	agent1 := graph.AddNode("authorizer", "Legal Department", "Authorized legal agent", "👔", map[string]interface{}{
 		"department": "legal",
 	})
-	graph.SetNodePosition(agent1.ID, -3, 0, 2) //nolint:errcheck
+	_ = graph.SetNodePosition(agent1.ID, -3, 0, 2)
 
 	agent2 := graph.AddNode("authorizer", "Finance Department", "Authorized finance agent", "💼", map[string]interface{}{
 		"department": "finance",
 	})
-	graph.SetNodePosition(agent2.ID, 3, 0, 2) //nolint:errcheck
+	_ = graph.SetNodePosition(agent2.ID, 3, 0, 2)
 
 	// Create AI clients
 	aiClient1 := graph.AddNode("client", "Legal AI Assistant", "AI for legal document processing", "🤖", map[string]interface{}{
 		"capability": "document_analysis",
 	})
-	graph.SetNodePosition(aiClient1.ID, -3, 0, 4) //nolint:errcheck
+	_ = graph.SetNodePosition(aiClient1.ID, -3, 0, 4)
 
 	aiClient2 := graph.AddNode("client", "Finance AI Assistant", "AI for financial analysis", "🤖", map[string]interface{}{
 		"capability": "financial_analysis",
 	})
-	graph.SetNodePosition(aiClient2.ID, 3, 0, 4) //nolint:errcheck
+	_ = graph.SetNodePosition(aiClient2.ID, 3, 0, 4)
 
 	// Create resources
 	resource1 := graph.AddNode("resource", "Legal Documents", "Contracts and legal files", "📄", map[string]interface{}{
 		"sensitivity": "high",
 	})
-	graph.SetNodePosition(resource1.ID, -3, 0, 6) //nolint:errcheck
+	_ = graph.SetNodePosition(resource1.ID, -3, 0, 6)
 
 	resource2 := graph.AddNode("resource", "Financial Database", "Financial records and transactions", "💾", map[string]interface{}{
 		"sensitivity": "critical",
 	})
-	graph.SetNodePosition(resource2.ID, 3, 0, 6) //nolint:errcheck
+	_ = graph.SetNodePosition(resource2.ID, 3, 0, 6)
 
 	// Create delegation edges
 	graph.AddEdge(principal.ID, agent1.ID, "delegates", "Delegates legal authority", 0.95, map[string]interface{}{
@@ -292,7 +292,7 @@ func createDemoComplexGraph(c *gin.Context) {
 	})
 
 	// Set one node to pending for demo
-	graph.UpdateNodeStatus(aiClient2.ID, "pending") //nolint:errcheck
+	_ = graph.UpdateNodeStatus(aiClient2.ID, "pending")
 
 	c.JSON(http.StatusCreated, gin.H{
 		"graph":   graph,

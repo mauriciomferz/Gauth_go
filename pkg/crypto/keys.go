@@ -20,6 +20,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/internal/anchor"
 	"github.com/mauriciomferz/Gauth_go/internal/tracing"
 	ledger "github.com/mauriciomferz/Gauth_go/pkg/ledger"
 )
@@ -99,10 +100,48 @@ func NewManager(ttl time.Duration) (*Manager, error) {
 	// Optional ledger integration for rotation audit events (hash-chained & persistent)
 	if lp := os.Getenv("GAUTH_EDDSA_ROTATION_LEDGER_PATH"); lp != "" {
 		if abs, err := filepath.Abs(lp); err == nil {
-			if st, err := ledger.NewBoltStore(abs); err == nil {
-				m.ledgerStore = st
+			// Check for generic External Anchor configuration
+			anchorProvider := os.Getenv("GAUTH_ROTATION_ANCHOR_PROVIDER")
+			anchorURL := os.Getenv("GAUTH_ROTATION_ANCHOR_URL")
+
+			if anchorProvider != "" && anchorURL != "" {
+				// Use ExternalAuditLedger
+				fmt.Fprintf(os.Stderr, "[crypto] initializing external audit ledger with provider %s\n", anchorProvider)
+
+				var provider anchor.Provider
+				if anchorProvider == "rfc3161" {
+					provider = ledger.NewRFC3161Provider(anchorURL)
+				}
+
+				if provider != nil {
+					// Use same path for receipt store with .receipts extension if not specified
+					receiptPath := abs + ".receipts"
+					if rp := os.Getenv("GAUTH_ROTATION_ANCHOR_RECEIPT_PATH"); rp != "" {
+						receiptPath = rp
+					}
+
+					if st, err := ledger.NewExternalAuditLedger(abs, provider, receiptPath, 60*time.Second); err == nil {
+						m.ledgerStore = st
+					} else {
+						fmt.Fprintf(os.Stderr, "[crypto] external rotation ledger init failed: %v\n", err)
+						// Fallback to basic bolt store
+						if st, err := ledger.NewBoltStore(abs); err == nil {
+							m.ledgerStore = st
+						}
+					}
+				} else {
+					// Invalid provider, fallback
+					if st, err := ledger.NewBoltStore(abs); err == nil {
+						m.ledgerStore = st
+					}
+				}
 			} else {
-				fmt.Fprintf(os.Stderr, "[crypto] rotation ledger init failed: %v\n", err)
+				// Standard BoltStore
+				if st, err := ledger.NewBoltStore(abs); err == nil {
+					m.ledgerStore = st
+				} else {
+					fmt.Fprintf(os.Stderr, "[crypto] rotation ledger init failed: %v\n", err)
+				}
 			}
 		}
 	}

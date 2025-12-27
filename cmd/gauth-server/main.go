@@ -1,24 +1,16 @@
-// Package main provides a demonstration of the GAuth protocol implementation
-//
-// This demo shows the basic flow of the GAuth protocol, including:
-// - Authorization request and grant
-// - Token issuance
-// - Transaction processing
-// - Audit logging
-// - Token expiration
 package main
 
 import (
-	"flag"
-	"fmt"
-	"net/http"
-	"os"
-	"time"
+"flag"
+"fmt"
+"net/http"
+"os"
+"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/config"
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+"github.com/mauriciomferz/Gauth_go/internal/config"
+imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -35,11 +27,11 @@ func main() {
 			os.Exit(1)
 		}
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			fmt.Println("OK")
 			os.Exit(0)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		fmt.Printf("unhealthy status: %d\n", resp.StatusCode)
 		os.Exit(1)
 	}
@@ -81,7 +73,7 @@ func main() {
 	scopes := []string{"transaction:execute", "read", "write"}
 	expiry := config.GetDurationSeconds("GAUTH_TOKEN_EXPIRY_SECONDS", 3600)
 
-	config := gauth.Config{
+	gconfig := gauth.Config{
 		AuthServerURL:     authURL,
 		ClientID:          clientID,
 		ClientSecret:      clientSecret,
@@ -95,7 +87,7 @@ func main() {
 	if enableProm {
 		_ = imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "core"})
 	}
-	authService, err := gauth.New(config)
+	authService, err := gauth.New(gconfig)
 	if err != nil {
 		fmt.Println("Error creating GAuth instance:", err)
 		return

@@ -84,9 +84,13 @@ const (
 	EventTypeGNAPTokenIssue    EventType = "gnap_token_issue"
 	EventTypeGNAPTokenRotate   EventType = "gnap_token_rotate"
 	EventTypeGNAPTokenRevoke   EventType = "gnap_token_revoke"
+	EventTypeObligation        EventType = "obligation"
 )
 
-// Event represents an audit event
+// Logger defines the interface for audit logging
+type Logger interface {
+	Log(ctx context.Context, entry interface{}) error
+}
 
 // MemoryLogger implements audit logging in memory
 type MemoryLogger struct {

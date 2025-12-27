@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -27,7 +28,12 @@ func main() {
 	}
 
 	fmt.Printf("Starting GAuth %s on port %s\n", version, port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	server := &http.Server{
+		Addr:         ":" + port,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	if err := server.ListenAndServe(); err != nil {
 		fmt.Printf("Server failed: %v\n", err)
 		os.Exit(1)
 	}

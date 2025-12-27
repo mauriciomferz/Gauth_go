@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	GrantTypeJWTBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+	GrantTypeJWTBearer         = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+	GrantTypeIdentityAssertion = "urn:ietf:params:oauth:grant-type:identity-assertion"
 )
 
 type Handler struct {
@@ -38,7 +39,7 @@ func (h *Handler) HandleTokenRequest(c *gin.Context) {
 	grantType := c.PostForm("grant_type")
 	assertion := c.PostForm("assertion")
 
-	if grantType != GrantTypeJWTBearer {
+	if grantType != GrantTypeJWTBearer && grantType != GrantTypeIdentityAssertion {
 		// Pass through to next handler or return error if this is the only one
 		// For now, we assume this endpoint might handle multiple, but here we error
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported_grant_type"})

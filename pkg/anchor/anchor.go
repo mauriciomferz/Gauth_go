@@ -121,7 +121,8 @@ func (m *MemoryAnchor) save() error {
 		return err
 	}
 	// Ensure directory exists
-	if err := os.MkdirAll(filepath.Dir(m.persistPath), 0o755); err != nil {
+	// #nosec G301
+	if err := os.MkdirAll(filepath.Dir(m.persistPath), 0o750); err != nil {
 		return err
 	}
 	tmpPath := m.persistPath + ".tmp"

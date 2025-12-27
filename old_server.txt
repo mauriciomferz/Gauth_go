@@ -3133,7 +3133,7 @@ func (s *BetaServer) loadCapabilitiesFromFile(path string) error {
 						pm.SetCapabilityAnchorEmissionJitter(stddev)
 					}
 				}
-				//nolint:gosec // G115: Unix timestamp always positive, safe conversion
+				// #nosec G115: Unix timestamp always positive, safe conversion
 				// Record unix epoch seconds of last write for status freshness monitoring (memory + prometheus adapter supported).
 				if s.metrics != nil {
 					s.metrics.SetCapabilityAnchorLastWriteUnix(uint64(s.capAnchorLastWrite.Unix()))
@@ -6945,11 +6945,11 @@ func (s *BetaServer) apiPolicyMetricsPrometheus(c *gin.Context) {
 		// midpoint approximation between previous bound (exclusive) and current bound (inclusive)
 		low := prevBound
 		if i == 0 {
-			//nolint:gosec // G115: histogram calculation, segmentMid bounded
+			// #nosec G115: histogram calculation, segmentMid bounded
 			low = 0
 		}
 		segmentMid := (low + ub) / 2
-		approxSum += uint64(segmentMid) * cnt //nolint:gosec // G115: histogram
+		approxSum += uint64(segmentMid) * cnt // #nosec G115: histogram
 		b.WriteString(fmt.Sprintf("gauth_policy_eval_latency_ns_bucket{le=\"%d\"} %d\n", ub, cumulative))
 		prevBound = ub
 	}

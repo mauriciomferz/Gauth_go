@@ -23,9 +23,10 @@ import (
 
 // Algorithm identifier constants following IANA JOSE registry conventions
 const (
-	AlgorithmEd25519   = "EdDSA" // RFC 8032 - Ed25519 signature algorithm
-	AlgorithmRSAPSS    = "PS256" // RFC 8017 - RSA-PSS with SHA-256
-	AlgorithmECDSAP256 = "ES256" // RFC 7518 - ECDSA with P-256 and SHA-256
+	AlgorithmEd25519   = "EdDSA"     // RFC 8032 - Ed25519 signature algorithm
+	AlgorithmRSAPSS    = "PS256"     // RFC 8017 - RSA-PSS with SHA-256
+	AlgorithmECDSAP256 = "ES256"     // RFC 7518 - ECDSA with P-256 and SHA-256
+	AlgorithmBLS       = "BLS12-381" // BLS12-381 curve
 )
 
 // AlgorithmSignerVerifier provides core signing and verification operations for algorithm providers.
@@ -39,6 +40,9 @@ type AlgorithmSignerVerifier interface {
 
 	// AlgorithmID returns the IANA JOSE algorithm identifier (e.g., "EdDSA", "PS256", "ES256")
 	AlgorithmID() string
+
+	// VerifyBatch validates a batch of signatures dependent on the algorithm
+	VerifyBatch(publicKeys []interface{}, messages [][]byte, signatures [][]byte) error
 }
 
 // KeyFactory generates new key pairs for a specific algorithm.
@@ -103,6 +107,14 @@ func (p *Ed25519Provider) Verify(publicKey interface{}, message, signature []byt
 		return errors.New("signature verification failed")
 	}
 	return nil
+}
+
+// VerifyBatch checks a batch of Ed25519 signatures.
+func (p *Ed25519Provider) VerifyBatch(publicKeys []interface{}, messages [][]byte, signatures [][]byte) error {
+	if BatchVerifyEd25519(publicKeys, messages, signatures) {
+		return nil
+	}
+	return errors.New("batch signature verification failed")
 }
 
 // KeyType returns the Go type name for Ed25519 private keys.
@@ -240,6 +252,19 @@ func (p *RSAPSSProvider) Verify(publicKey interface{}, message, signature []byte
 	return nil
 }
 
+// VerifyBatch checks a batch of RSA-PSS signatures.
+func (p *RSAPSSProvider) VerifyBatch(publicKeys []interface{}, messages [][]byte, signatures [][]byte) error {
+	if len(publicKeys) != len(messages) || len(publicKeys) != len(signatures) {
+		return errors.New("batch length mismatch")
+	}
+	for i, pk := range publicKeys {
+		if err := p.Verify(pk, messages[i], signatures[i]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // KeyType returns the Go type name for RSA private keys.
 func (p *RSAPSSProvider) KeyType() string {
 	return "*rsa.PrivateKey"
@@ -354,6 +379,19 @@ func (p *ECDSAP256Provider) Verify(publicKey interface{}, message, signature []b
 	return nil
 }
 
+// VerifyBatch checks a batch of ECDSA P-256 signatures.
+func (p *ECDSAP256Provider) VerifyBatch(publicKeys []interface{}, messages [][]byte, signatures [][]byte) error {
+	if len(publicKeys) != len(messages) || len(publicKeys) != len(signatures) {
+		return errors.New("batch length mismatch")
+	}
+	for i, pk := range publicKeys {
+		if err := p.Verify(pk, messages[i], signatures[i]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // KeyType returns the Go type name for ECDSA private keys.
 func (p *ECDSAP256Provider) KeyType() string {
 	return "*ecdsa.PrivateKey"
@@ -450,6 +488,7 @@ func NewAlgorithmRegistry() *AlgorithmRegistry {
 	registry.Register(AlgorithmEd25519, &Ed25519Provider{})
 	registry.Register(AlgorithmRSAPSS, NewRSAPSSProvider(2048))
 	registry.Register(AlgorithmECDSAP256, &ECDSAP256Provider{})
+	registry.Register(AlgorithmBLS, NewBLSProvider(""))
 
 	return registry
 }

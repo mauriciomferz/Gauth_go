@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -82,13 +83,32 @@ func (f *FileKeyStore) Generate(ctx context.Context, tenant string) (string, err
 	// Create key ID from first 8 bytes of public key
 	keyID := base64.RawURLEncoding.EncodeToString(pub[:8])
 
+	// Encrypt private key if master key is present
+	privBytes := []byte(priv)
+	if len(f.masterKey) == 32 {
+		block, err := aes.NewCipher(f.masterKey)
+		if err != nil {
+			return "", fmt.Errorf("AES cipher error: %w", err)
+		}
+		gcm, err := cipher.NewGCM(block)
+		if err != nil {
+			return "", fmt.Errorf("AES-GCM error: %w", err)
+		}
+		nonce := make([]byte, gcm.NonceSize())
+		if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+			return "", fmt.Errorf("nonce generation failed: %w", err)
+		}
+		// Seal appends nonce + ciphertext + tag
+		privBytes = gcm.Seal(nonce, nonce, privBytes, nil)
+	}
+
 	// Prepare key data
 	now := time.Now().UTC()
 	keyData := FileKeyData{
 		Algorithm:  "Ed25519",
 		CreatedAt:  now,
 		ExpiresAt:  now.Add(f.ttl),
-		PrivateKey: base64.StdEncoding.EncodeToString(priv),
+		PrivateKey: base64.StdEncoding.EncodeToString(privBytes),
 		PublicKey:  base64.StdEncoding.EncodeToString(pub),
 		Tenant:     tenant,
 		Active:     false,

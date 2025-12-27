@@ -2,7 +2,9 @@ package replay
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -290,16 +292,72 @@ func (d *DurableReplayStore) recover() error {
 
 // loadSnapshot loads snapshot file into memory.
 func (d *DurableReplayStore) loadSnapshot(path string) error {
-	// Implementation uses json.Decoder to read snapshot array
-	// (see web/replay_store.go SnapshotAndCompact for format)
-	// Simplified: delegate to WALStore.Snapshot format parsing
-	return nil // Snapshot loading handled by WAL recovery
+	f, err := os.Open(path)
+	if isNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	type snapEntry struct {
+		Key string `json:"key"`
+		TS  int64  `json:"ts"`
+	}
+
+	var entries []snapEntry
+	if err := json.NewDecoder(f).Decode(&entries); err != nil {
+		if err == io.EOF {
+			return nil
+		}
+		return fmt.Errorf("decode snapshot: %w", err)
+	}
+
+	for _, entry := range entries {
+		ts := time.Unix(entry.TS, 0)
+		d.entries[entry.Key] = ts
+		d.accessTimes[entry.Key] = ts // Initialize access time to preserved timestamp
+	}
+	return nil
 }
 
 // isNotExist checks if error is "file not found".
 func isNotExist(err error) bool {
-	// Use os.IsNotExist or errors.Is for proper check
-	return err != nil && (err.Error() == "file does not exist" || err.Error() == "no such file or directory")
+	return os.IsNotExist(err)
+}
+
+// Snapshot creates a point-in-time snapshot and compacts WAL.
+func (d *DurableReplayStore) Snapshot() error {
+	d.mu.RLock()
+	// Build active entries (exclude expired)
+	now := time.Now()
+	active := make(map[string]time.Time, len(d.entries))
+	for k, ts := range d.entries {
+		if now.Sub(ts) <= d.ttl {
+			active[k] = ts
+		}
+	}
+	d.mu.RUnlock()
+
+	// 1. Write snapshot file (outside lock)
+	snapStart := time.Now()
+	if err := d.wal.Snapshot(active); err != nil {
+		d.metrics.IncReplayStoreErrors()
+		return fmt.Errorf("create snapshot: %w", err)
+	}
+	d.metrics.ObserveReplayWALSnapshotDuration(time.Since(snapStart))
+
+	// 2. Clear WAL (truncate) to start fresh delta log
+	// Note: We intentionally do NOT re-append entries to WAL here.
+	// We rely on loadSnapshot + new WAL updates for recovery.
+	if err := d.wal.Rotate(); err != nil {
+		d.metrics.IncReplayStoreErrors()
+		return fmt.Errorf("rotate WAL: %w", err)
+	}
+	d.metrics.SetReplayWALPending(0)
+
+	return nil
 }
 
 // Seen checks if JTI has been seen before (thread-safe).
@@ -487,49 +545,6 @@ func (d *DurableReplayStore) Record(jti string, at time.Time) error {
 	d.metrics.ObserveReplayStoreLatency(time.Since(start))
 	d.metrics.SetReplayWALPending(len(d.entries))
 	d.metrics.SetReplayStoreSize(len(d.entries))
-
-	return nil
-}
-
-// Snapshot creates a point-in-time snapshot and compacts WAL.
-func (d *DurableReplayStore) Snapshot() error {
-	d.mu.RLock()
-	// Build active entries (exclude expired)
-	now := time.Now()
-	active := make(map[string]time.Time, len(d.entries))
-	for k, ts := range d.entries {
-		if now.Sub(ts) <= d.ttl {
-			active[k] = ts
-		}
-	}
-	d.mu.RUnlock()
-
-	// Write snapshot (outside lock)
-	snapStart := time.Now()
-	if err := d.wal.Snapshot(active); err != nil {
-		d.metrics.IncReplayStoreErrors()
-		return fmt.Errorf("create snapshot: %w", err)
-	}
-	d.metrics.ObserveReplayWALSnapshotDuration(time.Since(snapStart))
-
-	// Rotate WAL (truncate)
-	if err := d.wal.Rotate(); err != nil {
-		d.metrics.IncReplayStoreErrors()
-		return fmt.Errorf("rotate WAL: %w", err)
-	}
-
-	// Re-append active entries to new WAL
-	flushStart := time.Now()
-	for k, ts := range active {
-		_ = d.wal.AppendRecord(WALRecord{
-			Op:    "Record",
-			Key:   []byte(k),
-			Value: nil,
-			TS:    ts.Unix(),
-		})
-	}
-	d.metrics.ObserveReplayWALFlushLatency(time.Since(flushStart))
-	d.metrics.SetReplayWALPending(0)
 
 	return nil
 }

@@ -99,7 +99,7 @@ func (s *BetaServer) registerCapabilityDiff() {
 		start := time.Now()
 		// RB9 tracing span (capability.diff)
 		var span *tracing.Span
-		//nolint:gosec // G404: weak random acceptable for trace sampling decision
+		// #nosec G404
 		if s.tracerProvider != nil && (s.tracerSampleRatio <= 0 || rand.Float64() < s.tracerSampleRatio) {
 			_, span = s.tracerProvider.StartSpan(c.Request.Context(), "capability.diff")
 			if span != nil {

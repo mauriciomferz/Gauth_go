@@ -58,12 +58,17 @@ func (b *AuthorizationBridge) AuthorizeResourceRead(
 		Attributes: map[string]string{
 			"token_id":         token.AccessToken,
 			"client_id":        token.AuthorizationChain.Client.EntityID,
+			"client_name":      token.AuthorizationChain.Client.EntityName,
+			"client_type":      token.AuthorizationChain.Client.EntityType,
 			"client_owner_id":  token.ClientOwner.OwnerID,
 			"authorizer_id":    token.OwnersAuthorizer.AuthorizerID,
 			"resource_uri":     resourceURI,
 			"resource_type":    extractResourceType(resourceURI),
 			"jurisdiction":     token.JurisdictionContext.PrimaryJurisdiction,
 			"compliance_level": token.ComplianceLevel,
+			"agent_id":         token.AuthorizationChain.Client.EntityID,
+			"agent_name":       token.AuthorizationChain.Client.EntityName,
+			"agent_assurance":  b.extractAgentAssurance(token),
 		},
 		Time: time.Now(),
 	}
@@ -112,6 +117,9 @@ func (b *AuthorizationBridge) AuthorizeToolCall(
 		return false, fmt.Errorf("tool restriction violation: %w", err)
 	}
 
+	// Update PDP request with argument-specific context if applicable
+	monetaryValue, hasValue := extractMonetaryValue(arguments)
+
 	// Build PDP request for policy evaluation
 	pdpRequest := pdp.Request{
 		Subject:  token.AuthorizationChain.Client.EntityID,
@@ -120,14 +128,23 @@ func (b *AuthorizationBridge) AuthorizeToolCall(
 		Attributes: map[string]string{
 			"token_id":         token.AccessToken,
 			"client_id":        token.AuthorizationChain.Client.EntityID,
+			"client_name":      token.AuthorizationChain.Client.EntityName,
+			"client_type":      token.AuthorizationChain.Client.EntityType,
 			"client_owner_id":  token.ClientOwner.OwnerID,
 			"authorizer_id":    token.OwnersAuthorizer.AuthorizerID,
 			"tool_name":        toolName,
 			"jurisdiction":     token.JurisdictionContext.PrimaryJurisdiction,
 			"compliance_level": token.ComplianceLevel,
+			"agent_id":         token.AuthorizationChain.Client.EntityID,
+			"agent_name":       token.AuthorizationChain.Client.EntityName,
+			"agent_assurance":  b.extractAgentAssurance(token),
 			"argument_count":   fmt.Sprintf("%d", len(arguments)),
 		},
 		Time: time.Now(),
+	}
+
+	if hasValue {
+		pdpRequest.Attributes["monetary_value"] = fmt.Sprintf("%.2f", monetaryValue)
 	}
 
 	// Evaluate policy through PDP
@@ -176,11 +193,16 @@ func (b *AuthorizationBridge) AuthorizePromptGet(
 		Attributes: map[string]string{
 			"token_id":         token.AccessToken,
 			"client_id":        token.AuthorizationChain.Client.EntityID,
+			"client_name":      token.AuthorizationChain.Client.EntityName,
+			"client_type":      token.AuthorizationChain.Client.EntityType,
 			"client_owner_id":  token.ClientOwner.OwnerID,
 			"authorizer_id":    token.OwnersAuthorizer.AuthorizerID,
 			"prompt_name":      promptName,
 			"jurisdiction":     token.JurisdictionContext.PrimaryJurisdiction,
 			"compliance_level": token.ComplianceLevel,
+			"agent_id":         token.AuthorizationChain.Client.EntityID,
+			"agent_name":       token.AuthorizationChain.Client.EntityName,
+			"agent_assurance":  b.extractAgentAssurance(token),
 		},
 		Time: time.Now(),
 	}
@@ -427,6 +449,9 @@ func (b *AuthorizationBridge) AuthorizeWithDetails(
 			"authorizer_id":    token.OwnersAuthorizer.AuthorizerID,
 			"jurisdiction":     token.JurisdictionContext.PrimaryJurisdiction,
 			"compliance_level": token.ComplianceLevel,
+			"agent_id":         token.AuthorizationChain.Client.EntityID,
+			"agent_name":       token.AuthorizationChain.Client.EntityName,
+			"agent_assurance":  b.extractAgentAssurance(token),
 		},
 		Time: time.Now(),
 	}
@@ -454,4 +479,18 @@ func (b *AuthorizationBridge) AuthorizeWithDetails(
 	}
 
 	return result, nil
+}
+
+// extractAgentAssurance retrieves the identity assurance level of the agent (client)
+func (b *AuthorizationBridge) extractAgentAssurance(token *gauth.ExtendedToken) string {
+	if token.VerificationProof == nil {
+		return "none"
+	}
+	agentID := token.AuthorizationChain.Client.EntityID
+	for _, level := range token.VerificationProof.VerificationLevels {
+		if level.EntityID == agentID && level.AssuranceLevel != "" {
+			return level.AssuranceLevel
+		}
+	}
+	return "none"
 }

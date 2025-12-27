@@ -5,10 +5,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"strings"
 	"time"
 )
 
@@ -44,10 +41,10 @@ type VaultConfig struct {
 
 // NewVaultKeyStore creates a new Vault-backed key store.
 func NewVaultKeyStore(config VaultConfig) (*VaultKeyStore, error) {
-	client := &httpVaultClient{
-		address: config.Address,
-		token:   config.Token,
-		client:  &http.Client{Timeout: 30 * time.Second},
+	// Use official SDK client
+	client, err := NewVaultSDKClient(config)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create vault client: %w", err)
 	}
 
 	// Default paths
@@ -354,122 +351,4 @@ func (v *VaultKeyStore) parseVaultKey(keyID string, keyData map[string]interface
 		Alg:       algorithm,
 		Use:       "sig",
 	}, nil
-}
-
-// HTTP Vault Client implementation
-
-type httpVaultClient struct {
-	address string
-	token   string
-	client  *http.Client
-}
-
-func (c *httpVaultClient) Read(ctx context.Context, path string) (*VaultResponse, error) {
-	url := fmt.Sprintf("%s/v1/%s", strings.TrimSuffix(c.address, "/"), path)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("X-Vault-Token", c.token)
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("vault request failed with status %d", resp.StatusCode)
-	}
-
-	var vaultResp VaultResponse
-	if err := json.NewDecoder(resp.Body).Decode(&vaultResp); err != nil {
-		return nil, err
-	}
-
-	return &vaultResp, nil
-}
-
-func (c *httpVaultClient) Write(ctx context.Context, path string, data map[string]interface{}) (*VaultResponse, error) {
-	url := fmt.Sprintf("%s/v1/%s", strings.TrimSuffix(c.address, "/"), path)
-
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(string(jsonData)))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Set("X-Vault-Token", c.token)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("vault write failed with status %d", resp.StatusCode)
-	}
-
-	var vaultResp VaultResponse
-	if err := json.NewDecoder(resp.Body).Decode(&vaultResp); err != nil {
-		// Write operations may not return data, so ignore decode errors
-		return &VaultResponse{}, nil
-	}
-
-	return &vaultResp, nil
-}
-
-func (c *httpVaultClient) Delete(ctx context.Context, path string) error {
-	url := fmt.Sprintf("%s/v1/%s", strings.TrimSuffix(c.address, "/"), path)
-	req, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("X-Vault-Token", c.token)
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("vault delete failed with status %d", resp.StatusCode)
-	}
-
-	return nil
-}
-
-func (c *httpVaultClient) Health(ctx context.Context) error {
-	url := fmt.Sprintf("%s/v1/sys/health", strings.TrimSuffix(c.address, "/"))
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Vault health endpoint returns various status codes based on health
-	// 200 = initialized, unsealed, and active
-	// 429 = unsealed and standby
-	// 472 = disaster recovery mode replication secondary and active
-	// 473 = performance standby
-	// 501 = not initialized
-	// 503 = sealed
-
-	if resp.StatusCode == 200 || resp.StatusCode == 429 {
-		return nil // Healthy states
-	}
-
-	return fmt.Errorf("vault unhealthy, status code: %d", resp.StatusCode)
 }

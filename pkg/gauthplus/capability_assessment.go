@@ -9,15 +9,17 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/mauriciomferz/Gauth_go/pkg/database"
 )
 
-// PostgreSQLCapabilityAssessmentService implements CapabilityAssessmentService
+// PostgreSQLCapabilityAssessmentService implements CapabilityAssessmentService (pgx)
 type PostgreSQLCapabilityAssessmentService struct {
-	db *sql.DB
+	db *database.DB
 }
 
 // NewPostgreSQLCapabilityAssessmentService creates a new capability assessment service
-func NewPostgreSQLCapabilityAssessmentService(db *sql.DB) *PostgreSQLCapabilityAssessmentService {
+func NewPostgreSQLCapabilityAssessmentService(db *database.DB) *PostgreSQLCapabilityAssessmentService {
 	return &PostgreSQLCapabilityAssessmentService{db: db}
 }
 
@@ -57,7 +59,7 @@ func (s *PostgreSQLCapabilityAssessmentService) CreateAssessment(
 		return fmt.Errorf("failed to marshal certifications: %w", err)
 	}
 
-	_, err = s.db.ExecContext(ctx, `
+	_, err = s.db.Pool.Exec(ctx, `
 		INSERT INTO ai_capability_assessments (
 			id, agent_id, assessed_by, assessment_date,
 			overall_level, domain_scores, risk_profile, limitations,
@@ -87,9 +89,9 @@ func (s *PostgreSQLCapabilityAssessmentService) GetLatestAssessment(
 
 	assessment := &AICapabilityAssessment{}
 	var domainScoresJSON, riskProfileJSON, limitationsJSON, certificationsJSON []byte
-	var notes sql.NullString
+	var notes *string
 
-	err := s.db.QueryRowContext(ctx, `
+	err := s.db.Pool.QueryRow(ctx, `
 		SELECT id, agent_id, assessed_by, assessment_date,
 		       overall_level, domain_scores, risk_profile, limitations,
 		       certifications, valid_until, notes, created_at, updated_at
@@ -106,7 +108,7 @@ func (s *PostgreSQLCapabilityAssessmentService) GetLatestAssessment(
 		&assessment.CreatedAt, &assessment.UpdatedAt,
 	)
 
-	if err == sql.ErrNoRows {
+	if err == pgx.ErrNoRows {
 		return nil, nil // No assessment found
 	}
 	if err != nil {
@@ -129,8 +131,8 @@ func (s *PostgreSQLCapabilityAssessmentService) GetLatestAssessment(
 		return nil, fmt.Errorf("failed to unmarshal certifications: %w", err)
 	}
 
-	if notes.Valid {
-		assessment.Notes = notes.String
+	if notes != nil {
+		assessment.Notes = *notes
 	}
 
 	return assessment, nil
@@ -145,7 +147,7 @@ func (s *PostgreSQLCapabilityAssessmentService) GetAssessmentHistory(
 		return []*AICapabilityAssessment{}, nil
 	}
 
-	rows, err := s.db.QueryContext(ctx, `
+	rows, err := s.db.Pool.Query(ctx, `
 		SELECT id, agent_id, assessed_by, assessment_date,
 		       overall_level, domain_scores, risk_profile, limitations,
 		       certifications, valid_until, notes, created_at, updated_at
@@ -163,7 +165,7 @@ func (s *PostgreSQLCapabilityAssessmentService) GetAssessmentHistory(
 	for rows.Next() {
 		assessment := &AICapabilityAssessment{}
 		var domainScoresJSON, riskProfileJSON, limitationsJSON, certificationsJSON []byte
-		var notes sql.NullString
+		var notes *string
 
 		err := rows.Scan(
 			&assessment.ID, &assessment.AgentID, &assessment.AssessedBy,
@@ -192,8 +194,8 @@ func (s *PostgreSQLCapabilityAssessmentService) GetAssessmentHistory(
 			return nil, fmt.Errorf("failed to unmarshal certifications: %w", err)
 		}
 
-		if notes.Valid {
-			assessment.Notes = notes.String
+		if notes != nil {
+			assessment.Notes = *notes
 		}
 
 		assessments = append(assessments, assessment)
@@ -312,7 +314,7 @@ func (s *PostgreSQLCapabilityAssessmentService) GetExpiringAssessments(
 		ORDER BY valid_until ASC`
 
 	expiryDate := time.Now().AddDate(0, 0, daysUntilExpiry)
-	rows, err := s.db.QueryContext(ctx, query, expiryDate)
+	rows, err := s.db.Pool.Query(ctx, query, expiryDate)
 	if err != nil {
 		return nil, fmt.Errorf("query expiring assessments: %w", err)
 	}

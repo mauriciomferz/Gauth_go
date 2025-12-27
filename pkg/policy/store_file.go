@@ -37,7 +37,8 @@ func (f *FileStore) load() error {
 	if f.loaded {
 		return nil
 	}
-	if err := os.MkdirAll(filepath.Dir(f.path), 0o755); err != nil {
+	// #nosec G301
+	if err := os.MkdirAll(filepath.Dir(f.path), 0o750); err != nil {
 		return err
 	}
 	data, err := os.ReadFile(f.path)

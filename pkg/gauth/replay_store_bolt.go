@@ -122,8 +122,8 @@ func (s *BoltReplayStore) CheckAndRecord(jti string) error {
 
 		// Check if JTI exists and is not expired
 		if existing != nil {
-			//nolint:gosec // G115: converting stored timestamp, safe for Unix time values
-			expiry := int64(binary.BigEndian.Uint64(existing))
+			// Check if JTI exists and is not expired
+			expiry := int64(binary.BigEndian.Uint64(existing)) // #nosec G115: conversion safe for Unix timestamp
 			if now < expiry {
 				return fmt.Errorf("replay detected: jti=%s already used", jti)
 			}
@@ -131,7 +131,7 @@ func (s *BoltReplayStore) CheckAndRecord(jti string) error {
 
 		// Record new JTI with expiration timestamp
 		value := make([]byte, 8)
-		//nolint:gosec // G115: timestamp conversion, safe for Unix time values
+		// #nosec G115: timestamp conversion, safe for Unix time values
 		binary.BigEndian.PutUint64(value, uint64(expiresAt))
 		return bucket.Put(key, value)
 	})

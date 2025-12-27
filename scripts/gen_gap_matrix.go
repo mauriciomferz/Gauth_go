@@ -336,6 +336,7 @@ func writeBadgeSVG(rows []gapRow) error {
 </svg>
 `, totalWidth, label, value, totalWidth, labelTextWidth, labelTextWidth, valueTextWidth, color, totalWidth, labelTextWidth/2, label, labelTextWidth/2, label, labelTextWidth+valueTextWidth/2, value, labelTextWidth+valueTextWidth/2, value)
 	badgeDir := filepath.Join("docs", "badges")
+	// #nosec G301
 	if err := os.MkdirAll(badgeDir, 0o755); err != nil {
 		return err
 	}

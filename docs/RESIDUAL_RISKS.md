@@ -1,8 +1,8 @@
 # Residual Risk Register
 ## GAuth RFC 0111/0115 Implementation
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-01  
+**Document Version**: 1.1  
+**Last Updated**: 2025-12-27  
 **Status**: Active
 
 This document tracks unmitigated security risks, their severity, likelihood, and planned mitigation strategies, fulfilling sec14.item2 (Residual Risk Register).
@@ -73,6 +73,8 @@ Risk Score = Severity × Likelihood (scale: Critical=4, High=3, Medium=2, Low=1)
 | MR-006 | AI resource exhaustion | High | Model metadata limits (token/cost/rate) | 2025-01 |
 | MR-007 | Cross-border data violations | Critical | Jurisdiction enforcement | 2025-01 |
 | MR-008 | Multi-signature bypass | Critical | M-of-N threshold verification | 2025-01 |
+| MR-009 | Capability registry tampering | High | RFC-3161 TSA anchoring with CMS verification | 2025-12-27 |
+| MR-010 | Discovery metadata spoofing | Medium | JWKS signatures and deprecation schedules | 2025-12-27 |
 
 ---
 

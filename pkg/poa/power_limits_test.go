@@ -80,4 +80,54 @@ func TestPowerLimitsValidation_RFC115_C5(t *testing.T) {
 			t.Error("Expected strict nil limits to allow (or default behavior, creating validation logic check)")
 		}
 	})
+	// Test Structural Limits
+	t.Run("StructuralLimits", func(t *testing.T) {
+		validLimits := &PowerLimitSet{
+			ResourceLimits: &ResourceLimits{
+				MaxNodes: 100,
+				MaxDepth: 5,
+				MaxWidth: 10,
+			},
+		}
+
+		if err := validLimits.Validate(); err != nil {
+			t.Errorf("Valid structural limits failed validation: %v", err)
+		}
+
+		negativeNodes := &PowerLimitSet{
+			ResourceLimits: &ResourceLimits{
+				MaxNodes: -1,
+			},
+		}
+
+		if err := negativeNodes.Validate(); err == nil {
+			t.Error("Expected error for negative MaxNodes")
+		} else if !strings.Contains(err.Error(), "max nodes cannot be negative") {
+			t.Errorf("Unexpected error message: %v", err)
+		}
+
+		negativeDepth := &PowerLimitSet{
+			ResourceLimits: &ResourceLimits{
+				MaxDepth: -5,
+			},
+		}
+
+		if err := negativeDepth.Validate(); err == nil {
+			t.Error("Expected error for negative MaxDepth")
+		} else if !strings.Contains(err.Error(), "max depth cannot be negative") {
+			t.Errorf("Unexpected error message: %v", err)
+		}
+
+		negativeWidth := &PowerLimitSet{
+			ResourceLimits: &ResourceLimits{
+				MaxWidth: -10,
+			},
+		}
+
+		if err := negativeWidth.Validate(); err == nil {
+			t.Error("Expected error for negative MaxWidth")
+		} else if !strings.Contains(err.Error(), "max width cannot be negative") {
+			t.Errorf("Unexpected error message: %v", err)
+		}
+	})
 }

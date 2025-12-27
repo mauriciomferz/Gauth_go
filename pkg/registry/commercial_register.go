@@ -179,7 +179,7 @@ func NewMockCommercialRegisterService() *MockCommercialRegisterService {
 // seedTestData populates mock with test data
 func (m *MockCommercialRegisterService) seedTestData() {
 	// German GmbH example
-	m.registrations["HRB12345-DE"] = &EntityDetails{
+	m.registrations["HRB 12345-DE"] = &EntityDetails{
 		RegistrationNumber: "HRB 12345",
 		EntityName:         "Test Technologies GmbH",
 		LegalForm:          "GmbH",

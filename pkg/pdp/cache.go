@@ -2,6 +2,7 @@ package pdp
 
 import (
 	"container/list"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -20,10 +21,9 @@ type PDPCacheEntry struct {
 	AccessCount uint64
 }
 
-// PDPCache provides an LRU cache with TTL for PDP decisions.
+// InMemoryCache provides an LRU cache with TTL for PDP decisions.
 //
 // P2.13 (sec2.item5): Implements single-node PDP caching for performance optimization.
-// Future: Distributed cache invalidation, external cache backends (Redis, Memcached).
 //
 // Key Design:
 //   - LRU eviction when capacity exceeded
@@ -40,7 +40,7 @@ type PDPCacheEntry struct {
 // Configuration:
 //   - GAUTH_PDP_CACHE_SIZE: Max cache entries (default 1000, 0=disabled)
 //   - GAUTH_PDP_CACHE_TTL: Entry lifetime (default 5m, 0=no expiration)
-type PDPCache struct {
+type InMemoryCache struct {
 	capacity int
 	ttl      time.Duration
 	mu       sync.RWMutex
@@ -68,18 +68,18 @@ type cacheListPayload struct {
 	resource string
 }
 
-// NewPDPCache creates a new LRU cache with specified capacity and TTL.
+// NewInMemoryCache creates a new LRU cache with specified capacity and TTL.
 //
 // Parameters:
 //   - capacity: Maximum number of entries (0 = disabled)
 //   - ttl: Time-to-live for each entry (0 = no expiration)
 //
 // Returns cache instance (no-op if capacity <= 0).
-func NewPDPCache(capacity int, ttl time.Duration) *PDPCache {
+func NewInMemoryCache(capacity int, ttl time.Duration) *InMemoryCache {
 	if capacity <= 0 {
 		capacity = 0
 	}
-	cache := &PDPCache{
+	cache := &InMemoryCache{
 		capacity: capacity,
 		ttl:      ttl,
 		items:    make(map[string]*list.Element, capacity),
@@ -96,14 +96,14 @@ func NewPDPCache(capacity int, ttl time.Duration) *PDPCache {
 	return cache
 }
 
-// NewPDPCacheFromEnv creates cache from environment variables.
+// NewInMemoryCacheFromEnv creates cache from environment variables.
 //
 // Environment Variables:
 //   - GAUTH_PDP_CACHE_SIZE: Max entries (default 1000)
 //   - GAUTH_PDP_CACHE_TTL: TTL duration (default 5m, e.g., "300s", "5m", "1h")
 //
 // Returns cache instance or no-op cache if disabled.
-func NewPDPCacheFromEnv() *PDPCache {
+func NewInMemoryCacheFromEnv() *InMemoryCache {
 	capacity := 1000 // default
 	if s := os.Getenv("GAUTH_PDP_CACHE_SIZE"); s != "" {
 		if v, err := strconv.Atoi(s); err == nil {
@@ -118,29 +118,30 @@ func NewPDPCacheFromEnv() *PDPCache {
 		}
 	}
 
-	return NewPDPCache(capacity, ttl)
+	return NewInMemoryCache(capacity, ttl)
 }
 
 // Close explicitly stops the background cleanup goroutine.
 // Essential for preventing goroutine leaks in tests or reloads.
-func (c *PDPCache) Close() {
+func (c *InMemoryCache) Close() error {
 	if c.capacity == 0 {
-		return
+		return nil
 	}
 
 	select {
 	case <-c.quit:
 		// Already closed
-		return
+		return nil
 	default:
 		// Safe to close
 		close(c.quit)
 		c.wg.Wait()
 	}
+	return nil
 }
 
 // cleanupLoop runs periodically to remove expired entries.
-func (c *PDPCache) cleanupLoop() {
+func (c *InMemoryCache) cleanupLoop() {
 	defer c.wg.Done()
 
 	// Check randomly within interval to avoid thundering herd if many caches start at once
@@ -194,9 +195,9 @@ func makeKey(req Request) string {
 // Returns:
 //   - decision: Cached decision
 //   - found: true if present and valid, false otherwise
-func (c *PDPCache) Get(req Request) (Decision, bool) {
+func (c *InMemoryCache) Get(ctx context.Context, req Request) (Decision, bool, error) {
 	if c.capacity == 0 {
-		return Decision{}, false
+		return Decision{}, false, nil
 	}
 
 	c.mu.Lock()
@@ -208,7 +209,7 @@ func (c *PDPCache) Get(req Request) (Decision, bool) {
 	elem, ok := c.items[key]
 	if !ok {
 		c.misses++
-		return Decision{}, false
+		return Decision{}, false, nil
 	}
 
 	payload := elem.Value.(*cacheListPayload)
@@ -221,7 +222,7 @@ func (c *PDPCache) Get(req Request) (Decision, bool) {
 		delete(c.items, key)
 		c.expirations++
 		c.misses++
-		return Decision{}, false
+		return Decision{}, false, nil
 	}
 
 	// Cache hit - update access count and move to front (most recent)
@@ -238,15 +239,15 @@ func (c *PDPCache) Get(req Request) (Decision, bool) {
 	dec.Metadata["cache_hit"] = "true"
 	dec.Metadata["cache_age_seconds"] = fmt.Sprintf("%.1f", time.Since(entry.InsertedAt).Seconds())
 
-	return dec, true
+	return dec, true, nil
 }
 
 // Set stores a decision in the cache with TTL.
 //
 // Evicts least-recently-used entry if capacity exceeded.
-func (c *PDPCache) Set(req Request, decision Decision) {
+func (c *InMemoryCache) Set(ctx context.Context, req Request, decision Decision) error {
 	if c.capacity == 0 {
-		return
+		return nil
 	}
 
 	c.mu.Lock()
@@ -270,7 +271,7 @@ func (c *PDPCache) Set(req Request, decision Decision) {
 		payload.action = req.Action
 		payload.resource = req.Resource
 		c.order.MoveToFront(elem)
-		return
+		return nil
 	}
 
 	// New entry - check capacity and evict if needed
@@ -295,14 +296,15 @@ func (c *PDPCache) Set(req Request, decision Decision) {
 	}
 	elem := c.order.PushFront(payload)
 	c.items[key] = elem
+	return nil
 }
 
 // InvalidateAll clears the entire cache.
 //
 // Use after policy updates, schema changes, or administrative operations.
-func (c *PDPCache) InvalidateAll() {
+func (c *InMemoryCache) InvalidateAll(ctx context.Context) error {
 	if c.capacity == 0 {
-		return
+		return nil
 	}
 
 	c.mu.Lock()
@@ -312,14 +314,15 @@ func (c *PDPCache) InvalidateAll() {
 	c.items = make(map[string]*list.Element, c.capacity)
 	c.order = list.New()
 	c.invalidations += uint64(count)
+	return nil
 }
 
 // InvalidateSubject removes all cached decisions for a specific subject.
 //
 // Use when subject roles/permissions change.
-func (c *PDPCache) InvalidateSubject(subject string) {
+func (c *InMemoryCache) InvalidateSubject(ctx context.Context, subject string) error {
 	if c.capacity == 0 {
-		return
+		return nil
 	}
 
 	c.mu.Lock()
@@ -341,14 +344,15 @@ func (c *PDPCache) InvalidateSubject(subject string) {
 		delete(c.items, payload.key)
 		c.invalidations++
 	}
+	return nil
 }
 
 // InvalidateResource removes all cached decisions for a specific resource.
 //
 // Use when resource permissions change.
-func (c *PDPCache) InvalidateResource(resource string) {
+func (c *InMemoryCache) InvalidateResource(ctx context.Context, resource string) error {
 	if c.capacity == 0 {
-		return
+		return nil
 	}
 
 	c.mu.Lock()
@@ -370,14 +374,15 @@ func (c *PDPCache) InvalidateResource(resource string) {
 		delete(c.items, payload.key)
 		c.invalidations++
 	}
+	return nil
 }
 
 // InvalidateAction removes all cached decisions for a specific action.
 //
 // Use when action policies change.
-func (c *PDPCache) InvalidateAction(action string) {
+func (c *InMemoryCache) InvalidateAction(ctx context.Context, action string) error {
 	if c.capacity == 0 {
-		return
+		return nil
 	}
 
 	c.mu.Lock()
@@ -399,24 +404,11 @@ func (c *PDPCache) InvalidateAction(action string) {
 		delete(c.items, payload.key)
 		c.invalidations++
 	}
-}
-
-// GetMetrics returns current cache metrics snapshot.
-type PDPCacheMetrics struct {
-	Capacity      int     `json:"capacity"`
-	Size          int     `json:"size"`
-	Lookups       uint64  `json:"lookups"`
-	Hits          uint64  `json:"hits"`
-	Misses        uint64  `json:"misses"`
-	HitRate       float64 `json:"hit_rate"`
-	Evictions     uint64  `json:"evictions"`
-	Expirations   uint64  `json:"expirations"`
-	Invalidations uint64  `json:"invalidations"`
-	TTL           string  `json:"ttl"`
+	return nil
 }
 
 // GetMetrics returns cache statistics.
-func (c *PDPCache) GetMetrics() PDPCacheMetrics {
+func (c *InMemoryCache) GetMetrics() PDPCacheMetrics {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -436,11 +428,12 @@ func (c *PDPCache) GetMetrics() PDPCacheMetrics {
 		Expirations:   c.expirations,
 		Invalidations: c.invalidations,
 		TTL:           c.ttl.String(),
+		Backend:       "memory",
 	}
 }
 
 // Size returns current number of cached entries.
-func (c *PDPCache) Size() int {
+func (c *InMemoryCache) Size() int {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.order.Len()
@@ -450,7 +443,7 @@ func (c *PDPCache) Size() int {
 //
 // Typically not needed as expiration is handled lazily on Get().
 // Use for periodic cleanup to reclaim memory.
-func (c *PDPCache) CleanupExpired() int {
+func (c *InMemoryCache) CleanupExpired() int {
 	if c.capacity == 0 || c.ttl == 0 {
 		return 0
 	}
@@ -479,7 +472,7 @@ func (c *PDPCache) CleanupExpired() int {
 }
 
 // ResetMetrics clears all metric counters (for testing).
-func (c *PDPCache) ResetMetrics() {
+func (c *InMemoryCache) ResetMetrics() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 

@@ -502,6 +502,7 @@ func (e *EthereumAdapter) GetTransactionStatus(ctx context.Context, txHash strin
 		return nil, fmt.Errorf("failed to get current block: %w", err)
 	}
 
+	// #nosec G115
 	confirmations := int(currentBlock - receipt.BlockNumber.Uint64())
 
 	status := &TransactionStatus{

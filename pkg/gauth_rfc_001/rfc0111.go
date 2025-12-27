@@ -22,11 +22,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/internal/observability"
+	"github.com/mauriciomferz/Gauth_go/internal/sunset"
 	"github.com/mauriciomferz/Gauth_go/pkg/attest"
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto/keyring"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto/scheduler"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
@@ -66,6 +68,44 @@ func WithSubject(ctx context.Context, subject string) context.Context {
 var uuidV4Rx = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`)
 
 func isUUIDv4(s string) bool { return uuidV4Rx.MatchString(s) }
+
+// JTIValidationError captures specific JTI validation failure reasons.
+type JTIValidationError struct {
+	Reason string // One of: length_invalid, format_invalid, timestamp_skew
+	JTI    string
+}
+
+func (e *JTIValidationError) Error() string {
+	return fmt.Sprintf("JTI validation failed: %s (jti=%s)", e.Reason, e.JTI)
+}
+
+// validateJTIEnhanced performs comprehensive JTI validation with enhanced checks.
+// Returns (*JTIValidationError, metrics reason code) for detailed error tracking.
+func validateJTIEnhanced(jti string, nowFn func() time.Time) (*JTIValidationError, string) {
+	// Check 1: Length validation (UUID v4 is exactly 36 characters: 8-4-4-4-12 + 4 hyphens)
+	if len(jti) != 36 {
+		return &JTIValidationError{
+			Reason: "length_invalid",
+			JTI:    jti,
+		}, "jti_length_invalid"
+	}
+
+	// Check 2: UUID v4 format validation
+	if !isUUIDv4(jti) {
+		return &JTIValidationError{
+			Reason: "format_invalid",
+			JTI:    jti,
+		}, "jti_format_invalid"
+	}
+
+	// Check 3: Optional timestamp skew detection
+	// If JTI contains embedded timestamp (e.g., time-based UUID or custom format),
+	// we can detect tokens with unreasonable issue times.
+	// For standard UUID v4 (random), this is a no-op, but provides extension point.
+	// Future enhancement: support UUIDv7 (time-ordered) with skew detection.
+
+	return nil, "" // Validation passed
+}
 
 // POAStatus represents lifecycle states for a PowerOfAttorney.
 type POAStatus string
@@ -129,6 +169,8 @@ type PowerOfAttorney struct {
 	PendingRevocation *PendingRevocationState `json:"pending_revocation,omitempty"` // Non-nil when a revocation workflow is in progress
 	// Evidence hash attachments for forensic strengthening (excluded from canonical digest)
 	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
+	// Requirement 134: Granular Revocation - specific scopes that are no longer valid.
+	RevokedScopes []string `json:"revoked_scopes,omitempty"`
 }
 
 // POASignature provides authenticity metadata; signature covers canonical digest.
@@ -324,14 +366,15 @@ type ThresholdValidation struct {
 
 // Reusable constants (reduce duplication and goconst warnings)
 const (
-	poaVersionV1 = "poa/v1"
-	algEd25519   = "Ed25519"
+	poaVersionV1     = "poa/v1"
+	poaVersionV1CBOR = "poa/v1/cbor"
+	algEd25519       = "Ed25519"
 	// Digest mismatch classification reasons (used in envelope & signature verification metrics)
-	reasonDomainConflict  = "domain_conflict"
-	reasonTamperSuspected = "tamper_suspected"
-	reasonOther           = "other"
-	// Canonicalization digest mismatch sub-reason (standardized literal)
+	reasonDomainConflict        = "domain_conflict"
+	reasonTamperSuspected       = "tamper_suspected"
 	reasonCanonicalizationError = "canonicalization_error"
+	reasonUnsupportedProof      = "unsupported_attestation_proof"
+	reasonOther                 = "other"
 	// Generic semantic mismatch keys (deduplicated for metrics snapshot maps)
 	counterCurrencyMismatch    = "currency_mismatch"
 	counterRestrictionMismatch = "restriction_mismatch"
@@ -723,6 +766,17 @@ func WithAttestationTrustAnchors(reg *attest.TrustAnchorRegistry) Option {
 	}
 }
 
+// WithKeyRotation enables automated key rotation at the specified interval (Epic 3).
+func WithKeyRotation(interval time.Duration) Option {
+	return func(s *Service) {
+		if interval > 0 && s.keyRing != nil {
+			// Adapt KeyRing to Rotator
+			rotator := &keyRingRotator{kr: s.keyRing}
+			s.keyRotationScheduler = scheduler.NewScheduler(rotator, interval, s.metrics)
+		}
+	}
+}
+
 // kmsKeyProviderAdapter adapts a KMS to KeyProvider for verification.
 type kmsKeyProviderAdapter struct{ kms cr.KMS }
 
@@ -820,6 +874,26 @@ func WithLedger(l ledger.Store) Option {
 	}
 }
 
+// parseFloatEnv parses a float64 from environment variable, returns defaultVal if not set or invalid.
+func parseFloatEnv(key string, defaultVal float64) float64 {
+	if val := os.Getenv(key); val != "" {
+		if f, err := strconv.ParseFloat(val, 64); err == nil {
+			return f
+		}
+	}
+	return defaultVal
+}
+
+// parseDurationEnv parses a time.Duration from environment variable, returns defaultVal if not set or invalid.
+func parseDurationEnv(key string, defaultVal time.Duration) time.Duration {
+	if val := os.Getenv(key); val != "" {
+		if d, err := time.ParseDuration(val); err == nil {
+			return d
+		}
+	}
+	return defaultVal
+}
+
 // NewService creates a new RFC 0111 service (in-memory prototype) with optional functional options.
 // SECURITY DEFAULTS:
 //   - failClosedReplay: true (revocation/replay checks fail-closed on store errors)
@@ -867,6 +941,32 @@ func NewService(auditLogger *audit.MemoryLogger, authorizer authz.Authorizer, op
 		s.strictAuthenticity = true
 	}
 	// Initialize delegation chain validator (always available for transitive delegations)
+	// Initialize sunset controller (Epic 8) with environment configuration
+	var mv sunset.MetricsView
+	if m, ok := s.metrics.(*metrics.Memory); ok {
+		mv = sunset.MemoryMetricsView{M: m}
+	}
+	if mv != nil {
+		// Parse configuration from environment
+		cfg := sunset.ControllerConfig{
+			Enable:                     os.Getenv("GAUTH_SUNSET_ENABLED") != "0", // Enabled by default
+			AllowRollback:              os.Getenv("GAUTH_SUNSET_ALLOW_ROLLBACK") != "0",
+			PilotToBroadAdoption:       parseFloatEnv("GAUTH_SUNSET_PILOT_THRESHOLD", 0.60),
+			BroadToStabilizeAdoption:   parseFloatEnv("GAUTH_SUNSET_BROAD_THRESHOLD", 0.80),
+			StabilizeToSoftDepAdoption: parseFloatEnv("GAUTH_SUNSET_STABILIZE_THRESHOLD", 0.90),
+			SoftDepToSunsetAdoption:    parseFloatEnv("GAUTH_SUNSET_SOFTDEP_THRESHOLD", 0.95),
+			MaxMismatchRatio:           parseFloatEnv("GAUTH_SUNSET_MAX_MISMATCH", 0.005),
+			RollbackMismatchRatio:      parseFloatEnv("GAUTH_SUNSET_ROLLBACK_THRESHOLD", 0.05),
+			Window:                     parseDurationEnv("GAUTH_SUNSET_WINDOW", 15*time.Minute),
+			Interval:                   parseDurationEnv("GAUTH_SUNSET_INTERVAL", 30*time.Second),
+		}
+		s.sunsetController = sunset.NewController(cfg, mv)
+		// Start controller in background if enabled
+		if cfg.Enable {
+			go s.sunsetController.Start(context.Background())
+		}
+	}
+
 	s.delegationChainValidator = NewDelegationChainValidator(s.repo, func() func() time.Time { return s.nowFn }, s.metrics)
 	return s
 }
@@ -906,6 +1006,13 @@ func NewServicePersistent(auditLogPath string, authorizer authz.Authorizer, opts
 			opt(s)
 		}
 	}
+	// Initialize sunset controller (Epic 8)
+	var mv sunset.MetricsView
+	if m, ok := s.metrics.(*metrics.Memory); ok {
+		mv = sunset.MemoryMetricsView{M: m}
+	}
+	s.sunsetController = sunset.NewController(sunset.ControllerConfig{Enable: true}, mv)
+
 	if os.Getenv("GAUTH_STRICT_AUTHENTICITY") != "0" && !s.strictAuthenticity {
 		s.strictAuthenticity = true
 	}
@@ -960,6 +1067,8 @@ type TokenVerificationResult struct {
 	Status          string            `json:"status"`
 	IssuanceChain   string            `json:"issuance_chain_tip,omitempty"`
 	RevocationChain string            `json:"revocation_chain_tip,omitempty"`
+	RawPOAChain     string            `json:"raw_poa_chain,omitempty"`
+	RawPOAChainAlgo string            `json:"raw_poa_chain_algo,omitempty"`
 	Expired         bool              `json:"expired"`
 	Revoked         bool              `json:"revoked"`
 	Suspended       bool              `json:"suspended"`
@@ -1069,6 +1178,9 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 					s.metrics.IncReplayStoreErrors()
 				}
 				if s.failClosedReplay {
+					if s.metrics != nil {
+						s.metrics.IncReplayStoreAvailabilityImpact()
+					}
 					return nil, rfc.New(rfc.ErrInvalidRequest, "replay store error")
 				}
 			} else if seen {
@@ -1083,6 +1195,9 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 					s.metrics.IncReplayStoreErrors()
 				}
 				if s.failClosedReplay {
+					if s.metrics != nil {
+						s.metrics.IncReplayStoreAvailabilityImpact()
+					}
 					return nil, rfc.New(rfc.ErrInvalidRequest, "replay store record error")
 				}
 			} else if s.metrics != nil {
@@ -1138,7 +1253,31 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 	if offlineMode && useV2 && env2.RawPOA != "" {
 		// Attempt to extract embedded PoA
 		var embeddedPoA PowerOfAttorney
-		if err := json.Unmarshal([]byte(env2.RawPOA), &embeddedPoA); err == nil {
+		decoded := false
+		if env2.PoAVersion == poaVersionV1CBOR {
+			if rawBytes, bErr := base64.StdEncoding.DecodeString(env2.RawPOA); bErr == nil {
+				if item, cErr := streamPkg.UnmarshalRawPOAItem(rawBytes); cErr == nil {
+					// Map RawPOAItem back to PowerOfAttorney
+					embeddedPoA = PowerOfAttorney{
+						ID:           item.ID,
+						Version:      item.Version,
+						Grantor:      item.Issuer,
+						Grantee:      item.Subject,
+						Scope:        item.Scope,
+						Restrictions: item.Claims,
+						Status:       POAStatus(item.Status),
+						CreatedAt:    time.Unix(item.Timestamp, 0),
+					}
+					decoded = true
+				}
+			}
+		} else {
+			if err := json.Unmarshal([]byte(env2.RawPOA), &embeddedPoA); err == nil {
+				decoded = true
+			}
+		}
+
+		if decoded {
 			// Validate embedded PoA ID matches envelope
 			if embeddedPoA.ID == delegationID {
 				// Use embedded PoA instead of repository lookup
@@ -1219,6 +1358,18 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			}
 			return ""
 		}(),
+		RawPOAChain: func() string {
+			if useV2 {
+				return env2.RawPOAChain
+			}
+			return ""
+		}(),
+		RawPOAChainAlgo: func() string {
+			if useV2 {
+				return env2.RawPOAChainAlgo
+			}
+			return ""
+		}(),
 	}
 	now := s.nowFn().UTC()
 	exp := res.ExpiresAt
@@ -1234,6 +1385,22 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			s.metrics.IncDelegationStatusTransitionFailures() // Reuse existing metric for suspended rejections
 		}
 		return nil, rfc.New(rfc.ErrUnauthorized, "delegation is suspended")
+	}
+
+	// Requirement 134: Granular Revocation - check if any scope in token is revoked in PoA
+	if len(poa.RevokedScopes) > 0 {
+		revokedSet := make(map[string]bool)
+		for _, rs := range poa.RevokedScopes {
+			revokedSet[rs] = true
+		}
+		for _, ts := range res.Scope {
+			if revokedSet[ts] {
+				if s.metrics != nil {
+					s.metrics.IncUnauthorized()
+				}
+				return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("scope %s has been revoked for this delegation", ts))
+			}
+		}
 	}
 	// Advanced claims validation (P2.10 sec1.item2): Enforce typ semantic rules when AdvancedClaims present.
 	// Feature-gated by GAUTH_ADVANCED_CLAIMS=1 for backward compatibility with tokens issued before P2.10.
@@ -1340,6 +1507,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 					} else if s.metrics != nil { // verification failure
 						s.metrics.IncSignatureVerificationFailures()
 						incDetachedVerify("invalid_signature")
+						s.metrics.RecordDecisionWithReason("verify_token", env2.DetachedSignatureKid, metrics.OutcomeDeny, metrics.ReasonSignatureInvalid)
 					}
 				} else if s.metrics != nil { // missing public key
 					s.metrics.IncSignaturePublicKeyMissing()
@@ -1349,6 +1517,17 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 				if s.metrics != nil {
 					s.metrics.IncSignatureVerificationFailures()
 					s.metrics.IncEnvelopeDigestMismatch()
+					// Mismatch detection heuristics (Epic 8)
+					reason := "domain_conflict"
+					if len(dig) != len(env2.CanonicalDigest) {
+						reason = "tamper_suspected"
+					}
+					s.metrics.IncEnvelopeDigestMismatchReason(reason)
+					metricReason := metrics.ReasonDomainConflict
+					if reason == "tamper_suspected" {
+						metricReason = metrics.ReasonTamperSuspected
+					}
+					s.metrics.RecordDecisionWithReason("verify_token", env2.DetachedSignatureKid, metrics.OutcomeDeny, metricReason)
 				}
 				incDetachedVerify("digest_mismatch")
 			}
@@ -1439,7 +1618,77 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 				}
 			}
 		}
+		if res.SignatureValid && s.metrics != nil {
+			s.metrics.IncMultiSignatureSuccess()
+		}
 	}
+
+	// Requirement 135: Persistent Usage Ledger & Financial Limits
+	if s.enhancedValidator != nil {
+		// Run full enhanced validation (includes financial limits check against current usage)
+		if err := s.enhancedValidator.ValidateWithContext(ctx, poa); err != nil {
+			return nil, err
+		}
+
+		contextData := map[string]interface{}{
+			"now":           float64(now.Unix()),
+			"now_iso":       now.Format(time.RFC3339),
+			"subject":       sessionUser,
+			"grantor":       poa.Grantor,
+			"grantee":       poa.Grantee,
+			"delegation_id": poa.ID,
+		}
+		// Try typed key first for requested_amount
+		if amt := ctx.Value(ctxKeyRequestedAmount); amt != nil {
+			contextData["requested_amount"] = amt
+		} else if amtLegacy := ctx.Value(LegacyCtxRequestedAmount); amtLegacy != nil {
+			contextData["requested_amount"] = amtLegacy
+		}
+
+		if err := s.enhancedValidator.EvaluatePoAConditions(ctx, poa, contextData); err != nil {
+			return nil, err
+		}
+	}
+
+	// Requirement 135: Persistent Usage Ledger
+	if s.enhancedValidator != nil {
+		var requestedAmount float64
+		hasAmount := false
+		if amt := ctx.Value(ctxKeyRequestedAmount); amt != nil {
+			if f, ok := amt.(float64); ok {
+				requestedAmount = f
+				hasAmount = true
+			} else if s, ok := amt.(string); ok {
+				if f, err := strconv.ParseFloat(s, 64); err == nil {
+					requestedAmount = f
+					hasAmount = true
+				}
+			}
+		} else if amtLegacy := ctx.Value(LegacyCtxRequestedAmount); amtLegacy != nil {
+			if f, ok := amtLegacy.(float64); ok {
+				requestedAmount = f
+				hasAmount = true
+			} else if s, ok := amtLegacy.(string); ok {
+				if f, err := strconv.ParseFloat(s, 64); err == nil {
+					requestedAmount = f
+					hasAmount = true
+				}
+			}
+		}
+
+		if hasAmount && requestedAmount > 0 {
+			currency := "USD"
+			if c := ctx.Value("currency"); c != nil {
+				if s, ok := c.(string); ok {
+					currency = s
+				}
+			} else if dc, ok := poa.Restrictions["default_currency"]; ok {
+				currency = dc
+			}
+			_ = s.enhancedValidator.RecordPoAConsumption(ctx, poa, requestedAmount, currency)
+		}
+	}
+
 	return res, nil
 }
 
@@ -1483,36 +1732,57 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 		return nil, rfc.New(rfc.ErrInvalidRequest, "no embedded poa definition (GAUTH_EMBED_FULL_POA=1 not enabled)")
 	}
 
-	// Parse canonical JSON - the canonical format encodes version as a string (for digest stability),
-	// but PowerOfAttorney expects an int. We need a custom unmarshal step.
-	// Create an intermediate struct that accepts version as either string or int.
-	type canonicalPoA struct {
-		PowerOfAttorney
-		VersionRaw interface{} `json:"version"` // Accept string or int
-	}
-
-	var intermediate canonicalPoA
-	if err := json.Unmarshal([]byte(result.RawPOA), &intermediate); err != nil {
-		return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid embedded poa json: %v", err))
-	}
-
-	// Convert version from string to int if needed
-	switch v := intermediate.VersionRaw.(type) {
-	case string:
-		if parsed, err := strconv.Atoi(v); err == nil {
-			intermediate.PowerOfAttorney.Version = parsed
+	var poa *PowerOfAttorney
+	if result.PoAVersion == poaVersionV1CBOR {
+		if rawBytes, bErr := base64.StdEncoding.DecodeString(result.RawPOA); bErr == nil {
+			if item, cErr := streamPkg.UnmarshalRawPOAItem(rawBytes); cErr == nil {
+				poa = &PowerOfAttorney{
+					ID:           item.ID,
+					Version:      item.Version,
+					Grantor:      item.Issuer,
+					Grantee:      item.Subject,
+					Scope:        item.Scope,
+					Restrictions: item.Claims,
+					Status:       POAStatus(item.Status),
+					CreatedAt:    time.Unix(item.Timestamp, 0),
+				}
+			} else {
+				return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid embedded poa cbor: %v", cErr))
+			}
 		} else {
-			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid version format: %s", v))
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid embedded poa base64: %v", bErr))
 		}
-	case float64: // JSON numbers decode as float64
-		intermediate.PowerOfAttorney.Version = int(v)
-	case int:
-		intermediate.PowerOfAttorney.Version = v
-	default:
-		return nil, rfc.New(rfc.ErrInvalidRequest, "version field must be string or number")
-	}
+	} else {
+		// Parse canonical JSON - the canonical format encodes version as a string (for digest stability),
+		// but PowerOfAttorney expects an int. We need a custom unmarshal step.
+		// Create an intermediate struct that accepts version as either string or int.
+		type canonicalPoA struct {
+			PowerOfAttorney
+			VersionRaw interface{} `json:"version"` // Accept string or int
+		}
 
-	poa := &intermediate.PowerOfAttorney
+		var intermediate canonicalPoA
+		if err := json.Unmarshal([]byte(result.RawPOA), &intermediate); err != nil {
+			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid embedded poa json: %v", err))
+		}
+
+		// Convert version from string to int if needed
+		switch v := intermediate.VersionRaw.(type) {
+		case string:
+			if parsed, err := strconv.Atoi(v); err == nil {
+				intermediate.PowerOfAttorney.Version = parsed
+			} else {
+				return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid version format: %s", v))
+			}
+		case float64: // JSON numbers decode as float64
+			intermediate.PowerOfAttorney.Version = int(v)
+		case int:
+			intermediate.PowerOfAttorney.Version = v
+		default:
+			return nil, rfc.New(rfc.ErrInvalidRequest, "version field must be string or number")
+		}
+		poa = &intermediate.PowerOfAttorney
+	}
 
 	// Validate extracted PoA matches token envelope DelegationID
 	if poa.ID == "" {
@@ -1657,6 +1927,8 @@ type Service struct {
 	attestAnchors           *attest.TrustAnchorRegistry // optional trust anchor registry for attestation proofs
 	jurisdictionEnforcement *JurisdictionEnforcement    // optional jurisdiction-specific enforcement (P1.3)
 	auditSink               AuditSink                   // optional external audit sink for token lifecycle events (P1.4)
+	sunsetController        *sunset.Controller          // Envelope V1 sunset lifecycle controller (Epic 8)
+	keyRotationScheduler    *scheduler.Scheduler        // Key rotation scheduler (Epic 3)
 	// semanticCounters prototype: fine-grained semantic rejection reasons (will be surfaced via endpoints later)
 	semanticCounters struct {
 		AmountLimitExceeded      uint64
@@ -1671,6 +1943,19 @@ type Service struct {
 	atomicCounterStore       *AtomicCounterStore       // Redis-backed atomic constraint enforcement (TOCTOU mitigation)
 	delegationChainValidator *DelegationChainValidator // Transitive delegation chain validation
 	revocationBlacklistStore *RevocationBlacklistStore // Real-time revocation status checking (zombie token mitigation)
+}
+
+// StartLifecycle initiates background processes for the service (schedulers, controllers).
+// It should be called once after service creation and before serving traffic.
+func (s *Service) StartLifecycle(ctx context.Context) {
+	if s.sunsetController != nil {
+		go s.sunsetController.Start(ctx)
+	}
+	if s.keyRotationScheduler != nil {
+		if err := s.keyRotationScheduler.Start(ctx); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to start key rotation scheduler: %v\n", err)
+		}
+	}
 }
 
 // AttachEvidenceHashes appends new evidence hash(es) to a POA ensuring uniqueness and basic validation.
@@ -2087,9 +2372,38 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 				maxDepth = iv
 			}
 		}
+
+		// Enforce parent-defined max_delegation_depth (Requirement 12)
+		// If parent has a defined limit, it overrides the global default if stricterm and must be respected
+		if parentMaxDepthStr, ok := parent.Restrictions["max_delegation_depth"]; ok {
+			if parentMax, err := strconv.Atoi(parentMaxDepthStr); err == nil {
+				// Global environment limit acts as a hard cap; parent restriction can only tighten it further
+				if parentMax < maxDepth {
+					maxDepth = parentMax
+				}
+			}
+		}
+
 		if depth > maxDepth {
 			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("delegation depth %d exceeds max %d", depth, maxDepth))
 		}
+
+		// Enforce inheritance of max_delegation_depth restriction
+		// Child cannot have a higher max_delegation_depth than parent (monotonic tightening)
+		if reqMaxDepthStr, ok := req.Restrictions["max_delegation_depth"]; ok {
+			if reqMax, err := strconv.Atoi(reqMaxDepthStr); err == nil {
+				if reqMax > maxDepth {
+					return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("child max_delegation_depth %d cannot exceed effective limit %d", reqMax, maxDepth))
+				}
+			}
+		} else {
+			// Auto-propagate the effective limit to the child if not explicitly set
+			if req.Restrictions == nil {
+				req.Restrictions = make(map[string]string)
+			}
+			req.Restrictions["max_delegation_depth"] = strconv.Itoa(maxDepth)
+		}
+
 		// Scope inheritance enforcement: child scope must be subset of parent scope semantics.
 		if err := validateInheritedScope(parent.Scope, req.Scope); err != nil {
 			return nil, rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("scope inheritance invalid: %v", err))
@@ -2126,6 +2440,9 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 			return nil, rfc.New(rfc.ErrInternal, fmt.Sprintf("pdp evaluation failed: %v", err))
 		}
 		if !pdpDec.Allow {
+			if s.metrics != nil {
+				s.metrics.RecordDecisionWithReason("create_delegation", req.Grantee, metrics.OutcomeDeny, metrics.ReasonPolicyDeny)
+			}
 			return nil, rfc.New(rfc.ErrUnauthorized, pdpDec.Reason)
 		}
 	} else {
@@ -2138,6 +2455,9 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 			return nil, rfc.New(rfc.ErrInternal, fmt.Sprintf("authorization failed: %v", err))
 		}
 		if !decision.Allow {
+			if s.metrics != nil {
+				s.metrics.RecordDecisionWithReason("create_delegation", req.Grantee, metrics.OutcomeDeny, metrics.ReasonPolicyDeny)
+			}
 			if ctxErr := ctx.Err(); ctxErr != nil {
 				return nil, ctxErr
 			}
@@ -2348,6 +2668,9 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 	authToken := generateAuthToken(s, poa)
 
 	// Audit log
+	if s.metrics != nil {
+		s.metrics.RecordDecisionWithReason("create_delegation", poa.ID, metrics.OutcomeAllow, metrics.ReasonPolicyAllow)
+	}
 	event := audit.NewEvent(audit.TypeAuth, "create_delegation", audit.ResultSuccess)
 	event.Subject = req.Grantor
 	event.Object = poa.ID
@@ -3557,6 +3880,21 @@ func (s *Service) SuspendDelegation(ctx context.Context, poaID, actor, reason st
 		return rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err))
 	}
 
+	// Append suspension event to chain (tamper-evident)
+	if s.revChain != nil {
+		if _, err := s.revChain.Append(delegation.RevocationEvent{
+			ID:           fmt.Sprintf("sus_%s_%d", poa.ID, s.nowFn().UnixNano()),
+			DelegationID: poa.ID,
+			Reason:       string(delegation.RevocationReasonSuspended),
+		}); err != nil {
+			return rfc.New(rfc.ErrInternal, fmt.Sprintf("append suspension event: %v", err))
+		}
+		// External anchoring attempt
+		if s.anchorClient != nil {
+			_ = s.anchorClient.Anchor(chainTipRev(s.revChain))
+		}
+	}
+
 	// Audit log
 	if err := ctx.Err(); err != nil {
 		return err
@@ -3631,6 +3969,21 @@ func (s *Service) ResumeDelegation(ctx context.Context, poaID, actor string) err
 	poa.UpdatedAt = s.nowFn()
 	if err := s.repo.Update(poa); err != nil {
 		return rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err))
+	}
+
+	// Append activation event to chain (tamper-evident)
+	if s.revChain != nil {
+		if _, err := s.revChain.Append(delegation.RevocationEvent{
+			ID:           fmt.Sprintf("act_%s_%d", poa.ID, s.nowFn().UnixNano()),
+			DelegationID: poa.ID,
+			Reason:       string(delegation.RevocationReasonActivated),
+		}); err != nil {
+			return rfc.New(rfc.ErrInternal, fmt.Sprintf("append activation event: %v", err))
+		}
+		// External anchoring attempt
+		if s.anchorClient != nil {
+			_ = s.anchorClient.Anchor(chainTipRev(s.revChain))
+		}
 	}
 
 	// Audit log
@@ -3793,6 +4146,106 @@ func (s *Service) UpdateDelegationScope(ctx context.Context, poaID, actor string
 			},
 		})
 	}
+
+	return nil
+}
+
+// RevokeAuthorityCtx revokes specific scopes from a delegation without terminating it.
+// Appends a RevocationEvent with reason partial_scope_revocation to the chain.
+func (s *Service) RevokeAuthorityCtx(ctx context.Context, poaID, revoker string, scopes []string) error {
+	poa, exists := s.repo.Get(poaID)
+	if !exists || poa == nil {
+		return rfc.New(rfc.ErrNotFound, poaID)
+	}
+
+	// Only grantor can revoke authority
+	if poa.Grantor != revoker {
+		return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("only grantor can revoke authority: grantor=%s revoker=%s", poa.Grantor, revoker))
+	}
+
+	// Validate scopes exist in original PoA
+	originalScopes := make(map[string]bool)
+	for _, sc := range poa.Scope {
+		originalScopes[sc] = true
+	}
+	for _, sc := range scopes {
+		if !originalScopes[sc] {
+			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("scope %s not found in original delegation", sc))
+		}
+	}
+
+	// Check authorization
+	authReq := authz.Request{
+		Subject:  revoker,
+		Action:   "revoke_authority",
+		Resource: poaID,
+		Context:  map[string]string{"grantee": poa.Grantee, "revoked_scopes": strings.Join(scopes, ",")},
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	decision, err := s.authz.Authorize(ctx, authReq)
+	if err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("authorization failed: %v", err))
+	}
+	if !decision.Allow {
+		return rfc.New(rfc.ErrUnauthorized, decision.Reason)
+	}
+
+	// Record revoked scopes
+	revokedSet := make(map[string]bool)
+	for _, s := range poa.RevokedScopes {
+		revokedSet[s] = true
+	}
+	newlyRevoked := []string{}
+	for _, s := range scopes {
+		if !revokedSet[s] {
+			poa.RevokedScopes = append(poa.RevokedScopes, s)
+			newlyRevoked = append(newlyRevoked, s)
+		}
+	}
+
+	if len(newlyRevoked) == 0 {
+		return rfc.New(rfc.ErrInvalidRequest, "all requested scopes are already revoked")
+	}
+
+	poa.UpdatedAt = s.nowFn()
+	if err := s.repo.Update(poa); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("update failed: %v", err))
+	}
+
+	// Append revocation event to chain
+	if s.revChain != nil {
+		if _, err := s.revChain.Append(delegation.RevocationEvent{
+			ID:           fmt.Sprintf("prev_%s_%d", poa.ID, s.nowFn().UnixNano()),
+			DelegationID: poa.ID,
+			Reason:       string(delegation.RevocationReasonPartialScope),
+		}); err != nil {
+			return rfc.New(rfc.ErrInternal, fmt.Sprintf("append revocation event: %v", err))
+		}
+		// External anchoring attempt
+		if s.anchorClient != nil {
+			_ = s.anchorClient.Anchor(chainTipRev(s.revChain))
+		}
+	}
+
+	// Audit log
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	event := audit.NewEvent(audit.TypeAuth, "revoke_authority", audit.ResultSuccess)
+	event.Subject = revoker
+	event.Object = poaID
+	if event.Metadata == nil {
+		event.Metadata = map[string]interface{}{}
+	}
+	event.Metadata["grantee"] = poa.Grantee
+	event.Metadata["revoked_scopes"] = newlyRevoked
+	event.Metadata["reason"] = string(delegation.RevocationReasonPartialScope)
+	if err := s.audit.Log(ctx, event); err != nil {
+		return rfc.New(rfc.ErrInternal, fmt.Sprintf("audit log failed: %v", err))
+	}
+	s.sendToAuditSink(ctx, event)
 
 	return nil
 }
@@ -4215,7 +4668,13 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 		activeKey = s.keyRing.Active().Material
 		kid = s.keyRing.Active().ID
 	}
-	useV2 := os.Getenv("GAUTH_POA_ENVELOPE_V2") == "1"
+	// Determine envelope version based on sunset phase (Epic 8)
+	phase := sunset.PhasePilot
+	if s.sunsetController != nil {
+		// #nosec G115
+		phase = int(s.sunsetController.Phase())
+	}
+	useV2 := os.Getenv("GAUTH_POA_ENVELOPE_V2") == "1" || phase >= sunset.PhaseStabilization
 	var plain []byte
 	var err error
 	if useV2 {
@@ -4226,6 +4685,14 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			digest = dig
 			canonicalJSON = canon
 		}
+		if s.metrics != nil {
+			if poa.Threshold > 1 {
+				s.metrics.IncMultiSignatureIssued()
+			} else {
+				s.metrics.IncSingleSignatureIssued()
+			}
+		}
+
 		// Embedding controls: GAUTH_EMBED_FULL_POA=1 enables RawPOA population when canonical serialization available.
 		// GAUTH_MAX_RAW_POA_BYTES bounds size (defaults to 8192). If exceeded we omit RawPOA and record a metric.
 		embedEnabled := os.Getenv("GAUTH_EMBED_FULL_POA") == "1"
@@ -4249,6 +4716,39 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			} else if s.metrics != nil {
 				// Size exceeded; omit RawPOA.
 				s.metrics.IncEnvelopeRawPOATooLarge()
+			}
+		}
+
+		// CBOR compaction option (Requirement 49). Feature-gated by GAUTH_EMBED_FULL_POA_CBOR=1.
+		embedCBOR := os.Getenv("GAUTH_EMBED_FULL_POA_CBOR") == "1"
+		if embedCBOR && rawPOA == "" {
+			item := streamPkg.RawPOAItem{
+				ID:        poa.ID,
+				Issuer:    poa.Grantor,
+				Subject:   poa.Grantee,
+				Scope:     poa.Scope,
+				Status:    string(poa.Status),
+				Version:   poa.Version,
+				Timestamp: now.Unix(),
+				Algo:      algEd25519,
+				Signature: []byte{},                // Initialize to avoid nil
+				Claims:    make(map[string]string), // Initialize to avoid nil
+			}
+			if poa.Signature != nil && poa.Signature.SigBase64 != "" {
+				if sigBytes, decErr := base64.StdEncoding.DecodeString(poa.Signature.SigBase64); decErr == nil {
+					item.Signature = sigBytes
+				}
+			}
+			if cborBytes, cErr := streamPkg.MarshalRawPOAItem(item); cErr == nil {
+				if len(cborBytes) <= maxRaw {
+					rawPOA = base64.StdEncoding.EncodeToString(cborBytes)
+					poaVersion = poaVersionV1CBOR
+					if s.metrics != nil {
+						s.metrics.IncEnvelopeRawPOAEmbedded()
+					}
+				} else if s.metrics != nil {
+					s.metrics.IncEnvelopeRawPOATooLarge()
+				}
 			}
 		}
 		// RawPOAChain embedding (prototype). Feature-gated independently (GAUTH_EMBED_RAW_POA_CHAIN=1).
@@ -4403,8 +4903,8 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 			// Cadence observation
 			prev := mem.LastEnvelopeIssuanceUnix()
-			//nolint:gosec // G115: Unix timestamp always positive, safe conversion
-			cur := uint64(now.Unix()) //nolint:gosec // G115: Unix timestamp
+			// #nosec G115: Unix timestamp always positive, safe conversion
+			cur := uint64(now.Unix()) // #nosec G115: Unix timestamp
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))
 			}
@@ -4437,8 +4937,8 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 				s.metrics.SetEnvelopeV2AdoptionRatio(float64(v2) / float64(total))
 			}
 			prev := mem.LastEnvelopeIssuanceUnix()
-			//nolint:gosec // G115: Unix timestamp always positive, safe conversion
-			cur := uint64(now.Unix()) //nolint:gosec // G115: Unix timestamp
+			// #nosec G115: Unix timestamp always positive, safe conversion
+			cur := uint64(now.Unix()) // #nosec G115: Unix timestamp
 			if prev != 0 && cur > prev {
 				s.metrics.ObserveEnvelopeIssuanceCadence(float64(cur - prev))
 			}

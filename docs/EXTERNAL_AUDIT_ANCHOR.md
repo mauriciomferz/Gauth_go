@@ -19,7 +19,7 @@ The External Audit Anchor system provides comprehensive external timestamping an
 1. **ExternalAnchorClient** - Bridges ledger.AnchorClient interface with external anchor.Provider implementations
 2. **ExternalAuditLedger** - Enhanced BoltDB ledger with automatic external anchoring capabilities  
 3. **External Anchor Providers** - Pluggable timestamping services (Memory, TSA stub, extensible for production)
-4. **External Receipt Store** - Hash-chained persistence for external anchor receipts with integrity verification
+4. **External Receipt Store** - Hash-chained persistence for external anchor receipts (JSON file or BoltDB) with integrity verification
 
 ### Integration Points
 
@@ -189,7 +189,7 @@ type Provider interface {
 ```
 
 Future providers can implement:
-- RFC3161 Timestamp Authorities
+- RFC3161 Timestamp Authorities (Implemented: `pkg/ledger/rfc3161`)
 - Blockchain anchoring (Bitcoin, Ethereum)  
 - Certificate Transparency logs
 - Merkle tree transparency services

@@ -156,6 +156,7 @@ func (a *API) AuditVerify(c *gin.Context) {
 		c.JSON(200, gin.H{"success": true, "configured": false})
 		return
 	}
+	// #nosec G304
 	b, err := os.ReadFile(path)
 	if err != nil {
 		c.JSON(500, gin.H{"success": false, "error": "read_failed"})

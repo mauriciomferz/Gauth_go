@@ -400,6 +400,22 @@ func (reg *CollectorRegistry) IncEnvelopeRawPOATooLarge() {
 	reg.dispatch(func(c MetricsCollector) { c.IncEnvelopeRawPOATooLarge() })
 }
 
+func (reg *CollectorRegistry) IncMultiSignatureSuccess() {
+	reg.dispatch(func(c MetricsCollector) { c.IncMultiSignatureSuccess() })
+}
+
+func (reg *CollectorRegistry) IncMultiSignatureIssued() {
+	reg.dispatch(func(c MetricsCollector) { c.IncMultiSignatureIssued() })
+}
+
+func (reg *CollectorRegistry) IncSingleSignatureIssued() {
+	reg.dispatch(func(c MetricsCollector) { c.IncSingleSignatureIssued() })
+}
+
+func (reg *CollectorRegistry) SetMultiSignatureAdoptionRatio(r float64) {
+	reg.dispatch(func(c MetricsCollector) { c.SetMultiSignatureAdoptionRatio(r) })
+}
+
 func (reg *CollectorRegistry) IncMultiSignatureStructuralFailures() {
 	reg.dispatch(func(c MetricsCollector) { c.IncMultiSignatureStructuralFailures() })
 }
@@ -499,13 +515,32 @@ func (reg *CollectorRegistry) IncExternalAnchorForcedFailuresProvider(provider s
 func (reg *CollectorRegistry) ObserveExternalAnchorLatency(provider string, d time.Duration) {
 	reg.dispatch(func(c MetricsCollector) { c.ObserveExternalAnchorLatency(provider, d) })
 }
-
 func (reg *CollectorRegistry) SetExternalAnchorLastHashLen(n int) {
 	reg.dispatch(func(c MetricsCollector) { c.SetExternalAnchorLastHashLen(n) })
 }
 
 func (reg *CollectorRegistry) SetExternalAnchorAgeSeconds(age uint64) {
 	reg.dispatch(func(c MetricsCollector) { c.SetExternalAnchorAgeSeconds(age) })
+}
+
+func (reg *CollectorRegistry) ObserveExternalAnchorInterval(seconds float64) {
+	reg.dispatch(func(c MetricsCollector) { c.ObserveExternalAnchorInterval(seconds) })
+}
+
+func (reg *CollectorRegistry) HygieneSnapshot() map[string]uint64 {
+	// This method returns a value. The dispatch mechanism needs to be adapted
+	// to handle return values, e.g., by returning the result from the first
+	// collector or aggregating results. For now, we'll call it on all and return
+	// an empty map, as the dispatch pattern doesn't support returning values directly.
+	// A more robust solution would involve modifying the dispatch method itself
+	// or having a specific dispatch for methods that return values.
+	var result map[string]uint64
+	reg.dispatch(func(c MetricsCollector) {
+		// In a real scenario, you might want to aggregate these or return the first one.
+		// For this faithful edit, we just call it.
+		result = c.HygieneSnapshot()
+	})
+	return result
 }
 
 func (reg *CollectorRegistry) IncObligationsExecuted() {
@@ -534,6 +569,9 @@ func (reg *CollectorRegistry) IncReplayMisses() {
 
 func (reg *CollectorRegistry) IncReplayStoreErrors() {
 	reg.dispatch(func(c MetricsCollector) { c.IncReplayStoreErrors() })
+}
+func (reg *CollectorRegistry) IncMalformedJTI(reason string) {
+	reg.dispatch(func(c MetricsCollector) { c.IncMalformedJTI(reason) })
 }
 
 func (reg *CollectorRegistry) ObserveReplayStoreLatency(d time.Duration) {
@@ -788,4 +826,12 @@ func (reg *CollectorRegistry) IncJurisdictionEnforcementDenials() {
 
 func (reg *CollectorRegistry) IncJurisdictionEnforcementAllows() {
 	reg.dispatch(func(c MetricsCollector) { c.IncJurisdictionEnforcementAllows() })
+}
+
+func (reg *CollectorRegistry) IncReplayStoreAvailabilityImpact() {
+	reg.dispatch(func(c MetricsCollector) { c.IncReplayStoreAvailabilityImpact() })
+}
+
+func (reg *CollectorRegistry) ObserveCapabilityAnchorInterval(d time.Duration) {
+	reg.dispatch(func(c MetricsCollector) { c.ObserveCapabilityAnchorInterval(d) })
 }

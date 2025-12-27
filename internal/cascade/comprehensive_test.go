@@ -379,11 +379,11 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 		}
 
 		// Check descendants processed metric
-		//nolint:gosec // G115: test code, ProcessedCount is small value
+		// #nosec G115: test code, ProcessedCount is small value
 		if snapshot.CascadeDescendantsProcessed != uint64(result.ProcessedCount) {
 			t.Errorf("Expected descendants processed metric to be %d, got %d", result.ProcessedCount, snapshot.CascadeDescendantsProcessed)
 		} // Check batch processing metric
-		//nolint:gosec // G115: test code, BatchCount is small value
+		// #nosec G115: test code, BatchCount is small value
 		if snapshot.CascadeBatchProcessed != uint64(result.BatchCount) {
 			t.Errorf("Expected batches processed metric to be %d, got %d", result.BatchCount, snapshot.CascadeBatchProcessed)
 		}

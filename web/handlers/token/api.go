@@ -610,9 +610,21 @@ func (h *Handler) JWKS(c *gin.Context) {
 	etag := fmt.Sprintf(`"%x"`, sha256.Sum256(keysJSON))
 	c.Header("ETag", etag)
 
-	// Update server's ETag if updater is available
+	// Update server's metadata if updater is available
 	if h.ETagUpdater != nil {
 		h.ETagUpdater.UpdateJWKSETag(etag)
+		// Report deprecation schedule
+		depSchedule := map[string]time.Time{}
+		if mode == "eddsa" && h.KeyProvider != nil {
+			if km, ok := h.KeyProvider.(*crypto.Manager); ok {
+				for _, k := range km.ListCurrent() {
+					if !k.DeprecatedAfter.IsZero() {
+						depSchedule["key:"+k.ID] = k.DeprecatedAfter
+					}
+				}
+			}
+		}
+		h.ETagUpdater.UpdateDeprecationSchedule(depSchedule)
 	}
 
 	// Support conditional requests (If-None-Match)
@@ -631,6 +643,9 @@ func (h *Handler) JWKS(c *gin.Context) {
 			sig := base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
 			c.Header("X-JWKS-Signature", sig)
 			c.Header("X-JWKS-Signature-Alg", "HMAC-SHA256")
+			if h.ETagUpdater != nil {
+				h.ETagUpdater.UpdateJWKSSignature(sig)
+			}
 		}
 	}
 
