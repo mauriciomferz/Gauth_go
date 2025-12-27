@@ -2,10 +2,10 @@ package gauth_test
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
@@ -578,23 +578,27 @@ func TestGAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 
 // Helper functions
 
-func setupTestDB(t *testing.T) (*sql.DB, func()) {
-	// Connect to test database
-	connStr := "host=localhost port=5432 user=postgres password=gauth_dev_password dbname=gauth sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+func setupTestDB(t *testing.T) (*database.DB, func()) {
+	// Connect to test database using pkg/database (pgx)
+	cfg := &database.Config{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "postgres",
+		Password: "gauth_dev_password",
+		Database: "gauth",
+		SSLMode:  "disable",
+	}
+
+	db, err := database.NewDB(cfg)
 	if err != nil {
 		t.Skipf("Cannot connect to test database: %v", err)
 		return nil, func() {}
 	}
 
-	// Test connection
-	if err := db.Ping(); err != nil {
-		t.Skipf("Cannot ping test database: %v", err)
-		return nil, func() {}
-	}
+	ctx := context.Background()
 
 	// Insert test tenant
-	_, err = db.Exec(`
+	_, err = db.Pool.Exec(ctx, `
 		INSERT INTO subscribers (tenant_id, tenant_name, status) 
 		VALUES ('tenant-1', 'Test Tenant', 'active') 
 		ON CONFLICT (tenant_id) DO NOTHING
@@ -604,7 +608,8 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 	}
 
 	// Insert test data for PoA
-	_, err = db.Exec(`
+	// Note: We cast arrays explicitly for pgx
+	_, err = db.Pool.Exec(ctx, `
 		INSERT INTO power_of_attorney (
 			id, tenant_id, poa_name, grantor_id, grantor_name, representative_id, representative_name, representative_type, 
 			scope_type, actions, status, delegation_policy, valid_from, valid_until
@@ -624,7 +629,8 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 	}
 
 	// Insert test data for Capability Assessment (L3 for primary agent)
-	_, err = db.Exec(`
+	// Note: Explicit type checks may be needed if db strictness increases, but raw strings usually work in Exec
+	_, err = db.Pool.Exec(ctx, `
 		INSERT INTO ai_capability_assessments (
 			id, agent_id, assessment_date, overall_level, domain_scores, 
 			risk_profile, certification_status, certifications, limitations, 
@@ -667,17 +673,18 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 
 	cleanup := func() {
 		// Clean up test data
-		_, _ = db.Exec("DELETE FROM successor_activations WHERE poa_id::text LIKE '550e8400%'")
-		_, _ = db.Exec("DELETE FROM ai_delegations WHERE source_poa_id::text LIKE '550e8400%'")
-		_, _ = db.Exec("DELETE FROM ai_capability_assessments WHERE agent_id LIKE 'agent-%'")
-		_, _ = db.Exec("DELETE FROM fiduciary_duty_violations WHERE poa_id::text LIKE '550e8400%'")
+		ctx := context.Background()
+		_, _ = db.Pool.Exec(ctx, "DELETE FROM successor_activations WHERE poa_id::text LIKE '550e8400%'")
+		_, _ = db.Pool.Exec(ctx, "DELETE FROM ai_delegations WHERE source_poa_id::text LIKE '550e8400%'")
+		_, _ = db.Pool.Exec(ctx, "DELETE FROM ai_capability_assessments WHERE agent_id LIKE 'agent-%'")
+		_, _ = db.Pool.Exec(ctx, "DELETE FROM fiduciary_duty_violations WHERE poa_id::text LIKE '550e8400%'")
 		db.Close()
 	}
 
 	return db, cleanup
 }
 
-func createTestGAuthPlusValidator(db *sql.DB) *gauth.GAuthPlusValidator {
+func createTestGAuthPlusValidator(db *database.DB) *gauth.GAuthPlusValidator {
 	successorService := gauthplus.NewPostgreSQLSuccessorService(db)
 	delegationService := gauthplus.NewPostgreSQLDelegationService(db)
 	dualControlService := gauthplus.NewPostgreSQLDualControlService(db)
