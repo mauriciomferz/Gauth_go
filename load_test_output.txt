@@ -1,0 +1,2331 @@
+=== RUN   TestLoad_ThroughputBaseline
+    load_test.go:380:   Progress: 2s elapsed, 167394 ops, 83696.28 ops/sec
+    load_test.go:380:   Progress: 4s elapsed, 327120 ops, 81779.72 ops/sec
+    load_test.go:380:   Progress: 6s elapsed, 479746 ops, 79955.74 ops/sec
+    load_test.go:380:   Progress: 8s elapsed, 575924 ops, 71990.30 ops/sec
+    load_test.go:380:   Progress: 10s elapsed, 691911 ops, 69190.93 ops/sec
+    load_test.go:91: Baseline Throughput Test Results:
+    load_test.go:92:   Total Operations:    691911
+    load_test.go:93:   Success Rate:        100.00%
+    load_test.go:94:   Throughput:          69190.94 ops/sec
+    load_test.go:95:   Latency P50:         0.01 ms
+    load_test.go:96:   Latency P95:         0.02 ms
+    load_test.go:97:   Latency P99:         0.07 ms
+    load_test.go:98:   Latency Min/Max/Avg: 0.01 / 53.15 / 0.01 ms
+--- PASS: TestLoad_ThroughputBaseline (10.04s)
+=== RUN   TestLoad_ConcurrentThroughput
+=== RUN   TestLoad_ConcurrentThroughput/Workers=10
+    load_test.go:380:   Progress: 2s elapsed, 144118 ops, 72054.04 ops/sec
+    load_test.go:380:   Progress: 4s elapsed, 199358 ops, 49719.55 ops/sec
+    load_test.go:380:   Progress: 6s elapsed, 228557 ops, 37857.98 ops/sec
+    load_test.go:380:   Progress: 8s elapsed, 244579 ops, 30537.06 ops/sec
+    load_test.go:380:   Progress: 10s elapsed, 270574 ops, 27051.71 ops/sec
+    load_test.go:129: Concurrent Throughput Test Results (10 workers):
+    load_test.go:130:   Total Operations:    270580
+    load_test.go:131:   Success Rate:        70.15%
+    load_test.go:132:   Throughput:          27040.80 ops/sec
+    load_test.go:133:   Create Ops:          189490 (18936.96 ops/sec)
+    load_test.go:134:   Validate Ops:        54060 (5402.56 ops/sec)
+    load_test.go:135:   Revoke Ops:          27030 (2701.28 ops/sec)
+    load_test.go:136:   Latency P50:         0.05 ms
+    load_test.go:137:   Latency P95:         1.17 ms
+    load_test.go:138:   Latency P99:         5.02 ms
+    load_test.go:139:   Latency P999:        31.70 ms
+=== RUN   TestLoad_ConcurrentThroughput/Workers=100
+fatal error: concurrent map read and map write
+
+goroutine 244 [running]:
+internal/runtime/maps.fatal({0x10537f3d0?, 0x1403359da03?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/panic.go:1046 +0x20
+github.com/mauriciomferz/Gauth_go/pkg/delegation.(*RevocationChain).IsDelegationRevoked(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:237
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {0x1403265d5d8, 0x17}, {0x14041bad200, 0x8}, {0x105365dc4, 0x4})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2832 +0x63c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2710
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x5e)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:422 +0x71c
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 1 [chan receive]:
+testing.(*T).Run(0x14000282380, {0x10537ae3b?, 0x14000185b38?}, 0x10564e160)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2005 +0x378
+testing.runTests.func1(0x14000282380)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2477 +0x38
+testing.tRunner(0x14000282380, 0x14000185c68)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1934 +0xc8
+testing.runTests(0x140002ba6f0, {0x105b64060, 0x5, 0x5}, {0x1400029adc0?, 0x7?, 0x105b73b20?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2475 +0x3b8
+testing.(*M).Run(0x140002ea140)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2337 +0x530
+main.main()
+	_testmain.go:53 +0x80
+
+goroutine 63 [chan receive]:
+testing.(*T).Run(0x14000256fc0, {0x1405c1172a0?, 0x1400048cf38?}, 0x14032052320)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2005 +0x378
+github.com/mauriciomferz/Gauth_go/test/load.TestLoad_ConcurrentThroughput(0x14000256fc0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:126 +0x1b0
+testing.tRunner(0x14000256fc0, 0x10564e160)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1934 +0xc8
+created by testing.(*T).Run in goroutine 1
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1997 +0x364
+
+goroutine 117 [select]:
+github.com/mauriciomferz/Gauth_go/pkg/audit.(*MemoryLogger).processEvents(0x140002e8280)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:148 +0x9c
+created by github.com/mauriciomferz/Gauth_go/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 105
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:139 +0x140
+
+goroutine 118 [select]:
+github.com/mauriciomferz/Gauth_go/internal/sunset.(*Controller).Start(0x140002e8300, {0x10565b7c8, 0x105b9e320})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/sunset/controller.go:108 +0x114
+created by github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.NewService in goroutine 105
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:966 +0x798
+
+goroutine 146 [sync.WaitGroup.Wait]:
+sync.runtime_SemacquireWaitGroup(0x104c7f830?, 0xb8?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:114 +0x38
+sync.(*WaitGroup).Wait(0x1405d05cdf0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/waitgroup.go:206 +0xa8
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest(0x1400073afc0, {0x64, 0x2540be400, 0x0, 0x46, 0x14, 0xa, 0x3, 0x77359400})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:460 +0xa64
+github.com/mauriciomferz/Gauth_go/test/load.TestLoad_ConcurrentThroughput.func1(0x1400073afc0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:127 +0x38
+testing.tRunner(0x1400073afc0, 0x14032052320)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1934 +0xc8
+created by testing.(*T).Run in goroutine 63
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1997 +0x364
+
+goroutine 65 [select]:
+github.com/mauriciomferz/Gauth_go/pkg/audit.(*MemoryLogger).processEvents(0x1408be67a00)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:148 +0x9c
+created by github.com/mauriciomferz/Gauth_go/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 64
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:139 +0x140
+
+goroutine 130 [select]:
+github.com/mauriciomferz/Gauth_go/internal/sunset.(*Controller).Start(0x1408be67a80, {0x10565b7c8, 0x105b9e320})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/sunset/controller.go:108 +0x114
+created by github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.NewService in goroutine 64
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:966 +0x798
+
+goroutine 147 [runnable]:
+github.com/mauriciomferz/Gauth_go/pkg/audit.(*MemoryLogger).processEvents(0x14031b71000)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:148 +0x9c
+created by github.com/mauriciomferz/Gauth_go/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:139 +0x140
+
+goroutine 148 [select]:
+github.com/mauriciomferz/Gauth_go/internal/sunset.(*Controller).Start(0x14031b71080, {0x10565b7c8, 0x105b9e320})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/sunset/controller.go:108 +0x114
+created by github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.NewService in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:966 +0x798
+
+goroutine 149 [select]:
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func1()
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:373 +0x19c
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:365 +0x84c
+
+goroutine 150 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x14032f9f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cbd8008)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14020be7c38, 0x7}, {0x14020be7ed0, 0x8}, {0x1405bcfd890, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 151 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x50?, 0x14032f13828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x14040229d48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14048ef35e8, 0x7}, {0x14048ef36d0, 0x8}, {0x1405caa2ab0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x1)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 152 [runnable]:
+crypto/internal/fips140/sha256.(*Digest).Sum(0x14033291680, {0x14033291660, 0x0, 0x20})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/crypto/internal/fips140/sha256/sha256.go:200 +0x13c
+crypto/sha256.Sum256({0x14042514120, 0x10f, 0x120})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/crypto/sha256/sha256.go:60 +0x8c
+github.com/mauriciomferz/Gauth_go/pkg/delegation.hashRevocationEvent({{0x14098a3b530, 0x2f}, {0x1401f972ca8, 0x17}, {0x0, 0x0}, {0x105371f73, 0x12}, {0xaca96a8, 0xee0e39bff, ...}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:314 +0x98
+github.com/mauriciomferz/Gauth_go/pkg/delegation.(*RevocationChain).Verify(0x14030629aa0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:191 +0xa8
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {0x1403265df08, 0x17}, {0x14041968528, 0x8}, {0x105365dc4, 0x4})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2826 +0x5d8
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2710
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x2)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:422 +0x71c
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 153 [runnable]:
+syscall.syscall(0x1408d7cb548?, 0x104cde4ac?, 0x80000000000?, 0x7ffff80000000000?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sys_darwin.go:27 +0x40
+syscall.write(0x140002ab500?, {0x140002a1000?, 0x1408d7cb5b8?, 0x104d18714?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/syscall/zsyscall_darwin_arm64.go:1709 +0x48
+syscall.Write(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/syscall/syscall_unix.go:211
+internal/poll.ignoringEINTRIO(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/poll/fd_unix.go:738
+internal/poll.(*FD).Write(0x140002ab500, {0x140002a1000, 0x1000, 0x1000})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/poll/fd_unix.go:374 +0x2b4
+os.(*File).write(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/os/file_posix.go:46
+os.(*File).Write(0x140002c60c8, {0x140002a1000?, 0x1000, 0x64?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/os/file.go:215 +0x54
+bufio.(*Writer).Flush(0x140002bcbc0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/bufio/bufio.go:645 +0x58
+bufio.(*Writer).WriteString(0x140002bcbc0, {0x105377099?, 0x1054d27d8?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/bufio/bufio.go:769 +0x158
+testing/internal/testdeps.(*testLog).add(0x105b71250, {0x10536784d, 0x6}, {0x105377099, 0x18})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/internal/testdeps/deps.go:105 +0x120
+testing/internal/testdeps.(*testLog).Getenv(0x105367aab?, {0x105377099?, 0x1408d7cb848?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/internal/testdeps/deps.go:77 +0x34
+internal/testlog.Getenv({0x105377099?, 0x1052adc28?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/testlog/log.go:52 +0x58
+os.Getenv({0x105377099, 0x18})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/os/env.go:102 +0x24
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140420ad078, 0x7}, {0x140420ad0b0, 0x8}, {0x1405ce08d50, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2514 +0xccc
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x3)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 154 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x14032f15828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf2c248)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405c2e5f88, 0x5}, {0x1405c2e5fd0, 0x8}, {0x1405b76a0c0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x4)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:437 +0x5c0
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 155 [runnable]:
+bytes.(*Buffer).Write(0x10001403e7e4fc0, {0x1401f5f5648, 0x0, 0x1d})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/bytes/buffer.go:181
+encoding/json.stringEncoder(0x1401c7ebe00, {0x105541ee0?, 0x140420495f0?, 0x14032f175d0?}, {0xa8?, 0x74?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:632 +0x394
+encoding/json.structEncoder.encode({{{0x14000420508, 0x6, 0x8}, 0x1408e969560, 0x1408e969590}}, 0x1401c7ebe00, {0x1055e5ba0?, 0x140420495e0?, 0xee4aa405171102e7?}, {0xb3?, ...})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:758 +0x254
+encoding/json.(*encodeState).reflectValue(0x1401c7ebe00, {0x1055e5ba0?, 0x140420495e0?, 0x0?}, {0x0?, 0x0?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:367 +0x70
+encoding/json.(*encodeState).marshal(0x0?, {0x1055e5ba0?, 0x140420495e0?}, {0x56?, 0xa8?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:343 +0xa8
+encoding/json.Marshal({0x1055e5ba0, 0x140420495e0})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:209 +0x84
+github.com/mauriciomferz/Gauth_go/pkg/delegation.hashRevocationEvent({{0x14001061980, 0x2f}, {0x1401df55f08, 0x17}, {0x0, 0x0}, {0x105371f73, 0x12}, {0x3a0a4aa8, 0xee0e39bfe, ...}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:310 +0x90
+github.com/mauriciomferz/Gauth_go/pkg/delegation.(*RevocationChain).Verify(0x14030629aa0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:191 +0xa8
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {0x1403265df08, 0x17}, {0x140413ca200, 0x8}, {0x105365dc4, 0x4})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2826 +0x5d8
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2710
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x5)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:422 +0x71c
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 156 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x140330b9828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b861448)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402ad84130, 0x7}, {0x1402ad84138, 0x8}, {0x1405c3d3680, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x6)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 157 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x140330bb828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf32008)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405c413728, 0x7}, {0x1405c413750, 0x8}, {0x1405c1bee10, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x7)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 158 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x80?, 0x1403343b828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403dabcd88)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405612ecd8, 0x7}, {0x1405612ed70, 0x8}, {0x1405c010e40, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 159 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xf0?, 0x14000a03828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x140404e06c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1406ff14c30, 0x7}, {0x1406ff14c38, 0x8}, {0x1405cb54d80, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x9)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 160 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x14032c2d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1404048d208)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14049b847b0, 0x8}, {0x14049b847b8, 0x8}, {0x1405c9b6960, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0xa)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 161 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x0?, 0x14056ebb828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d032488)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bf8de00, 0x8}, {0x1405bf8de08, 0x8}, {0x1405bf5d320, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0xb)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 162 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14032eb7828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1404061c248)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14055363388, 0x8}, {0x14055363650, 0x8}, {0x1405cb18450, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0xc)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 163 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14033f3d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x140404e0d88)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1406ff152e0, 0x8}, {0x1406ff152e8, 0x8}, {0x1405cb55140, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0xd)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 164 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x10?, 0x140336bb828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d901208)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405443bf38, 0x8}, {0x1405443bfb0, 0x8}, {0x1405c778630, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0xe)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 165 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x70?, 0x14032c27828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cbd5208)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14033aa8058, 0x8}, {0x14033aa83e0, 0x8}, {0x1405c487890, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0xf)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 166 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x40?, 0x14032eb5828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403dd798c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14054393f08, 0x8}, {0x14054780210, 0x8}, {0x1405c5dbb60, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x10)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 167 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x10?, 0x14032eb3828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cd97208)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402b860190, 0x8}, {0x1402b860198, 0x8}, {0x1405c550c00, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x11)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 168 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x1403328f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf326c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140549788b8, 0x8}, {0x14054978b20, 0x8}, {0x1405c5137d0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x12)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 169 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xe0?, 0x140330bd828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b86e248)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14022f99c58, 0x8}, {0x14022f99d10, 0x8}, {0x1405c0100c0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x13)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 170 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xa0?, 0x14033ee7828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b861b08)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14029840b50, 0x8}, {0x14029840b58, 0x8}, {0x1405c4c4900, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x14)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 171 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x40?, 0x1408d7c7828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d032b48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda0d78, 0x8}, {0x1405bda0da0, 0x8}, {0x1405bf27cb0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x15)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 172 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xb0?, 0x14032f9b828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403dabd448)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405612f468, 0x8}, {0x1405612f620, 0x8}, {0x1405c011230, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x16)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 173 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x14032f9d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b86efc8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140268ae018, 0x8}, {0x140268ae2e0, 0x8}, {0x1405c010180, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x17)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 174 [runnable]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xb0?, 0x14033fdd828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x140401ce908)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14070260e58, 0x8}, {0x14070261090, 0x8}, {0x1405cae0e70, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x18)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 175 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xd0?, 0x14033fdf828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cda4d88)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda0d38, 0x8}, {0x1405bda0d70, 0x8}, {0x1405bf27bc0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x19)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 176 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x14033583828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cc30d88)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14029f053e0, 0x8}, {0x14029f053e8, 0x8}, {0x1405c6782d0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x1a)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 177 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xf0?, 0x14033997828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cda46c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14028478c98, 0x8}, {0x140284790d0, 0x8}, {0x1405c5514d0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x1b)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 178 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xa0?, 0x14033999828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b719688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bf8da48, 0x8}, {0x1405bf8daa0, 0x8}, {0x1405bf5cc90, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x1c)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 179 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xa0?, 0x14033439828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403ce8cfc8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402bcfeec8, 0x8}, {0x1402bcff630, 0x8}, {0x1405c5da6f0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x1d)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 180 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x0?, 0x14033eed828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cc30008)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405c1cdab0, 0x8}, {0x1405c1cdab8, 0x8}, {0x1405bed9ef0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x1e)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 181 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x70?, 0x14033ea5828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b718fc8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bf8d898, 0x8}, {0x1405bf8d920, 0x8}, {0x1405bf5c930, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x1f)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 182 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x50?, 0x14033ee9828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d0338c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402ba565c0, 0x8}, {0x1402ba565c8, 0x8}, {0x1405bf5d9e0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x20)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 183 [runnable]:
+time.Now()
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/time.go:1343 +0xc4
+github.com/mauriciomferz/Gauth_go/pkg/delegation.(*RevocationChain).Verify(0x14030629aa0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:204 +0x14c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {0x1403265dbc0, 0x17}, {0x140424a82c8, 0x8}, {0x105365dc4, 0x4})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2826 +0x5d8
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2710
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x21)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:422 +0x71c
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 184 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x14000187828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403ce8d688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402b736ec8, 0x8}, {0x1402b736f60, 0x8}, {0x1405b76b8f0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x22)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 185 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14032c29828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d15fb08)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14054ec60e8, 0x8}, {0x14054ec61b0, 0x8}, {0x1405c7f2d50, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x23)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 186 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x70?, 0x14032c2b828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d2a5208)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14049210c98, 0x8}, {0x14049210dc0, 0x8}, {0x1405c63ec30, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x24)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 187 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14033f63828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b8478c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140335642b8, 0x8}, {0x14033564570, 0x8}, {0x1405b81dc50, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x25)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 188 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xf0?, 0x140330df828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cbd58c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14025bc6d68, 0x8}, {0x14025bc7310, 0x8}, {0x1405bfd42a0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x26)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 189 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xe0?, 0x140330e1828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cd978c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402b8611f0, 0x8}, {0x1402b8611f8, 0x8}, {0x1405c550ea0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x27)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 190 [runnable]:
+syscall.syscall(0x140341caf48?, 0x104c48020?, 0x152a3cda8?, 0x104c4bf80?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sys_darwin.go:27 +0x40
+internal/syscall/unix.ARC4Random({0x14045f0cbf0?, 0x105c01d88?, 0x140341cafa8?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/syscall/unix/arc4random_darwin.go:22 +0x4c
+crypto/internal/sysrand.read(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/crypto/internal/sysrand/rand_arc4random.go:20
+crypto/internal/sysrand.Read({0x14045f0cbf0?, 0x14045f0cbf0?, 0x140341cafd8?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/crypto/internal/sysrand/rand.go:41 +0xcc
+crypto/rand.(*reader).Read(0x105ba0701?, {0x14045f0cbf0, 0x10, 0x10})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/crypto/rand/rand.go:50 +0x5c
+io.ReadAtLeast({0x105658a00, 0x140001127a0}, {0x14045f0cbf0, 0x10, 0x10}, 0x10)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/io/io.go:335 +0x98
+io.ReadFull(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/io/io.go:354
+github.com/google/uuid.NewRandomFromReader({0x105658a00, 0x140001127a0})
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/google/uuid@v1.6.0/version4.go:49 +0x54
+github.com/google/uuid.NewRandom()
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/google/uuid@v1.6.0/version4.go:41 +0x60
+github.com/google/uuid.NewString()
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/google/uuid@v1.6.0/version4.go:22 +0x1c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.generateAuthToken(0x140004901e0, 0x140423c8488)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:4927 +0xe60
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14045f0ca38, 0x8}, {0x14045f0ca90, 0x8}, {0x1405cdb8f60, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2668 +0x1910
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x28)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 191 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x10?, 0x14033f3f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b719d48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bf8dc50, 0x8}, {0x1405bf8dc58, 0x8}, {0x1405bf5cff0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x29)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 192 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xa0?, 0x1403393f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf2dd48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda0eb8, 0x8}, {0x1405bda0ed0, 0x8}, {0x1405c1f4000, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x2a)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 193 [runnable]:
+time.appendInt.func1(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/format.go:426
+time.appendInt({0x1403e161770?, 0xee0e39bff?, 0x0?}, 0x11?, 0x140334951e8?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/format.go:429 +0xcc
+time.Time.appendFormatRFC3339({0x14033495248?, 0x104d5aa80?, 0x0?}, {0x1403e161770, 0x1, 0x25}, 0x1)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/format_rfc3339.go:37 +0x200
+time.Time.appendStrictRFC3339({0x1405cae0b00?, 0x10564e958?, 0x0?}, {0x1403e161770?, 0x1, 0x104d11a9c?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/format_rfc3339.go:64 +0x2c
+time.Time.MarshalJSON({0x14033495448?, 0x10557f2e0?, 0x0?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/time.go:1590 +0x64
+encoding/json.marshalerEncoder(0x1402f17b780, {0x105628d60?, 0x1403ad41d10?, 0x105b9e320?}, {0xe0?, 0xf2?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:483 +0xc0
+encoding/json.condAddrEncoder.encode({0x10564e918?, 0x10564e960?}, 0x14033495488?, {0x105628d60?, 0x1403ad41d10?, 0x104d5a480?}, {0xe0?, 0x1e?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:947 +0x78
+encoding/json.structEncoder.encode({{{0x140002faa88, 0x9, 0x11}, 0x14000422c90, 0x14000422cc0}}, 0x1402f17b780, {0x1055f9cc0?, 0x1403ad41cb0?, 0x80?}, {0x80?, ...})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:758 +0x254
+encoding/json.(*encodeState).reflectValue(0x1402f17b780, {0x1055f9cc0?, 0x1403ad41cb0?, 0x4?}, {0x48?, 0x58?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:367 +0x70
+encoding/json.(*encodeState).marshal(0x1403cddab40?, {0x1055f9cc0?, 0x1403ad41cb0?}, {0xf4?, 0x94?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:343 +0xa8
+encoding/json.Marshal({0x1055f9cc0, 0x1403ad41cb0})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:209 +0x84
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*DelegationChain).Append(0x140311d9b60, {{0x1403e161740, 0x2f}, {0x1403cdd5d70, 0x17}, {0x14070260548, 0x8}, {0x140702607f0, 0x8}, {0x1405cae0ae0, ...}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:4404 +0x110
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14070260548, 0x8}, {0x140702607f0, 0x8}, {0x1405cae0ae0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2654 +0x1878
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x2b)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 194 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x14033995828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x140401cefc8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405b7e6800, 0x8}, {0x1405b7e6808, 0x8}, {0x1405ca2eed0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x2c)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 195 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x60?, 0x14033b2f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403c8afb08)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402b0253d0, 0x8}, {0x1402b0253d8, 0x8}, {0x1405b76b080, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x2d)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 196 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x80?, 0x140336b7828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf2cfc8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda0e38, 0x8}, {0x1405bda0e90, 0x8}, {0x1405bf27e30, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x2e)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 197 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xa0?, 0x14000a01828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403e1f5688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14020a58378, 0x8}, {0x14020a58cb0, 0x8}, {0x1405c923620, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x2f)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 198 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14000181828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403db69d48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14049ccf6b0, 0x8}, {0x14049ccf6b8, 0x8}, {0x1405c8282d0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x30)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 199 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x14032f19828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cc306c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140290fa770, 0x8}, {0x140290fa778, 0x8}, {0x1405c04cc90, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x31)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 200 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x70?, 0x14032eb1828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403bce5b08)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14029464d98, 0x8}, {0x14029465210, 0x8}, {0x1405c5da150, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x32)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 201 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x140330e3828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1404061c908)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14055363d58, 0x8}, {0x14055363e00, 0x8}, {0x1405cb18810, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x33)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 202 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xb0?, 0x140330b7828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403e45fb08)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402136b028, 0x8}, {0x1402136b900, 0x8}, {0x1405c829140, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x34)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 203 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xf0?, 0x14033293828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b860d88)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402bba8f00, 0x8}, {0x1402bba8f08, 0x8}, {0x1405c3d3410, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x35)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 204 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x70?, 0x140330dd828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf2c908)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda0df8, 0x8}, {0x1405bda0e30, 0x8}, {0x1405bf27dd0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x36)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 205 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x0?, 0x14033405828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x140401cf688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140702615c0, 0x8}, {0x140702615c8, 0x8}, {0x1405cae1380, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x37)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 206 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x140333ff828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403def0488)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402107d100, 0x8}, {0x1402107d108, 0x8}, {0x1405b76be60, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x38)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 207 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xd0?, 0x1403328d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403e58afc8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405520fcc8, 0x8}, {0x1405520fd50, 0x8}, {0x1405c8655f0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x39)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 208 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x14033401828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d034008)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14021afefb0, 0x8}, {0x14021afefb8, 0x8}, {0x1405c39e990, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x3a)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 209 [runnable]:
+github.com/google/uuid.encodeHex({0x14032f990e4?, 0x24?, 0x24?}, {0x9c, 0x8, 0x5f, 0x95, 0x38, 0x31, 0x40, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/google/uuid@v1.6.0/uuid.go:259 +0x31c
+github.com/google/uuid.UUID.String(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/google/uuid@v1.6.0/uuid.go:246
+github.com/google/uuid.NewString()
+	/Users/mauricio.fernandez_fernandezsiemens.co/go/pkg/mod/github.com/google/uuid@v1.6.0/version4.go:22 +0x64
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.generateAuthToken(0x140004901e0, 0x1404061d688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:4927 +0xe60
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14054d78bc8, 0x5}, {0x14054d78f80, 0x8}, {0x1405cb18f60, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2668 +0x1910
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x3b)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:437 +0x5c0
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 210 [runnable]:
+internal/sync.runtime_SemacquireMutex(0xc?, 0xc?, 0xc?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140004a7c00)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+github.com/mauriciomferz/Gauth_go/internal/metrics.(*Memory).RecordDecisionWithReason(0x140004a7008, {0x105370c90?, 0x1403b581a58?}, {0x1403b581a58?, 0x140461d0928?}, {0x105366975?, 0x140461d0980?}, {0x10536d2be?, 0x1405ccdfdd0?})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/metrics/metrics.go:1653 +0x130
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140461d0928, 0x8}, {0x140461d0980, 0x8}, {0x1405ccdfdd0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2672 +0x1960
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x3c)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 211 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x50?, 0x1403343f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403ce8c908)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bf8d7c0, 0x8}, {0x1405bf8d7c8, 0x8}, {0x1405bf5c7e0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x3d)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 212 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x10?, 0x1403342f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf2f8c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402bda3c50, 0x8}, {0x1402bda3c58, 0x8}, {0x1405c513260, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x3e)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 213 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x14033403828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x140401cfd48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14070261d00, 0x8}, {0x14070261d08, 0x8}, {0x1405cae1680, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x3f)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 214 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xb0?, 0x14033c4b828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403ce8dd48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14033aa8c58, 0x8}, {0x14033aa8f00, 0x8}, {0x1405c6b4030, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x40)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 215 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x14033941828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cd96b48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402a3f1280, 0x8}, {0x1402a3f1288, 0x8}, {0x1405c550810, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x41)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 216 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x60?, 0x140335a1828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b86e908)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14022f99d18, 0x8}, {0x140268ae010, 0x8}, {0x1405c010150, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x42)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 217 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x0?, 0x14033ea9828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403e000fc8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140550bcf88, 0x8}, {0x140550bd040, 0x8}, {0x1405c6792c0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x43)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 218 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xe0?, 0x14033b31828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x14040902248)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14054e1ee90, 0x8}, {0x14054e1ee98, 0x8}, {0x1405c59d560, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x44)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 219 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x60?, 0x14033b33828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf2d688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda0e98, 0x8}, {0x1405bda0eb0, 0x8}, {0x1405bf27f50, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x45)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 220 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x1403342d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b8606c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402a8e9d90, 0x8}, {0x1402a8e9d98, 0x8}, {0x1405c3d30e0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x46)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 221 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x40?, 0x1403393d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cf2f208)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14024c07470, 0x8}, {0x14024c07478, 0x8}, {0x1405c2b3260, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x47)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 222 [runnable]:
+encoding/json.appendCompact({0x14027a0aea2, 0x0, 0x15e}, {0x14041f654a0, 0x1d, 0x25}, 0x1)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/indent.go:73 +0x434
+encoding/json.marshalerEncoder(0x14026ece900, {0x105628d60?, 0x14042118900?, 0x104c4c100?}, {0x18?, 0x54?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:487 +0x128
+encoding/json.condAddrEncoder.encode({0x10564e918?, 0x10564e960?}, 0x14056eb5448?, {0x105628d60?, 0x14042118900?, 0x104d5a480?}, {0xe0?, 0x1e?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:947 +0x78
+encoding/json.structEncoder.encode({{{0x14000420508, 0x6, 0x8}, 0x1408e969560, 0x1408e969590}}, 0x14026ece900, {0x1055e5ba0?, 0x140421188c0?, 0xff6861e71cff6395?}, {0xbc?, ...})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:758 +0x254
+encoding/json.(*encodeState).reflectValue(0x14026ece900, {0x1055e5ba0?, 0x140421188c0?, 0x0?}, {0x0?, 0x0?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:367 +0x70
+encoding/json.(*encodeState).marshal(0x0?, {0x1055e5ba0?, 0x140421188c0?}, {0xe6?, 0x81?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:343 +0xa8
+encoding/json.Marshal({0x1055e5ba0, 0x140421188c0})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:209 +0x84
+github.com/mauriciomferz/Gauth_go/pkg/delegation.hashRevocationEvent({{0x1400b48f440, 0x2f}, {0x1400b9f9ec0, 0x17}, {0x0, 0x0}, {0x105371f73, 0x12}, {0x74728c0, 0xee0e39bff, ...}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:310 +0x90
+github.com/mauriciomferz/Gauth_go/pkg/delegation.(*RevocationChain).Verify(0x14030629aa0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:191 +0xa8
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {0x1403265dbc0, 0x17}, {0x1405b7e7488, 0x8}, {0x105365dc4, 0x4})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2826 +0x5d8
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).ValidateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2710
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:422 +0x71c
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 223 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xd0?, 0x14056eb7828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403c690248)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402b219740, 0x8}, {0x1402b219748, 0x8}, {0x1405c4516b0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x49)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 224 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xe0?, 0x14033b2d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403db69688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140551699d0, 0x8}, {0x140551699d8, 0x8}, {0x1405c7b4840, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x4a)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 225 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x14033493828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403e18e488)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140495520f8, 0x8}, {0x140495528b0, 0x8}, {0x1405c7b4e10, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x4b)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 226 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x14033c4d828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x140404e0008)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14056281368, 0x8}, {0x14056281470, 0x8}, {0x1405c9ed680, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x4c)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 227 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14033f3b828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d033208)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1403546e288, 0x8}, {0x1403546ea10, 0x8}, {0x1405b7e3920, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x4d)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 228 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x14033585828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403c8af448)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402b0243c0, 0x8}, {0x1402b0243c8, 0x8}, {0x1405b76ad20, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x4e)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 229 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x14033f41828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b418908)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda04a0, 0x8}, {0x1405bda04a8, 0x8}, {0x1405bf26900, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x4f)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 230 [runnable]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14033587828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403bcf6248)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402cced0f0, 0x8}, {0x1402cced0f8, 0x8}, {0x1405ba42810, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x50)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 231 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x90?, 0x14033943828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cda4008)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402e6e0e58, 0x8}, {0x1402e6e1210, 0x8}, {0x1405bf9d380, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x51)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 232 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x14033c49828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1404088a488)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14055bf2470, 0x8}, {0x14055bf2478, 0x8}, {0x1405cae1a40, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x52)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 233 [runnable]:
+encoding/json.stringEncoder(0x1403032eec0, {0x105541ee0?, 0x140405bc540?, 0x98?}, {0x0?, 0x1?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:610 +0x418
+encoding/json.structEncoder.encode({{{0x140002fb508, 0xd, 0x11}, 0x14000422ed0, 0x14000422f30}}, 0x1403032eec0, {0x10560b0a0?, 0x140405bc540?, 0x0?}, {0xe4?, ...})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:758 +0x254
+encoding/json.(*encodeState).reflectValue(0x1403032eec0, {0x10560b0a0?, 0x140405bc540?, 0x104c517c0?}, {0x58?, 0x10?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:367 +0x70
+encoding/json.(*encodeState).marshal(0x14033491098?, {0x10560b0a0?, 0x140405bc540?}, {0x0?, 0x0?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:343 +0xa8
+encoding/json.Marshal({0x10560b0a0, 0x140405bc540})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/encoding/json/encode.go:209 +0x84
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.generateAuthToken(0x140004901e0, 0x140421c06c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:4929 +0xf50
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14041f06728, 0x8}, {0x14041f06810, 0x8}, {0x1405caa3e90, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2668 +0x1910
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x53)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 234 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x14033c47828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403c2ddd48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402bb01ae0, 0x8}, {0x1402bb01ae8, 0x8}, {0x1405c59c2a0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x54)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 235 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x20?, 0x14033431828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d900b48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405443b9a0, 0x8}, {0x1405443b9a8, 0x8}, {0x1405c7782d0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x55)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 236 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x80?, 0x14033589828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d0346c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402ba57fc0, 0x8}, {0x1402ba57fc8, 0x8}, {0x1405c6ee000, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x56)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 237 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xd0?, 0x14033f69828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b86f688)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140268ae2e8, 0x8}, {0x140268ae750, 0x8}, {0x1405c010240, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x57)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 238 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xc0?, 0x1403359f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403b846b48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402a799d58, 0x8}, {0x1402ab86480, 0x8}, {0x1405c3d2570, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x58)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 239 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xa0?, 0x140336b9828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cbd4b48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1401bfd31b8, 0x8}, {0x1401bfd3740, 0x8}, {0x1405c487530, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x59)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 240 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xe0?, 0x1403348f828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cda5448)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14022f99c38, 0x8}, {0x14022f99c50, 0x8}, {0x1405c010030, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x5a)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 241 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x60?, 0x140336bd828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403bcf6908)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1402185aa18, 0x8}, {0x1402185aba0, 0x8}, {0x1405bb81e60, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x5b)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 242 [runnable]:
+github.com/mauriciomferz/Gauth_go/pkg/delegation.(*RevocationChain).Events(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:183
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.chainTipRev(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:4970
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.generateAuthToken(0x140004901e0, 0x140404e1b08)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:4926 +0xe08
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1404282c228, 0x5}, {0x1404282c300, 0x8}, {0x1405cb558c0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2668 +0x1910
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x5c)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:437 +0x5c0
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 243 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x60?, 0x14033fe1828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403d2a58c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140492118b8, 0x8}, {0x14049211c10, 0x8}, {0x1405c63eff0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x5d)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 245 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x30?, 0x14033eab828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403e1f5d48)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14020a59e58, 0x8}, {0x14055602010, 0x8}, {0x1405c923920, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x5f)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 246 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x0?, 0x14033ea7828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403cc138c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405c413fc0, 0x8}, {0x1405c413fc8, 0x8}, {0x1405c1bfb90, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x60)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 247 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0x0?, 0x1403359b828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403ec08008)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x14048b487b8, 0x8}, {0x14048b48ab0, 0x8}, {0x1405c63f350, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x61)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 248 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xb0?, 0x1403399b828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1404048d8c8)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x140548cc630, 0x8}, {0x140548cc638, 0x8}, {0x1405ca69f50, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x62)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+
+goroutine 249 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x4?, 0xa0?, 0x14000183828?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:95 +0x28
+internal/sync.(*Mutex).lockSlow(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:149 +0x170
+internal/sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/mutex.go:46
+sync.(*RWMutex).Lock(0x140292c3ea0)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:150 +0x6c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*memoryRepository).Create(0x140292c3ea0, 0x1403ce8c248)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/repository.go:34 +0x34
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegationCtx(0x140004901e0, {0x10565b7c8, 0x105b9e320}, {{0x1405bda0da8, 0x8}, {0x1405bda0df0, 0x8}, {0x1405bf27ce0, 0x3, 0x3}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2650 +0x171c
+github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001.(*Service).CreateDelegation(...)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go:2349
+github.com/mauriciomferz/Gauth_go/test/load.runLoadTest.func2(0x63)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:417 +0x314
+created by github.com/mauriciomferz/Gauth_go/test/load.runLoadTest in goroutine 146
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test/load/load_test.go:394 +0x888
+FAIL	github.com/mauriciomferz/Gauth_go/test/load	21.574s
+FAIL

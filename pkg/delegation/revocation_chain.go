@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
@@ -67,6 +68,7 @@ func validateReason(r string) string {
 // RevocationChain now maintains optional Signed Tree Head snapshots (Phase 4).
 // treeHeads is append-only history of signed roots for audit / persistence.
 type RevocationChain struct {
+	mu             sync.RWMutex
 	events         []RevocationEvent
 	eventMap       map[string]bool // Optimized lookup for RR-014
 	merkle         *MerkleTree
@@ -125,6 +127,9 @@ func NewRevocationChain(opts ...Option) *RevocationChain {
 
 // Append adds a new revocation event computing linkage and hash integrity.
 func (c *RevocationChain) Append(e RevocationEvent) (RevocationEvent, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if e.ID == "" {
 		return RevocationEvent{}, errors.New("revocation event id required")
 	}
@@ -180,13 +185,19 @@ func (c *RevocationChain) Append(e RevocationEvent) (RevocationEvent, error) {
 
 // Events returns a copy of the underlying slice for external iteration.
 func (c *RevocationChain) Events() []RevocationEvent {
-	out := make([]RevocationEvent, len(c.events))
-	copy(out, c.events)
-	return out
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	res := make([]RevocationEvent, len(c.events))
+	copy(res, c.events)
+	return res
 }
 
 // Verify ensures hash integrity, linkage and chronological ordering (no future timestamps).
 func (c *RevocationChain) Verify() error {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	for i, e := range c.events {
 		h, err := hashRevocationEvent(e)
 		if err != nil {
@@ -232,6 +243,9 @@ func (c *RevocationChain) Verify() error {
 // IsDelegationRevoked checks whether a given delegation ID or hash appears in the chain.
 // Uses optimized O(1) lookup if map is available (RR-014).
 func (c *RevocationChain) IsDelegationRevoked(delegationID, delegationHash string) bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if c.eventMap != nil {
 		if delegationID != "" {
 			if _, ok := c.eventMap["id:"+delegationID]; ok {
@@ -258,6 +272,9 @@ func (c *RevocationChain) IsDelegationRevoked(delegationID, delegationHash strin
 
 // BuildRevocationIndex converts the chain into a RevocationIndex (by DelegationID only) for compatibility.
 func (c *RevocationChain) BuildRevocationIndex() *RevocationIndex {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if c == nil {
 		return NewRevocationIndex(nil)
 	}
@@ -336,9 +353,16 @@ func signableBytes(e RevocationEvent) ([]byte, error) {
 // AggregateHash computes a stable hash over the entire revocation chain contents (order-dependent).
 // Domain separated with prefix to avoid collision with individual event hashes.
 func (c *RevocationChain) AggregateHash() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.aggregateHash()
+}
+
+func (c *RevocationChain) aggregateHash() string {
 	if c == nil || len(c.events) == 0 {
 		return ""
 	}
+
 	// Copy shallow slice to avoid mutation while sorting (though order must be preserved). We rely on original order.
 	// Build JSON array deterministically of events' hash values and IDs.
 	type mini struct{ ID, Hash string }
@@ -346,22 +370,28 @@ func (c *RevocationChain) AggregateHash() string {
 	for i, e := range c.events {
 		arr[i] = mini{ID: e.ID, Hash: e.Hash}
 	}
+
 	// We intentionally DO NOT sort to preserve sequence semantics; however we also compute a secondary digest that is
 	// order-insensitive for optional comparison by sorting by ID then hashing again and concatenating, giving two dimensions.
 	seqBytes, _ := json.Marshal(arr)
 	hSeq := sha256.Sum256(append([]byte("GAuthRevocationChain_v1_seq:"), seqBytes...))
+
 	// Order-insensitive component
 	sorted := make([]mini, len(arr))
 	copy(sorted, arr)
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i].ID < sorted[j].ID })
 	setBytes, _ := json.Marshal(sorted)
 	hSet := sha256.Sum256(append([]byte("GAuthRevocationChain_v1_set:"), setBytes...))
+
 	combo := sha256.Sum256(append(hSeq[:], hSet[:]...))
 	return hex.EncodeToString(combo[:])
 }
 
 // MerkleRoot returns current Merkle root (empty if no events or merkle disabled)
 func (c *RevocationChain) MerkleRoot() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if c == nil || c.merkle == nil {
 		return ""
 	}
@@ -420,6 +450,9 @@ func signableTreeHeadBytes(sth *SignedTreeHead) ([]byte, error) {
 
 // LatestTreeHead returns most recent signed tree head (nil if none signed yet).
 func (c *RevocationChain) LatestTreeHead() *SignedTreeHead {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if c == nil || len(c.treeHeads) == 0 {
 		return nil
 	}
@@ -428,6 +461,9 @@ func (c *RevocationChain) LatestTreeHead() *SignedTreeHead {
 
 // TreeHeads returns a copy of the signed tree head history.
 func (c *RevocationChain) TreeHeads() []*SignedTreeHead {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	if c == nil {
 		return nil
 	}
@@ -439,6 +475,9 @@ func (c *RevocationChain) TreeHeads() []*SignedTreeHead {
 // SignTreeHead creates and signs a new tree head snapshot using the active EdDSA key provider (if available).
 // If key provider unavailable, returns unsigned tree head (Signatures slice empty) – still useful for anchoring.
 func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if c == nil {
 		return nil, errors.New("nil_chain")
 	}
@@ -453,7 +492,11 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 			threshold = v
 		}
 	}
-	sth := &SignedTreeHead{Version: 1, MerkleRoot: c.MerkleRoot(), ChainLength: len(c.events), AggregateHash: c.AggregateHash(), Timestamp: time.Now().UTC()}
+	root := ""
+	if c.merkle != nil {
+		root = c.merkle.Root()
+	}
+	sth := &SignedTreeHead{Version: 1, MerkleRoot: root, ChainLength: len(c.events), AggregateHash: c.aggregateHash(), Timestamp: time.Now().UTC()}
 	weightsMap := map[string]int{}
 	if raw := os.Getenv("GAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
 		parts := strings.Split(raw, ",")
@@ -642,7 +685,7 @@ func (c *RevocationChain) LoadSignedTreeHeads(path string) error {
 	if c == nil {
 		return errors.New("nil_chain")
 	}
-	b, err := os.ReadFile(path)
+	b, err := os.ReadFile(path) // #nosec G304 - Persistence path is trusted or pre-sanitized by caller
 	if err != nil {
 		return err
 	}
@@ -1121,7 +1164,13 @@ func VerifyConsistencyProof(proof *ConsistencyProof, allEventHashes []string) er
 
 // GenerateMerkleProof returns proof for event ID (lookup index). Error if not found.
 func (c *RevocationChain) GenerateMerkleProof(eventID string) ([]MerkleProofStep, string, error) {
-	if c == nil || c.merkle == nil {
+	if c == nil {
+		return nil, "", errors.New("nil_receiver")
+	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.merkle == nil {
 		return nil, "", errors.New("merkle_not_enabled")
 	}
 	idx := -1
@@ -1139,7 +1188,13 @@ func (c *RevocationChain) GenerateMerkleProof(eventID string) ([]MerkleProofStep
 
 // GenerateMerkleProofByIndex returns merkle proof for given 0-based index.
 func (c *RevocationChain) GenerateMerkleProofByIndex(index int) ([]MerkleProofStep, string, error) {
-	if c == nil || c.merkle == nil {
+	if c == nil {
+		return nil, "", errors.New("nil_receiver")
+	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.merkle == nil {
 		return nil, "", errors.New("merkle_not_enabled")
 	}
 	if index < 0 || index >= len(c.events) {
@@ -1150,7 +1205,13 @@ func (c *RevocationChain) GenerateMerkleProofByIndex(index int) ([]MerkleProofSt
 
 // GenerateMerkleProofByHash returns proof for event hash (exact match) if present.
 func (c *RevocationChain) GenerateMerkleProofByHash(hash string) ([]MerkleProofStep, string, error) {
-	if c == nil || c.merkle == nil {
+	if c == nil {
+		return nil, "", errors.New("nil_receiver")
+	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if c.merkle == nil {
 		return nil, "", errors.New("merkle_not_enabled")
 	}
 	idx := -1

@@ -132,7 +132,7 @@ func NewIndexedDelegationStore(dbPath string, pruneConfig *PruneConfig) (*Indexe
 		return nil
 	})
 	if err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, err
 	}
 
