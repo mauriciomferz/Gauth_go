@@ -167,7 +167,7 @@ const (
 	// Demo KID for RSA path
 	demoRSAKid = "demo-rsa"
 	// Demo dev secret placeholder (long repeated literal)
-	//nolint:gosec // G101: demo constant, not real credentials
+	// #nosec G101: demo constant, not real credentials
 	devSecretDemo = "dev-secret-demo-00000000000000000000000000000000"
 	// Lifecycle / decision reason literals (standardized with JSON Schemas)
 	reasonMaintenance      = "maintenance"
@@ -574,8 +574,27 @@ func (s *BetaServer) RegisterUIRoutes() {
 
 			data, err := staticUI.ReadFile("static_ui/" + path)
 			if err != nil {
-				_ = c.AbortWithError(http.StatusNotFound, err)
-				return
+				// Fallback to repository disk copy (useful for CI and local dev when embedding isn't used)
+				// Try relative to module root (web/static/...) and relative to package (static/...)
+				candidates := []string{
+					filepath.Join("web", "static", path),
+					filepath.Join("static", path),
+				}
+				var d2 []byte
+				var err2 error
+				for _, p := range candidates {
+					d2, err2 = os.ReadFile(p) // #nosec G304 // Reading static UI assets from validated paths
+					if err2 == nil {
+						break
+					}
+				}
+
+				if err2 == nil {
+					data = d2
+				} else {
+					_ = c.AbortWithError(http.StatusNotFound, err)
+					return
+				}
 			}
 			_, _ = c.Writer.Write(data)
 		}
@@ -1637,7 +1656,7 @@ func (s *BetaServer) routes() {
 
 		// Create GAuth service with RFC-0111 compliance enabled
 		// Create ExtendedTokenService for protocol orchestrator
-		extendedTokenService := gauth.NewExtendedTokenService(
+		s.extendedTokenService = gauth.NewExtendedTokenService(
 			rfc0111Components.AuthChainValidator,
 			rfc0111Components.ComplianceValidator,
 			rfc0111Components.PIPClient,
@@ -1662,7 +1681,7 @@ func (s *BetaServer) routes() {
 			},
 			gauth.WithRFCCompliance(
 				rfc0111Components.SubscriptionStore,
-				extendedTokenService,
+				s.extendedTokenService,
 				rfc0111Components.ComplianceValidator,
 				rfc0111Components.AuthChainValidator,
 				rfc0111Components.FormalReqValidator,

@@ -16,7 +16,7 @@ func TestAuthorizationCacheBasic(t *testing.T) {
 		t.Fatalf("expected first snapshot version=1 got %d", version)
 	}
 
-	cache := authz.NewAuthorizationCache(8)
+	cache := authz.NewLRUDecisionCache(8)
 	ma.SetDecisionCache(cache)
 	ma.SetJurisdiction("us")
 

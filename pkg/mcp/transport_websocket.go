@@ -288,10 +288,8 @@ func (t *WebSocketTransport) Close() error {
 
 	t.connMu.Lock()
 	if t.conn != nil {
-		// Send close message
-		_ = t.conn.SetWriteDeadline(time.Now().Add(writeWait))                                                          // Best effort deadline
 		_ = t.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")) // Best effort close
-		t.conn.Close()
+		_ = t.conn.Close()
 		t.conn = nil
 	}
 	t.connected = false
@@ -314,7 +312,7 @@ func (t *WebSocketTransport) handleDisconnect(err error) {
 	wasConnected := t.connected
 	t.connected = false
 	if t.conn != nil {
-		t.conn.Close()
+		_ = t.conn.Close()
 		t.conn = nil
 	}
 	t.connMu.Unlock()

@@ -128,6 +128,9 @@ func (s *BetaServer) Shutdown() {
 	// It says "Flush limits persistence".
 
 	// Shut down GAuth+ components (caches)
+	if s.systemClockMonitor != nil {
+		s.systemClockMonitor.Stop()
+	}
 	ShutdownGAuthPlus()
 }
 

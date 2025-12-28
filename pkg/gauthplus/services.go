@@ -214,6 +214,71 @@ func (s *PostgreSQLDelegationService) CreateDelegation(
 		return fmt.Errorf("database not available")
 	}
 
+	// 1. Validate source authority and determine depth (RR-014)
+	if delegation.SourcePOAID == "" {
+		return fmt.Errorf("source_poa_id is required")
+	}
+
+	// Fetch parent delegation or root PoA to determine depth and max_depth
+	var parentMaxDepth int
+	var parentDepth int
+	var parentStatus string
+
+	// First try to find a parent delegation for this agent in the same chain
+	err := s.db.Pool.QueryRow(ctx, `
+		SELECT status, delegation_depth, max_allowed_depth
+		FROM ai_delegations
+		WHERE target_agent_id = $1 AND source_poa_id = $2 AND status = 'active'
+		ORDER BY delegation_depth DESC LIMIT 1
+	`, delegation.SourceAgentID, delegation.SourcePOAID).Scan(&parentStatus, &parentDepth, &parentMaxDepth)
+
+	if err == pgx.ErrNoRows {
+		// If no parent delegation, check if SourceAgentID is the root grantee of the SourcePOAID
+		var poaStatus string
+		var metadataJSON []byte
+
+		err = s.db.Pool.QueryRow(ctx, `
+			SELECT status, metadata FROM poa_records
+			WHERE id = $1 AND representative_id = $2
+		`, delegation.SourcePOAID, delegation.SourceAgentID).Scan(&poaStatus, &metadataJSON)
+
+		if err == pgx.ErrNoRows {
+			return fmt.Errorf("source agent %s has no active authority for PoA %s", delegation.SourceAgentID, delegation.SourcePOAID)
+		}
+		if err != nil {
+			return fmt.Errorf("failed to verify root authority: %w", err)
+		}
+		if poaStatus != "active" {
+			return fmt.Errorf("root PoA %s is %s", delegation.SourcePOAID, poaStatus)
+		}
+
+		// Root PoA found: current agent is at depth 0 (relative to root)
+		parentDepth = 0
+		// Extract max_depth from PoA metadata
+		parentMaxDepth = 5 // Default internal limit
+		if len(metadataJSON) > 0 {
+			var meta map[string]interface{}
+			_ = json.Unmarshal(metadataJSON, &meta)
+			if p, ok := meta["delegation_policy"]; ok {
+				if policy, ok := p.(map[string]interface{}); ok {
+					if md, ok := policy["max_depth"].(float64); ok {
+						parentMaxDepth = int(md)
+					}
+				}
+			}
+		}
+	} else if err != nil {
+		return fmt.Errorf("failed to verify parent delegation: %w", err)
+	}
+
+	// Calculate and validate new depth
+	delegation.DelegationDepth = parentDepth + 1
+	delegation.MaxAllowedDepth = parentMaxDepth
+
+	if delegation.DelegationDepth > delegation.MaxAllowedDepth {
+		return fmt.Errorf("delegation depth %d exceeds max allowed %d", delegation.DelegationDepth, delegation.MaxAllowedDepth)
+	}
+
 	if delegation.ID == "" {
 		delegation.ID = uuid.New().String()
 	}
@@ -244,13 +309,13 @@ func (s *PostgreSQLDelegationService) CreateDelegation(
 
 	_, err = s.db.Pool.Exec(ctx, `
 		INSERT INTO ai_delegations (
-			id, source_poa_id, source_agent_id, target_agent_id,
-			delegated_scope, delegation_depth, max_allowed_depth,
-			valid_from, valid_until, status, delegation_policy,
+			id, source_poa_id, source_agent_id, target_agent_id, 
+			delegated_scope, delegation_depth, max_allowed_depth, 
+			valid_from, valid_until, status, delegation_policy, 
 			created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7, $8, $9, $10, $11, $12, $13)
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 	`, delegation.ID, delegation.SourcePOAID, delegation.SourceAgentID,
-		delegation.TargetAgentID, string(scopeJSON), delegation.DelegationDepth,
+		delegation.TargetAgentID, scopeJSON, delegation.DelegationDepth,
 		delegation.MaxAllowedDepth, delegation.ValidFrom, delegation.ValidUntil,
 		delegation.Status, policyJSON, delegation.CreatedAt, delegation.UpdatedAt)
 
@@ -261,7 +326,7 @@ func (s *PostgreSQLDelegationService) CreateDelegation(
 	return nil
 }
 
-// ValidateDelegation checks if delegation is allowed per policy
+// ValidateDelegation validates if an agent has valid delegated authority
 func (s *PostgreSQLDelegationService) ValidateDelegation(
 	ctx context.Context,
 	sourceAgentID, targetAgentID string,
@@ -269,66 +334,57 @@ func (s *PostgreSQLDelegationService) ValidateDelegation(
 	depth int,
 ) error {
 	if s.db == nil {
-		return nil
+		return fmt.Errorf("database not available")
 	}
 
-	// Check if source agent exists and get their delegation policy
-	var policyJSON []byte
+	// 1. Check if delegation exists and is active
+	var status string
+	var maxDepth int
+	var delegatedScopeJSON []byte
+
 	err := s.db.Pool.QueryRow(ctx, `
-		SELECT poa.metadata->>'delegation_policy' 
-		FROM poa_records poa
-		WHERE poa.representative_id = $1 AND poa.status = 'active'
+		SELECT status, max_allowed_depth, delegated_scope
+		FROM ai_delegations
+		WHERE source_agent_id = $1 AND target_agent_id = $2 AND status = 'active'
 		LIMIT 1
-	`, sourceAgentID).Scan(&policyJSON)
+	`, sourceAgentID, targetAgentID).Scan(&status, &maxDepth, &delegatedScopeJSON)
 
 	if err == pgx.ErrNoRows {
-		// Possibly no delegation policy defined or no active PoA
-		// For safety, assume disallowed if no PoA found, or allow if just no policy?
-		// VerificationService should generally require explicit policy for delegation.
-		return fmt.Errorf("source agent active PoA or delegation policy not found: %s", sourceAgentID)
+		return fmt.Errorf("no active delegation from %s to %s", sourceAgentID, targetAgentID)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to get delegation policy: %w", err)
+		return fmt.Errorf("failed to validate delegation: %w", err)
 	}
 
-	if len(policyJSON) == 0 {
-		// No policy means default deny for AI delegation usually, but let's say permissive?
-		// VerificationService/requirements.go uses default deny if requirements not met.
-		// Let's assume default deny.
-		return fmt.Errorf("no delegation policy defined for agent: %s", sourceAgentID)
+	// 2. Check depth
+	if depth > maxDepth {
+		return fmt.Errorf("delegation depth %d exceeds maximum allowed %d", depth, maxDepth)
 	}
 
-	policy, err := UnmarshalDelegationPolicy(policyJSON)
-	if err != nil {
-		return fmt.Errorf("failed to unmarshal policy: %w", err)
+	// 3. Check scope (simplified)
+	var delegatedScope []string
+	if err := json.Unmarshal(delegatedScopeJSON, &delegatedScope); err != nil {
+		return fmt.Errorf("failed to unmarshal delegated scope: %w", err)
 	}
 
-	// Validate policy rules
-	if !policy.CanDelegate {
-		return fmt.Errorf("agent %s is not allowed to delegate", sourceAgentID)
-	}
-
-	if depth > policy.MaxDepth {
-		return fmt.Errorf("delegation depth %d exceeds max allowed depth %d", depth, policy.MaxDepth)
-	}
-
-	if len(policy.AllowedDelegates) > 0 {
-		allowed := false
-		for _, allowedID := range policy.AllowedDelegates {
-			if allowedID == targetAgentID {
-				allowed = true
+	// Basic check: all requested actions must be in delegated scope
+	for _, s := range scope {
+		found := false
+		for _, ds := range delegatedScope {
+			if s == ds {
+				found = true
 				break
 			}
 		}
-		if !allowed {
-			return fmt.Errorf("target agent %s not in allowed delegates list", targetAgentID)
+		if !found {
+			return fmt.Errorf("action %s not in delegated scope", s)
 		}
 	}
 
 	return nil
 }
 
-// RevokeDelegation revokes an active delegation
+// RevokeDelegation revokes an active delegation and cascades to descendants
 func (s *PostgreSQLDelegationService) RevokeDelegation(
 	ctx context.Context,
 	delegationID, revokedBy, reason string,
@@ -337,8 +393,22 @@ func (s *PostgreSQLDelegationService) RevokeDelegation(
 		return fmt.Errorf("database not available")
 	}
 
+	// 1. Get delegation details for propagation
+	var targetAgentID, sourcePoAID string
+	err := s.db.Pool.QueryRow(ctx, `
+		SELECT target_agent_id, source_poa_id FROM ai_delegations 
+		WHERE id = $1 AND status = 'active'
+	`, delegationID).Scan(&targetAgentID, &sourcePoAID)
+
+	if err == pgx.ErrNoRows {
+		return fmt.Errorf("no active delegation found with ID: %s", delegationID)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to fetch delegation details: %w", err)
+	}
+
 	now := time.Now().UTC()
-	result, err := s.db.Pool.Exec(ctx, `
+	_, err = s.db.Pool.Exec(ctx, `
 		UPDATE ai_delegations
 		SET status = 'revoked',
 		    revoked_at = $1,
@@ -352,11 +422,36 @@ func (s *PostgreSQLDelegationService) RevokeDelegation(
 		return fmt.Errorf("failed to revoke delegation: %w", err)
 	}
 
-	if result.RowsAffected() == 0 {
-		return fmt.Errorf("no active delegation found with ID: %s", delegationID)
-	}
+	// 2. Cascade revocation to all descendants
+	go func() {
+		bgCtx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+		defer cancel()
+		s.propagateStatusUpdate(bgCtx, targetAgentID, sourcePoAID, revokedBy, "Parent Delegation Revoked: "+reason)
+	}()
 
 	return nil
+}
+
+func (s *PostgreSQLDelegationService) propagateStatusUpdate(ctx context.Context, sourceAgentID, poaID, revokedBy, reason string) {
+	// Recursive query to mark all descendants as revoked
+	query := `
+		WITH RECURSIVE descendants AS (
+			SELECT id, target_agent_id FROM ai_delegations
+			WHERE source_agent_id = $1 AND source_poa_id = $2 AND status = 'active'
+			UNION ALL
+			SELECT d.id, d.target_agent_id FROM ai_delegations d
+			INNER JOIN descendants desc ON d.source_agent_id = desc.target_agent_id
+			WHERE d.source_poa_id = $2 AND d.status = 'active'
+		)
+		UPDATE ai_delegations
+		SET status = 'revoked',
+		    revoked_at = $3,
+		    revoked_by = $4,
+		    revocation_reason = $5,
+		    updated_at = $3
+		WHERE id IN (SELECT id FROM descendants)
+	`
+	_, _ = s.db.Pool.Exec(ctx, query, sourceAgentID, poaID, time.Now().UTC(), revokedBy, reason)
 }
 
 // GetDelegationChain returns full delegation chain
@@ -417,7 +512,7 @@ func (s *PostgreSQLDelegationService) GetDelegationChain(
 	return delegations, rows.Err()
 }
 
-// CheckMaxDepthExceeded checks if adding delegation would exceed max depth
+// CheckMaxDepthExceeded checks if delegation depth exceeds policy
 func (s *PostgreSQLDelegationService) CheckMaxDepthExceeded(
 	ctx context.Context,
 	sourceAgentID string,
@@ -427,27 +522,20 @@ func (s *PostgreSQLDelegationService) CheckMaxDepthExceeded(
 		return false, nil
 	}
 
+	// Find the delegation identifying this agent's policy (simplified)
 	var maxDepth int
-	var policyJSON []byte
 	err := s.db.Pool.QueryRow(ctx, `
-		SELECT metadata->>'delegation_policy'
-		FROM poa_records
-		WHERE representative_id = $1 AND status = 'active'
-		LIMIT 1
-	`, sourceAgentID).Scan(&policyJSON)
+		SELECT max_allowed_depth FROM ai_delegations
+		WHERE target_agent_id = $1 AND status = 'active'
+		ORDER BY delegation_depth DESC LIMIT 1
+	`, sourceAgentID).Scan(&maxDepth)
 
+	if err == pgx.ErrNoRows {
+		// If no delegation, check if it's the root agent of a PoA (max depth in policy)
+		return false, nil // Assume root for now
+	}
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return false, nil // No policy -> assume default depth 0 or handled elsewhere
-		}
-		return false, fmt.Errorf("failed to get max depth: %w", err)
-	}
-	if len(policyJSON) == 0 {
-		return false, nil
-	}
-	policy, _ := UnmarshalDelegationPolicy(policyJSON)
-	if policy != nil {
-		maxDepth = policy.MaxDepth
+		return false, fmt.Errorf("failed to check max depth: %w", err)
 	}
 
 	return currentDepth >= maxDepth, nil
@@ -463,76 +551,118 @@ func NewPostgreSQLPoAStore(db *database.DB) *PostgreSQLPoAStore {
 	return &PostgreSQLPoAStore{db: db}
 }
 
-// GetPoA gets the PoA by ID
+// GetPoA retrieves a specific PoA or AI-to-AI Delegation
 func (s *PostgreSQLPoAStore) GetPoA(ctx context.Context, poaID string) (*EnhancedPoA, error) {
 	if s.db == nil {
 		return nil, fmt.Errorf("database not available")
 	}
 
-	query := `
-		SELECT 
-			id, grantor_id, representative_id, 
-			scope_type, actions, geographic_regions, 
-			status, valid_from, valid_until, 
-			revoked_at, revoked_by, revocation_reason,
-			created_at, metadata
-		FROM poa_records
-		WHERE id = $1
-	`
-	var id, grantorID, representativeID, scopeType, status string
-	var actions, regions []string
+	// 1. Try to get from poa_records (Human-to-AI or Human-to-Human)
+	var id, grantorID, representativeID, status string
+	var actions []string
 	var validFrom, validUntil, createdAt time.Time
 	var revokedAt *time.Time
 	var revokedBy, revocationReason *string
 	var metadataJSON []byte
 
-	err := s.db.Pool.QueryRow(ctx, query, poaID).Scan(
-		&id, &grantorID, &representativeID,
-		&scopeType, &actions, &regions,
-		&status, &validFrom, &validUntil,
-		&revokedAt, &revokedBy, &revocationReason,
-		&createdAt, &metadataJSON,
+	err := s.db.Pool.QueryRow(ctx, `
+		SELECT 
+			id, grantor_id, representative_id, status, 
+			actions, valid_from, valid_until, created_at,
+			revoked_at, revoked_by, revocation_reason, metadata
+		FROM poa_records
+		WHERE id = $1
+	`, poaID).Scan(
+		&id, &grantorID, &representativeID, &status,
+		&actions, &validFrom, &validUntil, &createdAt,
+		&revokedAt, &revokedBy, &revocationReason, &metadataJSON,
 	)
 
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, fmt.Errorf("PoA not found: %s", poaID)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("failed to query poa_records: %w", err)
+	}
+
+	if err == nil {
+		poa := &EnhancedPoA{
+			ID:               id,
+			IssuerID:         grantorID,
+			GranteeID:        representativeID,
+			Status:           status,
+			ValidFrom:        validFrom,
+			ValidUntil:       validUntil,
+			CreatedAt:        createdAt,
+			RevokedAt:        revokedAt,
+			RevocationReason: revocationReason,
+			Scope:            actions,
+			StructuredScope: &StructuredScope{
+				Transactions: actions,
+				Actions:      actions,
+			},
+			VersionNumber: 1,
 		}
-		return nil, fmt.Errorf("failed to get PoA: %w", err)
+		if revokedBy != nil {
+			poa.RevokedBy = revokedBy
+		}
+		// Parse metadata
+		if len(metadataJSON) > 0 {
+			var meta map[string]interface{}
+			_ = json.Unmarshal(metadataJSON, &meta)
+			if p, ok := meta["delegation_policy"]; ok {
+				if pb, err := json.Marshal(p); err == nil {
+					poa.DelegationPolicy, _ = UnmarshalDelegationPolicy(pb)
+				}
+			}
+		}
+		return poa, nil
+	}
+
+	// 2. Try to get from ai_delegations
+	var sourcePoAID string
+	err = s.db.Pool.QueryRow(ctx, `
+		SELECT 
+			id, source_poa_id, source_agent_id, target_agent_id, status, 
+			delegated_scope, valid_from, valid_until, created_at,
+			revoked_at, revoked_by, revocation_reason
+		FROM ai_delegations
+		WHERE id = $1
+	`, poaID).Scan(
+		&id, &sourcePoAID, &grantorID, &representativeID, &status,
+		&metadataJSON, &validFrom, &validUntil, &createdAt,
+		&revokedAt, &revokedBy, &revocationReason,
+	)
+
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("PoA or Delegation not found: %s", poaID)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to query ai_delegations: %w", err)
+	}
+
+	// Unmarshal scope from JSONB
+	if err := json.Unmarshal(metadataJSON, &actions); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal delegated scope: %w", err)
 	}
 
 	poa := &EnhancedPoA{
 		ID:               id,
 		IssuerID:         grantorID,
 		GranteeID:        representativeID,
+		SourcePOAID:      &sourcePoAID,
 		Status:           status,
 		ValidFrom:        validFrom,
 		ValidUntil:       validUntil,
 		CreatedAt:        createdAt,
 		RevokedAt:        revokedAt,
 		RevocationReason: revocationReason,
-		Scope:            actions, // Default scope list
+		Scope:            actions,
 		StructuredScope: &StructuredScope{
-			Transactions: actions, // Simplification
+			Transactions: actions,
 			Actions:      actions,
 		},
 		VersionNumber: 1,
 	}
-
 	if revokedBy != nil {
 		poa.RevokedBy = revokedBy
-	}
-
-	// Parse metadata for other fields
-	if len(metadataJSON) > 0 {
-		var meta map[string]interface{}
-		_ = json.Unmarshal(metadataJSON, &meta)
-		// Try to extract policies if present
-		if p, ok := meta["delegation_policy"]; ok {
-			if pb, err := json.Marshal(p); err == nil {
-				poa.DelegationPolicy, _ = UnmarshalDelegationPolicy(pb)
-			}
-		}
 	}
 
 	return poa, nil
@@ -543,70 +673,180 @@ func (s *PostgreSQLPoAStore) GetPoAsByGrantee(ctx context.Context, granteeID str
 	if s.db == nil {
 		return nil, fmt.Errorf("database not available")
 	}
-	// TODO: Implementing simplified version
-	return []*EnhancedPoA{}, nil
+
+	query := `
+		SELECT 
+			id, grantor_id, representative_id, 
+			status, actions, 
+			valid_from, valid_until, created_at,
+			revoked_at, revoked_by, revocation_reason, metadata
+		FROM poa_records
+		WHERE representative_id = $1 AND status = 'active'
+		ORDER BY created_at DESC
+	`
+
+	rows, err := s.db.Pool.Query(ctx, query, granteeID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query PoAs by grantee: %w", err)
+	}
+	defer rows.Close()
+
+	var poas []*EnhancedPoA
+	for rows.Next() {
+		var id, grantorID, representativeID, status string
+		var actions []string
+		var validFrom, validUntil, createdAt time.Time
+		var revokedAt *time.Time
+		var revokedBy, revocationReason *string
+		var metadataJSON []byte
+
+		err := rows.Scan(
+			&id, &grantorID, &representativeID, &status, &actions,
+			&validFrom, &validUntil, &createdAt,
+			&revokedAt, &revokedBy, &revocationReason, &metadataJSON,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan PoA: %w", err)
+		}
+
+		poa := &EnhancedPoA{
+			ID:               id,
+			IssuerID:         grantorID,
+			GranteeID:        representativeID,
+			Status:           status,
+			ValidFrom:        validFrom,
+			ValidUntil:       validUntil,
+			CreatedAt:        createdAt,
+			RevokedAt:        revokedAt,
+			RevocationReason: revocationReason,
+			Scope:            actions,
+			StructuredScope: &StructuredScope{
+				Transactions: actions,
+				Actions:      actions,
+			},
+			VersionNumber: 1,
+		}
+		if revokedBy != nil {
+			poa.RevokedBy = revokedBy
+		}
+
+		// Parse metadata
+		if len(metadataJSON) > 0 {
+			var meta map[string]interface{}
+			_ = json.Unmarshal(metadataJSON, &meta)
+			if p, ok := meta["delegation_policy"]; ok {
+				if pb, err := json.Marshal(p); err == nil {
+					poa.DelegationPolicy, _ = UnmarshalDelegationPolicy(pb)
+				}
+			}
+		}
+
+		poas = append(poas, poa)
+	}
+
+	return poas, nil
 }
 
 // IsRevoked checks if PoA is revoked
 func (s *PostgreSQLPoAStore) IsRevoked(ctx context.Context, poaID string) (bool, *RevocationInfo, error) {
-	poa, err := s.GetPoA(ctx, poaID)
-	if err != nil {
-		return false, nil, err
+	if s.db == nil {
+		return false, nil, fmt.Errorf("database not available")
 	}
-	if poa.Status == "revoked" {
+
+	var status string
+	var revokedAt *time.Time
+	var revokedBy, revocationReason *string
+
+	err := s.db.Pool.QueryRow(ctx, `
+		SELECT status, revoked_at, revoked_by, revocation_reason 
+		FROM poa_records WHERE id = $1
+	`, poaID).Scan(&status, &revokedAt, &revokedBy, &revocationReason)
+
+	if err != nil && err != pgx.ErrNoRows {
+		// Also check ai_delegations
+		err = s.db.Pool.QueryRow(ctx, `
+			SELECT status, revoked_at, revoked_by, revocation_reason 
+			FROM ai_delegations WHERE id = $1
+		`, poaID).Scan(&status, &revokedAt, &revokedBy, &revocationReason)
+	}
+
+	if err == pgx.ErrNoRows {
+		return false, nil, fmt.Errorf("PoA or Delegation not found: %s", poaID)
+	}
+	if err != nil {
+		return false, nil, fmt.Errorf("failed to check revocation status: %w", err)
+	}
+
+	if status == "revoked" && revokedAt != nil {
 		info := &RevocationInfo{
-			RevokedAt: time.Now(), // Fallback if nil
-			Reason:    "unknown",
+			RevokedAt: *revokedAt,
 		}
-		if poa.RevokedAt != nil {
-			info.RevokedAt = *poa.RevokedAt
+		if revokedBy != nil {
+			info.RevokedBy = *revokedBy
 		}
-		if poa.RevocationReason != nil {
-			info.Reason = *poa.RevocationReason
-		}
-		if poa.RevokedBy != nil {
-			info.RevokedBy = *poa.RevokedBy
+		if revocationReason != nil {
+			info.Reason = *revocationReason
 		}
 		return true, info, nil
 	}
+
 	return false, nil, nil
 }
 
-// StubAttestationVerifier implements AttestationVerifier (Stub)
-type StubAttestationVerifier struct{}
+// RevokePoA revokes an active PoA and triggers cascade revocation
+func (s *PostgreSQLPoAStore) RevokePoA(ctx context.Context, poaID, revokedBy, reason string) error {
+	if s.db == nil {
+		return fmt.Errorf("database not available")
+	}
 
-func (v *StubAttestationVerifier) Verify(ctx context.Context, attestation Attestation) (bool, error) {
-	return true, nil
-}
+	// 1. Get PoA to know the grantee (who will have delegated powers revoked)
+	poa, err := s.GetPoA(ctx, poaID)
+	if err != nil {
+		return err
+	}
 
-// StubFiduciaryDutyService implements FiduciaryDutyService (Stub)
-type StubFiduciaryDutyService struct{}
+	now := time.Now().UTC()
+	_, err = s.db.Pool.Exec(ctx, `
+		UPDATE poa_records
+		SET status = 'revoked',
+		    revoked_at = $1,
+		    revoked_by = $2,
+		    revocation_reason = $3
+		WHERE id = $4 AND status = 'active'
+	`, now, revokedBy, reason, poaID)
 
-func (s *StubFiduciaryDutyService) RecordViolation(ctx context.Context, violation *FiduciaryDutyViolation) error {
+	if err != nil {
+		return fmt.Errorf("failed to revoke PoA Record: %w", err)
+	}
+
+	// 2. Trigger cascade revocation of all AI-to-AI delegations branching from this PoA
+	go func() {
+		bgCtx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
+		defer cancel()
+		s.propagateStatusUpdate(bgCtx, poa.GranteeID, poaID, revokedBy, "Parent PoA Revoked: "+reason)
+	}()
+
 	return nil
 }
-func (s *StubFiduciaryDutyService) GetViolations(ctx context.Context, poaID, agentID string) ([]*FiduciaryDutyViolation, error) {
-	return []*FiduciaryDutyViolation{}, nil
-}
-func (s *StubFiduciaryDutyService) ResolveViolation(ctx context.Context, violationID, reviewedBy, notes string) error {
-	return nil
-}
-func (s *StubFiduciaryDutyService) GetViolationsBySeverity(ctx context.Context, minSeverity string) ([]*FiduciaryDutyViolation, error) {
-	return []*FiduciaryDutyViolation{}, nil
-}
 
-// StubCapabilityService implements CapabilityAssessmentService (Stub)
-type StubCapabilityService struct{}
-
-func (s *StubCapabilityService) CreateAssessment(ctx context.Context, assessment *AICapabilityAssessment) error {
-	return nil
-}
-func (s *StubCapabilityService) GetLatestAssessment(ctx context.Context, agentID string) (*AICapabilityAssessment, error) {
-	return nil, nil
-}
-func (s *StubCapabilityService) CheckCapabilityMatch(ctx context.Context, agentID string, requirements *CapabilityRequirements) (bool, []string, error) {
-	return true, []string{}, nil
-}
-func (s *StubCapabilityService) GetExpiringAssessments(ctx context.Context, daysUntilExpiry int) ([]*AICapabilityAssessment, error) {
-	return []*AICapabilityAssessment{}, nil
+func (s *PostgreSQLPoAStore) propagateStatusUpdate(ctx context.Context, sourceAgentID, poaID, revokedBy, reason string) {
+	// Optimized recursive update for cascade revocation
+	query := `
+		WITH RECURSIVE descendants AS (
+			SELECT id, target_agent_id FROM ai_delegations
+			WHERE source_agent_id = $1 AND source_poa_id = $2 AND status = 'active'
+			UNION ALL
+			SELECT d.id, d.target_agent_id FROM ai_delegations d
+			INNER JOIN descendants desc ON d.source_agent_id = desc.target_agent_id
+			WHERE d.source_poa_id = $2 AND d.status = 'active'
+		)
+		UPDATE ai_delegations
+		SET status = 'revoked',
+		    revoked_at = $3,
+		    revoked_by = $4,
+		    revocation_reason = $5,
+		    updated_at = $3
+		WHERE id IN (SELECT id FROM descendants)
+	`
+	_, _ = s.db.Pool.Exec(ctx, query, sourceAgentID, poaID, time.Now().UTC(), revokedBy, reason)
 }

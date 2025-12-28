@@ -232,6 +232,6 @@ const (
 
 // ProofMethod constants for OIDC
 const (
-	ProofMethodOIDCIDToken  = "oidc_id_token" // GAuth-issued ID token
+	ProofMethodOIDCIDToken  = "oidc_id_token" // #nosec G101 // GAuth-issued ID token
 	ProofMethodOIDCExternal = "oidc_external" // External provider (Google, Okta, etc.)
 )

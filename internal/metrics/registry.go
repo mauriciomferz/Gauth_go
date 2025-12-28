@@ -574,6 +574,10 @@ func (reg *CollectorRegistry) IncMalformedJTI(reason string) {
 	reg.dispatch(func(c MetricsCollector) { c.IncMalformedJTI(reason) })
 }
 
+func (reg *CollectorRegistry) IncReplayStoreEvictions() {
+	reg.dispatch(func(c MetricsCollector) { c.IncReplayStoreEvictions() })
+}
+
 func (reg *CollectorRegistry) ObserveReplayStoreLatency(d time.Duration) {
 	reg.dispatch(func(c MetricsCollector) { c.ObserveReplayStoreLatency(d) })
 }
@@ -808,8 +812,8 @@ func (reg *CollectorRegistry) IncCascadeBatchProcessed() {
 	reg.dispatch(func(c MetricsCollector) { c.IncCascadeBatchProcessed() })
 }
 
-func (reg *CollectorRegistry) SetCascadeMaxDepthReached(depth int) {
-	reg.dispatch(func(c MetricsCollector) { c.SetCascadeMaxDepthReached(depth) })
+func (reg *CollectorRegistry) SetCascadeMaxDepthReached(d int) {
+	reg.dispatch(func(c MetricsCollector) { c.SetCascadeMaxDepthReached(d) })
 }
 
 func (reg *CollectorRegistry) IncCascadeProcessingErrors() {
@@ -826,6 +830,10 @@ func (reg *CollectorRegistry) IncJurisdictionEnforcementDenials() {
 
 func (reg *CollectorRegistry) IncJurisdictionEnforcementAllows() {
 	reg.dispatch(func(c MetricsCollector) { c.IncJurisdictionEnforcementAllows() })
+}
+
+func (reg *CollectorRegistry) SetSystemClockSkew(seconds float64) {
+	reg.dispatch(func(c MetricsCollector) { c.SetSystemClockSkew(seconds) })
 }
 
 func (reg *CollectorRegistry) IncReplayStoreAvailabilityImpact() {

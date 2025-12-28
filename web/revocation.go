@@ -30,8 +30,11 @@ type RevocationService struct {
 // It returns nil if GAUTH_REVOCATION_ENABLED != "1" or initialization fails.
 func NewRevocationService(ctx context.Context) *RevocationService {
 	// Check if revocation system is enabled
+	// Check if revocation system is enabled
 	if os.Getenv("GAUTH_REVOCATION_ENABLED") != "1" {
-		log.Println("[revocation] Revocation system disabled (set GAUTH_REVOCATION_ENABLED=1 to enable)")
+		if os.Getenv("GAUTH_REVOCATION_ENABLED") != "0" && os.Getenv("GAUTH_TEST_SILENT") != "1" {
+			log.Println("[revocation] Revocation system disabled (set GAUTH_REVOCATION_ENABLED=1 to enable)")
+		}
 		return &RevocationService{enabled: false}
 	}
 

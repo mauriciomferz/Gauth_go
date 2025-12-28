@@ -8,6 +8,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto/keys"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
@@ -39,6 +40,11 @@ type LifecycleRecorder interface {
 	RecordEvent(entityType, entityID, oldStatus, newStatus, outcome, reason string, latencyNS int64)
 }
 
+// ClockStatusProvider provides status of system clock synchronization
+type ClockStatusProvider interface {
+	Status() (string, time.Duration, error)
+}
+
 // JWKSETagUpdater allows updating the server's JWKS metadata for discovery
 type JWKSETagUpdater interface {
 	UpdateJWKSETag(etag string)
@@ -51,19 +57,21 @@ type CapabilityEnforcer func(action string, claims map[string]any) (bool, []stri
 
 // Handler manages token operations
 type Handler struct {
-	Store        *Store
-	Replay       *ReplayNonceStore
-	Auditor      Auditor
-	Emitter      Emitter
-	PrimaryAuth  PrimaryAuth
-	Tracer       Tracer
-	TracerRatio  float64
-	CapEnforcer  CapabilityEnforcer
-	Metrics      metrics.Metrics
-	Lifecycle    LifecycleRecorder
-	KeyProvider  crypto.KeyProvider
-	ETagUpdater  JWKSETagUpdater
-	GAuthService gauth.GAuth
+	Store         *Store
+	Replay        *ReplayNonceStore
+	Auditor       Auditor
+	Emitter       Emitter
+	PrimaryAuth   PrimaryAuth
+	Tracer        Tracer
+	TracerRatio   float64
+	CapEnforcer   CapabilityEnforcer
+	Metrics       metrics.Metrics
+	Lifecycle     LifecycleRecorder
+	KeyProvider   crypto.KeyProvider
+	JWTKeyManager keys.KeyManager
+	ETagUpdater   JWKSETagUpdater
+	GAuthService  gauth.GAuth
+	ClockStatus   ClockStatusProvider
 
 	// Configs
 	UseJWTLib    bool
@@ -76,24 +84,26 @@ type Handler struct {
 	ClockSkew    time.Duration
 }
 
-func NewHandler(store *Store, replay *ReplayNonceStore, auditor Auditor, emitter Emitter, primaryAuth PrimaryAuth, tracer Tracer, capEnforcer CapabilityEnforcer, m metrics.Metrics, lifecycle LifecycleRecorder, kp crypto.KeyProvider) *Handler {
+func NewHandler(store *Store, replay *ReplayNonceStore, auditor Auditor, emitter Emitter, primaryAuth PrimaryAuth, tracer Tracer, capEnforcer CapabilityEnforcer, m metrics.Metrics, lifecycle LifecycleRecorder, kp crypto.KeyProvider, km keys.KeyManager, clock ClockStatusProvider) *Handler {
 	// Defaults/Env loading could be here or passed in.
 	// For now, load envs that are "static" here, or assume caller sets them.
 	// But apiTokenCreate heavily used os.Getenv. Let's load them for convenience.
 	// We can update them if needed.
 
 	h := &Handler{
-		Store:       store,
-		Replay:      replay,
-		Auditor:     auditor,
-		Emitter:     emitter,
-		PrimaryAuth: primaryAuth,
-		Tracer:      tracer,
-		TracerRatio: 0, // Default to 0? Caller should set.
-		CapEnforcer: capEnforcer,
-		Metrics:     m,
-		Lifecycle:   lifecycle,
-		KeyProvider: kp,
+		Store:         store,
+		Replay:        replay,
+		Auditor:       auditor,
+		Emitter:       emitter,
+		PrimaryAuth:   primaryAuth,
+		Tracer:        tracer,
+		TracerRatio:   0, // Default to 0? Caller should set.
+		CapEnforcer:   capEnforcer,
+		Metrics:       m,
+		Lifecycle:     lifecycle,
+		KeyProvider:   kp,
+		JWTKeyManager: km,
+		ClockStatus:   clock,
 
 		UseJWTLib:    os.Getenv("GAUTH_USE_JWT_LIB") == "1",
 		JWTAlg:       os.Getenv("GAUTH_JWT_ALG"),

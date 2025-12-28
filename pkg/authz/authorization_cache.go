@@ -16,11 +16,22 @@ type AuthorizationCacheEntry struct {
 	Inserted time.Time
 }
 
-// AuthorizationCache provides an LRU cache keyed by composite authorization attributes.
+// DecisionCache defines the interface for PDP decision caching.
+type DecisionCache interface {
+	Get(key string) (AuthorizationCacheEntry, bool)
+	Set(key string, entry AuthorizationCacheEntry)
+	Invalidate(key string)
+	InvalidateAll()
+	MarkStale(key string)
+	Size() int
+	Snapshot() AuthorizationCacheMetrics
+}
+
+// LRUDecisionCache provides an LRU cache keyed by composite authorization attributes.
 // Key shape (pipe-delimited): subject|action|resource|policyVersion|jurisdiction
 // It supports staleness detection when policyVersion / jurisdiction differ from current evaluation context.
 // Metrics exposed via Snapshot for hit ratio & stale evictions.
-type AuthorizationCache struct {
+type LRUDecisionCache struct {
 	capacity int
 	mu       sync.Mutex
 	items    map[string]*list.Element
@@ -34,19 +45,13 @@ type AuthorizationCache struct {
 	invalidations uint64
 }
 
-// cacheListPayload wraps key and value for list element.
-type cacheListPayload struct {
-	key   string
-	value AuthorizationCacheEntry
-}
-
-// NewAuthorizationCache constructs an LRU cache with the provided positive capacity.
+// NewLRUDecisionCache constructs an LRU cache with the provided positive capacity.
 // capacity <= 0 results in a no-op cache (all operations degrade to misses).
-func NewAuthorizationCache(capacity int) *AuthorizationCache {
+func NewLRUDecisionCache(capacity int) *LRUDecisionCache {
 	if capacity <= 0 {
 		capacity = 0
 	}
-	return &AuthorizationCache{capacity: capacity, items: make(map[string]*list.Element, capacity), order: list.New()}
+	return &LRUDecisionCache{capacity: capacity, items: make(map[string]*list.Element, capacity), order: list.New()}
 }
 
 // makeKey builds the composite cache key.
@@ -64,8 +69,14 @@ func fmtInt(v int64) string {
 	return strconv.FormatInt(v, 10)
 }
 
+// cacheListPayload wraps key and value for list element.
+type cacheListPayload struct {
+	key   string
+	value AuthorizationCacheEntry
+}
+
 // Get returns a decision and whether it was found (not yet judged stale). Version & jurisdiction are validated externally.
-func (c *AuthorizationCache) Get(key string) (AuthorizationCacheEntry, bool) {
+func (c *LRUDecisionCache) Get(key string) (AuthorizationCacheEntry, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.lookups++
@@ -85,7 +96,7 @@ func (c *AuthorizationCache) Get(key string) (AuthorizationCacheEntry, bool) {
 }
 
 // Set inserts or updates a decision entry.
-func (c *AuthorizationCache) Set(key string, entry AuthorizationCacheEntry) {
+func (c *LRUDecisionCache) Set(key string, entry AuthorizationCacheEntry) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.capacity == 0 {
@@ -112,7 +123,7 @@ func (c *AuthorizationCache) Set(key string, entry AuthorizationCacheEntry) {
 }
 
 // Invalidate removes a specific key.
-func (c *AuthorizationCache) Invalidate(key string) {
+func (c *LRUDecisionCache) Invalidate(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if el, ok := c.items[key]; ok {
@@ -123,7 +134,7 @@ func (c *AuthorizationCache) Invalidate(key string) {
 }
 
 // InvalidateAll clears the cache.
-func (c *AuthorizationCache) InvalidateAll() {
+func (c *LRUDecisionCache) InvalidateAll() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.items = make(map[string]*list.Element, c.capacity)
@@ -132,7 +143,7 @@ func (c *AuthorizationCache) InvalidateAll() {
 }
 
 // MarkStale evicts a key counting it as stale eviction (used when version/jurisdiction mismatch detected on access).
-func (c *AuthorizationCache) MarkStale(key string) {
+func (c *LRUDecisionCache) MarkStale(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if el, ok := c.items[key]; ok {
@@ -143,14 +154,14 @@ func (c *AuthorizationCache) MarkStale(key string) {
 }
 
 // Size returns current number of entries.
-func (c *AuthorizationCache) Size() int {
+func (c *LRUDecisionCache) Size() int {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.order.Len()
 }
 
 // Snapshot returns current metrics (hit ratio derived).
-func (c *AuthorizationCache) Snapshot() AuthorizationCacheMetrics {
+func (c *LRUDecisionCache) Snapshot() AuthorizationCacheMetrics {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	var ratio float64

@@ -64,6 +64,7 @@ type PoARecord struct {
 	ValidUntil         time.Time        `json:"validUntil"`
 	Conditions         *json.RawMessage `json:"conditions,omitempty"`
 	Metadata           *json.RawMessage `json:"metadata,omitempty"`
+	MultiSignatures    *json.RawMessage `json:"multiSignatures,omitempty"`
 	UpdatedAt          *time.Time       `json:"updatedAt,omitempty"`
 }
 
@@ -116,8 +117,8 @@ func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
 			tenant_id, poa_name, grantor_id, grantor_name,
 			representative_id, representative_name, representative_type,
 			scope_type, actions, geographic_regions,
-			status, valid_from, valid_until, conditions, metadata, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+			status, valid_from, valid_until, conditions, metadata, multi_signatures, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 		RETURNING id, created_at
 	`
 
@@ -125,7 +126,7 @@ func (r *Repository) CreatePoA(ctx context.Context, poa *PoARecord) error {
 		poa.TenantID, poa.PoAName, poa.GrantorID, poa.GrantorName,
 		poa.RepresentativeID, poa.RepresentativeName, poa.RepresentativeType,
 		poa.ScopeType, poa.Actions, poa.GeographicRegions,
-		poa.Status, poa.ValidFrom, poa.ValidUntil, poa.Conditions, poa.Metadata, time.Now(),
+		poa.Status, poa.ValidFrom, poa.ValidUntil, poa.Conditions, poa.Metadata, poa.MultiSignatures, time.Now(),
 	).Scan(&poa.ID, &poa.CreatedAt)
 
 	if err != nil {
@@ -155,7 +156,8 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 			scope_type, actions, geographic_regions,
 			status, created_at, approved_at, approved_by,
 			revoked_at, revoked_by, revocation_reason,
-			valid_from, valid_until, conditions, metadata, updated_at
+			revoked_at, revoked_by, revocation_reason,
+			valid_from, valid_until, conditions, metadata, multi_signatures, updated_at
 		FROM power_of_attorney
 		WHERE tenant_id = $1
 		ORDER BY created_at DESC
@@ -169,14 +171,14 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 	var poas []PoARecord
 	for rows.Next() {
 		var poa PoARecord
-		var conditionsJSON, metadataJSON *[]byte
+		var conditionsJSON, metadataJSON, multiSignaturesJSON *[]byte
 		err := rows.Scan(
 			&poa.ID, &poa.TenantID, &poa.PoAName, &poa.GrantorID, &poa.GrantorName,
 			&poa.RepresentativeID, &poa.RepresentativeName, &poa.RepresentativeType,
 			&poa.ScopeType, &poa.Actions, &poa.GeographicRegions,
 			&poa.Status, &poa.CreatedAt, &poa.ApprovedAt, &poa.ApprovedBy,
 			&poa.RevokedAt, &poa.RevokedBy, &poa.RevocationReason,
-			&poa.ValidFrom, &poa.ValidUntil, &conditionsJSON, &metadataJSON, &poa.UpdatedAt,
+			&poa.ValidFrom, &poa.ValidUntil, &conditionsJSON, &metadataJSON, &multiSignaturesJSON, &poa.UpdatedAt,
 		)
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to scan PoA: %w", err)
@@ -188,6 +190,10 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 		if metadataJSON != nil && len(*metadataJSON) > 0 {
 			raw := json.RawMessage(*metadataJSON)
 			poa.Metadata = &raw
+		}
+		if multiSignaturesJSON != nil && len(*multiSignaturesJSON) > 0 {
+			raw := json.RawMessage(*multiSignaturesJSON)
+			poa.MultiSignatures = &raw
 		}
 		poas = append(poas, poa)
 	}
@@ -211,7 +217,7 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 			scope_type, actions, geographic_regions,
 			status, created_at, approved_at, approved_by,
 			revoked_at, revoked_by, revocation_reason,
-			valid_from, valid_until, conditions, metadata, updated_at
+			valid_from, valid_until, conditions, metadata, multi_signatures, updated_at
 		FROM power_of_attorney
 		WHERE tenant_id = $1 AND id = $2
 	`
@@ -223,7 +229,7 @@ func (r *Repository) GetPoA(ctx context.Context, tenantID, poaID string) (*PoARe
 		&poa.ScopeType, &poa.Actions, &poa.GeographicRegions,
 		&poa.Status, &poa.CreatedAt, &poa.ApprovedAt, &poa.ApprovedBy,
 		&poa.RevokedAt, &poa.RevokedBy, &poa.RevocationReason,
-		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata, &poa.UpdatedAt,
+		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata, &poa.MultiSignatures, &poa.UpdatedAt,
 	)
 
 	if err == pgx.ErrNoRows {
@@ -342,7 +348,7 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 			scope_type, actions, geographic_regions,
 			status, created_at, approved_at, approved_by,
 			revoked_at, revoked_by, revocation_reason,
-			valid_from, valid_until, conditions, metadata, updated_at
+			valid_from, valid_until, conditions, metadata, multi_signatures, updated_at
 		FROM power_of_attorney
 		WHERE tenant_id = $1 
 		  AND grantor_id = $2 
@@ -362,7 +368,7 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 		&poa.ScopeType, &poa.Actions, &poa.GeographicRegions,
 		&poa.Status, &poa.CreatedAt, &poa.ApprovedAt, &poa.ApprovedBy,
 		&poa.RevokedAt, &poa.RevokedBy, &poa.RevocationReason,
-		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata,
+		&poa.ValidFrom, &poa.ValidUntil, &poa.Conditions, &poa.Metadata, &poa.MultiSignatures,
 	)
 
 	if err == pgx.ErrNoRows {
@@ -399,6 +405,107 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 	}
 
 	return &poa, true, "Valid Power of Attorney found"
+}
+
+// AddMultiSignature adds a signature to the PoA and transitions to active if threshold matched.
+// It uses row-level locking (SELECT FOR UPDATE) to ensure concurrency safety (RR-007).
+func (r *Repository) AddMultiSignature(ctx context.Context, tenantID, poaID string, signerID string, signature map[string]interface{}, threshold int) (*PoARecord, error) {
+	if r.db == nil {
+		return nil, fmt.Errorf("database not available")
+	}
+
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// 1. Lock the row
+	query := `
+		SELECT multi_signatures, status
+		FROM power_of_attorney
+		WHERE tenant_id = $1 AND id = $2
+		FOR UPDATE
+	`
+
+	var currentSigsRaw []byte
+	var status string
+	err = tx.QueryRow(ctx, query, tenantID, poaID).Scan(&currentSigsRaw, &status)
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("PoA not found")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to lock PoA: %w", err)
+	}
+
+	// 2. Parse existing signatures
+	signatures := make(map[string]interface{})
+	if len(currentSigsRaw) > 0 {
+		if err := json.Unmarshal(currentSigsRaw, &signatures); err != nil {
+			return nil, fmt.Errorf("corrupt multi_signatures data: %w", err)
+		}
+	}
+
+	// 3. Add new signature
+	signatures[signerID] = signature
+
+	// 4. Check threshold
+	if len(signatures) >= threshold && status == "pending" {
+		status = "active"
+	}
+
+	// 5. Update row
+	updateQuery := `
+		UPDATE power_of_attorney
+		SET multi_signatures = $1, status = $2, updated_at = $3
+		WHERE tenant_id = $4 AND id = $5
+		RETURNING 
+			id, tenant_id, poa_name, grantor_id, grantor_name,
+			representative_id, representative_name, representative_type,
+			scope_type, actions, geographic_regions,
+			status, created_at, approved_at, approved_by,
+			revoked_at, revoked_by, revocation_reason,
+			valid_from, valid_until, conditions, metadata, multi_signatures, updated_at
+	`
+
+	newSigsJSON, err := json.Marshal(signatures)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal signatures: %w", err)
+	}
+
+	var updatedPoa PoARecord
+	var conditionsJSON, metadataJSON, multiSignaturesJSON *[]byte
+
+	err = tx.QueryRow(ctx, updateQuery, newSigsJSON, status, time.Now(), tenantID, poaID).Scan(
+		&updatedPoa.ID, &updatedPoa.TenantID, &updatedPoa.PoAName, &updatedPoa.GrantorID, &updatedPoa.GrantorName,
+		&updatedPoa.RepresentativeID, &updatedPoa.RepresentativeName, &updatedPoa.RepresentativeType,
+		&updatedPoa.ScopeType, &updatedPoa.Actions, &updatedPoa.GeographicRegions,
+		&updatedPoa.Status, &updatedPoa.CreatedAt, &updatedPoa.ApprovedAt, &updatedPoa.ApprovedBy,
+		&updatedPoa.RevokedAt, &updatedPoa.RevokedBy, &updatedPoa.RevocationReason,
+		&updatedPoa.ValidFrom, &updatedPoa.ValidUntil, &conditionsJSON, &metadataJSON, &multiSignaturesJSON, &updatedPoa.UpdatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update PoA signatures: %w", err)
+	}
+
+	if conditionsJSON != nil && len(*conditionsJSON) > 0 {
+		raw := json.RawMessage(*conditionsJSON)
+		updatedPoa.Conditions = &raw
+	}
+	if metadataJSON != nil && len(*metadataJSON) > 0 {
+		raw := json.RawMessage(*metadataJSON)
+		updatedPoa.Metadata = &raw
+	}
+	if multiSignaturesJSON != nil && len(*multiSignaturesJSON) > 0 {
+		raw := json.RawMessage(*multiSignaturesJSON)
+		updatedPoa.MultiSignatures = &raw
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return &updatedPoa, nil
 }
 
 // GetPoAStats retrieves aggregate statistics for power of attorneys

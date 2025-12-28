@@ -116,7 +116,7 @@ const (
 	ErrInvalidFormat         = "invalid_format"
 	ErrInvalidSignature      = "invalid_signature"
 	ErrExpiredToken          = "expired_token"
-	ErrTokenNotYetValid      = "token_not_yet_valid"
+	ErrTokenNotYetValid      = "token_not_yet_valid" // #nosec G101 // Error code string constant
 	ErrInvalidIssuer         = "invalid_issuer"
 	ErrInvalidAudience       = "invalid_audience"
 	ErrMissingKID            = "missing_kid"

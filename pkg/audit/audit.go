@@ -81,9 +81,9 @@ const (
 	EventTypeGNAPGrantRequest  EventType = "gnap_grant_request"
 	EventTypeGNAPGrantApproved EventType = "gnap_grant_approved"
 	EventTypeGNAPGrantDenied   EventType = "gnap_grant_denied"
-	EventTypeGNAPTokenIssue    EventType = "gnap_token_issue"
-	EventTypeGNAPTokenRotate   EventType = "gnap_token_rotate"
-	EventTypeGNAPTokenRevoke   EventType = "gnap_token_revoke"
+	EventTypeGNAPTokenIssue    EventType = "gnap_token_issue"  // #nosec G101 // Audit event type constant
+	EventTypeGNAPTokenRotate   EventType = "gnap_token_rotate" // #nosec G101 // Audit event type constant
+	EventTypeGNAPTokenRevoke   EventType = "gnap_token_revoke" // #nosec G101 // Audit event type constant
 	EventTypeObligation        EventType = "obligation"
 )
 

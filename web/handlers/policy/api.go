@@ -354,6 +354,10 @@ func (a *API) AddBundle(c *gin.Context) {
 		_ = a.Handler.SaveState() // best effort
 	}
 
+	if a.Handler.OnPolicyChange != nil {
+		a.Handler.OnPolicyChange()
+	}
+
 	c.JSON(201, gin.H{"success": true, "bundle_hash": b.Hash, "head_hash": head.Hash, "policy_version": b.Version, "verified": verified, "verification_error": vmsg, "chain": a.Handler.Registry.ChainHashes()})
 }
 
@@ -398,6 +402,10 @@ func (a *API) Rollback(c *gin.Context) {
 
 	if a.Handler.Config.PersistPath != "" {
 		_ = a.Handler.SaveState()
+	}
+
+	if a.Handler.OnPolicyChange != nil {
+		a.Handler.OnPolicyChange()
 	}
 
 	if a.Auditor != nil {

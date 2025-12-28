@@ -1,6 +1,7 @@
 package token
 
 import (
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -16,6 +17,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto/keys"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
@@ -40,7 +42,34 @@ func (h *Handler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/.well-known/jwks.json", h.JWKS)
 }
 
+func (h *Handler) checkClock(c *gin.Context) bool {
+	if h.ClockStatus == nil {
+		return true
+	}
+	status, skew, err := h.ClockStatus.Status()
+	if status == "Critical" {
+		c.JSON(503, gin.H{
+			"success": false,
+			"error":   "system_clock_unsynchronized",
+			"detail":  fmt.Sprintf("System clock skew (%v) exceeds safety threshold. Operation rejected for security.", skew),
+			"retry":   true,
+		})
+		if h.Metrics != nil {
+			h.Metrics.RecordLifecycleTransition("token", "any", "failed", "clock_skew_critical")
+		}
+		return false
+	}
+	if err != nil && status == "Critical" { // Fail closed if check fails and status was critical
+		c.JSON(503, gin.H{"success": false, "error": "clock_monitor_failure"})
+		return false
+	}
+	return true
+}
+
 func (h *Handler) Create(c *gin.Context) {
+	if !h.checkClock(c) {
+		return
+	}
 	var span Span
 	if h.ShouldTrace() {
 		_, span = h.Tracer.StartSpan(c.Request.Context(), "token.issue")
@@ -138,15 +167,29 @@ func (h *Handler) Create(c *gin.Context) {
 		kid := h.JWTKid
 		var signingKey interface{}
 		if h.JWTAlg == "RS256" {
-			pk, err := LoadOrGenerateRSAKey()
-			if err != nil {
-				c.JSON(500, gin.H{"success": false, "message": "rsa key error"})
-				return
+			if h.JWTKeyManager != nil {
+				s, err := h.JWTKeyManager.CryptoSigner(c.Request.Context())
+				if err != nil {
+					c.JSON(500, gin.H{"success": false, "message": "key manager error"})
+					return
+				}
+				signingKey = s
+				if k, err := h.JWTKeyManager.GetKeyID(c.Request.Context()); err == nil && k != "" {
+					kid = k
+				}
+			} else {
+				// Legacy fallback (should ideally be removed if KeyManager is always set)
+				pk, err := LoadOrGenerateRSAKey()
+				if err != nil {
+					c.JSON(500, gin.H{"success": false, "message": "rsa key error"})
+					return
+				}
+				signingKey = pk
 			}
-			signingKey = pk
 		} else {
 			secret := h.JWTSecret
 			if secret == "" {
+				// #nosec G101: demo secret placeholder for dev use
 				secret = "dev-secret-demo-00000000000000000000000000000000"
 			}
 			signingKey = []byte(secret)
@@ -188,6 +231,9 @@ func (h *Handler) Create(c *gin.Context) {
 }
 
 func (h *Handler) Validate(c *gin.Context) {
+	if !h.checkClock(c) {
+		return
+	}
 	var span Span
 	if h.ShouldTrace() {
 		_, span = h.Tracer.StartSpan(c.Request.Context(), "token.validate")
@@ -248,6 +294,24 @@ func (h *Handler) Validate(c *gin.Context) {
 				return nil, errors.New(ErrInvalidAlgorithm)
 			}
 			if alg == "RS256" {
+				if h.JWTKeyManager != nil {
+					// RR-005: Use LookupPublicKey if kid header is present
+					if kid, ok := t.Header["kid"].(string); ok && kid != "" {
+						pub, err := h.JWTKeyManager.LookupPublicKey(context.Background(), kid)
+						if err == nil {
+							return pub, nil
+						}
+						// If lookup fails but we have implicit trust (e.g. single key env), fallthrough?
+						// Strictly failing on explicit KID mismatch is safer.
+						return nil, fmt.Errorf("unknown kid: %s", kid)
+					}
+					// Fallback legacy (active key) if no KID
+					pub, err := h.JWTKeyManager.GetPublicKey(context.Background())
+					if err != nil {
+						return nil, err
+					}
+					return pub, nil
+				}
 				pk, err := LoadOrGenerateRSAKey()
 				if err != nil {
 					return nil, err
@@ -256,6 +320,7 @@ func (h *Handler) Validate(c *gin.Context) {
 			}
 			secret := h.JWTSecret
 			if secret == "" {
+				// #nosec G101: demo secret placeholder for dev use
 				secret = "dev-secret-demo-00000000000000000000000000000000"
 			}
 			return []byte(secret), nil
@@ -546,18 +611,24 @@ func (h *Handler) JWKS(c *gin.Context) {
 		c.Header("X-Key-Rotation-Interval-Days", rot)
 	}
 
-	keys := []any{}
+	jwkList := []any{}
 	if useLib {
 		if alg == "RS256" {
-			jwk, err := rsaPublicJWK() // from keys.go (internal)
+			var jwk map[string]any
+			var err error
+			if h.JWTKeyManager != nil {
+				jwk, err = keys.PublicJWK(h.JWTKeyManager)
+			} else {
+				jwk, err = rsaPublicJWK() // from keys.go (internal)
+			}
 			if err != nil {
 				c.JSON(500, gin.H{"success": false, "message": "jwks generation error"})
 				return
 			}
-			keys = append(keys, jwk)
+			jwkList = append(jwkList, jwk)
 		} else {
 			kid := h.JWTKid
-			keys = append(keys, gin.H{"kty": "oct", "alg": alg, "kid": kid, "use": "sig"})
+			jwkList = append(jwkList, gin.H{"kty": "oct", "alg": alg, "kid": kid, "use": "sig"})
 		}
 	}
 
@@ -585,7 +656,7 @@ func (h *Handler) JWKS(c *gin.Context) {
 					if !k.SunsetAfter.IsZero() {
 						jwk["sunset_after"] = k.SunsetAfter.Format(time.RFC3339)
 					}
-					keys = append(keys, jwk)
+					jwkList = append(jwkList, jwk)
 				}
 			}
 		}
@@ -597,16 +668,16 @@ func (h *Handler) JWKS(c *gin.Context) {
 		c.Header("Warning", warning)
 	}
 
-	if len(keys) == 0 {
+	if len(jwkList) == 0 {
 		kid := h.JWTKid
 		if kid == "" {
 			kid = "demo-rsa"
 		}
-		keys = append(keys, gin.H{"kty": "oct", "alg": "HS256", "kid": kid, "use": "sig", "metadata_only": true})
+		jwkList = append(jwkList, gin.H{"kty": "oct", "alg": "HS256", "kid": kid, "use": "sig", "metadata_only": true})
 	}
 
 	// Generate ETag based on keys content
-	keysJSON, _ := json.Marshal(keys)
+	keysJSON, _ := json.Marshal(jwkList)
 	etag := fmt.Sprintf(`"%x"`, sha256.Sum256(keysJSON))
 	c.Header("ETag", etag)
 
@@ -649,5 +720,5 @@ func (h *Handler) JWKS(c *gin.Context) {
 		}
 	}
 
-	c.JSON(200, gin.H{"keys": keys})
+	c.JSON(200, gin.H{"keys": jwkList})
 }

@@ -49,7 +49,8 @@ The GAuth prototype implements RFC 0111 delegation (PowerOfAttorney) with option
 2. Service ↔ BoltDB File System (host FS permissions)
 3. Service ↔ Anchor External System (stub; future real network boundary)
 4. Service ↔ Metrics Backend (Prometheus scrape interface)
-5. In-memory Components (key ring, signer, canonical digest) ↔ Untrusted input
+5. Service ↔ MCP Servers (Stdio/SSE/WS transport boundary)
+6. In-memory Components (key ring, signer, canonical digest) ↔ Untrusted input
 
 ## 5. Threat Scenarios
 | ID | Threat | Description | Impact | Likelihood (Current) |
@@ -66,6 +67,8 @@ The GAuth prototype implements RFC 0111 delegation (PowerOfAttorney) with option
 | T10 | DOS via Large Scope/Restrictions | Oversized JSON causing memory pressure | Availability | Low (size limits enforced) |
 | T11 | Timing Side Channel | Signature verification timing leaks key info | Confidentiality | Low (Ed25519 constant-time) |
 | T12 | Anchor Spoofing | Fake success anchoring hides external tampering | Integrity | Medium (Noop client) |
+| T13 | MCP Unauthorized Access | AI agents calling MCP tools without valid delegation | Privilege escalation | Low (MCP Auth Bridge) |
+| T14 | MCP Audit Log Bypass | Executing MCP operations without generating audit trails | Non-repudiation loss | Low (Enforced Auditing) |
 
 ## 6. Existing Mitigations
 | Threats | Mitigations |
@@ -82,12 +85,15 @@ The GAuth prototype implements RFC 0111 delegation (PowerOfAttorney) with option
 | T10 | Explicit size caps on scope slice length, individual scope string length, restrictions count, key/value lengths |
 | T11 | Use Ed25519 (designed for constant-time verification) |
 | T12 | Metrics fold anchor attempts + failures to detect persistent failure mode |
+| T13 | MCP Authorization Bridge enforces PDP checks on every resource/tool/prompt request; Identity from ExtendedToken required. |
+| T14 | MCPHandler strictly calls AuditLogger before and after sensitive operations; Fail-closed on auth failure. |
 
 ## 7. Gaps & Weaknesses
 - (Completed) Token replay protection: JTI issuance & distributed (Redis) replay store with fail-closed mode.
 - (Completed) Discovery hardening: JWKS signatures and deprecation schedules now exposed via `/.well-known/gauth-configuration`.
 - (Completed) RFC-3161 verification: Cryptographic verification of TimeStampToken CMS structures implemented.
 - (Completed) Capability registry anchoring: External TSA anchoring integrated for capability governance audit trail.
+- (Completed) MCP Security: GAuth-secured MCP REST integration with mandatory authorization and auditing.
 - Public key distribution and persistence missing (verification relies on key ring only).
 - No integrity seal / checksum for BoltDB file (tampering offline undetected on startup).
 - Lack of structured authorization policy around List operations (privacy risk).

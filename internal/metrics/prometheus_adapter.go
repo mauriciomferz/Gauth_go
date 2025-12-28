@@ -214,6 +214,15 @@ type PrometheusMetrics struct {
 	cascadeBatchProcessed       prom.Counter
 	cascadeMaxDepthReachedGauge prom.Gauge
 	cascadeProcessingErrors     prom.Counter
+
+	// Jurisdiction enforcement metrics
+	jurisdictionEnforcementErrors  prom.Counter
+	jurisdictionEnforcementDenials prom.Counter
+	jurisdictionEnforcementAllows  prom.Counter
+
+	// System clock skew gauge
+	systemClockSkew      prom.Gauge
+	replayStoreEvictions prom.Counter
 }
 
 // Dual-control revocation workflow Prometheus counter increments (moved outside struct)
@@ -443,13 +452,18 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		hierDigestParentDigestMissing: fqCounter("hier_digest_parent_digest_missing_total", "Hierarchical digest parent digest missing during issuance or validation"),
 		hierDigestVersionMismatch:     fqCounter("hier_digest_version_mismatch_total", "Hierarchical digest expected V4 but observed different version"),
 		// Cascade revocation metrics
-		cascadeRevocationTriggered:    fqCounter("cascade_revocation_triggered_total", "Cascade revocation operations initiated for parent POA"),
-		cascadeDescendantsProcessed:   fqCounter("cascade_descendants_processed_total", "Descendant POAs processed during cascade revocation"),
-		cascadeDepthLimitReached:      fqCounter("cascade_depth_limit_reached_total", "Cascade operations hitting configured maximum depth limit"),
-		cascadeBatchProcessed:         fqCounter("cascade_batch_processed_total", "Batches processed during cascade revocation operations"),
-		cascadeMaxDepthReachedGauge:   fqGauge("cascade_max_depth_reached", "Maximum cascade depth reached in current session"),
-		cascadeProcessingErrors:       fqCounter("cascade_processing_errors_total", "Errors encountered during cascade descendant processing"),
-		replayStoreAvailabilityImpact: fqCounter("replay_store_availability_impact_total", "Fail-closed denials due to replay store unavailability"),
+		cascadeRevocationTriggered:     fqCounter("cascade_revocation_triggered_total", "Cascade revocation operations initiated for parent POA"),
+		cascadeDescendantsProcessed:    fqCounter("cascade_descendants_processed_total", "Descendant POAs processed during cascade revocation"),
+		cascadeDepthLimitReached:       fqCounter("cascade_depth_limit_reached_total", "Cascade operations hitting configured maximum depth limit"),
+		cascadeBatchProcessed:          fqCounter("cascade_batch_processed_total", "Batches processed during cascade revocation operations"),
+		cascadeMaxDepthReachedGauge:    fqGauge("cascade_max_depth_reached", "Maximum cascade depth reached in current session"),
+		cascadeProcessingErrors:        fqCounter("cascade_processing_errors_total", "Errors encountered during cascade descendant processing"),
+		jurisdictionEnforcementErrors:  fqCounter("jurisdiction_enforcement_errors_total", "Errors encountered during jurisdiction enforcement"),
+		jurisdictionEnforcementDenials: fqCounter("jurisdiction_enforcement_denials_total", "Jurisdiction enforcement denials"),
+		jurisdictionEnforcementAllows:  fqCounter("jurisdiction_enforcement_allows_total", "Jurisdiction enforcement allows"),
+		systemClockSkew:                fqGauge("system_clock_skew_seconds", "Difference between local system time and NTP time in seconds"),
+		replayStoreAvailabilityImpact:  fqCounter("replay_store_availability_impact_total", "Fail-closed denials due to replay store unavailability"),
+		replayStoreEvictions:           fqCounter("replay_store_evictions_total", "Replay nonces purged due to capacity limits"),
 	}
 	// Attestation proof issuance latency histogram
 	attIssue := prom.NewHistogram(prom.HistogramOpts{Namespace: opts.Namespace, Subsystem: opts.Subsystem, Name: "attestation_proof_issue_latency_seconds", Help: "Latency of attestation proof issuance operations", Buckets: opts.Buckets, ConstLabels: labels})
@@ -955,15 +969,19 @@ func (p *PrometheusMetrics) IncCascadeProcessingErrors() {
 
 // Jurisdiction enforcement metrics (P1.3)
 func (p *PrometheusMetrics) IncJurisdictionEnforcementErrors() {
-	// Implementation can be added when Prometheus counters are initialized
+	p.jurisdictionEnforcementErrors.Inc()
 }
 
 func (p *PrometheusMetrics) IncJurisdictionEnforcementDenials() {
-	// Implementation can be added when Prometheus counters are initialized
+	p.jurisdictionEnforcementDenials.Inc()
 }
 
 func (p *PrometheusMetrics) IncJurisdictionEnforcementAllows() {
-	// Implementation can be added when Prometheus counters are initialized
+	p.jurisdictionEnforcementAllows.Inc()
+}
+
+func (p *PrometheusMetrics) SetSystemClockSkew(seconds float64) {
+	p.systemClockSkew.Set(seconds)
 }
 
 // SetSunsetPhaseSatisfactionProgress sets 0..1 gauge indicating fraction of window satisfied.
@@ -1045,6 +1063,7 @@ func (p *PrometheusMetrics) IncCombinedAnchorEmitted()       { p.combinedAnchorE
 func (p *PrometheusMetrics) IncCombinedAnchorFailures()      { p.combinedAnchorFailures.Inc() }
 func (p *PrometheusMetrics) IncAnchorFailures()              { p.anchorFailures.Inc() }
 func (p *PrometheusMetrics) IncReplayHits()                  { p.replayHits.Inc() }
+func (p *PrometheusMetrics) IncReplayStoreEvictions()        { p.replayStoreEvictions.Inc() }
 func (p *PrometheusMetrics) IncReplayMisses()                { p.replayMisses.Inc() }
 func (p *PrometheusMetrics) IncReplayStoreAvailabilityImpact() {
 	p.replayStoreAvailabilityImpact.Inc()

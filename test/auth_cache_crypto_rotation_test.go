@@ -17,7 +17,7 @@ func TestAuthorizationCacheCryptoRotationInvalidation(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
 	ma.AddPolicy(authz.Policy{ID: "p1", Subject: "sam", Resource: "obj:1", Actions: []string{"read"}, Effect: authz.Allow})
 	ma.Snapshot()
-	cache := authz.NewAuthorizationCache(4)
+	cache := authz.NewLRUDecisionCache(4)
 	ma.SetDecisionCache(cache)
 
 	req := authz.Request{Subject: "sam", Resource: "obj:1", Action: "read"}

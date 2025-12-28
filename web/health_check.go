@@ -2,8 +2,10 @@ package web
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/mauriciomferz/Gauth_go/pkg/common/clock"
 	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
 )
 
@@ -43,6 +45,20 @@ func (s *BetaServer) DeepHealthCheck(ctx context.Context) map[string]string {
 			}
 		}
 		metrics.MCPActiveConnections.Set(float64(activeCount))
+	}
+
+	// 4. System Clock Monitor (RR-015)
+	if s.systemClockMonitor != nil {
+		st, skew, _ := s.systemClockMonitor.Status()
+		if st == string(clock.StatusCritical) {
+			status["system_clock"] = "critical_skew"
+			status["overall"] = "degraded"
+		} else if st == string(clock.StatusWarning) {
+			status["system_clock"] = "warning_skew"
+		} else {
+			status["system_clock"] = "synchronized"
+		}
+		status["clock_skew"] = fmt.Sprintf("%.3fs", skew.Seconds())
 	}
 
 	return status

@@ -28,6 +28,7 @@ When the replay store (Redis or other distributed backend) becomes unavailable:
 Fail-closed behavior is implemented in [`pkg/gauth_rfc_001/rfc0111.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go) and triggered when the `CheckJTI` method encounters a replay store availability error.
 
 **Key Metric**: `IncReplayStoreAvailabilityImpact()` is emitted each time a validation is denied due to replay store unavailability.
+- **MCP Authorization**: MCP endpoints (Resource, Tool, Prompt) operate in a mandatory fail-closed mode; any authorization bridge failure or missing token identity results in an immediate 403/401 denial.
 
 ---
 

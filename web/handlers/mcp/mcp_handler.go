@@ -8,18 +8,26 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mauriciomferz/Gauth_go/pkg/gagent"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
 )
 
 // MCPHandler handles Model Context Protocol server management endpoints
 type MCPHandler struct {
-	connManager *mcp.ConnectionManager
+	connManager  *mcp.ConnectionManager
+	authBridge   gagent.AuthorizationBridge
+	auditLogger  mcp.AuditLogger
+	tokenService *gauth.ExtendedTokenService
 }
 
-// NewMCPHandler creates a new MCP handler instance
-func NewMCPHandler() *MCPHandler {
+// NewMCPHandler creates a new MCP handler instance with security dependencies
+func NewMCPHandler(authBridge gagent.AuthorizationBridge, auditLogger mcp.AuditLogger, tokenService *gauth.ExtendedTokenService) *MCPHandler {
 	return &MCPHandler{
-		connManager: mcp.NewConnectionManager(),
+		connManager:  mcp.NewConnectionManager(),
+		authBridge:   authBridge,
+		auditLogger:  auditLogger,
+		tokenService: tokenService,
 	}
 }
 
@@ -34,6 +42,32 @@ func (h *MCPHandler) RegisterRoutes(r *gin.RouterGroup) {
 	r.POST("/mcp/servers/:id/resources/read", h.ReadResource)
 	r.GET("/mcp/servers/:id/tools", h.ListTools)
 	r.POST("/mcp/servers/:id/tools/call", h.CallTool)
+	r.GET("/mcp/servers/:id/prompts", h.ListPrompts)
+	r.GET("/mcp/servers/:id/prompts/:name", h.GetPrompt)
+}
+
+// authorize extracts and validates the token from the request
+func (h *MCPHandler) authorize(c *gin.Context) (*gauth.ExtendedToken, error) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
+		return nil, errors.New("missing or invalid authorization header")
+	}
+
+	tokenString := authHeader[7:]
+	if h.tokenService == nil {
+		return nil, errors.New("token service not initialized")
+	}
+
+	result, err := h.tokenService.ValidateExtendedToken(c.Request.Context(), tokenString)
+	if err != nil {
+		return nil, fmt.Errorf("token validation failed: %w", err)
+	}
+
+	if !result.Valid || result.ExtendedToken == nil {
+		return nil, errors.New("invalid token")
+	}
+
+	return result.ExtendedToken, nil
 }
 
 // HealthCheck returns the health status of the MCP handler
@@ -329,6 +363,57 @@ func (h *MCPHandler) ReadResource(c *gin.Context) {
 		return
 	}
 
+	// Authorization
+	token, err := h.authorize(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"error":   "unauthorized",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// MCP Authorization Bridge Check
+	authorized, err := h.authBridge.AuthorizeResourceRead(c.Request.Context(), token, req.URI)
+
+	// Audit Log
+	h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
+		Timestamp:  time.Now(),
+		Operation:  "resource_read",
+		AgentID:    token.AuthorizationChain.Client.EntityID,
+		Target:     req.URI,
+		Authorized: authorized,
+		Decision: func() string {
+			if authorized {
+				return "granted"
+			} else if err != nil {
+				return err.Error()
+			} else {
+				return "denied"
+			}
+		}(),
+		MCPServerID: serverID,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "authorization_error",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if !authorized {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"error":   "forbidden",
+			"message": "Access denied by policy",
+		})
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
@@ -410,6 +495,57 @@ func (h *MCPHandler) CallTool(c *gin.Context) {
 		return
 	}
 
+	// Authorization
+	token, err := h.authorize(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"error":   "unauthorized",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// MCP Authorization Bridge Check
+	authorized, err := h.authBridge.AuthorizeToolCall(c.Request.Context(), token, req.Name, req.Arguments)
+
+	// Audit Log
+	h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
+		Timestamp:  time.Now(),
+		Operation:  "tool_call",
+		AgentID:    token.AuthorizationChain.Client.EntityID,
+		Target:     req.Name,
+		Authorized: authorized,
+		Decision: func() string {
+			if authorized {
+				return "granted"
+			} else if err != nil {
+				return err.Error()
+			} else {
+				return "denied"
+			}
+		}(),
+		MCPServerID: serverID,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "authorization_error",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if !authorized {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"error":   "forbidden",
+			"message": "Access denied by policy",
+		})
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
 	defer cancel()
 
@@ -428,6 +564,132 @@ func (h *MCPHandler) CallTool(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"error":   "tool_call_failed",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"content": result,
+	})
+}
+
+// ListPrompts lists all prompts available on an MCP server
+func (h *MCPHandler) ListPrompts(c *gin.Context) {
+	serverID := c.Param("id")
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	client, err := h.connManager.GetClient(ctx, serverID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "server_not_found",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	prompts, err := client.ListPrompts(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "list_failed",
+			"message": err.Error(),
+			"prompts": []interface{}{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"prompts": prompts,
+	})
+}
+
+// GetPrompt retrieves a specific prompt from an MCP server
+func (h *MCPHandler) GetPrompt(c *gin.Context) {
+	serverID := c.Param("id")
+	promptName := c.Param("name")
+
+	// Authorization
+	token, err := h.authorize(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"error":   "unauthorized",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// MCP Authorization Bridge Check
+	authorized, authErr := h.authBridge.AuthorizePromptGet(c.Request.Context(), token, promptName)
+
+	// Audit Log
+	h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
+		Timestamp:  time.Now(),
+		Operation:  "prompt_get",
+		AgentID:    token.AuthorizationChain.Client.EntityID,
+		Target:     promptName,
+		Authorized: authorized,
+		Decision: func() string {
+			if authorized {
+				return "granted"
+			} else if authErr != nil {
+				return authErr.Error()
+			} else {
+				return "denied"
+			}
+		}(),
+		MCPServerID: serverID,
+	})
+
+	if authErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "authorization_error",
+			"message": authErr.Error(),
+		})
+		return
+	}
+
+	if !authorized {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"error":   "forbidden",
+			"message": "Access denied by policy",
+		})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	client, err := h.connManager.GetClient(ctx, serverID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"error":   "server_not_found",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	arguments := make(map[string]string)
+	for k, v := range c.Request.URL.Query() {
+		if len(v) > 0 {
+			arguments[k] = v[0]
+		}
+	}
+
+	result, err := client.GetPrompt(ctx, promptName, arguments)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "prompt_get_failed",
 			"message": err.Error(),
 		})
 		return

@@ -1,9 +1,10 @@
-# RFC 0111/0115 Conformance - Remaining Gaps Analysis
+# RFC 0111/0115 Conformance - Gaps Analysis (ARCHIVED)
 
-## Date: 2025
-## Status: For Architectural Discussion
+## Date: 2025-12-28
+## Status: **SUPERSEDED** - All gaps listed below have been closed as of Phase 17.
 
-This document analyzes the remaining conformance gaps that require architectural decisions or major new subsystems before implementation.
+> [!NOTE]
+> This document remains for historical architectural context. Current compliance status is tracked in `docs/GAP_MATRIX.md` and `docs/RESIDUAL_RISKS.md`.
 
 ---
 

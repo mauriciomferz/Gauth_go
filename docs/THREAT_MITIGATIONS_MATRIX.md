@@ -110,6 +110,13 @@ This document maps identified security threats to their implemented mitigations,
 | T10.3 | Decision traceability loss | **High** | Decision metrics with action/resource/outcome labels | internal/metrics/prometheus_adapter.go | ✅ Complete | Labeled counters, reason taxonomy |
 | T10.4 | Semantic violation spikes | **Medium** | Per-category violation counters | internal/observability/violations.go | ✅ Complete | 20+ violation categories |
 
+### 11. Dependency & Sync Threats
+
+| Threat ID | Threat Description | Severity | Mitigation Strategy | Implementation | Status | Evidence |
+|-----------|-------------------|----------|---------------------|----------------|--------|----------|
+| T11.1 | Stale jurisdictional policies | **Medium** | Automated polling and synchronization | pkg/policy/sync/syncer.go | ✅ Complete | PolicySyncer with FileSource/External polling |
+| T11.2 | Role hierarchy deadlocks | **Low** | Cycle detection during hierarchy updates | pkg/authz/graph.go | ✅ Complete | DetectCycles() DFS validation |
+
 ---
 
 ## Mitigation Coverage Summary
@@ -126,7 +133,8 @@ This document maps identified security threats to their implemented mitigations,
 | AI Governance | 4 | 4 | 0 | 0 | **100%** |
 | Revocation & Lifecycle | 4 | 4 | 0 | 0 | **100%** |
 | Observability | 4 | 4 | 0 | 0 | **100%** |
-| **TOTAL** | **40** | **40** | **0** | **0** | **100%** |
+| Dependency & Sync | 2 | 2 | 0 | 0 | **100%** |
+| **TOTAL** | **42** | **42** | **0** | **0** | **100%** |
 
 ---
 

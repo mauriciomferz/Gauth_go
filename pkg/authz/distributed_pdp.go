@@ -7,39 +7,50 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/policy"
 )
 
-// DecisionCache provides a cache for PDP decisions with invalidation hooks.
-type DecisionCache interface {
-	Get(key string) (Decision, bool)
-	Set(key string, decision Decision)
-	Invalidate(key string)
-}
-
 // DistributedPDP supports distributed policy decision points.
 type DistributedPDP interface {
 	Decide(request map[string]interface{}) (Decision, error)
 	RegisterCache(cache DecisionCache)
 }
 
-// DefaultDecisionCache is a simple in-memory implementation.
+// DefaultDecisionCache is a simple in-memory implementation for DistributedPDP.
 type DefaultDecisionCache struct {
-	store map[string]Decision
+	store map[string]AuthorizationCacheEntry
 }
 
 func NewDefaultDecisionCache() *DefaultDecisionCache {
-	return &DefaultDecisionCache{store: make(map[string]Decision)}
+	return &DefaultDecisionCache{store: make(map[string]AuthorizationCacheEntry)}
 }
 
-func (c *DefaultDecisionCache) Get(key string) (Decision, bool) {
+func (c *DefaultDecisionCache) Get(key string) (AuthorizationCacheEntry, bool) {
 	d, ok := c.store[key]
 	return d, ok
 }
 
-func (c *DefaultDecisionCache) Set(key string, decision Decision) {
-	c.store[key] = decision
+func (c *DefaultDecisionCache) Set(key string, entry AuthorizationCacheEntry) {
+	c.store[key] = entry
 }
 
 func (c *DefaultDecisionCache) Invalidate(key string) {
 	delete(c.store, key)
+}
+
+func (c *DefaultDecisionCache) InvalidateAll() {
+	c.store = make(map[string]AuthorizationCacheEntry)
+}
+
+func (c *DefaultDecisionCache) MarkStale(key string) {
+	delete(c.store, key)
+}
+
+func (c *DefaultDecisionCache) Size() int {
+	return len(c.store)
+}
+
+func (c *DefaultDecisionCache) Snapshot() AuthorizationCacheMetrics {
+	return AuthorizationCacheMetrics{
+		Size: len(c.store),
+	}
 }
 
 // DefaultDistributedPDP implements distributed policy decision logic with local caching.
@@ -62,8 +73,8 @@ func (p *DefaultDistributedPDP) Decide(request map[string]interface{}) (Decision
 
 	// 2. Check Cache
 	if p.cache != nil {
-		if dec, found := p.cache.Get(key); found {
-			return dec, nil
+		if arc, found := p.cache.Get(key); found {
+			return arc.Decision, nil
 		}
 	}
 
@@ -84,7 +95,7 @@ func (p *DefaultDistributedPDP) Decide(request map[string]interface{}) (Decision
 
 	// 5. Update Cache
 	if p.cache != nil {
-		p.cache.Set(key, dec)
+		p.cache.Set(key, AuthorizationCacheEntry{Decision: dec})
 	}
 
 	return dec, nil

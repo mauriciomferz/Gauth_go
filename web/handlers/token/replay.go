@@ -1,6 +1,7 @@
 package token
 
 import (
+	"container/list"
 	"fmt"
 	"os"
 	"strconv"
@@ -26,10 +27,17 @@ func (r *ReplayNonceStore) CheckAndStore(jti string) error {
 type ReplayNonceStore struct {
 	mu      sync.Mutex
 	ttl     time.Duration
-	seen    map[string]time.Time
+	seen    map[string]*list.Element
+	lru     *list.List
 	cap     int // optional capacity limit; evict oldest on insert when exceeded
 	wal     *replay.WALStore
 	metrics metrics.Metrics // optional; nil-safe
+	stopCh  chan struct{}
+}
+
+type replayEntry struct {
+	key string
+	ts  time.Time
 }
 
 // NewReplayNonceStore creates a store without metrics (backward compatibility).
@@ -50,6 +58,11 @@ func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore
 			cap = v
 		}
 	}
+	if raw := os.Getenv("GAUTH_REPLAY_TTL"); raw != "" {
+		if v, err := time.ParseDuration(raw); err == nil && v > 0 {
+			ttl = v
+		}
+	}
 	walPath := os.Getenv("GAUTH_REPLAY_WAL")
 	var wal *replay.WALStore
 	if walPath != "" {
@@ -60,7 +73,15 @@ func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore
 			m.IncReplayStoreErrors()
 		}
 	}
-	store := &ReplayNonceStore{ttl: ttl, seen: make(map[string]time.Time), cap: cap, wal: wal, metrics: m}
+	store := &ReplayNonceStore{
+		ttl:     ttl,
+		seen:    make(map[string]*list.Element),
+		lru:     list.New(),
+		cap:     cap,
+		wal:     wal,
+		metrics: m,
+		stopCh:  make(chan struct{}),
+	}
 	// Recover from WAL if available (corruption-tolerant)
 	if wal != nil {
 		start := time.Now()
@@ -72,7 +93,7 @@ func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore
 				if ts.After(time.Now()) {
 					ts = time.Now()
 				}
-				store.seen[string(rec.Key)] = ts
+				store.seen[string(rec.Key)] = store.lru.PushBack(&replayEntry{key: string(rec.Key), ts: ts})
 			}
 			return nil
 		})
@@ -83,6 +104,7 @@ func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore
 			}
 		}
 	}
+	go store.backgroundCleanup()
 	return store
 }
 
@@ -90,7 +112,14 @@ func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore
 // on environment variables. This enables isolated durable replay stores (e.g. attestation vs token issuance)
 // without mutating global process environment. If walPath is empty durability is disabled.
 func NewReplayNonceStoreWithConfig(ttl time.Duration, capacity int, walPath string, m metrics.Metrics) *ReplayNonceStore {
-	store := &ReplayNonceStore{ttl: ttl, seen: make(map[string]time.Time), cap: capacity, metrics: m}
+	store := &ReplayNonceStore{
+		ttl:     ttl,
+		seen:    make(map[string]*list.Element),
+		lru:     list.New(),
+		cap:     capacity,
+		metrics: m,
+		stopCh:  make(chan struct{}),
+	}
 	if walPath != "" {
 		if w, err := replay.NewWALStore(walPath); err == nil {
 			store.wal = w
@@ -103,7 +132,7 @@ func NewReplayNonceStoreWithConfig(ttl time.Duration, capacity int, walPath stri
 					if ts.After(time.Now()) {
 						ts = time.Now()
 					}
-					store.seen[string(rec.Key)] = ts
+					store.seen[string(rec.Key)] = store.lru.PushBack(&replayEntry{key: string(rec.Key), ts: ts})
 				}
 				return nil
 			})
@@ -117,66 +146,90 @@ func NewReplayNonceStoreWithConfig(ttl time.Duration, capacity int, walPath stri
 			m.IncReplayStoreErrors()
 		}
 	}
+	go store.backgroundCleanup()
 	return store
 }
 
-// Seen returns true if nonce already recorded (and not expired). Performs lazy TTL cleanup.
+// backgroundCleanup periodically removes expired entries to prevent unbounded growth.
+func (r *ReplayNonceStore) backgroundCleanup() {
+	// Run cleanup at 1/10th of TTL or at least every 5s, max 1m
+	interval := r.ttl / 10
+	if interval < 5*time.Second {
+		interval = 5 * time.Second
+	} else if interval > 1*time.Minute {
+		interval = 1 * time.Minute
+	}
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-r.stopCh:
+			return
+		case <-ticker.C:
+			r.cleanup()
+		}
+	}
+}
+
+// cleanup removes expired entries.
+func (r *ReplayNonceStore) cleanup() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	now := time.Now()
+	for {
+		el := r.lru.Front()
+		if el == nil {
+			break
+		}
+		ent := el.Value.(*replayEntry)
+		if now.Sub(ent.ts) > r.ttl {
+			delete(r.seen, ent.key)
+			r.lru.Remove(el)
+		} else {
+			break // Front is the oldest; if it's not expired, nothing after it is
+		}
+	}
+}
+
+// Seen returns true if nonce already recorded (and not expired).
+// Optimized to avoid O(N) scan.
 func (r *ReplayNonceStore) Seen(n string, now time.Time) bool {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	// Cleanup
-	for k, t := range r.seen {
-		if now.Sub(t) > r.ttl {
-			delete(r.seen, k)
-		}
-	}
-	t, ok := r.seen[n]
+	el, ok := r.seen[n]
 	if !ok {
 		return false
 	}
-	if now.Sub(t) > r.ttl {
-		delete(r.seen, n)
+	ent := el.Value.(*replayEntry)
+	if now.Sub(ent.ts) > r.ttl {
+		delete(r.seen, n) // Lazy delete on access
+		r.lru.Remove(el)
 		return false
 	}
 	return true
 }
 
-// Record stores nonce occurrence time.
+// Record stores nonce occurrence time, enforcing capacity logic.
 func (r *ReplayNonceStore) Record(n string, now time.Time) {
-	r.mu.Lock()
-	r.seen[n] = now
-	if r.wal != nil {
-		start := time.Now()
-		err := r.wal.AppendRecord(replay.WALRecord{
-			Op:    "Record",
-			Key:   []byte(n),
-			Value: nil,
-			TS:    now.Unix(),
-		})
-		if r.metrics != nil {
-			if err != nil {
-				r.metrics.IncReplayStoreErrors()
-			} else {
-				r.metrics.ObserveReplayStoreLatency(time.Since(start))
-				// Pending WAL entries approximated by active seen size
-				r.metrics.SetReplayWALPending(len(r.seen))
-			}
-		}
-	}
-	r.mu.Unlock()
+	r.RecordWithEvict(n, now)
 }
 
 // RecordWithEvict records and applies capacity eviction if configured.
 func (r *ReplayNonceStore) RecordWithEvict(n string, now time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	// TTL cleanup first
-	for k, t := range r.seen {
-		if now.Sub(t) > r.ttl {
-			delete(r.seen, k)
-		}
+
+	// If already seen, update its position and time
+	if el, ok := r.seen[n]; ok {
+		ent := el.Value.(*replayEntry)
+		ent.ts = now
+		r.lru.MoveToBack(el)
+	} else {
+		// New entry
+		r.seen[n] = r.lru.PushBack(&replayEntry{key: n, ts: now})
 	}
-	r.seen[n] = now
+
 	if r.wal != nil {
 		start := time.Now()
 		err := r.wal.AppendRecord(replay.WALRecord{
@@ -195,32 +248,29 @@ func (r *ReplayNonceStore) RecordWithEvict(n string, now time.Time) {
 			}
 		}
 	}
+
+	// Capacity enforcement - O(1) eviction
 	if r.cap > 0 && len(r.seen) > r.cap {
-		// Evict oldest (linear scan sufficient for small demo; optimize with min-heap if needed)
-		var oldestKey string
-		var oldestTime time.Time
-		first := true
-		for k, t := range r.seen {
-			if first || t.Before(oldestTime) {
-				oldestKey = k
-				oldestTime = t
-				first = false
+		el := r.lru.Front()
+		if el != nil {
+			ent := el.Value.(*replayEntry)
+			delete(r.seen, ent.key)
+			r.lru.Remove(el)
+			if r.metrics != nil {
+				r.metrics.IncReplayStoreEvictions()
 			}
 		}
-		delete(r.seen, oldestKey)
 	}
 }
 
-// Size returns current number of active (non-expired) entries. Performs a lazy TTL cleanup first.
+// Size returns current number of active entries.
+// Note: This might include some expired entries that haven't been swept yet.
+// For accuracy, we could scan, but that returns to O(N).
+// Given "Size()" is often for metrics, returning raw map size is O(1) and acceptable if we accept slight overcount between sweeps.
+// However, original implementation did lazy cleanup. To be safe, let's keep it O(1) and rely on background.
 func (r *ReplayNonceStore) Size() int {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	now := time.Now()
-	for k, t := range r.seen {
-		if now.Sub(t) > r.ttl {
-			delete(r.seen, k)
-		}
-	}
 	return len(r.seen)
 }
 
@@ -232,12 +282,13 @@ func (r *ReplayNonceStore) SnapshotAndCompact() error {
 		return nil
 	} // nothing to do
 	r.mu.Lock()
-	// Build active map (exclude expired)
+	// Build active map (exclude expired - one-time O(N) ok for implementation maintenance)
 	now := time.Now()
 	active := make(map[string]time.Time, len(r.seen))
-	for k, t := range r.seen {
-		if now.Sub(t) <= r.ttl {
-			active[k] = t
+	for k, el := range r.seen {
+		ent := el.Value.(*replayEntry)
+		if now.Sub(ent.ts) <= r.ttl {
+			active[k] = ent.ts
 		}
 	}
 	r.mu.Unlock()
@@ -279,8 +330,9 @@ func (r *ReplayNonceStore) IsDurable() bool {
 	return r.wal != nil
 }
 
-// Close closes the underlying WAL store if present.
+// Close closes the underlying WAL store if present and stops background cleanup.
 func (r *ReplayNonceStore) Close() error {
+	close(r.stopCh) // Stop background cleanup
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if r.wal != nil {

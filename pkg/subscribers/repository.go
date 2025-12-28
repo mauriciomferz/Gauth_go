@@ -403,6 +403,7 @@ func (r *Repository) GetSubscriberMetrics(ctx context.Context, tenantID string) 
 		}, nil
 	}
 	// Get token statistics
+	// #nosec G101: SQL query containing 'token' word, not a credential
 	tokenQuery := `
 		SELECT 
 			COUNT(*) AS total_tokens,

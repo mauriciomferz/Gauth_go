@@ -132,6 +132,7 @@ type Metrics interface {
 	IncReplayMisses()
 	IncReplayStoreErrors()
 	IncMalformedJTI(reason string) // Tracks JTI validation failures with reason (length_invalid, format_invalid, etc.)
+	IncReplayStoreEvictions()      // Tracks manual evictions when store capacity is reached
 	ObserveReplayStoreLatency(d time.Duration)
 	// WAL durability metrics (RB1 Phase): pending buffered entries and flush latency.
 	SetReplayWALPending(n int)
@@ -276,6 +277,9 @@ type Metrics interface {
 	IncJurisdictionEnforcementDenials()
 	// IncJurisdictionEnforcementAllows increments counter when jurisdiction enforcement allows operation
 	IncJurisdictionEnforcementAllows()
+
+	// SetSystemClockSkew sets a gauge tracking the difference between local and NTP time in seconds.
+	SetSystemClockSkew(seconds float64)
 }
 
 // Noop provides a do-nothing implementation used when instrumentation is disabled.
@@ -361,6 +365,7 @@ func (n noop) IncReplayHits()                                                   
 func (n noop) IncReplayMisses()                                                              {}
 func (n noop) IncReplayStoreErrors()                                                         {}
 func (n noop) IncMalformedJTI(reason string)                                                 {}
+func (n noop) IncReplayStoreEvictions()                                                      {}
 func (n noop) ObserveReplayStoreLatency(d time.Duration)                                     {}
 func (n noop) SetReplayWALPending(p int)                                                     {}
 func (n noop) ObserveReplayWALFlushLatency(d time.Duration)                                  {}
@@ -429,6 +434,7 @@ func (n noop) IncCascadeProcessingErrors()                     {}
 func (n noop) IncJurisdictionEnforcementErrors()               {}
 func (n noop) IncJurisdictionEnforcementDenials()              {}
 func (n noop) IncJurisdictionEnforcementAllows()               {}
+func (n noop) SetSystemClockSkew(seconds float64)              {}
 
 // Memory is a simple in-process metrics collector used for tests and benchmarks.
 // It is intentionally minimal and lock-free for write paths using atomics.
@@ -455,7 +461,7 @@ type Memory struct {
 	envelopeDigestMismatch        uint64
 	envelopeRawPOAEmbedded        uint64 // count of envelopes embedding RawPOA
 	envelopeRawPOATooLarge        uint64 // count of embedding attempts omitted due to size
-	// Attestation proof counters (Task 9)
+	// Attestation proof counters (prototype Task 9)
 	attestationProofIssued                     uint64
 	attestationProofIssueFailures              uint64
 	attestationProofVerifications              uint64
@@ -536,6 +542,7 @@ type Memory struct {
 	replayWALSnapshotDurationCount   uint64
 	replayWALSnapshotDurationTotalNS uint64
 	replayWALSnapshotDurationMaxNS   uint64
+	replayStoreEvictions             uint64
 	// Capability anchoring counters
 	capabilityAnchorEmitted       uint64
 	capabilityAnchorSkipped       uint64
@@ -654,6 +661,9 @@ type Memory struct {
 	jurisdictionEnforcementErrors  uint64
 	jurisdictionEnforcementDenials uint64
 	jurisdictionEnforcementAllows  uint64
+
+	// System clock skew gauge (float64 bits)
+	systemClockSkewBits uint64
 }
 
 // IncEvidenceAttachment increments successful evidence hash attachment counter.
@@ -738,8 +748,16 @@ func (m *Memory) IncJurisdictionEnforcementAllows() {
 	atomic.AddUint64(&m.jurisdictionEnforcementAllows, 1)
 }
 
+func (m *Memory) SetSystemClockSkew(seconds float64) {
+	atomic.StoreUint64(&m.systemClockSkewBits, math.Float64bits(seconds))
+}
+
 func (m *Memory) IncReplayStoreAvailabilityImpact() {
 	atomic.AddUint64(&m.replayStoreAvailabilityImpact, 1)
+}
+
+func (m *Memory) IncReplayStoreEvictions() {
+	atomic.AddUint64(&m.replayStoreEvictions, 1)
 }
 
 func (m *Memory) ObserveCapabilityAnchorInterval(d time.Duration) {

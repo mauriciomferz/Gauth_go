@@ -87,7 +87,9 @@ func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error
 		return err2
 	})
 	if err != nil {
-		db.Close()
+		if closeErr := db.Close(); closeErr != nil {
+			fmt.Fprintf(os.Stderr, "replay_store: failed to close db after error: %v\n", closeErr)
+		}
 		return nil, fmt.Errorf("replay_store: create bucket: %w", err)
 	}
 

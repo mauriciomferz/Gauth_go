@@ -37,6 +37,18 @@ func init() {
 	_ = DefaultRegistry.Register("regex_match", builtinRegexMatch)
 }
 
+// regexCache internal cache for compiled expressions
+var regexCache = struct {
+	sync.RWMutex
+	compiled map[string]*regexp.Regexp
+	order    []string // simple LRU
+	maxSize  int
+}{
+	compiled: make(map[string]*regexp.Regexp),
+	order:    make([]string, 0, 100),
+	maxSize:  100,
+}
+
 // registry is the concrete implementation of FunctionRegistry.
 type registry struct {
 	mu    sync.RWMutex
@@ -213,10 +225,35 @@ func builtinRegexMatch(args []interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("regex_match() pattern too long (max 256 chars)")
 	}
 
-	matched, err := regexp.MatchString(pattern, str)
-	if err != nil {
-		return nil, fmt.Errorf("regex_match() invalid pattern: %w", err)
+	// Check cache
+	regexCache.RLock()
+	re, ok := regexCache.compiled[pattern]
+	regexCache.RUnlock()
+
+	if !ok {
+		// Compile and cache
+		var err error
+		re, err = regexp.Compile(pattern)
+		if err != nil {
+			return nil, fmt.Errorf("regex_match() invalid pattern: %w", err)
+		}
+
+		regexCache.Lock()
+		// Double check
+		if existing, exists := regexCache.compiled[pattern]; exists {
+			re = existing
+		} else {
+			// Evict if full
+			if len(regexCache.order) >= regexCache.maxSize {
+				oldest := regexCache.order[0]
+				delete(regexCache.compiled, oldest)
+				regexCache.order = regexCache.order[1:]
+			}
+			regexCache.compiled[pattern] = re
+			regexCache.order = append(regexCache.order, pattern)
+		}
+		regexCache.Unlock()
 	}
 
-	return matched, nil
+	return re.MatchString(str), nil
 }

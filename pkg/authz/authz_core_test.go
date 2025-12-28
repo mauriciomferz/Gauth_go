@@ -16,7 +16,7 @@ func TestSetDecisionCache(t *testing.T) {
 	}
 
 	// Attach cache
-	cache := NewAuthorizationCache(100)
+	cache := NewLRUDecisionCache(100)
 	ma.SetDecisionCache(cache)
 
 	if ma.decisionCache != cache {
@@ -27,7 +27,7 @@ func TestSetDecisionCache(t *testing.T) {
 // TestSetJurisdiction verifies jurisdiction setting and cache invalidation
 func TestSetJurisdiction(t *testing.T) {
 	ma := NewMemoryAuthorizer()
-	cache := NewAuthorizationCache(100)
+	cache := NewLRUDecisionCache(100)
 	ma.SetDecisionCache(cache)
 
 	// Add cache entry
@@ -61,7 +61,7 @@ func TestSetJurisdiction(t *testing.T) {
 func TestSetJurisdiction_NoChange(t *testing.T) {
 	ma := NewMemoryAuthorizer()
 	ma.jurisdiction = "us-east"
-	cache := NewAuthorizationCache(100)
+	cache := NewLRUDecisionCache(100)
 	ma.SetDecisionCache(cache)
 
 	// Add cache entry
@@ -152,7 +152,7 @@ func TestSetValidatorRegistry(t *testing.T) {
 // TestInvalidateOnCryptoRotation verifies cache invalidation on crypto rotation
 func TestInvalidateOnCryptoRotation(t *testing.T) {
 	ma := NewMemoryAuthorizer()
-	cache := NewAuthorizationCache(100)
+	cache := NewLRUDecisionCache(100)
 	ma.SetDecisionCache(cache)
 
 	// Add cache entries
@@ -199,7 +199,7 @@ func TestAuthorizationCacheMetrics(t *testing.T) {
 	}
 
 	// With cache
-	cache := NewAuthorizationCache(50)
+	cache := NewLRUDecisionCache(50)
 	ma.SetDecisionCache(cache)
 
 	// Add some entries and operations

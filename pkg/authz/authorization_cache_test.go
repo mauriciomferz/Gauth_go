@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// TestNewAuthorizationCache verifies constructor with various capacity values
-func TestNewAuthorizationCache(t *testing.T) {
+// TestNewLRUDecisionCache verifies constructor with various capacity values
+func TestNewLRUDecisionCache(t *testing.T) {
 	tests := []struct {
 		name     string
 		capacity int
@@ -19,9 +19,9 @@ func TestNewAuthorizationCache(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cache := NewAuthorizationCache(tt.capacity)
+			cache := NewLRUDecisionCache(tt.capacity)
 			if cache == nil {
-				t.Fatal("NewAuthorizationCache returned nil")
+				t.Fatal("NewLRUDecisionCache returned nil")
 			}
 			if cache.capacity != tt.wantCap {
 				t.Errorf("capacity = %d, want %d", cache.capacity, tt.wantCap)
@@ -121,9 +121,9 @@ func TestFmtInt(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_GetSet verifies basic get/set operations
-func TestAuthorizationCache_GetSet(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_GetSet verifies basic get/set operations
+func TestLRUDecisionCache_GetSet(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 	key := makeKey("user1", "read", "doc1", 1, "us")
 
 	// Test miss on empty cache
@@ -165,9 +165,9 @@ func TestAuthorizationCache_GetSet(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_Update verifies updating existing entries
-func TestAuthorizationCache_Update(t *testing.T) {
-	cache := NewAuthorizationCache(5)
+// TestLRUDecisionCache_Update verifies updating existing entries
+func TestLRUDecisionCache_Update(t *testing.T) {
+	cache := NewLRUDecisionCache(5)
 	key := makeKey("user1", "read", "doc1", 1, "us")
 
 	// Initial entry
@@ -199,9 +199,9 @@ func TestAuthorizationCache_Update(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_Eviction verifies LRU eviction when capacity exceeded
-func TestAuthorizationCache_Eviction(t *testing.T) {
-	cache := NewAuthorizationCache(3) // Small capacity for testing
+// TestLRUDecisionCache_Eviction verifies LRU eviction when capacity exceeded
+func TestLRUDecisionCache_Eviction(t *testing.T) {
+	cache := NewLRUDecisionCache(3) // Small capacity for testing
 
 	// Fill cache to capacity
 	for i := 0; i < 3; i++ {
@@ -242,9 +242,9 @@ func TestAuthorizationCache_Eviction(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_LRU verifies least-recently-used ordering
-func TestAuthorizationCache_LRU(t *testing.T) {
-	cache := NewAuthorizationCache(3)
+// TestLRUDecisionCache_LRU verifies least-recently-used ordering
+func TestLRUDecisionCache_LRU(t *testing.T) {
+	cache := NewLRUDecisionCache(3)
 
 	// Add 3 entries
 	key1 := makeKey("user", "read", "doc1", 1, "us")
@@ -279,9 +279,9 @@ func TestAuthorizationCache_LRU(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_Invalidate verifies single key invalidation
-func TestAuthorizationCache_Invalidate(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_Invalidate verifies single key invalidation
+func TestLRUDecisionCache_Invalidate(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 
 	key1 := makeKey("user1", "read", "doc1", 1, "us")
 	key2 := makeKey("user2", "read", "doc2", 1, "us")
@@ -317,9 +317,9 @@ func TestAuthorizationCache_Invalidate(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_InvalidateNonExistent verifies invalidating non-existent key is safe
-func TestAuthorizationCache_InvalidateNonExistent(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_InvalidateNonExistent verifies invalidating non-existent key is safe
+func TestLRUDecisionCache_InvalidateNonExistent(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 	key := makeKey("user", "read", "doc", 1, "us")
 
 	// Invalidate non-existent key (should not panic)
@@ -331,9 +331,9 @@ func TestAuthorizationCache_InvalidateNonExistent(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_InvalidateAll verifies clearing entire cache
-func TestAuthorizationCache_InvalidateAll(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_InvalidateAll verifies clearing entire cache
+func TestLRUDecisionCache_InvalidateAll(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 
 	// Add multiple entries
 	for i := 0; i < 5; i++ {
@@ -371,9 +371,9 @@ func TestAuthorizationCache_InvalidateAll(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_MarkStale verifies stale eviction tracking
-func TestAuthorizationCache_MarkStale(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_MarkStale verifies stale eviction tracking
+func TestLRUDecisionCache_MarkStale(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 	key := makeKey("user", "read", "doc", 1, "us")
 
 	cache.Set(key, AuthorizationCacheEntry{Decision: Decision{Allow: true}, PolicyVersion: 1})
@@ -398,9 +398,9 @@ func TestAuthorizationCache_MarkStale(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_Size verifies size tracking
-func TestAuthorizationCache_Size(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_Size verifies size tracking
+func TestLRUDecisionCache_Size(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 
 	if size := cache.Size(); size != 0 {
 		t.Errorf("Initial size = %d, want 0", size)
@@ -426,9 +426,9 @@ func TestAuthorizationCache_Size(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_Snapshot verifies metrics snapshot
-func TestAuthorizationCache_Snapshot(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_Snapshot verifies metrics snapshot
+func TestLRUDecisionCache_Snapshot(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 
 	// Initial snapshot
 	metrics := cache.Snapshot()
@@ -474,9 +474,9 @@ func TestAuthorizationCache_Snapshot(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_HitRatioCalculation verifies hit ratio calculation
-func TestAuthorizationCache_HitRatioCalculation(t *testing.T) {
-	cache := NewAuthorizationCache(10)
+// TestLRUDecisionCache_HitRatioCalculation verifies hit ratio calculation
+func TestLRUDecisionCache_HitRatioCalculation(t *testing.T) {
+	cache := NewLRUDecisionCache(10)
 
 	// Add entries
 	for i := 0; i < 5; i++ {
@@ -513,9 +513,9 @@ func TestAuthorizationCache_HitRatioCalculation(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_ZeroCapacity verifies zero-capacity cache behavior
-func TestAuthorizationCache_ZeroCapacity(t *testing.T) {
-	cache := NewAuthorizationCache(0)
+// TestLRUDecisionCache_ZeroCapacity verifies zero-capacity cache behavior
+func TestLRUDecisionCache_ZeroCapacity(t *testing.T) {
+	cache := NewLRUDecisionCache(0)
 
 	key := makeKey("user", "read", "doc", 1, "us")
 
@@ -544,9 +544,9 @@ func TestAuthorizationCache_ZeroCapacity(t *testing.T) {
 	}
 }
 
-// TestAuthorizationCache_Concurrent verifies thread-safety (smoke test)
-func TestAuthorizationCache_Concurrent(t *testing.T) {
-	cache := NewAuthorizationCache(100)
+// TestLRUDecisionCache_Concurrent verifies thread-safety (smoke test)
+func TestLRUDecisionCache_Concurrent(t *testing.T) {
+	cache := NewLRUDecisionCache(100)
 	done := make(chan bool, 2)
 
 	// Writer goroutine

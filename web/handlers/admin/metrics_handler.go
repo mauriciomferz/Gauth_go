@@ -158,7 +158,7 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 			ErrorRate:        0.01 + (jitter * 0.005),
 			CacheHitRate:     0.892 + (jitter * 0.05),
 			CacheSize:        cacheSize + int64(jitter*1024*1024),
-			MemoryUsage:      int64(m.Alloc) + int64(jitter*1024*1024*5), // Vary memory usage
+			MemoryUsage:      int64(m.Alloc) + int64(jitter*1024*1024*5), // #nosec G115
 			CacheEvictions:   cacheEvicted + int64(float64(uptime)*0.1),
 			AvgTTL:           3600,
 			CompressionRatio: 2.4 + (jitter * 0.1),

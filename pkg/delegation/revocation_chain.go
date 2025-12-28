@@ -68,6 +68,7 @@ func validateReason(r string) string {
 // treeHeads is append-only history of signed roots for audit / persistence.
 type RevocationChain struct {
 	events         []RevocationEvent
+	eventMap       map[string]bool // Optimized lookup for RR-014
 	merkle         *MerkleTree
 	treeHeads      []*SignedTreeHead
 	keyProvider    crypto.KeyProvider
@@ -112,6 +113,7 @@ var OnRevocationAppended func(ev RevocationEvent, chainLen int, aggregateHash st
 func NewRevocationChain(opts ...Option) *RevocationChain {
 	c := &RevocationChain{
 		events:    make([]RevocationEvent, 0),
+		eventMap:  make(map[string]bool),
 		merkle:    NewMerkleTree(),
 		treeHeads: make([]*SignedTreeHead, 0),
 	}
@@ -155,6 +157,17 @@ func (c *RevocationChain) Append(e RevocationEvent) (RevocationEvent, error) {
 		}
 	}
 	c.events = append(c.events, e)
+	// Update lookup map for O(1) checks (RR-014)
+	if c.eventMap == nil {
+		c.eventMap = make(map[string]bool)
+	}
+	if e.DelegationID != "" {
+		c.eventMap["id:"+e.DelegationID] = true
+	}
+	if e.DelegationHash != "" {
+		c.eventMap["hash:"+e.DelegationHash] = true
+	}
+
 	// Merkle append (Phase 3): incorporate event hash
 	if c.merkle != nil {
 		c.merkle.AppendLeaf(e.Hash)
@@ -217,15 +230,26 @@ func (c *RevocationChain) Verify() error {
 }
 
 // IsDelegationRevoked checks whether a given delegation ID or hash appears in the chain.
+// Uses optimized O(1) lookup if map is available (RR-014).
 func (c *RevocationChain) IsDelegationRevoked(delegationID, delegationHash string) bool {
-	if c == nil {
+	if c.eventMap != nil {
+		if delegationID != "" {
+			if _, ok := c.eventMap["id:"+delegationID]; ok {
+				return true
+			}
+		}
+		if delegationHash != "" {
+			if _, ok := c.eventMap["hash:"+delegationHash]; ok {
+				return true
+			}
+		}
 		return false
 	}
-	for _, e := range c.events {
-		if delegationID != "" && e.DelegationID == delegationID {
-			return true
-		}
-		if delegationHash != "" && e.DelegationHash == delegationHash {
+
+	// Fallback to linear scan if map not initialized (should not happen with NewRevocationChain)
+	for _, event := range c.events {
+		if (delegationID != "" && event.DelegationID == delegationID) ||
+			(delegationHash != "" && event.DelegationHash == delegationHash) {
 			return true
 		}
 	}

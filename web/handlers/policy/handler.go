@@ -22,6 +22,7 @@ type Handler struct {
 		IsDelegationRevoked(id, hash string) bool
 		LatestTreeHead() *delegation.SignedTreeHead
 	}
+	OnPolicyChange func()
 }
 
 func NewHandler(persistPath string, m metrics.Metrics) *Handler {

@@ -67,6 +67,54 @@ func (e *BasicEnforcer) RemovePolicy(ctx context.Context, policyID string) error
 	return nil
 }
 
+// ReplacePolicies atomically replaces all policies in the authorizer.
+func (ma *MemoryAuthorizer) ReplacePolicies(ctx context.Context, newPolicies []Policy) error {
+	ma.policiesMu.Lock()
+	defer ma.policiesMu.Unlock()
+
+	// Assign current version to new policies
+	for i := range newPolicies {
+		newPolicies[i].Version = ma.version
+	}
+
+	// Create snapshot of OLD policies before replacing
+	ma.Snapshot()
+
+	// Replace
+	ma.policies = newPolicies
+
+	// Invalidate cache since policies changed
+	ma.InvalidateAll()
+
+	// Increment version again for the new working set?
+	// Snapshot() already increments ma.version.
+	// Snapshot method implementation:
+	//   1. copies ma.policies to versions list.
+	//   2. increments ma.version.
+	// So after Snapshot(), ma.version is V+1.
+	// The newPolicies are assigned V. Wait.
+	// If I call Snapshot() *inside* here, it safeguards the *old* policies.
+	// Then I overwrite ma.policies.
+	// The new policies should probably have the *new* version?
+	// Actually, `AddPolicy` sets `policy.Version = ma.version`.
+	// So I should set the version *after* snapshotting?
+	// Let's refine.
+
+	/* Refined Logic:
+	   1. Snapshot() -> Saves current `ma.policies` as version `ma.version`. Increments `ma.version`.
+	   2. Replace `ma.policies` with `newPolicies`.
+	   3. Set `newPolicies` version to the *new* `ma.version`.
+	*/
+
+	// Update new policies to current (new) version
+	for i := range ma.policies {
+		ma.policies[i].Version = ma.version
+	}
+
+	atomic.AddUint64(&ma.metricReloads, 1)
+	return nil
+}
+
 // Authorize authorizes a request (compatibility method)
 func (e *BasicEnforcer) Authorize(ctx context.Context, reqOrSubject interface{}, actionOrNil ...interface{}) (*Decision, error) {
 	if req, ok := reqOrSubject.(*Request); ok {
@@ -209,7 +257,7 @@ type MemoryAuthorizer struct {
 	regexMatchCounts   map[string]uint64 // guarded by regexMu for updates
 	metricRegexMatches uint64            // total successful regex matches (atomic)
 	// Authorization LRU cache (Task 4)
-	decisionCache *AuthorizationCache
+	decisionCache DecisionCache
 	jurisdiction  string // current jurisdiction scope (empty => global)
 	// Advice / obligation execution
 	obligationExecutor ObligationExecutor
@@ -221,6 +269,11 @@ type MemoryAuthorizer struct {
 		RecordDecision(action, resource, decision string, duration time.Duration)
 	} // minimal metrics subset
 	validatorRegistry *ValidatorRegistry
+
+	// RR-008: Role Hierarchy (Parent -> Children)
+	// If a user has Parent, they inherit permissions of Children.
+	roleHierarchy map[string][]string
+	hierarchyMu   sync.RWMutex
 }
 
 // NewMemoryAuthorizer creates a new in-memory authorizer
@@ -247,7 +300,7 @@ func NewMemoryAuthorizer() *MemoryAuthorizer {
 }
 
 // SetDecisionCache attaches an external authorization decision cache.
-func (ma *MemoryAuthorizer) SetDecisionCache(c *AuthorizationCache) { ma.decisionCache = c }
+func (ma *MemoryAuthorizer) SetDecisionCache(c DecisionCache) { ma.decisionCache = c }
 
 // SetJurisdiction sets the active jurisdiction and invalidates cache (simplistic full flush for now).
 func (ma *MemoryAuthorizer) SetJurisdiction(j string) {
@@ -280,6 +333,21 @@ func (ma *MemoryAuthorizer) SetMetricsProvider(mp interface {
 
 // SetValidatorRegistry attaches a validator registry.
 func (ma *MemoryAuthorizer) SetValidatorRegistry(vr *ValidatorRegistry) { ma.validatorRegistry = vr }
+
+// SetRoleHierarchy defines the role inheritance structure (Parent -> Children).
+// If user has 'Parent', they effectively also have 'Child'.
+func (ma *MemoryAuthorizer) SetRoleHierarchy(hierarchy map[string][]string) error {
+	if err := DetectCycles(hierarchy); err != nil {
+		return err
+	}
+	ma.hierarchyMu.Lock()
+	ma.roleHierarchy = hierarchy
+	ma.hierarchyMu.Unlock()
+
+	// Invalidate cache as hierarchy affects decisions
+	ma.InvalidateAll()
+	return nil
+}
 
 // InvalidateOnCryptoRotation flushes decision cache on cryptographic key rotation events.
 // External rotation managers SHOULD invoke this after completing a rotation to avoid serving decisions
@@ -963,15 +1031,16 @@ func (ma *MemoryAuthorizer) matchesPolicy(request Request, policy Policy) bool {
 		}
 	}
 	if len(policy.Roles) > 0 {
+		// RR-008: Role Hierarchy Expansion
 		// extract roles from context (comma separated)
-		ctxRoles := strings.Split(request.Context["roles"], ",")
+		ctxRolesRaw := strings.Split(request.Context["roles"], ",")
+		expandedRoles := ma.expandRoles(ctxRolesRaw)
+
 		roleMatch := false
 		for _, pr := range policy.Roles {
-			for _, cr := range ctxRoles {
-				if pr != "" && strings.TrimSpace(cr) == pr {
-					roleMatch = true
-					break
-				}
+			if expandedRoles[pr] {
+				roleMatch = true
+				break
 			}
 		}
 		if !roleMatch {
@@ -1263,6 +1332,39 @@ func (ma *MemoryAuthorizer) evalTimeAfter(contextValue string, values []string) 
 		}
 	}
 	return false
+}
+
+// expandRoles calculates the full set of roles a user has, considering hierarchy.
+func (ma *MemoryAuthorizer) expandRoles(userRoles []string) map[string]bool {
+	ma.hierarchyMu.RLock()
+	defer ma.hierarchyMu.RUnlock()
+
+	expanded := make(map[string]bool)
+	var queue []string
+
+	for _, r := range userRoles {
+		r = strings.TrimSpace(r)
+		if r != "" {
+			expanded[r] = true
+			queue = append(queue, r)
+		}
+	}
+
+	// BFS expansion
+	idx := 0
+	for idx < len(queue) {
+		current := queue[idx]
+		idx++
+		if children, ok := ma.roleHierarchy[current]; ok {
+			for _, child := range children {
+				if !expanded[child] {
+					expanded[child] = true
+					queue = append(queue, child)
+				}
+			}
+		}
+	}
+	return expanded
 }
 
 // BasicEnforcer minimal structure for backward compatibility

@@ -310,7 +310,7 @@ func (p *ConnectionPool) closeClient(pool *serverPool, client *pooledClient) {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 
-	client.client.Close()
+	_ = client.client.Close()
 	pool.activeCount--
 	pool.totalClosed++
 
@@ -410,7 +410,7 @@ func (p *ConnectionPool) Close() error {
 	for _, pool := range p.pools {
 		pool.mu.Lock()
 		for _, client := range pool.clients {
-			client.client.Close()
+			_ = client.client.Close()
 		}
 		pool.clients = nil
 		close(pool.available)

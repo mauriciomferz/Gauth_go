@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -29,8 +30,14 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 			t.Fatalf("log %d: %v", i, err)
 		}
 	}
-	if len(fl.Events()) != 3 {
-		t.Fatalf("expected 3 events, got %d", len(fl.Events()))
+
+	// Verify persistence by counting lines
+	count, err := countEventsInFile(path)
+	if err != nil {
+		t.Fatalf("count: %v", err)
+	}
+	if count != 3 {
+		t.Fatalf("expected 3 events, got %d", count)
 	}
 	if err2 := fl.VerifyChain(); err2 != nil {
 		t.Fatalf("verify: %v", err)
@@ -44,11 +51,17 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 		t.Fatalf("reopen: %v", err)
 	}
 	defer func() { _ = fl2.Close() }()
-	if len(fl2.Events()) != 3 {
-		t.Fatalf("reloaded events mismatch: %d", len(fl2.Events()))
-	}
 	if err := fl2.VerifyChain(); err != nil {
 		t.Fatalf("verify reloaded: %v", err)
+	}
+
+	// Check count again
+	count, err = countEventsInFile(path)
+	if err != nil {
+		t.Fatalf("count reloaded: %v", err)
+	}
+	if count != 3 {
+		t.Fatalf("reloaded events mismatch: %d", count)
 	}
 }
 
@@ -88,8 +101,13 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 			t.Fatalf("log phase2 %d: %v", i, err)
 		}
 	}
-	if len(fl2.Events()) != 8 {
-		t.Fatalf("expected 8 events after phase2, got %d", len(fl2.Events()))
+
+	count, err := countEventsInFile(path)
+	if err != nil {
+		t.Fatalf("count phase2: %v", err)
+	}
+	if count != 8 {
+		t.Fatalf("expected 8 events after phase2, got %d", count)
 	}
 	if err2 := fl2.VerifyChain(); err2 != nil {
 		t.Fatalf("verify phase2: %v", err2)
@@ -104,21 +122,39 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 		t.Fatalf("reopen phase3: %v", err)
 	}
 	defer func() { _ = fl3.Close() }()
-	if len(fl3.Events()) != 8 {
-		t.Fatalf("expected 8 events phase3, got %d", len(fl3.Events()))
+	defer func() { _ = fl3.Close() }()
+
+	count, err = countEventsInFile(path)
+	if err != nil {
+		t.Fatalf("count phase3: %v", err)
+	}
+	if count != 8 {
+		t.Fatalf("expected 8 events phase3, got %d", count)
 	}
 	if err := fl3.VerifyChain(); err != nil {
 		t.Fatalf("verify phase3: %v", err)
 	}
 
-	// Query all events (nil filters)
-	queried, qerr := fl3.Query(context.TODO(), nil)
-	if qerr != nil {
-		t.Fatalf("query: %v", qerr)
+	// Query is no longer supported in FileLogger
+	_, qerr := fl3.Query(context.TODO(), nil)
+	if qerr == nil {
+		t.Fatal("expected query to fail with not supported")
 	}
-	if len(queried) != 8 {
-		t.Fatalf("query expected 8 events, got %d", len(queried))
+}
+
+func countEventsInFile(path string) (int, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return 0, err
 	}
+	// Filter empty lines
+	lines := 0
+	for _, line := range strings.Split(string(b), "\n") {
+		if len(line) > 0 {
+			lines++
+		}
+	}
+	return lines, nil
 }
 
 func TestFileLoggerTamperDetection(t *testing.T) {

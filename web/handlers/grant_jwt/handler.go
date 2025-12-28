@@ -9,6 +9,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/auth"
 )
 
+// #nosec G101: false positive - these are OIDC/OAuth URN strings, not credentials
 const (
 	GrantTypeJWTBearer         = "urn:ietf:params:oauth:grant-type:jwt-bearer"
 	GrantTypeIdentityAssertion = "urn:ietf:params:oauth:grant-type:identity-assertion"

@@ -14,9 +14,11 @@ import (
 	anchor "github.com/mauriciomferz/Gauth_go/pkg/anchor"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
+	"github.com/mauriciomferz/Gauth_go/pkg/common/clock"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
 	"github.com/mauriciomferz/Gauth_go/pkg/redis"
@@ -244,6 +246,12 @@ type BetaServer struct {
 	// Model Limits Handler (refactored)
 	modelLimitsHandler *modellimits.Handler
 	modelLimitsAPI     *modellimits.API
+
+	// System Clock Monitor (RR-015)
+	systemClockMonitor *clock.SystemClockMonitor
+
+	// Extended Token Service for RFC-0111 validation
+	extendedTokenService *gauth.ExtendedTokenService
 }
 
 // auditChainAnchorAdapter adapts anchor.Provider, anchor.AnchorClient and capabilities.AnchorClient interfaces.

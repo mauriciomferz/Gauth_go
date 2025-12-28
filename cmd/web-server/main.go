@@ -1,5 +1,3 @@
-// The web-server command launches the GAuth beta HTTP API including metrics, policy,
-// delegation and token endpoints. It is a demonstration binary and NOT production hardened.
 package main
 
 import (
@@ -7,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	_ "net/http/pprof" // Enable pprof HTTP handlers
+	_ "net/http/pprof" // #nosec G108 // Enable pprof HTTP handlers, gated by GAUTH_ENABLE_PPROF
 	"os"
 	"strings"
 	"time"

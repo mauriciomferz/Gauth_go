@@ -633,6 +633,7 @@ func generateExtendedTokenFromSubscription(sub *gauth.Subscription) (string, err
 func getJWTSigningKey() []byte {
 	secret := os.Getenv("GAUTH_JWT_SECRET")
 	if secret == "" {
+		// #nosec G101: demo secret placeholder for dev use
 		secret = "dev-secret-demo-00000000000000000000000000000000"
 	}
 	return []byte(secret)

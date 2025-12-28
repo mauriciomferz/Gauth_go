@@ -265,6 +265,7 @@ type EnhancedPoA struct {
 	ID               string                  `json:"id"`
 	IssuerID         string                  `json:"issuer_id"`
 	GranteeID        string                  `json:"grantee_id"`
+	SourcePOAID      *string                 `json:"source_poa_id,omitempty"`
 	SuccessorID      *string                 `json:"successor_id,omitempty"`
 	Scope            []string                `json:"scope"`
 	StructuredScope  *StructuredScope        `json:"structured_scope,omitempty"`
@@ -854,7 +855,34 @@ func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context
 	}
 
 	// Overall validity
-	report.OverallValid = poaVerif.Valid && scopeVerif.Authorized && !revStatus.Revoked
+	// 1. Core PoA must be valid and active
+	// 2. Scope must be authorized
+	// 3. PoA must not be revoked
+	// 4. MUST have human accountability (Human-at-top requirement RR-014)
+	// 5. MUST not exceed max delegation depth
+
+	hasHumanAccountability := false
+	maxDepthExceeded := false
+	if len(chain) > 0 {
+		hasHumanAccountability = chain[len(chain)-1].IsHuman
+
+		// Check depth limits (RR-014)
+		actualDepth := len(chain) - 1
+		// Get root PoA policy for depth limit
+		rootPoA, _ := v.poaStore.GetPoA(ctx, chain[len(chain)-1].PoAID)
+		if rootPoA != nil && rootPoA.DelegationPolicy != nil && rootPoA.DelegationPolicy.MaxDepth > 0 {
+			if actualDepth > rootPoA.DelegationPolicy.MaxDepth {
+				maxDepthExceeded = true
+				report.Warnings = append(report.Warnings, fmt.Sprintf("Delegation depth %d exceeds max allowed %d", actualDepth, rootPoA.DelegationPolicy.MaxDepth))
+			}
+		}
+	}
+
+	if !hasHumanAccountability {
+		report.Warnings = append(report.Warnings, "Missing human accountability: Root of authority chain is not a human principal")
+	}
+
+	report.OverallValid = poaVerif.Valid && scopeVerif.Authorized && !revStatus.Revoked && hasHumanAccountability && !maxDepthExceeded
 
 	// Set validity period
 	report.ValidityPeriod = fmt.Sprintf("%s to %s",
@@ -872,63 +900,96 @@ func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context
 	if time.Until(poaVerif.ValidUntil) < 30*24*time.Hour {
 		report.Recommendations = append(report.Recommendations, "PoA expires within 30 days - consider renewal")
 	}
+	if !hasHumanAccountability {
+		report.Recommendations = append(report.Recommendations, "Establish a human-anchored Power of Attorney for this agent")
+	}
 
 	return report, nil
 }
 
 // VerifyAuthorizationChain verifies the complete chain of authority
+// VerifyAuthorizationChain traces the authority from the actor back to a human principal
 func (v *VerificationServiceImpl) VerifyAuthorizationChain(ctx context.Context, poaID string) ([]AuthorityLink, error) {
 	chain := []AuthorityLink{}
-
-	// Get current PoA
-	poa, err := v.poaStore.GetPoA(ctx, poaID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get PoA: %w", err)
-	}
-
-	// Add current link
-	chain = append(chain, AuthorityLink{
-		Level:           0,
-		PoAID:           poa.ID,
-		IssuerID:        poa.IssuerID,
-		GranteeID:       poa.GranteeID,
-		GrantedAt:       poa.CreatedAt,
-		IsHuman:         v.isHumanEntity(poa.IssuerID),
-		DelegationDepth: 0,
-	})
-
-	// Trace back through delegation chain
-	currentGrantee := poa.IssuerID
-	depth := 1
-	maxDepth := 10 // Prevent infinite loops
+	currentID := poaID
+	depth := 0
+	maxDepth := 10 // Safety limit
 
 	for depth < maxDepth {
-		// Get PoAs where current entity is the grantee
-		parentPoAs, err := v.poaStore.GetPoAsByGrantee(ctx, currentGrantee)
-		if err != nil || len(parentPoAs) == 0 {
-			break
+		// Get current link (PoA or Delegation)
+		node, err := v.poaStore.GetPoA(ctx, currentID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get authority link %s: %w", currentID, err)
 		}
 
-		// Use the first (most recent) parent PoA
-		parentPoA := parentPoAs[0]
-
+		// Add current link
 		chain = append(chain, AuthorityLink{
 			Level:           depth,
-			PoAID:           parentPoA.ID,
-			IssuerID:        parentPoA.IssuerID,
-			GranteeID:       parentPoA.GranteeID,
-			GrantedAt:       parentPoA.CreatedAt,
-			IsHuman:         v.isHumanEntity(parentPoA.IssuerID),
+			PoAID:           node.ID,
+			IssuerID:        node.IssuerID,
+			GranteeID:       node.GranteeID,
+			GrantedAt:       node.CreatedAt,
+			IsHuman:         v.isHumanEntity(node.IssuerID),
 			DelegationDepth: depth,
 		})
 
-		// If we reached a human, stop
-		if v.isHumanEntity(parentPoA.IssuerID) {
+		// If the issuer is a human, the chain is complete and accounted for
+		if v.isHumanEntity(node.IssuerID) {
 			break
 		}
 
-		currentGrantee = parentPoA.IssuerID
+		// Otherwise, try to find the power that authorized this issuer
+		// If it's a delegation, we follow the source agent's authority for the same root PoA
+		if node.SourcePOAID != nil {
+			// Find the delegation where the target is the current issuer
+			// and belongs to the same root PoA
+			delegations, err := v.delegationService.GetDelegationChain(ctx, node.IssuerID)
+			if err != nil || len(delegations) == 0 {
+				// Try checking if the issuer has a direct PoA (PoA 1)
+				rootPoA, err := v.poaStore.GetPoA(ctx, *node.SourcePOAID)
+				if err == nil && rootPoA.GranteeID == node.IssuerID {
+					currentID = rootPoA.ID
+				} else {
+					return nil, fmt.Errorf("interrupted authority chain: could not find source for %s", node.IssuerID)
+				}
+			} else {
+				// Use the delegation that matches the source PoA
+				found := false
+				for _, d := range delegations {
+					if d.SourcePOAID == *node.SourcePOAID {
+						currentID = d.ID
+						found = true
+						break
+					}
+				}
+				if !found {
+					// Fallback to root PoA check
+					rootPoA, err := v.poaStore.GetPoA(ctx, *node.SourcePOAID)
+					if err == nil && rootPoA.GranteeID == node.IssuerID {
+						currentID = rootPoA.ID
+					} else {
+						return nil, fmt.Errorf("interrupted authority chain: delegation for %s not found", node.IssuerID)
+					}
+				}
+			}
+		} else {
+			// This is a direct PoA but issuer is NOT human (e.g. an AI system issuing powers?)
+			// GAuth+ requires a human at the top.
+			// Check if this AI was delegated power by someone else?
+			// But if SourcePOAID is nil, it's a root. If root issuer isn't human, it's invalid in our policy.
+			break
+		}
+
 		depth++
+	}
+
+	// Basic check: top link MUST be human
+	if len(chain) > 0 {
+		topLink := chain[len(chain)-1]
+		if !topLink.IsHuman {
+			// Note: We don't error here to allow the caller to decide based on warnings,
+			// but we could mark the chain as invalid.
+		}
 	}
 
 	return chain, nil

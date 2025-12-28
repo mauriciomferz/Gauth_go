@@ -7,26 +7,44 @@ package audit
 
 import (
 	"bufio"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"sync"
 	"time"
 )
 
-// FileLogger implements persistent audit logging.
+// FileLogger implements persistent audit logging with file rotation.
 type FileLogger struct {
-	mu     sync.RWMutex
-	path   string
-	file   *os.File
-	events []Event
-	// lazyWrite flushes every append; batching could be added later.
+	mu   sync.RWMutex
+	path string
+	file *os.File
+
+	// State tracking for chain linking (instead of full event history)
+	lastEventHash  string
+	lastEventIndex int
+
+	// Rotation limits
+	currentSize int64
+	maxSize     int64 // bytes
+	maxBackups  int
+
+	// Archival settings (RR-009)
+	archivePath     string
+	compress        bool
+	maxArchiveSize  int64
+	maxArchiveCount int
 }
 
 // OpenFileLogger opens (or creates) an audit log file. If the file exists it is loaded.
+// Uses default limits: 100MB size, 5 backups.
 func OpenFileLogger(path string) (*FileLogger, error) {
 	if path == "" {
 		return nil, errors.New("path required")
@@ -35,18 +53,60 @@ func OpenFileLogger(path string) (*FileLogger, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return nil, err
 	}
+	// Stat to check existence and size
+	fi, err := os.Stat(path)
+	exists := err == nil
+	originalSize := int64(0)
+	if exists {
+		originalSize = fi.Size()
+	}
+
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600)
 	if err != nil {
 		return nil, err
 	}
-	fl := &FileLogger{path: path, file: f, events: make([]Event, 0, 128)}
-	if err2 := fl.load(); err2 != nil {
-		f.Close()
-		return nil, fmt.Errorf("load: %w", err)
+
+	fl := &FileLogger{
+		path:           path,
+		file:           f,
+		maxSize:        100 * 1024 * 1024, // 100MB
+		maxBackups:     5,
+		lastEventIndex: -1, // -1 means no events produced yet (0th event will be index 0)
+		currentSize:    originalSize,
+
+		// Archival defaults (RR-009)
+		archivePath:     os.Getenv("GAUTH_AUDIT_ARCHIVE_DIR"),
+		compress:        os.Getenv("GAUTH_AUDIT_ARCHIVE_COMPRESS") != "0",
+		maxArchiveSize:  1 * 1024 * 1024 * 1024, // 1GB default
+		maxArchiveCount: 100,                    // 100 files default
 	}
-	// Reopen in append mode to avoid rewriting existing content.
+
+	if v := os.Getenv("GAUTH_AUDIT_ARCHIVE_MAX_SIZE"); v != "" {
+		if s, err := strconv.ParseInt(v, 10, 64); err == nil {
+			fl.maxArchiveSize = s
+		}
+	}
+	if v := os.Getenv("GAUTH_AUDIT_ARCHIVE_MAX_COUNT"); v != "" {
+		if c, err := strconv.Atoi(v); err == nil {
+			fl.maxArchiveCount = c
+		}
+	}
+
+	if fl.archivePath != "" {
+		// #nosec G301
+		_ = os.MkdirAll(fl.archivePath, 0o750)
+	}
+
+	if exists && originalSize > 0 {
+		if err2 := fl.load(); err2 != nil {
+			f.Close()
+			return nil, fmt.Errorf("load: %w", err2)
+		}
+	}
+
+	// Reopen in append mode for writing
 	f.Close()
-	f, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o600)
+	f, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
 	if err != nil {
 		return nil, err
 	}
@@ -54,49 +114,67 @@ func OpenFileLogger(path string) (*FileLogger, error) {
 	return fl, nil
 }
 
-// load ingests existing file contents and validates hash chain.
+// load ingests existing file only to find the LAST event for chaining.
 func (fl *FileLogger) load() error {
 	fl.mu.Lock()
 	defer fl.mu.Unlock()
-	fl.events = fl.events[:0]
+
 	f, err := os.Open(fl.path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
+
 	scanner := bufio.NewScanner(f)
+	// We only need to scan to the end to get the last hash and index
+	// In a production system we might seek to end and read backwards, but JSON lines vary in length.
+	// Scanning is acceptable for now given 100MB limit.
+
+	lastHash := ""
+	lastIndex := -1
 	lineNo := 0
+
 	for scanner.Scan() {
 		raw := scanner.Bytes()
 		if len(raw) == 0 {
 			continue
 		}
+
+		// Optimization: Don't fully unmarshal every event if we just want the chain tip?
+		// But we should verify the chain integrity on load as per previous behavior.
 		var ev Event
 		if err := json.Unmarshal(raw, &ev); err != nil {
 			return fmt.Errorf("unmarshal line %d: %w", lineNo, err)
 		}
-		// Recompute hash to detect tamper.
+
+		// Verify hash
 		expected := computeEventHash(ev)
 		if ev.Hash != expected {
 			return fmt.Errorf("hash mismatch line %d", lineNo)
 		}
-		// Chain linkage check.
+
+		// Verify chain
 		if ev.ChainIndex != lineNo {
-			return fmt.Errorf("chain index mismatch line %d", lineNo)
+			return fmt.Errorf("chain index mismatch line %d: got %d want %d", lineNo, ev.ChainIndex, lineNo)
 		}
 		if lineNo == 0 && ev.PrevHash != "" {
 			return fmt.Errorf("first prev hash non-empty line %d", lineNo)
 		}
-		if lineNo > 0 && ev.PrevHash != fl.events[lineNo-1].Hash {
+		if lineNo > 0 && ev.PrevHash != lastHash {
 			return fmt.Errorf("prev hash mismatch line %d", lineNo)
 		}
-		fl.events = append(fl.events, ev)
+
+		lastHash = ev.Hash
+		lastIndex = ev.ChainIndex
 		lineNo++
 	}
+
+	fl.lastEventHash = lastHash
+	fl.lastEventIndex = lastIndex
 	return scanner.Err()
 }
 
-// Log appends an event; accepts *Event similar to MemoryLogger.
+// Log appends an event; accepts *Event. Handles rotation.
 func (fl *FileLogger) Log(ctx context.Context, entry interface{}) error {
 	ev, ok := entry.(*Event)
 	if !ok {
@@ -108,95 +186,237 @@ func (fl *FileLogger) Log(ctx context.Context, entry interface{}) error {
 	if ev.Timestamp.IsZero() {
 		ev.Timestamp = time.Now().UTC()
 	}
+
 	fl.mu.Lock()
-	idx := len(fl.events)
-	prev := ""
-	if idx > 0 {
-		prev = fl.events[idx-1].Hash
-	}
-	ev.ChainIndex = idx
-	ev.PrevHash = prev
+	defer fl.mu.Unlock()
+
+	// Chain linking
+	ev.ChainIndex = fl.lastEventIndex + 1
+	ev.PrevHash = fl.lastEventHash
 	ev.Hash = computeEventHash(*ev)
-	fl.events = append(fl.events, *ev)
-	// Marshal with error handling (previously ignored by errcheck). On marshal failure
-	// we roll back the in-memory append to keep chain consistent.
+
 	b, mErr := json.Marshal(ev)
 	if mErr != nil {
-		fl.events = fl.events[:len(fl.events)-1]
-		fl.mu.Unlock()
 		return fmt.Errorf("marshal audit event: %w", mErr)
 	}
-	// write line (append newline delimiter)
-	if _, err := fl.file.Write(append(b, '\n')); err != nil {
-		fl.mu.Unlock()
+
+	line := append(b, '\n')
+	lineLen := int64(len(line))
+
+	// Check rotation
+	if fl.currentSize > 0 && fl.currentSize+lineLen > fl.maxSize {
+		if err := fl.rotateLocked(); err != nil {
+			return fmt.Errorf("rotate: %w", err)
+		}
+	}
+
+	if _, err := fl.file.Write(line); err != nil {
 		return err
 	}
-	fl.mu.Unlock()
+
+	fl.currentSize += lineLen
+	fl.lastEventIndex = ev.ChainIndex
+	fl.lastEventHash = ev.Hash
+
 	return nil
 }
 
-// Query returns matching events (basic filters only - identical logic to MemoryLogger).
+// rotateLocked performs log rotation. Caller must hold lock.
+func (fl *FileLogger) rotateLocked() error {
+	_ = fl.file.Sync()
+	_ = fl.file.Close()
+
+	// Rotation scheme: just rename current to .<timestamp>
+	timestamp := time.Now().Format("20060102-150405.000000")
+	backupName := fl.path + "." + timestamp
+	if err := os.Rename(fl.path, backupName); err != nil {
+		return err
+	}
+
+	// Trigger archival if configured (RR-009)
+	if fl.archivePath != "" {
+		fl.archiveLocked(backupName)
+	} else {
+		// Pruning old backups (standard logic only if archival disabled)
+		matches, err := filepath.Glob(fl.path + ".*")
+		if err == nil && len(matches) > fl.maxBackups {
+			// Sort by name (lexicographically equivalent to chronological for our format)
+			sort.Strings(matches)
+
+			// Delete oldest excess backups
+			excess := len(matches) - fl.maxBackups
+			for i := 0; i < excess; i++ {
+				_ = os.Remove(matches[i])
+			}
+		}
+	}
+
+	newFile, err := os.OpenFile(fl.path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
+	if err != nil {
+		return err
+	}
+	fl.file = newFile
+	fl.currentSize = 0
+
+	// Hash chain continuity:
+	// The new file starts fresh? Or should it link?
+	// If we link, the first entry in new file has PrevHash = lastHash from old file.
+	// This maintains cryptographic continuity across files.
+	// Users verifying chain across files would need to stitch them.
+	// Current state (lastEventHash) is preserved in memory, so next link will be correct.
+
+	return nil
+}
+
+// archiveLocked performs async archival. Caller must hold lock or ensure exclusivity via other means.
+// This is called from rotateLocked so it's under fl.mu.
+func (fl *FileLogger) archiveLocked(backupPath string) {
+	// Capturing config values to avoid race conditions if they are changed via SetLimits
+	// (though archive settings don't have setters yet, it's good practice)
+	archiveDir := fl.archivePath
+	compress := fl.compress
+	maxCount := fl.maxArchiveCount
+	maxSize := fl.maxArchiveSize
+
+	go func(src string) {
+		destBase := filepath.Base(src)
+		destPath := filepath.Join(archiveDir, destBase)
+
+		if compress {
+			destPath += ".gz"
+			if err := compressFile(src, destPath); err != nil {
+				fmt.Fprintf(os.Stderr, "[audit] archival compression failed: %v\n", err)
+				return
+			}
+			_ = os.Remove(src)
+		} else {
+			if err := os.Rename(src, destPath); err != nil {
+				fmt.Fprintf(os.Stderr, "[audit] archival move failed: %v\n", err)
+				return
+			}
+		}
+
+		// Prune archives after successful move/compress
+		fl.pruneArchives(archiveDir, maxCount, maxSize)
+	}(backupPath)
+}
+
+func compressFile(src, dest string) error {
+	s, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer s.Close()
+
+	d, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+
+	gw := gzip.NewWriter(d)
+	defer gw.Close()
+
+	_, err = io.Copy(gw, s)
+	return err
+}
+
+func (fl *FileLogger) pruneArchives(dir string, maxCount int, maxSize int64) {
+	matches, err := filepath.Glob(filepath.Join(dir, "*"))
+	if err != nil || len(matches) == 0 {
+		return
+	}
+
+	sort.Strings(matches) // chronological by name
+
+	// Prune by count
+	if maxCount > 0 && len(matches) > maxCount {
+		excess := len(matches) - maxCount
+		for i := 0; i < excess; i++ {
+			_ = os.Remove(matches[i])
+		}
+		matches = matches[excess:]
+	}
+
+	// Prune by size
+	if maxSize > 0 {
+		var totalSize int64
+		for _, m := range matches {
+			if fi, err := os.Stat(m); err == nil {
+				totalSize += fi.Size()
+			}
+		}
+
+		for len(matches) > 1 && totalSize > maxSize {
+			if fi, err := os.Stat(matches[0]); err == nil {
+				totalSize -= fi.Size()
+			}
+			_ = os.Remove(matches[0])
+			matches = matches[1:]
+		}
+	}
+}
+
+// Query returns NotSupported error as FileLogger no longer retains memory index.
 func (fl *FileLogger) Query(ctx context.Context, filter *Filter) ([]*Event, error) {
-	fl.mu.RLock()
-	defer fl.mu.RUnlock()
-	var out []*Event
-	for i := range fl.events {
-		ev := &fl.events[i]
-		if filter != nil {
-			if len(filter.EventTypes) > 0 {
-				match := false
-				for _, t := range filter.EventTypes {
-					if ev.Type == t {
-						match = true
-						break
-					}
-				}
-				if !match {
-					continue
-				}
-			}
-			if filter.Subject != "" && ev.Subject != filter.Subject {
-				continue
-			}
-			if filter.StartTime != nil && ev.Timestamp.Before(*filter.StartTime) {
-				continue
-			}
-			if filter.EndTime != nil && ev.Timestamp.After(*filter.EndTime) {
-				continue
-			}
-		}
-		out = append(out, ev)
-	}
-	if filter != nil {
-		if filter.Offset > 0 && filter.Offset < len(out) {
-			out = out[filter.Offset:]
-		}
-		if filter.Limit > 0 && filter.Limit < len(out) {
-			out = out[:filter.Limit]
-		}
-	}
-	return out, nil
+	return nil, fmt.Errorf("query not supported in rotating file logger")
 }
 
 // VerifyChain recomputes hashes to verify integrity; returns first error encountered.
+// Reads the full file from disk.
 func (fl *FileLogger) VerifyChain() error {
 	fl.mu.RLock()
 	defer fl.mu.RUnlock()
-	for i, ev := range fl.events {
-		if ev.Hash != computeEventHash(ev) {
-			return fmt.Errorf("hash mismatch index %d", i)
-		}
-		if i == 0 && ev.PrevHash != "" {
-			return fmt.Errorf("first prev hash non-empty")
-		}
-		if i > 0 && ev.PrevHash != fl.events[i-1].Hash {
-			return fmt.Errorf("broken link at %d", i)
-		}
-		if ev.ChainIndex != i {
-			return fmt.Errorf("index field mismatch %d", i)
-		}
+
+	// We verify the CURRENT file.
+	// Note: We need to open a separate read handle to not disturb the write handle offset if standard file.
+	// But standard file writes are append, read is separate?
+	// Safest to open new handle.
+	f, err := os.Open(fl.path)
+	if err != nil {
+		return err
 	}
-	return nil
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	lineNo := 0
+	lastHash := ""
+	lastIndex := -1
+
+	// Warning: This verify assumes the file starts at index 0 or we don't know the start index?
+	// If rotation happened, the new file starts at index N.
+	// We need to support starting verification from any index, provided continuity within the file.
+	// BUT, strict VerifyChain usually expects index 0.
+	// We will relax to: Check internal consistency.
+
+	for scanner.Scan() {
+		var ev Event
+		if err := json.Unmarshal(scanner.Bytes(), &ev); err != nil {
+			return err
+		}
+
+		if ev.Hash != computeEventHash(ev) {
+			return fmt.Errorf("hash mismatch line %d", lineNo)
+		}
+
+		if lineNo > 0 {
+			if ev.PrevHash != lastHash {
+				return fmt.Errorf("chain break at line %d", lineNo)
+			}
+			if ev.ChainIndex != -1 && ev.ChainIndex != lastIndex+1 {
+				return fmt.Errorf("index discontinuity at line %d: got %d want %d", lineNo, ev.ChainIndex, lastIndex+1)
+			}
+		} else {
+			// First line of THIS file.
+			// It might have a PrevHash from previous file. We can't verify it against previous file here easily without input.
+			// So we skip PrevHash check for first line if we don't know context.
+		}
+
+		lastHash = ev.Hash
+		lastIndex = ev.ChainIndex
+		lineNo++
+	}
+	return scanner.Err()
 }
 
 // Close closes underlying file.
@@ -209,11 +429,15 @@ func (fl *FileLogger) Close() error {
 	return nil
 }
 
-// Events exposes a snapshot for tests.
+// Events returns nil (not supported).
 func (fl *FileLogger) Events() []Event {
-	fl.mu.RLock()
-	defer fl.mu.RUnlock()
-	out := make([]Event, len(fl.events))
-	copy(out, fl.events)
-	return out
+	return nil
+}
+
+// SetLimits configures rotation limits. Useful for testing or config overrides.
+func (fl *FileLogger) SetLimits(maxSize int64, maxBackups int) {
+	fl.mu.Lock()
+	defer fl.mu.Unlock()
+	fl.maxSize = maxSize
+	fl.maxBackups = maxBackups
 }

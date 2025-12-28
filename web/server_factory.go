@@ -41,8 +41,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
 	"github.com/mauriciomferz/Gauth_go/pkg/cache"
 	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/Gauth_go/pkg/common/clock"
 	cacheConfig "github.com/mauriciomferz/Gauth_go/pkg/config"
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/Gauth_go/pkg/crypto/keys"
 	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	devicePkg "github.com/mauriciomferz/Gauth_go/pkg/device"
@@ -52,6 +54,7 @@ import (
 	gnapPkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
 	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
 	"github.com/mauriciomferz/Gauth_go/pkg/redis"
 	"github.com/mauriciomferz/Gauth_go/pkg/registry"
 	"github.com/mauriciomferz/Gauth_go/pkg/scim"
@@ -207,6 +210,23 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			r.Use(tracing.GinTracingMiddleware(s.tracerProvider.Tracer(), s.tracerSampleRatio))
 		}
 	}
+
+	// Initialize System Clock Monitor (RR-015)
+	ntpServer := envFallback("GAUTH_NTP_SERVER", "pool.ntp.org")
+	maxSkew := 5 * time.Minute
+	if v := os.Getenv("GAUTH_MAX_CLOCK_SKEW"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			maxSkew = d
+		}
+	}
+	ntpInterval := 1 * time.Hour
+	if v := os.Getenv("GAUTH_NTP_INTERVAL"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			ntpInterval = d
+		}
+	}
+	s.systemClockMonitor = clock.NewSystemClockMonitor(ntpServer, maxSkew, ntpInterval, s.metrics)
+	s.systemClockMonitor.Start()
 
 	// Redis Initialization
 	if os.Getenv("GAUTH_SKIP_REDIS") == "1" {
@@ -422,7 +442,17 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.tokens = token.NewStore(500) // Re-initialize if overwritten or just ensure it matches
 	s.delegationHandler = delegationHandlers.NewHandler(s.metrics, s.audit, s, s.enforceCapabilities, s.tracerProvider, s.capabilitiesHandler.GetRequiredCaps)
 
-	s.tokenHandler = token.NewHandler(s.tokens, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider)
+	// Initialize Key Manager
+	// RR-013 Phase 2: Support External/Cloud KMS
+	// Uses unified factory which checks GAUTH_KMS_PROVIDER
+	km, kmErr := keys.NewKeyManager(context.Background())
+
+	if kmErr != nil {
+		fmt.Fprintf(os.Stderr, "[factory] warning: failed to init key manager: %v\n", kmErr)
+		// We can proceed but token issuance might fail
+	}
+
+	s.tokenHandler = token.NewHandler(s.tokens, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider, km, s.systemClockMonitor)
 
 	s.tokenHandler.ETagUpdater = s // Server implements JWKSETagUpdater
 	s.tokenHandler.RegisterRoutes(s.router)
@@ -441,6 +471,54 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	if s.authorizer == nil {
 		s.authorizer = authz.NewMemoryAuthorizer()
 	}
+
+	// Initialize PDP Distributed Cache (RR-001)
+	if os.Getenv("GAUTH_PDP_CACHE_ENABLED") == "1" {
+		l1Size := atoiDefault(os.Getenv("GAUTH_PDP_CACHE_L1_SIZE"), 1000)
+		l1 := authz.NewLRUDecisionCache(l1Size)
+
+		var cacheImpl authz.DecisionCache = l1
+
+		if os.Getenv("GAUTH_PDP_CACHE_TYPE") == "redis" && s.redisClient != nil {
+			// Initialize L2 Redis cache using server's redis connection info
+			redisHost := os.Getenv("REDIS_HOST")
+			if redisHost == "" {
+				redisHost = "localhost"
+			}
+			redisPort := os.Getenv("REDIS_PORT")
+			if redisPort == "" {
+				redisPort = "6379"
+			}
+
+			l2, err := cache.NewRedisCache(&cache.Config{
+				RedisURL: fmt.Sprintf("redis://%s:%s", redisHost, redisPort),
+				Type:     "redis",
+			})
+			if err == nil {
+				nodeID := os.Getenv("GAUTH_NODE_ID")
+				if nodeID == "" {
+					nodeID = "node-" + strconv.FormatInt(time.Now().UnixNano()%1000, 10)
+				}
+				cacheImpl = authz.NewDistributedDecisionCache(l1, l2, s.redisClient.GetClient(), nodeID)
+				fmt.Fprintln(os.Stderr, "[factory] using Distributed PDP Cache (Hybrid L1/L2)")
+			} else {
+				fmt.Fprintf(os.Stderr, "[factory] warning: failed to init pdp l2 cache: %v\n", err)
+			}
+		} else {
+			fmt.Fprintln(os.Stderr, "[factory] using Local PDP Cache (L1 only)")
+		}
+
+		s.authorizer.SetDecisionCache(cacheImpl)
+
+		// Wire OnPolicyChange hook to invalidate cache across nodes
+		if s.policyHandler != nil {
+			s.policyHandler.OnPolicyChange = func() {
+				cacheImpl.InvalidateAll()
+				fmt.Fprintln(os.Stderr, "[factory] pdp cache invalidated due to policy change")
+			}
+		}
+	}
+
 	// Wire obligation executor for persistence and failure taxonomy (Epic 4)
 	s.authorizer.SetObligationExecutor(&authz.AuditObligationExecutor{Audit: s.audit})
 	// Initialize Authz Handler
@@ -677,8 +755,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	if s.db != nil {
 		poaStore := gauthplus.NewPostgreSQLPoAStore(s.db)
-		delSvc := gauthplus.NewPostgreSQLDelegationService(s.db)
-		capSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(s.db)
+		// Enable caching for delegation and capability services (RR-014)
+		rawDelSvc := gauthplus.NewPostgreSQLDelegationService(s.db)
+		delSvc := gauthplus.NewCachedDelegationService(rawDelSvc, 5*time.Minute)
+
+		rawCapSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(s.db)
+		capSvc := gauthplus.NewCachedCapabilityService(rawCapSvc, 10*time.Minute)
+
 		fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(s.db)
 		principalVerifier := gauthplus.NewDefaultPrincipalVerifier()
 		attestationVerifier := gauthplus.NewDefaultAttestationVerifier()
@@ -696,7 +779,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		gnapVerificationService = gauthplus.NewVerificationService(
 			poaStore, delSvc, capSvc, fidSvc, principalVerifier, attestationVerifier, attestationSigner, registerService,
 		)
-		fmt.Println("GAuth+ VerificationService wired with PostgreSQL storage and Hardened Verifiers")
+		fmt.Println("GAuth+ VerificationService wired with PostgreSQL storage (cached) and Hardened Verifiers")
 	}
 
 	gnapHandler := gnapHandlers.NewHandler(gnapStore, gnapVerificationService, gnapBaseURL)
@@ -1231,7 +1314,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// MCP (Model Context Protocol) handler - works with or without database
-	mcpHandler := mcpHandlers.NewMCPHandler()
+	pdpAdapter := pdp.NewAuthzAdapter(s.authorizer)
+	mcpAuthBridge := mcp.NewAuthorizationBridge(pdpAdapter)
+	mcpAuditLogger := mcp.NewInMemoryAuditLogger(1000)
+	mcpHandler := mcpHandlers.NewMCPHandler(mcpAuthBridge, mcpAuditLogger, s.extendedTokenService)
 	gauthAPIGroup := r.Group("/api/v1/gauth")
 	mcpHandler.RegisterRoutes(gauthAPIGroup)
 	fmt.Fprintln(os.Stderr, "[mcp] Model Context Protocol handler registered at /api/v1/gauth/mcp/*")
@@ -1258,7 +1344,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		fmt.Fprintln(os.Stderr, "[revocation] Production revocation system initialized (77 tests validated)")
 		fmt.Fprintln(os.Stderr, "[revocation] Emergency Oracle + Two-Phase + Optimistic + Circuit Breaker")
 		fmt.Fprintln(os.Stderr, "[revocation] Performance: 67k ops/sec, P99 <30ms latency")
-	} else {
+	} else if os.Getenv("GAUTH_REVOCATION_ENABLED") != "0" && os.Getenv("GAUTH_TEST_SILENT") != "1" {
 		fmt.Fprintln(os.Stderr, "[revocation] Production revocation system disabled")
 		fmt.Fprintln(os.Stderr, "[revocation] Set GAUTH_REVOCATION_ENABLED=1 and configure Redis to enable")
 	}
