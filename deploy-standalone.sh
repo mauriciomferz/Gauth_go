@@ -62,6 +62,7 @@ docker run -d \
   --network gauth_go_gauth-network \
   -p ${BACKEND_PORT}:8080 \
   -e GAUTH_JWT_SIGNING_KEY="${JWT_SIGNING_KEY}" \
+  -e GAUTH_DB_HOST=postgres \
   -e DB_HOST=postgres \
   -e DB_PORT=5432 \
   -e DB_NAME=${DB_NAME} \
