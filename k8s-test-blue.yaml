@@ -49,6 +49,12 @@ spec:
           value: "1"
         - name: GAUTH_PPROF_PORT
           value: "6060"
+        - name: GAUTH_PPROF_PORT
+          value: "6060"
+        - name: GAUTH_REVOCATION_ENABLED
+          value: "1"
+        - name: GAUTH_JWT_SIGNING_KEY
+          value: "staging-secret-key-change-in-prod"
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:

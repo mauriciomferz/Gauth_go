@@ -34,6 +34,12 @@ spec:
           value: "info"
         - name: VERSION
           value: "green"
+        - name: VERSION
+          value: "green"
+        - name: GAUTH_REVOCATION_ENABLED
+          value: "1"
+        - name: GAUTH_JWT_SIGNING_KEY
+          value: "staging-secret-key-change-in-prod"
         resources:
           requests:
             memory: 256Mi
