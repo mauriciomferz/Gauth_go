@@ -1257,22 +1257,18 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// 2. Events Handler
 		eventHandler := adminHandlers.NewEventHandler(nil)
 		eventHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] Events handler registered (Degraded Mode: Empty)")
 
 		// 3. Audit Handler (Verified: stopCh passed correctly)
 		auditHandler := adminHandlers.NewAuditHandler(nil, s.stopCh)
 		auditHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] Audit handler registered (Degraded Mode: Empty)")
 
 		// 4. Revocation Handler
 		revocationHandler := adminHandlers.NewRevocationHandler(nil)
 		revocationHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] Revocation handler registered (Degraded Mode: Empty)")
 
 		// 5. OIDC Handler
 		oidcHandler := adminHandlers.NewOIDCHandler(nil)
 		oidcHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] OIDC handler registered (Degraded Mode: Empty)")
 
 		// 6. Policy Templates Handler
 		policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(nil)
