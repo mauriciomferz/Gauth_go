@@ -11,11 +11,6 @@ jobs:
     name: Build & Unit Test
     runs-on: ubuntu-latest
     steps:
-      - name: Debug File Content
-        run: |
-          echo "Debugging web/server_factory.go content:"
-          grep -nC 5 "Policy Templates" web/server_factory.go || echo "Pattern not found"
-          go clean -cache
 
       - uses: actions/checkout@v4
 
@@ -24,6 +19,12 @@ jobs:
         with:
           go-version: '1.23.0'
           cache: true
+
+      - name: Debug File Content
+        run: |
+          echo "Debugging web/server_factory.go content:"
+          grep -nC 5 "Policy Templates" web/server_factory.go || echo "Pattern not found"
+          go clean -cache
 
       - name: Verify Dependencies
         run: go mod tidy && go mod verify
