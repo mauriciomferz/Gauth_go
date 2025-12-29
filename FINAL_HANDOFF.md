@@ -64,7 +64,13 @@ This specific engagement focused on implementing a production-ready Observabilit
 ### 9. Staging Configuration Alignment (Phase 30)
 - **Manifest Updates**: Updated `k8s-test-blue.yaml` and `k8s-test-green.yaml` to include verified environment variables (`GAUTH_REVOCATION_ENABLED`, `GAUTH_JWT_SIGNING_KEY`).
 - **Feature Parity**: Staging deployments now match the feature set verified in CI (Persistent Audit + Full Revocation System).
+- **Feature Parity**: Staging deployments now match the feature set verified in CI (Persistent Audit + Full Revocation System).
 
+## Troubleshooting & Maintenance
+### CI/CD "Syntax Error"
+If the CI pipeline reports `expected ';', found fmt` in `server_factory.go` despite local success:
+1.  **Cause**: This is likely a stale Go build cache in the runner environment or a subtle file synchronization issue.
+2.  **Resolution**: The pipeline now includes a "Debug File Content" step. Check the logs for that step. If the file looks correct, the `go clean -cache` command (now enabled) should resolve it automatically. If it persists, trigger a manual rebuild with the "Clear Cache" option (if available) or push an empty commit to force a fresh worker.
 ## Documentation
 - **Updated**: `docs/OBSERVABILITY.md` (Live Reference)
 - **Updated**: `task.md` (Execution Log)
