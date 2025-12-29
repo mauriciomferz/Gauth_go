@@ -61,6 +61,10 @@ This specific engagement focused on implementing a production-ready Observabilit
 - **Persistent Audit Verified**: Validated end-to-end audit log storage in PostgreSQL via CI pipeline.
 - **Initialization Bug Fixed**: Removed duplicate handler initialization code in `server_factory.go` that was silently overriding database-backed handlers with empty "Degraded Mode" versions, ensuring production stability.
 
+### 9. Staging Configuration Alignment (Phase 30)
+- **Manifest Updates**: Updated `k8s-test-blue.yaml` and `k8s-test-green.yaml` to include verified environment variables (`GAUTH_REVOCATION_ENABLED`, `GAUTH_JWT_SIGNING_KEY`).
+- **Feature Parity**: Staging deployments now match the feature set verified in CI (Persistent Audit + Full Revocation System).
+
 ## Documentation
 - **Updated**: `docs/OBSERVABILITY.md` (Live Reference)
 - **Updated**: `task.md` (Execution Log)
