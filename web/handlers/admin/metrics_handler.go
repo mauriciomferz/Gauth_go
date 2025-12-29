@@ -88,13 +88,13 @@ func (c *GAuthCollector) Describe(ch chan<- *prometheus.Desc) {
 func (c *GAuthCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 
-	// 1. Audit Events (Table: audit_logs, Column: result)
+	// 1. Audit Events (Table: audit_events, Column: status)
 	var success, failure int64
 	err := c.db.QueryRow(ctx, `
 		SELECT 
-			COUNT(CASE WHEN result = 'success' THEN 1 END),
-			COUNT(CASE WHEN result = 'failure' THEN 1 END)
-		FROM audit_logs
+			COUNT(CASE WHEN status = 'success' THEN 1 END),
+			COUNT(CASE WHEN status = 'failure' THEN 1 END)
+		FROM audit_events
 	`).Scan(&success, &failure)
 	if err == nil {
 		ch <- prometheus.MustNewConstMetric(c.auditEventsTotal, prometheus.CounterValue, float64(success), "success")
@@ -105,32 +105,26 @@ func (c *GAuthCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	// 2. API Keys (Active vs Revoked)
-	// Table unavailable in current schema, returning 0 to avoid errors
-	/*
-		var active, revoked int64
-		err = c.db.QueryRow(ctx, `
-			SELECT
-				COUNT(CASE WHEN enabled = true THEN 1 END),
-				COUNT(CASE WHEN enabled = false THEN 1 END)
-			FROM api_keys
-		`).Scan(&active, &revoked)
-		if err == nil {
-			ch <- prometheus.MustNewConstMetric(c.apiKeysTotal, prometheus.GaugeValue, float64(active), "active")
-			ch <- prometheus.MustNewConstMetric(c.apiKeysTotal, prometheus.GaugeValue, float64(revoked), "revoked")
-		} else {
-			fmt.Printf("Error collecting API key metrics: %v\n", err)
-		}
-	*/
+	var active, revoked int64
+	err = c.db.QueryRow(ctx, `
+		SELECT
+			COUNT(CASE WHEN status = 'active' THEN 1 END),
+			COUNT(CASE WHEN status = 'revoked' THEN 1 END)
+		FROM api_keys
+	`).Scan(&active, &revoked)
+	if err == nil {
+		ch <- prometheus.MustNewConstMetric(c.apiKeysTotal, prometheus.GaugeValue, float64(active), "active")
+		ch <- prometheus.MustNewConstMetric(c.apiKeysTotal, prometheus.GaugeValue, float64(revoked), "revoked")
+	} else {
+		fmt.Printf("Error collecting API key metrics: %v\n", err)
+	}
 
 	// 3. Active Policies
-	// Table unavailable in current schema, returning 0
-	/*
-		var activePolicies int64
-		err = c.db.QueryRow(ctx, "SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'").Scan(&activePolicies)
-		if err == nil {
-			ch <- prometheus.MustNewConstMetric(c.activePoliciesTotal, prometheus.GaugeValue, float64(activePolicies))
-		}
-	*/
+	var activePolicies int64
+	err = c.db.QueryRow(ctx, "SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'").Scan(&activePolicies)
+	if err == nil {
+		ch <- prometheus.MustNewConstMetric(c.activePoliciesTotal, prometheus.GaugeValue, float64(activePolicies))
+	}
 }
 
 // SystemMetricsResponse represents the system metrics API response

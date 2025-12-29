@@ -29,14 +29,14 @@ RUN echo "=== Verifying Go modules ===" && \
 
 # Verify source files are present
 RUN echo "=== Checking source files ===" && \
-    ls -la ./cmd/gauth-server/ && \
+    ls -la ./cmd/web-server/ && \
     echo "=== Source files verified ==="
 
 # Build the applications with verbose output
 RUN echo "=== Starting Go build ===" && \
     CGO_ENABLED=1 GOOS=linux go build \
     -ldflags='-w -s' \
-    -o gauth-server ./cmd/gauth-server && \
+    -o gauth-server ./cmd/web-server && \
     echo "=== Build completed successfully ==="
 
 # Verify binary

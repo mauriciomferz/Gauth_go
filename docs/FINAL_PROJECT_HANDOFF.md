@@ -32,6 +32,9 @@ This specific engagement focused on implementing a production-ready Observabilit
 - **Observability**: Full stack deployed (Prometheus, Grafana, Alertmanager) alongside application.
 - **Custom Metrics Fix**: Resolved critical issue where `gauth_audit_events_total` was missing.
     - **Fix**: Globally registered custom collector, injected missing `GAUTH_DB_*` env vars, and aligned schema query to `audit_logs` table.
+- **Phase 25 Fixes**:
+    - **CrashLoop**: Fixed incorrect entrypoint in Dockerfile (switched to `web-server`).
+    - **Schema Repair**: Restored missing `audit_events` and `api_keys` tables to enable full metrics.
 - **Status**: Production-ready configuration verified in staging.
 
 ## Documentation

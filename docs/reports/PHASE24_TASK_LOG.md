@@ -76,6 +76,14 @@ Phase 19 & 20 deployment complete. Now enhancing with testing, documentation, an
 - [x] Configure Prometheus to load rules
 - [x] Verify Alerts Triggering
 
+## Phase 25: Post-Handoff Fixes [x]
+- [x] Fix Container CrashLoopBackOff (`gauth-server` demo vs `web-server` entrypoint)
+- [x] Restore missing database tables for metrics
+  - [x] `audit_events` (Fix schema mismatch with app)
+  - [x] `api_keys` (Enable `gauth_api_keys_total` metric)
+  - [x] `authorization_policies` (Enable `gauth_active_policies_total` metric)
+- [x] Verify Full Metrics Suite on `/metrics` endpoint
+
 ## Final Status: ALL COMPLETE ✅
 - [x] Observability Stack complete (Metrics, Dashboards, Alerts)
 - [x] Testing complete - All endpoints working

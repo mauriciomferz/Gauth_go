@@ -347,6 +347,31 @@ cat docs/SECURITY.md
 
 ---
 
+## Phase 25: Stability & Metrics Restoration
+**Date**: 2025-12-29 (Post-Handoff)
+
+### 1. CrashLoopBackOff Resolution
+- **Issue**: The `gauth:staging` container was entering a crash loop because the `Dockerfile` was building `cmd/gauth-server`, which turned out to be a short-lived **demo application** that exits after completion.
+- **Fix**: Updated `Dockerfile` to build `cmd/web-server`, which initializes the persistent `web.NewBetaServer`. verified stable runtime.
+
+### 2. Missing Metrics & Schema Mismatch
+- **Issue**: Metrics collection for `api_keys` and `audit_events` failed because:
+  1.  `api_keys` keys table was missing from the staging database.
+  2.  `audit_events` table was missing (legacy `audit_logs` existed but had incompatible schema).
+  3.  Application code failed to persist events due to missing `audit_events`.
+- **Fix**:
+  1.  Identified correct schema definitions in `001_initial_schema.sql` and `006_create_api_keys_table.sql`.
+  2.  Created and applied `fix_tables.sql` to staging DB, restoring `subscribers`, `api_keys`, and `audit_events`.
+  3.  Updated `metrics_handler.go` to target `audit_events` (status column) and `api_keys` (status column).
+- **Verification**: `wget` from inside pod confirmed all metrics present:
+  ```
+  gauth_active_policies_total 0
+  gauth_api_keys_total{status="active"} 0
+  gauth_audit_events_total{status="success"} 0
+  ```
+
+---
+
 ## Summary
 
 **Project**: GAuth+ Authorization Framework  
