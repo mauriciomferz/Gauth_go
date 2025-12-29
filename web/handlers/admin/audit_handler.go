@@ -24,18 +24,26 @@ type AuditHandler struct {
 }
 
 // NewAuditHandler creates a new audit handler instance
-func NewAuditHandler(db *pgxpool.Pool) *AuditHandler {
+// NewAuditHandler creates a new audit handler instance
+func NewAuditHandler(db *pgxpool.Pool, stopCh <-chan struct{}) *AuditHandler {
 	repo := audit.NewRepository(db)
 	exportService := audit.NewExportService(repo, "/tmp/gauth-audit-exports")
 
 	// Start cleanup routine for expired exports
-	go func() {
-		ticker := time.NewTicker(1 * time.Hour)
-		defer ticker.Stop()
-		for range ticker.C {
-			exportService.CleanupExpiredJobs()
-		}
-	}()
+	if stopCh != nil {
+		go func() {
+			ticker := time.NewTicker(1 * time.Hour)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					exportService.CleanupExpiredJobs()
+				case <-stopCh:
+					return
+				}
+			}
+		}()
+	}
 
 	return &AuditHandler{
 		repo:          repo,

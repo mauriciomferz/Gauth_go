@@ -1134,7 +1134,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}
 
 			// Audit handler
-			auditHandler := adminHandlers.NewAuditHandler(dbPool)
+			auditHandler := adminHandlers.NewAuditHandler(dbPool, s.stopCh)
 			auditHandler.RegisterRoutes(adminGroup)
 
 			// Subscribers handler (Singular)
@@ -1260,7 +1260,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		fmt.Fprintln(os.Stderr, "[DEV] Events handler registered (Degraded Mode: Empty)")
 
 		// 3. Audit Handler
-		auditHandler := adminHandlers.NewAuditHandler(nil)
+		auditHandler := adminHandlers.NewAuditHandler(nil, s.stopCh)
 		auditHandler.RegisterRoutes(adminGroup)
 		fmt.Fprintln(os.Stderr, "[DEV] Audit handler registered (Degraded Mode: Empty)")
 
