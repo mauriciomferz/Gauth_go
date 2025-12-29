@@ -58,6 +58,17 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: "6379"
 
+      # Authentication
+      GAUTH_JWT_SIGNING_KEY: ${GAUTH_JWT_SIGNING_KEY}
+
+      # Database Connection (Environment overrides)
+      GAUTH_DB_HOST: postgres
+      GAUTH_DB_USER: ${GAUTH_DB_USER}
+      GAUTH_DB_PASSWORD: ${GAUTH_DB_PASSWORD}
+      GAUTH_DB_NAME: ${GAUTH_DB_NAME}
+      GAUTH_DB_PORT: "5432"
+      GAUTH_DB_SSL_MODE: disable
+
       # Server Configuration
       PORT: "8080"
       GIN_MODE: release
@@ -96,8 +107,47 @@ services:
       retries: 3
       start_period: 5s
 
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: gauth-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - gauth-network
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:10.0.0
+    container_name: gauth-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    networks:
+      - gauth-network
+    depends_on:
+      - prometheus
 volumes:
   postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local
 
 networks:

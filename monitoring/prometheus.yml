@@ -3,28 +3,18 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - "rules/*.yml"
-
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-          - alertmanager:9093
+  - "alerts.yml"
 
 scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'gauth-server'
-    static_configs:
-      - targets: ['gauth:8080']
-    metrics_path: /metrics
+  - job_name: 'gauth-backend'
     scrape_interval: 5s
-
-  - job_name: 'node-exporter'
+    metrics_path: /api/admin/metrics/prometheus
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets: ['backend:8080']
 
   - job_name: 'postgres'
     static_configs:

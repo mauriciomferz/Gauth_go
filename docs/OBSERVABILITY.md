@@ -1,10 +1,52 @@
 ---
 title: Observability
 category: guide
-status: draft
-lastUpdated: 2025-12-25
+status: live
+lastUpdated: 2025-12-29
 owners: [system]
 ---
+
+# Implemented Observability Stack (Phase 21-23)
+
+## 1. Custom Business Metrics
+The following metrics are implemented in `web/handlers/admin/metrics_handler.go` and exposed via `/api/admin/metrics/prometheus`:
+
+### Audit Events
+- **Metric**: `gauth_audit_events_total`
+- **Type**: Counter
+- **Labels**: `status` (success, failure)
+- **Description**: Tracks total audit log entries created.
+- **Source**: `SELECT COUNT(*) FROM audit_events`
+
+### API Keys
+- **Metric**: `gauth_api_keys_total`
+- **Type**: Gauge
+- **Labels**: `status` (active, revoked)
+- **Description**: Current count of API keys in system.
+- **Source**: `SELECT COUNT(*) FROM api_keys`
+
+### Authorization Policies
+- **Metric**: `gauth_active_policies_total`
+- **Type**: Gauge
+- **Description**: Number of active authorization policies.
+- **Source**: `SELECT COUNT(*) FROM authorization_policies WHERE status='active'`
+
+## 2. Alerting Rules
+Defined in `monitoring/alerts.yml` and loaded by Prometheus:
+
+| Alert Name | Condition | Severity | Description |
+|------------|-----------|----------|-------------|
+| `InstanceDown` | `up == 0` for 1m | Critical | Service has been unreachable for > 1 minute. |
+| `HighErrorRate` | 5xx Rate > 5% for 5m | Warning | >5% of HTTP requests failing with 5xx. |
+| `HighMemoryUsage` | Heap > 90% Limit for 5m | Warning | Service memory usage critically high. |
+
+## 3. Dashboards
+- **System Metrics**: Go runtime stats (Goroutines, GC, Heap).
+- **Business Metrics**: Visualization of Audit and API Key metrics.
+- **Datasource**: Auto-provisioned Prometheus.
+
+---
+
 
 ## Decision Metrics
 ## Tracing (RB9) & Latency Percentiles (NEW)

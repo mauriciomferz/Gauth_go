@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"runtime"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -28,11 +30,99 @@ type requestCounter struct {
 
 // NewMetricsHandler creates a new metrics handler
 func NewMetricsHandler(registry *prometheus.Registry, db *pgxpool.Pool) *MetricsHandler {
+	// Register standard Go runtime metrics
+	registry.MustRegister(collectors.NewGoCollector())
+	registry.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
+
+	// Register custom GAuth collector
+	if db != nil {
+		registry.MustRegister(NewGAuthCollector(db))
+	}
+
 	return &MetricsHandler{
 		registry:   registry,
 		db:         db,
 		startTime:  time.Now(),
 		reqCounter: &requestCounter{},
+	}
+}
+
+// GAuthCollector implements prometheus.Collector for custom business metrics
+type GAuthCollector struct {
+	db                  *pgxpool.Pool
+	auditEventsTotal    *prometheus.Desc
+	apiKeysTotal        *prometheus.Desc
+	activePoliciesTotal *prometheus.Desc
+}
+
+// NewGAuthCollector creates a new GAuthCollector
+func NewGAuthCollector(db *pgxpool.Pool) *GAuthCollector {
+	return &GAuthCollector{
+		db: db,
+		auditEventsTotal: prometheus.NewDesc(
+			"gauth_audit_events_total",
+			"Total number of audit events recorded",
+			[]string{"status"}, nil,
+		),
+		apiKeysTotal: prometheus.NewDesc(
+			"gauth_api_keys_total",
+			"Total number of API keys",
+			[]string{"status"}, nil,
+		),
+		activePoliciesTotal: prometheus.NewDesc(
+			"gauth_active_policies_total",
+			"Total number of active authorization policies",
+			nil, nil,
+		),
+	}
+}
+
+// Describe implements prometheus.Collector
+func (c *GAuthCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- c.auditEventsTotal
+	ch <- c.apiKeysTotal
+	ch <- c.activePoliciesTotal
+}
+
+// Collect implements prometheus.Collector
+func (c *GAuthCollector) Collect(ch chan<- prometheus.Metric) {
+	ctx := context.Background()
+
+	// 1. Audit Events
+	var success, failure int64
+	err := c.db.QueryRow(ctx, `
+		SELECT 
+			COUNT(CASE WHEN status = 'success' THEN 1 END),
+			COUNT(CASE WHEN status = 'failure' THEN 1 END)
+		FROM audit_events
+	`).Scan(&success, &failure)
+	if err == nil {
+		ch <- prometheus.MustNewConstMetric(c.auditEventsTotal, prometheus.CounterValue, float64(success), "success")
+		ch <- prometheus.MustNewConstMetric(c.auditEventsTotal, prometheus.CounterValue, float64(failure), "failure")
+	} else {
+		fmt.Printf("Error collecting audit metrics: %v\n", err)
+	}
+
+	// 2. API Keys (Active vs Revoked)
+	var active, revoked int64
+	err = c.db.QueryRow(ctx, `
+		SELECT 
+			COUNT(CASE WHEN enabled = true THEN 1 END),
+			COUNT(CASE WHEN enabled = false THEN 1 END)
+		FROM api_keys
+	`).Scan(&active, &revoked)
+	if err == nil {
+		ch <- prometheus.MustNewConstMetric(c.apiKeysTotal, prometheus.GaugeValue, float64(active), "active")
+		ch <- prometheus.MustNewConstMetric(c.apiKeysTotal, prometheus.GaugeValue, float64(revoked), "revoked")
+	} else {
+		fmt.Printf("Error collecting API key metrics: %v\n", err)
+	}
+
+	// 3. Active Policies
+	var activePolicies int64
+	err = c.db.QueryRow(ctx, "SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'").Scan(&activePolicies)
+	if err == nil {
+		ch <- prometheus.MustNewConstMetric(c.activePoliciesTotal, prometheus.GaugeValue, float64(activePolicies))
 	}
 }
 
