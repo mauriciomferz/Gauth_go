@@ -29,9 +29,28 @@ jobs:
         run: go test -v ./...
 
   load-verification:
-    name: Load Test (Degraded Mode)
+    name: Load Test (Persistence Check)
     runs-on: ubuntu-latest
     needs: build-and-test
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: gauth
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: gauth
+        ports:
+          - 5432:5432
+        # Set health check to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
     steps:
       - uses: actions/checkout@v4
 
@@ -44,11 +63,18 @@ jobs:
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
       
-      - name: Start Background Server (Degraded Mode)
+      - name: Start Background Server (Full Persistence)
         run: |
           # Export necessary secrets for dev mode
           export GAUTH_JWT_SIGNING_KEY=ci-secret-key-123
-          export GAUTH_REVOCATION_ENABLED=0
+          export GAUTH_REVOCATION_ENABLED=1
+          export DB_HOST=localhost
+          export DB_PORT=5432
+          export DB_USER=gauth
+          export DB_PASSWORD=password
+          export DB_NAME=gauth
+          export REDIS_HOST=localhost
+          export REDIS_PORT=6379
           
           # Start server in background
           go run cmd/web-server/main.go &
@@ -60,9 +86,9 @@ jobs:
 
       - name: Run Soak Test (Smoke Check)
         run: |
-          k6 run -e DURATION=10s -e DEGRADED_MODE=true tests/load/soak-test.js
+          k6 run -e DURATION=10s -e DEGRADED_MODE=false tests/load/soak-test.js
 
-      - name: Run Load Test (Health/MCP Check)
+      - name: Run Load Test (Persistence Verification)
         run: |
            # Use localhost since GitHub Actions runs on Linux (host networking is simpler here)
            k6 run -e DURATION=10s -e BASE_URL=http://localhost:8080 tests/load/k6-load-test.js

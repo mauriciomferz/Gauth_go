@@ -43,6 +43,7 @@ export const options = {
 };
 
 const BASE_URL = __ENV.BASE_URL || 'http://[::1]:8080';
+const DEGRADED_MODE = __ENV.DEGRADED_MODE === 'true';
 
 // Test data
 const testData = {
@@ -345,37 +346,38 @@ export function testAdminAudit() {
 
 // Main test execution
 export default function () {
-  // Randomly execute different test scenarios
-  // Simplified for Degraded Mode (No DB): Run only Health and MCP which confirm server stability
   const rand = Math.random();
 
-  if (rand < 0.5) {
-    testHealthCheck();
+  if (DEGRADED_MODE) {
+    if (rand < 0.5) {
+      testHealthCheck();
+    } else {
+      testMCPResourcesList();
+    }
   } else {
-    testMCPResourcesList();
+    // Full Persistence Mode
+    if (rand < 0.10) {
+      testHealthCheck();
+    } else if (rand < 0.25) {
+      testPoACreation();
+    } else if (rand < 0.35) {
+      testAuthorization();
+    } else if (rand < 0.45) {
+      testRevocation();
+    } else if (rand < 0.50) {
+      testAdminAudit();
+    } else if (rand < 0.55) {
+      testAuditPersistence(); // Verification of DB write
+    } else if (rand < 0.65) {
+      testBrazilCPFValidation();
+    } else if (rand < 0.75) {
+      testCanadaSINValidation();
+    } else if (rand < 0.85) {
+      testMexicoCURPValidation();
+    } else {
+      testMCPResourcesList();
+    }
   }
-
-  /* Database-dependent tests disabled in Degraded Mode
-  if (rand < 0.15) {
-    testHealthCheck();
-  } else if (rand < 0.30) {
-    testPoACreation();
-  } else if (rand < 0.40) {
-    testAuthorization();
-  } else if (rand < 0.50) {
-    testRevocation(); // New: 10%
-  } else if (rand < 0.55) {
-    testAdminAudit(); // New: 5% (Heavier op)
-  } else if (rand < 0.65) {
-    testBrazilCPFValidation();
-  } else if (rand < 0.75) {
-    testCanadaSINValidation();
-  } else if (rand < 0.85) {
-    testMexicoCURPValidation();
-  } else {
-    testMCPResourcesList();
-  }
-  */
 
   sleep(1);
 }
