@@ -344,6 +344,45 @@ export function testAdminAudit() {
   requestsPerSecond.add(1);
 }
 
+
+export function testAuditPersistence() {
+  // 1. Get initial metric count
+  const resBefore = http.get(`${BASE_URL}/api/admin/metrics/prometheus`);
+
+  let initialCount = 0;
+  if (resBefore.status === 200) {
+    const match = resBefore.body.match(/gauth_audit_events_total\s+(\d+)/);
+    if (match) {
+      initialCount = parseInt(match[1], 10);
+    }
+  }
+
+  // 2. Perform action to generate audit log (Create PoA)
+  testPoACreation();
+
+  // 3. Get new metric count (allow delay for async write/scrape)
+  sleep(1);
+  const resAfter = http.get(`${BASE_URL}/api/admin/metrics/prometheus`);
+
+  let finalCount = 0;
+  if (resAfter.status === 200) {
+    const match = resAfter.body.match(/gauth_audit_events_total\s+(\d+)/);
+    if (match) {
+      finalCount = parseInt(match[1], 10);
+    }
+  }
+
+  // 4. Verification
+  const success = check(resAfter, {
+    'Audit metric increased': () => finalCount > initialCount,
+  });
+
+  if (!success) {
+    console.warn(`Audit Persistence Failed: ${initialCount} -> ${finalCount}`);
+    errorRate.add(1);
+  }
+}
+
 // Main test execution
 export default function () {
   const rand = Math.random();
