@@ -193,3 +193,11 @@ bin/
 test_output*.txt
 
 scripts/conformance
+
+# Root level binaries
+web-server
+
+# Certificates and Keys
+*.pem
+*.key
+k8s-secrets-patched.yaml
