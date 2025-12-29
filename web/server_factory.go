@@ -1277,48 +1277,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// 6. Policy Templates Handler
 		policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(nil)
 		adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates) // Manually registered in main block
-		adminGroup.GET("/policy-templates/:id", policyTemplatesHandler.GetPolicyTemplate)
-		adminGroup.POST("/policy-templates", policyTemplatesHandler.CreatePolicyTemplate)
-		adminGroup.PUT("/policy-templates/:id", policyTemplatesHandler.UpdatePolicyTemplate)
-		adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
-		adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
-		fmt.Fprintln(os.Stderr, "[DEV] Policy Templates handler registered (Degraded Mode: Empty)")
 
-		// 7. GAuthPlus Handler
-		gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(nil)
-		gauthPlusHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] GAuthPlus handler registered (Degraded Mode: Empty)")
-
-		// 8. Resilience Handler
-		resilienceHandler := adminHandlers.NewResilienceHandler(nil)
-		resilienceHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] Resilience handler registered (Degraded Mode: Empty)")
-
-		// 9. Tokens Handler
-		tokenHandler := adminHandlers.NewTokenHandler(nil, nil)
-		tokenHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] Tokens handler registered (Degraded Mode: Empty)")
-
-		// 10. API Keys Handler
-		apiKeyHandler := adminHandlers.NewAPIKeyHandler(nil)
-		apiKeyHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] API Keys handler registered (Degraded Mode: Empty)")
-
-		// 11. Security Handler
-		securityHandler := adminHandlers.NewSecurityHandler(nil)
-		securityHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] Security handler registered (Degraded Mode: Empty)")
-
-		// 12. Config Handler
-		configHandler := adminHandlers.NewConfigHandler(nil)
-		configHandler.RegisterRoutes(adminGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] Config handler registered (Degraded Mode: Empty)")
-
-		// 13. OIDC Auth Handler (Frontend)
-		oidcAuthHandler := authHandlers.NewOIDCAuthHandler(nil)
-		authGroup := r.Group("/auth")
-		oidcAuthHandler.RegisterRoutes(authGroup)
-		fmt.Fprintln(os.Stderr, "[DEV] OIDC Auth handler registered (Degraded Mode: Empty)")
 	}
 
 	// MCP (Model Context Protocol) handler - works with or without database
