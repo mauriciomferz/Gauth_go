@@ -1259,7 +1259,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		eventHandler.RegisterRoutes(adminGroup)
 		fmt.Fprintln(os.Stderr, "[DEV] Events handler registered (Degraded Mode: Empty)")
 
-		// 3. Audit Handler
+		// 3. Audit Handler (Verified: stopCh passed correctly)
 		auditHandler := adminHandlers.NewAuditHandler(nil, s.stopCh)
 		auditHandler.RegisterRoutes(adminGroup)
 		fmt.Fprintln(os.Stderr, "[DEV] Audit handler registered (Degraded Mode: Empty)")
