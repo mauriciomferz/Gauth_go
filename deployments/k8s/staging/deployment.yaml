@@ -26,8 +26,8 @@ spec:
         version: v1.0.0
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "9090"
-        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/api/admin/metrics/prometheus"
     spec:
       serviceAccountName: gauth-service-account
       securityContext:
@@ -82,9 +82,6 @@ spec:
         ports:
         - name: http
           containerPort: 8080
-          protocol: TCP
-        - name: metrics
-          containerPort: 9090
           protocol: TCP
         
         env:

@@ -35,6 +35,7 @@ This specific engagement focused on implementing a production-ready Observabilit
 - **Phase 25 Fixes**:
     - **CrashLoop**: Fixed incorrect entrypoint in Dockerfile (switched to `web-server`).
     - **Schema Repair**: Restored missing `audit_events` and `api_keys` tables to enable full metrics.
+    - **Alert Monitoring Fix**: Corrected `deployment.yaml` annotations to point Prometheus to app port 8080 (was missing scrape targets).
 - **Status**: Production-ready configuration verified in staging.
 
 ## Documentation
