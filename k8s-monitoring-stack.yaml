@@ -41,36 +41,10 @@ data:
             regex: gauth-service
             action: keep
           - source_labels: [__meta_kubernetes_endpoint_port_name]
-            regex: http
+            regex: metrics
             action: keep
         metrics_path: /metrics
         scrape_interval: 5s
-      
-      - job_name: 'postgres-exporter'
-        kubernetes_sd_configs:
-          - role: endpoints
-            namespaces:
-              names:
-                - gauth-data
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_service_name]
-            regex: postgres-exporter
-            action: keep
-        metrics_path: /metrics
-        scrape_interval: 15s
-      
-      - job_name: 'redis-exporter'
-        kubernetes_sd_configs:
-          - role: endpoints
-            namespaces:
-              names:
-                - gauth-data
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_service_name]
-            regex: redis-exporter
-            action: keep
-        metrics_path: /metrics
-        scrape_interval: 15s
 
 ---
 # Prometheus Deployment

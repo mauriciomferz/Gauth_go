@@ -78,7 +78,7 @@ spec:
       containers:
       - name: gauth
         image: gauth:staging  # Build with: docker build -t gauth:staging -f Dockerfile .
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - name: http
           containerPort: 8080
@@ -161,6 +161,38 @@ spec:
               name: gauth-config
               key: POSTGRES_SSL_MODE
         
+        # GAuth Server DB Config (Matches server_factory.go)
+        - name: GAUTH_DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: POSTGRES_HOST
+        - name: GAUTH_DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: POSTGRES_PORT
+        - name: GAUTH_DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: POSTGRES_USER
+        - name: GAUTH_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: gauth-secrets
+              key: postgres-password
+        - name: GAUTH_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: POSTGRES_DB
+        - name: GAUTH_DB_SSL_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: gauth-config
+              key: POSTGRES_SSL_MODE
+        
         # Redis configuration
         - name: REDIS_URL
           value: redis://:$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)
@@ -196,6 +228,11 @@ spec:
             secretKeyRef:
               name: gauth-secrets
               key: jwt-public-key
+        - name: GAUTH_JWT_SIGNING_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gauth-secrets
+              key: jwt-private-key
         
         # Ed25519 signing keys
         - name: GAUTH_ROTATIONS_V2_ED25519_KEYS
@@ -222,6 +259,8 @@ spec:
           mountPath: /tmp
         - name: logs
           mountPath: /app/logs
+        - name: app-tmp
+          mountPath: /app/tmp
         
         # Health checks
         livenessProbe:
@@ -281,6 +320,8 @@ spec:
       - name: tmp
         emptyDir: {}
       - name: logs
+        emptyDir: {}
+      - name: app-tmp
         emptyDir: {}
       
       # Pod scheduling

@@ -1125,6 +1125,14 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			metricsHandler := adminHandlers.NewMetricsHandler(registry, dbPool)
 			metricsHandler.RegisterRoutes(adminGroup)
 
+			// Register custom GAuth collector with global default registry for /metrics endpoint
+			// Ignore AlreadyRegisteredError to be safe in test environments
+			if err := prometheus.Register(adminHandlers.NewGAuthCollector(dbPool)); err != nil {
+				if _, ok := err.(prometheus.AlreadyRegisteredError); !ok {
+					fmt.Fprintf(os.Stderr, "[metrics] failed to register global custom collector: %v\n", err)
+				}
+			}
+
 			// Audit handler
 			auditHandler := adminHandlers.NewAuditHandler(dbPool)
 			auditHandler.RegisterRoutes(adminGroup)
