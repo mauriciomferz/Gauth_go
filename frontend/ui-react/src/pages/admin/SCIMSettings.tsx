@@ -154,7 +154,7 @@ export default function SCIMSettings() {
                 const err = await response.json();
                 setMessage({ type: 'error', text: err.error || 'Failed to create client' });
             }
-        } catch (err) {
+        } catch (_err) {
             setMessage({ type: 'error', text: 'Network error' });
         }
     };
@@ -175,7 +175,7 @@ export default function SCIMSettings() {
             } else {
                 setMessage({ type: 'error', text: 'Failed to revoke client' });
             }
-        } catch (err) {
+        } catch (_err) {
             setMessage({ type: 'error', text: 'Network error' });
         }
     };

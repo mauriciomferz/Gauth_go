@@ -144,7 +144,7 @@ const GNAP: React.FC = () => {
             } else {
                 setError('Failed to request grant');
             }
-        } catch (err) {
+        } catch (_err) {
             setError('Network error');
         } finally {
             setLoading(false);

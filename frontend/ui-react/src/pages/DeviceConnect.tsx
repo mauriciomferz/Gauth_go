@@ -114,7 +114,7 @@ export const DeviceConnect: React.FC = () => {
                     message: data.error_description || 'Verification failed. Please check the code and try again.',
                 });
             }
-        } catch (error) {
+        } catch (_error) {
             setResult({
                 type: 'error',
                 message: 'Network error. Please try again.',

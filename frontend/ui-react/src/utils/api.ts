@@ -39,7 +39,7 @@ export const apiFetch = async (
   options: FetchOptions = {}
 ): Promise<Response> => {
   const { skipTenant, skipAuth, ...fetchOptions } = options;
-  
+
   // Add tenant_id parameter unless explicitly skipped
   let finalUrl = url;
   if (!skipTenant) {
@@ -47,7 +47,7 @@ export const apiFetch = async (
     const separator = url.includes('?') ? '&' : '?';
     finalUrl = `${url}${separator}tenant_id=${encodeURIComponent(tenantId)}`;
   }
-  
+
   // Add authorization header if token exists and not skipped
   const token = !skipAuth ? localStorage.getItem('admin_token') : null;
   const headers: HeadersInit = {
@@ -55,19 +55,19 @@ export const apiFetch = async (
     ...(token && { Authorization: `Bearer ${token}` }),
     ...fetchOptions.headers,
   };
-  
+
   try {
     const response = await fetch(finalUrl, {
       ...fetchOptions,
       headers,
     });
-    
+
     // Handle tenant-specific errors
     if (response.status === 403) {
       const error = await response.json().catch(() => ({}));
       throw new TenantError(error.message || 'Access denied for this tenant');
     }
-    
+
     if (response.status === 400) {
       const error = await response.json().catch(() => ({}));
       if (error.message?.includes('tenant')) {
@@ -75,35 +75,35 @@ export const apiFetch = async (
       }
       throw new ApiError(error.message || 'Bad request', 400, error);
     }
-    
+
     if (response.status === 401) {
       // Token expired or invalid
       localStorage.removeItem('admin_token');
       throw new ApiError('Authentication required', 401);
     }
-    
+
     if (response.status === 404) {
       const error = await response.json().catch(() => ({}));
       throw new ApiError(error.message || 'Resource not found', 404, error);
     }
-    
+
     if (response.status === 500) {
       const error = await response.json().catch(() => ({}));
       throw new ApiError(error.message || 'Internal server error', 500, error);
     }
-    
+
     return response;
   } catch (error) {
     // Re-throw our custom errors
     if (error instanceof TenantError || error instanceof ApiError) {
       throw error;
     }
-    
+
     // Handle network errors
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       throw new ApiError('Network error: Cannot connect to server', 0);
     }
-    
+
     // Unknown error
     throw new ApiError('An unexpected error occurred', 0, error);
   }
@@ -159,7 +159,7 @@ export const apiDelete = async (url: string, options?: FetchOptions): Promise<Re
 export const parseResponse = async <T>(response: Response): Promise<T> => {
   try {
     return await response.json();
-  } catch (error) {
+  } catch (_error) {
     throw new ApiError('Failed to parse response', response.status);
   }
 };

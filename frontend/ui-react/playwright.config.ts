@@ -7,27 +7,27 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './e2e',
-  
+
   /* Maximum time one test can run for */
   timeout: 30 * 1000,
-  
+
   /* Maximum time expect() should wait for the condition to be met */
   expect: {
     timeout: 5000,
   },
-  
+
   /* Run tests in files in parallel */
   fullyParallel: true,
-  
+
   /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
-  
+
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  
+
   /* Opt out of parallel tests on CI */
   workers: process.env.CI ? 1 : undefined,
-  
+
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? [
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
@@ -39,40 +39,40 @@ export default defineConfig({
     ['json', { outputFile: 'playwright-report/results.json' }],
     ['list'],
   ],
-  
+
   /* Shared settings for all the projects below */
   use: {
     /* Base URL to use in actions like `await page.goto('/')` */
     baseURL: process.env.BASE_URL || 'http://localhost:3001',
-    
+
     /* Backend API URL for API testing */
-    // @ts-ignore - Custom property
+    // @ts-expect-error - Custom property
     apiURL: process.env.API_URL || 'http://localhost:8080',
-    
+
     /* Collect trace when retrying the failed test */
     trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure',
-    
+
     /* Take screenshot on failure */
     screenshot: 'only-on-failure',
-    
+
     /* Video on failure */
     video: 'retain-on-failure',
-    
+
     /* Maximum time for navigation */
     navigationTimeout: 15 * 1000,
-    
+
     /* Maximum time for page.waitForLoadState */
     actionTimeout: 10 * 1000,
-    
+
     /* Emulate viewport size */
     viewport: { width: 1280, height: 720 },
-    
+
     /* Enable automatic waiting for fonts */
     hasTouch: false,
-    
+
     /* Ignore HTTPS errors */
     ignoreHTTPSErrors: true,
-    
+
     /* Locale and timezone */
     locale: 'en-US',
     timezoneId: 'America/New_York',
@@ -89,7 +89,7 @@ export default defineConfig({
     // Desktop browsers - main testing
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Enable performance metrics
         contextOptions: {
@@ -117,7 +117,7 @@ export default defineConfig({
       use: { ...devices['Pixel 5'] },
       dependencies: ['setup'],
     },
-    
+
     {
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },

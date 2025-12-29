@@ -1208,7 +1208,7 @@ const ConfigurationManager: React.FC = () => {
                           try {
                             const parsed = JSON.parse(e.target.value);
                             setOverrideForm({ ...overrideForm, overrides: parsed });
-                          } catch (error) {
+                          } catch (_err) {
                             // Invalid JSON, ignore
                           }
                         }}

@@ -132,14 +132,14 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
     ':hover': {
       backgroundColor: tokens.colorNeutralBackground1Hover,
-      // @ts-ignore
-      borderColor: tokens.colorNeutralStroke1Hover,
+
+      borderColor: tokens.colorNeutralStroke1Hover as any,
     },
   },
   serverItemSelected: {
     backgroundColor: tokens.colorBrandBackground2,
-    // @ts-ignore
-    borderColor: tokens.colorBrandStroke1,
+
+    borderColor: tokens.colorBrandStroke1 as any,
     ':hover': {
       backgroundColor: tokens.colorBrandBackground2,
     },

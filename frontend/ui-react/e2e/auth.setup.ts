@@ -5,11 +5,11 @@
 
 import { test as setup } from '@playwright/test'
 
-const authFile = 'playwright/.auth/user.json'
+const _authFile = 'playwright/.auth/user.json'
 
-setup('prepare test environment', async ({ page }) => {
+setup('prepare test environment', async () => {
   console.log('📝 Running test setup...')
-  
+
   // Example: Pre-authenticate user if needed
   // await page.goto('/login')
   // await page.fill('input[name="username"]', 'test-user')
@@ -17,6 +17,6 @@ setup('prepare test environment', async ({ page }) => {
   // await page.click('button[type="submit"]')
   // await page.waitForURL('/dashboard')
   // await page.context().storageState({ path: authFile })
-  
+
   console.log('✅ Test setup complete')
 })

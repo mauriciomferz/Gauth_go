@@ -192,7 +192,7 @@ export default function Dashboard() {
         }
 
         // Use metrics data for authorization requests count
-        let authorizationRequests = metricsData.totalRequests || 0;
+        const authorizationRequests = metricsData.totalRequests || 0;
 
         // Calculate system uptime from metrics
         const uptimeSeconds = metricsData.uptime || 0;

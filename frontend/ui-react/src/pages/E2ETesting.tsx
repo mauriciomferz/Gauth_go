@@ -23,21 +23,21 @@ interface TestSuite {
 
 // Helper function to calculate coverage based on test results
 const calculateCoverage = (tests: TestResult[], keywords: string[]): number => {
-  const relevantTests = tests.filter(test => 
+  const relevantTests = tests.filter(test =>
     keywords.some(keyword => test.name.includes(keyword))
   );
-  
+
   if (relevantTests.length === 0) return 50 + Math.random() * 30;
-  
+
   const passedTests = relevantTests.filter(t => t.status === 'passed').length;
   const totalTests = relevantTests.length;
-  
+
   // Calculate base coverage
   const baseCoverage = (passedTests / totalTests) * 100;
-  
+
   // Add some randomness for realism (±5%)
   const variance = (Math.random() - 0.5) * 10;
-  
+
   return Math.min(100, Math.max(0, baseCoverage + variance));
 };
 
@@ -225,7 +225,7 @@ export default function E2ETesting() {
       // Should still pass as we're testing error handling
       tests.push({ name: 'Error Handling - Invalid Token', status: 'passed', duration });
       totalDuration += duration;
-    } catch (error: any) {
+    } catch (_error: any) {
       const duration = Date.now();
       // Catching an error is expected - this is a pass
       tests.push({ name: 'Error Handling - Invalid Token', status: 'passed', duration: duration % 1000 });
@@ -329,7 +329,7 @@ export default function E2ETesting() {
       // If all succeeded, rate limiting might not be enforced (which is fine for mock)
       tests.push({ name: 'Rate Limiting Enforcement', status: 'passed', duration });
       totalDuration += duration;
-    } catch (error: any) {
+    } catch (_error: any) {
       const duration = Date.now();
       // If we get rate limited, that's actually expected
       tests.push({ name: 'Rate Limiting Enforcement', status: 'passed', duration: duration % 1000 });
@@ -344,7 +344,7 @@ export default function E2ETesting() {
       const duration = Date.now() - start;
       tests.push({ name: 'Error Handling - Expired Token', status: 'passed', duration });
       totalDuration += duration;
-    } catch (error: any) {
+    } catch (_error: any) {
       const duration = Date.now();
       // Error is expected for expired tokens
       tests.push({ name: 'Error Handling - Expired Token', status: 'passed', duration: duration % 1000 });
@@ -370,7 +370,7 @@ export default function E2ETesting() {
 
     setResults(suite);
     setRunning(false);
-    
+
     if (failed === 0 && passed > 0) {
       toast.success(`All ${passed} tests passed!`);
     } else if (failed > 0) {
@@ -501,50 +501,50 @@ export default function E2ETesting() {
           <div>
             <h3 className="font-semibold mb-3">Core Components</h3>
             <div className="space-y-2">
-              <CoverageItem 
-                name="Token Management" 
-                coverage={results ? calculateCoverage(results.tests, ['Token Creation', 'Token Validation', 'Token Rotation']) : 85 + Math.random() * 15} 
+              <CoverageItem
+                name="Token Management"
+                coverage={results ? calculateCoverage(results.tests, ['Token Creation', 'Token Validation', 'Token Rotation']) : 85 + Math.random() * 15}
               />
-              <CoverageItem 
-                name="PVP Integration" 
-                coverage={results ? calculateCoverage(results.tests, ['PVP Identity']) : 80 + Math.random() * 15} 
+              <CoverageItem
+                name="PVP Integration"
+                coverage={results ? calculateCoverage(results.tests, ['PVP Identity']) : 80 + Math.random() * 15}
               />
-              <CoverageItem 
-                name="Registry Lookups" 
-                coverage={results ? calculateCoverage(results.tests, ['Registry Entity']) : 85 + Math.random() * 12} 
+              <CoverageItem
+                name="Registry Lookups"
+                coverage={results ? calculateCoverage(results.tests, ['Registry Entity']) : 85 + Math.random() * 12}
               />
-              <CoverageItem 
-                name="PIP Authorization" 
-                coverage={results ? calculateCoverage(results.tests, ['PIP Authorization']) : 80 + Math.random() * 15} 
+              <CoverageItem
+                name="PIP Authorization"
+                coverage={results ? calculateCoverage(results.tests, ['PIP Authorization']) : 80 + Math.random() * 15}
               />
-              <CoverageItem 
-                name="PoA Delegation" 
-                coverage={results ? calculateCoverage(results.tests, ['PoA Creation']) : 85 + Math.random() * 12} 
+              <CoverageItem
+                name="PoA Delegation"
+                coverage={results ? calculateCoverage(results.tests, ['PoA Creation']) : 85 + Math.random() * 12}
               />
             </div>
           </div>
           <div>
             <h3 className="font-semibold mb-3">Security & Performance</h3>
             <div className="space-y-2">
-              <CoverageItem 
-                name="JWT/JWE Validation" 
-                coverage={results ? calculateCoverage(results.tests, ['JWT', 'JWE']) : 90 + Math.random() * 10} 
+              <CoverageItem
+                name="JWT/JWE Validation"
+                coverage={results ? calculateCoverage(results.tests, ['JWT', 'JWE']) : 90 + Math.random() * 10}
               />
-              <CoverageItem 
-                name="Error Handling" 
-                coverage={results ? calculateCoverage(results.tests, ['Error Handling']) : 85 + Math.random() * 10} 
+              <CoverageItem
+                name="Error Handling"
+                coverage={results ? calculateCoverage(results.tests, ['Error Handling']) : 85 + Math.random() * 10}
               />
-              <CoverageItem 
-                name="Rate Limiting" 
-                coverage={results ? calculateCoverage(results.tests, ['Rate Limiting']) : 70 + Math.random() * 15} 
+              <CoverageItem
+                name="Rate Limiting"
+                coverage={results ? calculateCoverage(results.tests, ['Rate Limiting']) : 70 + Math.random() * 15}
               />
-              <CoverageItem 
-                name="Caching" 
-                coverage={results ? calculateCoverage(results.tests, ['Cache']) : 88 + Math.random() * 10} 
+              <CoverageItem
+                name="Caching"
+                coverage={results ? calculateCoverage(results.tests, ['Cache']) : 88 + Math.random() * 10}
               />
-              <CoverageItem 
-                name="Load Testing" 
-                coverage={results ? calculateCoverage(results.tests, ['Load Test', 'Concurrent']) : 60 + Math.random() * 20} 
+              <CoverageItem
+                name="Load Testing"
+                coverage={results ? calculateCoverage(results.tests, ['Load Test', 'Concurrent']) : 60 + Math.random() * 20}
               />
             </div>
           </div>
@@ -554,8 +554,8 @@ export default function E2ETesting() {
       {/* Quick Actions */}
       <Card title="Quick Actions">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             className="justify-start"
             onClick={() => {
               if (results) {
@@ -578,8 +578,8 @@ export default function E2ETesting() {
             <TrendingUp className="w-4 h-4 mr-2" />
             View Test History
           </Button>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             className="justify-start"
             onClick={() => {
               if (!results) {
@@ -618,8 +618,8 @@ export default function E2ETesting() {
             <Activity className="w-4 h-4 mr-2" />
             Generate Report
           </Button>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             className="justify-start"
             onClick={() => {
               if (!results) {
@@ -628,7 +628,7 @@ export default function E2ETesting() {
               }
               const csv = [
                 'Test Name,Status,Duration (ms),Error',
-                ...results.tests.map(t => 
+                ...results.tests.map(t =>
                   `"${t.name}","${t.status}",${t.duration},"${t.error || ''}"`
                 )
               ].join('\n');
@@ -658,7 +658,7 @@ interface CoverageItemProps {
 
 function CoverageItem({ name, coverage }: CoverageItemProps) {
   const color = coverage >= 90 ? 'bg-green-500' : coverage >= 75 ? 'bg-yellow-500' : 'bg-red-500';
-  
+
   return (
     <div>
       <div className="flex items-center justify-between mb-1">

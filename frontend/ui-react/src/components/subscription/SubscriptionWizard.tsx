@@ -94,7 +94,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
     const response = await apiClient.createSubscription({
       client_id: formData.clientId,
       requested_scope: formData.scope,
-      // @ts-ignore - Extra fields for demo
+
       owners_authorizer_id: 'director-001',
       identity_proof_request: {
         subject_id: 'director-001',

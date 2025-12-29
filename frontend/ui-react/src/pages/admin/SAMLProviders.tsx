@@ -185,7 +185,7 @@ export default function SAMLProviders() {
                 const error = await response.json();
                 setMessage({ type: 'error', text: error.error || 'Operation failed' });
             }
-        } catch (err) {
+        } catch (_err) {
             setMessage({ type: 'error', text: 'Network error occurred' });
         }
     };
@@ -206,7 +206,7 @@ export default function SAMLProviders() {
             } else {
                 setMessage({ type: 'error', text: 'Failed to delete provider' });
             }
-        } catch (err) {
+        } catch (_err) {
             setMessage({ type: 'error', text: 'Network error' });
         }
     };
