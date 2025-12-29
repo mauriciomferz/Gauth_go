@@ -370,6 +370,16 @@ cat docs/SECURITY.md
   gauth_audit_events_total{status="success"} 0
   ```
 
+### 3. Functional Metric Verification (Post-Release)
+Performed end-to-end validation of the observability pipeline on the live `v1.3.0` release:
+1.  **Baseline Check**: Verified `gauth_api_keys_total{status="active"}` was 0.
+2.  **Action - Create**: Created API Key `b301b9f2...` for `test-tenant`.
+    *   **Observation**: Metric `gauth_api_keys_total{status="active"}` incremented to 1 immediately.
+3.  **Action - Revoke**: Revoked API Key `b301b9f2...`.
+    *   **Observation**: Metric `gauth_api_keys_total{status="active"}` dropped to 0, `status="revoked"` rose to 1.
+
+**Result**: Confirmed full functionality of the database-to-Prometheus metric path.
+
 ---
 
 ## Summary
