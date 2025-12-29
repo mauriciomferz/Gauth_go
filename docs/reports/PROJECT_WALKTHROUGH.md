@@ -427,3 +427,18 @@ The frontend build was failing because the `lint` script used the deprecated `--
 - **Command**: `npm run lint`
 - **Result**: Success (Exit Code 0).
 - **Status**: 0 Errors, 171 Warnings (mostly legacy `any` usage).
+
+## Phase 27: Extended Load Testing
+**Date:** 2025-12-29
+**Objective:** Enhance system verification with advanced load scenarios and stability testing.
+
+### Changes
+- Updated `tests/load/k6-load-test.js` to include coverage for **Revocation** and **Admin Audit** endpoints.
+- Created `tests/load/soak-test.js` for long-duration stability verification.
+- Implemented `DEGRADED_MODE` support in scripts to allow verification in database-less environments.
+- Fixed networking configuration to support IPv6 (`[::1]:8080`) for local testing.
+
+### Verification
+- **k6 Load Test**: Verified with 0% error rate on Health and MCP endpoints (Degraded Mode).
+- **Soak Test**: Validated script infrastructure and connectivity with short duration runs.
+- **Environment**: Tooling (`k6`) successfully installed and configured.
