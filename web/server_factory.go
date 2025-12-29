@@ -1276,8 +1276,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 		// 6. Policy Templates Handler
 		policyTemplatesHandler := adminHandlers.NewPolicyTemplatesHandler(nil)
-		adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates) // Manually registered in main block
-
+		adminGroup.GET("/policy-templates", policyTemplatesHandler.ListPolicyTemplates)
 	}
 
 	// MCP (Model Context Protocol) handler - works with or without database
