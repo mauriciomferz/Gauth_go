@@ -11,6 +11,12 @@ jobs:
     name: Build & Unit Test
     runs-on: ubuntu-latest
     steps:
+      - name: Debug File Content
+        run: |
+          echo "Debugging web/server_factory.go content:"
+          grep -nC 5 "Policy Templates" web/server_factory.go || echo "Pattern not found"
+          go clean -cache
+
       - uses: actions/checkout@v4
 
       - name: Set up Go
