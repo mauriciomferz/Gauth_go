@@ -57,6 +57,10 @@ This specific engagement focused on implementing a production-ready Observabilit
     - **Continuous Verification**: Runs `soak-test.js` in "Degraded Mode" to smoke-test critical paths even without external dependencies.
 - **Local Recovery**: Diagnosed and restored Docker environment health, enabling local full-stack development (`docker-compose up` verified healthy).
 
+### 8. Critical Stability Fixes (Phase 29)
+- **Persistent Audit Verified**: Validated end-to-end audit log storage in PostgreSQL via CI pipeline.
+- **Initialization Bug Fixed**: Removed duplicate handler initialization code in `server_factory.go` that was silently overriding database-backed handlers with empty "Degraded Mode" versions, ensuring production stability.
+
 ## Documentation
 - **Updated**: `docs/OBSERVABILITY.md` (Live Reference)
 - **Updated**: `task.md` (Execution Log)
