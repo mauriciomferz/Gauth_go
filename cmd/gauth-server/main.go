@@ -1,16 +1,16 @@
 package main
 
 import (
-"flag"
-"fmt"
-"net/http"
-"os"
-"time"
+	"flag"
+	"fmt"
+	"net/http"
+	"os"
+	"time"
 
-"github.com/mauriciomferz/Gauth_go/internal/config"
-imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/mauriciomferz/Gauth_go/internal/config"
+	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
