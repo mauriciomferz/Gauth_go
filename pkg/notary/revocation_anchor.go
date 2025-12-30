@@ -21,7 +21,7 @@ import (
 //
 // Architecture:
 //
-//	gauth_rfc_001.Service.RevokeDelegation()
+//	gauth_aap_001.Service.RevokeDelegation()
 //	  → AnchorClient.Anchor(hash)
 //	    → RevocationAnchoringAdapter.Anchor(hash)
 //	      → Notarizer.Notarize(hash)  [RFC3161Provider, MemoryNotarizer, etc.]
@@ -159,7 +159,7 @@ func (rs *ReceiptStore) List() ([]notary.Receipt, error) {
 //	notarizer := notary.NewRFC3161Provider("https://freetsa.org/tsr", "FreeTSA")
 //	receiptStore, _ := NewReceiptStore(boltDB)
 //	adapter := NewRevocationAnchoringAdapter(notarizer, receiptStore)
-//	svc := gauth_rfc_001.NewService(..., gauth_rfc_001.WithAnchorClient(adapter))
+//	svc := gauth_aap_001.NewService(..., gauth_aap_001.WithAnchorClient(adapter))
 func NewRevocationAnchoringAdapter(notarizer notary.Notarizer, receiptStore *ReceiptStore) *RevocationAnchoringAdapter {
 	return &RevocationAnchoringAdapter{
 		notarizer:    notarizer,

@@ -9,7 +9,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/testutil"
 )
 
@@ -26,7 +26,7 @@ func FuzzCreateDelegation(f *testing.F) {
 			authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: grantor, Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 		}
 		logger := audit.NewMemoryLogger(testutil.NoopLogger{})
-		svc := gauth_rfc_001.NewService(logger, authorizer)
+		svc := gauth_aap_001.NewService(logger, authorizer)
 
 		// Normalize duration
 		if durationSeconds < 0 {
@@ -36,7 +36,7 @@ func FuzzCreateDelegation(f *testing.F) {
 			durationSeconds = 86400
 		} // clamp at 24h
 		dur := time.Duration(durationSeconds) * time.Second
-		req := gauth_rfc_001.DelegationRequest{Grantor: grantor, Grantee: grantee, Scope: []string{}, Duration: dur}
+		req := gauth_aap_001.DelegationRequest{Grantor: grantor, Grantee: grantee, Scope: []string{}, Duration: dur}
 		if action != "" {
 			req.Scope = []string{action}
 		}

@@ -8,7 +8,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 )
 
 // TestSemanticEWMAStatePersistence ensures EWMA anomaly stats survive save/load cycles.
@@ -20,7 +20,7 @@ func TestSemanticEWMAStatePersistence(t *testing.T) {
 	// Set up Handler with real AAP001 service to provide snapshots
 	memAuthz := authz.NewMemoryAuthorizer()
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-all-alice", Subject: "alice", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow})
-	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(nil), memAuthz)
+	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(nil), memAuthz)
 
 	h := NewHandler(svc, nil, persistPath)
 

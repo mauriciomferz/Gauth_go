@@ -49,7 +49,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	auditHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/audit"
 	betaHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/beta"
 	eventsHandlers "github.com/mauriciomferz/Gauth_go/web/handlers/events"
@@ -867,7 +867,7 @@ func (s *BetaServer) mountRevocationWorkflow() {
 				c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
 				return
 			}
-			req := gauth_rfc_001.RevocationRequest{POAID: id, Initiator: in.Initiator, Reason: in.Reason}
+			req := gauth_aap_001.RevocationRequest{POAID: id, Initiator: in.Initiator, Reason: in.Reason}
 			if err := s.aap001Service.InitiateRevocation(c, req); err != nil {
 				code := mapRevocationErr(err)
 				status := httpStatusForRevocationErr(code)
@@ -2637,9 +2637,9 @@ func (s *BetaServer) routes() {
 			nodes = append(nodes, gin.H{"id": id, "status": st})
 		}
 		// Attempt to enrich with parent-child edges from AAP001 repository if service available
-		if svc, ok := s.aap001Service.(*gauth_rfc_001.Service); ok && svc != nil {
+		if svc, ok := s.aap001Service.(*gauth_aap_001.Service); ok && svc != nil {
 			// The repository interface lacks a full scan; approximate by iterating over principals seen in status map (union grantor/grantee covered by map keys) then de-duplicating.
-			seen := make(map[string]*gauth_rfc_001.PowerOfAttorney)
+			seen := make(map[string]*gauth_aap_001.PowerOfAttorney)
 			principals := make(map[string]struct{})
 			for _, n := range nodes {
 				principals[n["id"].(string)] = struct{}{}

@@ -11,7 +11,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	gauth_rfc_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	gauth_aap_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
 )
 
@@ -27,29 +27,29 @@ func (s simpleAllowAuthorizer) GetPermissions(ctx context.Context, subject strin
 	return []authz.Permission{}, nil
 }
 
-func newServiceWithSigner(t *testing.T) *gauth_rfc_001.Service {
+func newServiceWithSigner(t *testing.T) *gauth_aap_001.Service {
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("kms init: %v", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
-	svc := gauth_rfc_001.NewService(auditLogger, simpleAllowAuthorizer{}, gauth_rfc_001.WithKMS(kms))
+	svc := gauth_aap_001.NewService(auditLogger, simpleAllowAuthorizer{}, gauth_aap_001.WithKMS(kms))
 	return svc
 }
 
 // newServiceWithSignerAndAnchors constructs a service with a supplied (possibly empty)
 // trust anchor registry for attestation enforcement tests.
-func newServiceWithSignerAndAnchors(t *testing.T, reg *attest.TrustAnchorRegistry, m metrics.Metrics) (*gauth_rfc_001.Service, cr.KMS) {
+func newServiceWithSignerAndAnchors(t *testing.T, reg *attest.TrustAnchorRegistry, m metrics.Metrics) (*gauth_aap_001.Service, cr.KMS) {
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("kms init: %v", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
-	opts := []gauth_rfc_001.Option{gauth_rfc_001.WithKMS(kms), gauth_rfc_001.WithAttestationTrustAnchors(reg)}
+	opts := []gauth_aap_001.Option{gauth_aap_001.WithKMS(kms), gauth_aap_001.WithAttestationTrustAnchors(reg)}
 	if m != nil {
-		opts = append(opts, gauth_rfc_001.WithMetrics(m))
+		opts = append(opts, gauth_aap_001.WithMetrics(m))
 	}
-	svc := gauth_rfc_001.NewService(auditLogger, simpleAllowAuthorizer{}, opts...)
+	svc := gauth_aap_001.NewService(auditLogger, simpleAllowAuthorizer{}, opts...)
 	return svc, kms
 }
 

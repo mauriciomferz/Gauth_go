@@ -49,7 +49,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	devicePkg "github.com/mauriciomferz/Gauth_go/pkg/device"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 	gnapPkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
 	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
@@ -1041,12 +1041,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			s.authorizer = authz.NewMemoryAuthorizer()
 		}
 		// Functional options: enable mandatory signatures when GAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
-		rfcOpts := []gauth_rfc_001.Option{}
+		rfcOpts := []gauth_aap_001.Option{}
 		if s.redisClient != nil {
 			// Enable distributed replay protection (GAUTH-VULN-004)
-			rfcOpts = append(rfcOpts, gauth_rfc_001.WithReplayStoreRedis(s.redisClient.GetClient(), "gauth", 5*time.Minute))
+			rfcOpts = append(rfcOpts, gauth_aap_001.WithReplayStoreRedis(s.redisClient.GetClient(), "gauth", 5*time.Minute))
 		}
-		svc := gauth_rfc_001.NewService(memAudit, s.authorizer, rfcOpts...)
+		svc := gauth_aap_001.NewService(memAudit, s.authorizer, rfcOpts...)
 		s.aap001Service = svc
 		fmt.Fprintln(os.Stderr, "[aap001] service initialized (semantic counters active)")
 		// Mount dual-control revocation workflow HTTP endpoints.

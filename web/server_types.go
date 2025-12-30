@@ -19,7 +19,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/database"
 	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
 	"github.com/mauriciomferz/Gauth_go/pkg/redis"
 	"github.com/mauriciomferz/Gauth_go/web/handlers/admin"
@@ -68,15 +68,15 @@ type BetaServer struct {
 	// These are no-ops when GAUTH_DISABLE_AAP001_SERVICE=1 (service nil) and handlers will fail closed.
 	aap001Service interface {
 		SemanticSnapshot() map[string]uint64
-		InitiateRevocation(ctx context.Context, req gauth_rfc_001.RevocationRequest) error
+		InitiateRevocation(ctx context.Context, req gauth_aap_001.RevocationRequest) error
 		ApproveRevocation(ctx context.Context, poaID, approver string) error
 		CancelRevocation(ctx context.Context, poaID, actor string) error
 	}
 	// RFC service reference for hierarchical digest features and delegation graph building
 	rfcService interface {
-		BuildDelegationGraph(ctx context.Context) ([]gauth_rfc_001.DelegationGraphNode, error)
-		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*gauth_rfc_001.PowerOfAttorney, error)
-		ListDelegations(userID string) ([]*gauth_rfc_001.PowerOfAttorney, error)
+		BuildDelegationGraph(ctx context.Context) ([]gauth_aap_001.DelegationGraphNode, error)
+		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*gauth_aap_001.PowerOfAttorney, error)
+		ListDelegations(userID string) ([]*gauth_aap_001.PowerOfAttorney, error)
 	}
 	violationHandler *violations.Handler
 	violationAPI     *violations.API

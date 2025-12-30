@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/internal/multisig"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 )
 
 // BoardMember represents a signing authority
@@ -112,7 +112,7 @@ func main() {
 	fmt.Println("   Authorization: High-value financial transaction")
 	fmt.Println("   Threshold: 3 of 5 signatures required")
 
-	poa := &gauth_rfc_001.PowerOfAttorney{
+	poa := &gauth_aap_001.PowerOfAttorney{
 		ID:        "poa-board-approval-2025-001",
 		Grantor:   "Acme Corporation Board of Directors",
 		Grantee:   "Chief Financial Officer",

@@ -22,7 +22,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 )
 
 // DemoResult captures key outcomes for testing & introspection while keeping
@@ -46,7 +46,7 @@ type scenarioParams struct {
 	performRevoke        bool                         // if false, skip revoke
 	postRevokeValidation bool                         // if true, attempt post-revoke validation
 	largeJSON            bool                         // if true, force JSON truncation path
-	modifyConfig         func(*gauth_rfc_001.AAP001Config) // optional mutator to trigger config errors
+	modifyConfig         func(*gauth_aap_001.AAP001Config) // optional mutator to trigger config errors
 }
 
 // runDemoInternal executes the scenario described by params and returns DemoResult or error explaining failure.
@@ -55,7 +55,7 @@ func runDemoInternal(p scenarioParams) (*DemoResult, error) {
 	if p.modifyConfig != nil {
 		p.modifyConfig(cfg)
 	}
-	if err := gauth_rfc_001.ValidateAAP001Compliance(cfg); err != nil {
+	if err := gauth_aap_001.ValidateAAP001Compliance(cfg); err != nil {
 		return nil, fmt.Errorf("config invalid: %w", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
@@ -69,8 +69,8 @@ func runDemoInternal(p scenarioParams) (*DemoResult, error) {
 	if p.allowInvalidAction {
 		authorizer.AddPolicy(authz.Policy{ID: "allow-admin-delete", Subject: p.grantor, Resource: "poa", Actions: []string{"admin:delete"}, Effect: authz.Allow})
 	}
-	svc := gauth_rfc_001.NewService(auditLogger, authorizer)
-	req := gauth_rfc_001.DelegationRequest{Grantor: p.grantor, Grantee: p.grantee, Scope: []string{"transaction:execute", "account:read"}, Duration: 2 * time.Hour}
+	svc := gauth_aap_001.NewService(auditLogger, authorizer)
+	req := gauth_aap_001.DelegationRequest{Grantor: p.grantor, Grantee: p.grantee, Scope: []string{"transaction:execute", "account:read"}, Duration: 2 * time.Hour}
 	delegation, err := svc.CreateDelegation(req)
 	if err != nil {
 		return nil, fmt.Errorf("create delegation failed: %w", err)
@@ -87,7 +87,7 @@ func runDemoInternal(p scenarioParams) (*DemoResult, error) {
 	} else if !p.allowInvalidAction { // action unexpectedly allowed
 		return nil, fmt.Errorf("expected invalid action rejection")
 	}
-	framework := gauth_rfc_001.AgentAuth10Framework{AuthServer: cfg.AuthorizationServerURL, Clients: []string{p.grantee}}
+	framework := gauth_aap_001.AgentAuth10Framework{AuthServer: cfg.AuthorizationServerURL, Clients: []string{p.grantee}}
 	meta, _ := framework.ToJSON()
 	out := map[string]interface{}{"delegation": delegation.POA, "auth_token": delegation.AuthToken, "framework": json.RawMessage(meta)}
 	if p.largeJSON {
@@ -184,8 +184,8 @@ func main() {
 	fmt.Println("\nAll RFC-0111 demo steps completed (beta demonstration – non-production).")
 }
 
-func createAAP001Config() *gauth_rfc_001.AAP001Config {
-	return &gauth_rfc_001.AAP001Config{
+func createAAP001Config() *gauth_aap_001.AAP001Config {
+	return &gauth_aap_001.AAP001Config{
 		AuthorizationServerURL:    "https://auth.gimelfoundation.com",
 		TrustServiceProvider:      "AgentAuth Community Trust Services",
 		RequireNotarization:       true,

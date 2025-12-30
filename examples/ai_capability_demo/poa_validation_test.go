@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/internal/ai"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	"net/http"
@@ -49,7 +49,7 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 			poaRepoMu.RUnlock()
 			if ok {
 				now := time.Now().UTC()
-				if poa.Status == gauth_rfc_001.POAStatusRevoked {
+				if poa.Status == gauth_aap_001.POAStatusRevoked {
 					result = "revoked"
 					allowed = false
 				} else if now.After(poa.ValidUntil) || now.Before(poa.ValidFrom) {
@@ -95,7 +95,7 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_rfc_001.POAStatusDraft {
+		if poa.Status != gauth_aap_001.POAStatusDraft {
 			poaRepoMu.Unlock()
 			c.JSON(400, gin.H{"error": "poa_not_draft", "status": poa.Status})
 			return
@@ -114,16 +114,16 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 			return
 		}
 		if poa.MultiSignatures == nil {
-			poa.MultiSignatures = map[string]*gauth_rfc_001.POASignature{}
+			poa.MultiSignatures = map[string]*gauth_aap_001.POASignature{}
 		}
 		if _, exists := poa.MultiSignatures[req.Signer]; exists {
 			poaRepoMu.Unlock()
 			c.JSON(409, gin.H{"error": "duplicate_signature"})
 			return
 		}
-		digest, canon, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+		digest, canon, _ := gauth_aap_001.CanonicalPOADigest(poa)
 		dummySig := base64.StdEncoding.EncodeToString([]byte("test-" + req.Signer + "-" + digest))
-		poa.MultiSignatures[req.Signer] = &gauth_rfc_001.POASignature{Algorithm: "ed25519", KeyID: req.Signer + "-kid", DigestHex: digest, SigBase64: dummySig, Canonical: canon}
+		poa.MultiSignatures[req.Signer] = &gauth_aap_001.POASignature{Algorithm: "ed25519", KeyID: req.Signer + "-kid", DigestHex: digest, SigBase64: dummySig, Canonical: canon}
 		poa.UpdatedAt = time.Now().UTC()
 		poaRepo[id] = poa
 		poaRepoMu.Unlock()
@@ -138,7 +138,7 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_rfc_001.POAStatusDraft {
+		if poa.Status != gauth_aap_001.POAStatusDraft {
 			poaRepoMu.Unlock()
 			c.JSON(400, gin.H{"error": "not_draft", "status": poa.Status})
 			return
@@ -148,7 +148,7 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 			c.JSON(400, gin.H{"error": "threshold_not_met", "current": len(poa.MultiSignatures), "need": poa.Threshold})
 			return
 		}
-		poa.Status = gauth_rfc_001.POAStatusActive
+		poa.Status = gauth_aap_001.POAStatusActive
 		poa.UpdatedAt = time.Now().UTC()
 		poaRepo[id] = poa
 		poaRepoMu.Unlock()
@@ -168,9 +168,9 @@ func setupTestRouter(t *testing.T) *gin.Engine {
 	return r
 }
 
-func issueTestPOA(id string, status gauth_rfc_001.POAStatus, scope []string, durSeconds int) *gauth_rfc_001.PowerOfAttorney {
+func issueTestPOA(id string, status gauth_aap_001.POAStatus, scope []string, durSeconds int) *gauth_aap_001.PowerOfAttorney {
 	now := time.Now().UTC()
-	poa := &gauth_rfc_001.PowerOfAttorney{
+	poa := &gauth_aap_001.PowerOfAttorney{
 		ID:           id,
 		Version:      1,
 		Grantor:      "grantor",
@@ -207,7 +207,7 @@ func TestPOAValidationSuccess(t *testing.T) {
 	// disable enforcement checks (focus on PoA presence)
 	os.Setenv("GAUTH_AI_DEMO_TEST_DISABLE_ENFORCEMENT", "1")
 	router := setupTestRouter(t)
-	poa := issueTestPOA("poa-success", gauth_rfc_001.POAStatusActive, []string{"transaction:read"}, 300)
+	poa := issueTestPOA("poa-success", gauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	body := `{"action":"transaction:read","claims":{"ai_entity_type":"agent","ai_entity_verified":true,"ai_agent_registered":true,"algorithmic_accountability":true,"risk_level":"medium","jurisdiction":"US"},"poa_id":"` + poa.ID + `"}`
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/demo/enforce", http.NoBody)
@@ -231,7 +231,7 @@ func TestPOAValidationSuccess(t *testing.T) {
 func TestPOAValidationRevoked(t *testing.T) {
 	os.Setenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH", "1")
 	router := setupTestRouter(t)
-	poa := issueTestPOA("poa-revoked", gauth_rfc_001.POAStatusRevoked, []string{"transaction:read"}, 300)
+	poa := issueTestPOA("poa-revoked", gauth_aap_001.POAStatusRevoked, []string{"transaction:read"}, 300)
 	body := `{"action":"transaction:read","claims":{},"poa_id":"` + poa.ID + `"}`
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/demo/enforce", http.NoBody)
@@ -250,7 +250,7 @@ func TestPOAValidationExpired(t *testing.T) {
 	router := setupTestRouter(t)
 	// expires immediately
 	now := time.Now().UTC()
-	poa := &gauth_rfc_001.PowerOfAttorney{ID: "poa-expired", Version: 1, Grantor: "g", Grantee: "gr", Scope: []string{"transaction:read"}, Restrictions: map[string]string{}, ValidFrom: now.Add(-time.Hour), ValidUntil: now.Add(-time.Minute), Status: gauth_rfc_001.POAStatusActive, CreatedAt: now, UpdatedAt: now}
+	poa := &gauth_aap_001.PowerOfAttorney{ID: "poa-expired", Version: 1, Grantor: "g", Grantee: "gr", Scope: []string{"transaction:read"}, Restrictions: map[string]string{}, ValidFrom: now.Add(-time.Hour), ValidUntil: now.Add(-time.Minute), Status: gauth_aap_001.POAStatusActive, CreatedAt: now, UpdatedAt: now}
 	poaRepoMu.Lock()
 	poaRepo[poa.ID] = poa
 	poaRepoMu.Unlock()
@@ -270,7 +270,7 @@ func TestPOAValidationExpired(t *testing.T) {
 func TestPOAValidationScopeMismatch(t *testing.T) {
 	os.Setenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH", "1")
 	router := setupTestRouter(t)
-	poa := issueTestPOA("poa-scope", gauth_rfc_001.POAStatusActive, []string{"transaction:read"}, 300)
+	poa := issueTestPOA("poa-scope", gauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	body := `{"action":"transaction:execute","claims":{},"poa_id":"` + poa.ID + `"}`
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/demo/enforce", http.NoBody)
@@ -291,9 +291,9 @@ func TestPOAIntegrityDigestMismatch(t *testing.T) {
 	os.Setenv("GAUTH_AI_DEMO_JWT_SECRET", secret)
 	os.Setenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH", "0")
 	r := setupTestRouter(t)
-	poa := issueTestPOA("poa-digest", gauth_rfc_001.POAStatusActive, []string{"transaction:read"}, 300)
+	poa := issueTestPOA("poa-digest", gauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
-	digest, _, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+	digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
 	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest + "tamper", "poa_version": poa.Version, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	w := httptest.NewRecorder()
@@ -318,9 +318,9 @@ func TestPOAIntegrityVersionMismatch(t *testing.T) {
 	os.Setenv("GAUTH_AI_DEMO_JWT_SECRET", secret)
 	os.Setenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH", "0")
 	r := setupTestRouter(t)
-	poa := issueTestPOA("poa-version", gauth_rfc_001.POAStatusActive, []string{"transaction:read"}, 300)
+	poa := issueTestPOA("poa-version", gauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
-	digest, _, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+	digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
 	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest, "poa_version": poa.Version + 1, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	w := httptest.NewRecorder()
@@ -345,9 +345,9 @@ func TestPOAIntegritySuccess(t *testing.T) {
 	os.Setenv("GAUTH_AI_DEMO_JWT_SECRET", secret)
 	os.Setenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH", "0")
 	r := setupTestRouter(t)
-	poa := issueTestPOA("poa-success-int", gauth_rfc_001.POAStatusActive, []string{"transaction:read"}, 300)
+	poa := issueTestPOA("poa-success-int", gauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
-	digest, _, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+	digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
 	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(30 * time.Minute).Unix(), "poa_id": poa.ID, "poa_digest": digest, "poa_version": poa.Version, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	w := httptest.NewRecorder()
@@ -371,9 +371,9 @@ func TestPOAIntegrityMetricsIncrement(t *testing.T) {
 		poaIntegrityFailuresCounter = prometheus.NewCounterVec(prometheus.CounterOpts{Name: "ai_demo_poa_integrity_failures_total", Help: "test counter"}, []string{"reason"})
 	}
 	r := setupTestRouter(t)
-	poa := issueTestPOA("poa-metrics", gauth_rfc_001.POAStatusActive, []string{"transaction:read"}, 300)
+	poa := issueTestPOA("poa-metrics", gauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
-	digest, _, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+	digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
 	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest + "x", "poa_version": poa.Version, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	before := testutil.ToFloat64(poaIntegrityFailuresCounter.WithLabelValues("digest_mismatch"))
@@ -401,7 +401,7 @@ func TestMultisigQuorumActivation(t *testing.T) {
 	router := setupTestRouter(t)
 	// Prepare draft via direct in-memory creation (simpler than hitting prepare endpoint for unit scope)
 	now := time.Now().UTC()
-	poa := &gauth_rfc_001.PowerOfAttorney{ID: "poa-multi", Version: 1, Grantor: "g1", Grantee: "gr1", Scope: []string{"transaction:read"}, ValidFrom: now, ValidUntil: now.Add(time.Hour), Status: gauth_rfc_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Signers: []string{"alice", "bob"}, Threshold: 2, MultiSignatures: map[string]*gauth_rfc_001.POASignature{}}
+	poa := &gauth_aap_001.PowerOfAttorney{ID: "poa-multi", Version: 1, Grantor: "g1", Grantee: "gr1", Scope: []string{"transaction:read"}, ValidFrom: now, ValidUntil: now.Add(time.Hour), Status: gauth_aap_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Signers: []string{"alice", "bob"}, Threshold: 2, MultiSignatures: map[string]*gauth_aap_001.POASignature{}}
 	poaRepoMu.Lock()
 	poaRepo[poa.ID] = poa
 	poaRepoMu.Unlock()
@@ -427,7 +427,7 @@ func TestMultisigQuorumActivation(t *testing.T) {
 	poaRepoMu.RLock()
 	updated := poaRepo[poa.ID]
 	poaRepoMu.RUnlock()
-	if updated.Status != gauth_rfc_001.POAStatusActive {
+	if updated.Status != gauth_aap_001.POAStatusActive {
 		t.Fatalf("expected status active got %s", updated.Status)
 	}
 }
@@ -438,7 +438,7 @@ func TestMultisigDuplicateSignature(t *testing.T) {
 	os.Setenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH", "1")
 	router := setupTestRouter(t)
 	now := time.Now().UTC()
-	poa := &gauth_rfc_001.PowerOfAttorney{ID: "poa-multi-dup", Version: 1, Grantor: "g1", Grantee: "gr1", Scope: []string{"transaction:read"}, ValidFrom: now, ValidUntil: now.Add(time.Hour), Status: gauth_rfc_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Signers: []string{"alice", "bob"}, Threshold: 2, MultiSignatures: map[string]*gauth_rfc_001.POASignature{}}
+	poa := &gauth_aap_001.PowerOfAttorney{ID: "poa-multi-dup", Version: 1, Grantor: "g1", Grantee: "gr1", Scope: []string{"transaction:read"}, ValidFrom: now, ValidUntil: now.Add(time.Hour), Status: gauth_aap_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Signers: []string{"alice", "bob"}, Threshold: 2, MultiSignatures: map[string]*gauth_aap_001.POASignature{}}
 	poaRepoMu.Lock()
 	poaRepo[poa.ID] = poa
 	poaRepoMu.Unlock()
@@ -466,7 +466,7 @@ func TestMultisigUnknownSigner(t *testing.T) {
 	os.Setenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH", "1")
 	router := setupTestRouter(t)
 	now := time.Now().UTC()
-	poa := &gauth_rfc_001.PowerOfAttorney{ID: "poa-multi-unknown", Version: 1, Grantor: "g1", Grantee: "gr1", Scope: []string{"transaction:read"}, ValidFrom: now, ValidUntil: now.Add(time.Hour), Status: gauth_rfc_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Signers: []string{"alice", "bob"}, Threshold: 2, MultiSignatures: map[string]*gauth_rfc_001.POASignature{}}
+	poa := &gauth_aap_001.PowerOfAttorney{ID: "poa-multi-unknown", Version: 1, Grantor: "g1", Grantee: "gr1", Scope: []string{"transaction:read"}, ValidFrom: now, ValidUntil: now.Add(time.Hour), Status: gauth_aap_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Signers: []string{"alice", "bob"}, Threshold: 2, MultiSignatures: map[string]*gauth_aap_001.POASignature{}}
 	poaRepoMu.Lock()
 	poaRepo[poa.ID] = poa
 	poaRepoMu.Unlock()

@@ -13,7 +13,7 @@ import (
 
 	"github.com/mauriciomferz/Gauth_go/pkg/audit"
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	"github.com/mauriciomferz/Gauth_go/pkg/testutil"
 )
 
@@ -36,8 +36,8 @@ func execDelegationScenarioInternal(allowForbidden bool) (*DelegationScenarioRes
 	if allowForbidden {
 		authorizer.AddPolicy(authz.Policy{ID: "allow-admin", Subject: "alice@example.com", Resource: "poa", Actions: []string{"forbidden:admin"}, Effect: authz.Allow})
 	}
-	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
-	req := gauth_rfc_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 90 * time.Minute}
+	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 90 * time.Minute}
 	resp, err := svc.CreateDelegation(req)
 	if err != nil {
 		return nil, fmt.Errorf("create failed: %w", err)
@@ -85,8 +85,8 @@ func ExecExpiryScenario() (bool, error) {
 	fc := testutil.NewFakeClock(time.Now())
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create-expiry", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
-	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
-	req := gauth_rfc_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 2 * time.Minute}
+	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
+	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 2 * time.Minute}
 	resp, err := svc.CreateDelegation(req)
 	if err != nil {
 		return false, fmt.Errorf("create failed: %w", err)
@@ -111,8 +111,8 @@ func ExecExpiryScenarioNoAdvance() (bool, error) {
 	fc := testutil.NewFakeClock(time.Now())
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create-expiry", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
-	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
-	req := gauth_rfc_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 2 * time.Minute}
+	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
+	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 2 * time.Minute}
 	resp, err := svc.CreateDelegation(req)
 	if err != nil {
 		return false, fmt.Errorf("create failed: %w", err)

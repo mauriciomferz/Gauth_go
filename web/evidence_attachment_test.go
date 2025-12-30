@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 )
 
 // helper to POST JSON (reuses performJSONPost in revocation tests if in same package, but redeclare for clarity)
@@ -25,12 +25,12 @@ func performJSONPostEvidence(s *BetaServer, path string, body any) *httptest.Res
 
 func createTestPOA(srv *BetaServer) (string, error) {
 	// Create a delegation through the service
-	svc, ok := srv.aap001Service.(*gauth_rfc_001.Service)
+	svc, ok := srv.aap001Service.(*gauth_aap_001.Service)
 	if !ok || svc == nil {
 		return "", fmt.Errorf("AAP001 service not available")
 	}
 
-	resp, err := svc.CreateDelegationCtx(context.Background(), gauth_rfc_001.DelegationRequest{
+	resp, err := svc.CreateDelegationCtx(context.Background(), gauth_aap_001.DelegationRequest{
 		Grantor:  "testgrantor",
 		Grantee:  "testgrantee",
 		Scope:    []string{"read"},

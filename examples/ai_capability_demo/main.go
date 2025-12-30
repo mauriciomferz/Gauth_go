@@ -24,7 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/Gauth_go/examples/ai_capability_demo/ledger"
 	"github.com/mauriciomferz/Gauth_go/internal/ai"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -75,8 +75,8 @@ var (
 	jwksNegative map[string]time.Time
 	// PoA repository (in-memory for demo) & mutex
 	poaRepoMu   sync.RWMutex
-	poaRepo     = make(map[string]*gauth_rfc_001.PowerOfAttorney)
-	boltPOARepo *gauth_rfc_001.BoltRepository
+	poaRepo     = make(map[string]*gauth_aap_001.PowerOfAttorney)
+	boltPOARepo *gauth_aap_001.BoltRepository
 	// Simple ledger instance (Week2 anchoring; may be replaced by BoltDB if persistence configured)
 	ledgerInstance      = ledger.New()
 	boltLedgerInstance  *ledger.BoltLedger
@@ -338,7 +338,7 @@ func main() {
 		defer poaRepoMu.Unlock()
 		if boltPOARepo == nil {
 			if len(poaRepo) == 0 {
-				poaRepo = make(map[string]*gauth_rfc_001.PowerOfAttorney)
+				poaRepo = make(map[string]*gauth_aap_001.PowerOfAttorney)
 			}
 		}
 	})
@@ -756,7 +756,7 @@ func authMiddleware() gin.HandlerFunc {
 							_ = json.Unmarshal(payloadRaw, &claims)
 							if poaID, ok := claims["poa_id"].(string); ok && poaID != "" {
 								poaRepoMu.RLock()
-								var poa *gauth_rfc_001.PowerOfAttorney
+								var poa *gauth_aap_001.PowerOfAttorney
 								var exists bool
 								if boltPOARepo != nil {
 									poa, exists = boltPOARepo.Get(poaID)
@@ -769,7 +769,7 @@ func authMiddleware() gin.HandlerFunc {
 									return
 								}
 								now := time.Now().UTC()
-								if poa.Status == gauth_rfc_001.POAStatusRevoked {
+								if poa.Status == gauth_aap_001.POAStatusRevoked {
 									unauth("poa_revoked")
 									return
 								}
@@ -779,7 +779,7 @@ func authMiddleware() gin.HandlerFunc {
 								}
 								// Digest/version integrity checks
 								if digClaim, okD := claims["poa_digest"].(string); okD && digClaim != "" {
-									if calcDig, _, errDig := gauth_rfc_001.CanonicalPOADigest(poa); errDig == nil {
+									if calcDig, _, errDig := gauth_aap_001.CanonicalPOADigest(poa); errDig == nil {
 										if calcDig != digClaim {
 											if poaIntegrityFailuresCounter != nil {
 												poaIntegrityFailuresCounter.WithLabelValues("digest_mismatch").Inc()
@@ -844,7 +844,7 @@ func authMiddleware() gin.HandlerFunc {
 							_ = json.Unmarshal(payloadRaw, &claims)
 							if poaID, ok := claims["poa_id"].(string); ok && poaID != "" {
 								poaRepoMu.RLock()
-								var poa *gauth_rfc_001.PowerOfAttorney
+								var poa *gauth_aap_001.PowerOfAttorney
 								var exists bool
 								if boltPOARepo != nil {
 									poa, exists = boltPOARepo.Get(poaID)
@@ -857,7 +857,7 @@ func authMiddleware() gin.HandlerFunc {
 									return
 								}
 								now := time.Now().UTC()
-								if poa.Status == gauth_rfc_001.POAStatusRevoked {
+								if poa.Status == gauth_aap_001.POAStatusRevoked {
 									unauth("poa_revoked")
 									return
 								}
@@ -866,7 +866,7 @@ func authMiddleware() gin.HandlerFunc {
 									return
 								}
 								if digClaim, okD := claims["poa_digest"].(string); okD && digClaim != "" {
-									if calcDig, _, errDig := gauth_rfc_001.CanonicalPOADigest(poa); errDig == nil {
+									if calcDig, _, errDig := gauth_aap_001.CanonicalPOADigest(poa); errDig == nil {
 										if calcDig != digClaim {
 											if poaIntegrityFailuresCounter != nil {
 												poaIntegrityFailuresCounter.WithLabelValues("digest_mismatch").Inc()
@@ -1263,7 +1263,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		if request.POAID != "" {
 			result := "not_found"
 			poaRepoMu.RLock()
-			var poa *gauth_rfc_001.PowerOfAttorney
+			var poa *gauth_aap_001.PowerOfAttorney
 			var ok bool
 			if boltPOARepo != nil {
 				poa, ok = boltPOARepo.Get(request.POAID)
@@ -1274,7 +1274,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			if ok {
 				// Basic status/time/scope validation
 				now := time.Now().UTC()
-				if poa.Status == gauth_rfc_001.POAStatusRevoked {
+				if poa.Status == gauth_aap_001.POAStatusRevoked {
 					result = "revoked"
 					allowed = false
 				} else if now.After(poa.ValidUntil) || now.Before(poa.ValidFrom) {
@@ -1299,7 +1299,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 					result = "success" // empty scope treated as wildcard for demo
 				}
 				metadata["poa_id"] = poa.ID
-				if dig, canon, err := gauth_rfc_001.CanonicalPOADigest(poa); err == nil {
+				if dig, canon, err := gauth_aap_001.CanonicalPOADigest(poa); err == nil {
 					metadata["poa_digest"] = dig
 					_ = canon
 				}
@@ -1400,7 +1400,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		if req.ID == "" {
 			req.ID = fmt.Sprintf("poa-%d", time.Now().UnixNano())
 		}
-		poa := &gauth_rfc_001.PowerOfAttorney{
+		poa := &gauth_aap_001.PowerOfAttorney{
 			ID:           req.ID,
 			Version:      1,
 			Grantor:      req.Grantor,
@@ -1409,7 +1409,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			Restrictions: map[string]string{},
 			ValidFrom:    time.Now().UTC(),
 			ValidUntil:   time.Now().UTC().Add(time.Duration(req.ValidForSeconds) * time.Second),
-			Status:       gauth_rfc_001.POAStatusActive,
+			Status:       gauth_aap_001.POAStatusActive,
 			CreatedAt:    time.Now().UTC(),
 			UpdatedAt:    time.Now().UTC(),
 			Jurisdiction: req.Jurisdiction,
@@ -1437,7 +1437,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			}
 		}
 		appendAudit("poa_issue", poa.Grantor, poa.ID, map[string]any{"scope": poa.Scope, "jurisdiction": poa.Jurisdiction})
-		digest, _, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+		digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
 		c.JSON(200, gin.H{"poa": poa, "canonical_digest": digest})
 	})
 
@@ -1468,7 +1468,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			return
 		}
 		now := time.Now().UTC()
-		poa := &gauth_rfc_001.PowerOfAttorney{ID: req.ID, Version: 1, Grantor: req.Grantor, Grantee: req.Grantee, Scope: req.Scope, Restrictions: map[string]string{}, ValidFrom: now, ValidUntil: now.Add(time.Duration(req.ValidForSeconds) * time.Second), Status: gauth_rfc_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Jurisdiction: req.Jurisdiction, Signers: req.Signers, Threshold: req.Threshold, MultiSignatures: map[string]*gauth_rfc_001.POASignature{}}
+		poa := &gauth_aap_001.PowerOfAttorney{ID: req.ID, Version: 1, Grantor: req.Grantor, Grantee: req.Grantee, Scope: req.Scope, Restrictions: map[string]string{}, ValidFrom: now, ValidUntil: now.Add(time.Duration(req.ValidForSeconds) * time.Second), Status: gauth_aap_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Jurisdiction: req.Jurisdiction, Signers: req.Signers, Threshold: req.Threshold, MultiSignatures: map[string]*gauth_aap_001.POASignature{}}
 		poaRepoMu.Lock()
 		if boltPOARepo != nil {
 			_ = boltPOARepo.Create(poa)
@@ -1504,7 +1504,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			return
 		}
 		poaRepoMu.Lock()
-		var poa *gauth_rfc_001.PowerOfAttorney
+		var poa *gauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1516,7 +1516,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_rfc_001.POAStatusDraft {
+		if poa.Status != gauth_aap_001.POAStatusDraft {
 			poaRepoMu.Unlock()
 			c.JSON(400, gin.H{"error": "poa_not_draft", "status": poa.Status})
 			return
@@ -1534,17 +1534,17 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			return
 		}
 		if poa.MultiSignatures == nil {
-			poa.MultiSignatures = map[string]*gauth_rfc_001.POASignature{}
+			poa.MultiSignatures = map[string]*gauth_aap_001.POASignature{}
 		}
 		if _, exists := poa.MultiSignatures[req.Signer]; exists {
 			poaRepoMu.Unlock()
 			c.JSON(409, gin.H{"error": "duplicate_signature"})
 			return
 		}
-		digest, canon, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+		digest, canon, _ := gauth_aap_001.CanonicalPOADigest(poa)
 		// For demo we generate a dummy Ed25519-like signature placeholder (no crypto key resolution).
 		randomSig := base64.StdEncoding.EncodeToString([]byte("demo-" + req.Signer + "-" + digest))
-		poa.MultiSignatures[req.Signer] = &gauth_rfc_001.POASignature{Algorithm: "ed25519", KeyID: req.Signer + "-kid", DigestHex: digest, SigBase64: randomSig, Canonical: canon}
+		poa.MultiSignatures[req.Signer] = &gauth_aap_001.POASignature{Algorithm: "ed25519", KeyID: req.Signer + "-kid", DigestHex: digest, SigBase64: randomSig, Canonical: canon}
 		poa.UpdatedAt = time.Now().UTC()
 		// Update repo
 		if boltPOARepo != nil {
@@ -1571,7 +1571,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 	router.GET("/demo/poa/:id/status", func(c *gin.Context) {
 		id := c.Param("id")
 		poaRepoMu.RLock()
-		var poa *gauth_rfc_001.PowerOfAttorney
+		var poa *gauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1590,7 +1590,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 	router.POST("/demo/poa/:id/finalize", func(c *gin.Context) {
 		id := c.Param("id")
 		poaRepoMu.Lock()
-		var poa *gauth_rfc_001.PowerOfAttorney
+		var poa *gauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1602,7 +1602,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_rfc_001.POAStatusDraft {
+		if poa.Status != gauth_aap_001.POAStatusDraft {
 			poaRepoMu.Unlock()
 			c.JSON(400, gin.H{"error": "not_draft", "status": poa.Status})
 			return
@@ -1614,7 +1614,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		}
 		// Mark active
 		oldStatus := poa.Status
-		poa.Status = gauth_rfc_001.POAStatusActive
+		poa.Status = gauth_aap_001.POAStatusActive
 		poa.UpdatedAt = time.Now().UTC()
 		if boltPOARepo != nil {
 			_ = boltPOARepo.Update(poa)
@@ -1799,7 +1799,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		id := c.Param("id")
 		reason := c.Query("reason")
 		poaRepoMu.Lock()
-		var poa *gauth_rfc_001.PowerOfAttorney
+		var poa *gauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1807,9 +1807,9 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			poa, ok = poaRepo[id]
 		}
 		if ok {
-			if poa.Status != gauth_rfc_001.POAStatusRevoked {
+			if poa.Status != gauth_aap_001.POAStatusRevoked {
 				oldStatus := poa.Status
-				poa.Status = gauth_rfc_001.POAStatusRevoked
+				poa.Status = gauth_aap_001.POAStatusRevoked
 				now := time.Now().UTC()
 				poa.RevokedAt = &now
 				poa.RevocationReason = reason
@@ -1851,7 +1851,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		id := c.Param("id")
 		reason := c.Query("reason")
 		poaRepoMu.Lock()
-		var poa *gauth_rfc_001.PowerOfAttorney
+		var poa *gauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1859,9 +1859,9 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			poa, ok = poaRepo[id]
 		}
 		if ok {
-			if poa.Status == gauth_rfc_001.POAStatusActive { // only allow suspend from active
+			if poa.Status == gauth_aap_001.POAStatusActive { // only allow suspend from active
 				oldStatus := poa.Status
-				poa.Status = gauth_rfc_001.POAStatusSuspended
+				poa.Status = gauth_aap_001.POAStatusSuspended
 				poa.UpdatedAt = time.Now().UTC()
 				if boltPOARepo != nil {
 					_ = boltPOARepo.Update(poa)
@@ -1886,7 +1886,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		c.JSON(200, gin.H{"suspended": poa.Status == gauth_rfc_001.POAStatusSuspended, "poa_id": id, "status": poa.Status, "reason": reason})
+		c.JSON(200, gin.H{"suspended": poa.Status == gauth_aap_001.POAStatusSuspended, "poa_id": id, "status": poa.Status, "reason": reason})
 	})
 
 	// PoA terminate endpoint (permanent; allow from active or suspended; cannot change revoked/expired/terminated)
@@ -1894,7 +1894,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		id := c.Param("id")
 		reason := c.Query("reason")
 		poaRepoMu.Lock()
-		var poa *gauth_rfc_001.PowerOfAttorney
+		var poa *gauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1902,9 +1902,9 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			poa, ok = poaRepo[id]
 		}
 		if ok {
-			if poa.Status == gauth_rfc_001.POAStatusActive || poa.Status == gauth_rfc_001.POAStatusSuspended {
+			if poa.Status == gauth_aap_001.POAStatusActive || poa.Status == gauth_aap_001.POAStatusSuspended {
 				oldStatus := poa.Status
-				poa.Status = gauth_rfc_001.POAStatusTerminated
+				poa.Status = gauth_aap_001.POAStatusTerminated
 				poa.UpdatedAt = time.Now().UTC()
 				if boltPOARepo != nil {
 					_ = boltPOARepo.Update(poa)
@@ -1928,7 +1928,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		c.JSON(200, gin.H{"terminated": poa.Status == gauth_rfc_001.POAStatusTerminated, "poa_id": id, "status": poa.Status, "reason": reason})
+		c.JSON(200, gin.H{"terminated": poa.Status == gauth_aap_001.POAStatusTerminated, "poa_id": id, "status": poa.Status, "reason": reason})
 	})
 
 	// Minimal extended token issuance referencing a PoA (HS256 signed JWT). Requires GAUTH_AI_DEMO_JWT_SECRET.
@@ -1940,7 +1940,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		}
 		id := c.Param("id")
 		poaRepoMu.RLock()
-		var poa *gauth_rfc_001.PowerOfAttorney
+		var poa *gauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1952,7 +1952,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_rfc_001.POAStatusActive {
+		if poa.Status != gauth_aap_001.POAStatusActive {
 			c.JSON(400, gin.H{"error": "poa_not_active", "status": poa.Status})
 			return
 		}
@@ -1961,7 +1961,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		if exp.Sub(now) > 2*time.Hour { // cap token lifetime to 2h for demo safety
 			exp = now.Add(2 * time.Hour)
 		}
-		digest, _, _ := gauth_rfc_001.CanonicalPOADigest(poa)
+		digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
 		claims := map[string]any{
 			"sub":           poa.Grantee,
 			"iss":           "gauth-demo",
