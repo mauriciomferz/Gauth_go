@@ -152,7 +152,7 @@ type NGPassportResponse struct {
 	Nationality      string `json:"nationality"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	PassportType     string `json:"passport_type"` // Ordinary, Official, Diplomatic
 	Error            string `json:"error,omitempty"`
 }
@@ -303,7 +303,7 @@ func (nc *NigeriaIdentityConnector) VerifyPassport(ctx context.Context, req *NGP
 		Nationality:      "NGA",
 		DateOfIssue:      "2020-01-15",
 		DateOfExpiry:     "2030-01-15",
-		IssuinagentAuthority: "Nigeria",
+		IssuingAuthority: "Nigeria",
 		PassportType:     "Ordinary",
 	}
 

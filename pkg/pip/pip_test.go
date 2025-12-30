@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 	"github.com/mauriciomferz/AgentAuth/pkg/pvp"

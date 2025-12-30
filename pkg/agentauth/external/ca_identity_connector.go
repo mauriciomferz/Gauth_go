@@ -79,7 +79,7 @@ type CADriverLicenseResponse struct {
 	LicenseClass     string     `json:"license_class"` // G, G2, M, M2, A, D, etc.
 	Conditions       string     `json:"conditions,omitempty"`
 	Endorsements     []string   `json:"endorsements,omitempty"`
-	IssuinagentAuthority string     `json:"issuing_authority,omitempty"`
+	IssuingAuthority string     `json:"issuing_authority,omitempty"`
 	Error            string     `json:"error,omitempty"`
 }
 
@@ -115,7 +115,7 @@ type CAPassportResponse struct {
 	Gender           string `json:"gender,omitempty"`
 	IssueDate        string `json:"issue_date,omitempty"`
 	ExpiryDate       string `json:"expiry_date,omitempty"`
-	IssuinagentAuthority string `json:"issuing_authority,omitempty"`
+	IssuingAuthority string `json:"issuing_authority,omitempty"`
 	Error            string `json:"error,omitempty"`
 }
 
@@ -286,7 +286,7 @@ func (cc *CanadaIdentityConnector) VerifyPassport(ctx context.Context, req *CAPa
 		Gender:           req.Gender,
 		IssueDate:        "2020-01-15",
 		ExpiryDate:       "2030-01-15",
-		IssuinagentAuthority: "Canada",
+		IssuingAuthority: "Canada",
 	}
 
 	return response, nil

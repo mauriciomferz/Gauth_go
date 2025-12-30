@@ -78,7 +78,7 @@ func (rbac *RBACEngine) Authorize(req *AccessRequest) (*AuthorizationDecision, e
     decision := rbac.evaluatePermissions(allPermissions, req)
     
     // Log the decision
-    rbac.auditLogger.LoagentAuthorizationDecision(req, decision)
+    rbac.auditLogger.LogAuthorizationDecision(req, decision)
     
     return decision, nil
 }

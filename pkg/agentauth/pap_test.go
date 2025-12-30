@@ -13,7 +13,7 @@ import (
 )
 
 // TestNewPowerAdministrationPoint tests PAP creation
-func TestNewPowerAdministrationPoint(int(t) *) *testing.T) {
+func TestNewPowerAdministrationPoint(t *testing.T) {
 	pap := NewPowerAdministrationPoint("pap-001", "Test PAP", "Test power administration point")
 
 	assert.NotNil(t, pap)

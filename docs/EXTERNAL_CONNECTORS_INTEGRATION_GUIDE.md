@@ -447,7 +447,7 @@ if ageVerified {
 11. IssuingState
 12. DocumentNumber
 13. DateOfExpiry
-14. IssuinagentAuthority
+14. IssuingAuthority
 15. PlaceOfResidence
 16. ResidencePermit1
 17. ResidencePermit2

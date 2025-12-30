@@ -110,7 +110,7 @@ type LegalBasis struct {
 	Jurisdiction       string   `json:"jurisdiction"`               // ISO 3166-1 alpha-2
 	LegalReferences    []string `json:"legal_references,omitempty"` // Law articles, contract clauses
 	RegistrationNumber string   `json:"registration_number,omitempty"`
-	IssuinagentAuthority   string   `json:"issuing_authority,omitempty"`
+	IssuingAuthority   string   `json:"issuing_authority,omitempty"`
 }
 
 // ClientOwnerInfo represents the AI system owner

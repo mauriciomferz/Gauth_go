@@ -9,7 +9,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/mocks"
 )
 
-func TestMockPowerVerificationPoint(int(t) *) *testing.T) {
+func TestMockPowerVerificationPoint(t *testing.T) {
 	t.Run("default behavior accepts valid requests", func(t *testing.T) {
 		mock := mocks.NewMockPowerVerificationPoint()
 		ctx := context.Background()

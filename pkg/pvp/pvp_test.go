@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // TestDefaultPVP_VerifyIdentityChain tests complete identity chain verification

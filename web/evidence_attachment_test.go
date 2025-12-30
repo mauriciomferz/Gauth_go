@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // helper to POST JSON (reuses performJSONPost in revocation tests if in same package, but redeclare for clarity)
@@ -25,12 +25,12 @@ func performJSONPostEvidence(s *BetaServer, path string, body any) *httptest.Res
 
 func createTestPOA(srv *BetaServer) (string, error) {
 	// Create a delegation through the service
-	svc, ok := srv.aap001Service.(*gauth_aap_001.Service)
+	svc, ok := srv.aap001Service.(*agentauth_aap_001.Service)
 	if !ok || svc == nil {
 		return "", fmt.Errorf("AAP-001 service not available")
 	}
 
-	resp, err := svc.CreateDelegationCtx(context.Background(), gauth_aap_001.DelegationRequest{
+	resp, err := svc.CreateDelegationCtx(context.Background(), agentauth_aap_001.DelegationRequest{
 		Grantor:  "testgrantor",
 		Grantee:  "testgrantee",
 		Scope:    []string{"read"},
@@ -49,7 +49,7 @@ func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 	// Enable AAP001 service and policy seeding
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -91,7 +91,7 @@ func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -123,7 +123,7 @@ func TestEvidenceAttachment_NotFound(t *testing.T) {
 
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	payload := map[string]any{"hashes": []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}

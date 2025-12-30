@@ -128,7 +128,7 @@ type AUDriverLicenseResponse struct {
 	ExpiryDate       string     `json:"expiry_date"`
 	LicenseClass     string     `json:"license_class"` // C, LR, MR, HR, HC, MC, etc.
 	Conditions       string     `json:"conditions,omitempty"`
-	IssuinagentAuthority string     `json:"issuing_authority,omitempty"`
+	IssuingAuthority string     `json:"issuing_authority,omitempty"`
 	Error            string     `json:"error,omitempty"`
 }
 
@@ -153,7 +153,7 @@ type AUPassportResponse struct {
 	Gender           string `json:"gender,omitempty"`
 	IssueDate        string `json:"issue_date,omitempty"`
 	ExpiryDate       string `json:"expiry_date,omitempty"`
-	IssuinagentAuthority string `json:"issuing_authority,omitempty"`
+	IssuingAuthority string `json:"issuing_authority,omitempty"`
 	Error            string `json:"error,omitempty"`
 }
 
@@ -331,7 +331,7 @@ func (ac *AustraliaIdentityConnector) VerifyPassport(ctx context.Context, req *A
 		Gender:           req.Gender,
 		IssueDate:        "2020-01-15",
 		ExpiryDate:       "2030-01-15",
-		IssuinagentAuthority: "Commonwealth of Australia",
+		IssuingAuthority: "Commonwealth of Australia",
 	}
 
 	return response, nil

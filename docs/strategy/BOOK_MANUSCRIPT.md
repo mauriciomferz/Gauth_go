@@ -1,6 +1,6 @@
 # The Agent's Signature: Identity & Law in the Age of AI
 
-**Status:** DRAFT
+**Status:** FINAL MANUSCRIPT
 **Date:** December 30, 2025
 
 > **LEGAL NOTICE**: This manuscript describes the **AgentAuth** framework. It is an open conceptual model for the Agentic Economy.

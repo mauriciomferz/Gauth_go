@@ -143,7 +143,7 @@ type KEPassportResponse struct {
 	Nationality      string `json:"nationality"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	PassportType     string `json:"passport_type"` // Ordinary, Official, Diplomatic
 	Error            string `json:"error,omitempty"`
 }
@@ -291,7 +291,7 @@ func (kc *KenyaIdentityConnector) VerifyPassport(ctx context.Context, req *KEPas
 		Nationality:      "KEN",
 		DateOfIssue:      "2020-01-15",
 		DateOfExpiry:     "2030-01-15",
-		IssuinagentAuthority: "Kenya",
+		IssuingAuthority: "Kenya",
 		PassportType:     "Ordinary",
 	}
 

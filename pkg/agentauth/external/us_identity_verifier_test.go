@@ -60,7 +60,7 @@ func TestVerifyPassport_Valid(t *testing.T) {
 	assert.GreaterOrEqual(t, result.ConfidenceScore, 0.8)
 	assert.NotNil(t, result.Checks)
 	assert.Equal(t, CheckStatusPassed, result.Checks.DocumentAuthenticity.Status)
-	assert.GreaterOrEqual(t, result.ProcessingTimeMs, int64(0) // Can be 0 in tests
+	assert.GreaterOrEqual(t, result.ProcessingTimeMs, int64(0)) // Can be 0 in tests
 }
 
 func TestVerifyPassport_InvalidFormat(t *testing.T) {

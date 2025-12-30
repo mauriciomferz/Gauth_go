@@ -60,9 +60,9 @@ type AuthorizationProof struct {
 	// Examples: "Commercial Register Entry HRB 12345", "Power of Attorney #2024-001"
 	DocumentReference string `json:"document_reference"`
 
-	// IssuinagentAuthority identifies who issued the proof
+	// IssuingAuthority identifies who issued the proof
 	// Examples: "Amtsgericht München", "Notary Public", "Company Board"
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 
 	// IssueDate when the authorization was granted (ISO 8601)
 	IssueDate string `json:"issue_date"`
@@ -138,7 +138,7 @@ func (ap *AuthorizationProof) Validate() error {
 		return fmt.Errorf("document reference required")
 	}
 
-	if ap.IssuinagentAuthority == "" {
+	if ap.IssuingAuthority == "" {
 		return fmt.Errorf("issuing authority required")
 	}
 

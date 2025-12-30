@@ -115,7 +115,7 @@ type ZAPassportResponse struct {
 	CountryOfBirth   string `json:"country_of_birth"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	Error            string `json:"error,omitempty"`
 }
 
@@ -276,7 +276,7 @@ func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req
 		Nationality:      "ZAF",
 		DateOfIssue:      "2020-01-15",
 		DateOfExpiry:     "2030-01-15",
-		IssuinagentAuthority: "South Africa",
+		IssuingAuthority: "South Africa",
 	}
 
 	return response, nil

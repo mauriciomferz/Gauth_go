@@ -51,7 +51,7 @@ func TestRotationRobustness(t *testing.T) {
 	// Simulate rotation (new active key) so previous key list contains old active (with signer kid) to ensure still found.
 	svc.keyRing.Rotate()
 	// Keep signer key id on first previous key
-	if len(svc.keyRing.Previous() == 0 {
+	if len(svc.keyRing.Previous()) == 0 {
 		t.Fatalf("expected previous key after rotation")
 	}
 	if err := svc.ValidateDelegationCtx(context.Background(), resp.POA.ID, "bob", "read"); err != nil {

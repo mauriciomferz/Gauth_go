@@ -9,11 +9,11 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 	"github.com/mauriciomferz/AgentAuth/pkg/aap/errs"
+	aap001 "github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	"github.com/mauriciomferz/AgentAuth/pkg/attest"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
-	gauth_aap_001 "github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 // simpleAllowAuthorizer always allows
@@ -28,29 +28,29 @@ func (s simpleAllowAuthorizer) GetPermissions(ctx context.Context, subject strin
 	return []authz.Permission{}, nil
 }
 
-func newServiceWithSigner(t *testing.T) *gauth_aap_001.Service {
+func newServiceWithSigner(t *testing.T) *aap001.Service {
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("kms init: %v", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
-	svc := gauth_aap_001.NewService(auditLogger, simpleAllowAuthorizer{}, gauth_aap_001.WithKMS(kms))
+	svc := aap001.NewService(auditLogger, simpleAllowAuthorizer{}, aap001.WithKMS(kms))
 	return svc
 }
 
 // newServiceWithSignerAndAnchors constructs a service with a supplied (possibly empty)
 // trust anchor registry for attestation enforcement tests.
-func newServiceWithSignerAndAnchors(t *testing.T, reg *attest.TrustAnchorRegistry, m metrics.Metrics) (*gauth_aap_001.Service, cr.KMS) {
+func newServiceWithSignerAndAnchors(t *testing.T, reg *attest.TrustAnchorRegistry, m metrics.Metrics) (*aap001.Service, cr.KMS) {
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("kms init: %v", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
-	opts := []gauth_aap_001.Option{gauth_aap_001.WithKMS(kms), gauth_aap_001.WithAttestationTrustAnchors(reg)}
+	opts := []aap001.Option{aap001.WithKMS(kms), aap001.WithAttestationTrustAnchors(reg)}
 	if m != nil {
-		opts = append(opts, gauth_aap_001.WithMetrics(m))
+		opts = append(opts, aap001.WithMetrics(m))
 	}
-	svc := gauth_aap_001.NewService(auditLogger, simpleAllowAuthorizer{}, opts...)
+	svc := aap001.NewService(auditLogger, simpleAllowAuthorizer{}, opts...)
 	return svc, kms
 }
 

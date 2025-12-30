@@ -108,12 +108,12 @@ type ModelAttributes struct {
 }
 
 type Certification struct {
-	Type              string
-	IssuinagentAuthority  string
-	CertificateNumber string
-	ValidFrom         string
-	ValidUntil        string
-	Scope             string
+	Type                 string
+	IssuingAuthority string
+	CertificateNumber    string
+	ValidFrom            string
+	ValidUntil           string
+	Scope                string
 }
 
 // ValidateClientType validates RFC-0115 client type
@@ -578,7 +578,7 @@ const (
 type RegistrationInfo struct {
 	RegisteredName        string `json:"registered_name"`
 	RegistrationNumber    string `json:"registration_number"`
-	RegisterinagentAuthority  string `json:"registering_authority"`
+	RegisteringAuthority  string `json:"registering_authority"`
 	RegistrationDate      string `json:"registration_date"` // ISO 8601
 	Jurisdiction          string `json:"jurisdiction"`
 	BusinessType          string `json:"business_type"`

@@ -610,7 +610,7 @@ type IdentityDocument struct {
     DocumentType     string    ✅ passport, national_id, etc.
     DocumentNumber   string    ✅
     IssuingCountry   string    ✅
-    IssuinagentAuthority string    ✅
+    IssuingAuthority string    ✅
     IssueDate        time.Time ✅
     ExpirationDate   time.Time ✅
     SubjectID        string    ✅

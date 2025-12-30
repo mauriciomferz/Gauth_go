@@ -135,7 +135,7 @@ type NZPassportResponse struct {
 	PlaceOfBirth     string `json:"place_of_birth"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	Error            string `json:"error,omitempty"`
 }
 
@@ -284,7 +284,7 @@ func (nc *NZIdentityConnector) VerifyPassport(ctx context.Context, req *NZPasspo
 		Nationality:      "NZL",
 		DateOfIssue:      "2020-01-15",
 		DateOfExpiry:     "2030-01-15",
-		IssuinagentAuthority: "New Zealand",
+		IssuingAuthority: "New Zealand",
 	}
 
 	return response, nil

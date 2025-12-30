@@ -19,13 +19,13 @@ func TestCreateAAP002CompliantConfig(t *testing.T) {
 	}
 
 	// Verify all exclusion flags are true
-	if rfcConfig.ExcludeWeb3 {
+	if !rfcConfig.ExcludeWeb3 {
 		t.Errorf("ExcludeWeb3 = false, want true")
 	}
-	if rfcConfig.ExcludeAIOperators {
+	if !rfcConfig.ExcludeAIOperators {
 		t.Errorf("ExcludeAIOperators = false, want true")
 	}
-	if rfcConfig.ExcludeDNAIdentities {
+	if !rfcConfig.ExcludeDNAIdentities {
 		t.Errorf("ExcludeDNAIdentities = false, want true")
 	}
 

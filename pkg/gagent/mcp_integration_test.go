@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )

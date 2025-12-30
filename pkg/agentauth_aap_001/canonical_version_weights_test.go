@@ -55,7 +55,7 @@ func TestCanonicalVersionWeightsPresence(t *testing.T) {
 
 // containsExact does a substring search using byte slice.
 func containsExact(b []byte, s string) bool {
-	return indexOf(b, []byte(s) >= 0
+	return indexOf(b, []byte(s)) >= 0
 }
 
 // containsExactPermutedWeights tolerates any ordering of keys in weights object (since sorted order ensures one deterministic mapping).

@@ -216,7 +216,7 @@ type IdentityDocument struct {
 	DocumentType     string            `json:"document_type"` // "passport", "id_card", "eidas_certificate"
 	DocumentNumber   string            `json:"document_number,omitempty"`
 	IssuingCountry   string            `json:"issuing_country,omitempty"`
-	IssuinagentAuthority string            `json:"issuing_authority,omitempty"`
+	IssuingAuthority string            `json:"issuing_authority,omitempty"`
 	IssueDate        time.Time         `json:"issue_date,omitempty"`
 	ExpirationDate   time.Time         `json:"expiration_date,omitempty"`
 	SubjectID        string            `json:"subject_id"`

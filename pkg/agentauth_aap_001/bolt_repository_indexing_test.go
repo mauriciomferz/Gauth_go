@@ -462,7 +462,7 @@ func TestBoltRepository_ConcurrentPruning(t *testing.T) {
 	// Create many expired POAs
 	for i := 0; i < 50; i++ {
 		poa := &PowerOfAttorney{
-			ID:         "poa-concurrent-" + string(rune('A'+i%26) + string(rune('0'+i/26)),
+			ID:         "poa-concurrent-" + string(rune('A'+i%26)) + string(rune('0'+i/26)),
 			Grantor:    "alice",
 			Grantee:    "bob",
 			Status:     POAStatusExpired,
@@ -573,7 +573,7 @@ func TestBoltRepository_StorageSizeReduction(t *testing.T) {
 	// Create many expired POAs
 	for i := 0; i < 100; i++ {
 		poa := &PowerOfAttorney{
-			ID:         "poa-size-" + string(rune('A'+i%26) + string(rune('0'+i/26)),
+			ID:         "poa-size-" + string(rune('A'+i%26)) + string(rune('0'+i/26)),
 			Grantor:    "alice",
 			Grantee:    "bob",
 			Status:     POAStatusExpired,

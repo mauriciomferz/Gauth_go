@@ -10,7 +10,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/internal/circuit"
 	"github.com/mauriciomferz/AgentAuth/internal/monitoring"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 func TestMainDemoOutput(t *testing.T) {

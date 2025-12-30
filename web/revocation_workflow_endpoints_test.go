@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // helper to perform JSON POST
@@ -28,11 +28,11 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 	t.Setenv("AGENTAUTH_REVOCATION_REQUIRED_WEIGHT", "0")
 	// Enable policy seeding to allow create_delegation authorization.
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Issue a PoA via underlying service directly (simplest path): we need service reference
-	svc, ok := srv.aap001Service.(*gauth_aap_001.Service)
+	svc, ok := srv.aap001Service.(*agentauth_aap_001.Service)
 	if !ok || svc == nil {
 		// Service should be wired; fail test if not
 		t.Fatalf("AAP-001 service not wired")
@@ -115,7 +115,7 @@ func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 	// TODO: Re-enable this test when TestInjectPOA method is implemented
 	/*
 		poaID := "poa_weight_test"
-		poa := &gauth_aap_001.PowerOfAttorney{
+		poa := &agentauth_aap_001.PowerOfAttorney{
 			ID:         poaID,
 			Grantor:    "grantor",
 			Grantee:    "grantee",
@@ -123,7 +123,7 @@ func TestRevocationWorkflowEndpoints_WeightQuorum(t *testing.T) {
 			Controllers: []string{"controllerA", "controllerB", "controllerC"},
 			ValidFrom:  time.Now().Add(-1 * time.Minute),
 			ValidUntil: time.Now().Add(10 * time.Minute),
-			Status:     gauth_aap_001.POAStatusActive,
+			Status:     agentauth_aap_001.POAStatusActive,
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),
 			Version:    1,

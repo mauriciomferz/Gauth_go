@@ -59,7 +59,7 @@ type NotarialCertificate struct {
 	NotaryName           string
 	NotaryLicense        string
 	Jurisdiction         string
-	IssuinagentAuthority string
+	IssuingAuthority string
 	CertificationDate    time.Time
 	ExpirationDate       time.Time
 	DocumentHash         string
@@ -193,7 +193,7 @@ type NotaryLicenseInfo struct {
 	Jurisdiction         string
 	IssueDate            time.Time
 	ExpiryDate           time.Time
-	IssuinagentAuthority string
+	IssuingAuthority string
 	LicenseType          string
 	Restrictions         []string
 }
@@ -589,7 +589,7 @@ func (v *FormalRequirementsValidator) validateSingleIdentityDocument(
 		// Basic validation without external service (using available fields)
 		result.DocumentAuthentic = doc.DocumentNumber != ""
 		result.SecurityFeatureOK = len(doc.VerificationData) > 0
-		result.IssuinagentAuthValid = doc.IssuinagentAuthority != ""
+		result.IssuinagentAuthValid = doc.IssuingAuthority != ""
 		result.Warnings = append(result.Warnings, "ID verification service not configured - basic checks only")
 	}
 

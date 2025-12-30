@@ -163,7 +163,7 @@ type JPDriverLicenseResponse struct {
 	ExpiryDate       string     `json:"expiry_date"`
 	LicenseTypes     []string   `json:"license_types"` // e.g., "普通", "大型", "二輪"
 	Conditions       string     `json:"conditions,omitempty"`
-	IssuinagentAuthority string     `json:"issuing_authority"`
+	IssuingAuthority string     `json:"issuing_authority"`
 	Error            string     `json:"error,omitempty"`
 }
 
@@ -360,7 +360,7 @@ func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *
 		DateOfBirth:      req.DateOfBirth,
 		IssueDate:        "2020-01-15",
 		ExpiryDate:       "2027-01-15",
-		IssuinagentAuthority: fmt.Sprintf("Prefecture %s Public Safety Commission", prefectureCode),
+		IssuingAuthority: fmt.Sprintf("Prefecture %s Public Safety Commission", prefectureCode),
 	}
 
 	return response, nil

@@ -47,7 +47,7 @@ func TestCanonicalDigestPermutations(t *testing.T) {
 	if string(canon3) == string(canon1) {
 		t.Fatalf("expected canonical JSON to differ with control chars")
 	}
-	if !containsEscapes(string(canon3) {
+	if !containsEscapes(string(canon3)) {
 		t.Fatalf("expected control character escapes in canonical JSON: %s", string(canon3))
 	}
 }

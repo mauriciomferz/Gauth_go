@@ -36,7 +36,7 @@ type revocationInclusionArtifact struct {
 			Signature string `json:"signature"`
 		} `json:"signatures"`
 	} `json:"signed_tree_head"`
-	RFCRefs []string `json:/aap_refs"`
+	RFCRefs []string `json:"rfc_refs"`
 }
 
 // TestExampleRevocationInclusionArtifactConsistency validates structural consistency

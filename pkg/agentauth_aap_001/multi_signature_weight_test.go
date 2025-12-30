@@ -73,7 +73,7 @@ func TestWeightedMultiSignatureInsufficient(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected failure due to insufficient weight")
 	}
-	if err.Error() == "" || (err != nil && !containsSubstring(err.Error(), "insufficient_weight_valid") {
+	if err.Error() == "" || (err != nil && !containsSubstring(err.Error(), "insufficient_weight_valid")) {
 		t.Fatalf("expected insufficient_weight_valid error, got: %v", err)
 	}
 }

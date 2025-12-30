@@ -512,7 +512,7 @@ func generateRandomScopes(count int) []string {
 	// Invalid scopes with control characters
 	for i := 0; i < count/4; i++ {
 		//nolint:gosec // G404: weak random acceptable for property-based test generation
-		invalidChar := byte(rand.Intn(32) // Control characters
+		invalidChar := byte(rand.Intn(32)) // Control characters
 		scopes = append(scopes, fmt.Sprintf("read%cfile", invalidChar))
 	}
 

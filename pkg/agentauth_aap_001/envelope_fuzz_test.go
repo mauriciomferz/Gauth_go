@@ -17,8 +17,8 @@ func FuzzParseEnvelope(f *testing.F) {
 	v2, _ := json.Marshal(token.EnvelopeV2{Version: "poa/v1-env2", DelegationID: "did2", Grantor: "carol", Grantee: "dave", CanonicalDigest: "abc"})
 	f.Add(v1)
 	f.Add(v2)
-	f.Add([]byte(`{"ver":"v1","delegation_id":"","grantor":"alice"}`)           // missing field
-	f.Add([]byte(`{"ver":"poa/v1-env2","delegation_id":"did","grantee":"bob"}`) // missing grantor
+	f.Add([]byte(`{"ver":"v1","delegation_id":"","grantor":"alice"}`))           // missing field
+	f.Add([]byte(`{"ver":"poa/v1-env2","delegation_id":"did","grantee":"bob"}`)) // missing grantor
 
 	f.Fuzz(func(t *testing.T, data []byte) {
 		var raw map[string]interface{}

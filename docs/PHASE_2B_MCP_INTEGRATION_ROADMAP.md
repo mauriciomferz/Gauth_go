@@ -255,7 +255,7 @@ type MCPAuditEvent struct {
 
 func (l *MCPAuditLogger) LogResourceRead(event *MCPAuditEvent)
 func (l *MCPAuditLogger) LogToolCall(event *MCPAuditEvent)
-func (l *MCPAuditLogger) LoagentAuthorizationFailure(event *MCPAuditEvent)
+func (l *MCPAuditLogger) LogAuthorizationFailure(event *MCPAuditEvent)
 func (l *MCPAuditLogger) GenerateComplianceReport(start, end time.Time) (*Report, error)
 ```
 

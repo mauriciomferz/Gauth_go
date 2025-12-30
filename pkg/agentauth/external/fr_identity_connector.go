@@ -129,7 +129,7 @@ type CNIVerificationResponse struct {
 	DocumentType     string `json:"document_type"` // CNI, Passport
 	IssueDate        string `json:"issue_date"`
 	ExpiryDate       string `json:"expiry_date"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	MRZVerified      bool   `json:"mrz_verified"`
 	ChipVerified     bool   `json:"chip_verified"`
 	Status           string `json:"status"` // valid, expired, revoked, lost
@@ -152,7 +152,7 @@ type FrenchPassportResponse struct {
 	DocumentType      string `json:"document_type"`
 	IssueDate         string `json:"issue_date"`
 	ExpiryDate        string `json:"expiry_date"`
-	IssuinagentAuthority  string `json:"issuing_authority"`
+	IssuingAuthority  string `json:"issuing_authority"`
 	MRZVerified       bool   `json:"mrz_verified"`
 	RFIDVerified      bool   `json:"rfid_verified"`
 	BiometricVerified bool   `json:"biometric_verified"`
@@ -345,7 +345,7 @@ func (fc *FranceIdentityConnector) VerifyCNI(ctx context.Context, req *CNIVerifi
 		DocumentType:     "CNI",
 		IssueDate:        "2020-01-15",
 		ExpiryDate:       "2030-01-15",
-		IssuinagentAuthority: "Prefecture de Paris",
+		IssuingAuthority: "Prefecture de Paris",
 		MRZVerified:      true,
 		ChipVerified:     true,
 		Status:           "valid",
@@ -376,7 +376,7 @@ func (fc *FranceIdentityConnector) VerifyFrenchPassport(ctx context.Context, req
 		DocumentType:      "Passport",
 		IssueDate:         "2020-01-15",
 		ExpiryDate:        "2030-01-15",
-		IssuinagentAuthority:  "République Française",
+		IssuingAuthority:  "République Française",
 		MRZVerified:       true,
 		RFIDVerified:      true,
 		BiometricVerified: true,

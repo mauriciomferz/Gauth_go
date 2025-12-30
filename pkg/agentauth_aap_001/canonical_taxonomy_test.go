@@ -6,7 +6,7 @@ import (
 )
 
 // containsExact performs a substring search.
-func containsExactTax(b []byte, s string) bool { return indexOfTax(b, []byte(s) >= 0 }
+func containsExactTax(b []byte, s string) bool { return indexOfTax(b, []byte(s)) >= 0 }
 
 // indexOf naive byte slice search
 func indexOfTax(haystack, needle []byte) int {

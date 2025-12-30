@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
@@ -578,7 +578,7 @@ func TestAgentAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 
 // Helper functions
 
-func setupTestDB(t *testing.T) (*database.DB, func() {
+func setupTestDB(t *testing.T) (*database.DB, func()) {
 	// Connect to test database using pkg/database (pgx)
 	cfg := &database.Config{
 		Host:     "localhost",

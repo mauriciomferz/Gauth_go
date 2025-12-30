@@ -216,7 +216,7 @@ func TestEnhancedPoAValidator_StressTest(t *testing.T) {
 		}
 
 		// Add some usage
-		usage := float64(float64(i) *) * 10)
+		usage := float64(i) * 10.0
 		if err2 := store.IncrementDailyUsage(poa.ID, today, usage); err2 != nil {
 			t.Fatalf("IncrementDailyUsage() error at iteration %d: %v", i, err2)
 		}
@@ -317,7 +317,7 @@ func TestEnhancedPoAValidator_ConcurrentAccess(t *testing.T) {
 		t.Fatalf("GetDailyUsage() final error = %v", err)
 	}
 
-	expectedUsage := float64(float64(numGoroutines * incrementsPerGoroutine) *) * 10)
+	expectedUsage := float64(numGoroutines*incrementsPerGoroutine) * 10.0
 	if finalUsage != expectedUsage {
 		t.Errorf("Final usage = %f, expected %f", finalUsage, expectedUsage)
 	}

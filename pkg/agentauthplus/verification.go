@@ -60,7 +60,7 @@ type PositionVerificationResult struct {
 	OrganizationID   string       `json:"organization_id"`
 	Position         string       `json:"position"`
 	AuthorizedToAct  bool         `json:"authorized_to_act"`
-	SigninagentAuthority bool         `json:"signing_authority"`
+	SigningAuthority bool         `json:"signing_authority"`
 	EffectiveDate    time.Time    `json:"effective_date"`
 	VerifiedAt       time.Time    `json:"verified_at"`
 	Issues           []string     `json:"issues,omitempty"`
@@ -685,7 +685,7 @@ func (v *VerificationServiceImpl) VerifyRepresentativePosition(ctx context.Conte
 			OrganizationID:   orgID,
 			Position:         "authorized_representative",
 			AuthorizedToAct:  true,
-			SigninagentAuthority: true,
+			SigningAuthority: true,
 			EffectiveDate:    time.Now().AddDate(-1, 0, 0),
 			VerifiedAt:       time.Now(),
 		}, nil
@@ -722,7 +722,7 @@ func (v *VerificationServiceImpl) VerifyRepresentativePosition(ctx context.Conte
 		OrganizationID:   orgID,
 		Position:         res.Position,
 		AuthorizedToAct:  res.Verified,
-		SigninagentAuthority: res.SignatureAuthority == "sole" || res.SignatureAuthority == "joint",
+		SigningAuthority: res.SignatureAuthority == "sole" || res.SignatureAuthority == "joint",
 		EffectiveDate:    res.AppointmentDate,
 		VerifiedAt:       res.VerificationDate,
 	}

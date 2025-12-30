@@ -297,7 +297,7 @@ type IdentityVerificationResult struct {
     DocumentType         DocumentType           `json:"document_type"`
     DocumentNumber       string                 `json:"document_number"`
     DocumentState        string                 `json:"document_state,omitempty"`
-    IssuinagentAuthority     string                 `json:"issuing_authority"`
+    IssuingAuthority     string                 `json:"issuing_authority"`
     
     // Identity details
     VerifiedIdentity     *VerifiedIdentity      `json:"verified_identity"`

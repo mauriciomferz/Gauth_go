@@ -69,7 +69,7 @@ func base64RawReplace(seg, old, new string) string {
 
 // Lightweight helpers (duplicated to avoid exporting internal logic)
 func base64RawDecode(s string) ([]byte, error) { return base64.RawURLEncoding.DecodeString(s) }
-func base64RawEncode(b string) string          { return base64.RawURLEncoding.EncodeToString([]byte(b) }
+func base64RawEncode(b string) string          { return base64.RawURLEncoding.EncodeToString([]byte(b)) }
 
 func TestExpiryEnforced(t *testing.T) {
 	svc := newTestService(t, 200*time.Millisecond)

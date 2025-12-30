@@ -10317,7 +10317,7 @@ type IdentityDocument struct {
 	DocumentType     string            `json:"document_type"` // "passport", "id_card", "eidas_certificate"
 	DocumentNumber   string            `json:"document_number,omitempty"`
 	IssuingCountry   string            `json:"issuing_country,omitempty"`
-	IssuinagentAuthority string            `json:"issuing_authority,omitempty"`
+	IssuingAuthority string            `json:"issuing_authority,omitempty"`
 	IssueDate        time.Time         `json:"issue_date,omitempty"`
 	ExpirationDate   time.Time         `json:"expiration_date,omitempty"`
 	SubjectID        string            `json:"subject_id"`
@@ -10688,7 +10688,7 @@ type LegalBasis struct {
 	Jurisdiction       string   `json:"jurisdiction"`               // ISO 3166-1 alpha-2
 	LegalReferences    []string `json:"legal_references,omitempty"` // Law articles, contract clauses
 	RegistrationNumber string   `json:"registration_number,omitempty"`
-	IssuinagentAuthority   string   `json:"issuing_authority,omitempty"`
+	IssuingAuthority   string   `json:"issuing_authority,omitempty"`
 }
     LegalBasis represents the legal foundation for authorization
 
@@ -11083,7 +11083,7 @@ type NotarialCertificate struct {
 	NotaryName        string
 	NotaryLicense     string
 	Jurisdiction      string
-	IssuinagentAuthority  string
+	IssuingAuthority  string
 	CertificationDate time.Time
 	ExpirationDate    time.Time
 	DocumentHash      string
@@ -11126,7 +11126,7 @@ type NotaryLicenseInfo struct {
 	Jurisdiction     string
 	IssueDate        time.Time
 	ExpiryDate       time.Time
-	IssuinagentAuthority string
+	IssuingAuthority string
 	LicenseType      string
 	Restrictions     []string
 }
@@ -13318,7 +13318,7 @@ type AUDriverLicenseResponse struct {
 	ExpiryDate       string     `json:"expiry_date"`
 	LicenseClass     string     `json:"license_class"` // C, LR, MR, HR, HC, MC, etc.
 	Conditions       string     `json:"conditions,omitempty"`
-	IssuinagentAuthority string     `json:"issuing_authority,omitempty"`
+	IssuingAuthority string     `json:"issuing_authority,omitempty"`
 	Error            string     `json:"error,omitempty"`
 }
     DriverLicenseResponse driver's license validation response for Australia
@@ -13343,7 +13343,7 @@ type AUPassportResponse struct {
 	Gender           string `json:"gender,omitempty"`
 	IssueDate        string `json:"issue_date,omitempty"`
 	ExpiryDate       string `json:"expiry_date,omitempty"`
-	IssuinagentAuthority string `json:"issuing_authority,omitempty"`
+	IssuingAuthority string `json:"issuing_authority,omitempty"`
 	Error            string `json:"error,omitempty"`
 }
     PassportResponse passport verification response for Australia
@@ -13677,7 +13677,7 @@ type CADriverLicenseResponse struct {
 	LicenseClass     string     `json:"license_class"` // G, G2, M, M2, A, D, etc.
 	Conditions       string     `json:"conditions,omitempty"`
 	Endorsements     []string   `json:"endorsements,omitempty"`
-	IssuinagentAuthority string     `json:"issuing_authority,omitempty"`
+	IssuingAuthority string     `json:"issuing_authority,omitempty"`
 	Error            string     `json:"error,omitempty"`
 }
     DriverLicenseResponse driver's license validation response for Canada
@@ -13702,7 +13702,7 @@ type CAPassportResponse struct {
 	Gender           string `json:"gender,omitempty"`
 	IssueDate        string `json:"issue_date,omitempty"`
 	ExpiryDate       string `json:"expiry_date,omitempty"`
-	IssuinagentAuthority string `json:"issuing_authority,omitempty"`
+	IssuingAuthority string `json:"issuing_authority,omitempty"`
 	Error            string `json:"error,omitempty"`
 }
     CAPassportResponse passport verification response for Canada
@@ -13782,7 +13782,7 @@ type CNIVerificationResponse struct {
 	DocumentType     string `json:"document_type"` // CNI, Passport
 	IssueDate        string `json:"issue_date"`
 	ExpiryDate       string `json:"expiry_date"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	MRZVerified      bool   `json:"mrz_verified"`
 	ChipVerified     bool   `json:"chip_verified"`
 	Status           string `json:"status"` // valid, expired, revoked, lost
@@ -14634,7 +14634,7 @@ type FrenchPassportResponse struct {
 	DocumentType      string `json:"document_type"`
 	IssueDate         string `json:"issue_date"`
 	ExpiryDate        string `json:"expiry_date"`
-	IssuinagentAuthority  string `json:"issuing_authority"`
+	IssuingAuthority  string `json:"issuing_authority"`
 	MRZVerified       bool   `json:"mrz_verified"`
 	RFIDVerified      bool   `json:"rfid_verified"`
 	BiometricVerified bool   `json:"biometric_verified"`
@@ -14872,7 +14872,7 @@ type IdentityVerificationResult struct {
 	DocumentType     DocumentType `json:"document_type"`
 	DocumentNumber   string       `json:"document_number"`
 	DocumentState    string       `json:"document_state,omitempty"`
-	IssuinagentAuthority string       `json:"issuing_authority"`
+	IssuingAuthority string       `json:"issuing_authority"`
 
 	// Identity details
 	VerifiedIdentity *VerifiedIdentity `json:"verified_identity"`
@@ -15076,7 +15076,7 @@ type JPDriverLicenseResponse struct {
 	ExpiryDate       string     `json:"expiry_date"`
 	LicenseTypes     []string   `json:"license_types"` // e.g., "普通", "大型", "二輪"
 	Conditions       string     `json:"conditions,omitempty"`
-	IssuinagentAuthority string     `json:"issuing_authority"`
+	IssuingAuthority string     `json:"issuing_authority"`
 	Error            string     `json:"error,omitempty"`
 }
     JPDriverLicenseResponse driver's license validation response for Japan
@@ -15203,7 +15203,7 @@ type KEPassportResponse struct {
 	Nationality      string `json:"nationality"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	PassportType     string `json:"passport_type"` // Ordinary, Official, Diplomatic
 	Error            string `json:"error,omitempty"`
 }
@@ -15401,7 +15401,7 @@ type MXPassportResponse struct {
 	PlaceOfBirth     string `json:"place_of_birth"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	Error            string `json:"error,omitempty"`
 }
     PassportResponse passport validation response
@@ -15647,7 +15647,7 @@ type NGPassportResponse struct {
 	Nationality      string `json:"nationality"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	PassportType     string `json:"passport_type"` // Ordinary, Official, Diplomatic
 	Error            string `json:"error,omitempty"`
 }
@@ -16162,7 +16162,7 @@ type NZPassportResponse struct {
 	PlaceOfBirth     string `json:"place_of_birth"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	Error            string `json:"error,omitempty"`
 }
     PassportResponse passport validation response
@@ -17618,7 +17618,7 @@ type ZAPassportResponse struct {
 	CountryOfBirth   string `json:"country_of_birth"`
 	DateOfIssue      string `json:"date_of_issue"`
 	DateOfExpiry     string `json:"date_of_expiry"`
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 	Error            string `json:"error,omitempty"`
 }
     PassportResponse passport validation response
@@ -20664,7 +20664,7 @@ type PositionVerificationResult struct {
 	OrganizationID   string    `json:"organization_id"`
 	Position         string    `json:"position"`
 	AuthorizedToAct  bool      `json:"authorized_to_act"`
-	SigninagentAuthority bool      `json:"signing_authority"`
+	SigningAuthority bool      `json:"signing_authority"`
 	EffectiveDate    time.Time `json:"effective_date"`
 	VerifiedAt       time.Time `json:"verified_at"`
 	Issues           []string  `json:"issues,omitempty"`
@@ -28628,9 +28628,9 @@ type AuthorizationProof struct {
 	// Examples: "Commercial Register Entry HRB 12345", "Power of Attorney #2024-001"
 	DocumentReference string `json:"document_reference"`
 
-	// IssuinagentAuthority identifies who issued the proof
+	// IssuingAuthority identifies who issued the proof
 	// Examples: "Amtsgericht München", "Notary Public", "Company Board"
-	IssuinagentAuthority string `json:"issuing_authority"`
+	IssuingAuthority string `json:"issuing_authority"`
 
 	// IssueDate when the authorization was granted (ISO 8601)
 	IssueDate string `json:"issue_date"`
@@ -28801,7 +28801,7 @@ const (
 )
 type Certification struct {
 	Type              string
-	IssuinagentAuthority  string
+	IssuingAuthority  string
 	CertificateNumber string
 	ValidFrom         string
 	ValidUntil        string
@@ -29643,7 +29643,7 @@ type RawPOAExposer interface {
 type RegistrationInfo struct {
 	RegisteredName        string `json:"registered_name"`
 	RegistrationNumber    string `json:"registration_number"`
-	RegisterinagentAuthority  string `json:"registering_authority"`
+	RegisteringAuthority  string `json:"registering_authority"`
 	RegistrationDate      string `json:"registration_date"` // ISO 8601
 	Jurisdiction          string `json:"jurisdiction"`
 	BusinessType          string `json:"business_type"`

@@ -139,7 +139,7 @@ func TestBoltRepositoryConcurrentReads(t *testing.T) {
 		<-done
 	}
 	// ensure at least one listing returned results
-	if len(repo.ListByPrincipal("eve") == 0 {
+	if len(repo.ListByPrincipal("eve")) == 0 {
 		t.Fatalf("expected listings for eve")
 	}
 }

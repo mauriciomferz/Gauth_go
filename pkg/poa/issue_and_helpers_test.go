@@ -166,8 +166,8 @@ func validateBasicPoA(t *testing.T, poa *ProofOfAuthorization) {
 	if poa.Action != "read" {
 		t.Errorf("Action = %v, want read", poa.Action)
 	}
-	if poa.Issuer != "gauth-poa-service" {
-		t.Errorf("Issuer = %v, want gauth-poa-service", poa.Issuer)
+	if poa.Issuer != "agentauth-poa-service" {
+		t.Errorf("Issuer = %v, want agentauth-poa-service", poa.Issuer)
 	}
 	if len(poa.Scope) != 2 {
 		t.Errorf("Scope length = %v, want 2", len(poa.Scope))
@@ -302,8 +302,8 @@ func TestMemoryService_Issue_AttestationDefaults(t *testing.T) {
 		t.Fatal("Attestation should not be nil")
 	}
 
-	if poa.Attestation.AttestedBy != "gauth-attestation-service" {
-		t.Errorf("AttestedBy = %v, want gauth-attestation-service", poa.Attestation.AttestedBy)
+	if poa.Attestation.AttestedBy != "agentauth-attestation-service" {
+		t.Errorf("AttestedBy = %v, want agentauth-attestation-service", poa.Attestation.AttestedBy)
 	}
 
 	if poa.Attestation.Confidence != 0.95 {

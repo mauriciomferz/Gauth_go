@@ -18,7 +18,7 @@ Systems MUST NOT reuse nonces.
 `
 
 func TestParseRFCFile_ExtractsClausesAndNormativeStatements(t *testing.T) {
-	tmp, err := os.CreateTemp(t.TempDir(), /aap.md")
+	tmp, err := os.CreateTemp(t.TempDir(), "aap.md")
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}

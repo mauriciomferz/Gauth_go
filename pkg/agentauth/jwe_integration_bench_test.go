@@ -161,7 +161,7 @@ func TestJWEIntegration_TokenSizeOverhead(t *testing.T) {
 	jwtSize := len(testJWT)
 	jweSize := len(jweToken)
 	overhead := jweSize - jwtSize
-	overheadPercent := float64(overhead) / float64(float64(jwtSize) *) * 100
+	overheadPercent := (float64(overhead) / float64(jwtSize)) * 100
 
 	t.Logf("JWT size: %d bytes", jwtSize)
 	t.Logf("JWE size: %d bytes", jweSize)

@@ -465,7 +465,7 @@ func TestSuspensionResumptionCycle(t *testing.T) {
 
 // Helper functions
 
-func setupTestService(t *testing.T) (*Service, func() {
+func setupTestService(t *testing.T) (*Service, func()) {
 	t.Helper()
 
 	// Create permissive authorizer for testing

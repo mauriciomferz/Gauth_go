@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // TestSemanticDiagnostics_Unwired verifies payload fields when no AAP001 service is wired (wired=false).
@@ -81,7 +81,7 @@ type mockAAP001Service struct {
 
 // Revocation workflow methods (no-op) to satisfy extended interface for tests.
 // They return nil to simulate successful operations without affecting snapshots.
-func (m *mockAAP001Service) InitiateRevocation(ctx context.Context, req gauth_aap_001.RevocationRequest) error {
+func (m *mockAAP001Service) InitiateRevocation(ctx context.Context, req agentauth_aap_001.RevocationRequest) error {
 	return nil
 }
 func (m *mockAAP001Service) ApproveRevocation(ctx context.Context, poaID, approver string) error {

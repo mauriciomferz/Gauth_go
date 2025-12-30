@@ -351,7 +351,7 @@ CREATE INDEX idx_audit_logs_status ON audit_logs(status);
 ```go
 // Specific event loggers
 LogPoACreated(ctx, grantor, grantee, clientID, metadata)
-LoagentAuthorization(ctx, clientID, resourceOwner, status, duration, metadata)
+LogAuthorization(ctx, clientID, resourceOwner, status, duration, metadata)
 LogTokenIssued(ctx, clientID, grantType, metadata)
 LogIdentityVerification(ctx, country, docType, status, duration, metadata)
 LogMCPRequest(ctx, method, status, duration, metadata)
@@ -372,7 +372,7 @@ logger, _ := audit.NewAuditLogger(db, 90) // 90 days retention
 defer logger.Close()
 
 // Log events
-logger.LoagentAuthorization(ctx, "client-123", "user@example.com", "success", 150*time.Millisecond, map[string]interface{}{
+logger.LogAuthorization(ctx, "client-123", "user@example.com", "success", 150*time.Millisecond, map[string]interface{}{
     "scope": "read write",
     "ip": "192.168.1.100",
 })
