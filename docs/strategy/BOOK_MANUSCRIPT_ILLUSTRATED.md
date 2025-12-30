@@ -3,6 +3,8 @@
 
 **A Comprehensive Technical & Legal Framework**
 
+**By Mauricio A. Fernández Fernández**
+
 ---
 
 > *"In the age of autonomous agents, every transaction is a legal act, every algorithm a potential fiduciary, and every cryptographic signature carries the weight of centuries of contract law."*
