@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 func setupTestAuth(t *testing.T) *agentauth.Service {
