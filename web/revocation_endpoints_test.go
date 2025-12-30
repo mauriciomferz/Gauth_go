@@ -12,7 +12,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
-// TestRevocationEndpoints verifies RFC111-R4, R5, R6, R7 compliance
+// TestRevocationEndpoints verifies AAP001-R4, R5, R6, R7 compliance
 func TestRevocationEndpoints(t *testing.T) {
 	// Setup isolated server with real revocation chain
 	gin.SetMode(gin.TestMode)
@@ -60,7 +60,7 @@ func TestRevocationEndpoints(t *testing.T) {
 	server.router.GET("/api/v1/token/revocation/verify", server.handleRevocationVerify)
 
 	// R4: Verify Head & Aggregate
-	t.Run("RFC111-R4_RevocationHead", func(t *testing.T) {
+	t.Run("AAP001-R4_RevocationHead", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/api/v1/token/revocation/head", nil)
 		w := httptest.NewRecorder()
 		server.router.ServeHTTP(w, req)
@@ -90,7 +90,7 @@ func TestRevocationEndpoints(t *testing.T) {
 	})
 
 	// R5: Verify Signature Presence & Validity
-	t.Run("RFC111-R5_VerifySignature", func(t *testing.T) {
+	t.Run("AAP001-R5_VerifySignature", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/api/v1/token/revocation/verify", nil)
 		w := httptest.NewRecorder()
 		server.router.ServeHTTP(w, req)
@@ -128,7 +128,7 @@ func TestRevocationEndpoints(t *testing.T) {
 	})
 
 	// R6: Discovery Verification
-	t.Run("RFC111-R6_DiscoveryMetadata", func(t *testing.T) {
+	t.Run("AAP001-R6_DiscoveryMetadata", func(t *testing.T) {
 		t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa") // Ensure enabled
 
 		// Create a separate handler/server to re-trigger registering or just invoke the handler logic?

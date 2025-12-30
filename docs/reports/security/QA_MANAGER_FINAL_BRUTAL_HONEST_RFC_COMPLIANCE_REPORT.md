@@ -1215,7 +1215,7 @@ To be fair and balanced, here's what IS excellent:
 
 ### For QA/Compliance
 
-**DO NOT CERTIFY** this implementation as AAP-001/0115 compliant.
+**DO NOT CERTIFY** this implementation as AAP-001/AAP-002 compliant.
 
 **REQUIRE**:
 - End-to-end protocol flow tests
@@ -1241,7 +1241,7 @@ To be fair and balanced, here's what IS excellent:
 
 ### The Impressive Truth
 
-This is **NO LONGER just an OAuth 2.0 server**. It is now a **substantially AAP-001/0115 compliant AgentAuth implementation** with **complete protocol orchestration**.
+This is **NO LONGER just an OAuth 2.0 server**. It is now a **substantially AAP-001/AAP-002 compliant AgentAuth implementation** with **complete protocol orchestration**.
 
 ### What You Have ✅
 
@@ -1400,7 +1400,7 @@ $ grep -B5 -A30 "func.*RequestToken" pkg/agentauth/agentauth.go
 
 I have conducted this review with brutal honesty as requested. The findings are **SIGNIFICANTLY BETTER** than initial assessment:
 
-**This implementation IS NOW substantially AAP-001/0115 compliant and approaching production readiness.**
+**This implementation IS NOW substantially AAP-001/AAP-002 compliant and approaching production readiness.**
 
 The codebase deserves MAJOR credit for:
 - ✅ **Complete protocol implementation** (1,265 lines across 3 core files)

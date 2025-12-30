@@ -397,7 +397,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 Japan My Number:     123456789012              (12 digits)
 Australia Medicare:  1234567890-1              (10 + IRN)
 Singapore NRIC:      S1234567D                 (Prefix + 7 digits + letter)
-South Korea RRN:     900115-1234567            (YYMMDD-GXXXXXX)
+South Korea RRN:     90AAP-002-1234567            (YYMMDD-GXXXXXX)
 India Aadhaar:       1234-5678-9012            (12 digits, masked)
 India PAN:           ABCDE1234F                (5L + 4D + 1L)
 Australia DL (NSW):  12345678                  (varies by state)
@@ -513,8 +513,8 @@ type NZAddress struct {
 | Country | Masked Format | Original Format |
 |---------|---------------|-----------------|
 | India | XXXX-XXXX-1234 | 1234-5678-9012 (Aadhaar) |
-| South Korea | 900115-******* | 900115-1234567 (RRN) |
-| South Korea | 900115-******* | 900115-1234567 (ARC) |
+| South Korea | 90AAP-002-******* | 90AAP-002-1234567 (RRN) |
+| South Korea | 90AAP-002-******* | 90AAP-002-1234567 (ARC) |
 | Singapore | Partially masked | Full NRIC in secure context |
 | Australia | Full display | Medicare (no masking by default) |
 

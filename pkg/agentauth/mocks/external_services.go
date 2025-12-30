@@ -1,5 +1,5 @@
 // Package mocks provides mock implementations of external service interfaces
-// for AAP-001 testing and development.
+// for AAP001 testing and development.
 package mocks
 
 import (

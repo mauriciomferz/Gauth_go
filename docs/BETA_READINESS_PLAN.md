@@ -32,15 +32,15 @@ Excluded (Documented Roadmap):
 ## Clause Compliance Summary (Beta-Critical)
 | RFC | Clause | Status | Evidence | Beta Action |
 |-----|--------|--------|----------|-------------|
-| 0111 | Multi-Signature Threshold | Implemented | `pkg/aap001/aap001.go` verifyMultiSignatures | None |
-| 0111 | Replay Protection | Partial | `web/server_clean.go` JTI checks; `web/replay_store.go` | Add WAL & persistence tests |
-| 0111 | Cryptographic Requirements | Partial | Canonical digest Ed25519 only | Add agility interface (stub ECDSA) |
-| 0111 | Audit Logging | Partial | Hash chain ledger | Add per-entry signature |
-| 0111 | Delegation & Revocation | Partial | Chain + basic revoke | Placeholder for partial/suspend |
-| 0115 | PoA Structure | Partial | Embedded version & weights | Add verifier helper + size guard |
-| 0115 | Validity Period | Implemented | Canonical digest excludes mutable fields | None |
-| 0115 | Canonical Serialization | Implemented | `pkg/aap001/canonical.go` + tests | None |
-| 0115 | Joint Signatures | Implemented | Weighted + threshold logic | None |
+| AAP-001 | Multi-Signature Threshold | Implemented | `pkg/aap001/aap001.go` verifyMultiSignatures | None |
+| AAP-001 | Replay Protection | Partial | `web/server_clean.go` JTI checks; `web/replay_store.go` | Add WAL & persistence tests |
+| AAP-001 | Cryptographic Requirements | Partial | Canonical digest Ed25519 only | Add agility interface (stub ECDSA) |
+| AAP-001 | Audit Logging | Partial | Hash chain ledger | Add per-entry signature |
+| AAP-001 | Delegation & Revocation | Partial | Chain + basic revoke | Placeholder for partial/suspend |
+| AAP-002 | PoA Structure | Partial | Embedded version & weights | Add verifier helper + size guard |
+| AAP-002 | Validity Period | Implemented | Canonical digest excludes mutable fields | None |
+| AAP-002 | Canonical Serialization | Implemented | `pkg/aap001/canonical.go` + tests | None |
+| AAP-002 | Joint Signatures | Implemented | Weighted + threshold logic | None |
 
 ## Remediation Tasks (P0/P1)
 | ID | Task | Priority | Deliverable | Success Criteria |

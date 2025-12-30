@@ -106,26 +106,26 @@ func (s *BetaServer) registerPolicyManifest() {
 	s.router.GET("/api/v1/policy/manifest", func(c *gin.Context) {
 		canon, raw, hash, err := s.buildPolicyManifest()
 		if err != nil {
-			respondError(c, 500, "manifest_build_failed", "build_failed", "policy manifest build failed", "AAP-001:policy_manifest", err.Error())
+			respondError(c, 500, "manifest_build_failed", "build_failed", "policy manifest build failed", "AAP001:policy_manifest", err.Error())
 			return
 		}
 		// Signing prerequisites - use s.keyProvider if available, fallback to global
 		kp := s.keyProvider
 
 		if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || kp == nil {
-			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP-001:policy_manifest", nil)
+			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP001:policy_manifest", nil)
 			return
 		}
 		// RB6: use signer interface for agility
 		signer, sErr := kp.ActiveSigner()
 		if sErr != nil {
-			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP-001:policy_manifest", sErr.Error())
+			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP001:policy_manifest", sErr.Error())
 			return
 		}
 		msg := append([]byte("AGENTAUTH_POLICY_MANIFEST:"), raw...)
 		sigBytes, sErr := signer.Sign(msg)
 		if sErr != nil {
-			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP-001:policy_manifest", sErr.Error())
+			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP001:policy_manifest", sErr.Error())
 			return
 		}
 		sigB64 := base64.RawURLEncoding.EncodeToString(sigBytes)

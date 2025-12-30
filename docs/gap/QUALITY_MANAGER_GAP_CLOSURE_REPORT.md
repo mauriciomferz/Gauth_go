@@ -904,7 +904,7 @@ $ go build ./pkg/poa/
 $ go build ./examples/official_rfc_compliance_test/
 # SUCCESS - No errors
 
-$ go build ./examples/rfc_0115_poa_definition/
+$ go build ./examples/rfc_AAP-002_poa_definition/
 # SUCCESS - No errors
 
 $ go build ./...
@@ -920,7 +920,7 @@ Both examples updated to use new type system:
 - ✅ Updated sector references: `poa.DemoSectorInfoComm`
 - ✅ Updated action types: `poa.ActionNonPhysicalResearching`
 
-**examples/rfc_0115_poa_definition/main.go:**
+**examples/rfc_AAP-002_poa_definition/main.go:**
 - ✅ Fixed AuthorizedClient struct initialization
 - ✅ Updated to use typed enums throughout
 - ✅ Demonstrates complete AAP-002 compliance
@@ -1052,7 +1052,7 @@ The original assessment identified 6 additional P1 (Priority 1) gaps. These are 
 **Release Classification:** **Production-Ready v1.0** (Core Features Complete)
 
 **Recommended Labels:**
-- "AgentAuth 1.0 - AAP-001/0115 Compliant"
+- "AgentAuth 1.0 - AAP-001/AAP-002 Compliant"
 - "Production-Ready (Core Features)"
 - "Advanced Features: Phase 2 Roadmap Available"
 
@@ -1143,7 +1143,7 @@ type AuthorizedClient struct {
 
 ### New Documentation to Create
 
-1. **docs/RFC_0115_COMPLIANCE.md** - Complete compliance guide
+1. **docs/RFC_AAP-002_COMPLIANCE.md** - Complete compliance guide
 2. **docs/ACTION_TYPES.md** - Action taxonomy reference
 3. **docs/POWER_LIMITS.md** - Power limit configuration guide
 4. **docs/OBLIGATIONS.md** - Rights & obligations framework
@@ -1188,7 +1188,7 @@ The AgentAuth implementation has transformed from a **"technical preview with mi
 - ✅ Power limit enforcement
 - ✅ Legal compliance tracking
 - ✅ Geographic restrictions
-- ✅ AAP-001/0115 token format compliance
+- ✅ AAP-001/AAP-002 token format compliance
 
 **Recommended for:** AI governance platforms, multi-agent systems, AI regulatory compliance, enterprise AI authorization
 
@@ -1206,7 +1206,7 @@ The AgentAuth implementation has transformed from a **"technical preview with mi
 **Files Modified:**
 1. `pkg/poa/poa.go` (~300 lines added)
 2. `examples/official_rfc_compliance_test/main.go` (~50 lines modified)
-3. `examples/rfc_0115_poa_definition/main.go` (~50 lines modified)
+3. `examples/rfc_AAP-002_poa_definition/main.go` (~50 lines modified)
 
 **Documentation Created:**
 1. `QUALITY_MANAGER_GAP_CLOSURE_REPORT.md` (this file)

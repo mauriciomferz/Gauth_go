@@ -1,6 +1,6 @@
 // Package agentauth - AgentAuth+ Integration for Authorization Chain Validation
 // Integrates AgentAuth+ features (successor management, delegation policies, dual control,
-// fiduciary duties, capability assessment) into AAP-001 authorization flow
+// fiduciary duties, capability assessment) into AAP001 authorization flow
 package agentauth
 
 import (
@@ -109,7 +109,7 @@ type FiduciaryCheckResult struct {
 }
 
 // ValidatePoAWithAgentAuthPlus performs comprehensive AgentAuth+ validation for a PoA
-// This is called during AAP-001 authorization chain validation to enforce
+// This is called during AAP001 authorization chain validation to enforce
 // AgentAuth+ policies (successor management, delegation, dual control, capabilities, fiduciary duties)
 func (v *AgentAuthPlusValidator) ValidatePoAWithAgentAuthPlus(
 	ctx context.Context,

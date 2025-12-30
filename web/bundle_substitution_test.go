@@ -7,7 +7,7 @@ import (
 )
 
 // Bundle substitution tests (initial scaffolding).
-// These DO NOT yet validate full RFC111 semantics; they prepare structure for future implementation.
+// These DO NOT yet validate full AAP001 semantics; they prepare structure for future implementation.
 // See docs/RFC_COMPLIANCE_MATRIX.md row: "Bundle Substitution Detection".
 //
 // Intent: Ensure that if a bundle in the middle of the chain is replaced (same position, different hash),

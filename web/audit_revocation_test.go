@@ -9,7 +9,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
-// TestRevocationAuditLogging verifies RFC111-R7 compliance.
+// TestRevocationAuditLogging verifies AAP001-R7 compliance.
 // It ensures that appending to the revocation chain triggers a centralized audit entry with correct metadata.
 func TestRevocationAuditLogging(t *testing.T) {
 	// Save/Restore global hook to avoid polluting other tests
@@ -61,7 +61,7 @@ func TestRevocationAuditLogging(t *testing.T) {
 		t.Fatalf("expected audit entry 'revocation_appended' not found. Total entries: %d", len(entries))
 	}
 
-	// 3. Validate Metadata (RFC111-R7)
+	// 3. Validate Metadata (AAP001-R7)
 	// Meta is 'any', so we must assert it to map[string]any
 	meta, ok := found.Meta.(map[string]any)
 	if !ok {

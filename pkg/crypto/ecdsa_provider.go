@@ -2,7 +2,7 @@ package crypto
 
 // In-memory ECDSA (P-256) provider and signer implementation to extend algorithm agility.
 // Follows same patterns as the Ed25519 provider: short key id derivation and base64 DER encoding
-// of signatures performed by higher layers"AAP-001 service). The Sign method returns raw DER bytes.
+// of signatures performed by higher layers"AAP001 service). The Sign method returns raw DER bytes.
 
 import (
 	"crypto/ecdsa"

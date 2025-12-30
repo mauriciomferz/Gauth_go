@@ -20,7 +20,7 @@ const (
 	// AuthorizationDenied represents an authorization denial event
 	AuthorizationDenied EventType = "authorization.denied"
 
-	// Delegation events (AAP-001)
+	// Delegation events (AAP001)
 	DelegationCreated   EventType = "delegation.created"
 	DelegationRevoked   EventType = "delegation.revoked"
 	DelegationValidated EventType = "delegation.validated"

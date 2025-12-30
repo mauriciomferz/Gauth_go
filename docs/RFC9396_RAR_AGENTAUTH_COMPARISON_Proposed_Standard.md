@@ -1,12 +1,12 @@
 ---
-title: RFC 9396 (Rich Authorization Requests) vs AgentAuth (AAP-001/0115)
+title: RFC 9396 (Rich Authorization Requests) vs AgentAuth (AAP-001/AAP-002)
 category: guide
 status: active
 lastUpdated: 2025-11-19
 owners: architecture-team
 ---
 
-# RFC 9396 (Rich Authorization Requests) vs AgentAuth (AAP-001/0115)
+# RFC 9396 (Rich Authorization Requests) vs AgentAuth (AAP-001/AAP-002)
 
 ## Executive Summary
 
@@ -48,7 +48,7 @@ owners: architecture-team
 
 ## 2. High-Level Comparison
 
-| Aspect | **AgentAuth (AAP-001/0115)** | **RFC 9396 (RAR)** |
+| Aspect | **AgentAuth (AAP-001/AAP-002)** | **RFC 9396 (RAR)** |
 |:-------|:--------------------------|:-------------------|
 | **Primary Focus** | Legal delegation chains & Power of Attorney | Fine-grained resource authorization |
 | **Authorization Model** | Multi-party chains (3+ levels) | Single request with detailed permissions |
@@ -189,7 +189,7 @@ Resource Server validates permissions
     "pvp_identity_check": true,
     "commercial_register_verified": true
   },
-  "compliance_level": "rfc-0111-compliant"
+  "compliance_level": "AAP-001-compliant"
 }
 ```
 
@@ -249,7 +249,7 @@ type AuthorizationDetail struct {
 
 ## 5. Use Case Matrix
 
-### Use AgentAuth (AAP-001/0115) When:
+### Use AgentAuth (AAP-001/AAP-002) When:
 
 ✅ AI agents need **legal authority** to act  
 ✅ **Multi-party delegation chains** required (Board → Company → AI → User)  
@@ -452,6 +452,6 @@ func (v *ComplianceValidator) ValidateAuthorizationDetails(
 
 - [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9396/)
 - [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/rfc6749/)
-- [AAP-001 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
+- [AAP-001 - AgentAuth 1.0 Authorization Framework](AAP_AAP-001.md)
 - [AgentAuth Gap Matrix](GAP_MATRIX.auto.md)
 - [AgentAuth Architecture](../ARCHITECTURE_SOLUTION.md)

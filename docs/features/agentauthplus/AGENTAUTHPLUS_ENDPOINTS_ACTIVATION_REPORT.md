@@ -307,22 +307,22 @@ TypeScript API client with 22 typed methods covering all 27 endpoints. Used by A
 ## Usage Example
 
 ```typescript
-import { agentAuthPlusAPI } from '@/lib/agentauthplus-api'
+import { AgentAuthPlusAPI } from '@/lib/agentauthplus-api'
 
 // Get active successor
-const { active_successor } = await agentAuthPlusAPI.getActiveSuccessor('poa-id')
+const { active_successor } = await AgentAuthPlusAPI.getActiveSuccessor('poa-id')
 
 // List pending approvals
-const { approvals } = await agentAuthPlusAPI.getPendingApprovals()
+const { approvals } = await AgentAuthPlusAPI.getPendingApprovals()
 
 // Get delegation chain
-const { chain, depth } = await agentAuthPlusAPI.getDelegationChain('agent-id')
+const { chain, depth } = await AgentAuthPlusAPI.getDelegationChain('agent-id')
 
 // Get capability assessment
-const { assessment } = await agentAuthPlusAPI.getLatestAssessment('agent-id')
+const { assessment } = await AgentAuthPlusAPI.getLatestAssessment('agent-id')
 
 // List violations
-const { violations, count } = await agentAuthPlusAPI.getViolations()
+const { violations, count } = await AgentAuthPlusAPI.getViolations()
 ```
 
 ## Documentation References

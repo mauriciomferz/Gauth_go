@@ -92,7 +92,7 @@ Error Payload Format:
   "code": "signing_unavailable",
   "error": "signing_unavailable",
   "message": "active eddsa key unavailable",
-  "rfc_ref": "rfc111:policy_manifest"
+  "rfc_ref": "AAP-001:policy_manifest"
 }
 ```
 

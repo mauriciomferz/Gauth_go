@@ -1,6 +1,6 @@
 package agentauth_aap_001
 
-// Compatibility layer for legacy AAP-001 example code.
+// Compatibility layer for legacy AAP001 example code.
 // The official_aap001_implementation example expects a configuration
 // struct and a validation helper that previously lived in an earlier
 // iteration of the project. Instead of rewriting the example to use the
@@ -12,7 +12,7 @@ import (
 )
 
 // AAP001Config represents high-level configuration required by the
-// official AAP-001 implementation demo. All fields are intentionally
+// official AAP001 implementation demo. All fields are intentionally
 // kept exactly as referenced in the example for backwards compatibility.
 type AAP001Config struct {
 	AuthorizationServerURL    string        `json:"authorization_server_url"`

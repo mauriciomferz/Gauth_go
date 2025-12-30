@@ -1,4 +1,4 @@
-// Package obligations provides obligation and advice processing for authorization decisions (AAP-001 sec2.item3).
+// Package obligations provides obligation and advice processing for authorization decisions (AAP001 sec2.item3).
 package obligations
 
 import (

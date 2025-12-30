@@ -67,8 +67,8 @@ owners: [system]
 - Aggregated signature support (BLS, batch) integrated in registry and interfaces.
 - Multi-algorithm extensibility: new schemes can be registered and dispatched via unified abstraction.
 - Placeholder tests for BLS/batch verification ensure future compliance and test coverage.
-- Compliance status: Ready for advanced cryptographic requirements in AAP-001/0115; extensibility for future standards.
-# AgentAuth AAP-001 / 0115 Gap Matrix
+- Compliance status: Ready for advanced cryptographic requirements in AAP-001/AAP-002; extensibility for future standards.
+# AgentAuth AAP-001 / AAP-002 Gap Matrix
 
 > Generated: 2025-10-21 (refreshed after Multi-Signature Granular Metrics + Envelope Versioning + External Anchor Forced Failures + Deterministic Seed + Capability Registry Notarization Prototype + RawPoA Embedding Phase 1)
 > Branch: beta-refactor
@@ -108,7 +108,7 @@ Legend:
 
 ## 4. Legal / Jurisdiction / Compliance
 | Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
-| Jurisdiction-specific enforcement | Comprehensive `LegalFrameworkValidator` implementation in `pkg/compliance/` with 6 jurisdictions (US, EU, UK, CA, AU, JP), entity type validation (corporation, LLC, partnership, individual, organization, AI agent), compliance rules (SOX, GDPR, MiFID II, AI oversight), approval levels (single/dual/board), value limits, time restrictions, metrics tracking, and integration tests. Extensible for new jurisdictions and rules. | **Production-ready:** All compliance features for AAP-001/0115 implemented and tested. | Implemented | P1 | Compliance | Continue to expand for new jurisdictions and evolving standards. |
+| Jurisdiction-specific enforcement | Comprehensive `LegalFrameworkValidator` implementation in `pkg/compliance/` with 6 jurisdictions (US, EU, UK, CA, AU, JP), entity type validation (corporation, LLC, partnership, individual, organization, AI agent), compliance rules (SOX, GDPR, MiFID II, AI oversight), approval levels (single/dual/board), value limits, time restrictions, metrics tracking, and integration tests. Extensible for new jurisdictions and rules. | **Production-ready:** All compliance features for AAP-001/AAP-002 implemented and tested. | Implemented | P1 | Compliance | Continue to expand for new jurisdictions and evolving standards. |
 | Compliance attestation proof | **COMPLETED:** `AttestationProof` struct implemented with Ed25519 signatures; `ComplianceResult` enhanced; `DefaultAttestationVerifier` enforces strict signature verification. Integration tests (`compliance_persistence_test.go`) verify generation and validation. | None | Implemented | P2 | Compliance/Trust | **COMPLETED** |
 | Arbitration / dispute hooks | **COMPLETED:** `DisputeService` and persistent `DisputeRegistry` (JSON-backed) implemented; `ArbitrationHook` interface defined. Support for `OpenCase`, `UpdateCase`, `CloseCase` transitions. Verified by `compliance_persistence_test.go`. | None | Implemented | P3 | Governance | **COMPLETED** |
 
@@ -145,7 +145,7 @@ Legend:
 
 ## 9. Testing & Conformance
 | Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
-| Clause-to-test mapping | **COMPLETED:** Conformance harness with comprehensive clause mapping (**38 AAP-001/0115 sections**, expanded from 24). Enhanced `clause_map.json` (v2.0) with explicit test ID linkage (60+ test IDs), coverage targets (avg 88%), and detailed descriptions. New sections include error handling, token lifecycle, delegation chains, security considerations, interoperability, jurisdiction enforcement, transaction limits, conditional execution, delegation restrictions, signature verification, envelope migration, and revocation external anchoring. Negative test variant pattern established. Conformance matrix documentation (`docs/CONFORMANCE_MATRIX.md`) provides detailed mapping and coverage tracking. CLI tooling supports threshold gating and history tracking. | All core RFC sections mapped with explicit test coverage | Implemented | P0 | Compliance | **COMPLETED** (Requirement 91) |
+| Clause-to-test mapping | **COMPLETED:** Conformance harness with comprehensive clause mapping (**38 AAP-001/AAP-002 sections**, expanded from 24). Enhanced `clause_map.json` (v2.0) with explicit test ID linkage (60+ test IDs), coverage targets (avg 88%), and detailed descriptions. New sections include error handling, token lifecycle, delegation chains, security considerations, interoperability, jurisdiction enforcement, transaction limits, conditional execution, delegation restrictions, signature verification, envelope migration, and revocation external anchoring. Negative test variant pattern established. Conformance matrix documentation (`docs/CONFORMANCE_MATRIX.md`) provides detailed mapping and coverage tracking. CLI tooling supports threshold gating and history tracking. | All core RFC sections mapped with explicit test coverage | Implemented | P0 | Compliance | **COMPLETED** (Requirement 91) |
 | Fuzzing / property tests | **COMPLETED:** Dedicated fuzz suites for `EnvelopeParser`, `PoAValidator`, `CapabilityLoader`, and `AnchorPersistence`; verified canonical hashing determinism; integrated into verification cycle | Comprehensive fuzz/property coverage for all core compliance and integrity paths | Implemented | P1 | Security/Robustness | **COMPLETED** |
 | Load/stress benchmarks | **COMPLETED:** dedicated `cmd/loadtest` CLI implemented with scenarios (`auth-std`, `auth-high`); `load-test.sh` updated. Benchmarks authorization throughput and cache efficiency. Simulation verified (~240 RPS). | None | Implemented | P2 | Scalability | **COMPLETED** (Phase 3) |
 
@@ -235,7 +235,7 @@ Proceed with persistent ledger backend + ledger entry signatures & external anch
 
 ## Compliance & Production Readiness Priorities
 
-To achieve full AAP-001/0115 compliance and production readiness, prioritize:
+To achieve full AAP-001/AAP-002 compliance and production readiness, prioritize:
 - Completion of advanced cryptographic features (aggregated signature schemes, multi-algorithm support)
 - Production-grade external anchoring (TSA/transparency log integration)
 - Comprehensive compliance features (attestation, arbitration hooks, residual risk tracking)

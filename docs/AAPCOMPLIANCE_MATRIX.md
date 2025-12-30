@@ -15,21 +15,21 @@ This document maps (placeholder form) intended AgentAuth AgentAuth-RFC-001 (form
 
 | Area | RFC Reference (Placeholder) | Current Implementation Component | Status | Gaps / TODO |
 |------|-----------------------------|----------------------------------|--------|-------------|
-| Policy Bundle Chaining | RFC111 §Chain Integrity | `pkg/policy` (hashing & AddBundle) | Partial | Formal spec hash algorithm & tamper test referencing RFC section missing |
-| Bundle Substitution Detection | RFC111 §Substitution | `test/policy_bundle_substitution_test.go` | Partial | Detection via hash mismatch implemented; need formal RFC error codes & negative multi-hop scenarios |
-| Provenance Endpoint | RFC111 §Provenance Query | `web/server_clean.go` `/policy/provenance` | Partial | Need response schema alignment with RFC format & negative cases |
-| Pagination of Chain | RFC111 §Chain Listing | `/policy/chain` endpoint | Partial | Need total count & consistent ordering invariants documented |
-| Audit Chain Integrity | RFC111 §Audit Linking | `audit` package (hash chain) | Partial | Cross-reference RFC integrity MUSTs & add collision simulation test |
-| Policy Evaluation Provenance | RFC111 §Decision Trace | Audit append w/ `bundle_hash` + `chain_head` | Partial | Need multi-bundle historical evaluation replay tests |
-| Delegation / POA Creation | RFC115 §Delegation Artifacts | `pkg/delegation/delegation.go` + `web/apiAuthorizePOA` + tests (`test/delegation_chain_test.go`, `web/delegation_authorize_test.go`) | Partial | Missing signatures, canonical serialization, enforcement binding to policy/authorization (metadata only) |
-| Delegation Scope Validation | RFC115 §Scope Limits | `delegation.ValidateScopeNarrowing` + chain tests + authorization widening rejection | Partial | Only equality narrowing; need advanced semantics (range/regex), integrate into token issuance scope reduction |
-| Revocation Handling | RFC115 §Revocation | Placeholder (not implemented) | Missing | Add Revocation struct, chain, tests & integration with verification |
-| Expiry Enforcement | RFC115 §Temporal Validity | Delegation expiry check in `VerifyChain()` + test | Partial | Need evaluation-time denial responses & clock skew handling |
-| Chain Anchor Externalization | RFC111 §External Anchor | Anchor callback in audit logger | Partial | Persist anchor & prove external verification procedure |
-| Cryptographic Algorithms | RFC111/115 §Crypto | Hash only (algorithm unspecified) | Missing | Document chosen hash & key scheme, add signature verification |
-| Error Codes & Semantics | RFC111/115 §Errors | Generic HTTP JSON errors | Missing | Define structured error taxonomy mapping to RFC clauses |
-| Interoperability (Cross-Impl) | RFC111/115 §Interoperability | None | Missing | Add harness testing against second independent implementation |
-| Compliance Test Suite | RFC111/115 §Conformance | Sparse / placeholders | Missing | Build table-driven tests enumerating MUST/SHOULD items |
+| Policy Bundle Chaining | AAP-001 §Chain Integrity | `pkg/policy` (hashing & AddBundle) | Partial | Formal spec hash algorithm & tamper test referencing RFC section missing |
+| Bundle Substitution Detection | AAP-001 §Substitution | `test/policy_bundle_substitution_test.go` | Partial | Detection via hash mismatch implemented; need formal RFC error codes & negative multi-hop scenarios |
+| Provenance Endpoint | AAP-001 §Provenance Query | `web/server_clean.go` `/policy/provenance` | Partial | Need response schema alignment with RFC format & negative cases |
+| Pagination of Chain | AAP-001 §Chain Listing | `/policy/chain` endpoint | Partial | Need total count & consistent ordering invariants documented |
+| Audit Chain Integrity | AAP-001 §Audit Linking | `audit` package (hash chain) | Partial | Cross-reference RFC integrity MUSTs & add collision simulation test |
+| Policy Evaluation Provenance | AAP-001 §Decision Trace | Audit append w/ `bundle_hash` + `chain_head` | Partial | Need multi-bundle historical evaluation replay tests |
+| Delegation / POA Creation | AAP-002 §Delegation Artifacts | `pkg/delegation/delegation.go` + `web/apiAuthorizePOA` + tests (`test/delegation_chain_test.go`, `web/delegation_authorize_test.go`) | Partial | Missing signatures, canonical serialization, enforcement binding to policy/authorization (metadata only) |
+| Delegation Scope Validation | AAP-002 §Scope Limits | `delegation.ValidateScopeNarrowing` + chain tests + authorization widening rejection | Partial | Only equality narrowing; need advanced semantics (range/regex), integrate into token issuance scope reduction |
+| Revocation Handling | AAP-002 §Revocation | Placeholder (not implemented) | Missing | Add Revocation struct, chain, tests & integration with verification |
+| Expiry Enforcement | AAP-002 §Temporal Validity | Delegation expiry check in `VerifyChain()` + test | Partial | Need evaluation-time denial responses & clock skew handling |
+| Chain Anchor Externalization | AAP-001 §External Anchor | Anchor callback in audit logger | Partial | Persist anchor & prove external verification procedure |
+| Cryptographic Algorithms | AAP-001/115 §Crypto | Hash only (algorithm unspecified) | Missing | Document chosen hash & key scheme, add signature verification |
+| Error Codes & Semantics | AAP-001/115 §Errors | Generic HTTP JSON errors | Missing | Define structured error taxonomy mapping to RFC clauses |
+| Interoperability (Cross-Impl) | AAP-001/115 §Interoperability | None | Missing | Add harness testing against second independent implementation |
+| Compliance Test Suite | AAP-001/115 §Conformance | Sparse / placeholders | Missing | Build table-driven tests enumerating MUST/SHOULD items |
 
 ## Notes
 - Sections labeled "RFC Reference" are placeholders pending precise clause citations.

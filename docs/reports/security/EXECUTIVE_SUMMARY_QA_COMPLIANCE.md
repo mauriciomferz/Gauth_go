@@ -291,10 +291,10 @@ Milestone 4: Production v1.0 (Week 15) 🎯
 ## 📎 References
 
 - **Full Compliance Report**: `QA_MANAGER_FINAL_COMPLIANCE_REPORT.md`
-- **Technical Gap Analysis**: `docs/COMPLIANCE_RFC111_RFC115_REPORT.md`
-- **RFC Documents**: `docs/Gifo_0011.md`, `docs/Gifo_0015.md`
+- **Technical Gap Analysis**: `docs/COMPLIANCE_AAP-001_AAP-002_REPORT.md`
+- **RFC Documents**: `docs/AAP_0011.md`, `docs/AAP_0015.md`
 - **Architecture Documentation**: `ARCHITECTURE.md`, `docs/RFC_ARCHITECTURE.md`
-- **Implementation Status**: `docs/RFC_0115_IMPLEMENTATION_SUMMARY.md`
+- **Implementation Status**: `docs/RFC_AAP-002_IMPLEMENTATION_SUMMARY.md`
 
 ---
 

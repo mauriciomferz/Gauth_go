@@ -1,4 +1,4 @@
-// Package agentauth provides formal requirements enforcement for AAP-001/AAP-002 compliance
+// Package agentauth provides formal requirements enforcement for AAP001/AAP002 compliance
 package agentauth
 
 import (
@@ -14,7 +14,7 @@ import (
 )
 
 // FormalRequirementsValidator validates formal legal requirements for PoA
-// AAP-002 Section C.1 - Formal Requirements
+// AAP002 Section C.1 - Formal Requirements
 type FormalRequirementsValidator struct {
 	// External service clients
 	notaryVerifier NotarialCertificateVerifier
@@ -54,22 +54,22 @@ type DigitalSignatureVerifier interface {
 
 // NotarialCertificate represents a notarial certification
 type NotarialCertificate struct {
-	CertificateID        string
-	NotaryID             string
-	NotaryName           string
-	NotaryLicense        string
-	Jurisdiction         string
-	IssuingAuthority string
-	CertificationDate    time.Time
-	ExpirationDate       time.Time
-	DocumentHash         string
-	NotarySeal           []byte
-	NotarySignature      []byte
-	ApostilleAttached    bool
-	ApostilleNumber      string
-	CertificationType    string // "acknowledgment", "jurat", "oath", "affirmation"
-	WitnessStatements    []WitnessStatement
-	Metadata             map[string]interface{}
+	CertificateID     string
+	NotaryID          string
+	NotaryName        string
+	NotaryLicense     string
+	Jurisdiction      string
+	IssuingAuthority  string
+	CertificationDate time.Time
+	ExpirationDate    time.Time
+	DocumentHash      string
+	NotarySeal        []byte
+	NotarySignature   []byte
+	ApostilleAttached bool
+	ApostilleNumber   string
+	CertificationType string // "acknowledgment", "jurat", "oath", "affirmation"
+	WitnessStatements []WitnessStatement
+	Metadata          map[string]interface{}
 }
 
 // WitnessStatement represents a witness attestation
@@ -138,18 +138,18 @@ type NotarialVerificationResult struct {
 
 // IDVerificationResult contains identity verification results
 type IDVerificationResult struct {
-	Valid                bool
-	DocumentAuthentic    bool
-	NotExpired           bool
-	BiometricMatch       bool
-	BiometricScore       float64
-	SecurityFeatureOK    bool
-	IssuinagentAuthValid bool
-	ChipDataValid        bool
-	Issues               []string
-	Warnings             []string
-	VerificationDate     time.Time
-	VerificationMethod   string
+	Valid                 bool
+	DocumentAuthentic     bool
+	NotExpired            bool
+	BiometricMatch        bool
+	BiometricScore        float64
+	SecurityFeatureOK     bool
+	IssuingAuthorityValid bool
+	ChipDataValid         bool
+	Issues                []string
+	Warnings              []string
+	VerificationDate      time.Time
+	VerificationMethod    string
 }
 
 // GovernmentIDInfo contains government ID information
@@ -187,15 +187,15 @@ type SignatureChainResult struct {
 
 // NotaryLicenseInfo contains notary license information
 type NotaryLicenseInfo struct {
-	NotaryID             string
-	LicenseNumber        string
-	Status               string // "active", "suspended", "revoked", "expired"
-	Jurisdiction         string
-	IssueDate            time.Time
-	ExpiryDate           time.Time
+	NotaryID         string
+	LicenseNumber    string
+	Status           string // "active", "suspended", "revoked", "expired"
+	Jurisdiction     string
+	IssueDate        time.Time
+	ExpiryDate       time.Time
 	IssuingAuthority string
-	LicenseType          string
-	Restrictions         []string
+	LicenseType      string
+	Restrictions     []string
 }
 
 // FormalRequirementsResult contains validation results
@@ -237,7 +237,7 @@ func NewFormalRequirementsValidator(
 }
 
 // ValidateFormalRequirements validates formal requirements for a PoA
-// AAP-002 Section C.1 - Formal Requirements validation
+// AAP002 Section C.1 - Formal Requirements validation
 func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	ctx context.Context,
 	poaDef *poa.PoADefinition,
@@ -264,7 +264,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	// Step 2: Validate notarial certification if required
 	if formalReqs.NotarialCertification {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
-			"AAP-002 Section C.1: Notarial certification required")
+			"AAP002 Section C.1: Notarial certification required")
 
 		if notaryCert == nil {
 			result.Valid = false
@@ -289,7 +289,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	// Step 3: Validate ID verification if required
 	if formalReqs.IDVerificationRequired {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
-			"AAP-002 Section C.1: Identity verification required")
+			"AAP002 Section C.1: Identity verification required")
 
 		if len(identityDocs) == 0 {
 			result.Valid = false
@@ -314,7 +314,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	// Step 4: Validate digital signatures if required
 	if formalReqs.DigitalSignatures {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
-			"AAP-002 Section C.1: Digital signatures required")
+			"AAP002 Section C.1: Digital signatures required")
 
 		if len(digitalSigs) == 0 {
 			result.Valid = false
@@ -507,7 +507,7 @@ func (v *FormalRequirementsValidator) ValidateIdentityDocuments(
 			result.BiometricScore = docResult.BiometricScore
 		}
 		result.SecurityFeatureOK = result.SecurityFeatureOK || docResult.SecurityFeatureOK
-		result.IssuinagentAuthValid = result.IssuinagentAuthValid || docResult.IssuinagentAuthValid
+		result.IssuingAuthorityValid = result.IssuingAuthorityValid || docResult.IssuingAuthorityValid
 		result.ChipDataValid = result.ChipDataValid || docResult.ChipDataValid
 	}
 
@@ -577,7 +577,7 @@ func (v *FormalRequirementsValidator) validateSingleIdentityDocument(
 		result.BiometricMatch = verifyResult.BiometricMatch
 		result.BiometricScore = verifyResult.BiometricScore
 		result.SecurityFeatureOK = verifyResult.SecurityFeatureOK
-		result.IssuinagentAuthValid = verifyResult.IssuinagentAuthValid
+		result.IssuingAuthorityValid = verifyResult.IssuingAuthorityValid
 		result.ChipDataValid = verifyResult.ChipDataValid
 
 		if !verifyResult.Valid {
@@ -589,7 +589,7 @@ func (v *FormalRequirementsValidator) validateSingleIdentityDocument(
 		// Basic validation without external service (using available fields)
 		result.DocumentAuthentic = doc.DocumentNumber != ""
 		result.SecurityFeatureOK = len(doc.VerificationData) > 0
-		result.IssuinagentAuthValid = doc.IssuingAuthority != ""
+		result.IssuingAuthorityValid = doc.IssuingAuthority != ""
 		result.Warnings = append(result.Warnings, "ID verification service not configured - basic checks only")
 	}
 
@@ -714,7 +714,7 @@ func (v *FormalRequirementsValidator) validateWrittenFormRequirements(
 		Warnings: []string{},
 	}
 
-	// AAP-002 written form requirements check
+	// AAP002 written form requirements check
 	// Must have complete party information (using correct struct fields)
 	if poaDef.Parties.Principal.Identity == "" {
 		result.Valid = false

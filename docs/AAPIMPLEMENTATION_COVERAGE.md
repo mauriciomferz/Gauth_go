@@ -2,7 +2,7 @@
 ## AgentAuth_go Codebase vs Corrected Protocol Flow
 
 **Date:** November 15, 2025
-**RFC Reference:** AAP-0111 with corrections from `Gifo_0111_CORRECTED_FLOW.md`
+**RFC Reference:** AAP-001 with corrections from `AAP_AAP-001_CORRECTED_FLOW.md`
 **Codebase Version:** main branch (commit b641f446)
 **Last Updated:** November 15, 2025 - Gap Closure Complete
 
@@ -872,4 +872,4 @@ The implementation is **production-ready** for core authorization scenarios and 
 **Document Status:** Implementation Coverage Analysis  
 **Assessment Date:** November 15, 2025  
 **Assessed By:** GitHub Copilot  
-**RFC Version:** AAP-0111 with corrections
+**RFC Version:** AAP-001 with corrections

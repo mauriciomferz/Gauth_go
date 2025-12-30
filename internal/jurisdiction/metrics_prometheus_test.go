@@ -30,9 +30,9 @@ func TestPrometheusMetricsEndpoint(t *testing.T) {
 	r.ServeHTTP(w, req)
 	body := w.Body.String()
 	for _, metric := range []string{
-		"AGENTAUTH_jurisdiction_enforcements_total",
-		"AGENTAUTH_jurisdiction_enforcements_allowed_total",
-		"AGENTAUTH_jurisdiction_average_latency_ms",
+		"agentauth_jurisdiction_enforcements_total",
+		"agentauth_jurisdiction_enforcements_allowed_total",
+		"agentauth_jurisdiction_average_latency_ms",
 	} {
 		if !strings.Contains(body, metric) {
 			t.Fatalf("expected metric %s in body", metric)
@@ -43,7 +43,7 @@ func TestPrometheusMetricsEndpoint(t *testing.T) {
 		t.Fatalf("empty metrics body")
 	}
 	// Latency should be >=0; enforcement sets EMA first sample.
-	if !strings.Contains(body, "AGENTAUTH_jurisdiction_average_latency_ms") {
+	if !strings.Contains(body, "agentauth_jurisdiction_average_latency_ms") {
 		t.Fatalf("latency metric missing")
 	}
 	// Clear env for isolation (if tests set external file)

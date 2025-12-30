@@ -8,7 +8,7 @@ type Exclusion struct {
 	LicenseRequired bool `json:"license_required"`
 }
 
-// AAP001Exclusions represents exclusions for AAP-001
+// AAP001Exclusions represents exclusions for AAP001
 type AAP001Exclusions struct {
 	Web3Blockchain     Exclusion `json:"web3_blockchain"`
 	AIOperators        Exclusion `json:"ai_operators"`
@@ -49,7 +49,7 @@ type PolicyVerificationPoint struct {
 	TrustServiceProvider string `json:"trust_service_provider"`
 }
 
-// AAP001PPArchitecture represents the PP architecture for AAP-001
+// AAP001PPArchitecture represents the PP architecture for AAP001
 type AAP001PPArchitecture struct {
 	PEP PolicyEnforcementPoint    `json:"pep"` // Policy Enforcement Point
 	PDP PolicyDecisionPoint       `json:"pdp"` // Policy Decision Point
@@ -105,7 +105,7 @@ type AgentAuthContext struct {
 	AIGovernanceLevel   string `json:"ai_governance_level"`
 }
 
-// AAP002PoADefinition represents the PoA definition for AAP-002
+// AAP002PoADefinition represents the PoA definition for AAP002
 type AAP002PoADefinition struct {
 	Definition       string                 `json:"definition"`
 	Attestation      string                 `json:"attestation"`
@@ -115,14 +115,14 @@ type AAP002PoADefinition struct {
 	AgentAuthContext AgentAuthContext       `json:"agentauth_context"`
 }
 
-// AAP001Config represents AAP-001 specific configuration
+// AAP001Config represents AAP001 specific configuration
 type AAP001Config struct {
 	Enabled        bool                 `json:"enabled"`
 	Exclusions     AAP001Exclusions     `json:"exclusions"`
 	PPArchitecture AAP001PPArchitecture `json:"pp_architecture"`
 }
 
-// AAP002Config represents AAP-002 specific configuration
+// AAP002Config represents AAP002 specific configuration
 type AAP002Config struct {
 	Enabled       bool   `json:"enabled"`
 	PoADefinition string `json:"poa_definition"`
@@ -130,8 +130,8 @@ type AAP002Config struct {
 
 // CombinedRFCConfig represents configuration for combined RFC compliance
 type CombinedRFCConfig struct {
-	AAP001           *AAP001Config          `json:"aap_0111"`
-	AAP002           *AAP002Config          `json:"aap_0115"`
+	AAP001           *AAP001Config          `json:"aap_001"`
+	AAP002           *AAP002Config          `json:"aap_002"`
 	IntegrationLevel string                 `json:"integration_level"`
 	CombinedVersion  string                 `json:"combined_version"`
 	Compatibility    map[string]interface{} `json:"compatibility"`
@@ -230,7 +230,7 @@ func ValidateCombinedRFCConfig(config *CombinedRFCConfig) error {
 	return nil
 }
 
-// AAP001ClientType represents different types of AAP-001 clients
+// AAP001ClientType represents different types of AAP001 clients
 type AAP001ClientType string
 
 const (
@@ -239,7 +239,7 @@ const (
 	AAP001ClientTypeHumanoidRobot AAP001ClientType = "humanoid_robot"
 )
 
-// AAP001Client represents a client for AAP-001 operations
+// AAP001Client represents a client for AAP001 operations
 type AAP001Client struct {
 	Type           AAP001ClientType       `json:"type"`
 	Identity       string                 `json:"identity"`
@@ -250,7 +250,7 @@ type AAP001Client struct {
 	Config         *CombinedRFCConfig     `json:"config,omitempty"`
 	Endpoint       string                 `json:"endpoint,omitempty"`
 	Metadata       map[string]interface{} `json:"metadata,omitempty"`
-} // NewAAP001Client creates a new AAP-001 client
+} // NewAAP001Client creates a new AAP001 client
 func NewAAP001Client(config *CombinedRFCConfig, endpoint string) *AAP001Client {
 	return &AAP001Client{
 		Config:   config,
@@ -259,7 +259,7 @@ func NewAAP001Client(config *CombinedRFCConfig, endpoint string) *AAP001Client {
 	}
 }
 
-// Initialize initializes the AAP-001 client
+// Initialize initializes the AAP001 client
 func (c *AAP001Client) Initialize() error {
 	if c.Config == nil {
 		return fmt.Errorf("config is required")
@@ -267,7 +267,7 @@ func (c *AAP001Client) Initialize() error {
 	return nil
 }
 
-// ValidateToken validates a token using AAP-001 rules
+// ValidateToken validates a token using AAP001 rules
 func (c *AAP001Client) ValidateToken(token string) error {
 	if token == "" {
 		return fmt.Errorf("token cannot be empty")
@@ -275,7 +275,7 @@ func (c *AAP001Client) ValidateToken(token string) error {
 	return nil
 }
 
-// ProcessRequest processes a request using AAP-001 protocols
+// ProcessRequest processes a request using AAP001 protocols
 func (c *AAP001Client) ProcessRequest(request interface{}) error {
 	if request == nil {
 		return fmt.Errorf("request cannot be nil")

@@ -1,5 +1,5 @@
 ---
-title: Rfc0111 Implementation Status
+title: AAP-001 Implementation Status
 category: guide
 status: draft
 lastUpdated: 2025-12-25

@@ -288,8 +288,8 @@ func TestJWTDuplicateJTIReplay(t *testing.T) {
 	}
 	var rep map[string]any
 	_ = json.Unmarshal(vw2.Body.Bytes(), &rep)
-	if rep["code"] != "token_replay_detected" || rep["error"] != "replay_detected" || rep["rfc_ref"] != "AAP-001:replay_protection" {
-		t.Fatalf("expected replay taxonomy code=token_replay_detected error=replay_detected rfc_ref=AAP-001:replay_protection body=%s", vw2.Body.String())
+	if rep["code"] != "token_replay_detected" || rep["error"] != "replay_detected" || rep["rfc_ref"] != "AAP001:replay_protection" {
+		t.Fatalf("expected replay taxonomy code=token_replay_detected error=replay_detected rfc_ref=AAP001:replay_protection body=%s", vw2.Body.String())
 	}
 }
 

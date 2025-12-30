@@ -7,7 +7,7 @@ import (
 )
 
 // ExtendedTokenStore defines the interface for storing and retrieving extended tokens.
-// This supports AAP-001 token lifecycle management including validation,
+// This supports AAP001 token lifecycle management including validation,
 // introspection, and revocation (RFC 7009).
 type ExtendedTokenStore interface {
 	// SaveToken stores a new extended token

@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-// TestRegistryTamperDetection_RFC111_C1_C2 verifies correct detection of chain tampering
+// TestRegistryTamperDetection_AAP_001_C1_C2 verifies correct detection of chain tampering
 // specifically addressing multi-hop integrity (C1) and error code mapping (C2).
-func TestRegistryTamperDetection_RFC111_C1_C2(t *testing.T) {
+func TestRegistryTamperDetection_AAP_001_C1_C2(t *testing.T) {
 	r := NewRegistry()
 
 	// 1. Add Bundles A -> B -> C

@@ -22,18 +22,18 @@ owners: [system]
 {
   "generated": "2025-10-20T00:00:00Z",
   "rfc": {
-    "0111": {
+    "AAP-001": {
       "sections": [
-        {"id": "0111:authz-combining", "title": "Combining Algorithms", "expected": ["deny_overrides", "permit_overrides", "first_applicable"], "tests": []},
-        {"id": "0111:jti-format", "title": "JTI Format Validation", "expected": ["uuidv4"], "tests": []},
-        {"id": "0111:replay-protection", "title": "Replay Protection", "expected": ["first-seen", "fail-open", "latency-metrics"], "tests": []}
+        {"id": "AAP-001:authz-combining", "title": "Combining Algorithms", "expected": ["deny_overrides", "permit_overrides", "first_applicable"], "tests": []},
+        {"id": "AAP-001:jti-format", "title": "JTI Format Validation", "expected": ["uuidv4"], "tests": []},
+        {"id": "AAP-001:replay-protection", "title": "Replay Protection", "expected": ["first-seen", "fail-open", "latency-metrics"], "tests": []}
       ]
     },
-    "0115": {
+    "AAP-002": {
       "sections": [
-        {"id": "0115:poa-structure", "title": "PoA Structural Fields", "expected": ["parties", "scope", "requirements"], "tests": []},
-        {"id": "0115:poa-semantic", "title": "Semantic Validation Rules", "expected": ["non-self-delegation", "transaction-currency", "temporal-invariants", "numeric-limits"], "tests": []},
-        {"id": "0115:canonical-digest", "title": "Canonical Digest Stability", "expected": ["stable-permutation", "domain-separation"], "tests": []}
+        {"id": "AAP-002:poa-structure", "title": "PoA Structural Fields", "expected": ["parties", "scope", "requirements"], "tests": []},
+        {"id": "AAP-002:poa-semantic", "title": "Semantic Validation Rules", "expected": ["non-self-delegation", "transaction-currency", "temporal-invariants", "numeric-limits"], "tests": []},
+        {"id": "AAP-002:canonical-digest", "title": "Canonical Digest Stability", "expected": ["stable-permutation", "domain-separation"], "tests": []}
       ]
     }
   }
@@ -43,7 +43,7 @@ owners: [system]
 ## 3. Script Plan (`scripts/generate_clause_coverage.go`)
 ### Responsibilities
 - Load static JSON template (e.g. `docs/coverage_template.json`).
-- Scan `./pkg` and `./test` for test files containing markers (`//clause:0111:authz-combining`).
+- Scan `./pkg` and `./test` for test files containing markers (`//clause:AAP-001:authz-combining`).
 - Populate `tests` arrays with file paths + test function names.
 - Emit `docs/CLAUSE_TEST_COVERAGE.json` with filled data.
 - Output summary: total clauses, covered clauses, coverage percentage.
@@ -61,13 +61,13 @@ owners: [system]
 ## 4. Marking Convention
 Add a comment at top of test functions:
 ```go
-//clause:0111:authz-combining
+//clause:AAP-001:authz-combining
 func TestDenyOverrides(t *testing.T) { ... }
 ```
 Multiple clauses:
 ```go
-//clause:0115:canonical-digest
-//clause:0115:poa-semantic
+//clause:AAP-002:canonical-digest
+//clause:AAP-002:poa-semantic
 func TestCanonicalDigestStable(t *testing.T) { ... }
 ```
 
@@ -78,12 +78,12 @@ func TestCanonicalDigestStable(t *testing.T) { ... }
 ## 6. Initial Target Clauses (Subset)
 | RFC | Clause ID | Priority | Current Coverage | Notes |
 |-----|-----------|----------|------------------|-------|
-| 0111 | 0111:authz-combining | P0 | TBD | Strategies tested; need markers |
-| 0111 | 0111:jti-format | P0 | TBD | Regex test exists; add marker |
-| 0111 | 0111:replay-protection | P1 | TBD | Add markers to replay tests |
-| 0115 | 0115:poa-structure | P0 | TBD | Structural tests in `poa_test.go` |
-| 0115 | 0115:poa-semantic | P0 | TBD | `BasicPoAValidator` tests |
-| 0115 | 0115:canonical-digest | P1 | TBD | Canonical digest property tests |
+| AAP-001 | AAP-001:authz-combining | P0 | TBD | Strategies tested; need markers |
+| AAP-001 | AAP-001:jti-format | P0 | TBD | Regex test exists; add marker |
+| AAP-001 | AAP-001:replay-protection | P1 | TBD | Add markers to replay tests |
+| AAP-002 | AAP-002:poa-structure | P0 | TBD | Structural tests in `poa_test.go` |
+| AAP-002 | AAP-002:poa-semantic | P0 | TBD | `BasicPoAValidator` tests |
+| AAP-002 | AAP-002:canonical-digest | P1 | TBD | Canonical digest property tests |
 
 ## 7. Roadmap
 1. Implement generator script with minimal clause subset.
@@ -96,7 +96,7 @@ func TestCanonicalDigestStable(t *testing.T) { ... }
 ## 9. Run Instructions (Initial)
 1. Add markers to tests (example):
   ```go
-  //clause:0111:authz-combining
+  //clause:AAP-001:authz-combining
   func TestDenyOverridesStrategy(t *testing.T) { /* ... */ }
   ```
 2. Execute generator:
@@ -105,7 +105,7 @@ func TestCanonicalDigestStable(t *testing.T) { ... }
   ```
 3. Inspect output file:
   ```bash
-  jq '.rfc["0111"].sections[] | {id:.id, tests_count:(.tests|length)}' docs/CLAUSE_TEST_COVERAGE.json
+  jq '.rfc["AAP-001"].sections[] | {id:.id, tests_count:(.tests|length)}' docs/CLAUSE_TEST_COVERAGE.json
   ```
 4. CI integration suggestion (Makefile target):
   ```make
@@ -115,7 +115,7 @@ func TestCanonicalDigestStable(t *testing.T) { ... }
   ```
 5. Failing threshold example (bash snippet):
   ```bash
-  pct=$(jq -r '(.rfc["0111"].sections + .rfc["0115"].sections | map(select(.tests|length>0) | length) / (.rfc["0111"].sections + .rfc["0115"].sections | length) * 100' docs/CLAUSE_TEST_COVERAGE.json)
+  pct=$(jq -r '(.rfc["AAP-001"].sections + .rfc["AAP-002"].sections | map(select(.tests|length>0) | length) / (.rfc["AAP-001"].sections + .rfc["AAP-002"].sections | length) * 100' docs/CLAUSE_TEST_COVERAGE.json)
   echo "Clause coverage: ${pct}%"
   awk "BEGIN {exit (${pct} < 5)}"  # require at least 5%
   ```
@@ -124,7 +124,7 @@ func TestCanonicalDigestStable(t *testing.T) { ... }
 - Add `deprecated:true` flag for retired clauses.
 - Support multi-file mapping summary (list unique functions per clause).
 - Emit coverage badge (SVG) based on percentage.
-- Add property/fuzz test classification (suffix markers: `//clause:0115:canonical-digest:fuzz`).
+- Add property/fuzz test classification (suffix markers: `//clause:AAP-002:canonical-digest:fuzz`).
 - Integrate with GAP matrix: auto-add clause entries for each row without status Missing.
 
 ---

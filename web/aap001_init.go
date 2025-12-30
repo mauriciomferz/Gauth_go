@@ -14,11 +14,11 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
 )
 
-// InitAAP001FromEnv initializes AAP-001 components based on environment variables.
+// InitAAP001FromEnv initializes AAP001 components based on environment variables.
 // This is a web-server specific helper that can create mock services and configure persistence.
 //
 // Environment variables:
-//   - AGENTAUTH_AAP001_ENABLED: Set to "1" to enable AAP-001 functionality
+//   - AGENTAUTH_AAP001_ENABLED: Set to "1" to enable AAP001 functionality
 //   - AGENTAUTH_AAP001_USE_MOCKS: Set to "1" to use mock external services (default: 1)
 //   - AGENTAUTH_TOKEN_STORE: "postgres" or "memory" (default: memory)
 //   - DB_HOST: PostgreSQL host (default: localhost)
@@ -28,10 +28,10 @@ import (
 //   - DB_PASSWORD: PostgreSQL password (default: agentauth_password)
 //   - DB_SSLMODE: PostgreSQL SSL mode (default: disable)
 //
-// Returns nil if AAP-001 is not enabled.
+// Returns nil if AAP001 is not enabled.
 // Returns an ExtendedTokenStore configured based on AGENTAUTH_TOKEN_STORE.
 func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenStore, error) {
-	// Check if AAP-001 is enabled
+	// Check if AAP001 is enabled
 	if os.Getenv("AGENTAUTH_AAP001_ENABLED") != "1" {
 		return nil, nil, nil
 	}
@@ -46,25 +46,25 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 		// Use real external service implementations (where available)
 		components, err = InitAAP001WithRealServices()
 		if err != nil {
-			return nil, nil, fmt.Errorf("AAP-001 real service initialization failed: %w", err)
+			return nil, nil, fmt.Errorf("AAP001 real service initialization failed: %w", err)
 		}
-		fmt.Fprintf(os.Stderr, "[AAP-001] Using REAL external services (Global Identity Verification)\n")
+		fmt.Fprintf(os.Stderr, "[AAP001] Using REAL external services (Global Identity Verification)\n")
 	} else {
 		// Create mock external services
 		pvpClient := mocks.NewMockPowerVerificationPoint()
 		pipClient := mocks.NewMockPIPClient()
 		commercialRegClient := mocks.NewMockCommercialRegisterClient()
 
-		// Initialize AAP-001 with mocks
+		// Initialize AAP001 with mocks
 		components, err = agentauth.InitAAP001WithComponents(
 			pvpClient,
 			pipClient,
 			commercialRegClient,
 		)
 		if err != nil {
-			return nil, nil, fmt.Errorf("AAP-001 mock initialization failed: %w", err)
+			return nil, nil, fmt.Errorf("AAP001 mock initialization failed: %w", err)
 		}
-		fmt.Fprintf(os.Stderr, "[AAP-001] Using MOCK external services\n")
+		fmt.Fprintf(os.Stderr, "[AAP001] Using MOCK external services\n")
 	}
 
 	// Initialize token store based on AGENTAUTH_TOKEN_STORE environment variable
@@ -111,11 +111,11 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 			return nil, nil, fmt.Errorf("failed to initialize PostgreSQL token store: %w", err)
 		}
 		tokenStore = pgStore
-		fmt.Fprintf(os.Stderr, "[AAP-001] Using PostgreSQL token store (host=%s, db=%s)\n", host, dbname)
+		fmt.Fprintf(os.Stderr, "[AAP001] Using PostgreSQL token store (host=%s, db=%s)\n", host, dbname)
 
 	case "memory":
 		tokenStore = agentauth.NewMemoryExtendedTokenStore()
-		fmt.Fprintf(os.Stderr, "[AAP-001] Using in-memory token store\n")
+		fmt.Fprintf(os.Stderr, "[AAP001] Using in-memory token store\n")
 
 	default:
 		return nil, nil, fmt.Errorf("unknown token store type: %s (supported: memory, postgres)", tokenStoreType)
@@ -138,7 +138,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 	return components, tokenStore, nil
 }
 
-// InitAAP001WithRealServices initializes AAP-001 components with real service connectors.
+// InitAAP001WithRealServices initializes AAP001 components with real service connectors.
 // This sets up the GlobalIdentityVerifier with supported country connectors.
 func InitAAP001WithRealServices() (*agentauth.AAP001Components, error) {
 	// 1. Initialize Country-Specific Connectors
@@ -169,7 +169,7 @@ func InitAAP001WithRealServices() (*agentauth.AAP001Components, error) {
 	}
 	frConnector, err := external.NewFranceIdentityConnector(frConfig)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[AAP-001] Warning: Failed to initialize France connector: %v\n", err)
+		fmt.Fprintf(os.Stderr, "[AAP001] Warning: Failed to initialize France connector: %v\n", err)
 		// Continue with nil connector (GlobalVerifier handles nil)
 		frConnector = nil
 	}
@@ -184,7 +184,7 @@ func InitAAP001WithRealServices() (*agentauth.AAP001Components, error) {
 	}
 	itConnector, err := external.NewItalyIdentityConnector(itConfig)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[AAP-001] Warning: Failed to initialize Italy connector: %v\n", err)
+		fmt.Fprintf(os.Stderr, "[AAP001] Warning: Failed to initialize Italy connector: %v\n", err)
 		itConnector = nil
 	}
 
@@ -199,7 +199,7 @@ func InitAAP001WithRealServices() (*agentauth.AAP001Components, error) {
 	}
 	esConnector, err := external.NewSpainIdentityConnector(esConfig)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[AAP-001] Warning: Failed to initialize Spain connector: %v\n", err)
+		fmt.Fprintf(os.Stderr, "[AAP001] Warning: Failed to initialize Spain connector: %v\n", err)
 		esConnector = nil
 	}
 
@@ -244,12 +244,12 @@ func InitAAP001WithRealServices() (*agentauth.AAP001Components, error) {
 		os.Getenv("AGENTAUTH_STRICT_FORMAL") == "1",
 	)
 
-	fmt.Fprintf(os.Stderr, "[AAP-001] Initialized GlobalIdentityVerifier with US, FR, IT, ES connectors\n")
+	fmt.Fprintf(os.Stderr, "[AAP001] Initialized GlobalIdentityVerifier with US, FR, IT, ES connectors\n")
 
 	return components, nil
 }
 
-// initializeAgentAuthPlus initializes AgentAuth+ services and integrates them with AAP-001 components.
+// initializeAgentAuthPlus initializes AgentAuth+ services and integrates them with AAP001 components.
 // This function requires a PostgreSQL database connection to be available.
 //
 // Environment variables:
@@ -366,7 +366,7 @@ func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string
 		}
 	}
 
-	// Integrate AgentAuth+ validator into AAP-001 components
+	// Integrate AgentAuth+ validator into AAP001 components
 	if components.ComplianceValidator != nil {
 		components.ComplianceValidator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
 		components.ComplianceValidator.SetEnforceAgentAuthPlus(true)

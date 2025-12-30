@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPowerLimitsValidation_RFC115_C5(t *testing.T) {
+func TestPowerLimitsValidation_AAP_002_C5(t *testing.T) {
 	// Test Numeric Enforcement
 	t.Run("NumericEnforcement", func(t *testing.T) {
 		validLimits := &PowerLimitSet{

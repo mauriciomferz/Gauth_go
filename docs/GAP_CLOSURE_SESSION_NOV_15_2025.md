@@ -343,7 +343,7 @@ spec:
     "extended_token": "eyJhbGc...",
     "poa_reference": "PoA-2025-001",
     "authorization_chain_hash": "sha256:abc123...",
-    "compliance_level": "rfc-0111-compliant"
+    "compliance_level": "AAP-001-compliant"
   }
 }
 ```
@@ -856,7 +856,7 @@ The AgentAuth_go implementation now provides:
 
 ### Related Documents
 
-- `docs/Gifo_0111_CORRECTED_FLOW.md` - Corrected RFC protocol flow
+- `docs/AAP_AAP-001_CORRECTED_FLOW.md` - Corrected RFC protocol flow
 - `docs/RFC_IMPLEMENTATION_COVERAGE.md` - Implementation coverage analysis
 - `docs/RESOURCE_SERVER_DEPLOYMENT.md` - RS deployment guide
 - `docs/MCP_INTEGRATION_PLAN.md` - MCP integration roadmap

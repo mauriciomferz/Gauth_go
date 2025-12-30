@@ -244,8 +244,8 @@ func TestDiscoveryService_SupportsScope(t *testing.T) {
 			want:  true,
 		},
 		{
-			name:  "Supports AGENTAUTH:owner",
-			scope: "AGENTAUTH:owner",
+			name:  "Supports agentauth:owner",
+			scope: "agentauth:owner",
 			want:  true,
 		},
 		{
@@ -269,8 +269,8 @@ func TestDiscoveryService_AgentAuthExtensions(t *testing.T) {
 	config := service.GetConfiguration()
 
 	// Verify AgentAuth-specific scopes
-	AGENTAUTHScopes := []string{"AGENTAUTH:owner", "AGENTAUTH:client", "AGENTAUTH:resource", "AGENTAUTH:legal_entity"}
-	for _, scope := range AGENTAUTHScopes {
+	agentauthScopes := []string{"agentauth:owner", "agentauth:client", "agentauth:resource", "agentauth:legal_entity"}
+	for _, scope := range agentauthScopes {
 		found := false
 		for _, supported := range config.ScopesSupported {
 			if supported == scope {

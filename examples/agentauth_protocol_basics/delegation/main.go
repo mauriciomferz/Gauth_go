@@ -1,4 +1,4 @@
-// Title: Minimal Delegation (AAP-002)
+// Title: Minimal Delegation (AAP002)
 // Description: Principal delegates limited authority to a service with attestation and validity period.
 package main
 

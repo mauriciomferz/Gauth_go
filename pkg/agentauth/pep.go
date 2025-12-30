@@ -1,5 +1,5 @@
-// Package agentauth - AAP-001 Power Enforcement Point (PEP)
-// This implements the PEP component of the P*P architecture (AAP-001 Section 3.1)
+// Package agentauth - AAP001 Power Enforcement Point (PEP)
+// This implements the PEP component of the P*P architecture (AAP001 Section 3.1)
 package agentauth
 
 import (
@@ -11,7 +11,7 @@ import (
 )
 
 // PowerEnforcementPoint (PEP) enforces authorization decisions at runtime
-// AAP-001 Section 3.1: "Power Enforcement Point (PEP) – usually the application, AI system or an
+// AAP001 Section 3.1: "Power Enforcement Point (PEP) – usually the application, AI system or an
 // intermediary that asks the PDP for a decision and enforces its result. AgentAuth differentiates between
 // supply-side and demand-side PEP. The client itself Must make sure it decides and acts in line with
 // its authorization, thus enforces compliance from the supply-side. The resource owner and/or resource

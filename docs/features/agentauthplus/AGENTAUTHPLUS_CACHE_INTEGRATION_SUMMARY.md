@@ -23,7 +23,7 @@ capabilityService := agentauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 delegationService := agentauthplus.NewPostgreSQLDelegationService(db)
 
 // Create validator with direct database services
-agentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
+AgentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
     successorService,
     delegationService,  // Direct database access
     dualControlService,
@@ -61,7 +61,7 @@ go func() {
 fmt.Fprintf(os.Stderr, "[AgentAuth+] Performance optimization: Caching enabled (capability TTL: 5m, delegation TTL: 1m)\n")
 
 // Create validator with cached services
-agentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
+AgentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
     successorService,
     cachedDelegationService,  // Cached version
     dualControlService,
@@ -355,7 +355,7 @@ To temporarily disable caching (rollback):
 
 ```go
 // Use services directly without caching
-agentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
+AgentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
     successorService,
     delegationService,    // Direct database access
     dualControlService,

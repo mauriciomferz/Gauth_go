@@ -195,7 +195,7 @@ func (v *GlobalIdentityVerifier) verifyFranceDocument(ctx context.Context, doc *
 			NotExpired:        res.Status == "valid",
 			BiometricMatch:    res.BiometricVerified,
 			SecurityFeatureOK: res.MRZVerified,
-			IssuinagentAuthValid:  true,
+			IssuingAuthorityValid:  true,
 			Issues:            v.errorToIssues(res.Error),
 		}, nil
 	}

@@ -35,7 +35,7 @@ type ClientOwnerInfo struct {
 	CommercialRegisterEntry   bool
 }
 
-// AAP-002 Section A.3 Client Type Classification
+// AAP002 Section A.3 Client Type Classification
 type ClientType string
 
 const (
@@ -116,7 +116,7 @@ type Certification struct {
 	Scope                string
 }
 
-// ValidateClientType validates AAP-002 client type
+// ValidateClientType validates AAP002 client type
 func ValidateClientType(ct ClientType) error {
 	switch ct {
 	case ClientTypeLLM, ClientTypeDigitalAgent, ClientTypeAgenticAI,
@@ -127,7 +127,7 @@ func ValidateClientType(ct ClientType) error {
 	}
 }
 
-// ValidateOperationalStatus validates AAP-002 operational status
+// ValidateOperationalStatus validates AAP002 operational status
 func ValidateOperationalStatus(status OperationalStatus) error {
 	switch status {
 	case OperationalStatusActive, OperationalStatusSuspended, OperationalStatusRevoked,
@@ -288,7 +288,7 @@ func (ac *AuthorizedClient) Validate() error {
 
 type AuthorizationScope struct {
 	AuthorizationType AuthorizationType
-	ApplicableSectors []taxonomy.IndustrySector // AAP-002 B.2 Industry Sector (uses full struct from sector_taxonomy.go)
+	ApplicableSectors []taxonomy.IndustrySector // AAP002 B.2 Industry Sector (uses full struct from sector_taxonomy.go)
 	ApplicableRegions []GeographicScope
 	AuthorizedActions AuthorizedActions
 }
@@ -300,7 +300,7 @@ type AuthorizationType struct {
 	SignatureType      string
 }
 
-// GeographicScope represents authorized geographic regions per AAP-002 Section B.3
+// GeographicScope represents authorized geographic regions per AAP002 Section B.3
 type GeographicScope struct {
 	// Type defines the geographic scope level
 	Type GeographicType `json:"type"`
@@ -318,7 +318,7 @@ type GeographicScope struct {
 	ExcludedSubdivisions []string `json:"excluded_subdivisions,omitempty"`
 }
 
-// GeographicType classifies geographic scope levels per AAP-002 B.3
+// GeographicType classifies geographic scope levels per AAP002 B.3
 type GeographicType string
 
 const (
@@ -412,10 +412,10 @@ func IsAuthorizedInRegion(scopes []GeographicScope, checkRegion string) bool {
 }
 
 type AuthorizedActions struct {
-	Transactions       []taxonomy.TransactionType       // AAP-002 B.4.1 Transaction types
-	Decisions          []taxonomy.DecisionType          // AAP-002 B.4.2 Decision types
-	PhysicalActions    []taxonomy.ActionTypePhysical    // AAP-002 B.4.3 Physical action types
-	NonPhysicalActions []taxonomy.ActionTypeNonPhysical // AAP-002 B.4.4 Non-physical action types
+	Transactions       []taxonomy.TransactionType       // AAP002 B.4.1 Transaction types
+	Decisions          []taxonomy.DecisionType          // AAP002 B.4.2 Decision types
+	PhysicalActions    []taxonomy.ActionTypePhysical    // AAP002 B.4.3 Physical action types
+	NonPhysicalActions []taxonomy.ActionTypeNonPhysical // AAP002 B.4.4 Non-physical action types
 }
 
 // Legacy type aliases for backward compatibility
@@ -459,7 +459,7 @@ type FormalRequirements struct {
 	DigitalSignatures      bool
 }
 
-// PowerLimits is an alias for AAP-002 Section C.2 comprehensive power limits
+// PowerLimits is an alias for AAP002 Section C.2 comprehensive power limits
 // Use PowerLimitSet from power_limits.go for new implementations
 type PowerLimits struct {
 	// Legacy fields for backward compatibility
@@ -469,11 +469,11 @@ type PowerLimits struct {
 	QuantumResistance  bool     `json:"quantum_resistance,omitempty"`
 	ExplicitExclusions []string `json:"explicit_exclusions,omitempty"`
 
-	// AAP-002 C.2 comprehensive power limits (preferred)
+	// AAP002 C.2 comprehensive power limits (preferred)
 	Comprehensive *PowerLimitSet `json:"comprehensive,omitempty"`
 }
 
-// RightsObligations is an alias for AAP-002 Section C.3 comprehensive rights/obligations
+// RightsObligations is an alias for AAP002 Section C.3 comprehensive rights/obligations
 // Use RightsObligationSet from rights_obligations.go for new implementations
 type RightsObligations struct {
 	// Legacy fields for backward compatibility
@@ -481,7 +481,7 @@ type RightsObligations struct {
 	LiabilityRules    []string `json:"liability_rules,omitempty"`
 	CompensationRules []string `json:"compensation_rules,omitempty"`
 
-	// AAP-002 C.3 comprehensive rights and obligations (preferred)
+	// AAP002 C.3 comprehensive rights and obligations (preferred)
 	Comprehensive *RightsObligationSet `json:"comprehensive,omitempty"`
 }
 
@@ -513,7 +513,7 @@ type ConflictResolution struct {
 	ArbitrationJurisdiction string
 }
 
-// --- AAP-002 PoA Definition Compatibility Types ---
+// --- AAP002 PoA Definition Compatibility Types ---
 
 // PoADefinition aggregates all sections of a Power-of-Attorney definition.
 type PoADefinition struct {
@@ -545,12 +545,12 @@ type Organization struct {
 	RegisteredAuthority bool   `json:"registered_authority"`
 }
 
-// Representative contains client owner info linking to authorization per AAP-002 Section A.2
+// Representative contains client owner info linking to authorization per AAP002 Section A.2
 type Representative struct {
 	// Legacy field for backward compatibility
 	ClientOwner *ClientOwnerInfo `json:"client_owner,omitempty"`
 
-	// AAP-002 A.2 Representative details
+	// AAP002 A.2 Representative details
 	Identity            string               `json:"identity"`
 	LegalRelationship   LegalRelationship    `json:"legal_relationship"`
 	RegistrationInfo    *RegistrationInfo    `json:"registration_info,omitempty"`
@@ -714,7 +714,7 @@ func ValidateAuthorizationChain(chain []AuthorizationLink) error {
 	return nil
 }
 
-// ValidatePoADefinition performs minimal structural validation for the AAP-002 example.
+// ValidatePoADefinition performs minimal structural validation for the AAP002 example.
 func ValidatePoADefinition(def PoADefinition) error {
 	if def.Parties.Principal.Identity == "" {
 		return fmt.Errorf("principal identity required")
@@ -761,7 +761,7 @@ var (
 	}
 )
 
-// Stub functions for AAP-002 demo compatibility
+// Stub functions for AAP002 demo compatibility
 // AAP002Config models exclusion flags & limits referenced by AAP001/0115 examples.
 type AAP002Config struct {
 	ExcludeWeb3          bool
@@ -852,25 +852,25 @@ type ProofOfAuthorization struct {
 	SigMode    string   `json:"sig_mode,omitempty"`
 	Threshold  int      `json:"threshold,omitempty"`
 
-	// AAP-002 Extended Token Format Fields
-	// PoADefinitionID links to the AAP-002 PoA definition used for this authorization
+	// AAP002 Extended Token Format Fields
+	// PoADefinitionID links to the AAP002 PoA definition used for this authorization
 	PoADefinitionID string `json:"poa_definition_id,omitempty"`
-	// SectorScopeRef references authorized industry sectors per AAP-002 B.2
+	// SectorScopeRef references authorized industry sectors per AAP002 B.2
 	SectorScopeRef *taxonomy.SectorScope `json:"sector_scope_ref,omitempty"`
-	// AuthorizedActionsRef references authorized action types per AAP-002 B.4
+	// AuthorizedActionsRef references authorized action types per AAP002 B.4
 	AuthorizedActionsRef *taxonomy.AuthorizedActionSet `json:"authorized_actions_ref,omitempty"`
-	// PowerLimitRefs references power limitations per AAP-002 C.2
+	// PowerLimitRefs references power limitations per AAP002 C.2
 	PowerLimitRefs *PowerLimitSet `json:"power_limit_refs,omitempty"`
-	// ObligationRefs references rights and obligations per AAP-002 C.3
+	// ObligationRefs references rights and obligations per AAP002 C.3
 	ObligationRefs *RightsObligationSet `json:"obligation_refs,omitempty"`
-	// ClientTypeInfo contains authorized client type information per AAP-002 A.3
+	// ClientTypeInfo contains authorized client type information per AAP002 A.3
 	ClientTypeInfo *AuthorizedClient `json:"client_type_info,omitempty"`
-	// RepresentativeInfo contains representative details per AAP-002 A.2
+	// RepresentativeInfo contains representative details per AAP002 A.2
 	RepresentativeInfo *Representative `json:"representative_info,omitempty"`
-	// GeographicScopeRef references authorized geographic regions per AAP-002 B.3
+	// GeographicScopeRef references authorized geographic regions per AAP002 B.3
 	GeographicScopeRef []GeographicScope `json:"geographic_scope_ref,omitempty"`
-	// ComplianceVersion indicates AAP-002 compliance version
-	ComplianceVersion string `json:"compliance_version,omitempty"` // e.g., "AAP-002-v1.0"
+	// ComplianceVersion indicates AAP002 compliance version
+	ComplianceVersion string `json:"compliance_version,omitempty"` // e.g., "AAP002-v1.0"
 }
 
 // Delegation represents delegation information
@@ -1077,15 +1077,15 @@ func (s *MemoryService) Validate(ctx context.Context, poa *ProofOfAuthorization)
 		}
 	}
 
-	// AAP-002 Extended Validation
+	// AAP002 Extended Validation
 	if err := ValidateAAP002Token(poa); err != nil {
-		return NewError(ErrCodeValidation, fmt.Sprintf("AAP-002 validation failed: %v", err))
+		return NewError(ErrCodeValidation, fmt.Sprintf("AAP002 validation failed: %v", err))
 	}
 
 	return nil
 }
 
-// ValidateAAP002Token performs AAP-002 compliance validation for extended token format
+// ValidateAAP002Token performs AAP002 compliance validation for extended token format
 func ValidateAAP002Token(poa *ProofOfAuthorization) error {
 	if poa == nil {
 		return fmt.Errorf("PoA token is nil")
@@ -1111,7 +1111,7 @@ func ValidateAAP002Token(poa *ProofOfAuthorization) error {
 }
 
 func validateComplianceVersion(version string) error {
-	if version != "" && !strings.HasPrefix(version, "AAP-002") {
+	if version != "" && !strings.HasPrefix(version, "AAP002") {
 		return fmt.Errorf("invalid compliance version: %s", version)
 	}
 	return nil

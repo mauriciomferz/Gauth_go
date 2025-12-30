@@ -12,10 +12,10 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
-// TestPolicyDecisionTraceability_RFC111_C4 verifies that audit logs capture
+// TestPolicyDecisionTraceability_AAP_001_C4 verifies that audit logs capture
 // the correct bundle hash and chain head for policy evaluations, ensuring traceability
 // across policy updates (multi-bundle replay).
-func TestPolicyDecisionTraceability_RFC111_C4(t *testing.T) {
+func TestPolicyDecisionTraceability_AAP_001_C4(t *testing.T) {
 	// 1. Setup Server
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

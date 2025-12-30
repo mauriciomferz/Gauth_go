@@ -19,7 +19,7 @@ Curated navigation for major reports, compliance summaries, gap analyses, and ar
 - `OIDC_INTEGRATION_DESIGN.md` / `OIDC_PHASE*.md` – OIDC integration phases.
 
 ## RFC Conformance & Gap Closure
-- `GAP_MATRIX.auto.md` – Machine-generated AAP-001/0115 requirement matrix.
+- `GAP_MATRIX.auto.md` – Machine-generated AAP-001/002 requirement matrix.
 - `GAP_G10_FINAL_COMPLETION_REPORT.md` – Final gap completion summary.
 - `GAP_G10_PHASE6_E2E_TESTS_COMPLETION.md` – End-to-end tests completion.
 - `GAP_G10_PHASE7_PERFORMANCE_REPORT.md` – Performance phase report.

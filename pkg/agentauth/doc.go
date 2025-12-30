@@ -2,7 +2,7 @@
 //
 // AgentAuth (Generic Authorization) is a comprehensive authorization system that supports
 // delegated authorization, proof-of-authorization tokens, and multi-signature validation.
-// This package implements the core AAP-001 and AAP-002 specifications.
+// This package implements the core AAP001 and AAP002 specifications.
 //
 // # Key Features
 //
@@ -120,6 +120,6 @@
 //   - Implement rate limiting to prevent abuse
 //
 // For more details, see the AgentAuth RFC specifications:
-//   - AAP-001: Core Authorization Protocol
-//   - AAP-002: Proof-of-Authorization (POA) Tokens
+//   - AAP001: Core Authorization Protocol
+//   - AAP002: Proof-of-Authorization (POA) Tokens
 package agentauth

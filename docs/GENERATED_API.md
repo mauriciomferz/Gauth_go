@@ -69,7 +69,7 @@ type AuditorResult struct {
 
 ## github.com/mauriciomferz/AgentAuth/cmd/conformance
 ```go
-Package main provides the conformance CLI tool for verifying AAP-001/0115
+Package main provides the conformance CLI tool for verifying AAP-001/AAP-002
 compliance.
 ```
 
@@ -8286,7 +8286,7 @@ implementation.
 AgentAuth (Generic Authorization) is a comprehensive authorization system
 that supports delegated authorization, proof-of-authorization tokens, and
 multi-signature validation. This package implements the core AAP-001 and RFC
-0115 specifications.
+AAP-002 specifications.
 
 # Key Features
 
@@ -9300,7 +9300,7 @@ func NewComplianceValidator(
 func (v *ComplianceValidator) SetEnforceAgentAuthPlus(enforce bool)
     SetEnforceAgentAuthPlus enables/disables AgentAuth+ enforcement
 
-func (v *ComplianceValidator) SetAgentAuthPlusValidator(agentAuthPlusValidator *AgentAuthPlusValidator)
+func (v *ComplianceValidator) SetAgentAuthPlusValidator(AgentAuthPlusValidator *AgentAuthPlusValidator)
     SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
 
 func (v *ComplianceValidator) ValidateGrantCompliance(
@@ -10303,7 +10303,7 @@ type IDVerificationResult struct {
 	BiometricMatch     bool
 	BiometricScore     float64
 	SecurityFeatureOK  bool
-	IssuinagentAuthValid   bool
+	IssuinAgentAuthValid   bool
 	ChipDataValid      bool
 	Issues             []string
 	Warnings           []string
@@ -12538,7 +12538,7 @@ type SubscriptionStatus string
 const (
 	SubscriptionStatusPending             SubscriptionStatus = "pending"
 	SubscriptionStatusAwaitingIdentity    SubscriptionStatus = "awaiting_identity"
-	SubscriptionStatusAwaitinagentAuthProof   SubscriptionStatus = "awaiting_auth_proof"
+	SubscriptionStatusAwaitinAgentAuthProof   SubscriptionStatus = "awaiting_auth_proof"
 	SubscriptionStatusAwaitingClientOwner SubscriptionStatus = "awaiting_client_owner"
 	SubscriptionStatusAwaitingClient      SubscriptionStatus = "awaiting_client"
 	SubscriptionStatusAwaitingResource    SubscriptionStatus = "awaiting_resource"
@@ -18819,7 +18819,7 @@ type ConditionalExpression struct {
 	Result     interface{}       `json:"result,omitempty"`
 }
     ConditionalExpression represents a conditional special condition (RFC
-    0115:7).
+    AAP-002:7).
 
 type DailyLimit struct {
 	MaxAmount       float64   `json:"max_amount"`
@@ -19063,7 +19063,7 @@ type FormalValidation struct {
 	Timestamp       time.Time `json:"timestamp"`
 }
     FormalValidation represents formal requirement validation state (RFC
-    0115:4).
+    AAP-002:4).
 
 type AgentAuth10Framework struct {
 	AuthServer string
@@ -19464,7 +19464,7 @@ type PowerOfAttorney struct {
 	RevokedAt        *time.Time    `json:"revoked_at,omitempty"`        // Timestamp of revocation (if revoked)
 	RevocationReason string        `json:"revocation_reason,omitempty"` // Human-readable structured reason code
 	Signature        *POASignature `json:"signature,omitempty"`
-	// Multi-signature prototype fields (RFC115-C8): if Signers provided and Threshold>1 we require aggregated validation.
+	// Multi-signature prototype fields (AAP-002-C8): if Signers provided and Threshold>1 we require aggregated validation.
 	Signers   []string       `json:"signers,omitempty"`
 	Threshold int            `json:"threshold,omitempty"`
 	Weights   map[string]int `json:"weights,omitempty"` // signer -> weight (positive int); included in canonical digest when present
@@ -19697,7 +19697,7 @@ type RuntimeEvaluation struct {
 	Conditions   []ConditionalExpression `json:"conditions,omitempty"`
 }
     RuntimeEvaluation represents runtime evaluation of special conditions (RFC
-    0115:7).
+    AAP-002:7).
 
 type ScopeItem struct {
 	Action      string            `json:"action"`
@@ -19705,7 +19705,7 @@ type ScopeItem struct {
 	Constraints map[string]string `json:"constraints,omitempty"`
 }
     ScopeItem represents a single scope entry with semantic validation (RFC
-    0115:2).
+    AAP-002:2).
 
 type ScopeUpdate struct {
 	Timestamp time.Time `json:"timestamp"`
@@ -20070,7 +20070,7 @@ type ThresholdValidation struct {
 	ValidatedAt        time.Time       `json:"validated_at"`
 }
     ThresholdValidation represents joint signature threshold validation (RFC
-    0115:8).
+    AAP-002:8).
 
 type TokenResult struct {
 	Token     string                   `json:"token"`
@@ -25378,8 +25378,8 @@ func (l *Logger) Info(msg string)
 func (l *Logger) Infof(format string, args ...interface{})
     Infof logs a formatted info-level message.
 
-func (l *Logger) LoagentAuthenticationAttempt(provider, userID string, success bool)
-    LoagentAuthenticationAttempt logs an authentication attempt.
+func (l *Logger) LoAgentAuthenticationAttempt(provider, userID string, success bool)
+    LoAgentAuthenticationAttempt logs an authentication attempt.
 
 func (l *Logger) LogDeviceFlowOperation(operation, status string, duration time.Duration)
     LogDeviceFlowOperation logs a device flow operation.
@@ -28052,7 +28052,7 @@ These interfaces decouple pkg/poa from the main AgentAuth pkg/crypto package,
 enabling standalone module extraction.
 
 Package poa provides Proof-of-Authorization (POA) token implementation per RFC
-0115.
+AAP-002.
 
 POA tokens are cryptographic proofs that demonstrate authorization was granted
 by a legitimate authority. They support delegation chains, multi-signature
@@ -29625,7 +29625,7 @@ type AAP-002Config struct {
 	MaxValidityDays      int // upper bound for validity period
 }
     Stub functions for AAP-002 demo compatibility AAP-002Config models
-    exclusion flags & limits referenced by AAP-001/0115 examples.
+    exclusion flags & limits referenced by AAP-001/AAP-002 examples.
 
 type RateLimit struct {
 	MaxRequests  int           `json:"max_requests"`               // Maximum requests
@@ -33100,8 +33100,8 @@ type AuthorizedClient struct {
     AuthorizedClient represents an authorized client
 
 type CombinedRFCConfig struct {
-	AAP-001          *AAP-001Config         `json:"rfc_0111"`
-	AAP-002          *AAP-002Config         `json:"rfc_0115"`
+	AAP-001          *AAP-001Config         `json:"rfc_AAP-001"`
+	AAP-002          *AAP-002Config         `json:"rfc_AAP-002"`
 	IntegrationLevel string                 `json:"integration_level"`
 	CombinedVersion  string                 `json:"combined_version"`
 	Compatibility    map[string]interface{} `json:"compatibility"`
@@ -35595,7 +35595,7 @@ type ErrorEnvelope struct {
         Code: machine-readable stable error code (snake_case).
         Error: legacy short error string retained for backward compatibility.
         Message: optional human-readable expansion.
-        RFCRef: optional RFC clause reference (e.g. "rfc111:replay_protection").
+        RFCRef: optional RFC clause reference (e.g. "AAP-001:replay_protection").
         Detail: arbitrary extra structured data.
 
     ErrorEnvelope aligns with OpenAPI components.schemas.ErrorEnvelope.

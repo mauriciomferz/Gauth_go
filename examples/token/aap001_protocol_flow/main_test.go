@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestRFC111ProtocolFlowOutput(t *testing.T) {
+func TestAAP001ProtocolFlowOutput(t *testing.T) {
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w

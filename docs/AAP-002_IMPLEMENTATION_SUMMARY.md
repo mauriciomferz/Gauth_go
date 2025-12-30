@@ -1,5 +1,5 @@
 ---
-title: Rfc 0115 Implementation Summary
+title: Rfc AAP-002 Implementation Summary
 category: guide
 status: draft
 lastUpdated: 2025-12-25
@@ -113,7 +113,7 @@ This document summarizes the complete implementation of **AAP-002 Power-of-Attor
 ```
 pkg/poa/
 ├── definition.go              # Complete AAP-002 PoA-Definition implementation
-examples/rfc_0115_poa_definition/
+examples/rfc_AAP-002_poa_definition/
 ├── main.go                   # Working demonstration
 ├── README.md                 # Implementation documentation
 docs/
@@ -183,7 +183,7 @@ jsonData, _ := json.MarshalIndent(poaDefinition, "", "  ")
 Run the complete AAP-002 demonstration:
 
 ```bash
-cd examples/rfc_0115_poa_definition
+cd examples/rfc_AAP-002_poa_definition
 go run main.go
 ```
 

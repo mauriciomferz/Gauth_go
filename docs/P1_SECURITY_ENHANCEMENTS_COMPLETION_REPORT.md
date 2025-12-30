@@ -263,7 +263,7 @@ Comprehensive strategic analysis comparing AAP-RFC proprietary delegation framew
    **PRIMARY FINDING**: AAP-RFC and OAuth 2.0 + RFC 8693 are **complementary, not competing** (consistent with RFC 9396 analysis).
 
    **RECOMMENDATION**: **ADOPT HYBRID APPROACH**
-   - Retain AAP-001/0115 as core framework
+   - Retain AAP-001/AAP-002 as core framework
    - Add RFC 8693 token exchange for interoperability
    - Implement in 4 weeks for $15K-$25K
    - Maintain 100% backward compatibility

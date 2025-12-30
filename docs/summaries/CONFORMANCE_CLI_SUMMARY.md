@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-Successfully created the missing `cmd/conformance` CLI tool that was documented in the conformance README but didn't exist in the codebase. The tool provides automated AAP-001/0115 conformance verification with history tracking and trend analysis.
+Successfully created the missing `cmd/conformance` CLI tool that was documented in the conformance README but didn't exist in the codebase. The tool provides automated AAP-001/AAP-002 conformance verification with history tracking and trend analysis.
 
 ## What Was Built
 
@@ -69,7 +69,7 @@ Since RFC markdown files (`docs/AAP-001.md`, `docs/AAP-002.md`) don't exist, the
 
 1. Reads clause_map.json to extract clause prefixes
 2. Creates Clause objects with ID, Title, RFC, LineFrom/LineTo
-3. Adds RFC placeholder clauses (0111 and 0115)
+3. Adds RFC placeholder clauses (AAP-001 and AAP-002)
 4. Passes clauses to existing analysis engine
 
 This approach maintains compatibility with the harnesslib API while avoiding the need for markdown files.
@@ -104,7 +104,7 @@ Exit code `2` if any threshold is violated.
 ### Basic Execution
 ```bash
 $ ./bin/conformance
-🔍 AgentAuth AAP-001/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/AAP-002 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 
@@ -120,7 +120,7 @@ $ ./bin/conformance \
   --history-file=artifacts/history.csv \
   --trend-markdown-out=artifacts/history_trend.md
 
-🔍 AgentAuth AAP-001/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/AAP-002 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 
@@ -138,7 +138,7 @@ $ ./bin/conformance \
 ### Threshold Enforcement
 ```bash
 $ ./bin/conformance --min-coverage=90
-🔍 AgentAuth AAP-001/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/AAP-002 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 
@@ -242,7 +242,7 @@ Driven by `conformance/clause_map.json`:
 {
   "entries": [
     {
-      "clause_prefix": "0111:1.-introduction",
+      "clause_prefix": "AAP-001:1.-introduction",
       "symbols": ["Service", "NewService", "TokenResult"],
       "tests_glob": "pkg/aap001/aap001_test.go"
     },

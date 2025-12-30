@@ -87,8 +87,8 @@ func TestIntrospectRS(t *testing.T) {
 	_ = json.Unmarshal(w2.Body.Bytes(), &resp2)
 	assert.False(t, resp2.Active)
 
-	// Test 3: Active Token (Mock logic for "AGENTAUTH_gnap_")
-	reqBody3 := gnap.IntrospectionRequest{Token: "AGENTAUTH_gnap_12345"}
+	// Test 3: Active Token (Mock logic for "agentauth_gnap_")
+	reqBody3 := gnap.IntrospectionRequest{Token: "agentauth_gnap_12345"}
 	body3, _ := json.Marshal(reqBody3)
 	req3, _ := http.NewRequest("POST", "/gnap/rs/introspect", bytes.NewBuffer(body3))
 	req3.Header.Set("Authorization", "RS my-rs-id")

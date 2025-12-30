@@ -1,5 +1,5 @@
 // Package enforcement - PEP (Power Enforcement Point) Implementation
-// This file implements the AAP-001 PEP architecture with supply-side and demand-side enforcement.
+// This file implements the AAP001 PEP architecture with supply-side and demand-side enforcement.
 package enforcement
 
 import (

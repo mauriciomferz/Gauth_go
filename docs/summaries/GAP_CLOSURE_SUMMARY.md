@@ -311,7 +311,7 @@ All structures include temporal tracking:
 ### Conformance Tool
 ```bash
 $ go run ./cmd/conformance
-🔍 AgentAuth AAP-001/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/AAP-002 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 100.0% coverage (48/48 symbols)
 ✅ All checks passed

@@ -738,8 +738,8 @@ Complete Go library API reference for AAP-001 (AgentAuth 1.0) and AAP-002 (PoA D
 ## 📋 **Table of Contents**
 
 1. [Core Service API](#core-service-api)
-2. [AAP-001 Authorization API](#rfc-111-authorization-api)
-3. [AAP-002 PoA Definition API](#rfc-115-poa-definition-api)
+2. [AAP-001 Authorization API](#AAP-001-authorization-api)
+3. [AAP-002 PoA Definition API](#AAP-002-poa-definition-api)
 4. [Professional Foundation API](#professional-foundation-api)
 5. [Data Types Reference](#data-types-reference)
 6. [Error Handling](#error-handling)
@@ -1237,7 +1237,7 @@ type AgentAuthResponse struct {
 type PoAValidationResult struct {
     Valid             bool     `json:"valid"`              // Overall validation result
     ValidationErrors  []string `json:"validation_errors"`  // Specific validation errors
-    ComplianceLevel   string   `json:"compliance_level"`   // "rfc115_compliant", etc.
+    ComplianceLevel   string   `json:"compliance_level"`   // "AAP-002_compliant", etc.
     AttestationStatus string   `json:"attestation_status"` // "validated", "pending", etc.
 }
 ```

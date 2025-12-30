@@ -92,15 +92,15 @@ Summary: Out of 21 attribute categories, Implemented: 1, Partial: 11, Missing: 9
 ## 8. Beta Gating Items (Derived)
 | ID | Gap | RFC Reference | Priority | Mitigation |
 |----|-----|---------------|----------|-----------|
-| G1 | Durable replay WAL + recovery | 0111:5 Replay Protection | P0 | Implement WAL + snapshot loader |
-| G2 | Algorithm agility interface | 0111:6 Cryptographic Requirements | P0 | Pluggable signature registry (Ed25519 + stub ECDSA) |
-| G3 | Signed policy bundle manifest | 0111:2 Policy Bundle Integrity | P1 | Manifest digest + Ed25519 signature file |
-| G4 | Ledger entry signatures | 0111:4 Audit Logging | P1 | Entry struct augmentation + verify path |
-| G5 | PoA attribute taxonomy extension (agent type, sector, actions) | 0115 Section 3 attributes | P1 | Introduce enumerated typed fields & validation |
-| G6 | Embedded PoA verifier helper | 0115 canonical/structure | P1 | Safe extraction + size enforcement |
+| G1 | Durable replay WAL + recovery | AAP-001:5 Replay Protection | P0 | Implement WAL + snapshot loader |
+| G2 | Algorithm agility interface | AAP-001:6 Cryptographic Requirements | P0 | Pluggable signature registry (Ed25519 + stub ECDSA) |
+| G3 | Signed policy bundle manifest | AAP-001:2 Policy Bundle Integrity | P1 | Manifest digest + Ed25519 signature file |
+| G4 | Ledger entry signatures | AAP-001:4 Audit Logging | P1 | Entry struct augmentation + verify path |
+| G5 | PoA attribute taxonomy extension (agent type, sector, actions) | AAP-002 Section 3 attributes | P1 | Introduce enumerated typed fields & validation |
+| G6 | Embedded PoA verifier helper | AAP-002 canonical/structure | P1 | Safe extraction + size enforcement |
 | G7 | Discovery endpoint | Interoperability (cross-RFC utility) | P1 | `/well-known/agentauth/config` with algorithms & required_claims |
-| G8 | Formal requirements & obligations fields | 0115 Formal Requirements & Obligations | P2 | PoA struct extension + evaluation hooks |
-| G9 | Delegation depth limit & suspension states | 0111 Delegation & Revocation | P2 | Depth counter + status enum expansion |
+| G8 | Formal requirements & obligations fields | AAP-002 Formal Requirements & Obligations | P2 | PoA struct extension + evaluation hooks |
+| G9 | Delegation depth limit & suspension states | AAP-001 Delegation & Revocation | P2 | Depth counter + status enum expansion |
 
 ---
 ## 9. Recommended Implementation Sequence

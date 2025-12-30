@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates an RFC111-style advanced revocation scenario using the AgentAuth token API. It covers multi-attestation, delegation, selective revocation, and compliance checks.
+This example demonstrates an AAP-001-style advanced revocation scenario using the AgentAuth token API. It covers multi-attestation, delegation, selective revocation, and compliance checks.
 
 ## Key Concepts
 - **Multi-Attestation**: Token issuance with multiple attesters.
@@ -24,7 +24,7 @@ go run main.go
 
 ## Educational Comments
 - See `main.go` for the full revocation and delegation flow.
-- All major RFC111 patterns are demonstrated and tested.
+- All major AAP-001 patterns are demonstrated and tested.
 
 ---
 

@@ -1650,11 +1650,11 @@ func (s *BetaServer) routes() {
 	// Delegation create + revoke (capability enforced when AGENTAUTH_CAPABILITY_ENFORCE=1)
 	s.delegationHandler.RegisterRoutes(s.router, beta)
 
-	// AAP-001 Subscription and Authorization Flow endpoints (optional, controlled by AGENTAUTH_AAP001_ENABLED=1)
+	// AAP001 Subscription and Authorization Flow endpoints (optional, controlled by AGENTAUTH_AAP001_ENABLED=1)
 	if aap001Components, tokenStore, err := InitAAP001FromEnv(); err == nil && aap001Components != nil {
-		fmt.Fprintf(os.Stderr, "[AAP-001] Enabled with mock external services\n")
+		fmt.Fprintf(os.Stderr, "[AAP001] Enabled with mock external services\n")
 
-		// Create AgentAuth service with AAP-001 compliance enabled
+		// Create AgentAuth service with AAP001 compliance enabled
 		// Create ExtendedTokenService for protocol orchestrator
 		s.extendedTokenService = agentauth.NewExtendedTokenService(
 			aap001Components.AuthChainValidator,
@@ -1673,7 +1673,7 @@ func (s *BetaServer) routes() {
 
 		agentauthService, err := agentauth.New(
 			agentauth.Config{
-				ClientID:          "AAP-001-demo",
+				ClientID:          "AAP001-demo",
 				ClientSecret:      "demo-secret",
 				SigningKey:        jwtSecret,
 				AuthServerURL:     os.Getenv("AGENTAUTH_ISSUER"),
@@ -1692,9 +1692,9 @@ func (s *BetaServer) routes() {
 			),
 		)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[AAP-001] Failed to create AgentAuth service: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[AAP001] Failed to create AgentAuth service: %v\n", err)
 		} else {
-			// Register all AAP-001 endpoints
+			// Register all AAP001 endpoints
 			s.RegisterAAP001Endpoints(
 				aap001Components.SubscriptionManager,
 				aap001Components.SubscriptionStore,
@@ -1706,42 +1706,42 @@ func (s *BetaServer) routes() {
 			// These endpoints expose the mock external services as HTTP APIs for UI integration
 			s.RegisterBetaExternalServiceEndpoints(aap001Components)
 
-			fmt.Fprintf(os.Stderr, "[AAP-001] Endpoints registered:\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]   Subscription Flow (Steps I-VIII):\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions (Step I: Initiate)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-ii (Authorizer Auth Proof)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-iii (Client Owner Identity)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-iv (Client Owner Auth)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-v (Client Authorization)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-vi (Resource Owner Identity)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-vii (Resource Owner Auth)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-viii (Resource Server Auth)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     GET  /api/v1/aap-001/subscriptions/:id (Get subscription)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     GET  /api/v1/aap-001/subscriptions (List subscriptions)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]   Authorization Flow (Steps a-i):\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/authorize (Request token)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/token/validate (Validate token)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/token/introspect (Introspect token)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/token/revoke (Revoke token)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]   Beta External Service APIs:\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]   Beta Power of Attorney APIs:\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST   /api/v1/beta/poa (Create PoA)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     GET    /api/v1/beta/poa/:id (Get PoA)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     GET    /api/v1/beta/poa (List PoAs)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     PUT    /api/v1/beta/poa/:id (Update PoA)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     DELETE /api/v1/beta/poa/:id (Revoke PoA)\n")
-			fmt.Fprintf(os.Stderr, "[AAP-001]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001] Endpoints registered:\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]   Subscription Flow (Steps I-VIII):\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions (Step I: Initiate)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions/:id/step-ii (Authorizer Auth Proof)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions/:id/step-iii (Client Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions/:id/step-iv (Client Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions/:id/step-v (Client Authorization)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions/:id/step-vi (Resource Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions/:id/step-vii (Resource Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/subscriptions/:id/step-viii (Resource Server Auth)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     GET  /api/v1/aap-001/subscriptions/:id (Get subscription)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     GET  /api/v1/aap-001/subscriptions (List subscriptions)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]   Authorization Flow (Steps a-i):\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/authorize (Request token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/token/validate (Validate token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/token/introspect (Introspect token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/aap-001/token/revoke (Revoke token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]   Beta External Service APIs:\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]   Beta Power of Attorney APIs:\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST   /api/v1/beta/poa (Create PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     GET    /api/v1/beta/poa/:id (Get PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     GET    /api/v1/beta/poa (List PoAs)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     PUT    /api/v1/beta/poa/:id (Update PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     DELETE /api/v1/beta/poa/:id (Revoke PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
 		}
 
 		// Initialize AgentAuth+ management API endpoints if enabled
 		s.InitializeAgentAuthPlusEndpoints()
 	} else if err != nil {
-		fmt.Fprintf(os.Stderr, "[AAP-001] Initialization failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "[AAP001] Initialization failed: %v\n", err)
 	}
-	// End AAP-001 initialization
+	// End AAP001 initialization
 
 	// Evidence hash attachment (beta forensic feature)
 	s.router.POST("/api/v1/beta/poa/:id/evidence", func(c *gin.Context) {
@@ -2408,13 +2408,13 @@ func (s *BetaServer) routes() {
 		olderRaw := c.Query("older")
 		newerRaw := c.Query("newer")
 		if olderRaw == "" || newerRaw == "" {
-			respondError(c, 400, "consistency_sizes_params_missing", "params_missing", "older/newer params missing", "AAP-001:revocation_consistency", map[string]string{"older": olderRaw, "newer": newerRaw})
+			respondError(c, 400, "consistency_sizes_params_missing", "params_missing", "older/newer params missing", "AAP001:revocation_consistency", map[string]string{"older": olderRaw, "newer": newerRaw})
 			return
 		}
 		older, err1 := strconv.Atoi(olderRaw)
 		newer, err2 := strconv.Atoi(newerRaw)
 		if err1 != nil || err2 != nil || older < 0 || newer < 0 || older > newer {
-			respondError(c, 400, "consistency_sizes_params_invalid", "params_invalid", "older/newer params invalid", "AAP-001:revocation_consistency", map[string]any{"older": olderRaw, "newer": newerRaw})
+			respondError(c, 400, "consistency_sizes_params_invalid", "params_invalid", "older/newer params invalid", "AAP001:revocation_consistency", map[string]any{"older": olderRaw, "newer": newerRaw})
 			return
 		}
 		curLen := 0
@@ -2425,7 +2425,7 @@ func (s *BetaServer) routes() {
 			c.JSON(200, gin.H{"success": true, "proof": gin.H{"trivial": true, "path": []any{}, "older": older, "newer": newer}})
 			return
 		}
-		respondError(c, 501, "consistency_proof_unavailable", "consistency_proof_unavailable", "consistency proof unavailable for sizes", "AAP-001:revocation_consistency", map[string]any{"older": older, "newer": newer, "current_length": curLen})
+		respondError(c, 501, "consistency_proof_unavailable", "consistency_proof_unavailable", "consistency proof unavailable for sizes", "AAP001:revocation_consistency", map[string]any{"older": older, "newer": newer, "current_length": curLen})
 	})
 
 	// RFC6962-style consistency proof v2 (logarithmic) endpoint
@@ -4813,7 +4813,7 @@ func (s *BetaServer) initUIRevamp() {
 	if !s.routeRegistered("/api/v1/beta/throttle/demoAction") {
 		s.router.POST("/api/v1/beta/throttle/demoAction", func(c *gin.Context) {
 			if s.semanticThrottleActive {
-				c.JSON(429, gin.H{"code": "semantic_throttle_active", "rfc_ref": "AAP-002:reactive_controls"})
+				c.JSON(429, gin.H{"code": "semantic_throttle_active", "rfc_ref": "AAP002:reactive_controls"})
 				return
 			}
 			c.JSON(200, gin.H{"success": true})
@@ -4824,7 +4824,7 @@ func (s *BetaServer) initUIRevamp() {
 		s.router.GET("/api/v1/diagnostics/semantic", func(c *gin.Context) {
 			// Strict wiring enforcement: fail closed when service disabled + strict flag
 			if os.Getenv("AGENTAUTH_DISABLE_AAP001_SERVICE") == "1" && os.Getenv("AGENTAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED") == "1" {
-				respondError(c, http.StatusServiceUnavailable, "semantic_metrics_unavailable", "semantic_metrics_unavailable", "AAP-001 service disabled", "AAP-002:semantic_diagnostics", map[string]string{"reason": "disabled"})
+				respondError(c, http.StatusServiceUnavailable, "semantic_metrics_unavailable", "semantic_metrics_unavailable", "AAP001 service disabled", "AAP002:semantic_diagnostics", map[string]string{"reason": "disabled"})
 				return
 			}
 			wired := os.Getenv("AGENTAUTH_DISABLE_AAP001_SERVICE") != "1"

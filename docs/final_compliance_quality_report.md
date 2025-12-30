@@ -1,5 +1,5 @@
 ---
-title: Final Compliance & Quality Report (RFC111 / RFC115) – Beta Release
+title: Final Compliance & Quality Report (AAP-001 / AAP-002) – Beta Release
 category: compliance-report
 status: archived
 lastUpdated: 2025-10-26
@@ -8,17 +8,17 @@ generated: true
 source: repository-state-analysis
 refreshCadence: none
 ---
-# Final Compliance & Quality Report (RFC111 / RFC115) – Beta Release
+# Final Compliance & Quality Report (AAP-001 / AAP-002) – Beta Release
 
 Date: 2025-10-26
 Scope: Repository factual assessment only (no external assumptions). Lines referenced are from current `main` branch state.
 
 ## 1. Executive Summary
-The implementation demonstrates broad RFC111 coverage (token validation, replay protection, PoP, model limits, capability & audit anchoring, external anchoring, revocation root emission, multi-sig ready revocation tree heads). Foundational RFC115 features (semantic diagnostics counters, history, anomaly EWMA scores, integrity hash chain, strict unavailability path) are present. Remaining gaps concentrate on deeper cryptographic attestation, rotation ledger invariants, integrity mismatch detection, and reactive controls.
+The implementation demonstrates broad AAP-001 coverage (token validation, replay protection, PoP, model limits, capability & audit anchoring, external anchoring, revocation root emission, multi-sig ready revocation tree heads). Foundational AAP-002 features (semantic diagnostics counters, history, anomaly EWMA scores, integrity hash chain, strict unavailability path) are present. Remaining gaps concentrate on deeper cryptographic attestation, rotation ledger invariants, integrity mismatch detection, and reactive controls.
 
 Readiness for demo: HIGH. Remaining enhancements are incremental and can be staged without refactoring existing public interfaces.
 
-## 2. RFC111 Coverage Evidence
+## 2. AAP-001 Coverage Evidence
 Clause | File:Line(s) | Notes
 ------|---------------|------
 Token Validation | `web/server_clean.go:244-264` | Structured JWT error mapping; `jwtRespondError` path.
@@ -35,16 +35,16 @@ Revocation Tree Heads | `pkg/delegation/revocation_chain.go:300-380` | SignedTre
 Tree Head Verification | `pkg/delegation/revocation_chain.go:400-470` | Single & multi-sig signature verification logic.
 Replay Cache Implementation | `pkg/aap001/aap001.go:1000-1110` | In-memory TTL cache & store abstraction.
 
-## 3. RFC115 Coverage Evidence
+## 3. AAP-002 Coverage Evidence
 Feature | File:Line(s) | Notes
 --------|--------------|------
 Semantic Diagnostics Handler | `web/server_clean.go:5320-5440` | Counters, history, anomaly rates, scores, hash chain fields.
-Handler Annotations | `web/server_clean.go:886-888,5367` | Comments marking RFC115 clauses.
+Handler Annotations | `web/server_clean.go:886-888,5367` | Comments marking AAP-002 clauses.
 Hash Chain Computation | `web/server_clean.go:5350-5370` | Deterministic SHA256 over sorted `key=value;` sequence.
 Strict Unavailability Error | `web/server_clean.go:5373` | 503 error when wiring required; RFC tag.
 Unwired Test | `web/diagnostics_semantic_test.go:1-50` | Structural validation.
 Wired Evolution Test | `web/diagnostics_semantic_test.go:66-122` | History growth, anomaly scores, evolving hash chain.
-Strict Unavailable Test | `web/diagnostics_semantic_test.go:52-70` | Verifies 503 + RFC115 code.
+Strict Unavailable Test | `web/diagnostics_semantic_test.go:52-70` | Verifies 503 + AAP-002 code.
 
 ## 4. Error Taxonomy Uniformity
 - Central struct: `web/error_response.go:1-40` retains RFC references.
@@ -52,16 +52,16 @@ Strict Unavailable Test | `web/diagnostics_semantic_test.go:52-70` | Verifies 50
 - JWT path refactored into structured taxonomy (`web/server_clean.go:248-264`).
 
 ## 5. Documentation Assessment
-Present: Extensive ADRs, compliance documents (`docs/compliance_rfc111_rfc115.md`, `docs/rfc_endpoint_mapping.md`, `docs/demo_readiness.md`).
+Present: Extensive ADRs, compliance documents (`docs/compliance_AAP-001_AAP-002.md`, `docs/rfc_endpoint_mapping.md`, `docs/demo_readiness.md`).
 Missing: Visual diagrams (no mermaid/diagram markers found in `docs/diagrams.md` search), inclusion proof example artifact, explicit semantic → governance feedback diagram.
 
 ## 6. Gaps & Recommendations
 Gap | Impact | Recommendation | Priority
 ----|--------|---------------|---------
-Attestation cryptographic integrity missing | Moderate governance assurance | Implement signature & trust anchor chain validation; add `rfc111:attestation_integrity` error codes | High
+Attestation cryptographic integrity missing | Moderate governance assurance | Implement signature & trust anchor chain validation; add `AAP-001:attestation_integrity` error codes | High
 Rotation ledger invariants minimal | Potential undetected ledger anomalies | Add sequence continuity, signature completeness checks with tagged errors | High
 Integrity mismatch status unused | Silent divergence impossible to surface | Persist expected prev hash and set `integrity_status=mismatch` on discrepancy + test | Medium
-Reactive semantic controls absent | Diagnostics passive only | Introduce rate/z-score driven temporary throttling or deny flag (`rfc115:reactive_controls`) | Medium
+Reactive semantic controls absent | Diagnostics passive only | Introduce rate/z-score driven temporary throttling or deny flag (`AAP-002:reactive_controls`) | Medium
 Semantic → policy linkage | Reduced adaptive narrative | Map an anomaly threshold to automatic policy enforcement example | Medium
 Multi-sig revocation using only EdDSA | Reduced cryptographic diversity | Add optional BLS aggregated signatures for tree heads | Low
 Missing diagrams & inclusion proof artifact | Lower demo clarity | Add protocol flow & transparency proof docs; example proof JSON | Low
@@ -101,7 +101,7 @@ Passive diagnostics only | High | Medium | Add throttle + policy reaction.
 Lack of integrity mismatch test | Low | Low | Add forced divergence scenario.
 
 ## 11. Actionable Next Commit Set (Concrete)
-1. `web/server_clean.go`: Add attestation signature verification (Ed25519) and trust anchor registry lookup; errors `attestation_signature_invalid`, `attestation_anchor_unknown` (`rfc111:attestation_integrity`).
+1. `web/server_clean.go`: Add attestation signature verification (Ed25519) and trust anchor registry lookup; errors `attestation_signature_invalid`, `attestation_anchor_unknown` (`AAP-001:attestation_integrity`).
 2. `web/server_clean.go`: Enhance rotation summary endpoint with sequence monotonicity & signature threshold validation (new error codes).
 3. `web/server_clean.go` + test: Store last emitted hash externally (in-memory) and deliberately mutate snapshot in test to exercise `integrity_status=mismatch`.
 4. Add environment flag `AGENTAUTH_SEMANTIC_THROTTLE_ENABLE`; if anomaly score > threshold, include field `throttle_active=true` and optional deny simulation endpoint.
@@ -109,7 +109,7 @@ Lack of integrity mismatch test | Low | Low | Add forced divergence scenario.
 6. Create `docs/diagrams.md` with Mermaid flow diagrams for issuance → anchoring → diagnostics feedback.
 
 ## 12. Conclusion
-The system is a robust beta implementation with strong RFC111 coverage and initial RFC115 integration. Enhancements outlined are incremental, low-risk, and will elevate governance adaptivity and transparency for demos and audits.
+The system is a robust beta implementation with strong AAP-001 coverage and initial AAP-002 integration. Enhancements outlined are incremental, low-risk, and will elevate governance adaptivity and transparency for demos and audits.
 
 ---
 Generated automatically from repository state; suitable for internal audit and stakeholder demo preparation.

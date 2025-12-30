@@ -1,5 +1,5 @@
 # Residual Risk Register
-## AgentAuth AAP-001/0115 Implementation
+## AgentAuth AAP-001/AAP-002 Implementation
 
 **Document Version**: 1.1  
 **Last Updated**: 2025-12-27  
@@ -150,4 +150,4 @@ Risk Score = Severity × Likelihood (scale: Critical=4, High=3, Medium=2, Low=1)
 - [THREAT_MITIGATIONS_MATRIX.md](THREAT_MITIGATIONS_MATRIX.md): Threat-to-mitigation mapping (sec14.item1)
 - [REMAINING_GAPS_ANALYSIS.md](REMAINING_GAPS_ANALYSIS.md): Architectural gaps discussion
 - [GAP_MATRIX.md](GAP_MATRIX.md): Conformance tracking
-- AAP-001/0115: Protocol specifications
+- AAP-001/AAP-002: Protocol specifications

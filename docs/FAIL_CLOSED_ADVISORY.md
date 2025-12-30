@@ -192,7 +192,7 @@ Measure fail-closed impact on throughput:
 
 ## References
 
-- [AAP-001 Specification](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/Gifo_0111.md)
+- [AAP-001 Specification](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/AAP_AAP-001.md)
 - [THREAT_MODEL.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/THREAT_MODEL.md)
 - [RESIDUAL_RISKS.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md)
 - [GAP_MATRIX.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/GAP_MATRIX.md)

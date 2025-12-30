@@ -41,10 +41,10 @@ func TestViolationPersistenceVerify(t *testing.T) {
 	mr := httptest.NewRequest("GET", "/api/v1/beta/metrics/violations/prometheus", nil)
 	srv.router.ServeHTTP(mw, mr)
 	promBody := mw.Body.String()
-	if !strings.Contains(promBody, "AGENTAUTH_persistence_integrity_violation") {
+	if !strings.Contains(promBody, "agentauth_persistence_integrity_violation") {
 		t.Fatalf("prometheus output missing violation integrity gauge: %s", promBody)
 	}
-	if strings.Contains(promBody, "AGENTAUTH_persistence_integrity_violation 0") {
+	if strings.Contains(promBody, "agentauth_persistence_integrity_violation 0") {
 		t.Fatalf("expected non-mismatch state initially got body=%s", promBody)
 	}
 	// Tamper file by modifying a counter value inside the payload (ensures hash mismatch)
@@ -102,7 +102,7 @@ func TestViolationPersistenceVerify(t *testing.T) {
 	mw2 := httptest.NewRecorder()
 	mr2 := httptest.NewRequest("GET", "/api/v1/beta/metrics/violations/prometheus", nil)
 	srv.router.ServeHTTP(mw2, mr2)
-	if !strings.Contains(mw2.Body.String(), "AGENTAUTH_persistence_integrity_violation 0") {
+	if !strings.Contains(mw2.Body.String(), "agentauth_persistence_integrity_violation 0") {
 		t.Fatalf("expected violation integrity gauge=0 after tamper got: %s", mw2.Body.String())
 	}
 }
@@ -158,10 +158,10 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	ms1 := httptest.NewRecorder()
 	msr1 := httptest.NewRequest("GET", "/api/v1/beta/metrics/poa/semantics/prometheus", nil)
 	srv.router.ServeHTTP(ms1, msr1)
-	if !strings.Contains(ms1.Body.String(), "AGENTAUTH_persistence_integrity_semantic") {
+	if !strings.Contains(ms1.Body.String(), "agentauth_persistence_integrity_semantic") {
 		t.Fatalf("prometheus missing semantic integrity gauge: %s", ms1.Body.String())
 	}
-	if strings.Contains(ms1.Body.String(), "AGENTAUTH_persistence_integrity_semantic 0") {
+	if strings.Contains(ms1.Body.String(), "agentauth_persistence_integrity_semantic 0") {
 		t.Fatalf("unexpected semantic mismatch gauge pre-tamper: %s", ms1.Body.String())
 	}
 	// Tamper semantic file by modifying a counter value (scope_violation) to force hash mismatch while keeping stored hash.
@@ -224,7 +224,7 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	ms2 := httptest.NewRecorder()
 	msr2 := httptest.NewRequest("GET", "/api/v1/beta/metrics/poa/semantics/prometheus", nil)
 	srv.router.ServeHTTP(ms2, msr2)
-	if !strings.Contains(ms2.Body.String(), "AGENTAUTH_persistence_integrity_semantic 0") {
+	if !strings.Contains(ms2.Body.String(), "agentauth_persistence_integrity_semantic 0") {
 		t.Fatalf("expected semantic integrity gauge=0 after tamper got: %s", ms2.Body.String())
 	}
 }

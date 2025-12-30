@@ -60,12 +60,12 @@ type ConsistencyProof struct {
 }
 ```
 
-### Error Taxonomy (extend RFC111 style)
+### Error Taxonomy (extend AAP-001 style)
 Code | Reason | HTTP | RFC Ref | Notes
 -----|--------|------|---------|------
-`consistency_invalid_params` | invalid_params | 400 | `rfc111:revocation_consistency` | Non-positive or older>newer.
-`consistency_head_unknown` | head_unknown | 404 | `rfc111:revocation_consistency` | Requested size not sealed into a head yet.
-`consistency_proof_unavailable` | proof_unavailable | 501 | `rfc111:revocation_consistency` | Phase 1 placeholder for differing sizes.
+`consistency_invalid_params` | invalid_params | 400 | `AAP-001:revocation_consistency` | Non-positive or older>newer.
+`consistency_head_unknown` | head_unknown | 404 | `AAP-001:revocation_consistency` | Requested size not sealed into a head yet.
+`consistency_proof_unavailable` | proof_unavailable | 501 | `AAP-001:revocation_consistency` | Phase 1 placeholder for differing sizes.
 
 ## Auditor CLI Mode
 New mode: `revocation-consistency`.

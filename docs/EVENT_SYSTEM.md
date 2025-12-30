@@ -83,7 +83,7 @@ The system provides predefined event actions for common scenarios:
 - `ActionTokenRevoked`: Token was revoked
 - ...
 
-### Delegation Actions (RFC111)
+### Delegation Actions (AAP-001)
 - `ActionDelegationCreated`: Delegation was created
 - `ActionDelegationExercised`: Delegate exercised power of attorney
 - ...

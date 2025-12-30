@@ -17,7 +17,7 @@ import (
 // - JWT compact serialization (header.payload.signature)
 // - JWT parsing and validation
 // - Token claim preservation
-// - AAP-001 extended token structure serialization
+// - AAP001 extended token structure serialization
 func TestE2E_JWTSerializationRoundTrip(t *testing.T) {
 	ctx := context.Background()
 

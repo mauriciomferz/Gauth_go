@@ -8,7 +8,7 @@ owners: [system]
 
 # Beta Demo Narrative
 
-Goal: Showcase end-to-end governance & integrity for AI agent authorization and transparency under RFC111/RFC115.
+Goal: Showcase end-to-end governance & integrity for AI agent authorization and transparency under AAP-001/AAP-002.
 Duration Target: ~8–10 minutes live.
 
 ## Cast

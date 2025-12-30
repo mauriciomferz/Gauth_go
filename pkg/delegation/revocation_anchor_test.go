@@ -15,7 +15,7 @@ func (m *mockAnchor) OnRevocationAnchor(sth *SignedTreeHead) error {
 	return nil
 }
 
-func TestRevocationExternalAnchor_RFC111_C5(t *testing.T) {
+func TestRevocationExternalAnchor_AAP_001_C5(t *testing.T) {
 	mock := &mockAnchor{}
 	rc := NewRevocationChain(WithAnchorObserver(mock))
 

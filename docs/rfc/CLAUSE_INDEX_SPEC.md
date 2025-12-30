@@ -11,7 +11,7 @@ owners: [system]
 Each clause entry object:
 ```
 {
-  "rfc": "0111" | "0115",
+  "rfc": "AAP-001" | "AAP-002",
   "section_id": "1.2" ,
   "fragment_id": "1.2.3" ,
   "title": "Delegation Chain Integrity",

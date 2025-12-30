@@ -1,4 +1,4 @@
-// Package main provides the conformance CLI tool for verifying AAP-001/0115 compliance.
+// Package main provides the conformance CLI tool for verifying AAP001/0115 compliance.
 package main
 
 import (
@@ -33,7 +33,7 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println("🔍 AgentAuth AAP-001/0115 Conformance Analyzer")
+	fmt.Println("🔍 AgentAuth AAP001/0115 Conformance Analyzer")
 	fmt.Println("============================================")
 
 	// Run conformance analysis
@@ -175,15 +175,15 @@ func runAnalysis() (harnesslib.Report, error) {
 
 	// Add RFC placeholders
 	allClauses = append(allClauses, harnesslib.Clause{
-		ID:       "0111/aap-0111-(placeholder-extract)",
-		Title:    "AAP-001 (Placeholder Extract)",
+		ID:       "0111/AAP001-(placeholder-extract)",
+		Title:    "AAP001 (Placeholder Extract)",
 		RFC:      "0111",
 		LineFrom: 1,
 		LineTo:   1,
 	})
 	allClauses = append(allClauses, harnesslib.Clause{
-		ID:       "0115/aap-0115-(placeholder-extract)",
-		Title:    "AAP-002 (Placeholder Extract)",
+		ID:       "0115/AAP002-(placeholder-extract)",
+		Title:    "AAP002 (Placeholder Extract)",
 		RFC:      "0115",
 		LineFrom: 1,
 		LineTo:   1,

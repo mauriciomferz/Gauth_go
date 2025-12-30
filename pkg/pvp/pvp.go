@@ -11,7 +11,7 @@ import (
 )
 
 // PowerVerificationPoint (PVP) handles identity verification chain validation
-// per AAP-001 Step VII requirements
+// per AAP001 Step VII requirements
 type PowerVerificationPoint interface {
 	// VerifyIdentityChain verifies the complete identity chain from Resource Owner → Client Owner → Client
 	VerifyIdentityChain(ctx context.Context, req *IdentityChainVerificationRequest) (*IdentityChainVerificationResult, error)

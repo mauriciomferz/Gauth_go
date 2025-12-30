@@ -1,4 +1,4 @@
-// Example: Advanced RFC111 protocol flow with multi-attestation and chained delegation.
+// Example: Advanced AAP001 protocol flow with multi-attestation and chained delegation.
 //
 // This example demonstrates:
 //   - Owner proof
@@ -7,7 +7,7 @@
 //   - Chained delegation (token delegated to another subject)
 //   - Revocation and compliance check
 //
-// Run with: go run ./examples/token/advanced"AAP-001_flow/main.go
+// Run with: go run ./examples/token/advanced"AAP001_flow/main.go
 package main
 
 import (

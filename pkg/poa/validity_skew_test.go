@@ -22,7 +22,7 @@ func ValidateValidityPeriod(vp ValidityPeriod, now time.Time, skew time.Duration
 	return (now.Equal(start) || now.After(start)) && (now.Equal(end) || now.Before(end))
 }
 
-func TestValidityPeriodSkew_RFC115_C3(t *testing.T) {
+func TestValidityPeriodSkew_AAP_002_C3(t *testing.T) {
 	now := time.Now().UTC()
 	skew := 30 * time.Second
 

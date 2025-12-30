@@ -514,7 +514,7 @@ if passportResult.Valid {
 
 // Verify driving licence
 dlRequest := &external.DrivingLicenceRequest{
-    LicenceNumber: "SMITH901156JA9IJ",
+    LicenceNumber: "SMITH9AAP-0026JA9IJ",
     FirstName:     "John",
     LastName:      "Smith",
     DateOfBirth:   "1990-01-15",

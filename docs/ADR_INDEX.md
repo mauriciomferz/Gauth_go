@@ -11,7 +11,7 @@ refreshCadence: on-change
 
 - Aggregated signature schemes (BLS, batch) and multi-algorithm support added to signature abstraction.
 - Registry and interfaces updated for extensibility; placeholders for BLS/batch logic present.
-- Compliance with AAP-001/0115 strengthened; future cryptographic schemes can be integrated with minimal changes.
+- Compliance with AAP-001/AAP-002 strengthened; future cryptographic schemes can be integrated with minimal changes.
 
 # ADR Index
 

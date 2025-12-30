@@ -698,6 +698,6 @@ This makes AgentAuth suitable for **regulated AI systems** requiring both legal 
 ## References
 
 - [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9396/)
-- [AAP-001 - AgentAuth Authorization Framework](../Gifo_0111.md)
+- [AAP-001 - AgentAuth Authorization Framework](../AAP_AAP-001.md)
 - [AgentAuth Architecture](../../ARCHITECTURE_SOLUTION.md)
 - [RFC 9396 vs AgentAuth Comparison](RFC9396_RAR_AGENTAUTH_COMPARISON.md)

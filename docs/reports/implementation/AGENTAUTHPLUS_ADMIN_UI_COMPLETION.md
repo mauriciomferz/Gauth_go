@@ -52,13 +52,13 @@ export interface DelegationPolicy { ... }
 
 **Usage Example:**
 ```typescript
-import { agentAuthPlusAPI } from '@/lib/agentauthplus-api'
+import { AgentAuthPlusAPI } from '@/lib/agentauthplus-api'
 
 // Get active successor
-const { active_successor } = await agentAuthPlusAPI.getActiveSuccessor('poa-id')
+const { active_successor } = await AgentAuthPlusAPI.getActiveSuccessor('poa-id')
 
 // List pending approvals
-const { approvals } = await agentAuthPlusAPI.getPendingApprovals()
+const { approvals } = await AgentAuthPlusAPI.getPendingApprovals()
 ```
 
 ---
@@ -273,7 +273,7 @@ User Action
     ↓
 Panel Component (React State)
     ↓
-agentAuthPlusAPI (API Client)
+AgentAuthPlusAPI (API Client)
     ↓
 Axios HTTP Request
     ↓

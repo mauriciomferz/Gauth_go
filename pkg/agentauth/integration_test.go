@@ -1,5 +1,5 @@
 // Package agentauth - Integration Tests
-// This file contains integration tests for the implemented AAP-001/AAP-002 components
+// This file contains integration tests for the implemented AAP001/AAP002 components
 package agentauth
 
 import (

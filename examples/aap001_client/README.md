@@ -15,7 +15,7 @@ This directory contains examples demonstrating how to use the AAP-001 REST API.
 Fast demonstration of Steps I-III using curl:
 
 ```bash
-./scripts/demo_rfc0111_quick.sh
+./scripts/demo_AAP-001_quick.sh
 ```
 
 **Output:**
@@ -29,7 +29,7 @@ Fast demonstration of Steps I-III using curl:
 Complete programmatic example in Go:
 
 ```bash
-go run examples/rfc0111_client/main.go
+go run examples/AAP-001_client/main.go
 ```
 
 **Features:**
@@ -43,7 +43,7 @@ go run examples/rfc0111_client/main.go
 Comprehensive test of all 8 subscription steps:
 
 ```bash
-./scripts/test_rfc0111_subscription_flow.sh
+./scripts/test_AAP-001_subscription_flow.sh
 ```
 
 **Features:**
@@ -62,7 +62,7 @@ Comprehensive test of all 8 subscription steps:
 
 2. **Verify server is running:**
    ```bash
-   curl http://localhost:8080/api/v1/rfc0111/subscriptions?client_id=test
+   curl http://localhost:8080/api/v1/AAP-001/subscriptions?client_id=test
    ```
 
 ## API Documentation

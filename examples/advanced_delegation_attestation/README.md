@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates an RFC111-style advanced delegation and attestation flow using the canonical AgentAuth API.
+This example demonstrates an AAP-001-style advanced delegation and attestation flow using the canonical AgentAuth API.
 
 ## Key Concepts
 - **Delegation**: Initiate authorization for delegated actions (e.g., signing contracts).

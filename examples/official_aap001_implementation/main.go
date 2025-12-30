@@ -1,4 +1,4 @@
-// Official AAP-0111 Implementation Demo (Beta Demonstration)
+// Official AAP001 Implementation Demo (Beta Demonstration)
 //
 // Copyright (c) 2025 AgentAuth Community
 // Licensed under Apache 2.0
@@ -10,7 +10,7 @@
 // See DISCLAIMER.md and docs/DEPRECATION_TIMELINE.md for lifecycle & removal roadmap.
 //
 // Demonstrates the complete AgentAuth 1.0 Authorization Framework
-// as specified in AAP-0111 by The AgentAuth Community
+// as specified in AAP001 by The AgentAuth Community
 
 package main
 
@@ -162,7 +162,7 @@ func RunDemoExpectFailure() error {
 }
 
 func main() {
-	fmt.Println("=== AAP-0111 AgentAuth 1.0 Authorization Framework Demo (Beta) ===")
+	fmt.Println("=== AAP001 AgentAuth 1.0 Authorization Framework Demo (Beta) ===")
 	fmt.Println("This walkthrough uses the current aap001 service API (delegations) instead of deprecated deep struct graph.")
 	fmt.Println()
 	res, err := RunDemo()
@@ -181,7 +181,7 @@ func main() {
 	} else {
 		fmt.Println("Snapshot JSON not truncated ✅")
 	}
-	fmt.Println("\nAll AAP-001 demo steps completed (beta demonstration – non-production).")
+	fmt.Println("\nAll AAP001 demo steps completed (beta demonstration – non-production).")
 }
 
 func createAAP001Config() *agentauth_aap_001.AAP001Config {
@@ -194,7 +194,7 @@ func createAAP001Config() *agentauth_aap_001.AAP001Config {
 		AuditingEnabled:           true,
 		ComplianceTrackingEnabled: true,
 
-		// AAP-001 Section 2: Mandatory exclusions for open source
+		// AAP001 Section 2: Mandatory exclusions for open source
 		ExcludeWeb3:          true, // No blockchain/web3 tokens
 		ExcludeAIOperators:   true, // No AI controlling the entire process
 		ExcludeDNAIdentities: true, // No DNA-based identities

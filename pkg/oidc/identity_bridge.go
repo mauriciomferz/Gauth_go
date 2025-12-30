@@ -11,7 +11,7 @@ import (
 )
 
 // IdentityBridge converts between OIDC and AgentAuth identity structures
-// This enables using OIDC ID tokens as identity proofs in AAP-001 flow
+// This enables using OIDC ID tokens as identity proofs in AAP001 flow
 type IdentityBridge struct {
 	idTokenService *IDTokenService
 	trustMapper    *TrustLevelMapper
@@ -26,7 +26,7 @@ func NewIdentityBridge(idTokenService *IDTokenService) *IdentityBridge {
 }
 
 // ConvertIDTokenToIdentityProof converts OIDC ID token to AgentAuth IdentityProofResult
-// This is the core bridge function enabling OIDC in AAP-001 Steps I, III, VI
+// This is the core bridge function enabling OIDC in AAP001 Steps I, III, VI
 func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 	ctx context.Context,
 	idToken string,
@@ -224,7 +224,7 @@ func ExtractProofDataFromClaims(claims *IDTokenClaims) map[string]interface{} {
 }
 
 // BuildIdentityProofRequestFromIDToken creates IdentityProofRequest from ID token
-// This enables using OIDC ID tokens in existing AAP-001 flow
+// This enables using OIDC ID tokens in existing AAP001 flow
 func BuildIdentityProofRequestFromIDToken(
 	idToken string,
 	idTokenService *IDTokenService,

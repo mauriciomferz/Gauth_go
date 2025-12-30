@@ -1,4 +1,4 @@
-// Title: Minimal POA (AAP-001) Flow
+// Title: Minimal POA (AAP001) Flow
 // Description: Basic Power of Attorney request/response illustrating core required fields.
 package main
 

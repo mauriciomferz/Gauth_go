@@ -1,5 +1,5 @@
 // delegation_example.go
-// Title: Minimal Delegation (AAP-002)
+// Title: Minimal Delegation (AAP002)
 // Description: Basic delegation request showing principal -> delegate with attestation requirement and validity period.
 package main
 

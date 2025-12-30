@@ -1,4 +1,4 @@
-// Package agentauth - Authorization Chain Validation per AAP-001
+// Package agentauth - Authorization Chain Validation per AAP001
 // Implements critical Gap #1 from QUALITY_MANAGER_RFC_COMPLIANCE_FINAL_ASSESSMENT.md
 package agentauth
 
@@ -32,7 +32,7 @@ type ValidationContext struct {
 	StrictMode               bool
 }
 
-// AuthorizationChainValidator validates complete authorization chains per AAP-001
+// AuthorizationChainValidator validates complete authorization chains per AAP001
 type AuthorizationChainValidator struct {
 	commercialRegisterClient CommercialRegisterClient
 	trustServiceProvider     TrustServiceProvider
@@ -72,7 +72,7 @@ func (v *AuthorizationChainValidator) SetMaxDelegationHops(hops int) {
 	}
 }
 
-// ValidateAuthorizationChain performs comprehensive AAP-001 authorization chain validation
+// ValidateAuthorizationChain performs comprehensive AAP001 authorization chain validation
 // RFC Requirement (Section 3, Page 6):
 // "The 'owner's authorizer' is the authorizer of the client owner or resource owner,
 // respectively, and defines the power of attorney of the client owner or resource owner,
@@ -408,7 +408,7 @@ func (v *AuthorizationChainValidator) validateChainExpiration(chain *Authorizati
 	return nil
 }
 
-// validateOwnersAuthorizer validates the owner's authorizer with AAP-001 requirements
+// validateOwnersAuthorizer validates the owner's authorizer with AAP001 requirements
 func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 	ctx context.Context,
 	authorizer *AuthorizationLink,
@@ -475,7 +475,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 			result.Checks["statutory_authority"] = false
 			return result, &AgentAuthError{
 				Code:    "missing_statutory_authority",
-				Message: "Owner's authorizer must have statutory authority per AAP-001",
+				Message: "Owner's authorizer must have statutory authority per AAP001",
 			}
 		}
 		result.Warnings = append(result.Warnings, "Statutory authority not specified")

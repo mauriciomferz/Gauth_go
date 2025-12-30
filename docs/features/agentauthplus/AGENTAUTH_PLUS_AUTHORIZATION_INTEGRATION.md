@@ -56,7 +56,7 @@ func (v *AgentAuthPlusValidator) ValidatePoAWithAgentAuthPlus(
 ```go
 type ComplianceValidator struct {
     chainValidator     *AuthorizationChainValidator
-    agentAuthPlusValidator *AgentAuthPlusValidator  // NEW
+    AgentAuthPlusValidator *AgentAuthPlusValidator  // NEW
     pipClient          PIPClient
     pdpClient          PDPClient
     strictMode         bool
@@ -67,7 +67,7 @@ type ComplianceValidator struct {
 **Setup Methods**:
 ```go
 // Enable AgentAuth+ enforcement
-validator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+validator.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 validator.SetEnforceAgentAuthPlus(true)
 ```
 
@@ -82,7 +82,7 @@ validator.SetEnforceAgentAuthPlus(true)
 ```go
 type SimplePDP struct {
     pap                *PowerAdministrationPoint
-    agentAuthPlusValidator *AgentAuthPlusValidator  // NEW
+    AgentAuthPlusValidator *AgentAuthPlusValidator  // NEW
     enforceAgentAuthPlus   bool                 // NEW
 }
 ```
@@ -90,7 +90,7 @@ type SimplePDP struct {
 **Setup Methods**:
 ```go
 // Enable AgentAuth+ in PDP
-pdp.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+pdp.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 pdp.SetEnforceAgentAuthPlus(true)
 ```
 
@@ -116,7 +116,7 @@ fiduciaryService := agentauthplus.NewPostgreSQLFiduciaryDutyService(db)
 capabilityService := agentauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 
 // Create AgentAuth+ validator
-agentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
+AgentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
     successorService,
     delegationService,
     dualControlService,
@@ -125,16 +125,16 @@ agentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
 )
 
 // Configure enforcement levels
-agentAuthPlusValidator.SetEnforceCapabilities(true)   // Enforce capability requirements
-agentAuthPlusValidator.SetEnforceDualControl(true)    // Enforce dual control approvals
-agentAuthPlusValidator.SetEnforceFiduciary(true)      // Block on critical violations
+AgentAuthPlusValidator.SetEnforceCapabilities(true)   // Enforce capability requirements
+AgentAuthPlusValidator.SetEnforceDualControl(true)    // Enforce dual control approvals
+AgentAuthPlusValidator.SetEnforceFiduciary(true)      // Block on critical violations
 
 // Integrate with ComplianceValidator
-complianceValidator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+complianceValidator.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 complianceValidator.SetEnforceAgentAuthPlus(true)
 
 // Integrate with PDP
-pdp.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+pdp.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 pdp.SetEnforceAgentAuthPlus(true)
 ```
 
@@ -359,27 +359,27 @@ if !result.Valid {
     
     // Check AgentAuth+ specific failures
     if result.AgentAuthPlusValidation != nil {
-        agentAuthPlus := result.AgentAuthPlusValidation
+        AgentAuthPlus := result.AgentAuthPlusValidation
         
-        if agentAuthPlus.SuccessorCheck.SuccessorActive {
-            log.Printf("Successor active: %s", agentAuthPlus.SuccessorCheck.EffectiveAgentID)
+        if AgentAuthPlus.SuccessorCheck.SuccessorActive {
+            log.Printf("Successor active: %s", AgentAuthPlus.SuccessorCheck.EffectiveAgentID)
         }
         
-        if agentAuthPlus.DelegationCheck.DepthExceeded {
+        if AgentAuthPlus.DelegationCheck.DepthExceeded {
             log.Printf("Delegation depth %d exceeds max %d",
-                agentAuthPlus.DelegationCheck.CurrentDepth,
-                agentAuthPlus.DelegationCheck.MaxAllowedDepth)
+                AgentAuthPlus.DelegationCheck.CurrentDepth,
+                AgentAuthPlus.DelegationCheck.MaxAllowedDepth)
         }
         
-        if !agentAuthPlus.CapabilityCheck.CapabilityMet {
+        if !AgentAuthPlus.CapabilityCheck.CapabilityMet {
             log.Printf("Capability %s below required %s",
-                agentAuthPlus.CapabilityCheck.ActualLevel,
-                agentAuthPlus.CapabilityCheck.RequiredLevel)
+                AgentAuthPlus.CapabilityCheck.ActualLevel,
+                AgentAuthPlus.CapabilityCheck.RequiredLevel)
         }
         
-        if agentAuthPlus.FiduciaryCheck.CriticalViolations > 0 {
+        if AgentAuthPlus.FiduciaryCheck.CriticalViolations > 0 {
             log.Printf("Agent has %d critical violations",
-                agentAuthPlus.FiduciaryCheck.CriticalViolations)
+                AgentAuthPlus.FiduciaryCheck.CriticalViolations)
         }
     }
     
@@ -537,20 +537,20 @@ complianceValidator := agentauth.NewComplianceValidator(chainValidator, pipClien
 
 **Phase 3: Enable Advisory Mode**
 ```go
-complianceValidator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+complianceValidator.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 complianceValidator.SetEnforceAgentAuthPlus(true)
 // But disable blocking
-agentAuthPlusValidator.SetEnforceCapabilities(false)
-agentAuthPlusValidator.SetEnforceDualControl(false)
-agentAuthPlusValidator.SetEnforceFiduciary(false)
+AgentAuthPlusValidator.SetEnforceCapabilities(false)
+AgentAuthPlusValidator.SetEnforceDualControl(false)
+AgentAuthPlusValidator.SetEnforceFiduciary(false)
 // Warnings logged but authorization not blocked
 ```
 
 **Phase 4: Enable Enforcement**
 ```go
-agentAuthPlusValidator.SetEnforceCapabilities(true)
-agentAuthPlusValidator.SetEnforceDualControl(true)
-agentAuthPlusValidator.SetEnforceFiduciary(true)
+AgentAuthPlusValidator.SetEnforceCapabilities(true)
+AgentAuthPlusValidator.SetEnforceDualControl(true)
+AgentAuthPlusValidator.SetEnforceFiduciary(true)
 // Full enforcement mode
 ```
 

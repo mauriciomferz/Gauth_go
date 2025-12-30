@@ -41,9 +41,9 @@ func TestRevocationAutoSignPrometheusMetrics(t *testing.T) {
 	body := w.Body.String()
 	// Basic presence checks with exact expected final values.
 	expected := map[string]int64{
-		"AGENTAUTH_revocation_auto_sign_emitted":           2,
-		"AGENTAUTH_revocation_auto_sign_skipped_empty":     1,
-		"AGENTAUTH_revocation_auto_sign_skipped_duplicate": 1,
+		"agentauth_revocation_auto_sign_emitted":           2,
+		"agentauth_revocation_auto_sign_skipped_empty":     1,
+		"agentauth_revocation_auto_sign_skipped_duplicate": 1,
 	}
 	for name, val := range expected {
 		needle := name + " " + intToString(val)

@@ -18,7 +18,7 @@ I hope you had a restful Christmas break.
 Given the timeline regarding Series-A and the need for immediate certainty in my professional planning, I have decided to move forward with an independent path for the authorization technology we discussed.
 
 **1. IP & Project Status (AgentAuth)**
-To resolve the IP ambiguity we discussed, I have formalized the codebase as **"AgentAuth"** (formerly the RFC-111 implementation). I am releasing the core protocol as an Open Standard (MIT License) to ensure industry-wide adoption.
+To resolve the IP ambiguity we discussed, I have formalized the codebase as **"AgentAuth"** (formerly the AAP-001 implementation). I am releasing the core protocol as an Open Standard (MIT License) to ensure industry-wide adoption.
 *   **Status**: The repository you have access to is now the "AgentAuth" open-source core.
 *   **Rights**: AgentAuth Technologies is free to use this open-source core under the standard MIT License terms (as is any other company).
 

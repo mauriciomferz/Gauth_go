@@ -3,7 +3,7 @@
 
 **Date:** November 15, 2025  
 **Status:** ERRATA - Critical Correction Required  
-**Original RFC:** AAP-0111 (August 2025)
+**Original RFC:** AAP-001 (August 2025)
 
 ---
 
@@ -37,7 +37,7 @@
 
 ## CRITICAL ISSUE IDENTIFIED
 
-The original AAP-0111 RFC **omits the Resource Server** from the protocol flow diagram, despite:
+The original AAP-001 RFC **omits the Resource Server** from the protocol flow diagram, despite:
 
 1. Resource Server being part of the inherited OAuth/OIDC foundation
 2. Resource Server being defined in AgentAuth nomenclature (Section 3)

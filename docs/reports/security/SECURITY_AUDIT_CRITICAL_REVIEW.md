@@ -539,7 +539,7 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 
 **Recommendation:**
 
-> **STRATEGIC PRIORITY 1:** Conduct a formal analysis comparing AAP-001/0115 to OAuth 2.0 + proven delegation extensions. Prepare a migration path to standards-based authentication.
+> **STRATEGIC PRIORITY 1:** Conduct a formal analysis comparing AAP-001/AAP-002 to OAuth 2.0 + proven delegation extensions. Prepare a migration path to standards-based authentication.
 
 ---
 
@@ -596,7 +596,7 @@ export AGENTAUTH_REPLAY_FAIL_CLOSED=1
 **1. README.md:**
 ```markdown
 ⚠️ **SECURITY NOTICE:**
-This framework uses proprietary AAP-RFC specifications (0111/0115) 
+This framework uses proprietary AAP-RFC specifications (AAP-001/AAP-002) 
 which have NOT been vetted by IETF or the broader security community. 
 Production use is NOT RECOMMENDED for:
 - Enterprise identity management
@@ -698,7 +698,7 @@ For production systems, use OAuth 2.0 + OIDC with proven delegation extensions.
 
 While the development team has demonstrated **tactical competence** in patching specific vulnerabilities (DoS mitigation, basic replay protection), the framework suffers from **strategic architectural risks** that cannot be resolved through incremental code fixes:
 
-1. **Non-Standard Protocol:** AAP-001/0115 lack industry vetting
+1. **Non-Standard Protocol:** AAP-001/AAP-002 lack industry vetting
 2. **Brittle Authorization:** String matching insufficient for modern permissions
 3. **Deployment Anti-Pattern:** BoltDB option encourages unsafe configurations
 

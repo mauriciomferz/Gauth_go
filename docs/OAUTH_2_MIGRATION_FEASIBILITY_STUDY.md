@@ -21,7 +21,7 @@ owners: [system]
 
 ## Executive Summary
 
-**Question**: Should AgentAuth migrate from AAP-001/0115 to standard OAuth 2.0 + RFC 8693 (Token Exchange)?
+**Question**: Should AgentAuth migrate from AAP-001/AAP-002 to standard OAuth 2.0 + RFC 8693 (Token Exchange)?
 
 **Answer**: **NO** - Migration not recommended. AAP-RFC and OAuth 2.0 + RFC 8693 serve **fundamentally different purposes** and are not interchangeable.
 
@@ -35,7 +35,7 @@ owners: [system]
 
 ### 1.1 High-Level Overview
 
-| Aspect | **AAP-001/0115** | **OAuth 2.0 + RFC 8693** |
+| Aspect | **AAP-001/AAP-002** | **OAuth 2.0 + RFC 8693** |
 |:-------|:-----------------------|:-------------------------|
 | **Primary Purpose** | Legal delegation chains with Power of Attorney | Token exchange for impersonation/delegation |
 | **Delegation Model** | Multi-level (3+) with legal authority | Single-level with composite tokens |
@@ -53,7 +53,7 @@ owners: [system]
 
 ## 2. Detailed Analysis
 
-### 2.1 AAP-001/0115 Capabilities
+### 2.1 AAP-001/AAP-002 Capabilities
 
 #### Core Features
 
@@ -122,7 +122,7 @@ Resource Server (Authorization Validated)
     "commercial_register_verified": true,
     "notarization_required": false
   },
-  "compliance_level": "rfc-0111-compliant"
+  "compliance_level": "AAP-001-compliant"
 }
 ```
 
@@ -411,7 +411,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
     {"entity": "Client Owner", "authority": "Delegated"},
     {"entity": "Client AI", "authority": "Granted"}
   ],
-  "agentauth_compliance": "rfc-0111-compliant"
+  "agentauth_compliance": "AAP-001-compliant"
 }
 ```
 
@@ -420,7 +420,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  AgentAuth Authorization Server                             │
-│  (AAP-001/0115 + RFC 8693)                        │
+│  (AAP-001/AAP-002 + RFC 8693)                        │
 └───────┬─────────────────────────────────┬───────────────┘
         │                                 │
         │ AgentAuth Extended Token            │ RFC 8693 Token Exchange
@@ -544,7 +544,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 **DO NOT migrate from AAP-RFC to OAuth 2.0 + RFC 8693.**
 
 **Instead, ADOPT HYBRID APPROACH:**
-1. ✅ **Retain AAP-001/0115** as core authorization framework
+1. ✅ **Retain AAP-001/AAP-002** as core authorization framework
 2. ✅ **Add RFC 8693 token exchange** for service-to-service patterns
 3. ✅ **Maintain backward compatibility** with existing AgentAuth clients
 4. ✅ **Document integration patterns** for OAuth 2.0 ecosystems
@@ -688,7 +688,7 @@ func (s *Service) generateRFC8693Token(params RFC8693TokenParams) (string, error
         Act:                actClaim,
         PoAID:              params.PoAID,
         AuthorizationChain: params.Chain,
-        ComplianceLevel:    "rfc-0111-compliant",
+        ComplianceLevel:    "AAP-001-compliant",
     }
     
     token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
@@ -822,7 +822,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 ### 8.2 Final Recommendation
 
-✅ **ADOPT HYBRID APPROACH**: Implement RFC 8693 token exchange while retaining AAP-001/0115 core framework.
+✅ **ADOPT HYBRID APPROACH**: Implement RFC 8693 token exchange while retaining AAP-001/AAP-002 core framework.
 
 **Implementation Timeline**: 4 weeks (fits P1 30-day window)
 
@@ -839,7 +839,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 - [RFC 6749 - OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
 - [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693)
 - [RFC 9396 - Rich Authorization Requests (RAR)](https://datatracker.ietf.org/doc/html/rfc9396)
-- [AAP-001 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
+- [AAP-001 - AgentAuth 1.0 Authorization Framework](AAP_AAP-001.md)
 - [AAP-002 - Power-of-Attorney Credential Definition](RFC_ARCHITECTURE.md)
 
 ### AgentAuth Documentation

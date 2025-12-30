@@ -266,7 +266,7 @@ Initiated comprehensive integration testing as the final phase of AAP-001/AAP-00
 ### Overall Gap G10 Success Criteria (Remaining):
 - [ ] ≥80 tests total (13/80 complete)
 - [ ] ≥90% test coverage across all components
-- [ ] All AAP-001/0115 critical paths tested
+- [ ] All AAP-001/AAP-002 critical paths tested
 - [ ] Performance baselines established
 - [ ] All tests execute in <5s total
 - [ ] Comprehensive documentation
@@ -345,7 +345,7 @@ Initiated comprehensive integration testing as the final phase of AAP-001/AAP-00
 **Quality**: Excellent - Zero errors, comprehensive RFC validation, fast execution  
 **Progress**: On Track - Day 1/9.5 complete, no blockers
 
-Successfully established robust integration testing foundation for AAP-001/0115 compliance validation. Extended Token tests provide comprehensive coverage of core authorization structures, legal frameworks, and commercial register proofs. Ready to proceed with PVP integration tests (Phase 2) in next session.
+Successfully established robust integration testing foundation for AAP-001/AAP-002 compliance validation. Extended Token tests provide comprehensive coverage of core authorization structures, legal frameworks, and commercial register proofs. Ready to proceed with PVP integration tests (Phase 2) in next session.
 
 **Key Achievement**: First production-quality integration test suite for AgentAuth 1.0 Extended Token structure with complete AAP-001 §3 compliance validation.
 

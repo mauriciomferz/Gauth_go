@@ -1,5 +1,5 @@
 ---
-title: Rfc0111 Role Mapping
+title: AAP-001 Role Mapping
 category: guide
 status: draft
 lastUpdated: 2025-12-25

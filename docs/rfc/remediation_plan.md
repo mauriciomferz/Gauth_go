@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Beta Remediation Plan (RFC111 / RFC115)
+# Beta Remediation Plan (AAP-001 / AAP-002)
 
 Date: 2025-10-26
 Goal: Achieve demonstrable RFC alignment for public beta (security, determinism, observability, multi-sig readiness).
@@ -65,7 +65,7 @@ Goal: Achieve demonstrable RFC alignment for public beta (security, determinism,
 All P1 items implemented + passing tests + OpenAPI updated + sequence diagrams present (at least PoP + multi-sig). Metrics counters exposed and no critical failing tests.
 
 ## Tracking
-Use labels `rfc111`, `rfc115`, `beta` in issue tracker. Each P1 item gets an issue referencing this plan.
+Use labels `AAP-001`, `AAP-002`, `beta` in issue tracker. Each P1 item gets an issue referencing this plan.
 
 ---
 Will refine as features land. Auto-generated baseline.

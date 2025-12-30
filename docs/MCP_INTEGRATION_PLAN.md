@@ -4,7 +4,7 @@
 **Date:** November 15, 2025  
 **Status:** Planning Phase  
 **Priority:** Phase 2 Enhancement  
-**RFC Reference:** AAP-0111 - AI Agent Authorization
+**RFC Reference:** AAP-001 - AI Agent Authorization
 
 ---
 
@@ -122,7 +122,7 @@ Company A AI ←MCP→ Company B AI
     "extended_token": "eyJhbGc...",
     "poa_reference": "PoA-2025-001",
     "authorization_chain_hash": "sha256:abc123...",
-    "compliance_level": "rfc-0111-compliant"
+    "compliance_level": "AAP-001-compliant"
   }
 }
 ```
@@ -470,7 +470,7 @@ response, err := client.Execute(ctx, &mcp.Request{
 **AgentAuth Implementation:**
 - `pkg/agentauth/extended_token_service.go`
 - `pkg/agentauth/pep.go`
-- `docs/Gifo_0111_CORRECTED_FLOW.md`
+- `docs/AAP_AAP-001_CORRECTED_FLOW.md`
 - `docs/RFC_IMPLEMENTATION_COVERAGE.md`
 
 **Related Standards:**

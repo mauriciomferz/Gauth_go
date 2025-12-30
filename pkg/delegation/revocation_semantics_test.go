@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestRevocationSemantics_RFC115_C10(t *testing.T) {
+func TestRevocationSemantics_AAP_002_C10(t *testing.T) {
 	// 1. Basic Revocation Check
 	t.Run("IsDelegationRevoked", func(t *testing.T) {
 		rc := NewRevocationChain()

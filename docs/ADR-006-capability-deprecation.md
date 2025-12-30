@@ -157,7 +157,7 @@ See [`docs/playbooks/capability-rollover.md`](file:///Users/mauricio.fernandez_f
 
 ## References
 - [Capability Registry Implementation](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/capability/registry.go)
-- [AAP-001 § Capability Management](https://example.com/rfc-0111#capabilities)
+- [AAP-001 § Capability Management](https://example.com/AAP-001#capabilities)
 - [NIST SP 800-57: Key Management Guidelines](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final)
 
 ---

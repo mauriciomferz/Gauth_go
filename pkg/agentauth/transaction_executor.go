@@ -1,5 +1,5 @@
-// Package agentauth - AAP-001 Step (g) Transaction/Decision/Action Executor
-// This implements Step (g) from AAP-001 Section 3.2.2 (Request-specific steps)
+// Package agentauth - AAP001 Step (g) Transaction/Decision/Action Executor
+// This implements Step (g) from AAP001 Section 3.2.2 (Request-specific steps)
 package agentauth
 
 import (
@@ -10,7 +10,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
-// TransactionExecutor handles AAP-001 Step (g): Transaction/Decision/Action Request
+// TransactionExecutor handles AAP001 Step (g): Transaction/Decision/Action Request
 // This component enables the client to make requests to resource servers using extended tokens
 type TransactionExecutor struct {
 	tokenValidator    TokenValidator
@@ -126,7 +126,7 @@ type TransactionExecutionResponse struct {
 	ErrorMessage string
 }
 
-// ExecuteTransaction implements AAP-001 Step (g): Transaction/Decision/Action Request
+// ExecuteTransaction implements AAP001 Step (g): Transaction/Decision/Action Request
 // This is called by the client to execute a transaction using an extended token
 func (e *TransactionExecutor) ExecuteTransaction(
 	ctx context.Context,

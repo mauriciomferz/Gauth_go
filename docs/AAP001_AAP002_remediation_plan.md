@@ -1,5 +1,5 @@
 ---
-title: Rfc0111 0115 Remediation Plan
+title: AAP-001 AAP-002 Remediation Plan
 category: guide
 status: draft
 lastUpdated: 2025-12-25
@@ -17,21 +17,21 @@ Update (2025-10-21): Envelope V2 migration instrumentation (adoption ratio gauge
 
 | Order | Epic | RFC Coverage | Priority | Outcome / Acceptance Criteria |
 |-------|------|--------------|----------|-------------------------------|
-| 1 | External Notarization & Timestamping | 0111 Audit Logging, 0115 Revocation Semantics | P0 | Capability & audit chain tips externally notarized; receipts retrievable & verifiable; latency/failure/age metrics present; GAP_MATRIX external anchoring status -> Implemented. |
-| 2 | Multi / Joint Signature Threshold | 0115 Joint Signatures | P1 | PoA supports required_signers + threshold & optional weights; granular verification metrics & latency histogram; domain separation v2 flag; satisfaction metadata exposed; tests cover success & failure taxonomy. |
-| 3 | Key Rotation Scheduler + Secure Storage | 0111 Cryptographic Requirements | P1 | Automatic key rotation with Vault/KMS backend; discovery advertises schedule; rotation log chain externally anchored; metrics reflect active key age & rotation counts. |
-| 4 | Obligations & Advice Execution Layer | 0111 Policy Bundle Integrity / Combining Algorithms | P1 | Engine executes obligations post-decision; advice returned to caller; tests simulate allow/deny with side-effect obligations; GAP entry moves from Missing -> Partial/Implemented. |
-| 5 | Full PoA Embedding & Canonical Expansion | 0115 Power-of-Attorney Structure | P1 | Token envelope embeds full canonical PoA serialization (JSON/CBOR) incl. limits/conditions; canonical digest stable; backward compatibility preserved; fuzz/property tests for serialization stability. |
-| 6 | Policy Versioning & Rollback Metadata | 0111 Delegation & Revocation / Policy Integrity | P1 | Policies carry version ids; evaluator stores historical versions; rollback endpoint; audit log includes version transitions. |
-| 7 | Public Verifiable Token Mode (Detached Sig / Public PASETO) | 0111 Cryptographic Requirements | P1 | Tokens carry detached signature (Ed25519) or PASETO public mode; verification endpoint updated; metrics expanded; digest mismatch counter validated across modes. |
-| 8 | Envelope V1 Sunset Execution | 0111/0115 Governance & Integrity | P1 | Adoption ratio >=0.95 sustained 7d & mismatch ratio <0.005; V1 issuance disabled (verification retained); issuance cadence histogram + phase controller implemented; CHANGELOG & GAP_MATRIX updated; archival snapshot stored. |
-| 9 | Conditional / Special Conditions Interpreter | 0115 Special Conditions | P2 | Interpreter evaluates conditions at validation time; failure surfaces reason metrics; property tests around expression classification. |
-| 10 | Replay Persistence WAL & Recovery | 0111 Replay Protection | P2 | Write-ahead log for JTI store; recovery harness; tests simulate crash & replay; GAP moves Missing -> Partial. |
-| 11 | OpenAPI Expansion & Discovery Enrichment | 0111 & 0115 Interop | P1 | Spec includes multi-sig, notarization, rotation endpoints; discovery doc adds deprecation & sunset schedule, rotation & notarization metadata, adoption ratio exposure. |
-| 12 | Secure Secret Storage (Vault/HSM) Hardening | 0111 Cryptographic Requirements | P0 | Active keys & secrets stored only in secure backend; fallback file mode flagged; GAP moves Missing -> Partial/Implemented. |
-| 13 | Fuzz & Property Test Expansion | 0111/0115 Robustness | P2 | Fuzz tests for loader, validator, signature verify, anchor artifact, envelope parser; property tests for canonical stability across multi-sig, embedded PoA & sunset removal commit. |
-| 14 | Distributed PDP & Caching | 0111 Scalability | P2 | Cache layer with invalidation; cluster metadata; latency metrics vs baseline. |
-| 15 | Conditional Numeric Multi-Period Limits Persistence | 0115 Power Limits | P2 | Weekly/monthly limit tracking in persistent ledger; exceedance metrics. |
+| 1 | External Notarization & Timestamping | AAP-001 Audit Logging, AAP-002 Revocation Semantics | P0 | Capability & audit chain tips externally notarized; receipts retrievable & verifiable; latency/failure/age metrics present; GAP_MATRIX external anchoring status -> Implemented. |
+| 2 | Multi / Joint Signature Threshold | AAP-002 Joint Signatures | P1 | PoA supports required_signers + threshold & optional weights; granular verification metrics & latency histogram; domain separation v2 flag; satisfaction metadata exposed; tests cover success & failure taxonomy. |
+| 3 | Key Rotation Scheduler + Secure Storage | AAP-001 Cryptographic Requirements | P1 | Automatic key rotation with Vault/KMS backend; discovery advertises schedule; rotation log chain externally anchored; metrics reflect active key age & rotation counts. |
+| 4 | Obligations & Advice Execution Layer | AAP-001 Policy Bundle Integrity / Combining Algorithms | P1 | Engine executes obligations post-decision; advice returned to caller; tests simulate allow/deny with side-effect obligations; GAP entry moves from Missing -> Partial/Implemented. |
+| 5 | Full PoA Embedding & Canonical Expansion | AAP-002 Power-of-Attorney Structure | P1 | Token envelope embeds full canonical PoA serialization (JSON/CBOR) incl. limits/conditions; canonical digest stable; backward compatibility preserved; fuzz/property tests for serialization stability. |
+| 6 | Policy Versioning & Rollback Metadata | AAP-001 Delegation & Revocation / Policy Integrity | P1 | Policies carry version ids; evaluator stores historical versions; rollback endpoint; audit log includes version transitions. |
+| 7 | Public Verifiable Token Mode (Detached Sig / Public PASETO) | AAP-001 Cryptographic Requirements | P1 | Tokens carry detached signature (Ed25519) or PASETO public mode; verification endpoint updated; metrics expanded; digest mismatch counter validated across modes. |
+| 8 | Envelope V1 Sunset Execution | AAP-001/AAP-002 Governance & Integrity | P1 | Adoption ratio >=0.95 sustained 7d & mismatch ratio <0.005; V1 issuance disabled (verification retained); issuance cadence histogram + phase controller implemented; CHANGELOG & GAP_MATRIX updated; archival snapshot stored. |
+| 9 | Conditional / Special Conditions Interpreter | AAP-002 Special Conditions | P2 | Interpreter evaluates conditions at validation time; failure surfaces reason metrics; property tests around expression classification. |
+| 10 | Replay Persistence WAL & Recovery | AAP-001 Replay Protection | P2 | Write-ahead log for JTI store; recovery harness; tests simulate crash & replay; GAP moves Missing -> Partial. |
+| 11 | OpenAPI Expansion & Discovery Enrichment | AAP-001 & AAP-002 Interop | P1 | Spec includes multi-sig, notarization, rotation endpoints; discovery doc adds deprecation & sunset schedule, rotation & notarization metadata, adoption ratio exposure. |
+| 12 | Secure Secret Storage (Vault/HSM) Hardening | AAP-001 Cryptographic Requirements | P0 | Active keys & secrets stored only in secure backend; fallback file mode flagged; GAP moves Missing -> Partial/Implemented. |
+| 13 | Fuzz & Property Test Expansion | AAP-001/AAP-002 Robustness | P2 | Fuzz tests for loader, validator, signature verify, anchor artifact, envelope parser; property tests for canonical stability across multi-sig, embedded PoA & sunset removal commit. |
+| 14 | Distributed PDP & Caching | AAP-001 Scalability | P2 | Cache layer with invalidation; cluster metadata; latency metrics vs baseline. |
+| 15 | Conditional Numeric Multi-Period Limits Persistence | AAP-002 Power Limits | P2 | Weekly/monthly limit tracking in persistent ledger; exceedance metrics. |
 
 ## Cross-Cutting Implementation Guidelines
 - Use feature flags for incremental rollout (`AGENTAUTH_NOTARY_PROVIDER`, `AGENTAUTH_MULTISIG_ENABLED`, `AGENTAUTH_KEY_ROTATION_ENABLED`).

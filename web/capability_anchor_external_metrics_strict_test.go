@@ -16,7 +16,7 @@ import (
 func TestExternalAnchorMetricsStrict(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", memoryProvider)
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP-001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP001", Registry: reg})
 	// Use metrics-aware constructor so startup external anchoring attempt records directly into Prometheus.
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })
@@ -49,14 +49,14 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 		return nil
 	}
 	// Unlabeled counters
-	attempts := find("AGENTAUTH_aap001_external_anchor_attempts_total")
+	attempts := find("agentauth_aap001_external_anchor_attempts_total")
 	if attempts == nil || len(attempts.Metric) == 0 {
 		t.Fatalf("attempts counter missing")
 	}
 	if attempts.Metric[0].Counter == nil || attempts.Metric[0].Counter.GetValue() < 1 {
 		t.Fatalf("attempts counter value <1")
 	}
-	failures := find("AGENTAUTH_aap001_external_anchor_failures_total")
+	failures := find("agentauth_aap001_external_anchor_failures_total")
 	if failures == nil || len(failures.Metric) == 0 {
 		t.Fatalf("failures counter missing")
 	}
@@ -64,7 +64,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 		t.Fatalf("failures counter nil")
 	}
 	// Provider-labeled attempts (Vec)
-	attemptsProv := find("AGENTAUTH_aap001_external_anchor_attempts_provider_total")
+	attemptsProv := find("agentauth_aap001_external_anchor_attempts_provider_total")
 	if attemptsProv == nil || len(attemptsProv.Metric) == 0 {
 		t.Fatalf("provider attempts vec missing")
 	}
@@ -85,7 +85,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 		t.Fatalf("provider labeled attempts memory not found")
 	}
 	// Latency histogram (unlabeled)
-	latHist := find("AGENTAUTH_aap001_external_anchor_latency_seconds")
+	latHist := find("agentauth_aap001_external_anchor_latency_seconds")
 	if latHist == nil || len(latHist.Metric) == 0 {
 		t.Fatalf("latency histogram missing")
 	}
@@ -93,7 +93,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 		t.Fatalf("latency histogram sample count == 0")
 	}
 	// Provider-labeled latency histogram
-	latHistProv := find("AGENTAUTH_aap001_external_anchor_latency_provider_seconds")
+	latHistProv := find("agentauth_aap001_external_anchor_latency_provider_seconds")
 	if latHistProv == nil || len(latHistProv.Metric) == 0 {
 		t.Fatalf("provider latency histogram missing")
 	}
@@ -115,7 +115,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 		t.Fatalf("provider latency histogram sample count == 0")
 	}
 	// Age gauge
-	ageGauge := find("AGENTAUTH_aap001_external_anchor_age_seconds")
+	ageGauge := find("agentauth_aap001_external_anchor_age_seconds")
 	if ageGauge == nil || len(ageGauge.Metric) == 0 {
 		t.Fatalf("age gauge missing")
 	}
@@ -123,7 +123,7 @@ func TestExternalAnchorMetricsStrict(t *testing.T) {
 		t.Fatalf("age gauge value nil")
 	}
 	// Hash len gauge
-	hashLen := find("AGENTAUTH_aap001_external_anchor_last_hash_len")
+	hashLen := find("agentauth_aap001_external_anchor_last_hash_len")
 	if hashLen == nil || len(hashLen.Metric) == 0 {
 		t.Fatalf("hash length gauge missing")
 	}

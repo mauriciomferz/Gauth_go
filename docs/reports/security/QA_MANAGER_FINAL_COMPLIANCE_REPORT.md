@@ -864,7 +864,7 @@ type ConflictResolution struct {
 - [ ] MCP integration
 - [ ] Commercial register API integration
 
-**Deliverable**: Complete AAP-001/0115 conformance
+**Deliverable**: Complete AAP-001/AAP-002 conformance
 
 ---
 
@@ -934,9 +934,9 @@ type ConflictResolution struct {
 | `README.md` | 🟢 Excellent | 90% |
 | `ARCHITECTURE.md` | 🟢 Excellent | 95% |
 | `docs/RFC_ARCHITECTURE.md` | 🟢 Excellent | 85% |
-| `docs/RFC_0115_IMPLEMENTATION_SUMMARY.md` | 🟢 Good | 70% |
+| `docs/RFC_AAP-002_IMPLEMENTATION_SUMMARY.md` | 🟢 Good | 70% |
 | `docs/API_REFERENCE.md` | 🟢 Good | 75% |
-| `docs/COMPLIANCE_RFC111_RFC115_REPORT.md` | 🟢 Excellent | 95% |
+| `docs/COMPLIANCE_AAP-001_AAP-002_REPORT.md` | 🟢 Excellent | 95% |
 
 ---
 
@@ -945,7 +945,7 @@ type ConflictResolution struct {
 | Document | Update Required | Priority |
 |----------|----------------|----------|
 | **API_REFERENCE.md** | Add client type taxonomy | P0 |
-| **RFC_0115_IMPLEMENTATION_SUMMARY.md** | Document gaps (sectors, actions) | P0 |
+| **RFC_AAP-002_IMPLEMENTATION_SUMMARY.md** | Document gaps (sectors, actions) | P0 |
 | **ARCHITECTURE.md** | Add P*P role interfaces | P1 |
 | **DEPLOYMENT_GUIDE.md** | Add replay store configuration | P0 |
 | **MIGRATION_GUIDE.md** | New field migration paths | P1 |
@@ -1060,7 +1060,7 @@ However, critical gaps in AAP-002 PoA Definition taxonomy prevent full productio
 
 **AAP-002 Evidence**:
 - `pkg/poa/poa.go` - PoA Definition structures
-- `docs/RFC_0115_IMPLEMENTATION_SUMMARY.md` - Implementation status
+- `docs/RFC_AAP-002_IMPLEMENTATION_SUMMARY.md` - Implementation status
 - `examples/legal_framework/main.go` - PoA usage examples
 
 **Security Evidence**:

@@ -11,13 +11,13 @@ import (
 func main() {
 	fmt.Println("🎯 AgentAuth RFC Implementation - Official AgentAuth Community Compliance Test")
 	fmt.Println("=====================================================================")
-	fmt.Println("Testing AAP-001 (AgentAuth 1.0) & AAP-002 (PoA Definition)")
+	fmt.Println("Testing AAP001 (AgentAuth 1.0) & AAP002 (PoA Definition)")
 	fmt.Println("Based on official AgentAuth Community specifications")
 	fmt.Println("")
 
 	// All references to undefined variables are commented out to ensure the file builds cleanly.
 
-	// Test 6: AAP-002 Advanced Delegation (legacy compatibility)
+	// Test 6: AAP002 Advanced Delegation (legacy compatibility)
 	// All delegation request and legacy compatibility code is commented out due to missing types and methods in the current implementation.
 
 	// Build a sample PoA definition to exercise structural validation.
@@ -48,8 +48,8 @@ func main() {
 
 	fmt.Println("\n🎯 RFC COMPLIANCE SUMMARY")
 	fmt.Println("========================")
-	fmt.Println("AAP-001 (AgentAuth 1.0): PARTIAL / DEMO ONLY - cryptographic tokens now prototype-quality (PASETO), delegation chain & external trust service missing")
-	fmt.Println("AAP-002 (PoA Definition):", aap002Status)
+	fmt.Println("AAP001 (AgentAuth 1.0): PARTIAL / DEMO ONLY - cryptographic tokens now prototype-quality (PASETO), delegation chain & external trust service missing")
+	fmt.Println("AAP002 (PoA Definition):", aap002Status)
 	fmt.Println("")
 	fmt.Println("🏢 AgentAuth Community Compliance:")
 	fmt.Println("   - Copyright (c) 2025 AgentAuth Community")

@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# QA Manager Report Summary - AAP-001/0115 Compliance
+# QA Manager Report Summary - AAP-001/AAP-002 Compliance
 
 **Date**: November 11, 2025
 **Report**: QA_MANAGER_FINAL_BRUTAL_HONEST_RFC_COMPLIANCE_REPORT.md

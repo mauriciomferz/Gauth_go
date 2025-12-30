@@ -1,18 +1,18 @@
 ---
-title: RFC 9635 (GNAP) vs AgentAuth (AAP-001/0115) - Comprehensive Comparison
+title: RFC 9635 (GNAP) vs AgentAuth (AAP-001/AAP-002) - Comprehensive Comparison
 category: guide
 status: active
 lastUpdated: 2025-11-19
 owners: architecture-team
 ---
 
-# RFC 9635 (GNAP) vs AgentAuth (AAP-001/0115) - Comprehensive Comparison
+# RFC 9635 (GNAP) vs AgentAuth (AAP-001/AAP-002) - Comprehensive Comparison
 
 ## Executive Summary
 
 **RFC 9635** is an IETF Standards Track specification (October 2024) that defines the Grant Negotiation and Authorization Protocol (GNAP) - a next-generation authorization framework designed to replace OAuth 2.0.
 
-**AgentAuth** is a AgentAuth Community specification (AAP-001/0115, August 2025) designed as a comprehensive authorization framework specifically for AI governance, Power of Attorney delegation, and legal compliance.
+**AgentAuth** is a AgentAuth Community specification (AAP-001/AAP-002, August 2025) designed as a comprehensive authorization framework specifically for AI governance, Power of Attorney delegation, and legal compliance.
 
 **Key Finding**: GNAP is a **modern successor to OAuth 2.0** focused on flexible, negotiated authorization, while AgentAuth is a **specialized framework for AI systems** that builds on OAuth 2.0 with added legal/compliance layers. They address related but distinct problem spaces.
 
@@ -20,7 +20,7 @@ owners: architecture-team
 
 ## 1. High-Level Comparison
 
-| Aspect | **RFC 9635 (GNAP)** | **AgentAuth (AAP-001/0115)** |
+| Aspect | **RFC 9635 (GNAP)** | **AgentAuth (AAP-001/AAP-002)** |
 |:-------|:-------------------|:--------------------------|
 | **Standards Body** | IETF (Internet Engineering Task Force) | AgentAuth Community |
 | **Publication Date** | October 2024 | August 2025 |
@@ -63,7 +63,7 @@ Processing → Pending → Approved → Finalized
 - Continuation access tokens
 - Token rotation and management API
 
-#### AgentAuth (AAP-001/0115)
+#### AgentAuth (AAP-001/AAP-002)
 
 **Roles** (P*P Architecture):
 - **PEP** (Power Enforcement Point): Supply & demand side
@@ -250,7 +250,7 @@ Per-Request Flow
     "pvp_identity_check": true,
     "commercial_register_verified": true
   },
-  "compliance_level": "rfc-0111-compliant",
+  "compliance_level": "AAP-001-compliant",
   "legal_framework": "GDPR|HIPAA"
 }
 ```
@@ -557,7 +557,7 @@ Despite their differences, GNAP and AgentAuth share several concepts:
     "issuer": "Owner's Authorizer"
   },
   "authorization_chain": [...],
-  "compliance_level": "rfc-0111-compliant"
+  "compliance_level": "AAP-001-compliant"
 }
 ```
 
@@ -581,7 +581,7 @@ Despite their differences, GNAP and AgentAuth share several concepts:
 - API platforms
 - Microservices authorization
 
-### Use AgentAuth (AAP-001/0115) When:
+### Use AgentAuth (AAP-001/AAP-002) When:
 
 ✅ Authorizing **AI agents** or autonomous systems  
 ✅ **Legal power of attorney** relationships must be modeled  
@@ -710,7 +710,7 @@ Signature: ...
 **GNAP and AgentAuth serve different purposes**:
 
 - **GNAP (RFC 9635)**: Modern, flexible authorization protocol designed to replace OAuth 2.0 for general-purpose use cases
-- **AgentAuth (AAP-001/0115)**: Specialized authorization framework for AI systems with legal power of attorney and compliance requirements
+- **AgentAuth (AAP-001/AAP-002)**: Specialized authorization framework for AI systems with legal power of attorney and compliance requirements
 
 **They are NOT competing** - GNAP provides technical authorization flexibility, while AgentAuth provides legal/compliance governance for AI.
 
@@ -722,7 +722,7 @@ Signature: ...
 
 - [RFC 9635 - Grant Negotiation and Authorization Protocol (GNAP)](https://datatracker.ietf.org/doc/rfc9635/)
 - [RFC 6749 - OAuth 2.0](https://datatracker.ietf.org/doc/rfc6749/)
-- [AAP-001 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
+- [AAP-001 - AgentAuth 1.0 Authorization Framework](AAP_AAP-001.md)
 - [AgentAuth Gap Matrix](GAP_MATRIX.auto.md)
 - [AgentAuth Architecture](../ARCHITECTURE_SOLUTION.md)
 - [RFC 9493 - Subject Identifiers for Security Event Tokens](https://datatracker.ietf.org/doc/rfc9493/)

@@ -2,7 +2,7 @@
   "generated_at": "2025-10-18T15:53:12.717818Z",
   "clauses": [
     {
-      "rfc": "0111",
+      "rfc": "AAP-001",
       "section_id": "1",
       "fragment_id": "1",
       "title": "1. Introduction",
@@ -12,7 +12,7 @@
       "source_file": "aap001.md"
     },
     {
-      "rfc": "0111",
+      "rfc": "AAP-001",
       "section_id": "2",
       "fragment_id": "2",
       "title": "2. Policy Bundle Integrity",
@@ -33,7 +33,7 @@
       "source_file": "aap001.md"
     },
     {
-      "rfc": "0111",
+      "rfc": "AAP-001",
       "section_id": "3",
       "fragment_id": "3",
       "title": "3. Delegation \u0026 Revocation",
@@ -59,7 +59,7 @@
       "source_file": "aap001.md"
     },
     {
-      "rfc": "0111",
+      "rfc": "AAP-001",
       "section_id": "4",
       "fragment_id": "4",
       "title": "4. Audit Logging",
@@ -80,7 +80,7 @@
       "source_file": "aap001.md"
     },
     {
-      "rfc": "0111",
+      "rfc": "AAP-001",
       "section_id": "5",
       "fragment_id": "5",
       "title": "5. Replay Protection",
@@ -96,7 +96,7 @@
       "source_file": "aap001.md"
     },
     {
-      "rfc": "0111",
+      "rfc": "AAP-001",
       "section_id": "6",
       "fragment_id": "6",
       "title": "6. Cryptographic Requirements",
@@ -117,7 +117,7 @@
       "source_file": "aap001.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "1",
       "fragment_id": "1",
       "title": "1. Power of Attorney Structure",
@@ -138,7 +138,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "2",
       "fragment_id": "2",
       "title": "2. Scope Semantics",
@@ -159,7 +159,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "3",
       "fragment_id": "3",
       "title": "3. Validity Period",
@@ -180,7 +180,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "4",
       "fragment_id": "4",
       "title": "4. Formal Requirements",
@@ -196,7 +196,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "5",
       "fragment_id": "5",
       "title": "5. Power Limits",
@@ -212,7 +212,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "6",
       "fragment_id": "6",
       "title": "6. Rights \u0026 Obligations",
@@ -228,7 +228,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "7",
       "fragment_id": "7",
       "title": "7. Special Conditions",
@@ -244,7 +244,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "8",
       "fragment_id": "8",
       "title": "8. Joint Signatures",
@@ -260,7 +260,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "9",
       "fragment_id": "9",
       "title": "9. Canonical Serialization",
@@ -276,7 +276,7 @@
       "source_file": "aap002.md"
     },
     {
-      "rfc": "0115",
+      "rfc": "AAP-002",
       "section_id": "10",
       "fragment_id": "10",
       "title": "10. Revocation Semantics",

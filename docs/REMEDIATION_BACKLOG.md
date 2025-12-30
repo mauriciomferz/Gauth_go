@@ -8,7 +8,7 @@ owners: [system]
 
 # Remediation Backlog (Beta Scope)
 
-Source Inputs: `COMPLIANCE_RFC111_RFC115_REPORT.md`, `RISK_REGISTER.md`, `BETA_READINESS_PLAN.md`.
+Source Inputs: `COMPLIANCE_AAP-001_AAP-002_REPORT.md`, `RISK_REGISTER.md`, `BETA_READINESS_PLAN.md`.
 Scope: All P0/P1 items required for a clean, demo‑ready beta release while preserving cryptographic and compliance invariants.
 
 ## Legend

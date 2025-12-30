@@ -30,8 +30,8 @@ type RFC0150Summary struct {
 }
 
 type ComplianceInfo struct {
-	AAP001 AAP001Summary
-	AAP002 AAP002Summary
+	AAP001  AAP001Summary
+	AAP002  AAP002Summary
 	RFC0150 RFC0150Summary
 }
 
@@ -79,8 +79,8 @@ func GetRFC0150Compliance() RFC0150Summary {
 
 func GetComplianceInfo() ComplianceInfo {
 	return ComplianceInfo{
-		AAP001: GetAAP001Compliance(),
-		AAP002: GetAAP002Compliance(),
+		AAP001:  GetAAP001Compliance(),
+		AAP002:  GetAAP002Compliance(),
 		RFC0150: GetRFC0150Compliance(),
 	}
 }
@@ -88,13 +88,13 @@ func GetComplianceInfo() ComplianceInfo {
 // ValidateCompliance performs a simple supported-RFC check.
 func ValidateCompliance(code string) bool {
 	switch code {
-	case "AAP-001", "0111", "AAP-002", "0115", "RFC-0150", "0150":
+	case "AAP-001", "AAP001", "001", "AAP-002", "AAP002", "002", "RFC-0150", "0150":
 		return true
 	default:
 		return false
 	}
 }
 
-func GetSupportedRFCs() []string { return []string{"AAP-001", "AAP-002", "RFC-0150"} }
+func GetSupportedRFCs() []string { return []string{"AAP001", "AAP002", "RFC-0150"} }
 
 // Methods ValidateAAP001Flow, TestAAP002Features, DemoAAP001PowerOfAttorney have been moved to pkg/aapdemo to avoid import cycles.

@@ -1,4 +1,4 @@
-// Package agentauth - Extended Token Implementation per AAP-001 Section 3
+// Package agentauth - Extended Token Implementation per AAP001 Section 3
 package agentauth
 
 import (
@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
-// ExtendedToken represents the AAP-001 comprehensive authorization credential
+// ExtendedToken represents the AAP001 comprehensive authorization credential
 // RFC Requirement (Section 3, Page 6):
 // "Extended tokens represent specific scopes and durations of authorization,
 // granted by the resource owner, and enforced by the resource server and authorization server.
@@ -24,7 +24,7 @@ type ExtendedToken struct {
 	Scope        []string  `json:"scope"`
 	IssuedAt     time.Time `json:"issued_at"`
 
-	// AAP-001 Extended Token Fields (Comprehensive Authorization)
+	// AAP001 Extended Token Fields (Comprehensive Authorization)
 	PowerOfAttorney    *poa.PoADefinition         `json:"power_of_attorney"`
 	AuthorizationChain *AuthorizationChain        `json:"authorization_chain"`
 	ClientOwner        *ClientOwnerInfo           `json:"client_owner"`
@@ -40,7 +40,7 @@ type ExtendedToken struct {
 	GrantID            string                 `json:"grant_id"`
 	TransactionContext map[string]interface{} `json:"transaction_context,omitempty"`
 
-	// Subscription Tracking (AAP-001 Steps I-VIII)
+	// Subscription Tracking (AAP001 Steps I-VIII)
 	SubscriptionID string `json:"subscription_id,omitempty"` // Links token to its originating subscription
 
 	// Compliance & Audit
@@ -136,7 +136,7 @@ type ClientOwnerInfo struct {
 }
 
 // OwnersAuthorizerInfo represents the entity that authorizes the client owner
-// AAP-001 Section 3: "The 'owner's authorizer' is the authorizer of the client owner
+// AAP001 Section 3: "The 'owner's authorizer' is the authorizer of the client owner
 // or resource owner, respectively, and defines the power of attorney of the client owner
 // or resource owner, e.g. its statutory authority."
 type OwnersAuthorizerInfo struct {
@@ -220,7 +220,7 @@ type AuthorizationServerInfo struct {
 }
 
 // IdentityVerificationChain represents the PVP verification chain
-// AAP-001 Section 3, Page 8: "Power Verification Point (PVP) – verification of the
+// AAP001 Section 3, Page 8: "Power Verification Point (PVP) – verification of the
 // identities that perform a specific role along the AgentAuth processing."
 type IdentityVerificationChain struct {
 	ChainID              string                    `json:"chain_id"`
@@ -272,7 +272,7 @@ type JurisdictionContext struct {
 	ConflictOfLawsRule     string   `json:"conflict_of_laws_rule,omitempty"`
 }
 
-// ExtendedTokenResponse extends TokenResponse with AAP-001 comprehensive data
+// ExtendedTokenResponse extends TokenResponse with AAP001 comprehensive data
 type ExtendedTokenResponse struct {
 	*ExtendedToken
 }
@@ -462,7 +462,7 @@ func (et *ExtendedToken) AddMCPScope(scope string) bool {
 	return true
 }
 
-// ExtendedTokenRequest represents an AAP-001 compliant token request
+// ExtendedTokenRequest represents an AAP001 compliant token request
 type ExtendedTokenRequest struct {
 	// Basic OAuth 2.0 fields
 	GrantID      string      `json:"grant_id"`
@@ -470,7 +470,7 @@ type ExtendedTokenRequest struct {
 	Restrictions interface{} `json:"restrictions,omitempty"`
 	Context      interface{} `json:"context,omitempty"`
 
-	// AAP-001 Extended fields (complete)
+	// AAP001 Extended fields (complete)
 	PowerOfAttorney      *poa.PoADefinition    `json:"power_of_attorney,omitempty"`
 	AuthorizationChain   *AuthorizationChain   `json:"authorization_chain,omitempty"`
 	ClientOwnerInfo      *ClientOwnerInfo      `json:"client_owner,omitempty"`
@@ -486,14 +486,14 @@ type ExtendedTokenRequest struct {
 	AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 }
 
-// ExtendedTokenValidationResult represents AAP-001 compliant validation result
+// ExtendedTokenValidationResult represents AAP001 compliant validation result
 type ExtendedTokenValidationResult struct {
 	// Basic validation fields (backward compatibility)
 	ClientID string   `json:"client_id"`
 	Scope    []string `json:"scope"`
 	Valid    bool     `json:"valid"`
 
-	// AAP-001 Extended validation results
+	// AAP001 Extended validation results
 	ExtendedToken          *ExtendedToken      `json:"extended_token,omitempty"`
 	AuthorizationChain     *AuthorizationChain `json:"authorization_chain,omitempty"`
 	ChainValidated         bool                `json:"chain_validated"`

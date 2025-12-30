@@ -1,4 +1,4 @@
-// Package registry - Commercial Register Integration per AAP-001 Steps II & VII
+// Package registry - Commercial Register Integration per AAP001 Steps II & VII
 package registry
 
 import (
@@ -8,7 +8,7 @@ import (
 )
 
 // CommercialRegisterService provides integration with commercial/business registers
-// AAP-001 Requirement (Step II & VII): Authorization server must verify authorization
+// AAP001 Requirement (Step II & VII): Authorization server must verify authorization
 // through commercial register or equivalent authoritative source
 type CommercialRegisterService interface {
 	// VerifyRegistration verifies an entity is registered in the commercial register

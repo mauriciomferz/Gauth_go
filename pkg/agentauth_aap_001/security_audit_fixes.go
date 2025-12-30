@@ -21,14 +21,14 @@ import (
 // 3. MEDIUM: Unenforced Usage Constraints (Scope Bypass)
 // 4. HIGH: Algorithm Confusion ("None" Attack)
 //
-// All fixes follow fail-closed security principles and AAP-001/0115 compliance.
+// All fixes follow fail-closed security principles and AAP001/0115 compliance.
 // ==============================================================================
 
 // AllowedSignatureAlgorithms defines the strict whitelist of permitted signature algorithms.
 // Any algorithm not in this list will be rejected during verification to prevent
 // algorithm confusion attacks (e.g., "none", "HS256" when expecting "Ed25519").
 //
-// RFC Compliance: AAP-0111 Section 5.2 (Cryptographic Standards)
+// RFC Compliance: AAP001 Section 5.2 (Cryptographic Standards)
 // Security: Prevents CVE-2015-9235 (JWT "none" algorithm bypass)
 //
 // Default whitelist:
@@ -83,7 +83,7 @@ func WithAllowedAlgorithms(algorithms []string) Option {
 // the PoA grantee (holder-of-key binding). This prevents impersonation attacks where
 // an attacker presents someone else's valid PoA.
 //
-// RFC Violation Fixed: AAP-0115 (PoA Definition) & AAP-0111 (Token Exchange)
+// RFC Violation Fixed: AAP002 (PoA Definition) & AAP001 (Token Exchange)
 // Vulnerability: CVE-2025-AGENTAUTH-001 (Broken Agent-Session Binding)
 //
 // Attack Scenario Prevented:
@@ -177,7 +177,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 // EnforceScopeConstraints validates that the requested action is permitted by the PoA's scope
 // and that all restrictions (e.g., max_amount, currency) are satisfied.
 //
-// RFC Violation Fixed: AAP-0115 Section 4 (Constraints)
+// RFC Violation Fixed: AAP002 Section 4 (Constraints)
 // Vulnerability: CVE-2025-AGENTAUTH-003 (Unenforced Usage Constraints / Scope Bypass)
 //
 // Attack Scenario Prevented:
@@ -405,7 +405,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 // This prevents algorithm confusion attacks where an attacker modifies the JWT/JWS header to
 // use weak or no-op algorithms (e.g., "none", "HS256" when expecting "Ed25519").
 //
-// RFC Violation Fixed: AAP-0111 (Cryptographic Standards)
+// RFC Violation Fixed: AAP001 (Cryptographic Standards)
 // Vulnerability: CVE-2025-AGENTAUTH-004 (Algorithm Confusion / "None" Attack)
 //
 // Attack Scenario Prevented:

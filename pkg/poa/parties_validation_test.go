@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestPartiesStructureValidation_RFC115_C1(t *testing.T) {
+func TestPartiesStructureValidation_AAP_002_C1(t *testing.T) {
 	// Test Principal Validation
 	t.Run("Principal", func(t *testing.T) {
 		p := Principal{Type: "Organization", Identity: "did:example:123"}

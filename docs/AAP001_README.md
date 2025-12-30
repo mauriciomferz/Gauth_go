@@ -1,5 +1,5 @@
 ---
-title: Rfc0111 Readme
+title: AAP-001 Readme
 category: guide
 status: draft
 lastUpdated: 2025-12-25
@@ -198,7 +198,7 @@ AAP-001 extended tokens include comprehensive metadata:
     "verification_levels": [...]
   },
   
-  "compliance_level": "rfc-0111-compliant",
+  "compliance_level": "AAP-001-compliant",
   "audit_trail": [...]
 }
 ```

@@ -39,7 +39,7 @@ refreshCadence: quarterly
 - ✅ **Performance validated** (750K ops/sec throughput)
 
 ### What's Ready
-- Complete AAP-001/0115 implementation
+- Complete AAP-001/AAP-002 implementation
 - Authorization chain validation (3 levels)
 - Extended token creation and validation
 - PVP identity verification framework

@@ -62,7 +62,7 @@
 - docs: Update status to 62.5% complete (5/8 tasks)
 - docs: Add comprehensive next steps guide for type alignment
 - docs: Update implementation status with QA enhancement progress
-- docs: Add comprehensive AAP-001/0115 compliance assessment
+- docs: Add comprehensive AAP-001/AAP-002 compliance assessment
 - docs: Document PostgreSQL integration completion in architecture guide
 
 ## Chore

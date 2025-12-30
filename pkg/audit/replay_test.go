@@ -6,7 +6,7 @@ import (
 )
 
 // TestAuditReplayDeterminism ensures recorded authorization decision metadata
-// contains sufficient fields to deterministically reproduce the outcome (RFC111 §4).
+// contains sufficient fields to deterministically reproduce the outcome (AAP001 §4).
 func TestAuditReplayDeterminism(t *testing.T) {
 	ml := NewMemoryLogger(nil)
 	req := map[string]interface{}{"subject": "alice", "action": "read", "resource": "doc:1"}

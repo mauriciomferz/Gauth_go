@@ -2,7 +2,7 @@
 
 **Assessment Date:** November 10, 2025  
 **Assessor Role:** Quality Manager  
-**Assessment Scope:** Complete AgentAuth Implementation vs. AAP-0111 & AAP-0115  
+**Assessment Scope:** Complete AgentAuth Implementation vs. AAP-001 & AAP-002  
 **Assessment Type:** Pre-Production Compliance Audit
 
 ---

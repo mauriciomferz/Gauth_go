@@ -24,13 +24,13 @@ func TestViolationMetricsPrometheus(t *testing.T) {
 	}
 	body := w.Body.String()
 	// Core header metrics
-	if !strings.Contains(body, "AGENTAUTH_validation_total ") {
-		t.Fatalf("missing AGENTAUTH_validation_total line")
+	if !strings.Contains(body, "agentauth_validation_total ") {
+		t.Fatalf("missing agentauth_validation_total line")
 	}
 	// Category lines
 	cats := []string{"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch", "replay_detected", "audience_mismatch", "missing_claim", "unknown"}
 	for _, c := range cats {
-		line := "AGENTAUTH_validation_" + c + "_total"
+		line := "agentauth_validation_" + c + "_total"
 		if !strings.Contains(body, line) {
 			t.Fatalf("missing metric line %s", line)
 		}

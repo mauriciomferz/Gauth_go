@@ -1,4 +1,4 @@
-// Package arbitration provides webhook support for external dispute resolution systems (AAP-001 sec4.item3).
+// Package arbitration provides webhook support for external dispute resolution systems (AAP001 sec4.item3).
 package arbitration
 
 import (

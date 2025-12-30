@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestRightsObligationsExecution_RFC115_C6(t *testing.T) {
+func TestRightsObligationsExecution_AAP_002_C6(t *testing.T) {
 	// Test Reporting Duty Validation
 	t.Run("ReportingDutyValidation", func(t *testing.T) {
 		validDuty := ReportingDuty{

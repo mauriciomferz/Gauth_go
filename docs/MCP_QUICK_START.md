@@ -597,7 +597,7 @@ async function readUserDocument(userId, filename) {
 
 - **MCP Protocol Specification:** https://spec.modelcontextprotocol.io/
 - **Official MCP SDK:** https://github.com/modelcontextprotocol/typescript-sdk
-- **AgentAuth AAP-001 Documentation:** `/docs/RFC_0111_IMPLEMENTATION.md`
+- **AgentAuth AAP-001 Documentation:** `/docs/RFC_AAP-001_IMPLEMENTATION.md`
 - **Phase 2B Completion Report:** `/PHASE_2B_MCP_COMPLETION_REPORT.md`
 
 ---

@@ -2,7 +2,7 @@
 ## AgentAuth 1.0 Protocol - Production Resource Server Implementation
 
 **Date:** November 15, 2025  
-**RFC Reference:** AAP-0111 Corrected Protocol Flow  
+**RFC Reference:** AAP-001 Corrected Protocol Flow  
 **Component:** Resource Server (OAuth/OIDC Foundation + AgentAuth Extensions)
 
 ---
@@ -782,5 +782,5 @@ This guide provides comprehensive patterns for deploying a AgentAuth-compliant R
 
 For questions or issues, refer to:
 - AgentAuth_go codebase: `pkg/agentauth/pep.go`
-- RFC corrections: `docs/Gifo_0111_CORRECTED_FLOW.md`
+- RFC corrections: `docs/AAP_AAP-001_CORRECTED_FLOW.md`
 - Implementation coverage: `docs/RFC_IMPLEMENTATION_COVERAGE.md`

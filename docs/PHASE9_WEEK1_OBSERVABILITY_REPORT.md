@@ -254,9 +254,9 @@ logger.LogRateLimitCheck("/token", "allowed", 95)
 // Output: {"level":"debug","endpoint":"/token","result":"allowed","remaining":95,"msg":"Rate limit check"}
 ```
 
-**LoagentAuthenticationAttempt**: Authentication
+**LoAgentAuthenticationAttempt**: Authentication
 ```go
-logger.LoagentAuthenticationAttempt("google", "user123", true)
+logger.LoAgentAuthenticationAttempt("google", "user123", true)
 // Output: {"level":"info","provider":"google","user_id":"user123","success":true,"msg":"Authentication attempt"}
 ```
 

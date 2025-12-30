@@ -215,11 +215,11 @@ func (v *simpleTokenValidator) ValidateExtendedToken(ctx context.Context, token 
 	return result.ExtendedToken, nil
 }
 
-// SimplePDP is a PDP implementation with PAP integration for AAP-001 compliance
+// SimplePDP is a PDP implementation with PAP integration for AAP001 compliance
 // It provides policy-based authorization decisions with centralized policy management
 type SimplePDP struct {
 	pap                    *PowerAdministrationPoint
-	agentAuthPlusValidator *AgentAuthPlusValidator
+	AgentAuthPlusValidator *AgentAuthPlusValidator
 	enforceAgentAuthPlus   bool
 }
 
@@ -241,7 +241,7 @@ func NewSimplePDPWithPAP(pap *PowerAdministrationPoint) *SimplePDP {
 
 // SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
 func (pdp *SimplePDP) SetAgentAuthPlusValidator(validator *AgentAuthPlusValidator) {
-	pdp.agentAuthPlusValidator = validator
+	pdp.AgentAuthPlusValidator = validator
 	pdp.enforceAgentAuthPlus = true
 }
 
@@ -292,12 +292,12 @@ func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bo
 	}
 
 	// Step 3: Check AgentAuth+ policies (if enabled)
-	if pdp.enforceAgentAuthPlus && pdp.agentAuthPlusValidator != nil {
+	if pdp.enforceAgentAuthPlus && pdp.AgentAuthPlusValidator != nil {
 		agentID := request.PowerOfAttorney.Parties.AuthorizedClient.Identity
 		// Note: Using agent identity as PoA ID placeholder
 		// In production, track PoA ID separately in AuthorizationDecisionRequest
 		poaID := agentID // TODO: Get actual PoA ID from request
-		agentAuthPlusResult, err := pdp.agentAuthPlusValidator.ValidatePoAWithAgentAuthPlus(
+		AgentAuthPlusResult, err := pdp.AgentAuthPlusValidator.ValidatePoAWithAgentAuthPlus(
 			context.Background(),
 			poaID,
 			request.PowerOfAttorney,
@@ -309,13 +309,13 @@ func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bo
 			return false, fmt.Sprintf("AgentAuth+ validation error: %v", err)
 		}
 
-		if !agentAuthPlusResult.Valid {
-			return false, fmt.Sprintf("AgentAuth+ policy violation: %s", agentAuthPlusResult.FailureReason)
+		if !AgentAuthPlusResult.Valid {
+			return false, fmt.Sprintf("AgentAuth+ policy violation: %s", AgentAuthPlusResult.FailureReason)
 		}
 
 		// Log any AgentAuth+ warnings (successor takeover, capability expiration, etc.)
-		if len(agentAuthPlusResult.Warnings) > 0 {
-			for _, warning := range agentAuthPlusResult.Warnings {
+		if len(AgentAuthPlusResult.Warnings) > 0 {
+			for _, warning := range AgentAuthPlusResult.Warnings {
 				log.Printf("AgentAuth+ Warning: %s", warning)
 			}
 		}

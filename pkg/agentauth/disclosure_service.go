@@ -1,5 +1,5 @@
-// Package agentauth - AAP-001 Public Disclosure Service
-// This implements the transparency and accountability requirements from AAP-001
+// Package agentauth - AAP001 Public Disclosure Service
+// This implements the transparency and accountability requirements from AAP001
 // Provides APIs for resource owners to view, manage, and revoke authorizations
 
 package agentauth
@@ -204,7 +204,7 @@ func (s *DisclosureService) GetAuthorizationDetail(
 		Restrictions:         token.Restrictions,
 		AuditTrail:           token.AuditTrail,
 		ComplianceViolations: violations,
-		SubscriptionID:       token.SubscriptionID, // Link to originating subscription (AAP-001 Steps I-VIII)
+		SubscriptionID:       token.SubscriptionID, // Link to originating subscription (AAP001 Steps I-VIII)
 	}
 
 	// Log disclosure access

@@ -4,7 +4,7 @@
 **Date**: November 12, 2025  
 **Assessor**: Quality Manager (Independent Review)  
 **Assessment Type**: Comprehensive AAP-001 & AAP-002 Compliance Audit  
-**Documentation**: `/docs/Gifo_0111.md` & `/docs/Gifo_0115.md`
+**Documentation**: `/docs/AAP_AAP-001.md` & `/docs/AAP_AAP-002.md`
 
 ---
 
@@ -1337,8 +1337,8 @@ Remaining gaps:
 - Various unit test files
 
 ### Documentation
-- `docs/Gifo_0111.md` (885 lines - AAP-001)
-- `docs/Gifo_0115.md` (434 lines - AAP-002)
+- `docs/AAP_AAP-001.md` (885 lines - AAP-001)
+- `docs/AAP_AAP-002.md` (434 lines - AAP-002)
 - `IMPLEMENTATION_STATUS.md`
 - Various QA reports
 

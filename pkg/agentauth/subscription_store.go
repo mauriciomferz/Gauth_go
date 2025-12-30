@@ -6,7 +6,7 @@ import (
 )
 
 // SubscriptionStore defines the interface for storing and retrieving subscriptions
-// This supports the AAP-001 ONE-OFF subscription enrollment (Steps I-VIII)
+// This supports the AAP001 ONE-OFF subscription enrollment (Steps I-VIII)
 type SubscriptionStore interface {
 	// CreateSubscription creates a new subscription and returns the subscription ID
 	CreateSubscription(ctx context.Context, sub *Subscription) error

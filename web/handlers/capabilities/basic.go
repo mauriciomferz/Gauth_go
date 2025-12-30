@@ -54,7 +54,7 @@ func negotiateHandler(deps BasicDeps) gin.HandlerFunc {
 			ClientVersions map[string][]string `json:"client_versions"`
 		}
 		if err := c.ShouldBindJSON(&req); err != nil || len(req.ClientVersions) == 0 {
-			respondError(c, http.StatusBadRequest, "capabilities_negotiate_invalid_payload", "invalid_payload", "client_versions required", "AAP-001:capabilities_negotiate", nil)
+			respondError(c, http.StatusBadRequest, "capabilities_negotiate_invalid_payload", "invalid_payload", "client_versions required", "AAP001:capabilities_negotiate", nil)
 			return
 		}
 		caps := capability.DefaultRegistry().List()

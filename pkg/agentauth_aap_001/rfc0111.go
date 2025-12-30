@@ -148,7 +148,7 @@ type PowerOfAttorney struct {
 	RevokedAt        *time.Time    `json:"revoked_at,omitempty"`        // Timestamp of revocation (if revoked)
 	RevocationReason string        `json:"revocation_reason,omitempty"` // Human-readable structured reason code
 	Signature        *POASignature `json:"signature,omitempty"`
-	// Multi-signature prototype fields (RFC115-C8): if Signers provided and Threshold>1 we require aggregated validation.
+	// Multi-signature prototype fields (AAP002-C8): if Signers provided and Threshold>1 we require aggregated validation.
 	Signers   []string       `json:"signers,omitempty"`
 	Threshold int            `json:"threshold,omitempty"`
 	Weights   map[string]int `json:"weights,omitempty"` // signer -> weight (positive int); included in canonical digest when present
@@ -209,10 +209,10 @@ type RevocationRequest struct {
 }
 
 // ========================================
-// AAP-001 & 0115 Conformance Types
+// AAP001 & 0115 Conformance Types
 // ========================================
 
-// TokenResult represents the result of token verification or issuance operations (AAP-001:1).
+// TokenResult represents the result of token verification or issuance operations (AAP001:1).
 type TokenResult struct {
 	Token     string                   `json:"token"`
 	ExpiresAt time.Time                `json:"expires_at"`
@@ -221,14 +221,14 @@ type TokenResult struct {
 	Error     string                   `json:"error,omitempty"`
 }
 
-// ScopeItem represents a single scope entry with semantic validation (AAP-002:2).
+// ScopeItem represents a single scope entry with semantic validation (AAP002:2).
 type ScopeItem struct {
 	Action      string            `json:"action"`
 	Resource    string            `json:"resource,omitempty"`
 	Constraints map[string]string `json:"constraints,omitempty"`
 }
 
-// ScopeValidator provides scope semantic validation (AAP-002:2).
+// ScopeValidator provides scope semantic validation (AAP002:2).
 type ScopeValidator struct {
 	AllowedActions   []string          `json:"allowed_actions,omitempty"`
 	RequiredFields   []string          `json:"required_fields,omitempty"`
@@ -236,7 +236,7 @@ type ScopeValidator struct {
 	StrictValidation bool              `json:"strict_validation"`
 }
 
-// ValidateScope performs semantic validation of scope items (AAP-002:2).
+// ValidateScope performs semantic validation of scope items (AAP002:2).
 func ValidateScope(items []ScopeItem, validator *ScopeValidator) error {
 	if validator == nil || !validator.StrictValidation {
 		return nil // permissive mode
@@ -262,7 +262,7 @@ func ValidateScope(items []ScopeItem, validator *ScopeValidator) error {
 	return nil
 }
 
-// FormalValidation represents formal requirement validation state (AAP-002:4).
+// FormalValidation represents formal requirement validation state (AAP002:4).
 type FormalValidation struct {
 	RequirementsMet bool      `json:"requirements_met"`
 	ChecksPassed    []string  `json:"checks_passed,omitempty"`
@@ -270,7 +270,7 @@ type FormalValidation struct {
 	Timestamp       time.Time `json:"timestamp"`
 }
 
-// RequirementCheck represents a single formal requirement check (AAP-002:4).
+// RequirementCheck represents a single formal requirement check (AAP002:4).
 type RequirementCheck struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description,omitempty"`
@@ -279,7 +279,7 @@ type RequirementCheck struct {
 	CheckedAt   time.Time `json:"checked_at"`
 }
 
-// DailyLimit represents daily transaction limits (AAP-002:5).
+// DailyLimit represents daily transaction limits (AAP002:5).
 type DailyLimit struct {
 	MaxAmount       float64   `json:"max_amount"`
 	Currency        string    `json:"currency,omitempty"`
@@ -290,7 +290,7 @@ type DailyLimit struct {
 	LastTransaction time.Time `json:"last_transaction,omitempty"`
 }
 
-// PowerLimit represents general power-of-attorney limits (AAP-002:5).
+// PowerLimit represents general power-of-attorney limits (AAP002:5).
 type PowerLimit struct {
 	Type         string            `json:"type"` // e.g., "daily", "transaction", "cumulative"
 	MaxValue     float64           `json:"max_value"`
@@ -299,7 +299,7 @@ type PowerLimit struct {
 	Metadata     map[string]string `json:"metadata,omitempty"`
 }
 
-// TransactionLimit represents per-transaction limits (AAP-002:5).
+// TransactionLimit represents per-transaction limits (AAP002:5).
 type TransactionLimit struct {
 	MaxAmount       float64 `json:"max_amount"`
 	MinAmount       float64 `json:"min_amount,omitempty"`
@@ -307,7 +307,7 @@ type TransactionLimit struct {
 	RequireApproval bool    `json:"require_approval,omitempty"`
 }
 
-// Rights represents rights granted under power of attorney (AAP-002:6).
+// Rights represents rights granted under power of attorney (AAP002:6).
 type Rights struct {
 	Actions               []string          `json:"actions"`
 	Resources             []string          `json:"resources,omitempty"`
@@ -317,7 +317,7 @@ type Rights struct {
 	TransferableSubRights bool              `json:"transferable_sub_rights,omitempty"`
 }
 
-// Obligations represents obligations under power of attorney (AAP-002:6).
+// Obligations represents obligations under power of attorney (AAP002:6).
 type Obligations struct {
 	DutiesOfCare      []string          `json:"duties_of_care,omitempty"`
 	ReportingRequired bool              `json:"reporting_required,omitempty"`
@@ -325,7 +325,7 @@ type Obligations struct {
 	ComplianceChecks  []string          `json:"compliance_checks,omitempty"`
 }
 
-// DutyOfCare represents a specific duty of care obligation (AAP-002:6).
+// DutyOfCare represents a specific duty of care obligation (AAP002:6).
 type DutyOfCare struct {
 	Description string            `json:"description"`
 	Standard    string            `json:"standard,omitempty"` // e.g., "reasonable_person", "professional"
@@ -333,7 +333,7 @@ type DutyOfCare struct {
 	Evidence    map[string]string `json:"evidence,omitempty"`
 }
 
-// ConditionalExpression represents a conditional special condition (AAP-002:7).
+// ConditionalExpression represents a conditional special condition (AAP002:7).
 type ConditionalExpression struct {
 	Condition  string            `json:"condition"`
 	Expression string            `json:"expression"`
@@ -342,7 +342,7 @@ type ConditionalExpression struct {
 	Result     interface{}       `json:"result,omitempty"`
 }
 
-// RuntimeEvaluation represents runtime evaluation of special conditions (AAP-002:7).
+// RuntimeEvaluation represents runtime evaluation of special conditions (AAP002:7).
 type RuntimeEvaluation struct {
 	ExpressionID string                  `json:"expression_id"`
 	Context      map[string]interface{}  `json:"context,omitempty"`
@@ -352,7 +352,7 @@ type RuntimeEvaluation struct {
 	Conditions   []ConditionalExpression `json:"conditions,omitempty"`
 }
 
-// ThresholdValidation represents joint signature threshold validation (AAP-002:8).
+// ThresholdValidation represents joint signature threshold validation (AAP002:8).
 type ThresholdValidation struct {
 	RequiredSignatures int             `json:"required_signatures"`
 	ProvidedSignatures int             `json:"provided_signatures"`
@@ -894,7 +894,7 @@ func parseDurationEnv(key string, defaultVal time.Duration) time.Duration {
 	return defaultVal
 }
 
-// NewService creates a new AAP-001 service (in-memory prototype) with optional functional options.
+// NewService creates a new AAP001 service (in-memory prototype) with optional functional options.
 // SECURITY DEFAULTS:
 //   - failClosedReplay: true (revocation/replay checks fail-closed on store errors)
 //   - strictConstraints: false (unknown constraints ignored for backward compatibility)
@@ -1035,7 +1035,7 @@ func (f *AgentAuth10Framework) GetStatus() map[string]interface{} {
 		"auth_server":    f.AuthServer,
 		"clients_count":  len(f.Clients),
 		"version":        "1.0.0",
-		"aap":            "AAP-0111",
+		"aap":            "AAP001",
 		"implementation": "Go Reference Implementation",
 	}
 }
@@ -1089,8 +1089,8 @@ type TokenVerificationResult struct {
 // 4. If POA has a signature: verify digest, locate public key, verify signature.
 // Returns a rich result struct and possible RFC error (expired, revoked, integrity_failure, unauthorized, etc.).
 //
-//nolint:gocyclo // AAP-001 token verification with delegation chain validation
-//nolint:gocyclo // AAP-001 token verification with delegation chain validation
+//nolint:gocyclo // AAP001 token verification with delegation chain validation
+//nolint:gocyclo // AAP001 token verification with delegation chain validation
 func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVerificationResult, error) {
 	if tokenString == "" {
 		return nil, aap.New(aap.ErrInvalidRequest, "empty token")
@@ -1891,7 +1891,7 @@ func (s *Service) ExtractEmbeddedPoAWithAudit(ctx context.Context, result *Token
 	return poa, err
 }
 
-// Service provides AAP-001 power-of-attorney services
+// Service provides AAP001 power-of-attorney services
 // AuditLogger is the interface subset we rely on (MemoryLogger & FileLogger both satisfy).
 type AuditLogger interface {
 	Log(context.Context, interface{}) error
@@ -2550,7 +2550,7 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		}
 	}
 
-	// Multi-signature enforcement (prototype RFC115-C8). If Threshold>1 require structural validity.
+	// Multi-signature enforcement (prototype AAP002-C8). If Threshold>1 require structural validity.
 	if err := ValidateMultiSignature(poa); err != nil {
 		return nil, aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("multi-signature invalid: %v", err))
 	}
@@ -4866,7 +4866,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			claimsMeta := &agentauth.ClaimsMetadata{
 				Version:      "1.0",             // Claims schema version
 				Capabilities: poa.Scope,         // Supported capabilities = delegated scopes
-				Source:       "AAP-001-service", // Claims source identifier
+				Source:       "AAP001-service", // Claims source identifier
 				Confidence:   1.0,               // Full confidence for directly issued tokens
 			}
 			// Populate AdvancedClaims with standard JWT claims + AgentAuth-specific metadata
@@ -5003,15 +5003,15 @@ func (s *Service) decryptWithAnyKey(token string, dest interface{}) error {
 	return fmt.Errorf("unable to decrypt token with any known key")
 }
 
-// Demo demonstrates AAP-001 power-of-attorney functionality
+// Demo demonstrates AAP001 power-of-attorney functionality
 func Demo() error {
-	fmt.Println("=== AAP-001 Power-of-Attorney Demo ===")
+	fmt.Println("=== AAP001 Power-of-Attorney Demo ===")
 
 	// Create service dependencies
 	auditLogger := audit.NewMemoryLogger(nil) // Use nil for demo logger
 	authorizer := authz.NewMemoryAuthorizer()
 
-	// Create AAP-001 service
+	// Create AAP001 service
 	service := NewService(auditLogger, authorizer)
 
 	// Demo delegation creation
@@ -5079,6 +5079,6 @@ func Demo() error {
 		return fmt.Errorf("should have rejected revoked delegation")
 	}
 
-	fmt.Println("\n🎉 AAP-001 Power-of-Attorney demo completed successfully!")
+	fmt.Println("\n🎉 AAP001 Power-of-Attorney demo completed successfully!")
 	return nil
 }

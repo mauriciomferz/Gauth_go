@@ -200,7 +200,7 @@ owners: architecture-team
 │      power_of_attorney: {...},      │
 │      authorization_chain: {...},    │
 │      verification_proof: {...},     │
-│      compliance_level: "rfc-0111"   │
+│      compliance_level: "AAP-001"   │
 │    },                               │
 │    grant_validation: {...},         │
 │    compliance_status: {...}         │
@@ -366,7 +366,7 @@ owners: architecture-team
    │     power_of_attorney: {...},      │
    │     authorization_chain: {...},    │
    │     verification_proof: {...},     │
-   │     compliance_level: "rfc-0111"   │
+   │     compliance_level: "AAP-001"   │
    │   },                               │
    │   grant_validation: {              │
    │     valid: true                    │
@@ -622,9 +622,9 @@ FROM extended_tokens LIMIT 3;
 -- Result: ✅
 token_prefix              | token_type | expires_in | compliance_level
 --------------------------+------------+------------+------------------
-agentauth_at_a6cca05dc8eb2... | Bearer     | 3600       | rfc-0111-compliant
-agentauth_at_cba6bea9fea47... | Bearer     | 3600       | rfc-0111-compliant
-agentauth_at_8d66456cdf96c... | Bearer     | 3600       | rfc-0111-compliant
+agentauth_at_a6cca05dc8eb2... | Bearer     | 3600       | AAP-001-compliant
+agentauth_at_cba6bea9fea47... | Bearer     | 3600       | AAP-001-compliant
+agentauth_at_8d66456cdf96c... | Bearer     | 3600       | AAP-001-compliant
 ```
 
 **Performance Metrics**:

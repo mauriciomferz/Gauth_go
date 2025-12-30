@@ -39,7 +39,7 @@ func (m *MockInterpreter) Evaluate(conditions []string, ctx map[string]interface
 	return true, nil
 }
 
-func TestSpecialConditions_RFC115_C7(t *testing.T) {
+func TestSpecialConditions_AAP_002_C7(t *testing.T) {
 	t.Run("Structure_Serialization", func(t *testing.T) {
 		sc := SpecialConditions{
 			ConditionalEffectiveness: []string{"env == 'prod'", "time < 2030"},

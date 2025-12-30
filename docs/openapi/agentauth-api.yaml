@@ -3,14 +3,14 @@ info:
   title: AgentAuth API
   version: 1.0.0-beta
   description: |
-    # AgentAuth - OAuth 2.0 Authorization Server with RFC-0111 Compliance
+    # AgentAuth - OAuth 2.0 Authorization Server with AAP-001 Compliance
     
-    AgentAuth is a comprehensive OAuth 2.0 authorization server implementing RFC-0111 subscription flow,
+    AgentAuth is a comprehensive OAuth 2.0 authorization server implementing AAP-001 subscription flow,
     Power of Attorney (PoA) management, policy-based authorization, and advanced security features.
     
     ## Key Features
     
-    - **RFC-0111 Compliance**: 8-step subscription flow (Steps I-VIII)
+    - **AAP-001 Compliance**: 8-step subscription flow (Steps I-VIII)
     - **Power of Attorney**: Complete PoA lifecycle management (CRUD operations)
     - **Policy Management**: Version-controlled policy bundles with rollback
     - **Authorization**: Policy-based decision engine with caching
@@ -73,8 +73,8 @@ servers:
 tags:
   - name: System
     description: Health checks, system information, and service status
-  - name: RFC-0111
-    description: RFC-0111 compliant subscription flow (Steps I-VIII) and authorization
+  - name: AAP-001
+    description: AAP-001 compliant subscription flow (Steps I-VIII) and authorization
   - name: Tokens
     description: Token creation, validation, revocation, and lifecycle management
   - name: Power of Attorney
@@ -159,7 +159,7 @@ paths:
                     type: string
                   go_version:
                     type: string
-                  rfc0111_enabled:
+                  AAP-001_enabled:
                     type: boolean
                   capabilities:
                     type: array
@@ -185,15 +185,15 @@ paths:
                     example: pong
   
   # ============================================================================
-  # RFC-0111 SUBSCRIPTION FLOW ENDPOINTS
+  # AAP-001 SUBSCRIPTION FLOW ENDPOINTS
   # ============================================================================
   
-  /api/v1/rfc0111/subscriptions:
+  /api/v1/AAP-001/subscriptions:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Create subscription (Step I)
       description: |
-        Initiates RFC-0111 subscription flow by creating a new subscription.
+        Initiates AAP-001 subscription flow by creating a new subscription.
         This is Step I of the 8-step subscription process.
         
         After creating a subscription, execute Steps II-VIII in sequence:
@@ -265,7 +265,7 @@ paths:
           $ref: '#/components/responses/RateLimitExceeded'
     
     get:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: List subscriptions
       description: Retrieves a list of all subscriptions with optional filtering
       operationId: listSubscriptions
@@ -313,9 +313,9 @@ paths:
                   offset:
                     type: integer
   
-  /api/v1/rfc0111/subscriptions/{id}:
+  /api/v1/AAP-001/subscriptions/{id}:
     get:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Get subscription details
       description: Retrieves detailed information about a specific subscription
       operationId: getSubscription
@@ -336,12 +336,12 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
   
-  /api/v1/rfc0111/subscriptions/{id}/step-ii:
+  /api/v1/AAP-001/subscriptions/{id}/step-ii:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Execute Step II - Authorizer Authentication
       description: |
-        Executes Step II of RFC-0111 subscription flow: Authorizer Authentication via PVP.
+        Executes Step II of AAP-001 subscription flow: Authorizer Authentication via PVP.
         Verifies the authorizer's identity using Person Verification Protocol.
       operationId: executeStepII
       parameters:
@@ -373,9 +373,9 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
   
-  /api/v1/rfc0111/subscriptions/{id}/step-iii:
+  /api/v1/AAP-001/subscriptions/{id}/step-iii:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Execute Step III - Client Owner Identification
       operationId: executeStepIII
       parameters:
@@ -392,9 +392,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/StepResult'
   
-  /api/v1/rfc0111/subscriptions/{id}/step-iv:
+  /api/v1/AAP-001/subscriptions/{id}/step-iv:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Execute Step IV - Client Owner Authorization
       description: Verifies client owner via commercial registry
       operationId: executeStepIV
@@ -412,9 +412,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/StepResult'
   
-  /api/v1/rfc0111/subscriptions/{id}/step-v:
+  /api/v1/AAP-001/subscriptions/{id}/step-v:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Execute Step V - Client Authorization
       description: Verifies client with PoA proof
       operationId: executeStepV
@@ -432,9 +432,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/StepResult'
   
-  /api/v1/rfc0111/subscriptions/{id}/step-vi:
+  /api/v1/AAP-001/subscriptions/{id}/step-vi:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Execute Step VI - Resource Owner Identification
       operationId: executeStepVI
       parameters:
@@ -451,9 +451,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/StepResult'
   
-  /api/v1/rfc0111/subscriptions/{id}/step-vii:
+  /api/v1/AAP-001/subscriptions/{id}/step-vii:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Execute Step VII - Resource Owner Authorization
       operationId: executeStepVII
       parameters:
@@ -470,12 +470,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/StepResult'
   
-  /api/v1/rfc0111/subscriptions/{id}/step-viii:
+  /api/v1/AAP-001/subscriptions/{id}/step-viii:
     post:
-      tags: [RFC-0111]
+      tags: [AAP-001]
       summary: Execute Step VIII - Resource Server Verification
       description: |
-        Final step of RFC-0111 subscription flow. Upon successful completion,
+        Final step of AAP-001 subscription flow. Upon successful completion,
         returns an access token that can be used for API requests.
       operationId: executeStepVIII
       parameters:
@@ -1343,7 +1343,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT token obtained from RFC-0111 subscription flow
+      description: JWT token obtained from AAP-001 subscription flow
     
     ApiKeyAuth:
       type: apiKey
@@ -1374,7 +1374,7 @@ components:
         current_step:
           type: string
           enum: [I, II, III, IV, V, VI, VII, VIII]
-          description: Current step in RFC-0111 flow
+          description: Current step in AAP-001 flow
         created_at:
           type: string
           format: date-time

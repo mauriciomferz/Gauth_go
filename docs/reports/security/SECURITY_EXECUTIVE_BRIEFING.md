@@ -27,7 +27,7 @@ Following an external security audit (V-2025 series), our initial assessment con
 
 ### 1. Proprietary Standards Risk ⚠️ HIGH
 
-**Issue:** System built on AAP-001/0115 (custom protocols)
+**Issue:** System built on AAP-001/AAP-002 (custom protocols)
 
 **Problem:**
 - NOT approved by IETF (Internet Engineering Task Force)

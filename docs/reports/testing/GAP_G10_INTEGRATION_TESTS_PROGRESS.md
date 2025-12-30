@@ -14,7 +14,7 @@ owners: [system]
 
 ## Executive Summary
 
-Started comprehensive integration testing for AAP-001/0115 compliance as part of Gap G10 closure. Created initial test suite for Extended Token validation, covering authorization chains, legal frameworks, and commercial register proofs.
+Started comprehensive integration testing for AAP-001/AAP-002 compliance as part of Gap G10 closure. Created initial test suite for Extended Token validation, covering authorization chains, legal frameworks, and commercial register proofs.
 
 ## Completed Work
 

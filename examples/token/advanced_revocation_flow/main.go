@@ -1,4 +1,4 @@
-// Example: RFC111 advanced revocation scenario with multi-attestation and chained delegation.
+// Example: AAP001 advanced revocation scenario with multi-attestation and chained delegation.
 //
 // This example demonstrates:
 //   - Token issuance with multi-attestation

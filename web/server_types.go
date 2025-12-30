@@ -249,7 +249,7 @@ type BetaServer struct {
 	// System Clock Monitor (RR-015)
 	systemClockMonitor *clock.SystemClockMonitor
 
-	// Extended Token Service for AAP-001 validation
+	// Extended Token Service for AAP001 validation
 	extendedTokenService *agentauth.ExtendedTokenService
 }
 

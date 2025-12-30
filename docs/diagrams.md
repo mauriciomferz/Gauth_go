@@ -72,7 +72,7 @@ sequenceDiagram
   alt Success
     Server-->>Client: 200 {success:true, valid:true, kid}
   else Failure
-    Server-->>Client: 401 {success:false, code: attestation_signature_invalid, rfc_ref: rfc111:attestation_integrity}
+    Server-->>Client: 401 {success:false, code: attestation_signature_invalid, rfc_ref: AAP-001:attestation_integrity}
   end
 ```
 
@@ -93,17 +93,17 @@ sequenceDiagram
     Server->>Server: Verify signature (sanity)
   end
   alt Continuity Gap
-    Server-->>Client: 400 rotation_continuity_gap (rfc111:rotations)
+    Server-->>Client: 400 rotation_continuity_gap (AAP-001:rotations)
   else Signature Invalid
-    Server-->>Client: 400 rotation_summary_signature_invalid (rfc111:rotations)
+    Server-->>Client: 400 rotation_summary_signature_invalid (AAP-001:rotations)
   else Success
     Server-->>Client: 200 {summary, anchored:false}
   end
 ```
 
 ### Legend
-- rfc111:* indicates governance & integrity related clauses.
-- rfc115:* indicates semantic diagnostics & reactive controls.
+- AAP-001:* indicates governance & integrity related clauses.
+- AAP-002:* indicates semantic diagnostics & reactive controls.
 - EdDSA signatures domain separated (AGENTAUTH_ROTATION_SUMMARY:, AGENTAUTH_ROTATION_DESCRIPTOR:).
 
 ### Future Extensions

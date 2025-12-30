@@ -2,7 +2,7 @@
 
 ## Quick Reference Guide
 
-This document provides a concise summary of what needs to be built to achieve AAP-001/0115 compliance.
+This document provides a concise summary of what needs to be built to achieve AAP-001/AAP-002 compliance.
 
 ---
 

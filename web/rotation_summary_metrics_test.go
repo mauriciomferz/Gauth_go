@@ -69,26 +69,26 @@ func TestRotationSummaryMetrics(t *testing.T) {
 	}
 	body := mw.Body.String()
 	// Basic presence checks
-	if !strings.Contains(body, "AGENTAUTH_rotation_summary_latency_seconds") {
+	if !strings.Contains(body, "agentauth_rotation_summary_latency_seconds") {
 		t.Fatalf("missing latency metric")
 	}
-	if !strings.Contains(body, "AGENTAUTH_rotation_summary_total") {
+	if !strings.Contains(body, "agentauth_rotation_summary_total") {
 		t.Fatalf("missing summary total metric")
 	}
-	if !strings.Contains(body, "AGENTAUTH_rotation_summary_anchor_total") {
+	if !strings.Contains(body, "agentauth_rotation_summary_anchor_total") {
 		t.Fatalf("missing anchor metric")
 	}
-	if !strings.Contains(body, "AGENTAUTH_rotation_summary_chain_length") {
+	if !strings.Contains(body, "agentauth_rotation_summary_chain_length") {
 		t.Fatalf("missing chain length gauge")
 	}
-	if !strings.Contains(body, "AGENTAUTH_rotation_summary_head_age_seconds") {
+	if !strings.Contains(body, "agentauth_rotation_summary_head_age_seconds") {
 		t.Fatalf("missing head age gauge")
 	}
-	if !strings.Contains(body, "AGENTAUTH_rotation_summary_last_anchor_age_seconds") {
+	if !strings.Contains(body, "agentauth_rotation_summary_last_anchor_age_seconds") {
 		t.Fatalf("missing last anchor age gauge")
 	}
 	// Expect at least one anchored and one skipped or error label occurrence.
-	if !strings.Contains(body, "AGENTAUTH_rotation_summary_anchor_total{result=\"anchored\"") {
+	if !strings.Contains(body, "agentauth_rotation_summary_anchor_total{result=\"anchored\"") {
 		t.Fatalf("expected anchored result in metrics: %s", body)
 	}
 }

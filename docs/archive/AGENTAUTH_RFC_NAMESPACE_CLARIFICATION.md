@@ -151,7 +151,7 @@ The following changes have been implemented:
 
 1. **Package Rename**:
    - `pkg/aap001/` → `pkg/agentauth_rfc_001/`
-   - `pkg/rfc115/` → `pkg/agentauth_rfc_002/` (when created)
+   - `pkg/AAP-002/` → `pkg/agentauth_rfc_002/` (when created)
 
 2. **Import Path Updates**:
    - All Go files updated to use new import paths

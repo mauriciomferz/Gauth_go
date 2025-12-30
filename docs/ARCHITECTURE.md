@@ -47,7 +47,7 @@ AgentAuth 1.0 is a comprehensive authorization framework implementing AAP-001 (C
 3. **Auditability** - Complete audit trail for all operations
 4. **Extensibility** - Plugin architecture for custom policies
 5. **Performance** - Sub-millisecond authorization decisions
-6. **Standards Compliance** - AAP-001/0115 conformance
+6. **Standards Compliance** - AAP-001/AAP-002 conformance
 
 ---
 

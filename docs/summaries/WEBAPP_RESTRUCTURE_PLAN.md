@@ -122,7 +122,7 @@ This document outlines the comprehensive overhaul of the AgentAuth Learning Lab 
 - **Interactive Test:** runTestAuthDecision(), runTestBuildPoA(), testAllInteractiveFunctions(), forceShowTestResults(), testMarketingButtons(), testPoAActionButtons()
 
 #### Examples Section (6 buttons)
-- `[data-action="view-example"][data-example="rfc-0115"]`
+- `[data-action="view-example"][data-example="AAP-002"]`
 - `[data-action="view-example"][data-example="typed-events"]`
 - `[data-action="view-example"][data-example="token-revocation"]`
 - `[data-action="view-example"][data-example="resilience"]`

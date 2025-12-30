@@ -45,7 +45,7 @@ sequenceDiagram
     B->>S: POST /api/v1/model/limits/attestation/verify
     S-->>B: {valid:true, combined_hash, latency}
     A->>S: Trigger throttled sequence (simulate surge)
-    S-->>A: 429 semantic throttle error (rfc111:model_limits)
+    S-->>A: 429 semantic throttle error (AAP-001:model_limits)
     A->>S: Revoke PoA / token
     S-->>A: Revocation event appended
     A->>S: GET /api/v1/token/revocation/proof?id=<rev_event>

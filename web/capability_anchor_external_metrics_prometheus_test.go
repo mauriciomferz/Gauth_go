@@ -12,7 +12,7 @@ import (
 func TestExternalAnchorPrometheusMetrics(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	// Initialize Prometheus adapter (registers metrics in default registry).
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP-001"})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP001"})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm

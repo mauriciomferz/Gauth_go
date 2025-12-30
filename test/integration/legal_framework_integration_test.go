@@ -12,7 +12,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
-// TestCompleteAuthorizationFlow tests the complete RFC111 authorization flow
+// TestCompleteAuthorizationFlow tests the complete AAP001 authorization flow
 func TestCompleteAuthorizationFlow(t *testing.T) {
 	// Setup test environment
 	ctx := context.Background()

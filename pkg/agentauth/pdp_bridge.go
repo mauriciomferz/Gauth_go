@@ -11,7 +11,7 @@ import (
 )
 
 // PDPBridge implements PDPClient interface by wrapping pkg/pdp.Engine
-// This bridges the existing PDP engine with the AAP-001 compliance validation
+// This bridges the existing PDP engine with the AAP001 compliance validation
 type PDPBridge struct {
 	engine pdp.Engine
 }
@@ -24,7 +24,7 @@ func NewPDPBridge(engine pdp.Engine) *PDPBridge {
 }
 
 // EvaluatePolicy evaluates a policy decision request
-// Implements PDPClient interface for AAP-001 compliance validation
+// Implements PDPClient interface for AAP001 compliance validation
 func (b *PDPBridge) EvaluatePolicy(ctx context.Context, request interface{}) (bool, error) {
 	// Extract policy request details from the interface{}
 	pdpRequest, err := b.convertRequest(request)

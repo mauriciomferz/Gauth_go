@@ -587,7 +587,7 @@ Response:
     "legal_framework": { ... },
     "restrictions": { ... },
     "verification_proof": { ... },
-    "compliance_level": "rfc-0111-compliant"
+    "compliance_level": "AAP-001-compliant"
   },
   "grant_validation": {
     "valid": true,

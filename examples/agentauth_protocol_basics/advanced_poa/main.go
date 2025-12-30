@@ -1,5 +1,5 @@
-// Title: Advanced POA (AAP-001) Scenarios
-// Description: Demonstrates negative and positive cases for AAP-001 Power of Attorney validation,
+// Title: Advanced POA (AAP001) Scenarios
+// Description: Demonstrates negative and positive cases for AAP001 Power of Attorney validation,
 // including invalid jurisdiction, disallowed scope, missing fields, and a valid advanced POA.
 package main
 

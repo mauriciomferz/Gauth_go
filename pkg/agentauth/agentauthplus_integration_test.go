@@ -544,9 +544,9 @@ func TestAgentAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 	// Setup validators
 	chainValidator := createMockChainValidator()
 	complianceValidator := agentauth.NewComplianceValidator(chainValidator, nil, nil)
-	agentAuthPlusValidator := createTestAgentAuthPlusValidator(db)
+	AgentAuthPlusValidator := createTestAgentAuthPlusValidator(db)
 
-	complianceValidator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+	complianceValidator.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 	complianceValidator.SetEnforceAgentAuthPlus(true)
 
 	ctx := context.Background()

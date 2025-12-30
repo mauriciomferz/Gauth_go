@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// TestCanonicalDigestPermutations strengthens RFC115 §9 evidence: digest MUST be stable
+// TestCanonicalDigestPermutations strengthens AAP002 §9 evidence: digest MUST be stable
 // under field reordering (scope, restrictions, weights) and control characters are escaped.
 func TestCanonicalDigestPermutations(t *testing.T) {
 	base := &PowerOfAttorney{

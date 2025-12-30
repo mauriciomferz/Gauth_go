@@ -56,7 +56,7 @@ func verifyHandler(c *gin.Context, d Deps) {
 	// #nosec G304
 	b, err := os.ReadFile(path)
 	if err != nil {
-		respondError(c, http.StatusInternalServerError, "capabilities_audit_read_failed", "read_failed", "failed reading capability audit file", "AAP-001:capabilities_audit_verify", nil)
+		respondError(c, http.StatusInternalServerError, "capabilities_audit_read_failed", "read_failed", "failed reading capability audit file", "AAP001:capabilities_audit_verify", nil)
 		return
 	}
 	var wrapper struct {
@@ -66,7 +66,7 @@ func verifyHandler(c *gin.Context, d Deps) {
 		Timestamp string          `json:"timestamp"`
 	}
 	if jerr := json.Unmarshal(b, &wrapper); jerr != nil {
-		respondError(c, http.StatusInternalServerError, "capabilities_audit_invalid_json", "invalid_json", "capability audit wrapper invalid JSON", "AAP-001:capabilities_audit_verify", nil)
+		respondError(c, http.StatusInternalServerError, "capabilities_audit_invalid_json", "invalid_json", "capability audit wrapper invalid JSON", "AAP001:capabilities_audit_verify", nil)
 		return
 	}
 	h := sha256.Sum256(wrapper.Payload)
@@ -79,22 +79,22 @@ func verifyHandler(c *gin.Context, d Deps) {
 // Mirrors monolithic implementation; preserves error codes and fields.
 func anchorHandler(c *gin.Context, d Deps) {
 	if os.Getenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE") != "1" {
-		respondError(c, http.StatusForbidden, "capability_anchor_disabled", "anchoring_disabled", "capability anchoring disabled", "AAP-001:capability_anchor", nil)
+		respondError(c, http.StatusForbidden, "capability_anchor_disabled", "anchoring_disabled", "capability anchoring disabled", "AAP001:capability_anchor", nil)
 		return
 	}
 	client := d.AnchorClient()
 	if client == nil {
-		respondError(c, http.StatusInternalServerError, "capability_anchor_client_unavailable", "anchor_client_unavailable", "anchor client unavailable", "AAP-001:capability_anchor", nil)
+		respondError(c, http.StatusInternalServerError, "capability_anchor_client_unavailable", "anchor_client_unavailable", "anchor client unavailable", "AAP001:capability_anchor", nil)
 		return
 	}
 	tip := d.CapAuditPrevHash()
 	if tip == "" {
-		respondError(c, http.StatusBadRequest, "capabilities_audit_chain_tip_empty", "chain_tip_empty", "capability audit chain tip empty", "AAP-001:capabilities_audit_anchor", nil)
+		respondError(c, http.StatusBadRequest, "capabilities_audit_chain_tip_empty", "chain_tip_empty", "capability audit chain tip empty", "AAP001:capabilities_audit_anchor", nil)
 		return
 	}
 	rec, err := client.Anchor(tip)
 	if err != nil {
-		respondError(c, http.StatusInternalServerError, "capabilities_audit_anchor_failure", "anchor_failure", "failed anchoring capability audit chain tip", "AAP-001:capabilities_audit_anchor", err.Error())
+		respondError(c, http.StatusInternalServerError, "capabilities_audit_anchor_failure", "anchor_failure", "failed anchoring capability audit chain tip", "AAP001:capabilities_audit_anchor", err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "hash": rec.Hash, "anchored_at": rec.AnchoredAt.UTC().Format(time.RFC3339), "total": client.TotalAnchors(), "chain_tip": tip, "type": "capability_audit_chain_tip"})

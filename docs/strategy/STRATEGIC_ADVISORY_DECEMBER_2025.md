@@ -91,7 +91,7 @@ Current AI agents operate with **OAuth tokens** (technical access), but lack **l
 - Spend limits enforced at token level (not app level)
 - Multi-level approval workflows (CEO→CFO→Manager→Bot)
 
-**Target Customers**: SAP, Maersk, Siemens (internal pilot!)  
+**Target Customers**: SAP, Maersk, and major industrial sector partners  
 **Revenue Model**: Enterprise licensing ($100k-$500k/year)
 
 ### **Tier 2: Emerging Markets (12-24 months)**
@@ -203,7 +203,7 @@ You already have a **321-line manuscript** ([BOOK_MANUSCRIPT.md](file:///Users/m
 
 ### **⚠️ AVOID These Channels** (IP Risk)
 
-❌ **Internal Corporate Publishing** (Siemens Press, etc.)
+❌ **Internal Corporate Publishing** (Corporate Press, etc.)
 - Risk: Employer claims ownership via "work made for hire" doctrine
 - Even if you did this on personal time, corporate policy might claim it
 
@@ -224,7 +224,7 @@ Add disclaimer:
 > "This work was created independently, outside of employment obligations, using publicly available information and open-source principles."
 
 ✅ **3. Avoid Proprietary Examples**
-- ❌ Don't mention "Siemens internal architecture"
+- ❌ Don't mention "employer-specific internal architecture"
 - ✅ Do mention "Industrial IoT use case" (generic)
 
 ✅ **4. Timestamp Your Work**
@@ -239,7 +239,7 @@ Add disclaimer:
 ### **⚠️ High-Risk Decision - Requires Strategic Framing**
 
 #### **The Opportunity**
-If positioned correctly, AgentAuth could become the **"Standard for Industrial Identity"** within Siemens/your organization. This could:
+If positioned correctly, AgentAuth could become the **"Standard for Industrial Identity"** within your organization. This could:
 - Solve real pain points (supply chain automation, compliance)
 - Position you as a thought leader
 - Create internal demand for "official" adoption
@@ -249,7 +249,7 @@ If positioned correctly, AgentAuth could become the **"Standard for Industrial I
 **Risk 1: IP Appropriation**
 - Scenario: You present to leadership, they say "Great idea! Legal will formalize this."
 - Outcome: You lose control; it becomes corporate IP
-- **Mitigation**: Present as "external open-source standard I'm contributing to" (not "proposal for Siemens to own")
+- **Mitigation**: Present as "external open-source standard I'm contributing to" (not "proposal for employer to own")
 
 **Risk 2: Conflict of Interest Claims**
 - Scenario: Employer says "You used company time/resources"
@@ -257,7 +257,7 @@ If positioned correctly, AgentAuth could become the **"Standard for Industrial I
 - **Mitigation**: Prove all work done on personal time (Git timestamps, after-hours commits)
 
 **Risk 3: Confidentiality Breach**
-- Scenario: Presentation includes Siemens-specific details
+- Scenario: Presentation includes employer-specific details
 - Outcome: NDA violation
 - **Mitigation**: Use ONLY generic examples (no internal system names, no proprietary data)
 

@@ -1,4 +1,4 @@
-// Package agentauth - External Integration Interfaces per AAP-001
+// Package agentauth - External Integration Interfaces per AAP001
 // Implements critical Gaps #4 and #5 from QUALITY_MANAGER_RFC_COMPLIANCE_FINAL_ASSESSMENT.md
 package agentauth
 
@@ -8,7 +8,7 @@ import (
 )
 
 // CommercialRegisterClient defines the interface for commercial register integration
-// AAP-001 Requirement: Validation of owner's authorizer statutory authority
+// AAP001 Requirement: Validation of owner's authorizer statutory authority
 // through commercial register verification
 type CommercialRegisterClient interface {
 	// VerifyCompany verifies a company's existence and active status
@@ -28,7 +28,7 @@ type CommercialRegisterClient interface {
 }
 
 // TrustServiceProvider defines the interface for trust service provider integration
-// AAP-001 Section 3 (PVP): "verification of the identities that perform a specific
+// AAP001 Section 3 (PVP): "verification of the identities that perform a specific
 // role along the AgentAuth processing. E.g., a trust service provider that also runs
 // the authorization server."
 type TrustServiceProvider interface {

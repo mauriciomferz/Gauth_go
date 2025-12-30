@@ -8,7 +8,7 @@ source: internal
 refreshCadence: quarterly
 ---
 
-# AgentAuth Threat Model (AAP-001 / 0115 Delegation Prototype)
+# AgentAuth Threat Model (AAP-001 / AAP-002 Delegation Prototype)
 
 > Status: Updated – October 17, 2025
 > Scope: beta-refactor branch including replay protection (in-memory + Redis distributed JTI store), scope/restriction size limits, delegation issuance, revocation chain, token envelope (with JTI), BoltDB repository, metrics (replay hit/miss/store errors/latency), anchoring stub

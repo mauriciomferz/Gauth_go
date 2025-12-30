@@ -13,7 +13,7 @@ func TestSemanticRatesPrometheus(t *testing.T) {
 	srv := NewBetaServer("8123")
 	t.Cleanup(func() { srv.Shutdown() })
 	if srv.aap001Service == nil {
-		t.Fatalf("AAP-001 service not initialized; AGENTAUTH_DISABLE_AAP001_SERVICE should not be set")
+		t.Fatalf("AAP001 service not initialized; AGENTAUTH_DISABLE_AAP001_SERVICE should not be set")
 	}
 	// Inject Mock Service
 	mockSvc := &mockAAP001Service{
@@ -38,10 +38,10 @@ func TestSemanticRatesPrometheus(t *testing.T) {
 	srv.router.ServeHTTP(wp, rp)
 	out := wp.Body.String()
 	// Expect rate metric headers and at least one category rate line
-	if !strings.Contains(out, "AGENTAUTH_poa_semantic_rate_60s") {
-		t.Fatalf("expected AGENTAUTH_poa_semantic_rate_60s metrics in output")
+	if !strings.Contains(out, "agentauth_poa_semantic_rate_60s") {
+		t.Fatalf("expected agentauth_poa_semantic_rate_60s metrics in output")
 	}
-	if !strings.Contains(out, "AGENTAUTH_poa_semantic_rate_300s") {
-		t.Fatalf("expected AGENTAUTH_poa_semantic_rate_300s metrics in output")
+	if !strings.Contains(out, "agentauth_poa_semantic_rate_300s") {
+		t.Fatalf("expected agentauth_poa_semantic_rate_300s metrics in output")
 	}
 }

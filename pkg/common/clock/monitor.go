@@ -38,7 +38,7 @@ type SystemClockMonitor struct {
 
 // NewSystemClockMonitor creates a new clock monitor.
 // Default server: "pool.ntp.org"
-// Default maxSkew: 5 minutes (AAP-001 standard)
+// Default maxSkew: 5 minutes (AAP001 standard)
 // Default interval: 1 hour
 func NewSystemClockMonitor(server string, maxSkew time.Duration, interval time.Duration, m metrics.Metrics) *SystemClockMonitor {
 	if server == "" {

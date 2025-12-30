@@ -27,7 +27,7 @@ func createTestPOA(srv *BetaServer) (string, error) {
 	// Create a delegation through the service
 	svc, ok := srv.aap001Service.(*agentauth_aap_001.Service)
 	if !ok || svc == nil {
-		return "", fmt.Errorf("AAP-001 service not available")
+		return "", fmt.Errorf("AAP001 service not available")
 	}
 
 	resp, err := svc.CreateDelegationCtx(context.Background(), agentauth_aap_001.DelegationRequest{
@@ -49,7 +49,7 @@ func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 	// Enable AAP001 service and policy seeding
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP-001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -91,7 +91,7 @@ func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP-001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -123,7 +123,7 @@ func TestEvidenceAttachment_NotFound(t *testing.T) {
 
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP-001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	payload := map[string]any{"hashes": []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}

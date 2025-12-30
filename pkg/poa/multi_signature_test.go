@@ -44,7 +44,7 @@ func (m *MockKeyProvider) VerifyWith(payload, sig []byte, kid string) error {
 // We need to ensure we implement whatever KeyProvider requires.
 // Let's assume VerifyWith and ActiveSigner are the main ones from previous usage.
 
-func TestMultiSignatureVerification_RFC115_C8(t *testing.T) {
+func TestMultiSignatureVerification_AAP_002_C8(t *testing.T) {
 	// Mock provider that accepts "valid_sig_for_<kid>"
 	kp := &MockKeyProvider{}
 

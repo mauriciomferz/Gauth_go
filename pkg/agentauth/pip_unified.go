@@ -1,5 +1,5 @@
 // Package agentauth provides a unified Power Information Point (PIP) interface
-// AAP-001 Section 4 - Power Information Point implementation
+// AAP001 Section 4 - Power Information Point implementation
 package agentauth
 
 import (

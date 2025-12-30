@@ -42,7 +42,7 @@ func ValidateAAP001Flow(svc *agentauth.Service, issuedToken string) error {
 	return nil
 }
 
-// TestAAP002Features exercises basic token store operations for AAP-002 style features.
+// TestAAP002Features exercises basic token store operations for AAP002 style features.
 func TestAAP002Features() error {
 	store := token.NewMemoryStore()
 	ctx := context.Background()
@@ -69,9 +69,9 @@ func TestAAP002Features() error {
 	return nil
 }
 
-// DemoAAP001PowerOfAttorney demonstrates an AAP-001 style issuance + revocation cycle.
+// DemoAAP001PowerOfAttorney demonstrates an AAP001 style issuance + revocation cycle.
 func DemoAAP001PowerOfAttorney() error {
-	fmt.Println("=== AAP-001 Power-of-Attorney Demonstration ===")
+	fmt.Println("=== AAP001 Power-of-Attorney Demonstration ===")
 
 	cfg := agentauth.Config{
 		AuthServerURL:     "https://auth.example.com",
@@ -124,6 +124,6 @@ func DemoAAP001PowerOfAttorney() error {
 	}
 	fmt.Printf("   ✅ Token validation confirmed - token is invalid\n")
 
-	fmt.Println("\n🎉 AAP-001 Power-of-Attorney flow completed successfully!")
+	fmt.Println("\n🎉 AAP001 Power-of-Attorney flow completed successfully!")
 	return nil
 }

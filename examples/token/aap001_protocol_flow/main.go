@@ -1,13 +1,13 @@
-// Example: RFC111-compliant token protocol flow with owner proof, grant, attestation, revocation, and compliance check.
+// Example: AAP001-compliant token protocol flow with owner proof, grant, attestation, revocation, and compliance check.
 //
-// This example demonstrates a full protocol flow as required by RFC111:
+// This example demonstrates a full protocol flow as required by AAP001:
 //   - Owner proof (subject provides proof of control)
 //   - Grant (authorization server issues token)
 //   - Attestation (third party attests to token)
 //   - Revocation (token is revoked)
 //   - Compliance check (ensure revoked tokens are not valid)
 //
-// Run with: go run ./examples/token"AAP-001_protocol_flow/main.go
+// Run with: go run ./examples/token"AAP001_protocol_flow/main.go
 package main
 
 import (

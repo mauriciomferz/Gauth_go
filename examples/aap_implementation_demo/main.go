@@ -1,4 +1,4 @@
-// AAP-001 & 115 Implementation Demo
+// AAP001 & 115 Implementation Demo
 // Demonstrates AgentAuth 1.0 specification compliance using professional implementation
 
 package main
@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🏛️ AgentAuth 1.0 - AAP-001 & 115 Implementation Demo")
+	fmt.Println("🏛️ AgentAuth 1.0 - AAP001 & 115 Implementation Demo")
 	fmt.Println("==================================================")
 	fmt.Println("Power-of-Attorney Protocol (P*P) Implementation")
 	fmt.Println("")
@@ -22,13 +22,13 @@ func main() {
 	// Create RFC-compliant service built on development JWT foundation
 	// Note: "production" is just a configuration parameter name, NOT for actual production use
 	rfcService := auth.NewRFCCompliantService()
-	fmt.Println("✅ AAP-001/115 compliant service created successfully!")
+	fmt.Println("✅ AAP001/115 compliant service created successfully!")
 
-	// Test AAP-001: AI Power-of-Attorney Authorization
-	fmt.Println("\n🔐 AAP-001: AI Power-of-Attorney Authorization")
+	// Test AAP001: AI Power-of-Attorney Authorization
+	fmt.Println("\n🔐 AAP001: AI Power-of-Attorney Authorization")
 	fmt.Println("===============================================")
 
-	// Create AAP-001 compliant power-of-attorney request
+	// Create AAP001 compliant power-of-attorney request
 	poaRequest := auth.PowerOfAttorneyRequest{
 		ClientID:     "ai_trading_bot",
 		ResponseType: "code",
@@ -48,13 +48,13 @@ func main() {
 	fmt.Printf("   Jurisdiction: %s\n", poaRequest.Jurisdiction)
 	fmt.Printf("   Scope: %v\n", poaRequest.Scope)
 
-	// Execute AAP-001 authorization
+	// Execute AAP001 authorization
 	poaResponse, err := rfcService.AuthorizePowerOfAttorney(ctx, poaRequest)
 	if err != nil {
-		log.Fatalf("❌ AAP-001 authorization failed: %v", err)
+		log.Fatalf("❌ AAP001 authorization failed: %v", err)
 	}
 
-	fmt.Printf("✅ AAP-001 Authorization Successful!\n")
+	fmt.Printf("✅ AAP001 Authorization Successful!\n")
 	if len(poaResponse.AuthorizationCode) > 19 {
 		fmt.Printf("   Authorization Code: %s...\n", poaResponse.AuthorizationCode[:20])
 	} else {
@@ -66,11 +66,11 @@ func main() {
 
 	// Skipped: Exchange authorization code for power-of-attorney token (method not in stub)
 
-	// Test AAP-002: Advanced Delegation
-	fmt.Println("\n⚡ AAP-002: Advanced Delegation Framework")
+	// Test AAP002: Advanced Delegation
+	fmt.Println("\n⚡ AAP002: Advanced Delegation Framework")
 	fmt.Println("========================================")
 
-	// Create AAP-002 compliant delegation request with required fields
+	// Create AAP002 compliant delegation request with required fields
 	delegationRequest := auth.DelegationRequest{
 		PrincipalID: "corp_ceo_123",
 		DelegateID:  "ai_trading_assistant_v2",
@@ -85,13 +85,13 @@ func main() {
 	fmt.Printf("📋 Creating Advanced Delegation:\n")
 	// Skipped: Print fields (not in stub)
 
-	// Execute AAP-002 delegation
+	// Execute AAP002 delegation
 	delegationResponse, err := rfcService.CreateAdvancedDelegation(ctx, delegationRequest)
 	if err != nil {
-		log.Fatalf("❌ AAP-002 delegation failed: %v", err)
+		log.Fatalf("❌ AAP002 delegation failed: %v", err)
 	}
 
-	fmt.Printf("✅ AAP-002 Delegation Successful!\n")
+	fmt.Printf("✅ AAP002 Delegation Successful!\n")
 	fmt.Printf("   Delegation ID: %s\n", delegationResponse.DelegationID)
 	fmt.Printf("   Status: %s\n", delegationResponse.Status)
 	fmt.Printf("   Valid Until: %s\n", delegationResponse.ValidUntil.Format("2006-01-02 15:04:05"))
@@ -101,7 +101,7 @@ func main() {
 	// Summary
 	fmt.Println("\n🎯 RFC Implementation Summary")
 	fmt.Println("============================")
-	fmt.Println("✅ AAP-001 Features Implemented:")
+	fmt.Println("✅ AAP001 Features Implemented:")
 	fmt.Println("   - AI Power-of-Attorney Authorization ✅")
 	fmt.Println("   - Legal Framework Validation ✅")
 	fmt.Println("   - Principal Capacity Verification ✅")
@@ -109,7 +109,7 @@ func main() {
 	fmt.Println("   - Power Restrictions Enforcement ✅")
 	fmt.Println("   - Audit Trail Generation ✅")
 	fmt.Println("")
-	fmt.Println("✅ AAP-002 Features Implemented:")
+	fmt.Println("✅ AAP002 Features Implemented:")
 	fmt.Println("   - Advanced Delegation Framework ✅")
 	fmt.Println("   - Multi-Level Attestation ✅")
 	fmt.Println("   - Time-Bound Validity Controls ✅")
@@ -124,6 +124,6 @@ func main() {
 	fmt.Println("   - Professional Configuration Management ✅")
 	fmt.Println("")
 	fmt.Println("🎉 AgentAuth 1.0 RFC Implementation Complete!")
-	fmt.Println("   Your project now implements the full AAP-001 & 115 specifications")
+	fmt.Println("   Your project now implements the full AAP001 & 115 specifications")
 	fmt.Println("   built on your development JWT foundation!")
 }

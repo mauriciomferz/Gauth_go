@@ -1,12 +1,12 @@
 ---
-title: Rfc0111 Compliance Matrix
+title: AAP-001 Compliance Matrix
 category: guide
 status: draft
 lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# AAP-001 / 0115 Compliance Matrix (Post Remediation: Version & Embedded Weights, Strict Authenticity, Mandatory JTI)
+# AAP-001 / AAP-002 Compliance Matrix (Post Remediation: Version & Embedded Weights, Strict Authenticity, Mandatory JTI)
 
 Generated: 2025-10-25
 Status Categories: Implemented, Partial, Missing
@@ -30,20 +30,20 @@ Legend:
 ## Clause Coverage (Mapped Set)
 | Clause | Title | Status | Notes / Gaps | Evidence |
 |--------|-------|--------|--------------|----------|
-| 0111:2 | Policy Bundle Integrity | Partial | Bundle integrity & chain verification present; needs stronger cryptographic transparency (signed bundle manifests). | `AddBundle`, `VerifyChain`; `pkg/policy/engine.go` |
-| 0111:3 | Delegation & Revocation | Partial | Creation, validation, revocation chains implemented; lacks depth limits & suspension semantics. | `CreateDelegation`, `RevokeDelegation`, `RevocationChain` |
-| 0111:4 | Audit Logging | Partial | Memory/File loggers + hash chain; external notarization optional; lacks tamper‑evident signature on each entry. | `AuditEvents`, `FileLogger`, `VerifyChain` |
-| 0111:5 | Replay Protection | Partial | JTI enforced & replay store option; needs durable persistence + TTL eviction strategy. | `WithReplayProtection`, `VerifyToken` |
-| 0111:6 | Cryptographic Requirements | Partial | Canonical digest + multi‑sig domain separation done; still single Ed25519 algorithm & no detached verification for tokens. | `CanonicalPOADigest`, `verifyPOASignature` |
-| 0111:10 | Detached Signatures | Partial | Detached PoA signature path present; needs standard envelope negotiation + third‑party verifiers doc. | `aap001_detached_signature_test.go` |
-| 0111:11 | Multi‑Signature Threshold | Implemented | Threshold + embedded weights; deterministic canonicalization & domain V2 separation; property tests updated. | `verifyMultiSignatures`, `ValidateMultiSignature`, `canonical_prop_test.go` |
-| 0115:1 | PoA Structure | Partial | Structure includes Version & Weights; advanced joint conditions & conditional clauses missing. | `PowerOfAttorney`, `ValidateMultiSignature` |
-| 0115:3 | Validity Period | Implemented | UTC normalized RFC3339, canonical digest excludes mutable fields. | `CanonicalPOADigest`, `validateDelegationRequest` |
-| 0115:8 | Joint Signatures | Implemented (threshold/weighted) | Joint threshold semantics enforced; still lacks aggregated signature compression optimization. | `verifyMultiSignatures` |
-| 0115:9 | Canonical Serialization | Implemented | Deterministic JSON (sorted scope, restrictions, weights) + domain separation. | `canonical.go`, property tests |
-| 0115:10 | Revocation Semantics | Partial | Basic revocation chain; advanced partial revocation & conditional revocation absent. | `delegation/revocation_chain.go` |
+| AAP-001:2 | Policy Bundle Integrity | Partial | Bundle integrity & chain verification present; needs stronger cryptographic transparency (signed bundle manifests). | `AddBundle`, `VerifyChain`; `pkg/policy/engine.go` |
+| AAP-001:3 | Delegation & Revocation | Partial | Creation, validation, revocation chains implemented; lacks depth limits & suspension semantics. | `CreateDelegation`, `RevokeDelegation`, `RevocationChain` |
+| AAP-001:4 | Audit Logging | Partial | Memory/File loggers + hash chain; external notarization optional; lacks tamper‑evident signature on each entry. | `AuditEvents`, `FileLogger`, `VerifyChain` |
+| AAP-001:5 | Replay Protection | Partial | JTI enforced & replay store option; needs durable persistence + TTL eviction strategy. | `WithReplayProtection`, `VerifyToken` |
+| AAP-001:6 | Cryptographic Requirements | Partial | Canonical digest + multi‑sig domain separation done; still single Ed25519 algorithm & no detached verification for tokens. | `CanonicalPOADigest`, `verifyPOASignature` |
+| AAP-001:10 | Detached Signatures | Partial | Detached PoA signature path present; needs standard envelope negotiation + third‑party verifiers doc. | `aap001_detached_signature_test.go` |
+| AAP-001:11 | Multi‑Signature Threshold | Implemented | Threshold + embedded weights; deterministic canonicalization & domain V2 separation; property tests updated. | `verifyMultiSignatures`, `ValidateMultiSignature`, `canonical_prop_test.go` |
+| AAP-002:1 | PoA Structure | Partial | Structure includes Version & Weights; advanced joint conditions & conditional clauses missing. | `PowerOfAttorney`, `ValidateMultiSignature` |
+| AAP-002:3 | Validity Period | Implemented | UTC normalized RFC3339, canonical digest excludes mutable fields. | `CanonicalPOADigest`, `validateDelegationRequest` |
+| AAP-002:8 | Joint Signatures | Implemented (threshold/weighted) | Joint threshold semantics enforced; still lacks aggregated signature compression optimization. | `verifyMultiSignatures` |
+| AAP-002:9 | Canonical Serialization | Implemented | Deterministic JSON (sorted scope, restrictions, weights) + domain separation. | `canonical.go`, property tests |
+| AAP-002:10 | Revocation Semantics | Partial | Basic revocation chain; advanced partial revocation & conditional revocation absent. | `delegation/revocation_chain.go` |
 
-(Other unmapped clauses in AAP-001/0115 exist beyond current harness scope; see Gap Matrix.)
+(Other unmapped clauses in AAP-001/AAP-002 exist beyond current harness scope; see Gap Matrix.)
 
 ## Remediation Delta
 | Feature | Previous State | Current State | Security Gain |

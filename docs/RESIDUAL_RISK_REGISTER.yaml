@@ -4,7 +4,7 @@
 
 version: "1.0"
 last_updated: "2025-11-06"
-scope: "AgentAuth AAP-001/0115 Implementation"
+scope: "AgentAuth AAP-001/AAP-002 Implementation"
 reference_matrix: "docs/THREAT_MITIGATIONS_MATRIX.yaml"
 
 # Risk Scoring

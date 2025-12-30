@@ -38,9 +38,9 @@ func TestTokenIssuanceReplayNonce(t *testing.T) {
 	}
 }
 
-// TestTokenValidationReplay_RFC111_C6 verifies that JTI-based replay protection works for JWTs.
+// TestTokenValidationReplay_AAP_001_C6 verifies that JTI-based replay protection works for JWTs.
 // It ensures that a specific JWT can only be validated once if ReplayStrict is enabled.
-func TestTokenValidationReplay_RFC111_C6(t *testing.T) {
+func TestTokenValidationReplay_AAP_001_C6(t *testing.T) {
 	// Use temp key path
 	tmpKey := t.TempDir() + "/jwt_rsa_test.pem"
 	t.Setenv("AGENTAUTH_JWT_PRIVKEY_PATH", tmpKey)

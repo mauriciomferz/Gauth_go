@@ -35,8 +35,8 @@ func main() {
 	// Create RFC-compliant service
 	rfcService := auth.NewRFCCompliantService()
 	fmt.Println("✅ RFC service created")
-	// Test 1: AAP-001 with VALID request
-	fmt.Println("\n🧪 Test 1: AAP-001 Valid Power-of-Attorney Request")
+	// Test 1: AAP001 with VALID request
+	fmt.Println("\n🧪 Test 1: AAP001 Valid Power-of-Attorney Request")
 
 	validPOARequest := auth.PowerOfAttorneyRequest{
 		ClientID:     "ai_trading_bot",
@@ -66,8 +66,8 @@ func main() {
 		passed++
 	}
 
-	// Test 2: AAP-001 with INVALID jurisdiction (should fail)
-	fmt.Println("\n🧪 Test 2: AAP-001 Invalid Jurisdiction (Should Fail)")
+	// Test 2: AAP001 with INVALID jurisdiction (should fail)
+	fmt.Println("\n🧪 Test 2: AAP001 Invalid Jurisdiction (Should Fail)")
 	fmt.Println("=" + strings.Repeat("=", 55))
 
 	invalidJurisdictionRequest := validPOARequest
@@ -82,8 +82,8 @@ func main() {
 		failed++
 	}
 
-	// Test 3: AAP-001 with INVALID AI capabilities (should fail)
-	fmt.Println("\n🧪 Test 3: AAP-001 Invalid AI Capabilities (Should Fail)")
+	// Test 3: AAP001 with INVALID AI capabilities (should fail)
+	fmt.Println("\n🧪 Test 3: AAP001 Invalid AI Capabilities (Should Fail)")
 	fmt.Println("=" + strings.Repeat("=", 56))
 
 	invalidAIRequest := validPOARequest
@@ -98,8 +98,8 @@ func main() {
 		failed++
 	}
 
-	// Test 4: AAP-002 Valid Delegation
-	fmt.Println("\n🧪 Test 4: AAP-002 Valid Advanced Delegation")
+	// Test 4: AAP002 Valid Delegation
+	fmt.Println("\n🧪 Test 4: AAP002 Valid Advanced Delegation")
 	fmt.Println("=" + strings.Repeat("=", 42))
 	validDelegationRequest := auth.DelegationRequest{
 		PrincipalID:    "corp_ceo_123",
@@ -122,8 +122,8 @@ func main() {
 		passed++
 	}
 
-	// Test 5: AAP-002 Invalid delegation period (should fail)
-	fmt.Println("\n🧪 Test 5: AAP-002 Invalid Delegation Period (Should Fail)")
+	// Test 5: AAP002 Invalid delegation period (should fail)
+	fmt.Println("\n🧪 Test 5: AAP002 Invalid Delegation Period (Should Fail)")
 	fmt.Println("=" + strings.Repeat("=", 57))
 	invalidPeriodRequest := validDelegationRequest
 	invalidPeriodRequest.ValidityPeriod.Days = 0
@@ -136,8 +136,8 @@ func main() {
 		failed++
 	}
 
-	// Test 6: AAP-002 Insufficient attestation (should fail)
-	fmt.Println("\n🧪 Test 6: AAP-002 Insufficient Attestation (Should Fail)")
+	// Test 6: AAP002 Insufficient attestation (should fail)
+	fmt.Println("\n🧪 Test 6: AAP002 Insufficient Attestation (Should Fail)")
 	fmt.Println("=" + strings.Repeat("=", 52))
 	insufficientAttestationRequest := validDelegationRequest
 	insufficientAttestationRequest.AttestationRequirement.Attesters = nil
@@ -161,7 +161,7 @@ func main() {
 	}
 	fmt.Println("")
 	fmt.Println("📌 Notes:")
-	fmt.Println("   - Delegation tests are placeholders pending full AAP-002 implementation")
+	fmt.Println("   - Delegation tests are placeholders pending full AAP002 implementation")
 	fmt.Println("   - Only jurisdiction & capability negative cases executed")
 }
 

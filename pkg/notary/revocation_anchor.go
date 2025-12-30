@@ -13,7 +13,7 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-// RevocationAnchoringAdapter implements the AnchorClient interface from pkg"AAP-001
+// RevocationAnchoringAdapter implements the AnchorClient interface from pkg"AAP001
 // by wrapping an internal/notary.Notarizer and providing receipt persistence.
 //
 // P2.12 (sec5.item3): Provides external revocation anchoring with RFC 3161 TSA integration.
@@ -168,7 +168,7 @@ func NewRevocationAnchoringAdapter(notarizer notary.Notarizer, receiptStore *Rec
 	}
 }
 
-// Anchor implements the AnchorClient interface (from pkg"AAP-001).
+// Anchor implements the AnchorClient interface (from pkg"AAP001).
 //
 // Workflow:
 // 1. Compute SHA256 hash of input hash (for request integrity)

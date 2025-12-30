@@ -1,10 +1,10 @@
-// Official AAP-0115 PoA-Definition Implementation Demo
+// Official AAP002 PoA-Definition Implementation Demo
 //
 // Copyright (c) 2025 AgentAuth Community
 // Licensed under Apache 2.0
 //
 // Demonstrates the complete Power-of-Attorney Credential Definition (PoA-Definition)
-// structure as specified in AAP-0115 by The AgentAuth Community
+// structure as specified in AAP002 by The AgentAuth Community
 //
 // Digital Supply Institute - Standards Track Document
 // Obsoletes: - 15. September 2025
@@ -22,7 +22,7 @@ import (
 )
 
 func main() {
-	fmt.Println("=== AAP-0115 PoA-Definition Implementation Demo ===")
+	fmt.Println("=== AAP002 PoA-Definition Implementation Demo ===")
 	fmt.Println("Digital Supply Institute")
 	fmt.Println("Category: Standards Track")
 	fmt.Println("Obsoletes: - 15. September 2025")
@@ -42,7 +42,7 @@ func main() {
 		log.Fatalf("Error marshaling PoA-Definition: %v", err)
 	}
 
-	fmt.Println("Complete AAP-002 PoA-Definition Structure:")
+	fmt.Println("Complete AAP002 PoA-Definition Structure:")
 	fmt.Println("==========================================")
 	fmt.Println(string(jsonData))
 	fmt.Println()
@@ -59,26 +59,26 @@ func main() {
 		poaDefinition.Requirements.ValidityPeriod.EndTime.Format("2006-01-02"))
 	fmt.Println()
 
-	// Demonstrate AAP-002 compliance validation
-	fmt.Println("AAP-002 Compliance Validation:")
+	// Demonstrate AAP002 compliance validation
+	fmt.Println("AAP002 Compliance Validation:")
 	fmt.Println("==============================")
 
-	// Create AAP-002 compliant configuration
+	// Create AAP002 compliant configuration
 	config := poa.CreateAAP002CompliantConfig()
 	if err := poa.ValidateAAP002Compliance(config); err != nil {
-		log.Fatalf("AAP-002 compliance validation failed: %v", err)
+		log.Fatalf("AAP002 compliance validation failed: %v", err)
 	}
-	fmt.Println("✅ AAP-002 exclusions validated (Web3, AI operators, DNA identities excluded)")
+	fmt.Println("✅ AAP002 exclusions validated (Web3, AI operators, DNA identities excluded)")
 
 	// Validate the PoA-Definition itself
 	if err := poa.ValidatePoADefinition(*poaDefinition); err != nil {
 		log.Fatalf("PoA-Definition validation failed: %v", err)
 	}
-	fmt.Println("✅ PoA-Definition structure validated for AAP-002 compliance")
+	fmt.Println("✅ PoA-Definition structure validated for AAP002 compliance")
 	fmt.Println("✅ Official AgentAuth Community attribution")
 	fmt.Println()
 
-	fmt.Println("✅ AAP-002 PoA-Definition implementation successfully demonstrated")
+	fmt.Println("✅ AAP002 PoA-Definition implementation successfully demonstrated")
 }
 
 func createExamplePoADefinition() *poa.PoADefinition {
@@ -87,7 +87,7 @@ func createExamplePoADefinition() *poa.PoADefinition {
 	endTime := startTime.AddDate(1, 0, 0) // Valid for 1 year
 
 	return &poa.PoADefinition{
-		// A. Parties (AAP-002 Section 3.A)
+		// A. Parties (AAP002 Section 3.A)
 		Parties: poa.Parties{
 			Principal: poa.Principal{
 				Type:     poa.PrincipalTypeOrganization,
@@ -117,7 +117,7 @@ func createExamplePoADefinition() *poa.PoADefinition {
 			},
 		},
 
-		// B. Type and Scope of Authorization (AAP-002 Section 3.B)
+		// B. Type and Scope of Authorization (AAP002 Section 3.B)
 		Authorization: poa.AuthorizationScope{
 			AuthorizationType: poa.AuthorizationType{
 				RepresentationType: poa.RepresentationSole,
@@ -151,7 +151,7 @@ func createExamplePoADefinition() *poa.PoADefinition {
 			},
 		},
 
-		// C. Requirements (AAP-002 Section 3.C)
+		// C. Requirements (AAP002 Section 3.C)
 		Requirements: poa.Requirements{
 			ValidityPeriod: poa.ValidityPeriod{
 				StartTime:             startTime,
@@ -179,13 +179,13 @@ func createExamplePoADefinition() *poa.PoADefinition {
 				},
 				QuantumResistance: true,
 				ExplicitExclusions: []string{
-					"Web3/blockchain technology for extended tokens (AAP-002 Section 2)",
-					"AI-controlled AI deployment lifecycle (AAP-002 Section 2)",
-					"AI-based authorization compliance tracking (AAP-002 Section 2)",
-					"AI quality assurance systems (AAP-002 Section 2)",
-					"DNA-based identities or genetic data biometrics (AAP-002 Section 2)",
-					"AI tracking of DNA identity quality (AAP-002 Section 2)",
-					"AI-based identity theft risk tracking (AAP-002 Section 2)",
+					"Web3/blockchain technology for extended tokens (AAP002 Section 2)",
+					"AI-controlled AI deployment lifecycle (AAP002 Section 2)",
+					"AI-based authorization compliance tracking (AAP002 Section 2)",
+					"AI quality assurance systems (AAP002 Section 2)",
+					"DNA-based identities or genetic data biometrics (AAP002 Section 2)",
+					"AI tracking of DNA identity quality (AAP002 Section 2)",
+					"AI-based identity theft risk tracking (AAP002 Section 2)",
 					"Legal representation in court proceedings",
 					"Personnel hiring/firing decisions",
 					"Regulatory filings and submissions",

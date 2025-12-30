@@ -1,4 +1,4 @@
-// Package arbitration provides hooks for dispute resolution and policy conflict arbitration (AAP-001 sec4.item3).
+// Package arbitration provides hooks for dispute resolution and policy conflict arbitration (AAP001 sec4.item3).
 package arbitration
 
 import (

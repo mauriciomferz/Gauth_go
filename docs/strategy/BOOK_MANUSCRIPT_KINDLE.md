@@ -125,7 +125,7 @@ If the database administrator deletes row 123, Alice ceases to exist digitally.
 In AgentAuth, an Identity is not a row; it is a **public/private key pair** wrapped in a legal metadata envelope. We call this **The Entity Profile**.
 
 *   **The Key**: A cryptographic key (Ed25519 or ECDSA) that *only* the agent possesses.
-*   **The Profile**: A signed JSON document stating: "I am 'Purchasing Bot 9000', operating under the legal jurisdiction of Siemens Germany, authorized by [Parent Identity Signature]."
+*   **The Profile**: A signed JSON document stating: "I am 'Purchasing Bot 9000', operating under the legal jurisdiction of an International Industrial Partner, authorized by [Parent Identity Signature]."
 
 This means the agent carries its passport with it. It doesn't need to phone home to prove who it is. It simply signs a message.
 
@@ -326,7 +326,7 @@ The framework described in this book—Identity, Delegation, Fiduciary Logic, an
 
 But code is dead without a network. To bring the Agentic Economy to life, we need three things:
 
-1.  **Adoption by Anchors**: Large enterprises (like Siemens, Maersk, Bosch) must adopt AgentAuth for their internal machine-to-machine identity. They will be the "Trust Anchors" of the network.
+1.  **Adoption by Anchors**: Large enterprises (like major logistics and manufacturing firms) must adopt AgentAuth for their internal machine-to-machine identity. They will be the "Trust Anchors" of the network.
 2.  **Legal Validation**: We need lawyers to contribute to the Adapter Registry. We need "Law as Code" hackathons where attorneys and engineers sit side-by-side.
 3.  **Developer Tooling**: We need SDKs that make issuing a PoA token as easy as generating a JWT.
 

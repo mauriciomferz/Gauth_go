@@ -38,7 +38,7 @@ func (m *DefaultScopeMatcher) Matches(held, requested string) bool {
 	// Escape meta chars except '*'
 	quoted := regexp.QuoteMeta(held)
 	// Replace \* with .*? (non-greedy match) or [^:]+ for path segments?
-	// AAP-002 usually implies hierarchy. Let's assume '*' matches anything in that segment.
+	// AAP002 usually implies hierarchy. Let's assume '*' matches anything in that segment.
 	// For "resource:*" -> "resource:.*"
 	regexStr := "^" + strings.ReplaceAll(quoted, "\\*", ".*") + "$"
 	matched, _ := regexp.MatchString(regexStr, requested)
@@ -55,7 +55,7 @@ func ValidateScopeNarrowing(heldScopes []string, requestedScope string) bool {
 	return false
 }
 
-func TestScopeNarrowing_RFC115_C2(t *testing.T) {
+func TestScopeNarrowing_AAP_002_C2(t *testing.T) {
 	tests := []struct {
 		name    string
 		held    []string

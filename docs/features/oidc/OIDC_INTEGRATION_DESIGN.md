@@ -21,7 +21,7 @@ refreshCadence: on-change
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [AAP-001 Requirements](#rfc-0111-requirements)
+2. [AAP-001 Requirements](#AAP-001-requirements)
 3. [Current State Analysis](#current-state-analysis)
 4. [Design Goals](#design-goals)
 5. [Architecture Overview](#architecture-overview)

@@ -87,7 +87,7 @@ type AgentAuthPlusValidationResult struct {
 ```go
 type ComplianceValidator struct {
     chainValidator     *AuthorizationChainValidator
-    agentAuthPlusValidator *AgentAuthPlusValidator  // NEW
+    AgentAuthPlusValidator *AgentAuthPlusValidator  // NEW
     pipClient          PIPClient
     pdpClient          PDPClient
     strictMode         bool
@@ -139,7 +139,7 @@ type ExtendedAuthorizationGrant struct {
 ```go
 type SimplePDP struct {
     pap                *PowerAdministrationPoint
-    agentAuthPlusValidator *AgentAuthPlusValidator  // NEW
+    AgentAuthPlusValidator *AgentAuthPlusValidator  // NEW
     enforceAgentAuthPlus   bool                 // NEW
 }
 ```
@@ -299,22 +299,22 @@ fiduciaryService := agentauthplus.NewPostgreSQLFiduciaryDutyService(db)
 capabilityService := agentauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 
 // 2. Create AgentAuth+ validator
-agentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
+AgentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
     successorService, delegationService, dualControlService,
     fiduciaryService, capabilityService,
 )
 
 // 3. Configure enforcement
-agentAuthPlusValidator.SetEnforceCapabilities(true)
-agentAuthPlusValidator.SetEnforceDualControl(true)
-agentAuthPlusValidator.SetEnforceFiduciary(true)
+AgentAuthPlusValidator.SetEnforceCapabilities(true)
+AgentAuthPlusValidator.SetEnforceDualControl(true)
+AgentAuthPlusValidator.SetEnforceFiduciary(true)
 
 // 4. Integrate with ComplianceValidator
-complianceValidator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+complianceValidator.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 complianceValidator.SetEnforceAgentAuthPlus(true)
 
 // 5. Integrate with PDP
-pdp.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+pdp.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 pdp.SetEnforceAgentAuthPlus(true)
 ```
 
@@ -472,7 +472,7 @@ Planned test scenarios:
 ### Phase 3: Enable Advisory Mode
 ```go
 // Week 1-2: Monitor warnings, tune policies
-complianceValidator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
+complianceValidator.SetAgentAuthPlusValidator(AgentAuthPlusValidator)
 complianceValidator.SetEnforceAgentAuthPlus(true)
 // All enforce* flags = false (warnings only)
 ```
@@ -480,13 +480,13 @@ complianceValidator.SetEnforceAgentAuthPlus(true)
 ### Phase 4: Gradual Enforcement
 ```go
 // Week 3: Enable capability enforcement
-agentAuthPlusValidator.SetEnforceCapabilities(true)
+AgentAuthPlusValidator.SetEnforceCapabilities(true)
 
 // Week 4: Enable fiduciary enforcement  
-agentAuthPlusValidator.SetEnforceFiduciary(true)
+AgentAuthPlusValidator.SetEnforceFiduciary(true)
 
 // Week 5: Enable delegation enforcement
-agentAuthPlusValidator.SetEnforceDualControl(true)
+AgentAuthPlusValidator.SetEnforceDualControl(true)
 ```
 
 ---

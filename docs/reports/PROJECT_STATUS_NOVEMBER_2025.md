@@ -227,7 +227,7 @@ e7c65e87 - Implement two-phase revocation to eliminate TOCTOU vulnerability
 efdc7e17 - Add comprehensive SQA audit remediation completion summary
 a414f203 - Implement dual-channel identity verification to prevent key theft (CRITICAL-5)
 5a455c62 - Implement semantic allow-lists to replace fiduciary duty (CRITICAL-3)
-2cdf7ce4 - Rename RFC-111/115 to AgentAuth-RFC-001/002 to avoid IETF collision
+2cdf7ce4 - Rename AAP-001/115 to AgentAuth-RFC-001/002 to avoid IETF collision
 ```
 
 ### Statistics

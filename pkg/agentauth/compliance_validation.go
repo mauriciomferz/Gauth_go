@@ -1,4 +1,4 @@
-// Package agentauth - Request and Grant Compliance Validation per AAP-001 Section 6
+// Package agentauth - Request and Grant Compliance Validation per AAP001 Section 6
 // Implements critical Gaps #2 and #3 from QUALITY_MANAGER_RFC_COMPLIANCE_FINAL_ASSESSMENT.md
 // RFC Section 6: Two-phase protocol flow validation
 package agentauth
@@ -11,10 +11,10 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
-// ComplianceValidator performs AAP-001 Section 6 compliance validation
+// ComplianceValidator performs AAP001 Section 6 compliance validation
 type ComplianceValidator struct {
 	chainValidator     *AuthorizationChainValidator
-	agentAuthPlusValidator *AgentAuthPlusValidator
+	AgentAuthPlusValidator *AgentAuthPlusValidator
 	pipClient          PIPClient
 	pdpClient          PDPClient
 	strictMode         bool
@@ -37,8 +37,8 @@ func NewComplianceValidator(
 }
 
 // SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
-func (v *ComplianceValidator) SetAgentAuthPlusValidator(agentAuthPlusValidator *AgentAuthPlusValidator) {
-	v.agentAuthPlusValidator = agentAuthPlusValidator
+func (v *ComplianceValidator) SetAgentAuthPlusValidator(AgentAuthPlusValidator *AgentAuthPlusValidator) {
+	v.AgentAuthPlusValidator = AgentAuthPlusValidator
 	v.enforceAgentAuthPlus = true
 }
 
@@ -47,7 +47,7 @@ func (v *ComplianceValidator) SetEnforceAgentAuthPlus(enforce bool) {
 	v.enforceAgentAuthPlus = enforce
 }
 
-// ExtendedAuthorizationRequest represents an AAP-001 compliant authorization request
+// ExtendedAuthorizationRequest represents an AAP001 compliant authorization request
 type ExtendedAuthorizationRequest struct {
 	*AuthorizationRequest                        // Embed existing type for compatibility
 	PowerOfAttorney       *poa.PoADefinition     `json:"power_of_attorney,omitempty"`
@@ -60,7 +60,7 @@ type ExtendedAuthorizationRequest struct {
 	RequestTime           time.Time              `json:"request_time"`
 }
 
-// ExtendedAuthorizationGrant represents an AAP-001 compliant authorization grant
+// ExtendedAuthorizationGrant represents an AAP001 compliant authorization grant
 type ExtendedAuthorizationGrant struct {
 	*AuthorizationGrant                     // Embed existing type for compatibility
 	ResourceOwnerID     string              `json:"resource_owner_id"`
@@ -76,9 +76,9 @@ type ExtendedAuthorizationGrant struct {
 	GrantedActions      []string            `json:"granted_actions,omitempty"` // Actions authorized by this grant
 }
 
-// ValidateRequestCompliance implements AAP-001 Section 6 step (b)
+// ValidateRequestCompliance implements AAP001 Section 6 step (b)
 // "Request compliance validation"
-// Validates that an authorization request complies with AAP-001 requirements
+// Validates that an authorization request complies with AAP001 requirements
 func (v *ComplianceValidator) ValidateRequestCompliance(
 	ctx context.Context,
 	request *ExtendedAuthorizationRequest,
@@ -159,11 +159,11 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 	} else {
 		if v.strictMode {
 			result.Valid = false
-			result.FailureReason = "Power of Attorney is required per AAP-001"
+			result.FailureReason = "Power of Attorney is required per AAP001"
 			result.Checks["power_of_attorney"] = false
 			return result, &AgentAuthError{
 				Code:    "missing_poa",
-				Message: "Power of Attorney is required per AAP-001",
+				Message: "Power of Attorney is required per AAP001",
 			}
 		}
 		result.Warnings = append(result.Warnings, "No Power of Attorney provided")
@@ -202,9 +202,9 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 	return result, nil
 }
 
-// ValidateGrantCompliance implements AAP-001 Section 6 step (f)
+// ValidateGrantCompliance implements AAP001 Section 6 step (f)
 // "Grant compliance validation"
-// Validates that an authorization grant complies with AAP-001 requirements
+// Validates that an authorization grant complies with AAP001 requirements
 func (v *ComplianceValidator) ValidateGrantCompliance(
 	ctx context.Context,
 	grant *ExtendedAuthorizationGrant,
@@ -257,11 +257,11 @@ func (v *ComplianceValidator) ValidateGrantCompliance(
 		result.Checks["authorization_chain"] = true
 	} else {
 		result.Valid = false
-		result.FailureReason = "Authorization chain is required in grant per AAP-001"
+		result.FailureReason = "Authorization chain is required in grant per AAP001"
 		result.Checks["authorization_chain"] = false
 		return result, &AgentAuthError{
 			Code:    "missing_authorization_chain",
-			Message: "Authorization chain is required in grant per AAP-001",
+			Message: "Authorization chain is required in grant per AAP001",
 		}
 	}
 
@@ -419,29 +419,29 @@ func (v *ComplianceValidator) validatePoAWithAgentAuthPlus(
 	actionType string,
 	result *RequestComplianceResult,
 ) error {
-	if !v.enforceAgentAuthPlus || v.agentAuthPlusValidator == nil {
+	if !v.enforceAgentAuthPlus || v.AgentAuthPlusValidator == nil {
 		// AgentAuth+ enforcement disabled or validator not set
 		return nil
 	}
 
-	agentAuthPlusResult, err := v.agentAuthPlusValidator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, actionType)
+	AgentAuthPlusResult, err := v.AgentAuthPlusValidator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, actionType)
 	if err != nil {
 		return fmt.Errorf("AgentAuth+ validation failed: %w", err)
 	}
 
-	result.AgentAuthPlusValidation = agentAuthPlusResult
-	result.Checks["agentauthplus_validation"] = agentAuthPlusResult.Valid
+	result.AgentAuthPlusValidation = AgentAuthPlusResult
+	result.Checks["agentauthplus_validation"] = AgentAuthPlusResult.Valid
 
 	// Merge AgentAuth+ warnings into result warnings
-	if len(agentAuthPlusResult.Warnings) > 0 {
-		result.Warnings = append(result.Warnings, agentAuthPlusResult.Warnings...)
+	if len(AgentAuthPlusResult.Warnings) > 0 {
+		result.Warnings = append(result.Warnings, AgentAuthPlusResult.Warnings...)
 	}
 
 	// If AgentAuth+ validation failed, add failure reason
-	if !agentAuthPlusResult.Valid {
+	if !AgentAuthPlusResult.Valid {
 		return &AgentAuthError{
 			Code:    "agentauthplus_validation_failed",
-			Message: agentAuthPlusResult.FailureReason,
+			Message: AgentAuthPlusResult.FailureReason,
 		}
 	}
 
@@ -554,7 +554,7 @@ func (v *ComplianceValidator) validateLegalFramework(
 			result.Checks["legal_framework"] = false
 			return &AgentAuthError{
 				Code:    "missing_legal_framework",
-				Message: "Legal framework is required per AAP-001",
+				Message: "Legal framework is required per AAP001",
 			}
 		}
 		result.Warnings = append(result.Warnings, "No legal framework provided")
@@ -763,7 +763,7 @@ func (v *ComplianceValidator) validateGrantLegalFramework(
 			result.Checks["legal_framework"] = false
 			return &AgentAuthError{
 				Code:    "missing_legal_framework",
-				Message: "Legal framework is required in grant per AAP-001",
+				Message: "Legal framework is required in grant per AAP001",
 			}
 		}
 		result.Warnings = append(result.Warnings, "No legal framework in grant")

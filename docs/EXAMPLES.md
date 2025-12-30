@@ -26,7 +26,7 @@ This document describes the working examples demonstrating AAP-002 PoA-Definitio
 ## ✅ **WORKING EXAMPLES**
 
 ### **AAP-002 PoA-Definition Implementation** ⭐
-- **Location**: `examples/rfc_0115_poa_definition/`
+- **Location**: `examples/rfc_AAP-002_poa_definition/`
 - **Status**: ✅ **FULLY FUNCTIONAL**
 - **Description**: Complete demonstration of AAP-002 PoA-Definition structure
 - **Features**: Full type safety, JSON serialization, AgentAuth Community compliance

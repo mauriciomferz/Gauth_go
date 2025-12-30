@@ -4,7 +4,7 @@
 
 version: "1.0"
 last_updated: "2025-11-06"
-scope: "AgentAuth AAP-001/0115 Implementation"
+scope: "AgentAuth AAP-001/AAP-002 Implementation"
 
 # STRIDE categorization reference
 stride_categories:
@@ -32,7 +32,7 @@ threats:
         description: "Short-lived tokens with bounded delegation duration"
         implementation:
           - "pkg/agentauth/agentauth.go:VerifyToken"
-          - "pkg/rfc0111/rfc0111.go:ValidateDelegationCtx"
+          - "pkg/AAP-001/AAP-001.go:ValidateDelegationCtx"
         status: "Implemented"
         effectiveness: "High"
         
@@ -42,7 +42,7 @@ threats:
         implementation:
           - "pkg/agentauth/replay_store_bolt.go:BoltReplayStore"
           - "pkg/replay/durable_replay_store.go:DurableReplayStore"
-          - "pkg/rfc0111/redis_replay_store.go:RedisReplayStore"
+          - "pkg/AAP-001/redis_replay_store.go:RedisReplayStore"
         status: "Implemented"
         effectiveness: "High"
         
@@ -51,7 +51,7 @@ threats:
         description: "Replay metrics for detection and alerting"
         implementation:
           - "internal/metrics/prometheus_adapter.go"
-          - "pkg/rfc0111/rfc0111_metrics.go"
+          - "pkg/AAP-001/AAP-001_metrics.go"
         status: "Implemented"
         effectiveness: "Medium"
         
@@ -59,7 +59,7 @@ threats:
         type: "Preventive"
         description: "Fail-closed replay mode (reject on store errors)"
         implementation:
-          - "pkg/rfc0111/rfc0111_replay_failclosed_test.go"
+          - "pkg/AAP-001/AAP-001_replay_failclosed_test.go"
         status: "Implemented"
         effectiveness: "High"
         
@@ -127,7 +127,7 @@ threats:
         description: "Strict authenticity mode flags missing keys"
         implementation:
           - "pkg/agentauth/agentauth.go:WithStrictAuthenticity"
-          - "pkg/rfc0111/rfc0111.go:strictAuthenticity"
+          - "pkg/AAP-001/AAP-001.go:strictAuthenticity"
         status: "Implemented"
         effectiveness: "High"
         
@@ -329,7 +329,7 @@ threats:
         description: "Strict authenticity mode rejects missing keys"
         implementation:
           - "pkg/agentauth/agentauth.go:WithStrictAuthenticity"
-          - "pkg/rfc0111/rfc0111.go:strictAuthenticity"
+          - "pkg/AAP-001/AAP-001.go:strictAuthenticity"
         status: "Implemented"
         effectiveness: "High"
         
@@ -449,7 +449,7 @@ coverage:
 # Implementation references
 implementation_packages:
   - pkg/agentauth
-  - pkg/rfc0111
+  - pkg/AAP-001
   - pkg/replay
   - pkg/pdp
   - pkg/limits

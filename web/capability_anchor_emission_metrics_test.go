@@ -21,7 +21,7 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{
 		Namespace: "AGENTAUTH",
-		Subsystem:"AAP-001",
+		Subsystem:"AAP001",
 		Registry:  prometheus.NewRegistry(),
 	})
 	srv := NewBetaServer(":0")
@@ -68,14 +68,14 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	}
 
 	// Basic presence checks.
-	if !regexp.MustCompile(`AGENTAUTH_aap001_capability_anchor_emission_jitter_seconds`).MatchString(body) {
+	if !regexp.MustCompile(`agentauth_aap001_capability_anchor_emission_jitter_seconds`).MatchString(body) {
 		t.Fatalf("expected jitter gauge line in body:\n%s", body)
 	}
-	if !regexp.MustCompile(`AGENTAUTH_aap001_capability_anchor_age_seconds`).MatchString(body) {
+	if !regexp.MustCompile(`agentauth_aap001_capability_anchor_age_seconds`).MatchString(body) {
 		t.Fatalf("expected age gauge line in body")
 	}
 	// Jitter should be >0 after varied intervals (non-zero stddev). Accept small floating value.
-	if m := regexp.MustCompile(`AGENTAUTH_aap001_capability_anchor_emission_jitter_seconds ([0-9E.e+-]+)`).FindStringSubmatch(body); len(m) == 2 {
+	if m := regexp.MustCompile(`agentauth_aap001_capability_anchor_emission_jitter_seconds ([0-9E.e+-]+)`).FindStringSubmatch(body); len(m) == 2 {
 		// Accept presence; do not assert non-zero to avoid flakiness on CI timing.
 	} else {
 		t.Fatalf("did not find jitter metric line")

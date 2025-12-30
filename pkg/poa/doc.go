@@ -1,4 +1,4 @@
-// Package poa provides Proof-of-Authorization (POA) token implementation per AAP-002.
+// Package poa provides Proof-of-Authorization (POA) token implementation per AAP002.
 //
 // POA tokens are cryptographic proofs that demonstrate authorization was granted
 // by a legitimate authority. They support delegation chains, multi-signature
@@ -101,9 +101,9 @@
 //   - Revocation status
 //   - Constraint evaluation
 //
-// # AAP-002 Compliance
+// # AAP002 Compliance
 //
-// Validate AAP-002 compliance:
+// Validate AAP002 compliance:
 //
 //	// Check compliance
 //	compliant, issues := poa.ValidateAAP002Compliance(token)
@@ -198,7 +198,7 @@
 //   - POA issuance and validation
 //   - Multi-signature validation
 //   - Delegation chain processing
-//   - AAP-002 compliance validation
+//   - AAP002 compliance validation
 //   - CBOR encoding/decoding
 //   - Error path coverage
 package poa

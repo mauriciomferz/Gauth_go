@@ -13,7 +13,7 @@ import (
 func TestExternalAnchorMetricsConsistency(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP-001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP001", Registry: reg})
 	// Manual attempts & latency observations (simulate 3 successful anchors)
 	for i := 0; i < 3; i++ {
 		pm.IncExternalAnchorAttempts("memory")
@@ -32,12 +32,12 @@ func TestExternalAnchorMetricsConsistency(t *testing.T) {
 		}
 		return nil
 	}
-	attempts := find("AGENTAUTH_aap001_external_anchor_attempts_total")
+	attempts := find("agentauth_aap001_external_anchor_attempts_total")
 	if attempts == nil || len(attempts.Metric) == 0 {
 		t.Fatalf("attempts counter missing")
 	}
 	unlabeledAttempts := attempts.Metric[0].Counter.GetValue()
-	attemptsProv := find("AGENTAUTH_aap001_external_anchor_attempts_provider_total")
+	attemptsProv := find("agentauth_aap001_external_anchor_attempts_provider_total")
 	if attemptsProv == nil {
 		t.Fatalf("provider attempts vec missing")
 	}
@@ -61,12 +61,12 @@ func TestExternalAnchorMetricsConsistency(t *testing.T) {
 		t.Fatalf("attempt mismatch unlabeled=%f labeled=%f", unlabeledAttempts, labeledAttempts)
 	}
 	// Histograms sample count consistency
-	latHist := find("AGENTAUTH_aap001_external_anchor_latency_seconds")
+	latHist := find("agentauth_aap001_external_anchor_latency_seconds")
 	if latHist == nil || len(latHist.Metric) == 0 || latHist.Metric[0].Histogram == nil {
 		t.Fatalf("unlabeled latency histogram missing")
 	}
 	unlabeledSamples := latHist.Metric[0].Histogram.GetSampleCount()
-	latHistProv := find("AGENTAUTH_aap001_external_anchor_latency_provider_seconds")
+	latHistProv := find("agentauth_aap001_external_anchor_latency_provider_seconds")
 	if latHistProv == nil {
 		t.Fatalf("provider latency histogram missing")
 	}

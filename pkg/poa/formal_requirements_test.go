@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestFormalRequirements_RFC115_C4(t *testing.T) {
+func TestFormalRequirements_AAP_002_C4(t *testing.T) {
 	// Test Serialization
 	// Verify that boolean flags are correctly serialized/deserialized
 	t.Run("Serialization", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestFormalRequirements_RFC115_C4(t *testing.T) {
 	// Test Validation (if any logic exists or needs to exist)
 	// Currently FormalRequirements is just a struct. We might want to enforce consistency checks?
 	// E.g. If NotarialCertification is true, maybe some other field is required?
-	// AAP-002 doesn't strictly say "if X then Y" for these booleans alone, they are just flags.
+	// AAP002 doesn't strictly say "if X then Y" for these booleans alone, they are just flags.
 	// However, we can test that the struct integrates into Requirements.
 
 	t.Run("Integration in Requirements", func(t *testing.T) {

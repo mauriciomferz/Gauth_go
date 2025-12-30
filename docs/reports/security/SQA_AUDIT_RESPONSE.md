@@ -799,8 +799,8 @@ $ grep -r "RFC.111\|RFC.115" .
 
 ./docs/ARCHITECTURE.md:12:  - AgentAuth-RFC-001 (formerly AAP-001): Base authentication protocol
 ./docs/ARCHITECTURE.md:45:  - AgentAuth-RFC-002 (formerly AAP-002): Hierarchical delegation model
-./pkg/rfc111/auth.go:1:     // Package rfc111 implements AgentAuth-RFC-001 (formerly AAP-001) authentication
-./pkg/rfc115/delegation.go:1: // Package rfc115 implements AgentAuth-RFC-002 (formerly AAP-002) delegation
+./pkg/AAP-001/auth.go:1:     // Package AAP-001 implements AgentAuth-RFC-001 (formerly AAP-001) authentication
+./pkg/AAP-002/delegation.go:1: // Package AAP-002 implements AgentAuth-RFC-002 (formerly AAP-002) delegation
 ./README.md:34:             AgentAuth implements AgentAuth-RFC-001 (formerly AAP-001) and AgentAuth-RFC-002 (formerly AAP-002) standards
 ```
 
@@ -815,8 +815,8 @@ OLD                          NEW
 ---                          ---
 AgentAuth-RFC-001 (formerly AAP-001)                  →   AgentAuth-RFC-001 (or AAP-RFC-001)
 AgentAuth-RFC-002 (formerly AAP-002)                  →   AgentAuth-RFC-002
-pkg/rfc111/              →   pkg/agentauth-rfc-001/
-pkg/rfc115/              →   pkg/agentauth-rfc-002/
+pkg/AAP-001/              →   pkg/agentauth-rfc-001/
+pkg/AAP-002/              →   pkg/agentauth-rfc-002/
 
 # Alternative: Use descriptive names
 AgentAuth-RFC-001 (formerly AAP-001)                  →   AgentAuth Authentication Specification v1.0
@@ -832,16 +832,16 @@ AgentAuth-RFC-002 (formerly AAP-002)                  →   AgentAuth Delegation
 echo "Renaming RFC references to avoid IETF collision..."
 
 # Update code
-find . -type f -name "*.go" -exec sed -i '' 's/package rfc111/package agentauth_rfc_001/g' {} +
-find . -type f -name "*.go" -exec sed -i '' 's/package rfc115/package agentauth_rfc_002/g' {} +
+find . -type f -name "*.go" -exec sed -i '' 's/package AAP-001/package agentauth_rfc_001/g' {} +
+find . -type f -name "*.go" -exec sed -i '' 's/package AAP-002/package agentauth_rfc_002/g' {} +
 
 # Update imports
-find . -type f -name "*.go" -exec sed -i '' 's|"github.com/mauriciomferz/AgentAuth/pkg/rfc111"|"github.com/mauriciomferz/AgentAuth/pkg/agentauth-rfc-001"|g' {} +
-find . -type f -name "*.go" -exec sed -i '' 's|"github.com/mauriciomferz/AgentAuth/pkg/rfc115"|"github.com/mauriciomferz/AgentAuth/pkg/agentauth-rfc-002"|g' {} +
+find . -type f -name "*.go" -exec sed -i '' 's|"github.com/mauriciomferz/AgentAuth/pkg/AAP-001"|"github.com/mauriciomferz/AgentAuth/pkg/agentauth-rfc-001"|g' {} +
+find . -type f -name "*.go" -exec sed -i '' 's|"github.com/mauriciomferz/AgentAuth/pkg/AAP-002"|"github.com/mauriciomferz/AgentAuth/pkg/agentauth-rfc-002"|g' {} +
 
 # Rename directories
-mv pkg/rfc111 pkg/agentauth-rfc-001
-mv pkg/rfc115 pkg/agentauth-rfc-002
+mv pkg/AAP-001 pkg/agentauth-rfc-001
+mv pkg/AAP-002 pkg/agentauth-rfc-002
 
 # Update documentation
 find ./docs -type f -exec sed -i '' 's/AgentAuth-RFC-001 (formerly AAP-001)/AgentAuth-RFC-001/g' {} +

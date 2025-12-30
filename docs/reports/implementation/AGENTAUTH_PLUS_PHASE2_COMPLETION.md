@@ -62,8 +62,8 @@ During Phase 2 completion, the `pkg/agentauthplus/types.go` file became corrupte
 
 ```go
 // Lines 3667-3669
-agentAuthPlusHandler := adminHandlers.NewAgentAuthPlusHandler(dbPool)
-agentAuthPlusHandler.RegisterRoutes(adminGroup)
+AgentAuthPlusHandler := adminHandlers.NewAgentAuthPlusHandler(dbPool)
+AgentAuthPlusHandler.RegisterRoutes(adminGroup)
 ```
 
 - AgentAuth+ handler registered in admin routes

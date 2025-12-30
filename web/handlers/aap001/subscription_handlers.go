@@ -1,4 +1,4 @@
-// Package aap001 provides HTTP handlers for AAP-001 subscription and authorization flows.
+// Package aap001 provides HTTP handlers for AAP001 subscription and authorization flows.
 //
 // NOTE: These handlers are basic stubs that demonstrate the REST API structure.
 // Full implementation requires:
@@ -7,7 +7,7 @@
 // 3. Error handling and validation
 // 4. Authentication and authorization middleware
 //
-// The subscription flow follows AAP-001 Steps I-VIII, and authorization follows Steps a-i.
+// The subscription flow follows AAP001 Steps I-VIII, and authorization follows Steps a-i.
 package agentauth_aap_001
 
 import (
@@ -22,7 +22,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
-// SubscriptionHandlers encapsulates AAP-001 subscription API handlers.
+// SubscriptionHandlers encapsulates AAP001 subscription API handlers.
 type SubscriptionHandlers struct {
 	subscriptionManager *agentauth.SubscriptionFlowManager
 	subscriptionStore   agentauth.SubscriptionStore
@@ -36,8 +36,8 @@ func NewSubscriptionHandlers(manager *agentauth.SubscriptionFlowManager, store a
 	}
 }
 
-// CreateSubscription handles POST /api/v1"AAP-001/subscriptions
-// AAP-001 Step I: Owner's Authorizer Identity Proof
+// CreateSubscription handles POST /api/v1"AAP001/subscriptions
+// AAP001 Step I: Owner's Authorizer Identity Proof
 func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 	var req struct {
 		OwnersAuthorizerID   string `json:"owners_authorizer_id" binding:"required"`
@@ -105,7 +105,7 @@ func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 	})
 }
 
-// GetSubscription handles GET /api/v1"AAP-001/subscriptions/:id
+// GetSubscription handles GET /api/v1"AAP001/subscriptions/:id
 func (h *SubscriptionHandlers) GetSubscription(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -133,7 +133,7 @@ func (h *SubscriptionHandlers) GetSubscription(c *gin.Context) {
 	})
 }
 
-// ListSubscriptions handles GET /api/v1"AAP-001/subscriptions?client_id=xxx
+// ListSubscriptions handles GET /api/v1"AAP001/subscriptions?client_id=xxx
 func (h *SubscriptionHandlers) ListSubscriptions(c *gin.Context) {
 	clientID := c.Query("client_id")
 	if clientID == "" {
@@ -168,8 +168,8 @@ func (h *SubscriptionHandlers) ListSubscriptions(c *gin.Context) {
 	})
 }
 
-// ExecuteStepII handles POST /api/v1"AAP-001/subscriptions/:id/step-ii
-// AAP-001 Step II: Owner's Authorizer Authorization Proof
+// ExecuteStepII handles POST /api/v1"AAP001/subscriptions/:id/step-ii
+// AAP001 Step II: Owner's Authorizer Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -214,8 +214,8 @@ func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 	})
 }
 
-// ExecuteStepIII handles POST /api/v1"AAP-001/subscriptions/:id/step-iii
-// AAP-001 Step III: Client Owner Identity Proof
+// ExecuteStepIII handles POST /api/v1"AAP001/subscriptions/:id/step-iii
+// AAP001 Step III: Client Owner Identity Proof
 func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -271,8 +271,8 @@ func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 	})
 }
 
-// ExecuteStepIV handles POST /api/v1"AAP-001/subscriptions/:id/step-iv
-// AAP-001 Step IV: Client Owner Authorization Proof
+// ExecuteStepIV handles POST /api/v1"AAP001/subscriptions/:id/step-iv
+// AAP001 Step IV: Client Owner Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -315,8 +315,8 @@ func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	})
 }
 
-// ExecuteStepV handles POST /api/v1"AAP-001/subscriptions/:id/step-v
-// AAP-001 Step V: Client Authorization
+// ExecuteStepV handles POST /api/v1"AAP001/subscriptions/:id/step-v
+// AAP001 Step V: Client Authorization
 func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -400,8 +400,8 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	})
 }
 
-// ExecuteStepVI handles POST /api/v1"AAP-001/subscriptions/:id/step-vi
-// AAP-001 Step VI: Resource Owner Identity Proof
+// ExecuteStepVI handles POST /api/v1"AAP001/subscriptions/:id/step-vi
+// AAP001 Step VI: Resource Owner Identity Proof
 func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -457,8 +457,8 @@ func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 	})
 }
 
-// ExecuteStepVII handles POST /api/v1"AAP-001/subscriptions/:id/step-vii
-// AAP-001 Step VII: Resource Owner Authorization Proof
+// ExecuteStepVII handles POST /api/v1"AAP001/subscriptions/:id/step-vii
+// AAP001 Step VII: Resource Owner Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -501,8 +501,8 @@ func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	})
 }
 
-// ExecuteStepVIII handles POST /api/v1"AAP-001/subscriptions/:id/step-viii
-// AAP-001 Step VIII: Resource Server Authorization
+// ExecuteStepVIII handles POST /api/v1"AAP001/subscriptions/:id/step-viii
+// AAP001 Step VIII: Resource Server Authorization
 func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -597,7 +597,7 @@ func generateExtendedTokenFromSubscription(sub *agentauth.Subscription) (string,
 		issuer = "http://localhost:8080" // Default for dev
 	}
 
-	// Build AAP-001 extended token claims
+	// Build AAP001 extended token claims
 	claims := jwt.MapClaims{
 		"iss":             issuer,
 		"sub":             clientOwnerID,

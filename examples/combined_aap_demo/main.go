@@ -1,8 +1,8 @@
-// Combined AAP-001 & AAP-002 Implementation Demo
+// Combined AAP001 & AAP002 Implementation Demo
 //
 // This example demonstrates the unified implementation of:
-// - AAP-0111: The AgentAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
-// - AAP-0115: Power-of-Attorney Credential Definition (PoA-Definition)
+// - AAP001: The AgentAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
+// - AAP002: Power-of-Attorney Credential Definition (PoA-Definition)
 //
 // Copyright (c) 2025 AgentAuth Community
 // Licensed under Apache 2.0
@@ -32,7 +32,7 @@ func displayAAP001Exclusions(ex aap.AAP001Exclusions) {
 }
 
 func main() {
-	fmt.Println("🚀 Combined AAP-001 & AAP-002 Implementation Demo")
+	fmt.Println("🚀 Combined AAP001 & AAP002 Implementation Demo")
 	fmt.Println("═══════════════════════════════════════════════════")
 
 	// Create combined RFC configuration
@@ -46,17 +46,17 @@ func main() {
 	}
 	fmt.Println("✅ Combined RFC configuration validated successfully")
 
-	// Display AAP-001 compliance
-	fmt.Println("\n🔒 AAP-001 Exclusions Compliance:")
+	// Display AAP001 compliance
+	fmt.Println("\n🔒 AAP001 Exclusions Compliance:")
 	displayAAP001Exclusions(combinedConfig.AAP001.Exclusions)
 
-	// Display AAP-001 PP Architecture
-	fmt.Println("\n🏗️ AAP-001 Power*Point Architecture:")
+	// Display AAP001 PP Architecture
+	fmt.Println("\n🏗️ AAP001 Power*Point Architecture:")
 	displayPPArchitecture(combinedConfig.AAP001.PPArchitecture)
 
-	// Display AAP-002 PoA Definition
+	// Display AAP002 PoA Definition
 	if combinedConfig.AAP002 != nil {
-		fmt.Println("\n📄 AAP-002 Power-of-Attorney Definition:")
+		fmt.Println("\n📄 AAP002 Power-of-Attorney Definition:")
 		poaDefinition := aap.CreateDefaultPoADefinition(combinedConfig.AAP002.PoADefinition)
 		displayPoADefinition(poaDefinition)
 	}
@@ -167,7 +167,7 @@ func createDigitalAgentConfig() aap.AAP001Client {
 		},
 		AutonomyLevel:  "supervised",
 		RequestTypes:   []string{"transactions", "decisions", "actions", "communications"},
-		ComplianceMode: "strict/aap0111",
+		ComplianceMode: "strict/AAP001",
 	}
 }
 
@@ -185,7 +185,7 @@ func createAgenticAIConfig() aap.AAP001Client {
 		},
 		AutonomyLevel:  "semi_autonomous",
 		RequestTypes:   []string{"complex_transactions", "strategic_decisions", "coordinated_actions"},
-		ComplianceMode: "enterprise/aap0111",
+		ComplianceMode: "enterprise/AAP001",
 	}
 }
 
@@ -203,6 +203,6 @@ func createHumanoidRobotConfig() aap.AAP001Client {
 		},
 		AutonomyLevel:  "supervised_physical",
 		RequestTypes:   []string{"physical_actions", "safety_decisions", "interaction_protocols"},
-		ComplianceMode: "safety_critical/aap0111",
+		ComplianceMode: "safety_critical/AAP001",
 	}
 }

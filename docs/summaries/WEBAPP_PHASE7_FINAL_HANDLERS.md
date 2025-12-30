@@ -103,7 +103,7 @@ Phase 7 completes the AgentAuth Web Application development by implementing ALL 
 
 ### Example Viewing (1 handler)
 14. **handleViewExample** - Loads and displays examples
-    - 6 example types supported (rfc-0115, typed-events, token-revocation, resilience, cascade, microservices)
+    - 6 example types supported (AAP-002, typed-events, token-revocation, resilience, cascade, microservices)
     - Dynamic example loading
     - Context-aware display
 

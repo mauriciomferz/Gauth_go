@@ -8,7 +8,7 @@ import (
 func TestClauseOrderingPlacesPlaceholderFirst(t *testing.T) {
 	clauses := []Clause{
 		{ID: "0115:2.-scope-semantics", Title: "2. Scope Semantics", RFC: "0115"},
-		{ID: "AAP-0115-(placeholder-extract)", Title: "AAP-002 (Placeholder Extract)", RFC: "0115"},
+		{ID: "AAP-0115-(placeholder-extract)", Title: "AAP002 (Placeholder Extract)", RFC: "0115"},
 		{ID: "0115:10.-revocation-semantics", Title: "10. Revocation Semantics", RFC: "0115"},
 		{ID: "0115:3.-validity-period", Title: "3. Validity Period", RFC: "0115"},
 	}

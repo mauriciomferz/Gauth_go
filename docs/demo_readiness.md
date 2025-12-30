@@ -8,13 +8,13 @@ owners: [system]
 
 # Demo Readiness Checklist (Beta)
 
-This checklist enumerates remaining polish items to ensure a clear, compelling live demonstration of AgentAuth’s protocol features (RFC111) and semantic diagnostics (RFC115).
+This checklist enumerates remaining polish items to ensure a clear, compelling live demonstration of AgentAuth’s protocol features (AAP-001) and semantic diagnostics (AAP-002).
 
 ## Core Demonstration Flow
 1. Issue Delegation (PoA) with scoped restrictions.
 2. Validate JWT / Replay protection (strict JTI mode) showing `token_replay_detected` on duplicate.
 3. Multi-Signature issuance & verification (BLS aggregate) with participant count enforcement.
-4. Model limits validation (trigger a limit_exceeded response tagged `rfc111:model_limits`).
+4. Model limits validation (trigger a limit_exceeded response tagged `AAP-001:model_limits`).
 5. Capability + Rotation anchoring (external & registry) showing anchor receipts.
 6. Revocation events appended → emit revocation Merkle root anchor.
 7. Semantic diagnostics: induce semantic counter growth → show anomaly scores and hash chain evolution.
@@ -50,7 +50,7 @@ This checklist enumerates remaining polish items to ensure a clear, compelling l
 | Replay strict mode unset | Replay demo fails silently | Assert `AGENTAUTH_REPLAY_STRICT=1` early; script check environment variable. |
 | Capability registry hash unchanged | Anchor looks trivial | Introduce a small modification (add capability) mid-demo before re-anchoring. |
 | Revocation chain empty | Anchor emission returns 404 | Pre-seed 2 revocation events early in sequence. |
-| Anomaly scores all zero | Diminished RFC115 showcase | Rapid bursts (≥3 snapshots) with increasing semantic counts to elevate z-score. |
+| Anomaly scores all zero | Diminished AAP-002 showcase | Rapid bursts (≥3 snapshots) with increasing semantic counts to elevate z-score. |
 
 ## Immediate Actionable Items
 1. Add demo sequence script (`scripts/demo_sequence.sh`).
@@ -60,6 +60,6 @@ This checklist enumerates remaining polish items to ensure a clear, compelling l
 
 ## Completion Criteria
 - All referenced endpoints returning expected structured payloads.
-- Compliance docs (`compliance_rfc111_rfc115.md`, `rfc_endpoint_mapping.md`) accessible and linked.
+- Compliance docs (`compliance_AAP-001_AAP-002.md`, `rfc_endpoint_mapping.md`) accessible and linked.
 - Demo script runs end-to-end without manual intervention.
 - Anomaly scores non-zero in at least one semantic counter during live session.

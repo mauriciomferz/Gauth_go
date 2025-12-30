@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestAdvancedRFC111FlowOutput(t *testing.T) {
+func TestAdvancedAAP001FlowOutput(t *testing.T) {
 	origStdout := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w

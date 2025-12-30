@@ -21,16 +21,16 @@ The beta implementation satisfies core AAP-001 / AAP-002 requirements for: capab
 ## Compliance Matrix (Condensed)
 | Area | RFC Ref | Status | Evidence | Gaps / Future Work |
 |------|---------|--------|----------|--------------------|
-| Exclusions Enforcement | 0115 Sec.2 | Complete | `pkg/aap001/compat.go` (flags), grep absence of Web3 code | Periodic auto-report endpoint |
-| PoA Taxonomy (agent_type, sector, action_class) | 0111 Sec.3 | Complete | `pkg/aap001/taxonomy.go`, `canonical.go`, `canonical_taxonomy_test.go` | Enumeration expansion process doc |
-| Canonical POA Digest (Version ≥3 taxonomy domain) | 0111 Sec.3.4 | Complete | `pkg/aap001/canonical.go` domain selection logic | Weight-aware digest for multi-sig issuance |
-| Delegation Depth Limits | 0111 Sec.4 | Complete | `pkg/aap001/compat.go`, `pkg/delegation/delegation.go` (ErrDelegationDepthExceeded) | Depth change audit metric |
-| Attestation Dual Domain Signature | 0115 Sec.5 | Complete | `pkg/attest/service.go`, domain signature tests (`web/model_limits_attestation_*`) | Structured key rotation lineage doc |
-| Replay Protection (Nonce/JTI) | 0115 Sec.6 | Complete | `web/replay_store.go` WAL + snapshot; Redis backend `pkg/replay/redis_backend.go` | Bloom filter aging optimization |
-| Policy Manifest Signing | 0115 Sec.7 | Complete | `web/policy_manifest.go`, signature verify tests | Manifest diff endpoint with field-level change log |
-| Capability Registry Hash & Anchoring | 0111/0115 transparency | Complete | `web/server_clean.go` (hash fields + anchor endpoints), `web/capability_canonical_hash_test.go` | Periodic external notarization for registry delta sets |
-| Revocation Merkle Inclusion Proof | 0115 Sec.10 | Complete | Revocation proof endpoint (`server_clean.go` ~6726+), auditor retrieval | Proof size optimization & batch mode |
-| Consistency (Append-only) Proof | 0115 Sec.10 | Complete | `revocation_chain.go` GenerateConsistencyProof(V2), verify tests | Sizes-based variant full implementation |
+| Exclusions Enforcement | AAP-002 Sec.2 | Complete | `pkg/aap001/compat.go` (flags), grep absence of Web3 code | Periodic auto-report endpoint |
+| PoA Taxonomy (agent_type, sector, action_class) | AAP-001 Sec.3 | Complete | `pkg/aap001/taxonomy.go`, `canonical.go`, `canonical_taxonomy_test.go` | Enumeration expansion process doc |
+| Canonical POA Digest (Version ≥3 taxonomy domain) | AAP-001 Sec.3.4 | Complete | `pkg/aap001/canonical.go` domain selection logic | Weight-aware digest for multi-sig issuance |
+| Delegation Depth Limits | AAP-001 Sec.4 | Complete | `pkg/aap001/compat.go`, `pkg/delegation/delegation.go` (ErrDelegationDepthExceeded) | Depth change audit metric |
+| Attestation Dual Domain Signature | AAP-002 Sec.5 | Complete | `pkg/attest/service.go`, domain signature tests (`web/model_limits_attestation_*`) | Structured key rotation lineage doc |
+| Replay Protection (Nonce/JTI) | AAP-002 Sec.6 | Complete | `web/replay_store.go` WAL + snapshot; Redis backend `pkg/replay/redis_backend.go` | Bloom filter aging optimization |
+| Policy Manifest Signing | AAP-002 Sec.7 | Complete | `web/policy_manifest.go`, signature verify tests | Manifest diff endpoint with field-level change log |
+| Capability Registry Hash & Anchoring | AAP-001/AAP-002 transparency | Complete | `web/server_clean.go` (hash fields + anchor endpoints), `web/capability_canonical_hash_test.go` | Periodic external notarization for registry delta sets |
+| Revocation Merkle Inclusion Proof | AAP-002 Sec.10 | Complete | Revocation proof endpoint (`server_clean.go` ~6726+), auditor retrieval | Proof size optimization & batch mode |
+| Consistency (Append-only) Proof | AAP-002 Sec.10 | Complete | `revocation_chain.go` GenerateConsistencyProof(V2), verify tests | Sizes-based variant full implementation |
 | Observability (Spans & Metrics) | RB9 / governance | Complete | Spans: token.issue/validate, attestation.verify, rotation.perform/append; Metrics: attestation_domain_signature_*; notarization latency, revocation_integrity_failures_total | PoA issuance latency histogram |
 | Secret Hygiene / Key Rotation | Security baseline | Complete | Global rotating signer `internal/crypto/agility.go`, rotation spans, key providers (KMS/Vault/File) | Automated stale key retirement metric |
 | Algorithm Agility (additional curves) | Future-proofing | Partial | Ed25519, BLS PoP experimental, ECDSA provider present | Integrate BLS for attestation + PoA signatures end-to-end |

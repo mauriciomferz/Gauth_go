@@ -48,7 +48,7 @@
 
 ## ✅ What's Complete
 
-### Backend (AAP-001/0115)
+### Backend (AAP-001/AAP-002)
 - ✅ JWT/JWE token serialization
 - ✅ Token validation and parsing
 - ✅ OpenID Connect integration (8K+ lines)

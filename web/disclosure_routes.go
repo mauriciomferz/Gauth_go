@@ -1,4 +1,4 @@
-// Package web - AAP-001 Disclosure API Routes
+// Package web - AAP001 Disclosure API Routes
 package web
 
 import (
@@ -6,7 +6,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/web/handlers/disclosure"
 )
 
-// RegisterDisclosureRoutes registers AAP-001 disclosure/transparency endpoints
+// RegisterDisclosureRoutes registers AAP001 disclosure/transparency endpoints
 func (s *BetaServer) RegisterDisclosureRoutes(disclosureService *agentauth.DisclosureService) {
 	handler := disclosure.NewHandler(disclosureService)
 

@@ -57,9 +57,9 @@ Test Execution Time: ~4 minutes (including load tests)
 | **examples/token_management/oauth2** | 86.0% | OAuth2 integration examples |
 | **examples/token_management/distributed_tokens** | 83.3% | Distributed token examples |
 | **examples/token/advanced_revocation_flow** | 77.4% | Revocation workflows |
-| **examples/token/advanced_rfc111_flow** | 73.5% | Advanced RFC patterns |
+| **examples/token/advanced_AAP-001_flow** | 73.5% | Advanced RFC patterns |
 | **examples/token/type_safe_usage** | 73.5% | Type-safe API usage |
-| **examples/token/rfc111_protocol_flow** | 72.0% | Protocol flows |
+| **examples/token/AAP-001_protocol_flow** | 72.0% | Protocol flows |
 
 ---
 

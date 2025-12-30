@@ -1,4 +1,4 @@
-// Package conditions provides conditional expression evaluation for policy rules (AAP-001 sec3.item4).
+// Package conditions provides conditional expression evaluation for policy rules (AAP001 sec3.item4).
 package conditions
 
 import (

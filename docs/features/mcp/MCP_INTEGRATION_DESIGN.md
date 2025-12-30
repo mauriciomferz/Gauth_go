@@ -11,7 +11,7 @@
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [AAP-001 Requirements](#rfc-0111-requirements)
+2. [AAP-001 Requirements](#AAP-001-requirements)
 3. [MCP Protocol Overview](#mcp-protocol-overview)
 4. [Current State Analysis](#current-state-analysis)
 5. [Design Goals](#design-goals)

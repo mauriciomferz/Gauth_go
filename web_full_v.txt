@@ -1,0 +1,266 @@
+=== RUN   TestLegacyAliasDisabled
+[redis] initialization skipped via AGENTAUTH_SKIP_REDIS
+2025/12/30 20:39:19 [oauth2] registered CIBA and Token Exchange endpoints at /api/v1/oauth2/*
+2025/12/30 20:39:19 [gnap] RFC 9635 GNAP endpoints registered at /gnap/*
+[violation-metrics] primary agentauth.Service initialized (violation counters active)
+[aap001] service initialized (semantic counters active)
+[WARNING] DB_HOST not configured - running in DEVELOPMENT mode
+[DEV] Admin authentication endpoint available (database-free mode)
+[DEV] Other admin endpoints require database - set DB_HOST to enable
+[DEV] Auth handler registered: POST /api/admin/auth/login
+[DEV] Test credentials: admin@example.com / password
+[DEV] Authorization handler registered (Degraded Mode: Memory/Empty)
+[DEV] Subscribers handler registered (Degraded Mode: Empty)
+[DEV] Metrics handler registered (Degraded Mode: In-Memory Only)
+2025/12/30 20:39:19 Memory cache initialized (fallback)
+[DEV] PoA handler registered (Degraded Mode: Empty)
+[mcp] Model Context Protocol handler registered at /api/v1/agentauth/mcp/*
+[auth] Frontend authentication endpoints registered at /api/v1/agentauth/auth/*
+[auth]   POST /api/v1/agentauth/auth/login/init (Initiate login)
+[auth]   POST /api/v1/agentauth/auth/login/mfa (Verify MFA and get JWT)
+2025/12/30 20:39:19 [revocation] Revocation system disabled (set AGENTAUTH_REVOCATION_ENABLED=1 to enable)
+[revocation] Production revocation system disabled
+[revocation] Set AGENTAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
+[cap-anchor] startup triggering initial anchor...
+[cap-anchor] startup anchor success
+--- PASS: TestLegacyAliasDisabled (0.08s)
+=== RUN   TestLegacyAliasTelemetry
+[redis] initialization skipped via AGENTAUTH_SKIP_REDIS
+2025/12/30 20:39:19 [oauth2] registered CIBA and Token Exchange endpoints at /api/v1/oauth2/*
+2025/12/30 20:39:19 [gnap] RFC 9635 GNAP endpoints registered at /gnap/*
+[violation-metrics] primary agentauth.Service initialized (violation counters active)
+[aap001] service initialized (semantic counters active)
+[WARNING] DB_HOST not configured - running in DEVELOPMENT mode
+[DEV] Admin authentication endpoint available (database-free mode)
+[DEV] Other admin endpoints require database - set DB_HOST to enable
+[DEV] Auth handler registered: POST /api/admin/auth/login
+[DEV] Test credentials: admin@example.com / password
+[DEV] Authorization handler registered (Degraded Mode: Memory/Empty)
+[DEV] Subscribers handler registered (Degraded Mode: Empty)
+[DEV] Metrics handler registered (Degraded Mode: In-Memory Only)
+2025/12/30 20:39:19 Memory cache initialized (fallback)
+[DEV] PoA handler registered (Degraded Mode: Empty)
+[mcp] Model Context Protocol handler registered at /api/v1/agentauth/mcp/*
+[auth] Frontend authentication endpoints registered at /api/v1/agentauth/auth/*
+[auth]   POST /api/v1/agentauth/auth/login/init (Initiate login)
+[auth]   POST /api/v1/agentauth/auth/login/mfa (Verify MFA and get JWT)
+2025/12/30 20:39:19 [revocation] Revocation system disabled (set AGENTAUTH_REVOCATION_ENABLED=1 to enable)
+[revocation] Production revocation system disabled
+[revocation] Set AGENTAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
+[deprecate] /api/governance/lifecycle_timeline invoked; migrate to /api/v1/beta/lifecycle/timeline
+[deprecate] /api/governance/lifecycle_timeline invoked; migrate to /api/v1/beta/lifecycle/timeline
+[cap-anchor] startup triggering initial anchor...
+[cap-anchor] startup anchor success
+--- PASS: TestLegacyAliasTelemetry (0.06s)
+=== RUN   TestRevocationAnchorEmit_EmptyChain
+[redis] initialization skipped via AGENTAUTH_SKIP_REDIS
+2025/12/30 20:39:19 [oauth2] registered CIBA and Token Exchange endpoints at /api/v1/oauth2/*
+2025/12/30 20:39:19 [gnap] RFC 9635 GNAP endpoints registered at /gnap/*
+[violation-metrics] primary agentauth.Service initialized (violation counters active)
+[aap001] service initialized (semantic counters active)
+[WARNING] DB_HOST not configured - running in DEVELOPMENT mode
+[DEV] Admin authentication endpoint available (database-free mode)
+[DEV] Other admin endpoints require database - set DB_HOST to enable
+[DEV] Auth handler registered: POST /api/admin/auth/login
+[DEV] Test credentials: admin@example.com / password
+[DEV] Authorization handler registered (Degraded Mode: Memory/Empty)
+[DEV] Subscribers handler registered (Degraded Mode: Empty)
+[DEV] Metrics handler registered (Degraded Mode: In-Memory Only)
+2025/12/30 20:39:19 Memory cache initialized (fallback)
+[DEV] PoA handler registered (Degraded Mode: Empty)
+[mcp] Model Context Protocol handler registered at /api/v1/agentauth/mcp/*
+[auth] Frontend authentication endpoints registered at /api/v1/agentauth/auth/*
+[auth]   POST /api/v1/agentauth/auth/login/init (Initiate login)
+[auth]   POST /api/v1/agentauth/auth/login/mfa (Verify MFA and get JWT)
+2025/12/30 20:39:19 [revocation] Revocation system disabled (set AGENTAUTH_REVOCATION_ENABLED=1 to enable)
+[revocation] Production revocation system disabled
+[revocation] Set AGENTAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
+[cap-anchor] startup triggering initial anchor...
+[cap-anchor] startup anchor success
+--- PASS: TestRevocationAnchorEmit_EmptyChain (0.06s)
+=== RUN   TestRevocationAnchorEmit_Success
+[redis] initialization skipped via AGENTAUTH_SKIP_REDIS
+2025/12/30 20:39:19 [oauth2] registered CIBA and Token Exchange endpoints at /api/v1/oauth2/*
+2025/12/30 20:39:19 [gnap] RFC 9635 GNAP endpoints registered at /gnap/*
+[violation-metrics] primary agentauth.Service initialized (violation counters active)
+[aap001] service initialized (semantic counters active)
+[WARNING] DB_HOST not configured - running in DEVELOPMENT mode
+[DEV] Admin authentication endpoint available (database-free mode)
+[DEV] Other admin endpoints require database - set DB_HOST to enable
+[DEV] Auth handler registered: POST /api/admin/auth/login
+[DEV] Test credentials: admin@example.com / password
+[DEV] Authorization handler registered (Degraded Mode: Memory/Empty)
+[DEV] Subscribers handler registered (Degraded Mode: Empty)
+[DEV] Metrics handler registered (Degraded Mode: In-Memory Only)
+2025/12/30 20:39:19 Memory cache initialized (fallback)
+[DEV] PoA handler registered (Degraded Mode: Empty)
+[mcp] Model Context Protocol handler registered at /api/v1/agentauth/mcp/*
+[auth] Frontend authentication endpoints registered at /api/v1/agentauth/auth/*
+[auth]   POST /api/v1/agentauth/auth/login/init (Initiate login)
+[auth]   POST /api/v1/agentauth/auth/login/mfa (Verify MFA and get JWT)
+2025/12/30 20:39:19 [revocation] Revocation system disabled (set AGENTAUTH_REVOCATION_ENABLED=1 to enable)
+[revocation] Production revocation system disabled
+[revocation] Set AGENTAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
+[cap-anchor] startup triggering initial anchor...
+[cap-anchor] startup anchor success
+panic: test timed out after 10m0s
+	running tests:
+		TestRevocationAnchorEmit_Success (10m0s)
+
+goroutine 226 [running]:
+testing.(*M).startAlarm.func1()
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2682 +0x2b0
+created by time.goFunc
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/time/sleep.go:215 +0x38
+
+goroutine 1 [chan receive, 9 minutes]:
+testing.(*T).Run(0x14000382540, {0x103e23ce8?, 0x1400035db38?}, 0x104f57810)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2005 +0x378
+testing.runTests.func1(0x14000382540)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2477 +0x38
+testing.tRunner(0x14000382540, 0x1400035dc68)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1934 +0xc8
+testing.runTests(0x140001382e8, {0x105f96c00, 0x121, 0x121}, {0x140004024a0?, 0x7?, 0x105fa08a0?})
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2475 +0x3b8
+testing.(*M).Run(0x140003e4280)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:2337 +0x530
+main.main()
+	_testmain.go:631 +0x80
+
+goroutine 119 [select]:
+github.com/mauriciomferz/AgentAuth/internal/limits.InitFromEnv.func1()
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/limits/manager.go:88 +0x84
+created by github.com/mauriciomferz/AgentAuth/internal/limits.InitFromEnv in goroutine 1
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/limits/manager.go:85 +0x354
+
+goroutine 161 [sync.RWMutex.RLock, 9 minutes]:
+sync.runtime_SemacquireRWMutexR(0xe7a306a8a4f6d355?, 0xaa?, 0x41544e4547412f1c?)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/runtime/sema.go:100 +0x28
+sync.(*RWMutex).RLock(...)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/sync/rwmutex.go:74
+github.com/mauriciomferz/AgentAuth/pkg/delegation.(*RevocationChain).AggregateHash(0x1400031ea80)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:356 +0x74
+github.com/mauriciomferz/AgentAuth/pkg/delegation.(*RevocationChain).Append(_, {{0x103dd721f, 0x5}, {0x103dd7224, 0x5}, {0x0, 0x0}, {0x103dea40f, 0xc}, {0x15e51270, ...}, ...})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/delegation/revocation_chain.go:181 +0x600
+github.com/mauriciomferz/AgentAuth/web.TestRevocationAnchorEmit_Success(0x14000382700)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/anchor_revocation_emit_test.go:51 +0x110
+testing.tRunner(0x14000382700, 0x104f57810)
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1934 +0xc8
+created by testing.(*T).Run in goroutine 1
+	/opt/homebrew/Cellar/go/1.25.4/libexec/src/testing/testing.go:1997 +0x364
+
+goroutine 91 [select]:
+github.com/mauriciomferz/AgentAuth/web/handlers/token.(*ReplayNonceStore).backgroundCleanup(0x1400017c4b0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:166 +0x100
+created by github.com/mauriciomferz/AgentAuth/web/handlers/token.newReplayNonceStore in goroutine 90
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:107 +0x248
+
+goroutine 93 [select, 5 minutes]:
+github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).reloader(0x14000382e00, {0x104f83b88, 0x105fcbee0})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:169 +0xa8
+created by github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).Init in goroutine 90
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:160 +0x88
+
+goroutine 95 [select, 9 minutes]:
+github.com/mauriciomferz/AgentAuth/pkg/audit.(*MemoryLogger).processEvents(0x140004f0280)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:148 +0x9c
+created by github.com/mauriciomferz/AgentAuth/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 90
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:139 +0x140
+
+goroutine 132 [select]:
+github.com/mauriciomferz/AgentAuth/pkg/cache.(*MemoryCache).cleanupExpired(0x1400014e1e0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:217 +0xcc
+created by github.com/mauriciomferz/AgentAuth/pkg/cache.NewMemoryCache in goroutine 90
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:40 +0x10c
+
+goroutine 97 [select]:
+github.com/mauriciomferz/AgentAuth/web/handlers/token.(*ReplayNonceStore).backgroundCleanup(0x1400017c5a0)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:166 +0x100
+created by github.com/mauriciomferz/AgentAuth/web/handlers/token.newReplayNonceStore in goroutine 96
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:107 +0x248
+
+goroutine 147 [select, 5 minutes]:
+github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).reloader(0x14000103dc0, {0x104f83b88, 0x105fcbee0})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:169 +0xa8
+created by github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).Init in goroutine 96
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:160 +0x88
+
+goroutine 217 [select]:
+github.com/mauriciomferz/AgentAuth/pkg/cache.(*MemoryCache).cleanupExpired(0x14000405320)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:217 +0xcc
+created by github.com/mauriciomferz/AgentAuth/pkg/cache.NewMemoryCache in goroutine 161
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:40 +0x10c
+
+goroutine 149 [select, 9 minutes]:
+github.com/mauriciomferz/AgentAuth/pkg/audit.(*MemoryLogger).processEvents(0x140004f0380)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:148 +0x9c
+created by github.com/mauriciomferz/AgentAuth/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 96
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:139 +0x140
+
+goroutine 152 [select]:
+github.com/mauriciomferz/AgentAuth/pkg/cache.(*MemoryCache).cleanupExpired(0x140004f3500)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:217 +0xcc
+created by github.com/mauriciomferz/AgentAuth/pkg/cache.NewMemoryCache in goroutine 96
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:40 +0x10c
+
+goroutine 214 [select, 9 minutes]:
+github.com/mauriciomferz/AgentAuth/pkg/audit.(*MemoryLogger).processEvents(0x1400031e980)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:148 +0x9c
+created by github.com/mauriciomferz/AgentAuth/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 161
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:139 +0x140
+
+goroutine 213 [select]:
+github.com/mauriciomferz/AgentAuth/web.NewBetaServerWithMetrics.func8()
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go:859 +0xa0
+created by github.com/mauriciomferz/AgentAuth/web.NewBetaServerWithMetrics in goroutine 161
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go:855 +0x334c
+
+goroutine 62 [select]:
+github.com/mauriciomferz/AgentAuth/web/handlers/token.(*ReplayNonceStore).backgroundCleanup(0x140002b2140)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:166 +0x100
+created by github.com/mauriciomferz/AgentAuth/web/handlers/token.newReplayNonceStore in goroutine 61
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:107 +0x248
+
+goroutine 64 [select, 5 minutes]:
+github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).reloader(0x14000003dc0, {0x104f83b88, 0x105fcbee0})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:169 +0xa8
+created by github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).Init in goroutine 61
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:160 +0x88
+
+goroutine 162 [select, 9 minutes]:
+github.com/mauriciomferz/AgentAuth/pkg/audit.(*MemoryLogger).processEvents(0x1400031e480)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:148 +0x9c
+created by github.com/mauriciomferz/AgentAuth/pkg/audit.NewMemoryLoggerWithQueueSize in goroutine 61
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/audit/audit.go:139 +0x140
+
+goroutine 212 [select, 5 minutes]:
+github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).reloader(0x14000383340, {0x104f83b88, 0x105fcbee0})
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:169 +0xa8
+created by github.com/mauriciomferz/AgentAuth/web/handlers/modellimits.(*Handler).Init in goroutine 161
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/modellimits/handler.go:160 +0x88
+
+goroutine 163 [select]:
+github.com/mauriciomferz/AgentAuth/pkg/cache.(*MemoryCache).cleanupExpired(0x14000760540)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:217 +0xcc
+created by github.com/mauriciomferz/AgentAuth/pkg/cache.NewMemoryCache in goroutine 61
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/cache/memory.go:40 +0x10c
+
+goroutine 210 [select]:
+github.com/mauriciomferz/AgentAuth/web/handlers/token.(*ReplayNonceStore).backgroundCleanup(0x1400017c690)
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:166 +0x100
+created by github.com/mauriciomferz/AgentAuth/web/handlers/token.newReplayNonceStore in goroutine 161
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/token/replay.go:107 +0x248
+
+goroutine 211 [select, 9 minutes]:
+github.com/mauriciomferz/AgentAuth/pkg/common/clock.(*SystemClockMonitor).Start.func1()
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/common/clock/monitor.go:75 +0xa4
+created by github.com/mauriciomferz/AgentAuth/pkg/common/clock.(*SystemClockMonitor).Start in goroutine 161
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/common/clock/monitor.go:67 +0x5c
+
+goroutine 218 [select, 9 minutes]:
+github.com/mauriciomferz/AgentAuth/web/handlers/admin.NewAuditHandler.func1()
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/admin/audit_handler.go:38 +0xa4
+created by github.com/mauriciomferz/AgentAuth/web/handlers/admin.NewAuditHandler in goroutine 161
+	/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/admin/audit_handler.go:34 +0xbc
+FAIL	github.com/mauriciomferz/AgentAuth/web	602.667s
+FAIL

@@ -8,7 +8,7 @@ source: internal
 refreshCadence: quarterly
 ---
 # Threat Mitigations Matrix
-## AgentAuth AAP-001/0115 Security Implementation
+## AgentAuth AAP-001/AAP-002 Security Implementation
 
 **Document Version**: 1.0  
 **Last Updated**: 2025-01  

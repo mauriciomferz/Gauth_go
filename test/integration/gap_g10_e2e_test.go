@@ -2,7 +2,7 @@
 // +build integration
 
 // Gap G10 Phase 6: End-to-End Integration Tests
-// Tests complete authorization flows involving multiple RFC-0111 components
+// Tests complete authorization flows involving multiple AAP001 components
 package integration
 
 import (
@@ -22,11 +22,11 @@ import (
 
 // TestGapG10E2E_CompleteTokenIssuanceFlow tests the complete token issuance flow
 // Flow: PoA → Commercial Register → PVP → PIP → Extended Token
-// This test demonstrates how all RFC-0111 components work together for token issuance
+// This test demonstrates how all AAP001 components work together for token issuance
 func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 	ctx := context.Background()
 
-	// Step 1: Create PoA Definition (RFC-0115 compliant)
+	// Step 1: Create PoA Definition (AAP002 compliant)
 	now := time.Now()
 	poaDef := &poa.PoADefinition{
 		Parties: poa.Parties{
@@ -310,7 +310,7 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 		},
 		RequestID:       "req-" + now.Format("20060102150405"),
 		GrantID:         "grant-123",
-		ComplianceLevel: "RFC-0111-compliant",
+		ComplianceLevel: "AAP001-compliant",
 		JurisdictionContext: &agentauth.JurisdictionContext{
 			PrimaryJurisdiction: "DE",
 			ApplicableLaws:      []string{"BGB", "HGB", "GmbHG"},
@@ -685,7 +685,7 @@ func createCompleteExtendedToken(t *testing.T) *agentauth.ExtendedToken {
 		},
 		RequestID:       "req-" + now.Format("20060102150405"),
 		GrantID:         "grant-123",
-		ComplianceLevel: "RFC-0111-compliant",
+		ComplianceLevel: "AAP001-compliant",
 		JurisdictionContext: &agentauth.JurisdictionContext{
 			PrimaryJurisdiction: "DE",
 			ApplicableLaws:      []string{"BGB", "HGB", "GmbHG"},

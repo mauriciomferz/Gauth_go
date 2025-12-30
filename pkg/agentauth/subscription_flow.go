@@ -1,4 +1,4 @@
-// Package agentauth - AAP-001 Subscription Flow (Steps I-VIII)
+// Package agentauth - AAP001 Subscription Flow (Steps I-VIII)
 // This implements the one-off enrollment process that was MISSING from the implementation
 package agentauth
 
@@ -35,7 +35,7 @@ type IdentityProofResult struct {
 	FailureReason string
 }
 
-// SubscriptionFlowManager manages AAP-001 Steps I-VIII (ONE-OFF SUBSCRIPTION)
+// SubscriptionFlowManager manages AAP001 Steps I-VIII (ONE-OFF SUBSCRIPTION)
 type SubscriptionFlowManager struct {
 	pvpClient           PowerVerificationPoint
 	pipClient           PIPClient
@@ -51,7 +51,7 @@ type SubscriptionStatus string
 const (
 	SubscriptionStatusPending             SubscriptionStatus = "pending"
 	SubscriptionStatusAwaitingIdentity    SubscriptionStatus = "awaiting_identity"
-	SubscriptionStatusAwaitinagentAuthProof   SubscriptionStatus = "awaiting_auth_proof"
+	SubscriptionStatusAwaitinAgentAuthProof   SubscriptionStatus = "awaiting_auth_proof"
 	SubscriptionStatusAwaitingClientOwner SubscriptionStatus = "awaiting_client_owner"
 	SubscriptionStatusAwaitingClient      SubscriptionStatus = "awaiting_client"
 	SubscriptionStatusAwaitingResource    SubscriptionStatus = "awaiting_resource"
@@ -59,7 +59,7 @@ const (
 	SubscriptionStatusFailed              SubscriptionStatus = "failed"
 )
 
-// Subscription represents a complete AAP-001 subscription
+// Subscription represents a complete AAP001 subscription
 type Subscription struct {
 	ID        string
 	Status    SubscriptionStatus
@@ -145,7 +145,7 @@ func NewSubscriptionFlowManager(
 	}
 }
 
-// InitiateSubscription starts a new AAP-001 subscription flow
+// InitiateSubscription starts a new AAP001 subscription flow
 func (m *SubscriptionFlowManager) InitiateSubscription(ctx context.Context) (*Subscription, error) {
 	sub := &Subscription{
 		ID:        generateSubscriptionID(),
@@ -162,7 +162,7 @@ func (m *SubscriptionFlowManager) InitiateSubscription(ctx context.Context) (*Su
 }
 
 // ExecuteStepI performs Step I: Owner's Authorizer Identity Proof
-// AAP-001: "The owner's authorizer, who is authorized to act on behalf of the client
+// AAP001: "The owner's authorizer, who is authorized to act on behalf of the client
 // owner, proves their identity to the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepI(
 	ctx context.Context,
@@ -189,14 +189,14 @@ func (m *SubscriptionFlowManager) ExecuteStepI(
 	}
 
 	sub.OwnersAuthorizerIdentity = proof
-	sub.Status = SubscriptionStatusAwaitinagentAuthProof
+	sub.Status = SubscriptionStatusAwaitinAgentAuthProof
 	sub.UpdatedAt = time.Now()
 
 	return m.subscriptionStore.SaveSubscription(ctx, sub)
 }
 
 // ExecuteStepII performs Step II: Owner's Authorizer Authorization Proof
-// AAP-001: "The owner's authorizer proves their authority to the authorization server,
+// AAP001: "The owner's authorizer proves their authority to the authorization server,
 // e.g., via a commercial register entry"
 func (m *SubscriptionFlowManager) ExecuteStepII(
 	ctx context.Context,
@@ -262,7 +262,7 @@ func (m *SubscriptionFlowManager) ExecuteStepII(
 }
 
 // ExecuteStepIII performs Step III: Client Owner Identity Proof
-// AAP-001: "The client owner (owner of the AI system) proves their identity
+// AAP001: "The client owner (owner of the AI system) proves their identity
 // to the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepIII(
 	ctx context.Context,
@@ -302,7 +302,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIII(
 }
 
 // ExecuteStepIV performs Step IV: Client Owner Authorization Proof
-// AAP-001: "The client owner is authorized by the owner's authorizer
+// AAP001: "The client owner is authorized by the owner's authorizer
 // to register clients with the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepIV(
 	ctx context.Context,
@@ -355,7 +355,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIV(
 }
 
 // ExecuteStepV performs Step V: Client Authorization
-// AAP-001: "The client owner authorizes a client (AI system) to act with the
+// AAP001: "The client owner authorizes a client (AI system) to act with the
 // authorization server, including identity sharing and prompting"
 func (m *SubscriptionFlowManager) ExecuteStepV(
 	ctx context.Context,
@@ -428,7 +428,7 @@ func (m *SubscriptionFlowManager) ExecuteStepV(
 }
 
 // ExecuteStepVI performs Step VI: Resource Owner Identity Proof
-// AAP-001: "The resource owner proves their identity to the authorization server"
+// AAP001: "The resource owner proves their identity to the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepVI(
 	ctx context.Context,
 	subscriptionID string,
@@ -466,7 +466,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVI(
 }
 
 // ExecuteStepVII performs Step VII: Resource Owner Authorization Proof
-// AAP-001: "The resource owner is authorized by the owner's authorizer
+// AAP001: "The resource owner is authorized by the owner's authorizer
 // to control resources on the resource server"
 func (m *SubscriptionFlowManager) ExecuteStepVII(
 	ctx context.Context,
@@ -510,7 +510,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVII(
 }
 
 // ExecuteStepVIII performs Step VIII: Resource Server Authorization
-// AAP-001: "The resource server is authorized to serve resources under the
+// AAP001: "The resource server is authorized to serve resources under the
 // authorization server's governance"
 func (m *SubscriptionFlowManager) ExecuteStepVIII(
 	ctx context.Context,

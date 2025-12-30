@@ -1,4 +1,4 @@
-// Example: Advanced Delegation & Attestation Flow (RFC111-style, using canonical AgentAuth API)
+// Example: Advanced Delegation & Attestation Flow (AAP001-style, using canonical AgentAuth API)
 package main
 
 import (

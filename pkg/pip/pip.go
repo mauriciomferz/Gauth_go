@@ -1,5 +1,5 @@
 // Package pip provides Power Information Point (PIP) implementation
-// This consolidates authorization data from scattered sources per AAP-001
+// This consolidates authorization data from scattered sources per AAP001
 package pip
 
 import (
@@ -15,7 +15,7 @@ import (
 )
 
 // PowerInformationPoint (PIP) consolidates authorization data from multiple sources
-// AAP-001 §5: PIP provides centralized access to:
+// AAP001 §5: PIP provides centralized access to:
 // - Power of Attorney definitions
 // - Authorization chains
 // - Commercial register data

@@ -8,7 +8,7 @@ This directory contains the strategic assets for the commercialization and distr
 |------|-------------|-----------------|
 | **[STRATEGIC_ADVISORY_DECEMBER_2025.md](./STRATEGIC_ADVISORY_DECEMBER_2025.md)** | **START HERE.** Executive summary of IP strategy, monetization models, and legal risks. | Internal / Founders |
 | **[BOOK_MANUSCRIPT.md](./BOOK_MANUSCRIPT.md)** | Final 10-chapter manuscript: *"The Agent's Signature: Identity & Law in the Age of AI"*. | Public / Publishers |
-| **[COMMERCIAL_PROPOSAL_GIMEL.md](./COMMERCIAL_PROPOSAL_GIMEL.md)** | B2B proposal for spinning out AgentAuth as a vendor to Gimel/Siemens. | Dr. Götz G. Wehberg |
+| **[COMMERCIAL_PROPOSAL_AGENTAUTH.md](./COMMERCIAL_PROPOSAL_AGENTAUTH.md)** | B2B proposal for spinning out AgentAuth as a vendor to Gimel/Siemens. | Dr. Götz G. Wehberg |
 | **[STRATEGIC_WHITEPAPER.md](./STRATEGIC_WHITEPAPER.md)** | Technical/Business whitepaper for investors and public positioning. | Investors / Partners |
 
 ## 📚 Publishing Assets

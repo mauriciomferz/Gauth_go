@@ -57,7 +57,7 @@ This **beta implementation** provides M-of-N threshold signature collection and 
 │                                                               │
 ├─────────────────────────────────────────────────────────────┤
 │                  Core Verification Engine                    │
-│              (pkg/rfc0111/rfc0111.go)                        │
+│              (pkg/AAP-001/AAP-001.go)                        │
 │                                                               │
 │  verifyMultiSignatures() - 180+ lines                        │
 │  • Threshold M-of-N enforcement                              │
@@ -222,7 +222,7 @@ package main
 import (
     "context"
     "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/multisig"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/AAP-001"
 )
 
 func main() {
@@ -230,7 +230,7 @@ func main() {
     manager := multisig.NewSignatureManager(keyProvider)
     
     // Define PoA with 3-of-5 threshold
-    poa := &rfc0111.PowerOfAttorney{
+    poa := &AAP-001.PowerOfAttorney{
         ID:        "poa-001",
         Threshold: 3,
         Signers:   []string{"alice", "bob", "carol", "dave", "eve"},
@@ -263,7 +263,7 @@ export AGENTAUTH_MULTI_SIG_WEIGHTS="CEO=5,CFO=3,CTO=2,COO=1"
 ```
 
 ```go
-poa := &rfc0111.PowerOfAttorney{
+poa := &AAP-001.PowerOfAttorney{
     ID:        "poa-weighted",
     Threshold: 7,  // Require cumulative weight >= 7
     Signers:   []string{"CEO", "CFO", "CTO", "COO"},
@@ -327,13 +327,13 @@ The underlying verification engine has extensive test coverage:
 
 ```bash
 # Multi-signature threshold tests
-go test ./pkg/rfc0111 -v -run=MultiSignature
+go test ./pkg/AAP-001 -v -run=MultiSignature
 
 # Weighted signature tests
-go test ./pkg/rfc0111 -v -run=Weighted
+go test ./pkg/AAP-001 -v -run=Weighted
 
 # Granular metrics tests
-go test ./pkg/rfc0111 -v -run=Granular
+go test ./pkg/AAP-001 -v -run=Granular
 ```
 
 ## Metrics & Observability
@@ -342,19 +342,19 @@ go test ./pkg/rfc0111 -v -run=Granular
 
 ```prometheus
 # Success counter
-agentauth_rfc0111_multi_signature_verifications_total
+agentauth_AAP-001_multi_signature_verifications_total
 
 # Failure counters (granular categorization)
-agentauth_rfc0111_multi_signature_verification_failures_total
-agentauth_rfc0111_multi_signature_structural_failures_total
-agentauth_rfc0111_multi_signature_digest_failures_total
-agentauth_rfc0111_multi_signature_public_key_missing_failures_total
-agentauth_rfc0111_multi_signature_invalid_signature_failures_total
-agentauth_rfc0111_multi_signature_threshold_failures_total
-agentauth_rfc0111_multi_signature_weight_failures_total
+agentauth_AAP-001_multi_signature_verification_failures_total
+agentauth_AAP-001_multi_signature_structural_failures_total
+agentauth_AAP-001_multi_signature_digest_failures_total
+agentauth_AAP-001_multi_signature_public_key_missing_failures_total
+agentauth_AAP-001_multi_signature_invalid_signature_failures_total
+agentauth_AAP-001_multi_signature_threshold_failures_total
+agentauth_AAP-001_multi_signature_weight_failures_total
 
 # Latency histogram
-agentauth_rfc0111_multi_signature_verification_latency_seconds
+agentauth_AAP-001_multi_signature_verification_latency_seconds
 ```
 
 ### Failure Taxonomy
@@ -456,10 +456,10 @@ http.HandleFunc("/api/v1/beta/poa/multisig/pending", api.HandleListPending)
 ## References
 
 - **ADR**: `docs/ADR-multi-signature-threshold-enforcement.md`
-- **Core Implementation**: `pkg/rfc0111/rfc0111.go` (lines 177-370)
+- **Core Implementation**: `pkg/AAP-001/AAP-001.go` (lines 177-370)
 - **Manager**: `internal/multisig/manager.go`
 - **REST API**: `internal/multisig/api.go`
-- **Tests**: `internal/multisig/manager_test.go`, `pkg/rfc0111/multi_signature_*.go`
+- **Tests**: `internal/multisig/manager_test.go`, `pkg/AAP-001/multi_signature_*.go`
 - **GAP_MATRIX**: `artifacts/gap_matrix.csv` (sec3.item3: Implemented)
 
 ## AAP-002 Compliance

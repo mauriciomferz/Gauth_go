@@ -256,7 +256,7 @@ func (a *SimpleAuthenticator) AuthorizePowerOfAttorney(ctx context.Context, req 
 }
 
 func (a *SimpleAuthenticator) CreateAdvancedDelegation(ctx context.Context, req DelegationRequest) (*DelegationResponse, error) {
-	// --- Minimal AAP-002 validation logic ---
+	// --- Minimal AAP002 validation logic ---
 	if req.PrincipalID == "" || req.DelegateID == "" {
 		return nil, fmt.Errorf("missing required principal or delegate ID")
 	}

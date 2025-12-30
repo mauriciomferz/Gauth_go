@@ -983,7 +983,7 @@ Demonstrates the combined functionality of AAP-001 and AAP-002 in a unified conf
   "success": true,
   "message": "Combined RFC configuration validated successfully",
   "combined_config": {
-    "rfc_0111": {
+    "rfc_AAP-001": {
       "pp_architecture": { /* AAP-001 configuration */ },
       "exclusions": { /* exclusions configuration */ },
       "extended_tokens": { /* token configuration */ },
@@ -993,7 +993,7 @@ Demonstrates the combined functionality of AAP-001 and AAP-002 in a unified conf
       "created_at": "2025-10-02T20:00:00Z",
       "updated_at": "2025-10-02T20:00:00Z"
     },
-    "rfc_0115": {
+    "rfc_AAP-002": {
       "parties": { /* party definitions */ },
       "authorization": { /* authorization scope */ },
       "requirements": { /* requirements structure */ },

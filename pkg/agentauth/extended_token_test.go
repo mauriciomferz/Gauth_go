@@ -7,7 +7,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
-// TestExtendedToken_Validate tests extended token validation per AAP-001 §3
+// TestExtendedToken_Validate tests extended token validation per AAP001 §3
 func TestExtendedToken_Validate(t *testing.T) {
 	now := time.Now()
 	futureTime := now.Add(365 * 24 * time.Hour)

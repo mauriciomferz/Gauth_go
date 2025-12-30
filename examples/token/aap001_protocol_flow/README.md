@@ -1,9 +1,9 @@
-# RFC111 Protocol Flow Example
+# AAP-001 Protocol Flow Example
 
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates a full RFC111-compliant token protocol flow using the AgentAuth token API. It covers owner proof, grant, attestation, revocation, and compliance checks.
+This example demonstrates a full AAP-001-compliant token protocol flow using the AgentAuth token API. It covers owner proof, grant, attestation, revocation, and compliance checks.
 
 ## Key Concepts
 - **Owner Proof**: Subject provides proof of control.
@@ -13,18 +13,18 @@ This example demonstrates a full RFC111-compliant token protocol flow using the 
 
 ## How to Run
 ```bash
-cd examples/token/rfc111_protocol_flow
+cd examples/token/AAP-001_protocol_flow
 go run main.go
 ```
 
 ## Code Review Notes
-- Code is idiomatic Go, modular, and demonstrates RFC111 protocol patterns.
+- Code is idiomatic Go, modular, and demonstrates AAP-001 protocol patterns.
 - All steps are clearly separated and easy to follow.
 - Inline comments added for Beta readability.
 
 ## Educational Comments
 - See `main.go` for the full protocol flow.
-- All major RFC111 patterns are demonstrated and tested.
+- All major AAP-001 patterns are demonstrated and tested.
 
 ---
 

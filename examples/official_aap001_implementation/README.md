@@ -12,7 +12,7 @@ refreshCadence: on-change
 > Status: Active
 
 > **⚠️ BETA DEMONSTRATION NOTICE**
-> This example reflects a **refactored, lean representation** of RFC‑0111 delegation concepts using the *current* exported `rfc0111` package API (delegation lifecycle + audit + in‑memory authz). It is **not production ready** and omits notarization workflows, policy engines, evidence retention, and formal identity assurance. See `DISCLAIMER.md` and `docs/DEPRECATION_TIMELINE.md`.
+> This example reflects a **refactored, lean representation** of RFC‑0111 delegation concepts using the *current* exported `AAP-001` package API (delegation lifecycle + audit + in‑memory authz). It is **not production ready** and omits notarization workflows, policy engines, evidence retention, and formal identity assurance. See `DISCLAIMER.md` and `docs/DEPRECATION_TIMELINE.md`.
 
 This directory previously showcased a large graph of deep RFC‑0111 domain structs (`AAP-001ResourceOwner`, `AAP-001Client`, `AAP-001ExtendedToken`, P*P architecture objects, etc.). Those types no longer exist in the simplified public API; the example now focuses on the **delegation (Power of Attorney) lifecycle**, which is the practical core for demonstrating authority transfer.
 
@@ -83,7 +83,7 @@ These exclusions are **strictly enforced** by the implementation and violation d
 ## Running the Demo
 
 ```bash
-cd examples/official_rfc0111_implementation
+cd examples/official_AAP-001_implementation
 go run main.go
 ```
 
@@ -111,8 +111,8 @@ authorizer.AddPolicy(authz.Policy{ // grantor can revoke any of its delegations
     Effect:   authz.Allow,
 })
 
-svc := rfc0111.NewService(audit.NewMemoryLogger(nil), authorizer)
-req := rfc0111.DelegationRequest{
+svc := AAP-001.NewService(audit.NewMemoryLogger(nil), authorizer)
+req := AAP-001.DelegationRequest{
     Grantor: "principal@example.com",
     Grantee: "agent@example.com",
     Scope:   []string{"transaction:execute"},
@@ -132,44 +132,44 @@ To successfully execute the full lifecycle (create → validate → revoke) you 
 | `revoke_delegation`  | `*` or POA ID  | Allows revocation of previously issued POA |
 
 If either policy is omitted you will receive an authorization error: `delegation not authorized: No matching policy found - default deny` or `revocation not authorized: No matching policy found - default deny`.
-    Type: rfc0111.AAP-001ClientTypeDigitalAgent,
-    Identity: rfc0111.AAP-001ClientIdentity{
+    Type: AAP-001.AAP-001ClientTypeDigitalAgent,
+    Identity: AAP-001.AAP-001ClientIdentity{
         AgentID: "agentauth-agent-v1.0",
-        TrustLevel: rfc0111.AAP-001TrustLevelStandard,
-        CertificationLevel: rfc0111.AAP-001CertificationStandard,
+        TrustLevel: AAP-001.AAP-001TrustLevelStandard,
+        CertificationLevel: AAP-001.AAP-001CertificationStandard,
     },
-    Capabilities: []rfc0111.AAP-001ClientCapability{
-        rfc0111.AAP-001CapabilityTransaction,
-        rfc0111.AAP-001CapabilityDecision,
-        rfc0111.AAP-001CapabilityAction,
+    Capabilities: []AAP-001.AAP-001ClientCapability{
+        AAP-001.AAP-001CapabilityTransaction,
+        AAP-001.AAP-001CapabilityDecision,
+        AAP-001.AAP-001CapabilityAction,
     },
 }
 ```
 
 ### 4. **Extended Token**
 ```go
-token := &rfc0111.AAP-001ExtendedToken{
-    Scope: rfc0111.AAP-001AuthorizationScope{
+token := &AAP-001.AAP-001ExtendedToken{
+    Scope: AAP-001.AAP-001AuthorizationScope{
         Resources:    []string{"commercial_registry", "corporate_documents"},
         Actions:      []string{"read", "verify", "audit"},
-        Geographic:   []rfc0111.AAP-001GeographicScope{{Type: "country", Identifier: "DE"}},
-        Temporal:     &rfc0111.AAP-001TemporalScope{...},
-        Monetary:     &rfc0111.AAP-001MonetaryScope{Currency: "EUR", MaxAmount: 10000.00},
+        Geographic:   []AAP-001.AAP-001GeographicScope{{Type: "country", Identifier: "DE"}},
+        Temporal:     &AAP-001.AAP-001TemporalScope{...},
+        Monetary:     &AAP-001.AAP-001MonetaryScope{Currency: "EUR", MaxAmount: 10000.00},
     },
 }
 ```
 
 ### 5. **P*P Architecture Components**
 ```go
-pdp := &rfc0111.AAP-001PowerDecisionPoint{
-    Owner: rfc0111.AAP-001ClientOwner{...},
-    Policies: []rfc0111.AAP-001AuthorizationPolicy{...},
+pdp := &AAP-001.AAP-001PowerDecisionPoint{
+    Owner: AAP-001.AAP-001ClientOwner{...},
+    Policies: []AAP-001.AAP-001AuthorizationPolicy{...},
 }
 
-pip := &rfc0111.AAP-001PowerInformationPoint{
-    DataSources: []rfc0111.AAP-001InformationSource{
-        {Type: rfc0111.AAP-001SourceTypeCommercialRegister, URL: "https://commercial-register.siegburg.de"},
-        {Type: rfc0111.AAP-001SourceTypeIdentityProvider, URL: "https://identity.example.com"},
+pip := &AAP-001.AAP-001PowerInformationPoint{
+    DataSources: []AAP-001.AAP-001InformationSource{
+        {Type: AAP-001.AAP-001SourceTypeCommercialRegister, URL: "https://commercial-register.siegburg.de"},
+        {Type: AAP-001.AAP-001SourceTypeIdentityProvider, URL: "https://identity.example.com"},
     },
 }
 ```
@@ -192,7 +192,7 @@ MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Da
 2. Core AAP-001 Authorization Framework:
 Resource Owner: AgentAuth Open Source Community (organization)
 AI Client: agentauth-agent-v1.0 (digital_agent)
-Extended Token: rfc0111-token-1738519234 (valid until 2025-10-03 16:13)
+Extended Token: AAP-001-token-1738519234 (valid until 2025-10-03 16:13)
 
 3. Power*Point (P*P) Architecture:
 Power Decision Point: agentauth-community-pdp (Owner: AgentAuth Open Source Community)
@@ -207,13 +207,13 @@ Power Verification Point: agentauth-community-pvp (Trust Service: AgentAuth Comm
 
 ## Running
 ```bash
-go run ./examples/official_rfc0111_implementation
+go run ./examples/official_AAP-001_implementation
 ```
 
 ## Testing
 After adding the lifecycle test (see forthcoming `main_test.go`):
 ```bash
-go test ./examples/official_rfc0111_implementation -v
+go test ./examples/official_AAP-001_implementation -v
 ```
 
 ### Focused Tests & Makefile Target
@@ -228,7 +228,7 @@ Two focused tests now exist:
 Run just these via the convenience target:
 
 ```bash
-make test-rfc0111-example
+make test-AAP-001-example
 ```
 
 ## Limitations & Future Expansion

@@ -1,18 +1,18 @@
 {
   "generated": "",
   "rfc": {
-    "0111": {
+    "AAP-001": {
       "sections": [
-        {"id": "0111:authz-combining", "title": "Combining Algorithms", "expected": ["deny_overrides", "permit_overrides", "first_applicable"], "tests": []},
-        {"id": "0111:jti-format", "title": "JTI Format Validation", "expected": ["uuidv4"], "tests": []},
-        {"id": "0111:replay-protection", "title": "Replay Protection", "expected": ["first-seen", "fail-open", "latency-metrics"], "tests": []}
+        {"id": "AAP-001:authz-combining", "title": "Combining Algorithms", "expected": ["deny_overrides", "permit_overrides", "first_applicable"], "tests": []},
+        {"id": "AAP-001:jti-format", "title": "JTI Format Validation", "expected": ["uuidv4"], "tests": []},
+        {"id": "AAP-001:replay-protection", "title": "Replay Protection", "expected": ["first-seen", "fail-open", "latency-metrics"], "tests": []}
       ]
     },
-    "0115": {
+    "AAP-002": {
       "sections": [
-        {"id": "0115:poa-structure", "title": "PoA Structural Fields", "expected": ["parties", "scope", "requirements"], "tests": []},
-        {"id": "0115:poa-semantic", "title": "Semantic Validation Rules", "expected": ["non-self-delegation", "transaction-currency", "temporal-invariants", "numeric-limits"], "tests": []},
-        {"id": "0115:canonical-digest", "title": "Canonical Digest Stability", "expected": ["stable-permutation", "domain-separation"], "tests": []}
+        {"id": "AAP-002:poa-structure", "title": "PoA Structural Fields", "expected": ["parties", "scope", "requirements"], "tests": []},
+        {"id": "AAP-002:poa-semantic", "title": "Semantic Validation Rules", "expected": ["non-self-delegation", "transaction-currency", "temporal-invariants", "numeric-limits"], "tests": []},
+        {"id": "AAP-002:canonical-digest", "title": "Canonical Digest Stability", "expected": ["stable-permutation", "domain-separation"], "tests": []}
       ]
     }
   }

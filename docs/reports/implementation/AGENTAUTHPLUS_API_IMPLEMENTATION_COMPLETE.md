@@ -58,7 +58,7 @@ Successfully implemented comprehensive HTTP API endpoints for all five AgentAuth
 
 2. **web/aap001_init.go**
    - Already contained `InitializeAgentAuthPlusEndpoints` method
-   - Services stored in `agentAuthPlusServicesGlobal` for endpoint registration
+   - Services stored in `AgentAuthPlusServicesGlobal` for endpoint registration
 
 ## API Endpoints Summary
 
