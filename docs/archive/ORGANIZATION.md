@@ -29,7 +29,7 @@ AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/
 │   ├── auth/             # Authentication primitives
 │   ├── authz/            # Authorization engine (memory + regex metrics)
 │   ├── audit/            # Hash‑chained audit logging
-│   ├── delegation/       # RFC0111 / RFC0115 delegation flows
+│   ├── delegation/       # AAP-001 / AAP-002 delegation flows
 │   ├── policy/           # Experimental provenance chain & evaluation adapter
 │   ├── token/            # Token issuance/validation/revocation
 │   ├── events/           # Typed event hub
@@ -64,7 +64,7 @@ AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/
 
 **Highlighted Demonstration Features:**
 - 🎯 Token lifecycle & revocation
-- 🎯 Delegation (RFC0111/RFC0115) flows
+- 🎯 Delegation (AAP-001/AAP-002) flows
 - 🎯 Hash‑chained audit logging & tamper detection
 - 🎯 Experimental policy chain & provenance
 - 🎯 Authorization metrics & regex caching

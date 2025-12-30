@@ -43,8 +43,8 @@ services:
     container_name: gauth-backend
     environment:
       # RFC-0111 Configuration
-      GAUTH_RFC0111_ENABLED: "1"
-      GAUTH_RFC0111_USE_MOCKS: "1"
+      GAUTH_AAP-001_ENABLED: "1"
+      GAUTH_AAP-001_USE_MOCKS: "1"
 
       # Database Configuration
       DB_HOST: postgres

@@ -206,7 +206,7 @@ func TestSubscriptionFlow(t *testing.T) {
 Full workflow testing:
 
 ```go
-func TestCompleteRFC0111Flow(t *testing.T) {
+func TestCompleteAAP-001Flow(t *testing.T) {
     // Setup mocks
     mocks := setupMockServices()
     

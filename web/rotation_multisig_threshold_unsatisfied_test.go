@@ -58,7 +58,7 @@ func TestRotationSummary_MultiSignatureThresholdUnsatisfied(t *testing.T) {
 	}
 	var errResp struct {
 		Code   string         `json:"code"`
-		RFC    string         `json:"rfc_ref"`
+		RFC    string         `json:/aap_ref"`
 		Detail map[string]any `json:"detail"`
 	}
 	if err := json.Unmarshal(w.Body.Bytes(), &errResp); err != nil {

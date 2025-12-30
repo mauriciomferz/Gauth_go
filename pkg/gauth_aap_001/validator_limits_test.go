@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // MockLimitStore implements LimitStore for testing
@@ -163,12 +163,12 @@ func TestFinancialLimits_MultiPeriod(t *testing.T) {
 				if err == nil {
 					t.Errorf("Expected error but got nil")
 				} else {
-					rfcErr, ok := err.(rfc.RFCError)
+				/aapErr, ok := err. aap.RFCError)
 					if !ok {
-						t.Errorf("Expected rfc.Error, got %T", err)
+						t.Errorf("Expected aap.Error, got %T", err)
 					}
 					if ok && len(tt.errorSubstr) > 0 {
-						if !strings.Contains(rfcErr.Error(), tt.errorSubstr) {
+						if !strings.Contains/aapErr.Error(), tt.errorSubstr) {
 							t.Errorf("Expected error containing %q, got %q", tt.errorSubstr, err.Error())
 						}
 					}
@@ -251,12 +251,12 @@ func TestFinancialLimits_CurrencyValidation(t *testing.T) {
 				if err == nil {
 					t.Errorf("Expected error but got nil")
 				} else {
-					rfcErr, ok := err.(rfc.RFCError)
+				/aapErr, ok := err. aap.RFCError)
 					if !ok {
-						t.Errorf("Expected rfc.Error, got %T", err)
+						t.Errorf("Expected aap.Error, got %T", err)
 					}
 					if ok && len(tt.errorSubstr) > 0 {
-						if !strings.Contains(rfcErr.Error(), tt.errorSubstr) {
+						if !strings.Contains/aapErr.Error(), tt.errorSubstr) {
 							t.Errorf("Expected error containing %q, got %q", tt.errorSubstr, err.Error())
 						}
 					}

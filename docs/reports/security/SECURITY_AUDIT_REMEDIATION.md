@@ -839,4 +839,4 @@ Date: November 21, 2025
 
 ---
 
-*For questions or security concerns, contact: security@gimel-foundation.org*
+*For questions or security concerns, contact: security@example.com.org*

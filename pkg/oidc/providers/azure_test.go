@@ -302,7 +302,7 @@ func TestAzureADProvider_MapClaims(t *testing.T) {
 
 	azureClaims := map[string]interface{}{
 		"oid":                "00000000-0000-0000-0000-000000000000",
-		"sub":                "AAAAAAAAAAAAAAAAAAAAAAAAAg",
+		"sub":                "aapAAAAAAAAAAAAAAAAAAAAAAAg",
 		"email":              "user@contoso.com",
 		"upn":                "user@contoso.com",
 		"name":               "John Doe",
@@ -320,7 +320,7 @@ func TestAzureADProvider_MapClaims(t *testing.T) {
 	// Verify mapped claims
 	expectedMappings := map[string]interface{}{
 		"user_id":            "00000000-0000-0000-0000-000000000000",
-		"subject":            "AAAAAAAAAAAAAAAAAAAAAAAAAg",
+		"subject":            "aapAAAAAAAAAAAAAAAAAAAAAAAg",
 		"email":              "user@contoso.com",
 		"username":           "user@contoso.com",
 		"full_name":          "John Doe",

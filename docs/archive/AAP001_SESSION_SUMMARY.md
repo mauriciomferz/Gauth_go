@@ -98,7 +98,7 @@ Updated `MockCommercialRegisterClient` to:
 
 ### 7. Comprehensive Documentation
 
-**File:** `RFC0111_API_GUIDE.md` (Updated with 2,000+ words)
+**File:** `AAP-001_API_GUIDE.md` (Updated with 2,000+ words)
 
 Added complete sections:
 
@@ -150,14 +150,14 @@ Added complete sections:
 | `web/server_clean.go` | +15 | Startup messages |
 | `pkg/gauth/mocks/external_services.go` | +20 | Enhanced mocks |
 | `scripts/test_rfc0111_subscription_flow.sh` | +342 | Integration test |
-| `RFC0111_API_GUIDE.md` | +800 | Complete documentation |
+| `AAP-001_API_GUIDE.md` | +800 | Complete documentation |
 | Total New/Modified Code | **~1,534 lines** | |
 
 ### Server Configuration
 
 **Environment Variable:**
 ```bash
-GAUTH_RFC0111_ENABLED=1
+GAUTH_AAP-001_ENABLED=1
 ```
 
 **Server Status:**
@@ -333,8 +333,8 @@ Total RFC-0111 Implementation:
 
 ### Updated Files
 
-1. **RFC0111_API_GUIDE.md** - Complete API reference
-2. **RFC0111_SESSION_SUMMARY.md** - This document
+1. **AAP-001_API_GUIDE.md** - Complete API reference
+2. **AAP-001_SESSION_SUMMARY.md** - This document
 3. **scripts/test_rfc0111_subscription_flow.sh** - Integration test
 
 ### New Sections Added

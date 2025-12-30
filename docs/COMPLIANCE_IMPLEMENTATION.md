@@ -397,9 +397,9 @@ Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
 ### Canonical Delegation Digest
 Deterministic JSON (stable key ordering, sorted scope & restriction keys, RFC3339 UTC timestamps) hashed with domain prefix:
 
-* `GAUTH_RFC0111_POA_V1` – Legacy single-signer (Version <3, Threshold=1)
-* `GAUTH_RFC0111_POA_V2|thr=<T>|w=<sorted-weight-map>` – Multi-signature / threshold mode (any Version) includes threshold + weights in prefix for domain separation
-* `GAUTH_RFC0111_POA_V3|tax=1` – Taxonomy expansion (Version >=3, non multi-sig) signals inclusion eligibility of optional taxonomy object without colliding with prior digests
+* `GAUTH_AAP-001_POA_V1` – Legacy single-signer (Version <3, Threshold=1)
+* `GAUTH_AAP-001_POA_V2|thr=<T>|w=<sorted-weight-map>` – Multi-signature / threshold mode (any Version) includes threshold + weights in prefix for domain separation
+* `GAUTH_AAP-001_POA_V3|tax=1` – Taxonomy expansion (Version >=3, non multi-sig) signals inclusion eligibility of optional taxonomy object without colliding with prior digests
 
 SHA-256(domain || canonicalJSON) in lowercase hex. Mutable operational fields are excluded. Taxonomy object serialized only when non-empty values present (agent_type, sector, action_class) to preserve minimal legacy size.
 

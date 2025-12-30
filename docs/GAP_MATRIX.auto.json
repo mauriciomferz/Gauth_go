@@ -118,7 +118,7 @@
       "evidence": "docs/GAP_MATRIX.md:24"
     },
     {
-      "section": "PoA Definition (RFC0115)",
+      "section": "PoA Definition (AAP-002)",
       "id": "sec3.item1",
       "requirement": "Full semantic validation",
       "status": "Partial",
@@ -127,7 +127,7 @@
       "evidence": "docs/GAP_MATRIX.md:32|pkg/rfc0111/validator.go|pkg/rfc0111/rfc0111.go"
     },
     {
-      "section": "PoA Definition (RFC0115)",
+      "section": "PoA Definition (AAP-002)",
       "id": "sec3.item2",
       "requirement": "Embed full PoA in token",
       "status": "Partial",
@@ -136,7 +136,7 @@
       "evidence": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go|internal/metrics/metrics.go"
     },
     {
-      "section": "PoA Definition (RFC0115)",
+      "section": "PoA Definition (AAP-002)",
       "id": "sec3.item3",
       "requirement": "Joint/collective signature enforcement",
       "status": "Missing",
@@ -145,7 +145,7 @@
       "evidence": "docs/GAP_MATRIX.md:33"
     },
     {
-      "section": "PoA Definition (RFC0115)",
+      "section": "PoA Definition (AAP-002)",
       "id": "sec3.item4",
       "requirement": "Conditional/special conditions evaluation",
       "status": "Missing",

@@ -16,7 +16,7 @@ refreshCadence: quarterly
 
 ## Overview
 
-AgentAuth implements RFC0115-compliant JWKS integrity mechanisms to protect key distribution and provide structured key lifecycle signals to clients. This includes:
+AgentAuth implements AAP-002-compliant JWKS integrity mechanisms to protect key distribution and provide structured key lifecycle signals to clients. This includes:
 
 1. **Integrity Signatures**: Optional HMAC-SHA256 signatures on JWKS responses (X-JWKS-Signature header)
 2. **Deprecation Metadata**: Structured key lifecycle timestamps (`deprecated_after`, `sunset_after`)
@@ -39,13 +39,13 @@ Sunset / Expiration (100% of TTL)      ← sunset_after timestamp
 
 ### Deprecation Timestamps
 
-**DeprecatedAfter** (RFC0115 §6.2.1 "Key Deprecation Warning"):
+**DeprecatedAfter** (AAP-002 §6.2.1 "Key Deprecation Warning"):
 - Signals clients to begin rotating to newer keys
 - Computed as `CreatedAt + (TTL * 0.8)` (80% of key lifetime)
 - Keys remain valid for verification but should not be used for new signatures
 - Included in JWKS response as `deprecated_after` (RFC3339 format)
 
-**SunsetAfter** (RFC0115 §6.2.2 "Key Sunset"):
+**SunsetAfter** (AAP-002 §6.2.2 "Key Sunset"):
 - Hard cutoff timestamp when key expires
 - Equals `ExpiresAt` (100% of key lifetime)
 - Included in JWKS response as `sunset_after` (RFC3339 format)

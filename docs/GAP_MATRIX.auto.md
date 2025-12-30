@@ -47,7 +47,7 @@ Schema Version: 1
 | sec2.item4 | Policy versioning & rollback | Missing | P1 | No version metadata | docs/GAP_MATRIX.md:23 |
 | sec2.item5 | Distributed PDP & caching | Missing | P2 | No clustering or cache invalidation | docs/GAP_MATRIX.md:24 |
 
-## PoA Definition (RFC0115)
+## PoA Definition (AAP-002)
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|

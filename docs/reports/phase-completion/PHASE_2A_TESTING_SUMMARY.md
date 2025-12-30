@@ -131,7 +131,7 @@ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 ### Backend (Port 8080)
 ```bash
 # Running with RFC-0111 enabled
-GAUTH_RFC0111_ENABLED=1 GAUTH_RFC0111_USE_MOCKS=1 go run ./cmd/web-server
+GAUTH_AAP-001_ENABLED=1 GAUTH_AAP-001_USE_MOCKS=1 go run ./cmd/web-server
 
 # Health check
 curl http://localhost:8080/api/v1/beta/health

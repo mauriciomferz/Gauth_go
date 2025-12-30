@@ -1,6 +1,6 @@
 // poa_advanced_example.go
-// Title: Advanced POA (RFC 111) Scenarios
-// Description: Demonstrates negative and positive cases for RFC 111 Power of Attorney validation, including invalid jurisdiction, disallowed scope, missing fields, and a valid advanced POA.
+// Title: Advanced POA (AAP-001) Scenarios
+// Description: Demonstrates negative and positive cases for AAP-001 Power of Attorney validation, including invalid jurisdiction, disallowed scope, missing fields, and a valid advanced POA.
 
 package main
 
@@ -11,7 +11,7 @@ import (
 	auth "github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
-// Advanced RFC 111 Power of Attorney (POA) scenario demonstrating negative cases and compliance checks.
+// Advanced AAP-001 Power of Attorney (POA) scenario demonstrating negative cases and compliance checks.
 
 //nolint:unused // Example function for documentation purposes
 func runAdvancedPOAExample() {

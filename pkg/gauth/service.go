@@ -326,7 +326,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 	}
 
 	// Convert TokenRequest to RFCCompliantAuthorizationRequest
-	rfcReq := &RFCCompliantAuthorizationRequest{
+	aapReq := &RFCCompliantAuthorizationRequest{
 		ClientID:             g.config.ClientID,
 		SubscriptionID:       req.GrantID, // Use GrantID as subscription reference
 		RequestedScope:       convertScopeToAuthorizationScope(req.Scope),
@@ -335,7 +335,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 	}
 
 	// Execute RFC-0111 compliant flow
-	rfcResp, err := g.RequestTokenRFC(ctx, rfcReq)
+	aapResp, err := g.RequestTokenRFC(ctx, aapReq)
 	if err != nil {
 		// If RFC flow fails, log and fallback to legacy
 		// In production, you may want to return the error instead
@@ -343,7 +343,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 	}
 
 	// Convert RFCCompliantTokenResponse to TokenResponse
-	return convertRFCResponseToTokenResponse(rfcResp), nil
+	return convertRFCResponseToTokenResponse(aapResp), nil
 }
 
 // RequestTokenLegacy generates a basic OAuth token (non-RFC-0111 compliant)
@@ -685,12 +685,12 @@ func convertContextToMap(ctx interface{}) map[string]interface{} {
 }
 
 // convertRFCResponseToTokenResponse converts RFC response to legacy TokenResponse
-func convertRFCResponseToTokenResponse(rfcResp *RFCCompliantTokenResponse) *TokenResponse {
-	if rfcResp == nil || rfcResp.ExtendedToken == nil {
+func convertRFCResponseToTokenResponse(aapResp *RFCCompliantTokenResponse) *TokenResponse {
+	if aapResp == nil || aapResp.ExtendedToken == nil {
 		return &TokenResponse{}
 	}
 
-	token := rfcResp.ExtendedToken
+	token := aapResp.ExtendedToken
 	expiry := token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second)
 
 	return &TokenResponse{

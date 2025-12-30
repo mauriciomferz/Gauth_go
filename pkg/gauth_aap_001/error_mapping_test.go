@@ -7,7 +7,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // helper to build service with allow policy
@@ -22,12 +22,12 @@ func newDelegation(s *Service, dur time.Duration) (*DelegationResponse, error) {
 	return s.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"transaction:pay", "read"}, Duration: dur, Restrictions: map[string]string{"max_amount": "50"}})
 }
 
-func expectCode(t *testing.T, err error, code rfc.ErrorCode) {
+func expectCode(t *testing.T, err error, code aap.ErrorCode) {
 	t.Helper()
 	if err == nil {
 		t.Fatalf("expected error code %s got nil", code)
 	}
-	rerr, ok := err.(rfc.RFCError)
+	rerr, ok := err. aap.RFCError)
 	if !ok {
 		t.Fatalf("expected RFCError got %T", err)
 	}
@@ -45,17 +45,17 @@ func TestErrorMapping(t *testing.T) {
 		t.Fatalf("delegation create: %v", err)
 	}
 	err = svc.ValidateDelegationCtx(context.Background(), dr.POA.ID, "bob", "admin:delete")
-	expectCode(t, err, rfc.ErrScopeViolation)
+	expectCode(t, err, aap.ErrScopeViolation)
 
 	// 2. Restriction exceeded
 	ctx := WithRequestedAmount(context.Background(), "75")
 	err = svc.ValidateDelegationCtx(ctx, dr.POA.ID, "bob", "transaction:pay")
-	expectCode(t, err, rfc.ErrRestrictionExceeded)
+	expectCode(t, err, aap.ErrRestrictionExceeded)
 
 	// 3. Expired
 	svc.WithClock(func() time.Time { return time.Now().Add(10 * time.Minute) })
 	err = svc.ValidateDelegationCtx(context.Background(), dr.POA.ID, "bob", "read")
-	expectCode(t, err, rfc.ErrExpired)
+	expectCode(t, err, aap.ErrExpired)
 
 	// 4. Revoked
 	// Need fresh delegation (not expired) then revoke.
@@ -71,5 +71,5 @@ func TestErrorMapping(t *testing.T) {
 		t.Fatalf("revoke: %v", err2)
 	}
 	err = svc.ValidateDelegationCtx(context.Background(), dr2.POA.ID, "bob", "read")
-	expectCode(t, err, rfc.ErrRevoked)
+	expectCode(t, err, aap.ErrRevoked)
 }

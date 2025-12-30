@@ -19,7 +19,7 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	// Construct server with provided metrics adapter so initial attempted (and failing) anchor uses Prometheus.
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })

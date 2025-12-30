@@ -11,7 +11,7 @@ echo ""
 # Set minimal required environment variables
 export GAUTH_JWT_SIGNING_KEY="test-integration-key-$(date +%s)"
 export GAUTH_DEV_INDEX="1"
-export GAUTH_RFC0111_ENABLED="1"
+export GAUTH_AAP-001_ENABLED="1"
 export GAUTH_USE_JWT_LIB="1"
 
 echo "✅ Environment configured"

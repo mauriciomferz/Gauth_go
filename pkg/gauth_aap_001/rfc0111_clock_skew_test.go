@@ -8,7 +8,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	rfc "github.com/mauriciomferz/AgentAuth/pkg/rfc"
+"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // TestClockSkewTolerance validates not-before and expiry grace window behavior controlled by GAUTH_CLOCK_SKEW_SECONDS.
@@ -34,7 +34,7 @@ func TestClockSkewTolerance(t *testing.T) {
 	}
 	if err := svc.ValidateDelegationRich(context.Background(), poaOutside.ID, "bob", ValidationContext{Action: "read"}); err == nil {
 		t.Fatalf("expected failure for not-yet-valid delegation outside skew tolerance")
-	} else if e, ok := err.(rfc.RFCError); !ok || e.Code != rfc.ErrInvalidRequest {
+	} else if e, ok := err. aap.RFCError); !ok || e.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request code for not-yet-valid, got: %v", err)
 	}
 
@@ -54,7 +54,7 @@ func TestClockSkewTolerance(t *testing.T) {
 	}
 	if err := svc.ValidateDelegationRich(context.Background(), poaExpired.ID, "bob", ValidationContext{Action: "read"}); err == nil {
 		t.Fatalf("expected failure for expired delegation outside skew tolerance")
-	} else if e, ok := err.(rfc.RFCError); !ok || e.Code != rfc.ErrExpired {
+	} else if e, ok := err. aap.RFCError); !ok || e.Code != aap.ErrExpired {
 		t.Fatalf("expected expired code, got: %v", err)
 	}
 }

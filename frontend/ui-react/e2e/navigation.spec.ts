@@ -27,8 +27,8 @@ test.describe('Navigation and Common Elements', () => {
     for (const url of pages) {
       await page.goto(url)
       await page.waitForSelector('#root > *', { state: 'attached', timeout: 10000 })
-      // Header has "GAuth 1.0" heading - use getByRole('banner') to target header specifically
-      await expect(page.getByRole('banner').getByRole('heading', { name: /GAuth 1\.0/i })).toBeVisible()
+      // Header has "AgentAuth 1.0" heading - use getByRole('banner') to target header specifically
+      await expect(page.getByRole('banner').getByRole('heading', { name: /AgentAuth 1\.0/i })).toBeVisible()
     }
   })
 
@@ -73,6 +73,6 @@ test.describe('Navigation and Common Elements', () => {
     await page.goto('/')
     
     // Even if backend is down, page should still render
-    await expect(page.getByRole('heading', { name: /Welcome to GAuth/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Welcome to AgentAuth/i })).toBeVisible()
   })
 })

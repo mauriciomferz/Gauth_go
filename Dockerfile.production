@@ -1,4 +1,4 @@
-# Production Dockerfile for GAuth Web Server
+# Production Dockerfile for AgentAuth Web Server
 # Multi-stage build supporting CGO dependencies (BLS library)
 # Target: linux/amd64 for Kubernetes deployment
 
@@ -33,7 +33,7 @@ COPY . .
 
 # Build the web-server binary with CGO enabled for BLS support
 # Target linux/amd64 for Kubernetes compatibility
-RUN echo "=== Building GAuth web-server with CGO support ===" && \
+RUN echo "=== Building AgentAuth web-server with CGO support ===" && \
     CGO_ENABLED=1 \
     go build -v \
     -ldflags="-w -s" \

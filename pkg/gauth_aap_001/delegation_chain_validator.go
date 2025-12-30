@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
-	rfc "github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // DelegationChainValidator provides validation for transitive (multi-hop) delegation chains.
@@ -199,7 +199,7 @@ func (v *DelegationChainValidator) ValidateChainForAction(ctx context.Context, l
 	// First validate chain structure
 	chainResult, err := v.ValidateChain(ctx, leafPOA, sessionUser)
 	if err != nil {
-		return rfc.New(rfc.ErrInternal, fmt.Sprintf("chain validation failed: %v", err))
+		return aap.New(aap.ErrInternal, fmt.Sprintf("chain validation failed: %v", err))
 	}
 
 	if !chainResult.Valid {
@@ -207,7 +207,7 @@ func (v *DelegationChainValidator) ValidateChainForAction(ctx context.Context, l
 		if len(chainResult.Errors) > 0 {
 			errorMsg = chainResult.Errors[0] // Return first error
 		}
-		return rfc.New(rfc.ErrUnauthorized, errorMsg)
+		return aap.New(aap.ErrUnauthorized, errorMsg)
 	}
 
 	// Then check if action is in leaf PoA's scope
@@ -215,7 +215,7 @@ func (v *DelegationChainValidator) ValidateChainForAction(ctx context.Context, l
 		if v.metrics != nil {
 			v.metrics.IncScopeViolations()
 		}
-		return rfc.New(rfc.ErrScopeViolation, fmt.Sprintf("action %s not in delegation scope", action))
+		return aap.New(aap.ErrScopeViolation, fmt.Sprintf("action %s not in delegation scope", action))
 	}
 
 	return nil

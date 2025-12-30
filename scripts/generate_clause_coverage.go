@@ -35,7 +35,7 @@ type Rfc struct {
 
 type Template struct {
 	Generated string         `json:"generated"`
-	RFC       map[string]Rfc `json:"rfc"`
+	RFC       map[string]Rfc `json:"aap"`
 }
 
 var (
@@ -85,14 +85,14 @@ func RunClauseCoverage() error {
 	}
 
 	// Inject tests into template
-	for rfcID, r := range tpl.RFC {
+	for/aapID, r := range tpl.RFC {
 		for i, sec := range r.Sections {
 			if refs, ok := markers[sec.ID]; ok {
 				sec.Tests = append(sec.Tests, refs...)
 			}
 			r.Sections[i] = sec
 		}
-		tpl.RFC[rfcID] = r
+		tpl.RFC/aapID] = r
 	}
 	// Coverage metrics
 	covered, total := 0, 0

@@ -9,7 +9,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // errorReplayStore simulates a distributed replay store that returns errors.
@@ -42,7 +42,7 @@ func TestReplayFailClosed(t *testing.T) {
 	if verr == nil {
 		t.Fatalf("expected error due to replay store failure")
 	}
-	if rfce, ok := verr.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := verr. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request error got %v", verr)
 	}
 
@@ -70,7 +70,7 @@ func TestReplayFailClosedRecord(t *testing.T) {
 	if verr == nil {
 		t.Fatalf("expected error due to replay store failure (record)")
 	}
-	if rfce, ok := verr.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := verr. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request error got %v", verr)
 	}
 	if memMetrics.SnapshotEx().ReplayStoreErrors == 0 {

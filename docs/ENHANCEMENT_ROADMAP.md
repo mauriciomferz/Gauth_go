@@ -32,7 +32,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 6. ✅ **Phase 2A: Backend API Integration (100%)** ← JUST COMPLETED
    - ✅ 11 backend endpoints implemented and tested
    - ✅ All UI mocks replaced with real backend
-   - ✅ Server requires `GAUTH_RFC0111_ENABLED=1` flag
+   - ✅ Server requires `GAUTH_AAP-001_ENABLED=1` flag
 
 ---
 
@@ -52,7 +52,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 - ✅ All UI pages integrated with real backend
 - ✅ 0 UI mocks remaining
 - ✅ Comprehensive documentation (3 new docs)
-- ✅ Server configuration documented (`GAUTH_RFC0111_ENABLED=1` required)
+- ✅ Server configuration documented (`GAUTH_AAP-001_ENABLED=1` required)
 
 **Key Documents**:
 - [Completion Report](PHASE_2A_BACKEND_COMPLETION_REPORT.md)

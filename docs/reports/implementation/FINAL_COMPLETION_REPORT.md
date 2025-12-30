@@ -174,7 +174,7 @@ export DB_HEALTH_CHECK_SEC="60"      # Default: 60 seconds
 
 # Development Mode (Optional)
 export GAUTH_DEV_INDEX="1"
-export GAUTH_RFC0111_ENABLED="1"
+export GAUTH_AAP-001_ENABLED="1"
 export GAUTH_USE_JWT_LIB="1"
 ```
 

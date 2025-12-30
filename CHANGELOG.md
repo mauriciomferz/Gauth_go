@@ -200,7 +200,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 - Prometheus recording & alert rules scaffold (`deployments/observability/recording-rules-envelopes.yaml`) providing adoption smoothing, mismatch ratio, readiness composite, regression & spike alerts, and sunset readiness alert.
 
 ### Changed (Governance Docs)
-- `RFC0111_0115_remediation_plan.md` updated: new epic for Envelope V1 Sunset Execution; success metrics extended with adoption & mismatch criteria.
+- `AAP-001_0115_remediation_plan.md` updated: new epic for Envelope V1 Sunset Execution; success metrics extended with adoption & mismatch criteria.
 
 ### Added (Cadence & Phase Instrumentation)
 - Issuance cadence histogram (`gauth_rfc0111_envelope_issuance_cadence_seconds`) recording inter-issuance intervals.

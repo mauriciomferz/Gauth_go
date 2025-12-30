@@ -56,7 +56,7 @@ The `pkg/rfc0111` package is a **Power of Attorney (PoA) validation framework** 
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ RFC0111 SERVICE (THIS REPOSITORY)                          │
+│ AAP-001 SERVICE (THIS REPOSITORY)                          │
 │                                                             │
 │ Validates:                                                  │
 │ ✅ Bob is the grantee (line 3056: grantee binding)        │
@@ -100,7 +100,7 @@ The `pkg/rfc0111` package is a **Power of Attorney (PoA) validation framework** 
 
 **Example Integration:**
 ```go
-// Payment API Service (integrates RFC0111)
+// Payment API Service (integrates AAP-001)
 func (api *PaymentAPI) ProcessPayment(ctx context.Context, req PaymentRequest) error {
     // EVERY payment validates against PoA constraints
     vctx := rfc0111.ValidationContext{
@@ -506,7 +506,7 @@ func InsecureMiddleware(next http.Handler) http.Handler {
 
 **This is a FRAMEWORK, not a complete application.**
 
-**RFC0111 Service Responsibility:**
+**AAP-001 Service Responsibility:**
 - ✅ Validate `poa.Grantee == sessionUser`
 - ✅ Check PoA constraints
 - ✅ Check revocation status
@@ -522,7 +522,7 @@ The integration guide SHOULD explicitly state:
 ```markdown
 ## Security Requirements for Integrators
 
-⚠️ **CRITICAL**: The RFC0111 service trusts the `ctxKeySubject` value
+⚠️ **CRITICAL**: The AAP-001 service trusts the `ctxKeySubject` value
 provided in the context. Integrators MUST:
 
 1. ✅ Authenticate users cryptographically (mTLS, DPoP, OAuth2)

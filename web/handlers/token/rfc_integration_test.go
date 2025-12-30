@@ -78,7 +78,7 @@ func TestRFC9396_CreateToken_RAR(t *testing.T) {
 	// Expectation
 	// We use MatchedBy because Context map comparison can be tricky with nil/interface{}
 	expectedResp := &gauth.TokenResponse{
-		Token:      "mock_rfc_token",
+		Token:      "mock/aap_token",
 		Scope:      []string{"payment"},
 		ValidUntil: time.Now().Add(1 * time.Hour),
 	}
@@ -107,7 +107,7 @@ func TestRFC9396_CreateToken_RAR(t *testing.T) {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
-	assert.Equal(t, "mock_rfc_token", respBody["access_token"])
+	assert.Equal(t, "mock/aap_token", respBody["access_token"])
 	assert.Equal(t, true, respBody["success"])
 	assert.Equal(t, "Bearer", respBody["token_type"])
 

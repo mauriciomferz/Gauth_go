@@ -36,7 +36,7 @@ type revocationInclusionArtifact struct {
 			Signature string `json:"signature"`
 		} `json:"signatures"`
 	} `json:"signed_tree_head"`
-	RFCRefs []string `json:"rfc_refs"`
+	RFCRefs []string `json:/aap_refs"`
 }
 
 // TestExampleRevocationInclusionArtifactConsistency validates structural consistency
@@ -74,7 +74,7 @@ func TestExampleRevocationInclusionArtifactConsistency(t *testing.T) {
 		t.Fatalf("expected at least one signature")
 	}
 	if len(art.RFCRefs) == 0 {
-		t.Fatalf("expected rfc_refs to be present")
+		t.Fatalf("expected/aap_refs to be present")
 	}
 	// Ensure placeholder siblings are present but we don't enforce count beyond non-empty.
 	if len(art.MerkleProof.Siblings) == 0 {

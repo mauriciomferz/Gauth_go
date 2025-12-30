@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // Delegation status constants
@@ -89,7 +89,7 @@ func (c *Chain) Append(d Delegation) (Delegation, error) {
 	if md := currentMaxDelegationDepth(); md > 0 {
 		newDepth := int64(len(c.items) + 1) // depth defined as number of chain entries after append
 		if newDepth > md {
-			return Delegation{}, rfc.New(rfc.ErrDelegationDepthExceeded, fmt.Sprintf("delegation depth %d exceeds max %d", newDepth, md))
+			return Delegation{}, aap.New(aap.ErrDelegationDepthExceeded, fmt.Sprintf("delegation depth %d exceeds max %d", newDepth, md))
 		}
 	}
 	if len(c.items) > 0 {
@@ -116,7 +116,7 @@ func (c *Chain) AppendWithMetrics(d Delegation, m metrics.Metrics) (Delegation, 
 			if m != nil {
 				m.IncDelegationDepthExceeded()
 			}
-			return Delegation{}, rfc.New(rfc.ErrDelegationDepthExceeded, fmt.Sprintf("delegation depth %d exceeds max %d", newDepth, md))
+			return Delegation{}, aap.New(aap.ErrDelegationDepthExceeded, fmt.Sprintf("delegation depth %d exceeds max %d", newDepth, md))
 		}
 	}
 	if len(c.items) > 0 {

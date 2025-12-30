@@ -73,7 +73,7 @@ docker run -d \
   -e REDIS_PORT=6379 \
   -e PORT=8080 \
   -e GIN_MODE=release \
-  -e GAUTH_RFC0111_ENABLED=1 \
+  -e GAUTH_AAP-001_ENABLED=1 \
   -e GAUTH_METRICS_ENABLED=true \
   -e GAUTH_LOG_LEVEL=info \
   -e AUDIT_EXPORT_DIR=/tmp/gauth-audit-exports \

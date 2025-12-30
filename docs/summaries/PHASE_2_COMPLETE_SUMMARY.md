@@ -78,7 +78,7 @@ Improve `pkg/poa` test coverage from baseline to 75%+
 | Session | Focus Area | Lines | Coverage Change | Key Achievement |
 |---------|------------|-------|-----------------|-----------------|
 | 28 | MemoryService | 782 | 19.3% → 23.3% (+4.0pp) | CRUD operations 100% |
-| 29 | RFC0115 compliance | 745 | 23.3% → 25.3% (+2.0pp) | Compliance validation |
+| 29 | AAP-002 compliance | 745 | 23.3% → 25.3% (+2.0pp) | Compliance validation |
 | 30 | Issue & helpers | 803 | 25.3% → 26.3% (+1.0pp) | Issue function tested |
 | 31 | Raw POA stream | 498 | 26.3% → 46.3% (+20.0pp) | **LARGEST GAIN!** |
 | 32 | Edge cases | 458 | 46.3% → 46.5% (+0.2pp) | Multi-sig verification |
@@ -111,7 +111,7 @@ Improve `pkg/poa` test coverage from baseline to 75%+
 #### 1. Major Functions Well-Tested
 | Function | Coverage | Status |
 |----------|----------|--------|
-| ValidateRFC0115Compliance | 96.6% | ✅ Excellent |
+| ValidateAAP-002Compliance | 96.6% | ✅ Excellent |
 | VerifyMultiSig | 95.0% | ✅ Excellent |
 | marshalCBORItem | 92.6% | ✅ Excellent |
 | Issue | 89.5% | ✅ Very Good |
@@ -341,12 +341,12 @@ Start   | 19.3%    | -      | -
 
 Phase 2B Commits:
 1. aa866887 - Session 28: MemoryService tests
-2. 52b65c0f - Session 29: RFC0115 compliance tests
+2. 52b65c0f - Session 29: AAP-002 compliance tests
 3. ea37fec4 - Session 30: Issue and helpers tests
 4. 78d67ed9 - Session 31: Raw POA stream tests (+20pp!)
 5. 740c97f4 - Session 32: Edge cases tests
 6. a402d03e - Session 33: Expanded stream tests
-7. d11db53e - Session 34: ValidateRFC0115Compliance edges
+7. d11db53e - Session 34: ValidateAAP-002Compliance edges
 8. e8d354a8 - Session 36: Additional edge cases
 
 ### C. Test File Sizes

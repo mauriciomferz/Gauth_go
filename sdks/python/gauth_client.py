@@ -1,11 +1,11 @@
 """
-GAuth Python SDK
+AgentAuth Python SDK
 
-Official Python client library for the GAuth OAuth 2.0 Authorization Server.
+Official Python client library for the AgentAuth OAuth 2.0 Authorization Server.
 Supports RFC-0111 subscription flow, Power of Attorney, and more.
 
 Version: 1.0.0-beta
-Author: GAuth Team
+Author: AgentAuth Team
 License: MIT
 """
 
@@ -66,8 +66,8 @@ class Token:
 # Exceptions
 # ============================================================================
 
-class GAuthError(Exception):
-    """Base exception for GAuth SDK"""
+class AgentAuthError(Exception):
+    """Base exception for AgentAuth SDK"""
     
     def __init__(self, error: str, error_description: str, 
                  error_uri: Optional[str] = None, timestamp: Optional[str] = None):
@@ -78,8 +78,8 @@ class GAuthError(Exception):
         super().__init__(f"{error}: {error_description}")
 
 
-class GAuthHTTPError(GAuthError):
-    """HTTP error from GAuth API"""
+class AgentAuthHTTPError(AgentAuthError):
+    """HTTP error from AgentAuth API"""
     
     def __init__(self, response: requests.Response):
         try:
@@ -103,12 +103,12 @@ class GAuthHTTPError(GAuthError):
 # Main Client Class
 # ============================================================================
 
-class GAuthClient:
+class AgentAuthClient:
     """
-    GAuth API Client
+    AgentAuth API Client
     
     Example usage:
-        >>> client = GAuthClient(base_url='http://localhost:8080')
+        >>> client = AgentAuthClient(base_url='http://localhost:8080')
         >>> # Complete RFC-0111 subscription flow
         >>> result = client.complete_subscription_flow(
         ...     client_id='my-app',
@@ -128,10 +128,10 @@ class GAuthClient:
     def __init__(self, base_url: str, api_key: Optional[str] = None, 
                  access_token: Optional[str] = None, timeout: int = 30):
         """
-        Initialize GAuth client
+        Initialize AgentAuth client
         
         Args:
-            base_url: Base URL of the GAuth API (e.g., 'http://localhost:8080')
+            base_url: Base URL of the AgentAuth API (e.g., 'http://localhost:8080')
             api_key: API key for authentication (optional)
             access_token: OAuth 2.0 access token (optional)
             timeout: Request timeout in seconds (default: 30)
@@ -166,7 +166,7 @@ class GAuthClient:
         return headers
     
     def _request(self, method: str, path: str, **kwargs) -> Any:
-        """Make HTTP request to GAuth API"""
+        """Make HTTP request to AgentAuth API"""
         url = f"{self.base_url}{path}"
         headers = self._get_headers()
         headers.update(kwargs.pop('headers', {}))
@@ -182,9 +182,9 @@ class GAuthClient:
             response.raise_for_status()
             return response.json()
         except requests.HTTPError:
-            raise GAuthHTTPError(response)
+            raise AgentAuthHTTPError(response)
         except requests.RequestException as e:
-            raise GAuthError('request_failed', str(e))
+            raise AgentAuthError('request_failed', str(e))
     
     # ========================================================================
     # RFC-0111 Subscription Flow Methods
@@ -514,12 +514,12 @@ class GAuthClient:
 # Convenience Functions
 # ============================================================================
 
-def create_client(base_url: str = 'http://localhost:8080', **kwargs) -> GAuthClient:
+def create_client(base_url: str = 'http://localhost:8080', **kwargs) -> AgentAuthClient:
     """
-    Create a GAuth client with default settings
+    Create a AgentAuth client with default settings
     
     Example:
         >>> client = create_client()
         >>> client.health()
     """
-    return GAuthClient(base_url=base_url, **kwargs)
+    return AgentAuthClient(base_url=base_url, **kwargs)

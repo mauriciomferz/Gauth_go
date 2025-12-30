@@ -93,7 +93,7 @@ owners: [system]
 ```bash
 GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
 GAUTH_DEV_INDEX=1
-GAUTH_RFC0111_ENABLED=1
+GAUTH_AAP-001_ENABLED=1
 GAUTH_USE_JWT_LIB=1
 DB_HOST=localhost
 DB_PORT=5432
@@ -109,7 +109,7 @@ DB_SSLMODE=disable
 ```bash
 # Backend
 GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
-GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 GAUTH_USE_JWT_LIB=1 \
+GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 GAUTH_USE_JWT_LIB=1 \
 DB_HOST=localhost DB_PORT=5432 DB_USER=postgres \
 DB_PASSWORD=gauth_dev_password DB_NAME=gauth DB_SSLMODE=disable \
 go run ./cmd/web-server

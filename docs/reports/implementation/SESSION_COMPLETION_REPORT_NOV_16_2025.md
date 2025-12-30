@@ -491,7 +491,7 @@ export GAUTH_DB_NAME=gauth
 export GAUTH_DB_USER=postgres
 export GAUTH_DB_PASSWORD=your_password
 export GAUTH_MCP_ENABLED=1
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 
 # 5. Build and run
 go build ./cmd/web-server

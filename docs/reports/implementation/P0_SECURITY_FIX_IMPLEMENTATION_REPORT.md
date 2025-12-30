@@ -466,7 +466,7 @@ As outlined in SECURITY_AUDIT_CRITICAL_REVIEW.md:
 ## Contact
 
 **Security Issues:**
-- Email: security@gimel.foundation
+- Email: security@example.com
 - Report: See [SECURITY.md](../SECURITY.md)
 - Reference: CV-2025-005
 

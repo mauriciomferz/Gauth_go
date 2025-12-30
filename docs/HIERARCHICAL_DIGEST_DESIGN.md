@@ -192,7 +192,7 @@ Generated: 2025-10-30
 Implemented (Phase 1):
 * Env flags wired: `GAUTH_ENABLE_HIER_DIGEST`, `GAUTH_FORCE_HIER_DIGEST`.
 * Structural field `parent_digest` added to PoA; canonical JSON emits hierarchy object for Version>=4.
-* V4 domain sentinel: `GAUTH_RFC0111_POA_V4|hier=1`.
+* V4 domain sentinel: `GAUTH_AAP-001_POA_V4|hier=1`.
 * **Metrics fully implemented**: Dedicated Prometheus counters with proper registration (`hierDigestIssued`, `hierDigestParentDigestMissing`, `hierDigestVersionMismatch`) in both in-memory and Prometheus adapter implementations.
 * Unit tests: root & child issuance (Version=4), disabled flag path retains Version<4, parent digest tamper changes canonical digest.
 

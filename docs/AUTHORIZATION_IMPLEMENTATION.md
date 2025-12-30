@@ -18,7 +18,7 @@ Implemented (this branch):
 - Role-based matching via `Policy.Roles` (context key `roles`).
 - Required scope enforcement via `Policy.RequiredScopes` against context `scopes` list.
 - Advanced ABAC operators: `equals`, `not_equals`, `in`, `contains`, `prefix`, `suffix`.
-- Revocation chain (`RevocationChain`) for delegation/POA revocations (tamper-evident hash linkage) integrated into RFC0111 service.
+- Revocation chain (`RevocationChain`) for delegation/POA revocations (tamper-evident hash linkage) integrated into AAP-001 service.
 - JWT demo token scopes embedded & extracted (`Claims.HasScope`).
 
 Still Missing (roadmap):
@@ -470,7 +470,7 @@ Editing `policies.json` (e.g. flip an effect to `deny`) and saving will update d
 4. Hierarchical directory store (base + env overrides).
 5. Index structures for large policy counts.
 
-### Revocation Chain Integration (RFC0111 Service)
+### Revocation Chain Integration (AAP-001 Service)
 After revocation, validation checks chain integrity and revoked state:
 ```go
 svc := rfc0111.NewService(audit.NewMemoryLogger(nil), authzMem)
@@ -692,7 +692,7 @@ Notes:
 |------|------|---------|
 | Scopes Round Trip | `test/auth/jwt_scope_test.go` | Ensures token scopes encode/decode correctly |
 | Revocation Chain | `pkg/delegation/revocation_chain_test.go` | Hash linkage integrity & tamper detection |
-| RFC0111 Revocation Integration | `pkg/rfc0111/rfc0111_revocation_integration_test.go` | Service-level revocation enforcement |
+| AAP-001 Revocation Integration | `pkg/rfc0111/rfc0111_revocation_integration_test.go` | Service-level revocation enforcement |
 | Roles & Required Scopes | `pkg/authz/authz_enhanced_test.go` | Policy match via roles and scope set |
 | ABAC Operators | `pkg/authz/authz_enhanced_test.go` | Advanced condition operator semantics |
 

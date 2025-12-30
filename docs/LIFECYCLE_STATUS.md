@@ -66,14 +66,14 @@ Revocation sets RevokedAt and implicitly treats token as revoked regardless of S
 ## Metrics
 New counters added (memory & Prometheus):
 - multi_signature_weight_failures_total: Cumulative weight shortfall under weighted threshold semantics.
-- delegation_status_transitions_total / delegation_status_transition_failures_total (reserved for future when server integrates persistent RFC0111 service).
+- delegation_status_transitions_total / delegation_status_transition_failures_total (reserved for future when server integrates persistent AAP-001 service).
 - token_status_transitions_total / token_status_transition_failures_total (reserved; prototype audit-only implementation).
 
 ## Weighted Multi-Signature Threshold
 If `GAUTH_MULTI_SIG_WEIGHTS` is set (format signer=weight,...), the multi-signature verification path interprets `Threshold` as required cumulative `weight` of valid signatures instead of raw count. Failures increment `multi_signature_weight_failures_total`.
 
 ## Future Enhancements
-- Persistent delegation status updates wired to RFC0111 service repository.
+- Persistent delegation status updates wired to AAP-001 service repository.
 - Distinct error codes for suspended vs terminated.
 - Administrative audit trail enrichment (actor roles & reasons).
 - Bulk status transition endpoint with concurrency safeguards.

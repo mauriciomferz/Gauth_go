@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-P1.3 integrates the existing jurisdiction enforcement infrastructure (`internal/jurisdiction/`) with RFC0111 token operations (delegation creation and token verification). This enables **opt-in** compliance with GDPR, CCPA, cross-border data transfer rules, data residency requirements, and jurisdiction-specific blocked actions at the token level.
+P1.3 integrates the existing jurisdiction enforcement infrastructure (`internal/jurisdiction/`) with AAP-001 token operations (delegation creation and token verification). This enables **opt-in** compliance with GDPR, CCPA, cross-border data transfer rules, data residency requirements, and jurisdiction-specific blocked actions at the token level.
 
 **Key Features:**
 - ✅ **GDPR Consent Validation** (EU): Requires `gdpr_consent:true` for data processing actions
@@ -88,7 +88,7 @@ import (
 // Create jurisdiction enforcement integration
 integration := jurisdiction.NewServerIntegration()
 
-// Create RFC0111 service with jurisdiction enforcement
+// Create AAP-001 service with jurisdiction enforcement
 logger := audit.NewMemoryLogger(nil)
 authorizer := authz.NewMemoryAuthorizer()
 
@@ -398,7 +398,7 @@ PASS
 
 ### `WithJurisdictionEnforcement(integration *jurisdiction.ServerIntegration) Option`
 
-Enables jurisdiction enforcement for RFC0111 Service operations.
+Enables jurisdiction enforcement for AAP-001 Service operations.
 
 **Parameters:**
 - `integration`: ServerIntegration instance from `internal/jurisdiction`

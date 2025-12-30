@@ -4,7 +4,7 @@ package gauth_aap_001
 // The official_aap001_implementation example expects a configuration
 // struct and a validation helper that previously lived in an earlier
 // iteration of the project. Instead of rewriting the example to use the
-// newer consolidated rfc package config we provide a thin shim here.
+// newer consolidated aap package config we provide a thin shim here.
 
 import (
 	"fmt"

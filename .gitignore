@@ -201,3 +201,4 @@ web-server
 *.pem
 *.key
 k8s-secrets-patched.yaml
+dist/

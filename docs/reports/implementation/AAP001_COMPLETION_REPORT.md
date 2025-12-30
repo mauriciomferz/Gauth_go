@@ -80,13 +80,13 @@ All code compiles successfully and is ready for testing and further development.
 
 #### Route Registration
 - **`web/rfc0111_routes.go`** (34 lines)
-  - `RegisterRFC0111Endpoints()` helper
+  - `RegisterAAP-001Endpoints()` helper
   - Clean separation of concerns
   - Easy integration with BetaServer
 
 ### 3. Documentation
 
-- **`RFC0111_API_GUIDE.md`** (comprehensive guide)
+- **`AAP-001_API_GUIDE.md`** (comprehensive guide)
   - Complete API documentation
   - Integration examples
   - Architecture diagrams
@@ -221,7 +221,7 @@ gauthService := gauth.New(
 )
 
 // 7. Register endpoints
-server.RegisterRFC0111Endpoints(subscriptionManager, subscriptionStore, gauthService)
+server.RegisterAAP-001Endpoints(subscriptionManager, subscriptionStore, gauthService)
 ```
 
 ---
@@ -339,8 +339,8 @@ The RFC-0111 compliance implementation is **complete and ready for testing**. Al
 4. `web/handlers/rfc0111/subscription_handlers.go`
 5. `web/handlers/rfc0111/authorization_handlers.go`
 6. `web/rfc0111_routes.go`
-7. `RFC0111_API_GUIDE.md`
-8. `RFC0111_COMPLETION_REPORT.md` (this file)
+7. `AAP-001_API_GUIDE.md`
+8. `AAP-001_COMPLETION_REPORT.md` (this file)
 
 ### Modified
 1. `pkg/gauth/gauth.go` - Added RFC components and methods

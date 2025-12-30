@@ -12,7 +12,7 @@ owners: [system]
 
 ```bash
 # Start server with RFC-0111 enabled
-GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 # Run all tests
 ./scripts/test_rfc0111_end_to_end.sh
@@ -107,7 +107,7 @@ audit_trail          - Complete audit log
 
 ## Testing Checklist
 
-- [ ] Server running with `GAUTH_RFC0111_ENABLED=1`
+- [ ] Server running with `GAUTH_AAP-001_ENABLED=1`
 - [ ] Can create subscription (8 steps)
 - [ ] Subscription reaches "completed" status
 - [ ] Can request authorization token
@@ -138,5 +138,5 @@ audit_trail          - Complete audit log
 - **Core Logic**: `pkg/gauth/`
 - **PoA Types**: `pkg/poa/`
 - **Tests**: `scripts/test_rfc0111_*.sh`
-- **Docs**: `docs/RFC0111_README.md`
-- **Status**: `RFC0111_IMPLEMENTATION_STATUS.md`
+- **Docs**: `docs/AAP-001_README.md`
+- **Status**: `AAP-001_IMPLEMENTATION_STATUS.md`

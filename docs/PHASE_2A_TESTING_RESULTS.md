@@ -3,7 +3,7 @@
 **Date**: November 16, 2025  
 **Status**: ✅ **ALL TESTS PASSED**  
 **Server**: `localhost:8080`  
-**Environment**: `GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1`
+**Environment**: `GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1`
 
 ---
 
@@ -433,14 +433,14 @@ The PoA validation endpoint correctly checks:
 
 ```bash
 GAUTH_DEV_INDEX=1          # Enables dev mode (serves UI from disk)
-GAUTH_RFC0111_ENABLED=1    # Enables RFC-0111 endpoints (REQUIRED for Phase 2A)
+GAUTH_AAP-001_ENABLED=1    # Enables RFC-0111 endpoints (REQUIRED for Phase 2A)
 ```
 
 ### Server Startup Command ✅
 
 ```bash
 cd /path/to/Gauth_go
-GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 ### Endpoint Registration Confirmation ✅
@@ -467,7 +467,7 @@ Server logs show all endpoints were registered:
 ## Known Issues & Limitations
 
 ### ⚠️ CRITICAL: RFC-0111 Flag Required
-**Issue**: Phase 2A endpoints only register if `GAUTH_RFC0111_ENABLED=1` is set.
+**Issue**: Phase 2A endpoints only register if `GAUTH_AAP-001_ENABLED=1` is set.
 
 **Impact**: Without this flag, all `/api/v1/beta/*` endpoints return 404.
 
@@ -509,7 +509,7 @@ Server logs show all endpoints were registered:
 - Add integration tests with frontend
 
 ### 3. Configuration Improvements 🔜 (Future)
-- Consider removing `GAUTH_RFC0111_ENABLED` gate for Phase 2A endpoints
+- Consider removing `GAUTH_AAP-001_ENABLED` gate for Phase 2A endpoints
 - Or: Add separate `GAUTH_BETA_ENDPOINTS_ENABLED` flag
 - Make Phase 2A endpoints always available for UI integration
 

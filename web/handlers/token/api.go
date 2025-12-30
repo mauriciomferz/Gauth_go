@@ -362,7 +362,7 @@ func (h *Handler) Validate(c *gin.Context) {
 			}
 			if hasJTI && jtiVal != "" && h.Replay != nil {
 				if h.Replay.Seen(jtiVal, time.Now()) {
-					c.JSON(401, gin.H{"success": false, "code": "token_replay_detected", "error": "replay_detected", "rfc_ref": "rfc111:replay_protection", "detail": "replay detected (jti dedicated)"})
+					c.JSON(401, gin.H{"success": false, "code": "token_replay_detected", "error": "replay_detected", "rfc_ref": "AAP-001:replay_protection", "detail": "replay detected (jti dedicated)"})
 					return
 				}
 				h.Replay.Record(jtiVal, time.Now())

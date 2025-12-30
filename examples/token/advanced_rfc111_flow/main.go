@@ -7,7 +7,7 @@
 //   - Chained delegation (token delegated to another subject)
 //   - Revocation and compliance check
 //
-// Run with: go run ./examples/token/advanced_rfc111_flow/main.go
+// Run with: go run ./examples/token/advanced"AAP-001_flow/main.go
 package main
 
 import (

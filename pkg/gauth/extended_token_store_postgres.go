@@ -88,7 +88,7 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
 
 	// Map ExtendedToken fields to table columns
 	// Note: compliance_level is required but not in ExtendedToken struct
-	complianceLevel := "rfc-0111-compliant" // default value
+	complianceLevel := "AAP-0111-compliant" // default value
 
 	// Insert or update token
 	query := `

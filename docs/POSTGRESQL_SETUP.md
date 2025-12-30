@@ -160,8 +160,8 @@ DB_CONN_MAX_IDLE_TIME=1m  # Connection max idle time (default: 1m)
 
 ```bash
 # Enable RFC-0111 Features
-GAUTH_RFC0111_ENABLED=1              # Enable RFC-0111 endpoints
-GAUTH_RFC0111_USE_MOCKS=0            # Use real services (1 for mocks)
+GAUTH_AAP-001_ENABLED=1              # Enable RFC-0111 endpoints
+GAUTH_AAP-001_USE_MOCKS=0            # Use real services (1 for mocks)
 
 # Token Store Selection
 GAUTH_TOKEN_STORE=postgres           # Options: memory, postgres (default: memory)
@@ -382,7 +382,7 @@ export DB_PORT=5432
 export DB_NAME=gauth
 export DB_USER=gauth
 export DB_PASSWORD=gauth_password
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 export GAUTH_TOKEN_STORE=postgres
 
 go test -v ./pkg/gauth/... -run TestPostgres
@@ -563,7 +563,7 @@ docker-compose exec -T postgres psql -U gauth -d gauth < backup_20231115.sql
 
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/16/)
 - [JSONB Performance Tips](https://www.postgresql.org/docs/16/datatype-json.html)
-- [RFC-0111 Specification](../RFC0111_README.md)
+- [RFC-0111 Specification](../AAP-001_README.md)
 - [AgentAuth Architecture](../ARCHITECTURE.md)
 
 ## Support

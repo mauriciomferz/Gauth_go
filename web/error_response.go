@@ -15,7 +15,7 @@ import (
 //	Code: machine-readable stable error code (snake_case).
 //	Error: legacy short error string retained for backward compatibility.
 //	Message: optional human-readable expansion.
-//	RFCRef: optional RFC clause reference (e.g. "rfc111:replay_protection").
+//	RFCRef: optional RFC clause reference (e.g. "AAP-001:replay_protection").
 //	Detail: arbitrary extra structured data.
 //
 // ErrorEnvelope aligns with OpenAPI components.schemas.ErrorEnvelope.

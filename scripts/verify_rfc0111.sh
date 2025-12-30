@@ -13,7 +13,7 @@ if ! pgrep -f "web-server" > /dev/null; then
     echo "❌ Server is not running"
     echo ""
     echo "Start the server with:"
-    echo "  GAUTH_RFC0111_ENABLED=1 GAUTH_RFC0111_USE_MOCKS=1 ./bin/web-server"
+    echo "  GAUTH_AAP-001_ENABLED=1 GAUTH_AAP-001_USE_MOCKS=1 ./bin/web-server"
     exit 1
 fi
 
@@ -66,7 +66,7 @@ if echo "$AUTH_RESPONSE" | grep -q "Subscription must be completed"; then
     echo "   Current subscription status: $CURRENT_STATUS"
 elif echo "$AUTH_RESPONSE" | grep -q "RFC-0111 protocol orchestrator not initialized"; then
     echo "❌ RFC-0111 NOT PROPERLY INITIALIZED"
-    echo "   Restart server with: GAUTH_RFC0111_ENABLED=1 ./bin/web-server"
+    echo "   Restart server with: GAUTH_AAP-001_ENABLED=1 ./bin/web-server"
     exit 1
 else
     echo "⚠️  Unexpected response:"
@@ -117,4 +117,4 @@ echo "To complete authorization:"
 echo "  1. Complete subscription Steps II-VIII"
 echo "  2. Use completed subscription ID in authorization request"
 echo ""
-echo "For details, see: RFC0111_FIX_SUMMARY.md"
+echo "For details, see: AAP-001_FIX_SUMMARY.md"

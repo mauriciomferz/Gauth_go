@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>GAuth - API_REFERENCE</title>
+  <title>AgentAuth - API_REFERENCE</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -94,7 +94,7 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">GAuth - API_REFERENCE</h1>
+<h1 class="title">AgentAuth - API_REFERENCE</h1>
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
@@ -139,7 +139,7 @@ Protection</a></li>
 <li><a href="#rfccompliantservice"
 id="toc-rfccompliantservice"><strong>RFCCompliantService</strong></a></li>
 <li><a href="#creategauthtoken-future-enhancement"
-id="toc-creategauthtoken-future-enhancement"><strong>CreateGAuthToken</strong>
+id="toc-creategauthtoken-future-enhancement"><strong>CreateAgentAuthToken</strong>
 (Future Enhancement)</a></li>
 </ul></li>
 <li><a href="#rfc-115-poa-definition-api"
@@ -171,11 +171,11 @@ id="toc-legalframeworkvalidator"><strong>LegalFrameworkValidator</strong></a></l
 <strong>Response Types</strong></a>
 <ul>
 <li><a href="#gauthresponse"
-id="toc-gauthresponse"><strong>GAuthResponse</strong></a></li>
+id="toc-gauthresponse"><strong>AgentAuthResponse</strong></a></li>
 <li><a href="#poavalidationresult"
 id="toc-poavalidationresult"><strong>PoAValidationResult</strong></a></li>
 <li><a href="#gauthtoken"
-id="toc-gauthtoken"><strong>GAuthToken</strong></a></li>
+id="toc-gauthtoken"><strong>AgentAuthToken</strong></a></li>
 </ul></li>
 <li><a href="#error-handling" id="toc-error-handling">🚨 <strong>Error
 Handling</strong></a>
@@ -1142,7 +1142,7 @@ store (e.g., Redis) implementing <code>ReplayStore</code> to survive
 restarts and coordinate across replicas. - TTL tuning balances memory
 footprint vs. replay window risk; choose a value aligned with average
 token lifetime. — Need context? See: README.md | docs/ARCHITECTURE.md |
-docs/GETTING_STARTED.md # (Metadata moved to top) GAuth RFC API
+docs/GETTING_STARTED.md # (Metadata moved to top) AgentAuth RFC API
 Reference</p>
 <blockquote>
 <p>Last Updated: 2025-10-21 Status: Active</p>
@@ -1154,8 +1154,8 @@ intentionally missing security, policy, and lifecycle controls.</p>
 </blockquote>
 <p><strong>Beta Demonstration API Documentation (NOT Production
 Ready)</strong></p>
-<p>Complete Go library API reference for GiFo-RFC-0111 (GAuth 1.0) and
-GiFo-RFC-0115 (PoA Definition) implementation.</p>
+<p>Complete Go library API reference for AAP-RFC-0111 (AgentAuth 1.0) and
+AAP-RFC-0115 (PoA Definition) implementation.</p>
 <blockquote>
 <p><strong>📝 Note</strong>: This document covers the Go library API.
 For the web demonstration API documentation, see <a
@@ -1268,16 +1268,16 @@ before trusting embedded JSON. Future versions may add
 <pre><code>
 ## 🎯 **RFC 111 Authorization API**
 
-### **AuthorizeGAuth**
+### **AuthorizeAgentAuth**
 
 Main authorization method implementing complete RFC 111 flow with RFC 115 PoA Definition validation.
 
 ```go
-func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthRequest) (*GAuthResponse, error)</code></pre>
+func (s *RFCCompliantService) AuthorizeAgentAuth(ctx context.Context, req AgentAuthRequest) (*AgentAuthResponse, error)</code></pre>
 <p><strong>Parameters:</strong> - <code>ctx</code> (context.Context):
 Request context for cancellation and timeout - <code>req</code>
-(GAuthRequest): Complete RFC-compliant authorization request</p>
-<p><strong>Returns:</strong> - <code>*GAuthResponse</code>:
+(AgentAuthRequest): Complete RFC-compliant authorization request</p>
+<p><strong>Returns:</strong> - <code>*AgentAuthResponse</code>:
 Authorization response with compliance validation - <code>error</code>:
 Authorization or validation error</p>
 <p><strong>Process Flow:</strong> 1. Validates PoA Definition (RFC 115)
@@ -1286,7 +1286,7 @@ capabilities 4. Validates legal compliance 5. Generates authorization
 code 6. Creates comprehensive audit record</p>
 <p><strong>Example:</strong></p>
 <div class="sourceCode" id="cb28"><pre
-class="sourceCode go"><code class="sourceCode go"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>response<span class="op">,</span> err <span class="op">:=</span> service<span class="op">.</span>AuthorizeGAuth<span class="op">(</span>ctx<span class="op">,</span> auth<span class="op">.</span>GAuthRequest<span class="op">{</span></span>
+class="sourceCode go"><code class="sourceCode go"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>response<span class="op">,</span> err <span class="op">:=</span> service<span class="op">.</span>AuthorizeAgentAuth<span class="op">(</span>ctx<span class="op">,</span> auth<span class="op">.</span>AgentAuthRequest<span class="op">{</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    ClientID<span class="op">:</span>     <span class="st">&quot;ai_agent_v1&quot;</span><span class="op">,</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    ResponseType<span class="op">:</span> <span class="st">&quot;code&quot;</span><span class="op">,</span></span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    Scope<span class="op">:</span>        <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;financial_advisory&quot;</span><span class="op">},</span></span>
@@ -1297,12 +1297,12 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb28-1"><a href="#cb
 <span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    PoADefinition<span class="op">:</span> poaDefinition<span class="op">,</span> <span class="co">// Complete RFC 115 structure</span></span>
 <span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="op">})</span></span></code></pre></div>
 <h3
-id="creategauthtoken-future-enhancement"><strong>CreateGAuthToken</strong>
+id="creategauthtoken-future-enhancement"><strong>CreateAgentAuthToken</strong>
 (Future Enhancement)</h3>
 <p>Exchange authorization code for extended token with comprehensive
 metadata.</p>
 <div class="sourceCode" id="cb29"><pre
-class="sourceCode go"><code class="sourceCode go"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>RFCCompliantService<span class="op">)</span> CreateGAuthToken<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> authCode <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>GAuthToken<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
+class="sourceCode go"><code class="sourceCode go"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>s <span class="op">*</span>RFCCompliantService<span class="op">)</span> CreateAgentAuthToken<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> authCode <span class="dt">string</span><span class="op">)</span> <span class="op">(*</span>AgentAuthToken<span class="op">,</span> <span class="dt">error</span><span class="op">)</span></span></code></pre></div>
 <h2 id="rfc-115-poa-definition-api">📋 <strong>RFC 115 PoA Definition
 API</strong></h2>
 <h3 id="poa-definition-structure"><strong>PoA Definition
@@ -1583,9 +1583,9 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb44-1"><a href="#cb
 <span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> <span class="op">(</span>v <span class="op">*</span>LegalFrameworkValidator<span class="op">)</span> ValidateFramework<span class="op">(</span>ctx context<span class="op">.</span>Context<span class="op">,</span> framework LegalFramework<span class="op">)</span> <span class="dt">error</span></span></code></pre></div>
 <h2 id="response-types">📊 <strong>Response Types</strong></h2>
-<h3 id="gauthresponse"><strong>GAuthResponse</strong></h3>
+<h3 id="gauthresponse"><strong>AgentAuthResponse</strong></h3>
 <div class="sourceCode" id="cb45"><pre
-class="sourceCode go"><code class="sourceCode go"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> GAuthResponse <span class="kw">struct</span> <span class="op">{</span></span>
+class="sourceCode go"><code class="sourceCode go"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AgentAuthResponse <span class="kw">struct</span> <span class="op">{</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    AuthorizationCode <span class="dt">string</span>              <span class="st">`json:&quot;code&quot;`</span>              <span class="co">// OAuth authorization code</span></span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    State            <span class="dt">string</span>              <span class="st">`json:&quot;state&quot;`</span>             <span class="co">// CSRF protection state</span></span>
 <span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    ExtendedToken    <span class="dt">string</span>              <span class="st">`json:&quot;extended_token&quot;`</span>    <span class="co">// Optional immediate token</span></span>
@@ -1603,9 +1603,9 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb46-1"><a href="#cb
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    ComplianceLevel   <span class="dt">string</span>   <span class="st">`json:&quot;compliance_level&quot;`</span>   <span class="co">// &quot;rfc115_compliant&quot;, etc.</span></span>
 <span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    AttestationStatus <span class="dt">string</span>   <span class="st">`json:&quot;attestation_status&quot;`</span> <span class="co">// &quot;validated&quot;, &quot;pending&quot;, etc.</span></span>
 <span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<h3 id="gauthtoken"><strong>GAuthToken</strong></h3>
+<h3 id="gauthtoken"><strong>AgentAuthToken</strong></h3>
 <div class="sourceCode" id="cb47"><pre
-class="sourceCode go"><code class="sourceCode go"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> GAuthToken <span class="kw">struct</span> <span class="op">{</span></span>
+class="sourceCode go"><code class="sourceCode go"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> AgentAuthToken <span class="kw">struct</span> <span class="op">{</span></span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    AccessToken      <span class="dt">string</span>           <span class="st">`json:&quot;access_token&quot;`</span>      <span class="co">// JWT access token</span></span>
 <span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    TokenType        <span class="dt">string</span>           <span class="st">`json:&quot;token_type&quot;`</span>        <span class="co">// &quot;bearer&quot;</span></span>
 <span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    ExpiresIn        <span class="dt">int</span>              <span class="st">`json:&quot;expires_in&quot;`</span>        <span class="co">// Token expiration (seconds)</span></span>
@@ -1706,7 +1706,7 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb49-1"><a href="#cb
 <span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;context&quot;</span></span>
 <span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
 <span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;time&quot;</span></span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/Gimel-Foundation/gauth/pkg/auth&quot;</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/AgentAuth-Foundation/gauth/pkg/auth&quot;</span></span>
 <span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
 <span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> main<span class="op">()</span> <span class="op">{</span></span>
@@ -1789,8 +1789,8 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb49-1"><a href="#cb
 <span id="cb49-87"><a href="#cb49-87" aria-hidden="true" tabindex="-1"></a>        <span class="op">},</span></span>
 <span id="cb49-88"><a href="#cb49-88" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb49-89"><a href="#cb49-89" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb49-90"><a href="#cb49-90" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create GAuth request</span></span>
-<span id="cb49-91"><a href="#cb49-91" aria-hidden="true" tabindex="-1"></a>    request <span class="op">:=</span> auth<span class="op">.</span>GAuthRequest<span class="op">{</span></span>
+<span id="cb49-90"><a href="#cb49-90" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create AgentAuth request</span></span>
+<span id="cb49-91"><a href="#cb49-91" aria-hidden="true" tabindex="-1"></a>    request <span class="op">:=</span> auth<span class="op">.</span>AgentAuthRequest<span class="op">{</span></span>
 <span id="cb49-92"><a href="#cb49-92" aria-hidden="true" tabindex="-1"></a>        ClientID<span class="op">:</span>     <span class="st">&quot;ai_financial_advisor_v3&quot;</span><span class="op">,</span></span>
 <span id="cb49-93"><a href="#cb49-93" aria-hidden="true" tabindex="-1"></a>        ResponseType<span class="op">:</span> <span class="st">&quot;code&quot;</span><span class="op">,</span></span>
 <span id="cb49-94"><a href="#cb49-94" aria-hidden="true" tabindex="-1"></a>        Scope<span class="op">:</span>        <span class="op">[]</span><span class="dt">string</span><span class="op">{</span><span class="st">&quot;financial_advisory&quot;</span><span class="op">,</span> <span class="st">&quot;asset_management&quot;</span><span class="op">},</span></span>
@@ -1803,7 +1803,7 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb49-1"><a href="#cb
 <span id="cb49-101"><a href="#cb49-101" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb49-102"><a href="#cb49-102" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb49-103"><a href="#cb49-103" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Authorize with full RFC validation</span></span>
-<span id="cb49-104"><a href="#cb49-104" aria-hidden="true" tabindex="-1"></a>    response<span class="op">,</span> err <span class="op">:=</span> service<span class="op">.</span>AuthorizeGAuth<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> request<span class="op">)</span></span>
+<span id="cb49-104"><a href="#cb49-104" aria-hidden="true" tabindex="-1"></a>    response<span class="op">,</span> err <span class="op">:=</span> service<span class="op">.</span>AuthorizeAgentAuth<span class="op">(</span>context<span class="op">.</span>Background<span class="op">(),</span> request<span class="op">)</span></span>
 <span id="cb49-105"><a href="#cb49-105" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> err <span class="op">!=</span> <span class="ot">nil</span> <span class="op">{</span></span>
 <span id="cb49-106"><a href="#cb49-106" aria-hidden="true" tabindex="-1"></a>        fmt<span class="op">.</span>Printf<span class="op">(</span><span class="st">&quot;❌ Authorization failed: %v</span><span class="ch">\n</span><span class="st">&quot;</span><span class="op">,</span> err<span class="op">)</span></span>
 <span id="cb49-107"><a href="#cb49-107" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
@@ -1818,7 +1818,7 @@ class="sourceCode go"><code class="sourceCode go"><span id="cb49-1"><a href="#cb
 <span id="cb49-116"><a href="#cb49-116" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <hr />
 <p><em>This API reference provides complete documentation for the
-official Gimel Foundation GAuth RFC implementation. For additional
+official AgentAuth Community AgentAuth RFC implementation. For additional
 examples and guides, see the <a
 href="../docs/GETTING_STARTED.md">Getting Started Guide</a> and <a
 href="../docs/RFC_ARCHITECTURE.md">RFC Architecture

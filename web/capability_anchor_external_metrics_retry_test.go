@@ -27,7 +27,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	// Force exactly one initial failure irrespective of probability to stabilize test expectations.
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	srv := NewBetaServerWithMetrics(":0", pm) // server needed for startup attempt
 	t.Cleanup(func() { srv.Shutdown() })
 	// Wait for initial attempt + potential retries to finish.
@@ -120,7 +120,7 @@ func TestExternalAnchorMetricsRetryAllFail(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "3")
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "5")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	_ = NewBetaServerWithMetrics(":0", pm)
 	time.Sleep(300 * time.Millisecond)
 	mfs, err := reg.Gather()

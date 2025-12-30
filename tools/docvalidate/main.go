@@ -20,7 +20,7 @@ var (
 	frontMatterDelim = "---"
 	// Allowed enumerations sourced from docs conventions (kept lightweight; not exhaustive of future tags)
 	allowedCategories = map[string]struct{}{
-		"architecture": {}, "rfc": {}, "guide": {}, "operations": {}, "security": {}, "performance": {}, "api": {}, "adr": {}, "release": {}, "generated": {}, "roadmap": {}, "compliance": {}, "example": {}, "ui": {}, "audit": {}, "maintenance": {}, "org": {}, "misc": {}, "audit-log": {}, "audit-log-index": {}, "documentation-index": {},
+		"architecture": {}, "aap": {}, "guide": {}, "operations": {}, "security": {}, "performance": {}, "api": {}, "adr": {}, "release": {}, "generated": {}, "roadmap": {}, "compliance": {}, "example": {}, "ui": {}, "audit": {}, "maintenance": {}, "org": {}, "misc": {}, "audit-log": {}, "audit-log-index": {}, "documentation-index": {},
 		// Additional observed categories retained during transition
 		"legal-disclaimer": {}, "build-artifacts-guide": {}, "project-organization": {}, "security-guide": {}, "adr-index": {}, "security-assessment": {}, "security-setup-guide": {}, "example-index": {},
 	}

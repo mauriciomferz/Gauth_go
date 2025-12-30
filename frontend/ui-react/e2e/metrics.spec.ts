@@ -12,7 +12,7 @@ test.describe('Metrics and Monitoring', () => {
   })
 
   test('should display metrics page', async ({ page }) => {
-    await expect(page).toHaveTitle(/GAuth/)
+    await expect(page).toHaveTitle(/AgentAuth/)
     const heading = page.getByRole('heading', { name: /Metrics|Monitoring|Prometheus|Performance|System/i })
     await expect(heading.first()).toBeVisible({ timeout: 10000 })
   })

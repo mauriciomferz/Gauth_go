@@ -181,7 +181,7 @@ _ = resp.Body.Close() // Explicitly ignore cleanup error
 - 8 commits to main
 
 **Major Functions Coverage**:
-- ValidateRFC0115Compliance: 96.6% ✅
+- ValidateAAP-002Compliance: 96.6% ✅
 - VerifyMultiSig: 95.0% ✅
 - marshalCBORItem: 92.6% ✅
 - Issue: 89.5% ✅

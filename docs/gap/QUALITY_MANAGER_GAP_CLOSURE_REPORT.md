@@ -700,9 +700,9 @@ type ProofOfAuthorization struct {
 **Cross-Validation Function:**
 
 ```go
-// ValidateRFC0115Token performs comprehensive cross-validation between
+// ValidateAAP-002Token performs comprehensive cross-validation between
 // the extended token fields and the referenced component structures
-func ValidateRFC0115Token(token *ProofOfAuthorization) error {
+func ValidateAAP-002Token(token *ProofOfAuthorization) error {
 	// 1. Validate sector scope reference
 	if token.SectorScopeRef != "" {
 		if err := ValidateSectorScopeReference(token.SectorScopeRef); err != nil {

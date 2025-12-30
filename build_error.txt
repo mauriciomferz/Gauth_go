@@ -50,8 +50,8 @@
 #15 [builder 6/8] COPY . .
 #15 DONE 8.1s
 
-#16 [builder 7/8] RUN echo "=== Building GAuth web-server with CGO support ===" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags="-w -s"     -o /build/web-server     ./cmd/web-server &&     echo "=== Build completed successfully ==="
-#16 0.288 === Building GAuth web-server with CGO support ===
+#16 [builder 7/8] RUN echo "=== Building AgentAuth web-server with CGO support ===" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags="-w -s"     -o /build/web-server     ./cmd/web-server &&     echo "=== Build completed successfully ==="
+#16 0.288 === Building AgentAuth web-server with CGO support ===
 #16 1.017 encoding
 #16 1.017 internal/coverage/rtcov
 #16 1.017 internal/goexperiment
@@ -499,9 +499,9 @@
 #16 8.098 github.com/prometheus/client_model/go
 #16 8.138 github.com/prometheus/common/model
 #16 8.226 github.com/prometheus/client_golang/prometheus/internal
-#16 ERROR: process "/bin/sh -c echo \"=== Building GAuth web-server with CGO support ===\" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags=\"-w -s\"     -o /build/web-server     ./cmd/web-server &&     echo \"=== Build completed successfully ===\"" did not complete successfully: exit code: 1
+#16 ERROR: process "/bin/sh -c echo \"=== Building AgentAuth web-server with CGO support ===\" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags=\"-w -s\"     -o /build/web-server     ./cmd/web-server &&     echo \"=== Build completed successfully ===\"" did not complete successfully: exit code: 1
 ------
- > [builder 7/8] RUN echo "=== Building GAuth web-server with CGO support ===" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags="-w -s"     -o /build/web-server     ./cmd/web-server &&     echo "=== Build completed successfully ===":
+ > [builder 7/8] RUN echo "=== Building AgentAuth web-server with CGO support ===" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags="-w -s"     -o /build/web-server     ./cmd/web-server &&     echo "=== Build completed successfully ===":
 7.801 go.opentelemetry.io/auto/sdk
 7.828 github.com/crate-crypto/go-eth-kzg/internal/kzg_multi
 7.855 github.com/crate-crypto/go-eth-kzg
@@ -516,7 +516,7 @@
 Dockerfile.production:36
 --------------------
   35 |     # Target linux/amd64 for Kubernetes compatibility
-  36 | >>> RUN echo "=== Building GAuth web-server with CGO support ===" && \
+  36 | >>> RUN echo "=== Building AgentAuth web-server with CGO support ===" && \
   37 | >>>     CGO_ENABLED=1 \
   38 | >>>     GOOS=linux \
   39 | >>>     GOARCH=amd64 \
@@ -527,6 +527,6 @@ Dockerfile.production:36
   44 | >>>     echo "=== Build completed successfully ==="
   45 |     
 --------------------
-ERROR: failed to build: failed to solve: process "/bin/sh -c echo \"=== Building GAuth web-server with CGO support ===\" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags=\"-w -s\"     -o /build/web-server     ./cmd/web-server &&     echo \"=== Build completed successfully ===\"" did not complete successfully: exit code: 1
+ERROR: failed to build: failed to solve: process "/bin/sh -c echo \"=== Building AgentAuth web-server with CGO support ===\" &&     CGO_ENABLED=1     GOOS=linux     GOARCH=amd64     go build -v     -ldflags=\"-w -s\"     -o /build/web-server     ./cmd/web-server &&     echo \"=== Build completed successfully ===\"" did not complete successfully: exit code: 1
 
 View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/98llmftu3i2dc8uu2y6151kee

@@ -18,7 +18,7 @@ This directory contains the complete implementation of the RFC-0111 Authorizatio
 
 - Go 1.21 or later
 - Server running on `http://localhost:8080`
-- RFC-0111 feature enabled: `GAUTH_RFC0111_ENABLED=1`
+- RFC-0111 feature enabled: `GAUTH_AAP-001_ENABLED=1`
 
 ### Running Tests
 
@@ -310,7 +310,7 @@ Uses **in-memory storage** for subscriptions and tokens. Data is lost on server 
 
 ```bash
 # 1. Start server with RFC-0111 enabled
-GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 # 2. Create subscription
 ./scripts/test_rfc0111_subscription_flow.sh
@@ -399,7 +399,7 @@ Before production deployment:
 ## Support
 
 For issues or questions:
-1. Check [RFC0111_IMPLEMENTATION_STATUS.md](../RFC0111_IMPLEMENTATION_STATUS.md)
+1. Check [AAP-001_IMPLEMENTATION_STATUS.md](../AAP-001_IMPLEMENTATION_STATUS.md)
 2. Review test scripts for usage examples
 3. Check server logs for detailed error messages
 

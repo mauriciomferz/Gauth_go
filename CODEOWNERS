@@ -14,7 +14,7 @@ pkg/policy/                      @policy-engine
 pkg/crypto/                      @crypto-sec
 internal/crypto/                 @crypto-sec
 
-# Proof of Authorization / RFC0115
+# Proof of Authorization / AAP-002
 pkg/poa/                         @poa-rfc
 
 # Compliance & Jurisdiction

@@ -1,4 +1,4 @@
-# Minimal Dockerfile for beta demonstration / debug builds of GAuth
+# Minimal Dockerfile for beta demonstration / debug builds of AgentAuth
 # Purpose: Fast, low-surface build useful for local debugging and CI fallback.
 # This intentionally omits extra packages, healthchecks, non-root user setup,
 # and aggressive binary size stripping to reduce moving parts when diagnosing

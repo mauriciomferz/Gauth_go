@@ -232,7 +232,7 @@ All API endpoints are under `/api/v1/beta`:
 - **AAP-RFC-0150**: Go Implementation Guidelines
 
 ### External Links
-- [AgentAuth Community](https://gimelfoundation.com) - Organization behind AgentAuth
+- [AgentAuth Community](https://example.com) - Organization behind AgentAuth
 - [GitHub Repository](https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0) - Source code
 - [RFC Repository](https://github.com/AgentAuth-Foundation/RFCs) - Official RFC documents
 

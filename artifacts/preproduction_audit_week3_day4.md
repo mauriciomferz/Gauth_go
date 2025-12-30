@@ -341,7 +341,7 @@ Week 3 Day 4 establishes comprehensive compliance documentation framework for Ag
 **Key GAP Categories:**
 1. **Cryptographic & Authenticity** - 6 items (3 implemented, 3 partial)
 2. **Authorization Engine** - 5 items (2 implemented, 3 missing)
-3. **PoA Definition (RFC0115)** - 4 items (1 implemented, 3 partial/missing)
+3. **PoA Definition (AAP-002)** - 4 items (1 implemented, 3 partial/missing)
 4. **Legal/Jurisdiction** - 3 items (all missing, P1-P3)
 5. **Persistence & Durability** - 3 items (all partial)
 6. **Replay Security** - 3 items (1 implemented, 1 partial, 1 missing)

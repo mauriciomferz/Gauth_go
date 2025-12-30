@@ -21,7 +21,7 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{
 		Namespace: "gauth",
-		Subsystem: "aap001",
+		Subsystem:"AAP-001",
 		Registry:  prometheus.NewRegistry(),
 	})
 	srv := NewBetaServer(":0")

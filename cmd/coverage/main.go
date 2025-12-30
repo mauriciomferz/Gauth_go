@@ -34,7 +34,7 @@ type Rfc struct {
 
 type Template struct {
 	Generated string         `json:"generated"`
-	RFC       map[string]Rfc `json:"rfc"`
+	RFC       map[string]Rfc `json:"aap"`
 }
 
 var (

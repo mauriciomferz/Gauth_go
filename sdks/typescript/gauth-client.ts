@@ -1,11 +1,11 @@
 /**
- * GAuth TypeScript/JavaScript SDK
+ * AgentAuth TypeScript/JavaScript SDK
  * 
- * Official client library for the GAuth OAuth 2.0 Authorization Server
+ * Official client library for the AgentAuth OAuth 2.0 Authorization Server
  * Supports RFC-0111 subscription flow, Power of Attorney, and more.
  * 
  * @version 1.0.0-beta
- * @author GAuth Team
+ * @author AgentAuth Team
  * @license MIT
  */
 
@@ -13,7 +13,7 @@
 // Types and Interfaces
 // ============================================================================
 
-export interface GAuthConfig {
+export interface AgentAuthConfig {
   baseURL: string;
   apiKey?: string;
   accessToken?: string;
@@ -142,10 +142,10 @@ export interface APIError {
 // Main Client Class
 // ============================================================================
 
-export class GAuthClient {
-  private config: Required<GAuthConfig>;
+export class AgentAuthClient {
+  private config: Required<AgentAuthConfig>;
 
-  constructor(config: GAuthConfig) {
+  constructor(config: AgentAuthConfig) {
     this.config = {
       baseURL: config.baseURL,
       apiKey: config.apiKey || '',
@@ -212,13 +212,13 @@ export class GAuthClient {
           error_description: `HTTP ${response.status}: ${response.statusText}`,
           timestamp: new Date().toISOString(),
         }));
-        throw new GAuthError(error);
+        throw new AgentAuthError(error);
       }
 
       return await response.json();
     } catch (error) {
       clearTimeout(timeoutId);
-      if (error instanceof GAuthError) {
+      if (error instanceof AgentAuthError) {
         throw error;
       }
       throw new Error(`Request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -539,7 +539,7 @@ export class GAuthClient {
 // Error Handling
 // ============================================================================
 
-export class GAuthError extends Error {
+export class AgentAuthError extends Error {
   public readonly error: string;
   public readonly error_description: string;
   public readonly error_uri?: string;
@@ -547,14 +547,14 @@ export class GAuthError extends Error {
 
   constructor(apiError: APIError) {
     super(apiError.error_description);
-    this.name = 'GAuthError';
+    this.name = 'AgentAuthError';
     this.error = apiError.error;
     this.error_description = apiError.error_description;
     this.error_uri = apiError.error_uri;
     this.timestamp = apiError.timestamp;
     
     // Maintain proper prototype chain
-    Object.setPrototypeOf(this, GAuthError.prototype);
+    Object.setPrototypeOf(this, AgentAuthError.prototype);
   }
 }
 
@@ -562,4 +562,4 @@ export class GAuthError extends Error {
 // Exports
 // ============================================================================
 
-export default GAuthClient;
+export default AgentAuthClient;

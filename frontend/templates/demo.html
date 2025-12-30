@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GAuth Learning Lab – Interactive RFC-0150 compliance testing, authorization pattern evaluation, and GAuth concept experimentation platform.">
-    <title>GAuth Learning Lab - RFC-0150 Evaluation & Experimentation Platform</title>
+    <meta name="description" content="AgentAuth Learning Lab – Interactive RFC-0150 compliance testing, authorization pattern evaluation, and AgentAuth concept experimentation platform.">
+    <title>AgentAuth Learning Lab - RFC-0150 Evaluation & Experimentation Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
@@ -422,7 +422,7 @@
                         
                         <div class="module-section">
                             <h4>1. Subject-Resource-Action Model</h4>
-                            <p>GAuth uses a powerful three-component model for authorization:</p>
+                            <p>AgentAuth uses a powerful three-component model for authorization:</p>
                             <ul>
                                 <li><strong>Subject:</strong> Who is making the request (user, service, AI agent)</li>
                                 <li><strong>Resource:</strong> What they want to access (document, API, database)</li>
@@ -437,7 +437,7 @@ Action: READ</pre>
                         
                         <div class="module-section">
                             <h4>2. Policy-Based Access Control</h4>
-                            <p>Instead of hardcoding permissions, GAuth uses flexible policies:</p>
+                            <p>Instead of hardcoding permissions, AgentAuth uses flexible policies:</p>
                             <ul>
                                 <li>Policies define rules for who can do what</li>
                                 <li>Policies can be updated without code changes</li>
@@ -470,7 +470,7 @@ Action: READ</pre>
                             <ul>
                                 <li>Authorization answers "Can this subject perform this action on this resource?"</li>
                                 <li>Policies make authorization flexible and maintainable</li>
-                                <li>GAuth supports both simple and complex authorization scenarios</li>
+                                <li>AgentAuth supports both simple and complex authorization scenarios</li>
                             </ul>
                         </div>
                         
@@ -661,7 +661,7 @@ Revoking the Manager's authority invalidates all downstream access</pre>
                         
                         <div class="module-section">
                             <h4>3. Revocation Algorithm</h4>
-                            <p>How GAuth processes cascade revocation:</p>
+                            <p>How AgentAuth processes cascade revocation:</p>
                             <div class="code-example">
                                 <pre>1. Identify revocation target (delegation ID)
 2. Mark delegation as REVOKED with timestamp
@@ -707,7 +707,7 @@ Revoking the Manager's authority invalidates all downstream access</pre>
                         
                         <div class="module-section">
                             <h4>6. Revocation Proofs</h4>
-                            <p>GAuth generates cryptographic proofs of revocation:</p>
+                            <p>AgentAuth generates cryptographic proofs of revocation:</p>
                             <ul>
                                 <li>Tamper-proof record of when and why revocation occurred</li>
                                 <li>Blockchain-anchored for compliance and audit</li>
@@ -731,7 +731,7 @@ Revoking the Manager's authority invalidates all downstream access</pre>
                                 <li>Cascade revocation ensures immediate and complete authority withdrawal</li>
                                 <li>Essential for security incidents and employee lifecycle management</li>
                                 <li>Cryptographic proofs provide audit trail and compliance</li>
-                                <li>GAuth handles complex delegation trees efficiently</li>
+                                <li>AgentAuth handles complex delegation trees efficiently</li>
                             </ul>
                         </div>
                         
@@ -809,7 +809,7 @@ Revoking the Manager's authority invalidates all downstream access</pre>
                         
                         <div class="module-section">
                             <h4>1. Immutable Audit Logs</h4>
-                            <p>GAuth maintains tamper-proof audit trails:</p>
+                            <p>AgentAuth maintains tamper-proof audit trails:</p>
                             <ul>
                                 <li>Every authorization decision logged</li>
                                 <li>Cryptographic anchoring prevents tampering</li>
@@ -871,7 +871,7 @@ Revoking the Manager's authority invalidates all downstream access</pre>
                         
                         <div class="module-section">
                             <h4>1. Token Types</h4>
-                            <p>GAuth supports multiple token formats:</p>
+                            <p>AgentAuth supports multiple token formats:</p>
                             <ul>
                                 <li><strong>Access Tokens:</strong> Short-lived authentication</li>
                                 <li><strong>Delegation Tokens:</strong> Carry PoA credentials</li>
@@ -912,7 +912,7 @@ Revoking the Manager's authority invalidates all downstream access</pre>
                 content: `
                     <div class="learning-module-content">
                         <div class="module-header">
-                            <h3>Cryptography in GAuth</h3>
+                            <h3>Cryptography in AgentAuth</h3>
                             <div class="module-meta">
                                 <span class="badge">⏱️ 35 minutes</span>
                                 <span class="badge">📊 Advanced</span>
@@ -1016,7 +1016,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                 content: `
                     <div class="learning-module-content">
                         <div class="module-header">
-                            <h3>Securing APIs with GAuth</h3>
+                            <h3>Securing APIs with AgentAuth</h3>
                             <div class="module-meta">
                                 <span class="badge">⏱️ 30 minutes</span>
                                 <span class="badge">📊 Intermediate</span>
@@ -1375,7 +1375,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                             if (data.success) {
                                 displayResult('Learning Journey Started!', `
                                     <div class="learning-progress">
-                                        <h3>🎓 GAuth Learning Path Initialized</h3>
+                                        <h3>🎓 AgentAuth Learning Path Initialized</h3>
                                         <p><strong>Session ID:</strong> ${data.session_id}</p>
                                         <p><strong>Current Module:</strong> ${data.current_module}</p>
                                         <div class="progress-bar">
@@ -1462,7 +1462,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                             if (data.success) {
                                 displayResult('Demo Token Created Successfully!', `
                                     <div class="token-results">
-                                        <h3>🎫 GAuth Demo Token Generated</h3>
+                                        <h3>🎫 AgentAuth Demo Token Generated</h3>
                                         <div class="token-info">
                                             <p><strong>Token ID:</strong> <code>${data.token_id}</code></p>
                                             <p><strong>Issued:</strong> ${data.issued_at}</p>
@@ -1648,7 +1648,7 @@ verified = verify(token, signature, publicKey) // true</pre>
             if (data.success) {
                 displayResult('Validation Complete', `
                     <div class="validation-results">
-                        <h3>✅ GAuth Validation Suite</h3>
+                        <h3>✅ AgentAuth Validation Suite</h3>
                         <p><strong>Validation:</strong> ${action.replace('-', ' ').toUpperCase()}</p>
                         <p><strong>Validation ID:</strong> ${data.validation_id}</p>
                         <div class="validation-status ${data.overall_status}">
@@ -1697,7 +1697,7 @@ verified = verify(token, signature, publicKey) // true</pre>
             if (data.success) {
                 displayResult('Action Complete', `
                     <div class="action-results">
-                        <h3>⚡ GAuth Action: ${action.replace('-', ' ').toUpperCase()}</h3>
+                        <h3>⚡ AgentAuth Action: ${action.replace('-', ' ').toUpperCase()}</h3>
                         <p><strong>Action ID:</strong> ${data.action_id}</p>
                         <p><strong>Status:</strong> ${data.status}</p>
                         <p><strong>Message:</strong> ${data.message}</p>
@@ -2089,7 +2089,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                     <div class="flex-shrink-0">
                         <h1 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
                             <i class="fas fa-flask text-blue-600" aria-hidden="true"></i>
-                            <span>GAuth Learning Lab</span>
+                            <span>AgentAuth Learning Lab</span>
                         </h1>
                     </div>
                 </div>
@@ -2590,10 +2590,10 @@ verified = verify(token, signature, publicKey) // true</pre>
                 <span>RFC-0150 Compliant Authorization Platform</span>
             </div>
             <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-                GAuth Learning Lab
+                AgentAuth Learning Lab
             </h1>
             <p class="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-                Master authorization patterns, test compliance, and explore GAuth capabilities through interactive demos and real-world scenarios.
+                Master authorization patterns, test compliance, and explore AgentAuth capabilities through interactive demos and real-world scenarios.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                 <button data-action="start-learning-path" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg inline-flex items-center justify-center gap-2">
@@ -2637,7 +2637,7 @@ verified = verify(token, signature, publicKey) // true</pre>
             <div class="text-center mb-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Quick Start Guide</h2>
                 <p class="text-gray-600">
-                Learn, experiment, and validate GAuth concepts through hands-on exploration of authorization patterns, 
+                Learn, experiment, and validate AgentAuth concepts through hands-on exploration of authorization patterns, 
                 compliance testing, and real-world implementation scenarios.
             </p>
             
@@ -2646,7 +2646,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                 <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl transition-shadow">
                     <div class="text-4xl mb-3">📚</div>
                     <h3 class="font-bold text-gray-900 mb-2">Concept Evaluation</h3>
-                    <p class="text-gray-600 text-sm">Structured learning path through GAuth authorization concepts, from basic delegation to advanced cascade patterns</p>
+                    <p class="text-gray-600 text-sm">Structured learning path through AgentAuth authorization concepts, from basic delegation to advanced cascade patterns</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
                     <div class="text-4xl mb-3">�</div>
@@ -2711,7 +2711,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                     <i class="fas fa-key mr-2"></i>
                     Create Demo Token
                 </button>
-                <a href="https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0" 
+                <a href="https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0" 
                    target="_blank" rel="noopener noreferrer"
                    class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg">
                     <i class="fab fa-github mr-2"></i>
@@ -2730,7 +2730,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                     <span>Guided Learning Path</span>
                 </h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Progressive exploration of GAuth concepts, from fundamental authorization principles to advanced cascade delegation patterns
+                    Progressive exploration of AgentAuth concepts, from fundamental authorization principles to advanced cascade delegation patterns
                 </p>
                 <div class="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-green-100 border border-green-300 rounded-full">
                     <i class="fas fa-graduation-cap text-green-600"></i>
@@ -2746,7 +2746,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                         <h3 class="text-xl font-bold text-blue-900">Authorization Fundamentals</h3>
                         <div class="progress-indicator bg-blue-200 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">○</div>
                     </div>
-                    <p class="text-blue-700 text-sm mb-4">Learn the core concepts of authorization in GAuth including Subject-Resource-Action model and policy-based access control.</p>
+                    <p class="text-blue-700 text-sm mb-4">Learn the core concepts of authorization in AgentAuth including Subject-Resource-Action model and policy-based access control.</p>
                     <div class="flex items-center justify-between text-xs text-blue-600 mb-4">
                         <span><i class="fas fa-clock mr-1"></i>15 minutes</span>
                         <span><i class="fas fa-signal mr-1"></i>Beginner</span>
@@ -2858,7 +2858,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                         <h3 class="text-xl font-bold text-gray-900">Cryptographic Foundations</h3>
                         <div class="progress-indicator bg-gray-200 text-gray-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">○</div>
                     </div>
-                    <p class="text-gray-700 text-sm mb-4">Understand digital signatures, hash functions, and cryptographic proofs in GAuth.</p>
+                    <p class="text-gray-700 text-sm mb-4">Understand digital signatures, hash functions, and cryptographic proofs in AgentAuth.</p>
                     <div class="flex items-center justify-between text-xs text-gray-600 mb-4">
                         <span><i class="fas fa-clock mr-1"></i>22 minutes</span>
                         <span><i class="fas fa-signal mr-1"></i>Advanced</span>
@@ -2922,7 +2922,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                         <h3 class="text-xl font-bold text-emerald-900">Enterprise Integration</h3>
                         <div class="progress-indicator bg-emerald-200 text-emerald-800 rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">○</div>
                     </div>
-                    <p class="text-emerald-700 text-sm mb-4">Learn to integrate GAuth with existing enterprise systems and identity providers.</p>
+                    <p class="text-emerald-700 text-sm mb-4">Learn to integrate AgentAuth with existing enterprise systems and identity providers.</p>
                     <div class="flex items-center justify-between text-xs text-emerald-600 mb-4">
                         <span><i class="fas fa-clock mr-1"></i>21 minutes</span>
                         <span><i class="fas fa-signal mr-1"></i>Advanced</span>
@@ -3002,7 +3002,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                 </div>
                 <!-- Semantic Metrics Panel -->
                 <div id="semantic-metrics-panel" class="bg-gray-50 rounded-xl shadow border border-gray-200 p-5">
-                    <h3 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-language text-green-600" aria-hidden="true"></i><span>Semantic Counters (RFC0111)</span></h3>
+                    <h3 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-language text-green-600" aria-hidden="true"></i><span>Semantic Counters (AAP-001)</span></h3>
                     <div id="semantic-metrics-status" class="text-xs text-gray-600 mb-2" aria-live="polite">Initializing…</div>
                     <div id="semantic-rate-badge" class="text-[11px] bg-white border rounded px-2 py-1 inline-block mb-2">No rates</div>
                     <div class="overflow-x-auto">
@@ -3362,7 +3362,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                     <span>Experimental Playground</span>
                 </h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Safe sandbox environment for testing GAuth concepts and authorization scenarios
+                    Safe sandbox environment for testing AgentAuth concepts and authorization scenarios
                 </p>
             </div>
 
@@ -3662,7 +3662,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                             <h4 class="text-lg font-semibold text-gray-900 mb-4">Results & Analysis</h4>
                             <div id="sandbox-terminal" class="bg-gray-900 rounded-lg p-4 h-80 overflow-auto">
                                 <div class="text-green-400 font-mono text-sm">
-                                    <div class="text-gray-500"># GAuth Authorization Sandbox v2.0</div>
+                                    <div class="text-gray-500"># AgentAuth Authorization Sandbox v2.0</div>
                                     <div class="text-gray-500"># Ready for experiments...</div>
                                     <div class="text-blue-400 mt-2">sandbox></div>
                                     <span class="blinking-cursor">_</span>
@@ -3953,7 +3953,7 @@ verified = verify(token, signature, publicKey) // true</pre>
     <section id="overview" class="py-16 bg-white" role="region" aria-labelledby="overview-heading">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4">GAuth Learning Summary</h2>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">AgentAuth Learning Summary</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
                     Understanding the key concepts and capabilities demonstrated in this RFC-0150 compliant implementation
                 </p>
@@ -3990,7 +3990,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                         <i class="fas fa-balance-scale text-3xl text-red-600"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2">RFC Compliance</h3>
-                    <p class="text-gray-600">Adheres to GiFo-RFC-0111 and GiFo-RFC-0115 standards</p>
+                    <p class="text-gray-600">Adheres to AAP-RFC-0111 and AAP-RFC-0115 standards</p>
                 </div>
             </div>
         </div>
@@ -4590,7 +4590,7 @@ verified = verify(token, signature, publicKey) // true</pre>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">Interactive Demo</h2>
-                <p class="text-xl text-gray-600">Explore GAuth concepts through hands-on examples</p>
+                <p class="text-xl text-gray-600">Explore AgentAuth concepts through hands-on examples</p>
                 <div class="mt-4 p-4 bg-orange-100 border border-orange-200 rounded-lg inline-block">
                     <p class="text-orange-800 font-medium">
                         <i class="fas fa-graduation-cap mr-2"></i>
@@ -4630,7 +4630,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                 <!-- Samples Demo -->
                 <div id="samples-demo" class="tab-content hidden p-8">
                                         <div class="mb-6">
-                        <h3 class="text-2xl font-bold mb-2">Run GAuth Samples</h3>
+                        <h3 class="text-2xl font-bold mb-2">Run AgentAuth Samples</h3>
                                                 <p class="text-gray-600 mb-4">Browse and execute 37+ working Go examples. Output appears below.</p>
                                                 <div class="grid md:grid-cols-4 gap-4 mb-4">
                                                     <div class="md:col-span-2">
@@ -5002,7 +5002,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                     <div class="max-w-6xl mx-auto">
                         <div class="text-center mb-8">
                             <h3 class="text-3xl font-bold text-gray-900 mb-4">🧪 Interactive Feature Testing</h3>
-                            <p class="text-xl text-gray-600">Comprehensive test environment for GAuth interactive components</p>
+                            <p class="text-xl text-gray-600">Comprehensive test environment for AgentAuth interactive components</p>
                             <div class="mt-4 p-4 bg-blue-100 border border-blue-200 rounded-lg inline-block">
                                 <p class="text-blue-800 font-medium">
                                     <i class="fas fa-flask mr-2"></i>
@@ -5156,7 +5156,7 @@ verified = verify(token, signature, publicKey) // true</pre>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">System Architecture</h2>
-                <p class="text-xl text-gray-600">Understanding the GAuth framework structure and components</p>
+                <p class="text-xl text-gray-600">Understanding the AgentAuth framework structure and components</p>
             </div>
 
             <!-- Architecture Diagram -->
@@ -5173,11 +5173,11 @@ verified = verify(token, signature, publicKey) // true</pre>
 
                     <div class="text-4xl text-gray-400">→</div>
 
-                    <!-- GAuth Core -->
+                    <!-- AgentAuth Core -->
                     <div class="text-center">
                         <div class="bg-purple-500 text-white rounded-lg p-4 mb-4">
                             <i class="fas fa-shield-alt text-2xl mb-2"></i>
-                            <div class="font-semibold">GAuth Core</div>
+                            <div class="font-semibold">AgentAuth Core</div>
                         </div>
                         <p class="text-sm text-gray-600">Authorization<br>Token Management</p>
                     </div>
@@ -5297,7 +5297,7 @@ verified = verify(token, signature, publicKey) // true</pre>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-4xl font-bold text-gray-900 mb-4">Learning Examples</h2>
-                <p class="text-xl text-gray-600">Explore 37+ working examples demonstrating GAuth concepts</p>
+                <p class="text-xl text-gray-600">Explore 37+ working examples demonstrating AgentAuth concepts</p>
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -5401,7 +5401,7 @@ verified = verify(token, signature, publicKey) // true</pre>
 
             <!-- View All Examples Button -->
             <div class="text-center mt-12">
-                <a href="https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/tree/main/examples" 
+                <a href="https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/tree/main/examples" 
                    target="_blank"
                    class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-4 px-8 rounded-lg text-lg transition-all transform hover:scale-105">
                     <i class="fas fa-folder-open mr-2"></i>
@@ -5417,7 +5417,7 @@ verified = verify(token, signature, publicKey) // true</pre>
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Live System Activity</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Real-time monitoring of GAuth operations, audit events, and system health
+                    Real-time monitoring of AgentAuth operations, audit events, and system health
                 </p>
             </div>
 
@@ -5486,7 +5486,7 @@ verified = verify(token, signature, publicKey) // true</pre>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="text-xl font-bold mb-4">GAuth Beta Demo</h3>
+                    <h3 class="text-xl font-bold mb-4">AgentAuth Beta Demo</h3>
                     <p class="text-gray-400 text-sm">
                         RFC-0150 compliant authorization framework implementation for learning and demonstration purposes.
                     </p>
@@ -5503,9 +5503,9 @@ verified = verify(token, signature, publicKey) // true</pre>
                 <div>
                     <h4 class="text-lg font-semibold mb-4">RFC Standards</h4>
                     <ul class="text-gray-400 text-sm space-y-2">
-                        <li><a href="#" class="hover:text-white">GiFo-RFC-0111</a></li>
-                        <li><a href="#" class="hover:text-white">GiFo-RFC-0115</a></li>
-                        <li><a href="#" class="hover:text-white">GiFo-RFC-0150</a></li>
+                        <li><a href="#" class="hover:text-white">AAP-RFC-0111</a></li>
+                        <li><a href="#" class="hover:text-white">AAP-RFC-0115</a></li>
+                        <li><a href="#" class="hover:text-white">AAP-RFC-0150</a></li>
                         <li><a href="#" class="hover:text-white">Compliance Guide</a></li>
                     </ul>
                 </div>
@@ -5524,7 +5524,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                     © 2025 AgentAuth Community gGmbH i.G. Licensed under Apache 2.0
                 </div>
                 <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="https://github.com/Gimel-Foundation" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">
+                    <a href="https://github.com/AgentAuth-Foundation" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">
                         <i class="fab fa-github text-xl"></i>
                     </a>
                     <a href="https://gimelfoundation.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white">
@@ -5536,7 +5536,7 @@ verified = verify(token, signature, publicKey) // true</pre>
     </footer>
 
     <!-- JavaScript -->
-    <!-- New Comprehensive GAuth Implementation -->
+    <!-- New Comprehensive AgentAuth Implementation -->
     <!-- Learning system immediate fix -->
     <script src="/static/js/learning-fix.js"></script>
     
@@ -5565,15 +5565,15 @@ verified = verify(token, signature, publicKey) // true</pre>
     <script type="module" src="/static/js/modules/ui.js"></script>
     <script type="module" src="/static/js/modules/refresh.js" defer></script>
 
-    <!-- GAuth Lab Pattern Explorer (inline) -->
+    <!-- AgentAuth Lab Pattern Explorer (inline) -->
     <script>
-    // Create GAuthLab namespace if it doesn't exist
-    if (typeof window.GAuthLab === 'undefined') {
-        window.GAuthLab = {};
+    // Create AgentAuthLab namespace if it doesn't exist
+    if (typeof window.AgentAuthLab === 'undefined') {
+        window.AgentAuthLab = {};
     }
 
     // Pattern Explorer for the HTML onclick handlers
-    window.GAuthLab.PatternExplorer = {
+    window.AgentAuthLab.PatternExplorer = {
         patterns: {
             'delegation-chain': {
                 name: 'Hierarchical Delegation Chain',
@@ -5661,11 +5661,11 @@ verified = verify(token, signature, publicKey) // true</pre>
                             </p>
                             
                             <div class="grid md:grid-cols-2 gap-4 mb-6">
-                                <button onclick="window.GAuthLab.PatternExplorer.startSimulation('${patternId}')"
+                                <button onclick="window.AgentAuthLab.PatternExplorer.startSimulation('${patternId}')"
                                         class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
                                     🚀 Start Simulation
                                 </button>
-                                <button onclick="window.GAuthLab.PatternExplorer.exportPattern('${patternId}')"
+                                <button onclick="window.AgentAuthLab.PatternExplorer.exportPattern('${patternId}')"
                                         class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
                                     📥 Export Pattern
                                 </button>
@@ -5673,7 +5673,7 @@ verified = verify(token, signature, publicKey) // true</pre>
 
                             <div id="simulation-output-${patternId}" class="hidden">
                                 <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
-                                    <div class="text-blue-400 mb-2">🔧 GAuth Pattern Simulator v2.0</div>
+                                    <div class="text-blue-400 mb-2">🔧 AgentAuth Pattern Simulator v2.0</div>
                                     <div id="simulation-log-${patternId}"></div>
                                 </div>
                             </div>
@@ -5867,17 +5867,17 @@ verified = verify(token, signature, publicKey) // true</pre>
         }
     };
 
-    console.log('✅ GAuth Lab Pattern Explorer bridge loaded');
+    console.log('✅ AgentAuth Lab Pattern Explorer bridge loaded');
     
     // Test that the functions are accessible
-    if (window.GAuthLab && window.GAuthLab.PatternExplorer) {
-        console.log('✅ Pattern Explorer functions available:', Object.keys(window.GAuthLab.PatternExplorer));
+    if (window.AgentAuthLab && window.AgentAuthLab.PatternExplorer) {
+        console.log('✅ Pattern Explorer functions available:', Object.keys(window.AgentAuthLab.PatternExplorer));
         
         // Add a global test function
         window.testPatternButtons = function() {
             console.log('🧪 Testing pattern buttons...');
             try {
-                window.GAuthLab.PatternExplorer.showPattern('delegation-chain');
+                window.AgentAuthLab.PatternExplorer.showPattern('delegation-chain');
                 console.log('✅ Load Pattern button test passed');
             } catch (error) {
                 console.error('❌ Load Pattern button test failed:', error);
@@ -6184,7 +6184,7 @@ verified = verify(token, signature, publicKey) // true</pre>
             
             const demoDiv = document.createElement('div');
             demoDiv.style.cssText = 'background: #dbeafe; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid #3b82f6;';
-            demoDiv.innerHTML = '<p style="margin: 0; color: #1e40af;"><strong>Interactive Demo:</strong> This pattern demonstration shows how authorization flows work in the GAuth system.</p>';
+            demoDiv.innerHTML = '<p style="margin: 0; color: #1e40af;"><strong>Interactive Demo:</strong> This pattern demonstration shows how authorization flows work in the AgentAuth system.</p>';
             
             content.appendChild(successDiv);
             content.appendChild(detailsDiv);
@@ -6251,7 +6251,7 @@ verified = verify(token, signature, publicKey) // true</pre>
                 content.appendChild(simulationDiv);
             }
             
-            simulationDiv.innerHTML = '<div style="color: #3b82f6;">🔧 GAuth Pattern Simulator v2.0</div><div style="color: #10b981;">🚀 Initializing simulation...</div>';
+            simulationDiv.innerHTML = '<div style="color: #3b82f6;">🔧 AgentAuth Pattern Simulator v2.0</div><div style="color: #10b981;">🚀 Initializing simulation...</div>';
             
             // Simulate pattern execution with comprehensive scenarios
             let steps = [];
@@ -7501,7 +7501,7 @@ Next Steps: Proceed with campaign implementation
                 };
                 
                 // Create and download test report
-                const reportContent = `GAuth Content Approval Test Report
+                const reportContent = `AgentAuth Content Approval Test Report
 Generated: ${testResults.timestamp}
 
 Test Status: ${testResults.status}
@@ -7774,7 +7774,7 @@ Test completed successfully with ${testResults.approvalScore}% approval score.
                 }, 2000);
                 
                 // Show success message
-                showActionMessage('🎓 Welcome to your GAuth Learning Journey! Start with the fundamentals below.', 'success');
+                showActionMessage('🎓 Welcome to your AgentAuth Learning Journey! Start with the fundamentals below.', 'success');
             } else {
                 // If section not found, show message anyway
                 showActionMessage('🎓 Learning Journey started! Explore the features below.', 'success');
@@ -7944,7 +7944,7 @@ Test completed successfully with ${testResults.approvalScore}% approval score.
         setTimeout(() => {
             // Create mock compliance certificate
             const certificate = {
-                title: 'GAuth Compliance Certificate',
+                title: 'AgentAuth Compliance Certificate',
                 issueDate: new Date().toISOString().split('T')[0],
                 validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                 standards: ['RFC-0150', 'ISO-27001', 'GDPR', 'SOC-2'],
@@ -7956,7 +7956,7 @@ Test completed successfully with ${testResults.approvalScore}% approval score.
             
             // Generate and download certificate
             const certificateText = `
-GAuth Compliance Certificate
+AgentAuth Compliance Certificate
 ═══════════════════════════════
 
 Certificate ID: ${certificate.certificateId}
@@ -7970,7 +7970,7 @@ Test Results:
 • Tests Passed: ${certificate.testsPassed}/${certificate.totalTests}
 • Compliance Score: ${certificate.complianceScore}
 
-This certificate confirms that the GAuth implementation
+This certificate confirms that the AgentAuth implementation
 meets all specified compliance requirements.
 
 Generated: ${new Date().toISOString()}
@@ -8056,7 +8056,7 @@ Generated: ${new Date().toISOString()}
                 const moduleContentMap = {
                     'auth-fundamentals': {
                         title: 'Authorization Fundamentals',
-                        description: 'Learn the core concepts of authorization in GAuth including Subject-Resource-Action model and policy-based access control.',
+                        description: 'Learn the core concepts of authorization in AgentAuth including Subject-Resource-Action model and policy-based access control.',
                         icon: '🔐',
                         color: 'from-blue-600 to-blue-800',
                         sections: [
@@ -8845,7 +8845,7 @@ Generated: ${new Date().toISOString()}
                     },
                     'crypto-foundations': {
                         title: 'Cryptographic Foundations',
-                        description: 'Understand digital signatures, hash functions, and cryptographic proofs in GAuth.',
+                        description: 'Understand digital signatures, hash functions, and cryptographic proofs in AgentAuth.',
                         icon: '🔒',
                         color: 'from-gray-600 to-slate-800',
                         sections: [
@@ -8995,11 +8995,11 @@ Generated: ${new Date().toISOString()}
                                 `
                             },
                             {
-                                title: 'GAuth Cryptographic Implementation',
+                                title: 'AgentAuth Cryptographic Implementation',
                                 content: `
                                     <div class="space-y-4">
                                         <div class="bg-slate-50 p-4 rounded-lg">
-                                            <h5 class="font-bold text-slate-800 mb-2">GAuth Cryptographic Stack</h5>
+                                            <h5 class="font-bold text-slate-800 mb-2">AgentAuth Cryptographic Stack</h5>
                                             <div class="space-y-3">
                                                 <div class="bg-white p-3 rounded border-l-4 border-blue-400">
                                                     <h6 class="font-semibold text-blue-700">Token Signing & Verification</h6>
@@ -9203,9 +9203,9 @@ Generated: ${new Date().toISOString()}
                                             </div>
                                         </div>
                                         <div class="bg-orange-50 p-4 rounded-lg">
-                                            <h5 class="font-bold text-orange-800 mb-2">GAuth Authorization Implementation</h5>
+                                            <h5 class="font-bold text-orange-800 mb-2">AgentAuth Authorization Implementation</h5>
                                             <div class="bg-gray-800 p-3 rounded text-white font-mono text-sm">
-                                                <div class="text-green-400">// GAuth middleware example</div>
+                                                <div class="text-green-400">// AgentAuth middleware example</div>
                                                 <div>func AuthorizeRequest(requiredAction string) gin.HandlerFunc {</div>
                                                 <div>  return func(c *gin.Context) {</div>
                                                 <div>    token := extractToken(c)</div>
@@ -9309,7 +9309,7 @@ Generated: ${new Date().toISOString()}
                                             </div>
                                         </div>
                                         <div class="bg-rose-50 p-4 rounded-lg">
-                                            <h5 class="font-bold text-rose-800 mb-2">GAuth Consensus Implementation</h5>
+                                            <h5 class="font-bold text-rose-800 mb-2">AgentAuth Consensus Implementation</h5>
                                             <div class="bg-gray-800 p-3 rounded text-white font-mono text-sm">
                                                 <div class="text-green-400">// Multi-signature authorization consensus</div>
                                                 <div>type ConsensusResult struct {</div>
@@ -9433,7 +9433,7 @@ Generated: ${new Date().toISOString()}
                                             </div>
                                         </div>
                                         <div class="bg-blue-50 p-4 rounded-lg">
-                                            <h5 class="font-bold text-blue-800 mb-2">GAuth Resilience Implementation</h5>
+                                            <h5 class="font-bold text-blue-800 mb-2">AgentAuth Resilience Implementation</h5>
                                             <div class="bg-gray-800 p-3 rounded text-white font-mono text-sm">
                                                 <div class="text-green-400">// Circuit breaker pattern for authorization</div>
                                                 <div>type AuthCircuitBreaker struct {</div>
@@ -9578,7 +9578,7 @@ Generated: ${new Date().toISOString()}
                                             </div>
                                         </div>
                                         <div class="bg-yellow-50 p-4 rounded-lg">
-                                            <h5 class="font-bold text-yellow-800 mb-2">GAuth Consent Implementation</h5>
+                                            <h5 class="font-bold text-yellow-800 mb-2">AgentAuth Consent Implementation</h5>
                                             <div class="bg-gray-800 p-3 rounded text-white font-mono text-sm">
                                                 <div class="text-green-400">// Consent-aware authorization</div>
                                                 <div>type ConsentRecord struct {</div>
@@ -9599,7 +9599,7 @@ Generated: ${new Date().toISOString()}
                     },
                     'enterprise-integration': {
                         title: 'Enterprise Integration',
-                        description: 'Learn to integrate GAuth with existing enterprise systems and identity providers.',
+                        description: 'Learn to integrate AgentAuth with existing enterprise systems and identity providers.',
                         icon: '🏢',
                         color: 'from-emerald-600 to-teal-800',
                         sections: [
@@ -9702,7 +9702,7 @@ Generated: ${new Date().toISOString()}
                                                     <div>    c.JSON(400, gin.H{"error": "Token exchange failed"})</div>
                                                     <div>    return</div>
                                                     <div>  }</div>
-                                                    <div>  gauthToken := convertToGAuthToken(token)</div>
+                                                    <div>  gauthToken := convertToAgentAuthToken(token)</div>
                                                     <div>  c.SetCookie("auth_token", gauthToken, 3600, "/", "", true, true)</div>
                                                     <div>}</div>
                                                 </div>
@@ -9741,7 +9741,7 @@ Generated: ${new Date().toISOString()}
                                                             <div class="text-xs text-gray-600">cn, sn, mail, memberOf</div>
                                                         </div>
                                                         <div class="bg-blue-100 p-2 rounded">
-                                                            <div class="font-semibold">GAuth Claims</div>
+                                                            <div class="font-semibold">AgentAuth Claims</div>
                                                             <div class="text-xs text-gray-600">subject, email, groups, roles</div>
                                                         </div>
                                                     </div>
@@ -9752,7 +9752,7 @@ Generated: ${new Date().toISOString()}
                                             <h5 class="font-bold text-orange-800 mb-2">LDAP Query Implementation</h5>
                                             <div class="bg-gray-800 p-3 rounded text-white font-mono text-sm">
                                                 <div class="text-green-400">// LDAP authentication and attribute retrieval</div>
-                                                <div>func AuthenticateUser(username, password string) (*GAuthUser, error) {</div>
+                                                <div>func AuthenticateUser(username, password string) (*AgentAuthUser, error) {</div>
                                                 <div>  conn, err := ldap.Dial("tcp", "ldap.company.com:389")</div>
                                                 <div>  if err != nil {</div>
                                                 <div>    return nil, err</div>
@@ -9772,7 +9772,7 @@ Generated: ${new Date().toISOString()}
                                                 <div>    "(objectClass=*)", []string{"cn", "mail", "memberOf"}, nil)</div>
                                                 <div>  </div>
                                                 <div>  sr, err := conn.Search(searchRequest)</div>
-                                                <div>  return mapLDAPToGAuth(sr.Entries[0]), nil</div>
+                                                <div>  return mapLDAPToAgentAuth(sr.Entries[0]), nil</div>
                                                 <div>}</div>
                                             </div>
                                         </div>
@@ -9791,14 +9791,14 @@ Generated: ${new Date().toISOString()}
                                                         <span class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">1</span>
                                                         <span class="font-semibold">User Access Attempt</span>
                                                     </div>
-                                                    <p class="text-sm text-gray-600 ml-11">User tries to access GAuth-protected resource</p>
+                                                    <p class="text-sm text-gray-600 ml-11">User tries to access AgentAuth-protected resource</p>
                                                 </div>
                                                 <div class="bg-white p-3 rounded">
                                                     <div class="flex items-center mb-2">
                                                         <span class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm mr-3">2</span>
                                                         <span class="font-semibold">Redirect to IdP</span>
                                                     </div>
-                                                    <p class="text-sm text-gray-600 ml-11">GAuth redirects to enterprise identity provider</p>
+                                                    <p class="text-sm text-gray-600 ml-11">AgentAuth redirects to enterprise identity provider</p>
                                                 </div>
                                                 <div class="bg-white p-3 rounded">
                                                     <div class="flex items-center mb-2">
@@ -9812,12 +9812,12 @@ Generated: ${new Date().toISOString()}
                                                         <span class="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm mr-3">4</span>
                                                         <span class="font-semibold">Token Exchange</span>
                                                     </div>
-                                                    <p class="text-sm text-gray-600 ml-11">IdP returns assertion/token, GAuth creates internal session</p>
+                                                    <p class="text-sm text-gray-600 ml-11">IdP returns assertion/token, AgentAuth creates internal session</p>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="bg-blue-50 p-4 rounded-lg">
-                                            <h5 class="font-bold text-blue-800 mb-2">GAuth SSO Configuration</h5>
+                                            <h5 class="font-bold text-blue-800 mb-2">AgentAuth SSO Configuration</h5>
                                             <div class="bg-gray-800 p-3 rounded text-white font-mono text-sm">
                                                 <div class="text-green-400">// SSO configuration example</div>
                                                 <div>type SSOConfig struct {</div>
@@ -9826,7 +9826,7 @@ Generated: ${new Date().toISOString()}
                                                 <div>  Certificate      string // For SAML signature validation</div>
                                                 <div>  ClientID         string // For OIDC</div>
                                                 <div>  ClientSecret     string // For OIDC</div>
-                                                <div>  AttributeMapping map[string]string // IdP → GAuth claims</div>
+                                                <div>  AttributeMapping map[string]string // IdP → AgentAuth claims</div>
                                                 <div>  SessionDuration  time.Duration</div>
                                                 <div>}</div>
                                                 <div></div>
@@ -9982,7 +9982,7 @@ Generated: ${new Date().toISOString()}
                 const scenarioType = document.getElementById('sandbox-scenario-type')?.value || 'simple';
                 terminal.innerHTML = `
                     <div class="text-green-400 font-mono text-sm">
-                        <div class="text-gray-500"># GAuth Authorization Sandbox v2.0</div>
+                        <div class="text-gray-500"># AgentAuth Authorization Sandbox v2.0</div>
                         <div class="text-blue-400">sandbox> run_experiment --type=${scenarioType}</div>
                         <div class="text-yellow-400">🔬 Initializing experiment environment...</div>
                         <div class="text-green-400">✅ Participants loaded: alice, bob, charlie</div>
@@ -10066,7 +10066,7 @@ Generated: ${new Date().toISOString()}
         button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Exporting...';
         
         setTimeout(() => {
-            const reportContent = `GAuth Authorization Sandbox Report
+            const reportContent = `AgentAuth Authorization Sandbox Report
 Generated: ${new Date().toISOString()}
 
 Experiment Configuration:
@@ -10091,7 +10091,7 @@ Recommendations:
 - Consider implementing role-based access for document management
 - Add additional constraints for high-privilege operations
 
-GAuth Sandbox v2.0 - Authorization Testing Platform
+AgentAuth Sandbox v2.0 - Authorization Testing Platform
             `.trim();
             
             const blob = new Blob([reportContent], { type: 'text/plain' });
@@ -10135,7 +10135,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 if (terminal) {
                     terminal.innerHTML = `
                         <div class="text-green-400 font-mono text-sm">
-                            <div class="text-gray-500"># GAuth Delegation Example</div>
+                            <div class="text-gray-500"># AgentAuth Delegation Example</div>
                             <div class="text-blue-400">example> run delegation_chain_demo</div>
                             <div class="text-yellow-400">🔗 Setting up delegation chain...</div>
                             <div class="text-green-400">✅ CEO -> VP Marketing (budget: $100K)</div>
@@ -11043,7 +11043,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
             console.log('✅ All Button Types Handler initialized');
             
             // Initialize API client
-            window.apiClient = new GAuthAPIClient();
+            window.apiClient = new AgentAuthAPIClient();
             console.log('✅ API Client initialized');
             
             // Initialize Live System Activity
@@ -11051,11 +11051,11 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
             initializeLiveActivity();
             
             // Initialize learning path
-            if (typeof GAuthLearningPath !== 'undefined') {
-                window.learningPath = new GAuthLearningPath(window.apiClient);
+            if (typeof AgentAuthLearningPath !== 'undefined') {
+                window.learningPath = new AgentAuthLearningPath(window.apiClient);
                 console.log('✅ Learning Path initialized');
             } else {
-                console.log('⚠️ GAuthLearningPath not available, using fallback');
+                console.log('⚠️ AgentAuthLearningPath not available, using fallback');
             }
             
             // Initialize pattern explorer (if available)
@@ -11076,7 +11076,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 console.log('✅ Authorization Sandbox initialized');
             }
             
-            console.log('🎉 GAuth Learning Lab initialization completed!');
+            console.log('🎉 AgentAuth Learning Lab initialization completed!');
             
             // DIRECT FIX FOR SIMULATE PATTERN BUTTON
             setTimeout(function() {
@@ -11594,7 +11594,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 </div>
                 <div style="margin-top: 0.25rem; font-size: 0.7rem;">
                     • Blockchain transaction: 0x${Math.random().toString(16).substr(2, 40)}
-                    <br>• Network: GAuth Enterprise Chain
+                    <br>• Network: AgentAuth Enterprise Chain
                     <br>• Gas used: 127,439 wei
                     <br>• Deployment timestamp: ${new Date().toISOString()}
                 </div>
@@ -11615,7 +11615,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
                 blockNumber: Math.floor(Math.random() * 1000000) + 15000000,
                 gasUsed: 127439,
                 timestamp: new Date().toISOString(),
-                network: 'GAuth Enterprise Chain'
+                network: 'AgentAuth Enterprise Chain'
             };
             
             const blob = new Blob([JSON.stringify(receiptData, null, 2)], { type: 'application/json' });
@@ -11646,7 +11646,7 @@ GAuth Sandbox v2.0 - Authorization Testing Platform
 
 Certificate ID: ${poaId}
 Issue Date: ${new Date().toISOString().split('T')[0]}
-Issuer: GAuth Enterprise Authorization System
+Issuer: AgentAuth Enterprise Authorization System
 Status: ACTIVE
 
 --- CERTIFICATE DETAILS ---
@@ -11661,7 +11661,7 @@ Public Key: 04a1b2c3d4e5f6789abcdef0123456789abcdef0123456789abcdef0123456789abc
 Signature: ${btoa(poaId + Date.now()).substr(0, 128)}
 
 --- BLOCKCHAIN ANCHOR ---
-Network: GAuth Enterprise Chain
+Network: AgentAuth Enterprise Chain
 Contract Address: 0x742d35Cc6334C0532925a3b8c0d56f4759CF8bC6
 Transaction Hash: 0x${Math.random().toString(16).substr(2, 40)}
 
@@ -12788,7 +12788,7 @@ Generated: ${new Date().toISOString()}
                 complianceLevel: 'FULL_COMPLIANCE',
                 score: '96.8%',
                 standards: ['RFC-0150', 'OAuth 2.0', 'GDPR', 'SOC 2'],
-                certifiedBy: 'GAuth Compliance Engine v2.0',
+                certifiedBy: 'AgentAuth Compliance Engine v2.0',
                 certificationDetails: {
                     authorizationPatterns: 'COMPLIANT',
                     cryptographicStandards: 'COMPLIANT',
@@ -13051,7 +13051,7 @@ Generated: ${new Date().toISOString()}
                 
                 // Handle different actions
                 if (action === 'start-learning-path') {
-                    alert('Starting Learning Journey!\n\nThis will guide you through GAuth capabilities.');
+                    alert('Starting Learning Journey!\n\nThis will guide you through AgentAuth capabilities.');
                 } else if (action === 'quick-compliance-check') {
                     alert('Quick Compliance Check!\n\nAnalyzing your current compliance status.');
                 } else if (action === 'create-token') {
@@ -13966,7 +13966,7 @@ Generated: ${new Date().toISOString()}
                     ]);
                     
                     // Generate comprehensive report
-                    const report = `GAuth Learning Lab - Test Report
+                    const report = `AgentAuth Learning Lab - Test Report
 Generated: ${new Date().toISOString()}
 ========================================
 
@@ -13991,7 +13991,7 @@ ${Object.entries(metrics).slice(0, 10).map(([key, value]) =>
 ).join('\n') || 'No metrics available'}
 
 ========================================
-Report generated by GAuth Learning Lab
+Report generated by AgentAuth Learning Lab
 RFC-0150 Authorization Platform
 `;
                     
@@ -14025,8 +14025,8 @@ RFC-0150 Authorization Platform
             'load-pattern': async function(btn) {
                 const patternId = btn.dataset.patternId || 'default';
                 showNotification(`📐 Loading pattern: ${patternId}...`, 'info');
-                if (window.GAuthLab && window.GAuthLab.PatternExplorer) {
-                    window.GAuthLab.PatternExplorer.showPattern(patternId);
+                if (window.AgentAuthLab && window.AgentAuthLab.PatternExplorer) {
+                    window.AgentAuthLab.PatternExplorer.showPattern(patternId);
                 } else {
                     showNotification(`✅ Pattern "${patternId}" loaded`, 'success');
                 }
@@ -14448,7 +14448,7 @@ RFC-0150 Authorization Platform
                 const firstModule = document.querySelector('[id="introduction"]');
                 if (firstModule) {
                     firstModule.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    showNotification('✅ Welcome to GAuth Learning Lab! Start with Introduction.', 'success');
+                    showNotification('✅ Welcome to AgentAuth Learning Lab! Start with Introduction.', 'success');
                 } else {
                     showNotification('✅ Learning path activated', 'success');
                 }
@@ -14624,7 +14624,7 @@ RFC-0150 Authorization Platform
         setTimeout(initializeButtonHandlers, 1000);
         
         // Make functions globally accessible for debugging
-        window.GAuthButtonSystem = {
+        window.AgentAuthButtonSystem = {
             handlers: buttonHandlers,
             reinitialize: initializeButtonHandlers,
             showNotification: showNotification

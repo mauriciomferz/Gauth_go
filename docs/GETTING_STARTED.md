@@ -8,29 +8,24 @@ owners: [system]
 
 # Getting Started with AgentAuth RFC Implementation
 
-> Last Updated: 2025-10-19
+> Last Updated: 2025-12-30
 > Status: Active
 
-> NOTE: Beta demonstration only – NOT production ready. See `../DISCLAIMER.md` for intentionally missing security, compliance, and operational controls.
+> NOTE: Beta demonstration only – NOT production ready. See `../DISCLAIMER.md` for missing security controls.
 
-**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
+**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 AAP-002 COMPLETE** | **🏢 OPEN SOURCE COMMUNITY**
 
-**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
-Licensed under Apache 2.0
+**Copyright (c) 2025 AgentAuth Authors**
+Licensed under MIT License
 
-**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
-Operated by AgentAuth Technologies GmbH
-MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
-
-This guide will help you get started with the official AgentAuth Community AgentAuth implementation, featuring complete AAP-RFC-0115 PoA-Definition compliance.
+This guide will help you get started with the official AgentAuth implementation.
 
 ## 🚀 Quick Installation
 
 ### 1. **Install the Package**
 
 ```bash
-go get github.com/AgentAuth-Foundation/gauth
+go get github.com/mauriciomferz/AgentAuth
 ```
 
 ### 2. **Build and Test**
@@ -88,21 +83,21 @@ Implementation notes:
 
 ```bash
 # Clone the repository
-git clone https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
-cd AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
+git clone https://github.com/mauriciomferz/Gauth_go
+cd Gauth_go
 
 # Build the package
 go build ./pkg/auth
 
-# Run RFC compliance tests
-go run examples/official_rfc_compliance_test/main.go
+# Run compliance tests
+go run examples/aap_functional_test/main.go
 ```
 
-## 🎯 **First AgentAuth-RFC-001 (formerly RFC 111) Implementation**
+## 🎯 **First AAP-001 Implementation**
 
 ### **Basic AgentAuth Authorization**
 
-Create your first RFC-compliant authorization:
+Create your first AAP-001 compliant authorization:
 
 ```go
 package main
@@ -111,7 +106,7 @@ import (
     "context"
     "fmt"
     "time"
-    "github.com/AgentAuth-Foundation/gauth/pkg/auth"
+    "github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 func main() {

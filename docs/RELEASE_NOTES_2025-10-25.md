@@ -95,8 +95,8 @@ Planned: algorithm introspection endpoint, heterogeneous threshold aggregation, 
 
 ## Checksums (Informational)
 The canonical digest domain prefix variants:
-- V1: `GAUTH_RFC0111_POA_V1` (single-sig)
-- V2: `GAUTH_RFC0111_POA_V2|thr=<T>|w=<sorted weights>` (multi-sig)
+- V1: `GAUTH_AAP-001_POA_V1` (single-sig)
+- V2: `GAUTH_AAP-001_POA_V2|thr=<T>|w=<sorted weights>` (multi-sig)
 
 ## Acknowledgments
 Thanks to contributors refining threshold signatures, authenticity defaults, and compliance mapping.

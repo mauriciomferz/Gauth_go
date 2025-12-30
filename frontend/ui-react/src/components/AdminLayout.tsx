@@ -213,7 +213,7 @@ const navGroups: NavGroup[] = [
     label: 'Policy',
     items: [
       { id: 'authorization', label: 'Authorization Engine', icon: <ShieldTask24Regular />, path: '/admin/authorization' },
-      { id: 'gauthplus', label: 'GAuth+', icon: <Bot24Regular />, path: '/admin/gauthplus' },
+      { id: 'gauthplus', label: 'AgentAuth+', icon: <Bot24Regular />, path: '/admin/gauthplus' },
       { id: 'poa', label: 'Power of Attorney', icon: <DocumentCheckmark24Regular />, path: '/admin/poa' },
       { id: 'gnap', label: 'GNAP Grants', icon: <Key24Regular />, path: '/admin/gnap' },
     ],

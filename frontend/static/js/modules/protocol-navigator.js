@@ -15,7 +15,7 @@
 //   - Mock tokens are correctly rejected with 401 (security working)
 //   - Valid tokens require completed subscription + PoA credential
 //
-// Environment: Requires GAUTH_RFC0111_ENABLED=1
+// Environment: Requires GAUTH_AAP-001_ENABLED=1
 
 /**
  * AgentAuth Protocol Flow Steps

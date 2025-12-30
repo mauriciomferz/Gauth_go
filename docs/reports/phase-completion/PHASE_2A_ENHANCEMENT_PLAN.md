@@ -22,7 +22,7 @@
 - [Completion Report](docs/PHASE_2A_BACKEND_COMPLETION_REPORT.md) - Implementation details
 - [Testing Results](docs/PHASE_2A_TESTING_RESULTS.md) - Verification and test results
 
-**Server Requirement**: Must set `GAUTH_RFC0111_ENABLED=1` environment variable to enable Phase 2A endpoints.
+**Server Requirement**: Must set `GAUTH_AAP-001_ENABLED=1` environment variable to enable Phase 2A endpoints.
 
 ---
 

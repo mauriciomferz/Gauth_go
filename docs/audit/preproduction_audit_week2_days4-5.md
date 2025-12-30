@@ -139,12 +139,12 @@ Stage 7: Terminate Delegation
 
 #### Test Suite 3: AAP-001 Metrics End-to-End
 **File:** `pkg/rfc0111/rfc0111_metrics_e2e_test.go`  
-**Test:** `TestRFC0111MetricsE2E`  
+**Test:** `TestAAP-001MetricsE2E`  
 **Status:** ✅ PASS (0.00s)
 
 **Workflow Validated:**
 ```
-Step 1: Create RFC0111 Service
+Step 1: Create AAP-001 Service
   ↳ In-memory service with Prometheus registry ✓
 
 Step 2: Create Delegation
@@ -172,8 +172,8 @@ Step 6: Scrape Metrics (/metrics endpoint)
 
 **Test Output:**
 ```
-=== RUN   TestRFC0111MetricsE2E
---- PASS: TestRFC0111MetricsE2E (0.00s)
+=== RUN   TestAAP-001MetricsE2E
+--- PASS: TestAAP-001MetricsE2E (0.00s)
 ```
 
 **Production Readiness:** ✅ Prometheus metrics integration confirmed working.
@@ -301,7 +301,7 @@ ok  web  0.313s
 | Delegation Lifecycle | `pkg/delegation/lifecycle_test.go` | `TestDelegation_LifecycleWorkflow` | ✅ PASS | 0.00s | 7 stages |
 | Dual-Control Revocation | `pkg/rfc0111/rfc0111_dual_control_revocation_test.go` | `TestDualControlRevocationWorkflow` | ✅ PASS | 0.06s | 3 flows |
 | Dual-Control Metrics | `pkg/rfc0111/rfc0111_dual_control_revocation_test.go` | `TestDualControlRevocationMetrics` | ⏭️ SKIP | 0.00s | N/A |
-| AAP-001 Metrics E2E | `pkg/rfc0111/rfc0111_metrics_e2e_test.go` | `TestRFC0111MetricsE2E` | ✅ PASS | 0.00s | 6 steps |
+| AAP-001 Metrics E2E | `pkg/rfc0111/rfc0111_metrics_e2e_test.go` | `TestAAP-001MetricsE2E` | ✅ PASS | 0.00s | 6 steps |
 | REST API Token Lifecycle | `web/token_status_test.go` | `TestTokenStatusTransitions` | ✅ PASS | 0.00s | 7 API calls |
 | Professional Token Lifecycle | `pkg/auth/professional_service_test.go` | `TestProfessionalAuthService_TokenLifecycle` | ✅ PASS | 0.00s | Full lifecycle |
 | Secrets Provider Lifecycle | `internal/secrets/filesystem_test.go` | `TestFilesystemProviderLifecycle` | ✅ PASS | 0.00s | Full lifecycle |

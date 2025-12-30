@@ -1,4 +1,4 @@
-# Quick production Dockerfile for GAuth Web Server
+# Quick production Dockerfile for AgentAuth Web Server
 # Uses pre-built binary to avoid CGO cross-compilation issues
 
 FROM alpine:3.19

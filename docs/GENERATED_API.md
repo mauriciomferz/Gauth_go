@@ -324,7 +324,7 @@ FUNCTIONS
 
 func DiscoverClauseTags(root string) (map[string][]string, error)
     DiscoverClauseTags maps tests to clause IDs by looking for inline comments
-    like: // CLAUSE: RFC0111-3.2.1
+    like: // CLAUSE: AAP-001-3.2.1
 
 func EmitMarkdown(r *Report) string
     EmitMarkdown renders a simple markdown table for the coverage report.
@@ -5499,8 +5499,8 @@ type Key struct {
 	ID              string             `json:"kid"`
 	CreatedAt       time.Time          `json:"created_at"`
 	ExpiresAt       time.Time          `json:"expires_at"`
-	DeprecatedAfter time.Time          `json:"deprecated_after,omitempty"` // RFC0115 deprecation warning timestamp (recommended: 80% of TTL)
-	SunsetAfter     time.Time          `json:"sunset_after,omitempty"`     // RFC0115 hard cutoff timestamp (same as ExpiresAt)
+	DeprecatedAfter time.Time          `json:"deprecated_after,omitempty"` // AAP-002 deprecation warning timestamp (recommended: 80% of TTL)
+	SunsetAfter     time.Time          `json:"sunset_after,omitempty"`     // AAP-002 hard cutoff timestamp (same as ExpiresAt)
 	Private         ed25519.PrivateKey `json:"-"`
 	Public          ed25519.PublicKey  `json:"public"`
 	Alg             string             `json:"alg"` // EdDSA
@@ -11926,7 +11926,7 @@ func (v *RARValidator) ValidateAuthorizationDetails(
 ) error
     ValidateAuthorizationDetails ensures requested details are within PoA scope
 
-type RFC0111Components struct {
+type AAP-001Components struct {
 	SubscriptionStore   SubscriptionStore
 	SubscriptionManager *SubscriptionFlowManager
 	ComplianceTracker   ComplianceTracker
@@ -11937,15 +11937,15 @@ type RFC0111Components struct {
 	PIPClient           PIPClient
 	CommercialRegClient CommercialRegisterClient
 }
-    RFC0111Components holds initialized RFC-0111 components
+    AAP-001Components holds initialized RFC-0111 components
 
-func InitRFC0111FromEnv() (*RFC0111Components, error)
-    InitRFC0111FromEnv initializes RFC-0111 components based on environment
+func InitAAP-001FromEnv() (*AAP-001Components, error)
+    InitAAP-001FromEnv initializes RFC-0111 components based on environment
     variables. This is a convenience function for web server integration.
     Deprecated: Use internal/config.Load() and explicit initialization instead.
     Environment variables:
-      - GAUTH_RFC0111_ENABLED: Set to "1" to enable RFC-0111 functionality
-      - GAUTH_RFC0111_USE_MOCKS: Set to "1" to use mock external services
+      - GAUTH_AAP-001_ENABLED: Set to "1" to enable RFC-0111 functionality
+      - GAUTH_AAP-001_USE_MOCKS: Set to "1" to use mock external services
         (default)
 
     When enabled with mocks, this function creates:
@@ -11955,19 +11955,19 @@ func InitRFC0111FromEnv() (*RFC0111Components, error)
       - Subscription flow manager
       - Compliance tracker
 
-func InitRFC0111WithComponents(
+func InitAAP-001WithComponents(
 	pvpClient PowerVerificationPoint,
 	pipClient PIPClient,
 	commercialRegClient CommercialRegisterClient,
-) (*RFC0111Components, error)
-    InitRFC0111WithComponents initializes RFC-0111 using provided components.
+) (*AAP-001Components, error)
+    InitAAP-001WithComponents initializes RFC-0111 using provided components.
     This gives full control over which implementations to use (mock or real).
 
-func InitRFC0111WithMocks() (*RFC0111Components, error)
-    InitRFC0111WithMocks initializes RFC-0111 components using mock external
+func InitAAP-001WithMocks() (*AAP-001Components, error)
+    InitAAP-001WithMocks initializes RFC-0111 components using mock external
     services. This is suitable for development, testing, and demonstrations.
 
-type RFC0111Config struct {
+type AAP-001Config struct {
 	// Enabled controls whether RFC-0111 functionality is active
 	Enabled bool
 
@@ -11990,7 +11990,7 @@ type RFC0111Config struct {
 	SubscriptionManager *SubscriptionFlowManager
 	ComplianceTracker   ComplianceTracker
 }
-    RFC0111Config holds the configuration for RFC-0111 components
+    AAP-001Config holds the configuration for RFC-0111 components
 
 type RFCCompliantAuthorizationRequest struct {
 	// Client information
@@ -18469,8 +18469,8 @@ func ValidateMultiSignature(p *PowerOfAttorney) error
     signature mode (no error) - If Threshold > 0 and len(Signers) < Threshold =>
     error - Signer identities must be non-empty unique strings
 
-func ValidateRFC0111Compliance(cfg *RFC0111Config) error
-    ValidateRFC0111Compliance performs minimal semantic checks required by the
+func ValidateAAP-001Compliance(cfg *AAP-001Config) error
+    ValidateAAP-001Compliance performs minimal semantic checks required by the
     example. It intentionally does NOT try to replicate deeper domain logic –
     the goal is to confirm that mandatory exclusions are enforced and that key
     numeric / duration parameters are sensible.
@@ -18654,7 +18654,7 @@ func (f AuditSinkFunc) Send(ctx context.Context, event *audit.Event) error
 
 type BasicPoAValidator struct{}
     BasicPoAValidator provides minimal semantic rules intended to preserve
-    backwards compatibility with earlier RFC0111 test fixtures. Stricter
+    backwards compatibility with earlier AAP-001 test fixtures. Stricter
     governance rules (currency requirement for financial scopes, duration caps,
     wildcard gating, business hour / weekday gating, aggregate scope length
     limits, etc.) are reserved for the AdvancedPoAValidator to avoid breaking
@@ -19116,7 +19116,7 @@ type JurisdictionEnforcement struct {
 	// Has unexported fields.
 }
     JurisdictionEnforcement provides optional jurisdiction-specific runtime
-    enforcement for RFC0111 operations. When enabled, all delegation creation
+    enforcement for AAP-001 operations. When enabled, all delegation creation
     and token verification operations are subject to jurisdiction rules
     including GDPR consent, CCPA opt-out, cross-border data transfer, data
     residency, and blocked actions.
@@ -19493,7 +19493,7 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
     a TokenVerificationResult. This enables offline token verification without
     requiring access to the PoA repository.
 
-    Requirements (RFC0115 sec3.item2):
+    Requirements (AAP-002 sec3.item2):
       - RawPOA field must be non-empty (GAUTH_EMBED_FULL_POA=1 must have been
         enabled during token issuance)
       - RawPOA must contain valid canonical JSON representing a PowerOfAttorney
@@ -19515,7 +19515,7 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
         }
         // Use poa for authorization without repository access
 
-type RFC0111Config struct {
+type AAP-001Config struct {
 	AuthorizationServerURL    string        `json:"authorization_server_url"`
 	TrustServiceProvider      string        `json:"trust_service_provider"`
 	RequireNotarization       bool          `json:"require_notarization"`
@@ -19529,7 +19529,7 @@ type RFC0111Config struct {
 	ExcludeAIOperators   bool `json:"exclude_ai_operators"`
 	ExcludeDNAIdentities bool `json:"exclude_dna_identities"`
 }
-    RFC0111Config represents high-level configuration required by the official
+    AAP-001Config represents high-level configuration required by the official
     RFC-0111 implementation demo. All fields are intentionally kept exactly as
     referenced in the example for backwards compatibility.
 
@@ -28160,7 +28160,7 @@ Validation includes:
 Validate AAP-002 compliance:
 
     // Check compliance
-    compliant, issues := poa.ValidateRFC0115Compliance(token)
+    compliant, issues := poa.ValidateAAP-002Compliance(token)
     if !compliant {
         for _, issue := range issues {
             log.Printf("Compliance issue: %s", issue)
@@ -28333,7 +28333,7 @@ func CanonicalDigest(p *ProofOfAuthorization) string
     across benign descriptive changes. Canonical serialization order is fixed by
     explicit struct used below.
 
-func CreateRFC0115CompliantConfig() interface{}
+func CreateAAP-002CompliantConfig() interface{}
 func EncodeCBOR(poA *PowerOfAttorney) ([]byte, error)
     EncodeCBOR encodes a PowerOfAttorney into deterministic CBOR bytes.
 
@@ -28379,13 +28379,13 @@ func ValidatePoADefinition(def PoADefinition) error
     ValidatePoADefinition performs minimal structural validation for the
     RFC-0115 example.
 
-func ValidateRFC0115Compliance(config interface{}) error
-    ValidateRFC0115Compliance performs structural & semantic checks on PoA
-    definition + config. Accepts either RFC0115Config, PoADefinition, or a
+func ValidateAAP-002Compliance(config interface{}) error
+    ValidateAAP-002Compliance performs structural & semantic checks on PoA
+    definition + config. Accepts either AAP-002Config, PoADefinition, or a
     composite struct {Config, Definition}.
 
-func ValidateRFC0115Token(poa *ProofOfAuthorization) error
-    ValidateRFC0115Token performs RFC-0115 compliance validation for extended
+func ValidateAAP-002Token(poa *ProofOfAuthorization) error
+    ValidateAAP-002Token performs RFC-0115 compliance validation for extended
     token format
 
 func ValidateRepresentativeType(rt RepresentativeType) error
@@ -29618,14 +29618,14 @@ type ProofOfAuthorization struct {
 }
     ProofOfAuthorization represents a proof of authorization token
 
-type RFC0115Config struct {
+type AAP-002Config struct {
 	ExcludeWeb3          bool
 	ExcludeAIOperators   bool
 	ExcludeDNAIdentities bool
 	MaxValidityDays      int // upper bound for validity period
 }
-    Stub functions for RFC-0115 demo compatibility RFC0115Config models
-    exclusion flags & limits referenced by RFC0111/0115 examples.
+    Stub functions for RFC-0115 demo compatibility AAP-002Config models
+    exclusion flags & limits referenced by AAP-001/0115 examples.
 
 type RateLimit struct {
 	MaxRequests  int           `json:"max_requests"`               // Maximum requests
@@ -31972,11 +31972,11 @@ func (d *DurableReplayStore) Stats() DurableReplayStoreStats
 type DurableReplayStoreAdapter struct {
 	// Has unexported fields.
 }
-    WithContext wraps DurableReplayStore to satisfy RFC0111 ReplayStore
+    WithContext wraps DurableReplayStore to satisfy AAP-001 ReplayStore
     interface.
 
 func NewDurableReplayStoreAdapter(store *DurableReplayStore) *DurableReplayStoreAdapter
-    NewDurableReplayStoreAdapter creates an adapter for RFC0111 integration.
+    NewDurableReplayStoreAdapter creates an adapter for AAP-001 integration.
 
 func (a *DurableReplayStoreAdapter) CheckAndStore(jti string) error
     CheckAndStore implements gauth.ReplayStore interface for fail-closed mode.
@@ -31986,10 +31986,10 @@ func (a *DurableReplayStoreAdapter) Close() error
     Close closes the underlying store.
 
 func (a *DurableReplayStoreAdapter) Record(jti string, at time.Time) error
-    Record implements RFC0111 ReplayStore.Record.
+    Record implements AAP-001 ReplayStore.Record.
 
 func (a *DurableReplayStoreAdapter) Seen(jti string) (bool, error)
-    Seen implements RFC0111 ReplayStore.Seen.
+    Seen implements AAP-001 ReplayStore.Seen.
 
 type DurableReplayStoreConfig struct {
 	WALPath          string               // Path to WAL file
@@ -33100,8 +33100,8 @@ type AuthorizedClient struct {
     AuthorizedClient represents an authorized client
 
 type CombinedRFCConfig struct {
-	RFC0111          *RFC0111Config         `json:"rfc_0111"`
-	RFC0115          *RFC0115Config         `json:"rfc_0115"`
+	AAP-001          *AAP-001Config         `json:"rfc_0111"`
+	AAP-002          *AAP-002Config         `json:"rfc_0115"`
 	IntegrationLevel string                 `json:"integration_level"`
 	CombinedVersion  string                 `json:"combined_version"`
 	Compatibility    map[string]interface{} `json:"compatibility"`
@@ -33112,8 +33112,8 @@ type CombinedRFCConfig struct {
 func CreateCombinedRFCConfig() *CombinedRFCConfig
 
 type ComplianceInfo struct {
-	RFC0111 RFC0111Summary
-	RFC0115 RFC0115Summary
+	AAP-001 AAP-001Summary
+	AAP-002 AAP-002Summary
 	RFC0150 RFC0150Summary
 }
 
@@ -33194,8 +33194,8 @@ type Principal struct {
 }
     Principal represents a principal party
 
-type RFC0111Client struct {
-	Type           RFC0111ClientType      `json:"type"`
+type AAP-001Client struct {
+	Type           AAP-001ClientType      `json:"type"`
 	Identity       string                 `json:"identity"`
 	AutonomyLevel  string                 `json:"autonomy_level"`
 	AICapabilities []string               `json:"ai_capabilities"`
@@ -33204,54 +33204,54 @@ type RFC0111Client struct {
 	Config         *CombinedRFCConfig     `json:"config,omitempty"`
 	Endpoint       string                 `json:"endpoint,omitempty"`
 	Metadata       map[string]interface{} `json:"metadata,omitempty"`
-} // NewRFC0111Client creates a new AAP-001 client
-    RFC0111Client represents a client for AAP-001 operations
+} // NewAAP-001Client creates a new AAP-001 client
+    AAP-001Client represents a client for AAP-001 operations
 
-func NewRFC0111Client(config *CombinedRFCConfig, endpoint string) *RFC0111Client
+func NewAAP-001Client(config *CombinedRFCConfig, endpoint string) *AAP-001Client
 
-func (c *RFC0111Client) Initialize() error
+func (c *AAP-001Client) Initialize() error
     Initialize initializes the AAP-001 client
 
-func (c *RFC0111Client) ProcessRequest(request interface{}) error
+func (c *AAP-001Client) ProcessRequest(request interface{}) error
     ProcessRequest processes a request using AAP-001 protocols
 
-func (c *RFC0111Client) ValidateToken(token string) error
+func (c *AAP-001Client) ValidateToken(token string) error
     ValidateToken validates a token using AAP-001 rules
 
-type RFC0111ClientType string
-    RFC0111ClientType represents different types of AAP-001 clients
+type AAP-001ClientType string
+    AAP-001ClientType represents different types of AAP-001 clients
 
 const (
-	RFC0111ClientTypeDigitalAgent  RFC0111ClientType = "digital_agent"
-	RFC0111ClientTypeAgenticAI     RFC0111ClientType = "agentic_ai"
-	RFC0111ClientTypeHumanoidRobot RFC0111ClientType = "humanoid_robot"
+	AAP-001ClientTypeDigitalAgent  AAP-001ClientType = "digital_agent"
+	AAP-001ClientTypeAgenticAI     AAP-001ClientType = "agentic_ai"
+	AAP-001ClientTypeHumanoidRobot AAP-001ClientType = "humanoid_robot"
 )
-type RFC0111Config struct {
+type AAP-001Config struct {
 	Enabled        bool                  `json:"enabled"`
-	Exclusions     RFC0111Exclusions     `json:"exclusions"`
-	PPArchitecture RFC0111PPArchitecture `json:"pp_architecture"`
+	Exclusions     AAP-001Exclusions     `json:"exclusions"`
+	PPArchitecture AAP-001PPArchitecture `json:"pp_architecture"`
 }
-    RFC0111Config represents AAP-001 specific configuration
+    AAP-001Config represents AAP-001 specific configuration
 
-type RFC0111Exclusions struct {
+type AAP-001Exclusions struct {
 	Web3Blockchain     Exclusion `json:"web3_blockchain"`
 	AIOperators        Exclusion `json:"ai_operators"`
 	DNABasedIdentities Exclusion `json:"dna_based_identities"`
 	DecentralizedAuth  Exclusion `json:"decentralized_auth"`
 	EnforcementLevel   string    `json:"enforcement_level"`
 }
-    RFC0111Exclusions represents exclusions for AAP-001
+    AAP-001Exclusions represents exclusions for AAP-001
 
-type RFC0111PPArchitecture struct {
+type AAP-001PPArchitecture struct {
 	PEP PolicyEnforcementPoint    `json:"pep"` // Policy Enforcement Point
 	PDP PolicyDecisionPoint       `json:"pdp"` // Policy Decision Point
 	PIP PolicyInformationPoint    `json:"pip"` // Policy Information Point
 	PAP PolicyAdministrationPoint `json:"pap"` // Policy Administration Point
 	PVP PolicyVerificationPoint   `json:"pvp"` // Policy Verification Point
 }
-    RFC0111PPArchitecture represents the PP architecture for AAP-001
+    AAP-001PPArchitecture represents the PP architecture for AAP-001
 
-type RFC0111Summary struct {
+type AAP-001Summary struct {
 	Version     string
 	Compliance  bool
 	Features    []string
@@ -33259,15 +33259,15 @@ type RFC0111Summary struct {
 }
     Summary types (lightweight – do not duplicate full config domain models)
 
-func GetRFC0111Compliance() RFC0111Summary
+func GetAAP-001Compliance() AAP-001Summary
 
-type RFC0115Config struct {
+type AAP-002Config struct {
 	Enabled       bool   `json:"enabled"`
 	PoADefinition string `json:"poa_definition"`
 }
-    RFC0115Config represents AAP-002 specific configuration
+    AAP-002Config represents AAP-002 specific configuration
 
-type RFC0115PoADefinition struct {
+type AAP-002PoADefinition struct {
 	Definition    string                 `json:"definition"`
 	Attestation   string                 `json:"attestation"`
 	Verification  map[string]interface{} `json:"verification"`
@@ -33275,19 +33275,19 @@ type RFC0115PoADefinition struct {
 	Authorization Authorization          `json:"authorization"`
 	AgentAuthContext  AgentAuthContext           `json:"gauth_context"`
 }
-    RFC0115PoADefinition represents the PoA definition for AAP-002
+    AAP-002PoADefinition represents the PoA definition for AAP-002
 
-func CreateDefaultPoADefinition(definition string) RFC0115PoADefinition
+func CreateDefaultPoADefinition(definition string) AAP-002PoADefinition
     CreateDefaultPoADefinition creates a default PoA definition with sample data
 
-type RFC0115Summary struct {
+type AAP-002Summary struct {
 	Version     string
 	Compliance  bool
 	Features    []string
 	LastUpdated time.Time
 }
 
-func GetRFC0115Compliance() RFC0115Summary
+func GetAAP-002Compliance() AAP-002Summary
 
 type RFC0150Summary struct {
 	Version     string
@@ -33350,16 +33350,16 @@ package rfcdemo // import "github.com/mauriciomferz/Gauth_go/pkg/rfcdemo"
 
 FUNCTIONS
 
-func DemoRFC0111PowerOfAttorney() error
-    DemoRFC0111PowerOfAttorney demonstrates an AAP-001 style issuance +
+func DemoAAP-001PowerOfAttorney() error
+    DemoAAP-001PowerOfAttorney demonstrates an AAP-001 style issuance +
     revocation cycle.
 
-func TestRFC0115Features() error
-    TestRFC0115Features exercises basic token store operations for AAP-002
+func TestAAP-002Features() error
+    TestAAP-002Features exercises basic token store operations for AAP-002
     style features.
 
-func ValidateRFC0111Flow(svc *gauth.Service, issuedToken string) error
-    ValidateRFC0111Flow performs a minimal validation sequence on a gauth
+func ValidateAAP-001Flow(svc *gauth.Service, issuedToken string) error
+    ValidateAAP-001Flow performs a minimal validation sequence on a gauth
     Service. NOTE: The caller must have already issued a token to supply here;
     this helper focuses on validation + revocation semantics only. (Examples
     perform full grant/token issuance flows.)
@@ -35246,14 +35246,14 @@ var (
 
 FUNCTIONS
 
-func InitRFC0111FromEnv() (*gauth.RFC0111Components, gauth.ExtendedTokenStore, error)
-    InitRFC0111FromEnv initializes RFC-0111 components based on environment
+func InitAAP-001FromEnv() (*gauth.AAP-001Components, gauth.ExtendedTokenStore, error)
+    InitAAP-001FromEnv initializes RFC-0111 components based on environment
     variables. This is a web-server specific helper that can create mock
     services and configure persistence.
 
     Environment variables:
-      - GAUTH_RFC0111_ENABLED: Set to "1" to enable RFC-0111 functionality
-      - GAUTH_RFC0111_USE_MOCKS: Set to "1" to use mock external services
+      - GAUTH_AAP-001_ENABLED: Set to "1" to enable RFC-0111 functionality
+      - GAUTH_AAP-001_USE_MOCKS: Set to "1" to use mock external services
         (default: 1)
       - GAUTH_TOKEN_STORE: "postgres" or "memory" (default: memory)
       - DB_HOST: PostgreSQL host (default: localhost)
@@ -35266,8 +35266,8 @@ func InitRFC0111FromEnv() (*gauth.RFC0111Components, gauth.ExtendedTokenStore, e
     Returns nil if RFC-0111 is not enabled. Returns an ExtendedTokenStore
     configured based on GAUTH_TOKEN_STORE.
 
-func InitRFC0111WithRealServices() (*gauth.RFC0111Components, error)
-    InitRFC0111WithRealServices initializes RFC-0111 components with real
+func InitAAP-001WithRealServices() (*gauth.AAP-001Components, error)
+    InitAAP-001WithRealServices initializes RFC-0111 components with real
     service connectors. This sets up the GlobalIdentityVerifier with supported
     country connectors.
 
@@ -35476,7 +35476,7 @@ func (s *BetaServer) RegisterAPIDocumentation()
     RegisterAPIDocumentation registers API documentation endpoints (Swagger UI,
     ReDoc, OpenAPI spec)
 
-func (s *BetaServer) RegisterBetaExternalServiceEndpoints(components *gauth.RFC0111Components)
+func (s *BetaServer) RegisterBetaExternalServiceEndpoints(components *gauth.AAP-001Components)
     RegisterBetaExternalServiceEndpoints registers HTTP endpoints that expose
     mock external services (PVP, Commercial Registry, PoA) for UI integration.
     This is part of Phase 2A Enhancement to convert UI mocks to real backend
@@ -35508,13 +35508,13 @@ func (s *BetaServer) RegisterAgentAuthPlusEndpoints(
     These endpoints enable operational management of AgentAuth+ features integrated
     into the RFC-0111 authorization chain.
 
-func (s *BetaServer) RegisterRFC0111Endpoints(
+func (s *BetaServer) RegisterAAP-001Endpoints(
 	subscriptionManager *gauth.SubscriptionFlowManager,
 	subscriptionStore gauth.SubscriptionStore,
 	gauthService *gauth.Service,
 	tokenStore gauth.ExtendedTokenStore,
 )
-    RegisterRFC0111Endpoints registers all RFC-0111 subscription and
+    RegisterAAP-001Endpoints registers all RFC-0111 subscription and
     authorization endpoints. These endpoints provide the full RFC-0111 compliant
     subscription flow (Steps I-VIII) and authorization flow (Steps a-i).
 
@@ -40306,7 +40306,7 @@ func (a *API) RegisterRoutes(r *gin.Engine)
 type Handler struct {
 
 	// External deps
-	Service RFC0111Service
+	Service AAP-001Service
 	Metrics Metrics
 
 	// Config
@@ -40315,7 +40315,7 @@ type Handler struct {
 }
     Handler manages semantic anomaly detection state and calculations.
 
-func NewHandler(service RFC0111Service, metrics Metrics, persistencePath string) *Handler
+func NewHandler(service AAP-001Service, metrics Metrics, persistencePath string) *Handler
     NewHandler creates a new semantic anomaly handler.
 
 func (h *Handler) AddSnapshot(at time.Time, snap map[string]uint64)
@@ -40355,10 +40355,10 @@ type Metrics interface {
 }
     Metrics interface for recording semantic anomaly stats
 
-type RFC0111Service interface {
+type AAP-001Service interface {
 	SemanticSnapshot() map[string]uint64
 }
-    RFC0111Service abstracts the external PoA service
+    AAP-001Service abstracts the external PoA service
 
 type SnapshotEntry struct {
 	At       time.Time         `json:"at"`

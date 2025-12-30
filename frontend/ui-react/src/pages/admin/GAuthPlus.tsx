@@ -1,5 +1,5 @@
 /**
- * GAuth+ Management Dashboard
+ * AgentAuth+ Management Dashboard
  * Comprehensive UI for managing AI-specific authorization features
  */
 
@@ -77,7 +77,7 @@ const useStyles = makeStyles({
 
 type TabValue = 'successor' | 'delegation' | 'dual-control' | 'capability' | 'fiduciary'
 
-export default function GAuthPlus() {
+export default function AgentAuthPlus() {
   const styles = useStyles()
   const [selectedTab, setSelectedTab] = useState<TabValue>('successor')
   const [loading] = useState(false)
@@ -110,7 +110,7 @@ export default function GAuthPlus() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <Title3>GAuth+ Management</Title3>
+        <Title3>AgentAuth+ Management</Title3>
         <Text className={styles.subtitle}>
           Advanced AI authorization features - Successor management, delegation chains, dual
           control approvals, capability assessments, and fiduciary duty tracking

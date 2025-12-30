@@ -14,7 +14,7 @@ owners: [system]
 
 ## 🎯 Overview
 
-Successfully implemented comprehensive enhanced PoA validation system for RFC0111, extending the existing BasicPoAValidator with advanced validation capabilities including warning collection, persistent daily limits, conditional expressions, and comprehensive metrics. This is a beta implementation for testing and evaluation purposes.
+Successfully implemented comprehensive enhanced PoA validation system for AAP-001, extending the existing BasicPoAValidator with advanced validation capabilities including warning collection, persistent daily limits, conditional expressions, and comprehensive metrics. This is a beta implementation for testing and evaluation purposes.
 
 ## 📋 Implementation Details
 
@@ -146,7 +146,7 @@ summary := metrics.GetMetricsSummary()
 fmt.Printf("Total validations: %d\n", summary["total_validations"])
 ```
 
-## 🔗 Integration with RFC0111 Service
+## 🔗 Integration with AAP-001 Service
 
 ### Service Integration (Production Ready)
 ```go

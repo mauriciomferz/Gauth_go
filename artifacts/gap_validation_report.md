@@ -46,7 +46,7 @@ The readiness score is calculated using weighted priority scoring:
 | ✅ Legal / Jurisdiction / Compliance | 4 | 4 | 100.0% |
 | ✅ Observability & Metrics | 4 | 4 | 100.0% |
 | ✅ Persistence & Durability | 3 | 3 | 100.0% |
-| ✅ PoA Definition (RFC0115) | 4 | 4 | 100.0% |
+| ✅ PoA Definition (AAP-002) | 4 | 4 | 100.0% |
 | ✅ Replay & Token Security | 3 | 3 | 100.0% |
 | ✅ Risk & Threat Modeling | 2 | 2 | 100.0% |
 | ✅ Testing & Conformance | 4 | 4 | 100.0% |

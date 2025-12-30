@@ -15,7 +15,7 @@ Purpose: Provide a concise, cacheable snapshot of cryptographic + governance con
 ## Required Fields (Backlog Spec)
 | Field | Type | Description |
 |-------|------|-------------|
-| `digest_domains` | `[]string` | Active canonical digest domain identifiers (`GAUTH_RFC0111_POA_V1`, `GAUTH_RFC0111_POA_V2`, `GAUTH_RFC0111_POA_V3|tax=1`). |
+| `digest_domains` | `[]string` | Active canonical digest domain identifiers (`GAUTH_AAP-001_POA_V1`, `GAUTH_AAP-001_POA_V2`, `GAUTH_AAP-001_POA_V3|tax=1`). |
 | `active_digest_domain` | `string` | Domain primarily used for newly issued single‑sig PoAs (V3 if taxonomy enabled, else V1). |
 | `token_algorithms` | `[]string` | Supported token signature / JWT algorithms (e.g., `HS256`, `RS256`, `EdDSA`). |
 | `replay_strict_mode` | `bool` | Whether durable replay protection (WAL + snapshot) is active (`GAUTH_REPLAY_WAL_PATH` set). |
@@ -44,8 +44,8 @@ Client MAY send `If-None-Match` with prior ETag to receive `304 Not Modified` wh
 {
   "schema_version": 1,
   "generated_at": "2025-10-27T00:15:10Z",
-  "digest_domains": ["GAUTH_RFC0111_POA_V1","GAUTH_RFC0111_POA_V2","GAUTH_RFC0111_POA_V3|tax=1"],
-  "active_digest_domain": "GAUTH_RFC0111_POA_V3|tax=1",
+  "digest_domains": ["GAUTH_AAP-001_POA_V1","GAUTH_AAP-001_POA_V2","GAUTH_AAP-001_POA_V3|tax=1"],
+  "active_digest_domain": "GAUTH_AAP-001_POA_V3|tax=1",
   "token_algorithms": ["HS256","RS256","EdDSA"],
   "replay_strict_mode": true,
   "poa_version_current": 3,

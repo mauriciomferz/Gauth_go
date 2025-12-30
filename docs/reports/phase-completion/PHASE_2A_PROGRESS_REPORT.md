@@ -29,7 +29,7 @@ Phase 2A (UI Backend Integration) has begun with API client updates and endpoint
 - **Frontend**: Running on port 3000 with Vite dev server
 - **Proxy**: Configured `/api/*` → `http://localhost:8080`
 - **Health Check**: ✅ `/api/v1/beta/health` returns healthy
-- **Environment**: `GAUTH_RFC0111_ENABLED=1 GAUTH_RFC0111_USE_MOCKS=1`
+- **Environment**: `GAUTH_AAP-001_ENABLED=1 GAUTH_AAP-001_USE_MOCKS=1`
 
 ### 2. RFC-0111 Endpoints Activated ✅
 ```
@@ -350,8 +350,8 @@ Step VIII: Resource Server Authentication
 
 ### Backend Configuration
 ```bash
-GAUTH_RFC0111_ENABLED=1
-GAUTH_RFC0111_USE_MOCKS=1
+GAUTH_AAP-001_ENABLED=1
+GAUTH_AAP-001_USE_MOCKS=1
 GAUTH_TOKEN_STORE=memory
 Port: 8080
 PID: running

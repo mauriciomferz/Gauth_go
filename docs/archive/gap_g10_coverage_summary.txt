@@ -1,4 +1,4 @@
-# github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa [github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa.test]
+# github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/poa [github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/poa.test]
 pkg/poa/rfc0115_compliance_test.go:788:40: undefined: SectorFinancialInsurance
 pkg/poa/rfc0115_compliance_test.go:825:40: undefined: SectorFinancialInsurance
 pkg/poa/rfc0115_compliance_test.go:866:40: undefined: SectorFinancialInsurance
@@ -10,9 +10,9 @@ pkg/poa/rfc0115_compliance_test.go:1068:40: undefined: SectorFinancialInsurance
 pkg/poa/rfc0115_negative_test.go:13:143: cannot use ClientTypeLLM (constant "LLM" of string type ClientType) as string value in struct literal
 pkg/poa/rfc0115_negative_test.go:14:73: undefined: SectorInformationComm
 pkg/poa/rfc0115_negative_test.go:14:73: too many errors
-ok  	github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth	1.610s	coverage: 69.6% of statements
-ok  	github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/verification	1.461s	coverage: 76.7% of statements
-ok  	github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/registry	3.784s	coverage: 91.4% of statements
-ok  	github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pip	2.149s	coverage: 72.9% of statements
-FAIL	github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa [build failed]
+ok  	github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth	1.610s	coverage: 69.6% of statements
+ok  	github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/verification	1.461s	coverage: 76.7% of statements
+ok  	github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/registry	3.784s	coverage: 91.4% of statements
+ok  	github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pip	2.149s	coverage: 72.9% of statements
+FAIL	github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/poa [build failed]
 FAIL

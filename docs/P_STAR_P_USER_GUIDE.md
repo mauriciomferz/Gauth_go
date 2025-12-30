@@ -1268,7 +1268,7 @@ func main() {
 
 ```bash
 # Enable P*P features
-GAUTH_RFC0111_ENABLED=1
+GAUTH_AAP-001_ENABLED=1
 GAUTH_USE_JWT_LIB=1
 
 # PIP Configuration
@@ -1288,7 +1288,7 @@ GAUTH_PEP_AUDIT_ENABLED=true
 
 ```bash
 # Start AgentAuth server with P*P features
-GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 GAUTH_USE_JWT_LIB=1 go run ./cmd/web-server
+GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 GAUTH_USE_JWT_LIB=1 go run ./cmd/web-server
 
 # Test PAP policy creation
 curl -X POST http://localhost:8080/api/v1/pap/policies \

@@ -26,7 +26,7 @@ Start the server with the required environment variable:
 ```bash
 pkill -9 web-server
 go build -o bin/web-server ./cmd/web-server
-GAUTH_RFC0111_ENABLED=1 GAUTH_RFC0111_USE_MOCKS=1 ./bin/web-server
+GAUTH_AAP-001_ENABLED=1 GAUTH_AAP-001_USE_MOCKS=1 ./bin/web-server
 ```
 
 ### Verification
@@ -126,7 +126,7 @@ Can be performed multiple times after subscription is complete:
 ### Initialization Code Location
 `web/server_clean.go` lines 5950-6050:
 ```go
-if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
+if rfc0111Components, tokenStore, err := InitAAP-001FromEnv(); err == nil && rfc0111Components != nil {
     // Create AgentAuth service with RFC-0111 compliance enabled
     extendedTokenService := gauth.NewExtendedTokenService(...)
     
@@ -140,7 +140,7 @@ if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc
         ),
     )
     
-    s.RegisterRFC0111Endpoints(
+    s.RegisterAAP-001Endpoints(
         rfc0111Components.SubscriptionManager,
         rfc0111Components.SubscriptionStore,
         gauthService,
@@ -165,10 +165,10 @@ if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc
 | Mock external services | ✅ Enabled |
 | Protocol orchestrator | ✅ Initialized |
 
-**The RFC-0111 authorization endpoint is working correctly. The error you initially received was due to the server not being started with `GAUTH_RFC0111_ENABLED=1`.**
+**The RFC-0111 authorization endpoint is working correctly. The error you initially received was due to the server not being started with `GAUTH_AAP-001_ENABLED=1`.**
 
 To use it, you need to:
-1. ✅ Start server with `GAUTH_RFC0111_ENABLED=1` (DONE)
+1. ✅ Start server with `GAUTH_AAP-001_ENABLED=1` (DONE)
 2. Complete subscription flow (Steps I-VIII) 
 3. Use the completed subscription ID in authorization requests
 

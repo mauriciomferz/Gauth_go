@@ -9,7 +9,7 @@ refreshCadence: on-change
 # Multi-Signature Power of Attorney (PoA) - Beta Implementation
 
 **GAP_MATRIX Reference:** `sec3.item3` - Joint/collective signature enforcement  
-**RFC0115 Section:** Section B (Authorization Type)  
+**AAP-002 Section:** Section B (Authorization Type)  
 **Status:** ✅ **IMPLEMENTED** (Beta)
 
 ## Overview
@@ -20,7 +20,7 @@ This **beta implementation** provides M-of-N threshold signature collection and 
 
 - **M-of-N Threshold Verification**: Require M valid signatures from N authorized signers
 - **Weighted Signatures**: Optional weighted voting (e.g., CEO=3 votes, CFO=2 votes)
-- **Canonical Digest**: Tamper-proof signature verification using RFC0111 canonical digest
+- **Canonical Digest**: Tamper-proof signature verification using AAP-001 canonical digest
 - **Concurrent Submission**: Thread-safe parallel signature collection
 - **Lifecycle Management**: `pending` → `completed` → `active` state transitions
 - **Expiration Control**: Configurable signature collection windows
@@ -315,7 +315,7 @@ The test suite (`internal/multisig/manager_test.go`) includes 10 comprehensive t
 5. **TestSignatureManager_UnauthorizedSigner**: Authorization enforcement
 6. **TestSignatureManager_ActivatePoA**: Activation workflow
 7. **TestSignatureManager_Expiration**: Time-based expiration
-8. **TestSignatureManager_GetSignatures**: RFC0111 format export
+8. **TestSignatureManager_GetSignatures**: AAP-001 format export
 9. **TestSignatureManager_ListPending**: Pending collections query
 10. **TestSignatureManager_RejectCollection**: Manual rejection
 
@@ -462,9 +462,9 @@ http.HandleFunc("/api/v1/beta/poa/multisig/pending", api.HandleListPending)
 - **Tests**: `internal/multisig/manager_test.go`, `pkg/rfc0111/multi_signature_*.go`
 - **GAP_MATRIX**: `artifacts/gap_matrix.csv` (sec3.item3: Implemented)
 
-## RFC0115 Compliance
+## AAP-002 Compliance
 
-This **beta implementation** satisfies **RFC0115 Section B (Authorization Type)** requirements for joint/collective signature enforcement:
+This **beta implementation** satisfies **AAP-002 Section B (Authorization Type)** requirements for joint/collective signature enforcement:
 
 ✅ M-of-N threshold policies  
 ✅ Canonical digest stability  

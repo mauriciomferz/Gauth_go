@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 func TestConditionalSyntaxValidation(t *testing.T) {
@@ -94,7 +94,7 @@ func TestConditionalRuntimeEnforcement(t *testing.T) {
 	err := validator.EvaluatePoAConditions(ctx, p, ctxDataFail)
 	if err == nil {
 		t.Error("Expected error for low balance, got nil")
-	} else if rfcErr, ok := err.(rfc.RFCError); !ok || rfcErr.Code != rfc.ErrRestrictionExceeded {
+	} else if/aapErr, ok := err. aap.RFCError); !ok ||/aapErr.Code != aap.ErrRestrictionExceeded {
 		t.Errorf("Expected ErrRestrictionExceeded, got %v", err)
 	}
 

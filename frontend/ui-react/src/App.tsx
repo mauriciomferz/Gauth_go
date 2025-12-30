@@ -19,7 +19,7 @@ const AuditTrail = lazy(() => import('./pages/admin/AuditTrail'))
 const ConfigurationManager = lazy(() => import('./pages/admin/ConfigurationManager'))
 const RevocationTransparency = lazy(() => import('./pages/admin/RevocationTransparency'))
 const OIDCProviders = lazy(() => import('./pages/admin/OIDCProviders'))
-const GAuthPlus = lazy(() => import('./pages/admin/GAuthPlus'))
+const AgentAuthPlus = lazy(() => import('./pages/admin/AgentAuthPlus'))
 const SAMLProviders = lazy(() => import('./pages/admin/SAMLProviders'))
 const SCIMSettings = lazy(() => import('./pages/admin/SCIMSettings'))
 const AuthCallback = lazy(() => import('./pages/AuthCallback'))
@@ -82,7 +82,7 @@ function App() {
           <Route path="revocation" element={<RevocationTransparency />} />
           <Route path="configuration" element={<ConfigurationManager />} />
           <Route path="oidc-providers" element={<OIDCProviders />} />
-          <Route path="gauthplus" element={<GAuthPlus />} />
+          <Route path="gauthplus" element={<AgentAuthPlus />} />
           <Route path="saml-providers" element={<SAMLProviders />} />
           <Route path="scim-settings" element={<SCIMSettings />} />
           <Route path="gnap" element={<GNAP />} />

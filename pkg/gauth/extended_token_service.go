@@ -197,7 +197,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		TransactionContext: s.convertContext(request.Context),
 
 		// Compliance & audit
-		ComplianceLevel:     "rfc-0111-compliant",
+		ComplianceLevel:     "AAP-0111-compliant",
 		JurisdictionContext: request.JurisdictionContext,
 		// RFC 9396
 		AuthorizationDetails: request.AuthorizationDetails,

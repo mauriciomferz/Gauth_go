@@ -9,7 +9,7 @@ owners: [system]
 # PoA Embedding in Token Envelope
 
 **Status**: Implemented (P1.1 High Priority Feature)  
-**RFC Reference**: RFC0115 sec3.item2  
+**RFC Reference**: AAP-002 sec3.item2  
 **Implementation**: pkg/rfc0111/rfc0111.go, pkg/rfc0111/embedding_test.go
 
 ## Overview
@@ -38,7 +38,7 @@ Tokens are PASETO v2.local encrypted envelopes containing delegation claims. Wit
 
 ### Canonical PoA Format
 
-The `raw_poa` field contains **canonical JSON** (RFC0115 canonical digest format):
+The `raw_poa` field contains **canonical JSON** (AAP-002 canonical digest format):
 - Minimal encoding (no whitespace)
 - Sorted keys (scope, restrictions, weights)
 - Fixed field ordering
@@ -319,7 +319,7 @@ go run examples/verification/main.go
 
 ## References
 
-- RFC0115 Specification: `docs/RFC0115_POA_DEFINITION.md`
+- AAP-002 Specification: `docs/AAP-002_POA_DEFINITION.md`
 - Canonical Digest: `pkg/rfc0111/canonical.go`
 - Token Integrity: `docs/TOKEN_INTEGRITY_MULTI_ALGO.md`
 - EnvelopeV2 Format: `pkg/token/envelope.go`

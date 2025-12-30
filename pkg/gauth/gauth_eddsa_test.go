@@ -55,7 +55,7 @@ func TestEdDSATokenTamper(t *testing.T) {
 		t.Fatalf("unexpected token parts")
 	}
 	// Tamper payload
-	parts[1] += "AAAA"
+	parts[1] += /aapAA"
 	bad := strings.Join(parts, ".")
 	if _, err := svc.ValidateToken(bad); err == nil {
 		t.Fatalf("expected validation failure for tampered token")

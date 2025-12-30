@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-The **Semantic PoA Validator** provides comprehensive RFC0115-compliant semantic validation for Power of Attorney delegations, ensuring that PoA structures conform to both syntactic and semantic requirements. This addresses the final P0 critical gap (sec3.item1) by extending beyond basic field validation to full semantic checking.
+The **Semantic PoA Validator** provides comprehensive AAP-002-compliant semantic validation for Power of Attorney delegations, ensuring that PoA structures conform to both syntactic and semantic requirements. This addresses the final P0 critical gap (sec3.item1) by extending beyond basic field validation to full semantic checking.
 
 ## Architecture
 
@@ -21,7 +21,7 @@ PoAValidator (interface)
   ├── NoopPoAValidator - No validation
   ├── BasicPoAValidator - Basic field validation
   ├── AdvancedPoAValidator - extends Basic + governance rules
-  └── EnhancedPoAValidator - extends Basic + RFC0115 semantics
+  └── EnhancedPoAValidator - extends Basic + AAP-002 semantics
 ```
 
 ### Selection Mechanism
@@ -42,11 +42,11 @@ export GAUTH_POA_VALIDATOR=basic
 export GAUTH_POA_VALIDATOR=none
 ```
 
-## RFC0115 Semantic Validation Rules
+## AAP-002 Semantic Validation Rules
 
 ### 1. Scope Syntax Validation
 
-**Purpose**: Ensure scope strings conform to RFC0115 syntax requirements
+**Purpose**: Ensure scope strings conform to AAP-002 syntax requirements
 
 **Rules**:
 - Empty scopes not allowed
@@ -95,7 +95,7 @@ export GAUTH_POA_VALIDATOR=none
 
 ### 3. Action Taxonomy Validation
 
-**Purpose**: Validate actions against RFC0115 standard taxonomy
+**Purpose**: Validate actions against AAP-002 standard taxonomy
 
 **Valid Action Classes**:
 - `read` - Read-only access
@@ -233,7 +233,7 @@ poa := &PowerOfAttorney{
 
 **Purpose**: Validate restriction key-value pairs
 
-**Known Restriction Keys** (RFC0115):
+**Known Restriction Keys** (AAP-002):
 - `currency` - ISO 4217 currency code
 - `max_amount` - Maximum transaction amount
 - `max_daily_amount` - Daily transaction limit
@@ -272,7 +272,7 @@ poa := &PowerOfAttorney{
 // ⚠️ Warning: unknown restriction
 poa := &PowerOfAttorney{
     Restrictions: map[string]string{
-        "custom_rule": "value",  // Info: not in RFC0115
+        "custom_rule": "value",  // Info: not in AAP-002
     },
 }
 
@@ -303,14 +303,14 @@ poa := &PowerOfAttorney{
 | `administrative_scope` | error | Admin/root scope detected |
 | `duplicate_scope` | warning | Duplicate scope in array |
 | `scope_subsumption` | info | One scope subsumes another |
-| `unknown_action_prefix` | info | Scope prefix not in RFC0115 taxonomy |
+| `unknown_action_prefix` | info | Scope prefix not in AAP-002 taxonomy |
 | `unknown_action_class` | warning | ActionClass not in taxonomy |
 | `past_valid_from` | warning | valid_from > 24h in past |
 | `very_short_duration` | info | Duration < 1 hour |
 | `overnight_hours` | info | valid_hours spans midnight |
 | `service_to_service` | warning | Service account delegation |
 | `delegation_chain` | info | Has parent delegation |
-| `unknown_restriction` | info | Restriction not in RFC0115 |
+| `unknown_restriction` | info | Restriction not in AAP-002 |
 | `invalid_ip_format` | warning | IP whitelist format issue |
 | `high_amount_limit` | warning | max_amount > 1,000,000 |
 | `approaching_daily_limit` | warning | Usage > 80% of daily limit |
@@ -681,7 +681,7 @@ BenchmarkEnhancedValidator_FullChain-8      30000    35000 ns/op    3072 B/op   
 | Conditional expressions | ❌ | ❌ | ✅ (optional) |
 | Metrics recording | ❌ | ❌ | ✅ (optional) |
 | Validator chain | ❌ | ❌ | ✅ |
-| RFC0115 compliance | Partial | Partial | **Full** |
+| AAP-002 compliance | Partial | Partial | **Full** |
 
 ## API Reference
 
@@ -729,10 +729,10 @@ type ValidationWarning struct {
 
 **v0.4.0 (2025-01-19)** - P0.4 Implementation
 - Integrated EnhancedPoAValidator into selectPoAValidator() as `semantic` option
-- Added 7 RFC0115-specific semantic validation rules:
+- Added 7 AAP-002-specific semantic validation rules:
   1. Scope syntax validation (namespace:action format, character restrictions)
   2. Scope semantics validation (duplicates, wildcard rules, subsumption)
-  3. Action taxonomy validation (RFC0115 action classes)
+  3. Action taxonomy validation (AAP-002 action classes)
   4. Temporal constraint semantics (duration warnings, overnight hours)
   5. Authority relationship validation (self-delegation, service accounts)
   6. Delegation depth semantics (parent chain tracking)

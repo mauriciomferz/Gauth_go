@@ -3,7 +3,7 @@ package scim
 import "time"
 
 // User represents a SCIM User Resource
-// https://datatracker.ietf.org/doc/html/rfc7643#section-4.1
+// https://datatracker.ietf.org/doc/html/aap7643#section-4.1
 type User struct {
 	Schemas    []string `json:"schemas"`
 	ID         string   `json:"id"`

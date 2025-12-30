@@ -329,7 +329,7 @@ export default function AdminLogin() {
 
           <div className={classes.footer}>
             <Text>
-              GAuth Identity Platform v1.0 • Powered by RFC-0111 & RFC-0115
+              AgentAuth Identity Platform v1.0 • Powered by RFC-0111 & RFC-0115
             </Text>
           </div>
         </Card>

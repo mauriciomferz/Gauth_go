@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // TestReplayProtection verifies that a second validation of the same token is rejected.
@@ -41,7 +41,7 @@ func TestReplayProtection(t *testing.T) {
 	if verr2 == nil {
 		t.Fatalf("expected error on replay but got none")
 	}
-	if rfce, ok := verr2.(rfc.RFCError); !ok || rfce.Code != rfc.ErrReplay {
+	if/aape, ok := verr2. aap.RFCError); !ok ||/aape.Code != aap.ErrReplay {
 		t.Fatalf("expected replay error got: %v", verr2)
 	}
 	if vres2 != nil {

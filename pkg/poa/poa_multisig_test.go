@@ -165,7 +165,7 @@ func TestPoAMultiSigTamperSignature(t *testing.T) {
 		t.Fatalf("expected one signature")
 	}
 	// Tamper first signature
-	poaObj.Signatures[0] = poaObj.Signatures[0][:10] + "AAAA" + poaObj.Signatures[0][10:]
+	poaObj.Signatures[0] = poaObj.Signatures[0][:10] + "aapAA" + poaObj.Signatures[0][10:]
 	vcount, satisfied, _ := VerifyMultiSig(poaObj, km)
 	if vcount != 0 || satisfied {
 		t.Fatalf("tamper should invalidate signature valid=%d satisfied=%v", vcount, satisfied)

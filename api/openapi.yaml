@@ -50,7 +50,7 @@ tags:
   - name: Admin & Monitoring
     description: System administration and monitoring endpoints
   - name: Semantic Metrics (Beta)
-    description: Prototype RFC0111 semantic counters and anomaly detection
+    description: Prototype AAP-001 semantic counters and anomaly detection
   - name: Violation Metrics (Beta)
     description: Prototype violation counters and persistence integrity
   - name: Capability Anchoring (Beta)
@@ -1244,7 +1244,7 @@ paths:
       tags:
         - Semantic Metrics (Beta)
       summary: List semantic counters
-      description: Returns prototype RFC0111 semantic counters and active anomalies
+      description: Returns prototype AAP-001 semantic counters and active anomalies
       operationId: getSemanticCounters
       responses:
         '200':

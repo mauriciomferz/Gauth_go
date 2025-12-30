@@ -214,7 +214,7 @@ func (a *SimpleAuthenticator) generateRefreshToken(user *User) (string, error) {
 }
 
 // RFC Functional Test compatibility stubs
-// These types and methods are required for the rfc_functional_test example to build.
+// These types and methods are required for the/aap_functional_test example to build.
 type PowerOfAttorneyResponse struct {
 	AuthorizationCode string
 	LegalCompliance   bool

@@ -245,7 +245,7 @@ func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "AAP002Config with Web3 not excluded",
+			name: "AAP-002Config with Web3 not excluded",
 			config: AAP002Config{
 				ExcludeWeb3:          false,
 				ExcludeAIOperators:   true,
@@ -255,7 +255,7 @@ func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "AAP002Config with AI operators not excluded",
+			name: "AAP-002Config with AI operators not excluded",
 			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   false,
@@ -265,7 +265,7 @@ func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "AAP002Config with DNA identities not excluded",
+			name: "AAP-002Config with DNA identities not excluded",
 			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
@@ -275,7 +275,7 @@ func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "AAP002Config with zero max validity days",
+			name: "AAP-002Config with zero max validity days",
 			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
@@ -285,7 +285,7 @@ func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "AAP002Config with negative max validity days",
+			name: "AAP-002Config with negative max validity days",
 			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
@@ -295,7 +295,7 @@ func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "AAP002Config with max validity days too high",
+			name: "AAP-002Config with max validity days too high",
 			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
@@ -305,7 +305,7 @@ func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "AAP002Config with boundary max validity days (730)",
+			name: "AAP-002Config with boundary max validity days (730)",
 			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,

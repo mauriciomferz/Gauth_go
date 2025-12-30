@@ -392,7 +392,7 @@ export GAUTH_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 export GAUTH_RATE_LIMIT_RPS=100
 
 # Features
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 
 # Logging
 export GAUTH_AUDIT_LOG_FILE=/var/log/gauth/audit.log

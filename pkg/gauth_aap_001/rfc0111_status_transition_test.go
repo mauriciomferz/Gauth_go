@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 func TestDelegationStatusTransition(t *testing.T) {
@@ -51,8 +51,8 @@ func TestDelegationStatusTransition(t *testing.T) {
 	if err == nil {
 		t.Error("Verification should fail for suspended delegation")
 	} else {
-		rfcErr, ok := err.(rfc.RFCError)
-		if !ok || rfcErr.Code != rfc.ErrUnauthorized {
+	/aapErr, ok := err. aap.RFCError)
+		if !ok ||/aapErr.Code != aap.ErrUnauthorized {
 			t.Errorf("Expected ErrUnauthorized, got %v", err)
 		}
 	}

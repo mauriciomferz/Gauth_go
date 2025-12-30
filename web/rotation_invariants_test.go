@@ -79,7 +79,7 @@ func TestRotationSummary_ContinuityGap(t *testing.T) {
 	var resp struct {
 		Success bool           `json:"success"`
 		Code    string         `json:"code"`
-		RFC     string         `json:"rfc"`
+		RFC     string         `json:"aap"`
 		Detail  map[string]any `json:"detail"`
 	}
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
@@ -141,7 +141,7 @@ func TestRotationSummary_SignatureMissing(t *testing.T) {
 	}
 	var resp struct {
 		Code string `json:"code"`
-		RFC  string `json:"rfc"`
+		RFC  string `json:"aap"`
 	}
 	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
 		t.Fatalf("unmarshal: %v", err)

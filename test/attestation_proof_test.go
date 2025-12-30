@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap/errs"
 	"github.com/mauriciomferz/AgentAuth/pkg/attest"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	gauth_aap_001 "github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 // simpleAllowAuthorizer always allows
@@ -113,7 +114,7 @@ func TestAttestationProofExpiry(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected expired error, got nil")
 	}
-	if e, ok := err.(rfc.RFCError); !ok || e.Code != rfc.ErrExpired {
+	if e, ok := err.(errs.RFCError); !ok || e.Code != aap.ErrExpired {
 		t.Fatalf("expected expired RFC error, got %v", err)
 	}
 }

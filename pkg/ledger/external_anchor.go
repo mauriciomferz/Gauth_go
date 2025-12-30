@@ -272,7 +272,6 @@ func NewRFC3161ProviderWithConfig(config TSAConfig) *RFC3161Provider {
 	}
 
 	primaryClient := rfc3161.NewClient(config.PrimaryURL)
-
 	var secondaryClient *rfc3161.Client
 	if config.SecondaryURL != "" {
 		secondaryClient = rfc3161.NewClient(config.SecondaryURL)

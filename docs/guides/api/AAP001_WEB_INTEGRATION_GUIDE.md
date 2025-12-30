@@ -21,7 +21,7 @@ go build -o bin/web-server ./cmd/web-server
 
 ```bash
 # Enable RFC-0111 with mock services
-GAUTH_RFC0111_ENABLED=1 ./bin/web-server 8090
+GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
 Expected output:
@@ -68,14 +68,14 @@ curl "http://localhost:8090/api/v1/rfc0111/subscriptions?client_id=test_client"
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_RFC0111_ENABLED` | `0` | Set to `1` to enable RFC-0111 endpoints |
-| `GAUTH_RFC0111_USE_MOCKS` | `1` | Set to `1` to use mock external services (currently required) |
+| `GAUTH_AAP-001_ENABLED` | `0` | Set to `1` to enable RFC-0111 endpoints |
+| `GAUTH_AAP-001_USE_MOCKS` | `1` | Set to `1` to use mock external services (currently required) |
 
 ### Example Configurations
 
 **Development with mocks** (recommended):
 ```bash
-GAUTH_RFC0111_ENABLED=1 ./bin/web-server 8090
+GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
 **Disable RFC-0111**:
@@ -165,17 +165,17 @@ Revoke a token
 
 1. **pkg/gauth/rfc0111_config.go**
    - Configuration helpers for RFC-0111 initialization
-   - `InitRFC0111WithComponents()` - Initialize with provided components
+   - `InitAAP-001WithComponents()` - Initialize with provided components
    - Component validation and setup
 
 2. **web/rfc0111_init.go**
    - Web server specific initialization
-   - `InitRFC0111FromEnv()` - Environment-based configuration
+   - `InitAAP-001FromEnv()` - Environment-based configuration
    - Mock service creation and wiring
 
 3. **web/server_clean.go** (modified)
    - Integrated RFC-0111 initialization into `NewBetaServerWithMetrics()`
-   - Conditional endpoint registration based on `GAUTH_RFC0111_ENABLED`
+   - Conditional endpoint registration based on `GAUTH_AAP-001_ENABLED`
    - Logging for initialization status
 
 ### Mock Services
@@ -208,7 +208,7 @@ go build -o bin/rfc0111-example ./examples/rfc0111
 
 ```bash
 # Start web server with RFC-0111
-GAUTH_RFC0111_ENABLED=1 ./bin/web-server 8090
+GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
 ### 3. Run Tests
@@ -283,7 +283,7 @@ curl -s "${BASE_URL}/api/v1/rfc0111/subscriptions?client_id=test" | jq .
 **Problem**: Endpoints not registered
 
 **Solution**: 
-1. Ensure `GAUTH_RFC0111_ENABLED=1` is set
+1. Ensure `GAUTH_AAP-001_ENABLED=1` is set
 2. Check server logs for initialization messages
 3. Verify server rebuilt after code changes
 
@@ -310,7 +310,7 @@ lsof -ti:8090
 pkill -f "web-server 8090"
 
 # Start on different port
-GAUTH_RFC0111_ENABLED=1 ./bin/web-server 8091
+GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8091
 ```
 
 ### Mock services not working
@@ -419,7 +419,7 @@ cat /tmp/gauth_server.log | grep -i "failed\|error"
 
 **Start Server:**
 ```bash
-GAUTH_RFC0111_ENABLED=1 ./bin/web-server 8090
+GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
 **Create Subscription:**

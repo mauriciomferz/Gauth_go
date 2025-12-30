@@ -1,4 +1,4 @@
-// semantic_metrics.js - shows RFC0111 semantic counters & computed 60s rates
+// semantic_metrics.js - shows AAP-001 semantic counters & computed 60s rates
 import { backoffFetchJSON } from './refresh.js';
 
 export function initSemanticMetricsPanel(){

@@ -27,7 +27,7 @@
     },
     {
       "id": "sec3",
-      "name": "PoA Definition (RFC0115)",
+      "name": "PoA Definition (AAP-002)",
       "items": [
   {"id": "sec3.item1", "requirement": "Full semantic validation", "status": "Partial", "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits", "evidence": ["docs/GAP_MATRIX.md:32", "pkg/rfc0111/validator.go", "pkg/rfc0111/rfc0111.go"], "priority": "P0"},
   {"id": "sec3.item2", "requirement": "Embed full PoA in token", "status": "Partial", "gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence", "evidence": ["docs/GAP_MATRIX.md:33", "pkg/rfc0111/rfc0111.go", "internal/metrics/metrics.go"], "priority": "P1"},

@@ -35,7 +35,7 @@ cd /path/to/Gauth_go
 
 # Enable MCP and RFC-0111 features
 export GAUTH_MCP_ENABLED=1
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 
 # Start the server
 go run ./cmd/web-server

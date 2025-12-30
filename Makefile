@@ -105,7 +105,7 @@ debug-ci-env: ## Debug CI environment (detailed diagnostics)
 	@if [ -f "./go.mod" ]; then head -5 ./go.mod; else echo "❌ ./go.mod not found"; fi
 
 build-ci-adaptive: ## CI-adaptive build that handles nested directory structures
-	@echo "🔧 CI-Adaptive Build for GAuth Server"
+	@echo "🔧 CI-Adaptive Build for AgentAuth Server"
 	@echo "======================================"
 	@echo "📍 Working Directory: $$(pwd)"
 	@echo ""
@@ -156,7 +156,7 @@ ci-build: ## Recommended build target for CI/CD environments
 	@$(MAKE) build-ci-adaptive
 
 build-server-adaptive: ## Build gauth-server with adaptive path detection (recommended)
-	@echo "🔧 Building GAuth demo server (adaptive method)..."
+	@echo "🔧 Building AgentAuth demo server (adaptive method)..."
 	@echo "📍 Current working directory: $$(pwd)"
 	@echo "� Searching for gauth-server source..."
 	@SOURCE_PATH=""; \
@@ -229,8 +229,8 @@ test-integration: ## Run integration tests
 	@echo "🔗 Running integration tests..."
 	$(GOTEST) -v -tags=integration ./test/integration/...
 
-test-rfc0111-example: ## Run RFC0111 example tests (F=Regex to filter, default runs both)
-	@echo "🧪 Running RFC0111 example tests..."
+test-rfc0111-example: ## Run AAP-001 example tests (F=Regex to filter, default runs both)
+	@echo "🧪 Running AAP-001 example tests..."
 	@if [ -n "$(F)" ]; then \
 	  echo "▶ Filter: $(F)"; \
 	  $(GOTEST) -v ./examples/official_rfc0111_implementation -run $(F) -count=1; \
@@ -239,8 +239,8 @@ test-rfc0111-example: ## Run RFC0111 example tests (F=Regex to filter, default r
 	  $(GOTEST) -v ./examples/official_rfc0111_implementation -run TestUnauthorizedRevocation -count=1; \
 	fi
 
-coverage-rfc0111: ## Run coverage for RFC0111 example (outputs coverage.out.rfc0111 and summary)
-	@echo "📊 RFC0111 example coverage..."; \
+coverage-rfc0111: ## Run coverage for AAP-001 example (outputs coverage.out.rfc0111 and summary)
+	@echo "📊 AAP-001 example coverage..."; \
 	$(GOTEST) -cover -coverprofile=coverage.out.rfc0111 ./examples/official_rfc0111_implementation -count=1 > /dev/null; \
 	go tool cover -func=coverage.out.rfc0111 | tee coverage.rfc0111.txt | grep total || true; \
 	echo "✅ Coverage artifacts: coverage.out.rfc0111, coverage.rfc0111.txt";
@@ -458,7 +458,7 @@ docs-meta-index: ## Generate taxonomy index (docs/TAXONOMY_INDEX.auto.md) via Go
 	echo "✅ Taxonomy index written to docs/TAXONOMY_INDEX.auto.md"
 
 help: ## Show this help message
-	@echo "GAuth Makefile Commands:"
+	@echo "AgentAuth Makefile Commands:"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 	@echo ""

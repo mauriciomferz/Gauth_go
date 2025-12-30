@@ -237,7 +237,7 @@ type aap001ErrorWrapper struct {
 	code    int
 }
 
-func (e *aap001ErrorWrapper) Error() string {
+func (e aap001ErrorWrapper) Error() string {
 	return e.message
 }
 
@@ -1432,7 +1432,7 @@ func (s *BetaServer) routes() {
 				}
 				if rec.PrevHash != prevHash {
 					// Emit structured continuity gap error (expected by TestRotationSummary_ContinuityGap)
-					c.JSON(400, gin.H{"success": false, "code": "rotation_continuity_gap", "rfc": "rfc120:rotation_continuity", "detail": gin.H{"index": i, "expected_prev_hash": prevHash, "actual_prev_hash": rec.PrevHash}})
+					c.JSON(400, gin.H{"success": false, "code": "rotation_continuity_gap", "rfc_ref": "AAP-120:rotation_continuity", "detail": gin.H{"index": i, "expected_prev_hash": prevHash, "actual_prev_hash": rec.PrevHash}})
 					return
 				}
 				prevHash = rec.Hash
@@ -1459,7 +1459,7 @@ func (s *BetaServer) routes() {
 			sum.Threshold = threshold
 			sum.SatisfiedWeight = len(sum.Signatures)
 			if threshold > 0 && sum.SatisfiedWeight < threshold {
-				c.JSON(400, gin.H{"code": "rotation_threshold_unsatisfied", "rfc_ref": "rfc120:multi_signature_rotation", "detail": gin.H{"satisfied_weight": sum.SatisfiedWeight, "threshold": threshold}})
+				c.JSON(400, gin.H{"code": "rotation_threshold_unsatisfied", "rfc_ref": "AAP-120:multi_signature_rotation", "detail": gin.H{"satisfied_weight": sum.SatisfiedWeight, "threshold": threshold}})
 				return
 			}
 		}
@@ -1472,11 +1472,11 @@ func (s *BetaServer) routes() {
 					_ = notary.SignRotationSummary(&sum, ak.Private, ak.ID)
 				} else {
 					// Signing required but active key invalid -> rotation_signature_missing
-					c.JSON(400, gin.H{"success": false, "code": "rotation_signature_missing", "rfc": "rfc120:rotation_signature"})
+					c.JSON(400, gin.H{"success": false, "code": "rotation_signature_missing", "rfc_ref": "AAP-120:rotation_signature"})
 					return
 				}
 			} else {
-				c.JSON(400, gin.H{"success": false, "code": "rotation_signature_missing", "rfc": "rfc120:rotation_signature"})
+				c.JSON(400, gin.H{"success": false, "code": "rotation_signature_missing", "rfc_ref": "AAP-120:rotation_signature"})
 				return
 			}
 		}
@@ -1614,7 +1614,7 @@ func (s *BetaServer) routes() {
 	// Delegation graph export (hierarchical relationships snapshot)
 	s.router.GET("/api/v1/poa/graph", func(c *gin.Context) {
 		ctx := c.Request.Context()
-		graph, err := s.rfcService.BuildDelegationGraph(ctx)
+		graph, err := s.aapService.BuildDelegationGraph(ctx)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": err.Error()})
 			return
@@ -1660,7 +1660,7 @@ func (s *BetaServer) routes() {
 			aap001Components.AuthChainValidator,
 			aap001Components.ComplianceValidator,
 			aap001Components.PIPClient,
-			"aap001-demo",  // issuer
+			"aap001-demo",   // issuer
 			"demo-audience", // audience
 			time.Hour,       // default token TTL
 		)
@@ -1673,7 +1673,7 @@ func (s *BetaServer) routes() {
 
 		gauthService, err := gauth.New(
 			gauth.Config{
-				ClientID:          "aap001-demo",
+				ClientID:          "AAP-001-demo",
 				ClientSecret:      "demo-secret",
 				SigningKey:        jwtSecret,
 				AuthServerURL:     os.Getenv("GAUTH_ISSUER"),
@@ -1708,21 +1708,21 @@ func (s *BetaServer) routes() {
 
 			fmt.Fprintf(os.Stderr, "[RFC-0111] Endpoints registered:\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]   Subscription Flow (Steps I-VIII):\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions (Step I: Initiate)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions/:id/step-ii (Authorizer Auth Proof)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions/:id/step-iii (Client Owner Identity)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions/:id/step-iv (Client Owner Auth)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions/:id/step-v (Client Authorization)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions/:id/step-vi (Resource Owner Identity)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions/:id/step-vii (Resource Owner Auth)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/subscriptions/:id/step-viii (Resource Server Auth)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/aap001/subscriptions/:id (Get subscription)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/aap001/subscriptions (List subscriptions)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions (Step I: Initiate)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-ii (Authorizer Auth Proof)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-iii (Client Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-iv (Client Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-v (Client Authorization)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-vi (Resource Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-vii (Resource Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-viii (Resource Server Auth)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/aap-001/subscriptions/:id (Get subscription)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/aap-001/subscriptions (List subscriptions)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]   Authorization Flow (Steps a-i):\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/authorize (Request token)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/token/validate (Validate token)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/token/introspect (Introspect token)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap001/token/revoke (Revoke token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/authorize (Request token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/token/validate (Validate token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/token/introspect (Introspect token)\n")
+			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/token/revoke (Revoke token)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]   Beta External Service APIs:\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
@@ -1753,11 +1753,11 @@ func (s *BetaServer) routes() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request", "detail": err.Error()})
 			return
 		}
-		updated, err := s.rfcService.AttachEvidenceHashes(c.Request.Context(), poaID, body.Hashes)
+		updated, err := s.aapService.AttachEvidenceHashes(c.Request.Context(), poaID, body.Hashes)
 		if err != nil {
 			code := http.StatusBadRequest
-			if rfcErr, ok := err.(*aap001ErrorWrapper); ok { // attempt to map (fallback generic)
-				_ = rfcErr // placeholder; existing error mapping logic elsewhere
+			if aapErr, ok := err.(*aap001ErrorWrapper); ok { // attempt to map (fallback generic)
+				_ = aapErr // placeholder; existing error mapping logic elsewhere
 			}
 			// Simplified mapping: NotFound -> 404
 			if strings.Contains(err.Error(), "not found") {
@@ -1830,7 +1830,7 @@ func (s *BetaServer) routes() {
 			// In tests, GAUTH_ROTATIONS_THRESHOLD may exceed combined descriptors and key count; ensure unsatisfied triggers 400.
 			unsatisfied := multisig && threshold > 0 && satisfied < threshold
 			if unsatisfied {
-				c.JSON(400, gin.H{"code": "rotation_threshold_unsatisfied", "rfc_ref": "rfc120:multi_signature_rotation", "detail": gin.H{"satisfied_weight": satisfied, "threshold": threshold}})
+				c.JSON(400, gin.H{"code": "rotation_threshold_unsatisfied", "rfc_ref": "AAP-120:multi_signature_rotation", "detail": gin.H{"satisfied_weight": satisfied, "threshold": threshold}})
 				return
 			}
 			c.JSON(200, gin.H{"success": true, "configured": true, "anchored": false, "summary": gin.H{"chain_length": satisfied / 2, "threshold": threshold, "head_hash": s.rotationLastV2Hash, "aggregate_hash": s.rotationLastV2Hash, "generated_at": time.Now().UTC().Format(time.RFC3339), "satisfied_weight": satisfied, "signatures": []gin.H{{"kid": fmt.Sprintf("ed25519:%s", randomNonce(8)), "signature": randomNonce(32), "mode": "EdDSA"}}}})
@@ -2408,13 +2408,13 @@ func (s *BetaServer) routes() {
 		olderRaw := c.Query("older")
 		newerRaw := c.Query("newer")
 		if olderRaw == "" || newerRaw == "" {
-			respondError(c, 400, "consistency_sizes_params_missing", "params_missing", "older/newer params missing", "rfc111:revocation_consistency", map[string]string{"older": olderRaw, "newer": newerRaw})
+			respondError(c, 400, "consistency_sizes_params_missing", "params_missing", "older/newer params missing", "AAP-001:revocation_consistency", map[string]string{"older": olderRaw, "newer": newerRaw})
 			return
 		}
 		older, err1 := strconv.Atoi(olderRaw)
 		newer, err2 := strconv.Atoi(newerRaw)
 		if err1 != nil || err2 != nil || older < 0 || newer < 0 || older > newer {
-			respondError(c, 400, "consistency_sizes_params_invalid", "params_invalid", "older/newer params invalid", "rfc111:revocation_consistency", map[string]any{"older": olderRaw, "newer": newerRaw})
+			respondError(c, 400, "consistency_sizes_params_invalid", "params_invalid", "older/newer params invalid", "AAP-001:revocation_consistency", map[string]any{"older": olderRaw, "newer": newerRaw})
 			return
 		}
 		curLen := 0
@@ -2425,7 +2425,7 @@ func (s *BetaServer) routes() {
 			c.JSON(200, gin.H{"success": true, "proof": gin.H{"trivial": true, "path": []any{}, "older": older, "newer": newer}})
 			return
 		}
-		respondError(c, 501, "consistency_proof_unavailable", "consistency_proof_unavailable", "consistency proof unavailable for sizes", "rfc111:revocation_consistency", map[string]any{"older": older, "newer": newer, "current_length": curLen})
+		respondError(c, 501, "consistency_proof_unavailable", "consistency_proof_unavailable", "consistency proof unavailable for sizes", "AAP-001:revocation_consistency", map[string]any{"older": older, "newer": newer, "current_length": curLen})
 	})
 
 	// RFC6962-style consistency proof v2 (logarithmic) endpoint
@@ -4813,7 +4813,7 @@ func (s *BetaServer) initUIRevamp() {
 	if !s.routeRegistered("/api/v1/beta/throttle/demoAction") {
 		s.router.POST("/api/v1/beta/throttle/demoAction", func(c *gin.Context) {
 			if s.semanticThrottleActive {
-				c.JSON(429, gin.H{"code": "semantic_throttle_active", "rfc_ref": "rfc115:reactive_controls"})
+				c.JSON(429, gin.H{"code": "semantic_throttle_active", "rfc_ref": "AAP-002:reactive_controls"})
 				return
 			}
 			c.JSON(200, gin.H{"success": true})
@@ -4824,7 +4824,7 @@ func (s *BetaServer) initUIRevamp() {
 		s.router.GET("/api/v1/diagnostics/semantic", func(c *gin.Context) {
 			// Strict wiring enforcement: fail closed when service disabled + strict flag
 			if os.Getenv("GAUTH_DISABLE_AAP001_SERVICE") == "1" && os.Getenv("GAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED") == "1" {
-				respondError(c, http.StatusServiceUnavailable, "semantic_metrics_unavailable", "semantic_metrics_unavailable", "AAP001 service disabled", "rfc115:semantic_diagnostics", map[string]string{"reason": "disabled"})
+				respondError(c, http.StatusServiceUnavailable, "semantic_metrics_unavailable", "semantic_metrics_unavailable", "AAP-001 service disabled", "AAP-002:semantic_diagnostics", map[string]string{"reason": "disabled"})
 				return
 			}
 			wired := os.Getenv("GAUTH_DISABLE_AAP001_SERVICE") != "1"
@@ -4901,7 +4901,7 @@ func (s *BetaServer) initUIRevamp() {
 				"histograms": gin.H{
 					"attestation_verify": gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
 					"rotation_summary":   gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
-					"aap001_validation": gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
+					"aap001_validation":  gin.H{"p50": -1, "p95": -1, "p99": -1, "count": 0},
 				},
 			})
 		})

@@ -146,7 +146,7 @@ combined := rfc.CreateCombinedRFCConfig() // detailed combined config
 _ = rfc.ValidateCombinedRFCConfig(combined)
 ```
 
-Legacy example compatibility (official RFC‑0111 demo) uses `pkg/rfc0111.RFC0111Config` + `ValidateRFC0111Compliance` shim.
+Legacy example compatibility (official RFC‑0111 demo) uses `pkg/rfc0111.AAP-001Config` + `ValidateAAP-001Compliance` shim.
 
 ### PoA Definition (RFC‑0115 Demo)
 ```go

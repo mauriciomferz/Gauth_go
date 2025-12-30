@@ -33,7 +33,7 @@ type DeviceInfo struct {
 	Version   string
 }
 
-// Token represents a token in the GAuth system
+// Token represents a token in the AgentAuth system
 type Token struct {
 	ID               string
 	Type             TokenType  // Use TokenType instead of string

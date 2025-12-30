@@ -7,7 +7,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // TestSuspendDelegation_Success validates successful suspension of an active delegation.
@@ -89,8 +89,8 @@ func TestSuspendDelegation_InvalidStatus(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected error for invalid status, got nil")
 			}
-			rfcErr, ok := err.(rfc.RFCError)
-			if !ok || rfcErr.Code != rfc.ErrInvalidRequest {
+		/aapErr, ok := err. aap.RFCError)
+			if !ok ||/aapErr.Code != aap.ErrInvalidRequest {
 				t.Errorf("expected ErrInvalidRequest, got %v", err)
 			}
 		})
@@ -110,8 +110,8 @@ func TestSuspendDelegation_Unauthorized(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for non-grantor, got nil")
 	}
-	rfcErr, ok := err.(rfc.RFCError)
-	if !ok || rfcErr.Code != rfc.ErrUnauthorized {
+/aapErr, ok := err. aap.RFCError)
+	if !ok ||/aapErr.Code != aap.ErrUnauthorized {
 		t.Errorf("expected ErrUnauthorized, got %v", err)
 	}
 
@@ -201,8 +201,8 @@ func TestResumeDelegation_InvalidStatus(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected error for invalid status, got nil")
 			}
-			rfcErr, ok := err.(rfc.RFCError)
-			if !ok || rfcErr.Code != rfc.ErrInvalidRequest {
+		/aapErr, ok := err. aap.RFCError)
+			if !ok ||/aapErr.Code != aap.ErrInvalidRequest {
 				t.Errorf("expected ErrInvalidRequest, got %v", err)
 			}
 		})
@@ -282,8 +282,8 @@ func TestUpdateDelegationScope_InvalidSubset(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for scope expansion, got nil")
 	}
-	rfcErr, ok := err.(rfc.RFCError)
-	if !ok || rfcErr.Code != rfc.ErrInvalidRequest {
+/aapErr, ok := err. aap.RFCError)
+	if !ok ||/aapErr.Code != aap.ErrInvalidRequest {
 		t.Errorf("expected ErrInvalidRequest, got %v", err)
 	}
 
@@ -307,8 +307,8 @@ func TestUpdateDelegationScope_EmptyScope(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for empty scope, got nil")
 	}
-	rfcErr, ok := err.(rfc.RFCError)
-	if !ok || rfcErr.Code != rfc.ErrInvalidRequest {
+/aapErr, ok := err. aap.RFCError)
+	if !ok ||/aapErr.Code != aap.ErrInvalidRequest {
 		t.Errorf("expected ErrInvalidRequest, got %v", err)
 	}
 }
@@ -326,8 +326,8 @@ func TestUpdateDelegationScope_NoChange(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for identical scope, got nil")
 	}
-	rfcErr, ok := err.(rfc.RFCError)
-	if !ok || rfcErr.Code != rfc.ErrInvalidRequest {
+/aapErr, ok := err. aap.RFCError)
+	if !ok ||/aapErr.Code != aap.ErrInvalidRequest {
 		t.Errorf("expected ErrInvalidRequest, got %v", err)
 	}
 }
@@ -402,8 +402,8 @@ func TestVerifyToken_SuspendedDelegation(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for suspended delegation, got nil")
 	}
-	rfcErr, ok := err.(rfc.RFCError)
-	if !ok || rfcErr.Code != rfc.ErrUnauthorized {
+/aapErr, ok := err. aap.RFCError)
+	if !ok ||/aapErr.Code != aap.ErrUnauthorized {
 		t.Errorf("expected ErrUnauthorized, got %v", err)
 	}
 	if result != nil && !result.Suspended {

@@ -42,14 +42,14 @@ Modern React-based Single Page Application (SPA) for the AgentAuth 1.0 RFC-0111/
 
 - Node.js 18+ and npm (or yarn/pnpm)
 - AgentAuth Go backend running on `localhost:8080`
-- **IMPORTANT**: Backend must have `GAUTH_RFC0111_ENABLED=1` environment variable set (Phase 2A endpoints)
+- **IMPORTANT**: Backend must have `GAUTH_AAP-001_ENABLED=1` environment variable set (Phase 2A endpoints)
 
 ### Installation
 
 1. **Start the AgentAuth backend** (from project root):
    ```bash
-   # REQUIRED: Set GAUTH_RFC0111_ENABLED=1 to enable Phase 2A endpoints
-   GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+   # REQUIRED: Set GAUTH_AAP-001_ENABLED=1 to enable Phase 2A endpoints
+   GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
    ```
    
    Backend will start on `http://localhost:8080`
@@ -260,9 +260,9 @@ Ensure the Go backend is running on `localhost:8080`. Check proxy configuration 
 
 **Problem**: `/api/v1/beta/pvp/verify`, `/api/v1/beta/registry/*`, or `/api/v1/beta/poa/*` endpoints return 404.
 
-**Solution**: Start backend with `GAUTH_RFC0111_ENABLED=1`:
+**Solution**: Start backend with `GAUTH_AAP-001_ENABLED=1`:
 ```bash
-GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 **Verify**: Check backend logs for this message:

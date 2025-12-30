@@ -1,4 +1,4 @@
-# Production Dockerfile for GAuth React Frontend
+# Production Dockerfile for AgentAuth React Frontend
 # Multi-stage build with optimized Nginx deployment
 
 # ============================================================================

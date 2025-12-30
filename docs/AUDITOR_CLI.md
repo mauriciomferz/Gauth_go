@@ -86,7 +86,7 @@ On failure:
 Add new modes by extending the `switch` in `cmd/auditor/main.go` and implementing a helper function returning a structured map. Keep output backward compatible.
 
 ## Roadmap Alignment
-This tool supports external auditor workflows required for RFC0111 / RFC0115 compliance narratives by enabling independent verification of:
+This tool supports external auditor workflows required for AAP-001 / AAP-002 compliance narratives by enabling independent verification of:
 - Rotation integrity (multi-signature governance)
 - Deterministic PoA digests and threshold signatures
 

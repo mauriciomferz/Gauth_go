@@ -164,7 +164,7 @@ Week 3 Day 2 completed comprehensive AAP-001/0115 compliance validation using au
 - ✅ TestPropertyCanonicalDeterminism
 
 **Metrics & Observability (12 tests):**
-- ✅ TestRFC0111MetricsE2E
+- ✅ TestAAP-001MetricsE2E
 - ✅ TestDetachedMetricsRegistration
 - ✅ TestAuditEventLogging
 

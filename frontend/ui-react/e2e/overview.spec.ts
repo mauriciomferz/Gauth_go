@@ -6,7 +6,7 @@ test.describe('Overview Page', () => {
   })
 
   test('should display the main heading', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Welcome to GAuth/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Welcome to AgentAuth/i })).toBeVisible()
   })
 
   test('should show RFC compliance information', async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe('Overview Page', () => {
   })
 
   test('should display RFC compliance section', async ({ page }) => {
-    await expect(page.getByText('GAuth 1.0 Extended Tokens')).toBeVisible()
+    await expect(page.getByText('AgentAuth 1.0 Extended Tokens')).toBeVisible()
     await expect(page.getByText('Power of Attorney Framework')).toBeVisible()
     await expect(page.getByText(/eIDAS/i).first()).toBeVisible()
   })

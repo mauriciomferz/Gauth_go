@@ -10,7 +10,7 @@ import (
 type Clause struct {
 	ID       string `json:"id"`
 	Title    string `json:"title"`
-	RFC      string `json:"rfc"`
+	RFC      string `json:"aap"`
 	LineFrom int    `json:"line_from"`
 	LineTo   int    `json:"line_to"`
 }

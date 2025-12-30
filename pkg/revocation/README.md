@@ -352,7 +352,7 @@ For detailed architecture documentation, see:
 ## Security Disclosure
 
 If you discover a security vulnerability in this implementation, please report it to:
-**security@gimel.foundation** (PGP key: [link])
+**security@example.com** (PGP key: [link])
 
 Do not disclose publicly until the vulnerability is addressed.
 

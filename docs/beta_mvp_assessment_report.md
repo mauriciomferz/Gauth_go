@@ -31,7 +31,7 @@ Remaining gaps now center on hierarchical digest cascade revocation implementati
 
 ## Scope
 - Components assessed: `examples/ai_capability_demo`, `pkg/rfc0111`, multisig tests, JWT/JWKS auth middleware, SQLite decision persistence.
-- Standards: RFC0111 (Delegation & Authorization protocol core) and RFC0115 (PoA definition attributes).
+- Standards: AAP-001 (Delegation & Authorization protocol core) and AAP-002 (PoA definition attributes).
 
 ## Achievements (Cumulative to Week 2)
 | Area | Achievement |

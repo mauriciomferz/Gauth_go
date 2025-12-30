@@ -1,4 +1,4 @@
-# GAuth Authorization Server with JWE Encryption
+# AgentAuth Authorization Server with JWE Encryption
 # Production-ready Docker image with JWE key management
 
 FROM golang:1.21-alpine AS builder

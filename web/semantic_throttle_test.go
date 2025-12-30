@@ -46,7 +46,7 @@ func TestSemanticReactiveThrottle(t *testing.T) {
 	if errResp.Code != "semantic_throttle_active" {
 		t.Fatalf("expected semantic_throttle_active code got %s", errResp.Code)
 	}
-	if errResp.RFC != "rfc115:reactive_controls" {
-		t.Fatalf("expected rfc115:reactive_controls got %s", errResp.RFC)
+	if errResp.RFC != "AAP-002:reactive_controls" {
+		t.Fatalf("expected AAP-002:reactive_controls got %s", errResp.RFC)
 	}
 }

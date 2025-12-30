@@ -127,10 +127,10 @@ Source Generated: 2025-10-21
 | Authorization Engine | sec2.item3 | Obligations & advice processing | Missing | P2 | Concept only, not executed | docs/GAP_MATRIX.md:25 |
 | Authorization Engine | sec2.item4 | Policy versioning & rollback | Missing | P1 | No version metadata | docs/GAP_MATRIX.md:23 |
 | Authorization Engine | sec2.item5 | Distributed PDP & caching | Missing | P2 | No clustering or cache invalidation | docs/GAP_MATRIX.md:24 |
-| PoA Definition (RFC0115) | sec3.item1 | Full semantic validation | Partial | P0 | AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits | docs/GAP_MATRIX.md:32<br>pkg/rfc0111/validator.go<br>pkg/rfc0111/rfc0111.go |
-| PoA Definition (RFC0115) | sec3.item2 | Embed full PoA in token | Partial | P1 | RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence | docs/GAP_MATRIX.md:33<br>pkg/rfc0111/rfc0111.go<br>internal/metrics/metrics.go |
-| PoA Definition (RFC0115) | sec3.item3 | Joint/collective signature enforcement | Missing | P1 | No multi-signer aggregation | docs/GAP_MATRIX.md:33 |
-| PoA Definition (RFC0115) | sec3.item4 | Conditional/special conditions evaluation | Missing | P2 | No runtime interpreter | docs/GAP_MATRIX.md:34 |
+| PoA Definition (AAP-002) | sec3.item1 | Full semantic validation | Partial | P0 | AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits | docs/GAP_MATRIX.md:32<br>pkg/rfc0111/validator.go<br>pkg/rfc0111/rfc0111.go |
+| PoA Definition (AAP-002) | sec3.item2 | Embed full PoA in token | Partial | P1 | RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence | docs/GAP_MATRIX.md:33<br>pkg/rfc0111/rfc0111.go<br>internal/metrics/metrics.go |
+| PoA Definition (AAP-002) | sec3.item3 | Joint/collective signature enforcement | Missing | P1 | No multi-signer aggregation | docs/GAP_MATRIX.md:33 |
+| PoA Definition (AAP-002) | sec3.item4 | Conditional/special conditions evaluation | Missing | P2 | No runtime interpreter | docs/GAP_MATRIX.md:34 |
 | Legal / Jurisdiction / Compliance | sec4.item1 | Jurisdiction-specific enforcement | Missing | P1 | No runtime branching | docs/GAP_MATRIX.md:40 |
 | Legal / Jurisdiction / Compliance | sec4.item2 | Compliance attestation proof | Missing | P2 | No evidence ingestion | docs/GAP_MATRIX.md:41 |
 | Legal / Jurisdiction / Compliance | sec4.item3 | Arbitration / dispute hooks | Missing | P3 | No code path | docs/GAP_MATRIX.md:42 |

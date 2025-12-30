@@ -1,4 +1,4 @@
-# Multi-stage Docker build for GAuth
+# Multi-stage Docker build for AgentAuth
 # Build stage - REQUIRES Go 1.25.5 for security patches (CVE fixes)
 FROM golang:1.25.5-alpine AS builder
 

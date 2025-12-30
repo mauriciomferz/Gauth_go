@@ -1366,7 +1366,7 @@
 									"endColumn": 2,
 									"endLine": 235,
 									"snippet": {
-										"text": "ProofMethodOIDCIDToken  = \"oidc_id_token\" // GAuth-issued ID token"
+										"text": "ProofMethodOIDCIDToken  = \"oidc_id_token\" // AgentAuth-issued ID token"
 									},
 									"sourceLanguage": "go",
 									"startColumn": 2,

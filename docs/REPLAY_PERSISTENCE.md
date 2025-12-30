@@ -102,7 +102,7 @@ func main() {
 }
 ```
 
-### RFC0111 Integration
+### AAP-001 Integration
 
 ```go
 package main
@@ -125,10 +125,10 @@ func main() {
     }
     defer durableStore.Close()
 
-    // Wrap with adapter for RFC0111
+    // Wrap with adapter for AAP-001
     adapter := replay.NewDurableReplayStoreAdapter(durableStore)
 
-    // Create RFC0111 service with durable replay protection
+    // Create AAP-001 service with durable replay protection
     svc, err := rfc0111.NewService(
         rfc0111.WithReplayStore(adapter),
         // ... other options
@@ -495,7 +495,7 @@ go test -cover ./pkg/replay
 - ✅ Snapshot creation and recovery
 - ✅ Concurrent access (10 goroutines)
 - ✅ Stats reporting
-- ✅ RFC0111 adapter integration
+- ✅ AAP-001 adapter integration
 - ✅ Automatic snapshot scheduling
 - ✅ Graceful shutdown (final snapshot)
 - ✅ Size() reporting
@@ -533,7 +533,7 @@ func TestCrashRecovery(t *testing.T) {
 
 ## References
 
-- **RFC0111**: AgentAuth 1.0 Authorization Protocol (replay protection requirements)
+- **AAP-001**: AgentAuth 1.0 Authorization Protocol (replay protection requirements)
 - **WALStore**: `pkg/replay/wal_store.go` (write-ahead log implementation)
 - **ReplayNonceStore**: `web/replay_store.go` (original in-memory implementation)
 - **GAP Matrix**: `docs/GAP_MATRIX.auto.md` (sec6.item3 implementation status)

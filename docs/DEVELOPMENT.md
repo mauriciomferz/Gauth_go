@@ -18,7 +18,7 @@ Licensed under Apache 2.0
 
 **AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
 Operated by AgentAuth Technologies GmbH
-MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
+MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Daniel Hartert
 Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
 Development guide for the AAP-RFC-0111 and AAP-RFC-0115 implementation, featuring complete RFC-0115 PoA-Definition compliance.

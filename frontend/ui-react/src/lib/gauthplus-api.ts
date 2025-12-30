@@ -1,6 +1,6 @@
 /**
- * GAuth+ API Client
- * Provides type-safe access to GAuth+ management endpoints
+ * AgentAuth+ API Client
+ * Provides type-safe access to AgentAuth+ management endpoints
  */
 
 import axios, { AxiosInstance } from 'axios'
@@ -117,7 +117,7 @@ export interface FiduciaryDutyViolation {
   updated_at: string
 }
 
-class GAuthPlusClient {
+class AgentAuthPlusClient {
   private client: AxiosInstance
 
   constructor() {
@@ -365,4 +365,4 @@ class GAuthPlusClient {
   }
 }
 
-export const gauthPlusAPI = new GAuthPlusClient()
+export const gauthPlusAPI = new AgentAuthPlusClient()

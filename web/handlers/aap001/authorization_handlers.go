@@ -27,7 +27,7 @@ func NewAuthorizationHandlers(service *gauth.Service, tokenStore gauth.ExtendedT
 	}
 }
 
-// RequestToken handles POST /api/v1/aap001/authorize
+// RequestToken handles POST /api/v1"AAP-001/authorize
 // RFC-0111 Steps a-i: Complete RFC-compliant authorization flow
 func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 	var req struct {
@@ -91,7 +91,7 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 	})
 }
 
-// ValidateToken handles POST /api/v1/aap001/token/validate
+// ValidateToken handles POST /api/v1"AAP-001/token/validate
 // Validates an RFC-0111 compliant token
 func (h *AuthorizationHandlers) ValidateToken(c *gin.Context) {
 	var req struct {
@@ -143,7 +143,7 @@ func (h *AuthorizationHandlers) ValidateToken(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// IntrospectToken handles POST /api/v1/aap001/token/introspect
+// IntrospectToken handles POST /api/v1"AAP-001/token/introspect
 // RFC 7662 compatible introspection endpoint
 func (h *AuthorizationHandlers) IntrospectToken(c *gin.Context) {
 	var req struct {
@@ -180,7 +180,7 @@ func (h *AuthorizationHandlers) IntrospectToken(c *gin.Context) {
 	})
 }
 
-// RevokeToken handles POST /api/v1/aap001/token/revoke
+// RevokeToken handles POST /api/v1"AAP-001/token/revoke
 // RFC 7009 compatible revocation endpoint
 func (h *AuthorizationHandlers) RevokeToken(c *gin.Context) {
 	var req struct {

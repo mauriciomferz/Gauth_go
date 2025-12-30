@@ -100,7 +100,7 @@ func createDefaultPDPEngine() pdp.Engine {
 	// Add default policies for RFC-0111 compliance
 	// Policy 1: Allow authenticated requests with valid authorization chains
 	engine.AddPolicy(pdp.Policy{
-		ID:       "aap001-allow-valid-chain",
+		ID:      "AAP-001-allow-valid-chain",
 		Subjects: []string{"*"}, // Apply to all subjects
 		Rules: []pdp.Rule{
 			{
@@ -112,13 +112,13 @@ func createDefaultPDPEngine() pdp.Engine {
 		},
 		Metadata: map[string]string{
 			"description": "Allow requests with valid authorization chains",
-			"rfc":         "RFC-0111",
+			"aap":         "RFC-0111",
 		},
 	})
 
 	// Policy 2: Default deny for unknown actions
 	engine.AddPolicy(pdp.Policy{
-		ID:       "aap001-default-deny",
+		ID:      "AAP-001-default-deny",
 		Subjects: []string{"*"},
 		Rules: []pdp.Rule{
 			{
@@ -130,7 +130,7 @@ func createDefaultPDPEngine() pdp.Engine {
 		},
 		Metadata: map[string]string{
 			"description": "Deny dangerous actions by default",
-			"rfc":         "RFC-0111",
+			"aap":         "RFC-0111",
 		},
 	})
 

@@ -72,8 +72,7 @@ type BetaServer struct {
 		ApproveRevocation(ctx context.Context, poaID, approver string) error
 		CancelRevocation(ctx context.Context, poaID, actor string) error
 	}
-	// RFC service reference for hierarchical digest features and delegation graph building
-	rfcService interface {
+	aapService interface {
 		BuildDelegationGraph(ctx context.Context) ([]gauth_aap_001.DelegationGraphNode, error)
 		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*gauth_aap_001.PowerOfAttorney, error)
 		ListDelegations(userID string) ([]*gauth_aap_001.PowerOfAttorney, error)

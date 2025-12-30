@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // ==============================================================================
@@ -100,7 +100,7 @@ func WithAllowedAlgorithms(algorithms []string) Option {
 //
 // Returns:
 //   - nil if binding is valid (sessionUser == poa.Grantee)
-//   - rfc.ErrUnauthorized if binding check fails (impersonation attempt detected)
+//   - aap.ErrUnauthorized if binding check fails (impersonation attempt detected)
 //
 // Security Properties:
 //   - Fail-closed: rejects on mismatch (no bypass)
@@ -108,7 +108,7 @@ func WithAllowedAlgorithms(algorithms []string) Option {
 //   - Metrics: increments impersonation_attempt counter for security monitoring
 func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAttorney, sessionUser string) error {
 	if poa == nil {
-		return rfc.New(rfc.ErrInvalidRequest, "nil poa in session binding check")
+		return aap.New(aap.ErrInvalidRequest, "nil poa in session binding check")
 	}
 
 	if sessionUser == "" {
@@ -128,7 +128,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 			_ = s.audit.Log(ctx, event)
 			s.sendToAuditSink(ctx, event)
 		}
-		return rfc.New(rfc.ErrUnauthorized, "no authenticated session user (anonymous requests not permitted)")
+		return aap.New(aap.ErrUnauthorized, "no authenticated session user (anonymous requests not permitted)")
 	}
 
 	// CRITICAL CHECK: Session user MUST match PoA grantee (holder-of-key binding)
@@ -153,7 +153,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 			s.sendToAuditSink(ctx, event)
 		}
 
-		return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf(
+		return aap.New(aap.ErrUnauthorized, fmt.Sprintf(
 			"agent-session binding violation: session user '%s' does not match poa grantee '%s' (impersonation attempt)",
 			sessionUser, poa.Grantee,
 		))
@@ -194,7 +194,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 //
 // Returns:
 //   - nil if all constraints satisfied
-//   - rfc.ErrUnauthorized if scope/restrictions violated
+//   - aap.ErrUnauthorized if scope/restrictions violated
 //
 // Supported Restriction Keys:
 //   - "currency": e.g., "USD" - must match if present
@@ -209,7 +209,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 //   - Audit trail: logs all constraint violations
 func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttorney, requestedAction string, requestedAmount *float64) error {
 	if poa == nil {
-		return rfc.New(rfc.ErrInvalidRequest, "nil poa in scope enforcement")
+		return aap.New(aap.ErrInvalidRequest, "nil poa in scope enforcement")
 	}
 
 	if requestedAction == "" {
@@ -217,7 +217,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 		if s.metrics != nil {
 			s.metrics.IncDelegationStatusTransitionFailures()
 		}
-		return rfc.New(rfc.ErrUnauthorized, "requested action cannot be empty")
+		return aap.New(aap.ErrUnauthorized, "requested action cannot be empty")
 	}
 
 	// Normalize action for comparison (lowercase, trim whitespace)
@@ -280,7 +280,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 			_ = s.audit.Log(ctx, event)
 			s.sendToAuditSink(ctx, event)
 		}
-		return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf(
+		return aap.New(aap.ErrUnauthorized, fmt.Sprintf(
 			"scope violation: action '%s' not permitted by poa scope %v",
 			requestedAction, poa.Scope,
 		))
@@ -313,7 +313,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 					_ = s.audit.Log(ctx, event)
 					s.sendToAuditSink(ctx, event)
 				}
-				return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf(
+				return aap.New(aap.ErrUnauthorized, fmt.Sprintf(
 					"currency mismatch: expected %s, got %s",
 					currency, ctxCurrency,
 				))
@@ -341,7 +341,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 							_ = s.audit.Log(ctx, event)
 							s.sendToAuditSink(ctx, event)
 						}
-						return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf(
+						return aap.New(aap.ErrUnauthorized, fmt.Sprintf(
 							"amount limit exceeded: requested %.2f exceeds max %.2f",
 							*requestedAmount, maxAmount,
 						))
@@ -376,7 +376,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 					_ = s.audit.Log(ctx, event)
 					s.sendToAuditSink(ctx, event)
 				}
-				return rfc.New(rfc.ErrUnauthorized, fmt.Sprintf(
+				return aap.New(aap.ErrUnauthorized, fmt.Sprintf(
 					"action '%s' not in allowed_actions restriction %v",
 					requestedAction, actionsList,
 				))
@@ -419,7 +419,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 //
 // Returns:
 //   - nil if algorithm is whitelisted
-//   - rfc.ErrIntegrityFailure if algorithm is not allowed (fail-closed)
+//   - aap.ErrIntegrityFailure if algorithm is not allowed (fail-closed)
 //
 // Whitelisted Algorithms (default):
 //   - Ed25519 (recommended for PoA signatures)
@@ -435,7 +435,7 @@ func (s *Service) ValidateAlgorithmWhitelist(algorithm string) error {
 		if s.metrics != nil {
 			s.metrics.IncSignatureVerificationFailures()
 		}
-		return rfc.New(rfc.ErrIntegrityFailure, "missing algorithm in signature")
+		return aap.New(aap.ErrIntegrityFailure, "missing algorithm in signature")
 	}
 
 	// Normalize algorithm string
@@ -449,7 +449,7 @@ func (s *Service) ValidateAlgorithmWhitelist(algorithm string) error {
 			if s.metrics != nil {
 				s.metrics.IncSignatureVerificationFailures()
 			}
-			return rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf(
+			return aap.New(aap.ErrIntegrityFailure, fmt.Sprintf(
 				"algorithm '%s' explicitly rejected (algorithm confusion attack blocked)",
 				alg,
 			))
@@ -461,7 +461,7 @@ func (s *Service) ValidateAlgorithmWhitelist(algorithm string) error {
 		if s.metrics != nil {
 			s.metrics.IncSignatureVerificationFailures()
 		}
-		return rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf(
+		return aap.New(aap.ErrIntegrityFailure, fmt.Sprintf(
 			"algorithm '%s' not in whitelist %v (only whitelisted algorithms permitted)",
 			alg, AllowedSignatureAlgorithms,
 		))

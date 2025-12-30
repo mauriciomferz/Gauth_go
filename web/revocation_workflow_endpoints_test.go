@@ -28,14 +28,14 @@ func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 	t.Setenv("GAUTH_REVOCATION_REQUIRED_WEIGHT", "0")
 	// Enable policy seeding to allow create_delegation authorization.
 	t.Setenv("GAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Issue a PoA via underlying service directly (simplest path): we need service reference
 	svc, ok := srv.aap001Service.(*gauth_aap_001.Service)
 	if !ok || svc == nil {
 		// Service should be wired; fail test if not
-		t.Fatalf("AAP001 service not wired")
+		t.Fatalf("AAP-001 service not wired")
 	}
 
 	// Create POA through proper service methods instead of direct injection
@@ -88,7 +88,7 @@ func TestRevocationWorkflowEndpoints_Unauthorized(t *testing.T) {
 
 	// TODO: Re-enable this test when TestInjectPOA method is implemented
 	/*
-		pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001"})
+		pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 		srv := NewBetaServerWithMetrics("", pm)
 		t.Cleanup(func() { srv.Shutdown() })
 		poaID := "poa-test-unauthorized"

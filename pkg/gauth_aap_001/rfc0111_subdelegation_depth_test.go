@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/mauriciomferz/AgentAuth/pkg/common"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // MockAllowAllAuthorizer implements authz.Authorizer and allows everything
@@ -90,7 +90,7 @@ func TestSubDelegation_MaxDepth_Enforcement(t *testing.T) {
 	_, err = svc.CreateDelegationCtx(ctx, greatGrandChildReq)
 	if err == nil {
 		t.Error("Expected error for delegation depth 3 (max 2), got nil")
-	} else if errRes, ok := err.(rfc.RFCError); !ok || errRes.Code != rfc.ErrInvalidRequest {
+	} else if errRes, ok := err. aap.RFCError); !ok || errRes.Code != aap.ErrInvalidRequest {
 		t.Errorf("Expected ErrInvalidRequest, got %v", err)
 	}
 }

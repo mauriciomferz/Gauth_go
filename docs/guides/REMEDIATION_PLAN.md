@@ -919,7 +919,7 @@ The following residual risks have been accepted with documented justification:
 ```
 ✅ Cryptographic & Authenticity:        6/6 (100%)
 ✅ Authorization Engine:                5/5 (100%)
-✅ PoA Definition (RFC0115):            4/4 (100%)
+✅ PoA Definition (AAP-002):            4/4 (100%)
 ✅ Legal/Jurisdiction/Compliance:       4/4 (100%)
 ✅ Persistence & Durability:            3/3 (100%)
 ✅ Replay & Token Security:             3/3 (100%)

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * Enhanced Playwright Configuration for GAuth Testing
+ * Enhanced Playwright Configuration for AgentAuth Testing
  * Supports E2E, visual regression, accessibility, and performance testing
  * See https://playwright.dev/docs/test-configuration
  */

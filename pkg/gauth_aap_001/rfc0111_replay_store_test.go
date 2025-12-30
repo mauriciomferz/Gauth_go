@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // TestReplayStorePrecedence ensures that when a ReplayStore is configured it is used for detection.
@@ -36,7 +36,7 @@ func TestReplayStorePrecedence(t *testing.T) {
 	if err2 == nil {
 		t.Fatalf("expected replay error on second verify")
 	}
-	if rfce, ok := err2.(rfc.RFCError); !ok || rfce.Code != rfc.ErrReplay {
+	if/aape, ok := err2. aap.RFCError); !ok ||/aape.Code != aap.ErrReplay {
 		t.Fatalf("expected replay error got %v", err2)
 	}
 	snap := memMetrics.SnapshotEx()

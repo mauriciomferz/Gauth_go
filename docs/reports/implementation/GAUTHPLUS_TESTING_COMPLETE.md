@@ -210,7 +210,7 @@ chmod +x test_gauthplus_api.sh
 ```bash
 # Environment variables required
 GAUTH_DEV_INDEX=1
-GAUTH_RFC0111_ENABLED=1
+GAUTH_AAP-001_ENABLED=1
 GAUTH_USE_JWT_LIB=1
 GAUTH_GAUTHPLUS_ENABLED=1
 DB_HOST=localhost

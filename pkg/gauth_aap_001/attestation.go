@@ -12,17 +12,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/mauriciomferz/AgentAuth/pkg/attest"
 	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // IssueAttestationProof creates and signs a new AttestationProof.
 // Fail-closed semantics: any canonicalization or signing error results in integrity_failure.
 func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject string, duration time.Duration) (*attest.AttestationProof, error) {
 	if statement == "" || subject == "" {
-		return nil, rfc.New(rfc.ErrInvalidRequest, "statement and subject required")
+		return nil, aap.New(aap.ErrInvalidRequest, "statement and subject required")
 	}
 	if len(statement) > 1024 {
-		return nil, rfc.New(rfc.ErrInvalidRequest, "statement too large (>1024 bytes)")
+		return nil, aap.New(aap.ErrInvalidRequest, "statement too large (>1024 bytes)")
 	}
 	if duration < 0 {
 		duration = 0
@@ -54,28 +54,28 @@ func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject 
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofIssueFailures()
 		}
-		return nil, rfc.New(rfc.ErrIntegrityFailure, "signer unavailable")
+		return nil, aap.New(aap.ErrIntegrityFailure, "signer unavailable")
 	}
 	signer, err := s.signerProvider()
 	if err != nil || signer == nil {
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofIssueFailures()
 		}
-		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("signer error: %v", err))
+		return nil, aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("signer error: %v", err))
 	}
 	dig, canon, derr := attest.CanonicalAttestationDigest(proof)
 	if derr != nil {
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofIssueFailures()
 		}
-		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("canonicalization failed: %v", derr))
+		return nil, aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("canonicalization failed: %v", derr))
 	}
 	sigBytes, serr := signer.Sign(canon)
 	if serr != nil {
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofIssueFailures()
 		}
-		return nil, rfc.New(rfc.ErrIntegrityFailure, fmt.Sprintf("sign failed: %v", serr))
+		return nil, aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("sign failed: %v", serr))
 	}
 	proof.DigestHex = dig
 	proof.CanonicalDigest = dig
@@ -94,11 +94,11 @@ func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject 
 //nolint:gocyclo // Attestation proof verification with signature checks
 func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.AttestationProof) error {
 	if proof == nil {
-		return rfc.New(rfc.ErrInvalidRequest, "nil proof")
+		return aap.New(aap.ErrInvalidRequest, "nil proof")
 	}
 	start := time.Now()
 	if !proof.ExpiresAt.IsZero() && time.Now().UTC().After(proof.ExpiresAt.UTC()) {
-		return rfc.New(rfc.ErrExpired, "attestation proof expired")
+		return aap.New(aap.ErrExpired, "attestation proof expired")
 	}
 	// Optional trust anchor enforcement (strict issuer binding). Enabled when GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1.
 	requireAnchor := parseBoolEnv("GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR")
@@ -109,7 +109,7 @@ func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.Atte
 				s.metrics.IncAttestationProofVerificationFailures()
 				s.metrics.IncAttestationProofTrustAnchorMissing()
 			}
-			return rfc.New(rfc.ErrIntegrityFailure, "trust anchor missing for issuer")
+			return aap.New(aap.ErrIntegrityFailure, "trust anchor missing for issuer")
 		}
 		// Enforce algorithm and key binding match.
 		if anchor.Algorithm != "" && anchor.Algorithm != proof.Algorithm {
@@ -117,14 +117,14 @@ func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.Atte
 				s.metrics.IncAttestationProofVerificationFailures()
 				s.metrics.IncAttestationProofTrustAnchorAlgorithmMismatch()
 			}
-			return rfc.New(rfc.ErrIntegrityFailure, "attestation algorithm mismatch with trust anchor")
+			return aap.New(aap.ErrIntegrityFailure, "attestation algorithm mismatch with trust anchor")
 		}
 		if anchor.KeyID != "" && anchor.KeyID != proof.KeyID {
 			if s.metrics != nil {
 				s.metrics.IncAttestationProofVerificationFailures()
 				s.metrics.IncAttestationProofTrustAnchorKeyMismatch()
 			}
-			return rfc.New(rfc.ErrIntegrityFailure, "attestation key mismatch with trust anchor")
+			return aap.New(aap.ErrIntegrityFailure, "attestation key mismatch with trust anchor")
 		}
 	}
 	dig, canon, derr := attest.CanonicalAttestationDigest(proof)
@@ -132,14 +132,14 @@ func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.Atte
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofVerificationFailures()
 		}
-		return rfc.New(rfc.ErrIntegrityFailure, "canonicalization failed")
+		return aap.New(aap.ErrIntegrityFailure, "canonicalization failed")
 	}
 	if dig != proof.DigestHex {
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofDigestMismatch()
 			s.metrics.IncAttestationProofVerificationFailures()
 		}
-		return rfc.New(rfc.ErrIntegrityFailure, "digest mismatch")
+		return aap.New(aap.ErrIntegrityFailure, "digest mismatch")
 	}
 	// Dispatch verification through registered algorithm
 	algo := proof.Algorithm
@@ -150,13 +150,13 @@ func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.Atte
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofVerificationFailures()
 		}
-		return rfc.New(rfc.ErrIntegrityFailure, "unsupported algorithm")
+		return aap.New(aap.ErrIntegrityFailure, "unsupported algorithm")
 	}
 	if s.keyProvider == nil {
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofVerificationFailures()
 		}
-		return rfc.New(rfc.ErrIntegrityFailure, "key provider unavailable")
+		return aap.New(aap.ErrIntegrityFailure, "key provider unavailable")
 	}
 	err := cr.VerifyAlgorithm(algo, canon, proof.Signature, proof.KeyID, s.keyProvider)
 	if err != nil {
@@ -165,12 +165,12 @@ func (s *Service) VerifyAttestationProof(ctx context.Context, proof *attest.Atte
 			if s.metrics != nil {
 				s.metrics.IncAttestationProofVerificationFailures()
 			}
-			return rfc.New(rfc.ErrIntegrityFailure, "public key missing")
+			return aap.New(aap.ErrIntegrityFailure, "public key missing")
 		}
 		if s.metrics != nil {
 			s.metrics.IncAttestationProofVerificationFailures()
 		}
-		return rfc.New(rfc.ErrIntegrityFailure, "signature verification failed")
+		return aap.New(aap.ErrIntegrityFailure, "signature verification failed")
 	}
 	if s.metrics != nil {
 		s.metrics.IncAttestationProofVerifications()

@@ -63,7 +63,7 @@ owners: [system]
 GAUTH_GAUTHPLUS_ENABLED=1 \
 DB_HOST=localhost DB_PORT=5432 DB_USER=postgres \
 DB_PASSWORD=gauth_dev_password DB_NAME=gauth \
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 ./bin/web-server
 
 # Server logs will show:
@@ -393,7 +393,7 @@ func LoadPolicyConfig() (*AgentAuthPlusPolicyConfig, error)
 go build -o bin/web-server ./cmd/web-server/
 
 # Run with AgentAuth+ enabled
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENABLED=1 \
 DB_HOST=localhost \
 DB_PORT=5432 \

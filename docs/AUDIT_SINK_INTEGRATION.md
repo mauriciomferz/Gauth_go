@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Audit Sink Integration (P1.4) enables RFC0111 token lifecycle events to be sent to external audit destinations such as SIEM systems, log aggregators, compliance archives, and message queues. This feature provides real-time audit trail streaming while maintaining backward compatibility with existing deployments.
+The Audit Sink Integration (P1.4) enables AAP-001 token lifecycle events to be sent to external audit destinations such as SIEM systems, log aggregators, compliance archives, and message queues. This feature provides real-time audit trail streaming while maintaining backward compatibility with existing deployments.
 
 **Key Features:**
 - **Opt-in Design**: Audit sinks are disabled by default (backward compatible)
@@ -20,7 +20,7 @@ The Audit Sink Integration (P1.4) enables RFC0111 token lifecycle events to be s
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    RFC0111 Service                          │
+│                    AAP-001 Service                          │
 │                                                             │
 │  ┌──────────────┐       ┌──────────────┐                   │
 │  │ CreateDelegation│───>│ AuditLogger  │                   │

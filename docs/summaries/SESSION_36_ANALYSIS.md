@@ -90,7 +90,7 @@ To reach 75% coverage would require:
 
 ### Qualitative Achievements
 - **All major functions well-tested:**
-  - ValidateRFC0115Compliance: 96.6%
+  - ValidateAAP-002Compliance: 96.6%
   - VerifyMultiSig: 95.0%
   - marshalCBORItem: 92.6%
   - Issue: 89.5%

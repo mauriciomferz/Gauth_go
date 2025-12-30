@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // PoAValidator defines semantic validation beyond syntactic request checks.
@@ -44,17 +44,17 @@ type BasicPoAValidator struct{}
 //nolint:gocyclo // Basic PoA validation with field checks
 func (BasicPoAValidator) Validate(p *PowerOfAttorney) error {
 	if p == nil {
-		return rfc.New(rfc.ErrInvalidRequest, "nil poa")
+		return aap.New(aap.ErrInvalidRequest, "nil poa")
 	}
 	// Rule 1: Prevent trivial self-delegation unless scope is exactly ["*"]
 	if p.Grantor == p.Grantee {
 		if !(len(p.Scope) == 1 && p.Scope[0] == "*") {
-			return rfc.New(rfc.ErrInvalidRequest, "grantor and grantee must differ for non-wildcard delegation")
+			return aap.New(aap.ErrInvalidRequest, "grantor and grantee must differ for non-wildcard delegation")
 		}
 	}
 	// Temporal invariant
 	if !p.ValidFrom.Before(p.ValidUntil) {
-		return rfc.New(rfc.ErrInvalidRequest, "valid_from must be before valid_until")
+		return aap.New(aap.ErrInvalidRequest, "valid_from must be before valid_until")
 	}
 	// Normalize restrictions map if nil
 	if p.Restrictions == nil {
@@ -66,7 +66,7 @@ func (BasicPoAValidator) Validate(p *PowerOfAttorney) error {
 	for _, sc := range p.Scope {
 		if len(sc) >= 11 && sc[:11] == "regulatory:" {
 			if _, ok := p.Restrictions["jurisdiction"]; !ok {
-				return rfc.New(rfc.ErrInvalidRequest, "jurisdiction restriction required for regulatory scopes")
+				return aap.New(aap.ErrInvalidRequest, "jurisdiction restriction required for regulatory scopes")
 			}
 		}
 	}
@@ -77,11 +77,11 @@ func (BasicPoAValidator) Validate(p *PowerOfAttorney) error {
 		if strings.HasPrefix(sc, "joint:") {
 			val, ok := p.Restrictions["signatures"]
 			if !ok || val == "" {
-				return rfc.New(rfc.ErrInvalidRequest, "signatures restriction required for joint delegation")
+				return aap.New(aap.ErrInvalidRequest, "signatures restriction required for joint delegation")
 			}
 			n, err := strconv.Atoi(val)
 			if err != nil || n < 2 {
-				return rfc.New(rfc.ErrInvalidRequest, "signatures count must be integer >=2 for joint delegation")
+				return aap.New(aap.ErrInvalidRequest, "signatures count must be integer >=2 for joint delegation")
 			}
 		}
 	}
@@ -91,22 +91,22 @@ func (BasicPoAValidator) Validate(p *PowerOfAttorney) error {
 	// currency must be ISO-like (3 uppercase letters) when present.
 	if amtStr, ok := p.Restrictions["max_amount"]; ok {
 		if err := validatePositiveDecimal(amtStr); err != nil {
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_amount: %v", err))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid max_amount: %v", err))
 		}
 	}
 	if damtStr, ok := p.Restrictions["max_daily_amount"]; ok {
 		if err := validatePositiveDecimal(damtStr); err != nil {
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_daily_amount: %v", err))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid max_daily_amount: %v", err))
 		}
 		if amtStr, ok2 := p.Restrictions["max_amount"]; ok2 {
 			if greaterThan(amtStr, damtStr) {
-				return rfc.New(rfc.ErrInvalidRequest, "max_daily_amount must be >= max_amount")
+				return aap.New(aap.ErrInvalidRequest, "max_daily_amount must be >= max_amount")
 			}
 		}
 	}
 	if cur, ok := p.Restrictions["currency"]; ok {
 		if len(cur) != 3 || cur != strings.ToUpper(cur) || !isAlpha(cur) {
-			return rfc.New(rfc.ErrInvalidRequest, "currency must be 3 uppercase letters")
+			return aap.New(aap.ErrInvalidRequest, "currency must be 3 uppercase letters")
 		}
 	}
 	return nil
@@ -133,7 +133,7 @@ func (AdvancedPoAValidator) Validate(p *PowerOfAttorney) error {
 		return err
 	}
 	if p == nil {
-		return rfc.New(rfc.ErrInvalidRequest, "nil poa")
+		return aap.New(aap.ErrInvalidRequest, "nil poa")
 	}
 	// Enforce currency + 30d duration cap for transaction scopes
 	hasTxn := false
@@ -145,45 +145,45 @@ func (AdvancedPoAValidator) Validate(p *PowerOfAttorney) error {
 	}
 	if hasTxn {
 		if _, ok := p.Restrictions["currency"]; !ok {
-			return rfc.New(rfc.ErrInvalidRequest, "currency restriction required for transaction scopes")
+			return aap.New(aap.ErrInvalidRequest, "currency restriction required for transaction scopes")
 		}
 		if p.ValidUntil.Sub(p.ValidFrom) > (30 * 24 * time.Hour) {
-			return rfc.New(rfc.ErrInvalidRequest, "transaction delegation duration exceeds 30d cap")
+			return aap.New(aap.ErrInvalidRequest, "transaction delegation duration exceeds 30d cap")
 		}
 	}
 	// valid_hours format check
 	if vh, ok := p.Restrictions["valid_hours"]; ok {
 		parts := strings.Split(vh, "-")
 		if len(parts) != 2 {
-			return rfc.New(rfc.ErrInvalidRequest, "valid_hours must be HH-HH")
+			return aap.New(aap.ErrInvalidRequest, "valid_hours must be HH-HH")
 		}
 		sh, eh := parts[0], parts[1]
 		if len(sh) != 2 || len(eh) != 2 {
-			return rfc.New(rfc.ErrInvalidRequest, "valid_hours hours must be 2 digits")
+			return aap.New(aap.ErrInvalidRequest, "valid_hours hours must be 2 digits")
 		}
 		sHi, err1 := strconv.Atoi(sh)
 		eHi, err2 := strconv.Atoi(eh)
 		if err1 != nil || err2 != nil || sHi < 0 || sHi > 23 || eHi < 0 || eHi > 23 {
-			return rfc.New(rfc.ErrInvalidRequest, "valid_hours invalid hour range")
+			return aap.New(aap.ErrInvalidRequest, "valid_hours invalid hour range")
 		}
 	}
 	if vwd, ok := p.Restrictions["valid_weekdays"]; ok {
 		items := strings.Split(vwd, ",")
 		if len(items) == 0 {
-			return rfc.New(rfc.ErrInvalidRequest, "valid_weekdays empty")
+			return aap.New(aap.ErrInvalidRequest, "valid_weekdays empty")
 		}
 		seen := map[int]struct{}{}
 		for _, it := range items {
 			it = strings.TrimSpace(it)
 			if it == "" {
-				return rfc.New(rfc.ErrInvalidRequest, "valid_weekdays contains empty entry")
+				return aap.New(aap.ErrInvalidRequest, "valid_weekdays contains empty entry")
 			}
 			v, err := strconv.Atoi(it)
 			if err != nil || v < 0 || v > 6 {
-				return rfc.New(rfc.ErrInvalidRequest, "valid_weekdays out of range 0-6")
+				return aap.New(aap.ErrInvalidRequest, "valid_weekdays out of range 0-6")
 			}
 			if _, dup := seen[v]; dup {
-				return rfc.New(rfc.ErrInvalidRequest, "valid_weekdays duplicate value")
+				return aap.New(aap.ErrInvalidRequest, "valid_weekdays duplicate value")
 			}
 			seen[v] = struct{}{}
 		}
@@ -191,7 +191,7 @@ func (AdvancedPoAValidator) Validate(p *PowerOfAttorney) error {
 	// Multi-signature inline constraint
 	if p.Threshold > 1 && p.MultiSignatures != nil && len(p.MultiSignatures) > 0 {
 		if os.Getenv("GAUTH_ALLOW_INLINE_MULTISIG") != "1" {
-			return rfc.New(rfc.ErrInvalidRequest, "inline multi_signatures not allowed (enable GAUTH_ALLOW_INLINE_MULTISIG=1)")
+			return aap.New(aap.ErrInvalidRequest, "inline multi_signatures not allowed (enable GAUTH_ALLOW_INLINE_MULTISIG=1)")
 		}
 	}
 	// Aggregate scope length constraint (optional)
@@ -202,7 +202,7 @@ func (AdvancedPoAValidator) Validate(p *PowerOfAttorney) error {
 				total += len(sc)
 			}
 			if total > l {
-				return rfc.New(rfc.ErrInvalidRequest, "aggregate scope length exceeds limit")
+				return aap.New(aap.ErrInvalidRequest, "aggregate scope length exceeds limit")
 			}
 		}
 	}
@@ -210,7 +210,7 @@ func (AdvancedPoAValidator) Validate(p *PowerOfAttorney) error {
 	if os.Getenv("GAUTH_ALLOW_WILDCARD") != "1" {
 		for _, sc := range p.Scope {
 			if sc == "*" {
-				return rfc.New(rfc.ErrInvalidRequest, "wildcard scope disabled")
+				return aap.New(aap.ErrInvalidRequest, "wildcard scope disabled")
 			}
 		}
 	}

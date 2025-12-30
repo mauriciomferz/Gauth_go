@@ -13,7 +13,7 @@ test.describe.skip('Subscriptions Management', () => {
   })
 
   test('should display subscriptions page', async ({ page }) => {
-    await expect(page).toHaveTitle(/GAuth/)
+    await expect(page).toHaveTitle(/AgentAuth/)
     await expect(page.getByRole('heading', { name: /Subscription/i })).toBeVisible()
   })
 

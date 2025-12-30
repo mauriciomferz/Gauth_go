@@ -1,6 +1,6 @@
 // Package web implements the HTTP API server, capability negotiation/enforcement,
 // delegation lifecycle endpoints, observability instrumentation, and ancillary
-// demo/admin surfaces for the GAuth prototype. It wires together persistence,
+// demo/admin surfaces for the AgentAuth prototype. It wires together persistence,
 // metrics, auditing, policy, and cryptographic subsystems.
 //
 //lint:file-ignore SA4006 False positive on status variable usage in integrity/adaptive interval logic.
@@ -263,7 +263,7 @@ const (
 	ErrMalformedToken   = "malformed_token"
 )
 
-// rfc0111ErrorWrapper wraps RFC0111 service errors for consistent HTTP error mapping
+// rfc0111ErrorWrapper wraps AAP-001 service errors for consistent HTTP error mapping
 type rfc0111ErrorWrapper struct {
 	message string
 	code    int
@@ -301,8 +301,8 @@ type BetaServer struct {
 	// stopCh closes to signal background goroutines to exit gracefully.
 	stopCh  chan struct{}
 	stopped atomic.Bool // indicates Shutdown() invoked
-	// RFC0111 delegation service (prototype) to surface semantic counters and dual-control revocation workflow methods.
-	// These are no-ops when GAUTH_DISABLE_RFC0111_SERVICE=1 (service nil) and handlers will fail closed.
+	// AAP-001 delegation service (prototype) to surface semantic counters and dual-control revocation workflow methods.
+	// These are no-ops when GAUTH_DISABLE_AAP-001_SERVICE=1 (service nil) and handlers will fail closed.
 	rfc0111Service interface {
 		SemanticSnapshot() map[string]uint64
 		InitiateRevocation(ctx context.Context, req gauth_rfc_001.RevocationRequest) error
@@ -335,7 +335,7 @@ type BetaServer struct {
 	// ok=1 mismatch=0 legacy=-1 unconfigured=-2
 	violationIntegrityStatus string
 	semanticIntegrityStatus  string
-	// Delegation lifecycle prototype store (id -> status). Real implementation would live in RFC0111 service repo.
+	// Delegation lifecycle prototype store (id -> status). Real implementation would live in AAP-001 service repo.
 	delegationStatusMu sync.RWMutex
 	delegationStatus   map[string]string // active | suspended | terminated
 	port               string            // bound address (":8080" style)
@@ -422,7 +422,7 @@ type BetaServer struct {
 	// Capability audit hash chain persistence (tracking capability-related audit entries: create, revoke, enforce)
 	capAuditPrevHash    string
 	capAuditPersistPath string
-	// Protocol flow manager for interactive GAuth flow guidance
+	// Protocol flow manager for interactive AgentAuth flow guidance
 	protocolFlowManager *ProtocolFlowManager
 	// Capability registry external anchor artifact (periodic file emission)
 	capAnchorFilePath      string
@@ -689,7 +689,7 @@ func (s *BetaServer) RegisterUIRoutes() {
 		// Minimal HTML satisfying smoketest element assertions.
 		// Contains: themeToggle button, mobileNavButton button, role=tablist with >=5 data-tab elements,
 		// first tab id=tab-token-demo and aria-selected=true
-		html := `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>GAuth Demo</title></head><body>
+		html := `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>AgentAuth Demo</title></head><body>
 <button id="themeToggle" aria-label="Toggle theme"></button>
 <button id="mobileNavButton" aria-label="Open navigation"></button>
 <div role="tablist">
@@ -1015,7 +1015,7 @@ func copyMap(src map[string]uint64) map[string]uint64 {
 // Routes exposes registered gin routes for tooling (spec generation, coverage checks).
 func (s *BetaServer) Routes() []gin.RouteInfo { return s.router.Routes() }
 
-// --- RFC0111 Dual-Control Revocation Workflow Endpoints ---
+// --- AAP-001 Dual-Control Revocation Workflow Endpoints ---
 // POST /api/v1/poa/{id}/revocation/initiate  Body: {"initiator":"alice","reason":"risk"}
 // POST /api/v1/poa/{id}/revocation/approve   Body: {"approver":"controller1"}
 // POST /api/v1/poa/{id}/revocation/cancel    Body: {"actor":"alice"}
@@ -1801,9 +1801,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}
 		}
 	}
-	// Initialize RFC0111 service (semantic counters) unless disabled (GAUTH_DISABLE_RFC0111_SERVICE=1)
-	if os.Getenv("GAUTH_DISABLE_RFC0111_SERVICE") != "1" {
-		// Create an RFC0111 service using in-memory audit logger and existing authorizer policies.
+	// Initialize AAP-001 service (semantic counters) unless disabled (GAUTH_DISABLE_AAP-001_SERVICE=1)
+	if os.Getenv("GAUTH_DISABLE_AAP-001_SERVICE") != "1" {
+		// Create an AAP-001 service using in-memory audit logger and existing authorizer policies.
 		memAudit := audit.NewMemoryLogger(nil)
 		if s.authorizer == nil {
 			s.authorizer = authz.NewMemoryAuthorizer()
@@ -1951,8 +1951,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
 			adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
 
-			// GAuth+ enhanced authorization handler
-			gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(dbPool)
+			// AgentAuth+ enhanced authorization handler
+			gauthPlusHandler := adminHandlers.NewAgentAuthPlusHandler(dbPool)
 			gauthPlusHandler.RegisterRoutes(adminGroup)
 
 			fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, gauthplus (17 total)") // OIDC authentication flow handler
@@ -4296,11 +4296,11 @@ func (s *BetaServer) routes() {
 	s.router.POST("/api/v1/delegation/create", s.apiDelegationCreate)
 	s.router.POST("/api/v1/delegation/revoke", s.apiDelegationRevoke)
 
-	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by GAUTH_RFC0111_ENABLED=1)
-	if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
+	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by GAUTH_AAP-001_ENABLED=1)
+	if rfc0111Components, tokenStore, err := InitAAP-001FromEnv(); err == nil && rfc0111Components != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Enabled with mock external services\n")
 
-		// Create GAuth service with RFC-0111 compliance enabled
+		// Create AgentAuth service with RFC-0111 compliance enabled
 		// Create ExtendedTokenService for protocol orchestrator
 		extendedTokenService := gauth.NewExtendedTokenService(
 			rfc0111Components.AuthChainValidator,
@@ -4338,10 +4338,10 @@ func (s *BetaServer) routes() {
 			),
 		)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[RFC-0111] Failed to create GAuth service: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[RFC-0111] Failed to create AgentAuth service: %v\n", err)
 		} else {
 			// Register all RFC-0111 endpoints
-			s.RegisterRFC0111Endpoints(
+			s.RegisterAAP-001Endpoints(
 				rfc0111Components.SubscriptionManager,
 				rfc0111Components.SubscriptionStore,
 				gauthService,
@@ -4382,8 +4382,8 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
 		}
 
-		// Initialize GAuth+ management API endpoints if enabled
-		s.InitializeGAuthPlusEndpoints()
+		// Initialize AgentAuth+ management API endpoints if enabled
+		s.InitializeAgentAuthPlusEndpoints()
 	} else if err != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Initialization failed: %v\n", err)
 	}
@@ -4443,7 +4443,7 @@ func (s *BetaServer) routes() {
 
 	// Simple root page (rebranded Beta)
 	s.router.GET("/", func(c *gin.Context) {
-		c.Data(200, "text/html; charset=utf-8", []byte("<html><body><h1>GAuth Beta Demo</h1><p>Visit <a href='/index.html'>Full Beta UI</a></p></body></html>"))
+		c.Data(200, "text/html; charset=utf-8", []byte("<html><body><h1>AgentAuth Beta Demo</h1><p>Visit <a href='/index.html'>Full Beta UI</a></p></body></html>"))
 	})
 
 	// API Documentation routes (Swagger UI, ReDoc, OpenAPI spec)
@@ -4658,7 +4658,7 @@ func (s *BetaServer) routes() {
 			"deprecated_fields":    []string{},
 			"deprecated_after":     func() string { return os.Getenv("GAUTH_DEPRECATED_AFTER") }(),
 			"sunset_after":         func() string { return os.Getenv("GAUTH_SUNSET_AFTER") }(),
-			"implementation":       "GAuth Demo",
+			"implementation":       "AgentAuth Demo",
 			"issuer":               os.Getenv("GAUTH_ISSUER"),
 			"token_algorithms":     algs,
 			"eddsa_enabled":        eddsaMode,
@@ -5289,7 +5289,7 @@ func (s *BetaServer) routes() {
 
 	// --- Delegation Graph Export (observability) ---
 	// GET /api/v1/beta/delegations/graph?format=json|dot
-	// Prototype snapshot of current delegation hierarchy. Until RFC0111 service exposes parent relationships
+	// Prototype snapshot of current delegation hierarchy. Until AAP-001 service exposes parent relationships
 	// we emit only flat nodes derived from internal status map. DOT output helps quick visualization.
 	s.router.GET("/api/v1/beta/delegations/graph", func(c *gin.Context) {
 		format := strings.ToLower(c.Query("format"))
@@ -5304,7 +5304,7 @@ func (s *BetaServer) routes() {
 			nodes = append(nodes, gin.H{"id": id, "status": st})
 		}
 		s.delegationStatusMu.RUnlock()
-		// Attempt to enrich with parent-child edges from RFC0111 repository if service available
+		// Attempt to enrich with parent-child edges from AAP-001 repository if service available
 		if svc, ok := s.rfc0111Service.(*gauth_rfc_001.Service); ok && svc != nil {
 			// The repository interface lacks a full scan; approximate by iterating over principals seen in status map (union grantor/grantee covered by map keys) then de-duplicating.
 			seen := make(map[string]*gauth_rfc_001.PowerOfAttorney)
@@ -5777,7 +5777,7 @@ func (s *BetaServer) routes() {
 			}
 		}
 		// Fallback: serve embedded or minimal HTML
-		c.String(200, `<!DOCTYPE html><html><head><title>Protocol Flow Navigator</title></head><body><h1>GAuth Protocol Flow Navigator</h1><p>Loading...</p></body></html>`)
+		c.String(200, `<!DOCTYPE html><html><head><title>Protocol Flow Navigator</title></head><body><h1>AgentAuth Protocol Flow Navigator</h1><p>Loading...</p></body></html>`)
 	}
 	s.router.GET("/protocol-flow.html", protocolFlowHandler)
 	s.router.GET("/protocol-flow", protocolFlowHandler)
@@ -5817,14 +5817,14 @@ func (s *BetaServer) routes() {
 		}
 		// Fallback always returns a 200 minimal page (avoid 404 confusion between .html and non-.html routes)
 		c.Header("Content-Security-Policy", cspPolicy)
-		c.String(200, `<!DOCTYPE html><html><head><title>PoA Visualization</title></head><body><h1>GAuth PoA Map Visualization</h1><p>Loading...</p></body></html>`)
+		c.String(200, `<!DOCTYPE html><html><head><title>PoA Visualization</title></head><body><h1>AgentAuth PoA Map Visualization</h1><p>Loading...</p></body></html>`)
 	}
 	s.router.GET("/poa-visualization.html", poaVisHandler)
 	s.router.GET("/poa-visualization", poaVisHandler)
 	s.router.HEAD("/poa-visualization.html", poaVisHandler)
 	s.router.HEAD("/poa-visualization", poaVisHandler)
 
-	// Serve gauth1.html (GAuth 1.0 Dashboard)
+	// Serve gauth1.html (AgentAuth 1.0 Dashboard)
 	s.router.GET("/gauth1.html", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
 			path := wd + "/web/static_ui/gauth1.html"
@@ -5929,7 +5929,7 @@ func (s *BetaServer) routes() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAuth API Documentation - RFC-0150 Authorization Framework</title>
+    <title>AgentAuth API Documentation - RFC-0150 Authorization Framework</title>
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css" />
     <style>
         body {
@@ -5987,7 +5987,7 @@ func (s *BetaServer) routes() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAuth API - Swagger UI</title>
+    <title>AgentAuth API - Swagger UI</title>
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.10.5/swagger-ui.css" />
     <style>
         body { margin: 0; padding: 0; }
@@ -6029,7 +6029,7 @@ func (s *BetaServer) routes() {
 			html := `<!DOCTYPE html>
 <html>
 <head>
-    <title>GAuth API - ReDoc</title>
+    <title>AgentAuth API - ReDoc</title>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
@@ -6066,7 +6066,7 @@ func (s *BetaServer) routes() {
 			}
 		}
 		// Fallback: serve embedded or minimal HTML
-		c.String(200, `<!DOCTYPE html><html><head><title>GAuth Demo</title></head><body><h1>GAuth Comprehensive Demo</h1><p>Loading...</p></body></html>`)
+		c.String(200, `<!DOCTYPE html><html><head><title>AgentAuth Demo</title></head><body><h1>AgentAuth Comprehensive Demo</h1><p>Loading...</p></body></html>`)
 	})
 
 	// Serve embedded static assets
@@ -8526,7 +8526,7 @@ func (s *BetaServer) apiLifecycleMetrics(c *gin.Context) {
 //
 //nolint:gocyclo // Token status update handler
 
-// apiDelegationStatusUpdate prototype (no persistent RFC0111 service wiring yet).
+// apiDelegationStatusUpdate prototype (no persistent AAP-001 service wiring yet).
 // Payload: {"delegation_id":"poa_x","new_status":"active|suspended|terminated"}
 // For now this logs the requested update and returns persisted=false indicator.
 func (s *BetaServer) apiDelegationStatusUpdate(c *gin.Context) {
@@ -9126,7 +9126,7 @@ func (s *BetaServer) initUIRevamp() {
 	// Simple UI index placeholder
 	if !s.routeRegistered("/ui") {
 		s.router.GET("/ui", func(c *gin.Context) {
-			html := "<html><head><title>GAuth Beta Dashboard</title></head><body><h1>GAuth Beta Dashboard</h1></body></html>"
+			html := "<html><head><title>AgentAuth Beta Dashboard</title></head><body><h1>AgentAuth Beta Dashboard</h1></body></html>"
 			c.Data(200, "text/html; charset=utf-8", []byte(html))
 		})
 	}
@@ -9144,11 +9144,11 @@ func (s *BetaServer) initUIRevamp() {
 	if !s.routeRegistered("/api/v1/diagnostics/semantic") {
 		s.router.GET("/api/v1/diagnostics/semantic", func(c *gin.Context) {
 			// Strict wiring enforcement: fail closed when service disabled + strict flag
-			if os.Getenv("GAUTH_DISABLE_RFC0111_SERVICE") == "1" && os.Getenv("GAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED") == "1" {
-				respondError(c, http.StatusServiceUnavailable, "semantic_metrics_unavailable", "semantic_metrics_unavailable", "RFC0111 service disabled", "rfc115:semantic_diagnostics", map[string]string{"reason": "disabled"})
+			if os.Getenv("GAUTH_DISABLE_AAP-001_SERVICE") == "1" && os.Getenv("GAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED") == "1" {
+				respondError(c, http.StatusServiceUnavailable, "semantic_metrics_unavailable", "semantic_metrics_unavailable", "AAP-001 service disabled", "rfc115:semantic_diagnostics", map[string]string{"reason": "disabled"})
 				return
 			}
-			wired := os.Getenv("GAUTH_DISABLE_RFC0111_SERVICE") != "1"
+			wired := os.Getenv("GAUTH_DISABLE_AAP-001_SERVICE") != "1"
 			// When unwired emit minimal structure matching tests
 			if !wired {
 				anomaly := map[string]any{"rate_per_minute_60s": map[string]float64{}, "scores": map[string]any{}}

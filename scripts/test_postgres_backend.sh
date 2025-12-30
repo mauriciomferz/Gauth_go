@@ -9,7 +9,7 @@ echo "=== PostgreSQL Backend Test ==="
 echo
 
 # Configuration
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 export DB_HOST=localhost
 export DB_PORT=5432
 export DB_NAME=gauth

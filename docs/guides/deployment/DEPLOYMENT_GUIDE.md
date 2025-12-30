@@ -599,7 +599,7 @@ Use environment variables or secret management service:
 # .env.production (DO NOT COMMIT)
 
 # === REQUIRED: Phase 2A Backend Endpoints ===
-GAUTH_RFC0111_ENABLED=1         # MUST be set to enable Phase 2A endpoints
+GAUTH_AAP-001_ENABLED=1         # MUST be set to enable Phase 2A endpoints
                                 # Without this, /beta/pvp/verify, /beta/registry/*, and /beta/poa/* return 404
 GAUTH_DEV_INDEX=1               # Optional: Serve UI from disk for development
 

@@ -541,8 +541,8 @@ for sig in signatures:
 ## References
 
 - **BLS12-381 Spec**: [IETF Draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature)
-- **AgentAuth RFC0111**: Multi-signature threshold enforcement
-- **AgentAuth RFC0115**: Power of Attorney semantic validation
+- **AgentAuth AAP-001**: Multi-signature threshold enforcement
+- **AgentAuth AAP-002**: Power of Attorney semantic validation
 - **Library**: `github.com/herumi/bls-eth-go-binary` (BLS12-381 implementation)
 
 ---

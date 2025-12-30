@@ -15,7 +15,7 @@ refreshCadence: on-change
 This directory contains clear, concise Go examples demonstrating the core AgentAuth protocol flows:
 
 - **Power of Attorney (POA) Request/Response**
-- **Advanced POA (AgentAuth-RFC-001 (formerly RFC 111)) Scenarios**
+- **Advanced POA (AAP-001) Scenarios**
 - **Delegation (AgentAuth-RFC-002 (formerly RFC 115)) Request/Response**
 - **Token Creation and Validation**
 
@@ -28,9 +28,9 @@ Each example is self-contained and annotated for Beta demonstration clarity.
 
 - Shows how a client requests a POA and receives a response.
 
-## 1a. Advanced POA (AgentAuth-RFC-001 (formerly RFC 111)) Scenarios
+## 1a. Advanced POA (AAP-001) Scenarios
 
-- Demonstrates negative and positive cases for AgentAuth-RFC-001 (formerly RFC 111) POA validation:
+- Demonstrates negative and positive cases for AAP-001 POA validation:
 	- Invalid jurisdiction (should fail)
 	- Disallowed scope (should fail)
 	- Missing required fields (should fail)
@@ -53,7 +53,7 @@ Run any example with:
 cd examples/gauth_protocol_basics
 # For Minimal POA
 go run minimal_poa
-# For Advanced POA (AgentAuth-RFC-001 (formerly RFC 111))
+# For Advanced POA (AAP-001)
 go run advanced_poa
 # For Delegation
 go run delegation

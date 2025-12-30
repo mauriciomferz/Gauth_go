@@ -7,7 +7,7 @@
 //   - Revocation (token is revoked)
 //   - Compliance check (ensure revoked tokens are not valid)
 //
-// Run with: go run ./examples/token/rfc111_protocol_flow/main.go
+// Run with: go run ./examples/token"AAP-001_protocol_flow/main.go
 package main
 
 import (

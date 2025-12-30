@@ -40,7 +40,7 @@ func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Replace metrics with Prometheus implementation.
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Registry: reg, Namespace: "gauth", Subsystem: "aap001"})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Registry: reg, Namespace: "gauth", Subsystem:"AAP-001"})
 	srv.metrics = pm
 	// Instead of relying on background emission, set the metric explicitly for deterministic test.
 	setUnix := time.Now().Unix()

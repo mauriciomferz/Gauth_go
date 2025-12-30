@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // ValidationWarning represents a non-fatal validation issue that should be logged/monitored
@@ -317,7 +317,7 @@ func (v *EnhancedPoAValidator) validateAAP002Semantics(ctx context.Context, p *P
 	// 1. Scope syntax validation - ensure proper format
 	for i, scope := range p.Scope {
 		if err := v.validateScopeSyntax(scope); err != nil {
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("scope[%d] syntax invalid: %v", i, err))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("scope[%d] syntax invalid: %v", i, err))
 		}
 	}
 
@@ -395,7 +395,7 @@ func (v *EnhancedPoAValidator) validateScopeSyntax(scope string) error {
 // validateScopeSemantics validates logical consistency of scope array
 func (v *EnhancedPoAValidator) validateScopeSemantics(scopes []string) error {
 	if len(scopes) == 0 {
-		return rfc.New(rfc.ErrInvalidRequest, "scope array cannot be empty")
+		return aap.New(aap.ErrInvalidRequest, "scope array cannot be empty")
 	}
 
 	// Check for duplicates
@@ -408,7 +408,7 @@ func (v *EnhancedPoAValidator) validateScopeSemantics(scopes []string) error {
 
 		// Check for wildcard with other scopes
 		if scope == "*" && len(scopes) > 1 {
-			return rfc.New(rfc.ErrInvalidRequest, "wildcard scope must be used alone")
+			return aap.New(aap.ErrInvalidRequest, "wildcard scope must be used alone")
 		}
 
 		// Check for scope subsumption (e.g., "read:*" and "read:documents")
@@ -500,7 +500,7 @@ func (v *EnhancedPoAValidator) validateAuthorityRelationship(p *PowerOfAttorney)
 	if p.Grantor == p.Grantee {
 		isWildcard := len(p.Scope) == 1 && p.Scope[0] == "*"
 		if !isWildcard {
-			return rfc.New(rfc.ErrInvalidRequest, "self-delegation only allowed for wildcard scope")
+			return aap.New(aap.ErrInvalidRequest, "self-delegation only allowed for wildcard scope")
 		}
 	}
 
@@ -598,7 +598,7 @@ func (v *EnhancedPoAValidator) validateRestrictionSemantics(p *PowerOfAttorney) 
 	// Validate restriction value semantics
 	if purpose, exists := p.Restrictions["purpose"]; exists {
 		if len(purpose) > 500 {
-			return rfc.New(rfc.ErrInvalidRequest, "purpose restriction exceeds 500 character limit")
+			return aap.New(aap.ErrInvalidRequest, "purpose restriction exceeds 500 character limit")
 		}
 	}
 
@@ -633,7 +633,7 @@ func (v *EnhancedPoAValidator) validateFinancialScope(ctx context.Context, p *Po
 	requiredRestrictions := []string{"currency", "max_amount"}
 	for _, req := range requiredRestrictions {
 		if _, exists := p.Restrictions[req]; !exists {
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("financial scope %s requires %s restriction", scope, req))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("financial scope %s requires %s restriction", scope, req))
 		}
 	}
 
@@ -642,11 +642,11 @@ func (v *EnhancedPoAValidator) validateFinancialScope(ctx context.Context, p *Po
 		// Use converter if available
 		if v.currencyConverter != nil {
 			if !v.currencyConverter.IsValidCurrency(currency) {
-				return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("unsupported currency code: %s", currency))
+				return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("unsupported currency code: %s", currency))
 			}
 		} else if !v.isValidCurrencyCode(currency) {
 			// Fallback to basic validation
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid currency code: %s", currency))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid currency code: %s", currency))
 		}
 	}
 
@@ -662,7 +662,7 @@ func (v *EnhancedPoAValidator) validateFinancialScope(ctx context.Context, p *Po
 	// Geographic restrictions for international transactions
 	if strings.Contains(scope, "international") {
 		if _, exists := p.Restrictions["jurisdiction"]; !exists {
-			return rfc.New(rfc.ErrInvalidRequest, "international transactions require jurisdiction restriction")
+			return aap.New(aap.ErrInvalidRequest, "international transactions require jurisdiction restriction")
 		}
 	}
 
@@ -707,7 +707,7 @@ func (v *EnhancedPoAValidator) validateFinancialLimits(ctx context.Context, p *P
 	if dailyLimitStr, ok := p.Restrictions["max_daily_amount"]; ok {
 		limit, err := strconv.ParseFloat(dailyLimitStr, 64)
 		if err != nil {
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_daily_amount: %v", err))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid max_daily_amount: %v", err))
 		}
 
 		// Normalize requested amount to limit currency (if different)
@@ -737,7 +737,7 @@ func (v *EnhancedPoAValidator) validateFinancialLimits(ctx context.Context, p *P
 	if weeklyLimitStr, ok := p.Restrictions["max_weekly_amount"]; ok {
 		limit, err := strconv.ParseFloat(weeklyLimitStr, 64)
 		if err != nil {
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_weekly_amount: %v", err))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid max_weekly_amount: %v", err))
 		}
 
 		limitCurrency := "USD"
@@ -767,7 +767,7 @@ func (v *EnhancedPoAValidator) validateFinancialLimits(ctx context.Context, p *P
 	if monthlyLimitStr, ok := p.Restrictions["max_monthly_amount"]; ok {
 		limit, err := strconv.ParseFloat(monthlyLimitStr, 64)
 		if err != nil {
-			return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid max_monthly_amount: %v", err))
+			return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid max_monthly_amount: %v", err))
 		}
 
 		limitCurrency := "USD"
@@ -811,7 +811,7 @@ func (v *EnhancedPoAValidator) checkLimit(delegationID, periodKey string, amount
 	}
 
 	if (currentUsage + amount) > limit {
-		return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("%s limit exceeded: current=%f requested=%f limit=%f", periodType, currentUsage, amount, limit))
+		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("%s limit exceeded: current=%f requested=%f limit=%f", periodType, currentUsage, amount, limit))
 	}
 
 	// Warning for approaching limit
@@ -830,7 +830,7 @@ func (v *EnhancedPoAValidator) validateConditionalExpressions(ctx context.Contex
 	for key, value := range p.Restrictions {
 		if strings.HasPrefix(key, "condition_") {
 			if err := v.conditionalEngine.ValidateConditionSyntax(value); err != nil {
-				return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid condition %s: %v", key, err))
+				return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid condition %s: %v", key, err))
 			}
 		}
 	}
@@ -853,7 +853,7 @@ func (v *EnhancedPoAValidator) validateCrossFieldConsistency(ctx context.Context
 			max, err1 := strconv.ParseFloat(maxAmount, 64)
 			min, err2 := strconv.ParseFloat(minAmount, 64)
 			if err1 == nil && err2 == nil && min >= max {
-				return rfc.New(rfc.ErrInvalidRequest, "min_amount must be less than max_amount")
+				return aap.New(aap.ErrInvalidRequest, "min_amount must be less than max_amount")
 			}
 		}
 	}
@@ -889,14 +889,14 @@ func (v *EnhancedPoAValidator) validateTimeCondition(condition string) error {
 		start := strings.Index(condition, "weekdays(")
 		end := strings.Index(condition[start:], ")")
 		if end == -1 {
-			return rfc.New(rfc.ErrInvalidRequest, "malformed weekdays condition")
+			return aap.New(aap.ErrInvalidRequest, "malformed weekdays condition")
 		}
 		weekdayStr := condition[start+9 : start+end]
 		weekdays := strings.Split(weekdayStr, ",")
 		for _, wd := range weekdays {
 			wd = strings.TrimSpace(wd)
 			if day, err := strconv.Atoi(wd); err != nil || day < 0 || day > 6 {
-				return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid weekday: %s", wd))
+				return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid weekday: %s", wd))
 			}
 		}
 	}
@@ -905,19 +905,19 @@ func (v *EnhancedPoAValidator) validateTimeCondition(condition string) error {
 		start := strings.Index(condition, "hours(")
 		end := strings.Index(condition[start:], ")")
 		if end == -1 {
-			return rfc.New(rfc.ErrInvalidRequest, "malformed hours condition")
+			return aap.New(aap.ErrInvalidRequest, "malformed hours condition")
 		}
 		hoursStr := condition[start+6 : start+end]
 		if !strings.Contains(hoursStr, "-") {
-			return rfc.New(rfc.ErrInvalidRequest, "hours condition must be in HH-HH format")
+			return aap.New(aap.ErrInvalidRequest, "hours condition must be in HH-HH format")
 		}
 		parts := strings.Split(hoursStr, "-")
 		if len(parts) != 2 {
-			return rfc.New(rfc.ErrInvalidRequest, "hours condition must have start and end")
+			return aap.New(aap.ErrInvalidRequest, "hours condition must have start and end")
 		}
 		for _, part := range parts {
 			if hour, err := strconv.Atoi(strings.TrimSpace(part)); err != nil || hour < 0 || hour > 23 {
-				return rfc.New(rfc.ErrInvalidRequest, fmt.Sprintf("invalid hour: %s", part))
+				return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("invalid hour: %s", part))
 			}
 		}
 	}
@@ -974,7 +974,7 @@ func (v *EnhancedPoAValidator) EvaluatePoAConditions(ctx context.Context, p *Pow
 		// RFC says unprocessable critical restrictions must fail. conditions are critical.
 		for key := range p.Restrictions {
 			if strings.HasPrefix(key, "condition_") {
-				return rfc.New(rfc.ErrConfiguration, "conditional restrictions present but no engine configured")
+				return aap.New(aap.ErrConfiguration, "conditional restrictions present but no engine configured")
 			}
 		}
 		return nil
@@ -988,14 +988,14 @@ func (v *EnhancedPoAValidator) EvaluatePoAConditions(ctx context.Context, p *Pow
 				if v.metricsRecorder != nil {
 					v.metricsRecorder.RecordValidationFailure("conditional", key, err.Error())
 				}
-				return rfc.New(rfc.ErrRestrictionExceeded, fmt.Sprintf("condition evaluation error for %s: %v", key, err))
+				return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf("condition evaluation error for %s: %v", key, err))
 			}
 			if !result {
 				// Condition unmet
 				if v.metricsRecorder != nil {
 					v.metricsRecorder.RecordValidationFailure("conditional", key, "false_result")
 				}
-				return rfc.New(rfc.ErrRestrictionExceeded, fmt.Sprintf("condition unmet: %s", key))
+				return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf("condition unmet: %s", key))
 			}
 			if v.metricsRecorder != nil {
 				v.metricsRecorder.RecordValidationSuccess("conditional", key)

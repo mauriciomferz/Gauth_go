@@ -57,7 +57,7 @@ svc := rfc0111.NewService(audit, authz)
 ### **Development Security Issues (v2.0.0+)**
 For security vulnerabilities in the development RFC implementation:
 
-**🔒 CONFIDENTIAL REPORTING**: security@gimelfoundation.org
+**🔒 CONFIDENTIAL REPORTING**: security@example.com
 
 ### **Supported Versions**
 | Version | Status | Security Support |
@@ -87,7 +87,7 @@ This security policy operates under German law and EU regulations, consistent wi
 
 **Jurisdictional Coverage**: DE, EU, International (as applicable)
 **Compliance Standards**: GDPR, ISO 27001 principles, German corporate law
-**Legal Contact**: legal@gimelfoundation.org
+**Legal Contact**: legal@example.com
 
 ---
 

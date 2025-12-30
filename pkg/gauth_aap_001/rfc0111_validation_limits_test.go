@@ -6,7 +6,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // Test custom ValidationLimits override behavior.
@@ -103,7 +103,7 @@ func TestValidationLimitsRFCErrorCodes(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error")
 	}
-	if rfce, ok := err.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := err. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected RFC invalid_request error, got %v", err)
 	}
 }

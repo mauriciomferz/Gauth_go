@@ -6,10 +6,10 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC0111 & RFC0115 Remediation Plan
+# AAP-001 & AAP-002 Remediation Plan
 
 Date: 2025-10-20
-Scope: Close high-priority (P0/P1) gaps identified in GAP_MATRIX for Authorization (RFC0111) and Power of Attorney (RFC0115).
+Scope: Close high-priority (P0/P1) gaps identified in GAP_MATRIX for Authorization (AAP-001) and Power of Attorney (AAP-002).
 
 Update (2025-10-21): Envelope V2 migration instrumentation (adoption ratio gauge `envelope_v2_adoption_ratio` + digest mismatch counter `envelope_digest_mismatch_total`) live; sunset lifecycle defined in `ADR-envelope-v1-sunset.md`. Backlog adjusted to include sunset execution epic and cadence metrics.
 

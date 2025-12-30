@@ -320,7 +320,7 @@ test/integration/rfc0111/ → test/integration/gauth_rfc_001/
 import "github.com/mauriciomferz/Gauth_go/pkg/rfc0111"
 → import "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 
-const RFC0111_VERSION = "1.0.0"
+const AAP-001_VERSION = "1.0.0"
 → const GAUTH_RFC_001_VERSION = "1.0.0"
 ```
 

@@ -14,7 +14,7 @@ This document describes the REST API endpoints for RFC-0111 compliant subscripti
 
 ```bash
 # 1. Enable RFC-0111 and start server
-GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 # 2. Run integration test
 ./scripts/test_rfc0111_subscription_flow.sh
@@ -909,7 +909,7 @@ gauthService := gauth.New(
 )
 
 // 8. Register RFC-0111 endpoints
-server.RegisterRFC0111Endpoints(
+server.RegisterAAP-001Endpoints(
     subscriptionManager,
     subscriptionStore,
     gauthService,
@@ -944,9 +944,9 @@ server.RegisterRFC0111Endpoints(
 - ✅ Steps I-III validated end-to-end
 
 **Documentation:**
-- ✅ API Guide with complete examples - `RFC0111_API_GUIDE.md`
-- ✅ Web integration guide - `RFC0111_WEB_INTEGRATION_GUIDE.md`
-- ✅ Implementation notes - `RFC0111_IMPLEMENTATION_NOTES.md`
+- ✅ API Guide with complete examples - `AAP-001_API_GUIDE.md`
+- ✅ Web integration guide - `AAP-001_WEB_INTEGRATION_GUIDE.md`
+- ✅ Implementation notes - `AAP-001_IMPLEMENTATION_NOTES.md`
 
 ### 🚧 In Progress
 
@@ -1018,7 +1018,7 @@ This example demonstrates the complete RFC-0111 subscription flow from start to 
 
 1. Start the server with RFC-0111 enabled:
 ```bash
-GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
+GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 2. Set environment variables:
@@ -1314,7 +1314,7 @@ All API endpoints follow a consistent error response format:
 **Solution:**
 ```bash
 # Ensure RFC-0111 is enabled
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 
 # Start server
 go run ./cmd/web-server
@@ -1328,11 +1328,11 @@ go run ./cmd/web-server
 
 **Solution:**
 ```bash
-# Check if GAUTH_RFC0111_ENABLED is set
-echo $GAUTH_RFC0111_ENABLED
+# Check if GAUTH_AAP-001_ENABLED is set
+echo $GAUTH_AAP-001_ENABLED
 
 # If not set or not "1", set it:
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 
 # Restart server
 ```
@@ -1435,7 +1435,7 @@ bash -x ./scripts/test_rfc0111_subscription_flow.sh
 ```
 
 **Common Issues:**
-- Server not running → Start server with `GAUTH_RFC0111_ENABLED=1`
+- Server not running → Start server with `GAUTH_AAP-001_ENABLED=1`
 - Wrong port → Update `BASE_URL` in test script
 - Missing `jq` → Install with `brew install jq` (macOS) or `apt-get install jq` (Linux)
 

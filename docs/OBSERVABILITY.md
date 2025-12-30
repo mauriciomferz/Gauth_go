@@ -1137,12 +1137,12 @@ GAUTH_MULTI_SIG_DOMAIN_V2=1
 ```
 When active and `Threshold>1`, the canonical digest preimage domain changes from:
 ```
-GAUTH_RFC0111_POA_V1\n
+GAUTH_AAP-001_POA_V1\n
 ```
 to:
 ```
-GAUTH_RFC0111_POA_V2|thr=<threshold>|w=<sorted-weight-map>\n
-GAUTH_RFC0111_POA_V3|tax=1\n  (Introduced with taxonomy expansion RB2; used for single-signer / non multi-sig PoAs when Version >=3. Multi-sig PoAs continue to use V2 domain to minimize downstream changes. Canonical JSON gains optional taxonomy object: {"taxonomy":{"agent_type":...,"sector":...,"action_class":...}} only when non-empty values are provided.)
+GAUTH_AAP-001_POA_V2|thr=<threshold>|w=<sorted-weight-map>\n
+GAUTH_AAP-001_POA_V3|tax=1\n  (Introduced with taxonomy expansion RB2; used for single-signer / non multi-sig PoAs when Version >=3. Multi-sig PoAs continue to use V2 domain to minimize downstream changes. Canonical JSON gains optional taxonomy object: {"taxonomy":{"agent_type":...,"sector":...,"action_class":...}} only when non-empty values are provided.)
 ```
 `<sorted-weight-map>` is a comma-separated `signer=weight` list sorted lexicographically. If no valid weight map is configured, only `thr=<threshold>` is embedded (weights segment empty).
 
@@ -1371,7 +1371,7 @@ Set `GAUTH_SEMANTIC_PERSIST_PATH` to enable snapshot persistence (JSON file with
 ```
 Autosave interval via `GAUTH_SEMANTIC_AUTOSAVE_SEC` (>=10). Throttle override: `GAUTH_SEMANTIC_PERSIST_NO_THROTTLE=1`.
 
-Restore Behavior: On startup if `GAUTH_SEMANTIC_PERSIST_PATH` is set, the server calls `SetSemanticSnapshot` on the RFC0111 service to fully restore counters (missing keys default to zero). This replaces earlier advisory-only logging.
+Restore Behavior: On startup if `GAUTH_SEMANTIC_PERSIST_PATH` is set, the server calls `SetSemanticSnapshot` on the AAP-001 service to fully restore counters (missing keys default to zero). This replaces earlier advisory-only logging.
 
 ### Example PromQL
 ```promql

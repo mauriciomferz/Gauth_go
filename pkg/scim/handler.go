@@ -134,7 +134,7 @@ func (h *Handler) ServiceProviderConfig(c *gin.Context) {
 		"etag":           gin.H{"supported": true},
 		"authenticationSchemes": []gin.H{
 			{"name": "OAuth Bearer Token", "description": "Authentication scheme using the OAuth Bearer Token Standard",
-				"specUri": "http://www.rfc-editor.org/info/rfc6750", "type": "oauthbearertoken"},
+				"specUri": "https://www.rfc-editor.org/info/rfc6750", "type": "oauthbearertoken"},
 		},
 	})
 }

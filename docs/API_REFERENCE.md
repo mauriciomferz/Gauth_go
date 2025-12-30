@@ -738,8 +738,8 @@ Complete Go library API reference for AAP-RFC-0111 (AgentAuth 1.0) and AAP-RFC-0
 ## 📋 **Table of Contents**
 
 1. [Core Service API](#core-service-api)
-2. [AgentAuth-RFC-001 (formerly RFC 111) Authorization API](#rfc-111-authorization-api)
-3. [AgentAuth-RFC-002 (formerly RFC 115) PoA Definition API](#rfc-115-poa-definition-api)
+2. [AAP-001 Authorization API](#rfc-111-authorization-api)
+3. [AAP-002 PoA Definition API](#rfc-115-poa-definition-api)
 4. [Professional Foundation API](#professional-foundation-api)
 5. [Data Types Reference](#data-types-reference)
 6. [Error Handling](#error-handling)
@@ -758,7 +758,7 @@ Complete Go library API reference for AAP-RFC-0111 (AgentAuth 1.0) and AAP-RFC-0
 
 ### **RFCCompliantService**
 
-The main service implementing both AgentAuth-RFC-001 (formerly RFC 111) and AgentAuth-RFC-002 (formerly RFC 115) specifications.
+The main service implementing both AAP-001 and AAP-002 specifications.
 
 ```go
 type RFCCompliantService struct {
@@ -843,11 +843,11 @@ if err != nil {
 }
 ```
 
-## 🎯 **AgentAuth-RFC-001 (formerly RFC 111) Authorization API**
+## 🎯 **AAP-001 Authorization API**
 
 ### **AuthorizeAgentAuth**
 
-Main authorization method implementing complete AgentAuth-RFC-001 (formerly RFC 111) flow with AgentAuth-RFC-002 (formerly RFC 115) PoA Definition validation.
+Main authorization method implementing complete AAP-001 flow with AAP-002 PoA Definition validation.
 
 ```go
 func (s *RFCCompliantService) AuthorizeAgentAuth(ctx context.Context, req AgentAuthRequest) (*AgentAuthResponse, error)
@@ -862,8 +862,8 @@ func (s *RFCCompliantService) AuthorizeAgentAuth(ctx context.Context, req AgentA
 - `error`: Authorization or validation error
 
 **Process Flow:**
-1. Validates PoA Definition (AgentAuth-RFC-002 (formerly RFC 115))
-2. Validates principal capacity (AgentAuth-RFC-001 (formerly RFC 111))
+1. Validates PoA Definition (AAP-002)
+2. Validates principal capacity (AAP-001)
 3. Validates AI client capabilities
 4. Validates legal compliance
 5. Generates authorization code
@@ -879,7 +879,7 @@ response, err := service.AuthorizeAgentAuth(ctx, auth.AgentAuthRequest{
     PrincipalID:  "corp_ceo_123",
     AIAgentID:    "ai_financial_advisor",
     Jurisdiction: "US",
-    PoADefinition: poaDefinition, // Complete AgentAuth-RFC-002 (formerly RFC 115) structure
+    PoADefinition: poaDefinition, // Complete AAP-002 structure
 })
 ```
 
@@ -891,11 +891,11 @@ Exchange authorization code for extended token with comprehensive metadata.
 func (s *RFCCompliantService) CreateAgentAuthToken(ctx context.Context, authCode string) (*AgentAuthToken, error)
 ```
 
-## 📋 **AgentAuth-RFC-002 (formerly RFC 115) PoA Definition API**
+## 📋 **AAP-002 PoA Definition API**
 
 ### **PoA Definition Structure**
 
-Complete implementation of AgentAuth-RFC-002 (formerly RFC 115) Power-of-Attorney Credential Definition.
+Complete implementation of AAP-002 Power-of-Attorney Credential Definition.
 
 ```go
 type PoADefinition struct {

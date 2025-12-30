@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 func TestUsageLedgerPersistence(t *testing.T) {
@@ -50,8 +50,8 @@ func TestUsageLedgerPersistence(t *testing.T) {
 	if err == nil {
 		t.Error("Third verification should have failed due to daily limit")
 	} else {
-		rfcErr, ok := err.(rfc.RFCError)
-		if !ok || rfcErr.Code != rfc.ErrInvalidRequest {
+	/aapErr, ok := err. aap.RFCError)
+		if !ok ||/aapErr.Code != aap.ErrInvalidRequest {
 			t.Errorf("Expected ErrInvalidRequest, got %v", err)
 		}
 	}

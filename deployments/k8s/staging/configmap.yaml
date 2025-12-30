@@ -55,8 +55,8 @@ data:
   REFRESH_TOKEN_EXPIRY: "7d"
   
   # AAP-001 envelope configuration
-  GAUTH_RFC0111_ENFORCE_V2: "1"
-  GAUTH_RFC0111_ADOPTION_THRESHOLD: "0.95"
+  GAUTH_AAP-001_ENFORCE_V2: "1"
+  GAUTH_AAP-001_ADOPTION_THRESHOLD: "0.95"
   
   # Audit configuration
   AUDIT_LOG_ENABLED: "true"

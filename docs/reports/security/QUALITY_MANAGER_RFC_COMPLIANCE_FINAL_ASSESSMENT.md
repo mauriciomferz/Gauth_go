@@ -456,7 +456,7 @@ Users MUST NOT integrate:
 **What's Implemented**:
 ```go
 // pkg/rfc/combined_config.go:12-19
-type RFC0111Exclusions struct {
+type AAP-001Exclusions struct {
     Web3Blockchain     Exclusion `json:"web3_blockchain"`
     AIOperators        Exclusion `json:"ai_operators"`
     DNABasedIdentities Exclusion `json:"dna_based_identities"`

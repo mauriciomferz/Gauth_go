@@ -116,7 +116,7 @@ receiptStore, _ := notary.NewReceiptStore(db)
 // Create anchoring adapter
 adapter := notary.NewRevocationAnchoringAdapter(notarizer, receiptStore)
 
-// Inject into RFC0111 service
+// Inject into AAP-001 service
 svc := rfc0111.NewService(
     audit.NewMemoryLogger(nil),
     authz.NewNoopAuthorizer(),

@@ -54,7 +54,7 @@ Critical Gaps (P0):    0
 |---------|--------------|-------------|------------|
 | **Cryptographic & Authenticity** | 6 | 6 | 100.0% ✅ |
 | **Authorization Engine** | 5 | 5 | 100.0% ✅ |
-| **PoA Definition (RFC0115)** | 4 | 4 | 100.0% ✅ |
+| **PoA Definition (AAP-002)** | 4 | 4 | 100.0% ✅ |
 | **Legal / Jurisdiction / Compliance** | 4 | 4 | 100.0% ✅ |
 | **Persistence & Durability** | 3 | 3 | 100.0% ✅ |
 | **Replay & Token Security** | 3 | 3 | 100.0% ✅ |

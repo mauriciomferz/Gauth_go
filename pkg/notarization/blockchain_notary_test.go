@@ -157,7 +157,6 @@ func TestRFC3161TimestampNotary(t *testing.T) {
 func TestMultiNotary(t *testing.T) {
 	blockchain, _ := NewBlockchainNotary(&BlockchainConfig{ChainType: "ethereum"})
 	rfc3161, _ := NewRFC3161TimestampNotary("https://tsa.example.com")
-
 	multiNotary, err := NewMultiNotary(blockchain, rfc3161)
 	if err != nil {
 		t.Fatalf("Failed to create multi-notary: %v", err)

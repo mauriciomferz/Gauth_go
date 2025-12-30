@@ -42,13 +42,13 @@ func (p *weightedKeyProvider) VerifyWith(msg, sig []byte, keyID string) error {
 
 // local errors for clarity
 var (
-	ErrInvalidSignatureLength = rfcErr("invalid signature length")
-	ErrInvalidSignature       = rfcErr("invalid signature")
+	ErrInvalidSignatureLength =/aapErr("invalid signature length")
+	ErrInvalidSignature       =/aapErr("invalid signature")
 )
 
-type rfcErr string
+type/aapErr string
 
-func (e rfcErr) Error() string { return string(e) }
+func (e/aapErr) Error() string { return string(e) }
 
 // mkSig helper
 func mkSig(t *testing.T, poa *PowerOfAttorney, priv ed25519.PrivateKey, keyID string) *POASignature {

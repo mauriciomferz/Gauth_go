@@ -49,7 +49,7 @@ Database connection pool established: postgres@localhost:5432/gauth
 ### File Modified: `web/rfc0111_init.go`
 
 **Lines Added**: ~130 lines  
-**Function**: `initializeAgentAuthPlus(*gauth.RFC0111Components) error`
+**Function**: `initializeAgentAuthPlus(*gauth.AAP-001Components) error`
 
 #### Key Features Implemented:
 
@@ -113,7 +113,7 @@ GAUTH_GAUTHPLUS_ENFORCE_FIDUCIARY=1         # Enforce fiduciary duty checks
 ```bash
 # Enable AgentAuth+ with warnings only - safe for production
 GAUTH_DEV_INDEX=1 \
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENABLED=1 \
 GAUTH_USE_JWT_LIB=1 \
 DB_HOST=localhost \
@@ -135,7 +135,7 @@ GAUTH_JWT_SIGNING_KEY=your-production-key \
 #### 2. Strict Mode (Full Enforcement)
 ```bash
 # Enforce all AgentAuth+ policies - blocks authorization on violations
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENFORCE=1 \
 DB_HOST=localhost \
@@ -157,7 +157,7 @@ GAUTH_JWT_SIGNING_KEY=your-production-key \
 #### 3. Custom Mode (Selective Enforcement)
 ```bash
 # Enforce only capability and fiduciary checks, warn on dual control
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENFORCE_CAPABILITIES=1 \
 GAUTH_GAUTHPLUS_ENFORCE_FIDUCIARY=1 \
@@ -178,7 +178,7 @@ DB_NAME=gauth \
 #### 4. Disabled Mode (Default - Backward Compatible)
 ```bash
 # Run without AgentAuth+ (existing behavior preserved)
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 DB_HOST=localhost \
 DB_PORT=5432 \
 DB_USER=postgres \
@@ -249,8 +249,8 @@ Token Issuance or Error Response
 ### Component Relationships
 
 ```
-InitRFC0111FromEnv()
-    ├── Creates RFC0111Components
+InitAAP-001FromEnv()
+    ├── Creates AAP-001Components
     │   ├── ComplianceValidator
     │   ├── AuthChainValidator
     │   └── SimplePDP

@@ -8,7 +8,7 @@ import (
 func TestClauseOrderingPlacesPlaceholderFirst(t *testing.T) {
 	clauses := []Clause{
 		{ID: "0115:2.-scope-semantics", Title: "2. Scope Semantics", RFC: "0115"},
-		{ID: "0115:rfc-0115-(placeholder-extract)", Title: "AAP-002 (Placeholder Extract)", RFC: "0115"},
+		{ID: "0115"AAP-0115-(placeholder-extract)", Title: "AAP-002 (Placeholder Extract)", RFC: "0115"},
 		{ID: "0115:10.-revocation-semantics", Title: "10. Revocation Semantics", RFC: "0115"},
 		{ID: "0115:3.-validity-period", Title: "3. Validity Period", RFC: "0115"},
 	}
@@ -16,7 +16,7 @@ func TestClauseOrderingPlacesPlaceholderFirst(t *testing.T) {
 	md := rep.ToMarkdown()
 	// Find first clause row after header
 	// Ensure placeholder appears before others
-	placeIdx := strings.Index(md, "| 0115:rfc-0115-(placeholder-extract) |")
+	placeIdx := strings.Index(md, "| 0115"AAP-0115-(placeholder-extract) |")
 	scopeIdx := strings.Index(md, "| 0115:2.-scope-semantics |")
 	if placeIdx == -1 || scopeIdx == -1 {
 		t.Fatalf("expected both placeholder and scope clauses present")

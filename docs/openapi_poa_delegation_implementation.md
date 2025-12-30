@@ -360,8 +360,8 @@ sec10.item1,OpenAPI for PoA & delegation,Implemented,P1,Complete OpenAPI 3.1 spe
 ## Compliance
 
 - ✅ **OpenAPI 3.1.0** standard compliance
-- ✅ **RFC0115** Power-of-Attorney specification alignment
-- ✅ **RFC0111** AgentAuth 1.0 integration
+- ✅ **AAP-002** Power-of-Attorney specification alignment
+- ✅ **AAP-001** AgentAuth 1.0 integration
 - ✅ **Multi-signature workflow** complete documentation
 - ✅ **Delegation lifecycle** comprehensive coverage
 - ✅ **Error handling** standardized response schemas

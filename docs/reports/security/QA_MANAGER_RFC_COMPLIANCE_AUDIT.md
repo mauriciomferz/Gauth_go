@@ -61,14 +61,14 @@ This implementation demonstrates **strong technical architecture** and **signifi
 **Evidence**:
 ```go
 // From pkg/poa/poa.go:72-87
-type RFC0115Config struct {
+type AAP-002Config struct {
     ExcludeWeb3          bool
     ExcludeAIOperators   bool
     ExcludeDNAIdentities bool
     MaxValidityDays      int
 }
 
-func ValidateRFC0115Compliance(config interface{}) error {
+func ValidateAAP-002Compliance(config interface{}) error {
     if !v.ExcludeWeb3 || !v.ExcludeAIOperators || !v.ExcludeDNAIdentities {
         return fmt.Errorf("all exclusion flags must be true")
     }

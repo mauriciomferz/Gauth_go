@@ -39,7 +39,7 @@ export default function Overview() {
         <div className="inline-flex items-center gap-3 mb-4">
           <Shield className="h-16 w-16 text-primary-500" />
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary-500 to-purple-600 bg-clip-text text-transparent">
-            Welcome to GAuth 1.0
+            Welcome to AgentAuth 1.0
           </h1>
         </div>
         <p className="text-xl text-gray-600 dark:text-gray-400 mt-4">
@@ -107,7 +107,7 @@ export default function Overview() {
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">RFC-0111</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  GAuth 1.0 Extended Tokens
+                  AgentAuth 1.0 Extended Tokens
                 </p>
               </div>
             </div>

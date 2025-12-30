@@ -6,7 +6,7 @@
 
 ## Overview
 
-This document describes the **delegation suspension** and **partial revocation** capabilities implemented in AgentAuth RFC0111. These features provide granular control over delegation lifecycle, enabling temporary suspension without full revocation and scope reduction without complete termination.
+This document describes the **delegation suspension** and **partial revocation** capabilities implemented in AgentAuth AAP-001. These features provide granular control over delegation lifecycle, enabling temporary suspension without full revocation and scope reduction without complete termination.
 
 ### Key Capabilities
 

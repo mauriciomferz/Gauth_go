@@ -300,7 +300,7 @@ console.log('🎉 100% RFC CONFORMANCE ACHIEVED! 43/43 items, 100% security', ne
 |---------|-------|--------|----------|
 | sec1: Cryptographic & Authenticity | 6 | ✅ Complete | 100% |
 | sec2: Authorization Engine | 5 | ✅ Complete | 100% |
-| sec3: PoA Definition (RFC0115) | 4 | ✅ Complete | 100% |
+| sec3: PoA Definition (AAP-002) | 4 | ✅ Complete | 100% |
 | sec4: Legal/Jurisdiction/Compliance | 3 | ✅ Complete | 100% |
 | sec5: Persistence & Durability | 3 | ✅ Complete | 100% |
 | sec6: Replay & Token Security | 3 | ✅ Complete | 100% |

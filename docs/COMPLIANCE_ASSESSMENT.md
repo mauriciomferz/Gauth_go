@@ -45,7 +45,7 @@ The beta implementation satisfies core RFC-0111 / RFC-0115 requirements for: cap
 Config & validation: `pkg/rfc0111/compat.go` requires `ExcludeWeb3`, `ExcludeAIOperators`, `ExcludeDNAIdentities` true; failure paths return descriptive errors. Grep scans show no functional Web3/DNA code—only config flags and comments. Discovery can expose these flags (future enhancement).
 
 ### 2. Taxonomy & Canonical Digest
-Enumerations: `taxonomy.go` (AllowedAgentTypes, AllowedSectors, AllowedActionClasses). Validation only for Version ≥3 POAs (`ValidateTaxonomy`). Canonical inclusion: `canonical.go` inserts ordered taxonomy JSON under `taxonomy` object; digest domain upgrade to `GAUTH_RFC0111_POA_V3|tax=1` prevents collision. Tests: `canonical_taxonomy_test.go`, `taxonomy_validation_test.go`.
+Enumerations: `taxonomy.go` (AllowedAgentTypes, AllowedSectors, AllowedActionClasses). Validation only for Version ≥3 POAs (`ValidateTaxonomy`). Canonical inclusion: `canonical.go` inserts ordered taxonomy JSON under `taxonomy` object; digest domain upgrade to `GAUTH_AAP-001_POA_V3|tax=1` prevents collision. Tests: `canonical_taxonomy_test.go`, `taxonomy_validation_test.go`.
 
 ### 3. Delegation Depth
 `compat.go` rejects zero or >8 depth. Runtime enforcement in `delegation.go` with error `delegation depth %d exceeds max %d`. Discovery endpoint surfaces current max depth (env-driven). Scenario tests in `examples/official_rfc0111_implementation/` for invalid depth.

@@ -313,7 +313,7 @@ When a user successfully authenticates via OIDC:
 ```bash
 # Already configured
 GAUTH_DEV_INDEX=1
-GAUTH_RFC0111_ENABLED=1
+GAUTH_AAP-001_ENABLED=1
 GAUTH_USE_JWT_LIB=1
 DB_HOST=localhost
 DB_PORT=5432

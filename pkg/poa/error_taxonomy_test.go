@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc/errs"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap/errs"
 )
 
 func TestErrorTaxonomy(t *testing.T) {
@@ -17,12 +17,12 @@ func TestErrorTaxonomy(t *testing.T) {
 	}
 
 	// Verify conversion to RFCError
-	rfcErr := err.AsRFCError()
-	if rfcErr.Code != errs.ErrInvalidRequest {
-		t.Errorf("Expected RFC code %q, got %q", errs.ErrInvalidRequest, rfcErr.Code)
+	aapErr := err.AsRFCError()
+	if aapErr.Code != errs.ErrInvalidRequest {
+		t.Errorf("Expected RFC code %q, got %q", errs.ErrInvalidRequest, aapErr.Code)
 	}
-	if rfcErr.Message != "invalid input" {
-		t.Errorf("Expected message %q, got %q", "invalid input", rfcErr.Message)
+	if aapErr.Message != "invalid input" {
+		t.Errorf("Expected message %q, got %q", "invalid input", aapErr.Message)
 	}
 
 	// Test wrapping

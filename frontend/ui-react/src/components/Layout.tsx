@@ -60,7 +60,7 @@ export default function Layout({ children }: LayoutProps) {
             <div className="flex items-center gap-3">
               <Shield className="h-8 w-8 text-primary-500" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">GAuth 1.0</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">AgentAuth 1.0</h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   RFC-0111 & RFC-0115 Compliant
                 </p>
@@ -136,7 +136,7 @@ export default function Layout({ children }: LayoutProps) {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="h-5 w-5 text-primary-500" />
-                <h4 className="font-semibold text-gray-900 dark:text-white">GAuth 1.0</h4>
+                <h4 className="font-semibold text-gray-900 dark:text-white">AgentAuth 1.0</h4>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 RFC-0111 & RFC-0115 Compliant Authorization Framework

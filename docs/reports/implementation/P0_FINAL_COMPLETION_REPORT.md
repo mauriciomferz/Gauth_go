@@ -418,7 +418,7 @@ gauth_replay_store_errors_total
 **Resources:**
 - Migration Guide: REPLAY_STORE_MIGRATION_GUIDE.md
 - Technical Details: SECURITY_AUDIT_CRITICAL_REVIEW.md
-- Support: security@gimel.foundation
+- Support: security@example.com
 
 ### Documentation Updates ✅
 - [x] README.md security notice added
@@ -555,5 +555,5 @@ SHA256 (REPLAY_STORE_MIGRATION_GUIDE.md) = [generated at commit]
 **Reviewed By:** Senior QA, Security Audit Committee  
 **Approved By:** Engineering Leadership
 
-**For Questions:** security@gimel.foundation  
+**For Questions:** security@example.com  
 **Reference:** CV-2025-005, SECURITY_AUDIT_CRITICAL_REVIEW.md

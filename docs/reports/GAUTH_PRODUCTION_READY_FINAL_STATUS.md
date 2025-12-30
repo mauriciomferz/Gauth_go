@@ -328,7 +328,7 @@ cp .env.development .env
 # Edit .env with your database credentials
 
 # 5. Start backend server
-export GAUTH_RFC0111_ENABLED=1
+export GAUTH_AAP-001_ENABLED=1
 export GAUTH_MCP_ENABLED=1
 go run ./cmd/web-server
 
@@ -411,7 +411,7 @@ REDIS_URL=redis://localhost:6379
 
 # Server
 PORT=8080
-GAUTH_RFC0111_ENABLED=1
+GAUTH_AAP-001_ENABLED=1
 GAUTH_MCP_ENABLED=1
 
 # Identity Providers (optional)
@@ -713,7 +713,7 @@ export GAUTH_CIRCUIT_BREAKER_TIMEOUT=60
 
 1. **[README.md](README.md)** - Project overview and quick start
 2. **[QUICK_START_GUIDE.md](QUICK_START_GUIDE.md)** - Detailed setup instructions
-3. **[RFC0111_QUICKSTART.md](RFC0111_QUICKSTART.md)** - RFC-0111 specific guide
+3. **[AAP-001_QUICKSTART.md](AAP-001_QUICKSTART.md)** - RFC-0111 specific guide
 
 ### Architecture Documentation
 
@@ -724,7 +724,7 @@ export GAUTH_CIRCUIT_BREAKER_TIMEOUT=60
 ### API Documentation
 
 7. **[docs/openapi.yaml](docs/openapi.yaml)** - OpenAPI 3.0 specification
-8. **[RFC0111_API_GUIDE.md](RFC0111_API_GUIDE.md)** - RFC-0111 API guide
+8. **[AAP-001_API_GUIDE.md](AAP-001_API_GUIDE.md)** - RFC-0111 API guide
 9. **[API_KEYS_GUIDE.md](API_KEYS_GUIDE.md)** - API provider credentials
 
 ### Deployment Guides
@@ -750,7 +750,7 @@ export GAUTH_CIRCUIT_BREAKER_TIMEOUT=60
 19. **[SESSION_COMPLETION_REPORT_NOV_16_2025.md](SESSION_COMPLETION_REPORT_NOV_16_2025.md)** - Latest session
 20. **[PHASE_4_MCP_PRODUCTION_COMPLETION_REPORT.md](PHASE_4_MCP_PRODUCTION_COMPLETION_REPORT.md)** - MCP Phase 4
 21. **[PHASE_2A_COMPLETION_REPORT.md](PHASE_2A_COMPLETION_REPORT.md)** - Backend API
-22. **[RFC0111_COMPLETION_REPORT.md](RFC0111_COMPLETION_REPORT.md)** - RFC-0111 implementation
+22. **[AAP-001_COMPLETION_REPORT.md](AAP-001_COMPLETION_REPORT.md)** - RFC-0111 implementation
 
 ### Reference Documentation
 

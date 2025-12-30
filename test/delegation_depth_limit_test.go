@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap/errs"
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 func TestDelegationDepthLimitExceeded(t *testing.T) {
@@ -28,12 +29,12 @@ func TestDelegationDepthLimitExceeded(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected depth exceeded error")
 	}
-	rfcErr, ok := err.(rfc.RFCError)
+	rfcErr, ok := err.(errs.RFCError)
 	if !ok {
 		t.Fatalf("expected RFCError got %T", err)
 	}
-	if rfcErr.Code != rfc.ErrDelegationDepthExceeded {
-		t.Fatalf("expected code %s got %s", rfc.ErrDelegationDepthExceeded, rfcErr.Code)
+	if rfcErr.Code != aap.ErrDelegationDepthExceeded {
+		t.Fatalf("expected code %s got %s", aap.ErrDelegationDepthExceeded, rfcErr.Code)
 	}
 	if mem.SnapshotEx().DelegationStatusTransitions != 0 { /* unrelated metric unaffected */
 		_ = mem // Just checking the metric value

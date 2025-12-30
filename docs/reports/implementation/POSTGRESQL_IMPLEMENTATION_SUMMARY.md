@@ -278,7 +278,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 ## 🔗 Related Documents
 
 - [PostgreSQL Setup Guide](docs/POSTGRESQL_SETUP.md)
-- [RFC-0111 Implementation](RFC0111_README.md)
+- [RFC-0111 Implementation](AAP-001_README.md)
 - [Architecture Documentation](ARCHITECTURE.md)
 - [Production Ready Status](PRODUCTION_READY_STATUS_REPORT.md)
 

@@ -1041,12 +1041,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			s.authorizer = authz.NewMemoryAuthorizer()
 		}
 		// Functional options: enable mandatory signatures when GAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
-		rfcOpts := []gauth_aap_001.Option{}
+		aapOpts := []gauth_aap_001.Option{}
 		if s.redisClient != nil {
 			// Enable distributed replay protection (GAUTH-VULN-004)
-			rfcOpts = append(rfcOpts, gauth_aap_001.WithReplayStoreRedis(s.redisClient.GetClient(), "gauth", 5*time.Minute))
+			aapOpts = append(aapOpts, gauth_aap_001.WithReplayStoreRedis(s.redisClient.GetClient(), "gauth", 5*time.Minute))
 		}
-		svc := gauth_aap_001.NewService(memAudit, s.authorizer, rfcOpts...)
+		svc := gauth_aap_001.NewService(memAudit, s.authorizer, aapOpts...)
 		s.aap001Service = svc
 		fmt.Fprintln(os.Stderr, "[aap001] service initialized (semantic counters active)")
 		// Mount dual-control revocation workflow HTTP endpoints.

@@ -7,7 +7,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // NOTE: These tests exercise default limits (hard-coded defaults applied via ValidationLimits.applyDefaults).
@@ -28,7 +28,7 @@ func TestScopeTooManyEntries(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for too many scope entries")
 	}
-	if rfce, ok := err.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := err. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request got %v", err)
 	}
 }
@@ -44,7 +44,7 @@ func TestScopeItemTooLong(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for long scope item")
 	}
-	if rfce, ok := err.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := err. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request got %v", err)
 	}
 }
@@ -64,7 +64,7 @@ func TestRestrictionsTooMany(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for too many restrictions")
 	}
-	if rfce, ok := err.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := err. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request got %v", err)
 	}
 }
@@ -81,7 +81,7 @@ func TestRestrictionKeyTooLong(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for long restriction key")
 	}
-	if rfce, ok := err.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := err. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request got %v", err)
 	}
 }
@@ -98,7 +98,7 @@ func TestRestrictionValueTooLong(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error for long restriction value")
 	}
-	if rfce, ok := err.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := err. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request got %v", err)
 	}
 }

@@ -120,7 +120,7 @@ pdp.Request {
 **Changes:**
 1. Added `pkg/pdp` import
 2. Created `createDefaultPDPEngine()` helper function
-3. Integrated PDP bridge into `InitRFC0111WithComponents()`
+3. Integrated PDP bridge into `InitAAP-001WithComponents()`
 
 **Default PDP Configuration:**
 ```go

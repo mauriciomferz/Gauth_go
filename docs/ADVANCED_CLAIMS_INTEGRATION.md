@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-P2.10 integrates advanced JWT/PASETO claims into RFC0111 token generation and verification, completing the **sec1.item2** requirement. This feature adds:
+P2.10 integrates advanced JWT/PASETO claims into AAP-001 token generation and verification, completing the **sec1.item2** requirement. This feature adds:
 
 1. **Claims Set Metadata** (`ClaimsMetadata`): Structured metadata (version, capabilities, source, confidence, restrictions)
 2. **typ Semantic Enforcement**: Token type field (`gauth.delegation`, `gauth.token`, `gauth.capability`) with validation rules
@@ -77,7 +77,7 @@ type TimeWindow struct {
 
 | typ Value            | Description                         | Validation Rules                                           |
 |----------------------|-------------------------------------|------------------------------------------------------------|
-| `gauth.delegation`   | RFC0111 delegation tokens           | Must have non-empty `delegation_id` and `scope`            |
+| `gauth.delegation`   | AAP-001 delegation tokens           | Must have non-empty `delegation_id` and `scope`            |
 | `gauth.token`        | Generic AgentAuth tokens                | Standard validation only (no special rules)                |
 | `gauth.capability`   | Capability-based access tokens      | Must have at least one scope prefixed with `cap:`          |
 

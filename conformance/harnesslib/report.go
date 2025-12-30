@@ -41,7 +41,7 @@ func (r Report) ToMarkdown() string {
 			if isPlaceI != isPlaceJ {
 				return isPlaceI && !isPlaceJ
 			}
-			// Extract leading numeric section after RFC prefix pattern '<rfc>:<n>.'
+			// Extract leading numeric section after RFC prefix pattern '/aap>:<n>.'
 			secNum := func(id string) int {
 				// id like 0111:4.-audit-logging or 0115:10.-revocation-semantics
 				parts := strings.Split(id, ":")

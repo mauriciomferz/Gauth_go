@@ -1,4 +1,4 @@
-# RFC0111 & RFC0115 Compliance Report (Quality Manager Assessment)
+# AAP-001 & AAP-002 Compliance Report (Quality Manager Assessment)
 
 Generated: 2025-10-26
 Scope: Evaluate current implementation strictly against repository evidence and provided RFC text excerpts (Scope, Exclusions, Nomenclature, Roles, PoA Definition attributes). No external assumptions.
@@ -17,7 +17,7 @@ Classification:
 - Missing: Attribute not represented or only placeholder.
 
 ---
-## 2. Exclusions (RFC0111 / RFC0115 Section 2)
+## 2. Exclusions (AAP-001 / AAP-002 Section 2)
 The RFC excludes integration of (a) Web3/blockchain tokenization, (b) AI operators that fully control lifecycle, (c) DNA/genetic identity mechanisms. Repository evidence indicates:
 - External anchoring support uses hash chain + optional external provider stub (no blockchain implementation present: `pkg/ledger/external_anchor.go`).
 - No code referencing DNA/gene-based identity modules.
@@ -39,7 +39,7 @@ RFC roles: Resource Owner, Resource Server, Client, Authorization Server + P*P r
 Overall: Roles conceptually mapped; explicit dedicated interfaces (e.g., PDP abstraction) missing (Partial).
 
 ---
-## 4. PoA Definition Attribute Matrix (RFC0115 Section 3)
+## 4. PoA Definition Attribute Matrix (AAP-002 Section 3)
 | Attribute Group | Selected Attributes (RFC) | Repo Presence | Status | Evidence | Gap |
 |-----------------|---------------------------|---------------|--------|----------|-----|
 | Parties: Principal & Representative | Principal type (individual/org), representatives, authorizer | Basic principal/agent IDs + jurisdiction | Partial | `web/server_clean.go` PowerOfAttorneyRequest | No typed classification enum; no multi-representative registry |
@@ -64,7 +64,7 @@ Overall: Roles conceptually mapped; explicit dedicated interfaces (e.g., PDP abs
 Summary: Out of 21 attribute categories, Implemented: 1, Partial: 11, Missing: 9.
 
 ---
-## 5. Core Cryptographic & Integrity Features (RFC0111)
+## 5. Core Cryptographic & Integrity Features (AAP-001)
 | Feature | Repo Status | Evidence | Compliance |
 |---------|-------------|----------|-----------|
 | Canonical Digest with domain separation | Implemented | `pkg/rfc0111/canonical.go` + tests | Meets integrity binding; version & weights included |
@@ -83,9 +83,9 @@ Summary: Out of 21 attribute categories, Implemented: 1, Partial: 11, Missing: 9
 
 ---
 ## 7. Compliance Conclusions
-1. RFC0111 foundational guarantees (integrity, multi-signature, canonical serialization, replay fail-closed) largely satisfied.
+1. AAP-001 foundational guarantees (integrity, multi-signature, canonical serialization, replay fail-closed) largely satisfied.
 2. Governance richness (policy bundle cryptographic manifest, deep role separation, comprehensive PoA taxonomy) still emerging: multiple RFC text enumerations absent in PoA structure.
-3. RFC0115 extensive attribute taxonomy: many enumerated categories (agents types, sectors, actions, formal requirements) not represented—must be added or explicitly deferred and documented for beta.
+3. AAP-002 extensive attribute taxonomy: many enumerated categories (agents types, sectors, actions, formal requirements) not represented—must be added or explicitly deferred and documented for beta.
 4. Exclusions honored (no disallowed blockchain/DNA features integrated).
 
 ---

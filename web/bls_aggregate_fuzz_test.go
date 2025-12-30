@@ -19,7 +19,7 @@ func FuzzBLSAggregateEndpoint(f *testing.F) {
 	seed := map[string]any{"mode": "issue", "message_b64": seedMsg, "participants": 2}
 	b, _ := json.Marshal(seed)
 	f.Add(string(b))
-	f.Add(`{"mode":"verify","message_b64":"` + seedMsg + `","aggregated_signature_b64":"AAAA","public_keys_b64":["AAAA"]}`)
+	f.Add(`{"mode":"verify","message_b64":"` + seedMsg + `","aggregated_signature_b64":/aapAA","public_keys_b64":[/aapAA"]}`)
 	f.Fuzz(func(t *testing.T, raw string) {
 		mem := imetrics.NewMemory()
 		srv := NewBetaServerWithMetrics(":0", mem)

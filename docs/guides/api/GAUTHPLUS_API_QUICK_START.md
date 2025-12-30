@@ -20,7 +20,7 @@ docker-compose -f docker-compose.database.yml up -d
 
 # Start AgentAuth+ enabled server
 GAUTH_DEV_INDEX=1 \
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 GAUTH_USE_JWT_LIB=1 \
 GAUTH_GAUTHPLUS_ENABLED=1 \
 DB_HOST=localhost \
@@ -331,7 +331,7 @@ WHERE id = '00000000-0000-0000-0000-000000000001';
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GAUTH_GAUTHPLUS_ENABLED` | Yes | `0` | Enable AgentAuth+ features |
-| `GAUTH_RFC0111_ENABLED` | Yes | `0` | Enable RFC-0111 support |
+| `GAUTH_AAP-001_ENABLED` | Yes | `0` | Enable RFC-0111 support |
 | `DB_HOST` | Yes | - | PostgreSQL host |
 | `DB_PORT` | Yes | - | PostgreSQL port |
 | `DB_USER` | Yes | - | Database user |

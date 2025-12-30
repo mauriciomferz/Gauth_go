@@ -375,7 +375,7 @@ This security audit response confirms that:
 
 ## Contact
 
-**Security Issues:** security@gimel.foundation  
-**General Questions:** support@gimel.foundation  
+**Security Issues:** security@example.com  
+**General Questions:** support@example.com  
 
 **Responsible Disclosure:** Please report security vulnerabilities privately before public disclosure.

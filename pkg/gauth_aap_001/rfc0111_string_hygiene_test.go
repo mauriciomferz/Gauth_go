@@ -7,7 +7,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 func newHygieneSvc() *Service {
@@ -80,7 +80,7 @@ func TestRFCErrorCodeForControlChar(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error")
 	}
-	if rfce, ok := err.(rfc.RFCError); !ok || rfce.Code != rfc.ErrInvalidRequest {
+	if/aape, ok := err. aap.RFCError); !ok ||/aape.Code != aap.ErrInvalidRequest {
 		t.Fatalf("expected invalid_request RFC error got %v", err)
 	}
 }

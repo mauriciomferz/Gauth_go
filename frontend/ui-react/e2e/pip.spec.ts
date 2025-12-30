@@ -12,7 +12,7 @@ test.describe('PIP (Policy Information Point)', () => {
   })
 
   test('should display PIP page', async ({ page }) => {
-    await expect(page).toHaveTitle(/GAuth/)
+    await expect(page).toHaveTitle(/AgentAuth/)
     await expect(page.getByRole('heading', { name: /PIP|Policy Information/i })).toBeVisible({ timeout: 10000 })
   })
 

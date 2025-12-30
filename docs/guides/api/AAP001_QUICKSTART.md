@@ -75,8 +75,8 @@ web/
 └── rfc0111_routes.go             #  34 lines - Route registration
 
 Documentation:
-├── RFC0111_API_GUIDE.md          # Complete API documentation
-└── RFC0111_COMPLETION_REPORT.md  # Implementation report
+├── AAP-001_API_GUIDE.md          # Complete API documentation
+└── AAP-001_COMPLETION_REPORT.md  # Implementation report
 ```
 
 ## Key Components
@@ -148,7 +148,7 @@ func main() {
     )
     
     // 4. Register API endpoints
-    server.RegisterRFC0111Endpoints(manager, store, service)
+    server.RegisterAAP-001Endpoints(manager, store, service)
 }
 ```
 
@@ -199,8 +199,8 @@ go test ./pkg/gauth/... -cover
 ## Support
 
 See detailed documentation in:
-- `RFC0111_API_GUIDE.md` - Complete API reference
-- `RFC0111_COMPLETION_REPORT.md` - Full implementation details
+- `AAP-001_API_GUIDE.md` - Complete API reference
+- `AAP-001_COMPLETION_REPORT.md` - Full implementation details
 - Inline code comments - Implementation details
 
 ## Summary

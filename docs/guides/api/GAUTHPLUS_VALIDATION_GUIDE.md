@@ -80,7 +80,7 @@ AND table_name LIKE '%gauthplus%' OR table_name IN (
 # Start AgentAuth server with AgentAuth+ enabled
 cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
 
-GAUTH_RFC0111_ENABLED=1 \
+GAUTH_AAP-001_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENABLED=1 \
 DB_HOST=localhost \
 DB_PORT=5432 \

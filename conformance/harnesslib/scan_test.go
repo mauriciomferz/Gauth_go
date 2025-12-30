@@ -8,7 +8,7 @@ import (
 func TestScanFileHeadings(t *testing.T) {
 	// Create a temporary markdown file.
 	content := "# Title One\n## Sub Section\nPlain text\n### Deep Heading\n"
-	f, err := os.CreateTemp(t.TempDir(), "rfc*.md")
+	f, err := os.CreateTemp(t.TempDir(), "rfc.md")
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}

@@ -359,7 +359,7 @@ export default function E2ETesting() {
     const skipped = tests.filter(t => t.status === 'skipped').length;
 
     const suite: TestSuite = {
-      name: 'GAuth 1.0 E2E Test Suite',
+      name: 'AgentAuth 1.0 E2E Test Suite',
       tests,
       total: tests.length,
       passed,
@@ -397,7 +397,7 @@ export default function E2ETesting() {
           <h1 className="text-3xl font-bold">End-to-End Testing</h1>
         </div>
         <p className="text-muted-foreground">
-          Complete integration flows testing all GAuth 1.0 components together
+          Complete integration flows testing all AgentAuth 1.0 components together
         </p>
       </div>
 
@@ -439,7 +439,7 @@ export default function E2ETesting() {
       <Card title="Test Execution">
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Run comprehensive end-to-end tests covering all GAuth 1.0 components, including token
+            Run comprehensive end-to-end tests covering all AgentAuth 1.0 components, including token
             management, PVP, registry, PIP, and PoA flows.
           </p>
           <div className="flex gap-3">

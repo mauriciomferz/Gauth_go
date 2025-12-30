@@ -276,8 +276,8 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 			t.Error("Authorization chain should be validated")
 		}
 
-		if token.ComplianceLevel != "rfc-0111-compliant" {
-			t.Errorf("Expected compliance level 'rfc-0111-compliant', got '%s'", token.ComplianceLevel)
+		if token.ComplianceLevel != "AAP-0111-compliant" {
+			t.Errorf("Expected compliance level "AAP-0111-compliant', got '%s'", token.ComplianceLevel)
 		}
 
 		if token.PowerOfAttorney == nil {

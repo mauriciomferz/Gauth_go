@@ -123,7 +123,7 @@ func (s *BetaServer) registerCapabilityDiff() {
 		} else {
 			// Lookup snapshot by hash
 			if s.capDiffSnapshots == nil {
-				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "snapshot retention disabled", "rfc111:capability_diff", nil)
+				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "snapshot retention disabled", "AAP-001:capability_diff", nil)
 				if span != nil {
 					span.SetTag("outcome", "error")
 					span.SetTag("error_code", "snapshot_disabled")
@@ -133,7 +133,7 @@ func (s *BetaServer) registerCapabilityDiff() {
 			}
 			snap, ok := s.capDiffSnapshots.Get(baseHash)
 			if !ok {
-				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "base capability hash unknown", "rfc111:capability_diff", nil)
+				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "base capability hash unknown", "AAP-001:capability_diff", nil)
 				if span != nil {
 					span.SetTag("outcome", "error")
 					span.SetTag("error_code", "base_hash_unknown")

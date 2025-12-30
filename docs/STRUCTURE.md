@@ -50,7 +50,7 @@ artifacts/          # Audit and status reports (may consolidate into docs/ later
 | Delegation      | `pkg/delegation`    | @delegation-team    |
 | PDP / Policy    | `pkg/pdp`, `pkg/policy` | @policy-engine  |
 | Cryptography    | `pkg/crypto`, `internal/crypto` | @crypto-sec |
-| PoA / RFC0115   | `pkg/poa`           | @poa-rfc            |
+| PoA / AAP-002   | `pkg/poa`           | @poa-rfc            |
 | Compliance      | `pkg/compliance`    | @compliance         |
 | Audit / Ledger  | `pkg/audit`, `pkg/ledger` | @audit-ledger  |
 | Web / Handlers  | `web/`              | @web-platform       |

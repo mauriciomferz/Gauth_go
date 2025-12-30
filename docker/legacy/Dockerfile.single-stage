@@ -1,4 +1,4 @@
-# Single-stage Dockerfile for GAuth Web Server  
+# Single-stage Dockerfile for AgentAuth Web Server  
 # Avoids multi-platform manifest issues by using golang base directly
 
 FROM golang:1.25-alpine

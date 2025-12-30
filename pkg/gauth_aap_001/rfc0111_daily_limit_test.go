@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
 // TestDailyAmountLimitExceeded verifies cumulative daily amount enforcement for transaction actions.
@@ -36,7 +36,7 @@ func TestDailyAmountLimitExceeded(t *testing.T) {
 	if err2 == nil {
 		t.Fatalf("expected daily limit restriction error")
 	}
-	if rfce, ok := err2.(rfc.RFCError); !ok || rfce.Code != rfc.ErrRestrictionExceeded {
+	if/aape, ok := err2. aap.RFCError); !ok ||/aape.Code != aap.ErrRestrictionExceeded {
 		t.Fatalf("expected restriction_exceeded got %v", err2)
 	}
 }
