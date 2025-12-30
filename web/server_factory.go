@@ -279,90 +279,92 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// Wire up capabilities handler metrics and OnReload callback for anchor emission
 	capsHandler.Metrics = &capabilityMetricsAdapter{m: s.metrics}
 	capsHandler.OnReload = func(newHash string) {
-		// Emit anchor artifact (throttled by interval)
-		if s.capAnchorFilePath != "" {
-			// Check throttle
-			if time.Since(s.capAnchorLastWrite) >= s.capAnchorWriteInterval {
-				s.capAnchorLastWrite = time.Now()
-				// Build anchor material artifact
-				artifact := AnchorMaterial{
-					Type:          "capability_registry_anchor",
-					RegistryHash:  newHash,
-					PreviousHash:  s.capabilitiesHandler.PrevRegistryHash,
-					LastChangedAt: s.capabilitiesHandler.RegistryChangeAt.UTC().Format(time.RFC3339),
-					SchemaVersion: s.capabilitiesHandler.SchemaVersion,
-					AnchoredAt:    time.Now().UTC().Format(time.RFC3339),
-				}
-				// Use compact JSON for the inner artifact to ensure signature stability across transport
-				data, err := json.Marshal(artifact)
-				if err == nil {
-					// Check if signing is enabled and KeyManager available
-					signEnabled := os.Getenv("AGENTAUTH_CAP_ANCHOR_SIGN") == "1"
-					if signEnabled && s.keyProvider != nil {
-						// Attempt EdDSA signing via KeyProvider.ActiveSigner()
-						if signer, err := s.keyProvider.ActiveSigner(); err == nil && signer != nil {
-							sig, signErr := signer.Sign(data)
-							if signErr == nil {
-								// Build signed wrapper
-								wrapper := struct {
-									Artifact  json.RawMessage `json:"artifact"`
-									Kid       string          `json:"kid"`
-									Signature string          `json:"signature"`
-									Mode      string          `json:"mode"`
-								}{
-									Artifact:  data,
-									Kid:       signer.KeyID(),
-									Signature: base64.RawStdEncoding.EncodeToString(sig),
-									Mode:      "eddsa",
+		go func() {
+			// Emit anchor artifact (throttled by interval)
+			if s.capAnchorFilePath != "" {
+				// Check throttle
+				if time.Since(s.capAnchorLastWrite) >= s.capAnchorWriteInterval {
+					s.capAnchorLastWrite = time.Now()
+					// Build anchor material artifact
+					artifact := AnchorMaterial{
+						Type:          "capability_registry_anchor",
+						RegistryHash:  newHash,
+						PreviousHash:  s.capabilitiesHandler.PrevRegistryHash,
+						LastChangedAt: s.capabilitiesHandler.RegistryChangeAt.UTC().Format(time.RFC3339),
+						SchemaVersion: s.capabilitiesHandler.SchemaVersion,
+						AnchoredAt:    time.Now().UTC().Format(time.RFC3339),
+					}
+					// Use compact JSON for the inner artifact to ensure signature stability across transport
+					data, err := json.Marshal(artifact)
+					if err == nil {
+						// Check if signing is enabled and KeyManager available
+						signEnabled := os.Getenv("AGENTAUTH_CAP_ANCHOR_SIGN") == "1"
+						if signEnabled && s.keyProvider != nil {
+							// Attempt EdDSA signing via KeyProvider.ActiveSigner()
+							if signer, err := s.keyProvider.ActiveSigner(); err == nil && signer != nil {
+								sig, signErr := signer.Sign(data)
+								if signErr == nil {
+									// Build signed wrapper
+									wrapper := struct {
+										Artifact  json.RawMessage `json:"artifact"`
+										Kid       string          `json:"kid"`
+										Signature string          `json:"signature"`
+										Mode      string          `json:"mode"`
+									}{
+										Artifact:  data,
+										Kid:       signer.KeyID(),
+										Signature: base64.RawStdEncoding.EncodeToString(sig),
+										Mode:      "eddsa",
+									}
+									data, _ = json.MarshalIndent(wrapper, "", "  ")
 								}
-								data, _ = json.MarshalIndent(wrapper, "", "  ")
 							}
 						}
-					}
-					if writeErr := os.WriteFile(s.capAnchorFilePath, data, 0600); writeErr == nil {
-						if mem, ok := s.metrics.(*metrics.Memory); ok {
-							mem.IncCapabilityAnchorEmitted()
-							// #nosec G115
-							mem.SetCapabilityAnchorLastWriteUnix(uint64(time.Now().Unix()))
-							// Emit algorithm facet metrics for all registered algorithms
-							for _, algInfo := range crypto.ListAlgorithms() {
-								mem.IncCapabilityAnchorAlgorithm(algInfo.Name)
+						if writeErr := os.WriteFile(s.capAnchorFilePath, data, 0600); writeErr == nil {
+							if mem, ok := s.metrics.(*metrics.Memory); ok {
+								mem.IncCapabilityAnchorEmitted()
+								// #nosec G115
+								mem.SetCapabilityAnchorLastWriteUnix(uint64(time.Now().Unix()))
+								// Emit algorithm facet metrics for all registered algorithms
+								for _, algInfo := range crypto.ListAlgorithms() {
+									mem.IncCapabilityAnchorAlgorithm(algInfo.Name)
+								}
 							}
+							s.capAnchorEmitted = true
+							s.capAnchorArtifact = data
+						} else {
+							fmt.Fprintf(os.Stderr, "[anchor] write failed: %v\n", writeErr)
 						}
-						s.capAnchorEmitted = true
-						s.capAnchorArtifact = data
-					} else {
-						fmt.Fprintf(os.Stderr, "[anchor] write failed: %v\n", writeErr)
 					}
-				}
-			} else {
-				if mem, ok := s.metrics.(*metrics.Memory); ok {
-					mem.IncCapabilityAnchorSkipped()
+				} else {
+					if mem, ok := s.metrics.(*metrics.Memory); ok {
+						mem.IncCapabilityAnchorSkipped()
+					}
 				}
 			}
-		}
-		// Emit to external anchor provider if configured
-		if s.capabilityAnchorHandler != nil && s.capabilityAnchorHandler.Provider != nil && newHash != "" {
-			s.capabilityAnchorHandler.SetRegistryHash(newHash)
-			_, _ = s.capabilityAnchorHandler.Anchor(context.Background())
-		}
+			// Emit to external anchor provider if configured
+			if s.capabilityAnchorHandler != nil && s.capabilityAnchorHandler.Provider != nil && newHash != "" {
+				s.capabilityAnchorHandler.SetRegistryHash(newHash)
+				_, _ = s.capabilityAnchorHandler.Anchor(context.Background())
+			}
 
-		// Internal Notarization (if enabled via AGENTAUTH_CAP_ANCHOR_NOTARIZE)
-		if s.notarizer != nil {
-			if rec, err := s.notarizer.Notarize(newHash); err != nil {
-				fmt.Fprintf(os.Stderr, "[anchor] notarization failed hash=%s err=%v\n", newHash, err)
-			} else {
-				// Persist receipt
-				if s.receiptStore != nil {
-					if _, err := s.receiptStore.Append(rec); err != nil {
-						fmt.Fprintf(os.Stderr, "[anchor] receipt persistence failed: %v\n", err)
-					} else {
-						s.capLastNotarization = time.Now()
-						s.capLastNotarizationReceipt = rec
+			// Internal Notarization (if enabled via AGENTAUTH_CAP_ANCHOR_NOTARIZE)
+			if s.notarizer != nil {
+				if rec, err := s.notarizer.Notarize(newHash); err != nil {
+					fmt.Fprintf(os.Stderr, "[anchor] notarization failed hash=%s err=%v\n", newHash, err)
+				} else {
+					// Persist receipt
+					if s.receiptStore != nil {
+						if _, err := s.receiptStore.Append(rec); err != nil {
+							fmt.Fprintf(os.Stderr, "[anchor] receipt persistence failed: %v\n", err)
+						} else {
+							s.capLastNotarization = time.Now()
+							s.capLastNotarizationReceipt = rec
+						}
 					}
 				}
 			}
-		}
+		}()
 	}
 
 	// Wire Audit Chaining (Capability Audit Anchor)
@@ -397,7 +399,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}
 		}
 
-		// Wire Revocation Audit Hook (RFC111-R7)
+		// Wire Revocation Audit Hook (AAP001-R7)
 		delegation.OnRevocationAppended = func(ev delegation.RevocationEvent, chainLen int, aggregateHash string) {
 			// Capture event in centralized audit log
 			s.audit.Append(&AuditEntry{
@@ -1762,7 +1764,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// and the audit entry hash is linked back.
 		// Additionally, we anchor the aggregate hash to the unified anchor client.
 		delegation.OnRevocationAppended = func(ev delegation.RevocationEvent, chainLen int, aggregateHash string) {
-			// 1. Audit Log (RFC111-R7)
+			// 1. Audit Log (AAP001-R7)
 			if s.audit != nil {
 				s.audit.Append(&AuditEntry{
 					ID:       randomNonce(8),
