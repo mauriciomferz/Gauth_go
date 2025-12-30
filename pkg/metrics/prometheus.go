@@ -98,7 +98,7 @@ var (
 		[]string{"country", "document_type"},
 	)
 
-	// RFC-0111 PoA Metrics
+	// AAP-001 PoA Metrics
 	PoACreatedTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
 			Name: "agentauth_poa_created_total",

@@ -29,11 +29,11 @@ func TestPolicyMetricsPrometheusViolationCounters(t *testing.T) {
 	}
 	out := w.Body.String()
 	expected := []string{
-		"gauth_scope_violations_total",
-		"gauth_restriction_violations_total",
-		"gauth_unauthorized_decisions_total",
-		"gauth_expired_delegations_total",
-		"gauth_revoked_delegations_total",
+		"AGENTAUTH_scope_violations_total",
+		"AGENTAUTH_restriction_violations_total",
+		"AGENTAUTH_unauthorized_decisions_total",
+		"AGENTAUTH_expired_delegations_total",
+		"AGENTAUTH_revoked_delegations_total",
 	}
 	for _, token := range expected {
 		if !strings.Contains(out, token) {

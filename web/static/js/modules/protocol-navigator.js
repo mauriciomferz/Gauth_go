@@ -7,11 +7,11 @@
 //   - PVP Identity Verification (/api/v1/beta/pvp/verify)
 //   - Registry Entity/Signatory Verification (/api/v1/beta/registry/*)
 //   - Power of Attorney (PoA) Management (/api/v1/beta/poa/*)
-//   - RFC-0111 Token Authorization (/api/v1/rfc0111/authorize)
+//   - AAP-001 Token Authorization (/api/v1/rfc0111/authorize)
 //   - Token Security Validation (/api/v1/rfc0111/token/validate)
 //
 // Token Security Model:
-//   - Full RFC-0111 token creation requires 8-step subscription flow
+//   - Full AAP-001 token creation requires 8-step subscription flow
 //   - Mock tokens are correctly rejected with 401 (security working)
 //   - Valid tokens require completed subscription + PoA credential
 //
@@ -19,7 +19,7 @@
 
 /**
  * AgentAuth Protocol Flow Steps
- * Based on RFC-0111 and RFC-0115 authorization flow
+ * Based on AAP-001 and AAP-002 authorization flow
  */
 const PROTOCOL_STEPS = {
     SUBSCRIPTION: {
@@ -63,7 +63,7 @@ const PROTOCOL_STEPS = {
         description: 'Authorization request with scope subset selection',
         icon: '🎯',
         substeps: [
-            { id: 'subscription_flow', name: 'RFC-0111 Subscription (Steps I-VIII)', status: 'pending' },
+            { id: 'subscription_flow', name: 'AAP-001 Subscription (Steps I-VIII)', status: 'pending' },
             { id: 'create_request', name: 'Create Auth Request', status: 'pending' },
             { id: 'request_compliance', name: 'Request Compliance Validation', status: 'pending' },
             { id: 'select_scope', name: 'Select Scope Subset', status: 'pending' },
@@ -81,7 +81,7 @@ const PROTOCOL_STEPS = {
             '/api/v1/beta/poa'
         ],
         notes: [
-            'RFC-0111 requires 8-step subscription before token generation',
+            'AAP-001 requires 8-step subscription before token generation',
             'Steps I-VIII: Identity proofs, authentication, authorization checks',
             'Token generation uses completed subscription + PoA credential'
         ]
@@ -121,7 +121,7 @@ const PROTOCOL_STEPS = {
         ],
         notes: [
             'Token validation properly rejects invalid/mock tokens with 401',
-            'Valid tokens require completed RFC-0111 subscription flow (8 steps)',
+            'Valid tokens require completed AAP-001 subscription flow (8 steps)',
             'Security validation confirms proper authentication enforcement'
         ]
     },

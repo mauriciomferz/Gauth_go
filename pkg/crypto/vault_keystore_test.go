@@ -30,8 +30,8 @@ func (m *MockVaultClient) Write(ctx context.Context, path string, data map[strin
 		m.Data[path] = map[string]interface{}{"data": d}
 
 		// Simulate KV v2 listing: if path implies a key, add to metadata keys list
-		// Path format: secret/data/gauth/keys/TENANT/KEYID
-		// Metadata format: secret/metadata/gauth/keys/TENANT -> { "keys": ["KEYID", ...] }
+		// Path format: secret/data/AGENTAUTH/keys/TENANT/KEYID
+		// Metadata format: secret/metadata/AGENTAUTH/keys/TENANT -> { "keys": ["KEYID", ...] }
 		if len(path) > 7 { // Simple check
 			parts := splitPath(path)
 			// Expecting secret/data/...

@@ -1,4 +1,4 @@
-// Combined RFC-0111 & RFC-0115 Implementation Demo
+// Combined AAP-001 & AAP-002 Implementation Demo
 //
 // This example demonstrates the unified implementation of:
 // - AAP-0111: The AgentAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
@@ -32,7 +32,7 @@ func displayAAP001Exclusions(ex aap.AAP001Exclusions) {
 }
 
 func main() {
-	fmt.Println("🚀 Combined RFC-0111 & RFC-0115 Implementation Demo")
+	fmt.Println("🚀 Combined AAP-001 & AAP-002 Implementation Demo")
 	fmt.Println("═══════════════════════════════════════════════════")
 
 	// Create combined RFC configuration
@@ -46,17 +46,17 @@ func main() {
 	}
 	fmt.Println("✅ Combined RFC configuration validated successfully")
 
-	// Display RFC-0111 compliance
-	fmt.Println("\n🔒 RFC-0111 Exclusions Compliance:")
+	// Display AAP-001 compliance
+	fmt.Println("\n🔒 AAP-001 Exclusions Compliance:")
 	displayAAP001Exclusions(combinedConfig.AAP001.Exclusions)
 
-	// Display RFC-0111 PP Architecture
-	fmt.Println("\n🏗️ RFC-0111 Power*Point Architecture:")
+	// Display AAP-001 PP Architecture
+	fmt.Println("\n🏗️ AAP-001 Power*Point Architecture:")
 	displayPPArchitecture(combinedConfig.AAP001.PPArchitecture)
 
-	// Display RFC-0115 PoA Definition
+	// Display AAP-002 PoA Definition
 	if combinedConfig.AAP002 != nil {
-		fmt.Println("\n📄 RFC-0115 Power-of-Attorney Definition:")
+		fmt.Println("\n📄 AAP-002 Power-of-Attorney Definition:")
 		poaDefinition := aap.CreateDefaultPoADefinition(combinedConfig.AAP002.PoADefinition)
 		displayPoADefinition(poaDefinition)
 	}

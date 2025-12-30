@@ -2,14 +2,14 @@
   "generated_at": "2025-12-26T03:16:41+01:00",
   "clauses": [
     {
-      "id": "0111:rfc-0111-(placeholder-extract)",
+      "id": "0111:AAP-001-(placeholder-extract)",
       "title": "AAP-001 (Placeholder Extract)",
       "rfc": "0111",
       "line_from": 1,
       "line_to": 1
     },
     {
-      "id": "0115:rfc-0115-(placeholder-extract)",
+      "id": "0115:AAP-002-(placeholder-extract)",
       "title": "AAP-002 (Placeholder Extract)",
       "rfc": "0115",
       "line_from": 1,
@@ -355,351 +355,351 @@
   },
   "evidence": {
     "AddBundle": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/engine.go:85",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/engine.go:85",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/policy/api.go:308",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/policy/api.go:308"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/engine.go:85",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/engine.go:85",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/policy/api.go:308",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/policy/api.go:308"
     ],
     "AdvancedClaims": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/advanced_claims.go:12"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/advanced_claims.go:12"
     ],
     "AnchorClient": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/tsa/tsa.go:32",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/anchor/anchor.go:55",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2205",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/anchor.go:10",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/capabilities/handler.go:60",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/server_clean.go:328"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/tsa/tsa.go:32",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/anchor/anchor.go:55",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2205",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/anchor.go:10",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/capabilities/handler.go:60",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/server_clean.go:328"
     ],
     "AnchorRecord": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/anchor/anchor.go:49"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/anchor/anchor.go:49"
     ],
     "AuditEvents": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3986"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3986"
     ],
     "CanonicalPOADigest": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/canonical.go:43",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/canonical.go:43",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/canonical.go:43"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/canonical.go:43",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/canonical.go:43",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/canonical.go:43"
     ],
     "CapabilityEnforcer": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/ai/capability_enforcer.go:15",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/token/handler.go:48"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/ai/capability_enforcer.go:15",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/token/handler.go:48"
     ],
     "ClaimsMetadata": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/advanced_claims.go:37"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/advanced_claims.go:37"
     ],
     "ClaimsRestrictions": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/advanced_claims.go:46"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/advanced_claims.go:46"
     ],
     "ComplianceValidator": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/compliance_validation.go:15"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/compliance_validation.go:15"
     ],
     "ConditionalExpression": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:297",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:297"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:297",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:297"
     ],
     "CreateDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2219",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2219",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2219",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/cache.go:376",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/cache.go:376",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/cache.go:376",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/services.go:215",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/services.go:215",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/services.go:215",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:155",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:155",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:155",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:46",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:46",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:46"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2219",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2219",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2219",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/cache.go:376",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/cache.go:376",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/cache.go:376",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/services.go:215",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/services.go:215",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/services.go:215",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:155",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:155",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:155",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:46",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:46",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:46"
     ],
     "DailyLimit": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:243",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:243"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:243",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:243"
     ],
     "DelegationChain": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4100"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4100"
     ],
     "DelegationChainValidator": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/delegation_chain_validator.go:38"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/delegation_chain_validator.go:38"
     ],
     "DutyOfCare": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:289"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:289"
     ],
     "EnvelopeV2": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/envelope.go:31",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/envelope.go:31",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/envelope.go:31"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/envelope.go:31",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/envelope.go:31",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/envelope.go:31"
     ],
     "EvaluateExpression": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/conditions/conditions.go:57",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/expr.go:664"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/conditions/conditions.go:57",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/authz/expr.go:664"
     ],
     "ExprLimits": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/expr.go:27"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/authz/expr.go:27"
     ],
     "ExternalAnchorClient": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/external_anchor.go:16"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/external_anchor.go:16"
     ],
     "ExternalRevocationAnchor": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/delegation/revocation_external_anchor.go:14"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/delegation/revocation_external_anchor.go:14"
     ],
     "FileLogger": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/audit/file_logger.go:21"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/audit/file_logger.go:21"
     ],
     "FormalValidation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:226"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:226"
     ],
     "JurisdictionEnforcement": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/jurisdiction/enforcement.go:54",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/jurisdiction_integration.go:25"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/jurisdiction/enforcement.go:54",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/jurisdiction_integration.go:25"
     ],
     "LegalFramework": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/auth/legal_framework_integration.go:241"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/auth/legal_framework_integration.go:241"
     ],
     "Manager": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/authorization/manager.go:10",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/limits/manager.go:33",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/crypto/keys.go:41",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/token.go:216",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/webhook/manager.go:26"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/authorization/manager.go:10",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/limits/manager.go:33",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/crypto/keys.go:41",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/token.go:216",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/webhook/manager.go:26"
     ],
     "MemoryAnchor": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/anchor/anchor.go:65"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/anchor/anchor.go:65"
     ],
     "MemoryLogger": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/audit/audit.go:96"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/audit/audit.go:96"
     ],
     "MemoryStore": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/tokenstore/tokenstore.go:13",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/store/store.go:13",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/token.go:209"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/tokenstore/tokenstore.go:13",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/store/store.go:13",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/token.go:209"
     ],
     "ModelLimits": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/ai/capability_enforcer.go:34",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/poa/power_limits.go:24"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/ai/capability_enforcer.go:34",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/poa/power_limits.go:24"
     ],
     "NewService": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/token_management/multi_region/cmd/main.go:48",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/token_management/multi_region/main.go:45",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:864",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/saml/service.go:19",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/scim/service.go:16",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/token.go:449"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/token_management/multi_region/cmd/main.go:48",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/token_management/multi_region/main.go:45",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:864",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/saml/service.go:19",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/scim/service.go:16",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/token.go:449"
     ],
     "Obligations": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:281"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:281"
     ],
     "POAStatus": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:73",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/poa/poa.go:23"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:73",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/poa/poa.go:23"
     ],
     "PolicyBundle": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/testutil/parse.go:53"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/testutil/parse.go:53"
     ],
     "PowerLimit": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:254"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:254"
     ],
     "PowerOfAttorney": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/auth/legal_framework_integration.go:303",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:89",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/poa/validator.go:15",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/poa_handler.go:43"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/auth/legal_framework_integration.go:303",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:89",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/poa/validator.go:15",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/poa_handler.go:43"
     ],
     "ReplayStore": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/service.go:91",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/service.go:91",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1969",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1969"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/service.go:91",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/service.go:91",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1969",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1969"
     ],
     "Request": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/authz.go:22",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/pdp/engine.go:17",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/poa/poa.go:897"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/authz/authz.go:22",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/pdp/engine.go:17",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/poa/poa.go:897"
     ],
     "RequirementCheck": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:234"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:234"
     ],
     "RevocationChain": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/delegation/revocation_chain.go:65",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/delegation/revocation_chain.go:65",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/delegation/revocation_chain.go:65"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/delegation/revocation_chain.go:65",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/delegation/revocation_chain.go:65",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/delegation/revocation_chain.go:65"
     ],
     "RevocationStatus": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/token.go:111"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/token.go:111"
     ],
     "RevokeDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3599",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3599",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3599",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/cache.go:389",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/cache.go:389",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/cache.go:389",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/services.go:333",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/services.go:333",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/services.go:333",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:238",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:238",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:238",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:74",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:74",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:74"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3599",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3599",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:3599",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/cache.go:389",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/cache.go:389",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/cache.go:389",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/services.go:333",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/services.go:333",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/services.go:333",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:238",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:238",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:238",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:74",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:74",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:74"
     ],
     "Rights": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:271"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:271"
     ],
     "RotationPolicy": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/crypto/keystore.go:66"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/crypto/keystore.go:66"
     ],
     "RotationStatus": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/crypto/keystore.go:102"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/crypto/keystore.go:102"
     ],
     "RuntimeEvaluation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:306",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:306"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:306",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:306"
     ],
     "ScopeItem": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:185"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:185"
     ],
     "ScopeValidator": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:192"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:192"
     ],
     "Service": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/cascade/pkg/mesh/mesh.go:24",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/token_management/multi_region/cmd/main.go:14",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/token_management/multi_region/main.go:14",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/service.go:47",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1772",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/poa/poa.go:915",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/saml/service.go:14",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/scim/service.go:11",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/token.go:230"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/cascade/pkg/mesh/mesh.go:24",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/token_management/multi_region/cmd/main.go:14",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/token_management/multi_region/main.go:14",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/service.go:47",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1772",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/poa/poa.go:915",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/saml/service.go:14",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/scim/service.go:11",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/token.go:230"
     ],
     "SignatureManager": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/multisig/manager.go:71",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/multisig/manager.go:71"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/multisig/manager.go:71",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/multisig/manager.go:71"
     ],
     "SpecialConditions": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/poa/poa.go:488"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/poa/poa.go:488"
     ],
     "ThresholdValidation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:316",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:316"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:316",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:316"
     ],
     "TokenResult": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:176",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:176"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:176",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:176"
     ],
     "TokenVerificationResult": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1020"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1020"
     ],
     "TransactionLimit": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:263",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:263"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:263",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:263"
     ],
     "UsageContext": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/ai/capability_enforcer.go:44"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/ai/capability_enforcer.go:44"
     ],
     "ValidateBundle": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/engine.go:349"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/engine.go:349"
     ],
     "ValidateChain": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/delegation_chain_validator.go:79"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/delegation_chain_validator.go:79"
     ],
     "ValidateDelegation": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2551",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/cache.go:402",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/services.go:271",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:184",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:112"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2551",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/cache.go:402",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauthplus/services.go:271",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/admin/agentauthplus_handler.go:184",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/agentauthplus/delegation_handlers.go:112"
     ],
     "ValidateMultiSignature": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:353",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:353",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:353"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:353",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:353",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:353"
     ],
     "ValidateScope": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/opa-integration/http_client.go:40",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/security/validation.go:264",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:200"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/opa-integration/http_client.go:40",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/security/validation.go:264",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:200"
     ],
     "ValidationError": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/common/types.go:46",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/errors/errors.go:303",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/oidc/token_validation_enhanced.go:100",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/token/token.go:16"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/common/types.go:46",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/errors/errors.go:303",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/oidc/token_validation_enhanced.go:100",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/token/token.go:16"
     ],
     "VerifyChain": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/ai_capability_demo/ledger/audit_ledger.go:173",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/ai_capability_demo/ledger/audit_ledger.go:173",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/audit/audit.go:231",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/audit/audit.go:231",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/audit/file_logger.go:181",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/audit/file_logger.go:181",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/delegation/delegation.go:146",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/delegation/delegation.go:146",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/anchor.go:57",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/anchor.go:57",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/bolt.go:263",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/bolt.go:263",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/ledger.go:172",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/ledger.go:172",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/engine.go:141",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/engine.go:141",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/store.go:35",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/store.go:35",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/store_file.go:162",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/store_file.go:162",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/a2a/handler.go:119",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/a2a/handler.go:119"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/ai_capability_demo/ledger/audit_ledger.go:173",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/ai_capability_demo/ledger/audit_ledger.go:173",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/audit/audit.go:231",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/audit/audit.go:231",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/audit/file_logger.go:181",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/audit/file_logger.go:181",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/delegation/delegation.go:146",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/delegation/delegation.go:146",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/anchor.go:57",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/anchor.go:57",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/bolt.go:263",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/bolt.go:263",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/ledger.go:172",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/ledger/ledger.go:172",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/engine.go:141",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/engine.go:141",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/store.go:35",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/store_file.go:162",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/store_file.go:162",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/a2a/handler.go:119",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/web/handlers/a2a/handler.go:119"
     ],
     "VerifyIntegrity": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4067"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4067"
     ],
     "VerifySignature": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/multi_signature_poa/main.go:54",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/arbitration/webhook.go:286",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth/external_integrations_mock.go:272"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/multi_signature_poa/main.go:54",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/arbitration/webhook.go:286",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth/external_integrations_mock.go:272"
     ],
     "VerifyToken": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/token_management/paseto/main.go:73",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/token_management/paseto/main.go:73",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1054",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1054"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/token_management/paseto/main.go:73",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/token_management/paseto/main.go:73",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1054",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:1054"
     ],
     "WithReplayProtection": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2121",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2121"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2121",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2121"
     ],
     "computeHash": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/examples/ai_capability_demo/ledger/audit_ledger.go:47",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4154"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/examples/ai_capability_demo/ledger/audit_ledger.go:47",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4154"
     ],
     "detachedIssued": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/metrics_detached.go:11"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/metrics_detached.go:11"
     ],
     "incDetachedVerify": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/metrics_detached.go:29"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/metrics_detached.go:29"
     ],
     "policy.Registry": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/capability/registry.go:20",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/metrics/prometheus_adapter.go:1654",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/compliance/compliance.go:37",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/engine.go:77",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/store.go:36",
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/policy/store_file.go:167"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/capability/registry.go:20",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/internal/metrics/prometheus_adapter.go:1654",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/compliance/compliance.go:37",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/engine.go:77",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/store.go:36",
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/policy/store_file.go:167"
     ],
     "registerDetachedMetrics": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/metrics_detached.go:21"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/metrics_detached.go:21"
     ],
     "validateDelegationRequest": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4161"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:4161"
     ],
     "verifyPOASignature": [
-      "/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2061"
+      "/Users/mauricio.fernandez_fernandezAgentAuth.co/AgentAuth/pkg/agentauth_rfc_001/rfc0111.go:2061"
     ]
   },
   "failure_categories": {

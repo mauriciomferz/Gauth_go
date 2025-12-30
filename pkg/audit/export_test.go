@@ -121,8 +121,8 @@ func TestExportFormats(t *testing.T) {
 
 		content := buf.String()
 		// Check for Syslog format markers
-		if !strings.Contains(content, "gauth-audit") {
-			t.Error("Syslog should contain gauth-audit hostname")
+		if !strings.Contains(content, "agentauth-audit") {
+			t.Error("Syslog should contain agentauth-audit hostname")
 		}
 		if !strings.Contains(content, "poa.create") {
 			t.Error("Syslog should contain action")

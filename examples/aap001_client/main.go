@@ -11,9 +11,9 @@ import (
 
 const apiBase = "http://localhost:8080/api/v1/aap-001"
 
-// Example demonstrating how to use the RFC-0111 REST API programmatically
+// Example demonstrating how to use the AAP-001 REST API programmatically
 func main() {
-	fmt.Println("=== RFC-0111 API Go Client Example ===")
+	fmt.Println("=== AAP-001 API Go Client Example ===")
 
 	// Step I: Create Subscription
 	fmt.Println("Step I: Creating subscription...")

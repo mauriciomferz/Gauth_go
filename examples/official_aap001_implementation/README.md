@@ -6,7 +6,7 @@ lastUpdated: 2025-11-12
 owners: architecture-team
 refreshCadence: on-change
 ---
-# Official AAP-RFC-0111 Implementation (Refactored Beta Demo)
+# Official AAP-AAP-001 Implementation (Refactored Beta Demo)
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -29,7 +29,7 @@ This directory previously showcased a large graph of deep RFC‑0111 domain stru
 
 The intent: keep the example runnable and aligned with the real code while still mapping to RFC‑0111 concepts for learning.
 
-## RFC-0111 Specification Details
+## AAP-001 Specification Details
 
 - **AAP-Request for Comments**: 0111
 - **Digital Supply Institute**
@@ -75,9 +75,9 @@ These exclusions are **strictly enforced** by the implementation and violation d
 
 ### 🏗️ **Complete Architecture**
 
-- **Type Safety**: Complete Go type system enforcement for all RFC-0111 structures
+- **Type Safety**: Complete Go type system enforcement for all AAP-001 structures
 - **JSON Serialization**: Full serialization support for all data structures
-- **Validation**: RFC-0111 compliance validation with detailed error reporting
+- **Validation**: AAP-001 compliance validation with detailed error reporting
 - **Extensibility**: Modular design supporting custom implementations
 
 ## Running the Demo
@@ -177,7 +177,7 @@ pip := &rfc0111.AAP-001PowerInformationPoint{
 ## Example Output
 
 ```
-=== AAP-RFC-0111 AgentAuth 1.0 Authorization Framework Demo ===
+=== AAP-AAP-001 AgentAuth 1.0 Authorization Framework Demo ===
 Digital Supply Institute
 ISBN: 978-3-00-084039-5
 Category: Standards Track
@@ -186,10 +186,10 @@ AgentAuth Open Source Community, www.AgentAuthFoundation.com
 Operated by AgentAuth Technologies GmbH
 MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Daniel Hartert
 
-1. RFC-0111 Compliance Validation:
-✅ RFC-0111 Exclusions validated (Web3, AI operators, DNA identities excluded)
+1. AAP-001 Compliance Validation:
+✅ AAP-001 Exclusions validated (Web3, AI operators, DNA identities excluded)
 
-2. Core RFC-0111 Authorization Framework:
+2. Core AAP-001 Authorization Framework:
 Resource Owner: AgentAuth Open Source Community (organization)
 AI Client: agentauth-agent-v1.0 (digital_agent)
 Extended Token: rfc0111-token-1738519234 (valid until 2025-10-03 16:13)
@@ -199,7 +199,7 @@ Power Decision Point: agentauth-community-pdp (Owner: AgentAuth Open Source Comm
 Power Information Point: agentauth-community-pip (2 data sources)
 Power Verification Point: agentauth-community-pvp (Trust Service: AgentAuth Community Trust Services)
 
-✅ AAP-RFC-0111 AgentAuth 1.0 Authorization Framework demonstration complete
+✅ AAP-AAP-001 AgentAuth 1.0 Authorization Framework demonstration complete
 ✅ All mandatory exclusions enforced (Section 2)
 ✅ Complete P*P Architecture implemented
 ✅ Official AgentAuth Open Source Community attribution
@@ -246,7 +246,7 @@ Beta demonstration – not production ready.
 
 ## Security Notice
 
-⚠️ **Development Prototype**: This demonstration shows the complete RFC-0111 structure but uses mock implementations for:
+⚠️ **Development Prototype**: This demonstration shows the complete AAP-001 structure but uses mock implementations for:
 
 - **Cryptographic operations**: Replace with real cryptographic libraries
 - **Identity verification**: Implement real commercial register integration
@@ -257,7 +257,7 @@ For real-world use, implement concrete services with proper security controls.
 
 ## Architecture Benefits
 
-Following the official RFC-0111 specification provides:
+Following the official AAP-001 specification provides:
 
 1. **Practical**: Comprehensive power-related approval rules for controlled AI operations
 2. **Comprehensive**: Beyond simple access control - full decision-making powers
@@ -268,7 +268,7 @@ Following the official RFC-0111 specification provides:
 
 ## Next Steps
 
-As per RFC-0111 Section 8:
+As per AAP-001 Section 8:
 
 - **Subsequent Specifications**: Extended token attributes and comprehensive authorization methods
 - **Post-Quantum Cryptography**: NIST-compatible implementations
@@ -278,14 +278,14 @@ As per RFC-0111 Section 8:
 ## Related Documentation
 
 - [AgentAuth Main Documentation](../../README.md)
-- [RFC-0115 PoA-Definition](../rfc_0115_poa_definition/)
+- [AAP-002 PoA-Definition](../rfc_0115_poa_definition/)
 - [Architecture Guide](../../docs/ARCHITECTURE.md)
 - [Security Policy](../../SECURITY.md)
 
 ---
 
 **Official AgentAuth Community Implementation**  
-**Status**: RFC-0111 Standards Track Compliant  
+**Status**: AAP-001 Standards Track Compliant  
 **Version**: 1.0 (Initial Implementation)  
 **License**: Apache 2.0
 

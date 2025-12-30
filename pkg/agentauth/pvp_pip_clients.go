@@ -1,4 +1,4 @@
-// Package external - External Service Clients for RFC-0111
+// Package external - External Service Clients for AAP-001
 // Implements production-ready clients for PowerVerificationPoint (PVP) and PIP
 // with retry logic, circuit breakers, authentication, and fallback mechanisms
 package agentauth

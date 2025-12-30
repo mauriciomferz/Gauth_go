@@ -38,10 +38,10 @@ func TestSemanticRatesPrometheus(t *testing.T) {
 	srv.router.ServeHTTP(wp, rp)
 	out := wp.Body.String()
 	// Expect rate metric headers and at least one category rate line
-	if !strings.Contains(out, "gauth_poa_semantic_rate_60s") {
-		t.Fatalf("expected gauth_poa_semantic_rate_60s metrics in output")
+	if !strings.Contains(out, "AGENTAUTH_poa_semantic_rate_60s") {
+		t.Fatalf("expected AGENTAUTH_poa_semantic_rate_60s metrics in output")
 	}
-	if !strings.Contains(out, "gauth_poa_semantic_rate_300s") {
-		t.Fatalf("expected gauth_poa_semantic_rate_300s metrics in output")
+	if !strings.Contains(out, "AGENTAUTH_poa_semantic_rate_300s") {
+		t.Fatalf("expected AGENTAUTH_poa_semantic_rate_300s metrics in output")
 	}
 }

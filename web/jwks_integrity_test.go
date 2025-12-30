@@ -29,7 +29,7 @@ func TestJWKSDiscoveryMetadata(t *testing.T) {
 	}
 	// Discovery should now surface jwks_etag & jwks_last_rotated
 	w2 := httptest.NewRecorder()
-	req2 := httptest.NewRequest("GET", "/.well-known/gauth-configuration", nil)
+	req2 := httptest.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
 	s.router.ServeHTTP(w2, req2)
 	if w2.Code != 200 {
 		t.Fatalf("expected 200 discovery got %d", w2.Code)

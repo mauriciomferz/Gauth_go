@@ -89,7 +89,7 @@ func (h *Handler) Create(c *gin.Context) {
 	}
 	_ = c.ShouldBindJSON(&req)
 
-	// RFC 9396 / RFC-0111 Flow Integration
+	// RFC 9396 / AAP-001 Flow Integration
 	if h.AgentAuthService != nil && (len(req.AuthorizationDetails) > 0 || req.GrantID != "") {
 		tokenReq := agentauth.TokenRequest{
 			GrantID:              req.GrantID,

@@ -5,8 +5,8 @@ import (
 	aap001handlers "github.com/mauriciomferz/AgentAuth/web/handlers/aap001"
 )
 
-// RegisterAAP001Endpoints registers all RFC-0111 subscription and authorization endpoints.
-// These endpoints provide the full RFC-0111 compliant subscription flow (Steps I-VIII)
+// RegisterAAP001Endpoints registers all AAP-001 subscription and authorization endpoints.
+// These endpoints provide the full AAP-001 compliant subscription flow (Steps I-VIII)
 // and authorization flow (Steps a-i).
 //
 // NOTE: This is a basic registration that demonstrates the API structure.

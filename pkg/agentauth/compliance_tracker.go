@@ -10,7 +10,7 @@ import (
 )
 
 // ComplianceTracker monitors ongoing compliance for active authorizations
-// This implements RFC-0111 Step (i): Compliance Tracking
+// This implements AAP-001 Step (i): Compliance Tracking
 type ComplianceTracker interface {
 	// StartTracking begins compliance monitoring for an extended token
 	StartTracking(ctx context.Context, req *ComplianceTrackingRequest) error

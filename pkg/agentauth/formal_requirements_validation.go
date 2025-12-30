@@ -1,4 +1,4 @@
-// Package agentauth provides formal requirements enforcement for RFC-0111/RFC-0115 compliance
+// Package agentauth provides formal requirements enforcement for AAP-001/AAP-002 compliance
 package agentauth
 
 import (
@@ -14,7 +14,7 @@ import (
 )
 
 // FormalRequirementsValidator validates formal legal requirements for PoA
-// RFC-0115 Section C.1 - Formal Requirements
+// AAP-002 Section C.1 - Formal Requirements
 type FormalRequirementsValidator struct {
 	// External service clients
 	notaryVerifier NotarialCertificateVerifier
@@ -237,7 +237,7 @@ func NewFormalRequirementsValidator(
 }
 
 // ValidateFormalRequirements validates formal requirements for a PoA
-// RFC-0115 Section C.1 - Formal Requirements validation
+// AAP-002 Section C.1 - Formal Requirements validation
 func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	ctx context.Context,
 	poaDef *poa.PoADefinition,
@@ -264,7 +264,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	// Step 2: Validate notarial certification if required
 	if formalReqs.NotarialCertification {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
-			"RFC-0115 Section C.1: Notarial certification required")
+			"AAP-002 Section C.1: Notarial certification required")
 
 		if notaryCert == nil {
 			result.Valid = false
@@ -289,7 +289,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	// Step 3: Validate ID verification if required
 	if formalReqs.IDVerificationRequired {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
-			"RFC-0115 Section C.1: Identity verification required")
+			"AAP-002 Section C.1: Identity verification required")
 
 		if len(identityDocs) == 0 {
 			result.Valid = false
@@ -314,7 +314,7 @@ func (v *FormalRequirementsValidator) ValidateFormalRequirements(
 	// Step 4: Validate digital signatures if required
 	if formalReqs.DigitalSignatures {
 		result.ApplicableLegalRequirements = append(result.ApplicableLegalRequirements,
-			"RFC-0115 Section C.1: Digital signatures required")
+			"AAP-002 Section C.1: Digital signatures required")
 
 		if len(digitalSigs) == 0 {
 			result.Valid = false
@@ -714,7 +714,7 @@ func (v *FormalRequirementsValidator) validateWrittenFormRequirements(
 		Warnings: []string{},
 	}
 
-	// RFC-0115 written form requirements check
+	// AAP-002 written form requirements check
 	// Must have complete party information (using correct struct fields)
 	if poaDef.Parties.Principal.Identity == "" {
 		result.Valid = false

@@ -15,13 +15,13 @@ func attemptLoadCapabilities(srv *BetaServer) (bool, string) {
 	resp := performRequest(srv.router, "POST", "/api/v1/beta/capabilities/reload")
 	if resp.Code != 200 {
 		// On failure, hash should remain previous
-		disc := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+		disc := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 		var doc map[string]any
 		_ = json.Unmarshal(disc.Body.Bytes(), &doc)
 		h, _ := doc["capability_registry_hash"].(string)
 		return false, h
 	}
-	disc := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	disc := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	var doc map[string]any
 	_ = json.Unmarshal(disc.Body.Bytes(), &doc)
 	h, _ := doc["capability_registry_hash"].(string)
@@ -96,7 +96,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
 		srv := NewBetaServer(":0")
 		t.Cleanup(func() { srv.Shutdown() })
-		disc := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+		disc := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 		var doc map[string]any
 		if err := json.Unmarshal(disc.Body.Bytes(), &doc); err != nil {
 			t.Fatal(err)
@@ -173,7 +173,7 @@ func FuzzCapabilityReload(f *testing.F) {
 			t.Fatalf("empty hash after reload")
 		}
 		// If semantic differences introduced (e.g., added capability) we expect hash change; heuristic: count capabilities.
-		disc2 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+		disc2 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 		var doc2 map[string]any
 		_ = json.Unmarshal(disc2.Body.Bytes(), &doc2)
 		capsAny, _ := doc2["capability_registry"].([]any)

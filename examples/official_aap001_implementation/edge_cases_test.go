@@ -7,7 +7,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/AGENTAUTH_aap_001"
 	"github.com/mauriciomferz/AgentAuth/pkg/testutil"
 )
 
@@ -59,8 +59,8 @@ func TestExpiryZeroDuration(t *testing.T) {
 	fc := testutil.NewFakeClock(time.Now())
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create-zero", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
-	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 0}
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 0}
 	if _, err := svc.CreateDelegation(req); err == nil {
 		t.Fatalf("expected create failure for zero duration")
 	}
@@ -71,8 +71,8 @@ func TestExpiryNegativeDuration(t *testing.T) {
 	fc := testutil.NewFakeClock(time.Now())
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create-neg", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
-	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: -1 * time.Minute}
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: -1 * time.Minute}
 	if _, err := svc.CreateDelegation(req); err == nil {
 		t.Fatalf("expected create failure for negative duration")
 	}

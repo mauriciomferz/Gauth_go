@@ -77,7 +77,7 @@ func TestMCP_Agent_Identity_Propagation(t *testing.T) {
 			Jurisdiction: "US",
 		},
 		IssuedBy: &agentauth.AuthorizationServerInfo{
-			ServerID: "gauth-test",
+			ServerID: "AGENTAUTH-test",
 			Issuer:   "https://agentauth.test",
 		},
 		JurisdictionContext: &agentauth.JurisdictionContext{

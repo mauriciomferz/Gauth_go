@@ -33,7 +33,7 @@ type JWEConfig struct {
 	KeyRotationDays int
 }
 
-// AAP001Config holds RFC-0111 compliance configuration
+// AAP001Config holds AAP-001 compliance configuration
 type AAP001Config struct {
 	Enabled  bool
 	UseMocks bool

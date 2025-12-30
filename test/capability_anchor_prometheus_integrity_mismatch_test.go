@@ -94,7 +94,7 @@ func TestCapabilityAnchorPrometheusIntegrityMismatch(t *testing.T) {
 		t.Fatalf("scrape status: %d", w.Code)
 	}
 	body := w.Body.String()
-	if !strings.Contains(body, "gauth_capability_anchor_notarization_receipts_integrity 0") {
+	if !strings.Contains(body, "agentauth_capability_anchor_notarization_receipts_integrity 0") {
 		t.Fatalf("expected mismatch gauge value 0, body=\n%s", body)
 	}
 

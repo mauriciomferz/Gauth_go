@@ -1,4 +1,4 @@
-// Package aap001 provides HTTP handlers for RFC-0111 subscription and authorization flows.
+// Package aap001 provides HTTP handlers for AAP-001 subscription and authorization flows.
 //
 // NOTE: These handlers are basic stubs that demonstrate the REST API structure.
 // Full implementation requires:
@@ -7,7 +7,7 @@
 // 3. Error handling and validation
 // 4. Authentication and authorization middleware
 //
-// The subscription flow follows RFC-0111 Steps I-VIII, and authorization follows Steps a-i.
+// The subscription flow follows AAP-001 Steps I-VIII, and authorization follows Steps a-i.
 package agentauth_aap_001
 
 import (
@@ -22,7 +22,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
-// SubscriptionHandlers encapsulates RFC-0111 subscription API handlers.
+// SubscriptionHandlers encapsulates AAP-001 subscription API handlers.
 type SubscriptionHandlers struct {
 	subscriptionManager *agentauth.SubscriptionFlowManager
 	subscriptionStore   agentauth.SubscriptionStore
@@ -37,7 +37,7 @@ func NewSubscriptionHandlers(manager *agentauth.SubscriptionFlowManager, store a
 }
 
 // CreateSubscription handles POST /api/v1"AAP-001/subscriptions
-// RFC-0111 Step I: Owner's Authorizer Identity Proof
+// AAP-001 Step I: Owner's Authorizer Identity Proof
 func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 	var req struct {
 		OwnersAuthorizerID   string `json:"owners_authorizer_id" binding:"required"`
@@ -169,7 +169,7 @@ func (h *SubscriptionHandlers) ListSubscriptions(c *gin.Context) {
 }
 
 // ExecuteStepII handles POST /api/v1"AAP-001/subscriptions/:id/step-ii
-// RFC-0111 Step II: Owner's Authorizer Authorization Proof
+// AAP-001 Step II: Owner's Authorizer Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -215,7 +215,7 @@ func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 }
 
 // ExecuteStepIII handles POST /api/v1"AAP-001/subscriptions/:id/step-iii
-// RFC-0111 Step III: Client Owner Identity Proof
+// AAP-001 Step III: Client Owner Identity Proof
 func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -272,7 +272,7 @@ func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 }
 
 // ExecuteStepIV handles POST /api/v1"AAP-001/subscriptions/:id/step-iv
-// RFC-0111 Step IV: Client Owner Authorization Proof
+// AAP-001 Step IV: Client Owner Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -316,7 +316,7 @@ func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 }
 
 // ExecuteStepV handles POST /api/v1"AAP-001/subscriptions/:id/step-v
-// RFC-0111 Step V: Client Authorization
+// AAP-001 Step V: Client Authorization
 func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -401,7 +401,7 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 }
 
 // ExecuteStepVI handles POST /api/v1"AAP-001/subscriptions/:id/step-vi
-// RFC-0111 Step VI: Resource Owner Identity Proof
+// AAP-001 Step VI: Resource Owner Identity Proof
 func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -458,7 +458,7 @@ func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 }
 
 // ExecuteStepVII handles POST /api/v1"AAP-001/subscriptions/:id/step-vii
-// RFC-0111 Step VII: Resource Owner Authorization Proof
+// AAP-001 Step VII: Resource Owner Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -502,7 +502,7 @@ func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 }
 
 // ExecuteStepVIII handles POST /api/v1"AAP-001/subscriptions/:id/step-viii
-// RFC-0111 Step VIII: Resource Server Authorization
+// AAP-001 Step VIII: Resource Server Authorization
 func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -597,7 +597,7 @@ func generateExtendedTokenFromSubscription(sub *agentauth.Subscription) (string,
 		issuer = "http://localhost:8080" // Default for dev
 	}
 
-	// Build RFC-0111 extended token claims
+	// Build AAP-001 extended token claims
 	claims := jwt.MapClaims{
 		"iss":             issuer,
 		"sub":             clientOwnerID,

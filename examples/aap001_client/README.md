@@ -1,14 +1,14 @@
 ---
-title: "RFC-0111 Client Examples"
+title: "AAP-001 Client Examples"
 category: example
 status: active
 lastUpdated: 2025-11-12
 owners: architecture-team
 refreshCadence: on-change
 ---
-# RFC-0111 Client Examples
+# AAP-001 Client Examples
 
-This directory contains examples demonstrating how to use the RFC-0111 REST API.
+This directory contains examples demonstrating how to use the AAP-001 REST API.
 
 ## Quick Demo (Bash)
 
@@ -55,7 +55,7 @@ Comprehensive test of all 8 subscription steps:
 
 ## Prerequisites
 
-1. **Start the server with RFC-0111 enabled:**
+1. **Start the server with AAP-001 enabled:**
    ```bash
    AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
    ```
@@ -77,7 +77,7 @@ For complete API reference, see:
 ### Quick Demo
 ```
 ========================================
-RFC-0111 API Quick Demo
+AAP-001 API Quick Demo
 ========================================
 
 Step I: Owner's Authorizer Identity Proof
@@ -97,7 +97,7 @@ Demo completed successfully!
 
 ### Go Client
 ```
-=== RFC-0111 API Go Client Example ===
+=== AAP-001 API Go Client Example ===
 
 Step I: Creating subscription...
 ✓ Subscription created: sub_1762827409479317000
@@ -150,7 +150,7 @@ AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 ### 404 errors
 ```bash
-# Ensure RFC-0111 is enabled
+# Ensure AAP-001 is enabled
 export AGENTAUTH_AAP-001_ENABLED=1
 go run ./cmd/web-server
 ```

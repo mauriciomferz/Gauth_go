@@ -4,7 +4,7 @@ package taxonomy
 import "fmt"
 
 // SectorCode represents ISIC Rev.4 / NACE Rev.2 industry sector codes
-// as required by RFC-0115 Section B.2
+// as required by AAP-002 Section B.2
 type SectorCode string
 
 const (

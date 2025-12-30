@@ -6,7 +6,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/AGENTAUTH_aap_001"
 )
 
 func TestRunDemoWithLargeJSON(t *testing.T) {
@@ -31,15 +31,15 @@ func TestRunDemoFailureScenarios(t *testing.T) {
 	// Scenario 1: Invalid config (delegation depth 0)
 	cfg := createAAP001Config()
 	cfg.MaxDelegationDepth = 0
-	if err := gauth_aap_001.ValidateAAP001Compliance(cfg); err == nil {
+	if err := AGENTAUTH_aap_001.ValidateAAP001Compliance(cfg); err == nil {
 		t.Fatalf("expected config validation failure for depth=0")
 	}
 	// Scenario 2: Missing revoke permission (simulate by crafting custom function locally)
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create-only", Subject: "principal@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
-	svc := gauth_aap_001.NewService(auditLogger, authorizer)
-	req := gauth_aap_001.DelegationRequest{Grantor: "principal@example.com", Grantee: "agent@example.com", Scope: []string{"transaction:execute"}, Duration: time.Hour}
+	svc := AGENTAUTH_aap_001.NewService(auditLogger, authorizer)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "principal@example.com", Grantee: "agent@example.com", Scope: []string{"transaction:execute"}, Duration: time.Hour}
 	delegation, err := svc.CreateDelegation(req)
 	if err != nil {
 		t.Fatalf("unexpected create failure: %v", err)

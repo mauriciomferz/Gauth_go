@@ -332,23 +332,23 @@ func TestAzureADProvider_MapClaims(t *testing.T) {
 		"tenant_id":          "12345678-1234-1234-1234-123456789012",
 	}
 
-	for gauthClaim, expectedValue := range expectedMappings {
-		actualValue, exists := mappedClaims[gauthClaim]
+	for AGENTAUTHClaim, expectedValue := range expectedMappings {
+		actualValue, exists := mappedClaims[AGENTAUTHClaim]
 		if !exists {
-			t.Errorf("Expected claim %q to be mapped but it wasn't", gauthClaim)
+			t.Errorf("Expected claim %q to be mapped but it wasn't", AGENTAUTHClaim)
 			continue
 		}
 
 		// For slice comparison
-		if gauthClaim == "roles" || gauthClaim == "groups" {
+		if AGENTAUTHClaim == "roles" || AGENTAUTHClaim == "groups" {
 			expectedSlice := expectedValue.([]string)
 			actualSlice, ok := actualValue.([]string)
 			if !ok {
-				t.Errorf("Expected claim %q to be []string but got %T", gauthClaim, actualValue)
+				t.Errorf("Expected claim %q to be []string but got %T", AGENTAUTHClaim, actualValue)
 				continue
 			}
 			if len(expectedSlice) != len(actualSlice) {
-				t.Errorf("Expected claim %q to have %d items but got %d", gauthClaim, len(expectedSlice), len(actualSlice))
+				t.Errorf("Expected claim %q to have %d items but got %d", AGENTAUTHClaim, len(expectedSlice), len(actualSlice))
 				continue
 			}
 			for i, item := range expectedSlice {
@@ -360,7 +360,7 @@ func TestAzureADProvider_MapClaims(t *testing.T) {
 		}
 
 		if actualValue != expectedValue {
-			t.Errorf("Expected claim %q to be %v but got %v", gauthClaim, expectedValue, actualValue)
+			t.Errorf("Expected claim %q to be %v but got %v", AGENTAUTHClaim, expectedValue, actualValue)
 		}
 	}
 

@@ -1,6 +1,6 @@
-// Package poa - RFC-0115 Section B.4 Authorized Actions Classification
+// Package poa - AAP-002 Section B.4 Authorized Actions Classification
 // This implements transaction types, decision types, and action types
-// as required by RFC-0115 Section B.4 (Authorized Actions)
+// as required by AAP-002 Section B.4 (Authorized Actions)
 package taxonomy
 
 import (
@@ -16,7 +16,7 @@ const (
 )
 
 // TransactionType represents financial/commercial transaction types
-// per RFC-0115 Section B.4.1
+// per AAP-002 Section B.4.1
 type TransactionType string
 
 const (
@@ -52,7 +52,7 @@ const (
 )
 
 // DecisionType represents decision-making categories
-// per RFC-0115 Section B.4.2
+// per AAP-002 Section B.4.2
 type DecisionType string
 
 const (
@@ -97,7 +97,7 @@ const (
 )
 
 // ActionTypePhysical represents physical action categories
-// per RFC-0115 Section B.4.3
+// per AAP-002 Section B.4.3
 type ActionTypePhysical string
 
 const (
@@ -132,23 +132,23 @@ const (
 	ActionPhysicalDelivery ActionTypePhysical = "Delivery"
 
 	// ActionPhysicalStorage - Storage and warehousing
-	// RFC-0115 B.4.3: Required for physical asset management
+	// AAP-002 B.4.3: Required for physical asset management
 	ActionPhysicalStorage ActionTypePhysical = "Storage"
 
 	// ActionPhysicalPackaging - Packaging and wrapping
-	// RFC-0115 B.4.3: Required for product preparation and logistics
+	// AAP-002 B.4.3: Required for product preparation and logistics
 	ActionPhysicalPackaging ActionTypePhysical = "Packaging"
 
 	// ActionPhysicalCleaning - Cleaning and sanitation
-	// RFC-0115 B.4.3: Required for maintenance and facility management
+	// AAP-002 B.4.3: Required for maintenance and facility management
 	ActionPhysicalCleaning ActionTypePhysical = "Cleaning"
 
 	// ActionPhysicalRecycling - Recycling and waste management
-	// RFC-0115 B.4.3: Required for environmental compliance and sustainability
+	// AAP-002 B.4.3: Required for environmental compliance and sustainability
 	ActionPhysicalRecycling ActionTypePhysical = "Recycling"
 
 	// ActionPhysicalCustomization - Customization and modification
-	// RFC-0115 B.4.3: Required for bespoke manufacturing and adaptation
+	// AAP-002 B.4.3: Required for bespoke manufacturing and adaptation
 	ActionPhysicalCustomization ActionTypePhysical = "Customization"
 
 	// ActionPhysicalOther - Other physical actions
@@ -156,7 +156,7 @@ const (
 )
 
 // ActionTypeNonPhysical represents non-physical action categories
-// per RFC-0115 Section B.4.4
+// per AAP-002 Section B.4.4
 type ActionTypeNonPhysical string
 
 const (
@@ -203,23 +203,23 @@ const (
 	ActionNonPhysicalDesigning ActionTypeNonPhysical = "Designing"
 
 	// ActionNonPhysicalDataAggregation - Data aggregation and consolidation
-	// RFC-0115 B.4.4: Required for AI data processing operations
+	// AAP-002 B.4.4: Required for AI data processing operations
 	ActionNonPhysicalDataAggregation ActionTypeNonPhysical = "DataAggregation"
 
 	// ActionNonPhysicalVisualization - Data visualization and reporting
-	// RFC-0115 B.4.4: Required for AI reporting and presentation
+	// AAP-002 B.4.4: Required for AI reporting and presentation
 	ActionNonPhysicalVisualization ActionTypeNonPhysical = "Visualization"
 
 	// ActionNonPhysicalNotification - Notification and alerting
-	// RFC-0115 B.4.4: Required for AI event-driven communications
+	// AAP-002 B.4.4: Required for AI event-driven communications
 	ActionNonPhysicalNotification ActionTypeNonPhysical = "Notification"
 
 	// ActionNonPhysicalRAG - Retrieval-Augmented Generation (RAG) operations
-	// RFC-0115 B.4.4: Explicit RAG support as specified in "Researching (e.g., RAG)"
+	// AAP-002 B.4.4: Explicit RAG support as specified in "Researching (e.g., RAG)"
 	ActionNonPhysicalRAG ActionTypeNonPhysical = "RAG"
 
 	// ActionNonPhysicalPresenting - Sharing and presenting information
-	// RFC-0115 B.4.4: "Sharing / presenting" from specification
+	// AAP-002 B.4.4: "Sharing / presenting" from specification
 	ActionNonPhysicalPresenting ActionTypeNonPhysical = "Presenting"
 
 	// ActionNonPhysicalOther - Other non-physical actions
@@ -227,7 +227,7 @@ const (
 )
 
 // AuthorizedActionSet represents a complete set of authorized actions
-// per RFC-0115 Section B.4
+// per AAP-002 Section B.4
 type AuthorizedActionSet struct {
 	Transactions       []TransactionType       `json:"transactions,omitempty"`
 	Decisions          []DecisionType          `json:"decisions,omitempty"`
@@ -240,7 +240,7 @@ type AuthorizedActionSet struct {
 	AllowAllNonPhysicalActions bool `json:"allow_all_non_physical_actions,omitempty"`
 }
 
-// ValidateTransactionType validates RFC-0115 transaction type
+// ValidateTransactionType validates AAP-002 transaction type
 func ValidateTransactionType(tt TransactionType) error {
 	validTypes := []TransactionType{
 		TransactionLoan, TransactionPurchase, TransactionSale,
@@ -255,7 +255,7 @@ func ValidateTransactionType(tt TransactionType) error {
 	return fmt.Errorf("invalid transaction type: %s", tt)
 }
 
-// ValidateDecisionType validates RFC-0115 decision type
+// ValidateDecisionType validates AAP-002 decision type
 func ValidateDecisionType(dt DecisionType) error {
 	validTypes := []DecisionType{
 		DecisionPersonnel, DecisionFinancial, DecisionBuySell,
@@ -271,7 +271,7 @@ func ValidateDecisionType(dt DecisionType) error {
 	return fmt.Errorf("invalid decision type: %s", dt)
 }
 
-// ValidateActionTypePhysical validates RFC-0115 physical action type
+// ValidateActionTypePhysical validates AAP-002 physical action type
 func ValidateActionTypePhysical(at ActionTypePhysical) error {
 	validTypes := []ActionTypePhysical{
 		ActionPhysicalManufacturing, ActionPhysicalAssembly,
@@ -291,7 +291,7 @@ func ValidateActionTypePhysical(at ActionTypePhysical) error {
 	return fmt.Errorf("invalid physical action type: %s", at)
 }
 
-// ValidateActionTypeNonPhysical validates RFC-0115 non-physical action type
+// ValidateActionTypeNonPhysical validates AAP-002 non-physical action type
 func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 	validTypes := []ActionTypeNonPhysical{
 		ActionNonPhysicalResearching, ActionNonPhysicalBrainstorming,

@@ -1,5 +1,5 @@
 // Package agentauth - Integration Tests
-// This file contains integration tests for the implemented RFC-0111/RFC-0115 components
+// This file contains integration tests for the implemented AAP-001/AAP-002 components
 package agentauth
 
 import (

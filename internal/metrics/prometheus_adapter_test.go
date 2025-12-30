@@ -27,10 +27,10 @@ func TestAttestationTrustAnchorMetricsExposure(t *testing.T) {
 	}
 
 	wanted := map[string]float64{
-		"gauth_aap001_attestation_proof_trust_anchor_missing_total":            0,
-		"gauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total": 0,
-		"gauth_aap001_attestation_proof_trust_anchor_key_mismatch_total":       0,
-		"gauth_aap001_crypto_signature_missing_total":                          0,
+		"AGENTAUTH_aap001_attestation_proof_trust_anchor_missing_total":            0,
+		"AGENTAUTH_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total": 0,
+		"AGENTAUTH_aap001_attestation_proof_trust_anchor_key_mismatch_total":       0,
+		"AGENTAUTH_aap001_crypto_signature_missing_total":                          0,
 	}
 
 	seen := map[string]bool{}
@@ -62,7 +62,7 @@ func TestAttestationTrustAnchorMetricsExposure(t *testing.T) {
 // TestPrometheusAdapterBasic verifies counters increment & exposition contains expected names.
 func TestPrometheusAdapterBasic(t *testing.T) {
 	reg := prom.NewRegistry()
-	pm := NewPrometheusMetrics(PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "test", Registry: reg})
+	pm := NewPrometheusMetrics(PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "test", Registry: reg})
 	pm.IncDelegationsCreated()
 	pm.IncDelegationsCreated()
 	pm.IncSignaturesIssued()
@@ -78,11 +78,11 @@ func TestPrometheusAdapterBasic(t *testing.T) {
 	promhttp.HandlerFor(reg, promhttp.HandlerOpts{}).ServeHTTP(rr, httptest.NewRequest("GET", "/metrics", nil))
 	body := rr.Body.String()
 	expected := []string{
-		"gauth_test_delegations_created_total",
-		"gauth_test_signatures_issued_total",
-		"gauth_test_signature_issue_failures_total",
-		"gauth_test_validation_latency_seconds_bucket",
-		"gauth_test_signature_public_key_missing_total",
+		"AGENTAUTH_test_delegations_created_total",
+		"AGENTAUTH_test_signatures_issued_total",
+		"AGENTAUTH_test_signature_issue_failures_total",
+		"AGENTAUTH_test_validation_latency_seconds_bucket",
+		"AGENTAUTH_test_signature_public_key_missing_total",
 	}
 	for _, name := range expected {
 		if !strings.Contains(body, name) {

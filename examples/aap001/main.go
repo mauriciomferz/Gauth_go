@@ -1,4 +1,4 @@
-// Package main demonstrates RFC-0111 integration with mock external services
+// Package main demonstrates AAP-001 integration with mock external services
 package main
 
 import (
@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("RFC-0111 Integration Example with Mock Services")
+	fmt.Println("AAP-001 Integration Example with Mock Services")
 	fmt.Println("================================================")
 	fmt.Println()
 
@@ -131,7 +131,7 @@ func main() {
 
 	// Success!
 	fmt.Println("================================================")
-	fmt.Println("✓ All RFC-0111 components working successfully!")
+	fmt.Println("✓ All AAP-001 components working successfully!")
 	fmt.Println("================================================")
 	fmt.Println()
 	fmt.Println("Next steps:")

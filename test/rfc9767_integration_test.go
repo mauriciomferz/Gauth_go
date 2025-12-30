@@ -87,9 +87,9 @@ func TestRFC9767_FullFlow(t *testing.T) {
 	t.Logf("Registered RS Instance: %s", rsResp.InstanceID)
 
 	// 2. Introspect (Active Token)
-	// We use the magic token "gauth_gnap_active" to trigger the mock active response in the handler
+	// We use the magic token "agentauth_gnap_active" to trigger the mock active response in the handler
 	introReq := gnap.IntrospectionRequest{
-		Token: "gauth_gnap_active",
+		Token: "agentauth_gnap_active",
 	}
 	body, _ = json.Marshal(introReq)
 

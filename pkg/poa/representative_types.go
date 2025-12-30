@@ -1,4 +1,4 @@
-// Package poa provides enhanced representative type system per RFC-0111 and RFC-0115
+// Package poa provides enhanced representative type system per AAP-001 and AAP-002
 // This file extends the base Representative types in poa.go with enhanced authorization chains
 package poa
 
@@ -15,7 +15,7 @@ import (
 // - ValidateLegalRelationship (function)
 
 // RepresentativeType distinguishes the type of representative in authorization chain
-// per RFC-0111 §4.1 Authorization Chain Requirements
+// per AAP-001 §4.1 Authorization Chain Requirements
 type RepresentativeType string
 
 const (
@@ -61,7 +61,7 @@ type AuthorizationProof struct {
 	DocumentReference string `json:"document_reference"`
 
 	// IssuingAuthority identifies who issued the proof
-	// Examples: "Amtsgericht München", "Notary Public", "Company Board"
+	// Examples: "Central Registry", "Notary Public", "Company Board"
 	IssuingAuthority string `json:"issuing_authority"`
 
 	// IssueDate when the authorization was granted (ISO 8601)
@@ -175,7 +175,7 @@ func (ap *AuthorizationProof) IsExpired() bool {
 }
 
 // EnhancedRepresentative extends the basic Representative with type distinction
-// and comprehensive authorization proof chain per RFC-0111 §4.1
+// and comprehensive authorization proof chain per AAP-001 §4.1
 type EnhancedRepresentative struct {
 	// Type distinguishes the representative's role in authorization chain
 	Type RepresentativeType `json:"type"`

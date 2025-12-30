@@ -13,7 +13,7 @@ func TestDiscoveryConditionalETag(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	// First request to get ETag
 	r1 := httptest.NewRecorder()
-	req1, _ := http.NewRequest("GET", "/.well-known/gauth-configuration", nil)
+	req1, _ := http.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
 	bs.router.ServeHTTP(r1, req1)
 	if r1.Code != 200 {
 		t.Fatalf("expected 200, got %d", r1.Code)
@@ -24,7 +24,7 @@ func TestDiscoveryConditionalETag(t *testing.T) {
 	}
 	// Second with If-None-Match
 	r2 := httptest.NewRecorder()
-	req2, _ := http.NewRequest("GET", "/.well-known/gauth-configuration", nil)
+	req2, _ := http.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
 	req2.Header.Set("If-None-Match", etag)
 	bs.router.ServeHTTP(r2, req2)
 	if r2.Code != 304 {

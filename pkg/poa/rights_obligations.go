@@ -1,6 +1,6 @@
-// Package poa - RFC-0115 Section C.3 Rights and Obligations
+// Package poa - AAP-002 Section C.3 Rights and Obligations
 // This implements rights and obligations framework for AI authorization
-// as required by RFC-0115 Section C.3
+// as required by AAP-002 Section C.3
 package poa
 
 import (
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// RightsObligationSet represents comprehensive rights and obligations per RFC-0115 C.3
+// RightsObligationSet represents comprehensive rights and obligations per AAP-002 C.3
 type RightsObligationSet struct {
 	ReportingDuties   []ReportingDuty    `json:"reporting_duties,omitempty"`
 	LiabilityRules    []LiabilityRule    `json:"liability_rules,omitempty"`
@@ -17,7 +17,7 @@ type RightsObligationSet struct {
 	ComplianceRules   []ComplianceRule   `json:"compliance_rules,omitempty"`
 }
 
-// ReportingDuty defines mandatory reporting obligations per RFC-0115 C.3.1
+// ReportingDuty defines mandatory reporting obligations per AAP-002 C.3.1
 type ReportingDuty struct {
 	// Type describes the report type
 	Type ReportType `json:"type"`
@@ -80,7 +80,7 @@ type ReportTrigger struct {
 	Immediate bool   `json:"immediate"`  // Requires immediate reporting
 }
 
-// LiabilityRule defines liability attribution per RFC-0115 C.3.2
+// LiabilityRule defines liability attribution per AAP-002 C.3.2
 type LiabilityRule struct {
 	// RuleID uniquely identifies the liability rule
 	RuleID string `json:"rule_id"`
@@ -149,7 +149,7 @@ type MonetaryAmount struct {
 	Currency string  `json:"currency"` // ISO 4217 code
 }
 
-// CompensationRule defines compensation obligations per RFC-0115 C.3.3
+// CompensationRule defines compensation obligations per AAP-002 C.3.3
 type CompensationRule struct {
 	// RuleID uniquely identifies the compensation rule
 	RuleID string `json:"rule_id"`
@@ -200,7 +200,7 @@ type PaymentSchedule struct {
 	GracePeriod  time.Duration `json:"grace_period,omitempty"`
 }
 
-// AuditRequirements defines audit obligations per RFC-0115 C.3.4
+// AuditRequirements defines audit obligations per AAP-002 C.3.4
 type AuditRequirements struct {
 	// AuditFrequency defines audit schedule
 	AuditFrequency string `json:"audit_frequency"` // "quarterly", "annual", "biennial"
@@ -227,7 +227,7 @@ type AuditRequirements struct {
 	CertificationRequired bool `json:"certification_required"`
 }
 
-// ComplianceRule defines regulatory compliance requirements per RFC-0115 C.3.5
+// ComplianceRule defines regulatory compliance requirements per AAP-002 C.3.5
 type ComplianceRule struct {
 	// RuleID uniquely identifies the compliance rule
 	RuleID string `json:"rule_id"`

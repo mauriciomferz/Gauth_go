@@ -20,11 +20,11 @@ func TestCapabilityAnchorPrometheusExposition(t *testing.T) {
 	body := w.Body.String()
 	// Basic expected metric names.
 	must := []string{
-		"gauth_capability_anchor_age_seconds",
-		"gauth_capability_anchor_stale",
-		"gauth_capability_anchor_emitted_total",
-		"gauth_capability_anchor_skipped_total",
-		"gauth_capability_registry_hash_changed_total",
+		"AGENTAUTH_capability_anchor_age_seconds",
+		"AGENTAUTH_capability_anchor_stale",
+		"AGENTAUTH_capability_anchor_emitted_total",
+		"AGENTAUTH_capability_anchor_skipped_total",
+		"AGENTAUTH_capability_registry_hash_changed_total",
 	}
 	for _, m := range must {
 		if !regexp.MustCompile(m + " ").MatchString(body) {

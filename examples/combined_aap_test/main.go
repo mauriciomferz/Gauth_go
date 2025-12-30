@@ -1,5 +1,5 @@
 // Simple Combined RFC Test
-// Demonstrates validation and compliance checks for RFC-0111 & RFC-0115 configurations.
+// Demonstrates validation and compliance checks for AAP-001 & AAP-002 configurations.
 // Shows how to create, validate, and inspect combined RFC configuration for AgentAuth.
 
 package main
@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🧪 Testing Combined RFC-0111 & RFC-0115 Implementation")
+	fmt.Println("🧪 Testing Combined AAP-001 & AAP-002 Implementation")
 	fmt.Println("══════════════════════════════════════════════════════")
 
 	// Test Combined Configuration using existing helper
@@ -25,7 +25,7 @@ func main() {
 	fmt.Println("✅ Combined RFC configuration validated successfully")
 
 	// Display Exclusions Compliance (structured fields)
-	fmt.Println("\n� RFC-0111 Exclusions Compliance:")
+	fmt.Println("\n� AAP-001 Exclusions Compliance:")
 	ex := combinedConfig.AAP001.Exclusions
 	fmt.Printf("  🚫 Web3 Blockchain: prohibited=%v license_required=%v\n", ex.Web3Blockchain.Prohibited, ex.Web3Blockchain.LicenseRequired)
 	fmt.Printf("  � AI Operators: prohibited=%v license_required=%v\n", ex.AIOperators.Prohibited, ex.AIOperators.LicenseRequired)
@@ -38,7 +38,7 @@ func main() {
 	fmt.Printf("  🔗 Integration Level: %s\n", combinedConfig.IntegrationLevel)
 	fmt.Printf("  📦 Combined Version: %s\n", combinedConfig.CombinedVersion)
 
-	fmt.Printf("  ✅ RFC-0115 PoA Definition: Included\n")
+	fmt.Printf("  ✅ AAP-002 PoA Definition: Included\n")
 	// Create detailed PoA definition and show nested data
 	poaDef := aap.CreateDefaultPoADefinition(combinedConfig.AAP002.PoADefinition)
 	fmt.Printf("  🤖 Authorized Client Type: %s\n", poaDef.Parties.AuthorizedClient.Type)

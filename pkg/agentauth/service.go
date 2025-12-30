@@ -59,7 +59,7 @@ type Service struct {
 	validator      TokenSignatureValidator
 	claimValidator *CommonClaimValidator // optional external replay persistence
 
-	// RFC-0111 compliance components
+	// AAP-001 compliance components
 	protocolOrchestrator  *ProtocolOrchestrator
 	subscriptionManager   *SubscriptionFlowManager
 	powerEnforcementPoint *PowerEnforcementPoint
@@ -119,8 +119,8 @@ func WithKeyManager(km *crypto.Manager) Option {
 	}
 }
 
-// WithRFCCompliance configures RFC-0111 compliance components
-// This enables the full RFC-0111 subscription and authorization flows
+// WithRFCCompliance configures AAP-001 compliance components
+// This enables the full AAP-001 subscription and authorization flows
 func WithRFCCompliance(
 	subscriptionStore SubscriptionStore,
 	extendedTokenService *ExtendedTokenService,
@@ -158,7 +158,7 @@ func WithRFCCompliance(
 		s.powerDecisionPoint = NewSimplePDP()
 
 		// Create PEP (Power Enforcement Point) wired to PDP
-		// This completes the P*P architecture integration (RFC-0111 Section 3.1)
+		// This completes the P*P architecture integration (AAP-001 Section 3.1)
 		if s.powerDecisionPoint != nil {
 			tokenValidator := &simpleTokenValidator{
 				extTokenService: extendedTokenService,
@@ -308,7 +308,7 @@ func (g *Service) InitiateAuthorization(req AuthorizationRequest) (*Authorizatio
 }
 
 // RequestToken requests a token using an authorization grant
-// UPDATED: Now uses RFC-0111 flow by default for RFC compliance
+// UPDATED: Now uses AAP-001 flow by default for RFC compliance
 // Set AGENTAUTH_LEGACY_OAUTH_MODE=1 to use legacy OAuth-only mode
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 	// Check if legacy OAuth mode is enabled
@@ -316,7 +316,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 		return g.RequestTokenLegacy(req)
 	}
 
-	// RFC-0111 compliant mode (default)
+	// AAP-001 compliant mode (default)
 	ctx := context.Background()
 
 	// Check if RFC orchestrator is available
@@ -334,7 +334,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 		AuthorizationDetails: req.AuthorizationDetails,
 	}
 
-	// Execute RFC-0111 compliant flow
+	// Execute AAP-001 compliant flow
 	aapResp, err := g.RequestTokenRFC(ctx, aapReq)
 	if err != nil {
 		// If RFC flow fails, log and fallback to legacy
@@ -346,7 +346,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 	return convertRFCResponseToTokenResponse(aapResp), nil
 }
 
-// RequestTokenLegacy generates a basic OAuth token (non-RFC-0111 compliant)
+// RequestTokenLegacy generates a basic OAuth token (non-AAP-001 compliant)
 // This is the original implementation, kept for backward compatibility
 // Use AGENTAUTH_LEGACY_OAUTH_MODE=1 to enable this mode
 func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
@@ -463,12 +463,12 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 	return &TokenResponse{Token: token, Scope: req.Scope, ValidUntil: expiry}, nil
 }
 
-// RequestTokenRFC executes RFC-0111 compliant authorization flow
-// This is the main entry point for RFC-0111 compliant token requests
+// RequestTokenRFC executes AAP-001 compliant authorization flow
+// This is the main entry point for AAP-001 compliant token requests
 // It orchestrates Steps (a)-(i) and returns an ExtendedToken
 func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthorizationRequest) (*RFCCompliantTokenResponse, error) {
 	if g.protocolOrchestrator == nil {
-		return nil, fmt.Errorf("RFC-0111 protocol orchestrator not initialized - use WithRFCCompliance option")
+		return nil, fmt.Errorf("AAP-001 protocol orchestrator not initialized - use WithRFCCompliance option")
 	}
 
 	return g.protocolOrchestrator.ExecuteRFCCompliantFlow(ctx, req)
@@ -645,7 +645,7 @@ func (g *Service) storeJTI(jti string) {
 	}
 }
 
-// Helper functions for RequestToken RFC-0111 conversion
+// Helper functions for RequestToken AAP-001 conversion
 
 // convertScopeToAuthorizationScope converts string scope to poa.AuthorizationScope
 func convertScopeToAuthorizationScope(scopes []string) *poa.AuthorizationScope {

@@ -38,14 +38,14 @@ func TestRevocationAutoSignMetrics(t *testing.T) {
 				continue
 			}
 			switch {
-			case strings.HasPrefix(line, "gauth_revocation_auto_sign_emitted "):
-				fmtS := strings.TrimPrefix(line, "gauth_revocation_auto_sign_emitted ")
+			case strings.HasPrefix(line, "AGENTAUTH_revocation_auto_sign_emitted "):
+				fmtS := strings.TrimPrefix(line, "AGENTAUTH_revocation_auto_sign_emitted ")
 				emitted = parseInt64(t, fmtS)
-			case strings.HasPrefix(line, "gauth_revocation_auto_sign_skipped_empty "):
-				fmtS := strings.TrimPrefix(line, "gauth_revocation_auto_sign_skipped_empty ")
+			case strings.HasPrefix(line, "AGENTAUTH_revocation_auto_sign_skipped_empty "):
+				fmtS := strings.TrimPrefix(line, "AGENTAUTH_revocation_auto_sign_skipped_empty ")
 				skippedEmpty = parseInt64(t, fmtS)
-			case strings.HasPrefix(line, "gauth_revocation_auto_sign_skipped_duplicate "):
-				fmtS := strings.TrimPrefix(line, "gauth_revocation_auto_sign_skipped_duplicate ")
+			case strings.HasPrefix(line, "AGENTAUTH_revocation_auto_sign_skipped_duplicate "):
+				fmtS := strings.TrimPrefix(line, "AGENTAUTH_revocation_auto_sign_skipped_duplicate ")
 				skippedDup = parseInt64(t, fmtS)
 			}
 		}

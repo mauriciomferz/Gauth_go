@@ -24,12 +24,12 @@ Operated by AgentAuth Technologies GmbH
 MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Daniel Hartert
 Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
-This directory contains beta examples demonstrating RFC-0115 PoA-Definition concepts and other AgentAuth learning materials. Each example is designed for learning and understanding AgentAuth principles.
+This directory contains beta examples demonstrating AAP-002 PoA-Definition concepts and other AgentAuth learning materials. Each example is designed for learning and understanding AgentAuth principles.
 
-## ⭐ **Featured Example - RFC-0115 PoA-Definition**
+## ⭐ **Featured Example - AAP-002 PoA-Definition**
 
-**[RFC-0115 PoA-Definition Implementation](rfc_0115_poa_definition/README.md)** ✅ **COMPLETE**
-- Complete AAP-RFC-0115 PoA-Definition structure
+**[AAP-002 PoA-Definition Implementation](rfc_0115_poa_definition/README.md)** ✅ **COMPLETE**
+- Complete AAP-AAP-002 PoA-Definition structure
 - Full type safety with Go type system
 - JSON serialization and validation
 - AgentAuth Community compliance demonstration

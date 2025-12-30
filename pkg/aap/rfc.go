@@ -88,13 +88,13 @@ func GetComplianceInfo() ComplianceInfo {
 // ValidateCompliance performs a simple supported-RFC check.
 func ValidateCompliance(code string) bool {
 	switch code {
-	case "RFC-0111", "0111", "RFC-0115", "0115", "RFC-0150", "0150":
+	case "AAP-001", "0111", "AAP-002", "0115", "RFC-0150", "0150":
 		return true
 	default:
 		return false
 	}
 }
 
-func GetSupportedRFCs() []string { return []string{"RFC-0111", "RFC-0115", "RFC-0150"} }
+func GetSupportedRFCs() []string { return []string{"AAP-001", "AAP-002", "RFC-0150"} }
 
 // Methods ValidateAAP001Flow, TestAAP002Features, DemoAAP001PowerOfAttorney have been moved to pkg/aapdemo to avoid import cycles.

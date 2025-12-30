@@ -90,7 +90,7 @@ func TestRotationsVerificationEndpoint(t *testing.T) {
 		// Accept either old or new key missing pattern.
 		found := false
 		for _, line := range strings.Split(body, "\n") {
-			if strings.Contains(line, "gauth_rotation_verification_failure_reason_total") && (strings.Contains(line, "reason=\"kid_not_found_old\"") || strings.Contains(line, "reason=\"kid_not_found_new\"")) {
+			if strings.Contains(line, "AGENTAUTH_rotation_verification_failure_reason_total") && (strings.Contains(line, "reason=\"kid_not_found_old\"") || strings.Contains(line, "reason=\"kid_not_found_new\"")) {
 				// Ensure it is at least 1
 				if strings.Contains(line, " 0") {
 					t.Fatalf("expected failure reason counter increment, line=%s", line)

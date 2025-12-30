@@ -1,7 +1,7 @@
 //go:build e2e
 
 // Package agentauth - End-to-End RFC Flow Tests
-// This file contains comprehensive E2E tests for RFC-0111 and RFC-0115 authorization flows
+// This file contains comprehensive E2E tests for AAP-001 and AAP-002 authorization flows
 //
 // UPDATED: November 12, 2025
 // - Re-enabled E2E tests after gap closure analysis
@@ -25,7 +25,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
-// TestE2E_CompleteAuthorizationFlow tests the complete RFC-0111 authorization flow
+// TestE2E_CompleteAuthorizationFlow tests the complete AAP-001 authorization flow
 // from Owner's Authorizer through to Resource Server access
 func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 	ctx := context.Background()
@@ -56,10 +56,10 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 	)
 	formalValidator := NewFormalRequirementsValidator(mockNotary, mockID, mockSig, false)
 
-	// Step 1: Create authorization chain (RFC-0111 steps I-VIII)
+	// Step 1: Create authorization chain (AAP-001 steps I-VIII)
 	chain := createTestAuthorizationChain(t)
 
-	// Step 2: Validate authorization chain (RFC-0111 step a)
+	// Step 2: Validate authorization chain (AAP-001 step a)
 	t.Run("Step_a_ValidateAuthorizationChain", func(t *testing.T) {
 		result, err := chainValidator.ValidateAuthorizationChain(ctx, chain)
 		if err != nil {
@@ -74,10 +74,10 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		t.Logf("✓ Authorization chain validated successfully")
 	})
 
-	// Step 3: Create PoA Definition (RFC-0115 sections A-C)
+	// Step 3: Create PoA Definition (AAP-002 sections A-C)
 	poaDef := createTestPoADefinition(t, chain)
 
-	// Step 4: Validate formal requirements (RFC-0115 Section C.1)
+	// Step 4: Validate formal requirements (AAP-002 Section C.1)
 	t.Run("Formal_Requirements_Validation", func(t *testing.T) {
 		notaryCert := createTestNotarialCertificate()
 		idDocs := createTestIdentityDocuments()
@@ -154,7 +154,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		t.Logf("✓ All entities registered in PIP successfully")
 	})
 
-	// Step 6: Create token request (RFC-0111 step b - request compliance)
+	// Step 6: Create token request (AAP-001 step b - request compliance)
 	t.Run("Step_b_CreateAndValidateRequest", func(t *testing.T) {
 		request := &ExtendedAuthorizationRequest{
 			AuthorizationRequest: &AuthorizationRequest{
@@ -171,7 +171,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 			RequestTime:        time.Now(),
 		}
 
-		// Validate request compliance (RFC-0111 step b)
+		// Validate request compliance (AAP-001 step b)
 		result, err := complianceValidator.ValidateRequestCompliance(ctx, request)
 		if err != nil {
 			t.Fatalf("Failed to validate request compliance: %v", err)
@@ -182,7 +182,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		t.Logf("✓ Request compliance validated successfully")
 	})
 
-	// Step 7: Create authorization grant (RFC-0111 steps c-e)
+	// Step 7: Create authorization grant (AAP-001 steps c-e)
 	t.Run("Step_c-e_AuthorizationGrant", func(t *testing.T) {
 		// In real implementation, this would involve:
 		// - Resource owner authentication (step c)
@@ -192,7 +192,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		t.Logf("✓ Authorization grant simulated")
 	})
 
-	// Step 8: Validate grant compliance (RFC-0111 step f)
+	// Step 8: Validate grant compliance (AAP-001 step f)
 	t.Run("Step_f_ValidateGrantCompliance", func(t *testing.T) {
 		grant := &ExtendedAuthorizationGrant{
 			AuthorizationGrant: &AuthorizationGrant{
@@ -222,7 +222,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		t.Logf("✓ Grant compliance validated successfully")
 	})
 
-	// Step 9: Create extended token (RFC-0111 step g)
+	// Step 9: Create extended token (AAP-001 step g)
 	t.Run("Step_g_CreateExtendedToken", func(t *testing.T) {
 		request := &ExtendedTokenRequest{
 			GrantID:            "grant-001",
@@ -292,7 +292,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		t.Logf("  - Compliance Level: %s", token.ComplianceLevel)
 	})
 
-	// Step 10: Validate extended token (RFC-0111 step h)
+	// Step 10: Validate extended token (AAP-001 step h)
 	t.Run("Step_h_ValidateExtendedToken", func(t *testing.T) {
 		// First create a token
 		request := &ExtendedTokenRequest{
@@ -346,7 +346,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		t.Logf("  - Scope: %v", result.Scope)
 	})
 
-	// Step 11: Resource access (RFC-0111 step i)
+	// Step 11: Resource access (AAP-001 step i)
 	t.Run("Step_i_ResourceAccess", func(t *testing.T) {
 		// In real implementation, resource server would:
 		// 1. Receive access token
@@ -372,7 +372,7 @@ func createTestAuthorizationChain(t *testing.T) *AuthorizationChain {
 		Role:               "authorizer",
 		AuthorizationDate:  time.Now().Add(-90 * 24 * time.Hour),
 		AuthorizationType:  "statutory",
-		StatutoryAuthority: "Statutory Law Section 1", // RFC-0111 Requirement
+		StatutoryAuthority: "Statutory Law Section 1", // AAP-001 Requirement
 		LegalBasis: &LegalBasis{
 			BasisType:    "statutory",
 			Jurisdiction: "DE",

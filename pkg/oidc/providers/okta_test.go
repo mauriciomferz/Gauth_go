@@ -295,23 +295,23 @@ func TestOktaProvider_MapClaims(t *testing.T) {
 		"roles":          []string{"Admins", "Developers"},
 	}
 
-	for gauthClaim, expectedValue := range expectedMappings {
-		actualValue, exists := mappedClaims[gauthClaim]
+	for AGENTAUTHClaim, expectedValue := range expectedMappings {
+		actualValue, exists := mappedClaims[AGENTAUTHClaim]
 		if !exists {
-			t.Errorf("Expected claim %q to be mapped but it wasn't", gauthClaim)
+			t.Errorf("Expected claim %q to be mapped but it wasn't", AGENTAUTHClaim)
 			continue
 		}
 
 		// For slice comparison, convert to string
-		if gauthClaim == "roles" {
+		if AGENTAUTHClaim == "roles" {
 			expectedGroups := expectedValue.([]string)
 			actualGroups, ok := actualValue.([]string)
 			if !ok {
-				t.Errorf("Expected claim %q to be []string but got %T", gauthClaim, actualValue)
+				t.Errorf("Expected claim %q to be []string but got %T", AGENTAUTHClaim, actualValue)
 				continue
 			}
 			if len(expectedGroups) != len(actualGroups) {
-				t.Errorf("Expected claim %q to have %d groups but got %d", gauthClaim, len(expectedGroups), len(actualGroups))
+				t.Errorf("Expected claim %q to have %d groups but got %d", AGENTAUTHClaim, len(expectedGroups), len(actualGroups))
 				continue
 			}
 			for i, group := range expectedGroups {
@@ -323,7 +323,7 @@ func TestOktaProvider_MapClaims(t *testing.T) {
 		}
 
 		if actualValue != expectedValue {
-			t.Errorf("Expected claim %q to be %v but got %v", gauthClaim, expectedValue, actualValue)
+			t.Errorf("Expected claim %q to be %v but got %v", AGENTAUTHClaim, expectedValue, actualValue)
 		}
 	}
 

@@ -261,27 +261,27 @@ func TestTokenExchangeService_NormalizeClaims(t *testing.T) {
 		AMR:               []string{"pwd", "mfa"},
 	}
 
-	gauthClaims := service.normalizeClaims(provider, externalClaims)
+	AGENTAUTHClaims := service.normalizeClaims(provider, externalClaims)
 
 	// Verify claims are copied correctly
-	if gauthClaims.RegisteredClaims.Subject != externalClaims.RegisteredClaims.Subject {
-		t.Errorf("Expected subject %q but got %q", externalClaims.RegisteredClaims.Subject, gauthClaims.RegisteredClaims.Subject)
+	if AGENTAUTHClaims.RegisteredClaims.Subject != externalClaims.RegisteredClaims.Subject {
+		t.Errorf("Expected subject %q but got %q", externalClaims.RegisteredClaims.Subject, AGENTAUTHClaims.RegisteredClaims.Subject)
 	}
 
-	if gauthClaims.Name != externalClaims.Name {
-		t.Errorf("Expected name %q but got %q", externalClaims.Name, gauthClaims.Name)
+	if AGENTAUTHClaims.Name != externalClaims.Name {
+		t.Errorf("Expected name %q but got %q", externalClaims.Name, AGENTAUTHClaims.Name)
 	}
 
-	if gauthClaims.Email != externalClaims.Email {
-		t.Errorf("Expected email %q but got %q", externalClaims.Email, gauthClaims.Email)
+	if AGENTAUTHClaims.Email != externalClaims.Email {
+		t.Errorf("Expected email %q but got %q", externalClaims.Email, AGENTAUTHClaims.Email)
 	}
 
-	if gauthClaims.ACR != externalClaims.ACR {
-		t.Errorf("Expected ACR %q but got %q", externalClaims.ACR, gauthClaims.ACR)
+	if AGENTAUTHClaims.ACR != externalClaims.ACR {
+		t.Errorf("Expected ACR %q but got %q", externalClaims.ACR, AGENTAUTHClaims.ACR)
 	}
 
-	if len(gauthClaims.AMR) != len(externalClaims.AMR) {
-		t.Errorf("Expected %d AMR values but got %d", len(externalClaims.AMR), len(gauthClaims.AMR))
+	if len(AGENTAUTHClaims.AMR) != len(externalClaims.AMR) {
+		t.Errorf("Expected %d AMR values but got %d", len(externalClaims.AMR), len(AGENTAUTHClaims.AMR))
 	}
 }
 

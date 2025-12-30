@@ -12,7 +12,7 @@ import (
 // - Capability Assessment (AI capability evaluation)
 // - Fiduciary Duty (violation tracking)
 //
-// These endpoints enable operational management of AgentAuth+ features integrated into the RFC-0111 authorization chain.
+// These endpoints enable operational management of AgentAuth+ features integrated into the AAP-001 authorization chain.
 func (s *BetaServer) RegisterAgentAuthPlusEndpoints(
 	successorService agentauthplus.SuccessorManagementService,
 	delegationService agentauthplus.DelegationService,

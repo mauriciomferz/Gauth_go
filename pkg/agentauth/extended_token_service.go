@@ -1,4 +1,4 @@
-// Package agentauth - Extended Token Creation and Validation per RFC-0111
+// Package agentauth - Extended Token Creation and Validation per AAP-001
 // Implements critical Gaps #6 and #7 from QUALITY_MANAGER_RFC_COMPLIANCE_FINAL_ASSESSMENT.md
 package agentauth
 
@@ -14,7 +14,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
-// ExtendedTokenService provides RFC-0111 compliant extended token operations
+// ExtendedTokenService provides AAP-001 compliant extended token operations
 type ExtendedTokenService struct {
 	chainValidator      *AuthorizationChainValidator
 	complianceValidator *ComplianceValidator
@@ -65,7 +65,7 @@ func (s *ExtendedTokenService) WithJWEEncryption(jweService JWEService) *Extende
 	return s
 }
 
-// CreateExtendedToken creates an RFC-0111 compliant extended token
+// CreateExtendedToken creates an AAP-001 compliant extended token
 // This implements the MISSING functionality identified in the assessment
 func (s *ExtendedTokenService) CreateExtendedToken(
 	ctx context.Context,
@@ -82,7 +82,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	if request.AuthorizationChain == nil {
 		return nil, &AgentAuthError{
 			Code:    "missing_authorization_chain",
-			Message: "Authorization chain is required per RFC-0111",
+			Message: "Authorization chain is required per AAP-001",
 		}
 	}
 
@@ -101,7 +101,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	if request.PowerOfAttorney == nil {
 		return nil, &AgentAuthError{
 			Code:    "missing_poa",
-			Message: "Power of Attorney is required per RFC-0111",
+			Message: "Power of Attorney is required per AAP-001",
 		}
 	}
 
@@ -123,7 +123,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	if request.ClientOwnerInfo == nil {
 		return nil, &AgentAuthError{
 			Code:    "missing_client_owner",
-			Message: "Client owner information is required per RFC-0111",
+			Message: "Client owner information is required per AAP-001",
 		}
 	}
 
@@ -131,7 +131,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	if request.OwnersAuthorizerInfo == nil {
 		return nil, &AgentAuthError{
 			Code:    "missing_owners_authorizer",
-			Message: "Owner's authorizer information is required per RFC-0111",
+			Message: "Owner's authorizer information is required per AAP-001",
 		}
 	}
 
@@ -139,7 +139,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	if request.LegalFramework == nil {
 		return nil, &AgentAuthError{
 			Code:    "missing_legal_framework",
-			Message: "Legal framework is required per RFC-0111",
+			Message: "Legal framework is required per AAP-001",
 		}
 	}
 
@@ -170,7 +170,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		Scope:        request.Scope,
 		IssuedAt:     now,
 
-		// RFC-0111 extended fields
+		// AAP-001 extended fields
 		PowerOfAttorney:    request.PowerOfAttorney,
 		AuthorizationChain: request.AuthorizationChain,
 		ClientOwner:        request.ClientOwnerInfo,
@@ -250,7 +250,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		"token_type": token.TokenType,
 		"scope":      token.Scope,
 
-		// RFC-0111 extended claims
+		// AAP-001 extended claims
 		"client_owner":      token.ClientOwner,
 		"owners_authorizer": token.OwnersAuthorizer,
 		"resource_owner":    token.ResourceOwner,
@@ -322,7 +322,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 	return tokenString, nil
 }
 
-// ValidateExtendedToken validates an RFC-0111 extended token
+// ValidateExtendedToken validates an AAP-001 extended token
 // This implements the MISSING functionality identified in the assessment
 func (s *ExtendedTokenService) ValidateExtendedToken(
 	ctx context.Context,

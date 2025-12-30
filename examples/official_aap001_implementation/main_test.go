@@ -6,7 +6,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/AGENTAUTH_aap_001"
 	"github.com/mauriciomferz/AgentAuth/pkg/testutil"
 )
 
@@ -26,8 +26,8 @@ func TestDelegationLifecycle(t *testing.T) {
 		Actions:  []string{"revoke_delegation"},
 		Effect:   authz.Allow,
 	})
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
-	req := gauth_aap_001.DelegationRequest{
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+	req := AGENTAUTH_aap_001.DelegationRequest{
 		Grantor:      "alice@example.com",
 		Grantee:      "bob@example.com",
 		Scope:        []string{"transaction:execute", "account:read"},
@@ -71,8 +71,8 @@ func TestUnauthorizedRevocation(t *testing.T) {
 		Actions:  []string{"revoke_delegation"},
 		Effect:   authz.Allow,
 	})
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
-	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 1 * time.Hour}
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 1 * time.Hour}
 	resp, err := svc.CreateDelegation(req)
 	if err != nil {
 		t.Fatalf("CreateDelegation failed: %v", err)
@@ -87,8 +87,8 @@ func TestUnauthorizedRevocation(t *testing.T) {
 
 func TestCreateDelegationUnauthorized(t *testing.T) {
 	authorizer := authz.NewMemoryAuthorizer()
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
-	req := gauth_aap_001.DelegationRequest{Grantor: "carol@example.com", Grantee: "dave@example.com", Scope: []string{"transaction:execute"}, Duration: 30 * time.Minute}
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "carol@example.com", Grantee: "dave@example.com", Scope: []string{"transaction:execute"}, Duration: 30 * time.Minute}
 	if _, err := svc.CreateDelegation(req); err == nil {
 		t.Fatalf("expected create delegation to be unauthorized without policy")
 	}
@@ -99,8 +99,8 @@ func TestDelegationExpiry(t *testing.T) {
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	authorizer.AddPolicy(authz.Policy{ID: "allow-revoke", Subject: "alice@example.com", Resource: "*", Actions: []string{"revoke_delegation"}, Effect: authz.Allow})
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
-	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 2 * time.Minute}
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer).WithClock(fc.Now)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 2 * time.Minute}
 	resp, err := svc.CreateDelegation(req)
 	if err != nil {
 		t.Fatalf("create failed: %v", err)
@@ -115,8 +115,8 @@ func TestDelegationWrongGrantee(t *testing.T) {
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	authorizer.AddPolicy(authz.Policy{ID: "allow-revoke", Subject: "alice@example.com", Resource: "*", Actions: []string{"revoke_delegation"}, Effect: authz.Allow})
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
-	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 10 * time.Minute}
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 10 * time.Minute}
 	resp, err := svc.CreateDelegation(req)
 	if err != nil {
 		t.Fatalf("create failed: %v", err)
@@ -130,8 +130,8 @@ func TestAuditEventsCount(t *testing.T) {
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: "alice@example.com", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	authorizer.AddPolicy(authz.Policy{ID: "allow-revoke", Subject: "alice@example.com", Resource: "*", Actions: []string{"revoke_delegation"}, Effect: authz.Allow})
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
-	req := gauth_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 5 * time.Minute}
+	svc := AGENTAUTH_aap_001.NewService(audit.NewMemoryLogger(testutil.NoopLogger{}), authorizer)
+	req := AGENTAUTH_aap_001.DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"transaction:execute"}, Duration: 5 * time.Minute}
 	resp, err := svc.CreateDelegation(req)
 	if err != nil {
 		t.Fatalf("create failed: %v", err)

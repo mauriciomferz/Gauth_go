@@ -12,7 +12,7 @@ func TestWellKnownDiscovery(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 	// Build request
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/.well-known/gauth-configuration", nil)
+	req := httptest.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
 	srv.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d body=%s", w.Code, w.Body.String())
@@ -51,7 +51,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC to ensure JWKS suppression
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	w := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)
 	}
@@ -77,7 +77,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	t.Setenv("AGENTAUTH_JWT_KID", "demo-key")
 	srv2 := NewBetaServer(":0")
 	t.Cleanup(func() { srv2.Shutdown() })
-	w2 := performRequest(srv2.router, "GET", "/.well-known/gauth-configuration")
+	w2 := performRequest(srv2.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	var body2 map[string]any
 	if err := json.Unmarshal(w2.Body.Bytes(), &body2); err != nil {
 		t.Fatalf("json2: %v", err)
@@ -91,7 +91,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	srv3 := NewBetaServer(":0")
 	t.Cleanup(func() { srv3.Shutdown() })
-	w3 := performRequest(srv3.router, "GET", "/.well-known/gauth-configuration")
+	w3 := performRequest(srv3.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	var body3 map[string]any
 	if err := json.Unmarshal(w3.Body.Bytes(), &body3); err != nil {
 		t.Fatalf("json3: %v", err)
@@ -104,7 +104,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	t.Setenv("AGENTAUTH_ISSUER", "https://agentauth.example.com")
 	srv4 := NewBetaServer(":0")
 	t.Cleanup(func() { srv4.Shutdown() })
-	w4 := performRequest(srv4.router, "GET", "/.well-known/gauth-configuration")
+	w4 := performRequest(srv4.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	var body4 map[string]any
 	if err := json.Unmarshal(w4.Body.Bytes(), &body4); err != nil {
 		t.Fatalf("json4: %v", err)
@@ -124,7 +124,7 @@ func TestDiscoveryAnchoringFields(t *testing.T) {
 	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	w := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)
 	}
@@ -152,7 +152,7 @@ func TestDiscoveryMultiSigWeights(t *testing.T) {
 	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "signerA=3,signerB=2")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	w := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)
 	}
@@ -178,7 +178,7 @@ func TestDiscoveryMultiSigWeightsInvalid(t *testing.T) {
 	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "signerA=2,signerB=2") // total 4 < threshold 5
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	w := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	var body map[string]any
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatalf("json: %v", err)

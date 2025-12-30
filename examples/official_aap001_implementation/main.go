@@ -181,7 +181,7 @@ func main() {
 	} else {
 		fmt.Println("Snapshot JSON not truncated ✅")
 	}
-	fmt.Println("\nAll RFC-0111 demo steps completed (beta demonstration – non-production).")
+	fmt.Println("\nAll AAP-001 demo steps completed (beta demonstration – non-production).")
 }
 
 func createAAP001Config() *agentauth_aap_001.AAP001Config {
@@ -194,7 +194,7 @@ func createAAP001Config() *agentauth_aap_001.AAP001Config {
 		AuditingEnabled:           true,
 		ComplianceTrackingEnabled: true,
 
-		// RFC-0111 Section 2: Mandatory exclusions for open source
+		// AAP-001 Section 2: Mandatory exclusions for open source
 		ExcludeWeb3:          true, // No blockchain/web3 tokens
 		ExcludeAIOperators:   true, // No AI controlling the entire process
 		ExcludeDNAIdentities: true, // No DNA-based identities

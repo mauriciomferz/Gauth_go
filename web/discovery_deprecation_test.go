@@ -12,7 +12,7 @@ func TestDiscoveryDeprecationMetadata(t *testing.T) {
 	s := NewBetaServer("0")
 	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/.well-known/gauth-configuration", nil)
+	req := httptest.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
 	s.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("expected 200 got %d", w.Code)

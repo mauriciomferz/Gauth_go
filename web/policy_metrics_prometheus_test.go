@@ -38,13 +38,13 @@ func TestPolicyMetricsPrometheus(t *testing.T) {
 	out := recM.Body.String()
 	// Required lines / prefixes
 	checks := []string{
-		"gauth_policy_evaluations_total ",
-		"gauth_policy_evaluations_allow_total ",
-		"gauth_policy_evaluations_deny_total ",
-		"gauth_policy_eval_latency_ns_bucket{le=\"+Inf\"}",
-		"gauth_policy_eval_latency_ns_count ",
-		"gauth_policy_eval_latency_ns_sum ",
-		"gauth_policy_eval_latency_ns_p99 ",
+		"AGENTAUTH_policy_evaluations_total ",
+		"AGENTAUTH_policy_evaluations_allow_total ",
+		"AGENTAUTH_policy_evaluations_deny_total ",
+		"AGENTAUTH_policy_eval_latency_ns_bucket{le=\"+Inf\"}",
+		"AGENTAUTH_policy_eval_latency_ns_count ",
+		"AGENTAUTH_policy_eval_latency_ns_sum ",
+		"AGENTAUTH_policy_eval_latency_ns_p99 ",
 	}
 	for _, ck := range checks {
 		if !strings.Contains(out, ck) {

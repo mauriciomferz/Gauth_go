@@ -20,7 +20,7 @@ func TestJWTDiscoveryAlgorithms(t *testing.T) {
 	t.Setenv("AGENTAUTH_JWT_ALG", "RS256")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	w := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	if w.Code != 200 {
 		t.Fatalf("expected 200, got %d", w.Code)
 	}

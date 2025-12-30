@@ -1,5 +1,5 @@
 // Package agentauth - Power Administration Point (PAP) Types
-// RFC-0111 Section 3.1 - P*P Architecture
+// AAP-001 Section 3.1 - P*P Architecture
 package agentauth
 
 import (

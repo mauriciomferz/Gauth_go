@@ -1,4 +1,4 @@
-// Package aap001 provides HTTP handlers for RFC-0111 authorization flows.
+// Package aap001 provides HTTP handlers for AAP-001 authorization flows.
 package agentauth_aap_001
 
 import (
@@ -13,7 +13,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
-// AuthorizationHandlers encapsulates RFC-0111 authorization API handlers.
+// AuthorizationHandlers encapsulates AAP-001 authorization API handlers.
 type AuthorizationHandlers struct {
 	agentauthService *agentauth.Service
 	tokenStore   agentauth.ExtendedTokenStore
@@ -28,7 +28,7 @@ func NewAuthorizationHandlers(service *agentauth.Service, tokenStore agentauth.E
 }
 
 // RequestToken handles POST /api/v1"AAP-001/authorize
-// RFC-0111 Steps a-i: Complete RFC-compliant authorization flow
+// AAP-001 Steps a-i: Complete RFC-compliant authorization flow
 func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 	var req struct {
 		ClientID         string                 `json:"client_id" binding:"required"`
@@ -92,7 +92,7 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 }
 
 // ValidateToken handles POST /api/v1"AAP-001/token/validate
-// Validates an RFC-0111 compliant token
+// Validates an AAP-001 compliant token
 func (h *AuthorizationHandlers) ValidateToken(c *gin.Context) {
 	var req struct {
 		Token string `json:"token" binding:"required"`
@@ -209,10 +209,10 @@ func (h *AuthorizationHandlers) RevokeToken(c *gin.Context) {
 
 // parseBasicScope converts a simple scope string (e.g., "read write") into an AuthorizationScope
 // This is a basic implementation that handles common OAuth-style scopes.
-// parseBasicScope converts OAuth-style scope strings to RFC-0111 AuthorizationScope.
-// Maps common OAuth scopes (read, write, delete, etc.) to RFC-0111 action types.
+// parseBasicScope converts OAuth-style scope strings to AAP-001 AuthorizationScope.
+// Maps common OAuth scopes (read, write, delete, etc.) to AAP-001 action types.
 //
-// For full RFC-0111 compliance with complex authorization types, sectors, and regions,
+// For full AAP-001 compliance with complex authorization types, sectors, and regions,
 // clients should use the full PoA credential specification with proper action types.
 func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 	if scopeString == "" {
@@ -225,7 +225,7 @@ func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 		return nil
 	}
 
-	// Map OAuth scopes to RFC-0111 non-physical actions (use predefined constants)
+	// Map OAuth scopes to AAP-001 non-physical actions (use predefined constants)
 	var nonPhysicalActions []taxonomy.ActionTypeNonPhysical
 	for _, s := range scopes {
 		switch strings.ToLower(s) {

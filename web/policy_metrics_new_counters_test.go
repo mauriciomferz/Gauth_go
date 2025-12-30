@@ -82,10 +82,10 @@ func TestPolicyMetricsNewCounters(t *testing.T) {
 		t.Fatalf("prometheus metrics fetch failed: %d", wProm.Code)
 	}
 	promBody := wProm.Body.String()
-	if !strings.Contains(promBody, "gauth_policy_rollback_total 1") {
+	if !strings.Contains(promBody, "AGENTAUTH_policy_rollback_total 1") {
 		t.Fatalf("expected rollback prometheus metric not found or incorrect: %s", promBody)
 	}
-	if !strings.Contains(promBody, "gauth_policy_diff_requests_total 1") {
+	if !strings.Contains(promBody, "AGENTAUTH_policy_diff_requests_total 1") {
 		t.Fatalf("expected diff requests prometheus metric not found or incorrect: %s", promBody)
 	}
 }

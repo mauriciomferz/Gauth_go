@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Combined RFC-0111 & RFC-0115 Implementation Demo
+# Combined AAP-001 & AAP-002 Implementation Demo
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -15,12 +15,12 @@ owners: [system]
 
 This example demonstrates a *beta demonstration* combination of both specifications. It is **NOT production ready** and omits critical security, compliance, operational, and performance safeguards. Do **NOT** use it for real users, regulated workloads, or commercial deployments.
 
-- **AAP-RFC-0111**: The AgentAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
-- **AAP-RFC-0115**: Power-of-Attorney Credential Definition (PoA-Definition)
+- **AAP-AAP-001**: The AgentAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
+- **AAP-AAP-002**: Power-of-Attorney Credential Definition (PoA-Definition)
 
 ### 📋 **Referenced Specifications (For Learning Only)**
 
-**RFC-0111: AgentAuth 1.0 Authorization Framework**
+**AAP-001: AgentAuth 1.0 Authorization Framework**
 - **Author**: the AgentAuth Community
 - **Organization**: Digital Supply Institute (DSI)
 - **Category**: Standards Track
@@ -28,7 +28,7 @@ This example demonstrates a *beta demonstration* combination of both specificati
 - **Obsoletes**: 1. August 2025
 - **Status**: AgentAuth Community Standards Track Document
 
-**RFC-0115: Power-of-Attorney Credential Definition**
+**AAP-002: Power-of-Attorney Credential Definition**
 - **Author**: the AgentAuth Community
 - **Organization**: Digital Supply Institute (DSI)
 - **Category**: Standards Track
@@ -48,7 +48,7 @@ This example demonstrates a *beta demonstration* combination of both specificati
 
 ## 🎯 **Implementation Features**
 
-### **RFC-0111 AgentAuth 1.0 Framework**
+### **AAP-001 AgentAuth 1.0 Framework**
 
 #### **Power*Point (P*P) Architecture**
 - **PEP (Power Enforcement Point)**: Supply-side and demand-side enforcement
@@ -78,7 +78,7 @@ This example demonstrates a *beta demonstration* combination of both specificati
 - **Client Owner**: AI system ownership and delegation
 - **Owner Authorizer**: Statutory authority and verification
 
-### **RFC-0115 PoA-Definition Structure**
+### **AAP-002 PoA-Definition Structure**
 
 #### **Section 3.A: Parties**
 - **Principal**: Individual or Organization with full identity details
@@ -110,19 +110,19 @@ This example demonstrates a *beta demonstration* combination of both specificati
 
 ### **AI Governance Capabilities**
 - **Autonomy Levels**: Supervised, semi-autonomous, safety-critical modes
-- **Compliance Modes**: Strict RFC-0111, enterprise-grade, safety-critical
+- **Compliance Modes**: Strict AAP-001, enterprise-grade, safety-critical
 - **Capability Tracking**: Comprehensive AI capability documentation
 - **Request Types**: Transactions, decisions, actions, communications
 
 ## 🔒 **Security & Compliance (Conceptual Only)**
 
-### **RFC-0111 Security Feature Examples (Not Complete)**
+### **AAP-001 Security Feature Examples (Not Complete)**
 - **Centralized Authorization**: All AI authorization through AgentAuth protocol
 - **Exclusions Enforcement**: Mandatory prohibition of specified technologies
 - **PP Architecture**: Comprehensive governance through power points
 - **Audit Trails**: Complete tracking of authorization decisions
 
-### **RFC-0115 Security Feature Examples (Not Complete)**
+### **AAP-002 Security Feature Examples (Not Complete)**
 - **Quantum Resistance**: Future-proof cryptographic requirements
 - **Legal Framework**: Multi-jurisdiction support with proper authority verification
 - **Formal Requirements**: Notarization and witness support for legal validity
@@ -148,7 +148,7 @@ go run main.go
 
 ### **Expected Output (Illustrative)**
 ```
-🚀 Combined RFC-0111 & RFC-0115 Implementation Demo
+🚀 Combined AAP-001 & AAP-002 Implementation Demo
 ═══════════════════════════════════════════════════
 
 📋 Creating Combined RFC Configuration...
@@ -156,14 +156,14 @@ go run main.go
 🔍 Validating Combined RFC Configuration...
 ✅ Combined RFC configuration validated successfully
 
-🔒 RFC-0111 Exclusions Compliance:
+🔒 AAP-001 Exclusions Compliance:
   🚫 Web3/Blockchain: true (Required License: true)
   🚫 AI Operators: true (Required License: true)
   🚫 DNA Identities: true (Required License: true)
   🚫 Decentralized Auth: true (Required License: true)
   ⚖️ Enforcement Level: mandatory
 
-🏗️ RFC-0111 Power*Point Architecture:
+🏗️ AAP-001 Power*Point Architecture:
   🛡️ PEP (Power Enforcement Point):
     - Supply Side: client (active)
     - Demand Side: resource_server (active)
@@ -172,7 +172,7 @@ go run main.go
   🔧 PAP (Power Administration Point): owner_authorizer
   ✅ PVP (Power Verification Point): trust_service
 
-📄 RFC-0115 Power-of-Attorney Definition:
+📄 AAP-002 Power-of-Attorney Definition:
   👤 Principal: principal_org_id (organization)
     - Organization: Principal Organization (commercial_enterprise)
     - Register Entry: HRB 12345
@@ -263,11 +263,11 @@ This document and implementation are subject to the AgentAuth Community's Legal 
 
 **License**: Apache 2.0 (see LICENSE file)
 
-**Exclusions**: The mandatory exclusions defined in RFC-0111 Section 2 are subject to separate license conditions and are protected by copyright and patent law.
+**Exclusions**: The mandatory exclusions defined in AAP-001 Section 2 are subject to separate license conditions and are protected by copyright and patent law.
 
 ## 🤝 **Compliance Statement (Clarification)**
 
-This repository provides **illustrative coverage of selected RFC-0111 and RFC-0115 concepts**. It is **NOT an audited, complete, or production-compliant implementation**. Any appearance of completeness refers only to example data structures—not to legal, security, or operational assurances.
+This repository provides **illustrative coverage of selected AAP-001 and AAP-002 concepts**. It is **NOT an audited, complete, or production-compliant implementation**. Any appearance of completeness refers only to example data structures—not to legal, security, or operational assurances.
 - ✅ **Exclusions Enforced**: All mandatory exclusions properly implemented
 - ✅ **Standards Compliant**: OAuth 2.0, OpenID Connect, and MCP integration
 - ✅ **Future-Ready**: Quantum resistance and extensible architecture

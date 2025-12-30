@@ -294,7 +294,7 @@ func TestPOAIntegrityDigestMismatch(t *testing.T) {
 	poa := issueTestPOA("poa-digest", agentauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
 	digest, _, _ := agentauth_aap_001.CanonicalPOADigest(poa)
-	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest + "tamper", "poa_version": poa.Version, "token_version": "et_v1"}
+	claims := map[string]any{"sub": poa.Grantee, "iss": "AGENTAUTH-demo", "aud": "AGENTAUTH-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest + "tamper", "poa_version": poa.Version, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/demo/enforce", httptestBody(`{"action":"transaction:read","claims":{},"poa_id":"`+poa.ID+`"}`))
@@ -321,7 +321,7 @@ func TestPOAIntegrityVersionMismatch(t *testing.T) {
 	poa := issueTestPOA("poa-version", agentauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
 	digest, _, _ := agentauth_aap_001.CanonicalPOADigest(poa)
-	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest, "poa_version": poa.Version + 1, "token_version": "et_v1"}
+	claims := map[string]any{"sub": poa.Grantee, "iss": "AGENTAUTH-demo", "aud": "AGENTAUTH-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest, "poa_version": poa.Version + 1, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/demo/enforce", httptestBody(`{"action":"transaction:read","claims":{},"poa_id":"`+poa.ID+`"}`))
@@ -348,7 +348,7 @@ func TestPOAIntegritySuccess(t *testing.T) {
 	poa := issueTestPOA("poa-success-int", agentauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
 	digest, _, _ := agentauth_aap_001.CanonicalPOADigest(poa)
-	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(30 * time.Minute).Unix(), "poa_id": poa.ID, "poa_digest": digest, "poa_version": poa.Version, "token_version": "et_v1"}
+	claims := map[string]any{"sub": poa.Grantee, "iss": "AGENTAUTH-demo", "aud": "AGENTAUTH-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(30 * time.Minute).Unix(), "poa_id": poa.ID, "poa_digest": digest, "poa_version": poa.Version, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("POST", "/demo/enforce", httptestBody(`{"action":"transaction:read","claims":{},"poa_id":"`+poa.ID+`"}`))
@@ -374,7 +374,7 @@ func TestPOAIntegrityMetricsIncrement(t *testing.T) {
 	poa := issueTestPOA("poa-metrics", agentauth_aap_001.POAStatusActive, []string{"transaction:read"}, 300)
 	now := time.Now().UTC()
 	digest, _, _ := agentauth_aap_001.CanonicalPOADigest(poa)
-	claims := map[string]any{"sub": poa.Grantee, "iss": "gauth-demo", "aud": "gauth-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest + "x", "poa_version": poa.Version, "token_version": "et_v1"}
+	claims := map[string]any{"sub": poa.Grantee, "iss": "AGENTAUTH-demo", "aud": "AGENTAUTH-demo-api", "iat": now.Unix(), "nbf": now.Unix(), "exp": now.Add(time.Hour).Unix(), "poa_id": poa.ID, "poa_digest": digest + "x", "poa_version": poa.Version, "token_version": "et_v1"}
 	token := signHS256(claims, secret)
 	before := testutil.ToFloat64(poaIntegrityFailuresCounter.WithLabelValues("digest_mismatch"))
 	w := httptest.NewRecorder()

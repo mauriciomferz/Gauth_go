@@ -14,7 +14,7 @@ import (
 func TestExternalAnchorMetricsIsolatedRegistry(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP-001", Registry: reg})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm
@@ -38,11 +38,11 @@ func TestExternalAnchorMetricsIsolatedRegistry(t *testing.T) {
 		t.Fatalf("gather error: %v", err)
 	}
 	want := map[string]bool{
-		"gauth_aap001_external_anchor_latency_seconds": false,
-		"gauth_aap001_external_anchor_attempts_total":  false,
-		"gauth_aap001_external_anchor_failures_total":  false,
-		"gauth_aap001_external_anchor_age_seconds":     false,
-		"gauth_aap001_external_anchor_last_hash_len":   false,
+		"AGENTAUTH_aap001_external_anchor_latency_seconds": false,
+		"AGENTAUTH_aap001_external_anchor_attempts_total":  false,
+		"AGENTAUTH_aap001_external_anchor_failures_total":  false,
+		"AGENTAUTH_aap001_external_anchor_age_seconds":     false,
+		"AGENTAUTH_aap001_external_anchor_last_hash_len":   false,
 	}
 	for _, mf := range mfs {
 		name := mf.GetName()

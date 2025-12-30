@@ -15,7 +15,7 @@ func TestKMSMetricsEmission(t *testing.T) {
 	t.Setenv("AGENTAUTH_KMS_METRICS", "1")
 	// Re-enable metrics in case another test already initialized them with different state.
 	// (EnableKMSPrometheusMetrics is idempotent; safe to call.)
-	EnableKMSPrometheusMetrics("gauth", "crypto")
+	EnableKMSPrometheusMetrics("AGENTAUTH", "crypto")
 
 	kms, err := NewMockKMS()
 	if err != nil {
@@ -63,16 +63,16 @@ func TestKMSMetricsEmission(t *testing.T) {
 		return nil
 	}
 
-	if v := find("gauth_crypto_kms_active_signer_requests_total"); v == nil || *v == 0 {
+	if v := find("AGENTAUTH_crypto_kms_active_signer_requests_total"); v == nil || *v == 0 {
 		t.Fatalf("expected active signer counter >0, got %v", v)
 	}
-	if v := find("gauth_crypto_kms_rotate_total"); v == nil || *v == 0 {
+	if v := find("AGENTAUTH_crypto_kms_rotate_total"); v == nil || *v == 0 {
 		t.Fatalf("expected rotate counter >0, got %v", v)
 	}
-	if v := find("gauth_crypto_kms_list_keys_total"); v == nil || *v == 0 {
+	if v := find("AGENTAUTH_crypto_kms_list_keys_total"); v == nil || *v == 0 {
 		t.Fatalf("expected list keys counter >0, got %v", v)
 	}
-	if v := find("gauth_crypto_kms_operation_latency_seconds"); v == nil || *v == 0 {
+	if v := find("AGENTAUTH_crypto_kms_operation_latency_seconds"); v == nil || *v == 0 {
 		t.Fatalf("expected latency histogram sample count >0, got %v", v)
 	}
 

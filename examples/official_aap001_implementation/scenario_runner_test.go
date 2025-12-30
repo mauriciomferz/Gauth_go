@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/AGENTAUTH_aap_001"
 )
 
 func TestScenarioRunnerSuccessMinimal(t *testing.T) {
@@ -36,7 +36,7 @@ func TestScenarioRunnerMissingRevokePolicy(t *testing.T) {
 }
 
 func TestScenarioRunnerConfigMutationFailure(t *testing.T) {
-	_, err := runDemoInternal(scenarioParams{grantor: "cm@example.com", grantee: "cg@example.com", allowCreatePolicy: true, modifyConfig: func(cfg *gauth_aap_001.AAP001Config) { cfg.MaxDelegationDepth = 0 }})
+	_, err := runDemoInternal(scenarioParams{grantor: "cm@example.com", grantee: "cg@example.com", allowCreatePolicy: true, modifyConfig: func(cfg *AGENTAUTH_aap_001.AAP001Config) { cfg.MaxDelegationDepth = 0 }})
 	if err == nil {
 		t.Fatalf("expected config validation failure")
 	}

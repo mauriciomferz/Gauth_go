@@ -1,6 +1,6 @@
 // Package oidc - OpenID Connect PowerVerificationPoint Implementation
 // This file implements the PowerVerificationPoint interface for OIDC ID token verification
-// Integrates with RFC-0111 Subscription Flow Steps I, III, and VI
+// Integrates with AAP-001 Subscription Flow Steps I, III, and VI
 package oidc
 
 import (

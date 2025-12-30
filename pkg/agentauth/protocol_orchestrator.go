@@ -1,4 +1,4 @@
-// Package agentauth - RFC-0111 Protocol Orchestrator (Steps a-i)
+// Package agentauth - AAP-001 Protocol Orchestrator (Steps a-i)
 // This implements the REQUEST-SPECIFIC flow that connects all validation components
 package agentauth
 
@@ -10,7 +10,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
-// ProtocolOrchestrator manages the complete RFC-0111 request-specific flow (steps a-i)
+// ProtocolOrchestrator manages the complete AAP-001 request-specific flow (steps a-i)
 // This is the MISSING component that connects all validation functions
 type ProtocolOrchestrator struct {
 	extendedTokenService *ExtendedTokenService
@@ -22,7 +22,7 @@ type ProtocolOrchestrator struct {
 	complianceTracker    ComplianceTracker
 }
 
-// NewProtocolOrchestrator creates a new RFC-0111 protocol orchestrator
+// NewProtocolOrchestrator creates a new AAP-001 protocol orchestrator
 func NewProtocolOrchestrator(
 	extendedTokenService *ExtendedTokenService,
 	complianceValidator *ComplianceValidator,
@@ -133,7 +133,7 @@ type ComplianceStatus struct {
 	NextCheck   time.Time
 }
 
-// ExecuteRFCCompliantFlow executes the complete RFC-0111 request-specific flow (steps a-i)
+// ExecuteRFCCompliantFlow executes the complete AAP-001 request-specific flow (steps a-i)
 // This is the MAIN METHOD that was missing - it orchestrates all validation functions
 func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 	ctx context.Context,

@@ -310,7 +310,7 @@ async function executeWizardStep() {
     }
 }
 
-// RFC-0111 Subscription Steps
+// AAP-001 Subscription Steps
 async function executeStepI() {
     const response = await fetch('/api/v1/rfc0111/subscriptions', {
         method: 'POST',
@@ -611,8 +611,8 @@ async function executeStepVIII() {
         expiresAt: new Date(Date.now() + 24*60*60*1000).toISOString(),
         scope: wizardState.scope,
         authorizationChain: {
-            ownersAuthorizer: 'RFC-0111 Flow',
-            clientOwner: 'RFC-0111 Flow',
+            ownersAuthorizer: 'AAP-001 Flow',
+            clientOwner: 'AAP-001 Flow',
             client: wizardState.clientId
         }
     };

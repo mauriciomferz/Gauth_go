@@ -1,4 +1,4 @@
-// Package poa - RFC-0115 Section B.4 Complete Authorization Actions Taxonomy
+// Package poa - AAP-002 Section B.4 Complete Authorization Actions Taxonomy
 // This file provides comprehensive taxonomy completion including:
 // - Action categorization and risk assessment
 // - Compliance checking and validation

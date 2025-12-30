@@ -7,9 +7,9 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/pdp"
 )
 
-// AAP001Config holds the configuration for RFC-0111 components
+// AAP001Config holds the configuration for AAP-001 components
 type AAP001Config struct {
-	// Enabled controls whether RFC-0111 functionality is active
+	// Enabled controls whether AAP-001 functionality is active
 	Enabled bool
 
 	// UseMocks controls whether to use mock external services
@@ -32,7 +32,7 @@ type AAP001Config struct {
 	ComplianceTracker   ComplianceTracker
 }
 
-// AAP001Components holds initialized RFC-0111 components
+// AAP001Components holds initialized AAP-001 components
 type AAP001Components struct {
 	SubscriptionStore   SubscriptionStore
 	SubscriptionManager *SubscriptionFlowManager
@@ -45,11 +45,11 @@ type AAP001Components struct {
 	CommercialRegClient CommercialRegisterClient
 }
 
-// InitAAP001FromEnv initializes RFC-0111 components based on environment variables.
+// InitAAP001FromEnv initializes AAP-001 components based on environment variables.
 // This is a convenience function for web server integration.
 // Deprecated: Use internal/config.Load() and explicit initialization instead.
 // Environment variables:
-//   - AGENTAUTH_AAP001_ENABLED: Set to "1" to enable RFC-0111 functionality
+//   - AGENTAUTH_AAP001_ENABLED: Set to "1" to enable AAP-001 functionality
 //   - AGENTAUTH_AAP001_USE_MOCKS: Set to "1" to use mock external services (default)
 //
 // When enabled with mocks, this function creates:
@@ -59,7 +59,7 @@ type AAP001Components struct {
 //   - Subscription flow manager
 //   - Compliance tracker
 func InitAAP001FromEnv() (*AAP001Components, error) {
-	// Check if RFC-0111 is enabled
+	// Check if AAP-001 is enabled
 	if os.Getenv("AGENTAUTH_AAP001_ENABLED") != "1" {
 		return nil, nil
 	}
@@ -71,23 +71,23 @@ func InitAAP001FromEnv() (*AAP001Components, error) {
 	}
 
 	if !useMocks {
-		return nil, fmt.Errorf("RFC-0111: real external service implementations not yet available, set AGENTAUTH_AAP001_USE_MOCKS=1")
+		return nil, fmt.Errorf("AAP-001: real external service implementations not yet available, set AGENTAUTH_AAP001_USE_MOCKS=1")
 	}
 
 	return InitAAP001WithMocks()
 }
 
-// InitAAP001WithMocks initializes RFC-0111 components using mock external services.
+// InitAAP001WithMocks initializes AAP-001 components using mock external services.
 // This is suitable for development, testing, and demonstrations.
 func InitAAP001WithMocks() (*AAP001Components, error) {
 	// Import is in this file to avoid circular dependency with mocks package
 	// Instead, we'll use interface types and let callers provide mock implementations
 	// For now, this returns an error requiring explicit setup
-	return nil, fmt.Errorf("RFC-0111: use InitAAP001WithComponents to provide mock implementations")
+	return nil, fmt.Errorf("AAP-001: use InitAAP001WithComponents to provide mock implementations")
 }
 
 // createDefaultPDPEngine creates a PDP engine with default policies
-// This provides basic policy evaluation capability for RFC-0111 compliance
+// This provides basic policy evaluation capability for AAP-001 compliance
 func createDefaultPDPEngine() pdp.Engine {
 	// Create engine with deny-overrides combining strategy
 	// This means any deny decision will override allow decisions
@@ -97,7 +97,7 @@ func createDefaultPDPEngine() pdp.Engine {
 	// Enable optional features
 	engine.WithObligationFailureDenies(true)
 
-	// Add default policies for RFC-0111 compliance
+	// Add default policies for AAP-001 compliance
 	// Policy 1: Allow authenticated requests with valid authorization chains
 	engine.AddPolicy(pdp.Policy{
 		ID:      "AAP-001-allow-valid-chain",
@@ -112,7 +112,7 @@ func createDefaultPDPEngine() pdp.Engine {
 		},
 		Metadata: map[string]string{
 			"description": "Allow requests with valid authorization chains",
-			"aap":         "RFC-0111",
+			"aap":         "AAP-001",
 		},
 	})
 
@@ -130,14 +130,14 @@ func createDefaultPDPEngine() pdp.Engine {
 		},
 		Metadata: map[string]string{
 			"description": "Deny dangerous actions by default",
-			"aap":         "RFC-0111",
+			"aap":         "AAP-001",
 		},
 	})
 
 	return engine
 }
 
-// InitAAP001WithComponents initializes RFC-0111 using provided components.
+// InitAAP001WithComponents initializes AAP-001 using provided components.
 // This gives full control over which implementations to use (mock or real).
 func InitAAP001WithComponents(
 	pvpClient PowerVerificationPoint,
@@ -146,13 +146,13 @@ func InitAAP001WithComponents(
 ) (*AAP001Components, error) {
 
 	if pvpClient == nil {
-		return nil, fmt.Errorf("RFC-0111: pvpClient is required")
+		return nil, fmt.Errorf("AAP-001: pvpClient is required")
 	}
 	if pipClient == nil {
-		return nil, fmt.Errorf("RFC-0111: pipClient is required")
+		return nil, fmt.Errorf("AAP-001: pipClient is required")
 	}
 	if commercialRegClient == nil {
-		return nil, fmt.Errorf("RFC-0111: commercialRegClient is required")
+		return nil, fmt.Errorf("AAP-001: commercialRegClient is required")
 	}
 
 	// Create storage

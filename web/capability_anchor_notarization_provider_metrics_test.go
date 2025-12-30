@@ -20,7 +20,7 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Replace default memory metrics with Prometheus adapter to access provider-labeled methods.
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "cap_anchor"})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "cap_anchor"})
 	srv.metrics = pm
 	if srv.notarizer == nil {
 		t.Fatalf("expected notarizer initialized")

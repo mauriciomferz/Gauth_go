@@ -17,13 +17,13 @@ func TestCapabilityAnchorPrometheusIntegrityGauge(t *testing.T) {
 		t.Fatalf("unexpected status: %d", w.Code)
 	}
 	body := w.Body.String()
-	if !strings.Contains(body, "# HELP gauth_capability_anchor_notarization_receipts_integrity") {
+	if !strings.Contains(body, "# HELP agentauth_capability_anchor_notarization_receipts_integrity") {
 		t.Fatalf("expected HELP line for integrity gauge")
 	}
-	if !strings.Contains(body, "# TYPE gauth_capability_anchor_notarization_receipts_integrity gauge") {
+	if !strings.Contains(body, "# TYPE agentauth_capability_anchor_notarization_receipts_integrity gauge") {
 		t.Fatalf("expected TYPE line for integrity gauge")
 	}
-	if !strings.Contains(body, "gauth_capability_anchor_notarization_receipts_integrity") {
+	if !strings.Contains(body, "agentauth_capability_anchor_notarization_receipts_integrity") {
 		t.Fatalf("expected gauge value line in body")
 	}
 }

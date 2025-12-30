@@ -1,4 +1,4 @@
-# Official AAP-RFC-0115 PoA-Definition Implementation
+# Official AAP-AAP-002 PoA-Definition Implementation
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -55,14 +55,14 @@ go run main.go
 ```
 
 ### **Expected Output**
-✅ RFC-0115 exclusions validated (Web3, AI operators, DNA identities excluded)
-✅ PoA-Definition structure validated for RFC-0115 compliance
+✅ AAP-002 exclusions validated (Web3, AI operators, DNA identities excluded)
+✅ PoA-Definition structure validated for AAP-002 compliance
 ✅ Mandatory exclusions enforced (Section 2)
 ✅ Official AgentAuth Community gGmbH i.G. attribution
 
 ## 📊 **Compliance Features**
 
-### **✅ RFC-0115 Validation**
+### **✅ AAP-002 Validation**
 - **Exclusions Enforcement**: Validates prohibited integrations
 - **Structure Validation**: Ensures compliant PoA-Definition format
 - **Type Safety**: Strong typing for all RFC components

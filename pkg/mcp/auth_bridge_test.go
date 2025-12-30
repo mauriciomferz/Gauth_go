@@ -100,7 +100,7 @@ func createTestToken() *agentauth.ExtendedToken {
 		},
 
 		IssuedBy: &agentauth.AuthorizationServerInfo{
-			ServerID:  "gauth-server-1",
+			ServerID:  "AGENTAUTH-server-1",
 			ServerURL: "https://auth.example.com",
 			IssueTime: now,
 		},

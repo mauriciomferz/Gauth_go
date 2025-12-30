@@ -1638,7 +1638,7 @@ console.log('[PoA] poa-viz module loaded', { ts: new Date().toISOString(), expor
  * ============================================================================
  * AgentAuth Protocol Flow Patterns - 95% RFC Compliance
  * ============================================================================
- * These patterns visualize the RFC-0111 and RFC-0115 authorization flow stages
+ * These patterns visualize the AAP-001 and AAP-002 authorization flow stages
  * Enhanced with 30 substeps (from 19) across 6 phases:
  * - Subscription: 3 substeps
  * - Matching: 7 substeps (was 4) - Added: authorization_chain, commercial_register, formal_requirements
@@ -1677,7 +1677,7 @@ function generateProtocolSubscription() {
  */
 function generateProtocolMatching() {
     const nodes = [
-        { id: 'poa-def', label: 'PoA Definition (RFC-0115)', type: 'root', status: 'active', position: { x: 0, y: 4, z: 0 }, metadata: { format: 'json', version: '1.0' } },
+        { id: 'poa-def', label: 'PoA Definition (AAP-002)', type: 'root', status: 'active', position: { x: 0, y: 4, z: 0 }, metadata: { format: 'json', version: '1.0' } },
         { id: 'validate', label: '1. Validate PoA', type: 'delegation', status: 'active', position: { x: -5, y: 2, z: -2 }, metadata: { step: 'validation', schema_check: true } },
         { id: 'capabilities', label: '2. Check AI Capabilities', type: 'delegation', status: 'active', position: { x: -3, y: 2, z: -2 }, metadata: { step: 'capabilities', ai_level: 'advanced' } },
         { id: 'jurisdiction', label: '3. Verify Jurisdiction', type: 'delegation', status: 'active', position: { x: -1, y: 2, z: -2 }, metadata: { step: 'jurisdiction', region: 'EU', gdpr: true } },
@@ -1802,7 +1802,7 @@ function generateProtocolVerification() {
 }
 
 /**
- * Complete Protocol Flow - Full RFC-0111 + RFC-0115 end-to-end flow
+ * Complete Protocol Flow - Full AAP-001 + AAP-002 end-to-end flow
  * 95% RFC Compliant - 30 substeps total across 6 phases
  */
 function generateProtocolFull() {
@@ -1812,7 +1812,7 @@ function generateProtocolFull() {
         { id: 'subscription', label: 'Subscription (3 steps)', type: 'delegation', status: 'active', position: { x: -6, y: 4, z: -2 }, metadata: { phase: 'subscription', icon: '📝' } },
         
         // Matching Phase (7 substeps - was 4) ✨
-        { id: 'poa-def', label: 'PoA Definition', type: 'root', status: 'active', position: { x: -4, y: 4, z: -4 }, metadata: { phase: 'matching', format: 'rfc-0115' } },
+        { id: 'poa-def', label: 'PoA Definition', type: 'root', status: 'active', position: { x: -4, y: 4, z: -4 }, metadata: { phase: 'matching', format: 'AAP-002' } },
         { id: 'matching', label: 'Matching (7 steps) ✨', type: 'delegation', status: 'active', position: { x: -2, y: 4, z: -6 }, metadata: { phase: 'matching', icon: '🔍', substeps: 7, enhanced: true } },
         
         // Request Phase (7 substeps - was 4) ✨

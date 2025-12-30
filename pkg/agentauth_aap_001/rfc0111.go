@@ -1089,8 +1089,8 @@ type TokenVerificationResult struct {
 // 4. If POA has a signature: verify digest, locate public key, verify signature.
 // Returns a rich result struct and possible RFC error (expired, revoked, integrity_failure, unauthorized, etc.).
 //
-//nolint:gocyclo // RFC-0111 token verification with delegation chain validation
-//nolint:gocyclo // RFC-0111 token verification with delegation chain validation
+//nolint:gocyclo // AAP-001 token verification with delegation chain validation
+//nolint:gocyclo // AAP-001 token verification with delegation chain validation
 func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVerificationResult, error) {
 	if tokenString == "" {
 		return nil, aap.New(aap.ErrInvalidRequest, "empty token")

@@ -21,7 +21,7 @@ go run auth_server.go
 ```
 
 **Features:**
-- Creates Extended Tokens with comprehensive RFC-0111 fields
+- Creates Extended Tokens with comprehensive AAP-001 fields
 - Encrypts tokens using RSA-OAEP-256 + A256GCM
 - Outputs JWE token for transmission to resource server
 
@@ -128,5 +128,5 @@ openssl rsa -in private.pem -pubout -out public.pem
 
 - [RFC 7516 - JSON Web Encryption (JWE)](https://tools.ietf.org/html/rfc7516)
 - [RFC 7518 - JSON Web Algorithms (JWA)](https://tools.ietf.org/html/rfc7518)
-- [AAP RFC-0111 - AgentAuth 1.0 Specification](../../RFC-0111.md)
+- [AAP AAP-001 - AgentAuth 1.0 Specification](../../AAP-001.md)
 - [JWE Phase 1 Completion Report](../../JWE_PHASE1_COMPLETION_REPORT.md)

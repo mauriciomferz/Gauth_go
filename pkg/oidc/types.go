@@ -1,5 +1,5 @@
 // Package oidc implements OpenID Connect integration for AgentAuth
-// RFC-0111 Building Block: OpenID Connect as identity verification mechanism
+// AAP-001 Building Block: OpenID Connect as identity verification mechanism
 package oidc
 
 import (

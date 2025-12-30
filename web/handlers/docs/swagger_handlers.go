@@ -203,7 +203,7 @@ func DocsLandingHandler(c *gin.Context) {
 <body>
     <div class="container">
         <h1>🔐 AgentAuth API Documentation</h1>
-        <p class="subtitle">OAuth 2.0 Authorization Server with RFC-0111 Compliance</p>
+        <p class="subtitle">OAuth 2.0 Authorization Server with AAP-001 Compliance</p>
         <div class="version-badge">v1.0.0-beta</div>
         
         <div class="cards">
@@ -229,7 +229,7 @@ func DocsLandingHandler(c *gin.Context) {
         <div class="features">
             <h2>Key Features</h2>
             <ul>
-                <li>RFC-0111 Subscription Flow</li>
+                <li>AAP-001 Subscription Flow</li>
                 <li>Power of Attorney Management</li>
                 <li>Policy-Based Authorization</li>
                 <li>Identity Verification (PVP)</li>

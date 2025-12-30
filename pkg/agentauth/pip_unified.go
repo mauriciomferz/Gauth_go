@@ -1,5 +1,5 @@
 // Package agentauth provides a unified Power Information Point (PIP) interface
-// RFC-0111 Section 4 - Power Information Point implementation
+// AAP-001 Section 4 - Power Information Point implementation
 package agentauth
 
 import (

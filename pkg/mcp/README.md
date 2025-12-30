@@ -8,7 +8,7 @@ owners: [system]
 
 # MCP (Model Context Protocol) Integration
 
-This package implements the Model Context Protocol (MCP) integration for AgentAuth 1.0, satisfying RFC-0111 building block requirements.
+This package implements the Model Context Protocol (MCP) integration for AgentAuth 1.0, satisfying AAP-001 building block requirements.
 
 ## Overview
 
@@ -290,7 +290,7 @@ go test -v ./pkg/gagent/... -run MCP
 - ✅ Performance: 2.3M audit entries/sec
 - ✅ Coverage: 35.2% (includes new untested transport code)
 
-## RFC-0111 Compliance
+## AAP-001 Compliance
 
 **MCP Building Block Progress**:
 - **Phase 1 (Core)**: 30% → Core MCP client functional
@@ -299,7 +299,7 @@ go test -v ./pkg/gagent/... -run MCP
 - **Phase 3 (E2E)**: 85% → Production-ready with testing
 - **Phase 4 (Hardening)**: **95%** → Enterprise-grade ✅
 
-**Overall AgentAuth RFC-0111 Compliance Impact**:
+**Overall AgentAuth AAP-001 Compliance Impact**:
 - Before MCP: 68% compliant (with OIDC Phases 1-2)
 - After MCP Phase 4: **≈75-80% compliant** (+7-12% increase)
 
@@ -344,7 +344,7 @@ MCP integration follows the standard AgentAuth development workflow:
 
 ## References
 
-- RFC-0111 (AgentAuth 1.0) - Section 1: Scope (Building Blocks)
+- AAP-001 (AgentAuth 1.0) - Section 1: Scope (Building Blocks)
 - Model Context Protocol Specification: https://modelcontextprotocol.io/
 - JSON-RPC 2.0 Specification: https://www.jsonrpc.org/specification
 - MCP TypeScript SDK: https://github.com/modelcontextprotocol/typescript-sdk
@@ -370,4 +370,4 @@ Part of the AgentAuth 1.0 implementation - same license as parent project.
 **Document Status**: Phases 1-4 Complete ✅ **PRODUCTION READY**  
 **Last Updated**: November 16, 2025  
 **Total Implementation**: 5,745 lines across 4 phases  
-**RFC-0111 MCP Compliance**: 95%
+**AAP-001 MCP Compliance**: 95%

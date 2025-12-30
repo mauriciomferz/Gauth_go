@@ -19,7 +19,7 @@ func TestCapabilityAnchorPrometheusVerifyParam(t *testing.T) {
 		t.Fatalf("initial scrape status %d", w1.Code)
 	}
 	body1 := w1.Body.String()
-	if !strings.Contains(body1, "gauth_capability_anchor_notarization_receipts_integrity") {
+	if !strings.Contains(body1, "agentauth_capability_anchor_notarization_receipts_integrity") {
 		t.Fatalf("expected integrity gauge line in first scrape")
 	}
 	// Capture timestamp before verify trigger
@@ -31,11 +31,11 @@ func TestCapabilityAnchorPrometheusVerifyParam(t *testing.T) {
 		t.Fatalf("verify scrape status %d", w3.Code)
 	}
 	body3 := w3.Body.String()
-	if !strings.Contains(body3, "gauth_capability_anchor_notarization_receipts_integrity") {
+	if !strings.Contains(body3, "agentauth_capability_anchor_notarization_receipts_integrity") {
 		t.Fatalf("expected integrity gauge line after verify")
 	}
 	// We cannot guarantee mismatch unless chain semantics known; ensure HELP line present and gauge value line present.
-	if !strings.Contains(body3, "# HELP gauth_capability_anchor_notarization_receipts_integrity") {
+	if !strings.Contains(body3, "# HELP agentauth_capability_anchor_notarization_receipts_integrity") {
 		t.Fatalf("missing HELP after verify")
 	}
 	t2 := srv.LastReceiptVerifyTime()

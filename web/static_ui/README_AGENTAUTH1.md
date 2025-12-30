@@ -8,7 +8,7 @@ owners: [system]
 
 # AgentAuth 1.0 Modern Dashboard
 
-**A production-ready web interface for RFC-0111 & RFC-0115 compliant authorization testing and demonstration.**
+**A production-ready web interface for AAP-001 & AAP-002 compliant authorization testing and demonstration.**
 
 ## 🚀 Quick Start
 
@@ -39,12 +39,12 @@ http://localhost:8080/agentauth1.html
 
 ### Overview Tab
 - **System Statistics**: Real-time metrics showing 91 passing tests, 19 benchmarks, 72.6% coverage
-- **RFC Compliance**: Visual indicators for RFC-0111 and RFC-0115 compliance
+- **RFC Compliance**: Visual indicators for AAP-001 and AAP-002 compliance
 - **System Components**: Status of all AgentAuth 1.0 components
 - **Quick Start Guide**: Step-by-step instructions for new users
 
 ### Extended Tokens Tab
-- **Create Tokens**: Interactive form to create RFC-0111 compliant extended tokens
+- **Create Tokens**: Interactive form to create AAP-001 compliant extended tokens
   - 3-level authorization chain (Owner's Authorizer → Client Owner → Client)
   - Configurable scope and expiration
   - Commercial register integration
@@ -73,7 +73,7 @@ http://localhost:8080/agentauth1.html
 - **Performance Benchmarks**: Sub-microsecond authorization decisions (224.5 ns/op)
 
 ### Power of Attorney (PoA) Tab
-- **Create PoA**: Generate RFC-0115 compliant Power of Attorney delegations
+- **Create PoA**: Generate AAP-002 compliant Power of Attorney delegations
   - Representative types (Managing Director, Prokura, Legal Counsel)
   - Action scopes with granular permissions
   - Geographic restrictions
@@ -184,7 +184,7 @@ go test -bench=. -benchmem ./pkg/...
 
 ## 📖 RFC Compliance
 
-### RFC-0111 (AgentAuth 1.0)
+### AAP-001 (AgentAuth 1.0)
 ✅ **100% Compliant**
 - §3: Extended Token Structure
 - §3: 3-Level Authorization Chain
@@ -192,7 +192,7 @@ go test -bench=. -benchmem ./pkg/...
 - §V: PIP Data Consolidation
 - §VII: PVP Identity Verification
 
-### RFC-0115 (Power of Attorney)
+### AAP-002 (Power of Attorney)
 ✅ **100% Compliant**
 - §A.2: Representative Types
 - §B.4: Action Types (Transactions, Decisions, Physical, Non-Physical)
@@ -272,7 +272,7 @@ For production deployment, implement these endpoints in the Go backend:
 - Debugging authorization chains
 
 ### Demonstration & Training
-- Interactive RFC-0111/0115 demonstrations
+- Interactive AAP-001/0115 demonstrations
 - Training sessions for developers
 - Stakeholder presentations
 - Compliance audits
@@ -304,7 +304,7 @@ MIT License - See [LICENSE](../LICENSE) file for details
 ## 🙏 Acknowledgments
 
 This dashboard demonstrates the power of:
-- RFC-0111/0115 compliant authorization
+- AAP-001/0115 compliant authorization
 - Modern web technologies
 - Production-ready performance
 - Comprehensive testing

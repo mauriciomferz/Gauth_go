@@ -51,18 +51,18 @@ func TestValidatorMetricsPrometheus(t *testing.T) {
 	body := w.Body.String()
 	// Core metrics to assert presence
 	for _, metric := range []string{
-		"gauth_validator_validation_attempts_total",
-		"gauth_validator_validation_successes_total",
-		"gauth_validator_validation_failures_total",
-		"gauth_validator_entity_validation_attempts_total",
-		"gauth_validator_entity_validation_failures_total",
-		"gauth_validator_value_limit_checks_total",
-		"gauth_validator_value_limit_violations_total",
-		"gauth_validator_approval_checks_total",
-		"gauth_validator_approval_failures_total",
-		"gauth_validator_board_approval_checks_total",
-		"gauth_validator_total_validation_latency_ms",
-		"gauth_validator_last_validation_latency_ms",
+		"AGENTAUTH_validator_validation_attempts_total",
+		"AGENTAUTH_validator_validation_successes_total",
+		"AGENTAUTH_validator_validation_failures_total",
+		"AGENTAUTH_validator_entity_validation_attempts_total",
+		"AGENTAUTH_validator_entity_validation_failures_total",
+		"AGENTAUTH_validator_value_limit_checks_total",
+		"AGENTAUTH_validator_value_limit_violations_total",
+		"AGENTAUTH_validator_approval_checks_total",
+		"AGENTAUTH_validator_approval_failures_total",
+		"AGENTAUTH_validator_board_approval_checks_total",
+		"AGENTAUTH_validator_total_validation_latency_ms",
+		"AGENTAUTH_validator_last_validation_latency_ms",
 	} {
 		if !strings.Contains(body, metric) {
 			t.Fatalf("expected metric %s in body", metric)

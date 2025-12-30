@@ -25,7 +25,7 @@ func (m *mockAuthorizationChecker) GetPrincipalPermissions(ctx context.Context, 
 }
 
 // TestValidateScopeAuthorization_PrivilegeEscalation tests the core security fix
-// for CVE-2025-GAUTH-005 (Weak Delegation Constraints).
+// for CVE-2025-AGENTAUTH-005 (Weak Delegation Constraints).
 func TestValidateScopeAuthorization_PrivilegeEscalation(t *testing.T) {
 	ctx := context.Background()
 

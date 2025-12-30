@@ -315,11 +315,11 @@ func TestGoogleProvider_MapClaims(t *testing.T) {
 		"hosted_domain": "example.com",
 	}
 
-	for gauthClaim, expectedValue := range expectedMappings {
-		if value, exists := mapped[gauthClaim]; !exists {
-			t.Errorf("MapClaims() missing mapped claim %q", gauthClaim)
+	for AGENTAUTHClaim, expectedValue := range expectedMappings {
+		if value, exists := mapped[AGENTAUTHClaim]; !exists {
+			t.Errorf("MapClaims() missing mapped claim %q", AGENTAUTHClaim)
 		} else if value != expectedValue {
-			t.Errorf("MapClaims() %q = %v, want %v", gauthClaim, value, expectedValue)
+			t.Errorf("MapClaims() %q = %v, want %v", AGENTAUTHClaim, value, expectedValue)
 		}
 	}
 

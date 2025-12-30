@@ -244,8 +244,8 @@ func TestDiscoveryService_SupportsScope(t *testing.T) {
 			want:  true,
 		},
 		{
-			name:  "Supports gauth:owner",
-			scope: "gauth:owner",
+			name:  "Supports AGENTAUTH:owner",
+			scope: "AGENTAUTH:owner",
 			want:  true,
 		},
 		{
@@ -269,8 +269,8 @@ func TestDiscoveryService_AgentAuthExtensions(t *testing.T) {
 	config := service.GetConfiguration()
 
 	// Verify AgentAuth-specific scopes
-	gauthScopes := []string{"gauth:owner", "gauth:client", "gauth:resource", "gauth:legal_entity"}
-	for _, scope := range gauthScopes {
+	AGENTAUTHScopes := []string{"AGENTAUTH:owner", "AGENTAUTH:client", "AGENTAUTH:resource", "AGENTAUTH:legal_entity"}
+	for _, scope := range AGENTAUTHScopes {
 		found := false
 		for _, supported := range config.ScopesSupported {
 			if supported == scope {
@@ -284,8 +284,8 @@ func TestDiscoveryService_AgentAuthExtensions(t *testing.T) {
 	}
 
 	// Verify AgentAuth-specific claims
-	gauthClaims := []string{"entity_type", "entity_id", "legal_entity_name", "jurisdiction"}
-	for _, claim := range gauthClaims {
+	AGENTAUTHClaims := []string{"entity_type", "entity_id", "legal_entity_name", "jurisdiction"}
+	for _, claim := range AGENTAUTHClaims {
 		found := false
 		for _, supported := range config.ClaimsSupported {
 			if supported == claim {

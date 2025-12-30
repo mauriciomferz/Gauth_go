@@ -8,14 +8,14 @@ import (
 )
 
 func TestNewJSONMetricsExporter(t *testing.T) {
-	exporter := NewJSONMetricsExporter("gauth-test", "1.0.0", "test-host")
+	exporter := NewJSONMetricsExporter("AGENTAUTH-test", "1.0.0", "test-host")
 
 	if exporter == nil {
 		t.Fatal("Expected non-nil exporter")
 	}
 
-	if exporter.metadata.ServiceName != "gauth-test" {
-		t.Errorf("Expected service name 'gauth-test', got '%s'", exporter.metadata.ServiceName)
+	if exporter.metadata.ServiceName != "AGENTAUTH-test" {
+		t.Errorf("Expected service name 'AGENTAUTH-test', got '%s'", exporter.metadata.ServiceName)
 	}
 
 	if exporter.metadata.ServiceVersion != "1.0.0" {
@@ -109,7 +109,7 @@ func TestRecordHistogram(t *testing.T) {
 }
 
 func TestExportJSON(t *testing.T) {
-	exporter := NewJSONMetricsExporter("gauth", "1.0.0", "localhost")
+	exporter := NewJSONMetricsExporter("AGENTAUTH", "1.0.0", "localhost")
 
 	// Record some metrics
 	exporter.RecordCounter("requests_total", 100, nil)
@@ -130,8 +130,8 @@ func TestExportJSON(t *testing.T) {
 	}
 
 	// Verify metadata
-	if response.Metadata.ServiceName != "gauth" {
-		t.Errorf("Expected service name 'gauth', got '%s'", response.Metadata.ServiceName)
+	if response.Metadata.ServiceName != "AGENTAUTH" {
+		t.Errorf("Expected service name 'AGENTAUTH', got '%s'", response.Metadata.ServiceName)
 	}
 
 	// Verify metrics count
@@ -151,7 +151,7 @@ func TestExportJSON(t *testing.T) {
 }
 
 func TestExportJSONCompact(t *testing.T) {
-	exporter := NewJSONMetricsExporter("gauth", "1.0.0", "localhost")
+	exporter := NewJSONMetricsExporter("AGENTAUTH", "1.0.0", "localhost")
 
 	exporter.RecordCounter("test_counter", 1, nil)
 
@@ -361,7 +361,7 @@ func TestConcurrentAccess(t *testing.T) {
 }
 
 func TestJSONMetricsResponseStructure(t *testing.T) {
-	exporter := NewJSONMetricsExporter("gauth", "1.0.0", "localhost")
+	exporter := NewJSONMetricsExporter("AGENTAUTH", "1.0.0", "localhost")
 
 	// Record various metric types
 	exporter.RecordCounter("auth_decisions_total", 1000, map[string]string{"result": "allow"})

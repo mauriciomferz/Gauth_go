@@ -215,7 +215,7 @@ func (v *simpleTokenValidator) ValidateExtendedToken(ctx context.Context, token 
 	return result.ExtendedToken, nil
 }
 
-// SimplePDP is a PDP implementation with PAP integration for RFC-0111 compliance
+// SimplePDP is a PDP implementation with PAP integration for AAP-001 compliance
 // It provides policy-based authorization decisions with centralized policy management
 type SimplePDP struct {
 	pap                    *PowerAdministrationPoint

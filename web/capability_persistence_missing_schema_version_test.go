@@ -23,7 +23,7 @@ func TestCapabilityPersistenceMissingSchemaVersion(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 
 	// Confirm initial load succeeded (source should be file, schema version present)
-	disc1 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	disc1 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	if disc1.Code != 200 {
 		t.Fatalf("discovery1 status=%d", disc1.Code)
 	}
@@ -48,7 +48,7 @@ func TestCapabilityPersistenceMissingSchemaVersion(t *testing.T) {
 	}
 
 	// Discovery should still reflect previous schema_version and capability
-	disc2 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
+	disc2 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
 	if disc2.Code != 200 {
 		t.Fatalf("discovery2 status=%d", disc2.Code)
 	}

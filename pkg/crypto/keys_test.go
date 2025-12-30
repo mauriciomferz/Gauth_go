@@ -8,7 +8,7 @@ import (
 
 func TestKeyArchivalAndRetrieval(t *testing.T) {
 	// Create temp file for persistence
-	f, err := os.CreateTemp("", "gauth-keys-*.json")
+	f, err := os.CreateTemp("", "AGENTAUTH-keys-*.json")
 	if err != nil {
 		t.Fatal(err)
 	}

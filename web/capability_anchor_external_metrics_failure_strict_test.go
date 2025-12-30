@@ -19,7 +19,7 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP-001", Registry: reg})
 	// Construct server with provided metrics adapter so initial attempted (and failing) anchor uses Prometheus.
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })
@@ -48,14 +48,14 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 		}
 		return nil
 	}
-	attempts := find("gauth_aap001_external_anchor_attempts_total")
+	attempts := find("AGENTAUTH_aap001_external_anchor_attempts_total")
 	if attempts == nil || len(attempts.Metric) == 0 || attempts.Metric[0].Counter == nil {
 		t.Fatalf("attempts counter missing")
 	}
 	if attempts.Metric[0].Counter.GetValue() < 1 {
 		t.Fatalf("attempts counter expected >=1")
 	}
-	failures := find("gauth_aap001_external_anchor_failures_total")
+	failures := find("AGENTAUTH_aap001_external_anchor_failures_total")
 	if failures == nil || len(failures.Metric) == 0 || failures.Metric[0].Counter == nil {
 		t.Fatalf("failures counter missing")
 	}
@@ -63,7 +63,7 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 		t.Fatalf("failures counter expected >=1")
 	}
 	// Provider-labeled failures
-	failuresProv := find("gauth_aap001_external_anchor_failures_provider_total")
+	failuresProv := find("AGENTAUTH_aap001_external_anchor_failures_provider_total")
 	if failuresProv == nil {
 		t.Fatalf("provider failures vec missing")
 	}
@@ -82,14 +82,14 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 		t.Fatalf("provider tsa-stub failures metric not found")
 	}
 	// Age gauge should be zero (no success). Hash len gauge should be zero.
-	age := find("gauth_aap001_external_anchor_age_seconds")
+	age := find("AGENTAUTH_aap001_external_anchor_age_seconds")
 	if age == nil || len(age.Metric) == 0 || age.Metric[0].Gauge == nil {
 		t.Fatalf("age gauge missing")
 	}
 	if age.Metric[0].Gauge.GetValue() != 0 {
 		t.Fatalf("expected age gauge 0 for no success got %f", age.Metric[0].Gauge.GetValue())
 	}
-	hlen := find("gauth_aap001_external_anchor_last_hash_len")
+	hlen := find("AGENTAUTH_aap001_external_anchor_last_hash_len")
 	if hlen == nil || len(hlen.Metric) == 0 || hlen.Metric[0].Gauge == nil {
 		t.Fatalf("hash len gauge missing")
 	}

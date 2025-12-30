@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates a professional implementation of RFC-0111 and RFC-0115 in the AgentAuth 1.0 framework. It covers:
+This example demonstrates a professional implementation of AAP-001 and AAP-002 in the AgentAuth 1.0 framework. It covers:
 
 - Power-of-Attorney authorization for AI agents (AgentAuth-RFC-001)
 - Advanced delegation and attestation (AgentAuth-RFC-002)

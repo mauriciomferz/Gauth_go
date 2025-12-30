@@ -29,7 +29,7 @@ func TestPoADefinition_CompleteValidation(t *testing.T) {
 					RegistrationInfo: &RegistrationInfo{
 						RegisteredName:        "AI Operations GmbH",
 						RegistrationNumber:    "HRB67890",
-						RegisteringAuthority:  "Amtsgericht München",
+						RegisteringAuthority:  "Central Registry",
 						RegistrationDate:      "2023-01-15",
 						Jurisdiction:          "DE",
 						BusinessType:          "GmbH",
@@ -228,7 +228,7 @@ func TestRepresentative_Validation(t *testing.T) {
 			RegistrationInfo: &RegistrationInfo{
 				RegisteredName:        "AI Operator GmbH",
 				RegistrationNumber:    "HRB12345",
-				RegisteringAuthority:  "Amtsgericht Berlin",
+				RegisteringAuthority:  "District Registry",
 				RegistrationDate:      "2023-06-01",
 				Jurisdiction:          "DE",
 				BusinessType:          "GmbH",

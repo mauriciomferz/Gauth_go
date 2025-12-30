@@ -1,6 +1,6 @@
-// Package poa - RFC-0115 Section C.2 Power Limitations
+// Package poa - AAP-002 Section C.2 Power Limitations
 // This implements power limit enforcement for AI authorization
-// as required by RFC-0115 Section C.2 (Power Limits)
+// as required by AAP-002 Section C.2 (Power Limits)
 package poa
 
 import (
@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// PowerLimitSet represents comprehensive power limitations per RFC-0115 Section C.2
+// PowerLimitSet represents comprehensive power limitations per AAP-002 Section C.2
 type PowerLimitSet struct {
 	ModelLimits         *ModelLimits         `json:"model_limits,omitempty"`
 	BehavioralLimits    *BehavioralLimits    `json:"behavioral_limits,omitempty"`
@@ -20,7 +20,7 @@ type PowerLimitSet struct {
 	ResourceLimits      *ResourceLimits      `json:"resource_limits,omitempty"`
 }
 
-// ModelLimits restricts AI model characteristics per RFC-0115 Section C.2.1
+// ModelLimits restricts AI model characteristics per AAP-002 Section C.2.1
 type ModelLimits struct {
 	// MaxParameters restricts model size
 	MaxParameters int64 `json:"max_parameters,omitempty"`
@@ -50,7 +50,7 @@ type ModelLimits struct {
 	ProhibitedModalities []string `json:"prohibited_modalities,omitempty"`
 }
 
-// BehavioralLimits restricts AI behavior per RFC-0115 Section C.2.2
+// BehavioralLimits restricts AI behavior per AAP-002 Section C.2.2
 type BehavioralLimits struct {
 	// ProhibitedActions lists explicitly forbidden actions
 	ProhibitedActions []string `json:"prohibited_actions"`
@@ -98,7 +98,7 @@ type EscalationPolicy struct {
 	Required         bool     `json:"required"`          // Whether escalation is required vs. advisory
 }
 
-// OutcomeLimitations restricts AI output characteristics per RFC-0115 Section C.2.3
+// OutcomeLimitations restricts AI output characteristics per AAP-002 Section C.2.3
 type OutcomeLimitations struct {
 	// MinAccuracyThreshold requires minimum accuracy
 	MinAccuracyThreshold float64 `json:"min_accuracy_threshold,omitempty"`
@@ -128,7 +128,7 @@ type OutcomeLimitations struct {
 	MaxUncertainty float64 `json:"max_uncertainty,omitempty"`
 }
 
-// InteractionBoundary restricts AI interaction scope per RFC-0115 Section C.2.4
+// InteractionBoundary restricts AI interaction scope per AAP-002 Section C.2.4
 type InteractionBoundary struct {
 	// AllowedDataSources restricts data access
 	AllowedDataSources []string `json:"allowed_data_sources,omitempty"`
@@ -158,7 +158,7 @@ type InteractionBoundary struct {
 	DataRetentionPolicyDays int `json:"data_retention_policy_days,omitempty"`
 }
 
-// ToolLimitation restricts tool/API usage per RFC-0115 Section C.2.5
+// ToolLimitation restricts tool/API usage per AAP-002 Section C.2.5
 type ToolLimitation struct {
 	// AllowedAPIs lists permitted APIs
 	AllowedAPIs []string `json:"allowed_apis,omitempty"`

@@ -1,4 +1,4 @@
-// Package agentauth - RFC-0111 Subscription Flow (Steps I-VIII)
+// Package agentauth - AAP-001 Subscription Flow (Steps I-VIII)
 // This implements the one-off enrollment process that was MISSING from the implementation
 package agentauth
 
@@ -35,7 +35,7 @@ type IdentityProofResult struct {
 	FailureReason string
 }
 
-// SubscriptionFlowManager manages RFC-0111 Steps I-VIII (ONE-OFF SUBSCRIPTION)
+// SubscriptionFlowManager manages AAP-001 Steps I-VIII (ONE-OFF SUBSCRIPTION)
 type SubscriptionFlowManager struct {
 	pvpClient           PowerVerificationPoint
 	pipClient           PIPClient
@@ -59,7 +59,7 @@ const (
 	SubscriptionStatusFailed              SubscriptionStatus = "failed"
 )
 
-// Subscription represents a complete RFC-0111 subscription
+// Subscription represents a complete AAP-001 subscription
 type Subscription struct {
 	ID        string
 	Status    SubscriptionStatus
@@ -145,7 +145,7 @@ func NewSubscriptionFlowManager(
 	}
 }
 
-// InitiateSubscription starts a new RFC-0111 subscription flow
+// InitiateSubscription starts a new AAP-001 subscription flow
 func (m *SubscriptionFlowManager) InitiateSubscription(ctx context.Context) (*Subscription, error) {
 	sub := &Subscription{
 		ID:        generateSubscriptionID(),
@@ -162,7 +162,7 @@ func (m *SubscriptionFlowManager) InitiateSubscription(ctx context.Context) (*Su
 }
 
 // ExecuteStepI performs Step I: Owner's Authorizer Identity Proof
-// RFC-0111: "The owner's authorizer, who is authorized to act on behalf of the client
+// AAP-001: "The owner's authorizer, who is authorized to act on behalf of the client
 // owner, proves their identity to the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepI(
 	ctx context.Context,
@@ -196,7 +196,7 @@ func (m *SubscriptionFlowManager) ExecuteStepI(
 }
 
 // ExecuteStepII performs Step II: Owner's Authorizer Authorization Proof
-// RFC-0111: "The owner's authorizer proves their authority to the authorization server,
+// AAP-001: "The owner's authorizer proves their authority to the authorization server,
 // e.g., via a commercial register entry"
 func (m *SubscriptionFlowManager) ExecuteStepII(
 	ctx context.Context,
@@ -262,7 +262,7 @@ func (m *SubscriptionFlowManager) ExecuteStepII(
 }
 
 // ExecuteStepIII performs Step III: Client Owner Identity Proof
-// RFC-0111: "The client owner (owner of the AI system) proves their identity
+// AAP-001: "The client owner (owner of the AI system) proves their identity
 // to the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepIII(
 	ctx context.Context,
@@ -302,7 +302,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIII(
 }
 
 // ExecuteStepIV performs Step IV: Client Owner Authorization Proof
-// RFC-0111: "The client owner is authorized by the owner's authorizer
+// AAP-001: "The client owner is authorized by the owner's authorizer
 // to register clients with the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepIV(
 	ctx context.Context,
@@ -355,7 +355,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIV(
 }
 
 // ExecuteStepV performs Step V: Client Authorization
-// RFC-0111: "The client owner authorizes a client (AI system) to act with the
+// AAP-001: "The client owner authorizes a client (AI system) to act with the
 // authorization server, including identity sharing and prompting"
 func (m *SubscriptionFlowManager) ExecuteStepV(
 	ctx context.Context,
@@ -428,7 +428,7 @@ func (m *SubscriptionFlowManager) ExecuteStepV(
 }
 
 // ExecuteStepVI performs Step VI: Resource Owner Identity Proof
-// RFC-0111: "The resource owner proves their identity to the authorization server"
+// AAP-001: "The resource owner proves their identity to the authorization server"
 func (m *SubscriptionFlowManager) ExecuteStepVI(
 	ctx context.Context,
 	subscriptionID string,
@@ -466,7 +466,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVI(
 }
 
 // ExecuteStepVII performs Step VII: Resource Owner Authorization Proof
-// RFC-0111: "The resource owner is authorized by the owner's authorizer
+// AAP-001: "The resource owner is authorized by the owner's authorizer
 // to control resources on the resource server"
 func (m *SubscriptionFlowManager) ExecuteStepVII(
 	ctx context.Context,
@@ -510,7 +510,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVII(
 }
 
 // ExecuteStepVIII performs Step VIII: Resource Server Authorization
-// RFC-0111: "The resource server is authorized to serve resources under the
+// AAP-001: "The resource server is authorized to serve resources under the
 // authorization server's governance"
 func (m *SubscriptionFlowManager) ExecuteStepVIII(
 	ctx context.Context,

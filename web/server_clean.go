@@ -1650,11 +1650,11 @@ func (s *BetaServer) routes() {
 	// Delegation create + revoke (capability enforced when AGENTAUTH_CAPABILITY_ENFORCE=1)
 	s.delegationHandler.RegisterRoutes(s.router, beta)
 
-	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by AGENTAUTH_AAP001_ENABLED=1)
+	// AAP-001 Subscription and Authorization Flow endpoints (optional, controlled by AGENTAUTH_AAP001_ENABLED=1)
 	if aap001Components, tokenStore, err := InitAAP001FromEnv(); err == nil && aap001Components != nil {
-		fmt.Fprintf(os.Stderr, "[RFC-0111] Enabled with mock external services\n")
+		fmt.Fprintf(os.Stderr, "[AAP-001] Enabled with mock external services\n")
 
-		// Create AgentAuth service with RFC-0111 compliance enabled
+		// Create AgentAuth service with AAP-001 compliance enabled
 		// Create ExtendedTokenService for protocol orchestrator
 		s.extendedTokenService = agentauth.NewExtendedTokenService(
 			aap001Components.AuthChainValidator,
@@ -1692,9 +1692,9 @@ func (s *BetaServer) routes() {
 			),
 		)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "[RFC-0111] Failed to create AgentAuth service: %v\n", err)
+			fmt.Fprintf(os.Stderr, "[AAP-001] Failed to create AgentAuth service: %v\n", err)
 		} else {
-			// Register all RFC-0111 endpoints
+			// Register all AAP-001 endpoints
 			s.RegisterAAP001Endpoints(
 				aap001Components.SubscriptionManager,
 				aap001Components.SubscriptionStore,
@@ -1706,42 +1706,42 @@ func (s *BetaServer) routes() {
 			// These endpoints expose the mock external services as HTTP APIs for UI integration
 			s.RegisterBetaExternalServiceEndpoints(aap001Components)
 
-			fmt.Fprintf(os.Stderr, "[RFC-0111] Endpoints registered:\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]   Subscription Flow (Steps I-VIII):\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions (Step I: Initiate)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-ii (Authorizer Auth Proof)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-iii (Client Owner Identity)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-iv (Client Owner Auth)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-v (Client Authorization)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-vi (Resource Owner Identity)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-vii (Resource Owner Auth)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/subscriptions/:id/step-viii (Resource Server Auth)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/aap-001/subscriptions/:id (Get subscription)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET  /api/v1/aap-001/subscriptions (List subscriptions)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]   Authorization Flow (Steps a-i):\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/authorize (Request token)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/token/validate (Validate token)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/token/introspect (Introspect token)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/aap-001/token/revoke (Revoke token)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]   Beta External Service APIs:\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]   Beta Power of Attorney APIs:\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa (Create PoA)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET    /api/v1/beta/poa/:id (Get PoA)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     GET    /api/v1/beta/poa (List PoAs)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     PUT    /api/v1/beta/poa/:id (Update PoA)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     DELETE /api/v1/beta/poa/:id (Revoke PoA)\n")
-			fmt.Fprintf(os.Stderr, "[RFC-0111]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001] Endpoints registered:\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]   Subscription Flow (Steps I-VIII):\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions (Step I: Initiate)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-ii (Authorizer Auth Proof)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-iii (Client Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-iv (Client Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-v (Client Authorization)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-vi (Resource Owner Identity)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-vii (Resource Owner Auth)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/subscriptions/:id/step-viii (Resource Server Auth)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     GET  /api/v1/aap-001/subscriptions/:id (Get subscription)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     GET  /api/v1/aap-001/subscriptions (List subscriptions)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]   Authorization Flow (Steps a-i):\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/authorize (Request token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/token/validate (Validate token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/token/introspect (Introspect token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/aap-001/token/revoke (Revoke token)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]   Beta External Service APIs:\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]   Beta Power of Attorney APIs:\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST   /api/v1/beta/poa (Create PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     GET    /api/v1/beta/poa/:id (Get PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     GET    /api/v1/beta/poa (List PoAs)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     PUT    /api/v1/beta/poa/:id (Update PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     DELETE /api/v1/beta/poa/:id (Revoke PoA)\n")
+			fmt.Fprintf(os.Stderr, "[AAP-001]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)\n")
 		}
 
 		// Initialize AgentAuth+ management API endpoints if enabled
 		s.InitializeAgentAuthPlusEndpoints()
 	} else if err != nil {
-		fmt.Fprintf(os.Stderr, "[RFC-0111] Initialization failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "[AAP-001] Initialization failed: %v\n", err)
 	}
-	// End RFC-0111 initialization
+	// End AAP-001 initialization
 
 	// Evidence hash attachment (beta forensic feature)
 	s.router.POST("/api/v1/beta/poa/:id/evidence", func(c *gin.Context) {

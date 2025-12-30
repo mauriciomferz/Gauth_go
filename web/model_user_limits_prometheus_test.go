@@ -48,9 +48,9 @@ func TestModelUserLimitsPrometheusExposition(t *testing.T) {
 	}
 	body := w.Body.String()
 	want := []string{
-		"gauth_aap001_model_user_input_limit_exceeded_total",
-		"gauth_aap001_model_user_output_limit_exceeded_total",
-		"gauth_aap001_model_user_rate_limit_exceeded_total",
+		"AGENTAUTH_aap001_model_user_input_limit_exceeded_total",
+		"AGENTAUTH_aap001_model_user_output_limit_exceeded_total",
+		"AGENTAUTH_aap001_model_user_rate_limit_exceeded_total",
 	}
 	for _, m := range want {
 		if !regexp.MustCompile(m + " ").MatchString(body) {

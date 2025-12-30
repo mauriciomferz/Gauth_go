@@ -1,4 +1,4 @@
-// Package disclosure provides HTTP handlers for RFC-0111 transparency endpoints
+// Package disclosure provides HTTP handlers for AAP-001 transparency endpoints
 package disclosure
 
 import (
