@@ -6,7 +6,7 @@
 <br>
 <br>
 
-**Author**: The AgentAuth Project
+**Author**: Mauricio A. Fernandez Fernandez
 **Date**: December 2025
 
 </div>

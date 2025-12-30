@@ -1,5 +1,7 @@
 # The Agent's Signature: Identity & Law in the Age of AI
 
+**By Mauricio A. Fernandez Fernandez**
+
 **Status:** FINAL MANUSCRIPT
 **Date:** December 30, 2025
 
