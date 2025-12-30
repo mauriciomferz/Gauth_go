@@ -3,7 +3,7 @@
 
 **A Comprehensive Technical & Legal Framework**
 
-**By Mauricio A. Fernández Fernández**
+**By Mauricio A. Fernandez Fernandez**
 
 ---
 
