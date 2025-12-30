@@ -79,7 +79,7 @@ func TestValidationFailureCounters(t *testing.T) {
 			// Let's assume non-JWT for this test or that Create returns ID in token object.
 			// NewBetaServer might use Tokens which are opaque by default if JWT env not set.
 			// But NewBetaServer might default to JWT?
-			// Default BetaServer uses JWT if GAUTH_USE_JWT_LIB=1.
+			// Default BetaServer uses JWT if AGENTAUTH_USE_JWT_LIB=1.
 			// Test doesn't set it. So it uses opaque tokens.
 		}
 	}

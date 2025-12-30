@@ -10,8 +10,8 @@ import (
 
 // TestPolicyProvenanceTamperDetection ensures provenance endpoint reports verification failure after in-memory tampering.
 func TestPolicyProvenanceTamperDetection(t *testing.T) {
-	t.Setenv("GAUTH_POLICY_ADMIN_TOKEN", "adm")
-	defer os.Unsetenv("GAUTH_POLICY_ADMIN_TOKEN")
+	t.Setenv("AGENTAUTH_POLICY_ADMIN_TOKEN", "adm")
+	defer os.Unsetenv("AGENTAUTH_POLICY_ADMIN_TOKEN")
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })
 

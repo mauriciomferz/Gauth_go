@@ -16,33 +16,33 @@ import (
 	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 )
 
-// MockAgentAuthService mocks gauth.AgentAuth interface
+// MockAgentAuthService mocks agentauth.AgentAuth interface
 type MockAgentAuthService struct {
 	mock.Mock
 }
 
-func (m *MockAgentAuthService) RequestToken(req gauth.TokenRequest) (*gauth.TokenResponse, error) {
+func (m *MockAgentAuthService) RequestToken(req agentauth.TokenRequest) (*agentauth.TokenResponse, error) {
 	args := m.Called(req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*gauth.TokenResponse), args.Error(1)
+	return args.Get(0).(*agentauth.TokenResponse), args.Error(1)
 }
 
-func (m *MockAgentAuthService) InitiateAuthorization(req gauth.AuthorizationRequest) (*gauth.AuthorizationGrant, error) {
+func (m *MockAgentAuthService) InitiateAuthorization(req agentauth.AuthorizationRequest) (*agentauth.AuthorizationGrant, error) {
 	args := m.Called(req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*gauth.AuthorizationGrant), args.Error(1)
+	return args.Get(0).(*agentauth.AuthorizationGrant), args.Error(1)
 }
 
-func (m *MockAgentAuthService) ValidateToken(token string) (*gauth.TokenValidationResult, error) {
+func (m *MockAgentAuthService) ValidateToken(token string) (*agentauth.TokenValidationResult, error) {
 	args := m.Called(token)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*gauth.TokenValidationResult), args.Error(1)
+	return args.Get(0).(*agentauth.TokenValidationResult), args.Error(1)
 }
 
 func (m *MockAgentAuthService) Close() error {
@@ -61,7 +61,7 @@ func TestRFC9396_CreateToken_RAR(t *testing.T) {
 	router := gin.New()
 	router.POST("/token", h.Create)
 
-	rarDetail := gauth.AuthorizationDetail{
+	rarDetail := agentauth.AuthorizationDetail{
 		Type:       "payment_initiation",
 		Locations:  []string{"https://api.example.com/accounts"},
 		Actions:    []string{"transfer"},
@@ -70,20 +70,20 @@ func TestRFC9396_CreateToken_RAR(t *testing.T) {
 
 	payload := map[string]interface{}{
 		"grant_id":              "grant_abc",
-		"authorization_details": []gauth.AuthorizationDetail{rarDetail},
+		"authorization_details": []agentauth.AuthorizationDetail{rarDetail},
 		"nonce":                 "nonce_123",
 	}
 	body, _ := json.Marshal(payload)
 
 	// Expectation
 	// We use MatchedBy because Context map comparison can be tricky with nil/interface{}
-	expectedResp := &gauth.TokenResponse{
+	expectedResp := &agentauth.TokenResponse{
 		Token:      "mock/aap_token",
 		Scope:      []string{"payment"},
 		ValidUntil: time.Now().Add(1 * time.Hour),
 	}
 
-	mockSvc.On("RequestToken", mock.MatchedBy(func(req gauth.TokenRequest) bool {
+	mockSvc.On("RequestToken", mock.MatchedBy(func(req agentauth.TokenRequest) bool {
 		if req.GrantID != "grant_abc" {
 			return false
 		}

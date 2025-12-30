@@ -18,13 +18,13 @@ import (
 
 // TestRawPOAChainEmbeddingEnabled verifies RawPOAChain is populated when feature flags enabled.
 func TestRawPOAChainEmbeddingEnabled(t *testing.T) {
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("GAUTH_EMBED_FULL_POA", "1")
-	os.Setenv("GAUTH_EMBED_RAW_POA_CHAIN", "1")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	os.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
 	defer func() {
-		os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
-		os.Unsetenv("GAUTH_EMBED_FULL_POA")
-		os.Unsetenv("GAUTH_EMBED_RAW_POA_CHAIN")
+		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+		os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
+		os.Unsetenv("AGENTAUTH_EMBED_RAW_POA_CHAIN")
 	}()
 	mem := metrics.NewMemory()
 	svc := NewService(newAuditMemory(), newAllowAllAuthorizer(), WithMetrics(mem))
@@ -60,15 +60,15 @@ func TestRawPOAChainEmbeddingEnabled(t *testing.T) {
 
 // TestRawPOAChainEmbeddingSizeLimit forces omission via tiny max bytes cap.
 func TestRawPOAChainEmbeddingSizeLimit(t *testing.T) {
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("GAUTH_EMBED_FULL_POA", "1")
-	os.Setenv("GAUTH_EMBED_RAW_POA_CHAIN", "1")
-	os.Setenv("GAUTH_MAX_RAW_POA_BYTES", "1") // force omission
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	os.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
+	os.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "1") // force omission
 	defer func() {
-		os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
-		os.Unsetenv("GAUTH_EMBED_FULL_POA")
-		os.Unsetenv("GAUTH_EMBED_RAW_POA_CHAIN")
-		os.Unsetenv("GAUTH_MAX_RAW_POA_BYTES")
+		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+		os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
+		os.Unsetenv("AGENTAUTH_EMBED_RAW_POA_CHAIN")
+		os.Unsetenv("AGENTAUTH_MAX_RAW_POA_BYTES")
 	}()
 	mem := metrics.NewMemory()
 	svc := NewService(newAuditMemory(), newAllowAllAuthorizer(), WithMetrics(mem))

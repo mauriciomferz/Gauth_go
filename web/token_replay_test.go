@@ -43,10 +43,10 @@ func TestTokenIssuanceReplayNonce(t *testing.T) {
 func TestTokenValidationReplay_RFC111_C6(t *testing.T) {
 	// Use temp key path
 	tmpKey := t.TempDir() + "/jwt_rsa_test.pem"
-	t.Setenv("GAUTH_JWT_PRIVKEY_PATH", tmpKey)
-	t.Setenv("GAUTH_USE_JWT_LIB", "1")
-	t.Setenv("GAUTH_REPLAY_STRICT", "1")
-	t.Setenv("GAUTH_JWT_ALG", "RS256")
+	t.Setenv("AGENTAUTH_JWT_PRIVKEY_PATH", tmpKey)
+	t.Setenv("AGENTAUTH_USE_JWT_LIB", "1")
+	t.Setenv("AGENTAUTH_REPLAY_STRICT", "1")
+	t.Setenv("AGENTAUTH_JWT_ALG", "RS256")
 
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

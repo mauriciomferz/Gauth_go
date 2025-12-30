@@ -17,7 +17,7 @@ func TestMerkleTreeVectors(t *testing.T) {
 	// Case 1: Single leaf "a"
 	mt.AppendLeaf(hashString("a"))
 	root1 := mt.Root()
-	// Computed manually: SHA256("GAUTH_MERKLE_LEAF:" + hash("a")) -> then that is the root (level 0 promoted)
+	// Computed manually: SHA256("AGENTAUTH_MERKLE_LEAF:" + hash("a")) -> then that is the root (level 0 promoted)
 	// Actually implementation promotes single leaf to root directly?
 	// verify implementation detail: level 0 is leaves. if len=1, loop breaks.
 	// So root = leaf digest.
@@ -29,7 +29,7 @@ func TestMerkleTreeVectors(t *testing.T) {
 	// Case 2: Two leaves "a", "b"
 	mt.AppendLeaf(hashString("b"))
 	root2 := mt.Root()
-	// Expected: SHA256("GAUTH_MERKLE_NODE:" + leaf(a) + leaf(b))
+	// Expected: SHA256("AGENTAUTH_MERKLE_NODE:" + leaf(a) + leaf(b))
 	leafA := LeafDigestForEventHash(hashString("a"))
 	leafB := LeafDigestForEventHash(hashString("b"))
 	expected2 := hashNode(leafA, leafB)
@@ -124,6 +124,6 @@ func hashString(s string) string {
 }
 
 func hashNode(left, right string) string {
-	h := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(left)...), []byte(right)...))
+	h := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(left)...), []byte(right)...))
 	return hex.EncodeToString(h[:])
 }

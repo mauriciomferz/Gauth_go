@@ -33,7 +33,7 @@ func buildMultiSigServer(t *testing.T) (*BetaServer, crypto.KeyProvider) {
 	t.Cleanup(func() { s.Shutdown() })
 
 	// Configure multi-sig threshold environment (count fallback, threshold 2)
-	t.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	// Append several events
 	for i := 0; i < 5; i++ {

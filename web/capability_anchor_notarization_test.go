@@ -21,7 +21,7 @@ func (f failingImpl) Notarize(string) (notary.Receipt, error) {
 	return notary.Receipt{}, errors.New("forced notarization failure")
 }
 
-// TestCapabilityAnchorNotarizationMetrics verifies that enabling GAUTH_CAP_ANCHOR_NOTARIZE produces
+// TestCapabilityAnchorNotarizationMetrics verifies that enabling AGENTAUTH_CAP_ANCHOR_NOTARIZE produces
 // a notarization receipt and exposes notarized age in status endpoint after an emission.
 func TestCapabilityAnchorNotarizationMetrics(t *testing.T) {
 	tmpDir := t.TempDir()
@@ -31,13 +31,13 @@ func TestCapabilityAnchorNotarizationMetrics(t *testing.T) {
 	if err := os.WriteFile(capsPath, []byte(testutil.CapAlphaV1), 0o600); err != nil {
 		t.Fatalf("write caps: %v", err)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capsPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	// Use new provider selection env var introduced in refactor; previous GAUTH_ANCHOR_PROVIDER is ignored for notarizer.
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
-	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capsPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	// Use new provider selection env var introduced in refactor; previous AGENTAUTH_ANCHOR_PROVIDER is ignored for notarizer.
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Manually invoke notarizer to simulate emission path (simplifies test; emission path validated elsewhere).
@@ -93,12 +93,12 @@ func TestCapabilityAnchorNotarizationFailureCounter(t *testing.T) {
 	if err := os.WriteFile(capsPath, []byte(testutil.CapAlphaV1), 0o600); err != nil {
 		t.Fatalf("write caps: %v", err)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capsPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
-	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capsPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth"})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

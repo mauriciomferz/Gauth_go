@@ -13,10 +13,10 @@ import (
 
 func TestEnvelopeCBORCompaction(t *testing.T) {
 	// Enable CBOR embedding before creating service
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("GAUTH_EMBED_FULL_POA_CBOR", "1")
-	defer os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
-	defer os.Unsetenv("GAUTH_EMBED_FULL_POA_CBOR")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_EMBED_FULL_POA_CBOR", "1")
+	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+	defer os.Unsetenv("AGENTAUTH_EMBED_FULL_POA_CBOR")
 
 	// Setup service with audit logger and authorizer
 	auditLogger := audit.NewMemoryLogger(nil)
@@ -77,10 +77,10 @@ func TestEnvelopeCBORCompaction(t *testing.T) {
 
 func TestStreamingLargePoAChainV2(t *testing.T) {
 	// Enable chain embedding before creating service
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("GAUTH_EMBED_RAW_POA_CHAIN", "1")
-	defer os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
-	defer os.Unsetenv("GAUTH_EMBED_RAW_POA_CHAIN")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
+	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+	defer os.Unsetenv("AGENTAUTH_EMBED_RAW_POA_CHAIN")
 
 	// Setup service with audit logger and authorizer
 	auditLogger := audit.NewMemoryLogger(nil)

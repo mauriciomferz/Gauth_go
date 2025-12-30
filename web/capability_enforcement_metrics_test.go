@@ -22,7 +22,7 @@ func doPostMetrics(bs *BetaServer, path string, body any) *httptest.ResponseReco
 
 // TestCapabilityEnforcementMetrics verifies allowed/denied counters increment.
 func TestCapabilityEnforcementMetrics(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
 	mem := imetrics.NewMemory()
 	bs := NewBetaServerWithMetrics("", mem)
 	t.Cleanup(func() { bs.Shutdown() })

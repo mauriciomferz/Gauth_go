@@ -79,9 +79,9 @@ func BenchmarkConsistencyProofV2PathSize(b *testing.B) {
 // BenchmarkConsistencyProofV2FutureFast (placeholder) will attempt fast reconstruction when implemented.
 func BenchmarkConsistencyProofV2FutureFast(b *testing.B) {
 	// Enable flag (algorithm not yet implemented). Should behave identical to normal path.
-	tval := os.Getenv("GAUTH_CONSISTENCY_V2_FAST")
-	os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Setenv("GAUTH_CONSISTENCY_V2_FAST", tval)
+	tval := os.Getenv("AGENTAUTH_CONSISTENCY_V2_FAST")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
+	defer os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", tval)
 	chain := seedBenchChain(1024)
 	if _, err := chain.Append(RevocationEvent{ID: "grow-fast", DelegationID: "grow-fast"}); err != nil {
 		b.Fatalf("Failed to append revocation event: %v", err)
@@ -139,8 +139,8 @@ func BenchmarkStartRootReconstruction(b *testing.B) {
 		})
 		// Fast path: reconstruct via prefix blocks.
 		b.Run(fmt.Sprintf("fast_prefix_reconstruct_%d", n), func(sb *testing.B) {
-			os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
-			defer os.Unsetenv("GAUTH_CONSISTENCY_V2_FAST")
+			os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
+			defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
 			for i := 0; i < sb.N; i++ {
 				r := ReconstructStartRootFromPrefixBlocks(proof.PrefixRoots, proof.PrefixSizes, proof.StartLength, proof.PrefixBridges)
 				if r == "" {

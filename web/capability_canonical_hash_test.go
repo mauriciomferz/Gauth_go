@@ -52,8 +52,8 @@ func randomPerm[T any](src []T) []T {
 // to assert that canonical hash computation remains stable regardless of input ordering.
 func TestCapabilityCanonicalHashStability(t *testing.T) {
 	// Disable background polls to minimize interference / timing variance.
-	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
-	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
+	t.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1")
+	t.Setenv("AGENTAUTH_SKIP_SMOKETEST", "1")
 	// Use local RNG instances for each shuffle to avoid global state mutation.
 	baseCaps := []capability.Capability{
 		{ID: "cap.transfer", Version: "1.0", Stable: true},

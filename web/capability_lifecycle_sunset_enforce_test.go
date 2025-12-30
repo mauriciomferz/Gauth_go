@@ -13,9 +13,9 @@ import (
 // TestCapabilitySunsetEnforcement ensures usage is denied after sunset when enforcement enabled.
 func TestCapabilitySunsetEnforcement(t *testing.T) {
 	t.Log("starting TestCapabilitySunsetEnforcement")
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
-	t.Setenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE", "1")
-	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_SKIP_SMOKETEST", "1")
 	// Reset registry to avoid cross-test contamination
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")

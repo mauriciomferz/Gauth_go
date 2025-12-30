@@ -30,18 +30,18 @@ func (m *MockPDPEngine) Metrics() pdp.MetricsSnapshot {
 }
 
 // createTestToken creates a valid extended token for testing
-func createTestToken() *gauth.ExtendedToken {
+func createTestToken() *agentauth.ExtendedToken {
 	now := time.Now()
 
-	return &gauth.ExtendedToken{
+	return &agentauth.ExtendedToken{
 		AccessToken: "test-token-123",
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
 		Scope:       []string{"mcp:resource:read", "mcp:tool:call", "mcp:prompt:get"},
 		IssuedAt:    now,
 
-		AuthorizationChain: &gauth.AuthorizationChain{
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+		AuthorizationChain: &agentauth.AuthorizationChain{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:         "authorizer-1",
 				EntityType:       "natural_person",
 				EntityName:       "John Doe",
@@ -51,7 +51,7 @@ func createTestToken() *gauth.ExtendedToken {
 				ValidUntil:       now.Add(365 * 24 * time.Hour),
 				IdentityVerified: true,
 			},
-			ClientOwner: &gauth.AuthorizationLink{
+			ClientOwner: &agentauth.AuthorizationLink{
 				EntityID:         "owner-1",
 				EntityType:       "organization",
 				EntityName:       "AI Corp",
@@ -62,7 +62,7 @@ func createTestToken() *gauth.ExtendedToken {
 				ValidUntil:       now.Add(365 * 24 * time.Hour),
 				IdentityVerified: true,
 			},
-			Client: &gauth.AuthorizationLink{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:         "client-1",
 				EntityType:       "ai_system",
 				EntityName:       "AI Agent",
@@ -78,7 +78,7 @@ func createTestToken() *gauth.ExtendedToken {
 			ChainDepth:     3,
 		},
 
-		ClientOwner: &gauth.ClientOwnerInfo{
+		ClientOwner: &agentauth.ClientOwnerInfo{
 			OwnerID:          "owner-1",
 			OwnerName:        "AI Corp",
 			OwnerType:        "organization",
@@ -86,7 +86,7 @@ func createTestToken() *gauth.ExtendedToken {
 			VerificationDate: now,
 		},
 
-		OwnersAuthorizer: &gauth.OwnersAuthorizerInfo{
+		OwnersAuthorizer: &agentauth.OwnersAuthorizerInfo{
 			AuthorizerID:     "authorizer-1",
 			AuthorizerName:   "John Doe",
 			AuthorizerType:   "managing_director",
@@ -94,24 +94,24 @@ func createTestToken() *gauth.ExtendedToken {
 			VerificationDate: now,
 		},
 
-		LegalFramework: &gauth.LegalFrameworkInfo{
+		LegalFramework: &agentauth.LegalFrameworkInfo{
 			ApplicableLaws: []string{"GDPR", "Company Law"},
 			Jurisdiction:   "DE",
 		},
 
-		IssuedBy: &gauth.AuthorizationServerInfo{
+		IssuedBy: &agentauth.AuthorizationServerInfo{
 			ServerID:  "gauth-server-1",
 			ServerURL: "https://auth.example.com",
 			IssueTime: now,
 		},
 
-		VerificationProof: &gauth.IdentityVerificationChain{
+		VerificationProof: &agentauth.IdentityVerificationChain{
 			ChainID:             "verify-chain-1",
 			OverallVerification: "verified",
 			VerificationTime:    now,
 		},
 
-		JurisdictionContext: &gauth.JurisdictionContext{
+		JurisdictionContext: &agentauth.JurisdictionContext{
 			PrimaryJurisdiction: "DE",
 			ApplicableLaws:      []string{"GDPR"},
 		},
@@ -133,7 +133,7 @@ func createTestToken() *gauth.ExtendedToken {
 			Requirements:  poa.Requirements{},
 		},
 
-		Restrictions: []gauth.PowerRestriction{
+		Restrictions: []agentauth.PowerRestriction{
 			{
 				RestrictionType:  "value_limit",
 				Description:      "Max transaction value 10000 EUR",

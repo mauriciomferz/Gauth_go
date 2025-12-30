@@ -58,26 +58,26 @@ func matchLabels(a, b map[string]string) bool {
 }
 
 func TestResilientService(t *testing.T) {
-	config := gauth.Config{
+	config := agentauth.Config{
 		AuthServerURL:     "https://test.example.com",
 		ClientID:          "test-client",
 		ClientSecret:      "test-secret",
 		Scopes:            []string{"transaction:execute"},
 		AccessTokenExpiry: time.Hour,
 	}
-	auth, err := gauth.New(config)
+	auth, err := agentauth.New(config)
 	if err != nil {
 		t.Fatalf("Failed to create AgentAuth instance: %v", err)
 	}
 	service := NewResilientService(auth)
 
 	t.Run("SuccessfulTransaction", func(t *testing.T) {
-		tx := gauth.TransactionDetails{Type: gauth.PaymentTransaction, Amount: 100.0, CustomMetadata: map[string]interface{}{"test": "true"}}
-		grant, err := auth.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
+		tx := agentauth.TransactionDetails{Type: agentauth.PaymentTransaction, Amount: 100.0, CustomMetadata: map[string]interface{}{"test": "true"}}
+		grant, err := auth.InitiateAuthorization(agentauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
 		if err != nil {
 			t.Fatalf("grant error: %v", err)
 		}
-		tokenResp, err := auth.RequestToken(gauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
+		tokenResp, err := auth.RequestToken(agentauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
 		if err != nil {
 			t.Fatalf("token error: %v", err)
 		}
@@ -91,7 +91,7 @@ func TestResilientService(t *testing.T) {
 	})
 
 	t.Run("CircuitBreakerTrip", func(t *testing.T) {
-		tx := gauth.TransactionDetails{ID: "test-tx-2", Type: gauth.PaymentTransaction, Amount: 100}
+		tx := agentauth.TransactionDetails{ID: "test-tx-2", Type: agentauth.PaymentTransaction, Amount: 100}
 		failures := 0
 		for i := 0; i < 6; i++ {
 			if err := service.ProcessRequest(tx, "invalid-token"); err != nil {
@@ -106,8 +106,8 @@ func TestResilientService(t *testing.T) {
 			t.Errorf("expected circuit open, got %v", service.breaker.GetState())
 		}
 		time.Sleep(11 * time.Second)
-		grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
-		tokenResp, _ := auth.RequestToken(gauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
+		grant, _ := auth.InitiateAuthorization(agentauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
+		tokenResp, _ := auth.RequestToken(agentauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
 		if err := service.ProcessRequest(tx, tokenResp.Token); err != nil {
 			t.Error("expected success after reset")
 		}
@@ -115,16 +115,16 @@ func TestResilientService(t *testing.T) {
 
 	t.Run("MetricsCollection", func(t *testing.T) {
 		service.metrics = monitoring.NewMetricsCollector()
-		grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
-		tokenResp, _ := auth.RequestToken(gauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
+		grant, _ := auth.InitiateAuthorization(agentauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
+		tokenResp, _ := auth.RequestToken(agentauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
 		cases := []struct {
-			tx    gauth.TransactionDetails
+			tx    agentauth.TransactionDetails
 			token string
 		}{
-			{gauth.TransactionDetails{Type: gauth.PaymentTransaction, Amount: 100, CustomMetadata: map[string]interface{}{"test": "1"}}, tokenResp.Token},
-			{gauth.TransactionDetails{Type: gauth.PaymentTransaction, Amount: 50, CustomMetadata: map[string]interface{}{"test": "2"}}, "invalid-token"},
-			{gauth.TransactionDetails{Type: gauth.PaymentTransaction, Amount: 75, CustomMetadata: map[string]interface{}{"test": "3"}}, tokenResp.Token},
-			{gauth.TransactionDetails{Type: "refund", Amount: 25, CustomMetadata: map[string]interface{}{"test": "refund"}}, "invalid-token"},
+			{agentauth.TransactionDetails{Type: agentauth.PaymentTransaction, Amount: 100, CustomMetadata: map[string]interface{}{"test": "1"}}, tokenResp.Token},
+			{agentauth.TransactionDetails{Type: agentauth.PaymentTransaction, Amount: 50, CustomMetadata: map[string]interface{}{"test": "2"}}, "invalid-token"},
+			{agentauth.TransactionDetails{Type: agentauth.PaymentTransaction, Amount: 75, CustomMetadata: map[string]interface{}{"test": "3"}}, tokenResp.Token},
+			{agentauth.TransactionDetails{Type: "refund", Amount: 25, CustomMetadata: map[string]interface{}{"test": "refund"}}, "invalid-token"},
 		}
 		for _, c := range cases {
 			_ = service.ProcessRequest(c.tx, c.token)
@@ -145,16 +145,16 @@ func TestResilientService(t *testing.T) {
 	t.Run("ConcurrentRequests", func(t *testing.T) {
 		const n = 50
 		errs := make(chan error, n)
-		grant, _ := auth.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
+		grant, _ := auth.InitiateAuthorization(agentauth.AuthorizationRequest{ClientID: "test-client", Scopes: []string{"transaction:execute"}})
 		for i := 0; i < n; i++ {
 			go func(id int) {
 				// Issue a fresh token per goroutine to avoid replay detection failures skewing resilience measurement.
-				tr, terr := auth.RequestToken(gauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
+				tr, terr := auth.RequestToken(agentauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope})
 				if terr != nil {
 					errs <- terr
 					return
 				}
-				tx := gauth.TransactionDetails{Type: gauth.PaymentTransaction, Amount: float64(id + 1)}
+				tx := agentauth.TransactionDetails{Type: agentauth.PaymentTransaction, Amount: float64(id + 1)}
 				errs <- service.ProcessRequest(tx, tr.Token)
 			}(i)
 		}

@@ -16,8 +16,8 @@ func TestForgedTokenRejection(t *testing.T) {
 
 	t.Run("weak signing key allows forgery", func(t *testing.T) {
 		// Setup weak key
-		os.Setenv("GAUTH_JWT_SIGNING_KEY", "dev-please-change")
-		defer os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+		os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", "dev-please-change")
+		defer os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 
 		// Validator should catch this
 		validator := security.NewStartupValidator(true)
@@ -34,8 +34,8 @@ func TestForgedTokenRejection(t *testing.T) {
 
 	t.Run("strong signing key passes", func(t *testing.T) {
 		// Setup strong key
-		os.Setenv("GAUTH_JWT_SIGNING_KEY", "strong-random-key-1234567890abcdefghijklmnopqrstuvwxyz")
-		defer os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+		os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", "strong-random-key-1234567890abcdefghijklmnopqrstuvwxyz")
+		defer os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 
 		validator := security.NewStartupValidator(true)
 		err := validator.ValidateAll()
@@ -141,11 +141,11 @@ func TestSSRFPrevention(t *testing.T) {
 // TestIdentityVerificationEnforcement validates PVP requirements
 func TestIdentityVerificationEnforcement(t *testing.T) {
 	t.Run("mock PVP blocked in production", func(t *testing.T) {
-		os.Setenv("GAUTH_PVP_PROVIDER", "mock")
-		os.Setenv("GAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
+		os.Setenv("AGENTAUTH_PVP_PROVIDER", "mock")
+		os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
 		defer func() {
-			os.Unsetenv("GAUTH_PVP_PROVIDER")
-			os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+			os.Unsetenv("AGENTAUTH_PVP_PROVIDER")
+			os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 		}()
 
 		validator := security.NewStartupValidator(true) // Production mode
@@ -167,11 +167,11 @@ func TestIdentityVerificationEnforcement(t *testing.T) {
 	})
 
 	t.Run("real PVP provider required in production", func(t *testing.T) {
-		os.Setenv("GAUTH_PVP_PROVIDER", "stripe")
-		os.Setenv("GAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
+		os.Setenv("AGENTAUTH_PVP_PROVIDER", "stripe")
+		os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
 		defer func() {
-			os.Unsetenv("GAUTH_PVP_PROVIDER")
-			os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+			os.Unsetenv("AGENTAUTH_PVP_PROVIDER")
+			os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 		}()
 
 		validator := security.NewStartupValidator(true)
@@ -186,19 +186,19 @@ func TestIdentityVerificationEnforcement(t *testing.T) {
 
 // TestDebugEndpointsBlocked validates debug features are disabled in production
 func TestDebugEndpointsBlocked(t *testing.T) {
-	t.Run("GAUTH_DEV_INDEX blocked in production", func(t *testing.T) {
-		os.Setenv("GAUTH_DEV_INDEX", "1")
-		os.Setenv("GAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
+	t.Run("AGENTAUTH_DEV_INDEX blocked in production", func(t *testing.T) {
+		os.Setenv("AGENTAUTH_DEV_INDEX", "1")
+		os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
 		defer func() {
-			os.Unsetenv("GAUTH_DEV_INDEX")
-			os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+			os.Unsetenv("AGENTAUTH_DEV_INDEX")
+			os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 		}()
 
 		validator := security.NewStartupValidator(true) // Production mode
 		err := validator.ValidateAll()
 
 		if err == nil {
-			t.Fatal("Expected error when GAUTH_DEV_INDEX=1 in production")
+			t.Fatal("Expected error when AGENTAUTH_DEV_INDEX=1 in production")
 		}
 
 		if !containsAny(err.Error(), []string{"DEV_INDEX", "debug", "development"}) {
@@ -206,19 +206,19 @@ func TestDebugEndpointsBlocked(t *testing.T) {
 		}
 	})
 
-	t.Run("GAUTH_DEV_MODE blocked in production", func(t *testing.T) {
-		os.Setenv("GAUTH_DEV_MODE", "true")
-		os.Setenv("GAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
+	t.Run("AGENTAUTH_DEV_MODE blocked in production", func(t *testing.T) {
+		os.Setenv("AGENTAUTH_DEV_MODE", "true")
+		os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", "strong-key-12345678901234567890123456")
 		defer func() {
-			os.Unsetenv("GAUTH_DEV_MODE")
-			os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+			os.Unsetenv("AGENTAUTH_DEV_MODE")
+			os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 		}()
 
 		validator := security.NewStartupValidator(true)
 		err := validator.ValidateAll()
 
 		if err == nil {
-			t.Fatal("Expected error when GAUTH_DEV_MODE=true in production")
+			t.Fatal("Expected error when AGENTAUTH_DEV_MODE=true in production")
 		}
 
 		if !containsAny(err.Error(), []string{"DEV_MODE", "development"}) {
@@ -227,13 +227,13 @@ func TestDebugEndpointsBlocked(t *testing.T) {
 	})
 
 	t.Run("debug settings allowed in development", func(t *testing.T) {
-		os.Setenv("GAUTH_DEV_INDEX", "1")
-		os.Setenv("GAUTH_DEV_MODE", "true")
-		os.Setenv("GAUTH_JWT_SIGNING_KEY", "dev-key-for-testing")
+		os.Setenv("AGENTAUTH_DEV_INDEX", "1")
+		os.Setenv("AGENTAUTH_DEV_MODE", "true")
+		os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", "dev-key-for-testing")
 		defer func() {
-			os.Unsetenv("GAUTH_DEV_INDEX")
-			os.Unsetenv("GAUTH_DEV_MODE")
-			os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+			os.Unsetenv("AGENTAUTH_DEV_INDEX")
+			os.Unsetenv("AGENTAUTH_DEV_MODE")
+			os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 		}()
 
 		validator := security.NewStartupValidator(false) // Development mode
@@ -256,23 +256,23 @@ func TestProductionModeDetection(t *testing.T) {
 		expectProd bool
 	}{
 		{
-			name: "GAUTH_ENV=production",
+			name: "AGENTAUTH_ENV=production",
 			envVars: map[string]string{
-				"GAUTH_ENV": "production",
+				"AGENTAUTH_ENV": "production",
 			},
 			expectProd: true,
 		},
 		{
-			name: "GAUTH_MODE=prod",
+			name: "AGENTAUTH_MODE=prod",
 			envVars: map[string]string{
-				"GAUTH_MODE": "prod",
+				"AGENTAUTH_MODE": "prod",
 			},
 			expectProd: true,
 		},
 		{
 			name: "development with dev index",
 			envVars: map[string]string{
-				"GAUTH_DEV_INDEX": "1",
+				"AGENTAUTH_DEV_INDEX": "1",
 			},
 			expectProd: false,
 		},
@@ -281,7 +281,7 @@ func TestProductionModeDetection(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clear env
-			clearKeys := []string{"GAUTH_ENV", "GAUTH_MODE", "GAUTH_DEV_MODE", "GAUTH_DEV_INDEX"}
+			clearKeys := []string{"AGENTAUTH_ENV", "AGENTAUTH_MODE", "AGENTAUTH_DEV_MODE", "AGENTAUTH_DEV_INDEX"}
 			for _, k := range clearKeys {
 				os.Unsetenv(k)
 			}

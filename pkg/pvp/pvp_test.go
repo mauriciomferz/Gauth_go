@@ -24,7 +24,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 				IdentifierType:     "tax_id",
 				Jurisdiction:       "DE",
 				VerificationMethod: "eIDAS",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					Level:              1,
 					EntityID:           "user_123",
 					EntityRole:         "resource_owner",
@@ -44,7 +44,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 				IdentifierType:     "commercial_register",
 				Jurisdiction:       "DE",
 				VerificationMethod: "CommercialRegister",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					Level:              2,
 					EntityID:           "owner_001",
 					EntityRole:         "client_owner",
@@ -64,7 +64,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 				IdentifierType:     "national_id",
 				Jurisdiction:       "DE",
 				VerificationMethod: "eIDAS",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					Level:              1,
 					EntityID:           "auth_001",
 					EntityRole:         "authorizer",
@@ -73,7 +73,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 					VerificationDate:   now,
 					AssuranceLevel:     "high",
 				},
-				TrustServiceProvider: &gauth.TrustServiceProviderInfo{
+				TrustServiceProvider: &agentauth.TrustServiceProviderInfo{
 					ProviderID:       "TSP-DE-001",
 					ProviderName:     "Bundesdruckerei GmbH",
 					ProviderType:     "qualified",
@@ -139,7 +139,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 				ID:   "user_123",
 				Type: "natural_person",
 				Name: "John Doe",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					VerificationStatus: "verified",
 				},
 				IssuedAt: now,
@@ -148,7 +148,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 				ID:   "owner_001",
 				Type: "legal_person",
 				Name: "TechCorp GmbH",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					VerificationStatus: "verified",
 				},
 				IssuedAt: now,
@@ -183,7 +183,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 			ResourceOwner: &IdentityCredential{
 				ID:   "user_123",
 				Type: "natural_person",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					VerificationStatus: "verified",
 					AssuranceLevel:     "low",
 				},
@@ -192,7 +192,7 @@ func TestDefaultPVP_VerifyIdentityChain(t *testing.T) {
 			ClientOwner: &IdentityCredential{
 				ID:   "owner_001",
 				Type: "legal_person",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					VerificationStatus: "verified",
 					AssuranceLevel:     "low",
 				},
@@ -224,12 +224,12 @@ func TestDefaultPVP_VerifyIdentityProof(t *testing.T) {
 
 	t.Run("Valid identity proof with qualified TSP", func(t *testing.T) {
 		now := time.Now()
-		proof := &gauth.IdentityVerificationChain{
+		proof := &agentauth.IdentityVerificationChain{
 			ChainID:             "chain_001",
 			OverallVerification: "verified",
 			VerificationTime:    now,
 			VerifierEntity:      "PVP-001",
-			TrustServiceProvider: &gauth.TrustServiceProviderInfo{
+			TrustServiceProvider: &agentauth.TrustServiceProviderInfo{
 				ProviderID:       "TSP-DE-001",
 				ProviderName:     "Bundesdruckerei GmbH",
 				ProviderType:     "qualified",
@@ -237,7 +237,7 @@ func TestDefaultPVP_VerifyIdentityProof(t *testing.T) {
 				AccreditationRef: "DE-TSP-001",
 				ServiceTypes:     []string{"identity_verification"},
 			},
-			VerificationLevels: []gauth.VerificationLevel{
+			VerificationLevels: []agentauth.VerificationLevel{
 				{
 					Level:              1,
 					EntityID:           "auth_001",
@@ -275,13 +275,13 @@ func TestDefaultPVP_VerifyIdentityProof(t *testing.T) {
 
 	t.Run("Invalid proof with no TSP", func(t *testing.T) {
 		now := time.Now()
-		proof := &gauth.IdentityVerificationChain{
+		proof := &agentauth.IdentityVerificationChain{
 			ChainID:             "chain_002",
 			OverallVerification: "unverified",
 			VerificationTime:    now,
 			VerifierEntity:      "PVP-001",
 			// Missing TrustServiceProvider
-			VerificationLevels: []gauth.VerificationLevel{
+			VerificationLevels: []agentauth.VerificationLevel{
 				{
 					Level:              1,
 					EntityID:           "entity_001",
@@ -388,8 +388,8 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 	now := time.Now()
 
 	t.Run("Valid complete chain", func(t *testing.T) {
-		chain := &gauth.AuthorizationChain{
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:           "auth_001",
 				EntityName:         "John Smith",
 				EntityType:         "natural_person",
@@ -397,7 +397,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				AuthorizedBy:       "root",
 				AuthorizationDate:  now,
 				AuthorizationType:  "statutory",
-				LegalBasis:         &gauth.LegalBasis{BasisType: "company_law", Jurisdiction: "DE"},
+				LegalBasis:         &agentauth.LegalBasis{BasisType: "company_law", Jurisdiction: "DE"},
 				StatutoryAuthority: "§35 GmbHG",
 				IdentityVerified:   true,
 				VerificationMethod: "eIDAS",
@@ -407,7 +407,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				Revocable:          true,
 				Status:             "active",
 			},
-			ClientOwner: &gauth.AuthorizationLink{
+			ClientOwner: &agentauth.AuthorizationLink{
 				EntityID:              "owner_001",
 				EntityName:            "TechCorp GmbH",
 				EntityType:            "organization",
@@ -415,7 +415,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				AuthorizedBy:          "auth_001",
 				AuthorizationDate:     now,
 				AuthorizationType:     "contractual",
-				LegalBasis:            &gauth.LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "DE"},
+				LegalBasis:            &agentauth.LegalBasis{BasisType: "power_of_attorney", Jurisdiction: "DE"},
 				CommercialRegisterRef: "DE-HRB-12345",
 				IdentityVerified:      true,
 				VerificationMethod:    "CommercialRegister",
@@ -425,7 +425,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				Revocable:             false,
 				Status:                "active",
 			},
-			Client: &gauth.AuthorizationLink{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:           "client_123",
 				EntityName:         "GPT-4",
 				EntityType:         "ai_system",
@@ -433,7 +433,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				AuthorizedBy:       "owner_001",
 				AuthorizationDate:  now,
 				AuthorizationType:  "delegated",
-				LegalBasis:         &gauth.LegalBasis{BasisType: "contractual", Jurisdiction: "DE"},
+				LegalBasis:         &agentauth.LegalBasis{BasisType: "contractual", Jurisdiction: "DE"},
 				IdentityVerified:   true,
 				VerificationMethod: "Certificate",
 				ScopeOfAuthority:   []string{"Operations"},
@@ -471,8 +471,8 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 	})
 
 	t.Run("Broken chain - missing identity verification", func(t *testing.T) {
-		chain := &gauth.AuthorizationChain{
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:           "auth_001",
 				AuthorizedBy:       "root",
 				ValidFrom:          now,
@@ -481,7 +481,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				IdentityVerified:   false, // Not verified
 				VerificationMethod: "",
 			},
-			ClientOwner: &gauth.AuthorizationLink{
+			ClientOwner: &agentauth.AuthorizationLink{
 				EntityID:           "owner_001",
 				AuthorizedBy:       "auth_001",
 				ValidFrom:          now,
@@ -490,7 +490,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				IdentityVerified:   true,
 				VerificationMethod: "CommercialRegister",
 			},
-			Client: &gauth.AuthorizationLink{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:           "client_123",
 				AuthorizedBy:       "owner_001",
 				ValidFrom:          now,
@@ -514,8 +514,8 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 	})
 
 	t.Run("Revoked link in chain", func(t *testing.T) {
-		chain := &gauth.AuthorizationChain{
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:           "auth_001",
 				EntityName:         "Auth",
 				AuthorizedBy:       "root",
@@ -525,7 +525,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				IdentityVerified:   true,
 				VerificationMethod: "eIDAS",
 			},
-			ClientOwner: &gauth.AuthorizationLink{
+			ClientOwner: &agentauth.AuthorizationLink{
 				EntityID:           "owner_001",
 				EntityName:         "Owner",
 				AuthorizedBy:       "auth_001",
@@ -535,7 +535,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				IdentityVerified:   true,
 				VerificationMethod: "CommercialRegister",
 			},
-			Client: &gauth.AuthorizationLink{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:           "client_123",
 				EntityName:         "Client",
 				AuthorizedBy:       "owner_001",
@@ -561,8 +561,8 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 
 	t.Run("Expired link in chain", func(t *testing.T) {
 		pastTime := now.Add(-48 * time.Hour)
-		chain := &gauth.AuthorizationChain{
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:           "auth_001",
 				EntityName:         "Auth",
 				AuthorizedBy:       "root",
@@ -572,7 +572,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				IdentityVerified:   true,
 				VerificationMethod: "eIDAS",
 			},
-			ClientOwner: &gauth.AuthorizationLink{
+			ClientOwner: &agentauth.AuthorizationLink{
 				EntityID:           "owner_001",
 				EntityName:         "Owner",
 				AuthorizedBy:       "auth_001",
@@ -582,7 +582,7 @@ func TestDefaultPVP_TraceAuthorizationChain(t *testing.T) {
 				IdentityVerified:   true,
 				VerificationMethod: "CommercialRegister",
 			},
-			Client: &gauth.AuthorizationLink{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:           "client_123",
 				EntityName:         "Client",
 				AuthorizedBy:       "owner_001",
@@ -621,7 +621,7 @@ func TestDefaultPVP_BindIdentityToCryptographicKey(t *testing.T) {
 				Type:               "natural_person",
 				Name:               "John Smith",
 				VerificationMethod: "eIDAS",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					VerificationStatus: "verified",
 					AssuranceLevel:     "high",
 				},
@@ -664,7 +664,7 @@ func TestDefaultPVP_BindIdentityToCryptographicKey(t *testing.T) {
 				Type:               "legal_person",
 				Name:               "TechCorp GmbH",
 				VerificationMethod: "CommercialRegister",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					VerificationStatus: "verified",
 					AssuranceLevel:     "high",
 				},
@@ -726,7 +726,7 @@ func BenchmarkDefaultPVP_VerifyIdentityChain(b *testing.B) {
 		ResourceOwner: &IdentityCredential{
 			ID:   "user_123",
 			Type: "natural_person",
-			VerificationLevel: gauth.VerificationLevel{
+			VerificationLevel: agentauth.VerificationLevel{
 				VerificationStatus: "verified",
 			},
 			IssuedAt: now,
@@ -734,7 +734,7 @@ func BenchmarkDefaultPVP_VerifyIdentityChain(b *testing.B) {
 		ClientOwner: &IdentityCredential{
 			ID:   "owner_001",
 			Type: "legal_person",
-			VerificationLevel: gauth.VerificationLevel{
+			VerificationLevel: agentauth.VerificationLevel{
 				VerificationStatus: "verified",
 			},
 			IssuedAt: now,
@@ -767,22 +767,22 @@ func BenchmarkDefaultPVP_TraceAuthorizationChain(b *testing.B) {
 	ctx := context.Background()
 	now := time.Now()
 
-	chain := &gauth.AuthorizationChain{
-		OwnersAuthorizer: &gauth.AuthorizationLink{
+	chain := &agentauth.AuthorizationChain{
+		OwnersAuthorizer: &agentauth.AuthorizationLink{
 			EntityID:     "auth_001",
 			AuthorizedBy: "root",
 			ValidFrom:    now,
 			ValidUntil:   now.Add(365 * 24 * time.Hour),
 			Status:       "active",
 		},
-		ClientOwner: &gauth.AuthorizationLink{
+		ClientOwner: &agentauth.AuthorizationLink{
 			EntityID:     "owner_001",
 			AuthorizedBy: "auth_001",
 			ValidFrom:    now,
 			ValidUntil:   now.Add(365 * 24 * time.Hour),
 			Status:       "active",
 		},
-		Client: &gauth.AuthorizationLink{
+		Client: &agentauth.AuthorizationLink{
 			EntityID:     "client_123",
 			AuthorizedBy: "owner_001",
 			ValidFrom:    now,

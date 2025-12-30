@@ -7,10 +7,10 @@ import (
 
 // TestCapabilityAuditChainAnchoring validates anchoring of audit chain tip.
 func TestCapabilityAuditChainAnchoring(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
-	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
-	t.Setenv("GAUTH_CAP_AUDIT_PERSIST_PATH", t.TempDir()+"/cap_audit_tip.json")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
+	t.Setenv("AGENTAUTH_CAP_AUDIT_PERSIST_PATH", t.TempDir()+"/cap_audit_tip.json")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	prev := srv.CapAuditPrevHash()

@@ -56,8 +56,8 @@ func TestStartupValidator_JWTSigningKey(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup
-			os.Setenv("GAUTH_JWT_SIGNING_KEY", tt.keyValue)
-			defer os.Unsetenv("GAUTH_JWT_SIGNING_KEY")
+			os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", tt.keyValue)
+			defer os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
 
 			validator := NewStartupValidator(tt.productionMode)
 			err := validator.ValidateAll()
@@ -85,24 +85,24 @@ func TestStartupValidator_ProductionMode(t *testing.T) {
 		{
 			name: "dev index enabled in production",
 			envVars: map[string]string{
-				"GAUTH_JWT_SIGNING_KEY": "strong-key-12345678901234567890",
-				"GAUTH_DEV_INDEX":       "1",
+				"AGENTAUTH_JWT_SIGNING_KEY": "strong-key-12345678901234567890",
+				"AGENTAUTH_DEV_INDEX":       "1",
 			},
 			expectError: true,
 		},
 		{
 			name: "mock PVP in production",
 			envVars: map[string]string{
-				"GAUTH_JWT_SIGNING_KEY": "strong-key-12345678901234567890",
-				"GAUTH_PVP_PROVIDER":    "mock",
+				"AGENTAUTH_JWT_SIGNING_KEY": "strong-key-12345678901234567890",
+				"AGENTAUTH_PVP_PROVIDER":    "mock",
 			},
 			expectWarning: true,
 		},
 		{
 			name: "rate limiting disabled in production",
 			envVars: map[string]string{
-				"GAUTH_JWT_SIGNING_KEY":    "strong-key-12345678901234567890",
-				"GAUTH_RATE_LIMIT_ENABLED": "false",
+				"AGENTAUTH_JWT_SIGNING_KEY":    "strong-key-12345678901234567890",
+				"AGENTAUTH_RATE_LIMIT_ENABLED": "false",
 			},
 			expectWarning: true,
 		},
@@ -251,31 +251,31 @@ func TestProductionModeDetector(t *testing.T) {
 		expectProduction bool
 	}{
 		{
-			name: "GAUTH_ENV=production",
+			name: "AGENTAUTH_ENV=production",
 			envVars: map[string]string{
-				"GAUTH_ENV": "production",
+				"AGENTAUTH_ENV": "production",
 			},
 			expectProduction: true,
 		},
 		{
-			name: "GAUTH_MODE=prod",
+			name: "AGENTAUTH_MODE=prod",
 			envVars: map[string]string{
-				"GAUTH_MODE": "prod",
+				"AGENTAUTH_MODE": "prod",
 			},
 			expectProduction: true,
 		},
 		{
 			name: "development mode",
 			envVars: map[string]string{
-				"GAUTH_ENV":      "development",
-				"GAUTH_DEV_MODE": "true",
+				"AGENTAUTH_ENV":      "development",
+				"AGENTAUTH_DEV_MODE": "true",
 			},
 			expectProduction: false,
 		},
 		{
 			name: "no env vars - defaults to dev",
 			envVars: map[string]string{
-				"GAUTH_DEV_INDEX": "1",
+				"AGENTAUTH_DEV_INDEX": "1",
 			},
 			expectProduction: false,
 		},
@@ -284,7 +284,7 @@ func TestProductionModeDetector(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clear all relevant env vars first
-			clearEnvVars := []string{"GAUTH_ENV", "GAUTH_MODE", "GAUTH_DEV_MODE", "GAUTH_DEV_INDEX", "GAUTH_PORT"}
+			clearEnvVars := []string{"AGENTAUTH_ENV", "AGENTAUTH_MODE", "AGENTAUTH_DEV_MODE", "AGENTAUTH_DEV_INDEX", "AGENTAUTH_PORT"}
 			for _, key := range clearEnvVars {
 				os.Unsetenv(key)
 			}

@@ -327,7 +327,7 @@ func TestDelegation_LifecycleWorkflow(t *testing.T) {
 
 func TestChain_DepthEnforcement(t *testing.T) {
 	// Test that depth limiting works as expected
-	t.Setenv("GAUTH_MAX_DELEGATION_DEPTH", "3")
+	t.Setenv("AGENTAUTH_MAX_DELEGATION_DEPTH", "3")
 
 	chain := NewChain()
 

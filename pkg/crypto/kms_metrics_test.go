@@ -7,12 +7,12 @@ import (
 	prom "github.com/prometheus/client_golang/prometheus"
 )
 
-// TestKMSMetricsEmission ensures that when GAUTH_KMS_METRICS=1 is set the mock KMS
+// TestKMSMetricsEmission ensures that when AGENTAUTH_KMS_METRICS=1 is set the mock KMS
 // emits Prometheus metrics for operations. We do a minimal sanity check on counter > 0
 // and histogram sample presence. This is intentionally coarse to avoid flakiness from
 // precise bucket counts.
 func TestKMSMetricsEmission(t *testing.T) {
-	t.Setenv("GAUTH_KMS_METRICS", "1")
+	t.Setenv("AGENTAUTH_KMS_METRICS", "1")
 	// Re-enable metrics in case another test already initialized them with different state.
 	// (EnableKMSPrometheusMetrics is idempotent; safe to call.)
 	EnableKMSPrometheusMetrics("gauth", "crypto")

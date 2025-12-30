@@ -31,7 +31,7 @@ func TestNewIDTokenService(t *testing.T) {
 		{
 			name: "Valid configuration with RS256",
 			config: &IDTokenServiceConfig{
-				IssuerURL:     "https://gauth.example.com",
+				IssuerURL:     "https://agentauth.example.com",
 				SigningKey:    privateKey,
 				SigningKeyID:  "test-key-1",
 				SigningMethod: "RS256",
@@ -42,7 +42,7 @@ func TestNewIDTokenService(t *testing.T) {
 		{
 			name: "Valid configuration with RS384",
 			config: &IDTokenServiceConfig{
-				IssuerURL:     "https://gauth.example.com",
+				IssuerURL:     "https://agentauth.example.com",
 				SigningKey:    privateKey,
 				SigningKeyID:  "test-key-1",
 				SigningMethod: "RS384",
@@ -53,7 +53,7 @@ func TestNewIDTokenService(t *testing.T) {
 		{
 			name: "Missing signing key",
 			config: &IDTokenServiceConfig{
-				IssuerURL:     "https://gauth.example.com",
+				IssuerURL:     "https://agentauth.example.com",
 				SigningKey:    nil,
 				SigningKeyID:  "test-key-1",
 				SigningMethod: "RS256",
@@ -63,7 +63,7 @@ func TestNewIDTokenService(t *testing.T) {
 		{
 			name: "Invalid signing method",
 			config: &IDTokenServiceConfig{
-				IssuerURL:     "https://gauth.example.com",
+				IssuerURL:     "https://agentauth.example.com",
 				SigningKey:    privateKey,
 				SigningKeyID:  "test-key-1",
 				SigningMethod: "HS256",
@@ -73,7 +73,7 @@ func TestNewIDTokenService(t *testing.T) {
 		{
 			name: "Default signing method (RS256)",
 			config: &IDTokenServiceConfig{
-				IssuerURL:  "https://gauth.example.com",
+				IssuerURL:  "https://agentauth.example.com",
 				SigningKey: privateKey,
 			},
 			wantErr: false,
@@ -97,7 +97,7 @@ func TestNewIDTokenService(t *testing.T) {
 func TestIDTokenService_IssueIDToken(t *testing.T) {
 	privateKey := generateTestRSAKey(t)
 	service, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:     "https://gauth.example.com",
+		IssuerURL:     "https://agentauth.example.com",
 		SigningKey:    privateKey,
 		SigningKeyID:  "test-key-1",
 		SigningMethod: "RS256",
@@ -202,7 +202,7 @@ func TestIDTokenService_IssueIDToken(t *testing.T) {
 func TestIDTokenService_ValidateIDToken(t *testing.T) {
 	privateKey := generateTestRSAKey(t)
 	service, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:     "https://gauth.example.com",
+		IssuerURL:     "https://agentauth.example.com",
 		SigningKey:    privateKey,
 		SigningKeyID:  "test-key-1",
 		SigningMethod: "RS256",
@@ -286,8 +286,8 @@ func TestIDTokenService_ValidateIDToken(t *testing.T) {
 				if claims.Subject != "user123" {
 					t.Errorf("Expected subject user123, got %s", claims.Subject)
 				}
-				if claims.Issuer != "https://gauth.example.com" {
-					t.Errorf("Expected issuer https://gauth.example.com, got %s", claims.Issuer)
+				if claims.Issuer != "https://agentauth.example.com" {
+					t.Errorf("Expected issuer https://agentauth.example.com, got %s", claims.Issuer)
 				}
 			}
 		})
@@ -297,7 +297,7 @@ func TestIDTokenService_ValidateIDToken(t *testing.T) {
 func TestIDTokenService_CreateIDTokenFromIdentity(t *testing.T) {
 	privateKey := generateTestRSAKey(t)
 	service, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:     "https://gauth.example.com",
+		IssuerURL:     "https://agentauth.example.com",
 		SigningKey:    privateKey,
 		SigningKeyID:  "test-key-1",
 		SigningMethod: "RS256",
@@ -383,7 +383,7 @@ func TestIDTokenService_CreateIDTokenFromIdentity(t *testing.T) {
 func TestIDTokenService_MapTrustLevelToACR(t *testing.T) {
 	privateKey := generateTestRSAKey(t)
 	service, _ := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:  "https://gauth.example.com",
+		IssuerURL:  "https://agentauth.example.com",
 		SigningKey: privateKey,
 	})
 
@@ -426,7 +426,7 @@ func TestIDTokenService_MapTrustLevelToACR(t *testing.T) {
 func TestIDTokenService_GetMethods(t *testing.T) {
 	privateKey := generateTestRSAKey(t)
 	service, _ := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:     "https://gauth.example.com",
+		IssuerURL:     "https://agentauth.example.com",
 		SigningKey:    privateKey,
 		SigningKeyID:  "test-key-1",
 		SigningMethod: "RS256",

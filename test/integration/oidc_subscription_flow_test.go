@@ -24,7 +24,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	}
 
 	idTokenService, err := oidc.NewIDTokenService(&oidc.IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "test-key-1",
 	})
@@ -100,7 +100,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 
 	// Test Step I: Owner's Authorizer Identity Proof with OIDC
 	t.Run("Step I: Owner's Authorizer with OIDC ID Token", func(t *testing.T) {
-		request := &gauth.IdentityProofRequest{
+		request := &agentauth.IdentityProofRequest{
 			SubjectID:    "owner-auth-123",
 			IdentityType: "natural_person",
 			ProofMethod:  "oidc_id_token",
@@ -137,7 +137,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 
 	// Test Step III: Client Owner Identity Proof with OIDC
 	t.Run("Step III: Client Owner with OIDC ID Token", func(t *testing.T) {
-		request := &gauth.IdentityProofRequest{
+		request := &agentauth.IdentityProofRequest{
 			SubjectID:    "client-owner-456",
 			IdentityType: "legal_entity",
 			ProofMethod:  "oidc_id_token",
@@ -174,7 +174,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 
 	// Test Step VI: Resource Owner Identity Proof with OIDC
 	t.Run("Step VI: Resource Owner with OIDC ID Token", func(t *testing.T) {
-		request := &gauth.IdentityProofRequest{
+		request := &agentauth.IdentityProofRequest{
 			SubjectID:    "resource-owner-789",
 			IdentityType: "natural_person",
 			ProofMethod:  "oidc_id_token",
@@ -228,7 +228,7 @@ func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 			t.Fatalf("Failed to issue low trust token: %v", err)
 		}
 
-		request := &gauth.IdentityProofRequest{
+		request := &agentauth.IdentityProofRequest{
 			SubjectID:    "low-trust-user",
 			IdentityType: "natural_person",
 			ProofMethod:  "oidc_id_token",
@@ -267,7 +267,7 @@ func TestOIDCPVPWithPVPRouter(t *testing.T) {
 	}
 
 	idTokenService, err := oidc.NewIDTokenService(&oidc.IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "test-key-1",
 	})
@@ -284,7 +284,7 @@ func TestOIDCPVPWithPVPRouter(t *testing.T) {
 	}
 
 	// Create router and register OIDC PVP
-	router := gauth.NewPVPRouter(nil)
+	router := agentauth.NewPVPRouter(nil)
 	router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
 
 	// Verify supported methods
@@ -315,7 +315,7 @@ func TestOIDCPVPWithPVPRouter(t *testing.T) {
 	}
 
 	// Verify through router
-	request := &gauth.IdentityProofRequest{
+	request := &agentauth.IdentityProofRequest{
 		SubjectID:    "test-user",
 		IdentityType: "natural_person",
 		ProofMethod:  "oidc_id_token",
@@ -356,7 +356,7 @@ func TestMultipleProofMethodsWithRouter(t *testing.T) {
 	}
 
 	idTokenService, err := oidc.NewIDTokenService(&oidc.IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "test-key-1",
 	})
@@ -376,7 +376,7 @@ func TestMultipleProofMethodsWithRouter(t *testing.T) {
 	eidasPVP := &mockEIDASPVP{}
 
 	// Create router with multiple PVPs
-	router := gauth.NewPVPRouter(nil)
+	router := agentauth.NewPVPRouter(nil)
 	router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
 	router.RegisterPVP([]string{"eIDAS"}, eidasPVP)
 
@@ -392,8 +392,8 @@ func TestMultipleProofMethodsWithRouter(t *testing.T) {
 // mockEIDASPVP is a mock implementation for testing
 type mockEIDASPVP struct{}
 
-func (m *mockEIDASPVP) VerifyIdentityProof(ctx context.Context, request *gauth.IdentityProofRequest) (*gauth.IdentityProofResult, error) {
-	return &gauth.IdentityProofResult{
+func (m *mockEIDASPVP) VerifyIdentityProof(ctx context.Context, request *agentauth.IdentityProofRequest) (*agentauth.IdentityProofResult, error) {
+	return &agentauth.IdentityProofResult{
 		Valid:      true,
 		SubjectID:  request.SubjectID,
 		Identity:   "eIDAS User",

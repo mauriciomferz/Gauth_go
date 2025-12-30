@@ -23,9 +23,9 @@ func TestModelLimitsAPIIntegration(t *testing.T) {
 	_, _ = limitsFile.WriteString(`{"model_limits":{"api-test-model":{"max_input_tokens":100}}}`)
 	limitsFile.Close()
 
-	t.Setenv("GAUTH_MODEL_LIMITS_CONFIG_PATH", limitsFile.Name())
+	t.Setenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH", limitsFile.Name())
 	// Set other envs to avoid side effects or enable features
-	t.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "0")
+	t.Setenv("AGENTAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "0")
 
 	// Initialize Server
 	gin.SetMode(gin.TestMode)

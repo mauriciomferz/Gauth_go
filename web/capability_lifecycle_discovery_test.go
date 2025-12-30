@@ -9,8 +9,8 @@ import (
 
 // TestCapabilityLifecycleDiscovery ensures lifecycle summary object present in /info.
 func TestCapabilityLifecycleDiscovery(t *testing.T) {
-	t.Setenv("GAUTH_CAP_LIFECYCLE_STRICT", "1")
-	t.Setenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAP_LIFECYCLE_STRICT", "1")
+	t.Setenv("AGENTAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE", "1")
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

@@ -33,8 +33,8 @@ func TestExternalRulesLoad(t *testing.T) {
 	}
 
 	// Set env to point to file
-	os.Setenv("GAUTH_JURISDICTION_RULES_PATH", f.Name())
-	defer os.Unsetenv("GAUTH_JURISDICTION_RULES_PATH")
+	os.Setenv("AGENTAUTH_JURISDICTION_RULES_PATH", f.Name())
+	defer os.Unsetenv("AGENTAUTH_JURISDICTION_RULES_PATH")
 
 	eng := NewEnforcementEngine()
 	enf, err := eng.GetJurisdictionEnforcement("UNITED_STATES")

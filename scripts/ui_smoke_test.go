@@ -17,7 +17,7 @@ import (
 
 // fetchRoot performs a GET to the provided URL (defaults to http://localhost:8080/index.html) and returns body.
 func fetchIndexHTML(t *testing.T) string {
-	url := os.Getenv("GAUTH_UI_URL")
+	url := os.Getenv("AGENTAUTH_UI_URL")
 	if url == "" {
 		url = "http://localhost:8080/index.html"
 	}

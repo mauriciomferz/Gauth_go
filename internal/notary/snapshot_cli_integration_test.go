@@ -18,7 +18,7 @@ func TestSnapshotCLIIntegration(t *testing.T) {
 	if err := rs.Load(); err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	os.Setenv("GAUTH_NOTARY_MERKLE_ENABLED", "1")
+	os.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
 	for _, h := range []string{"sha256:x1", "sha256:x2"} {
 		r := Receipt{Hash: h, Timestamp: "2025-10-20T00:00:00Z", Provider: "memory", Version: 1, Success: true}
 		if _, err := rs.Append(r); err != nil {

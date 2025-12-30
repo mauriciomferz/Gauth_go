@@ -47,7 +47,7 @@ func TestPrometheusMetricsEndpoint(t *testing.T) {
 		t.Fatalf("latency metric missing")
 	}
 	// Clear env for isolation (if tests set external file)
-	os.Unsetenv("GAUTH_JURISDICTION_RULES_PATH")
+	os.Unsetenv("AGENTAUTH_JURISDICTION_RULES_PATH")
 }
 
 // testContext provides a simple background context.

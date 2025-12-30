@@ -8,7 +8,7 @@ import (
 
 // TestIntervalPathTamper ensures verification fails if a sibling digest in the interval path proof is altered.
 func TestIntervalPathTamper(t *testing.T) {
-	os.Setenv("GAUTH_CONSISTENCY_V2_INTERVAL_PATH", "1")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH", "1")
 	chain := NewRevocationChain()
 	// Build first segment: 128 events, then snapshot
 	for i := 0; i < 128; i++ {

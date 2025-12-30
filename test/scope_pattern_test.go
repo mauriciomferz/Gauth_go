@@ -37,8 +37,8 @@ func TestScopePatternsRegexGate(t *testing.T) {
 	if gauth_aap_001.ScopeContains(scope, "payment.create") {
 		t.Fatalf("regex matched while gate disabled")
 	}
-	os.Setenv("GAUTH_SCOPE_ALLOW_REGEX", "1")
-	defer os.Unsetenv("GAUTH_SCOPE_ALLOW_REGEX")
+	os.Setenv("AGENTAUTH_SCOPE_ALLOW_REGEX", "1")
+	defer os.Unsetenv("AGENTAUTH_SCOPE_ALLOW_REGEX")
 	if !gauth_aap_001.ScopeContains(scope, "payment.create") {
 		t.Fatalf("expected regex to match payment.create when enabled")
 	}

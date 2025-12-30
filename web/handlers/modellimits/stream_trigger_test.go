@@ -9,9 +9,9 @@ import (
 
 // TestAttestationStreamAuditTrigger ensures audit append causes an attestation emission with reason=audit_append.
 func TestAttestationStreamAuditTrigger(t *testing.T) {
-	t.Setenv("GAUTH_ATTEST_STREAM_ENABLE", "1")
-	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN", "0")
-	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE", "0")
+	t.Setenv("AGENTAUTH_ATTEST_STREAM_ENABLE", "1")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN", "0")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE", "0")
 
 	// Limits file with small limit to force exceed
 	limitsFile, err := os.CreateTemp(t.TempDir(), "limits-*.json")

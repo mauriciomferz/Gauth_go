@@ -11,8 +11,8 @@ import (
 // TestPersistenceDurability verifies PoA entries persist across service restarts when Bolt repository is enabled.
 func TestPersistenceDurability(t *testing.T) {
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("GAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("GAUTH_PERSIST_PATH")
+	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
+	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
 
 	// First service instance (create)
 	memLogger := audit.NewMemoryLogger(nil)

@@ -16,9 +16,9 @@ func TestRevocationAnchoringPersistence(t *testing.T) {
 	persistPath := filepath.Join(tmpDir, "anchor.json")
 
 	// 2. Configure server with anchor persistence enabled
-	t.Setenv("GAUTH_ANCHOR_PERSIST_PATH", persistPath)
-	t.Setenv("GAUTH_REVOCATION_ENABLED", "1")
-	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
+	t.Setenv("AGENTAUTH_ANCHOR_PERSIST_PATH", persistPath)
+	t.Setenv("AGENTAUTH_REVOCATION_ENABLED", "1")
+	t.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1")
 
 	// Start server (initializes anchor client and hooks)
 	srv := NewBetaServer(":0")

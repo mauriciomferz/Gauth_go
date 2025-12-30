@@ -47,8 +47,8 @@ func TestWellKnownDiscovery(t *testing.T) {
 // TestDiscoveryExactKeys ensures discovery payload contains required keys and jwks_uri empties when JWT disabled.
 func TestDiscoveryExactKeys(t *testing.T) {
 	// Scenario 1: Neither JWT library nor EdDSA mode active -> jwks_uri should be empty.
-	os.Unsetenv("GAUTH_USE_JWT_LIB")
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC to ensure JWKS suppression
+	os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC to ensure JWKS suppression
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -73,8 +73,8 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	}
 
 	// Scenario 2: Enable JWT library -> jwks_uri populated.
-	t.Setenv("GAUTH_USE_JWT_LIB", "1")
-	t.Setenv("GAUTH_JWT_KID", "demo-key")
+	t.Setenv("AGENTAUTH_USE_JWT_LIB", "1")
+	t.Setenv("AGENTAUTH_JWT_KID", "demo-key")
 	srv2 := NewBetaServer(":0")
 	t.Cleanup(func() { srv2.Shutdown() })
 	w2 := performRequest(srv2.router, "GET", "/.well-known/gauth-configuration")
@@ -87,8 +87,8 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	}
 
 	// Scenario 3: Disable JWT but enable EdDSA -> jwks_uri populated (new behavior after EdDSA introduction).
-	os.Unsetenv("GAUTH_USE_JWT_LIB")
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	srv3 := NewBetaServer(":0")
 	t.Cleanup(func() { srv3.Shutdown() })
 	w3 := performRequest(srv3.router, "GET", "/.well-known/gauth-configuration")
@@ -100,8 +100,8 @@ func TestDiscoveryExactKeys(t *testing.T) {
 		t.Fatalf("jwks_uri should be populated when eddsa mode enabled")
 	}
 
-	// Scenario 4: GAUTH_ISSUER set -> jwks_uri and revocation endponts prefixed
-	t.Setenv("GAUTH_ISSUER", "https://gauth.example.com")
+	// Scenario 4: AGENTAUTH_ISSUER set -> jwks_uri and revocation endponts prefixed
+	t.Setenv("AGENTAUTH_ISSUER", "https://agentauth.example.com")
 	srv4 := NewBetaServer(":0")
 	t.Cleanup(func() { srv4.Shutdown() })
 	w4 := performRequest(srv4.router, "GET", "/.well-known/gauth-configuration")
@@ -110,18 +110,18 @@ func TestDiscoveryExactKeys(t *testing.T) {
 		t.Fatalf("json4: %v", err)
 	}
 	jwks := body4["jwks_uri"].(string)
-	if jwks != "https://gauth.example.com/.well-known/jwks.json" {
+	if jwks != "https://agentauth.example.com/.well-known/jwks.json" {
 		t.Errorf("expected prefixed jwks_uri, got %q", jwks)
 	}
 	rev := body4["revocation_endpoint"].(string)
-	if rev != "https://gauth.example.com/api/v1/token/revoke" {
+	if rev != "https://agentauth.example.com/api/v1/token/revoke" {
 		t.Errorf("expected prefixed revocation_endpoint, got %q", rev)
 	}
 }
 
 // TestDiscoveryAnchoringFields ensures anchoring fields populate when memory anchor enabled.
 func TestDiscoveryAnchoringFields(t *testing.T) {
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -148,8 +148,8 @@ func TestDiscoveryAnchoringFields(t *testing.T) {
 }
 
 func TestDiscoveryMultiSigWeights(t *testing.T) {
-	t.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
-	t.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=3,signerB=2")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "5")
+	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "signerA=3,signerB=2")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -174,8 +174,8 @@ func TestDiscoveryMultiSigWeights(t *testing.T) {
 }
 
 func TestDiscoveryMultiSigWeightsInvalid(t *testing.T) {
-	t.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5")
-	t.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "signerA=2,signerB=2") // total 4 < threshold 5
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "5")
+	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "signerA=2,signerB=2") // total 4 < threshold 5
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")

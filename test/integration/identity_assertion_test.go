@@ -44,7 +44,7 @@ func TestIdentityAssertionGrant(t *testing.T) {
 	assertionClaims := jwt.MapClaims{
 		"iss": "https://idp.example.com",
 		"sub": "user@example.com",
-		"aud": "https://gauth.example.com",
+		"aud": "https://agentauth.example.com",
 		"exp": time.Now().Add(time.Hour).Unix(),
 		"jti": "test-nonce-123",
 	}

@@ -54,7 +54,7 @@ func FuzzVerifyModelLimitsAttestation(f *testing.F) {
 	validSeed, _ := json.Marshal(base)
 	f.Add(validSeed)
 	// Domain signature variant
-	base.DomainPrefix = "GAUTH_FUZZ_PREFIX:"
+	base.DomainPrefix = "AGENTAUTH_FUZZ_PREFIX:"
 	dmsg := append([]byte(base.DomainPrefix), rawUnsigned...)
 	dsig := ed25519.Sign(priv, dmsg)
 	base.DomainSignature = base64.RawStdEncoding.EncodeToString(dsig)

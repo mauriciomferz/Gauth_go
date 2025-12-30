@@ -93,7 +93,7 @@ func FuzzCapabilityReload(f *testing.F) {
 		if err := os.WriteFile(capFile, seed, 0o600); err != nil {
 			t.Fatal(err)
 		}
-		t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
+		t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
 		srv := NewBetaServer(":0")
 		t.Cleanup(func() { srv.Shutdown() })
 		disc := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")

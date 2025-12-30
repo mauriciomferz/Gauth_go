@@ -15,8 +15,8 @@ import (
 // TestStrictAuthenticityMissingKey ensures missing public key transitions from soft skip to integrity failure when strict mode enabled.
 func TestStrictAuthenticityMissingKey(t *testing.T) {
 	// Soft mode service: explicitly disable strict authenticity env flag.
-	os.Setenv("GAUTH_STRICT_AUTHENTICITY", "0")
-	defer os.Unsetenv("GAUTH_STRICT_AUTHENTICITY")
+	os.Setenv("AGENTAUTH_STRICT_AUTHENTICITY", "0")
+	defer os.Unsetenv("AGENTAUTH_STRICT_AUTHENTICITY")
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
 	authorizer.AddPolicy(authz.Policy{ID: "p1", Subject: "alice", Resource: "*", Actions: []string{"create_delegation"}, Effect: authz.Allow})

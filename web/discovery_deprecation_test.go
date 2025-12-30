@@ -7,8 +7,8 @@ import (
 )
 
 func TestDiscoveryDeprecationMetadata(t *testing.T) {
-	t.Setenv("GAUTH_DEPRECATED_AFTER", "2025-12-31T00:00:00Z")
-	t.Setenv("GAUTH_SUNSET_AFTER", "2026-06-30T00:00:00Z")
+	t.Setenv("AGENTAUTH_DEPRECATED_AFTER", "2025-12-31T00:00:00Z")
+	t.Setenv("AGENTAUTH_SUNSET_AFTER", "2026-06-30T00:00:00Z")
 	s := NewBetaServer("0")
 	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()

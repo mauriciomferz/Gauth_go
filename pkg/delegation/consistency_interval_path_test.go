@@ -20,7 +20,7 @@ func TestIntervalPathEquivalence(t *testing.T) {
 		}
 	}
 	// baseline proof (legacy path) for each historical head
-	os.Setenv("GAUTH_CONSISTENCY_V2_INTERVAL_PATH", "0")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH", "0")
 	if len(chain.treeHeads) < 2 {
 		t.Fatalf("need at least 2 tree heads")
 	}
@@ -38,7 +38,7 @@ func TestIntervalPathEquivalence(t *testing.T) {
 		}
 	}
 	// interval path proofs
-	os.Setenv("GAUTH_CONSISTENCY_V2_INTERVAL_PATH", "1")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH", "1")
 	for i := 0; i < len(chain.treeHeads)-1; i++ {
 		p, err := chain.GenerateConsistencyProofV2(i)
 		if err != nil {

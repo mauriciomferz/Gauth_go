@@ -20,7 +20,7 @@ import (
 // prepareEdDSAKey ensures an active EdDSA key exists for signing tests.
 func prepareEdDSAKey(t *testing.T) *cryptopkg.Manager {
 	t.Helper()
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	km, err := cryptopkg.NewManager(24 * time.Hour)
 	if err != nil {
 		t.Fatalf("new manager: %v", err)
@@ -162,7 +162,7 @@ func TestPolicyManifestSignatureVerifyAndTamper(t *testing.T) {
 	if key == nil {
 		t.Fatalf("key not found for kid=%s", kid)
 	}
-	msg := append([]byte("GAUTH_POLICY_MANIFEST:"), raw...)
+	msg := append([]byte("AGENTAUTH_POLICY_MANIFEST:"), raw...)
 	if !ed25519.Verify(key.Public, msg, sigBytes) {
 		t.Fatalf("signature verify failed")
 	}
@@ -174,7 +174,7 @@ func TestPolicyManifestSignatureVerifyAndTamper(t *testing.T) {
 	canonTamper := canon
 	canonTamper.Capabilities = mcaps
 	rawTamper, _ := json.Marshal(canonTamper)
-	msgTamper := append([]byte("GAUTH_POLICY_MANIFEST:"), rawTamper...)
+	msgTamper := append([]byte("AGENTAUTH_POLICY_MANIFEST:"), rawTamper...)
 	if ed25519.Verify(key.Public, msgTamper, sigBytes) {
 		t.Fatalf("tampered signature unexpectedly valid")
 	}
@@ -183,9 +183,9 @@ func TestPolicyManifestSignatureVerifyAndTamper(t *testing.T) {
 // TestPolicyManifestSigningUnavailable ensures endpoint returns structured error when EdDSA signing prerequisites are not met.
 func TestPolicyManifestSigningUnavailable(t *testing.T) {
 	// Force non-EdDSA mode
-	orig := os.Getenv("GAUTH_TOKEN_SIG_MODE")
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "hs256")
-	defer t.Setenv("GAUTH_TOKEN_SIG_MODE", orig)
+	orig := os.Getenv("AGENTAUTH_TOKEN_SIG_MODE")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hs256")
+	defer t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", orig)
 	// No key provider passed
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -270,7 +270,7 @@ func TestPolicyManifestSignerInterface(t *testing.T) {
 	if active == nil || len(active.Private) != ed25519.PrivateKeySize {
 		t.Fatalf("active key missing")
 	}
-	msg := append([]byte("GAUTH_POLICY_MANIFEST:"), raw...)
+	msg := append([]byte("AGENTAUTH_POLICY_MANIFEST:"), raw...)
 	sigDirect := ed25519.Sign(active.Private, msg)
 	signer, err := km.ActiveSigner()
 	if err != nil {

@@ -11,7 +11,7 @@ import (
 
 // TestTokenCreateClientNonceReplay verifies strict nonce reuse rejection.
 func TestTokenCreateClientNonceReplay(t *testing.T) {
-	t.Setenv("GAUTH_REPLAY_STRICT", "1")
+	t.Setenv("AGENTAUTH_REPLAY_STRICT", "1")
 	gin.SetMode(gin.TestMode)
 	s := NewBetaServer(":0")
 	t.Cleanup(func() { s.Shutdown() })

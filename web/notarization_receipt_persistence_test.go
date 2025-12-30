@@ -34,12 +34,12 @@ func TestNotarizationReceiptPersistence(t *testing.T) {
 	anchorPath := filepath.Join(dir, "anchor.json")
 	receiptPath := filepath.Join(dir, "receipts.json")
 	// Use t.Setenv to ensure environment modifications are reverted after this test, preventing cross-test interference.
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1s") // speed up second emission (optional)
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory") // deterministic success, near-zero latency
-	t.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", receiptPath)
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1s") // speed up second emission (optional)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory") // deterministic success, near-zero latency
+	t.Setenv("AGENTAUTH_NOTARY_RECEIPT_PERSIST_PATH", receiptPath)
 
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })

@@ -9,7 +9,7 @@ import (
 // TestExternalAnchorVerifySuccess ensures verify endpoint reports verified=true for memory provider after successful anchor.
 func TestExternalAnchorVerifySuccess(t *testing.T) {
 	t.Skip("Skipping: VerifyIncremental returns non-ok for memory provider; needs store configuration fix")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Allow initial anchor
@@ -28,8 +28,8 @@ func TestExternalAnchorVerifySuccess(t *testing.T) {
 
 // TestExternalAnchorVerifyFailure ensures verify endpoint returns verified=false when provider fails (tsa_stub forced failure).
 func TestExternalAnchorVerifyFailure(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1") // always fail
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1") // always fail
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Give stub time to attempt initial anchor (should fail) then request verify.

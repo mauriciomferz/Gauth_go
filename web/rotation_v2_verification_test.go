@@ -19,12 +19,12 @@ func installTestKey(t *testing.T, id string) (ed25519.PrivateKey, ed25519.Public
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
 	// Populate fallback env variable used by server handler for signing (tests avoid full key manager mutation)
 	hexPriv := hex.EncodeToString(priv)
-	existing := os.Getenv("GAUTH_ROTATIONS_V2_ED25519_KEYS")
+	existing := os.Getenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS")
 	entry := id + ":" + hexPriv
 	if existing == "" {
-		t.Setenv("GAUTH_ROTATIONS_V2_ED25519_KEYS", entry)
+		t.Setenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS", entry)
 	} else {
-		t.Setenv("GAUTH_ROTATIONS_V2_ED25519_KEYS", existing+","+entry)
+		t.Setenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS", existing+","+entry)
 	}
 	return priv, pub
 }
@@ -34,9 +34,9 @@ func TestRotationV2VerifiedWeightSuccess(t *testing.T) {
 	// Prepare config file
 	cfgData := `{"schema_version":1,"active_key_set_id":"set","threshold_weight":2,"signers":[{"id":"k1","alg":"ED25519","weight":1},{"id":"k2","alg":"ED25519","weight":1}],"algorithm_suite":["ed25519"]}`
 	tmpCfg := writeTempFile(t, cfgData)
-	t.Setenv("GAUTH_ROTATIONS_V2_CONFIG", tmpCfg)
-	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
-	t.Setenv("GAUTH_ROTATIONS_V2_FORCE_SIGN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_CONFIG", tmpCfg)
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_SIGN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_FORCE_SIGN", "1")
 	// Install keys
 	installTestKey(t, "k1")
 	installTestKey(t, "k2")
@@ -70,11 +70,11 @@ func TestRotationV2ThresholdUnsatisfied(t *testing.T) {
 	// Config requires total weight 3 (2+1) threshold 3; we will only install key k1 so verified weight=2 < threshold.
 	cfgData := `{"schema_version":1,"active_key_set_id":"set","threshold_weight":3,"signers":[{"id":"k1","alg":"ED25519","weight":2},{"id":"k2","alg":"ED25519","weight":1}],"algorithm_suite":["ed25519"]}`
 	tmpCfg := writeTempFile(t, cfgData)
-	t.Setenv("GAUTH_ROTATIONS_V2_CONFIG", tmpCfg)
-	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
-	t.Setenv("GAUTH_ROTATIONS_V2_FORCE_SIGN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_CONFIG", tmpCfg)
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_SIGN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_FORCE_SIGN", "1")
 	// Ensure clean slate then install only k1
-	os.Unsetenv("GAUTH_ROTATIONS_V2_ED25519_KEYS")
+	os.Unsetenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS")
 	installTestKey(t, "k1") // single key -> verified weight 2 < threshold 3
 	srv := NewBetaServerWithMetrics("", nil)
 	t.Cleanup(func() { srv.Shutdown() })

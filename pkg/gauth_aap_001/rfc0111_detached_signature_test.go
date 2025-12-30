@@ -13,8 +13,8 @@ import (
 // TestDetachedSignatureIssuanceAndVerification ensures that when feature flags are enabled the
 // envelope V2 carries detached signature fields which verify successfully.
 func TestDetachedSignatureIssuanceAndVerification(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_DETACHED_SIGNATURE", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "1")
 
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
@@ -42,8 +42,8 @@ func TestDetachedSignatureIssuanceAndVerification(t *testing.T) {
 // TestDetachedSignatureTamper modifies stored POA after issuance to trigger integrity failure
 // (digest mismatch) – ensures tamper is detected (error returned).
 func TestDetachedSignatureTamper(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_DETACHED_SIGNATURE", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "1")
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("key provider: %v", err)
@@ -67,9 +67,9 @@ func TestDetachedSignatureTamper(t *testing.T) {
 
 // TestDetachedSignatureDisabled ensures absence when flag disabled (control path).
 func TestDetachedSignatureDisabled(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_DETACHED_SIGNATURE", "") // ensure disabled even if parent test process exported
-	// GAUTH_DETACHED_SIGNATURE intentionally NOT set
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "") // ensure disabled even if parent test process exported
+	// AGENTAUTH_DETACHED_SIGNATURE intentionally NOT set
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
 		t.Fatalf("key provider: %v", err)

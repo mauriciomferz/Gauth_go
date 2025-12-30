@@ -16,7 +16,7 @@ const testPastTime = "2025-01-01T00:00:00Z"
 // TestCapabilityNegotiationStrictLifecycle ensures deprecated capabilities are excluded when strict flag set.
 func TestCapabilityNegotiationStrictLifecycle(t *testing.T) {
 	// Set lifecycle strict flag and start with clean registry
-	t.Setenv("GAUTH_CAP_LIFECYCLE_STRICT", "1")
+	t.Setenv("AGENTAUTH_CAP_LIFECYCLE_STRICT", "1")
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -66,7 +66,7 @@ func TestCapabilityNegotiationStrictLifecycle(t *testing.T) {
 
 // TestCapabilityNegotiationNonStrictLifecycle ensures deprecated capabilities still negotiate when strict disabled.
 func TestCapabilityNegotiationNonStrictLifecycle(t *testing.T) {
-	os.Unsetenv("GAUTH_CAP_LIFECYCLE_STRICT")
+	os.Unsetenv("AGENTAUTH_CAP_LIFECYCLE_STRICT")
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

@@ -20,7 +20,7 @@ func doPost(bs *BetaServer, path string, body any) *httptest.ResponseRecorder {
 
 // TestDelegationCreateCapabilityEnforcement ensures capability is required when enforcement flag enabled.
 func TestDelegationCreateCapabilityEnforcement(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
 	// Missing capability should yield 403
@@ -43,7 +43,7 @@ func TestDelegationCreateCapabilityEnforcement(t *testing.T) {
 
 // TestDelegationRevokeCapabilityEnforcement ensures revoke requires capability.
 func TestDelegationRevokeCapabilityEnforcement(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
 	// First create delegation with required capability

@@ -11,18 +11,18 @@ import (
 )
 
 // TestExternalAnchorMetricsForcedFailure verifies that forced failure counters increment distinctly
-// from general failures and attempts when GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS is set.
+// from general failures and attempts when AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS is set.
 func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "0.0") // eliminate probabilistic failures; rely purely on forced path
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "2")     // allow some retries though success expected after forced failures consumed
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "10")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "0.0") // eliminate probabilistic failures; rely purely on forced path
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "2")     // allow some retries though success expected after forced failures consumed
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "10")
 	// Deterministic seed to remove randomness from latency only; probability zero.
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED", "1700011")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED", "1700011")
 	// Force exactly one initial failure.
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	srv := NewBetaServerWithMetrics(":0", pm)

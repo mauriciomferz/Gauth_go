@@ -54,14 +54,14 @@ func newServiceWithSignerAndAnchors(t *testing.T, reg *attest.TrustAnchorRegistr
 	return svc, kms
 }
 
-// withAttestationEnforcement sets GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1 for the duration
+// withAttestationEnforcement sets AGENTAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1 for the duration
 // of the test and restores previous value afterwards.
 func withAttestationEnforcement(t *testing.T) func() {
-	prev := os.Getenv("GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR")
-	if err := os.Setenv("GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR", "1"); err != nil {
+	prev := os.Getenv("AGENTAUTH_ATTEST_REQUIRE_TRUST_ANCHOR")
+	if err := os.Setenv("AGENTAUTH_ATTEST_REQUIRE_TRUST_ANCHOR", "1"); err != nil {
 		t.Fatalf("failed to set env: %v", err)
 	}
-	return func() { _ = os.Setenv("GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR", prev) }
+	return func() { _ = os.Setenv("AGENTAUTH_ATTEST_REQUIRE_TRUST_ANCHOR", prev) }
 }
 
 func TestAttestationProofIssueAndVerify_Success(t *testing.T) {

@@ -21,7 +21,7 @@ func TestGenerateSnapshot(t *testing.T) {
 		t.Fatalf("append2: %v", err)
 	}
 	// Disabled merkle
-	os.Unsetenv("GAUTH_NOTARY_MERKLE_ENABLED")
+	os.Unsetenv("AGENTAUTH_NOTARY_MERKLE_ENABLED")
 	snap1, err := GenerateSnapshot(rs, "")
 	if err != nil {
 		t.Fatalf("snapshot1 failed: %v", err)
@@ -36,7 +36,7 @@ func TestGenerateSnapshot(t *testing.T) {
 		t.Fatalf("expected snapshot hash")
 	}
 	// Enabled merkle
-	os.Setenv("GAUTH_NOTARY_MERKLE_ENABLED", "1")
+	os.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
 	r3 := Receipt{Hash: "sha256:three", Timestamp: "2025-10-20T00:00:02Z", Provider: "memory", Version: 1, Success: true}
 	if _, appendErr := rs.Append(r3); appendErr != nil {
 		t.Fatalf("append3: %v", appendErr)

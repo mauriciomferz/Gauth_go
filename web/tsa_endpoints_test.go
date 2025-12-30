@@ -11,7 +11,7 @@ import (
 
 // TestTSAAnchorAndVerify exercises the TSA prototype endpoints when enabled.
 func TestTSAAnchorAndVerify(t *testing.T) {
-	t.Setenv("GAUTH_TSA_ENDPOINTS_ENABLE", "1")
+	t.Setenv("AGENTAUTH_TSA_ENDPOINTS_ENABLE", "1")
 	// Need capability registry hash to validate verify path; server seeds static hash when no file.
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })

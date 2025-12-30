@@ -30,9 +30,9 @@ func TestRotationV2SigningIntegration(t *testing.T) {
 		t.Fatalf("write temp config: %v", err2)
 	}
 
-	t.Setenv("GAUTH_ROTATIONS_V2_CONFIG", cfgPath)
-	t.Setenv("GAUTH_ROTATIONS_V2_AUTO_GEN", "1")
-	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_CONFIG", cfgPath)
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_AUTO_GEN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_SIGN", "1")
 
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })

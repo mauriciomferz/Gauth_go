@@ -10,9 +10,9 @@ import (
 )
 
 // TestCapabilityAnchorNotarizationLatencyHistogram ensures the latency histogram line appears in custom exposition
-// when GAUTH_CAP_ANCHOR_NOTARIZE=1 and at least one observation is recorded.
+// when AGENTAUTH_CAP_ANCHOR_NOTARIZE=1 and at least one observation is recorded.
 func TestCapabilityAnchorNotarizationLatencyHistogram(t *testing.T) {
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
 	// We don't rely on emission path; directly observe a latency via adapter method.
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth"})
 	srv := NewBetaServer(":0")

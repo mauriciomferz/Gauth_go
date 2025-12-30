@@ -12,7 +12,7 @@ import (
 
 func TestRotationLogSignatureVerification(t *testing.T) {
 	logPath := "test_rotation_log.jsonl"
-	os.Setenv("GAUTH_EDDSA_ROTATION_LOG", logPath)
+	os.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", logPath)
 	defer os.Remove(logPath)
 
 	m, err := NewManager(10 * time.Second)

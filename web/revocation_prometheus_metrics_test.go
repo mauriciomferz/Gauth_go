@@ -12,7 +12,7 @@ import (
 
 // TestRevocationAutoSignPrometheusMetrics ensures the Prometheus exposition includes the revocation auto-sign counters.
 func TestRevocationAutoSignPrometheusMetrics(t *testing.T) {
-	t.Setenv("GAUTH_OTEL_METRICS_ENABLE", "0") // keep deterministic & fast
+	t.Setenv("AGENTAUTH_OTEL_METRICS_ENABLE", "0") // keep deterministic & fast
 	s := NewBetaServerWithMetrics(":0", imetrics.NewMemory())
 	t.Cleanup(func() { s.Shutdown() })
 	defer s.Shutdown()

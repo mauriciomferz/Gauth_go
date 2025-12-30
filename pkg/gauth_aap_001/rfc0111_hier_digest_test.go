@@ -11,11 +11,11 @@ import (
 
 // TestHierarchicalDigestRootAndChild verifies Version bump to 4 and parent digest binding.
 func TestHierarchicalDigestRootAndChild(t *testing.T) {
-	os.Setenv("GAUTH_ENABLE_HIER_DIGEST", "1")
-	defer os.Unsetenv("GAUTH_ENABLE_HIER_DIGEST")
+	os.Setenv("AGENTAUTH_ENABLE_HIER_DIGEST", "1")
+	defer os.Unsetenv("AGENTAUTH_ENABLE_HIER_DIGEST")
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("GAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("GAUTH_PERSIST_PATH")
+	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
+	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
@@ -60,8 +60,8 @@ func TestHierarchicalDigestRootAndChild(t *testing.T) {
 // TestHierDigestDisabled ensures Version <4 when hier digest flag not enabled.
 func TestHierDigestDisabled(t *testing.T) {
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("GAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("GAUTH_PERSIST_PATH")
+	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
+	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
@@ -79,11 +79,11 @@ func TestHierDigestDisabled(t *testing.T) {
 
 // TestHierDigestTamperParent verifies tampering parent digest causes child signature mismatch after re-sign attempt.
 func TestHierDigestTamperParent(t *testing.T) {
-	os.Setenv("GAUTH_ENABLE_HIER_DIGEST", "1")
-	defer os.Unsetenv("GAUTH_ENABLE_HIER_DIGEST")
+	os.Setenv("AGENTAUTH_ENABLE_HIER_DIGEST", "1")
+	defer os.Unsetenv("AGENTAUTH_ENABLE_HIER_DIGEST")
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("GAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("GAUTH_PERSIST_PATH")
+	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
+	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
 	kms, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {

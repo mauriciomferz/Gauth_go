@@ -22,18 +22,18 @@ func TestCapabilityAnchorAlgorithmMetrics(t *testing.T) {
 	}
 	anchorPath := filepath.Join(tmp, "anchor_artifact.json")
 	// Environment configuration required for anchor emission & signing
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m") // minimum accepted
-	t.Setenv("GAUTH_EDDSA_TTL_HOURS", "24")           // enable key manager
-	t.Setenv("GAUTH_CAP_ANCHOR_SIGN", "1")            // enable signing path
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m") // minimum accepted
+	t.Setenv("AGENTAUTH_EDDSA_TTL_HOURS", "24")           // enable key manager
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_SIGN", "1")            // enable signing path
 	// Ensure cleanup
 	t.Cleanup(func() {
-		os.Unsetenv("GAUTH_CAPABILITIES_PATH")
-		os.Unsetenv("GAUTH_CAP_ANCHOR_FILE_PATH")
-		os.Unsetenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL")
-		os.Unsetenv("GAUTH_EDDSA_TTL_HOURS")
-		os.Unsetenv("GAUTH_CAP_ANCHOR_SIGN")
+		os.Unsetenv("AGENTAUTH_CAPABILITIES_PATH")
+		os.Unsetenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH")
+		os.Unsetenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL")
+		os.Unsetenv("AGENTAUTH_EDDSA_TTL_HOURS")
+		os.Unsetenv("AGENTAUTH_CAP_ANCHOR_SIGN")
 	})
 	m := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics("0", m)

@@ -12,12 +12,12 @@ import (
 
 func TestSunsetControllerIntegration(t *testing.T) {
 	// Enable sunset controller
-	os.Setenv("GAUTH_SUNSET_ENABLED", "1")
-	os.Setenv("GAUTH_SUNSET_INTERVAL", "100ms")
-	os.Setenv("GAUTH_SUNSET_WINDOW", "500ms")
-	defer os.Unsetenv("GAUTH_SUNSET_ENABLED")
-	defer os.Unsetenv("GAUTH_SUNSET_INTERVAL")
-	defer os.Unsetenv("GAUTH_SUNSET_WINDOW")
+	os.Setenv("AGENTAUTH_SUNSET_ENABLED", "1")
+	os.Setenv("AGENTAUTH_SUNSET_INTERVAL", "100ms")
+	os.Setenv("AGENTAUTH_SUNSET_WINDOW", "500ms")
+	defer os.Unsetenv("AGENTAUTH_SUNSET_ENABLED")
+	defer os.Unsetenv("AGENTAUTH_SUNSET_INTERVAL")
+	defer os.Unsetenv("AGENTAUTH_SUNSET_WINDOW")
 
 	// Create service with memory metrics for controller integration
 	auditLogger := audit.NewMemoryLogger(nil)
@@ -61,8 +61,8 @@ func TestSunsetControllerIntegration(t *testing.T) {
 
 func TestSunsetControllerDisabled(t *testing.T) {
 	// Disable controller
-	os.Setenv("GAUTH_SUNSET_ENABLED", "0")
-	defer os.Unsetenv("GAUTH_SUNSET_ENABLED")
+	os.Setenv("AGENTAUTH_SUNSET_ENABLED", "0")
+	defer os.Unsetenv("AGENTAUTH_SUNSET_ENABLED")
 
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
@@ -84,12 +84,12 @@ func TestSunsetControllerDisabled(t *testing.T) {
 
 func TestSunsetControllerEnvironmentConfig(t *testing.T) {
 	// Test custom thresholds
-	os.Setenv("GAUTH_SUNSET_PILOT_THRESHOLD", "0.70")
-	os.Setenv("GAUTH_SUNSET_MAX_MISMATCH", "0.01")
-	os.Setenv("GAUTH_SUNSET_WINDOW", "1m")
-	defer os.Unsetenv("GAUTH_SUNSET_PILOT_THRESHOLD")
-	defer os.Unsetenv("GAUTH_SUNSET_MAX_MISMATCH")
-	defer os.Unsetenv("GAUTH_SUNSET_WINDOW")
+	os.Setenv("AGENTAUTH_SUNSET_PILOT_THRESHOLD", "0.70")
+	os.Setenv("AGENTAUTH_SUNSET_MAX_MISMATCH", "0.01")
+	os.Setenv("AGENTAUTH_SUNSET_WINDOW", "1m")
+	defer os.Unsetenv("AGENTAUTH_SUNSET_PILOT_THRESHOLD")
+	defer os.Unsetenv("AGENTAUTH_SUNSET_MAX_MISMATCH")
+	defer os.Unsetenv("AGENTAUTH_SUNSET_WINDOW")
 
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()

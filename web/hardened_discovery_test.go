@@ -8,9 +8,9 @@ import (
 )
 
 func TestHardenedDiscoveryFields(t *testing.T) {
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	t.Setenv("GAUTH_JWKS_SIGNING_KEY_ENABLED", "1")
-	t.Setenv("GAUTH_JWKS_SIGNING_KEY", "test-signing-key")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_JWKS_SIGNING_KEY_ENABLED", "1")
+	t.Setenv("AGENTAUTH_JWKS_SIGNING_KEY", "test-signing-key")
 
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -59,7 +59,7 @@ func TestHardenedDiscoveryFields(t *testing.T) {
 }
 
 func TestDiscoveryDeprecationSchedule(t *testing.T) {
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

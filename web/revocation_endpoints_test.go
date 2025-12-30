@@ -129,7 +129,7 @@ func TestRevocationEndpoints(t *testing.T) {
 
 	// R6: Discovery Verification
 	t.Run("RFC111-R6_DiscoveryMetadata", func(t *testing.T) {
-		t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa") // Ensure enabled
+		t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa") // Ensure enabled
 
 		// Create a separate handler/server to re-trigger registering or just invoke the handler logic?
 		// Since discovery is registered via RegisterRB3Discovery, and BetaServer is complex,

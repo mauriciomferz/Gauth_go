@@ -75,7 +75,7 @@ func TestAdvancedSemanticValidatorRules(t *testing.T) {
 	if _, err := svc.CreateDelegation(overCap); err == nil {
 		t.Fatalf("expected duration cap failure")
 	}
-	// Wildcard self delegation should be rejected under Advanced (unless GAUTH_ALLOW_WILDCARD=1)
+	// Wildcard self delegation should be rejected under Advanced (unless AGENTAUTH_ALLOW_WILDCARD=1)
 	deniedSelf := DelegationRequest{Grantor: "same@example.com", Grantee: "same@example.com", Scope: []string{"*"}, Restrictions: map[string]string{}, Duration: time.Hour}
 	if _, err := svc.CreateDelegation(deniedSelf); err == nil {
 		t.Fatalf("expected wildcard rejection in advanced mode")

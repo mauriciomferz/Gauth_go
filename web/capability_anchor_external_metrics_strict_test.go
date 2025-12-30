@@ -14,7 +14,7 @@ import (
 //
 //nolint:gocyclo // External anchor metrics test
 func TestExternalAnchorMetricsStrict(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", memoryProvider)
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", memoryProvider)
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	// Use metrics-aware constructor so startup external anchoring attempt records directly into Prometheus.

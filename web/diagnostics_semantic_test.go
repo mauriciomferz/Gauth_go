@@ -15,7 +15,7 @@ import (
 // TestSemanticDiagnostics_Unwired verifies payload fields when no AAP001 service is wired (wired=false).
 func TestSemanticDiagnostics_Unwired(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "1")
+	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "1")
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
@@ -54,8 +54,8 @@ func TestSemanticDiagnostics_Unwired(t *testing.T) {
 // TestSemanticDiagnostics_UnwiredStrictUnavailable verifies error response when strict wiring is required.
 func TestSemanticDiagnostics_UnwiredStrictUnavailable(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "1")
-	t.Setenv("GAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED", "1")
+	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "1")
+	t.Setenv("AGENTAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED", "1")
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
@@ -108,7 +108,7 @@ func (m *mockAAP001Service) SemanticSnapshot() map[string]uint64 {
 func TestSemanticDiagnostics_Wired(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	persistFile := t.TempDir() + "/semantic_counters.json"
-	t.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", persistFile)
+	t.Setenv("AGENTAUTH_SEMANTIC_PERSIST_PATH", persistFile)
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
 	// Inject mock service with stable history then a massive spike to trigger anomaly.

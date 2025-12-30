@@ -9,11 +9,11 @@ import (
 
 // TestSemanticRatesPrometheus ensures semantic rate metrics are exposed in Prometheus format.
 func TestSemanticRatesPrometheus(t *testing.T) {
-	t.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", "") // disable persistence interference
+	t.Setenv("AGENTAUTH_SEMANTIC_PERSIST_PATH", "") // disable persistence interference
 	srv := NewBetaServer("8123")
 	t.Cleanup(func() { srv.Shutdown() })
 	if srv.aap001Service == nil {
-		t.Fatalf("AAP-001 service not initialized; GAUTH_DISABLE_AAP001_SERVICE should not be set")
+		t.Fatalf("AAP-001 service not initialized; AGENTAUTH_DISABLE_AAP001_SERVICE should not be set")
 	}
 	// Inject Mock Service
 	mockSvc := &mockAAP001Service{

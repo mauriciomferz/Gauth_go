@@ -8,13 +8,13 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 )
 
-// TestScopeInheritanceAdvanced verifies regex pattern coverage when GAUTH_ENABLE_ADVANCED_SCOPE=1.
+// TestScopeInheritanceAdvanced verifies regex pattern coverage when AGENTAUTH_ENABLE_ADVANCED_SCOPE=1.
 func TestScopeInheritanceAdvanced(t *testing.T) {
-	os.Setenv("GAUTH_ENABLE_ADVANCED_SCOPE", "1")
-	defer os.Unsetenv("GAUTH_ENABLE_ADVANCED_SCOPE")
+	os.Setenv("AGENTAUTH_ENABLE_ADVANCED_SCOPE", "1")
+	defer os.Unsetenv("AGENTAUTH_ENABLE_ADVANCED_SCOPE")
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("GAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("GAUTH_PERSIST_PATH")
+	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
+	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
 	svc := NewService(memLogger, &allowAllAuthorizer{})
 	root, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read", "re:^audit\\.[a-z]+\\.write$"}, Duration: time.Hour})

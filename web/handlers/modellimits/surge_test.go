@@ -9,12 +9,12 @@ import (
 
 // TestAttestationStreamSurgeTrigger forces a surge condition and expects a surge_trigger attestation.
 func TestAttestationStreamSurgeTrigger(t *testing.T) {
-	t.Setenv("GAUTH_ATTEST_STREAM_ENABLE", "1")
-	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN", "0")
-	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE", "0")
+	t.Setenv("AGENTAUTH_ATTEST_STREAM_ENABLE", "1")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN", "0")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE", "0")
 	// Lower surge thresholds for deterministic trigger
-	t.Setenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR", "0.5")
-	t.Setenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "2")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_SURGE_FACTOR", "0.5")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "2")
 
 	// Prepare limits file (required to trigger exceed)
 	limitsFile, err := os.CreateTemp(t.TempDir(), "limits-*.json")

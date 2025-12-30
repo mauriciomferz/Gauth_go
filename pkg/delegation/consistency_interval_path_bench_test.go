@@ -12,7 +12,7 @@ func BenchmarkConsistencyIntervalPath(b *testing.B) {
 	sizes := []int{512, 1024, 2048, 4096}
 	for _, n := range sizes {
 		b.Run("legacy_"+strconv.Itoa(n), func(b *testing.B) {
-			os.Setenv("GAUTH_CONSISTENCY_V2_INTERVAL_PATH", "0")
+			os.Setenv("AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH", "0")
 			chain := NewRevocationChain()
 			// Build first half
 			for i := 0; i < n/2; i++ {
@@ -37,7 +37,7 @@ func BenchmarkConsistencyIntervalPath(b *testing.B) {
 			}
 		})
 		b.Run("interval_"+strconv.Itoa(n), func(b *testing.B) {
-			os.Setenv("GAUTH_CONSISTENCY_V2_INTERVAL_PATH", "1")
+			os.Setenv("AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH", "1")
 			chain := NewRevocationChain()
 			for i := 0; i < n/2; i++ {
 				_, _ = chain.Append(RevocationEvent{ID: "rev-" + strconv.Itoa(i), DelegationID: "del-" + strconv.Itoa(i)})

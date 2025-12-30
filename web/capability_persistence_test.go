@@ -25,7 +25,7 @@ func TestCapabilityPersistenceAndReload(t *testing.T) {
 	if err := tmp.Close(); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -122,7 +122,7 @@ func TestCapabilityRegistryHashPreservedOnFailedReload(t *testing.T) {
 		t.Fatal(err)
 	}
 	tmp.Close()
-	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	d1 := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")
@@ -175,7 +175,7 @@ func TestCapabilityRegistryHashDeterminism(t *testing.T) {
 		t.Fatal(err)
 	}
 	tmp1.Close()
-	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp1.Name())
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", tmp1.Name())
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	dA := performRequest(srv.router, "GET", "/.well-known/gauth-configuration")

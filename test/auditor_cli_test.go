@@ -26,7 +26,7 @@ func buildSigningPayload(p *poa.ProofOfAuthorization) []byte {
 	}
 	c := canon{ID: p.ID, Subject: p.Subject, Resource: p.Resource, Action: p.Action, Issuer: p.Issuer, IssuedAt: p.IssuedAt, ExpiresAt: p.ExpiresAt, Scope: append([]string(nil), p.Scope...)}
 	raw, _ := json.Marshal(c)
-	return append([]byte("GAUTH_POA:"), raw...)
+	return append([]byte("AGENTAUTH_POA:"), raw...)
 }
 
 func TestAuditorVerifyPOA(t *testing.T) {

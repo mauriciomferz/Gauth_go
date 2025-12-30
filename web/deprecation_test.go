@@ -15,7 +15,7 @@ import (
 // TestLegacyLifecycleAliasDeprecation ensures the legacy alias prints a deprecation warning.
 func TestLegacyLifecycleAliasDeprecation(t *testing.T) {
 	var srv *BetaServer
-	testutil.WithEnv(t, "GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "", func() {
+	testutil.WithEnv(t, "AGENTAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "", func() {
 		srv = NewBetaServer("")
 		// Seed one lifecycle event so handler returns events (not required for warning but keeps response meaningful)
 		seed := httptest.NewRecorder()

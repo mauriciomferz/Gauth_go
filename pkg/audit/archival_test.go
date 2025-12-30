@@ -14,12 +14,12 @@ func TestFileLoggerArchival(t *testing.T) {
 	archiveDir := filepath.Join(dir, "archives")
 
 	// Set env vars for OpenFileLogger
-	os.Setenv("GAUTH_AUDIT_ARCHIVE_DIR", archiveDir)
-	os.Setenv("GAUTH_AUDIT_ARCHIVE_COMPRESS", "1")
-	os.Setenv("GAUTH_AUDIT_ARCHIVE_MAX_COUNT", "2")
-	defer os.Unsetenv("GAUTH_AUDIT_ARCHIVE_DIR")
-	defer os.Unsetenv("GAUTH_AUDIT_ARCHIVE_COMPRESS")
-	defer os.Unsetenv("GAUTH_AUDIT_ARCHIVE_MAX_COUNT")
+	os.Setenv("AGENTAUTH_AUDIT_ARCHIVE_DIR", archiveDir)
+	os.Setenv("AGENTAUTH_AUDIT_ARCHIVE_COMPRESS", "1")
+	os.Setenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT", "2")
+	defer os.Unsetenv("AGENTAUTH_AUDIT_ARCHIVE_DIR")
+	defer os.Unsetenv("AGENTAUTH_AUDIT_ARCHIVE_COMPRESS")
+	defer os.Unsetenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT")
 
 	fl, err := OpenFileLogger(logPath)
 	if err != nil {
@@ -82,6 +82,6 @@ loop:
 		t.Fatal("expected archives to exist, but none found")
 	}
 	if len(matches) > 2 {
-		t.Fatalf("expected at most 2 archives due to pruning (GAUTH_AUDIT_ARCHIVE_MAX_COUNT=2), found %d", len(matches))
+		t.Fatalf("expected at most 2 archives due to pruning (AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT=2), found %d", len(matches))
 	}
 }

@@ -389,7 +389,7 @@ func TestBuildPoASigningPayload(t *testing.T) {
 				ExpiresAt: baseTime.Add(24 * time.Hour),
 				Scope:     []string{"read"},
 			},
-			checkPrefix:   "GAUTH_POA:",
+			checkPrefix:   "AGENTAUTH_POA:",
 			checkContains: []string{"poa_basic", "user_basic", "resource_basic", "read", "issuer_basic"},
 		},
 		{
@@ -412,7 +412,7 @@ func TestBuildPoASigningPayload(t *testing.T) {
 					Revocable:   true,
 				},
 			},
-			checkPrefix:   "GAUTH_POA:",
+			checkPrefix:   "AGENTAUTH_POA:",
 			checkContains: []string{"poa_del", "admin", "user_del"},
 		},
 		{
@@ -433,7 +433,7 @@ func TestBuildPoASigningPayload(t *testing.T) {
 					ValidityScore: 0.90,
 				},
 			},
-			checkPrefix:   "GAUTH_POA:",
+			checkPrefix:   "AGENTAUTH_POA:",
 			checkContains: []string{"poa_att", "verifier", "0.95"},
 		},
 	}
@@ -751,20 +751,20 @@ func TestMemoryService_Issue_WithMultisigEnv(t *testing.T) {
 	// However, without a properly initialized registry, it won't produce signatures
 
 	// Save original env vars
-	origSign := os.Getenv("GAUTH_POA_MULTISIG_SIGN")
-	origKids := os.Getenv("GAUTH_POA_MULTISIG_KIDS")
-	origThreshold := os.Getenv("GAUTH_POA_MULTISIG_THRESHOLD")
+	origSign := os.Getenv("AGENTAUTH_POA_MULTISIG_SIGN")
+	origKids := os.Getenv("AGENTAUTH_POA_MULTISIG_KIDS")
+	origThreshold := os.Getenv("AGENTAUTH_POA_MULTISIG_THRESHOLD")
 
 	defer func() {
-		os.Setenv("GAUTH_POA_MULTISIG_SIGN", origSign)
-		os.Setenv("GAUTH_POA_MULTISIG_KIDS", origKids)
-		os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", origThreshold)
+		os.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", origSign)
+		os.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", origKids)
+		os.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", origThreshold)
 	}()
 
 	// Set env vars to trigger multisig path
-	os.Setenv("GAUTH_POA_MULTISIG_SIGN", "1")
-	os.Setenv("GAUTH_POA_MULTISIG_KIDS", "key1,key2")
-	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "2")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", "1")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", "key1,key2")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", "2")
 
 	s := NewMemoryService()
 	ctx := context.Background()

@@ -20,12 +20,12 @@ func TestNotarizationReceiptVerification(t *testing.T) {
 	}
 	anchorPath := filepath.Join(dir, "anchor.json")
 	receiptPath := filepath.Join(dir, "receipts.json")
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1s")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
-	t.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", receiptPath)
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorPath)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1s")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_NOTARY_RECEIPT_PERSIST_PATH", receiptPath)
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger second emission to ensure persistence exists

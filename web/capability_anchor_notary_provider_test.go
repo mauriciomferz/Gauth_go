@@ -7,12 +7,12 @@ import (
 
 // TestCapabilityAnchorNotaryProviderSelection ensures external_stub provider initializes and produces provider field in receipt.
 func TestCapabilityAnchorNotaryProviderSelection(t *testing.T) {
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "external_stub")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "external_stub")
 	// tighten latency to reduce test duration
-	t.Setenv("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", "5")
-	t.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "15")
-	t.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0") // deterministic success
+	t.Setenv("AGENTAUTH_NOTARY_STUB_MIN_LATENCY_MS", "5")
+	t.Setenv("AGENTAUTH_NOTARY_STUB_MAX_LATENCY_MS", "15")
+	t.Setenv("AGENTAUTH_NOTARY_STUB_FAIL_PROB", "0") // deterministic success
 
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })

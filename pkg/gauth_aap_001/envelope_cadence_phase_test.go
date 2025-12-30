@@ -17,7 +17,7 @@ func TestEnvelopeIssuanceCadenceHistogram(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
 	ma.AddPolicy(authz.Policy{ID: "allow_create", Subject: "*", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	svc := NewService(audit.NewMemoryLogger(nil), ma, WithMetrics(mem))
-	_ = os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
+	_ = os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 	// First issuance – no cadence recorded (previous timestamp absent). Use same grantor for both issuances
 	req1 := DelegationRequest{Grantor: "cadence@example.com", Grantee: "g@example.com", Scope: []string{"x"}, Duration: time.Minute}
 	if _, err := svc.CreateDelegationCtx(tContext(), req1); err != nil {

@@ -14,7 +14,7 @@ import (
 )
 
 // TestAdvancedClaims_GenerationFeatureGated verifies that AdvancedClaims are only populated
-// when GAUTH_ADVANCED_CLAIMS=1, ensuring backward compatibility.
+// when AGENTAUTH_ADVANCED_CLAIMS=1, ensuring backward compatibility.
 func TestAdvancedClaims_GenerationFeatureGated(t *testing.T) {
 	ctx := WithSubject(context.Background(), "bob")
 	svc := newTestService()
@@ -32,9 +32,9 @@ func TestAdvancedClaims_GenerationFeatureGated(t *testing.T) {
 
 	t.Run("disabled_by_default", func(t *testing.T) {
 		// Ensure both flags are set correctly
-		os.Unsetenv("GAUTH_ADVANCED_CLAIMS")
-		os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-		defer os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
+		os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
+		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+		defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 
 		// Generate token using internal helper
 		tokenStr := generateAuthToken(svc, &resp.POA)
@@ -51,11 +51,11 @@ func TestAdvancedClaims_GenerationFeatureGated(t *testing.T) {
 
 	t.Run("enabled_with_flag", func(t *testing.T) {
 		// Enable both feature flags
-		os.Setenv("GAUTH_ADVANCED_CLAIMS", "1")
-		os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+		os.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "1")
+		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 		defer func() {
-			os.Unsetenv("GAUTH_ADVANCED_CLAIMS")
-			os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
+			os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
+			os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 		}()
 
 		// Generate token
@@ -92,10 +92,10 @@ func TestAdvancedClaims_BackwardCompatibility(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("token_without_advanced_claims", func(t *testing.T) {
-		// Ensure GAUTH_ADVANCED_CLAIMS is not set (simulates pre-P2.10 token generation)
-		os.Unsetenv("GAUTH_ADVANCED_CLAIMS")
-		os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-		defer os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
+		// Ensure AGENTAUTH_ADVANCED_CLAIMS is not set (simulates pre-P2.10 token generation)
+		os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
+		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+		defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 
 		tokenStr := generateAuthToken(svc, &resp.POA)
 		require.NotEmpty(t, tokenStr)
@@ -109,15 +109,15 @@ func TestAdvancedClaims_BackwardCompatibility(t *testing.T) {
 	})
 
 	t.Run("verification_skips_validation_when_flag_disabled", func(t *testing.T) {
-		// Enable GAUTH_ADVANCED_CLAIMS for token generation
-		os.Setenv("GAUTH_ADVANCED_CLAIMS", "1")
-		os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+		// Enable AGENTAUTH_ADVANCED_CLAIMS for token generation
+		os.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "1")
+		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 		tokenStr := generateAuthToken(svc, &resp.POA)
 		require.NotEmpty(t, tokenStr)
 
-		// Disable GAUTH_ADVANCED_CLAIMS for verification (simulates rollback scenario)
-		os.Unsetenv("GAUTH_ADVANCED_CLAIMS")
+		// Disable AGENTAUTH_ADVANCED_CLAIMS for verification (simulates rollback scenario)
+		os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
 
 		verifyRes, err := svc.VerifyToken(ctx, tokenStr)
 		require.NoError(t, err, "Verification should skip AdvancedClaims validation when flag disabled")
@@ -126,6 +126,6 @@ func TestAdvancedClaims_BackwardCompatibility(t *testing.T) {
 		assert.False(t, verifyRes.Suspended)
 
 		// Clean up
-		os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
+		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 	})
 }

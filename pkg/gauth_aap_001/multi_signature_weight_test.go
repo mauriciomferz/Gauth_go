@@ -35,8 +35,8 @@ func signPOAWeight(t *testing.T, poa *PowerOfAttorney, keyID string, priv ed2551
 // TestWeightedMultiSignatureSuccess ensures cumulative weights meeting threshold succeed.
 func TestWeightedMultiSignatureSuccess(t *testing.T) {
 	// Configure environment weights: alice=3,bob=2,carol=1 threshold=5 -> need any combination summing >=5
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "alice=3,bob=2,carol=1")
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "5") // threshold interpreted as weight requirement in verify logic
+	os.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "alice=3,bob=2,carol=1")
+	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "5") // threshold interpreted as weight requirement in verify logic
 	// Structural rule requires len(Signers) >= Threshold; include placeholder signers d1,d2 (not signed) for structural validity.
 	poa := &PowerOfAttorney{ID: "w1", Grantor: "grantor", Grantee: "agent", Scope: []string{"read"}, ValidFrom: time.Now().UTC(), ValidUntil: time.Now().UTC().Add(time.Hour), CreatedAt: time.Now().UTC(), Signers: []string{"alice", "bob", "carol", "d1", "d2"}, Threshold: 5, MultiSignatures: map[string]*POASignature{}}
 	// Keys per signer
@@ -57,8 +57,8 @@ func TestWeightedMultiSignatureSuccess(t *testing.T) {
 
 // TestWeightedMultiSignatureInsufficient ensures failure when cumulative weight below threshold.
 func TestWeightedMultiSignatureInsufficient(t *testing.T) {
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", "alice=3,bob=2,carol=1")
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "6") // require weight 6
+	os.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "alice=3,bob=2,carol=1")
+	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "6") // require weight 6
 	// Include placeholders to satisfy structural threshold (need >=6 signers) -> add d1,d2,d3
 	poa := &PowerOfAttorney{ID: "w2", Grantor: "grantor", Grantee: "agent", Scope: []string{"read"}, ValidFrom: time.Now().UTC(), ValidUntil: time.Now().UTC().Add(time.Hour), CreatedAt: time.Now().UTC(), Signers: []string{"alice", "bob", "carol", "d1", "d2", "d3"}, Threshold: 6, MultiSignatures: map[string]*POASignature{}}
 	privA, pubA, keyIDA := genKeyWeight(t)

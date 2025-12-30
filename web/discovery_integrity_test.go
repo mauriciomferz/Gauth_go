@@ -32,8 +32,8 @@ func TestDiscoveryETagPresent(t *testing.T) {
 
 func TestDiscoverySignatureOptional(t *testing.T) {
 	// ensure env not set for unsigned server
-	t.Setenv("GAUTH_DISCOVERY_SIGNING_KEY", "")
-	t.Setenv("GAUTH_DISCOVERY_SIGNING_KEY_ENABLED", "0")
+	t.Setenv("AGENTAUTH_DISCOVERY_SIGNING_KEY", "")
+	t.Setenv("AGENTAUTH_DISCOVERY_SIGNING_KEY_ENABLED", "0")
 	unsigned := NewTestServerNoSeed(t)
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/.well-known/gauth-configuration", nil)
@@ -47,8 +47,8 @@ func TestDiscoverySignatureOptional(t *testing.T) {
 	}
 
 	// set key for signed server
-	t.Setenv("GAUTH_DISCOVERY_SIGNING_KEY", "demo-secret")
-	t.Setenv("GAUTH_DISCOVERY_SIGNING_KEY_ENABLED", "1")
+	t.Setenv("AGENTAUTH_DISCOVERY_SIGNING_KEY", "demo-secret")
+	t.Setenv("AGENTAUTH_DISCOVERY_SIGNING_KEY_ENABLED", "1")
 	signed := NewTestServerNoSeed(t)
 	rr2 := httptest.NewRecorder()
 	signed.router.ServeHTTP(rr2, req)

@@ -19,16 +19,16 @@ func TestCapabilityAnchorMaterial(t *testing.T) {
 	tmp.Close()
 	// Use t.Setenv to ensure environment isolation (automatically restored after test) to
 	// prevent leakage influencing subsequent tests in this package.
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", tmp.Name())
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms") // force immediate write
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", tmp.Name())
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms") // force immediate write
 	// Sign if EdDSA active (optional) - do not enforce present
-	t.Setenv("GAUTH_CAP_ANCHOR_SIGN", "0")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_SIGN", "0")
 	// Provide a capabilities file to ensure loader path executes anchor emission logic (file-backed scenario).
 	capFile := filepath.Join(t.TempDir(), "caps.json")
 	if err2 := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err2 != nil {
 		t.Fatalf("write capabilities file: %v", err2)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Anchor artifact might emit only after file load; perform explicit reload to ensure loader executed (idempotent)

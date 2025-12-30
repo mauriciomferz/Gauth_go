@@ -20,7 +20,7 @@ func BenchmarkReplayNonceStore(b *testing.B) {
 			_ = s.Seen(k, time.Now())
 		}
 	})
-	addr := os.Getenv("GAUTH_ATTEST_REDIS_ADDR")
+	addr := os.Getenv("AGENTAUTH_ATTEST_REDIS_ADDR")
 	if addr == "" {
 		addr = "localhost:6379"
 	}

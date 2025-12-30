@@ -11,9 +11,9 @@ import (
 "github.com/mauriciomferz/AgentAuth/pkg/aap"
 )
 
-// TestClockSkewTolerance validates not-before and expiry grace window behavior controlled by GAUTH_CLOCK_SKEW_SECONDS.
+// TestClockSkewTolerance validates not-before and expiry grace window behavior controlled by AGENTAUTH_CLOCK_SKEW_SECONDS.
 func TestClockSkewTolerance(t *testing.T) {
-	os.Setenv("GAUTH_CLOCK_SKEW_SECONDS", "120") // 2 minute tolerance
+	os.Setenv("AGENTAUTH_CLOCK_SKEW_SECONDS", "120") // 2 minute tolerance
 	repo := newMemoryRepository()
 	svc := &Service{repo: repo, audit: audit.NewMemoryLogger(nil), authz: authz.NewMemoryAuthorizer(), nowFn: time.Now}
 

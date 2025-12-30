@@ -43,11 +43,11 @@ func performJSON(t *testing.T, srv *BetaServer, method, path, body string, hdr m
 //nolint:gocyclo // Policy lifecycle integration test
 func TestPolicyLifecycleIntegration(t *testing.T) {
 	// Ensure admin token for authorization path
-	t.Setenv("GAUTH_POLICY_ADMIN_TOKEN", "test-admin")
-	defer os.Unsetenv("GAUTH_POLICY_ADMIN_TOKEN")
+	t.Setenv("AGENTAUTH_POLICY_ADMIN_TOKEN", "test-admin")
+	defer os.Unsetenv("AGENTAUTH_POLICY_ADMIN_TOKEN")
 	// Disable automatic demo bundle seeding to start from empty chain for lifecycle assertions
-	t.Setenv("GAUTH_SEED_POLICY", "0")
-	defer os.Unsetenv("GAUTH_SEED_POLICY")
+	t.Setenv("AGENTAUTH_SEED_POLICY", "0")
+	defer os.Unsetenv("AGENTAUTH_SEED_POLICY")
 
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })

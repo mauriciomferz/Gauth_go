@@ -12,8 +12,8 @@ import (
 // TestCSPHeaders validates that /index.html responds with a CSP header containing a script nonce and frame-ancestors 'none'
 func TestCSPHeaders(t *testing.T) {
 	t.Skip("CSP middleware not yet implemented - pre-existing incomplete feature")
-	if os.Getenv("GAUTH_SKIP_SMOKETEST") == "1" {
-		t.Skip("GAUTH_SKIP_SMOKETEST=1")
+	if os.Getenv("AGENTAUTH_SKIP_SMOKETEST") == "1" {
+		t.Skip("AGENTAUTH_SKIP_SMOKETEST=1")
 	}
 	resp, err := http.Get("http://localhost:8080/index.html")
 	if err != nil {

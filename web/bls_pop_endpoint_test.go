@@ -13,7 +13,7 @@ import (
 
 // TestBLSPoPIssueAndVerify exercises PoP challenge issuance via require_pop and subsequent verification.
 func TestBLSPoPIssueAndVerify(t *testing.T) {
-	t.Setenv("GAUTH_ALLOW_POP_PRIV_EXPORT", "1")
+	t.Setenv("AGENTAUTH_ALLOW_POP_PRIV_EXPORT", "1")
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
 	t.Cleanup(func() { srv.Shutdown() })
@@ -103,7 +103,7 @@ func TestBLSPoPIssueAndVerify(t *testing.T) {
 
 // TestBLSPoPFailure modifies a signature to force verification failure.
 func TestBLSPoPFailure(t *testing.T) {
-	t.Setenv("GAUTH_ALLOW_POP_PRIV_EXPORT", "1")
+	t.Setenv("AGENTAUTH_ALLOW_POP_PRIV_EXPORT", "1")
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
 	t.Cleanup(func() { srv.Shutdown() })
@@ -198,7 +198,7 @@ func TestBLSPoPEdgeCases(t *testing.T) {
 	}
 
 	// Issue proper PoP to craft duplicate public key scenario
-	t.Setenv("GAUTH_ALLOW_POP_PRIV_EXPORT", "1")
+	t.Setenv("AGENTAUTH_ALLOW_POP_PRIV_EXPORT", "1")
 	msgB64 := base64.StdEncoding.EncodeToString([]byte("edge case msg"))
 	issueReq := map[string]interface{}{"mode": "issue", "message_b64": msgB64, "participants": 2, "require_pop": true}
 	ib, _ := json.Marshal(issueReq)

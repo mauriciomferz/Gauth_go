@@ -9,9 +9,9 @@ import (
 // TestNonProdNoSubstitution ensures placeholders are untouched outside prod environment.
 func TestNonProdNoSubstitution(t *testing.T) {
 	bs := &BetaServer{}
-	orig := os.Getenv("GAUTH_ENV")
-	defer t.Setenv("GAUTH_ENV", orig)
-	t.Setenv("GAUTH_ENV", "dev")
+	orig := os.Getenv("AGENTAUTH_ENV")
+	defer t.Setenv("AGENTAUTH_ENV", orig)
+	t.Setenv("AGENTAUTH_ENV", "dev")
 	page := []byte(`<script src="/static/js/__APP_BUNDLE__" integrity="__APP_SRI__"></script>`)
 	out := string(bs.applyBundleSubstitution(page))
 	if !strings.Contains(out, "__APP_BUNDLE__") || !strings.Contains(out, "__APP_SRI__") {

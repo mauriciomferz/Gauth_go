@@ -86,7 +86,7 @@ func genKey(t *testing.T) (priv ed25519.PrivateKey, pub ed25519.PublicKey, keyID
 }
 
 func TestVerifyMultiSignaturesThresholdSuccess(t *testing.T) {
-	os.Unsetenv("GAUTH_MULTI_SIG_WEIGHTS")
+	os.Unsetenv("AGENTAUTH_MULTI_SIG_WEIGHTS")
 	poa := &PowerOfAttorney{ID: "t1", Grantor: "alice", Grantee: "agent", Scope: []string{"read"}, ValidFrom: nowUTC(), ValidUntil: nowUTC().Add(time.Hour), CreatedAt: nowUTC(), Signers: []string{"alice", "bob", "carol"}, Threshold: 2, MultiSignatures: map[string]*POASignature{}}
 	// Build three providers (simulate distinct signer keys) - capture priv keys & keyIDs
 	privA, pubA, keyIDA := genKey(t)
@@ -102,7 +102,7 @@ func TestVerifyMultiSignaturesThresholdSuccess(t *testing.T) {
 }
 
 func TestVerifyMultiSignaturesThresholdInsufficient(t *testing.T) {
-	os.Unsetenv("GAUTH_MULTI_SIG_WEIGHTS")
+	os.Unsetenv("AGENTAUTH_MULTI_SIG_WEIGHTS")
 	poa := &PowerOfAttorney{ID: "t2", Grantor: "alice", Grantee: "agent", Scope: []string{"read"}, ValidFrom: nowUTC(), ValidUntil: nowUTC().Add(time.Hour), CreatedAt: nowUTC(), Signers: []string{"alice", "bob", "carol"}, Threshold: 3, MultiSignatures: map[string]*POASignature{}}
 	privA, pubA, keyIDA := genKey(t)
 	privB, pubB, keyIDB := genKey(t)
@@ -117,7 +117,7 @@ func TestVerifyMultiSignaturesThresholdInsufficient(t *testing.T) {
 }
 
 func TestVerifyMultiSignaturesInvalidSignature(t *testing.T) {
-	os.Unsetenv("GAUTH_MULTI_SIG_WEIGHTS")
+	os.Unsetenv("AGENTAUTH_MULTI_SIG_WEIGHTS")
 	poa := &PowerOfAttorney{ID: "t3", Grantor: "alice", Grantee: "agent", Scope: []string{"read"}, ValidFrom: nowUTC(), ValidUntil: nowUTC().Add(time.Hour), CreatedAt: nowUTC(), Signers: []string{"alice", "bob"}, Threshold: 2, MultiSignatures: map[string]*POASignature{}}
 	privA, pubA, keyIDA := genKey(t)
 	privB, pubB, keyIDB := genKey(t)

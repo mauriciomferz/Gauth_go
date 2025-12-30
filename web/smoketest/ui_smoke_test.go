@@ -11,7 +11,7 @@ import (
 )
 
 func fetchIndexHTML(t *testing.T) string {
-	url := os.Getenv("GAUTH_UI_URL")
+	url := os.Getenv("AGENTAUTH_UI_URL")
 	if url == "" {
 		url = "http://localhost:8080/index.html"
 	}

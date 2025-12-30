@@ -62,8 +62,8 @@ func TestEncryptedFileKeyStore(t *testing.T) {
 
 func TestEncryptedFileKeyStore_EnvVar(t *testing.T) {
 	// Set master key in environment
-	os.Setenv("GAUTH_MASTER_KEY", "test-passphrase-for-encryption")
-	defer os.Unsetenv("GAUTH_MASTER_KEY")
+	os.Setenv("AGENTAUTH_MASTER_KEY", "test-passphrase-for-encryption")
+	defer os.Unsetenv("AGENTAUTH_MASTER_KEY")
 
 	tmpDir := t.TempDir()
 	keystorePath := tmpDir + "/keys"
@@ -71,7 +71,7 @@ func TestEncryptedFileKeyStore_EnvVar(t *testing.T) {
 	// Create encrypted keystore using env var
 	store, err := NewEncryptedFileKeyStore(EncryptedStoreConfig{
 		FilePath:     keystorePath,
-		MasterKeyEnv: "GAUTH_MASTER_KEY",
+		MasterKeyEnv: "AGENTAUTH_MASTER_KEY",
 	})
 	if err != nil {
 		t.Fatalf("failed to create encrypted keystore: %v", err)
@@ -89,7 +89,7 @@ func TestEncryptedFileKeyStore_EnvVar(t *testing.T) {
 	// Reload
 	store2, err := NewEncryptedFileKeyStore(EncryptedStoreConfig{
 		FilePath:     keystorePath,
-		MasterKeyEnv: "GAUTH_MASTER_KEY",
+		MasterKeyEnv: "AGENTAUTH_MASTER_KEY",
 	})
 	if err != nil {
 		t.Fatalf("failed to reload: %v", err)

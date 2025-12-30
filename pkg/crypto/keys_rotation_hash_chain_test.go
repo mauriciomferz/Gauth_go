@@ -22,8 +22,8 @@ func TestRotationLogHashChain(t *testing.T) {
 	if cerr := tmp.Close(); cerr != nil {
 		t.Fatalf("close temp: %v", cerr)
 	}
-	os.Setenv("GAUTH_EDDSA_ROTATION_LOG", path)
-	defer func() { _ = os.Unsetenv("GAUTH_EDDSA_ROTATION_LOG") }()
+	os.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", path)
+	defer func() { _ = os.Unsetenv("AGENTAUTH_EDDSA_ROTATION_LOG") }()
 
 	// Short TTL to force multiple rotations quickly
 	m, err := NewManager(200 * time.Millisecond)

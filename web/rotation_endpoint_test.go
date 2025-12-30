@@ -17,8 +17,8 @@ func TestRotationsVerificationEndpoint(t *testing.T) {
 	// Prepare temp receipt file
 	dir := t.TempDir()
 	path := dir + "/receipts.jsonl"
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	t.Setenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH", path)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_NOTARY_RECEIPT_PERSIST_PATH", path)
 	// Initialize server (will load empty store)
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -33,8 +33,8 @@ func TestRotationsVerificationEndpoint(t *testing.T) {
 	if !ok {
 		t.Fatalf("receipt store type assertion failed")
 	}
-	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
-	t.Setenv("GAUTH_SEED_POLICY", "0")
+	t.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1")
+	t.Setenv("AGENTAUTH_SEED_POLICY", "0")
 	_, o1Priv, _ := ed25519.GenerateKey(rand.Reader)
 	_, o2Priv, _ := ed25519.GenerateKey(rand.Reader)
 	// First descriptor

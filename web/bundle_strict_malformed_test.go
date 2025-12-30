@@ -10,12 +10,12 @@ import (
 // TestStrictMalformedManifest ensures strict mode flags invalid JSON manifest.
 func TestStrictMalformedManifest(t *testing.T) {
 	bs := &BetaServer{}
-	origEnv := os.Getenv("GAUTH_ENV")
-	origStrict := os.Getenv("GAUTH_STRICT_ASSETS")
-	defer t.Setenv("GAUTH_ENV", origEnv)
-	defer t.Setenv("GAUTH_STRICT_ASSETS", origStrict)
-	t.Setenv("GAUTH_ENV", "prod")
-	t.Setenv("GAUTH_STRICT_ASSETS", "1")
+	origEnv := os.Getenv("AGENTAUTH_ENV")
+	origStrict := os.Getenv("AGENTAUTH_STRICT_ASSETS")
+	defer t.Setenv("AGENTAUTH_ENV", origEnv)
+	defer t.Setenv("AGENTAUTH_STRICT_ASSETS", origStrict)
+	t.Setenv("AGENTAUTH_ENV", "prod")
+	t.Setenv("AGENTAUTH_STRICT_ASSETS", "1")
 	manifestDir := filepath.Join("web", "static", "js")
 	// #nosec G301
 	if err := os.MkdirAll(manifestDir, 0o755); err != nil {
@@ -41,12 +41,12 @@ func TestStrictMalformedManifest(t *testing.T) {
 // TestStrictMissingFieldsManifest ensures strict mode flags missing required fields.
 func TestStrictMissingFieldsManifest(t *testing.T) {
 	bs := &BetaServer{}
-	origEnv := os.Getenv("GAUTH_ENV")
-	origStrict := os.Getenv("GAUTH_STRICT_ASSETS")
-	defer t.Setenv("GAUTH_ENV", origEnv)
-	defer t.Setenv("GAUTH_STRICT_ASSETS", origStrict)
-	t.Setenv("GAUTH_ENV", "prod")
-	t.Setenv("GAUTH_STRICT_ASSETS", "1")
+	origEnv := os.Getenv("AGENTAUTH_ENV")
+	origStrict := os.Getenv("AGENTAUTH_STRICT_ASSETS")
+	defer t.Setenv("AGENTAUTH_ENV", origEnv)
+	defer t.Setenv("AGENTAUTH_STRICT_ASSETS", origStrict)
+	t.Setenv("AGENTAUTH_ENV", "prod")
+	t.Setenv("AGENTAUTH_STRICT_ASSETS", "1")
 	manifestDir := filepath.Join("web", "static", "js")
 	// #nosec G301
 	if err := os.MkdirAll(manifestDir, 0o755); err != nil {

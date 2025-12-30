@@ -7,10 +7,10 @@ import (
 )
 
 // TestEnforceCapabilitiesSunsetUnit directly exercises enforceCapabilities to ensure
-// a capability past its SunsetAfter is treated as missing when GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE=1.
+// a capability past its SunsetAfter is treated as missing when AGENTAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE=1.
 func TestEnforceCapabilitiesSunsetUnit(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
-	t.Setenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE", "1")
 	capability.Reset([]capability.Capability{})
 	// Sunset time in past relative to test date
 	capability.Register(capability.Capability{ID: "cap.unit.sunset", Version: "1.0", Stable: true, SunsetAfter: "2025-01-01T00:00:00Z"})

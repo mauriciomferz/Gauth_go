@@ -17,8 +17,8 @@ import (
 // TestCapabilityAnchorEmissionMetrics verifies emission interval histogram & jitter gauge exposition logic
 // via the custom /api/v1/beta/capabilities/anchor/metrics/prometheus endpoint after multiple emissions.
 func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{
 		Namespace: "gauth",
 		Subsystem:"AAP-001",
@@ -27,8 +27,8 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Enable anchoring endpoints
-	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
+	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
 	// Inject prometheus metrics (server default uses memory) via direct assignment for test simplicity.
 	srv.metrics = pm
 	// Ensure memory anchor client exists (NewBetaServer may not create if env set after construction)

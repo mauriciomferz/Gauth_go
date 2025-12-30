@@ -9,10 +9,10 @@ import (
 // TestCapabilityAuditVerifyConfigured ensures integrity_ok=true when persistence configured.
 func TestCapabilityAuditVerifyConfigured(t *testing.T) {
 	t.Skip("Skipping: Capability audit chain persistence not fully wired in server_factory.go")
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
 	// Configure persistence path for capability audit chain
 	tempPath := t.TempDir() + "/cap_audit_tip.json"
-	t.Setenv("GAUTH_CAP_AUDIT_PERSIST_PATH", tempPath) // (future env if wired) fallback: we manually set field after server init
+	t.Setenv("AGENTAUTH_CAP_AUDIT_PERSIST_PATH", tempPath) // (future env if wired) fallback: we manually set field after server init
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger a delegation create to produce chain tip

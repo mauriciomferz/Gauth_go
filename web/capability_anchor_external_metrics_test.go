@@ -11,8 +11,8 @@ import (
 
 // TestExternalAnchorMetrics verifies metrics update and status receipt exposure when external anchor provider enabled.
 func TestExternalAnchorMetrics(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
-	t.Setenv("GAUTH_CAPABILITIES_PATH", "") // ensure static seed
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", "") // ensure static seed
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -40,8 +40,8 @@ func TestExternalAnchorMetrics(t *testing.T) {
 
 // TestExternalAnchorFailureMetrics uses tsa_stub with fail probability 1 to force failures and verify counters increment.
 func TestExternalAnchorFailureMetrics(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1") // always fail
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1") // always fail
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

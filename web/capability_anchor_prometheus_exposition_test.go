@@ -7,10 +7,10 @@ import (
 
 // TestCapabilityAnchorPrometheusExposition ensures capability anchor metrics endpoint exposes expected lines.
 func TestCapabilityAnchorPrometheusExposition(t *testing.T) {
-	t.Setenv("GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "10")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "10")
 	// Force a last write by simulating capability load (server initialization seeds static capabilities and may emit artifact if path configured).
 	// We set file path env to trigger emission.
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/api/v1/beta/capabilities/anchor/metrics/prometheus")

@@ -31,9 +31,9 @@ func TestRotationV2ExplicitKeysImport(t *testing.T) {
 		_, priv, _ := ed25519.GenerateKey(nil)
 		kvPairs = append(kvPairs, s.id+":"+base64.RawURLEncoding.EncodeToString(priv))
 	}
-	t.Setenv("GAUTH_ROTATIONS_V2_CONFIG", cfgPath)
-	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
-	t.Setenv("GAUTH_ROTATIONS_V2_ED25519_KEYS", joinComma(kvPairs))
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_CONFIG", cfgPath)
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_SIGN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS", joinComma(kvPairs))
 
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })

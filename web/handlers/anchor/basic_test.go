@@ -22,17 +22,17 @@ func perform(server *webpkg.BetaServer, method, path string) *httptest.ResponseR
 
 func TestAnchorEndpointsFullCycle(t *testing.T) {
 	// Enable anchoring + file emission
-	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
+	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
 	anchorFile := filepath.Join(t.TempDir(), "cap-anchor.json")
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorFile)
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
 	// Provide capabilities file for registry hash population
 	capFile := filepath.Join(t.TempDir(), "caps.json")
 	if err := os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"demo.cap","version":"1.0","status":"active"}]}`), 0o600); err != nil {
 		t.Fatalf("write capabilities file: %v", err)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
 	srv := webpkg.NewBetaServer(":0")
 	// Force reload to populate registry hash and trigger emission
 	_ = perform(srv, http.MethodPost, "/api/v1/beta/capabilities/reload")

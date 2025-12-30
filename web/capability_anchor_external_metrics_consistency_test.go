@@ -11,7 +11,7 @@ import (
 
 // TestExternalAnchorMetricsConsistency ensures unlabeled and provider-labeled counters/histograms stay in sync for manual observations.
 func TestExternalAnchorMetricsConsistency(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	// Manual attempts & latency observations (simulate 3 successful anchors)

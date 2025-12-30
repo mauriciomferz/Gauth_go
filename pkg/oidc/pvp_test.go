@@ -20,7 +20,7 @@ func TestNewOIDCPowerVerificationPoint(t *testing.T) {
 	}
 
 	idTokenService, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "key1",
 	})
@@ -93,7 +93,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 	}
 
 	idTokenService, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "key1",
 	})
@@ -150,14 +150,14 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 
 	tests := []struct {
 		name         string
-		request      *gauth.IdentityProofRequest
+		request      *agentauth.IdentityProofRequest
 		expectValid  bool
 		expectError  bool
 		expectReason string
 	}{
 		{
 			name: "valid ID token with sufficient trust",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user123",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -172,7 +172,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "valid ID token with default trust requirement",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user123",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -186,7 +186,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "insufficient trust level",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user789",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -202,7 +202,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "missing id_token",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user123",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -216,7 +216,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "missing audience",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user123",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -230,7 +230,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "invalid token format",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user123",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -245,7 +245,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "wrong audience",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user123",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -260,7 +260,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "subject ID mismatch",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "wrong_user",
 				IdentityType: "natural_person",
 				ProofMethod:  ProofMethodOIDCIDToken,
@@ -275,7 +275,7 @@ func TestOIDCPowerVerificationPoint_VerifyIdentityProof(t *testing.T) {
 		},
 		{
 			name: "unsupported proof method",
-			request: &gauth.IdentityProofRequest{
+			request: &agentauth.IdentityProofRequest{
 				SubjectID:    "user123",
 				IdentityType: "natural_person",
 				ProofMethod:  "eIDAS",
@@ -356,7 +356,7 @@ func TestOIDCPowerVerificationPoint_GetSupportedProofMethods(t *testing.T) {
 	}
 
 	idTokenService, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "key1",
 	})
@@ -396,7 +396,7 @@ func TestOIDCPowerVerificationPoint_ACRManagement(t *testing.T) {
 	}
 
 	idTokenService, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "key1",
 	})
@@ -432,7 +432,7 @@ func TestOIDCPowerVerificationPoint_ValidateProofData(t *testing.T) {
 	}
 
 	idTokenService, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:    "https://gauth.example.com",
+		IssuerURL:    "https://agentauth.example.com",
 		SigningKey:   privateKey,
 		SigningKeyID: "key1",
 	})

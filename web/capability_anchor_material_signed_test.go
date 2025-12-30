@@ -10,26 +10,26 @@ import (
 	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
-// TestCapabilityAnchorMaterialSigned verifies signature wrapper emission when GAUTH_CAP_ANCHOR_SIGN=1 and EdDSA key manager active.
+// TestCapabilityAnchorMaterialSigned verifies signature wrapper emission when AGENTAUTH_CAP_ANCHOR_SIGN=1 and EdDSA key manager active.
 func TestCapabilityAnchorMaterialSigned(t *testing.T) {
 	// Ensure EdDSA mode for active key manager.
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	t.Setenv("GAUTH_CAP_ANCHOR_SIGN", "1")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_SIGN", "1")
 	// Create anchor file path.
 	anchorFile, err := os.CreateTemp(t.TempDir(), "cap-anchor-signed-*.json")
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
 	anchorFile.Close()
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	// Force short interval (>=1m required by server init parse guard, so use 1m and rely on first-load unconditional write).
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	// Provide capabilities file (single capability) to trigger file-backed path.
 	capFile := filepath.Join(t.TempDir(), "caps.json")
 	if err2 := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err2 != nil {
 		t.Fatalf("write caps file: %v", err2)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
 
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

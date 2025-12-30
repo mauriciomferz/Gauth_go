@@ -34,8 +34,8 @@ func TestMemoryService_WithKeyManager(t *testing.T) {
 
 	// Issue a POA (should use injected manager)
 	// We need to set env vars to trigger multisig logic if we want to test that path
-	t.Setenv("GAUTH_POA_MULTISIG_KIDS", keyID)
-	t.Setenv("GAUTH_POA_MULTISIG_SIGN", "1")
+	t.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", keyID)
+	t.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", "1")
 
 	req := &Request{
 		Subject:  "alice",

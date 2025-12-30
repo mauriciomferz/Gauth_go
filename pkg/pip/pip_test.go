@@ -125,7 +125,7 @@ func TestDefaultPIP_VerifyIdentityChain(t *testing.T) {
 				IdentifierType:     "eIDAS_QES",
 				Jurisdiction:       "DE",
 				VerificationMethod: "eIDAS_qualified",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					Level:          1,
 					AssuranceLevel: "high",
 				},
@@ -140,7 +140,7 @@ func TestDefaultPIP_VerifyIdentityChain(t *testing.T) {
 				IdentifierType:     "commercial_register",
 				Jurisdiction:       "DE",
 				VerificationMethod: "commercial_register",
-				VerificationLevel: gauth.VerificationLevel{
+				VerificationLevel: agentauth.VerificationLevel{
 					Level:          2,
 					AssuranceLevel: "substantial",
 				},
@@ -211,8 +211,8 @@ func TestDefaultPIP_ValidateAuthorization(t *testing.T) {
 
 		// Pre-populate cache with authorization data
 		clientID := "client-123"
-		chain := &gauth.AuthorizationChain{
-			Client: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:   clientID,
 				EntityType: "ai_system",
 				Role:       "client",
@@ -264,8 +264,8 @@ func TestDefaultPIP_ValidateAuthorization(t *testing.T) {
 		pip := NewDefaultPIP(nil, nil, nil, 5*time.Minute)
 
 		clientID := "client-456"
-		chain := &gauth.AuthorizationChain{
-			Client: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			Client: &agentauth.AuthorizationLink{
 				EntityID: clientID,
 				Role:     "client",
 			},
@@ -387,8 +387,8 @@ func TestDefaultPIP_RefreshCache(t *testing.T) {
 
 		// Add data to cache
 		clientID := "client-refresh-test"
-		chain := &gauth.AuthorizationChain{
-			Client: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			Client: &agentauth.AuthorizationLink{
 				EntityID: clientID,
 				Role:     "client",
 			},
@@ -477,8 +477,8 @@ func TestAuthorizationCache_Invalidate(t *testing.T) {
 		clientID := "client-invalidate-test"
 
 		// Add authorization chain
-		chain := &gauth.AuthorizationChain{
-			Client: &gauth.AuthorizationLink{
+		chain := &agentauth.AuthorizationChain{
+			Client: &agentauth.AuthorizationLink{
 				EntityID: clientID,
 				Role:     "client",
 			},
@@ -486,7 +486,7 @@ func TestAuthorizationCache_Invalidate(t *testing.T) {
 		cache.SetAuthorizationChain(clientID, chain)
 
 		// Add client owner
-		owner := &gauth.ClientOwnerInfo{
+		owner := &agentauth.ClientOwnerInfo{
 			OwnerID: clientID + "-owner",
 		}
 		cache.clientOwners[clientID] = &cachedClientOwner{
@@ -549,7 +549,7 @@ func TestAuthorizationCache_Size(t *testing.T) {
 			t.Errorf("Size after 1 entry = %v, want 1", cache.Size())
 		}
 
-		cache.SetAuthorizationChain("client-1", &gauth.AuthorizationChain{})
+		cache.SetAuthorizationChain("client-1", &agentauth.AuthorizationChain{})
 		if cache.Size() != 2 {
 			t.Errorf("Size after 2 entries = %v, want 2", cache.Size())
 		}
@@ -790,8 +790,8 @@ func BenchmarkDefaultPIP_ValidateAuthorization(b *testing.B) {
 
 	// Setup cache
 	clientID := "bench-client"
-	chain := &gauth.AuthorizationChain{
-		Client: &gauth.AuthorizationLink{
+	chain := &agentauth.AuthorizationChain{
+		Client: &agentauth.AuthorizationLink{
 			EntityID: clientID,
 			Role:     "client",
 		},

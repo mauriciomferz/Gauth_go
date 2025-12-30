@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-// TestMerkleRootFeatureFlag verifies that MerkleRoot is populated only when GAUTH_NOTARY_MERKLE_ENABLED=1
+// TestMerkleRootFeatureFlag verifies that MerkleRoot is populated only when AGENTAUTH_NOTARY_MERKLE_ENABLED=1
 // and that root changes deterministically with appended entries.
 func TestMerkleRootFeatureFlag(t *testing.T) {
 	path := t.TempDir() + "/receipts.json"
 	// Disabled case
-	os.Unsetenv("GAUTH_NOTARY_MERKLE_ENABLED")
+	os.Unsetenv("AGENTAUTH_NOTARY_MERKLE_ENABLED")
 	rs := NewReceiptStore(path)
 	if err := rs.Load(); err != nil {
 		t.Fatalf("load failed: %v", err)
@@ -25,7 +25,7 @@ func TestMerkleRootFeatureFlag(t *testing.T) {
 	}
 
 	// Enabled case
-	os.Setenv("GAUTH_NOTARY_MERKLE_ENABLED", "1")
+	os.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
 	r2 := Receipt{Hash: "sha256:bbb", Timestamp: "2025-10-20T00:00:01Z", Provider: "memory", Version: 1, Success: true, LatencySeconds: 0}
 	sr2, err := rs.Append(r2)
 	if err != nil {

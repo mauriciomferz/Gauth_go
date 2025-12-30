@@ -7,7 +7,7 @@ import (
 
 // TestCapabilityAuditEndpoint ensures capability enforcement audit entries are exported.
 func TestCapabilityAuditEndpoint(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
 	bs := NewBetaServer(":0")
 	t.Cleanup(func() { bs.Shutdown() })
 	// Trigger denial (missing capability)

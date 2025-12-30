@@ -21,9 +21,9 @@ import (
 //
 //nolint:gocyclo // ECDSA verification test with multiple cases
 func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
-	os.Setenv("GAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
-	defer os.Unsetenv("GAUTH_ROTATIONS_V2_EMBED_PUBS")
-	// We'll inject ECDSA key via GAUTH_ROTATIONS_V2_ECDSA_KEYS env.
+	os.Setenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
+	defer os.Unsetenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS")
+	// We'll inject ECDSA key via AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS env.
 	cfg := &notary.WeightsConfig{SchemaVersion: 1, ActiveKeySetID: "embed-ec-set", ThresholdWeight: 9,
 		Signers: []struct {
 			ID     string `json:"id"`
@@ -54,7 +54,7 @@ func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
 	if encoded == "" {
 		t.Fatalf("helper returned empty encoding")
 	}
-	os.Setenv("GAUTH_ROTATIONS_V2_ECDSA_KEYS", "ecA:"+encoded)
+	os.Setenv("AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS", "ecA:"+encoded)
 	// Rebuild artifact to trigger embedding paths.
 	art2, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {
@@ -69,7 +69,7 @@ func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
 		}
 	}
 	// Auditor-style verification: preimage domain separation
-	preimage := []byte("GAUTH_ROTATION_V2:" + art2.CanonicalDigest)
+	preimage := []byte("AGENTAUTH_ROTATION_V2:" + art2.CanonicalDigest)
 	verified := 0
 	failures := []string{}
 	for _, s := range art2.Signers {

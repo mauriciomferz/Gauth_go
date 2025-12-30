@@ -17,7 +17,7 @@ func perform(server *webpkg.BetaServer, method, path string) *httptest.ResponseR
 }
 
 func TestAuditVerifyUnconfigured(t *testing.T) {
-	// No GAUTH_CAP_AUDIT_PERSIST_PATH set -> configured=false
+	// No AGENTAUTH_CAP_AUDIT_PERSIST_PATH set -> configured=false
 	srv := webpkg.NewBetaServer(":0")
 	w := perform(srv, http.MethodGet, "/api/v1/beta/capabilities/audit/verify")
 	if w.Code != http.StatusOK {

@@ -13,7 +13,7 @@ import (
 func TestNewIdentityBridge(t *testing.T) {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	idTokenService, _ := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:  "https://gauth.example.com",
+		IssuerURL:  "https://agentauth.example.com",
 		SigningKey: privateKey,
 	})
 
@@ -32,7 +32,7 @@ func TestNewIdentityBridge(t *testing.T) {
 func TestIdentityBridge_ConvertIDTokenToIdentityProof(t *testing.T) {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	idTokenService, _ := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:  "https://gauth.example.com",
+		IssuerURL:  "https://agentauth.example.com",
 		SigningKey: privateKey,
 	})
 	bridge := NewIdentityBridge(idTokenService)
@@ -119,21 +119,21 @@ func TestIdentityBridge_ConvertIDTokenToIdentityProof(t *testing.T) {
 func TestIdentityBridge_ConvertIdentityProofToIDToken(t *testing.T) {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	idTokenService, _ := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:  "https://gauth.example.com",
+		IssuerURL:  "https://agentauth.example.com",
 		SigningKey: privateKey,
 	})
 	bridge := NewIdentityBridge(idTokenService)
 
 	tests := []struct {
 		name         string
-		proof        *gauth.IdentityProofResult
+		proof        *agentauth.IdentityProofResult
 		audience     []string
 		identityType string
 		wantErr      bool
 	}{
 		{
 			name: "Valid identity proof",
-			proof: &gauth.IdentityProofResult{
+			proof: &agentauth.IdentityProofResult{
 				Valid:      true,
 				SubjectID:  "user123",
 				Identity:   "John Doe",
@@ -145,7 +145,7 @@ func TestIdentityBridge_ConvertIdentityProofToIDToken(t *testing.T) {
 		},
 		{
 			name: "Invalid identity proof",
-			proof: &gauth.IdentityProofResult{
+			proof: &agentauth.IdentityProofResult{
 				Valid:         false,
 				FailureReason: "verification failed",
 			},
@@ -424,7 +424,7 @@ func TestExtractProofDataFromClaims(t *testing.T) {
 func TestBuildIdentityProofRequestFromIDToken(t *testing.T) {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	idTokenService, _ := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:  "https://gauth.example.com",
+		IssuerURL:  "https://agentauth.example.com",
 		SigningKey: privateKey,
 	})
 
@@ -464,7 +464,7 @@ func TestBuildIdentityProofRequestFromIDToken(t *testing.T) {
 func TestValidateIDTokenForIdentityProof(t *testing.T) {
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	idTokenService, _ := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:  "https://gauth.example.com",
+		IssuerURL:  "https://agentauth.example.com",
 		SigningKey: privateKey,
 	})
 

@@ -22,7 +22,7 @@ func setupTokenExchangeTest(t *testing.T) (*TokenExchangeService, *InMemoryProvi
 
 	// Create ID token service
 	idTokenService, err := NewIDTokenService(&IDTokenServiceConfig{
-		IssuerURL:     "https://gauth.example.com",
+		IssuerURL:     "https://agentauth.example.com",
 		SigningKey:    privateKey,
 		SigningMethod: "RS256",
 	})

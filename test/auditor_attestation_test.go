@@ -36,7 +36,7 @@ func TestAuditorAttestationSignature(t *testing.T) {
 	unsigned.Snapshot.Hash = "demo_hash"
 	unsigned.Snapshot.GeneratedAt = time.Now().UTC().Format(time.RFC3339)
 	raw, _ := json.Marshal(unsigned)
-	msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+	msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	sig := ed25519.Sign(ak.Private, msg)
 	att := map[string]any{
 		"success":    true,

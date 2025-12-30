@@ -7,7 +7,7 @@ import (
 )
 
 func TestSchedulerGoroutineLaunch(t *testing.T) {
-	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "1")
+	os.Setenv("AGENTAUTH_EDDSA_AUTO_ROTATE", "1")
 	t.Logf("Test: creating manager with 10s TTL and auto-rotation enabled")
 	m, err := NewManager(10 * time.Second)
 	if err != nil {

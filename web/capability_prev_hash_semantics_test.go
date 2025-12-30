@@ -23,7 +23,7 @@ func TestCapabilityRegistryPrevHashPermutationSemantics(t *testing.T) {
 	if err := tmp.Close(); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", tmp.Name())
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 

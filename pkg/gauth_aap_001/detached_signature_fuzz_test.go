@@ -46,8 +46,8 @@ func FuzzDetachedSignatureIssueVerify(f *testing.F) {
 		if len(scopes) == 0 {
 			scopes = []string{"read"}
 		}
-		t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-		t.Setenv("GAUTH_DETACHED_SIGNATURE", "1")
+		t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+		t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "1")
 		kp, err := cr.NewInMemoryEd25519Provider()
 		if err != nil {
 			t.Fatalf("key provider: %v", err)

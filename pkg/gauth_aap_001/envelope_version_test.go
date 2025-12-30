@@ -26,7 +26,7 @@ func TestEnvelopeVersionIssuanceAndVerification(t *testing.T) {
 	svc := NewService(aud, authorizer, WithMetrics(mem))
 
 	// Baseline: ensure flag disabled for V1
-	_ = os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
+	_ = os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 	req := DelegationRequest{Grantor: "alice@example.com", Grantee: "bob@example.com", Scope: []string{"account:read"}, Duration: time.Hour}
 	resp, err := svc.CreateDelegationCtx(tContext(), req)
 	if err != nil {
@@ -51,7 +51,7 @@ func TestEnvelopeVersionIssuanceAndVerification(t *testing.T) {
 	}
 
 	// Enable V2
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 	req2 := DelegationRequest{Grantor: "carol@example.com", Grantee: "dave@example.com", Scope: []string{"transaction:execute"}, Duration: time.Minute * 30}
 	resp2, err2 := svc.CreateDelegationCtx(tContext(), req2)
 	if err2 != nil {
@@ -84,7 +84,7 @@ func TestEnvelopeVersionIssuanceAndVerification(t *testing.T) {
 
 // TestEnvelopeV2IncludesSatisfiedFields ensures multi-signature satisfied fields propagate into envelope V2.
 func TestEnvelopeV2IncludesSatisfiedFields(t *testing.T) {
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 	mem := metrics.NewMemory()
 	ma := authz.NewMemoryAuthorizer()
 	ma.AddPolicy(authz.Policy{ID: "allow_create", Subject: "*", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
@@ -119,7 +119,7 @@ func TestEnvelopeAdoptionRatioGauge(t *testing.T) {
 	ma.AddPolicy(authz.Policy{ID: "allow_create", Subject: "*", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	svc := NewService(audit.NewMemoryLogger(nil), ma, WithMetrics(mem))
 	// Issue initial V1 tokens
-	_ = os.Unsetenv("GAUTH_POA_ENVELOPE_V2")
+	_ = os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 	for i := 0; i < 3; i++ {
 		req := DelegationRequest{Grantor: "a@example.com", Grantee: "b@example.com", Scope: []string{"s"}, Duration: time.Minute}
 		if _, err := svc.CreateDelegationCtx(tContext(), req); err != nil {
@@ -127,7 +127,7 @@ func TestEnvelopeAdoptionRatioGauge(t *testing.T) {
 		}
 	}
 	// Switch to V2 & issue tokens
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 	for i := 0; i < 7; i++ {
 		req := DelegationRequest{Grantor: "c@example.com", Grantee: "d@example.com", Scope: []string{"s"}, Duration: time.Minute}
 		if _, err := svc.CreateDelegationCtx(tContext(), req); err != nil {
@@ -172,7 +172,7 @@ func TestEnvelopeDigestMismatchCounter(t *testing.T) {
 	_ = pub // not used directly
 	signer := &simpleSigner{priv: priv, kid: "test-signer"}
 	svc := NewService(audit.NewMemoryLogger(nil), ma, WithMetrics(mem), WithSignerProvider(func() (cr.Signer, error) { return signer, nil }))
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 	// Create delegation with signature
 	req := DelegationRequest{Grantor: "sig@example.com", Grantee: "dest@example.com", Scope: []string{"x"}, Duration: time.Minute}
 	resp, err := svc.CreateDelegationCtx(tContext(), req)

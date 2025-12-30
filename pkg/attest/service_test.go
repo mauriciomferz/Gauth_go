@@ -48,7 +48,7 @@ func TestSignDomainSeparatedAndVerify(t *testing.T) {
 	km := createKeyManager(t)
 	svc := NewAttestationService(WithKeyProvider(km))
 	raw := []byte(`{"x":1}`)
-	prefix := "GAUTH_ATTEST:"
+	prefix := "AGENTAUTH_ATTEST:"
 	sig, kid, err := svc.SignDomainSeparated(prefix, raw)
 	if err != nil {
 		t.Fatalf("sign err: %v", err)
@@ -170,8 +170,8 @@ func TestNotarizeAndSignModelLimits_NoPrivateMaterial(t *testing.T) {
 
 func TestNotarizeAndSignModelLimits_DomainPrefixDualSignature(t *testing.T) {
 	km := createKeyManager(t)
-	os.Setenv("GAUTH_ATTEST_DOMAIN_PREFIX", "GAUTH_ATTEST:")
-	defer os.Unsetenv("GAUTH_ATTEST_DOMAIN_PREFIX")
+	os.Setenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX", "AGENTAUTH_ATTEST:")
+	defer os.Unsetenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX")
 	svc := NewAttestationService(WithKeyProvider(km))
 	unsigned := []byte(`{"limits":{"max_tokens":77}}`)
 	mem := notary.NewMemory()
@@ -185,7 +185,7 @@ func TestNotarizeAndSignModelLimits_DomainPrefixDualSignature(t *testing.T) {
 	if res.DomainSignature == "" {
 		t.Fatalf("domain signature missing")
 	}
-	if res.DomainPrefix != "GAUTH_ATTEST:" {
+	if res.DomainPrefix != "AGENTAUTH_ATTEST:" {
 		t.Fatalf("domain prefix mismatch: %s", res.DomainPrefix)
 	}
 	rawBytes, _ := base64.RawStdEncoding.DecodeString(res.Signature)

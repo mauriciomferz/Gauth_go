@@ -47,8 +47,8 @@ func buildPrefixDecomposition(events []RevocationEvent, startLen int) ([]string,
 }
 
 func TestFastReconstructionMatchesFullTree(t *testing.T) {
-	os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("GAUTH_CONSISTENCY_V2_FAST")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
+	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
 	for n := 1; n <= 50; n++ {
 		c := NewRevocationChain()
 		for i := 0; i < n; i++ {
@@ -75,8 +75,8 @@ func TestFastReconstructionMatchesFullTree(t *testing.T) {
 }
 
 func TestFastReconstructionRejectsBadSizes(t *testing.T) {
-	os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("GAUTH_CONSISTENCY_V2_FAST")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
+	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
 	// invalid size (3 not power-of-two) should fail despite single root because prefixSizes invariants violated
 	bad := ReconstructStartRootFromPrefixBlocks([]string{"abc"}, []int{3}, 3, nil)
 	if bad != "" {
@@ -85,8 +85,8 @@ func TestFastReconstructionRejectsBadSizes(t *testing.T) {
 }
 
 func TestFastReconstructionRandomSizes(t *testing.T) {
-	os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("GAUTH_CONSISTENCY_V2_FAST")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
+	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
 	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < 200; i++ {
@@ -132,7 +132,7 @@ func buildBridges(prefixRoots []string, prefixSizes []int) []string {
 	for len(blocks) > 1 {
 		last := blocks[len(blocks)-1]
 		prev := blocks[len(blocks)-2]
-		parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(prev.h)...), []byte(last.h)...))
+		parent := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(prev.h)...), []byte(last.h)...))
 		phex := hex.EncodeToString(parent[:])
 		bridges = append(bridges, phex)
 		blocks[len(blocks)-2] = seg{h: phex, sz: prev.sz + last.sz}
@@ -143,7 +143,7 @@ func buildBridges(prefixRoots []string, prefixSizes []int) []string {
 			if a.sz != b.sz {
 				break
 			}
-			parent2 := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
+			parent2 := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
 			phex2 := hex.EncodeToString(parent2[:])
 			bridges = append(bridges, phex2)
 			blocks[len(blocks)-2] = seg{h: phex2, sz: a.sz * 2}
@@ -154,8 +154,8 @@ func buildBridges(prefixRoots []string, prefixSizes []int) []string {
 }
 
 func TestFastReconstructionTamperBridge(t *testing.T) {
-	os.Setenv("GAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("GAUTH_CONSISTENCY_V2_FAST")
+	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
+	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
 	c := NewRevocationChain()
 	for i := 0; i < 7; i++ {
 		id := fmt.Sprintf("TB%d", i)

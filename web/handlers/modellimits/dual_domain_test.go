@@ -15,11 +15,11 @@ import (
 // TestModelLimitsAttestationStreamDualDomainSignature subscribes to the SSE stream and validates
 // both primary and domain signatures on the initial emitted attestation.
 func TestModelLimitsAttestationStreamDualDomainSignature(t *testing.T) {
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	t.Setenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN", "1")
-	t.Setenv("GAUTH_ATTEST_DOMAIN_PREFIX", "EXTRA_ATTEST:")
-	t.Setenv("GAUTH_ATTEST_STREAM_ENABLE", "1")
-	t.Setenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN", "1")
+	t.Setenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX", "EXTRA_ATTEST:")
+	t.Setenv("AGENTAUTH_ATTEST_STREAM_ENABLE", "1")
+	t.Setenv("AGENTAUTH_MODEL_LIMITS_STRICT_UNKNOWN", "1")
 
 	limitsFile, _ := os.CreateTemp(t.TempDir(), "limits_*.json")
 	if _, err := limitsFile.WriteString(`{"model_limits":{"demo":{"max_input_tokens":5}}}`); err != nil {
@@ -31,7 +31,7 @@ func TestModelLimitsAttestationStreamDualDomainSignature(t *testing.T) {
 	auditFile.Close()
 	anchorFile, _ := os.CreateTemp(t.TempDir(), "anchor_*.jsonl")
 	anchorFile.Close()
-	t.Setenv("GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
+	t.Setenv("AGENTAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
 	km, _ := internalCrypto.NewManager(1 * time.Hour)
 	if km.Active() == nil {
@@ -105,7 +105,7 @@ func TestModelLimitsAttestationStreamDualDomainSignature(t *testing.T) {
 	primarySig, _ := base64.RawStdEncoding.DecodeString(attVal.Signature)
 	domainSig, _ := base64.RawStdEncoding.DecodeString(attVal.DomainSignature)
 
-	primaryMsg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+	primaryMsg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	if !ed25519.Verify(active.Public, primaryMsg, primarySig) {
 		t.Fatalf("primary signature invalid")
 	}

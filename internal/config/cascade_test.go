@@ -36,10 +36,10 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 		{
 			name: "enabled with revoke mode",
 			envVars: map[string]string{
-				"GAUTH_CASCADE_PARENT_REVOCATION": "1",
-				"GAUTH_CASCADE_MODE":              "revoke",
-				"GAUTH_CASCADE_MAX_DEPTH":         "5",
-				"GAUTH_CASCADE_BATCH_SIZE":        "50",
+				"AGENTAUTH_CASCADE_PARENT_REVOCATION": "1",
+				"AGENTAUTH_CASCADE_MODE":              "revoke",
+				"AGENTAUTH_CASCADE_MAX_DEPTH":         "5",
+				"AGENTAUTH_CASCADE_BATCH_SIZE":        "50",
 			},
 			expected: CascadeConfig{
 				Enabled:   true,
@@ -51,8 +51,8 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 		{
 			name: "enabled with suspend mode",
 			envVars: map[string]string{
-				"GAUTH_CASCADE_PARENT_REVOCATION": "true",
-				"GAUTH_CASCADE_MODE":              "suspend",
+				"AGENTAUTH_CASCADE_PARENT_REVOCATION": "true",
+				"AGENTAUTH_CASCADE_MODE":              "suspend",
 			},
 			expected: CascadeConfig{
 				Enabled:   true,
@@ -64,9 +64,9 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 		{
 			name: "enabled with notify mode",
 			envVars: map[string]string{
-				"GAUTH_CASCADE_PARENT_REVOCATION": "yes",
-				"GAUTH_CASCADE_MODE":              "notify",
-				"GAUTH_CASCADE_MAX_DEPTH":         "0", // unlimited
+				"AGENTAUTH_CASCADE_PARENT_REVOCATION": "yes",
+				"AGENTAUTH_CASCADE_MODE":              "notify",
+				"AGENTAUTH_CASCADE_MAX_DEPTH":         "0", // unlimited
 			},
 			expected: CascadeConfig{
 				Enabled:   true,
@@ -78,8 +78,8 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 		{
 			name: "invalid mode falls back to default",
 			envVars: map[string]string{
-				"GAUTH_CASCADE_PARENT_REVOCATION": "1",
-				"GAUTH_CASCADE_MODE":              "invalid",
+				"AGENTAUTH_CASCADE_PARENT_REVOCATION": "1",
+				"AGENTAUTH_CASCADE_MODE":              "invalid",
 			},
 			expected: CascadeConfig{
 				Enabled:   true,
@@ -91,9 +91,9 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 		{
 			name: "invalid numbers fall back to defaults",
 			envVars: map[string]string{
-				"GAUTH_CASCADE_PARENT_REVOCATION": "1",
-				"GAUTH_CASCADE_MAX_DEPTH":         "invalid",
-				"GAUTH_CASCADE_BATCH_SIZE":        "-1",
+				"AGENTAUTH_CASCADE_PARENT_REVOCATION": "1",
+				"AGENTAUTH_CASCADE_MAX_DEPTH":         "invalid",
+				"AGENTAUTH_CASCADE_BATCH_SIZE":        "-1",
 			},
 			expected: CascadeConfig{
 				Enabled:   true,
@@ -108,10 +108,10 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Clear environment
 			clearEnv := []string{
-				"GAUTH_CASCADE_PARENT_REVOCATION",
-				"GAUTH_CASCADE_MODE",
-				"GAUTH_CASCADE_MAX_DEPTH",
-				"GAUTH_CASCADE_BATCH_SIZE",
+				"AGENTAUTH_CASCADE_PARENT_REVOCATION",
+				"AGENTAUTH_CASCADE_MODE",
+				"AGENTAUTH_CASCADE_MAX_DEPTH",
+				"AGENTAUTH_CASCADE_BATCH_SIZE",
 			}
 			for _, key := range clearEnv {
 				os.Unsetenv(key)

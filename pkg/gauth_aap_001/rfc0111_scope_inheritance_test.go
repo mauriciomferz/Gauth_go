@@ -11,8 +11,8 @@ import (
 // TestScopeInheritance verifies conservative subset enforcement for sub-delegation scopes.
 func TestScopeInheritance(t *testing.T) {
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("GAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("GAUTH_PERSIST_PATH")
+	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
+	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
 	memLogger := audit.NewMemoryLogger(nil)
 	svc := NewService(memLogger, &allowAllAuthorizer{})
 	root, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read", "audit.*"}, Duration: time.Hour})

@@ -8,9 +8,9 @@ import (
 	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
-// TestLegacyAliasDisabled ensures setting GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS=1 prevents route registration.
+// TestLegacyAliasDisabled ensures setting AGENTAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS=1 prevents route registration.
 func TestLegacyAliasDisabled(t *testing.T) {
-	testutil.WithEnv(t, "GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "1", func() {
+	testutil.WithEnv(t, "AGENTAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "1", func() {
 		srv := NewBetaServer("")
 		t.Cleanup(func() { srv.Shutdown() })
 		rr := httptest.NewRecorder()

@@ -11,22 +11,22 @@ import (
 
 // TestCapabilityAnchorStatusEndpoint verifies status endpoint fields and metrics exposure.
 func TestCapabilityAnchorStatusEndpoint(t *testing.T) {
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	t.Setenv("GAUTH_CAP_ANCHOR_SIGN", "0")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_SIGN", "0")
 	anchorFile, err := os.CreateTemp(t.TempDir(), "cap-anchor-status-*.json")
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
 	anchorFile.Close()
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	capFile := filepath.Join(t.TempDir(), "caps.json")
 	if err := os.WriteFile(capFile, []byte(testutil.CapTransferV1), 0o600); err != nil {
 		t.Fatalf("write caps file: %v", err)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
-	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
-	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
+	t.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1")
+	t.Setenv("AGENTAUTH_SKIP_SMOKETEST", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger emission then a skip

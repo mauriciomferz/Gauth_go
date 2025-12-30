@@ -10,11 +10,11 @@ import (
 
 // TestTracingEnabledEmitsSpans ensures token.issue and token.validate spans appear when tracing enabled.
 func TestTracingEnabledEmitsSpans(t *testing.T) {
-	t.Setenv("GAUTH_TRACING_ENABLED", "1")
-	t.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "1")
+	t.Setenv("AGENTAUTH_TRACING_ENABLED", "1")
+	t.Setenv("AGENTAUTH_TRACING_SAMPLE_RATIO", "1")
 	defer func() {
-		os.Unsetenv("GAUTH_TRACING_ENABLED")
-		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
+		os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
+		os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
 	}()
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -58,9 +58,9 @@ func TestTracingEnabledEmitsSpans(t *testing.T) {
 
 // TestTracingDisabledNoSpans ensures spans absent when tracing not enabled.
 func TestTracingDisabledNoSpans(t *testing.T) {
-	os.Unsetenv("GAUTH_TRACING_ENABLED")
-	os.Unsetenv("GAUTH_OTEL_ENABLE")
-	os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
+	os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
+	os.Unsetenv("AGENTAUTH_OTEL_ENABLE")
+	os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Token create
@@ -95,11 +95,11 @@ func TestTracingDisabledNoSpans(t *testing.T) {
 
 // TestTracingSampleRatioZeroEmitsSpans ensures ratio=0 (always sample by implementation) still records spans.
 func TestTracingSampleRatioZeroEmitsSpans(t *testing.T) {
-	t.Setenv("GAUTH_TRACING_ENABLED", "1")
-	t.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "0")
+	t.Setenv("AGENTAUTH_TRACING_ENABLED", "1")
+	t.Setenv("AGENTAUTH_TRACING_SAMPLE_RATIO", "0")
 	defer func() {
-		os.Unsetenv("GAUTH_TRACING_ENABLED")
-		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
+		os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
+		os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
 	}()
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -139,11 +139,11 @@ func TestTracingSampleRatioZeroEmitsSpans(t *testing.T) {
 // TestTracingSampleRatioMidApproximatelySamples verifies probabilistic sampling at ratio=0.5.
 // It asserts that some (not all) operations generate spans, reducing flakiness by using bounds.
 func TestTracingSampleRatioMidApproximatelySamples(t *testing.T) {
-	t.Setenv("GAUTH_TRACING_ENABLED", "1")
-	t.Setenv("GAUTH_TRACING_SAMPLE_RATIO", "0.5")
+	t.Setenv("AGENTAUTH_TRACING_ENABLED", "1")
+	t.Setenv("AGENTAUTH_TRACING_SAMPLE_RATIO", "0.5")
 	defer func() {
-		os.Unsetenv("GAUTH_TRACING_ENABLED")
-		os.Unsetenv("GAUTH_TRACING_SAMPLE_RATIO")
+		os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
+		os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
 	}()
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })

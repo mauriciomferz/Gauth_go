@@ -393,8 +393,8 @@ func TestBLSEnvironmentFlags(t *testing.T) {
 	}
 
 	// Test with BLS batch disabled (default)
-	os.Setenv("GAUTH_BATCH_VERIFY_BLS", "0")
-	defer os.Unsetenv("GAUTH_BATCH_VERIFY_BLS")
+	os.Setenv("AGENTAUTH_BATCH_VERIFY_BLS", "0")
+	defer os.Unsetenv("AGENTAUTH_BATCH_VERIFY_BLS")
 
 	batchReq := BatchVerifyTokensRequest{
 		Tokens:  tokens,

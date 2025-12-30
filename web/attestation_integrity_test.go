@@ -85,7 +85,7 @@ func TestAttestationIntegrity_Success(t *testing.T) {
 	}{Success: payload.Success, Configured: payload.Configured, Nonce: payload.Nonce, Snapshot: payload.Snapshot, StrictUnknown: false}
 	raw, _ := json.Marshal(unsigned)
 	// Domain-separated signing (must match server verify path)
-	msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+	msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	sig := ed25519.Sign(priv, msg)
 	payload.Signature = base64.RawStdEncoding.EncodeToString(sig)
 	body, _ := json.Marshal(payload)
@@ -157,7 +157,7 @@ func TestAttestationIntegrity_SignatureInvalid(t *testing.T) {
 	}{Success: true, Configured: true, StrictUnknown: false}
 	raw, _ := json.Marshal(unsigned)
 	// Domain-separated signing, then tamper a byte to force invalid signature
-	msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+	msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	sig := ed25519.Sign(priv, msg)
 	sig[0] ^= 0xFF
 	payload := struct {

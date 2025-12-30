@@ -45,9 +45,9 @@ func TestPoAMultiSigThresholdSatisfied(t *testing.T) {
 		t.Fatalf("need at least 2 unique keys for test have=%d", len(uniq))
 	}
 	// Use first two kids
-	os.Setenv("GAUTH_POA_MULTISIG_SIGN", "1")
-	os.Setenv("GAUTH_POA_MULTISIG_KIDS", uniq[0]+","+uniq[1])
-	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "2")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", "1")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", uniq[0]+","+uniq[1])
+	os.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", "2")
 
 	// Inject key provider
 	svc := NewMemoryService(WithKeyProvider(km))
@@ -110,9 +110,9 @@ func TestPoAMultiSigThresholdUnsatisfied(t *testing.T) {
 	if len(uniq) < 2 {
 		t.Fatalf("need at least 2 unique keys for unsatisfied test have=%d", len(uniq))
 	}
-	os.Setenv("GAUTH_POA_MULTISIG_SIGN", "1")
-	os.Setenv("GAUTH_POA_MULTISIG_KIDS", uniq[0]+","+uniq[1])
-	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "3") // impossible threshold
+	os.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", "1")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", uniq[0]+","+uniq[1])
+	os.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", "3") // impossible threshold
 
 	svc := NewMemoryService(WithKeyProvider(km))
 	poaObj, err := svc.Issue(context.TODO(), &Request{Subject: "bob", Resource: "ledger", Action: "append"})
@@ -141,9 +141,9 @@ func TestPoAMultiSigTamperSignature(t *testing.T) {
 	if len(keys) < 1 {
 		t.Fatalf("need at least 1 key")
 	}
-	os.Setenv("GAUTH_POA_MULTISIG_SIGN", "1")
-	os.Setenv("GAUTH_POA_MULTISIG_KIDS", keys[0].ID)
-	os.Setenv("GAUTH_POA_MULTISIG_THRESHOLD", "1")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", "1")
+	os.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", keys[0].ID)
+	os.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", "1")
 
 	svc := NewMemoryService(WithKeyProvider(km))
 	poaObj, err := svc.Issue(context.TODO(), &Request{Subject: "carol", Resource: "db", Action: "query"})

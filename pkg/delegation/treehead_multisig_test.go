@@ -21,7 +21,7 @@ func TestMultiSignatureTreeHeadThreshold(t *testing.T) {
 		t.Fatalf("rotate2: %v", err)
 	}
 	// Configure threshold=2
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "2")
+	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
 	chain := NewRevocationChain(WithKeyProvider(km))
 	// Append some events
 	for i := 0; i < 3; i++ {
@@ -63,8 +63,8 @@ func TestMultiSignatureTreeHeadWeights(t *testing.T) {
 		t.Fatalf("need at least two keys")
 	}
 	wEnv := keys[0].ID + "=2," + keys[1].ID + "=1"
-	os.Setenv("GAUTH_MULTI_SIG_THRESHOLD", "3")
-	os.Setenv("GAUTH_MULTI_SIG_WEIGHTS", wEnv)
+	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "3")
+	os.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", wEnv)
 	chain := NewRevocationChain(WithKeyProvider(km))
 	if _, err2 := chain.Append(RevocationEvent{ID: "rev-x", DelegationID: "del-x"}); err != nil {
 		t.Fatalf("append: %v", err2)

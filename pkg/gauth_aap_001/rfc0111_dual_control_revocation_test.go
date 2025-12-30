@@ -11,10 +11,10 @@ import (
 
 // TestDualControlRevocationWorkflow exercises initiation, approval quorum and cancellation flows.
 func TestDualControlRevocationWorkflow(t *testing.T) {
-	os.Setenv("GAUTH_PERSIST_PATH", t.TempDir()+"/poa.db")
-	defer os.Unsetenv("GAUTH_PERSIST_PATH")
-	os.Setenv("GAUTH_REVOCATION_REQUIRED_COUNT", "2")
-	defer os.Unsetenv("GAUTH_REVOCATION_REQUIRED_COUNT")
+	os.Setenv("AGENTAUTH_PERSIST_PATH", t.TempDir()+"/poa.db")
+	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
+	os.Setenv("AGENTAUTH_REVOCATION_REQUIRED_COUNT", "2")
+	defer os.Unsetenv("AGENTAUTH_REVOCATION_REQUIRED_COUNT")
 	memLogger := audit.NewMemoryLogger(nil)
 	svc := NewService(memLogger, &allowAllAuthorizer{})
 	// Create POA with controllers

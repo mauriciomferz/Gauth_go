@@ -10,8 +10,8 @@ import (
 
 // TestCapabilityAnchoringLifecycle validates POST anchor and GET latest endpoints.
 func TestCapabilityAnchoringLifecycle(t *testing.T) {
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
-	t.Setenv("GAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
+	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Wait for async startup anchor to complete
@@ -103,8 +103,8 @@ func TestCapabilityAnchoringLifecycle(t *testing.T) {
 
 // TestCapabilityAnchorDisabled ensures POST returns 403 when enable flag not set.
 func TestCapabilityAnchorDisabled(t *testing.T) {
-	os.Unsetenv("GAUTH_CAPABILITY_ANCHOR_ENABLE")
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory")
+	os.Unsetenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE")
+	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()

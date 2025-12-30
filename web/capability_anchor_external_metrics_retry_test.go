@@ -14,18 +14,18 @@ import (
 //
 //nolint:gocyclo // External anchor retry test
 func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
 	// Medium fail prob to likely hit at least one retry; allow up to 4 retries.
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "0.6")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "4")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "10")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "0.6")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "4")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "10")
 	// Deterministic RNG seed to ensure we observe at least one failure then a success across attempts.
 	// Seed chosen empirically so sequence of rand.Float64() with failProb=0.6 yields failure early and success later.
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED", "1700001")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED", "1700001")
 	// Force exactly one initial failure irrespective of probability to stabilize test expectations.
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	srv := NewBetaServerWithMetrics(":0", pm) // server needed for startup attempt
@@ -113,12 +113,12 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 
 // TestExternalAnchorMetricsRetryAllFail forces all failures via prob=1 and checks attempts == retries+1 and failures == attempts.
 func TestExternalAnchorMetricsRetryAllFail(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "3")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "5")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "tsa_stub")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "1")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "3")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "5")
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	_ = NewBetaServerWithMetrics(":0", pm)

@@ -28,7 +28,7 @@ func TestVerifyRotationSummary_Success(t *testing.T) {
 		GeneratedAt   string `json:"generated_at"`
 	}{2, "abc", "def", time.Now().UTC().Format(time.RFC3339Nano)}
 	enc, _ := json.Marshal(payload)
-	sig := ed25519.Sign(priv, append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...))
+	sig := ed25519.Sign(priv, append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), enc...))
 	summary := map[string]any{
 		"success":    true,
 		"configured": true,
@@ -81,7 +81,7 @@ func TestVerifyRotationSummary_BadSignature(t *testing.T) {
 		GeneratedAt   string `json:"generated_at"`
 	}{1, "aa", "bb", time.Now().UTC().Format(time.RFC3339Nano)}
 	enc, _ := json.Marshal(payload)
-	sig := ed25519.Sign(priv, append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...))
+	sig := ed25519.Sign(priv, append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), enc...))
 	// Corrupt signature (flip a byte)
 	sig[0] ^= 0xff
 	summary := map[string]any{

@@ -12,7 +12,7 @@ import (
 
 // TestExternalAnchorMetricsIsolatedRegistry ensures external anchor metrics collectors register and emit in a custom registry.
 func TestExternalAnchorMetricsIsolatedRegistry(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	reg := prom.NewRegistry()
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001", Registry: reg})
 	srv := NewBetaServer(":0")

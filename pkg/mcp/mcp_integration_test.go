@@ -32,14 +32,14 @@ func TestMCP_Agent_Identity_Propagation(t *testing.T) {
 	bridge := NewAuthorizationBridge(pdpEngine)
 
 	// Create Extended Token with Chain
-	token := &gauth.ExtendedToken{
+	token := &agentauth.ExtendedToken{
 		AccessToken:     "test-token",
 		ExpiresIn:       3600,
 		IssuedAt:        time.Now(),
 		ComplianceLevel: "high",
 		Scope:           []string{"mcp:tool:call"},
-		AuthorizationChain: &gauth.AuthorizationChain{
-			Client: &gauth.AuthorizationLink{
+		AuthorizationChain: &agentauth.AuthorizationChain{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:         "agent-007",
 				EntityName:       "Bond Agent",
 				EntityType:       "ai_system",
@@ -48,13 +48,13 @@ func TestMCP_Agent_Identity_Propagation(t *testing.T) {
 				ValidUntil:       time.Now().Add(24 * time.Hour),
 				IdentityVerified: true,
 			},
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:         "auth-1",
 				Status:           "active",
 				ValidUntil:       time.Now().Add(24 * time.Hour),
 				IdentityVerified: true,
 			},
-			ClientOwner: &gauth.AuthorizationLink{
+			ClientOwner: &agentauth.AuthorizationLink{
 				EntityID:         "owner-1",
 				AuthorizedBy:     "auth-1",
 				Status:           "active",
@@ -62,10 +62,10 @@ func TestMCP_Agent_Identity_Propagation(t *testing.T) {
 				IdentityVerified: true,
 			},
 		},
-		ClientOwner:      &gauth.ClientOwnerInfo{OwnerID: "owner-1"},
-		OwnersAuthorizer: &gauth.OwnersAuthorizerInfo{AuthorizerID: "auth-1"},
-		VerificationProof: &gauth.IdentityVerificationChain{
-			VerificationLevels: []gauth.VerificationLevel{
+		ClientOwner:      &agentauth.ClientOwnerInfo{OwnerID: "owner-1"},
+		OwnersAuthorizer: &agentauth.OwnersAuthorizerInfo{AuthorizerID: "auth-1"},
+		VerificationProof: &agentauth.IdentityVerificationChain{
+			VerificationLevels: []agentauth.VerificationLevel{
 				{
 					EntityID:       "agent-007",
 					AssuranceLevel: "substantial",
@@ -73,14 +73,14 @@ func TestMCP_Agent_Identity_Propagation(t *testing.T) {
 			},
 			OverallVerification: "verified",
 		},
-		LegalFramework: &gauth.LegalFrameworkInfo{
+		LegalFramework: &agentauth.LegalFrameworkInfo{
 			Jurisdiction: "US",
 		},
-		IssuedBy: &gauth.AuthorizationServerInfo{
+		IssuedBy: &agentauth.AuthorizationServerInfo{
 			ServerID: "gauth-test",
-			Issuer:   "https://gauth.test",
+			Issuer:   "https://agentauth.test",
 		},
-		JurisdictionContext: &gauth.JurisdictionContext{
+		JurisdictionContext: &agentauth.JurisdictionContext{
 			PrimaryJurisdiction: "US",
 		},
 	}

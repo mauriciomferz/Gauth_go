@@ -93,26 +93,26 @@ func (m *mockMCPClient) Close() error {
 
 // Mock Authorization Bridge for testing
 type mockAuthBridge struct {
-	authorizeResourceReadFunc func(ctx context.Context, token *gauth.ExtendedToken, uri string) (bool, error)
-	authorizeToolCallFunc     func(ctx context.Context, token *gauth.ExtendedToken, name string, args map[string]interface{}) (bool, error)
-	authorizePromptGetFunc    func(ctx context.Context, token *gauth.ExtendedToken, name string) (bool, error)
+	authorizeResourceReadFunc func(ctx context.Context, token *agentauth.ExtendedToken, uri string) (bool, error)
+	authorizeToolCallFunc     func(ctx context.Context, token *agentauth.ExtendedToken, name string, args map[string]interface{}) (bool, error)
+	authorizePromptGetFunc    func(ctx context.Context, token *agentauth.ExtendedToken, name string) (bool, error)
 }
 
-func (m *mockAuthBridge) AuthorizeResourceRead(ctx context.Context, token *gauth.ExtendedToken, uri string) (bool, error) {
+func (m *mockAuthBridge) AuthorizeResourceRead(ctx context.Context, token *agentauth.ExtendedToken, uri string) (bool, error) {
 	if m.authorizeResourceReadFunc != nil {
 		return m.authorizeResourceReadFunc(ctx, token, uri)
 	}
 	return true, nil
 }
 
-func (m *mockAuthBridge) AuthorizeToolCall(ctx context.Context, token *gauth.ExtendedToken, name string, args map[string]interface{}) (bool, error) {
+func (m *mockAuthBridge) AuthorizeToolCall(ctx context.Context, token *agentauth.ExtendedToken, name string, args map[string]interface{}) (bool, error) {
 	if m.authorizeToolCallFunc != nil {
 		return m.authorizeToolCallFunc(ctx, token, name, args)
 	}
 	return true, nil
 }
 
-func (m *mockAuthBridge) AuthorizePromptGet(ctx context.Context, token *gauth.ExtendedToken, name string) (bool, error) {
+func (m *mockAuthBridge) AuthorizePromptGet(ctx context.Context, token *agentauth.ExtendedToken, name string) (bool, error) {
 	if m.authorizePromptGetFunc != nil {
 		return m.authorizePromptGetFunc(ctx, token, name)
 	}
@@ -120,9 +120,9 @@ func (m *mockAuthBridge) AuthorizePromptGet(ctx context.Context, token *gauth.Ex
 }
 
 // createTestToken creates a valid test token
-func createTestToken() *gauth.ExtendedToken {
+func createTestToken() *agentauth.ExtendedToken {
 	now := time.Now()
-	return &gauth.ExtendedToken{
+	return &agentauth.ExtendedToken{
 		AccessToken: "test_access_token",
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
@@ -137,14 +137,14 @@ func createTestToken() *gauth.ExtendedToken {
 		PowerOfAttorney: &poa.PoADefinition{
 			// Minimal PoA for testing
 		},
-		ClientOwner: &gauth.ClientOwnerInfo{
+		ClientOwner: &agentauth.ClientOwnerInfo{
 			OwnerID:          "client-owner-1",
 			OwnerName:        "Test Owner Org",
 			OwnerType:        "organization",
 			IdentityVerified: true,
 			VerificationDate: now,
 		},
-		OwnersAuthorizer: &gauth.OwnersAuthorizerInfo{
+		OwnersAuthorizer: &agentauth.OwnersAuthorizerInfo{
 			AuthorizerID:        "authorizer-1",
 			AuthorizerName:      "Test Board",
 			AuthorizerType:      "board_member",
@@ -154,15 +154,15 @@ func createTestToken() *gauth.ExtendedToken {
 			RelationshipToOwner: "board",
 			AuthorizationBasis:  "statutory",
 		},
-		ResourceOwner: &gauth.ResourceOwnerInfo{
+		ResourceOwner: &agentauth.ResourceOwnerInfo{
 			OwnerID:          "resource-owner-1",
 			OwnerName:        "Test Resource Owner",
 			OwnerType:        "organization",
 			IdentityVerified: true,
 			VerificationDate: now,
 		},
-		AuthorizationChain: &gauth.AuthorizationChain{
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+		AuthorizationChain: &agentauth.AuthorizationChain{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:          "authorizer-1",
 				EntityType:        "organization",
 				EntityName:        "Test Board",
@@ -176,7 +176,7 @@ func createTestToken() *gauth.ExtendedToken {
 				ValidUntil:        now.Add(365 * 24 * time.Hour),
 				Status:            "active",
 			},
-			ClientOwner: &gauth.AuthorizationLink{
+			ClientOwner: &agentauth.AuthorizationLink{
 				EntityID:          "client-owner-1",
 				EntityType:        "organization",
 				EntityName:        "Test Owner Org",
@@ -190,7 +190,7 @@ func createTestToken() *gauth.ExtendedToken {
 				ValidUntil:        now.Add(365 * 24 * time.Hour),
 				Status:            "active",
 			},
-			Client: &gauth.AuthorizationLink{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:          "client-1",
 				EntityType:        "ai_agent",
 				EntityName:        "Test AI Agent",
@@ -208,16 +208,16 @@ func createTestToken() *gauth.ExtendedToken {
 			ValidationTime: now,
 			ValidatorID:    "validator-1",
 		},
-		LegalFramework: &gauth.LegalFrameworkInfo{
+		LegalFramework: &agentauth.LegalFrameworkInfo{
 			Jurisdiction: "US",
 		},
-		IssuedBy: &gauth.AuthorizationServerInfo{
+		IssuedBy: &agentauth.AuthorizationServerInfo{
 			ServerID:  "gauth-server-1",
 			ServerURL: "https://auth.example.com",
 			Issuer:    "AgentAuth Authorization Server",
 			IssueTime: now,
 		},
-		VerificationProof: &gauth.IdentityVerificationChain{
+		VerificationProof: &agentauth.IdentityVerificationChain{
 			ChainID:             "verification-chain-1",
 			OverallVerification: "verified",
 			VerificationTime:    now,
@@ -346,7 +346,7 @@ func TestMCPAgent_ReadResource(t *testing.T) {
 	})
 
 	t.Run("authorization denied", func(t *testing.T) {
-		bridge.authorizeResourceReadFunc = func(ctx context.Context, token *gauth.ExtendedToken, uri string) (bool, error) {
+		bridge.authorizeResourceReadFunc = func(ctx context.Context, token *agentauth.ExtendedToken, uri string) (bool, error) {
 			return false, nil
 		}
 
@@ -400,7 +400,7 @@ func TestMCPAgent_CallTool(t *testing.T) {
 	})
 
 	t.Run("authorization denied", func(t *testing.T) {
-		bridge.authorizeToolCallFunc = func(ctx context.Context, token *gauth.ExtendedToken, name string, args map[string]interface{}) (bool, error) {
+		bridge.authorizeToolCallFunc = func(ctx context.Context, token *agentauth.ExtendedToken, name string, args map[string]interface{}) (bool, error) {
 			return false, nil
 		}
 
@@ -455,7 +455,7 @@ func TestMCPAgent_GetPrompt(t *testing.T) {
 	})
 
 	t.Run("authorization denied", func(t *testing.T) {
-		bridge.authorizePromptGetFunc = func(ctx context.Context, token *gauth.ExtendedToken, name string) (bool, error) {
+		bridge.authorizePromptGetFunc = func(ctx context.Context, token *agentauth.ExtendedToken, name string) (bool, error) {
 			return false, nil
 		}
 

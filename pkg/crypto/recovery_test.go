@@ -8,9 +8,9 @@ import (
 
 func TestRecoveryAutomation_KeyRotation(t *testing.T) {
 	t.Logf("Test: PID=%d, start=%v", os.Getpid(), time.Now())
-	os.Setenv("GAUTH_EDDSA_PERSIST_PATH", "test_recovery.json")
-	os.Setenv("GAUTH_EDDSA_AUTO_ROTATE", "1")
-	os.Setenv("GAUTH_EDDSA_ROTATE_INTERVAL", "2s")
+	os.Setenv("AGENTAUTH_EDDSA_PERSIST_PATH", "test_recovery.json")
+	os.Setenv("AGENTAUTH_EDDSA_AUTO_ROTATE", "1")
+	os.Setenv("AGENTAUTH_EDDSA_ROTATE_INTERVAL", "2s")
 	t.Logf("Test: creating manager with 10s TTL and auto-rotation interval 2s enabled")
 	m, err := NewManager(10 * time.Second)
 	if err != nil {

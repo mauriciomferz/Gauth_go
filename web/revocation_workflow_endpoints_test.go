@@ -22,12 +22,12 @@ func performJSONPost(s *BetaServer, path string, body any) *httptest.ResponseRec
 
 func TestRevocationWorkflowEndpoints_CountQuorum(t *testing.T) {
 	// Configure count quorum: require 2 approvals
-	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "0")
-	t.Setenv("GAUTH_REVOCATION_REQUIRED_COUNT", "2")
+	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
+	t.Setenv("AGENTAUTH_REVOCATION_REQUIRED_COUNT", "2")
 	// Weight not used in this test
-	t.Setenv("GAUTH_REVOCATION_REQUIRED_WEIGHT", "0")
+	t.Setenv("AGENTAUTH_REVOCATION_REQUIRED_WEIGHT", "0")
 	// Enable policy seeding to allow create_delegation authorization.
-	t.Setenv("GAUTH_SEED_POLICY", "1")
+	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })

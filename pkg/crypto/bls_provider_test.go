@@ -45,7 +45,7 @@ func signBLS(t *testing.T, sk *bls12381.Fr, msg []byte, domain []byte) *bls12381
 }
 
 func TestBLSProvider_AggregateAndVerify(t *testing.T) {
-	domainStr := "GAUTH_BLS_SIG_V1"
+	domainStr := "AGENTAUTH_BLS_SIG_V1"
 	provider := NewBLSProvider(domainStr)
 	domain := []byte(domainStr)
 

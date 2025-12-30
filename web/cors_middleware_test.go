@@ -40,7 +40,7 @@ func withEnv(t *testing.T, key, val string, fn func()) {
 
 // TestCORSAllowAll validates that wildcard ("*") configuration reflects any origin.
 func TestCORSAllowAll(t *testing.T) {
-	withEnv(t, "GAUTH_CORS_ALLOW", "*", func() {
+	withEnv(t, "AGENTAUTH_CORS_ALLOW", "*", func() {
 		engine := newTestEngine()
 		origin := "http://localhost:5173"
 		w := corsRequest(t, engine, http.MethodGet, "/ping", origin)
@@ -55,7 +55,7 @@ func TestCORSAllowAll(t *testing.T) {
 
 // TestCORSAllowList verifies only listed origins are reflected.
 func TestCORSAllowList(t *testing.T) {
-	withEnv(t, "GAUTH_CORS_ALLOW", "https://app.example.com, https://admin.example.com", func() {
+	withEnv(t, "AGENTAUTH_CORS_ALLOW", "https://app.example.com, https://admin.example.com", func() {
 		engine := newTestEngine()
 		allowed := "https://admin.example.com"
 		disallowed := "https://evil.example.com"
@@ -76,7 +76,7 @@ func TestCORSAllowList(t *testing.T) {
 
 // TestCORSPreflight ensures OPTIONS request short-circuits with 204 and proper headers when allowed.
 func TestCORSPreflight(t *testing.T) {
-	withEnv(t, "GAUTH_CORS_ALLOW", "https://app.example.com", func() {
+	withEnv(t, "AGENTAUTH_CORS_ALLOW", "https://app.example.com", func() {
 		engine := newTestEngine()
 		origin := "https://app.example.com"
 		w := corsRequest(t, engine, http.MethodOptions, "/ping", origin)

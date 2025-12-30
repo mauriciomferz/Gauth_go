@@ -54,17 +54,17 @@ func TestDurableReplayStoreFromEnv(t *testing.T) {
 	walPath := filepath.Join(dir, "env_test.wal")
 
 	// Set environment variables
-	os.Setenv("GAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("GAUTH_REPLAY_TTL_SEC", "300")
-	os.Setenv("GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC", "60")
-	os.Setenv("GAUTH_REPLAY_EVICTION_POLICY", "ttl")
-	os.Setenv("GAUTH_REPLAY_EVICTION_MAX_SIZE", "5000")
+	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "300")
+	os.Setenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC", "60")
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "5000")
 	defer func() {
-		os.Unsetenv("GAUTH_REPLAY_WAL_PATH")
-		os.Unsetenv("GAUTH_REPLAY_TTL_SEC")
-		os.Unsetenv("GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC")
-		os.Unsetenv("GAUTH_REPLAY_EVICTION_POLICY")
-		os.Unsetenv("GAUTH_REPLAY_EVICTION_MAX_SIZE")
+		os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
+		os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
+		os.Unsetenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC")
+		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
+		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
 	}()
 
 	store, err := pkg_replay.NewDurableReplayStoreFromEnv(pkg_replay.NoopReplayMetrics{})
@@ -102,13 +102,13 @@ func TestDurableReplayStoreWithSizeEviction(t *testing.T) {
 	dir := t.TempDir()
 	walPath := filepath.Join(dir, "size_eviction.wal")
 
-	os.Setenv("GAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("GAUTH_REPLAY_EVICTION_POLICY", "size")
-	os.Setenv("GAUTH_REPLAY_EVICTION_MAX_SIZE", "3")
+	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "size")
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "3")
 	defer func() {
-		os.Unsetenv("GAUTH_REPLAY_WAL_PATH")
-		os.Unsetenv("GAUTH_REPLAY_EVICTION_POLICY")
-		os.Unsetenv("GAUTH_REPLAY_EVICTION_MAX_SIZE")
+		os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
+		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
+		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
 	}()
 
 	store, err := pkg_replay.NewDurableReplayStoreFromEnv(pkg_replay.NoopReplayMetrics{})
@@ -142,15 +142,15 @@ func TestDurableReplayStoreCompositePolicy(t *testing.T) {
 	dir := t.TempDir()
 	walPath := filepath.Join(dir, "composite.wal")
 
-	os.Setenv("GAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("GAUTH_REPLAY_EVICTION_POLICY", "ttl+size")
-	os.Setenv("GAUTH_REPLAY_TTL_SEC", "1") // 1 second TTL for fast testing
-	os.Setenv("GAUTH_REPLAY_EVICTION_MAX_SIZE", "10")
+	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl+size")
+	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "1") // 1 second TTL for fast testing
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "10")
 	defer func() {
-		os.Unsetenv("GAUTH_REPLAY_WAL_PATH")
-		os.Unsetenv("GAUTH_REPLAY_EVICTION_POLICY")
-		os.Unsetenv("GAUTH_REPLAY_TTL_SEC")
-		os.Unsetenv("GAUTH_REPLAY_EVICTION_MAX_SIZE")
+		os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
+		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
+		os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
+		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
 	}()
 
 	store, err := pkg_replay.NewDurableReplayStoreFromEnv(pkg_replay.NoopReplayMetrics{})
@@ -179,11 +179,11 @@ func TestDurableReplayStoreCompositePolicy(t *testing.T) {
 // TestDurableReplayStoreEnvDefaults tests default values when env vars not set.
 func TestDurableReplayStoreEnvDefaults(t *testing.T) {
 	// Clear all replay-related env vars
-	os.Unsetenv("GAUTH_REPLAY_WAL_PATH")
-	os.Unsetenv("GAUTH_REPLAY_TTL_SEC")
-	os.Unsetenv("GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC")
-	os.Unsetenv("GAUTH_REPLAY_EVICTION_POLICY")
-	os.Unsetenv("GAUTH_REPLAY_EVICTION_MAX_SIZE")
+	os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
+	os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
+	os.Unsetenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC")
+	os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
+	os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
 
 	store, err := pkg_replay.NewDurableReplayStoreFromEnv(pkg_replay.NoopReplayMetrics{})
 	if err != nil {

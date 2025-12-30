@@ -13,9 +13,9 @@ import (
 func TestViolationPersistence(t *testing.T) {
 	dir := t.TempDir()
 	persistFile := filepath.Join(dir, "violations.json")
-	t.Setenv("GAUTH_VIOLATION_PERSIST_PATH", persistFile)
-	t.Setenv("GAUTH_VIOLATION_AUTOSAVE_SEC", "0") // disable autosave loop for test
-	t.Setenv("GAUTH_VIOLATION_PERSIST_NO_THROTTLE", "1")
+	t.Setenv("AGENTAUTH_VIOLATION_PERSIST_PATH", persistFile)
+	t.Setenv("AGENTAUTH_VIOLATION_AUTOSAVE_SEC", "0") // disable autosave loop for test
+	t.Setenv("AGENTAUTH_VIOLATION_PERSIST_NO_THROTTLE", "1")
 	srv := NewBetaServer("8091")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Trigger some violations (empty token)

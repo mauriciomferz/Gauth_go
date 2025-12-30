@@ -13,20 +13,20 @@ import (
 	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
-// TestRotationSummaryEndpointAnchoring verifies anchoring only occurs once for same head hash when GAUTH_ANCHOR_ROTATIONS=1.
+// TestRotationSummaryEndpointAnchoring verifies anchoring only occurs once for same head hash when AGENTAUTH_ANCHOR_ROTATIONS=1.
 func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	dir := t.TempDir()
 	ledgerPath := dir + "/ledger.json"
-	t.Setenv("GAUTH_ROTATION_LEDGER_PATH", ledgerPath)
-	t.Setenv("GAUTH_ANCHOR_ROTATIONS", "1")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")  // ensure notarizer & ledger initialization path executes
-	t.Setenv("GAUTH_ANCHOR_PROVIDER", "memory") // initialize memory anchor client
+	t.Setenv("AGENTAUTH_ROTATION_LEDGER_PATH", ledgerPath)
+	t.Setenv("AGENTAUTH_ANCHOR_ROTATIONS", "1")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")  // ensure notarizer & ledger initialization path executes
+	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory") // initialize memory anchor client
 	// Enable signing to exercise signature path (optional)
-	t.Setenv("GAUTH_ROTATIONS_SIGN", "1")
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_ROTATIONS_SIGN", "1")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	// Ensure isolation from previous tests that may have mutated global registry or multisig env.
-	os.Unsetenv("GAUTH_ROTATIONS_MULTISIG")
-	os.Unsetenv("GAUTH_ROTATIONS_THRESHOLD")
+	os.Unsetenv("AGENTAUTH_ROTATIONS_MULTISIG")
+	os.Unsetenv("AGENTAUTH_ROTATIONS_THRESHOLD")
 	m, _ := cryptoInt.NewManager(24 * time.Hour)
 	// Initialize server
 	srv := NewBetaServer("0", WithKeyProvider(m))

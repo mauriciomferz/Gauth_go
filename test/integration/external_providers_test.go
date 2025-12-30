@@ -81,7 +81,7 @@ func setupTestInfrastructure(t *testing.T) (*rsa.PrivateKey, *oidc.IDTokenServic
 
 	// Create ID token service
 	idTokenService, err := oidc.NewIDTokenService(&oidc.IDTokenServiceConfig{
-		IssuerURL:     "https://gauth.example.com",
+		IssuerURL:     "https://agentauth.example.com",
 		SigningKey:    privateKey,
 		SigningMethod: "RS256",
 	})

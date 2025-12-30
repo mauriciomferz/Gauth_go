@@ -82,7 +82,7 @@ func TestDiscoveryCapabilityRegistry(t *testing.T) {
 
 // TestDiscoveryCapabilityEnforcementFlag ensures enabled flips when env var set.
 func TestDiscoveryCapabilityEnforcementFlag(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
@@ -135,7 +135,7 @@ func TestDiscoveryCapabilityEnforcementFlag(t *testing.T) {
 //
 //nolint:gocyclo // Capability audit pagination test
 func TestAuditCapabilitiesPagination(t *testing.T) {
-	t.Setenv("GAUTH_CAPABILITY_ENFORCE", "1")
+	t.Setenv("AGENTAUTH_CAPABILITY_ENFORCE", "1")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Generate > limit entries (use capability_enforce denials by triggering missing capability for issue action)

@@ -70,7 +70,7 @@ func (e ErrUnknownKey) Error() string { return "unknown key " + string(e) }
 
 // TestMultiSignatureMetricsSuccessAndFailure verifies counters increment on success vs threshold failure.
 func TestMultiSignatureMetricsSuccessAndFailure(t *testing.T) {
-	os.Unsetenv("GAUTH_MULTI_SIG_WEIGHTS")
+	os.Unsetenv("AGENTAUTH_MULTI_SIG_WEIGHTS")
 	mem := imetrics.NewMemory()
 	// Generate three keys
 	pubA, privA, _ := ed25519.GenerateKey(rand.Reader)

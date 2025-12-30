@@ -150,22 +150,22 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 	require.True(t, repResult.Verified, "Representative must be verified")
 
 	// Step 3: Build Authorization Chain (3 levels: Board → Owner → Client)
-	authChain := &gauth.AuthorizationChain{
-		OwnersAuthorizer: &gauth.AuthorizationLink{
+	authChain := &agentauth.AuthorizationChain{
+		OwnersAuthorizer: &agentauth.AuthorizationLink{
 			EntityID:              repResult.RepresentativeName,
 			EntityType:            "natural_person",
 			EntityName:            repResult.RepresentativeName,
 			Role:                  "authorizer",
 			AuthorizationDate:     repResult.AppointmentDate,
 			AuthorizationType:     "statutory",
-			LegalBasis:            &gauth.LegalBasis{BasisType: "statutory", LegalReferences: []string{"GmbHG §35"}},
+			LegalBasis:            &agentauth.LegalBasis{BasisType: "statutory", LegalReferences: []string{"GmbHG §35"}},
 			CommercialRegisterRef: regResult.RegistrationNumber,
 			IdentityVerified:      true,
 			ValidFrom:             repResult.ValidFrom,
 			ValidUntil:            repResult.ValidUntil,
 			Status:                "active",
 		},
-		ClientOwner: &gauth.AuthorizationLink{
+		ClientOwner: &agentauth.AuthorizationLink{
 			EntityID:          regResult.RegistrationNumber,
 			EntityType:        "organization",
 			EntityName:        regResult.EntityName,
@@ -173,13 +173,13 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 			AuthorizedBy:      repResult.RepresentativeName,
 			AuthorizationDate: now.Add(-7 * 24 * time.Hour),
 			AuthorizationType: "delegated",
-			LegalBasis:        &gauth.LegalBasis{BasisType: "contractual"},
+			LegalBasis:        &agentauth.LegalBasis{BasisType: "contractual"},
 			IdentityVerified:  true,
 			ValidFrom:         poaDef.Requirements.ValidityPeriod.StartTime,
 			ValidUntil:        poaDef.Requirements.ValidityPeriod.EndTime,
 			Status:            "active",
 		},
-		Client: &gauth.AuthorizationLink{
+		Client: &agentauth.AuthorizationLink{
 			EntityID:          poaDef.Parties.AuthorizedClient.Identity,
 			EntityType:        "ai_system",
 			EntityName:        "Test AI Agent",
@@ -187,7 +187,7 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 			AuthorizedBy:      regResult.RegistrationNumber,
 			AuthorizationDate: now,
 			AuthorizationType: "delegated",
-			LegalBasis:        &gauth.LegalBasis{BasisType: "delegated_authority"},
+			LegalBasis:        &agentauth.LegalBasis{BasisType: "delegated_authority"},
 			IdentityVerified:  true,
 			ValidFrom:         poaDef.Requirements.ValidityPeriod.StartTime,
 			ValidUntil:        poaDef.Requirements.ValidityPeriod.EndTime,
@@ -253,7 +253,7 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 	require.NotNil(t, pipService, "PIP service must be created")
 
 	// Step 6: Create Extended Token with all components integrated
-	extToken := &gauth.ExtendedToken{
+	extToken := &agentauth.ExtendedToken{
 		AccessToken: "test-token-" + now.Format("20060102150405"),
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
@@ -262,7 +262,7 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 
 		PowerOfAttorney:    poaDef,
 		AuthorizationChain: authChain,
-		ClientOwner: &gauth.ClientOwnerInfo{
+		ClientOwner: &agentauth.ClientOwnerInfo{
 			OwnerID:                  poaDef.Parties.Principal.Organization.RegisterEntry,
 			OwnerName:                poaDef.Parties.Principal.Organization.Name,
 			OwnerType:                "organization",
@@ -274,26 +274,26 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 			IdentityVerified:         true,
 			VerificationDate:         now,
 		},
-		OwnersAuthorizer: &gauth.OwnersAuthorizerInfo{
+		OwnersAuthorizer: &agentauth.OwnersAuthorizerInfo{
 			AuthorizerID:       repResult.RepresentativeName,
 			AuthorizerName:     repResult.RepresentativeName,
 			AuthorizerType:     repResult.AuthorityType,
 			StatutoryAuthority: "managing_director",
 			AuthorityType:      repResult.AuthorityType,
 		},
-		LegalFramework: &gauth.LegalFrameworkInfo{
+		LegalFramework: &agentauth.LegalFrameworkInfo{
 			Jurisdiction:   "DE",
 			ApplicableLaws: []string{"BGB", "HGB", "GmbHG"},
 		},
-		IssuedBy: &gauth.AuthorizationServerInfo{
+		IssuedBy: &agentauth.AuthorizationServerInfo{
 			ServerID:  "gauth-server-1",
 			ServerURL: "https://auth.example.com",
 			Issuer:    "https://auth.example.com",
 			IssueTime: now,
 		},
-		VerificationProof: &gauth.IdentityVerificationChain{
+		VerificationProof: &agentauth.IdentityVerificationChain{
 			ChainID: "chain-" + now.Format("20060102150405"),
-			VerificationLevels: []gauth.VerificationLevel{
+			VerificationLevels: []agentauth.VerificationLevel{
 				{
 					Level:              1,
 					EntityID:           repResult.RepresentativeName,
@@ -311,7 +311,7 @@ func TestGapG10E2E_CompleteTokenIssuanceFlow(t *testing.T) {
 		RequestID:       "req-" + now.Format("20060102150405"),
 		GrantID:         "grant-123",
 		ComplianceLevel: "RFC-0111-compliant",
-		JurisdictionContext: &gauth.JurisdictionContext{
+		JurisdictionContext: &agentauth.JurisdictionContext{
 			PrimaryJurisdiction: "DE",
 			ApplicableLaws:      []string{"BGB", "HGB", "GmbHG"},
 		},
@@ -485,22 +485,22 @@ func TestGapG10E2E_ErrorHandlingFlow(t *testing.T) {
 	})
 
 	t.Run("BrokenAuthorizationChain", func(t *testing.T) {
-		brokenChain := &gauth.AuthorizationChain{
-			OwnersAuthorizer: &gauth.AuthorizationLink{
+		brokenChain := &agentauth.AuthorizationChain{
+			OwnersAuthorizer: &agentauth.AuthorizationLink{
 				EntityID:   "auth-1",
 				EntityType: "natural_person",
 				Role:       "authorizer",
-				LegalBasis: &gauth.LegalBasis{BasisType: "statutory"},
+				LegalBasis: &agentauth.LegalBasis{BasisType: "statutory"},
 				ValidFrom:  time.Now(),
 				ValidUntil: time.Now().Add(365 * 24 * time.Hour),
 				Status:     "active",
 			},
 			ClientOwner: nil, // Missing link - chain is broken
-			Client: &gauth.AuthorizationLink{
+			Client: &agentauth.AuthorizationLink{
 				EntityID:   "client-1",
 				EntityType: "ai_system",
 				Role:       "client",
-				LegalBasis: &gauth.LegalBasis{BasisType: "contractual"},
+				LegalBasis: &agentauth.LegalBasis{BasisType: "contractual"},
 				ValidFrom:  time.Now(),
 				ValidUntil: time.Now().Add(365 * 24 * time.Hour),
 				Status:     "active",
@@ -582,25 +582,25 @@ func createPoADefinition(t *testing.T) *poa.PoADefinition {
 	}
 }
 
-func createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken {
+func createCompleteExtendedToken(t *testing.T) *agentauth.ExtendedToken {
 	t.Helper()
 	now := time.Now()
 	poaDef := createPoADefinition(t)
 
-	authChain := &gauth.AuthorizationChain{
-		OwnersAuthorizer: &gauth.AuthorizationLink{
+	authChain := &agentauth.AuthorizationChain{
+		OwnersAuthorizer: &agentauth.AuthorizationLink{
 			EntityID:          "Max Mustermann",
 			EntityType:        "natural_person",
 			Role:              "authorizer",
 			AuthorizationDate: now.Add(-30 * 24 * time.Hour),
 			AuthorizationType: "statutory",
-			LegalBasis:        &gauth.LegalBasis{BasisType: "statutory"},
+			LegalBasis:        &agentauth.LegalBasis{BasisType: "statutory"},
 			IdentityVerified:  true,
 			ValidFrom:         now.Add(-30 * 24 * time.Hour),
 			ValidUntil:        now.Add(365 * 24 * time.Hour),
 			Status:            "active",
 		},
-		ClientOwner: &gauth.AuthorizationLink{
+		ClientOwner: &agentauth.AuthorizationLink{
 			EntityID:          "HRB123456",
 			EntityType:        "organization",
 			EntityName:        "Test Company GmbH",
@@ -608,13 +608,13 @@ func createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken {
 			AuthorizedBy:      "Max Mustermann",
 			AuthorizationDate: now.Add(-7 * 24 * time.Hour),
 			AuthorizationType: "delegated",
-			LegalBasis:        &gauth.LegalBasis{BasisType: "contractual"},
+			LegalBasis:        &agentauth.LegalBasis{BasisType: "contractual"},
 			IdentityVerified:  true,
 			ValidFrom:         now.Add(-7 * 24 * time.Hour),
 			ValidUntil:        now.Add(365 * 24 * time.Hour),
 			Status:            "active",
 		},
-		Client: &gauth.AuthorizationLink{
+		Client: &agentauth.AuthorizationLink{
 			EntityID:          "ai-agent-001",
 			EntityType:        "ai_system",
 			EntityName:        "Test AI Agent",
@@ -622,7 +622,7 @@ func createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken {
 			AuthorizedBy:      "HRB123456",
 			AuthorizationDate: now,
 			AuthorizationType: "delegated",
-			LegalBasis:        &gauth.LegalBasis{BasisType: "delegated_authority"},
+			LegalBasis:        &agentauth.LegalBasis{BasisType: "delegated_authority"},
 			IdentityVerified:  true,
 			ValidFrom:         now,
 			ValidUntil:        now.Add(90 * 24 * time.Hour),
@@ -634,7 +634,7 @@ func createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken {
 		ChainDepth:     3,
 	}
 
-	return &gauth.ExtendedToken{
+	return &agentauth.ExtendedToken{
 		AccessToken: "test-token-" + now.Format("20060102150405"),
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
@@ -643,7 +643,7 @@ func createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken {
 
 		PowerOfAttorney:    poaDef,
 		AuthorizationChain: authChain,
-		ClientOwner: &gauth.ClientOwnerInfo{
+		ClientOwner: &agentauth.ClientOwnerInfo{
 			OwnerID:                  "HRB123456",
 			OwnerName:                "Test Company GmbH",
 			OwnerType:                "organization",
@@ -655,26 +655,26 @@ func createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken {
 			IdentityVerified:         true,
 			VerificationDate:         now,
 		},
-		OwnersAuthorizer: &gauth.OwnersAuthorizerInfo{
+		OwnersAuthorizer: &agentauth.OwnersAuthorizerInfo{
 			AuthorizerID:       "Max Mustermann",
 			AuthorizerName:     "Max Mustermann",
 			AuthorizerType:     "managing_director",
 			StatutoryAuthority: "Managing Director",
 			AuthorityType:      "statutory",
 		},
-		LegalFramework: &gauth.LegalFrameworkInfo{
+		LegalFramework: &agentauth.LegalFrameworkInfo{
 			Jurisdiction:   "DE",
 			ApplicableLaws: []string{"BGB", "HGB", "GmbHG"},
 		},
-		IssuedBy: &gauth.AuthorizationServerInfo{
+		IssuedBy: &agentauth.AuthorizationServerInfo{
 			ServerID:  "gauth-server-1",
 			ServerURL: "https://auth.example.com",
 			Issuer:    "https://auth.example.com",
 			IssueTime: now,
 		},
-		VerificationProof: &gauth.IdentityVerificationChain{
+		VerificationProof: &agentauth.IdentityVerificationChain{
 			ChainID: "chain-" + now.Format("20060102150405"),
-			VerificationLevels: []gauth.VerificationLevel{
+			VerificationLevels: []agentauth.VerificationLevel{
 				{Level: 1, EntityID: "auth-1", EntityRole: "authorizer", VerificationStatus: "verified"},
 				{Level: 2, EntityID: "owner-1", EntityRole: "owner", VerificationStatus: "verified"},
 				{Level: 3, EntityID: "ai-agent-001", EntityRole: "client", VerificationStatus: "verified"},
@@ -686,21 +686,21 @@ func createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken {
 		RequestID:       "req-" + now.Format("20060102150405"),
 		GrantID:         "grant-123",
 		ComplianceLevel: "RFC-0111-compliant",
-		JurisdictionContext: &gauth.JurisdictionContext{
+		JurisdictionContext: &agentauth.JurisdictionContext{
 			PrimaryJurisdiction: "DE",
 			ApplicableLaws:      []string{"BGB", "HGB", "GmbHG"},
 		},
 	}
 }
 
-func convertToVerificationLevels(result *verification.IdentityChainVerificationResult) []gauth.VerificationLevel {
-	levels := make([]gauth.VerificationLevel, len(result.VerificationDetails))
+func convertToVerificationLevels(result *verification.IdentityChainVerificationResult) []agentauth.VerificationLevel {
+	levels := make([]agentauth.VerificationLevel, len(result.VerificationDetails))
 	for i, detail := range result.VerificationDetails {
 		status := "verified"
 		if !detail.Verified {
 			status = "failed"
 		}
-		levels[i] = gauth.VerificationLevel{
+		levels[i] = agentauth.VerificationLevel{
 			Level:              i + 1,
 			EntityID:           detail.Entity,
 			EntityRole:         detail.Step,

@@ -21,11 +21,11 @@ func TestExternalAnchorReceiptPersistence(t *testing.T) {
 	t.Skip("Skipping: External anchor receipt store file creation incomplete in server_factory.go wiring")
 	dir := t.TempDir()
 	receiptPath := filepath.Join(dir, "ext_receipts.json")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH", receiptPath)
-	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1") // deterministic
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH", receiptPath)
+	t.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1") // deterministic
 	// Provide a capability registry hash so initial anchor fires.
-	t.Setenv("GAUTH_SEED_POLICY", "0") // reduce noise
+	t.Setenv("AGENTAUTH_SEED_POLICY", "0") // reduce noise
 
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })

@@ -17,23 +17,23 @@ import (
 
 // TestCapabilityAnchorPrometheusGauge ensures Prometheus gauge reflects last write unix seconds after emission.
 func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
-	t.Setenv("GAUTH_CAP_ANCHOR_SIGN", "0")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_SIGN", "0")
 	anchorFile, err := os.CreateTemp(t.TempDir(), "cap-anchor-prom-*.json")
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
 	anchorFile.Close()
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	capFile := filepath.Join(t.TempDir(), "caps.json")
 	if err2 := os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"cap.transfer","version":"1.0","stable":true}],["action_mappings":{"transaction:execute":["cap.transfer"]}}`), 0o600); err2 != nil {
 		// fix malformed JSON quickly
 		_ = os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"cap.transfer","version":"1.0","stable":true}],"action_mappings":{"transaction:execute":["cap.transfer"]}}`), 0o600)
 	}
-	t.Setenv("GAUTH_CAPABILITIES_PATH", capFile)
-	t.Setenv("GAUTH_DISABLE_BG_POLLS", "1")
-	t.Setenv("GAUTH_SKIP_SMOKETEST", "1")
+	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
+	t.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1")
+	t.Setenv("AGENTAUTH_SKIP_SMOKETEST", "1")
 	// Use a dedicated registry to avoid clashes with global default.
 	reg := prom.NewRegistry()
 	// Create server; then swap metrics to Prometheus adapter for test.

@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewDiscoveryService(t *testing.T) {
-	issuerURL := "https://gauth.example.com"
+	issuerURL := "https://agentauth.example.com"
 	service := NewDiscoveryService(issuerURL)
 
 	if service == nil {
@@ -29,7 +29,7 @@ func TestNewDiscoveryService(t *testing.T) {
 }
 
 func TestDiscoveryService_GetConfiguration(t *testing.T) {
-	service := NewDiscoveryService("https://gauth.example.com")
+	service := NewDiscoveryService("https://agentauth.example.com")
 	config := service.GetConfiguration()
 
 	// Verify required fields
@@ -132,7 +132,7 @@ func TestDiscoveryService_ValidateConfiguration(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			service := NewDiscoveryService("https://gauth.example.com")
+			service := NewDiscoveryService("https://agentauth.example.com")
 			config := service.GetConfiguration()
 			tt.setup(config)
 			service.UpdateConfiguration(config)
@@ -146,7 +146,7 @@ func TestDiscoveryService_ValidateConfiguration(t *testing.T) {
 }
 
 func TestDiscoveryService_ServeHTTP(t *testing.T) {
-	service := NewDiscoveryService("https://gauth.example.com")
+	service := NewDiscoveryService("https://agentauth.example.com")
 
 	tests := []struct {
 		name       string
@@ -187,7 +187,7 @@ func TestDiscoveryService_ServeHTTP(t *testing.T) {
 }
 
 func TestDiscoveryService_SupportsACR(t *testing.T) {
-	service := NewDiscoveryService("https://gauth.example.com")
+	service := NewDiscoveryService("https://agentauth.example.com")
 
 	tests := []struct {
 		name string
@@ -226,7 +226,7 @@ func TestDiscoveryService_SupportsACR(t *testing.T) {
 }
 
 func TestDiscoveryService_SupportsScope(t *testing.T) {
-	service := NewDiscoveryService("https://gauth.example.com")
+	service := NewDiscoveryService("https://agentauth.example.com")
 
 	tests := []struct {
 		name  string
@@ -265,7 +265,7 @@ func TestDiscoveryService_SupportsScope(t *testing.T) {
 }
 
 func TestDiscoveryService_AgentAuthExtensions(t *testing.T) {
-	service := NewDiscoveryService("https://gauth.example.com")
+	service := NewDiscoveryService("https://agentauth.example.com")
 	config := service.GetConfiguration()
 
 	// Verify AgentAuth-specific scopes
@@ -307,13 +307,13 @@ func TestIssuerURL(t *testing.T) {
 	}{
 		{
 			name:  "URL with trailing slash",
-			input: "https://gauth.example.com/",
-			want:  "https://gauth.example.com",
+			input: "https://agentauth.example.com/",
+			want:  "https://agentauth.example.com",
 		},
 		{
 			name:  "URL without trailing slash",
-			input: "https://gauth.example.com",
-			want:  "https://gauth.example.com",
+			input: "https://agentauth.example.com",
+			want:  "https://agentauth.example.com",
 		},
 	}
 

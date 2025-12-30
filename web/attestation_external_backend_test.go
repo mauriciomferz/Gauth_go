@@ -11,10 +11,10 @@ import (
 
 // TestAttestationExternalRedisBackend ensures Redis backend detects replay after Record.
 func TestAttestationExternalRedisBackend(t *testing.T) {
-	if os.Getenv("GAUTH_ATTEST_REPLAY_BACKEND_TEST_SKIP") == "1" {
+	if os.Getenv("AGENTAUTH_ATTEST_REPLAY_BACKEND_TEST_SKIP") == "1" {
 		t.Skip("skipped via env")
 	}
-	addr := os.Getenv("GAUTH_ATTEST_REDIS_ADDR")
+	addr := os.Getenv("AGENTAUTH_ATTEST_REDIS_ADDR")
 	if addr == "" {
 		addr = "localhost:6379"
 	}

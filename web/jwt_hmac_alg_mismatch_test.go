@@ -11,10 +11,10 @@ import (
 
 // TestJWTHMACAlgMismatch verifies that when expecting HS256 the header contains RS256 and we get normalized invalid_algorithm detail.
 func TestJWTHMACAlgMismatch(t *testing.T) {
-	t.Setenv("GAUTH_USE_JWT_LIB", "1")
-	t.Setenv("GAUTH_JWT_ALG", "HS256") // Expect HMAC
-	t.Setenv("GAUTH_JWT_SECRET", "demo-hmac-secret-1234567890")
-	t.Setenv("GAUTH_JWT_KID", "demo-hmac")
+	t.Setenv("AGENTAUTH_USE_JWT_LIB", "1")
+	t.Setenv("AGENTAUTH_JWT_ALG", "HS256") // Expect HMAC
+	t.Setenv("AGENTAUTH_JWT_SECRET", "demo-hmac-secret-1234567890")
+	t.Setenv("AGENTAUTH_JWT_KID", "demo-hmac")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 

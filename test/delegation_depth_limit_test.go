@@ -12,8 +12,8 @@ import (
 )
 
 func TestDelegationDepthLimitExceeded(t *testing.T) {
-	os.Setenv("GAUTH_MAX_DELEGATION_DEPTH", "2")
-	defer os.Unsetenv("GAUTH_MAX_DELEGATION_DEPTH")
+	os.Setenv("AGENTAUTH_MAX_DELEGATION_DEPTH", "2")
+	defer os.Unsetenv("AGENTAUTH_MAX_DELEGATION_DEPTH")
 	chain := delegation.NewChain()
 	mem := metrics.NewMemory()
 
@@ -42,7 +42,7 @@ func TestDelegationDepthLimitExceeded(t *testing.T) {
 }
 
 func TestDelegationDepthLimitDisabled(t *testing.T) {
-	os.Unsetenv("GAUTH_MAX_DELEGATION_DEPTH")
+	os.Unsetenv("AGENTAUTH_MAX_DELEGATION_DEPTH")
 	chain := delegation.NewChain()
 	for i := 1; i <= 5; i++ {
 		_, err := chain.Append(delegation.Delegation{ID: time.Now().Format("150405") + string(rune('A'+i)), Subject: "s", Delegate: "d", Scope: map[string]string{"res": "x"}, ExpiresAt: time.Now().Add(time.Hour)})

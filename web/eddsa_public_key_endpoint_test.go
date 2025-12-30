@@ -9,7 +9,7 @@ import (
 
 // TestEdDSAPublicKeyEndpoint validates exposure of active EdDSA public key when mode enabled.
 func TestEdDSAPublicKeyEndpoint(t *testing.T) {
-	t.Setenv("GAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/api/v1/beta/keys/eddsa")

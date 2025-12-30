@@ -11,7 +11,7 @@ import (
 
 // TestLegacyAliasTelemetry verifies legacy_alias_hits increments when invoking the deprecated alias.
 func TestLegacyAliasTelemetry(t *testing.T) {
-	testutil.WithEnv(t, "GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "", func() {
+	testutil.WithEnv(t, "AGENTAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS", "", func() {
 		srv := NewBetaServer("")
 		t.Cleanup(func() { srv.Shutdown() })
 		// Baseline metrics

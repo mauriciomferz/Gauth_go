@@ -14,8 +14,8 @@ import (
 
 // TestRawPOAExposedWhenEmbedded ensures verification result surfaces RawPOA & PoAVersion.
 func TestRawPOAExposedWhenEmbedded(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
 	svc := NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer())
 	// authorize basic create_delegation for grantor
 	authzMem := svc.authz.(*authz.MemoryAuthorizer)
@@ -43,8 +43,8 @@ func TestRawPOAExposedWhenEmbedded(t *testing.T) {
 
 // TestRawPOAAbsentWhenDisabled ensures RawPOA empty when embedding flag off.
 func TestRawPOAAbsentWhenDisabled(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_EMBED_FULL_POA", "0")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "0")
 	svc := NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer())
 	authzMem := svc.authz.(*authz.MemoryAuthorizer)
 	authzMem.AddPolicy(authz.Policy{Subject: "g1", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
@@ -68,10 +68,10 @@ func TestRawPOAAbsentWhenDisabled(t *testing.T) {
 
 // TestRawPOAOmittedWhenSizeExceeded ensures omission when canonical JSON exceeds cap.
 func TestRawPOAOmittedWhenSizeExceeded(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
 	// Set a tiny max size to force omission (canonical JSON will exceed this)
-	t.Setenv("GAUTH_MAX_RAW_POA_BYTES", "10")
+	t.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "10")
 	svc := NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer())
 	authzMem := svc.authz.(*authz.MemoryAuthorizer)
 	authzMem.AddPolicy(authz.Policy{Subject: "g1", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})

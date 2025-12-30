@@ -47,8 +47,8 @@ func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 	t.Skip("Test requires proper authorization setup - skipping until policy configuration is fixed")
 
 	// Enable AAP001 service and policy seeding
-	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "0")
-	t.Setenv("GAUTH_SEED_POLICY", "1")
+	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
+	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
@@ -89,8 +89,8 @@ func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 	t.Skip("Test requires proper authorization setup - skipping until policy configuration is fixed")
 
-	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "0")
-	t.Setenv("GAUTH_SEED_POLICY", "1")
+	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
+	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
@@ -121,8 +121,8 @@ func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 func TestEvidenceAttachment_NotFound(t *testing.T) {
 	t.Skip("Test requires proper authorization setup - skipping until policy configuration is fixed")
 
-	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "0")
-	t.Setenv("GAUTH_SEED_POLICY", "1")
+	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
+	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
 	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })

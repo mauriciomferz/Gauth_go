@@ -11,12 +11,12 @@ import (
 	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
-// TestMandatoryDetachedSignature_Enforced verifies that when GAUTH_REQUIRE_DETACHED_SIGNATURE
+// TestMandatoryDetachedSignature_Enforced verifies that when AGENTAUTH_REQUIRE_DETACHED_SIGNATURE
 // is set, tokens without detached signatures are rejected.
 func TestMandatoryDetachedSignature_Enforced(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_DETACHED_SIGNATURE", "") // intentionally disabled
-	t.Setenv("GAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "") // intentionally disabled
+	t.Setenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
 
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
@@ -40,12 +40,12 @@ func TestMandatoryDetachedSignature_Enforced(t *testing.T) {
 	}
 }
 
-// TestMandatoryDetachedSignature_Present verifies that when GAUTH_REQUIRE_DETACHED_SIGNATURE
+// TestMandatoryDetachedSignature_Present verifies that when AGENTAUTH_REQUIRE_DETACHED_SIGNATURE
 // is set, tokens WITH detached signatures are accepted.
 func TestMandatoryDetachedSignature_Present(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_DETACHED_SIGNATURE", "1") // enabled
-	t.Setenv("GAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "1") // enabled
+	t.Setenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
 
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
@@ -73,11 +73,11 @@ func TestMandatoryDetachedSignature_Present(t *testing.T) {
 }
 
 // TestMandatoryDetachedSignature_NotRequired verifies backward compatibility when
-// GAUTH_REQUIRE_DETACHED_SIGNATURE is NOT set (default behavior).
+// AGENTAUTH_REQUIRE_DETACHED_SIGNATURE is NOT set (default behavior).
 func TestMandatoryDetachedSignature_NotRequired(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_DETACHED_SIGNATURE", "") // disabled
-	t.Setenv("GAUTH_REQUIRE_DETACHED_SIGNATURE", "")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "") // disabled
+	t.Setenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE", "")
 
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
@@ -106,11 +106,11 @@ func TestMandatoryDetachedSignature_NotRequired(t *testing.T) {
 }
 
 // TestMandatoryDetachedSignature_V1EnvelopeRejected verifies that when
-// GAUTH_REQUIRE_DETACHED_SIGNATURE is set, V1 envelopes (which cannot have detached signatures)
+// AGENTAUTH_REQUIRE_DETACHED_SIGNATURE is set, V1 envelopes (which cannot have detached signatures)
 // are rejected.
 func TestMandatoryDetachedSignature_V1EnvelopeRejected(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "") // V1 envelope
-	t.Setenv("GAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "") // V1 envelope
+	t.Setenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
 
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {
@@ -137,9 +137,9 @@ func TestMandatoryDetachedSignature_V1EnvelopeRejected(t *testing.T) {
 // TestMandatoryDetachedSignature_FailClosedMetrics verifies that mandatory enforcement
 // failures are properly instrumented in metrics.
 func TestMandatoryDetachedSignature_FailClosedMetrics(t *testing.T) {
-	t.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
-	t.Setenv("GAUTH_DETACHED_SIGNATURE", "")
-	t.Setenv("GAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_DETACHED_SIGNATURE", "")
+	t.Setenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE", "1")
 
 	kp, err := cr.NewInMemoryEd25519Provider()
 	if err != nil {

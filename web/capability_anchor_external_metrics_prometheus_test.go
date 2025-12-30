@@ -10,7 +10,7 @@ import (
 
 // TestExternalAnchorPrometheusMetrics validates that attempts, latency, and age/hash gauges are exposed after a successful anchor.
 func TestExternalAnchorPrometheusMetrics(t *testing.T) {
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	// Initialize Prometheus adapter (registers metrics in default registry).
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem:"AAP-001"})
 	srv := NewBetaServer(":0")

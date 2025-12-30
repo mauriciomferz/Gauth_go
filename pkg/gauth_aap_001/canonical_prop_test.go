@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// TestMultiSigDomainSeparationDeterminism validates that enabling GAUTH_MULTI_SIG_DOMAIN_V2 produces
+// TestMultiSigDomainSeparationDeterminism validates that enabling AGENTAUTH_MULTI_SIG_DOMAIN_V2 produces
 // identical digests regardless of input weight mapping order and that changing threshold or weights
 // changes the digest (domain separation effectiveness).
 func TestMultiSigDomainSeparationDeterminism(t *testing.T) {

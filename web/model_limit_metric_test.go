@@ -21,7 +21,7 @@ func TestModelLimitExceededMetric(t *testing.T) {
 		t.Fatalf("write: %v", err)
 	}
 	f.Close()
-	t.Setenv("GAUTH_MODEL_LIMITS_CONFIG_PATH", f.Name())
+	t.Setenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH", f.Name())
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })
 	mem, ok := bs.metrics.(*imetrics.Memory)

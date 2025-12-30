@@ -17,13 +17,13 @@ import (
 func TestCombinedAnchorEmissionWithRotation(t *testing.T) {
 	tmpReceipts := "test_ext_anchor_receipts_rotation.json"
 	_ = os.Remove(tmpReceipts)
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
-	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH", tmpReceipts)
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH", tmpReceipts)
 	// Enable notarization to initialize rotation ledger.
 	tmpLedger := "test_rotation_ledger.json"
 	_ = os.Remove(tmpLedger)
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	t.Setenv("GAUTH_ROTATION_LEDGER_PATH", tmpLedger)
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_ROTATION_LEDGER_PATH", tmpLedger)
 
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)

@@ -26,8 +26,8 @@ func TestRotationV2ContinuitySatisfied(t *testing.T) {
 	// Config threshold = 2 with two signers weight 1 each.
 	cfg := `{"schema_version":1,"active_key_set_id":"set","threshold_weight":2,"signers":[{"id":"k1","alg":"ED25519","weight":1},{"id":"k2","alg":"ED25519","weight":1}],"algorithm_suite":["ed25519"]}`
 	tmp := continuityTempFile(t, cfg)
-	t.Setenv("GAUTH_ROTATIONS_V2_CONFIG", tmp)
-	t.Setenv("GAUTH_ROTATIONS_V2_SIGN", "1")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_CONFIG", tmp)
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_SIGN", "1")
 	// Install keys (best-effort)
 	km := installKey(t, "k1") // Just use one manager for simpler test fix, or mock multi-node if needed.
 	// Actually, this test seems to rely on global side effects if installKey was void.

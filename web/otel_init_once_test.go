@@ -12,7 +12,7 @@ import (
 
 // TestOTELInitOnce ensures that multiple BetaServer constructions only initialize the OTEL exporter once.
 func TestOTELInitOnce(t *testing.T) {
-	t.Setenv("GAUTH_OTEL_METRICS_ENABLE", "1")
+	t.Setenv("AGENTAUTH_OTEL_METRICS_ENABLE", "1")
 
 	// Capture stderr
 	orig := os.Stderr

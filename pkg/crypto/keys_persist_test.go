@@ -10,8 +10,8 @@ import (
 func TestManagerPersistenceCycle(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "eddsa_keys.json")
-	os.Setenv("GAUTH_EDDSA_PERSIST_PATH", path)
-	defer func() { _ = os.Unsetenv("GAUTH_EDDSA_PERSIST_PATH") }()
+	os.Setenv("AGENTAUTH_EDDSA_PERSIST_PATH", path)
+	defer func() { _ = os.Unsetenv("AGENTAUTH_EDDSA_PERSIST_PATH") }()
 	m, err := NewManager(2 * time.Hour)
 	if err != nil {
 		t.Fatalf("new manager: %v", err)

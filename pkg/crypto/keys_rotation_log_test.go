@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-// TestRotationAuditTrail ensures rotation emits JSON line when GAUTH_EDDSA_ROTATION_LOG set.
+// TestRotationAuditTrail ensures rotation emits JSON line when AGENTAUTH_EDDSA_ROTATION_LOG set.
 func TestRotationAuditTrail(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "rotation.log")
-	os.Setenv("GAUTH_EDDSA_ROTATION_LOG", logPath)
-	defer func() { _ = os.Unsetenv("GAUTH_EDDSA_ROTATION_LOG") }()
+	os.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", logPath)
+	defer func() { _ = os.Unsetenv("AGENTAUTH_EDDSA_ROTATION_LOG") }()
 	m, err := NewManager(1 * time.Hour)
 	if err != nil {
 		t.Fatalf("manager: %v", err)

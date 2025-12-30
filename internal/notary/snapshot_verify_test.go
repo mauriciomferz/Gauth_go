@@ -12,7 +12,7 @@ func TestVerifySnapshot(t *testing.T) {
 	if err := rs.Load(); err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	os.Setenv("GAUTH_NOTARY_MERKLE_ENABLED", "1")
+	os.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
 	// Append receipts
 	for i, h := range []string{"sha256:a", "sha256:b", "sha256:c"} {
 		ts := fmt.Sprintf("2025-10-20T00:00:0%dZ", i)

@@ -13,7 +13,7 @@ func TestIndexedDelegationStore_Pruning_Background(t *testing.T) {
 	// Setup temp db
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "delegation_test.db")
-	t.Setenv("GAUTH_ALLOW_UNSAFE_BOLTDB", "1")
+	t.Setenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB", "1")
 
 	// Config with short intervals for testing
 	config := PruneConfig{
@@ -82,7 +82,7 @@ func TestIndexedDelegationStore_Pruning_Background(t *testing.T) {
 func TestIndexedDelegationStore_Lifecycle(t *testing.T) {
 	dir := t.TempDir()
 	dbPath := filepath.Join(dir, "lifecycle_test.db")
-	t.Setenv("GAUTH_ALLOW_UNSAFE_BOLTDB", "1")
+	t.Setenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB", "1")
 
 	config := PruneConfig{
 		Enabled:  true,

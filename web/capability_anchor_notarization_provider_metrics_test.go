@@ -12,11 +12,11 @@ import (
 
 // TestCapabilityAnchorNotarizationProviderMetrics ensures provider-labeled metrics are recorded.
 func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARIZE", "1")
-	t.Setenv("GAUTH_CAP_ANCHOR_NOTARY_PROVIDER", capSourceExternal)
-	t.Setenv("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", "1")
-	t.Setenv("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", "2")
-	t.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "0")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER", capSourceExternal)
+	t.Setenv("AGENTAUTH_NOTARY_STUB_MIN_LATENCY_MS", "1")
+	t.Setenv("AGENTAUTH_NOTARY_STUB_MAX_LATENCY_MS", "2")
+	t.Setenv("AGENTAUTH_NOTARY_STUB_FAIL_PROB", "0")
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Replace default memory metrics with Prometheus adapter to access provider-labeled methods.
@@ -57,7 +57,7 @@ func TestCapabilityAnchorNotarizationProviderMetrics(t *testing.T) {
 		t.Fatalf("unexpected provider: %s", receipt.Provider)
 	}
 	// Trigger a failure to exercise provider-labeled failures vector.
-	t.Setenv("GAUTH_NOTARY_STUB_FAIL_PROB", "1") // force failure next attempt
+	t.Setenv("AGENTAUTH_NOTARY_STUB_FAIL_PROB", "1") // force failure next attempt
 	// Recreate stub to pick up new env configuration.
 	_, _ = srv.notarizer.(interface{ Latest() interface{} }) // type hint to ensure interface compatibility
 	srv.notarizer = notary.NewExternalStub()

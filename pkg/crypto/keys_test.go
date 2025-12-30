@@ -16,7 +16,7 @@ func TestKeyArchivalAndRetrieval(t *testing.T) {
 	f.Close()
 	defer os.Remove(persistPath)
 
-	t.Setenv("GAUTH_EDDSA_PERSIST_PATH", persistPath)
+	t.Setenv("AGENTAUTH_EDDSA_PERSIST_PATH", persistPath)
 
 	// 1. Init Manager with short TTL
 	ttl := 200 * time.Millisecond

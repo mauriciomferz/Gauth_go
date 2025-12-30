@@ -16,8 +16,8 @@ import (
 // is implemented separately, we replicate its digest and signature preimage computation here.
 func TestRotationV2EmbeddedPublicKeyVerification(t *testing.T) {
 	// Set env to embed public keys when building artifact from config.
-	os.Setenv("GAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
-	defer os.Unsetenv("GAUTH_ROTATIONS_V2_EMBED_PUBS")
+	os.Setenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
+	defer os.Unsetenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS")
 
 	// Create a config with two Ed25519 signers that together meet threshold.
 	cfg := &notary.WeightsConfig{SchemaVersion: 1, ActiveKeySetID: "embed-set", ThresholdWeight: 6,
@@ -89,7 +89,7 @@ func auditorStyleVerify(art *notary.WeightedRotationArtifact) (int, []string, bo
 	if art == nil {
 		return 0, []string{"artifact_nil"}, false
 	}
-	preimage := []byte("GAUTH_ROTATION_V2:" + art.CanonicalDigest)
+	preimage := []byte("AGENTAUTH_ROTATION_V2:" + art.CanonicalDigest)
 	verified := 0
 	failures := []string{}
 	for _, s := range art.Signers {

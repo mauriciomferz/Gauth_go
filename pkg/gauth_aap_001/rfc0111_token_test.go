@@ -59,7 +59,7 @@ func TestValidationContextRestriction(t *testing.T) {
 	}
 }
 
-// TestTokenRoundTripEnvKey sets GAUTH_TOKEN_SYM_KEY to a fixed value, issues a token, decrypts it, and asserts fields.
+// TestTokenRoundTripEnvKey sets AGENTAUTH_TOKEN_SYM_KEY to a fixed value, issues a token, decrypts it, and asserts fields.
 // typedClaims mirrors the envelope JSON fields for decoding.
 type typedClaims struct {
 	Version      string            `json:"ver"`
@@ -82,8 +82,8 @@ func TestTokenRoundTripEnvKey(t *testing.T) {
 	for i := range key {
 		key[i] = byte(i + 1)
 	}
-	os.Setenv("GAUTH_TOKEN_SYM_KEY", base64.StdEncoding.EncodeToString(key))
-	defer os.Unsetenv("GAUTH_TOKEN_SYM_KEY")
+	os.Setenv("AGENTAUTH_TOKEN_SYM_KEY", base64.StdEncoding.EncodeToString(key))
+	defer os.Unsetenv("AGENTAUTH_TOKEN_SYM_KEY")
 
 	memAuthz := authz.NewMemoryAuthorizer()
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-create", Subject: "alice", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})

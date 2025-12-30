@@ -23,7 +23,7 @@ func TestDigestMismatchReasonHeuristics(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
 	ma.AddPolicy(authz.Policy{ID: "allow_create", Subject: "*", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	svc := NewService(audit.NewMemoryLogger(nil), ma, WithMetrics(mem))
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 	// Issue delegation
 	req := DelegationRequest{Grantor: "r@example.com", Grantee: "s@example.com", Scope: []string{"x"}, Duration: time.Minute}
 	resp, err := svc.CreateDelegationCtx(context.Background(), req)
@@ -79,7 +79,7 @@ func TestSunsetControllerPromotion(t *testing.T) {
 	// Seed initial phase Pilot (1)
 	mem.SetEnvelopeV1SunsetPhase(1)
 	// Simulate high adoption: issue V2 tokens only
-	os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 	for i := 0; i < 10; i++ {
 		req := DelegationRequest{Grantor: "p@example.com", Grantee: "q@example.com", Scope: []string{"x"}, Duration: time.Minute}
 		if _, err := svc.CreateDelegationCtx(context.Background(), req); err != nil {

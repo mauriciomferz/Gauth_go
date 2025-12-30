@@ -15,32 +15,32 @@ func TestAgentAuthDurableReplayAutoConfig(t *testing.T) {
 	walPath := "./testdata/gauth_autoconfig_replay.wal"
 	defer os.RemoveAll("./testdata")
 
-	os.Setenv("GAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("GAUTH_REPLAY_TTL_SEC", "60")
-	os.Setenv("GAUTH_REPLAY_EVICTION_POLICY", "ttl")
-	defer os.Unsetenv("GAUTH_REPLAY_WAL_PATH")
-	defer os.Unsetenv("GAUTH_REPLAY_TTL_SEC")
-	defer os.Unsetenv("GAUTH_REPLAY_EVICTION_POLICY")
+	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "60")
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
+	defer os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
+	defer os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
+	defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
 
 	// Register the replay factory (this would typically be done in init() or main())
-	gauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (gauth.ReplayStore, error) {
+	agentauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (agentauth.ReplayStore, error) {
 		return NewAgentAuthReplayStoreFromEnv(metrics)
 	})
 
 	// Create gauth service with auto-configured durable replay store
-	config := gauth.Config{
+	config := agentauth.Config{
 		ClientID:          "test-client",
 		ClientSecret:      "test-secret-12345678901234567890",
 		AccessTokenExpiry: 5 * time.Minute,
 	}
 
-	svc, err := gauth.New(config, gauth.WithDurableReplayFromEnvUsingFactory())
+	svc, err := agentauth.New(config, agentauth.WithDurableReplayFromEnvUsingFactory())
 	if err != nil {
 		t.Fatalf("Failed to create gauth service with auto-configured replay: %v", err)
 	}
 
 	// Test 1: Issue token with replay protection
-	req1 := gauth.TokenRequest{
+	req1 := agentauth.TokenRequest{
 		GrantID: "grant-123",
 		Scope:   []string{"read", "write"},
 	}
@@ -98,19 +98,19 @@ func TestAgentAuthDurableReplayPersistence(t *testing.T) {
 	walPath := "./testdata/gauth_persist_replay.wal"
 	defer os.RemoveAll("./testdata")
 
-	os.Setenv("GAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("GAUTH_REPLAY_TTL_SEC", "300") // 5 minutes
-	os.Setenv("GAUTH_REPLAY_EVICTION_POLICY", "ttl")
-	defer os.Unsetenv("GAUTH_REPLAY_WAL_PATH")
-	defer os.Unsetenv("GAUTH_REPLAY_TTL_SEC")
-	defer os.Unsetenv("GAUTH_REPLAY_EVICTION_POLICY")
+	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "300") // 5 minutes
+	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
+	defer os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
+	defer os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
+	defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
 
 	// Register factory
-	gauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (gauth.ReplayStore, error) {
+	agentauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (agentauth.ReplayStore, error) {
 		return NewAgentAuthReplayStoreFromEnv(metrics)
 	})
 
-	config := gauth.Config{
+	config := agentauth.Config{
 		ClientID:          "test-client",
 		ClientSecret:      "test-secret-12345678901234567890",
 		AccessTokenExpiry: 5 * time.Minute,
@@ -120,12 +120,12 @@ func TestAgentAuthDurableReplayPersistence(t *testing.T) {
 
 	// Phase 1: Create service, issue tokens
 	{
-		svc, err := gauth.New(config, gauth.WithDurableReplayFromEnvUsingFactory())
+		svc, err := agentauth.New(config, agentauth.WithDurableReplayFromEnvUsingFactory())
 		if err != nil {
 			t.Fatalf("Failed to create first service: %v", err)
 		}
 
-		req := gauth.TokenRequest{
+		req := agentauth.TokenRequest{
 			GrantID: "grant-123",
 			Scope:   []string{"read"},
 		}
@@ -150,7 +150,7 @@ func TestAgentAuthDurableReplayPersistence(t *testing.T) {
 
 	// Phase 2: Restart service (new instance)
 	{
-		svc2, err := gauth.New(config, gauth.WithDurableReplayFromEnvUsingFactory())
+		svc2, err := agentauth.New(config, agentauth.WithDurableReplayFromEnvUsingFactory())
 		if err != nil {
 			t.Fatalf("Failed to create second service: %v", err)
 		}
@@ -173,7 +173,7 @@ func TestAgentAuthDurableReplayPersistence(t *testing.T) {
 		}
 
 		// Issue a new token
-		req := gauth.TokenRequest{
+		req := agentauth.TokenRequest{
 			GrantID: "grant-123",
 			Scope:   []string{"read"},
 		}
@@ -212,32 +212,32 @@ func TestAgentAuthDurableReplayEvictionPolicies(t *testing.T) {
 			walPath := "./testdata/gauth_evict_" + tc.policy + "_replay.wal"
 			defer os.RemoveAll("./testdata")
 
-			os.Setenv("GAUTH_REPLAY_WAL_PATH", walPath)
-			os.Setenv("GAUTH_REPLAY_TTL_SEC", "60")
-			os.Setenv("GAUTH_REPLAY_EVICTION_POLICY", tc.policy)
-			os.Setenv("GAUTH_REPLAY_EVICTION_MAX_SIZE", "100")
-			defer os.Unsetenv("GAUTH_REPLAY_WAL_PATH")
-			defer os.Unsetenv("GAUTH_REPLAY_TTL_SEC")
-			defer os.Unsetenv("GAUTH_REPLAY_EVICTION_POLICY")
-			defer os.Unsetenv("GAUTH_REPLAY_EVICTION_MAX_SIZE")
+			os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+			os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "60")
+			os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", tc.policy)
+			os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "100")
+			defer os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
+			defer os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
+			defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
+			defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
 
-			gauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (gauth.ReplayStore, error) {
+			agentauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (agentauth.ReplayStore, error) {
 				return NewAgentAuthReplayStoreFromEnv(metrics)
 			})
 
-			config := gauth.Config{
+			config := agentauth.Config{
 				ClientID:          "test-client",
 				ClientSecret:      "test-secret-12345678901234567890",
 				AccessTokenExpiry: 5 * time.Minute,
 			}
 
-			svc, err := gauth.New(config, gauth.WithDurableReplayFromEnvUsingFactory())
+			svc, err := agentauth.New(config, agentauth.WithDurableReplayFromEnvUsingFactory())
 			if err != nil {
 				t.Fatalf("Failed to create service with %s policy: %v", tc.policy, err)
 			}
 
 			// Issue a few tokens
-			req := gauth.TokenRequest{
+			req := agentauth.TokenRequest{
 				GrantID: "grant-123",
 				Scope:   []string{"read"},
 			}

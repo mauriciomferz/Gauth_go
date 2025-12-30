@@ -18,9 +18,9 @@ type capabilityAnchorStatusResponse struct {
 
 // TestCapabilityAnchorSLAStale verifies stale flag toggles after threshold exceeded.
 func TestCapabilityAnchorSLAStale(t *testing.T) {
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
-	t.Setenv("GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "2") // very small threshold for test
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "2") // very small threshold for test
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Simulate a last write 5 seconds ago (beyond threshold)
@@ -52,9 +52,9 @@ func TestCapabilityAnchorSLAStale(t *testing.T) {
 
 // TestCapabilityAnchorSLAFresh verifies stale=false when age below threshold.
 func TestCapabilityAnchorSLAFresh(t *testing.T) {
-	t.Setenv("GAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
-	t.Setenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
-	t.Setenv("GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "10") // threshold higher than age
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS", "10") // threshold higher than age
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.capAnchorLastWrite = time.Now().Add(-2 * time.Second)
