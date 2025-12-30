@@ -12,7 +12,7 @@
 
 ### Milestone 1: Observability Complete ✅
 
-Phase 9 Week 1 successfully delivers **production-grade observability infrastructure** for the GAuth OIDC server:
+Phase 9 Week 1 successfully delivers **production-grade observability infrastructure** for the AgentAuth OIDC server:
 
 **✅ Task 1: Phase 9 Roadmap** - COMPLETE
 - File: `docs/PHASE9_ROADMAP.md`
@@ -575,7 +575,7 @@ Phase 9 Week 1 Days 1-2 successfully delivered **production-grade observability 
 ✅ **125 tests passing** (0 regressions)  
 
 ### Production Readiness
-The GAuth OIDC server now has:
+The AgentAuth OIDC server now has:
 - ✅ Full Prometheus integration for metrics
 - ✅ Kubernetes-ready health checks
 - ✅ Production-grade structured logging

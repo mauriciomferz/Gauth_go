@@ -1,4 +1,4 @@
-# GAuth Advanced Monitoring Guide
+# AgentAuth Advanced Monitoring Guide
 
 **Version**: 1.0  
 **Date**: November 26, 2025  
@@ -22,7 +22,7 @@
 
 ## Overview
 
-GAuth implements comprehensive monitoring using the Prometheus/Grafana stack, providing:
+AgentAuth implements comprehensive monitoring using the Prometheus/Grafana stack, providing:
 
 - **Real-time Metrics**: Request rates, latency, errors, cache performance
 - **Health Monitoring**: Component health checks and system status
@@ -47,7 +47,7 @@ GAuth implements comprehensive monitoring using the Prometheus/Grafana stack, pr
 
 ```
 ┌─────────────────┐
-│   GAuth API     │
+│   AgentAuth API     │
 │   Port: 8080    │
 │   /metrics/*    │
 └────────┬────────┘
@@ -69,7 +69,7 @@ GAuth implements comprehensive monitoring using the Prometheus/Grafana stack, pr
 
 ### Components
 
-1. **GAuth Application** - Exposes Prometheus metrics at multiple endpoints
+1. **AgentAuth Application** - Exposes Prometheus metrics at multiple endpoints
 2. **Prometheus** - Scrapes and stores time-series metrics data
 3. **Grafana** - Visualizes metrics in interactive dashboards
 4. **AlertManager** - Routes and manages alerts to various channels
@@ -97,12 +97,12 @@ This starts:
 
 1. Open http://localhost:3001
 2. Login: `admin` / `admin`
-3. Navigate to "Dashboards" → "GAuth - System Overview"
+3. Navigate to "Dashboards" → "AgentAuth - System Overview"
 
-### 3. Start GAuth Application
+### 3. Start AgentAuth Application
 
 ```bash
-# Ensure GAuth is running and exposing metrics
+# Ensure AgentAuth is running and exposing metrics
 go run ./cmd/web-server
 ```
 
@@ -236,7 +236,7 @@ http_request_duration_seconds_bucket{le="0.1"} 14500
 
 ## Grafana Dashboards
 
-### Pre-Installed Dashboard: "GAuth - System Overview"
+### Pre-Installed Dashboard: "AgentAuth - System Overview"
 
 #### Panels
 
@@ -467,7 +467,7 @@ docker exec -it gauth-grafana grafana-cli admin reset-admin-password newpassword
 
 - Docker and Docker Compose
 - Sufficient disk space for time-series data (recommend 50GB+)
-- Network access between monitoring stack and GAuth application
+- Network access between monitoring stack and AgentAuth application
 
 ### Deployment Steps
 
@@ -518,7 +518,7 @@ docker-compose logs -f
 # Check Prometheus targets
 curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | {job: .labels.job, health: .health}'
 
-# Test GAuth metrics endpoint
+# Test AgentAuth metrics endpoint
 curl http://localhost:8080/api/v1/admin/metrics/prometheus | head -20
 ```
 
@@ -582,13 +582,13 @@ For production HA setup:
 
 ### Common Issues
 
-#### 1. **Prometheus Not Scraping GAuth**
+#### 1. **Prometheus Not Scraping AgentAuth**
 
 **Symptoms**: No data in Grafana, targets show as "Down"
 
 **Solutions**:
 ```bash
-# Check GAuth is running
+# Check AgentAuth is running
 curl http://localhost:8080/api/v1/admin/metrics/prometheus
 
 # Check Prometheus targets
@@ -655,7 +655,7 @@ prometheus:
 2. Verify Prometheus scrape configuration
 3. Check for metric registration errors:
    ```bash
-   # GAuth application logs
+   # AgentAuth application logs
    grep "metric" logs/gauth.log
    ```
 
@@ -799,11 +799,11 @@ curl -X POST -H "Authorization: Bearer YOUR_API_KEY" \
 - [Grafana Documentation](https://grafana.com/docs/)
 - [AlertManager Documentation](https://prometheus.io/docs/alerting/latest/alertmanager/)
 - [PromQL Tutorial](https://prometheus.io/docs/prometheus/latest/querying/basics/)
-- [GAuth Metrics API Reference](../AUDIT_EXPORT_API_REFERENCE.md)
+- [AgentAuth Metrics API Reference](../AUDIT_EXPORT_API_REFERENCE.md)
 
 ---
 
-**Compliance Achievement**: With this advanced monitoring implementation, GAuth reaches **97/100 compliance** (+1.0 point for comprehensive monitoring and observability).
+**Compliance Achievement**: With this advanced monitoring implementation, AgentAuth reaches **97/100 compliance** (+1.0 point for comprehensive monitoring and observability).
 
 **Next Steps**:
 - Multi-region deployment (+1.0) → 98/100

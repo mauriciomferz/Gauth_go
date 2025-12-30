@@ -44,7 +44,7 @@
 
 ## Phase 21: Observability & Monitoring [x]
 - [x] Infrastructure Setup
-    - [x] Configure `prometheus.yml` for GAuth targets
+    - [x] Configure `prometheus.yml` for AgentAuth targets
     - [x] Create Grafana datasource provisioning
     - [x] Create Grafana system dashboard
     - [x] Update `docker-compose.yml` with monitoring services
@@ -59,7 +59,7 @@
 
 ## Phase 22: Advanced Observability (Custom Metrics) [x]
 - [x] Implement Custom Collector
-    - [x] Create `GAuthCollector` struct
+    - [x] Create `AgentAuthCollector` struct
     - [x] Implement DB query logic for Collect()
     - [x] Register with Prometheus registry
 - [x] Verify Custom Metrics

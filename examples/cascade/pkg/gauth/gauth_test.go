@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestGAuth(t *testing.T) {
+func TestAgentAuth(t *testing.T) {
 	// Test configuration validation
 	t.Run("Config Validation", func(t *testing.T) {
 		validConfig := Config{
@@ -18,10 +18,10 @@ func TestGAuth(t *testing.T) {
 
 		auth, err := New(validConfig)
 		if err != nil {
-			t.Errorf("Failed to create GAuth with valid config: %v", err)
+			t.Errorf("Failed to create AgentAuth with valid config: %v", err)
 		}
 		if auth == nil {
-			t.Error("Expected non-nil GAuth instance")
+			t.Error("Expected non-nil AgentAuth instance")
 		}
 
 		invalidConfig := Config{}

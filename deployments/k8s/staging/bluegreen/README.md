@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Blue-Green Deployment Strategy for GAuth Staging
+# Blue-Green Deployment Strategy for AgentAuth Staging
 
 This directory contains manifests for implementing a blue-green deployment strategy, enabling zero-downtime deployments with instant rollback capability.
 

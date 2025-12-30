@@ -1,5 +1,5 @@
 // Package poa provides Power-of-Attorney functionality
-// This is a compatibility alias for the rfc0111 package
+// This is a compatibility alias for the aap001 package
 package poa
 
 import (
@@ -762,24 +762,24 @@ var (
 )
 
 // Stub functions for RFC-0115 demo compatibility
-// RFC0115Config models exclusion flags & limits referenced by RFC0111/0115 examples.
-type RFC0115Config struct {
+// AAP002Config models exclusion flags & limits referenced by AAP001/0115 examples.
+type AAP002Config struct {
 	ExcludeWeb3          bool
 	ExcludeAIOperators   bool
 	ExcludeDNAIdentities bool
 	MaxValidityDays      int // upper bound for validity period
 }
 
-func CreateRFC0115CompliantConfig() interface{} {
-	return RFC0115Config{ExcludeWeb3: true, ExcludeAIOperators: true, ExcludeDNAIdentities: true, MaxValidityDays: 365}
+func CreateAAP002CompliantConfig() interface{} {
+	return AAP002Config{ExcludeWeb3: true, ExcludeAIOperators: true, ExcludeDNAIdentities: true, MaxValidityDays: 365}
 }
 
-// ValidateRFC0115Compliance performs structural & semantic checks on PoA definition + config.
-// Accepts either RFC0115Config, PoADefinition, or a composite struct {Config, Definition}.
-func ValidateRFC0115Compliance(config interface{}) error {
+// ValidateAAP002Compliance performs structural & semantic checks on PoA definition + config.
+// Accepts either AAP002Config, PoADefinition, or a composite struct {Config, Definition}.
+func ValidateAAP002Compliance(config interface{}) error {
 	// Allow passing PoADefinition directly for backward examples.
 	switch v := config.(type) {
-	case RFC0115Config:
+	case AAP002Config:
 		if !v.ExcludeWeb3 || !v.ExcludeAIOperators || !v.ExcludeDNAIdentities {
 			return fmt.Errorf("all exclusion flags must be true (web3, ai operators, dna identities)")
 		}
@@ -815,18 +815,18 @@ func ValidateRFC0115Compliance(config interface{}) error {
 		// Accept map[string]any with keys "config" and/or "definition"
 		if m, ok := config.(map[string]interface{}); ok {
 			if cfgRaw, ok2 := m["config"]; ok2 {
-				if err := ValidateRFC0115Compliance(cfgRaw); err != nil {
+				if err := ValidateAAP002Compliance(cfgRaw); err != nil {
 					return fmt.Errorf("config invalid: %w", err)
 				}
 			}
 			if defRaw, ok2 := m["definition"]; ok2 {
-				if err := ValidateRFC0115Compliance(defRaw); err != nil {
+				if err := ValidateAAP002Compliance(defRaw); err != nil {
 					return fmt.Errorf("definition invalid: %w", err)
 				}
 			}
 			return nil
 		}
-		return fmt.Errorf("unsupported RFC0115 compliance object type %T", config)
+		return fmt.Errorf("unsupported AAP002 compliance object type %T", config)
 	}
 }
 
@@ -1078,15 +1078,15 @@ func (s *MemoryService) Validate(ctx context.Context, poa *ProofOfAuthorization)
 	}
 
 	// RFC-0115 Extended Validation
-	if err := ValidateRFC0115Token(poa); err != nil {
+	if err := ValidateAAP002Token(poa); err != nil {
 		return NewError(ErrCodeValidation, fmt.Sprintf("RFC-0115 validation failed: %v", err))
 	}
 
 	return nil
 }
 
-// ValidateRFC0115Token performs RFC-0115 compliance validation for extended token format
-func ValidateRFC0115Token(poa *ProofOfAuthorization) error {
+// ValidateAAP002Token performs RFC-0115 compliance validation for extended token format
+func ValidateAAP002Token(poa *ProofOfAuthorization) error {
 	if poa == nil {
 		return fmt.Errorf("PoA token is nil")
 	}

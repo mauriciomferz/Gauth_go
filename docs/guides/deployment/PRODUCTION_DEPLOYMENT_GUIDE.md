@@ -1,6 +1,6 @@
-# GAuth Production Deployment Guide
+# AgentAuth Production Deployment Guide
 
-**Project**: GAuth Enterprise IAM Platform  
+**Project**: AgentAuth Enterprise IAM Platform  
 **Version**: 1.0.0  
 **Date**: November 15, 2025  
 **Status**: Production Ready ✅
@@ -25,7 +25,7 @@
 
 ### Architecture
 
-GAuth consists of two main components:
+AgentAuth consists of two main components:
 
 1. **Backend Service** (Go)
    - REST API server on port 8080
@@ -875,4 +875,4 @@ Increase resources based on metrics:
 
 **Document Status**: ✅ Production Ready  
 **Last Updated**: November 15, 2025  
-**Maintained By**: GAuth DevOps Team
+**Maintained By**: AgentAuth DevOps Team

@@ -9,7 +9,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
-// newTestService constructs a fresh RFC0111 service with memory audit/authorizer for isolation.
+// newTestService constructs a fresh AAP001 service with memory audit/authorizer for isolation.
 func newTestService() *Service {
 	memAuthz := authz.NewMemoryAuthorizer()
 	// Seed broad allow policy for test convenience (simplifies delegation creation authorization).

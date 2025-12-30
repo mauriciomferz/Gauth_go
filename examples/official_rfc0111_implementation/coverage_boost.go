@@ -1,7 +1,7 @@
 package main
 
 // coverage_boost.go adds additional small, documented functions strictly for
-// increasing statement coverage in the educational RFC0111 example. They model
+// increasing statement coverage in the educational AAP001 example. They model
 // simple decision helpers that could exist in a fuller implementation but are
 // intentionally isolated here.
 

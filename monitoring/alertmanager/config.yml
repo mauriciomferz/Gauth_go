@@ -36,7 +36,7 @@ receivers:
   - name: 'default'
     slack_configs:
       - channel: '#gauth-alerts'
-        title: 'GAuth Alert'
+        title: 'AgentAuth Alert'
         text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
         send_resolved: true
 
@@ -70,7 +70,7 @@ receivers:
         auth_username: 'alertmanager@gauth.example.com'
         auth_password: 'YOUR_EMAIL_PASSWORD'
         headers:
-          Subject: 'GAuth Info Alert: {{ .GroupLabels.alertname }}'
+          Subject: 'AgentAuth Info Alert: {{ .GroupLabels.alertname }}'
 
 # Inhibition rules (suppress alerts when others are firing)
 inhibit_rules:

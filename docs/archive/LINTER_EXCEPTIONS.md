@@ -22,7 +22,7 @@ After systematic cleanup achieving **57% reduction (194 → 84 warnings)**, all 
 
 **Example**:
 ```go
-// This comprehensive validation ensures that the delegation chain maintains cryptographic integrity across all RFC 0111 requirements including temporal bounds, issuer authority, and revocation status
+// This comprehensive validation ensures that the delegation chain maintains cryptographic integrity across all AAP-001 requirements including temporal bounds, issuer authority, and revocation status
 ```
 
 **Decision**: Keep as-is. Breaking would scatter context and reduce clarity.

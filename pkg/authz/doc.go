@@ -1,4 +1,4 @@
-// Package authz provides authorization enforcement and policy evaluation for GAuth.
+// Package authz provides authorization enforcement and policy evaluation for AgentAuth.
 //
 // This package implements the authorization layer, including policy-based access
 // control, decision caching, and obligation execution. It supports both

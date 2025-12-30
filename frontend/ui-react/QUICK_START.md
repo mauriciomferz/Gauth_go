@@ -88,7 +88,7 @@ The dev server supports instant updates - edit any file and see changes immediat
 The Vite config includes a proxy to forward `/api/*` requests to `localhost:8080`. Update the target in `vite.config.ts` if your backend runs on a different port.
 
 ### Type Safety
-TypeScript strict mode is enabled. The `src/lib/api.ts` file contains complete type definitions for all GAuth endpoints.
+TypeScript strict mode is enabled. The `src/lib/api.ts` file contains complete type definitions for all AgentAuth endpoints.
 
 ### Styling
 Tailwind CSS utility classes are used throughout. Custom colors:

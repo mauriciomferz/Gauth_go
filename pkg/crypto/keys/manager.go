@@ -233,7 +233,7 @@ func (km *LocalKeyManager) Sign(ctx context.Context, data []byte) ([]byte, error
 
 	// Actually, simpler: return the `crypto.Signer` is usually the best interface for go.
 	// But `KeyManager` is our custom one.
-	// Let's stick to simple Sign with SHA256 for now as default for GAuth.
+	// Let's stick to simple Sign with SHA256 for now as default for AgentAuth.
 
 	hashed := crypto.SHA256.New()
 	hashed.Write(data)

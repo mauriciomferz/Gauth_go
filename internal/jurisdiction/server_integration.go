@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
 )
 
-// ServerIntegration integrates jurisdiction enforcement with the GAuth server.
+// ServerIntegration integrates jurisdiction enforcement with the AgentAuth server.
 type ServerIntegration struct {
 	engine *EnforcementEngine
 }

@@ -240,17 +240,17 @@ go tool pprof -alloc_space mem.prof
 
 ### OAuth 2.0 Token Validation (Industry Baseline)
 - **Typical OAuth Token Validation**: 2-5µs (JWT signature verification)
-- **GAuth Extended Token Validation**: 1.3µs ✅ **2-4x faster**
+- **AgentAuth Extended Token Validation**: 1.3µs ✅ **2-4x faster**
 
 ### Authorization Decision Processing
 - **Typical AuthZ Decision (e.g., OPA)**: 500ns - 2µs
-- **GAuth Authorization Decision**: 257ns ✅ **2-8x faster**
+- **AgentAuth Authorization Decision**: 257ns ✅ **2-8x faster**
 
 ### Identity Verification
 - **Typical Identity Verification**: 1-10ms (with external API calls)
-- **GAuth PVP Identity Chain**: 582ns (cached) ✅ **1,700x faster**
+- **AgentAuth PVP Identity Chain**: 582ns (cached) ✅ **1,700x faster**
 
-**Note**: Industry comparisons assume optimized implementations with appropriate caching. GAuth's performance advantage comes from:
+**Note**: Industry comparisons assume optimized implementations with appropriate caching. AgentAuth's performance advantage comes from:
 1. Optimized in-memory data structures
 2. Minimal allocation design
 3. Efficient caching strategy

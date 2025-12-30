@@ -5,7 +5,7 @@
 
 ## 🎯 ONE-LINE SUMMARY
 
-**GAuth is 75-80% RFC-compliant (not 55-60%), production-ready in 3-4 months (not 6-8 months).**
+**AgentAuth is 75-80% RFC-compliant (not 55-60%), production-ready in 3-4 months (not 6-8 months).**
 
 ---
 

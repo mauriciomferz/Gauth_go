@@ -8,7 +8,7 @@ owners: [system]
 
 # Conformance Harness
 
-Automated, evidence-based verification that the implementation aligns with RFC 0111 and RFC 0115 clauses.
+Automated, evidence-based verification that the implementation aligns with AAP-001 and AAP-002 clauses.
 
 ## Current Components
 - `harnesslib/scan.go`: Parses canonical RFC markdown into structured clause IDs (slugified + RFC prefix).

@@ -107,4 +107,4 @@ export function initTokens() {
 }
 
 // Legacy global bridge (will be removed later)
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { createToken, validateToken, revokeToken });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { createToken, validateToken, revokeToken });

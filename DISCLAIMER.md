@@ -12,7 +12,7 @@ refreshCadence: quarterly
 > Last Updated: 2025-10-17
 > Status: Active
 
-This repository contains a **beta demonstration implementation** of concepts related to the GAuth authorization framework (GiFo RFC family). It is intentionally **NOT production ready**.
+This repository contains a **beta demonstration implementation** of concepts related to the AgentAuth authorization framework (AAP RFC family). It is intentionally **NOT production ready**.
 
 ## ❗ Do NOT Use For
 - Real users or customer data

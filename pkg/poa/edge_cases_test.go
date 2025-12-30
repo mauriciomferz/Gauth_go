@@ -227,16 +227,16 @@ func TestVerifyMultiSig_EdgeCases(t *testing.T) {
 	}
 }
 
-// TestValidateRFC0115Compliance_AdditionalCases tests more RFC 0115 compliance scenarios
-func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
+// TestValidateAAP002Compliance_AdditionalCases tests more AAP-002 compliance scenarios
+func TestValidateAAP002Compliance_AdditionalCases(t *testing.T) {
 	tests := []struct {
 		name    string
 		config  interface{}
 		wantErr bool
 	}{
 		{
-			name: "Valid RFC0115Config with all exclusions",
-			config: RFC0115Config{
+			name: "Valid AAP002Config with all exclusions",
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -245,8 +245,8 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "RFC0115Config with Web3 not excluded",
-			config: RFC0115Config{
+			name: "AAP002Config with Web3 not excluded",
+			config: AAP002Config{
 				ExcludeWeb3:          false,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -255,8 +255,8 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "RFC0115Config with AI operators not excluded",
-			config: RFC0115Config{
+			name: "AAP002Config with AI operators not excluded",
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   false,
 				ExcludeDNAIdentities: true,
@@ -265,8 +265,8 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "RFC0115Config with DNA identities not excluded",
-			config: RFC0115Config{
+			name: "AAP002Config with DNA identities not excluded",
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: false,
@@ -275,8 +275,8 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "RFC0115Config with zero max validity days",
-			config: RFC0115Config{
+			name: "AAP002Config with zero max validity days",
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -285,8 +285,8 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "RFC0115Config with negative max validity days",
-			config: RFC0115Config{
+			name: "AAP002Config with negative max validity days",
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -295,8 +295,8 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "RFC0115Config with max validity days too high",
-			config: RFC0115Config{
+			name: "AAP002Config with max validity days too high",
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -305,8 +305,8 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "RFC0115Config with boundary max validity days (730)",
-			config: RFC0115Config{
+			name: "AAP002Config with boundary max validity days (730)",
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -318,9 +318,9 @@ func TestValidateRFC0115Compliance_AdditionalCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateRFC0115Compliance(tt.config)
+			err := ValidateAAP002Compliance(tt.config)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidateRFC0115Compliance() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ValidateAAP002Compliance() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

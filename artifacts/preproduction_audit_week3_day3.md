@@ -38,7 +38,7 @@ Week 3 Day 3 penetration testing successfully executed comprehensive security va
 **Test Packages:** pkg/rfc0111, pkg/audit, pkg/gauth  
 
 **Package Breakdown:**
-- `pkg/rfc0111`: ~225 tests (~1.0s) - RFC 0111/0115 protocol security
+- `pkg/rfc0111`: ~225 tests (~1.0s) - AAP-001/0115 protocol security
 - `pkg/audit`: ~30 tests (~0.4s) - Audit logging, tamper detection
 - `pkg/gauth`: ~43 tests (~1.0s) - Authentication, token validation
 
@@ -99,7 +99,7 @@ Week 3 Day 3 penetration testing successfully executed comprehensive security va
 - ✅ Invalid/expired signatures
 
 **Security Controls Validated:**
-- Detached signature verification (RFC 0111 §4.3)
+- Detached signature verification (AAP-001 §4.3)
 - Hierarchical digest integrity (parent hash chains)
 - Revocation chain hash verification
 - Token signature verification
@@ -138,9 +138,9 @@ Week 3 Day 3 penetration testing successfully executed comprehensive security va
 - ✅ PoA chain scope validation
 
 **Security Controls Validated:**
-- Scope inheritance rules (RFC 0111 §3.2.2)
-- Wildcard subsumption detection (RFC 0111 §3.2.3)
-- Administrative scope detection (RFC 0111 §3.2.4)
+- Scope inheritance rules (AAP-001 §3.2.2)
+- Wildcard subsumption detection (AAP-001 §3.2.3)
+- Administrative scope detection (AAP-001 §3.2.4)
 - Control character rejection (ASCII 0x00-0x1F)
 - UTF-8 validation with violation counters
 - Scope length limits (max entries, max string length)
@@ -519,7 +519,7 @@ $ time go test ./pkg/rfc0111/... ./pkg/audit/... ./pkg/gauth/... -v
 ```
 
 **Package Timings:**
-- `pkg/rfc0111`: ~1.0s (225 tests) - RFC 0111/0115 protocol security
+- `pkg/rfc0111`: ~1.0s (225 tests) - AAP-001/0115 protocol security
 - `pkg/audit`: ~0.4s (~30 tests) - Audit logging, tamper detection
 - `pkg/gauth`: ~1.0s (~43 tests) - Authentication, token validation
 
@@ -615,7 +615,7 @@ $ go test -v ./pkg/rfc0111/... -run "Scope|Validation|Authorization"
 ## Appendix C: Related Audit Reports
 
 - **Week 3 Day 1:** `artifacts/preproduction_audit_week3_day1.md` (Security audit, gosec scan, crypto review)
-- **Week 3 Day 2:** `artifacts/preproduction_audit_week3_day2.md` (RFC 0111/0115 compliance validation)
+- **Week 3 Day 2:** `artifacts/preproduction_audit_week3_day2.md` (AAP-001/0115 compliance validation)
 - **Week 3 Day 4:** TBD - Compliance documentation
 - **Week 3 Day 5:** TBD - Security remediation
 

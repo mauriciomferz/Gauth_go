@@ -9,7 +9,7 @@ owners: [system]
 # SAML & SCIM Reference Implementation Plan
 
 ## Goal
-Extend the GAuth platform to support **SAML 2.0** (as a Service Provider) and **SCIM 2.0** (for user provisioning), enabling enterprise integrations.
+Extend the AgentAuth platform to support **SAML 2.0** (as a Service Provider) and **SCIM 2.0** (for user provisioning), enabling enterprise integrations.
 
 ## User Review Required
 > [!IMPORTANT]

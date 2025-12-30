@@ -10,7 +10,7 @@ refreshCadence: quarterly
 
 # GitHub Actions CI/CD Setup Guide
 
-This guide walks through setting up the GitHub Actions CI/CD pipeline for GAuth staging deployment.
+This guide walks through setting up the GitHub Actions CI/CD pipeline for AgentAuth staging deployment.
 
 ---
 
@@ -84,7 +84,7 @@ Navigate to your GitHub repository:
 **GitHub PAT Creation** (for GHCR):
 1. Go to GitHub **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
 2. Click **Generate new token (classic)**
-3. Name: `GAuth CI/CD`
+3. Name: `AgentAuth CI/CD`
 4. Scopes: 
    - `write:packages` (upload packages to GitHub Package Registry)
    - `delete:packages` (delete packages from GitHub Package Registry)
@@ -312,7 +312,7 @@ gcloud services enable containerregistry.googleapis.com
 
 # Create service account
 gcloud iam service-accounts create gauth-cicd \
-  --display-name "GAuth CI/CD" \
+  --display-name "AgentAuth CI/CD" \
   --project YOUR_PROJECT_ID
 
 # Grant permissions
@@ -473,7 +473,7 @@ kubectl get namespace gauth-staging
 
 1. Go to https://api.slack.com/apps
 2. Click **Create New App** → **From scratch**
-3. App Name: `GAuth CI/CD`
+3. App Name: `AgentAuth CI/CD`
 4. Workspace: Select your workspace
 5. Click **Create App**
 
@@ -493,7 +493,7 @@ kubectl get namespace gauth-staging
 # Test Slack notification
 curl -X POST -H 'Content-type: application/json' \
   --data '{
-    "text": "Test message from GAuth CI/CD",
+    "text": "Test message from AgentAuth CI/CD",
     "attachments": [{
       "color": "good",
       "fields": [{
@@ -511,7 +511,7 @@ curl -X POST -H 'Content-type: application/json' \
 The workflow sends notifications in this format:
 ```json
 {
-  "text": "🚀 GAuth Deployment - Success",
+  "text": "🚀 AgentAuth Deployment - Success",
   "attachments": [{
     "color": "good",
     "fields": [

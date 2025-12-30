@@ -8,7 +8,7 @@ owners: [system]
 
 ## Crypto Interface & Test Vectors (Phase 1)
 
-This document defines the unified `Signer` interface, encoding rules, and canonical test vector guidance for Ed25519, ECDSA (P‑256), and BLS12‑381 used in GAuth.
+This document defines the unified `Signer` interface, encoding rules, and canonical test vector guidance for Ed25519, ECDSA (P‑256), and BLS12‑381 used in AgentAuth.
 
 ### 1. Signer Interface
 

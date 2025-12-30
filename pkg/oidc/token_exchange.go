@@ -1,5 +1,5 @@
 // Package oidc - Token Exchange
-// Implements token exchange between external OIDC providers and GAuth
+// Implements token exchange between external OIDC providers and AgentAuth
 package oidc
 
 import (
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// TokenExchangeService handles token exchange between external providers and GAuth.
+// TokenExchangeService handles token exchange between external providers and AgentAuth.
 type TokenExchangeService struct {
 	providerRegistry     ProviderRegistry
 	idTokenService       *IDTokenService
@@ -128,13 +128,13 @@ type ExchangeRequest struct {
 
 // ExchangeResponse represents the result of a token exchange.
 type ExchangeResponse struct {
-	// GAuthToken is the new GAuth ID token
-	GAuthToken string
+	// AgentAuthToken is the new AgentAuth ID token
+	AgentAuthToken string
 
 	// ExpiresAt is when the token expires
 	ExpiresAt time.Time
 
-	// Claims are the normalized claims in GAuth format
+	// Claims are the normalized claims in AgentAuth format
 	Claims *IDTokenClaims
 
 	// TrustLevel is the determined trust level
@@ -147,7 +147,7 @@ type ExchangeResponse struct {
 	RefreshToken string
 }
 
-// ExchangeToken exchanges an external OIDC token for a GAuth token.
+// ExchangeToken exchanges an external OIDC token for a AgentAuth token.
 func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRequest) (*ExchangeResponse, error) {
 	// Validate request
 	if req.ProviderID == "" {
@@ -179,7 +179,7 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 		return nil, fmt.Errorf("failed to validate external token: %w", err)
 	}
 
-	// Normalize claims to GAuth format
+	// Normalize claims to AgentAuth format
 	gauthClaims := s.normalizeClaims(provider, externalClaims)
 
 	// Determine trust level
@@ -201,14 +201,14 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 		}
 	}
 
-	// Issue new GAuth token
+	// Issue new AgentAuth token
 	gauthToken, err := s.idTokenService.IssueIDToken(ctx, gauthClaims)
 	if err != nil {
-		return nil, fmt.Errorf("failed to issue GAuth token: %w", err)
+		return nil, fmt.Errorf("failed to issue AgentAuth token: %w", err)
 	}
 
 	return &ExchangeResponse{
-		GAuthToken: gauthToken,
+		AgentAuthToken: gauthToken,
 		ExpiresAt:  gauthClaims.ExpiresAt.Time,
 		Claims:     gauthClaims,
 		TrustLevel: trustLevel,
@@ -246,9 +246,9 @@ func (s *TokenExchangeService) validateExternalToken(ctx context.Context, provid
 	return claims, nil
 }
 
-// normalizeClaims converts provider-specific claims to GAuth format.
+// normalizeClaims converts provider-specific claims to AgentAuth format.
 func (s *TokenExchangeService) normalizeClaims(provider *ProviderConfig, externalClaims *IDTokenClaims) *IDTokenClaims {
-	// Create new claims in GAuth format
+	// Create new claims in AgentAuth format
 	gauthClaims := &IDTokenClaims{
 		RegisteredClaims: externalClaims.RegisteredClaims,
 	}
@@ -285,7 +285,7 @@ func (s *TokenExchangeService) normalizeClaims(provider *ProviderConfig, externa
 	return gauthClaims
 }
 
-// mapTrustLevel determines the GAuth trust level from external provider claims.
+// mapTrustLevel determines the AgentAuth trust level from external provider claims.
 func (s *TokenExchangeService) mapTrustLevel(provider *ProviderConfig, claims *IDTokenClaims) string {
 	// Check if provider has custom trust level mapping
 	if provider.Metadata != nil {
@@ -449,7 +449,7 @@ func (s *TokenExchangeService) RefreshExchangedToken(ctx context.Context, refres
 
 	// Build exchange response
 	exchangeResponse := &ExchangeResponse{
-		GAuthToken: response.IDToken,
+		AgentAuthToken: response.IDToken,
 		ExpiresAt:  claims.ExpiresAt.Time,
 		Claims:     claims,
 		TrustLevel: determineRefreshTrustLevel(claims),

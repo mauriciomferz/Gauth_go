@@ -15,8 +15,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
 )
 
-// RFC0111Service abstracts the external PoA service
-type RFC0111Service interface {
+// AAP001Service abstracts the external PoA service
+type AAP001Service interface {
 	SemanticSnapshot() map[string]uint64
 }
 
@@ -57,7 +57,7 @@ type Handler struct {
 	AnchorInterval  time.Duration
 
 	// External deps
-	Service RFC0111Service
+	Service AAP001Service
 	Metrics Metrics
 
 	// Config
@@ -71,7 +71,7 @@ type SnapshotEntry struct {
 }
 
 // NewHandler creates a new semantic anomaly handler.
-func NewHandler(service RFC0111Service, metrics Metrics, persistencePath string) *Handler {
+func NewHandler(service AAP001Service, metrics Metrics, persistencePath string) *Handler {
 	return &Handler{
 		Service:         service,
 		Metrics:         metrics,

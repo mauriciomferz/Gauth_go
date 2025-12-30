@@ -9,7 +9,7 @@ owners: [system]
 # API Keys & Security Configuration Implementation
 
 ## Overview
-This document describes the implementation of API key management and security configuration features for the GAuth admin portal.
+This document describes the implementation of API key management and security configuration features for the AgentAuth admin portal.
 
 ## Implementation Summary
 

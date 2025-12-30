@@ -1,4 +1,4 @@
-// Package integration - Integration Tests for OIDC with GAuth Subscription Flow
+// Package integration - Integration Tests for OIDC with AgentAuth Subscription Flow
 package integration
 
 import (
@@ -13,7 +13,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
 )
 
-// TestOIDCPVPIntegrationWithSubscriptionFlow tests complete OIDC → GAuth integration
+// TestOIDCPVPIntegrationWithSubscriptionFlow tests complete OIDC → AgentAuth integration
 func TestOIDCPVPIntegrationWithSubscriptionFlow(t *testing.T) {
 	ctx := context.Background()
 

@@ -108,7 +108,7 @@ curl https://gauth-staging.yourdomain.com/healthz
 ```
 
 ### Slack
-- ✅ Notification received: "🎉 GAuth Deployment Successful"
+- ✅ Notification received: "🎉 AgentAuth Deployment Successful"
 
 ---
 

@@ -65,7 +65,7 @@ func TestWebhookClient_SignatureVerification(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
-		receivedSignature = r.Header.Get("X-GAuth-Signature")
+		receivedSignature = r.Header.Get("X-AgentAuth-Signature")
 		mu.Unlock()
 		w.WriteHeader(http.StatusOK)
 	}))
@@ -349,9 +349,9 @@ func TestWebhookClient_HeadersPresent(t *testing.T) {
 	requiredHeaders := []string{
 		"Content-Type",
 		"User-Agent",
-		"X-GAuth-Event",
-		"X-GAuth-Timestamp",
-		"X-GAuth-Signature",
+		"X-AgentAuth-Event",
+		"X-AgentAuth-Timestamp",
+		"X-AgentAuth-Signature",
 	}
 
 	for _, header := range requiredHeaders {
@@ -363,8 +363,8 @@ func TestWebhookClient_HeadersPresent(t *testing.T) {
 	if headers.Get("Content-Type") != "application/json" {
 		t.Errorf("expected Content-Type application/json, got %s", headers.Get("Content-Type"))
 	}
-	if headers.Get("X-GAuth-Event") != string(EventDisputeCreated) {
-		t.Errorf("expected X-GAuth-Event %s, got %s", EventDisputeCreated, headers.Get("X-GAuth-Event"))
+	if headers.Get("X-AgentAuth-Event") != string(EventDisputeCreated) {
+		t.Errorf("expected X-AgentAuth-Event %s, got %s", EventDisputeCreated, headers.Get("X-AgentAuth-Event"))
 	}
 }
 

@@ -12,7 +12,7 @@ refreshCadence: on-change
 > Status: Active
 
 ## Overview
-This example demonstrates GAuth tracing and observability integration using OpenTelemetry. It covers authentication, authorization, and token lifecycle events with type-safe metadata.
+This example demonstrates AgentAuth tracing and observability integration using OpenTelemetry. It covers authentication, authorization, and token lifecycle events with type-safe metadata.
 
 ## How to Run
 ```bash
@@ -34,7 +34,7 @@ go run main.go
 For more, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
 # Tracing Example
 
-This example demonstrates how to use GAuth's tracing and observability features with the latest type-safe APIs.
+This example demonstrates how to use AgentAuth's tracing and observability features with the latest type-safe APIs.
 
 ## Features Demonstrated
 
@@ -58,7 +58,7 @@ This starts a demo server on `localhost:8080` with tracing enabled.
 
 ## Migration Note
 
-This example uses the latest GAuth APIs for tracing and event handling. If you are migrating from older code, see the Migration Guide in `docs/CODE_IMPROVEMENTS.md` for details on updating to the new type-safe patterns.
+This example uses the latest AgentAuth APIs for tracing and event handling. If you are migrating from older code, see the Migration Guide in `docs/CODE_IMPROVEMENTS.md` for details on updating to the new type-safe patterns.
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

@@ -1,6 +1,6 @@
 // Package gnap implements RFC 9635 Grant Negotiation and Authorization Protocol.
 // This provides modern authorization with grant negotiation, flexible interaction
-// modes, and token management, extended with GAuth's Power of Attorney support.
+// modes, and token management, extended with AgentAuth's Power of Attorney support.
 package gnap
 
 import (
@@ -37,12 +37,12 @@ type GrantRequest struct {
 	// Interact describes interaction capabilities (§2.5)
 	Interact *InteractionRequest `json:"interact,omitempty"`
 
-	// --- GAuth Extensions ---
+	// --- AgentAuth Extensions ---
 
 	// PoACredentialRef references a Power of Attorney credential
 	PoACredentialRef string `json:"poa_credential_ref,omitempty"`
 
-	// SubscriptionID links to existing GAuth subscription (migration path)
+	// SubscriptionID links to existing AgentAuth subscription (migration path)
 	SubscriptionID string `json:"subscription_id,omitempty"`
 }
 
@@ -234,7 +234,7 @@ type GrantResponse struct {
 	// Error if request failed (§3.6)
 	Error *GrantError `json:"error,omitempty"`
 
-	// --- GAuth Extensions ---
+	// --- AgentAuth Extensions ---
 
 	// PowerOfAttorney embedded in response
 	PowerOfAttorney *PowerOfAttorneyRef `json:"power_of_attorney,omitempty"`
@@ -286,7 +286,7 @@ type AccessToken struct {
 	// Flags for this token
 	Flags []TokenFlag `json:"flags,omitempty"`
 
-	// --- GAuth Extensions ---
+	// --- AgentAuth Extensions ---
 
 	// PoAID references embedded Power of Attorney
 	PoAID string `json:"poa_id,omitempty"`
@@ -355,7 +355,7 @@ const (
 	ErrorTooSlow            = "too_slow"
 )
 
-// PowerOfAttorneyRef references GAuth PoA in GNAP context.
+// PowerOfAttorneyRef references AgentAuth PoA in GNAP context.
 type PowerOfAttorneyRef struct {
 	PoAID   string `json:"poa_id"`
 	Issuer  string `json:"issuer"`
@@ -426,7 +426,7 @@ type IntrospectionResponse struct {
 	// Access rights granted associated with this token
 	Access []AccessRight `json:"access,omitempty"`
 
-	// PoA information (GAuth extension)
+	// PoA information (AgentAuth extension)
 	PoA *PowerOfAttorneyRef `json:"poa,omitempty"`
 
 	// Subject information associated with the token

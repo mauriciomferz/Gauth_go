@@ -158,14 +158,14 @@ func (s *ExtendedTokenService) parseExtendedToken(
 	})
 
 	if err != nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "jwt_parse_failed",
 			Message: fmt.Sprintf("Failed to parse JWT: %v", err),
 		}
 	}
 
 	if !jwtToken.Valid {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_jwt",
 			Message: "JWT token is invalid",
 		}
@@ -174,7 +174,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 	// Extract claims
 	claims, ok := jwtToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_claims",
 			Message: "Failed to extract JWT claims",
 		}
@@ -285,7 +285,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 **PowerVerificationPoint Integration**:
 - `pvp.go` - OIDC PowerVerificationPoint implementation (165 lines)
 - `pvp_test.go` - PVP tests (527 lines)
-- `identity_bridge.go` - Bridge to GAuth identity system
+- `identity_bridge.go` - Bridge to AgentAuth identity system
 
 **Provider Support**:
 - `provider_config.go` - Multi-provider configuration
@@ -489,7 +489,7 @@ type PolicyConflict struct {
 - Policy match counts
 - Expression evaluation errors
 
-### Integration with GAuth
+### Integration with AgentAuth
 
 **File**: `pkg/gauth/pdp_bridge.go` (216 lines)
 
@@ -545,7 +545,7 @@ policies := []pdp.Policy{
 
 engine := pdp.NewInMemoryEngine(policies, pdp.NewDenyOverrides(), nil)
 
-// Create bridge for GAuth integration
+// Create bridge for AgentAuth integration
 pdpBridge := gauth.NewPDPBridge(engine)
 
 // Use in ComplianceValidator
@@ -763,7 +763,7 @@ $ find pkg -name "*.go" -type f -exec grep -l "MCP\|ModelContext\|model.*context
 
 **Impact**: Medium-High
 - MCP is required by RFC-0111 for AI model context management
-- GAuth targets AI agent authorization
+- AgentAuth targets AI agent authorization
 - MCP integration needed for full RFC compliance
 
 **Recommendation**: 
@@ -772,7 +772,7 @@ $ find pkg -name "*.go" -type f -exec grep -l "MCP\|ModelContext\|model.*context
 - **Approach**: 
   1. Implement MCP client for context provision
   2. Implement MCP server for authorization context
-  3. Integrate with GAuth authorization flow
+  3. Integrate with AgentAuth authorization flow
   4. Add context propagation in extended tokens
 
 **Timeline**: Next sprint (Q1 2026)
@@ -1133,7 +1133,7 @@ $ find pkg -name "*pap*" -o -name "*policy*admin*"
 
 ### Week 2-3: MCP Design
 - Design MCP client/server architecture
-- Plan integration with GAuth
+- Plan integration with AgentAuth
 - Create MCP implementation roadmap
 
 ### Week 4-7: MCP Implementation

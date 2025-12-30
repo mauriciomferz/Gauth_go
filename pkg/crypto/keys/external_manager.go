@@ -36,7 +36,7 @@ func NewExternalKeyManager(client KMSClient) *ExternalKeyManager {
 func (m *ExternalKeyManager) Sign(ctx context.Context, data []byte) ([]byte, error) {
 	// For high-level Sign, we hash locally then ask KMS to sign digest.
 	// Assuming RS256 by default for now (or whatever KMS is configured for).
-	// GAuth historically uses RSA.
+	// AgentAuth historically uses RSA.
 	h := sha256.Sum256(data)
 	return m.client.SignDigest(ctx, h[:])
 }

@@ -1,4 +1,4 @@
--- GAuth Admin Handlers Database Schema
+-- AgentAuth Admin Handlers Database Schema
 -- PostgreSQL 14+ with Row-Level Security (RLS) for multi-tenant isolation
 -- Created: 2025-11-22
 -- Tables: 17 (for 5 admin handlers: PoA, Resilience, Events, Authz, Config)

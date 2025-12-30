@@ -8,7 +8,7 @@
 
 ## Overview
 
-GAuth now supports **wildcard pattern matching** for scope validation,  enabling flexible authorization while maintaining security boundaries. This addresses the P1 HIGH security enhancement identified in the audit.
+AgentAuth now supports **wildcard pattern matching** for scope validation,  enabling flexible authorization while maintaining security boundaries. This addresses the P1 HIGH security enhancement identified in the audit.
 
 ###Why Wildcards?
 
@@ -154,7 +154,7 @@ Invalid child delegations:
 
 ## Migration from String-Based Matching
 
-### Before (GAuth v3.0)
+### Before (AgentAuth v3.0)
 ```go
 // Only exact string matching
 parentScopes := []string{"users:read", "users:write", "users:delete"}
@@ -162,7 +162,7 @@ childScopes := []string{"users:read", "users:write"}
 // Required listing every action explicitly
 ```
 
-###After (GAuth v3.1+)
+###After (AgentAuth v3.1+)
 ```go
 // Wildcard support enabled by default
 parentScopes := []string{"users:*"}
@@ -350,7 +350,7 @@ This implementation addresses **P1.1** from the Security Audit Critical Review:
 ## FAQ
 
 **Q: Are wildcards enabled by default?**  
-A: Yes! No configuration needed. Works out of the box in GAuth v3.1+
+A: Yes! No configuration needed. Works out of the box in AgentAuth v3.1+
 
 **Q: Will wildcards break my existing code?**  
 A: No. All exact-match scopes continue to work. Backward compatible.
@@ -377,7 +377,7 @@ A: Use existing test suite or `/api/v1/scope/validate` endpoint
 
 ## References
 
-- [GAuth RFC-0111 Specification](./RFC-0111.md)
+- [AgentAuth RFC-0111 Specification](./RFC-0111.md)
 - [Security Audit Critical Review](./SECURITY_AUDIT_CRITICAL_REVIEW.md) (P1.1)
 - [Open Policy Agent](https://www.openpolicyagent.org/) (OPA integration guide coming in P1.2)
 - [OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) (migration study in P1.3)

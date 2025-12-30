@@ -32,7 +32,7 @@ This document describes the enhanced replay protection system (sec6.item1 P1) th
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    GAuth Service                             │
+│                    AgentAuth Service                             │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │ ReplayStore Interface                                 │   │
 │  │  - CheckAndStore(jti string) error                   │   │
@@ -550,7 +550,7 @@ func (a *DurableReplayStoreAdapter) CheckAndStore(jti string) error {
 - TestEvictionConcurrency: Thread safety ✅
 
 **Integration Tests (pkg/replay/gauth_integration_test.go):**
-- TestDurableReplayStoreGAuthIntegration: CheckAndStore interface ✅
+- TestDurableReplayStoreAgentAuthIntegration: CheckAndStore interface ✅
 - TestDurableReplayStoreFromEnv: Environment configuration ✅
 - TestDurableReplayStoreWithSizeEviction: Size policy with env vars ✅
 - TestDurableReplayStoreCompositePolicy: TTL+size composite ✅
@@ -612,4 +612,4 @@ func (a *DurableReplayStoreAdapter) CheckAndStore(jti string) error {
 
 **Document Version**: 1.0  
 **Last Updated**: November 5, 2025  
-**Maintainer**: GAuth Core Team
+**Maintainer**: AgentAuth Core Team

@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates rate limiting patterns using the GAuth framework's internal ratelimit package. It covers burst, steady rate, reset, remove, and window sliding logic.
+This example demonstrates rate limiting patterns using the AgentAuth framework's internal ratelimit package. It covers burst, steady rate, reset, remove, and window sliding logic.
 
 ## Key Concepts
 - **Limiter**: Implements rate limiting with burst, window, and reset controls.

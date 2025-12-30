@@ -4,10 +4,10 @@
 > Status: Active
 
 > **⚠️ BETA DEMONSTRATION NOTICE**
-> This checklist applies to a **beta demonstration implementation** of GAuth. It is **NOT production ready** and omits requirements needed for enforceable legal automation (e.g., qualified e-signature ceremony, tamper‑evident append‑only audit, jurisdictional rule expansion, retention policies, DPIA linkage). All items below MUST be treated as hypothetical mappings until validated in a production governance program. See `DISCLAIMER.md` and consult the deprecation lifecycle in `docs/DEPRECATION_TIMELINE.md` for context.
+> This checklist applies to a **beta demonstration implementation** of AgentAuth. It is **NOT production ready** and omits requirements needed for enforceable legal automation (e.g., qualified e-signature ceremony, tamper‑evident append‑only audit, jurisdictional rule expansion, retention policies, DPIA linkage). All items below MUST be treated as hypothetical mappings until validated in a production governance program. See `DISCLAIMER.md` and consult the deprecation lifecycle in `docs/DEPRECATION_TIMELINE.md` for context.
 
 ## Overview
-This document provides a comprehensive checklist for reviewing the legal and business logic mappings in the GAuth implementation (beta demonstration). **This review MUST be conducted with qualified domain experts** (legal counsel, compliance officers, business stakeholders) **before any attempt to adapt this demo toward a production system**.
+This document provides a comprehensive checklist for reviewing the legal and business logic mappings in the AgentAuth implementation (beta demonstration). **This review MUST be conducted with qualified domain experts** (legal counsel, compliance officers, business stakeholders) **before any attempt to adapt this demo toward a production system**.
 
 ## ⚠️ CRITICAL: Domain Expert Review Required (Beta Context)
 

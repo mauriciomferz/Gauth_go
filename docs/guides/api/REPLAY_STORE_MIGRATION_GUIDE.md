@@ -118,7 +118,7 @@ T=200s  Attacker replays captured token → BoltDB accepts (no record)
 # Create Redis cluster
 aws elasticache create-replication-group \
   --replication-group-id gauth-replay-store \
-  --replication-group-description "GAuth replay protection" \
+  --replication-group-description "AgentAuth replay protection" \
   --engine redis \
   --cache-node-type cache.t3.micro \
   --num-cache-clusters 2 \
@@ -483,7 +483,7 @@ spec:
       storage: 5Gi
   storageClassName: standard  # Or your preferred storage class
 ---
-# GAuth Application Deployment
+# AgentAuth Application Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,4 +1,4 @@
-# GAuth Production Alert Rules
+# AgentAuth Production Alert Rules
 # Critical alerts for system health and performance
 
 groups:
@@ -6,13 +6,13 @@ groups:
     interval: 30s
     rules:
       # Backend is down
-      - alert: GAuthBackendDown
+      - alert: AgentAuthBackendDown
         expr: up{job="gauth-backend"} == 0
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "GAuth backend is down"
+          summary: "AgentAuth backend is down"
           description: "Backend service has been down for more than 1 minute"
 
       # High error rate

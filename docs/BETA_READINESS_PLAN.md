@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Beta Readiness Plan (RFC 0111 & RFC 0115 Compliance)
+# Beta Readiness Plan (AAP-001 & AAP-002 Compliance)
 
 ## Objective
 Deliver a demonstrably compliant, transparent, and resilient beta implementation of core RFC0111 (delegation, revocation, cryptographic integrity, replay protection) and RFC0115 (Power of Attorney structure, multi-signature semantics, canonical serialization, validity period) for live demo usage.

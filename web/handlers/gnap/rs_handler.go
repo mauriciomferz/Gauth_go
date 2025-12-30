@@ -88,7 +88,7 @@ func (h *Handler) IntrospectRS(c *gin.Context) {
 			{Type: "financial-data", Actions: []string{"read"}, DataTypes: []string{"balance"}},
 		}
 
-		// GAuth Extension: Add PoA info
+		// AgentAuth Extension: Add PoA info
 		resp.PoA = &gnap.PowerOfAttorneyRef{
 			PoAID:   "poa_mock_123",
 			Issuer:  "user_alice",

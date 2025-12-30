@@ -6,7 +6,7 @@
 
 ## Overview
 
-GAuth supports BLS12-381 signature aggregation and batch token verification for efficient multi-signature operations. This feature reduces signature size and verification latency in multi-signer scenarios while maintaining cryptographic security.
+AgentAuth supports BLS12-381 signature aggregation and batch token verification for efficient multi-signature operations. This feature reduces signature size and verification latency in multi-signer scenarios while maintaining cryptographic security.
 
 **Key Benefits**:
 - **Compact Representation**: N signatures → 1 aggregated signature (~50% size reduction for 3+ signers)
@@ -541,13 +541,13 @@ for sig in signatures:
 ## References
 
 - **BLS12-381 Spec**: [IETF Draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-bls-signature)
-- **GAuth RFC0111**: Multi-signature threshold enforcement
-- **GAuth RFC0115**: Power of Attorney semantic validation
+- **AgentAuth RFC0111**: Multi-signature threshold enforcement
+- **AgentAuth RFC0115**: Power of Attorney semantic validation
 - **Library**: `github.com/herumi/bls-eth-go-binary` (BLS12-381 implementation)
 
 ---
 
 **Document Version**: 1.0  
 **Feature Version**: Implemented in P1.2  
-**Maintainer**: GAuth Core Team  
+**Maintainer**: AgentAuth Core Team  
 **Last Reviewed**: 2025-11-05

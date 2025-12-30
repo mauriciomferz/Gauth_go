@@ -104,13 +104,13 @@ echo "Test 3: Code structure verification"
 echo "-----------------------------------"
 
 # Check that imports are present
-if grep -q 'github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/database' web/server_clean.go; then
+if grep -q 'github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/database' web/server_clean.go; then
     echo "✅ Database package imported"
 else
     echo "❌ Database package import not found"
 fi
 
-if grep -q 'adminHandlers.*github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/web/handlers/admin' web/server_clean.go; then
+if grep -q 'adminHandlers.*github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/web/handlers/admin' web/server_clean.go; then
     echo "✅ Admin handlers package imported"
 else
     echo "❌ Admin handlers import not found"

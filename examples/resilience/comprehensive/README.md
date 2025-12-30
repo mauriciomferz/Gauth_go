@@ -11,7 +11,7 @@ owners: [system]
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates a full suite of resilience patterns using the GAuth framework:
+This example demonstrates a full suite of resilience patterns using the AgentAuth framework:
 
 - Circuit Breaker
 - Retry

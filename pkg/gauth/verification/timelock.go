@@ -172,7 +172,7 @@ func (t *TimelockPoA) CancelPoA(ctx context.Context, poaID string) error {
 	t.pendingPoAs.Delete(poaID)
 
 	// Send cancellation confirmation
-	subject := "GAuth: Power of Attorney Cancelled"
+	subject := "AgentAuth: Power of Attorney Cancelled"
 	message := fmt.Sprintf(`
 Your Power of Attorney (ID: %s) has been successfully cancelled.
 
@@ -210,7 +210,7 @@ func (t *TimelockPoA) activatePoA(ctx context.Context, poaID string) error {
 	t.activationTimers.Delete(poaID)
 
 	// Send activation confirmation
-	subject := "GAuth: Power of Attorney Activated"
+	subject := "AgentAuth: Power of Attorney Activated"
 	message := fmt.Sprintf(`
 Your Power of Attorney (ID: %s) is now ACTIVE.
 
@@ -238,7 +238,7 @@ Monitor activity: https://gauth.example.com/activity/%s
 func (t *TimelockPoA) sendActivationNotification(ctx context.Context, pending *PendingPoA) error {
 	hoursUntilActivation := time.Until(pending.PoA.ActivationTime).Hours()
 
-	subject := "🔔 GAuth: New Power of Attorney Created"
+	subject := "🔔 AgentAuth: New Power of Attorney Created"
 	message := fmt.Sprintf(`
 IMPORTANT: A new Power of Attorney has been created for your account.
 
@@ -281,7 +281,7 @@ func (t *TimelockPoA) sendReminderNotification(ctx context.Context, poaID string
 
 	hoursUntilActivation := time.Until(pending.PoA.ActivationTime).Hours()
 
-	subject := "⏰ GAuth Reminder: PoA Activates Soon"
+	subject := "⏰ AgentAuth Reminder: PoA Activates Soon"
 	message := fmt.Sprintf(`
 Reminder: Your Power of Attorney will activate in approximately %.0f hours.
 

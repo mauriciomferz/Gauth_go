@@ -8,7 +8,7 @@ source: internal
 refreshCadence: monthly
 ---
 
-# GAuth Staging Deployment Runbook
+# AgentAuth Staging Deployment Runbook
 # Week 4 Day 1: Environment Setup & Deployment Procedures
 
 ## Table of Contents
@@ -165,7 +165,7 @@ kubectl create secret generic redis-secrets \
   --namespace=gauth-staging \
   --from-literal=redis-password='REPLACE_WITH_REDIS_PASSWORD'
 
-# Create GAuth secrets
+# Create AgentAuth secrets
 kubectl create secret generic gauth-secrets \
   --namespace=gauth-staging \
   --from-literal=postgres-password='REPLACE_WITH_APP_PASSWORD' \
@@ -237,7 +237,7 @@ kubectl apply -f deployments/k8s/staging/service.yaml
 # Apply RBAC, NetworkPolicy, HPA, PDB
 kubectl apply -f deployments/k8s/staging/hpa-pdb-rbac-netpol.yaml
 
-# Apply deployments (GAuth, PostgreSQL, Redis, Prometheus, Grafana, AlertManager)
+# Apply deployments (AgentAuth, PostgreSQL, Redis, Prometheus, Grafana, AlertManager)
 kubectl apply -f deployments/k8s/staging/deployment.yaml
 kubectl apply -f deployments/k8s/staging/postgres-deployment.yaml
 kubectl apply -f deployments/k8s/staging/redis-deployment.yaml
@@ -391,7 +391,7 @@ kubectl logs -n gauth-staging -l app=gauth --tail=100 --follow
 # Check PostgreSQL logs
 kubectl logs -n gauth-staging -l app=postgres --tail=50
 
-# Test connectivity from GAuth pod
+# Test connectivity from AgentAuth pod
 kubectl exec -it -n gauth-staging deployment/gauth-deployment -- sh
 # Inside pod:
 nc -zv postgres-service 5432
@@ -462,7 +462,7 @@ kubectl get ingress prometheus-ingress -n gauth-staging
    - `rate(container_cpu_usage_seconds_total{namespace="gauth-staging",pod=~"gauth-.*"}[5m])`
 
 ### Alert Triggers
-1. **Pod Down**: Any GAuth pod unavailable > 2 minutes
+1. **Pod Down**: Any AgentAuth pod unavailable > 2 minutes
 2. **High Error Rate**: 5xx errors > 5% for 5 minutes
 3. **High Latency**: p95 latency > 1s for 5 minutes
 4. **High CPU**: CPU usage > 80% for 10 minutes
@@ -482,7 +482,7 @@ kubectl get ingress prometheus-ingress -n gauth-staging
 2. **Day 4**: Smoke Testing Suite
    - Automated health checks
    - Authorization flow validation
-   - RFC 0111/0115 compliance tests
+   - AAP-001/0115 compliance tests
    
 3. **Day 5-7**: Performance Validation
    - Load testing (1000 req/s baseline)
@@ -511,5 +511,5 @@ kubectl get ingress prometheus-ingress -n gauth-staging
 
 **Document Version**: 1.0  
 **Last Updated**: Week 4 Day 1 (November 9, 2025)  
-**Author**: GAuth Platform Engineering Team  
+**Author**: AgentAuth Platform Engineering Team  
 **Status**: Production-Ready for Staging Deployment

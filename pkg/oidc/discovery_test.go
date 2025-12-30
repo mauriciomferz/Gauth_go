@@ -264,11 +264,11 @@ func TestDiscoveryService_SupportsScope(t *testing.T) {
 	}
 }
 
-func TestDiscoveryService_GAuthExtensions(t *testing.T) {
+func TestDiscoveryService_AgentAuthExtensions(t *testing.T) {
 	service := NewDiscoveryService("https://gauth.example.com")
 	config := service.GetConfiguration()
 
-	// Verify GAuth-specific scopes
+	// Verify AgentAuth-specific scopes
 	gauthScopes := []string{"gauth:owner", "gauth:client", "gauth:resource", "gauth:legal_entity"}
 	for _, scope := range gauthScopes {
 		found := false
@@ -279,11 +279,11 @@ func TestDiscoveryService_GAuthExtensions(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("GAuth scope %s not found in supported scopes", scope)
+			t.Errorf("AgentAuth scope %s not found in supported scopes", scope)
 		}
 	}
 
-	// Verify GAuth-specific claims
+	// Verify AgentAuth-specific claims
 	gauthClaims := []string{"entity_type", "entity_id", "legal_entity_name", "jurisdiction"}
 	for _, claim := range gauthClaims {
 		found := false
@@ -294,7 +294,7 @@ func TestDiscoveryService_GAuthExtensions(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("GAuth claim %s not found in supported claims", claim)
+			t.Errorf("AgentAuth claim %s not found in supported claims", claim)
 		}
 	}
 }

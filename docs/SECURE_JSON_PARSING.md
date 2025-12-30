@@ -400,6 +400,6 @@ Proposed metrics for observability:
 
 ---
 
-**Report Prepared By**: GAuth Core Team  
+**Report Prepared By**: AgentAuth Core Team  
 **Implementation Date**: November 6, 2025  
 **Status**: ✅ Production-Ready (Feature-Gated)

@@ -10,11 +10,11 @@
 
 ## Executive Summary
 
-This document defines the architecture for integrating Trusted Execution Environment (TEE) attestation into the GAuth framework to provide **cryptographically verifiable proof** of AI agent execution location and code integrity. TEE attestation is the **only secure solution** to prevent geographic spoofing, as it provides hardware-backed guarantees that software-based checks (IP geolocation, headers) cannot provide.
+This document defines the architecture for integrating Trusted Execution Environment (TEE) attestation into the AgentAuth framework to provide **cryptographically verifiable proof** of AI agent execution location and code integrity. TEE attestation is the **only secure solution** to prevent geographic spoofing, as it provides hardware-backed guarantees that software-based checks (IP geolocation, headers) cannot provide.
 
 ### Problem Statement
 
-**Current Vulnerability**: GAuth enforces geographic constraints via IP address validation, which is trivially spoofable using VPNs or proxy servers. An AI agent can appear to operate from Frankfurt while actually running in an offshore datacenter, causing regulatory violations.
+**Current Vulnerability**: AgentAuth enforces geographic constraints via IP address validation, which is trivially spoofable using VPNs or proxy servers. An AI agent can appear to operate from Frankfurt while actually running in an offshore datacenter, causing regulatory violations.
 
 **Solution**: TEE attestation uses hardware security modules (TPM/Nitro) to generate cryptographic proofs of:
 1. **Physical execution location** (datacenter ID verified by cloud provider)
@@ -66,7 +66,7 @@ This document defines the architecture for integrating Trusted Execution Environ
 │                           │                                     │
 │                           ▼                                     │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │  3. GAuth Validator (Verifies Attestation)           │       │
+│  │  3. AgentAuth Validator (Verifies Attestation)           │       │
 │  │     ┌────────────────────────────────────┐           │       │
 │  │     │  Certificate Chain Validation      │           │       │
 │  │     │  - Verify against AWS/Azure/GCP CA │           │       │
@@ -1001,7 +1001,7 @@ Root CA: AWS Nitro Enclaves Root CA
 
 **Root CA Updates**:
 - AWS publishes new root CAs via AWS Security Bulletins
-- GAuth must update hardcoded root CA during software releases
+- AgentAuth must update hardcoded root CA during software releases
 - **Update frequency**: Every 2-3 years (AWS CA expiry: 20-30 years)
 
 **Implementation**:
@@ -1144,7 +1144,7 @@ func verifyNonce(attestation *AttestationDoc, expectedNonce []byte) error {
 - [ ] Provision EC2 instance with Nitro Enclave support (M5/C5/R5)
 - [ ] Build and test enclave image locally
 - [ ] Calculate PCR0 hash of enclave code
-- [ ] Add PCR0 to GAuth allowlist
+- [ ] Add PCR0 to AgentAuth allowlist
 - [ ] Deploy enclave to production
 - [ ] Verify enclave is running (`nitro-cli describe-enclaves`)
 - [ ] Test attestation generation
@@ -1241,7 +1241,7 @@ echo "✅ Test PASSED: Code tampering detected"
 
 ## Conclusion
 
-TEE attestation provides the **only cryptographically secure solution** for verifying AI agent execution location and code integrity. By implementing AWS Nitro Enclaves with proper certificate chain validation and PCR verification, GAuth can guarantee compliance with geographic regulations (MiFID II, GDPR, HIPAA) that software-based checks cannot provide.
+TEE attestation provides the **only cryptographically secure solution** for verifying AI agent execution location and code integrity. By implementing AWS Nitro Enclaves with proper certificate chain validation and PCR verification, AgentAuth can guarantee compliance with geographic regulations (MiFID II, GDPR, HIPAA) that software-based checks cannot provide.
 
 **Next Steps**:
 1. ✅ Complete TEE architecture design (this document)

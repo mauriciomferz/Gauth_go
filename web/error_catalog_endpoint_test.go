@@ -39,7 +39,7 @@ func TestUIIndex(t *testing.T) {
 	if w.Code != 200 {
 		t.Fatalf("expected 200 got %d", w.Code)
 	}
-	if !containsStr(w.Body.String(), "GAuth Beta Dashboard") {
+	if !containsStr(w.Body.String(), "AgentAuth Beta Dashboard") {
 		t.Fatalf("index missing content")
 	}
 }

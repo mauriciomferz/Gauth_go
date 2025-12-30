@@ -2,7 +2,7 @@ package main
 
 //
 // OAuth2 token management tests
-// Validates authorization code and refresh token flows using GAuth API
+// Validates authorization code and refresh token flows using AgentAuth API
 import (
 	"context"
 	"testing"

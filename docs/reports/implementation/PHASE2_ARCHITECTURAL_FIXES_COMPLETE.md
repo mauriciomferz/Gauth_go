@@ -657,7 +657,7 @@ appendfsync everysec          # Fsync every second (performance vs durability)
 
 ### Environment Variables
 ```bash
-# GAuth configuration
+# AgentAuth configuration
 GAUTH_REDIS_ADDR=redis:6379
 GAUTH_REDIS_PASSWORD=<secure-password>
 GAUTH_REDIS_DB=0

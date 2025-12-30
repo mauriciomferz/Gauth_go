@@ -10,9 +10,9 @@ owners: [system]
 
 ## Executive Summary
 
-**Major Achievement: 100% completion of all Priority 0 (Critical) and Priority 1 (High) items in the GAuth RFC Gap Matrix.**
+**Major Achievement: 100% completion of all Priority 0 (Critical) and Priority 1 (High) items in the AgentAuth RFC Gap Matrix.**
 
-This milestone represents the successful implementation of all security-critical and high-priority features required for production deployment of the GAuth RFC 0111 Power of Attorney delegation system.
+This milestone represents the successful implementation of all security-critical and high-priority features required for production deployment of the AgentAuth AAP-001 Power of Attorney delegation system.
 
 ## Completion Statistics
 
@@ -76,7 +76,7 @@ All foundational security and cryptographic capabilities are fully implemented:
 - Evidence: `docs/COVERAGE.md`, test suite
 
 ### 9. **sec12.item1 - PoA model completeness** ✅
-- Full RFC 0115 data model
+- Full AAP-002 data model
 - Versioned schema with migration support
 - Temporal constraints (ValidFrom/ValidUntil)
 - Evidence: `pkg/rfc0111/rfc0111.go:PowerOfAttorney`
@@ -197,7 +197,7 @@ This session completed the final 2 P1 items, achieving 100% P1 coverage:
 **sec6.item1 - Fail-closed replay mode:**
 - Factory pattern for durable replay integration
 - `RegisterDurableReplayStoreFactory()` in pkg/gauth
-- `NewGAuthReplayStoreFromEnv()` in pkg/replay
+- `NewAgentAuthReplayStoreFromEnv()` in pkg/replay
 - Environment-based auto-configuration
 - 3 comprehensive integration tests:
   * Auto-configuration test
@@ -323,7 +323,7 @@ This session completed the final 2 P1 items, achieving 100% P1 coverage:
 
 ## Conclusion
 
-With **100% completion of P0 Critical and P1 High Priority items**, the GAuth RFC 0111 implementation is **production-ready** for secure Power of Attorney delegation use cases.
+With **100% completion of P0 Critical and P1 High Priority items**, the AgentAuth AAP-001 implementation is **production-ready** for secure Power of Attorney delegation use cases.
 
 All security-critical features are implemented, tested, and validated:
 - ✅ Cryptographic integrity and authenticity

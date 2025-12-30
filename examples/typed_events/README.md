@@ -12,7 +12,7 @@ refreshCadence: on-change
 > Status: Active
 
 ## Overview
-This example demonstrates GAuth's event system with strongly typed event metadata. It covers publishing, subscribing, and handling events with type-safe structures for users, authentication, and tokens.
+This example demonstrates AgentAuth's event system with strongly typed event metadata. It covers publishing, subscribing, and handling events with type-safe structures for users, authentication, and tokens.
 
 ## How to Run
 ```bash
@@ -34,7 +34,7 @@ go run main.go
 For more, see the [Architecture Guide](../../docs/ARCHITECTURE.md).
 # Typed Events Example
 
-This example demonstrates how to use GAuth's event system with strongly typed event metadata instead of using `map[string]interface{}`.
+This example demonstrates how to use AgentAuth's event system with strongly typed event metadata instead of using `map[string]interface{}`.
 
 ## Features
 

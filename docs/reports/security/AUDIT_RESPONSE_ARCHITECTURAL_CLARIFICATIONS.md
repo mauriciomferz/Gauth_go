@@ -19,7 +19,7 @@ Thank you for the corrected audit focusing on actual implementation files. Your 
 ### Critical Misunderstanding: This is NOT a Token Issuance System
 
 **Your Assumption:**
-> "The GAuth Server validates the Request, but it issues a Standard Access Token (likely a Bearer JWT) to the client... the downstream Resource Server (API) will receive a valid token but lose the context of the restriction."
+> "The AgentAuth Server validates the Request, but it issues a Standard Access Token (likely a Bearer JWT) to the client... the downstream Resource Server (API) will receive a valid token but lose the context of the restriction."
 
 **Reality:**
 **This repository (`Gauth_go`) does NOT issue access tokens to external Resource Servers.**
@@ -28,7 +28,7 @@ Thank you for the corrected audit focusing on actual implementation files. Your 
 
 The `pkg/rfc0111` package is a **Power of Attorney (PoA) validation framework** used for:
 
-1. **Internal authorization decisions** within GiFo ecosystem services
+1. **Internal authorization decisions** within AAP ecosystem services
 2. **Validation-as-a-Service** where clients call `ValidateDelegation()` to check if action X is authorized
 3. **Embedded validation** in authorization servers (PDP/Policy Decision Point)
 
@@ -225,7 +225,7 @@ func WithReplayFailClosed() Option {
 - ✅ Degraded security is **intentional trade-off** for high availability
 
 **Your Concern is Valid:**
-> "RFC 0111 (Security Considerations) mandates that if the status of a High-Assurance credential (like a PoA) cannot be definitively verified, the request MUST be rejected."
+> "AAP-001 (Security Considerations) mandates that if the status of a High-Assurance credential (like a PoA) cannot be definitively verified, the request MUST be rejected."
 
 **Response:**
 1. **Current Design:** Optimizes for availability (fail-open by default)
@@ -302,7 +302,7 @@ vctx := ValidationContext{
 ```
 
 **Your Concern is Valid:**
-> "Security by Default requires that unknown constraints must result in a denial. If the GAuth Server cannot understand a restriction placed by the Principal, it cannot safely issue a token on their behalf."
+> "Security by Default requires that unknown constraints must result in a denial. If the AgentAuth Server cannot understand a restriction placed by the Principal, it cannot safely issue a token on their behalf."
 
 **Response:**
 

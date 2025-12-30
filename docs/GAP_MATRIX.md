@@ -59,16 +59,16 @@ owners: [system]
 - **GNAP Context Enrichment**: Refactored GNAP handlers to include real-time compliance reporting and enriched entity metadata in authorization chains.
 - **Phase 10 | GNAP Enrichment**: Completed - Dynamic compliance levels and entity types in GNAP responses.
 - **Phase 11 | Attestation Signing**: Completed - Cryptographic proofs generated for authoritative verifications.
-- **GNAP Integration**: GAuth+ Verification Service fully integrated into the server factory and GNAP handlers.
-- **Status**: Core GAuth+ services are now database-backed, hardened, and production ready.
+- **GNAP Integration**: AgentAuth+ Verification Service fully integrated into the server factory and GNAP handlers.
+- **Status**: Core AgentAuth+ services are now database-backed, hardened, and production ready.
 
 # Update: 2025-10-24 — Cryptographic enhancements
 
 - Aggregated signature support (BLS, batch) integrated in registry and interfaces.
 - Multi-algorithm extensibility: new schemes can be registered and dispatched via unified abstraction.
 - Placeholder tests for BLS/batch verification ensure future compliance and test coverage.
-- Compliance status: Ready for advanced cryptographic requirements in RFC 0111/0115; extensibility for future standards.
-# GAuth RFC 0111 / 0115 Gap Matrix
+- Compliance status: Ready for advanced cryptographic requirements in AAP-001/0115; extensibility for future standards.
+# AgentAuth AAP-001 / 0115 Gap Matrix
 
 > Generated: 2025-10-21 (refreshed after Multi-Signature Granular Metrics + Envelope Versioning + External Anchor Forced Failures + Deterministic Seed + Capability Registry Notarization Prototype + RawPoA Embedding Phase 1)
 > Branch: beta-refactor
@@ -89,7 +89,7 @@ Legend:
 | Multi-signature threshold & weight verification | EnvelopeV2 includes satisfaction metadata (`satisfied_weight`, `satisfied_signatures`); verification enforces configured threshold & per-signature weight (domain separation v2); granular failure counters (structural, digest, pubkey_missing, invalid_signature, threshold, weight) + verification latency histogram | **Fully Implemented**. `BLSProvider` supports aggregation & pairing verification. `EnvelopeV2` (poa.go) handles `bls12-381-agg` mode, aggregating keys and verifying single signature against threshold participants. | Implemented | P1 | Integrity/Security | Completed. |
 | Envelope versioning (V1/V2 adaptive parser) | Toggle `GAUTH_POA_ENVELOPE_V2`; issuance increments counters; adaptive `VerifyToken` normalizes both envelopes; canonical digest populated in V2; adoption ratio gauge, digest mismatch counter, issuance cadence histogram (`envelope_issuance_cadence_seconds`), sunset phase gauge (`envelope_v1_sunset_phase`) implemented | Dual-domain acceptance window for multi-signature digest domain migration deferred | Implemented | P1 | Integrity/Interop | Execute remaining V1 sunset automation controller & dual-domain acceptance (optional) |
 
-## 2. Authorization Engine (RFC 0111)
+## 2. Authorization Engine (AAP-001)
 | Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
 |-------------|------------------------|-----|--------|----------|--------|------------------|
 | PDP combining algorithms | `InMemoryEngine` with deny_overrides, permit_overrides, first_applicable; trace + per-policy match counts | Limited advice execution semantics (basic channel only) | Implemented | P0 | Security/Accuracy | Enhance conflict metadata |
@@ -98,7 +98,7 @@ Legend:
 | Policy versioning & rollback | Complete implementation: in-memory + persistent hash chain with integrity verification (`web/server_clean.go`), rollback API endpoints, audit trail with event logging, Prometheus metrics (`gauth_policy_revisions_total`, `gauth_policy_active_version`, `gauth_policy_rollback_total`), checksum verification, comprehensive test coverage (`policy_*_test.go`) | Initial implementation complete with full persistence, audit, and observability | Implemented | P1 | Governance | ✅ Full policy versioning system operational |
 | Distributed PDP & caching | **COMPLETED:** `DecisionCache` interface defined; `InMemoryCache` (LRU+TTL) refactored; `RedisDecisionCache` implemented with global version-based invalidation and granular (subject/resource/action) invalidation using secondary sets; `PDPEngine` integration completed; all tests passing. | None | Implemented | P2 | Scalability | **COMPLETED** |
 
-## 3. PoA Definition (RFC 0115)
+## 3. PoA Definition (AAP-002)
 | Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
 |-------------|------------------------|-----|--------|----------|--------|------------------|
 | Full semantic validation (Parties/Scope/Requirements) | `BasicPoAValidator` (minimal invariants: non-wildcard self-delegation block, temporal ordering, jurisdiction & joint placeholder, numeric sanity checks) + `AdvancedPoAValidator` (transaction currency & 30d cap, wildcard gating, business-hour & weekday restriction syntax, inline multisig control, aggregate scope length limit). `EnhancedPoAValidator` (warning channel via ValidationWarning/WarningCollector/DefaultWarningCollector, persistent daily limits via BoltDailyLimitStore with JSON storage, conditional engine via SimpleConditionalEngine, metrics recording via InMemoryValidationMetrics). Service integration via WithEnhancedValidator option, CreateDelegationCtx collects warnings in DelegationResponse.Warnings field. Comprehensive test coverage in rfc0111_enhanced_validator_service_integration_test.go (4 passing tests). Production example in examples/enhanced_poa_validator_integration/main.go. Runtime conditional evaluation (valid_hours / valid_weekdays) enforced in VerifyToken. Environment selection via GAUTH_POA_VALIDATOR=basic|advanced. | Remaining gaps: richer conditional DSL (amount/time expressions), modular validator registry, advanced restriction audit metrics. | Implemented | P0 | Compliance | Add richer conditional DSL, implement validator registry, expand audit metrics instrumentation |
@@ -108,7 +108,7 @@ Legend:
 
 ## 4. Legal / Jurisdiction / Compliance
 | Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
-| Jurisdiction-specific enforcement | Comprehensive `LegalFrameworkValidator` implementation in `pkg/compliance/` with 6 jurisdictions (US, EU, UK, CA, AU, JP), entity type validation (corporation, LLC, partnership, individual, organization, AI agent), compliance rules (SOX, GDPR, MiFID II, AI oversight), approval levels (single/dual/board), value limits, time restrictions, metrics tracking, and integration tests. Extensible for new jurisdictions and rules. | **Production-ready:** All compliance features for RFC 0111/0115 implemented and tested. | Implemented | P1 | Compliance | Continue to expand for new jurisdictions and evolving standards. |
+| Jurisdiction-specific enforcement | Comprehensive `LegalFrameworkValidator` implementation in `pkg/compliance/` with 6 jurisdictions (US, EU, UK, CA, AU, JP), entity type validation (corporation, LLC, partnership, individual, organization, AI agent), compliance rules (SOX, GDPR, MiFID II, AI oversight), approval levels (single/dual/board), value limits, time restrictions, metrics tracking, and integration tests. Extensible for new jurisdictions and rules. | **Production-ready:** All compliance features for AAP-001/0115 implemented and tested. | Implemented | P1 | Compliance | Continue to expand for new jurisdictions and evolving standards. |
 | Compliance attestation proof | **COMPLETED:** `AttestationProof` struct implemented with Ed25519 signatures; `ComplianceResult` enhanced; `DefaultAttestationVerifier` enforces strict signature verification. Integration tests (`compliance_persistence_test.go`) verify generation and validation. | None | Implemented | P2 | Compliance/Trust | **COMPLETED** |
 | Arbitration / dispute hooks | **COMPLETED:** `DisputeService` and persistent `DisputeRegistry` (JSON-backed) implemented; `ArbitrationHook` interface defined. Support for `OpenCase`, `UpdateCase`, `CloseCase` transitions. Verified by `compliance_persistence_test.go`. | None | Implemented | P3 | Governance | **COMPLETED** |
 
@@ -145,7 +145,7 @@ Legend:
 
 ## 9. Testing & Conformance
 | Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
-| Clause-to-test mapping | **COMPLETED:** Conformance harness with comprehensive clause mapping (**38 RFC 0111/0115 sections**, expanded from 24). Enhanced `clause_map.json` (v2.0) with explicit test ID linkage (60+ test IDs), coverage targets (avg 88%), and detailed descriptions. New sections include error handling, token lifecycle, delegation chains, security considerations, interoperability, jurisdiction enforcement, transaction limits, conditional execution, delegation restrictions, signature verification, envelope migration, and revocation external anchoring. Negative test variant pattern established. Conformance matrix documentation (`docs/CONFORMANCE_MATRIX.md`) provides detailed mapping and coverage tracking. CLI tooling supports threshold gating and history tracking. | All core RFC sections mapped with explicit test coverage | Implemented | P0 | Compliance | **COMPLETED** (Requirement 91) |
+| Clause-to-test mapping | **COMPLETED:** Conformance harness with comprehensive clause mapping (**38 AAP-001/0115 sections**, expanded from 24). Enhanced `clause_map.json` (v2.0) with explicit test ID linkage (60+ test IDs), coverage targets (avg 88%), and detailed descriptions. New sections include error handling, token lifecycle, delegation chains, security considerations, interoperability, jurisdiction enforcement, transaction limits, conditional execution, delegation restrictions, signature verification, envelope migration, and revocation external anchoring. Negative test variant pattern established. Conformance matrix documentation (`docs/CONFORMANCE_MATRIX.md`) provides detailed mapping and coverage tracking. CLI tooling supports threshold gating and history tracking. | All core RFC sections mapped with explicit test coverage | Implemented | P0 | Compliance | **COMPLETED** (Requirement 91) |
 | Fuzzing / property tests | **COMPLETED:** Dedicated fuzz suites for `EnvelopeParser`, `PoAValidator`, `CapabilityLoader`, and `AnchorPersistence`; verified canonical hashing determinism; integrated into verification cycle | Comprehensive fuzz/property coverage for all core compliance and integrity paths | Implemented | P1 | Security/Robustness | **COMPLETED** |
 | Load/stress benchmarks | **COMPLETED:** dedicated `cmd/loadtest` CLI implemented with scenarios (`auth-std`, `auth-high`); `load-test.sh` updated. Benchmarks authorization throughput and cache efficiency. Simulation verified (~240 RPS). | None | Implemented | P2 | Scalability | **COMPLETED** (Phase 3) |
 
@@ -193,7 +193,7 @@ Recommended next automation step: introduce a generation script that (a) merges 
 |-------------|------------------------|-----|--------|----------|--------|------------------|
 | UTF-8 & control char filtering | **COMPLETED:** Implemented in `validateDelegationRequest` and `VerifyToken`; violation counters (`scope_violations`, `restriction_violations`) exported via JSON/Prometheus/OTEL; detailed documentation in `docs/HYGIENE_METRICS.md`; hygiene snapshot cryptographically anchored in capability artifacts. | None | Implemented | P3 | Security | **COMPLETED** |
 | Structured numeric limit parsing | **COMPLETED:** `max_amount` per action + cumulative `max_daily_amount` enforced; `max_weekly_amount`, `max_monthly_amount` added via `Generic PeriodLimitStore`. Integrated currency normalization and persistent usage ledger in `VerifyToken`. | None | Implemented | P0 | Integrity | **COMPLETED** (Requirement 135) |
-| Resource Limit Parsing | **COMPLETED:** `max_nodes`, `max_depth`, `max_width` implemented in `ResourceLimits` (RFC 0115 C.2) with validation logic in `pkg/poa/power_limits.go`. Unit tests (`power_limits_test.go`) verify enforcement and negative cases. | None | Implemented | P1 | Security | **COMPLETED** |
+| Resource Limit Parsing | **COMPLETED:** `max_nodes`, `max_depth`, `max_width` implemented in `ResourceLimits` (AAP-002 C.2) with validation logic in `pkg/poa/power_limits.go`. Unit tests (`power_limits_test.go`) verify enforcement and negative cases. | None | Implemented | P1 | Security | **COMPLETED** |
 
 ## 14. Risk & Threat Modeling
 | Requirement | Current Implementation | Gap | Status | Priority | Impact | Suggested Action |
@@ -216,7 +216,7 @@ Next targets (refreshed after envelope versioning & multi-signature instrumentat
 4. (Epic 8) Envelope V1 sunset execution – adoption phase controller & mismatch reason labeling (cadence histogram + phase gauge already implemented) (P1) - **COMPLETED** (Phase Controller & Mismatch Labeling Integrated).
 5. (Epic 3) Key rotation scheduler + secure storage integration (Vault/KMS) + rotation schedule exposure (P1) - **COMPLETED** (Scheduler implemented & Integrated).
 6. (Epic 11) OpenAPI spec expansion (audit pagination, capability metadata, error schemas) + enriched discovery document updates (P1) - **COMPLETED** (OpenAPI Spec Updated).
-7. (Metrics Enhancement) Action/resource labeled JSON export & decision reason taxonomy (P1) - **COMPLETED** (Implemented decision reason taxonomy and instrumented RFC 0111).
+7. (Metrics Enhancement) Action/resource labeled JSON export & decision reason taxonomy (P1) - **COMPLETED** (Implemented decision reason taxonomy and instrumented AAP-001).
 8. (Semantic Anchoring) Semantic snapshot external anchoring & archival rotation (P2) - **COMPLETED** (Persistent ledger and external anchoring integrated).
 9. (Epic 4) Advice channel & obligation persistence + failure taxonomy (P2) - **COMPLETED** (AuditObligationExecutor implemented).
 10. (Epic 13) Fuzz/property tests (capability loader, canonical hash, digest, PoA validator, envelope parser, anchor artifact) (P2) - **COMPLETED** (Fuzz suites integrated).
@@ -235,7 +235,7 @@ Proceed with persistent ledger backend + ledger entry signatures & external anch
 
 ## Compliance & Production Readiness Priorities
 
-To achieve full RFC 0111/0115 compliance and production readiness, prioritize:
+To achieve full AAP-001/0115 compliance and production readiness, prioritize:
 - Completion of advanced cryptographic features (aggregated signature schemes, multi-algorithm support)
 - Production-grade external anchoring (TSA/transparency log integration)
 - Comprehensive compliance features (attestation, arbitration hooks, residual risk tracking)

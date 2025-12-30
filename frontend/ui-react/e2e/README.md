@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-This directory contains end-to-end tests for the GAuth React UI using Playwright.
+This directory contains end-to-end tests for the AgentAuth React UI using Playwright.
 
 ## Test Structure
 

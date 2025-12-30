@@ -100,7 +100,7 @@ TestAtomicCounter_TTLExpiration: ✅ PASS
 
 ```bash
 $ go test ./pkg/rfc0111/... -timeout 120s -count=1
-ok  github.com/Gimel-Foundation/.../pkg/rfc0111  5.095s
+ok  github.com/AgentAuth-Foundation/.../pkg/rfc0111  5.095s
 
 # Atomic Counter Tests
 ✅ TestAtomicCounter_ConcurrentCheckAndIncrement

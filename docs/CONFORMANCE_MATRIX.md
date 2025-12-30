@@ -7,22 +7,22 @@
 
 ## Summary
 
-This document provides a comprehensive mapping between RFC 0111/0115 requirements and test coverage.
+This document provides a comprehensive mapping between AAP-001/0115 requirements and test coverage.
 
 ### Coverage Statistics
 
 | Metric | Value |
 |--------|-------|
 | Total Clause Mappings | 38 |
-| RFC 0111 Sections | 16 |
-| RFC 0115 Sections | 22 |
+| AAP-001 Sections | 16 |
+| AAP-002 Sections | 22 |
 | Negative Test Variants | 1+ (expandable) |
 | Test IDs Linked | 60+ |
 | Average Coverage Target | 88% |
 
 ---
 
-## RFC 0111 - Core Protocol
+## AAP-001 - Core Protocol
 
 ### Section 1: Introduction
 - **Clause**: `0111:1.-introduction`
@@ -128,7 +128,7 @@ This document provides a comprehensive mapping between RFC 0111/0115 requirement
 
 ---
 
-## RFC 0115 - Power of Attorney Extensions
+## AAP-002 - Power of Attorney Extensions
 
 ### Section 1: PoA Structure
 - **Clause**: `0115:1.-power-of-attorney-structure`
@@ -278,8 +278,8 @@ This document provides a comprehensive mapping between RFC 0111/0115 requirement
 | Category | v1.0 | v2.0 | Change |
 |----------|------|------|--------|
 | Total Clauses | 24 | 38 | +14 (+58%) |
-| RFC 0111 Sections | 11 | 16 | +5 |
-| RFC 0115 Sections | 13 | 22 | +9 |
+| AAP-001 Sections | 11 | 16 | +5 |
+| AAP-002 Sections | 13 | 22 | +9 |
 | Explicitly Linked Test IDs | 0 | 60+ | +60 |
 | Coverage Targets Defined | 0 | 38 | +38 |
 | Negative Test Variants | 0 | 1+ | NEW |
@@ -317,5 +317,5 @@ go run ./cmd/conformance \
 
 ---
 
-**Maintained by**: GAuth Conformance Team  
+**Maintained by**: AgentAuth Conformance Team  
 **Last Review**: 2025-12-26

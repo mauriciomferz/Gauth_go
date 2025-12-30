@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates how to use GAuth to implement a legal and regulatory framework for financial services authentication and authorization with strongly typed structures.
+This example demonstrates how to use AgentAuth to implement a legal and regulatory framework for financial services authentication and authorization with strongly typed structures.
 
 ## Key Components
 

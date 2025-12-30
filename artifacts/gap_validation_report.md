@@ -8,7 +8,7 @@ generated: true
 source: scripts/gap_validation.sh
 refreshCadence: manual
 ---
-# GAuth Operations Readiness Gap Validation Report
+# AgentAuth Operations Readiness Gap Validation Report
 
 **Generated:** 2025-11-07T12:58:18+01:00
 
@@ -64,5 +64,5 @@ The readiness score is calculated using weighted priority scoring:
 
 ## Conclusion
 
-All 45 operational readiness requirements have been implemented, demonstrating 100% compliance with the GAuth production readiness criteria. The system is ready for production deployment after standard release procedures.
+All 45 operational readiness requirements have been implemented, demonstrating 100% compliance with the AgentAuth production readiness criteria. The system is ready for production deployment after standard release procedures.
 

@@ -1,6 +1,6 @@
-# GAuth Hygiene Metrics
+# AgentAuth Hygiene Metrics
 
-GAuth implements strict string hygiene for all delegation and token fields to prevent injection attacks and ensure interoperability across diverse clients.
+AgentAuth implements strict string hygiene for all delegation and token fields to prevent injection attacks and ensure interoperability across diverse clients.
 
 ## Metrics Overview
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# CloudHSM Setup and Integration Script for GAuth
+# CloudHSM Setup and Integration Script for AgentAuth
 # Provisions AWS CloudHSM cluster and integrates with Vault
 
 set -euo pipefail
@@ -41,7 +41,7 @@ notify_slack() {
                     \"color\": \"$color\",
                     \"title\": \"CloudHSM Setup\",
                     \"text\": \"$message\",
-                    \"footer\": \"GAuth Security\",
+                    \"footer\": \"AgentAuth Security\",
                     \"ts\": $(date +%s)
                 }]
             }"
@@ -235,7 +235,7 @@ initialize_cluster() {
     openssl genrsa -out /tmp/customer-ca.key 2048
     openssl req -new -x509 -days 3650 -key /tmp/customer-ca.key \
         -out /tmp/customer-ca.crt \
-        -subj "/C=US/ST=State/L=City/O=GAuth/CN=GAuth CloudHSM CA"
+        -subj "/C=US/ST=State/L=City/O=AgentAuth/CN=AgentAuth CloudHSM CA"
     
     # Sign cluster CSR
     log "Signing cluster certificate..."
@@ -328,7 +328,7 @@ create_kms_key() {
         --region "$AWS_REGION" \
         --origin AWS_CLOUDHSM \
         --custom-key-store-id "$key_store_id" \
-        --description "GAuth Vault auto-unseal key (CloudHSM-backed)" \
+        --description "AgentAuth Vault auto-unseal key (CloudHSM-backed)" \
         --query 'KeyMetadata.KeyId' \
         --output text)
     
@@ -415,7 +415,7 @@ create_backup() {
 main() {
     local action="${1:-setup}"
     
-    log "=== CloudHSM Setup for GAuth ==="
+    log "=== CloudHSM Setup for AgentAuth ==="
     
     check_prerequisites
     

@@ -1,7 +1,7 @@
 // Multi-Signature Power of Attorney Demo
 //
 // This example demonstrates the complete multi-signature PoA workflow implementing
-// RFC0115 Section B (Authorization Type) joint/collective signature enforcement
+// AAP002 Section B (Authorization Type) joint/collective signature enforcement
 // (GAP_MATRIX sec3.item3).
 //
 // Scenario: A company requires 3-of-5 board member signatures to authorize a
@@ -67,7 +67,7 @@ func (m *mockKeyProvider) VerifySignature(digest []byte, signature []byte, publi
 func main() {
 	fmt.Println("╔═══════════════════════════════════════════════════════════════╗")
 	fmt.Println("║  Multi-Signature Power of Attorney (PoA) Demo                ║")
-	fmt.Println("║  RFC0115 Section B - Joint/Collective Signature Enforcement  ║")
+	fmt.Println("║  AAP002 Section B - Joint/Collective Signature Enforcement  ║")
 	fmt.Println("║  GAP_MATRIX sec3.item3 Implementation                        ║")
 	fmt.Println("╚═══════════════════════════════════════════════════════════════╝")
 	fmt.Println()
@@ -202,10 +202,10 @@ func main() {
 	fmt.Println("   ✓ PoA is now ACTIVE and authorized for use")
 	fmt.Println()
 
-	// Step 10: Retrieve signatures in RFC0111 format
-	fmt.Println("📤 Step 10: Exporting Signatures (RFC0111 Format)")
+	// Step 10: Retrieve signatures in AAP001 format
+	fmt.Println("📤 Step 10: Exporting Signatures (AAP001 Format)")
 	signatures, _ := manager.GetSignatures(ctx, poa.ID)
-	fmt.Printf("   Retrieved %d signatures in RFC0111 POASignature format\n", len(signatures))
+	fmt.Printf("   Retrieved %d signatures in AAP001 POASignature format\n", len(signatures))
 	for signerID, sig := range signatures {
 		fmt.Printf("   • %s: Algorithm=%s, KeyID=%s\n",
 			signerID, sig.Algorithm, sig.KeyID)
@@ -223,7 +223,7 @@ func main() {
 	fmt.Println("   • Parallel/asynchronous signature submission")
 	fmt.Println("   • Automatic threshold completion detection")
 	fmt.Println("   • PoA lifecycle (pending → completed → active)")
-	fmt.Println("   • RFC0111 signature format compliance")
+	fmt.Println("   • AAP001 signature format compliance")
 	fmt.Println()
 	fmt.Println("🎯 GAP_MATRIX sec3.item3 (Joint/collective signature enforcement)")
 	fmt.Println("   Status: IMPLEMENTED ✓")

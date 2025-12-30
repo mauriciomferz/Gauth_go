@@ -56,7 +56,7 @@ jobs:
       - name: Run RFC compliance tests
         run: |
           go test ./pkg/gauth/... -v -short -run "(RFC|Envelope|Rotation)" -timeout=5m
-          echo "✅ RFC 0111/0115 compliance validated"
+          echo "✅ AAP-001/0115 compliance validated"
 
       - name: Run security regression tests
         run: |
@@ -285,7 +285,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ GAuth Staging Deployment Successful",
+              "text": "✅ AgentAuth Staging Deployment Successful",
               "blocks": [
                 {
                   "type": "header",
@@ -327,7 +327,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "❌ GAuth Staging Deployment Failed",
+              "text": "❌ AgentAuth Staging Deployment Failed",
               "blocks": [
                 {
                   "type": "header",
@@ -399,7 +399,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "🔄 GAuth Staging Deployment Rolled Back",
+              "text": "🔄 AgentAuth Staging Deployment Rolled Back",
               "blocks": [
                 {
                   "type": "header",

@@ -1,4 +1,4 @@
-# GAuth API Versioning & Deprecation Policy
+# AgentAuth API Versioning & Deprecation Policy
 
 **Version**: 1.0  
 **Effective Date**: November 2025  
@@ -23,7 +23,7 @@
 
 ## Overview
 
-GAuth follows a clear and predictable versioning strategy to ensure stability for integrators while allowing the API to evolve. This document outlines our commitment to backward compatibility and provides guidance on managing API changes.
+AgentAuth follows a clear and predictable versioning strategy to ensure stability for integrators while allowing the API to evolve. This document outlines our commitment to backward compatibility and provides guidance on managing API changes.
 
 ### Key Principles
 
@@ -38,7 +38,7 @@ GAuth follows a clear and predictable versioning strategy to ensure stability fo
 
 ### URL-Based Versioning
 
-GAuth uses **URL-based versioning** as the primary versioning mechanism:
+AgentAuth uses **URL-based versioning** as the primary versioning mechanism:
 
 ```
 https://api.gauth.example.com/api/{version}/{endpoint}

@@ -1,7 +1,7 @@
 {
   "generated_at": "2025-12-26",
   "version": "2.0",
-  "notes": "Comprehensive mapping covering 40+ RFC 0111/0115 sections with expanded test coverage including authorization engine, external anchoring, detached signatures, multi-signature threshold, advanced claims, key rotation, policy versioning, AI capability governance, embedding PoA in tokens, jurisdiction enforcement, error handling, security considerations, negative test variants, and explicit test ID linkage.",
+  "notes": "Comprehensive mapping covering 40+ AAP-001/0115 sections with expanded test coverage including authorization engine, external anchoring, detached signatures, multi-signature threshold, advanced claims, key rotation, policy versioning, AI capability governance, embedding PoA in tokens, jurisdiction enforcement, error handling, security considerations, negative test variants, and explicit test ID linkage.",
   "entries": [
     {
       "clause_prefix": "0111:1.-introduction",

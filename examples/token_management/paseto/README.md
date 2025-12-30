@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates token management using PASETO (Platform-Agnostic Security Tokens) in GAuth.
+This example demonstrates token management using PASETO (Platform-Agnostic Security Tokens) in AgentAuth.
 
 ## Key Concepts
 - **PasetoManager**: Handles PASETO token signing and verification with Ed25519 keys.

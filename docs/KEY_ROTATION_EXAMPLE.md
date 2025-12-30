@@ -27,7 +27,7 @@ macOS does not include GNU `timeout` by default; avoid `timeout 10s go run ...` 
 Generated and activated initial key <keyId> for tenant tenant-a
 Generated and activated initial key <keyId> for tenant tenant-b
 Generated and activated initial key <keyId> for tenant tenant-c
-Starting GAuth Key Rotation API server on :8080
+Starting AgentAuth Key Rotation API server on :8080
 ```
 
 ## Key Endpoints

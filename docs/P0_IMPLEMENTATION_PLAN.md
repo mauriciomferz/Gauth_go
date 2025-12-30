@@ -511,7 +511,7 @@ This document outlines the implementation strategy for all P0 (Critical) priorit
 
 ---
 
-**Document Owner**: GAuth Core Team  
+**Document Owner**: AgentAuth Core Team  
 **Last Updated**: November 5, 2025  
 **Status**: Draft - Awaiting Approval  
 **Next Review**: November 12, 2025

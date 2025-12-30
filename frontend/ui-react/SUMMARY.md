@@ -61,7 +61,7 @@ go run ./cmd/web-server
 
 4. **Complete API Client**
    - 308 lines of TypeScript with full type definitions
-   - All GAuth endpoints covered (20+ methods)
+   - All AgentAuth endpoints covered (20+ methods)
    - Error handling and interceptors
    - Ready for backend integration
 
@@ -371,7 +371,7 @@ I recommend **Option A** - complete the remaining pages so the frontend is 100% 
 
 ## Final Thoughts
 
-This React UI represents a **complete modernization** of the GAuth web interface:
+This React UI represents a **complete modernization** of the AgentAuth web interface:
 
 - **Professional**: Modern tech stack used by top companies (React, TypeScript, Vite, Tailwind)
 - **Maintainable**: Modular architecture with reusable components

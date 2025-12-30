@@ -8,11 +8,11 @@ owners: [system]
 
 # Load Testing Guide
 
-**P3.1 (sec9.item3)**: Comprehensive load and stress testing framework for GAuth production readiness validation.
+**P3.1 (sec9.item3)**: Comprehensive load and stress testing framework for AgentAuth production readiness validation.
 
 ## Overview
 
-This guide describes the load testing framework for GAuth, providing tools to measure throughput, latency percentiles, concurrent performance, and system behavior under stress.
+This guide describes the load testing framework for AgentAuth, providing tools to measure throughput, latency percentiles, concurrent performance, and system behavior under stress.
 
 ### Goals
 

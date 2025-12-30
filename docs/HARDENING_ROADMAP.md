@@ -6,13 +6,13 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Hardening Roadmap (From Beta Demonstration to Production Candidate)
+# AgentAuth Hardening Roadmap (From Beta Demonstration to Production Candidate)
 
 > Last Updated: 2025-10-17
 > Status: Active
 
 > Status: Draft
-> Scope: Defines phased implementation steps to transform the current **beta GAuth-RFC-001 (formerly RFC 111) / 115 demonstration** into a security, compliance, validation, and operations capable system.
+> Scope: Defines phased implementation steps to transform the current **beta AgentAuth-RFC-001 (formerly RFC 111) / 115 demonstration** into a security, compliance, validation, and operations capable system.
 
 ## Phase 0 – Current State (Beta Baseline)
 - Mock / simplified cryptography (basic signing)

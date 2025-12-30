@@ -1,5 +1,5 @@
 // Package pdp provides distributed Policy Decision Point (PDP) clustering
-// for high-availability GAuth deployments with cache invalidation.
+// for high-availability AgentAuth deployments with cache invalidation.
 package pdp
 
 import (

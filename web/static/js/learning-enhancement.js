@@ -8,13 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize API client if not already done
     if (!window.apiClient) {
-        window.apiClient = new GAuthAPIClient();
+        window.apiClient = new AgentAuthAPIClient();
         console.log('✅ API Client initialized');
     }
     
     // Initialize learning path if not already done
     if (!window.learningPath) {
-        window.learningPath = new GAuthLearningPath(window.apiClient);
+        window.learningPath = new AgentAuthLearningPath(window.apiClient);
         console.log('✅ Learning Path initialized');
     }
     
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const modules = {
             'auth-fundamentals': {
                 title: 'Authorization Fundamentals',
-                description: 'Learn the core concepts of authorization in GAuth',
+                description: 'Learn the core concepts of authorization in AgentAuth',
                 duration: '15 minutes',
                 difficulty: 'Beginner',
                 content: `
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 content: `
                     <h3 class="text-xl font-bold mb-4">Understanding Power of Attorney (PoA)</h3>
                     <div class="space-y-4">
-                        <p class="text-gray-700">Power of Attorney in GAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
+                        <p class="text-gray-700">Power of Attorney in AgentAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
                         
                         <div class="bg-blue-50 p-4 rounded-lg">
                             <h4 class="font-semibold text-blue-800 mb-2">Core Concepts:</h4>

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🪙 GAuth Token Management Demo")
+	fmt.Println("🪙 AgentAuth Token Management Demo")
 	fmt.Println("==============================")
 
 	// Create a new memory token store

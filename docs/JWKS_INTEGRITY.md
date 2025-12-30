@@ -16,7 +16,7 @@ refreshCadence: quarterly
 
 ## Overview
 
-GAuth implements RFC0115-compliant JWKS integrity mechanisms to protect key distribution and provide structured key lifecycle signals to clients. This includes:
+AgentAuth implements RFC0115-compliant JWKS integrity mechanisms to protect key distribution and provide structured key lifecycle signals to clients. This includes:
 
 1. **Integrity Signatures**: Optional HMAC-SHA256 signatures on JWKS responses (X-JWKS-Signature header)
 2. **Deprecation Metadata**: Structured key lifecycle timestamps (`deprecated_after`, `sunset_after`)
@@ -445,7 +445,7 @@ else:
 
 ### Step 1: Server-Side Deployment (Week 1)
 
-Deploy GAuth with deprecation metadata (backward compatible):
+Deploy AgentAuth with deprecation metadata (backward compatible):
 
 ```bash
 # Existing JWKS consumers see new fields (ignored if not supported)
@@ -533,11 +533,11 @@ curl localhost:8080/.well-known/jwks.json
 
 - RFC 7517: JSON Web Key (JWK)
 - RFC 7234: HTTP Caching (Warning header)
-- RFC 0115 §6.2: Key Lifecycle Management
+- AAP-002 §6.2: Key Lifecycle Management
 - NIST SP 800-57: Cryptographic Key Management Guidance
 
 ---
 
 **Implemented**: P2.4 (2025-11-05)  
-**Authors**: GAuth Core Team  
+**Authors**: AgentAuth Core Team  
 **Reviewers**: Security Team, Platform Engineering

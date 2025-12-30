@@ -27,7 +27,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	// Force exactly one initial failure irrespective of probability to stabilize test expectations.
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
 	srv := NewBetaServerWithMetrics(":0", pm) // server needed for startup attempt
 	t.Cleanup(func() { srv.Shutdown() })
 	// Wait for initial attempt + potential retries to finish.
@@ -51,7 +51,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 		}
 		return nil
 	}
-	attempts := find("gauth_rfc0111_external_anchor_attempts_total")
+	attempts := find("gauth_aap001_external_anchor_attempts_total")
 	if attempts == nil || len(attempts.Metric) == 0 {
 		t.Fatalf("attempts counter missing")
 	}
@@ -60,7 +60,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 		t.Fatalf("attempts <1")
 	}
 	// Provider-labeled attempts
-	attemptsProv := find("gauth_rfc0111_external_anchor_attempts_provider_total")
+	attemptsProv := find("gauth_aap001_external_anchor_attempts_provider_total")
 	if attemptsProv == nil {
 		t.Fatalf("provider attempts vec missing")
 	}
@@ -79,7 +79,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	// We no longer enforce a failure occurrence: deterministic seeding surfaced that some seeds produce
 	// immediate success sequences even with moderate failProb. Observability of success path (latency sample)
 	// is sufficient; failure scenarios are covered by TestExternalAnchorMetricsRetryAllFail.
-	failuresProv := find("gauth_rfc0111_external_anchor_failures_provider_total")
+	failuresProv := find("gauth_aap001_external_anchor_failures_provider_total")
 	var providerFailures float64
 	if failuresProv != nil {
 		for _, m := range failuresProv.Metric {
@@ -94,7 +94,7 @@ func TestExternalAnchorMetricsRetrySuccess(t *testing.T) {
 	if providerFailures < 1 {
 		t.Fatalf("expected at least one forced failure before success, got %f", providerFailures)
 	}
-	latProv := find("gauth_rfc0111_external_anchor_latency_provider_seconds")
+	latProv := find("gauth_aap001_external_anchor_latency_provider_seconds")
 	var sampleCount uint64
 	if latProv != nil {
 		for _, m := range latProv.Metric {
@@ -120,7 +120,7 @@ func TestExternalAnchorMetricsRetryAllFail(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "3")
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "5")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
 	_ = NewBetaServerWithMetrics(":0", pm)
 	time.Sleep(300 * time.Millisecond)
 	mfs, err := reg.Gather()
@@ -135,8 +135,8 @@ func TestExternalAnchorMetricsRetryAllFail(t *testing.T) {
 		}
 		return nil
 	}
-	attempts := find("gauth_rfc0111_external_anchor_attempts_total")
-	failures := find("gauth_rfc0111_external_anchor_failures_total")
+	attempts := find("gauth_aap001_external_anchor_attempts_total")
+	failures := find("gauth_aap001_external_anchor_failures_total")
 	if attempts == nil || failures == nil {
 		t.Fatalf("missing attempts or failures counters")
 	}
@@ -149,7 +149,7 @@ func TestExternalAnchorMetricsRetryAllFail(t *testing.T) {
 		t.Fatalf("expected failures == attempts got failures=%f attempts=%f", fCount, aCount)
 	}
 	// Provider-labeled failures count equality
-	failuresProv := find("gauth_rfc0111_external_anchor_failures_provider_total")
+	failuresProv := find("gauth_aap001_external_anchor_failures_provider_total")
 	if failuresProv == nil {
 		t.Fatalf("provider failures vec missing")
 	}
@@ -166,8 +166,8 @@ func TestExternalAnchorMetricsRetryAllFail(t *testing.T) {
 		t.Fatalf("expected provider failures == attempts got %f vs %f", providerFailures, aCount)
 	}
 	// Age & hash len gauges should remain zero
-	age := find("gauth_rfc0111_external_anchor_age_seconds")
-	hlen := find("gauth_rfc0111_external_anchor_last_hash_len")
+	age := find("gauth_aap001_external_anchor_age_seconds")
+	hlen := find("gauth_aap001_external_anchor_last_hash_len")
 	if age == nil || hlen == nil {
 		t.Fatalf("missing age or hash len gauges")
 	}

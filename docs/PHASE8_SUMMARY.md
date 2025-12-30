@@ -437,7 +437,7 @@ parService := NewPARService(DefaultPARConfig())
 
 ## Conclusion
 
-Phase 8 successfully implements **production-ready infrastructure** for the GAuth OIDC server:
+Phase 8 successfully implements **production-ready infrastructure** for the AgentAuth OIDC server:
 
 ✅ **3,230 lines** of production code  
 ✅ **7 new files** with complete implementations  

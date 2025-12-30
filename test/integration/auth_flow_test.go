@@ -21,7 +21,7 @@ func setupTestAuth(t *testing.T) *gauth.Service {
 
 	auth, err := gauth.New(config)
 	if err != nil {
-		t.Fatalf("Failed to create GAuth instance: %v", err)
+		t.Fatalf("Failed to create AgentAuth instance: %v", err)
 	}
 	return auth
 }

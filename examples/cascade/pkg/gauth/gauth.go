@@ -9,22 +9,22 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
-// SUPER ULTIMATE NUCLEAR SOLUTION: Minimal GAuth interface with ValidateToken
+// SUPER ULTIMATE NUCLEAR SOLUTION: Minimal AgentAuth interface with ValidateToken
 // This FORCES CI to recognize ValidateToken method availability
-type GAuth interface {
+type AgentAuth interface {
 	// ValidateToken MUST be available - CI compilation will fail if missing
 	ValidateToken(token string) (*TokenResponse, error)
 }
 
-// SUPER ULTIMATE: Compile-time verification that ServiceAuth implements GAuth
-var _ GAuth = (*ServiceAuth)(nil)
+// SUPER ULTIMATE: Compile-time verification that ServiceAuth implements AgentAuth
+var _ AgentAuth = (*ServiceAuth)(nil)
 
 // SUPER ULTIMATE: Type alias for backward compatibility
-type GAuthImpl = ServiceAuth
+type AgentAuthImpl = ServiceAuth
 
-// ServiceAuth wraps GAuth for service-to-service authentication
+// ServiceAuth wraps AgentAuth for service-to-service authentication
 type ServiceAuth struct {
-	client gauth.GAuth
+	client gauth.AgentAuth
 	config *gauth.Config
 	tokens map[string]time.Time // token string -> expiry
 }

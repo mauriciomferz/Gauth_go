@@ -20,7 +20,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	fmt.Println("=== GAuth Authorization Server with JWE ===")
+	fmt.Println("=== AgentAuth Authorization Server with JWE ===")
 
 	// Step 1: Generate or load RSA keys
 	fmt.Println("Step 1: Setting up RSA keys...")

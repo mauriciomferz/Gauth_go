@@ -39,59 +39,59 @@ func indexOf(s, sub string) int { return len(sub) } //nolint:unused // helper fo
 
 // (Above simplistic helpers kept minimal; using built-ins would be simpler but avoid extra imports.)
 
-// TestRFC0115NegativeCases covers structural & semantic failures.
-func TestRFC0115NegativeCases(t *testing.T) {
+// TestAAP002NegativeCases covers structural & semantic failures.
+func TestAAP002NegativeCases(t *testing.T) {
 	// 1. Exclusion flags not all true
-	cfgBad := RFC0115Config{ExcludeWeb3: false, ExcludeAIOperators: true, ExcludeDNAIdentities: true, MaxValidityDays: 365}
-	if err := ValidateRFC0115Compliance(cfgBad); err == nil {
+	cfgBad := AAP002Config{ExcludeWeb3: false, ExcludeAIOperators: true, ExcludeDNAIdentities: true, MaxValidityDays: 365}
+	if err := ValidateAAP002Compliance(cfgBad); err == nil {
 		t.Fatalf("expected exclusion flags error")
 	}
 
 	// 2. MaxValidityDays out of bounds
-	cfgBad2 := RFC0115Config{ExcludeWeb3: true, ExcludeAIOperators: true, ExcludeDNAIdentities: true, MaxValidityDays: 0}
-	if err := ValidateRFC0115Compliance(cfgBad2); err == nil {
+	cfgBad2 := AAP002Config{ExcludeWeb3: true, ExcludeAIOperators: true, ExcludeDNAIdentities: true, MaxValidityDays: 0}
+	if err := ValidateAAP002Compliance(cfgBad2); err == nil {
 		t.Fatalf("expected max validity error")
 	}
 
 	// 3. PoADefinition principal identity missing
 	def := minimalValidDefinition()
 	def.Parties.Principal.Identity = ""
-	if err := ValidateRFC0115Compliance(def); err == nil {
+	if err := ValidateAAP002Compliance(def); err == nil {
 		t.Fatalf("expected principal identity error")
 	}
 
 	// 4. No sectors
 	def2 := minimalValidDefinition()
 	def2.Authorization.ApplicableSectors = nil
-	if err := ValidateRFC0115Compliance(def2); err == nil {
+	if err := ValidateAAP002Compliance(def2); err == nil {
 		t.Fatalf("expected sector error")
 	}
 
 	// 5. No regions
 	def3 := minimalValidDefinition()
 	def3.Authorization.ApplicableRegions = nil
-	if err := ValidateRFC0115Compliance(def3); err == nil {
+	if err := ValidateAAP002Compliance(def3); err == nil {
 		t.Fatalf("expected region error")
 	}
 
 	// 6. No actions
 	def4 := minimalValidDefinition()
 	def4.Authorization.AuthorizedActions = AuthorizedActions{}
-	if err := ValidateRFC0115Compliance(def4); err == nil {
+	if err := ValidateAAP002Compliance(def4); err == nil {
 		t.Fatalf("expected action error")
 	}
 
 	// 7. Validity duration negative
 	def5 := minimalValidDefinition()
 	def5.Requirements.ValidityPeriod.EndTime = def5.Requirements.ValidityPeriod.StartTime.Add(-1 * time.Hour)
-	if err := ValidateRFC0115Compliance(def5); err == nil {
+	if err := ValidateAAP002Compliance(def5); err == nil {
 		t.Fatalf("expected negative duration error")
 	}
 
 	// 8. Validity duration exceeds 2 years
 	def6 := minimalValidDefinition()
 	def6.Requirements.ValidityPeriod.EndTime = def6.Requirements.ValidityPeriod.StartTime.Add(24 * time.Hour * 731)
-	if err := ValidateRFC0115Compliance(def6); err == nil {
+	if err := ValidateAAP002Compliance(def6); err == nil {
 		t.Fatalf("expected excessive duration error")
 	}
 }

@@ -1,6 +1,6 @@
-// Package auth provides authentication and token validation for the GAuth framework.
+// Package auth provides authentication and token validation for the AgentAuth framework.
 //
-// This package implements the authentication layer for GAuth, handling token
+// This package implements the authentication layer for AgentAuth, handling token
 // validation, signature verification, and principal extraction. It supports
 // multiple cryptographic algorithms and provides comprehensive validation
 // including expiration, revocation, and replay attack protection.

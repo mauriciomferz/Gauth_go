@@ -1,15 +1,15 @@
 /**
- * GAuth Lab Pattern Explorer - Bridge for HTML onclick handlers
- * This creates the window.GAuthLab.PatternExplorer namespace expected by the HTML buttons
+ * AgentAuth Lab Pattern Explorer - Bridge for HTML onclick handlers
+ * This creates the window.AgentAuthLab.PatternExplorer namespace expected by the HTML buttons
  */
 
-// Create GAuthLab namespace if it doesn't exist
-if (typeof window.GAuthLab === 'undefined') {
-    window.GAuthLab = {};
+// Create AgentAuthLab namespace if it doesn't exist
+if (typeof window.AgentAuthLab === 'undefined') {
+    window.AgentAuthLab = {};
 }
 
 // Pattern Explorer for the HTML onclick handlers
-window.GAuthLab.PatternExplorer = {
+window.AgentAuthLab.PatternExplorer = {
     patterns: {
         'delegation-chain': {
             name: 'Hierarchical Delegation Chain',
@@ -179,17 +179,17 @@ window.GAuthLab.PatternExplorer = {
                             </p>
                             
                             <div class="grid md:grid-cols-3 gap-4 mb-6">
-                                <button onclick="window.GAuthLab.PatternExplorer.startSimulation('${patternId}')"
+                                <button onclick="window.AgentAuthLab.PatternExplorer.startSimulation('${patternId}')"
                                         class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
                                     <i class="fas fa-rocket mr-2"></i>
                                     Start Simulation
                                 </button>
-                                <button onclick="window.GAuthLab.PatternExplorer.modifyParameters('${patternId}')"
+                                <button onclick="window.AgentAuthLab.PatternExplorer.modifyParameters('${patternId}')"
                                         class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
                                     <i class="fas fa-edit mr-2"></i>
                                     Modify Parameters
                                 </button>
-                                <button onclick="window.GAuthLab.PatternExplorer.exportPattern('${patternId}')"
+                                <button onclick="window.AgentAuthLab.PatternExplorer.exportPattern('${patternId}')"
                                         class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">
                                     <i class="fas fa-download mr-2"></i>
                                     Export Config
@@ -199,7 +199,7 @@ window.GAuthLab.PatternExplorer = {
                             <!-- Simulation Output -->
                             <div id="simulation-output-${patternId}" class="hidden">
                                 <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
-                                    <div class="text-blue-400 mb-2">🔧 GAuth Pattern Simulator v2.0</div>
+                                    <div class="text-blue-400 mb-2">🔧 AgentAuth Pattern Simulator v2.0</div>
                                     <div id="simulation-log-${patternId}"></div>
                                 </div>
                             </div>
@@ -218,7 +218,7 @@ window.GAuthLab.PatternExplorer = {
                                 class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded transition-colors">
                             Close
                         </button>
-                        <button onclick="window.GAuthLab.PatternExplorer.savePattern('${patternId}')"
+                        <button onclick="window.AgentAuthLab.PatternExplorer.savePattern('${patternId}')"
                                 class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors">
                             Save to Workspace
                         </button>
@@ -366,7 +366,7 @@ window.GAuthLab.PatternExplorer = {
                             class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded transition-colors">
                         Cancel
                     </button>
-                    <button onclick="window.GAuthLab.PatternExplorer.applyParameters('${patternId}', this)" 
+                    <button onclick="window.AgentAuthLab.PatternExplorer.applyParameters('${patternId}', this)" 
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors">
                         Apply Changes
                     </button>
@@ -592,7 +592,7 @@ window.GAuthLab.PatternExplorer = {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 GAuth Lab Pattern Explorer initialized');
+    console.log('🔧 AgentAuth Lab Pattern Explorer initialized');
 });
 
-console.log('✅ GAuth Lab Pattern Explorer bridge loaded');
+console.log('✅ AgentAuth Lab Pattern Explorer bridge loaded');

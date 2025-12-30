@@ -6,9 +6,9 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Server - Production Security Checklist
+# AgentAuth Server - Production Security Checklist
 
-**CRITICAL**: This checklist MUST be completed before deploying to production. The GAuth server includes development shortcuts that create severe security vulnerabilities if deployed as-is.
+**CRITICAL**: This checklist MUST be completed before deploying to production. The AgentAuth server includes development shortcuts that create severe security vulnerabilities if deployed as-is.
 
 ## ⚠️ Critical Security Vulnerabilities (MUST FIX)
 
@@ -279,7 +279,7 @@ Expected output:
 ```
 [SECURITY] Production mode detected - enforcing security validations
 [SECURITY] All security validations passed ✓
-[Server] Starting GAuth Server on :8080
+[Server] Starting AgentAuth Server on :8080
 ```
 
 If validation fails:
@@ -441,4 +441,4 @@ docker-compose logs gauth | grep SECURITY
 
 **Last Updated**: November 2025
 **Version**: 1.0
-**Maintainer**: GAuth Security Team
+**Maintainer**: AgentAuth Security Team

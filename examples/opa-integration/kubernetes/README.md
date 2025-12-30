@@ -8,7 +8,7 @@ owners: [system]
 
 # Kubernetes Deployment Guide
 
-This directory contains production-ready Kubernetes manifests for deploying GAuth with OPA sidecar.
+This directory contains production-ready Kubernetes manifests for deploying AgentAuth with OPA sidecar.
 
 ## Architecture
 
@@ -17,7 +17,7 @@ This directory contains production-ready Kubernetes manifests for deploying GAut
 │         Kubernetes Pod              │
 │                                     │
 │  ┌──────────────┐  ┌─────────────┐  │
-│  │    GAuth     │  │     OPA     │  │
+│  │    AgentAuth     │  │     OPA     │  │
 │  │  Container   │←→│   Sidecar   │  │
 │  │   :8080      │  │    :8181    │  │
 │  └──────────────┘  └─────────────┘  │
@@ -35,7 +35,7 @@ This directory contains production-ready Kubernetes manifests for deploying GAut
 ## Files
 
 - `opa-configmap.yaml` - OPA Rego policies
-- `deployment.yaml` - GAuth + OPA sidecar deployment
+- `deployment.yaml` - AgentAuth + OPA sidecar deployment
 - `secrets-example.yaml` - Secret template (DO NOT commit real secrets)
 - `monitoring.yaml` - Prometheus ServiceMonitor and alerting rules
 - `hpa.yaml` - Horizontal Pod Autoscaler
@@ -79,7 +79,7 @@ kubectl get configmap opa-policies -n gauth-system
 kubectl describe configmap opa-policies -n gauth-system
 ```
 
-### 2. Deploy GAuth with OPA Sidecar
+### 2. Deploy AgentAuth with OPA Sidecar
 ```bash
 kubectl apply -f deployment.yaml
 ```
@@ -149,9 +149,9 @@ curl -X POST http://localhost:8181/v1/data/gauth/authz/allow \
 # Expected: {"result":true}
 ```
 
-### 4. Check GAuth Application
+### 4. Check AgentAuth Application
 ```bash
-# Port-forward to GAuth
+# Port-forward to AgentAuth
 kubectl port-forward -n gauth-system svc/gauth 8080:80
 
 # Health check
@@ -213,7 +213,7 @@ kubectl get hpa gauth-hpa -n gauth-system -w
 
 ### Logs
 
-**GAuth container:**
+**AgentAuth container:**
 ```bash
 kubectl logs -n gauth-system -l app=gauth -c gauth --tail=100 -f
 ```
@@ -274,9 +274,9 @@ kubectl logs -n gauth-system -l app=gauth -c opa
 - **Policy not loaded**: Check ConfigMap mount
 - **Evaluation error**: Check input format matches policy expectations
 
-### GAuth-OPA Connection Issues
+### AgentAuth-OPA Connection Issues
 
-**Test from GAuth container:**
+**Test from AgentAuth container:**
 ```bash
 kubectl exec -n gauth-system -it \
   $(kubectl get pod -n gauth-system -l app=gauth -o name | head -n1) \
@@ -410,4 +410,4 @@ kubectl delete namespace gauth-system
 
 - [Kubernetes OPA Best Practices](https://www.openpolicyagent.org/docs/latest/kubernetes-primer/)
 - [OPA High Availability](https://www.openpolicyagent.org/docs/latest/management-high-availability/)
-- [GAuth OPA Integration Guide](../../../docs/OPA_INTEGRATION_GUIDE.md)
+- [AgentAuth OPA Integration Guide](../../../docs/OPA_INTEGRATION_GUIDE.md)

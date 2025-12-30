@@ -1,4 +1,4 @@
-// GAuth Error Handling Example
+// AgentAuth Error Handling Example
 // Demonstrates basic error handling patterns for token validation and rate limiting.
 // Extend with structured error types and middleware for production use.
 

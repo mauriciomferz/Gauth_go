@@ -15,12 +15,12 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
-// TestRFC0111MetricsE2E spins up an in-memory RFC0111 Service with Prometheus metrics and
+// TestAAP001MetricsE2E spins up an in-memory AAP001 Service with Prometheus metrics and
 // performs a small happy-path flow: create delegation, validate it, revoke it, then attempt
 // a validation that should fail. Finally scrapes /metrics and asserts counters present and incremented.
-func TestRFC0111MetricsE2E(t *testing.T) {
+func TestAAP001MetricsE2E(t *testing.T) {
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
 
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()
@@ -55,10 +55,10 @@ func TestRFC0111MetricsE2E(t *testing.T) {
 
 	// Assertions: expect creation + validation latency histogram + revocation related counters possibly zero/non-zero.
 	requiredNames := []string{
-		"gauth_rfc0111_delegations_created_total", // at least 1
-		"gauth_rfc0111_validation_latency_seconds_bucket",
-		"gauth_rfc0111_signatures_issued_total",            // may be zero if signer not configured, tolerate presence absence? we only check presence of name due to registration
-		"gauth_rfc0111_signature_public_key_missing_total", // soft-skip case may stay zero
+		"gauth_aap001_delegations_created_total", // at least 1
+		"gauth_aap001_validation_latency_seconds_bucket",
+		"gauth_aap001_signatures_issued_total",            // may be zero if signer not configured, tolerate presence absence? we only check presence of name due to registration
+		"gauth_aap001_signature_public_key_missing_total", // soft-skip case may stay zero
 	}
 	for _, name := range requiredNames {
 		if !strings.Contains(body, name) {
@@ -66,7 +66,7 @@ func TestRFC0111MetricsE2E(t *testing.T) {
 		}
 	}
 	// Ensure delegations_created counter incremented (value > 0)
-	if !containsMetricValue(body, "gauth_rfc0111_delegations_created_total", "1") && !containsMetricValue(body, "gauth_rfc0111_delegations_created_total", "2") {
+	if !containsMetricValue(body, "gauth_aap001_delegations_created_total", "1") && !containsMetricValue(body, "gauth_aap001_delegations_created_total", "2") {
 		t.Fatalf("expected delegations_created_total to be >=1; exposition snippet: %s", firstLines(body, 40))
 	}
 }

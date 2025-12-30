@@ -102,7 +102,7 @@ JWE Phase 2 (Integration Tests & E2E Validation) has been **successfully complet
 **Usage**:
 ```bash
 $ go run examples/jwe/auth_server.go
-=== GAuth Authorization Server with JWE ===
+=== AgentAuth Authorization Server with JWE ===
 Step 1: Setting up RSA keys...
 ✅ RSA keys ready (2048-bit)
 ...

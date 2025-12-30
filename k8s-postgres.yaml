@@ -1,5 +1,5 @@
 ---
-# PostgreSQL StatefulSet for GAuth
+# PostgreSQL StatefulSet for AgentAuth
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -58,7 +58,7 @@ metadata:
 type: Opaque
 stringData:
   POSTGRES_PASSWORD: gauth_dev_password_changeme
-  # Connection string for GAuth application
+  # Connection string for AgentAuth application
   DATABASE_URL: postgresql://gauth:gauth_dev_password_changeme@postgres-service.gauth-data.svc.cluster.local:5432/gauth?sslmode=disable
 
 ---

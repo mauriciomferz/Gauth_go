@@ -278,8 +278,8 @@ func TestDurableReplayStore_Stats(t *testing.T) {
 	}
 }
 
-// TestDurableReplayStoreAdapter_RFC0111Integration verifies adapter compatibility.
-func TestDurableReplayStoreAdapter_RFC0111Integration(t *testing.T) {
+// TestDurableReplayStoreAdapter_AAP001Integration verifies adapter compatibility.
+func TestDurableReplayStoreAdapter_AAP001Integration(t *testing.T) {
 	tmpDir := t.TempDir()
 	walPath := filepath.Join(tmpDir, "replay.wal")
 

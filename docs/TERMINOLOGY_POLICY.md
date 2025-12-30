@@ -11,7 +11,7 @@ owners: [system]
 > Last Updated: 2025-10-17
 > Status: Active
 
-This repository is a **Beta Demonstration** of GAuth concepts. To maintain consistent positioning and avoid accidental misrepresentation, the following terminology rules apply.
+This repository is a **Beta Demonstration** of AgentAuth concepts. To maintain consistent positioning and avoid accidental misrepresentation, the following terminology rules apply.
 
 ## Allowed Primary Term
 | Concept | Canonical Term |

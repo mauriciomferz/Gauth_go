@@ -8,11 +8,11 @@ owners: [system]
 
 # MCP (Model Context Protocol) Integration
 
-This package implements the Model Context Protocol (MCP) integration for GAuth 1.0, satisfying RFC-0111 building block requirements.
+This package implements the Model Context Protocol (MCP) integration for AgentAuth 1.0, satisfying RFC-0111 building block requirements.
 
 ## Overview
 
-MCP is an open standard developed by Anthropic for connecting AI applications to external systems. This implementation enables GAuth-authorized AI agents to access external resources (databases, files, APIs) and invoke tools (calculators, search engines, etc.) through standardized MCP servers.
+MCP is an open standard developed by Anthropic for connecting AI applications to external systems. This implementation enables AgentAuth-authorized AI agents to access external resources (databases, files, APIs) and invoke tools (calculators, search engines, etc.) through standardized MCP servers.
 
 ## Architecture
 
@@ -24,7 +24,7 @@ MCP is an open standard developed by Anthropic for connecting AI applications to
 │              │                             │              │
 └──────────────┘                             └──────────────┘
      ↓                                              ↓
-GAuth Authorization                          • Databases
+AgentAuth Authorization                          • Databases
 Extended Tokens                              • File Systems
 PDP Policies                                 • APIs/Tools
 ```
@@ -42,7 +42,7 @@ PDP Policies                                 • APIs/Tools
 - ✅ **Connection Pool** (`connection_pool.go`) - Production-grade pooling
 - ✅ **Rate Limiting** - Token bucket algorithm (100 req/sec default)
 - ✅ **Circuit Breakers** - Automatic failure isolation
-- ✅ **Authorization Bridge** (`auth_bridge.go`) - GAuth integration
+- ✅ **Authorization Bridge** (`auth_bridge.go`) - AgentAuth integration
 - ✅ **Audit Logger** (`audit_logger.go`) - Comprehensive logging
 - ✅ **Agent Integration** (`pkg/gagent/mcp_integration.go`) - AI agent wrapper
 - ✅ **E2E Tests** (`e2e_test.go`) - 72.9% coverage, all passing
@@ -52,7 +52,7 @@ PDP Policies                                 • APIs/Tools
 - ✅ List/call tools on MCP servers
 - ✅ List/get prompts from MCP servers
 - ✅ Manage multiple MCP server connections (stdio/WebSocket/SSE)
-- ✅ Authorization scope validation with GAuth tokens
+- ✅ Authorization scope validation with AgentAuth tokens
 - ✅ Complete audit trail of all operations
 - ✅ Connection pooling with health checks
 - ✅ Rate limiting and circuit breakers
@@ -217,7 +217,7 @@ for _, item := range result.Content {
 **Lines**: 905 lines
 
 ### Phase 2A: Authorization Bridge ✅ COMPLETE
-- ✅ Authorization Bridge (400 lines) - GAuth token → MCP permissions
+- ✅ Authorization Bridge (400 lines) - AgentAuth token → MCP permissions
 - ✅ Extended Token with MCP Scopes
 - ✅ PDP Integration for MCP policies
 - ✅ Audit Logger (304 lines)
@@ -299,7 +299,7 @@ go test -v ./pkg/gagent/... -run MCP
 - **Phase 3 (E2E)**: 85% → Production-ready with testing
 - **Phase 4 (Hardening)**: **95%** → Enterprise-grade ✅
 
-**Overall GAuth RFC-0111 Compliance Impact**:
+**Overall AgentAuth RFC-0111 Compliance Impact**:
 - Before MCP: 68% compliant (with OIDC Phases 1-2)
 - After MCP Phase 4: **≈75-80% compliant** (+7-12% increase)
 
@@ -335,7 +335,7 @@ go test -v ./pkg/gagent/... -run MCP
 
 ## Contributing
 
-MCP integration follows the standard GAuth development workflow:
+MCP integration follows the standard AgentAuth development workflow:
 1. Design documented in `MCP_INTEGRATION_DESIGN.md`
 2. Implementation in phases (currently Phase 1 complete)
 3. Unit tests required (45%+ coverage)
@@ -344,14 +344,14 @@ MCP integration follows the standard GAuth development workflow:
 
 ## References
 
-- RFC-0111 (GAuth 1.0) - Section 1: Scope (Building Blocks)
+- RFC-0111 (AgentAuth 1.0) - Section 1: Scope (Building Blocks)
 - Model Context Protocol Specification: https://modelcontextprotocol.io/
 - JSON-RPC 2.0 Specification: https://www.jsonrpc.org/specification
 - MCP TypeScript SDK: https://github.com/modelcontextprotocol/typescript-sdk
 
 ## License
 
-Part of the GAuth 1.0 implementation - same license as parent project.
+Part of the AgentAuth 1.0 implementation - same license as parent project.
 
 ## Transport Comparison
 

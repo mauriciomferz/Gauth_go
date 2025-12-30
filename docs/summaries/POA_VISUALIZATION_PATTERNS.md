@@ -9,7 +9,7 @@ owners: [system]
 # PoA Visualization Pattern Enhancement - Complete
 
 ## Summary
-Successfully extended the PoA visualization to include all major GAuth authorization patterns. The visualization now supports 9 different pattern types demonstrating various aspects of the Power of Attorney system.
+Successfully extended the PoA visualization to include all major AgentAuth authorization patterns. The visualization now supports 9 different pattern types demonstrating various aspects of the Power of Attorney system.
 
 ## Changes Made
 

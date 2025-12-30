@@ -348,7 +348,7 @@ Created comprehensive doc.go files for 5 core packages (806 lines):
 - **pkg/auth** (160 lines): Authentication and token validation
 - **pkg/authz** (193 lines): Authorization enforcement
 - **pkg/policy** (168 lines): Policy management and storage
-- **pkg/poa** (161 lines): Proof-of-Authorization tokens (RFC 0115)
+- **pkg/poa** (161 lines): Proof-of-Authorization tokens (AAP-002)
 
 #### 5B: Additional Package Documentation
 Extended documentation to 2 additional critical packages (327 lines):

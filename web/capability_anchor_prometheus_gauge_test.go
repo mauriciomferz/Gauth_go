@@ -40,7 +40,7 @@ func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Replace metrics with Prometheus implementation.
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Registry: reg, Namespace: "gauth", Subsystem: "rfc0111"})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Registry: reg, Namespace: "gauth", Subsystem: "aap001"})
 	srv.metrics = pm
 	// Instead of relying on background emission, set the metric explicitly for deterministic test.
 	setUnix := time.Now().Unix()
@@ -51,7 +51,7 @@ func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
 	rr := httptest.NewRecorder()
 	promhttp.HandlerFor(reg, promhttp.HandlerOpts{}).ServeHTTP(rr, httptest.NewRequest("GET", "/metrics", nil))
 	body, _ := io.ReadAll(rr.Body)
-	re := regexp.MustCompile(`(?m)^gauth_rfc0111_capability_anchor_last_write_seconds ([0-9.e+\-]+)$`)
+	re := regexp.MustCompile(`(?m)^gauth_aap001_capability_anchor_last_write_seconds ([0-9.e+\-]+)$`)
 	m := re.FindSubmatch(body)
 	if len(m) < 2 {
 		t.Fatalf("gauge not found in metrics output:\n%s", string(body))

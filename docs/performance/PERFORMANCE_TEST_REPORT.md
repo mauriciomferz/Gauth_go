@@ -16,7 +16,7 @@ refreshCadence: quarterly
 
 ## Executive Summary
 
-Comprehensive performance testing and benchmarking completed for GAuth QA enhancements (Tasks 6 & 7). All performance targets exceeded with excellent resource efficiency.
+Comprehensive performance testing and benchmarking completed for AgentAuth QA enhancements (Tasks 6 & 7). All performance targets exceeded with excellent resource efficiency.
 
 **Key Results**:
 - ✅ **Jurisdiction Lookup**: 7-9 ns/op (0 allocations)
@@ -348,7 +348,7 @@ Comprehensive performance testing and benchmarking completed for GAuth QA enhanc
 
 ## 8. Comparison to Industry Standards
 
-| Metric | GAuth | Industry Standard | Status |
+| Metric | AgentAuth | Industry Standard | Status |
 |--------|-------|-------------------|--------|
 | Auth latency | < 1ms | < 10ms | ✅ 10x better |
 | Metrics recording | 83ns | 1-10µs | ✅ 12-120x better |
@@ -356,7 +356,7 @@ Comprehensive performance testing and benchmarking completed for GAuth QA enhanc
 | Throughput per core | 1M+ req/sec | 10K-100K req/sec | ✅ 10-100x better |
 | Lock overhead | 17% | 50-200% | ✅ 3-12x better |
 
-**Conclusion**: GAuth performance significantly exceeds industry standards.
+**Conclusion**: AgentAuth performance significantly exceeds industry standards.
 
 ---
 
@@ -511,6 +511,6 @@ See: `scripts/performance_test.sh`
 ---
 
 **Report Generated**: November 11, 2025  
-**GAuth Version**: 1.0.0  
+**AgentAuth Version**: 1.0.0  
 **Go Version**: 1.21+  
 **Architecture**: darwin/arm64 (Apple M3 Pro)

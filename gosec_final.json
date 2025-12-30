@@ -214,7 +214,7 @@
 			"rule_id": "G101",
 			"details": "Potential hardcoded credentials",
 			"file": "/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/oidc/types.go",
-			"code": "234: const (\n235: \tProofMethodOIDCIDToken  = \"oidc_id_token\" // GAuth-issued ID token\n236: \tProofMethodOIDCExternal = \"oidc_external\" // External provider (Google, Okta, etc.)\n",
+			"code": "234: const (\n235: \tProofMethodOIDCIDToken  = \"oidc_id_token\" // AgentAuth-issued ID token\n236: \tProofMethodOIDCExternal = \"oidc_external\" // External provider (Google, Okta, etc.)\n",
 			"line": "235",
 			"column": "2",
 			"nosec": false,

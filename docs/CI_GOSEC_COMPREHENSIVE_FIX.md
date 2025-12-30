@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document details the comprehensive configuration and error handling for gosec security scanning in GAuth CI/CD pipelines. The implementation ensures resilient security scanning despite known compatibility issues between gosec v2.22.x and Go 1.25.x.
+This document details the comprehensive configuration and error handling for gosec security scanning in AgentAuth CI/CD pipelines. The implementation ensures resilient security scanning despite known compatibility issues between gosec v2.22.x and Go 1.25.x.
 
 ### Quick Stats
 - **Workflows Updated:** 2 (CI, Deploy-Staging)
@@ -24,7 +24,7 @@ This document details the comprehensive configuration and error handling for gos
 
 Gosec v2.22.x experiences SSA (Static Single Assignment) analysis panics with:
 - **Go 1.25.x** (bleeding edge compatibility issues)
-- **Complex AST patterns** in OIDC, POA, and GAuth packages
+- **Complex AST patterns** in OIDC, POA, and AgentAuth packages
 - **Unresolved imports** during SSA building phase
 - **Generic type constraints** and interface assertions
 
@@ -214,7 +214,7 @@ security:
 | Rule | Description | Reason for Exclusion |
 |------|-------------|---------------------|
 | **G104** | Unhandled errors | Common in `defer` cleanup; context-specific |
-| **G204** | Subprocess with variable | GAuth uses validated inputs |
+| **G204** | Subprocess with variable | AgentAuth uses validated inputs |
 | **G304** | File path from variable | Sanitized paths in config loading |
 | **G404** | Weak random generator | False positives on crypto/rand usage |
 | **G115** | Integer overflow | Go 1.25+ false positives on safe arithmetic |
@@ -393,7 +393,7 @@ go-version: '1.22.9'  # LTS version
 
 **Cons:**
 - ❌ Loses Go 1.25 features (generic improvements)
-- ❌ GAuth requires 1.25.x for type constraints
+- ❌ AgentAuth requires 1.25.x for type constraints
 
 **Verdict:** ❌ Rejected
 
@@ -467,7 +467,7 @@ go install github.com/securego/gosec/v2/cmd/gosec@v2.20.0
 ### Phase 2: Enhancement (Q1 2025)
 - [ ] Add gosec version matrix testing
 - [ ] Implement result caching
-- [ ] Create custom gosec rules for GAuth
+- [ ] Create custom gosec rules for AgentAuth
 - [ ] Integrate with SonarQube
 
 ### Phase 3: Migration Evaluation (Q2 2025)

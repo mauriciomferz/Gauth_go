@@ -582,7 +582,7 @@ ALERT SemanticAnomalyHigh
 	FOR 2m
 	LABELS {severity="high"}
 	ANNOTATIONS {
-		summary="High semantic rejection anomaly for GAuth",
+		summary="High semantic rejection anomaly for AgentAuth",
 		description="Semantic anomaly score exceeded 3 for >2m. Investigate recent PoA rejection surge categories."}
 ```
 
@@ -643,11 +643,11 @@ Deferrable Low-Risk Enhancements:
 
 Evidence references included in `docs/conformance_gaps.json` (sec7.item3 now Partial).
 
-# GAuth Observability & Metrics Guide
+# AgentAuth Observability & Metrics Guide
 
 > Last Updated: 2025-10-19
 
-This document describes the available metrics, recommended PromQL queries, alerting thresholds, and SLO considerations for the GAuth reference implementation.
+This document describes the available metrics, recommended PromQL queries, alerting thresholds, and SLO considerations for the AgentAuth reference implementation.
 
 ## 1. Metrics Surface
 
@@ -1261,7 +1261,7 @@ When strict authenticity is enabled (`WithStrictAuthenticity()`):
 
 ### Anchor Failure Burst
 1. Check external anchoring service health (HTTP 5xx rates, latency). 
-2. Verify DNS / network connectivity from GAuth pods. 
+2. Verify DNS / network connectivity from AgentAuth pods. 
 3. Inspect application logs for timeout or TLS errors. 
 4. Consider circuit breaker: temporarily disable anchoring (swap client to `NoopAnchorClient`) if causing cascading latency.
 

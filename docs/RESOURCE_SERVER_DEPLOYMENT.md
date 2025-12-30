@@ -1,15 +1,15 @@
 # Resource Server Deployment Guide
-## GAuth 1.0 Protocol - Production Resource Server Implementation
+## AgentAuth 1.0 Protocol - Production Resource Server Implementation
 
 **Date:** November 15, 2025  
-**RFC Reference:** GiFo-0111 Corrected Protocol Flow  
-**Component:** Resource Server (OAuth/OIDC Foundation + GAuth Extensions)
+**RFC Reference:** AAP-0111 Corrected Protocol Flow  
+**Component:** Resource Server (OAuth/OIDC Foundation + AgentAuth Extensions)
 
 ---
 
 ## Overview
 
-The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundation that GAuth builds upon. This guide documents how to deploy a GAuth-compliant Resource Server that implements **GAuth extensions** while maintaining OAuth/OIDC compatibility.
+The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundation that AgentAuth builds upon. This guide documents how to deploy a AgentAuth-compliant Resource Server that implements **AgentAuth extensions** while maintaining OAuth/OIDC compatibility.
 
 ### What the Resource Server Does
 
@@ -19,7 +19,7 @@ The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundatio
 - Enforces OAuth scopes
 - Returns standard HTTP error codes (401, 403)
 
-**GAuth Extensions:**
+**AgentAuth Extensions:**
 - Validates **Extended Tokens** with PoA claims
 - Enforces **Power of Attorney (PoA)** restrictions
 - Implements **PEP** (Policy Enforcement Point) for authorization decisions
@@ -39,7 +39,7 @@ The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundatio
 │  └─────────────────────┬─────────────────────────────────┘ │
 │                        │                                    │
 │  ┌─────────────────────▼─────────────────────────────────┐ │
-│  │     GAuth PEP Middleware (Demand-Side Enforcement)    │ │
+│  │     AgentAuth PEP Middleware (Demand-Side Enforcement)    │ │
 │  │  - Token validation                                   │ │
 │  │  - PoA enforcement                                    │ │
 │  │  - Scope checking                                     │ │
@@ -62,7 +62,7 @@ The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundatio
 └─────────────────────────────────────────────────────────────┘
                          │
                          │ OAuth/OIDC Protocol
-                         │ GAuth Extensions
+                         │ AgentAuth Extensions
                          ▼
           ┌──────────────────────────────┐
           │  Authorization Server (AS)   │
@@ -78,13 +78,13 @@ The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundatio
 
 ### Pattern 1: Embedded PEP (Recommended for Go)
 
-**Use GAuth_go library components directly in your application.**
+**Use AgentAuth_go library components directly in your application.**
 
-#### Step 1: Import GAuth Components
+#### Step 1: Import AgentAuth Components
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 ```
 
@@ -121,7 +121,7 @@ pep := gauth.NewPowerEnforcementPoint(
 #### Step 3: Create Middleware
 
 ```go
-func GAuthMiddleware(pep *gauth.PowerEnforcementPoint) func(http.Handler) http.Handler {
+func AgentAuthMiddleware(pep *gauth.PowerEnforcementPoint) func(http.Handler) http.Handler {
     return func(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             // Extract Bearer token
@@ -188,8 +188,8 @@ func main() {
     router.HandleFunc("/api/v1/decision", handleDecision)
     router.HandleFunc("/api/v1/action", handleAction)
     
-    // Apply GAuth middleware
-    protected := GAuthMiddleware(pep)(router)
+    // Apply AgentAuth middleware
+    protected := AgentAuthMiddleware(pep)(router)
     
     // Start server
     log.Fatal(http.ListenAndServe(":8443", protected))
@@ -256,7 +256,7 @@ import (
     "net/http/httputil"
     "net/url"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
 func main() {
@@ -269,8 +269,8 @@ func main() {
     
     // Create handler
     handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        // Enforce GAuth authorization
-        if !enforceGAuthAuthorization(pep, w, r) {
+        // Enforce AgentAuth authorization
+        if !enforceAgentAuthAuthorization(pep, w, r) {
             return // enforcement failed, response already sent
         }
         
@@ -281,7 +281,7 @@ func main() {
     log.Fatal(http.ListenAndServe(":8443", handler))
 }
 
-func enforceGAuthAuthorization(pep *gauth.PowerEnforcementPoint, w http.ResponseWriter, r *http.Request) bool {
+func enforceAgentAuthAuthorization(pep *gauth.PowerEnforcementPoint, w http.ResponseWriter, r *http.Request) bool {
     // Extract and validate token (same as Pattern 1)
     // ... enforcement logic ...
     return true // if authorized
@@ -383,7 +383,7 @@ func (rs *ResourceServer) ValidateTokenLocally(ctx context.Context, tokenString 
         }
     }
     
-    // Deserialize GAuth extended claims
+    // Deserialize AgentAuth extended claims
     extToken := rs.deserializeExtendedToken(claims)
     
     return extToken, nil
@@ -592,7 +592,7 @@ gauth:
     revocation_ttl: 60
     
   endpoints:
-    # GAuth-specific endpoints
+    # AgentAuth-specific endpoints
     transaction: "/api/v1/transaction"
     decision: "/api/v1/decision"
     action: "/api/v1/action"
@@ -615,7 +615,7 @@ Content-Type: application/json
 }
 ```
 
-### GAuth Extension Errors
+### AgentAuth Extension Errors
 
 ```http
 HTTP/1.1 403 Forbidden
@@ -764,11 +764,11 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ## Conclusion
 
-This guide provides comprehensive patterns for deploying a GAuth-compliant Resource Server. The implementation properly separates OAuth/OIDC foundation (token validation, standard errors) from GAuth extensions (PoA enforcement, compliance reporting).
+This guide provides comprehensive patterns for deploying a AgentAuth-compliant Resource Server. The implementation properly separates OAuth/OIDC foundation (token validation, standard errors) from AgentAuth extensions (PoA enforcement, compliance reporting).
 
 **Key Takeaways:**
-- RS is OAuth/OIDC foundation, extended by GAuth
-- PEP middleware handles GAuth-specific enforcement
+- RS is OAuth/OIDC foundation, extended by AgentAuth
+- PEP middleware handles AgentAuth-specific enforcement
 - Local token validation recommended for performance
 - Compliance event reporting enables AI governance
 - Multiple deployment patterns support different architectures
@@ -781,6 +781,6 @@ This guide provides comprehensive patterns for deploying a GAuth-compliant Resou
 5. Deploy and monitor
 
 For questions or issues, refer to:
-- GAuth_go codebase: `pkg/gauth/pep.go`
+- AgentAuth_go codebase: `pkg/gauth/pep.go`
 - RFC corrections: `docs/Gifo_0111_CORRECTED_FLOW.md`
 - Implementation coverage: `docs/RFC_IMPLEMENTATION_COVERAGE.md`

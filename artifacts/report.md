@@ -28,8 +28,8 @@ GAP Matrix: implemented=8 partial=16 missing=19 total=43
 
 | Clause ID | Title | RFC  |
 | ----------------------------------- | ------------------------------ | ---- |
-| 0111:rfc-0111-(placeholder-extract) | RFC 0111 (Placeholder Extract) | 0111 |
-| 0115:rfc-0115-(placeholder-extract) | RFC 0115 (Placeholder Extract) | 0115 |
+| 0111:rfc-0111-(placeholder-extract) | AAP-001 (Placeholder Extract) | 0111 |
+| 0115:rfc-0115-(placeholder-extract) | AAP-002 (Placeholder Extract) | 0115 |
 | 0111:1.-introduction | 1. Introduction | 0111 |
 | 0115:1.-power-of-attorney-structure | 1. Power Of Attorney Structure | 0115 |
 | 0111:2.-policy-bundle-integrity | 2. Policy Bundle Integrity | 0111 |

@@ -14,7 +14,7 @@ Think Machine-inspired 3D visualization for Power of Attorney relationships and 
 
 The PoA Visualization system provides interactive 3D visualizations for understanding:
 - **Power of Attorney Graphs**: Relationship networks between principals, agents, AI clients, and resources
-- **Protocol Steps**: Layered 3D visualization of GAuth protocol steps (Subscription, Matching, Request)
+- **Protocol Steps**: Layered 3D visualization of AgentAuth protocol steps (Subscription, Matching, Request)
 
 ## Architecture
 
@@ -152,7 +152,7 @@ Interactive demonstration with:
 ### Basic PoA Graph
 
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/visualization"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/visualization"
 
 // Create visualizer
 viz := visualization.NewPoAVisualizer()
@@ -272,12 +272,12 @@ open http://localhost:8080/poa-visualization
 
 ## RFC Compliance
 
-**GiFo-RFC-0111 (GAuth 1.0):**
+**AAP-RFC-0111 (AgentAuth 1.0):**
 - Visualizes Section 3.A parties (Principal, Authorizer, Client, Resource)
 - Represents subscription, matching, request protocol steps
 - Shows delegation chains and authorization relationships
 
-**GiFo-RFC-0115 (PoA Definition):**
+**AAP-RFC-0115 (PoA Definition):**
 - Visualizes PoA Definition structure and sections
 - Renders parties, scope, and requirements graph
 - Shows validation flow (structural, capability, jurisdiction)
@@ -321,7 +321,7 @@ open http://localhost:8080/poa-visualization
 
 ## License
 
-Apache 2.0 - Gimel Foundation gGmbH i.G.
+Apache 2.0 - AgentAuth Community gGmbH i.G.
 
 ## Related Documentation
 

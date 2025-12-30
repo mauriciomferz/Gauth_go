@@ -6,7 +6,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/internal/config"
 )
 
-// Metrics defines the minimal instrumentation surface for the basic GAuth token service.
+// Metrics defines the minimal instrumentation surface for the basic AgentAuth token service.
 // We intentionally keep this interface tiny to allow easy adaptation to different telemetry
 // backends (Prometheus, OpenTelemetry, in-memory test collector, etc.) without importing
 // heavy dependencies here.
@@ -25,7 +25,7 @@ func (n noopMetrics) IncTokensIssued()            {}
 func (n noopMetrics) IncTokenValidations()        {}
 func (n noopMetrics) IncTokenValidationFailures() {}
 
-// Config represents the configuration for GAuth
+// Config represents the configuration for AgentAuth
 type Config struct {
 	AuthServerURL     string
 	ClientID          string

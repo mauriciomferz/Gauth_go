@@ -14,7 +14,7 @@ owners: [system]
 
 ## Overview
 
-This document describes the multi-period rate limiting system that extends GAuth's model governance capabilities beyond simple per-minute rate limits. The system supports configurable time windows (minute, hour, day, week, month) with human-readable syntax and backward compatibility.
+This document describes the multi-period rate limiting system that extends AgentAuth's model governance capabilities beyond simple per-minute rate limits. The system supports configurable time windows (minute, hour, day, week, month) with human-readable syntax and backward compatibility.
 
 ## Motivation
 
@@ -520,4 +520,4 @@ redis.SetEx("ratelimit:gpt-4:1h", 3600, state)
 ---
 
 **Last Updated**: November 5, 2025  
-**Maintained By**: GAuth Core Team
+**Maintained By**: AgentAuth Core Team

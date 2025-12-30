@@ -171,4 +171,4 @@ export function jobLogsInit() {
   }
 }
 
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { startManualJobStream, stopManualJobStream, attachLogStream, cancelSampleStream, restoreCachedJob });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { startManualJobStream, stopManualJobStream, attachLogStream, cancelSampleStream, restoreCachedJob });

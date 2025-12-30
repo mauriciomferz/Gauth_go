@@ -10,8 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Start module buttons:', startButtons.length, 'found');
     
     // Test 2: Check if classes are available
-    console.log('GAuthAPIClient available:', typeof window.GAuthAPIClient !== 'undefined' ? '✅ Yes' : '❌ No');
-    console.log('GAuthLearningPath available:', typeof window.GAuthLearningPath !== 'undefined' ? '✅ Yes' : '❌ No');
+    console.log('AgentAuthAPIClient available:', typeof window.AgentAuthAPIClient !== 'undefined' ? '✅ Yes' : '❌ No');
+    console.log('AgentAuthLearningPath available:', typeof window.AgentAuthLearningPath !== 'undefined' ? '✅ Yes' : '❌ No');
     
     // Test 3: Check if learning path is initialized
     console.log('window.learningPath initialized:', typeof window.learningPath !== 'undefined' ? '✅ Yes' : '❌ No');

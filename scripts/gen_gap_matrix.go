@@ -223,7 +223,7 @@ func normalizeStatus(s string) string {
 
 func writeAutoMarkdown(rows []gapRow, caps capabilitiesFile, drift []string) error {
 	var b strings.Builder
-	fmt.Fprintf(&b, "# GAuth RFC Gap Matrix (Generated)\n\n")
+	fmt.Fprintf(&b, "# AgentAuth RFC Gap Matrix (Generated)\n\n")
 	fmt.Fprintf(&b, "> Generated: %s\n\n", time.Now().UTC().Format(time.RFC3339))
 	if len(drift) > 0 {
 		fmt.Fprintf(&b, "**Drift Detected (%d items)**:\n", len(drift))

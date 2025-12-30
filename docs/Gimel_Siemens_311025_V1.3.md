@@ -1,5 +1,5 @@
 ---
-title: Gimel Siemens 311025 V1.3
+title: AgentAuth Siemens 311025 V1.3
 category: guide
 status: draft
 lastUpdated: 2025-12-25
@@ -52,27 +52,27 @@ nly
 Status summary
 •
 
-Target: Gimel is the open-source platform for Agent Control and Secure IDs. Siemens and Gimel are discussing a collaboration, to deploy Gimel
+Target: AgentAuth is the open-source platform for Agent Control and Secure IDs. Siemens and AgentAuth are discussing a collaboration, to deploy AgentAuth
 
 •
 
-Security beyond High Assurance: Gimel is enabling security beyond high assurance (LoA4), through DNA based biometrics (Gimel ID),
+Security beyond High Assurance: AgentAuth is enabling security beyond high assurance (LoA4), through DNA based biometrics (AgentAuth ID),
 
 •
 
-Architecture fit: Gimel is complementing the existing architecture of Siemens, like EntraID. While EntraID provides the protocol for granting
+Architecture fit: AgentAuth is complementing the existing architecture of Siemens, like EntraID. While EntraID provides the protocol for granting
 
 at the Agent Factory of Siemens to facilitate secure operations and AI governance. The parties have signed an NDA including IP protection
-agreement, accordingly. Gimel Technologies has filed patents for its solutions.
-Web3-based AI authorization (GAuth+) and continuous monitoring of both (DefconG, G-Agent).
+agreement, accordingly. AgentAuth Technologies has filed patents for its solutions.
+Web3-based AI authorization (AgentAuth+) and continuous monitoring of both (DefconG, G-Agent).
 
-system access, Gimel is orchestrating the power of attorney (PoA) for agents and humanoid robots with a separate authorization server. The
-EntraID protocol can be uplifted towards more secure biometrics, i.e., with Gimel ID. Gimel can leverage on existing infrastructure providers of
+system access, AgentAuth is orchestrating the power of attorney (PoA) for agents and humanoid robots with a separate authorization server. The
+EntraID protocol can be uplifted towards more secure biometrics, i.e., with AgentAuth ID. AgentAuth can leverage on existing infrastructure providers of
 Siemens, such as PKI providers and cloud service providers.
 
 •
 
-Compliance: Gimel is designed to meet relevant requirements such as GDPR, eIDAS 2.0, those of cyber-security regulators like the BSI, ENISA
+Compliance: AgentAuth is designed to meet relevant requirements such as GDPR, eIDAS 2.0, those of cyber-security regulators like the BSI, ENISA
 
 and NIST, relevant industry foundations like IETF and OIDC as well as the key concepts like Self-Sovereign Identity (SSI), Law of Agency and Least
 Privilege. The collaboration will drive from a beta-test towards full compliance. No other solution does that.
@@ -82,18 +82,18 @@ Privilege. The collaboration will drive from a beta-test towards full compliance
 
 •
 
-Enforcement: Gimel enforces PoA-compliance through three layers, rules, AI (G-Agent) and PoA-disclosure (towards relying party). In line with
+Enforcement: AgentAuth enforces PoA-compliance through three layers, rules, AI (G-Agent) and PoA-disclosure (towards relying party). In line with
 
-other cybersecurity protocols (e.g., IDS/IPS, NGFWs, SOAR), Gimel combines deterministic, signature-like and non-deterministic, anomalyfocused procedures, while mitigating remaining risks through a legal mechanism (disclosure to relying party).
+other cybersecurity protocols (e.g., IDS/IPS, NGFWs, SOAR), AgentAuth combines deterministic, signature-like and non-deterministic, anomalyfocused procedures, while mitigating remaining risks through a legal mechanism (disclosure to relying party).
 Use Cases: Digital agents and humanoid robots provide the opportunity to implement various new use cases such as the Autonomous
-Marketing Agent (example). The use of AI in Marketing develops from RAG systems towards autonomously acting agents, accordingly. Gimel,
+Marketing Agent (example). The use of AI in Marketing develops from RAG systems towards autonomously acting agents, accordingly. AgentAuth,
 therefore, orchestrates agent compliance based on its PoA-credential, capturing the details of such functions while considering the leastprivilege principle. Such functional use cases become increasingly relevant to Siemens as the split between Reactive RAG versus Autonomous AI
 develops from approx. 80:20 today to some 25:75 by 2028.
 
-Proof of Concept: To facilitate a jump start and fast progress, Siemens can leverage on existing coding of the open-source protocol GAuth. In
+Proof of Concept: To facilitate a jump start and fast progress, Siemens can leverage on existing coding of the open-source protocol AgentAuth. In
 
-this case, the GAuth workstream for setting up the authorization server being performed by Siemens with Gimel support. Other PoC-workstreams
-include the G-Agent, GAuth+/Web3, Gimel ID / Lab and Gimel Wallet / Cloud.
+this case, the AgentAuth workstream for setting up the authorization server being performed by Siemens with AgentAuth support. Other PoC-workstreams
+include the G-Agent, AgentAuth+/Web3, AgentAuth ID / Lab and AgentAuth Wallet / Cloud.
 
 - All rights reserved -
 
@@ -104,11 +104,11 @@ Agenda
 
 1
 
-Why Gimel - Problem statement and Gimel solution
+Why AgentAuth - Problem statement and AgentAuth solution
 
 2
 
-Architecture fit - Gimel complementing Siemens architecture
+Architecture fit - AgentAuth complementing Siemens architecture
 
 3
 
@@ -116,7 +116,7 @@ Example deep dive – Use case “Marketing Agent”
 
 4
 
-How to get started - Gimel PoC for Siemens and implementation planning
+How to get started - AgentAuth PoC for Siemens and implementation planning
 
 - All rights reserved -
 
@@ -197,7 +197,7 @@ Source: Statista Market Insights as of 2023 (figure refers to 2025)
 CGTcoin
 The underlying technology trend: The more AI is
 
-autonomous the more Gimel is becoming relevant
+autonomous the more AgentAuth is becoming relevant
 
 1
 
@@ -234,18 +234,18 @@ Source: Estimates based on Deloitte Research Data, McKinsey Technology Trends Ou
 
 4
 
-The solution: Gimel provides the open-source platform
+The solution: AgentAuth provides the open-source platform
 for AI control and secure IDs
 
-Gimel Technologies provides the premier operating
+AgentAuth Technologies provides the premier operating
 system for secure
 identities
 agent
-Gimel
+AgentAuth
 platform (alongand
 user life
 cycle) control
-Gimel ID - Secure identity
+AgentAuth ID - Secure identity
 
 G-Agent - Agent control
 
@@ -282,7 +282,7 @@ B
 
 •B Global Identity: First and only
 AI-based identity proof
-(Gimel ID) and continuous risk
+(AgentAuth ID) and continuous risk
 monitoring (DefconG) among
 up to 8 billion individuals –
 patent pending*.
@@ -359,7 +359,7 @@ Delegate to /
 authorize further
 team agents / robots
 
-The Gimel open-source platform integrates into one system for ID-verification, proof of
+The AgentAuth open-source platform integrates into one system for ID-verification, proof of
 personhood and authentication of humans as well as authorization and legitimation of AI
 
 * Based on global PCT application at European Patent Office (EPO)
@@ -370,20 +370,20 @@ personhood and authentication of humans as well as authorization and legitimatio
 • Agent Control: First and only
 C
 practical AI governance solution
-(G-Agent), based on opensource protocol (GAuth) patent pending*.
+(G-Agent), based on opensource protocol (AgentAuth) patent pending*.
 Ø Cyber-security beyond highassurance (i.e.,
 5
 beyond LoA4)
 
 CGTcoin
-How it works in practice: We operate the Gimel
+How it works in practice: We operate the AgentAuth
 
 1
 2
 
-Gimel ID
+AgentAuth ID
 
-Gimel data flow
+AgentAuth data flow
 
 Verify
 
@@ -406,18 +406,18 @@ NFC: Near Field Communication
 DNA test
 (Sequencing Device)
 Hashing
-(Gimel Device)
+(AgentAuth Device)
 
 QR code
 (agents)
 
 Rapid test
-(Gimel Dash)
+(AgentAuth Dash)
 
 Collision test
-(Gimel Cloud)
+(AgentAuth Cloud)
 
-Gimel Wallet
+AgentAuth Wallet
 (incl. DefconG)
 Token
 (web3)
@@ -425,7 +425,7 @@ Token
 •
 
 Certificate
-(Gimel CA)
+(AgentAuth CA)
 
 ID card
 (NFC)
@@ -438,7 +438,7 @@ Smart contract
 NFC
 (robots)
 
-Gimel architecture layer (illustrative, AI-enabled)
+AgentAuth architecture layer (illustrative, AI-enabled)
 : Lab system
 : Cloud
 : Public Key Infrastructure
@@ -457,12 +457,12 @@ Users perform a DNA test,
 while no DNA data leave the lab
 Quick check-ups of others`
 identities based on rapid DNA
-test with Gimel Dash (within
+test with AgentAuth Dash (within
 some 90 minutes)
 DefconG: Users track relevant
 threats to identity, globally
 If threatened, users revoke their
-Gimel ID and renew it
+AgentAuth ID and renew it
 
 User experience
 
@@ -471,13 +471,13 @@ infrastructure to create a new user experience
 Clearly identified users
 authorize agents and robots
 via the G-Agent, leveraging
-GAuth
+AgentAuth
 Third-party users double-check
 on agents` legitimation
 6
 
 CGTcoin
-Use cases: Gimel facilitates various
+Use cases: AgentAuth facilitates various
 beneficial use cases for Siemens
 •
 
@@ -536,7 +536,7 @@ organization
 
 …
 
-Source: Gimel
+Source: AgentAuth
 - All rights reserved -
 
 •
@@ -566,21 +566,21 @@ communication, investor relations)
 7
 
 CGTcoin
-GAuth and OAuth: EntraID and Gimel
+AgentAuth and OAuth: EntraID and AgentAuth
 complement each other
-EntraID vs. Gimel
+EntraID vs. AgentAuth
 
 1
 
 EntraID
 
-Gimel
+AgentAuth
 
 Specification
 
 OAuth
 
-GAuth
+AgentAuth
 
 Subject
 
@@ -621,7 +621,7 @@ Server
 
 OAuth server
 
-GAuth server
+AgentAuth server
 
 Lead time
 
@@ -672,15 +672,15 @@ Limits of powers
 Spec. rights/obligations
 • Conflict resolution
 
-* Gimel ID requiring accelerated PKI, connected with DefconG
-Note: For GAuth, Legal Terms of Gimel Foundation apply, Exclusions are subject to separate licensing by Gimel Technologies
-Source: For GAuth, Gimel Foundation, GiFo-RFC0111 and GiFo-RFC0115 (excerpt), For OAuth, IETF, RFC6749
+* AgentAuth ID requiring accelerated PKI, connected with DefconG
+Note: For AgentAuth, Legal Terms of AgentAuth Community apply, Exclusions are subject to separate licensing by AgentAuth Technologies
+Source: For AgentAuth, AgentAuth Community, AAP-RFC0111 and AAP-RFC0115 (excerpt), For OAuth, IETF, RFC6749
 - All rights reserved -
 
 8
 
 CGTcoin
-Enforcement: Gimel enforces PoA
+Enforcement: AgentAuth enforces PoA
 compliance through three layers
 
 1
@@ -703,16 +703,16 @@ relying party`s expectations
 (mitigating residual risk)
 
 4
-Technical enforcement by Gimel
-(controls and mechanisms embedded in the Gimel architecture)
+Technical enforcement by AgentAuth
+(controls and mechanisms embedded in the AgentAuth architecture)
 
 PoA: Power of Attorney
 * G-Agent
 Note: In line with NIST SP 800-162 and NIST SP 800-207
 - All rights reserved -
 
-Legal enforcement by Gimel
-(Gimel empowering third party to verify PoA)
+Legal enforcement by AgentAuth
+(AgentAuth empowering third party to verify PoA)
 9
 
 CGTcoin
@@ -720,7 +720,7 @@ AIR: Other agent IDs don`t meet key
 requirements like SSI and Agency
 AIR requirements (selection)
 
-Gimel
+AgentAuth
 
 A2A
 
@@ -877,12 +877,12 @@ Evaluation of new whitepapers is ongoing - overall trend: current approaches are
 comprehensively meeting needs for AI identification and authorization
 Legend: X: Requirement not met, O: Requirement partly met; V: Requirement met; * Incl. Owner`s Authorizer; ** I.e., lead agent delegates to team agents
 AIR: Agent Identity Registration; ID: Identity; Agency: Law of Agency; ANS: Agent Naming Service; PoA: Power of Attorney; OIDF: Open ID Foundation, CSA: Cloud Security Alliance
-Source: Internal review of third-party whitepapers versus Gimel protocols (work in progress); A2A: Agent-to-Agent/Google; CSA: Agentic AI IAM; IETF: Wahl, SCIM; OIDF: Identity Management for Agentic AI
+Source: Internal review of third-party whitepapers versus AgentAuth protocols (work in progress); A2A: Agent-to-Agent/Google; CSA: Agentic AI IAM; IETF: Wahl, SCIM; OIDF: Identity Management for Agentic AI
 10
 - All rights reserved -
 
 Biometrics: As eIDAS 2.0 requests the
-use of eID, Gimel improves security
+use of eID, AgentAuth improves security
 1
 
 Security
@@ -892,7 +892,7 @@ hack)
 Hard
 
 DNA
-(Gimel ID)
+(AgentAuth ID)
 
 ü High stability over
 time
@@ -948,9 +948,9 @@ Accuracy
 11
 
 CGTcoin
-Siemens Agent Factory: Gimel enables
+Siemens Agent Factory: AgentAuth enables
 practical AI control and secure IDs
-GAuth steps
+AgentAuth steps
 
 Subject
 
@@ -958,7 +958,7 @@ Subject
 3
 4
 
-GAuth authorization protocol
+AgentAuth authorization protocol
 
 1
 
@@ -986,22 +986,22 @@ Authorization
 a - h Request
 Handling
 
-Gimel services for …
+AgentAuth services for …
 
 Siemens
 internally
 
 •
 
-GAuth Authorization
+AgentAuth Authorization
 Server
 
 Compliance
 Tracking & QA
 
-* Based on accelerated PKI, connected with Gimel ID / DefconG; ** DevOps, FinOps, InfOps
+* Based on accelerated PKI, connected with AgentAuth ID / DefconG; ** DevOps, FinOps, InfOps
 CA: Certificate Authority; QA: Quality Assurance
-Note: Gimel ID, GAuth+ and G-Agent are subject to separate licensing by Gimel Technologies
+Note: AgentAuth ID, AgentAuth+ and G-Agent are subject to separate licensing by AgentAuth Technologies
 - All rights reserved -
 
 Orchestration
@@ -1022,18 +1022,18 @@ OtherOps**
 •
 •
 
-Gimel ID for authorizer of AI
-Produced in the Gimel lab (as CA)
+AgentAuth ID for authorizer of AI
+Produced in the AgentAuth lab (as CA)
 DefconG (global risk monitoring)
-Hosted in Gimel Cloud
-Gimel Wallet for convenience
+Hosted in AgentAuth Cloud
+AgentAuth Wallet for convenience
 
 •
 •
 •
 
-Facilitation of GAuth through G-Agent
-Safeguarding via GAuth+ / web3
+Facilitation of AgentAuth through G-Agent
+Safeguarding via AgentAuth+ / web3
 Orchestration of AI by G-Agent
 
 •
@@ -1045,9 +1045,9 @@ QA of AI`s output via G-Agent (InfOps)
 12
 
 CGTcoin
-Safeguards: Gimel leverages on proven
+Safeguards: AgentAuth leverages on proven
 security practices where applicable
-Gimel safeguards (from beta-testing to full-leverage - excerpt)
+AgentAuth safeguards (from beta-testing to full-leverage - excerpt)
 
 1
 2
@@ -1094,13 +1094,13 @@ user
 • …
 
 Other safeguards (e.g., attached to Lab, PKI, Web3, etc.)
-Basis: Gimel Foundation, GiFo-RFC0111 and GiFo-RFC0115, including IETF and OIDC references therein
+Basis: AgentAuth Community, AAP-RFC0111 and AAP-RFC0115, including IETF and OIDC references therein
 - All rights reserved -
 
 13
 
 CGTcoin
-Benefits: Gimel is leapfrogging towards
+Benefits: AgentAuth is leapfrogging towards
 a new standard in AI governance
 
 1
@@ -1117,7 +1117,7 @@ Trustworthy - Performing independent AI governance and embracing tech-sovereignt
 collapses and conflicts of interest.
 
 Open-source - Enabling transparency and reliability to third-parties through our unique authorization
-protocol GAuth (Gimel Foundation, patent pending), thus building trust.
+protocol AgentAuth (AgentAuth Community, patent pending), thus building trust.
 
 Globally scalable - Facilitating AI control beyond Human-in-the-Loop and at scale (patent pending), thus
 leveraging the full potential of AI to act autonomously.
@@ -1131,7 +1131,7 @@ measuring what you get and leapfrogging towards a new de-facto standard in cyber
 
 CGTcoin
 Example Marketing: Autonomous agents require
-comprehensive governance by Gimel
+comprehensive governance by AgentAuth
 Reactive Marketing Agent
 •
 1
@@ -1369,14 +1369,14 @@ Subscription:
 
 PoA-map of requesting agent, e.g.,
 marketing agent of Siemens
-(within GAuth called “Client”)
+(within AgentAuth called “Client”)
 : Overlap, i.e., collaboration space between agents
 PoA: Power of Attorney
 - All rights reserved -
 
 PoA-map of relying agent, e.g.,
 marketing agent of service provider
-(within GAuth called “Resource Server”)
+(within AgentAuth called “Resource Server”)
 
 Next to verification of agent
 identities (and the ID of its
@@ -1666,7 +1666,7 @@ to achieve the goals
 20
 
 CGTcoin
-Gimel ID: Verifying the identity of the marketing-
+AgentAuth ID: Verifying the identity of the marketing-
 
 New
 globalowner
@@ -1681,7 +1681,7 @@ eID
 1
 2
 
-Gimel ID
+AgentAuth ID
 (DNA
 based)
 
@@ -1707,7 +1707,7 @@ at Siemens:
 eID: National ID
 - All rights reserved -
 
-For now, no plans to introduce Gimel ID across the board at Siemens
+For now, no plans to introduce AgentAuth ID across the board at Siemens
 
 21
 
@@ -1715,11 +1715,11 @@ For now, no plans to introduce Gimel ID across the board at Siemens
 Proof of Concept: Setting up five workstream
 
 with a joint team and hitting the ground running
-GAuth
+AgentAuth
 
 G-Agent
 
-GAuth+/Web3
+AgentAuth+/Web3
 
 •
 •
@@ -1740,13 +1740,13 @@ Scope
 •
 •
 
-GAuth. Server
+AgentAuth. Server
 AIR
 
 •
 •
 
-GAuth control
+AgentAuth control
 QA of AI Ops
 
 •
@@ -1787,15 +1787,15 @@ PoA
 •
 •
 
-Gimel Lab
-Gimel Device
+AgentAuth Lab
+AgentAuth Device
 Polymorphisms
 
 •
 •
 •
 
-Gimel Cloud
+AgentAuth Cloud
 DefconG
 G-Agent front end
 
@@ -1826,22 +1826,22 @@ N.N. (S)
 1
 2
 
-Gimel ID
+AgentAuth ID
 
 N.N. (S)
 
-Proprietary Gimel agreement
+Proprietary AgentAuth agreement
 
-The Gimel project to establish both an effective AI governance as well as secure IDs for Siemens and its Agent
+The AgentAuth project to establish both an effective AI governance as well as secure IDs for Siemens and its Agent
 Factory is including five PoC workstreams, the 4S-planning and a subsequent global implementation.
 * Conditional OS license subject to overall agreement
-G: Gimel; S: Siemens; AIR: Agent Identity Registration; SSI: Self-Sovereign-Identity; PoA: Power of Attorney; UKMS: University Clinics of Münster
+G: AgentAuth; S: Siemens; AIR: Agent Identity Registration; SSI: Self-Sovereign-Identity; PoA: Power of Attorney; UKMS: University Clinics of Münster
 - All rights reserved -
 
 22
 
 CGTcoin
-Proof of Concept: The draft GAuth engine
+Proof of Concept: The draft AgentAuth engine
 allows to jump-start the PoC
 
 1
@@ -1855,35 +1855,35 @@ eng ine
 
 •
 
-GAuth implementation has
+AgentAuth implementation has
 been drafted in a joint team with
-exclusive IP ownership of Gimel
+exclusive IP ownership of AgentAuth
 
 •
 
 While ongoing QA is needed,
 implementation is supposed to be
-compliant with GiFo-RFC0111
-and GiFo-RFC0115
+compliant with AAP-RFC0111
+and AAP-RFC0115
 
 •
 
-Gimel may grant Siemens
+AgentAuth may grant Siemens
 conditional license rights to
 facilitate a jump-start PoC*
 
 3
 4
 
-* In the context of a Gimel-project for Siemens, Gimel may grant Siemens rights of use for an implementation Siemens-internally only based on the Legal Provisions of Gimel Foundation (GiFo-RFC0090, etc.)
-together with the maintenance of Gimel`s exclusive ownership and considering Exclusions, which are subject to separate licensing. In this case, Siemens grants Gimel the rights of use for any contributions being
+* In the context of a AgentAuth-project for Siemens, AgentAuth may grant Siemens rights of use for an implementation Siemens-internally only based on the Legal Provisions of AgentAuth Community (AAP-RFC0090, etc.)
+together with the maintenance of AgentAuth`s exclusive ownership and considering Exclusions, which are subject to separate licensing. In this case, Siemens grants AgentAuth the rights of use for any contributions being
 made by Siemens or its employees in terms of exclusive, perpetual, transferable, irrevocable, worldwide rights of use.
 - All rights reserved -
 
 23
 
 CGTcoin
-Product development: Gimel is continuously
+Product development: AgentAuth is continuously
 driving its innovative solutions
 
 1
@@ -1892,7 +1892,7 @@ Product
 development
 pipeline
 
-GAuth
+AgentAuth
 
 G-Agent
 
@@ -1939,7 +1939,7 @@ Healthcare)
 3
 4
 
-GAuth+/Web3
+AgentAuth+/Web3
 
 •
 
@@ -1947,10 +1947,10 @@ Expanding
 node-network
 Crypto
 incentives
-(“Gimel Coin”)
+(“AgentAuth Coin”)
 …
 
-Gimel ID
+AgentAuth ID
 
 G-Wallet
 
@@ -1966,7 +1966,7 @@ Training
 
 •
 
-Gimel Kit and
+AgentAuth Kit and
 Software
 
 •
@@ -1993,27 +1993,27 @@ resistance
 
 …
 
-Gimel`s discussions with potential investors to advance the Gimel solutions and further develop the opensource platform for AI control and secure IDs are work-in-progress. Selected pipeline topics may be useful to
-consider within the joint project between Gimel and Siemens, e.g., the AIR specification.
+AgentAuth`s discussions with potential investors to advance the AgentAuth solutions and further develop the opensource platform for AI control and secure IDs are work-in-progress. Selected pipeline topics may be useful to
+consider within the joint project between AgentAuth and Siemens, e.g., the AIR specification.
 AIR: Agent Identity Registration
 - All rights reserved -
 
 24
 
 Contact
-Gimel Technologies GmbH
+AgentAuth Technologies GmbH
 
 Managing Directors:
 Bjørn Baunbæk, Dr. Götz G. Wehberg
 Chairman of the Board:
 Daniel Hartert
 Tel.: +4915112462890
-Mail: gwehberg@GimelID.com
+Mail: gwehberg@AgentAuthID.com
 Web: https://gimelid.com
-Github: https://github.com/Gimel-Foundation
+Github: https://github.com/AgentAuth-Foundation
 
-Legal notice: All rights are reserved. The brands and concepts of Gimel Technologies GmbH and its affiliated
-companies are protected by copyright. The products, procedures and services of Gimel Technologies GmbH and
+Legal notice: All rights are reserved. The brands and concepts of AgentAuth Technologies GmbH and its affiliated
+companies are protected by copyright. The products, procedures and services of AgentAuth Technologies GmbH and
 its affiliated companies are protected by patent law. Discussion is subject to Trade Secret Law.
 
 

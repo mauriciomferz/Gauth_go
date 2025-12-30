@@ -1,4 +1,4 @@
-# GAuth+ Security Documentation
+# AgentAuth+ Security Documentation
 
 Security best practices, vulnerability status, and incident response guide.
 

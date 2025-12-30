@@ -1,5 +1,5 @@
 // Legal Framework Integration Example
-// Demonstrates GAuth integration for legal and regulatory compliance in financial services.
+// Demonstrates AgentAuth integration for legal and regulatory compliance in financial services.
 // Shows type-safe structures for PoA requests, compliance, and legal requirements.
 
 package main
@@ -31,7 +31,7 @@ func main() {
 
 	// Test authorization with legal framework compliance
 	fmt.Println("\n2. Testing Authorization with Legal Framework...")
-	// Skipping authorization test, as AuthorizeGAuth is not defined in pkg/auth/auth.go
+	// Skipping authorization test, as AuthorizeAgentAuth is not defined in pkg/auth/auth.go
 
 	// Create a PoA definition with comprehensive legal framework
 	fmt.Println("\n3. Creating Comprehensive PoA Definition...")

@@ -1,6 +1,6 @@
-// Copyright (c) 2025 GAuth. All rights reserved.
+// Copyright (c) 2025 AgentAuth. All rights reserved.
 
-// Package load provides comprehensive load and stress testing for GAuth core operations.
+// Package load provides comprehensive load and stress testing for AgentAuth core operations.
 //
 // P3.1 (sec9.item3): Load/stress benchmarks for production readiness.
 package load

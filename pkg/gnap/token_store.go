@@ -36,7 +36,7 @@ type IssuedToken struct {
 	RevokedAt   time.Time     `json:"revoked_at,omitempty"`
 	Flags       []TokenFlag   `json:"flags,omitempty"`
 
-	// GAuth extensions
+	// AgentAuth extensions
 	PoAID string `json:"poa_id,omitempty"`
 }
 

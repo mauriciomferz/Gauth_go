@@ -6,15 +6,15 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth+ Integration with Authorization Chain
+# AgentAuth+ Integration with Authorization Chain
 
 ## Overview
 
-This document describes how GAuth+ features (successor management, AI-to-AI delegation, dual control approvals, capability assessment, and fiduciary duty tracking) are integrated into the RFC-0111 authorization chain validation process.
+This document describes how AgentAuth+ features (successor management, AI-to-AI delegation, dual control approvals, capability assessment, and fiduciary duty tracking) are integrated into the RFC-0111 authorization chain validation process.
 
 ## Architecture
 
-The GAuth+ integration adds an additional layer of policy enforcement on top of the existing RFC-0111 authorization chain validation. When enabled, GAuth+ policies are checked during:
+The AgentAuth+ integration adds an additional layer of policy enforcement on top of the existing RFC-0111 authorization chain validation. When enabled, AgentAuth+ policies are checked during:
 
 1. **Request Compliance Validation** (`ComplianceValidator.ValidateRequestCompliance`)
 2. **Grant Compliance Validation** (`ComplianceValidator.ValidateGrantCompliance`)
@@ -22,9 +22,9 @@ The GAuth+ integration adds an additional layer of policy enforcement on top of 
 
 ### Key Components
 
-#### 1. GAuthPlusValidator (`pkg/gauth/gauthplus_integration.go`)
+#### 1. AgentAuthPlusValidator (`pkg/gauth/gauthplus_integration.go`)
 
-Central integration point that coordinates validation across all GAuth+ services:
+Central integration point that coordinates validation across all AgentAuth+ services:
 
 - **PostgreSQLSuccessorService**: Checks for active successor AI takeovers
 - **PostgreSQLDelegationService**: Validates AI-to-AI delegation chains
@@ -34,13 +34,13 @@ Central integration point that coordinates validation across all GAuth+ services
 
 **Main Method**:
 ```go
-func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
+func (v *AgentAuthPlusValidator) ValidatePoAWithAgentAuthPlus(
     ctx context.Context,
     poaID string,
     poaDef *poa.PoADefinition,
     agentID string,
     actionType string,
-) (*GAuthPlusValidationResult, error)
+) (*AgentAuthPlusValidationResult, error)
 ```
 
 **Validation Flow**:
@@ -56,25 +56,25 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 ```go
 type ComplianceValidator struct {
     chainValidator     *AuthorizationChainValidator
-    gauthPlusValidator *GAuthPlusValidator  // NEW
+    gauthPlusValidator *AgentAuthPlusValidator  // NEW
     pipClient          PIPClient
     pdpClient          PDPClient
     strictMode         bool
-    enforceGAuthPlus   bool                 // NEW
+    enforceAgentAuthPlus   bool                 // NEW
 }
 ```
 
 **Setup Methods**:
 ```go
-// Enable GAuth+ enforcement
-validator.SetGAuthPlusValidator(gauthPlusValidator)
-validator.SetEnforceGAuthPlus(true)
+// Enable AgentAuth+ enforcement
+validator.SetAgentAuthPlusValidator(gauthPlusValidator)
+validator.SetEnforceAgentAuthPlus(true)
 ```
 
 **Integration Points**:
-- `ValidateRequestCompliance`: Step 4a calls `validatePoAWithGAuthPlus`
-- `ValidateGrantCompliance`: Step 5a calls `validatePoAWithGAuthPlus`
-- Results include `GAuthPlusValidation *GAuthPlusValidationResult`
+- `ValidateRequestCompliance`: Step 4a calls `validatePoAWithAgentAuthPlus`
+- `ValidateGrantCompliance`: Step 5a calls `validatePoAWithAgentAuthPlus`
+- Results include `AgentAuthPlusValidation *AgentAuthPlusValidationResult`
 
 #### 3. SimplePDP Extensions
 
@@ -82,20 +82,20 @@ validator.SetEnforceGAuthPlus(true)
 ```go
 type SimplePDP struct {
     pap                *PowerAdministrationPoint
-    gauthPlusValidator *GAuthPlusValidator  // NEW
-    enforceGAuthPlus   bool                 // NEW
+    gauthPlusValidator *AgentAuthPlusValidator  // NEW
+    enforceAgentAuthPlus   bool                 // NEW
 }
 ```
 
 **Setup Methods**:
 ```go
-// Enable GAuth+ in PDP
-pdp.SetGAuthPlusValidator(gauthPlusValidator)
-pdp.SetEnforceGAuthPlus(true)
+// Enable AgentAuth+ in PDP
+pdp.SetAgentAuthPlusValidator(gauthPlusValidator)
+pdp.SetEnforceAgentAuthPlus(true)
 ```
 
 **Integration Point**:
-- `evaluateRequest`: Step 3 validates GAuth+ policies before checking action authorization
+- `evaluateRequest`: Step 3 validates AgentAuth+ policies before checking action authorization
 
 ## Configuration
 
@@ -104,19 +104,19 @@ pdp.SetEnforceGAuthPlus(true)
 ```go
 import (
     "database/sql"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauthplus"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauthplus"
 )
 
-// Initialize GAuth+ services
+// Initialize AgentAuth+ services
 successorService := gauthplus.NewPostgreSQLSuccessorService(db)
 delegationService := gauthplus.NewPostgreSQLDelegationService(db)
 dualControlService := gauthplus.NewPostgreSQLDualControlService(db)
 fiduciaryService := gauthplus.NewPostgreSQLFiduciaryDutyService(db)
 capabilityService := gauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 
-// Create GAuth+ validator
-gauthPlusValidator := gauth.NewGAuthPlusValidator(
+// Create AgentAuth+ validator
+gauthPlusValidator := gauth.NewAgentAuthPlusValidator(
     successorService,
     delegationService,
     dualControlService,
@@ -130,43 +130,43 @@ gauthPlusValidator.SetEnforceDualControl(true)    // Enforce dual control approv
 gauthPlusValidator.SetEnforceFiduciary(true)      // Block on critical violations
 
 // Integrate with ComplianceValidator
-complianceValidator.SetGAuthPlusValidator(gauthPlusValidator)
-complianceValidator.SetEnforceGAuthPlus(true)
+complianceValidator.SetAgentAuthPlusValidator(gauthPlusValidator)
+complianceValidator.SetEnforceAgentAuthPlus(true)
 
 // Integrate with PDP
-pdp.SetGAuthPlusValidator(gauthPlusValidator)
-pdp.SetEnforceGAuthPlus(true)
+pdp.SetAgentAuthPlusValidator(gauthPlusValidator)
+pdp.SetEnforceAgentAuthPlus(true)
 ```
 
 ### Enforcement Modes
 
 **1. Fully Permissive (Default)**
 ```go
-validator.SetEnforceGAuthPlus(false)
-// GAuth+ checks are skipped entirely
+validator.SetEnforceAgentAuthPlus(false)
+// AgentAuth+ checks are skipped entirely
 ```
 
 **2. Advisory Mode**
 ```go
-validator.SetEnforceGAuthPlus(true)
+validator.SetEnforceAgentAuthPlus(true)
 validator.SetEnforceCapabilities(false)
 validator.SetEnforceDualControl(false)
 validator.SetEnforceFiduciary(false)
-// GAuth+ checks run but only produce warnings, don't block authorization
+// AgentAuth+ checks run but only produce warnings, don't block authorization
 ```
 
 **3. Strict Mode**
 ```go
-validator.SetEnforceGAuthPlus(true)
+validator.SetEnforceAgentAuthPlus(true)
 validator.SetEnforceCapabilities(true)
 validator.SetEnforceDualControl(true)
 validator.SetEnforceFiduciary(true)
-// All GAuth+ policy violations block authorization
+// All AgentAuth+ policy violations block authorization
 ```
 
 **4. Custom Mode**
 ```go
-validator.SetEnforceGAuthPlus(true)
+validator.SetEnforceAgentAuthPlus(true)
 validator.SetEnforceCapabilities(true)   // Block on capability issues
 validator.SetEnforceDualControl(false)   // Don't enforce dual control
 validator.SetEnforceFiduciary(true)      // Block on fiduciary violations
@@ -319,7 +319,7 @@ type FiduciaryCheckResult struct {
 ## Result Structure
 
 ```go
-type GAuthPlusValidationResult struct {
+type AgentAuthPlusValidationResult struct {
     Valid            bool
     SuccessorCheck   *SuccessorCheckResult
     DelegationCheck  *DelegationCheckResult
@@ -332,12 +332,12 @@ type GAuthPlusValidationResult struct {
 ```
 
 This result is embedded in:
-- `RequestComplianceResult.GAuthPlusValidation`
-- `GrantComplianceResult.GAuthPlusValidation`
+- `RequestComplianceResult.AgentAuthPlusValidation`
+- `GrantComplianceResult.AgentAuthPlusValidation`
 
 ## Usage Examples
 
-### Example 1: Request Validation with GAuth+ Enforcement
+### Example 1: Request Validation with AgentAuth+ Enforcement
 
 ```go
 request := &gauth.ExtendedAuthorizationRequest{
@@ -345,7 +345,7 @@ request := &gauth.ExtendedAuthorizationRequest{
     PowerOfAttorney:      poaDefinition,
     AuthorizationChain:   authChain,
     RequestedActions:     []string{"transfer"},
-    // Note: Include PoA ID in future for GAuth+ to work properly
+    // Note: Include PoA ID in future for AgentAuth+ to work properly
 }
 
 result, err := complianceValidator.ValidateRequestCompliance(ctx, request)
@@ -357,9 +357,9 @@ if err != nil {
 if !result.Valid {
     log.Printf("Validation failed: %s", result.FailureReason)
     
-    // Check GAuth+ specific failures
-    if result.GAuthPlusValidation != nil {
-        gauthPlus := result.GAuthPlusValidation
+    // Check AgentAuth+ specific failures
+    if result.AgentAuthPlusValidation != nil {
+        gauthPlus := result.AgentAuthPlusValidation
         
         if gauthPlus.SuccessorCheck.SuccessorActive {
             log.Printf("Successor active: %s", gauthPlus.SuccessorCheck.EffectiveAgentID)
@@ -389,7 +389,7 @@ if !result.Valid {
 log.Printf("Validation passed with %d warnings", len(result.Warnings))
 ```
 
-### Example 2: PDP Decision with GAuth+ Policies
+### Example 2: PDP Decision with AgentAuth+ Policies
 
 ```go
 decisionRequest := &gauth.AuthorizationDecisionRequest{
@@ -405,10 +405,10 @@ if err != nil {
 }
 
 if !decision.Authorized {
-    // Reason will include GAuth+ policy violations:
-    // - "GAuth+ policy violation: delegation depth 5 exceeds maximum 3"
-    // - "GAuth+ policy violation: agent has 2 critical unresolved fiduciary violations"
-    // - "GAuth+ policy violation: agent agent-001 does not meet capability requirements"
+    // Reason will include AgentAuth+ policy violations:
+    // - "AgentAuth+ policy violation: delegation depth 5 exceeds maximum 3"
+    // - "AgentAuth+ policy violation: agent has 2 critical unresolved fiduciary violations"
+    // - "AgentAuth+ policy violation: agent agent-001 does not meet capability requirements"
     log.Printf("Decision denied: %s", decision.Reason)
     return fmt.Errorf("authorization denied")
 }
@@ -418,9 +418,9 @@ log.Printf("Decision authorized: %s", decision.Reason)
 
 ## Database Dependencies
 
-GAuth+ integration requires the following database migrations:
+AgentAuth+ integration requires the following database migrations:
 
-**Migration 009**: GAuth+ Enhancement Tables
+**Migration 009**: AgentAuth+ Enhancement Tables
 - `successor_activations`
 - `ai_delegations`
 - `dual_control_approvals`
@@ -503,7 +503,7 @@ Integration tests should cover:
 
 ## Performance Considerations
 
-Each GAuth+ validation adds database queries:
+Each AgentAuth+ validation adds database queries:
 - Successor check: 1 query
 - Delegation chain: 1 recursive query
 - Dual control: 1 query (if implemented)
@@ -516,11 +516,11 @@ Each GAuth+ validation adds database queries:
 1. **Caching**: Cache capability assessments and delegation chains
 2. **Batch validation**: Validate multiple requests in single transaction
 3. **Lazy evaluation**: Only check policies relevant to action type
-4. **Read replicas**: Route GAuth+ queries to read replicas
+4. **Read replicas**: Route AgentAuth+ queries to read replicas
 
 ## Migration Path
 
-For existing deployments without GAuth+ tables:
+For existing deployments without AgentAuth+ tables:
 
 **Phase 1: Deploy Schema**
 ```bash
@@ -530,15 +530,15 @@ psql -U postgres -d gauth < database/migrations/010_fix_capability_assessments_s
 
 **Phase 2: Deploy Code (Disabled)**
 ```go
-// GAuth+ enforcement disabled by default
+// AgentAuth+ enforcement disabled by default
 complianceValidator := gauth.NewComplianceValidator(chainValidator, pipClient, pdpClient)
-// enforceGAuthPlus defaults to false
+// enforceAgentAuthPlus defaults to false
 ```
 
 **Phase 3: Enable Advisory Mode**
 ```go
-complianceValidator.SetGAuthPlusValidator(gauthPlusValidator)
-complianceValidator.SetEnforceGAuthPlus(true)
+complianceValidator.SetAgentAuthPlusValidator(gauthPlusValidator)
+complianceValidator.SetEnforceAgentAuthPlus(true)
 // But disable blocking
 gauthPlusValidator.SetEnforceCapabilities(false)
 gauthPlusValidator.SetEnforceDualControl(false)
@@ -556,7 +556,7 @@ gauthPlusValidator.SetEnforceFiduciary(true)
 
 ## Compliance Mapping
 
-GAuth+ features map to regulatory requirements:
+AgentAuth+ features map to regulatory requirements:
 
 | Feature | Regulatory Requirement |
 |---------|----------------------|
@@ -568,31 +568,31 @@ GAuth+ features map to regulatory requirements:
 
 ## Future Enhancements
 
-1. **Dynamic Policy Loading**: Load GAuth+ policies from PAP instead of database
-2. **Policy Conflict Resolution**: Handle conflicts between PoA and GAuth+ policies
-3. **Audit Trail**: Enhanced logging of all GAuth+ policy decisions
-4. **Real-time Monitoring**: Dashboard for GAuth+ policy violations
+1. **Dynamic Policy Loading**: Load AgentAuth+ policies from PAP instead of database
+2. **Policy Conflict Resolution**: Handle conflicts between PoA and AgentAuth+ policies
+3. **Audit Trail**: Enhanced logging of all AgentAuth+ policy decisions
+4. **Real-time Monitoring**: Dashboard for AgentAuth+ policy violations
 5. **Machine Learning**: Anomaly detection in delegation patterns
-6. **Multi-tenant Isolation**: Separate GAuth+ policies per organization
+6. **Multi-tenant Isolation**: Separate AgentAuth+ policies per organization
 7. **API Rate Limiting**: Prevent policy check abuse
 8. **Webhook Notifications**: Alert on critical violations
 9. **Policy Simulation**: Test policy changes before deployment
-10. **Compliance Reports**: Automated GAuth+ compliance reporting
+10. **Compliance Reports**: Automated AgentAuth+ compliance reporting
 
 ## Support
 
-For questions or issues with GAuth+ integration:
-1. Check logs for GAuth+ warnings and errors
+For questions or issues with AgentAuth+ integration:
+1. Check logs for AgentAuth+ warnings and errors
 2. Verify database migrations applied correctly
-3. Confirm GAuth+ services initialized properly
+3. Confirm AgentAuth+ services initialized properly
 4. Review enforcement mode configuration
 5. Test with advisory mode first before strict enforcement
 
 ## References
 
-- [RFC-0111: GAuth Authorization Framework](../docs/RFC_IMPLEMENTATION_COVERAGE.md)
-- [GAuth+ Phase 1 Completion](../GAUTH_PLUS_PHASE1_COMPLETION.md)
-- [GAuth+ Phase 2 Completion](../GAUTH_PLUS_PHASE2_COMPLETION.md)
-- [GAuth+ Integration Test Report](../GAUTH_PLUS_INTEGRATION_TEST_REPORT.md)
+- [RFC-0111: AgentAuth Authorization Framework](../docs/RFC_IMPLEMENTATION_COVERAGE.md)
+- [AgentAuth+ Phase 1 Completion](../GAUTH_PLUS_PHASE1_COMPLETION.md)
+- [AgentAuth+ Phase 2 Completion](../GAUTH_PLUS_PHASE2_COMPLETION.md)
+- [AgentAuth+ Integration Test Report](../GAUTH_PLUS_INTEGRATION_TEST_REPORT.md)
 - [Database Migration 009](../database/migrations/009_gauthplus_enhancements.sql)
 - [Database Migration 010](../database/migrations/010_fix_capability_assessments_schema.sql)

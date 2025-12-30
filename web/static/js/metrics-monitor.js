@@ -1,5 +1,5 @@
-// GAuth Metrics & Monitoring - Real-time metrics visualization and monitoring
-class GAuthMetricsMonitor {
+// AgentAuth Metrics & Monitoring - Real-time metrics visualization and monitoring
+class AgentAuthMetricsMonitor {
     constructor(apiClient) {
         this.api = apiClient;
         this.updateIntervals = new Map();
@@ -681,12 +681,12 @@ class GAuthMetricsMonitor {
 
 // Initialize metrics monitor when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    if (window.GAuthAPI) {
-        window.gAuthMetrics = new GAuthMetricsMonitor(window.GAuthAPI);
-        console.log('GAuth Metrics Monitor initialized');
+    if (window.AgentAuthAPI) {
+        window.gAuthMetrics = new AgentAuthMetricsMonitor(window.AgentAuthAPI);
+        console.log('AgentAuth Metrics Monitor initialized');
     } else {
-        console.error('GAuth API Client not available for metrics');
+        console.error('AgentAuth API Client not available for metrics');
     }
 });
 
-console.log('GAuth Metrics Monitor loaded');
+console.log('AgentAuth Metrics Monitor loaded');

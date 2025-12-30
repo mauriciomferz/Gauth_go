@@ -1,5 +1,5 @@
-// GAuth API Client - Comprehensive REST API client for GAuth beta server
-class GAuthAPIClient {
+// AgentAuth API Client - Comprehensive REST API client for AgentAuth beta server
+class AgentAuthAPIClient {
     constructor(baseURL = '') {
         this.baseURL = baseURL;
         this.cache = new Map();
@@ -392,6 +392,6 @@ class GAuthAPIClient {
 }
 
 // Create and export global API client instance
-window.GAuthAPI = new GAuthAPIClient();
+window.AgentAuthAPI = new AgentAuthAPIClient();
 
-console.log('GAuth API Client initialized');
+console.log('AgentAuth API Client initialized');

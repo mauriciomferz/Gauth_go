@@ -12,7 +12,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/authz"
 )
 
-// embeddingTestService constructs a fresh RFC0111 service for embedding tests
+// embeddingTestService constructs a fresh AAP001 service for embedding tests
 func embeddingTestService() *Service {
 	memAuthz := authz.NewMemoryAuthorizer()
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-all-alice", Subject: "alice", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow})

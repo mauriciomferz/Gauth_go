@@ -6,7 +6,7 @@ import (
 
 // Config aggregates all application configuration
 type Config struct {
-	// Core GAuth Settings
+	// Core AgentAuth Settings
 	TokenSigMode      string
 	JTITTLSeconds     int
 	KeyRotationHours  int
@@ -19,7 +19,7 @@ type Config struct {
 	// Sub-configurations
 	Cascade CascadeConfig
 	JWE     *JWEConfig
-	RFC0111 *RFC0111Config
+	AAP001 *AAP001Config
 }
 
 // JWEConfig holds JWE encryption configuration
@@ -33,8 +33,8 @@ type JWEConfig struct {
 	KeyRotationDays int
 }
 
-// RFC0111Config holds RFC-0111 compliance configuration
-type RFC0111Config struct {
+// AAP001Config holds RFC-0111 compliance configuration
+type AAP001Config struct {
 	Enabled  bool
 	UseMocks bool
 }
@@ -52,7 +52,7 @@ func Load() (*Config, error) {
 		StrictJSONParsing: parseBoolEnv("GAUTH_STRICT_JSON_PARSING"),
 		Cascade:           LoadCascadeConfigFromEnv(),
 		JWE:               loadJWEConfig(),
-		RFC0111:           loadRFC0111Config(),
+		AAP001:           loadAAP001Config(),
 	}
 
 	return cfg, nil
@@ -79,12 +79,12 @@ func loadJWEConfig() *JWEConfig {
 	return cfg
 }
 
-func loadRFC0111Config() *RFC0111Config {
-	cfg := &RFC0111Config{
-		Enabled:  os.Getenv("GAUTH_RFC0111_ENABLED") == "1",
+func loadAAP001Config() *AAP001Config {
+	cfg := &AAP001Config{
+		Enabled:  os.Getenv("GAUTH_AAP001_ENABLED") == "1",
 		UseMocks: true,
 	}
-	if val := os.Getenv("GAUTH_RFC0111_USE_MOCKS"); val == "0" {
+	if val := os.Getenv("GAUTH_AAP001_USE_MOCKS"); val == "0" {
 		cfg.UseMocks = false
 	}
 	return cfg

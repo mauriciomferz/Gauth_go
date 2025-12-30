@@ -61,7 +61,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 ### Deployed
 - **GitHub Repositories**: Successfully pushed updates to both repositories
   - mauriciomferz/Gauth_go (main branch)
-  - Gimel-Foundation/Gimel_Platform-GAuth_Server_Prototype (web-interactive-forms-fix branch)
+  - AgentAuth-Foundation/AgentAuth_Platform-AgentAuth_Server_Prototype (web-interactive-forms-fix branch)
 
 - `DISCLAIMER.md` centralizing NOT production ready rationale and enumerating intentionally missing controls.
 - Badge in `README.md` highlighting NOT production ready status.

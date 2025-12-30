@@ -6,13 +6,13 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth+ Authorization Chain Integration
+# AgentAuth+ Authorization Chain Integration
 
 > **✅ OPERATIONAL (December 1, 2025)** - RFC-0111 compliant AI authorization with advanced governance features
 
 **Status**: All 27 endpoints now active and serving requests. Set `GAUTH_GAUTHPLUS_ENABLED=1` to enable.
 
-GAuth+ extends the GAuth RFC-0111 implementation with five advanced authorization features designed for AI agent governance: successor management, delegation chains, dual control, capability assessment, and fiduciary duty enforcement.
+AgentAuth+ extends the AgentAuth RFC-0111 implementation with five advanced authorization features designed for AI agent governance: successor management, delegation chains, dual control, capability assessment, and fiduciary duty enforcement.
 
 **Quick Verification**:
 ```bash
@@ -23,12 +23,12 @@ curl http://localhost:8080/api/v1/gauthplus/fiduciary/violations
 
 ## Quick Start
 
-### Enable GAuth+ (Advisory Mode - Recommended)
+### Enable AgentAuth+ (Advisory Mode - Recommended)
 ```bash
 # Build the server
 go build -o bin/web-server ./cmd/web-server/
 
-# Start with GAuth+ enabled (warnings only, no blocking)
+# Start with AgentAuth+ enabled (warnings only, no blocking)
 GAUTH_RFC0111_ENABLED=1 \
 GAUTH_GAUTHPLUS_ENABLED=1 \
 DB_HOST=localhost \
@@ -41,14 +41,14 @@ DB_NAME=gauth \
 
 ### Expected Output
 ```
-[GAuth+] Enforcement mode: ADVISORY (warnings only, no blocking)
-[GAuth+] Integrated with ComplianceValidator
-[GAuth+] Features enabled:
-[GAuth+]   - Successor Management: AI takeover scenarios
-[GAuth+]   - Delegation Chains: Depth limits and policy validation
-[GAuth+]   - Dual Control: Multi-approver requirements
-[GAuth+]   - Capability Assessment: AI capability level enforcement
-[GAuth+]   - Fiduciary Duties: Violation detection and blocking
+[AgentAuth+] Enforcement mode: ADVISORY (warnings only, no blocking)
+[AgentAuth+] Integrated with ComplianceValidator
+[AgentAuth+] Features enabled:
+[AgentAuth+]   - Successor Management: AI takeover scenarios
+[AgentAuth+]   - Delegation Chains: Depth limits and policy validation
+[AgentAuth+]   - Dual Control: Multi-approver requirements
+[AgentAuth+]   - Capability Assessment: AI capability level enforcement
+[AgentAuth+]   - Fiduciary Duties: Violation detection and blocking
 [startup] BetaServer starting on http://localhost:8080
 ```
 
@@ -163,7 +163,7 @@ ExtendedTokenService.IssueToken()
     ↓
 ComplianceValidator.ValidateRequestCompliance()
     ↓
-GAuthPlusValidator.ValidatePoAWithGAuthPlus()  ← NEW
+AgentAuthPlusValidator.ValidatePoAWithAgentAuthPlus()  ← NEW
     ├── checkSuccessorStatus()
     ├── checkDelegationChain()
     ├── checkDualControlRequirements()
@@ -204,7 +204,7 @@ Connection reuse: Automatic
 ### Run Integration Tests
 ```bash
 # Requires PostgreSQL with test fixtures
-go test -v ./pkg/gauth -run TestGAuthPlusIntegration
+go test -v ./pkg/gauth -run TestAgentAuthPlusIntegration
 ```
 
 ### Test Coverage
@@ -218,14 +218,14 @@ go test -v ./pkg/gauth -run TestGAuthPlusIntegration
 
 ### Log Messages
 ```bash
-# Search for GAuth+ activity
-grep "GAuth+" server.log
+# Search for AgentAuth+ activity
+grep "AgentAuth+" server.log
 
 # Check for warnings (advisory mode)
-grep "GAuth+.*warning" server.log
+grep "AgentAuth+.*warning" server.log
 
 # Check for blocked requests (strict mode)
-grep "GAuth+.*blocked" server.log
+grep "AgentAuth+.*blocked" server.log
 ```
 
 ### Database Queries
@@ -268,13 +268,13 @@ ORDER BY detected_at DESC;
 
 ### Server Won't Start
 ```
-[GAuth+] WARNING: Failed to initialize GAuth+ integration: database connection failed
+[AgentAuth+] WARNING: Failed to initialize AgentAuth+ integration: database connection failed
 ```
 **Solution**: Check database credentials and ensure PostgreSQL is running.
 
 ### Legitimate Requests Blocked
 ```
-[GAuth+] Authorization blocked: capability requirement not met
+[AgentAuth+] Authorization blocked: capability requirement not met
 ```
 **Solution**: Switch to advisory mode or create capability assessments for agents.
 
@@ -316,7 +316,7 @@ ORDER BY detected_at DESC;
 
 ## Next Steps
 
-1. **Create HTTP API endpoints** for GAuth+ management
+1. **Create HTTP API endpoints** for AgentAuth+ management
 2. **Run integration tests** with database fixtures
 3. **Build admin dashboard** for operational management
 4. **Add caching** for performance optimization
@@ -324,11 +324,11 @@ ORDER BY detected_at DESC;
 
 ## License
 
-This is part of the GiFo GAuth RFC-0111 Go implementation.
+This is part of the AAP AgentAuth RFC-0111 Go implementation.
 
 ## Contact
 
-For questions or issues, please refer to the main GAuth documentation or open an issue in the repository.
+For questions or issues, please refer to the main AgentAuth documentation or open an issue in the repository.
 
 ---
 

@@ -323,7 +323,7 @@ func TestPropertyEnhancedSemanticsComposability(t *testing.T) {
 	}
 
 	// Run individual validations
-	err1 := validator.validateRFC0115Semantics(ctx, poa)
+	err1 := validator.validateAAP002Semantics(ctx, poa)
 	err2 := validator.validateCrossFieldConsistency(ctx, poa)
 	err3 := validator.validateRestrictionSemantics(poa)
 
@@ -332,7 +332,7 @@ func TestPropertyEnhancedSemanticsComposability(t *testing.T) {
 
 	// Property: Composed validation should catch all individual errors
 	if err1 != nil && errComposed == nil {
-		t.Error("Composed validation missed RFC0115 semantic error")
+		t.Error("Composed validation missed AAP002 semantic error")
 	}
 	if err2 != nil && errComposed == nil {
 		t.Error("Composed validation missed cross-field consistency error")

@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates token management using a Redis-backed distributed cache in GAuth.
+This example demonstrates token management using a Redis-backed distributed cache in AgentAuth.
 
 ## Key Concepts
 - **RedisStore**: Implements token storage and retrieval using Redis.

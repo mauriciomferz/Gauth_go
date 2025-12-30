@@ -92,7 +92,7 @@ export async function fetchTokenMetrics() {
 }
 
 // Legacy global bridge (for compatibility)
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { startMetricsPolling });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { startMetricsPolling });
 
 // ===== Authorization Metrics Dashboard =====
 function startAuthzMetricsPolling() {

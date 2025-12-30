@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🔍 GAuth Tracing Integration Demo")
+	fmt.Println("🔍 AgentAuth Tracing Integration Demo")
 	fmt.Println("=================================")
 
 	// Initialize OpenTelemetry
@@ -52,8 +52,8 @@ func main() {
 	ctx, span := tracer.Start(context.Background(), "gauth-authorization-flow")
 	defer span.End()
 
-	// Demonstrate traced GAuth operations
-	fmt.Println("\n3. Executing traced GAuth operations...")
+	// Demonstrate traced AgentAuth operations
+	fmt.Println("\n3. Executing traced AgentAuth operations...")
 
 	// Create a Power of Attorney request with tracing
 	_, childSpan := tracer.Start(ctx, "create-poa-request")

@@ -14,7 +14,7 @@ owners: [system]
 
 ## Overview
 
-The GAuth PDP implements XACML-style **obligations** and **advice** processing for post-decision actions:
+The AgentAuth PDP implements XACML-style **obligations** and **advice** processing for post-decision actions:
 
 - **Obligations**: Mandatory actions that **MUST** succeed (failure can flip `allow→deny` with `denyOnMandatoryFailure=true`)
 - **Advice**: Non-mandatory recommendations emitted asynchronously to clients (failures logged but don't affect decisions)
@@ -162,7 +162,7 @@ package main
 
 import (
     "context"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -215,7 +215,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -262,7 +262,7 @@ package main
 
 import (
     "context"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -299,7 +299,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 // Custom handler: Send Slack notification
@@ -340,7 +340,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -747,4 +747,4 @@ No. Obligations execute **after** the decision is finalized. They cannot modify 
 
 **Implementation Status:** ✅ Implemented (12/12 tests passing)  
 **Last Updated:** 2025-11-05T18:00:00Z  
-**Contributors:** GAuth Core Team
+**Contributors:** AgentAuth Core Team

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Load Testing Script for GAuth
+# Load Testing Script for AgentAuth
 # Requires: k6 (https://k6.io/docs/getting-started/installation/)
 
 set -e
@@ -184,7 +184,7 @@ EOF
 
 # Main menu
 echo -e "${BLUE}╔═══════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║     GAuth Load Testing Suite          ║${NC}"
+echo -e "${BLUE}║     AgentAuth Load Testing Suite          ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════╝${NC}"
 echo ""
 echo -e "${YELLOW}Target Server:${NC} ${BASE_URL}"

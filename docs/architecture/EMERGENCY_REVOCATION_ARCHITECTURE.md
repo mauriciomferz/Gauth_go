@@ -431,7 +431,7 @@ Flashbots is a **private transaction relay** that prevents front-running by hidi
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │  1. GAuth Revocation Service                         │       │
+│  │  1. AgentAuth Revocation Service                         │       │
 │  │     Creates revocation transaction                   │       │
 │  └──────────────────────────────────────────────────────┘       │
 │                           │                                     │
@@ -649,10 +649,10 @@ func (f *FlashbotsRevocation) encodeRevocationCall(poaID string) ([]byte, error)
 ### Smart Contract Integration
 
 ```solidity
-// contracts/GAuthRegistry.sol
+// contracts/AgentAuthRegistry.sol
 pragma solidity ^0.8.19;
 
-contract GAuthRegistry {
+contract AgentAuthRegistry {
     // PoA revocation event
     event PoARevoked(
         bytes32 indexed poaID,
@@ -849,7 +849,7 @@ func (h *RevocationHandler) EmergencyRevoke(w http.ResponseWriter, r *http.Reque
 
 ⚠️ **Redis compromise**: Attacker could inject false revocations  
    - **Mitigation**: TLS encryption + authentication  
-   - **Mitigation**: IP allowlisting (only GAuth services)  
+   - **Mitigation**: IP allowlisting (only AgentAuth services)  
    - **Mitigation**: Audit logs for all revocations  
 
 ⚠️ **Flashbots dependency**: Flashbots relay must be operational  

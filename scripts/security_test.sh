@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# GAuth Security Testing Suite
-# This script runs basic security tests against the GAuth beta demonstration implementation (non-production)
+# AgentAuth Security Testing Suite
+# This script runs basic security tests against the AgentAuth beta demonstration implementation (non-production)
 
 set -e
 
-echo "🔒 Starting GAuth Security Testing Suite"
+echo "🔒 Starting AgentAuth Security Testing Suite"
 echo "========================================"
 
 # Colors for output

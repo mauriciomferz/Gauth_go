@@ -1,4 +1,4 @@
-# GAuth+ Complete Project Walkthrough
+# AgentAuth+ Complete Project Walkthrough
 
 **Date**: December 29, 2025  
 **Status**: ✅ **ALL WORK COMPLETE**
@@ -112,17 +112,17 @@
 ### Phase 21: Observability & Monitoring ✅ DEPLOYED
 - Implemented comprehensive monitoring stack (Prometheus + Grafana)
 - Instrumented backend with standard Go runtime metrics
-- Configured custom GAuth+ metrics endpoint
+- Configured custom AgentAuth+ metrics endpoint
 - Created system health dashboards
 - **Verified**: Metrics collection and visualization operational
 
 ---
 
 ### Phase 22: Advanced Observability (Custom Metrics)
-**Goal**: Expose business-critical metrics to Prometheus for deeper insight involved implementing a custom collector (`GAuthCollector`).
+**Goal**: Expose business-critical metrics to Prometheus for deeper insight involved implementing a custom collector (`AgentAuthCollector`).
 
 **Key Changes**:
-- **Custom Collector**: Implemented `GAuthCollector` in `web/handlers/admin/metrics_handler.go` to scrape real-time data from the database.
+- **Custom Collector**: Implemented `AgentAuthCollector` in `web/handlers/admin/metrics_handler.go` to scrape real-time data from the database.
 - **Metrics Added**:
     - `gauth_audit_events_total`: Count of audit events by status (success/failure).
     - `gauth_api_keys_total`: Count of API keys by status (active/revoked).
@@ -340,7 +340,7 @@ cat docs/SECURITY.md
     - Mounted `/app/tmp` emptyDir for read-only filesystem compatibility.
 - **ServiceAccount**: Applied missing RBAC manifest.
 - **Custom Metrics (gauth_audit_events_total)**:
-    - **Registry Scope**: Explicitly registered `GAuthCollector` with global `DefaultRegisterer` in `server_factory.go`.
+    - **Registry Scope**: Explicitly registered `AgentAuthCollector` with global `DefaultRegisterer` in `server_factory.go`.
     - **DB Connection**: Added missing `GAUTH_DB_*` env vars to `deployment.yaml` and disabled SSL in `configmap.yaml` to fix "Development Mode" fallback.
     - **Schema Mismatch**: Updated `metrics_handler.go` to query `audit_logs` (actual table) instead of `audit_events` and use `result` column.
     - **Verification**: `curl /metrics | grep gauth_audit_events_total` → Success.
@@ -384,7 +384,7 @@ Performed end-to-end validation of the observability pipeline on the live `v1.3.
 
 ## Summary
 
-**Project**: GAuth+ Authorization Framework  
+**Project**: AgentAuth+ Authorization Framework  
 **Phases Complete**: 19, 20, Integration, Deployment, Testing, Documentation, Security  
 **Status**: ✅ Production Ready  
 **Compliance**: 100/100  
@@ -405,7 +405,7 @@ Performed end-to-end validation of the observability pipeline on the live `v1.3.
 
 ---
 
-**The GAuth+ project is complete, fully documented, and ready for production deployment!** ✨
+**The AgentAuth+ project is complete, fully documented, and ready for production deployment!** ✨
 
 ---
 

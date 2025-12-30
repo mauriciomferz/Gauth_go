@@ -6,9 +6,9 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Testing Guide
+# AgentAuth Testing Guide
 
-Comprehensive guide for running and maintaining the GAuth automated testing suite.
+Comprehensive guide for running and maintaining the AgentAuth automated testing suite.
 
 ## Table of Contents
 
@@ -23,7 +23,7 @@ Comprehensive guide for running and maintaining the GAuth automated testing suit
 
 ## Overview
 
-The GAuth project includes a comprehensive testing suite with multiple layers:
+The AgentAuth project includes a comprehensive testing suite with multiple layers:
 
 1. **E2E Tests** - Browser-based tests using Playwright
 2. **API Integration Tests** - Backend endpoint validation
@@ -632,7 +632,7 @@ use: {
 - [Playwright Documentation](https://playwright.dev/)
 - [k6 Documentation](https://k6.io/docs/)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [GAuth Project Documentation](./README.md)
+- [AgentAuth Project Documentation](./README.md)
 
 ## Support
 

@@ -55,7 +55,7 @@ evt-123,2025-11-26T10:00:00Z,tenant-1,user-1,poa.create,poa-456,poa,success,acce
 
 **CEF Export** (Common Event Format):
 ```
-CEF:0|Gimel Foundation|GAuth|1.0|access|poa.create|5|rt=1732618800000 tenantId=tenant-1 suser=user-1 act=poa.create src=192.168.1.1 outcome=success cat=access
+CEF:0|AgentAuth Community|AgentAuth|1.0|access|poa.create|5|rt=1732618800000 tenantId=tenant-1 suser=user-1 act=poa.create src=192.168.1.1 outcome=success cat=access
 ```
 
 ### 2. Handler Endpoints ✅
@@ -393,7 +393,7 @@ All 5 Quick Wins have been completed:
 4. ✅ Redis Cache - Distributed caching with PoA handler integration
 5. ✅ Audit Log Export - Multi-format exports with async job processing
 
-**GAuth is now at 96/100 compliance!**
+**AgentAuth is now at 96/100 compliance!**
 
 The implementation is production-ready with:
 - Comprehensive API documentation

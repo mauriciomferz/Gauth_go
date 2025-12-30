@@ -357,7 +357,7 @@ These are enhancements rather than critical functionality.
 
 **Mission Accomplished**: 100% P0/P1/P2 completion achieved! 🎉
 
-The GAuth implementation now has:
+The AgentAuth implementation now has:
 - ✅ Complete advice emission for policy obligations
 - ✅ Compliance attestation proof storage and retrieval
 - ✅ Crash-safe replay detection with WAL snapshots

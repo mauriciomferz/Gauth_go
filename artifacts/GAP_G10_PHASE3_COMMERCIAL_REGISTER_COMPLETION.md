@@ -213,7 +213,7 @@ Successfully completed Phase 3 of Gap G10 integration testing, creating a compre
 === RUN   TestEntityDetails_Validation
 --- PASS: TestEntityDetails_Validation (0.00s)
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/registry   6.324s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/registry   6.324s
 ```
 
 ### Performance Metrics

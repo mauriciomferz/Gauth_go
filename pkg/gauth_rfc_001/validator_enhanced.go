@@ -272,8 +272,8 @@ func (v *EnhancedPoAValidator) ValidateWithResult(ctx context.Context, p *PowerO
 
 // validateEnhancedSemantics performs advanced semantic validation with warnings
 func (v *EnhancedPoAValidator) validateEnhancedSemantics(ctx context.Context, p *PowerOfAttorney) error {
-	// RFC0115-specific semantic validation
-	if err := v.validateRFC0115Semantics(ctx, p); err != nil {
+	// AAP002-specific semantic validation
+	if err := v.validateAAP002Semantics(ctx, p); err != nil {
 		return err
 	}
 
@@ -312,8 +312,8 @@ func (v *EnhancedPoAValidator) validateEnhancedSemantics(ctx context.Context, p 
 	return nil
 }
 
-// validateRFC0115Semantics validates PoA according to RFC0115 semantic rules
-func (v *EnhancedPoAValidator) validateRFC0115Semantics(ctx context.Context, p *PowerOfAttorney) error {
+// validateAAP002Semantics validates PoA according to AAP002 semantic rules
+func (v *EnhancedPoAValidator) validateAAP002Semantics(ctx context.Context, p *PowerOfAttorney) error {
 	// 1. Scope syntax validation - ensure proper format
 	for i, scope := range p.Scope {
 		if err := v.validateScopeSyntax(scope); err != nil {
@@ -425,9 +425,9 @@ func (v *EnhancedPoAValidator) validateScopeSemantics(scopes []string) error {
 	return nil
 }
 
-// validateActionTaxonomy validates action classes against RFC0115 taxonomy
+// validateActionTaxonomy validates action classes against AAP002 taxonomy
 func (v *EnhancedPoAValidator) validateActionTaxonomy(p *PowerOfAttorney) error {
-	// Define valid action classes per RFC0115
+	// Define valid action classes per AAP002
 	validActionClasses := map[string]bool{
 		"read":        true,
 		"write":       true,
@@ -446,7 +446,7 @@ func (v *EnhancedPoAValidator) validateActionTaxonomy(p *PowerOfAttorney) error 
 	// Validate ActionClass field if present
 	if p.ActionClass != "" {
 		if !validActionClasses[strings.ToLower(p.ActionClass)] {
-			v.addWarning("unknown_action_class", "Action class not in RFC0115 taxonomy", "action_class", p.ActionClass, "warning")
+			v.addWarning("unknown_action_class", "Action class not in AAP002 taxonomy", "action_class", p.ActionClass, "warning")
 		}
 	}
 
@@ -456,7 +456,7 @@ func (v *EnhancedPoAValidator) validateActionTaxonomy(p *PowerOfAttorney) error 
 			parts := strings.SplitN(scope, ":", 2)
 			action := strings.ToLower(parts[0])
 			if action != "*" && !validActionClasses[action] {
-				v.addWarning("unknown_action_prefix", "Scope action prefix not in RFC0115 taxonomy", "scope", scope, "info")
+				v.addWarning("unknown_action_prefix", "Scope action prefix not in AAP002 taxonomy", "scope", scope, "info")
 			}
 		}
 	}
@@ -559,7 +559,7 @@ func (v *EnhancedPoAValidator) validateDelegationDepthSemantics(ctx context.Cont
 
 // validateRestrictionSemantics validates restriction key-value semantics
 func (v *EnhancedPoAValidator) validateRestrictionSemantics(p *PowerOfAttorney) error {
-	// Define valid restriction keys per RFC0115
+	// Define valid restriction keys per AAP002
 	knownRestrictions := map[string]bool{
 		"currency":           true,
 		"max_amount":         true,
@@ -591,7 +591,7 @@ func (v *EnhancedPoAValidator) validateRestrictionSemantics(p *PowerOfAttorney) 
 		}
 
 		if !knownRestrictions[key] {
-			v.addWarning("unknown_restriction", "Restriction key not in RFC0115 standard", "restriction", key, "info")
+			v.addWarning("unknown_restriction", "Restriction key not in AAP002 standard", "restriction", key, "info")
 		}
 	}
 

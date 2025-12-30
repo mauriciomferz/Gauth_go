@@ -76,7 +76,7 @@ type KeyProvider interface {
 ```
 
 ## 7. Canonicalization
-Canonical POA signing: Implemented deterministic canonical JSON (stable ordering of arrays/maps, RFC3339 timestamps) with domain separation prefix `GAuthPOA_v1:` hashed via SHA-256; golden test added.
+Canonical POA signing: Implemented deterministic canonical JSON (stable ordering of arrays/maps, RFC3339 timestamps) with domain separation prefix `AgentAuthPOA_v1:` hashed via SHA-256; golden test added.
 
 ## 8. Metrics Additions
 Implemented (in-memory): signatures_issued_total, signature_issue_failures_total, signature_verifications_total, signature_verification_failures_total, revocation_integrity_fail_total.
@@ -112,7 +112,7 @@ Add `internal/crypto/multisig/README.md` describing future threshold design (not
 
 ## 13. Open Questions
 - Do we need deterministic JSON or CBOR canonicalization? (Leaning JSON first.)
-- Should we pre-hash with domain separation tag? (Likely: `GAuthPOA_v1:` prefix.)
+- Should we pre-hash with domain separation tag? (Likely: `AgentAuthPOA_v1:` prefix.)
 
 ---
 Draft – iterate via PR before locking dates.

@@ -145,7 +145,7 @@ metadata:
     environment: staging
 data:
   redis.conf: |
-    # Redis Configuration for GAuth Staging
+    # Redis Configuration for AgentAuth Staging
     
     # Network
     bind 0.0.0.0

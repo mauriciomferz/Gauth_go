@@ -128,7 +128,7 @@ owners: architecture-team
 └──────────────────────────────────────┘
 ```
 
-**Result**: OAuth server, NOT GAuth. No RFC compliance.
+**Result**: OAuth server, NOT AgentAuth. No RFC compliance.
 
 ---
 
@@ -208,7 +208,7 @@ owners: architecture-team
 └─────────────────────────────────────┘
 ```
 
-**Result**: True RFC-0111 GAuth implementation. ✓
+**Result**: True RFC-0111 AgentAuth implementation. ✓
 
 ---
 
@@ -361,7 +361,7 @@ owners: architecture-team
    │ {                                  │
    │   extended_token: {                │
    │     access_token: "ext_...",       │
-   │     token_type: "GAuth-Extended",  │
+   │     token_type: "AgentAuth-Extended",  │
    │     expires_in: 3600,              │
    │     power_of_attorney: {...},      │
    │     authorization_chain: {...},    │
@@ -450,7 +450,7 @@ pkg/gauth/
 ❌ No protocol orchestration
 ❌ Direct JWT generation
 ❌ Validation functions never called
-❌ OAuth server, not GAuth
+❌ OAuth server, not AgentAuth
 ❌ RFC compliance: 58/100
 ```
 
@@ -460,7 +460,7 @@ pkg/gauth/
 ✅ Protocol orchestrator (Steps a-i)
 ✅ Extended tokens with PoA metadata
 ✅ All validation functions integrated
-✅ True RFC-0111 GAuth implementation
+✅ True RFC-0111 AgentAuth implementation
 ✅ RFC compliance: 95+/100
 ```
 

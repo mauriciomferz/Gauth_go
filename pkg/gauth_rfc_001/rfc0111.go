@@ -209,10 +209,10 @@ type RevocationRequest struct {
 }
 
 // ========================================
-// RFC 0111 & 0115 Conformance Types
+// AAP-001 & 0115 Conformance Types
 // ========================================
 
-// TokenResult represents the result of token verification or issuance operations (RFC 0111:1).
+// TokenResult represents the result of token verification or issuance operations (AAP-001:1).
 type TokenResult struct {
 	Token     string                   `json:"token"`
 	ExpiresAt time.Time                `json:"expires_at"`
@@ -221,14 +221,14 @@ type TokenResult struct {
 	Error     string                   `json:"error,omitempty"`
 }
 
-// ScopeItem represents a single scope entry with semantic validation (RFC 0115:2).
+// ScopeItem represents a single scope entry with semantic validation (AAP-002:2).
 type ScopeItem struct {
 	Action      string            `json:"action"`
 	Resource    string            `json:"resource,omitempty"`
 	Constraints map[string]string `json:"constraints,omitempty"`
 }
 
-// ScopeValidator provides scope semantic validation (RFC 0115:2).
+// ScopeValidator provides scope semantic validation (AAP-002:2).
 type ScopeValidator struct {
 	AllowedActions   []string          `json:"allowed_actions,omitempty"`
 	RequiredFields   []string          `json:"required_fields,omitempty"`
@@ -236,7 +236,7 @@ type ScopeValidator struct {
 	StrictValidation bool              `json:"strict_validation"`
 }
 
-// ValidateScope performs semantic validation of scope items (RFC 0115:2).
+// ValidateScope performs semantic validation of scope items (AAP-002:2).
 func ValidateScope(items []ScopeItem, validator *ScopeValidator) error {
 	if validator == nil || !validator.StrictValidation {
 		return nil // permissive mode
@@ -262,7 +262,7 @@ func ValidateScope(items []ScopeItem, validator *ScopeValidator) error {
 	return nil
 }
 
-// FormalValidation represents formal requirement validation state (RFC 0115:4).
+// FormalValidation represents formal requirement validation state (AAP-002:4).
 type FormalValidation struct {
 	RequirementsMet bool      `json:"requirements_met"`
 	ChecksPassed    []string  `json:"checks_passed,omitempty"`
@@ -270,7 +270,7 @@ type FormalValidation struct {
 	Timestamp       time.Time `json:"timestamp"`
 }
 
-// RequirementCheck represents a single formal requirement check (RFC 0115:4).
+// RequirementCheck represents a single formal requirement check (AAP-002:4).
 type RequirementCheck struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description,omitempty"`
@@ -279,7 +279,7 @@ type RequirementCheck struct {
 	CheckedAt   time.Time `json:"checked_at"`
 }
 
-// DailyLimit represents daily transaction limits (RFC 0115:5).
+// DailyLimit represents daily transaction limits (AAP-002:5).
 type DailyLimit struct {
 	MaxAmount       float64   `json:"max_amount"`
 	Currency        string    `json:"currency,omitempty"`
@@ -290,7 +290,7 @@ type DailyLimit struct {
 	LastTransaction time.Time `json:"last_transaction,omitempty"`
 }
 
-// PowerLimit represents general power-of-attorney limits (RFC 0115:5).
+// PowerLimit represents general power-of-attorney limits (AAP-002:5).
 type PowerLimit struct {
 	Type         string            `json:"type"` // e.g., "daily", "transaction", "cumulative"
 	MaxValue     float64           `json:"max_value"`
@@ -299,7 +299,7 @@ type PowerLimit struct {
 	Metadata     map[string]string `json:"metadata,omitempty"`
 }
 
-// TransactionLimit represents per-transaction limits (RFC 0115:5).
+// TransactionLimit represents per-transaction limits (AAP-002:5).
 type TransactionLimit struct {
 	MaxAmount       float64 `json:"max_amount"`
 	MinAmount       float64 `json:"min_amount,omitempty"`
@@ -307,7 +307,7 @@ type TransactionLimit struct {
 	RequireApproval bool    `json:"require_approval,omitempty"`
 }
 
-// Rights represents rights granted under power of attorney (RFC 0115:6).
+// Rights represents rights granted under power of attorney (AAP-002:6).
 type Rights struct {
 	Actions               []string          `json:"actions"`
 	Resources             []string          `json:"resources,omitempty"`
@@ -317,7 +317,7 @@ type Rights struct {
 	TransferableSubRights bool              `json:"transferable_sub_rights,omitempty"`
 }
 
-// Obligations represents obligations under power of attorney (RFC 0115:6).
+// Obligations represents obligations under power of attorney (AAP-002:6).
 type Obligations struct {
 	DutiesOfCare      []string          `json:"duties_of_care,omitempty"`
 	ReportingRequired bool              `json:"reporting_required,omitempty"`
@@ -325,7 +325,7 @@ type Obligations struct {
 	ComplianceChecks  []string          `json:"compliance_checks,omitempty"`
 }
 
-// DutyOfCare represents a specific duty of care obligation (RFC 0115:6).
+// DutyOfCare represents a specific duty of care obligation (AAP-002:6).
 type DutyOfCare struct {
 	Description string            `json:"description"`
 	Standard    string            `json:"standard,omitempty"` // e.g., "reasonable_person", "professional"
@@ -333,7 +333,7 @@ type DutyOfCare struct {
 	Evidence    map[string]string `json:"evidence,omitempty"`
 }
 
-// ConditionalExpression represents a conditional special condition (RFC 0115:7).
+// ConditionalExpression represents a conditional special condition (AAP-002:7).
 type ConditionalExpression struct {
 	Condition  string            `json:"condition"`
 	Expression string            `json:"expression"`
@@ -342,7 +342,7 @@ type ConditionalExpression struct {
 	Result     interface{}       `json:"result,omitempty"`
 }
 
-// RuntimeEvaluation represents runtime evaluation of special conditions (RFC 0115:7).
+// RuntimeEvaluation represents runtime evaluation of special conditions (AAP-002:7).
 type RuntimeEvaluation struct {
 	ExpressionID string                  `json:"expression_id"`
 	Context      map[string]interface{}  `json:"context,omitempty"`
@@ -352,7 +352,7 @@ type RuntimeEvaluation struct {
 	Conditions   []ConditionalExpression `json:"conditions,omitempty"`
 }
 
-// ThresholdValidation represents joint signature threshold validation (RFC 0115:8).
+// ThresholdValidation represents joint signature threshold validation (AAP-002:8).
 type ThresholdValidation struct {
 	RequiredSignatures int             `json:"required_signatures"`
 	ProvidedSignatures int             `json:"provided_signatures"`
@@ -700,7 +700,7 @@ func WithMetrics(m metrics.Metrics) Option {
 //	registry := metrics.NewCollectorRegistry(true) // concurrent dispatch
 //	registry.Register(collectors.NewPrometheusCollector("prom", promMetrics, "Prometheus exporter"))
 //	registry.Register(collectors.NewJSONCollector("json", "/tmp/metrics.json", false))
-//	svc := rfc0111.New(store, rfc0111.WithCollectorRegistry(registry))
+//	svc := aap001.New(store, aap001.WithCollectorRegistry(registry))
 func WithCollectorRegistry(registry *metrics.CollectorRegistry) Option {
 	return func(s *Service) {
 		if registry != nil {
@@ -894,7 +894,7 @@ func parseDurationEnv(key string, defaultVal time.Duration) time.Duration {
 	return defaultVal
 }
 
-// NewService creates a new RFC 0111 service (in-memory prototype) with optional functional options.
+// NewService creates a new AAP-001 service (in-memory prototype) with optional functional options.
 // SECURITY DEFAULTS:
 //   - failClosedReplay: true (revocation/replay checks fail-closed on store errors)
 //   - strictConstraints: false (unknown constraints ignored for backward compatibility)
@@ -1019,23 +1019,23 @@ func NewServicePersistent(auditLogPath string, authorizer authz.Authorizer, opts
 	return s, nil
 }
 
-type GAuth10Framework struct {
+type AgentAuth10Framework struct {
 	AuthServer string
 	Clients    []string
 }
 
 // ToJSON serializes the framework to JSON
-func (f *GAuth10Framework) ToJSON() ([]byte, error) {
+func (f *AgentAuth10Framework) ToJSON() ([]byte, error) {
 	return json.MarshalIndent(f, "", "  ")
 }
 
 // GetStatus returns the current status of the framework
-func (f *GAuth10Framework) GetStatus() map[string]interface{} {
+func (f *AgentAuth10Framework) GetStatus() map[string]interface{} {
 	return map[string]interface{}{
 		"auth_server":    f.AuthServer,
 		"clients_count":  len(f.Clients),
 		"version":        "1.0.0",
-		"rfc":            "GiFo-RFC-0111",
+		"rfc":            "AAP-0111",
 		"implementation": "Go Reference Implementation",
 	}
 }
@@ -1704,7 +1704,7 @@ func VerifyDelegationToken(ctx context.Context, svc *Service, tok string) (*Toke
 // ExtractEmbeddedPoA extracts and validates the embedded PoA definition from a TokenVerificationResult.
 // This enables offline token verification without requiring access to the PoA repository.
 //
-// Requirements (RFC0115 sec3.item2):
+// Requirements (AAP002 sec3.item2):
 //   - RawPOA field must be non-empty (GAUTH_EMBED_FULL_POA=1 must have been enabled during token issuance)
 //   - RawPOA must contain valid canonical JSON representing a PowerOfAttorney
 //   - Extracted PoA.ID must match the DelegationID from the token envelope
@@ -1891,7 +1891,7 @@ func (s *Service) ExtractEmbeddedPoAWithAudit(ctx context.Context, result *Token
 	return poa, err
 }
 
-// Service provides RFC 0111 power-of-attorney services
+// Service provides AAP-001 power-of-attorney services
 // AuditLogger is the interface subset we rely on (MemoryLogger & FileLogger both satisfy).
 type AuditLogger interface {
 	Log(context.Context, interface{}) error
@@ -4789,7 +4789,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 		}
 		env2 := token.EnvelopeV2{
-			Version:             "gauth-rfc0111-env2",
+			Version:             "gauth-aap001-env2",
 			KeyID:               kid,
 			DelegationID:        poa.ID,
 			Grantor:             poa.Grantor,
@@ -4866,10 +4866,10 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			claimsMeta := &gauth.ClaimsMetadata{
 				Version:      "1.0",             // Claims schema version
 				Capabilities: poa.Scope,         // Supported capabilities = delegated scopes
-				Source:       "rfc0111-service", // Claims source identifier
+				Source:       "aap001-service", // Claims source identifier
 				Confidence:   1.0,               // Full confidence for directly issued tokens
 			}
-			// Populate AdvancedClaims with standard JWT claims + GAuth-specific metadata
+			// Populate AdvancedClaims with standard JWT claims + AgentAuth-specific metadata
 			env2.AdvancedClaims = &gauth.AdvancedClaims{
 				Subject:        poa.Grantee,
 				Issuer:         poa.Grantor,
@@ -4912,7 +4912,7 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 		}
 	} else {
 		env := token.Envelope{
-			Version:         "gauth-rfc0111-env1",
+			Version:         "gauth-aap001-env1",
 			KeyID:           kid,
 			DelegationID:    poa.ID,
 			Grantor:         poa.Grantor,
@@ -4947,11 +4947,11 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 	}
 	// Cadence already recorded inside issuance branch above.
 	if err != nil {
-		return fmt.Sprintf("rfc0111_token_fallback_%s_%d", poa.ID, time.Now().UnixNano())
+		return fmt.Sprintf("aap001_token_fallback_%s_%d", poa.ID, time.Now().UnixNano())
 	}
 	tok, err := paseto.NewV2().Encrypt(activeKey, plain, nil)
 	if err != nil {
-		return fmt.Sprintf("rfc0111_token_fallback_%s_%d", poa.ID, time.Now().UnixNano())
+		return fmt.Sprintf("aap001_token_fallback_%s_%d", poa.ID, time.Now().UnixNano())
 	}
 	return tok
 }
@@ -5003,15 +5003,15 @@ func (s *Service) decryptWithAnyKey(token string, dest interface{}) error {
 	return fmt.Errorf("unable to decrypt token with any known key")
 }
 
-// Demo demonstrates RFC 0111 power-of-attorney functionality
+// Demo demonstrates AAP-001 power-of-attorney functionality
 func Demo() error {
-	fmt.Println("=== RFC 0111 Power-of-Attorney Demo ===")
+	fmt.Println("=== AAP-001 Power-of-Attorney Demo ===")
 
 	// Create service dependencies
 	auditLogger := audit.NewMemoryLogger(nil) // Use nil for demo logger
 	authorizer := authz.NewMemoryAuthorizer()
 
-	// Create RFC 0111 service
+	// Create AAP-001 service
 	service := NewService(auditLogger, authorizer)
 
 	// Demo delegation creation
@@ -5079,6 +5079,6 @@ func Demo() error {
 		return fmt.Errorf("should have rejected revoked delegation")
 	}
 
-	fmt.Println("\n🎉 RFC 0111 Power-of-Attorney demo completed successfully!")
+	fmt.Println("\n🎉 AAP-001 Power-of-Attorney demo completed successfully!")
 	return nil
 }

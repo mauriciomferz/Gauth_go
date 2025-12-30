@@ -11,7 +11,7 @@ import (
 	icrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
 )
 
-// aggregationTestService constructs a fresh RFC0111 service for aggregation tests
+// aggregationTestService constructs a fresh AAP001 service for aggregation tests
 func aggregationTestService() *Service {
 	memAuthz := authz.NewMemoryAuthorizer()
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-all", Subject: "*", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow})

@@ -1,16 +1,16 @@
-# MCP Integration Plan for GAuth
+# MCP Integration Plan for AgentAuth
 ## Model Context Protocol Integration Roadmap
 
 **Date:** November 15, 2025  
 **Status:** Planning Phase  
 **Priority:** Phase 2 Enhancement  
-**RFC Reference:** GiFo-0111 - AI Agent Authorization
+**RFC Reference:** AAP-0111 - AI Agent Authorization
 
 ---
 
 ## Overview
 
-**MCP (Model Context Protocol)** is a protocol for AI agent communication. Integrating MCP with GAuth will enable standardized AI-to-AI authorization flows where AI agents can:
+**MCP (Model Context Protocol)** is a protocol for AI agent communication. Integrating MCP with AgentAuth will enable standardized AI-to-AI authorization flows where AI agents can:
 
 1. Request authorization from other AI agents
 2. Present Extended Tokens with PoA context
@@ -21,7 +21,7 @@
 
 ## Current Status
 
-**GAuth Implementation:** 92% RFC-compliant
+**AgentAuth Implementation:** 92% RFC-compliant
 - ✅ Extended Tokens with PoA
 - ✅ Authorization Chains
 - ✅ P*P Architecture (PEP, PDP, PIP, PVP)
@@ -43,12 +43,12 @@
 │  │ (Client)   │        │ (Resource) │        │ (Service)  │  │
 │  └─────┬──────┘        └─────┬──────┘        └─────┬──────┘  │
 │        │                     │                      │         │
-│        │ GAuth Extended      │ GAuth Validation     │         │
+│        │ AgentAuth Extended      │ AgentAuth Validation     │         │
 │        │ Token Request       │ & Enforcement        │         │
 │        │                     │                      │         │
 │        ▼                     ▼                      ▼         │
 │  ┌──────────────────────────────────────────────────────────┐ │
-│  │         GAuth Authorization Server (AS)                  │ │
+│  │         AgentAuth Authorization Server (AS)                  │ │
 │  │  - Extended token issuance                              │ │
 │  │  - PoA validation                                       │ │
 │  │  - Authorization chain management                       │ │
@@ -59,16 +59,16 @@
 
 ---
 
-## MCP + GAuth Use Cases
+## MCP + AgentAuth Use Cases
 
 ### Use Case 1: AI Agent Delegation
 
 ```
 Alice's AI Assistant → Bob's AI Service
 1. Alice authorizes her AI assistant (PoA)
-2. AI assistant requests extended token from GAuth AS
+2. AI assistant requests extended token from AgentAuth AS
 3. AI assistant sends MCP request to Bob's AI service with extended token
-4. Bob's AI service validates token via GAuth PEP
+4. Bob's AI service validates token via AgentAuth PEP
 5. Bob's AI service executes request and returns result via MCP
 ```
 
@@ -80,7 +80,7 @@ Orchestrator AI → Analysis AI → Decision AI
 2. Orchestrator delegates subset to Analysis AI (authorization chain)
 3. Analysis AI validates authorization and processes data
 4. Analysis AI delegates decision to Decision AI (extended chain)
-5. All steps tracked in GAuth compliance log
+5. All steps tracked in AgentAuth compliance log
 ```
 
 ### Use Case 3: Cross-Organization AI Collaboration
@@ -89,7 +89,7 @@ Orchestrator AI → Analysis AI → Decision AI
 Company A AI ←MCP→ Company B AI
 1. Company A issues PoA to its AI agent
 2. AI agent requests extended token with cross-org scope
-3. Company B AI validates token via federated GAuth
+3. Company B AI validates token via federated AgentAuth
 4. Collaboration proceeds with audit trail
 ```
 
@@ -110,7 +110,7 @@ Company A AI ←MCP→ Company B AI
 }
 ```
 
-**GAuth-Extended MCP Message:**
+**AgentAuth-Extended MCP Message:**
 ```json
 {
   "protocol": "mcp/1.0",
@@ -127,7 +127,7 @@ Company A AI ←MCP→ Company B AI
 }
 ```
 
-### 2. MCP Transport with GAuth
+### 2. MCP Transport with AgentAuth
 
 **HTTP Transport:**
 ```http
@@ -135,8 +135,8 @@ POST /mcp/v1/execute HTTP/1.1
 Host: ai-service.example.com
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
-X-GAuth-PoA-Reference: PoA-2025-001
-X-GAuth-Chain-Depth: 3
+X-AgentAuth-PoA-Reference: PoA-2025-001
+X-AgentAuth-Chain-Depth: 3
 
 {
   "protocol": "mcp/1.0",
@@ -149,7 +149,7 @@ X-GAuth-Chain-Depth: 3
 ```javascript
 ws = new WebSocket("wss://ai-service.example.com/mcp");
 
-// Send GAuth-authenticated MCP message
+// Send AgentAuth-authenticated MCP message
 ws.send(JSON.stringify({
   protocol: "mcp/1.0",
   type: "request",
@@ -159,26 +159,26 @@ ws.send(JSON.stringify({
 }));
 ```
 
-### 3. GAuth MCP Adapter Interface
+### 3. AgentAuth MCP Adapter Interface
 
 ```go
 // pkg/mcp/adapter.go
 package mcp
 
-type GAuthMCPAdapter struct {
+type AgentAuthMCPAdapter struct {
     extendedTokenService *gauth.ExtendedTokenService
     pep                  *gauth.PowerEnforcementPoint
     complianceTracker    *gauth.ComplianceTracker
 }
 
-// SendMCPRequest sends an MCP request with GAuth extended token
-func (adapter *GAuthMCPAdapter) SendMCPRequest(
+// SendMCPRequest sends an MCP request with AgentAuth extended token
+func (adapter *AgentAuthMCPAdapter) SendMCPRequest(
     ctx context.Context,
     request *MCPRequest,
     extendedToken string,
 ) (*MCPResponse, error) {
-    // Attach GAuth context to MCP request
-    request.GAuth = &GAuthContext{
+    // Attach AgentAuth context to MCP request
+    request.AgentAuth = &AgentAuthContext{
         ExtendedToken: extendedToken,
         PoAReference:  extractPoAReference(extendedToken),
     }
@@ -197,13 +197,13 @@ func (adapter *GAuthMCPAdapter) SendMCPRequest(
     return response, err
 }
 
-// ValidateMCPRequest validates incoming MCP request with GAuth
-func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
+// ValidateMCPRequest validates incoming MCP request with AgentAuth
+func (adapter *AgentAuthMCPAdapter) ValidateMCPRequest(
     ctx context.Context,
     request *MCPRequest,
 ) (*ValidationResult, error) {
-    // Extract GAuth token from MCP request
-    extendedToken := request.GAuth.ExtendedToken
+    // Extract AgentAuth token from MCP request
+    extendedToken := request.AgentAuth.ExtendedToken
     
     // Validate token
     validationResult, err := adapter.extendedTokenService.ValidateExtendedToken(ctx, extendedToken)
@@ -236,14 +236,14 @@ func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
 
 **Tasks:**
 1. Create `pkg/mcp/` package structure
-2. Define MCP message types with GAuth extensions
-3. Implement GAuthMCPAdapter interface
+2. Define MCP message types with AgentAuth extensions
+3. Implement AgentAuthMCPAdapter interface
 4. Add MCP transport handlers (HTTP, WebSocket)
 5. Integration with ExtendedTokenService
 
 **Deliverables:**
 - [ ] `pkg/mcp/types.go` - MCP message types
-- [ ] `pkg/mcp/adapter.go` - GAuth-MCP adapter
+- [ ] `pkg/mcp/adapter.go` - AgentAuth-MCP adapter
 - [ ] `pkg/mcp/transport_http.go` - HTTP transport
 - [ ] `pkg/mcp/transport_ws.go` - WebSocket transport
 - [ ] Unit tests for MCP adapter
@@ -282,7 +282,7 @@ func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
 1. Create MCP client SDK
 2. Add MCP examples
 3. Write MCP integration guide
-4. Create demo AI agents using MCP+GAuth
+4. Create demo AI agents using MCP+AgentAuth
 
 **Deliverables:**
 - [ ] MCP client SDK
@@ -296,7 +296,7 @@ func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
 
 ## API Design
 
-### MCP Request with GAuth
+### MCP Request with AgentAuth
 
 ```go
 type MCPRequest struct {
@@ -307,11 +307,11 @@ type MCPRequest struct {
     Params   map[string]interface{} `json:"params"`
     Target   string                 `json:"target"`   // Target AI service
     
-    // GAuth extension
-    GAuth    *GAuthContext          `json:"gauth,omitempty"`
+    // AgentAuth extension
+    AgentAuth    *AgentAuthContext          `json:"gauth,omitempty"`
 }
 
-type GAuthContext struct {
+type AgentAuthContext struct {
     ExtendedToken           string    `json:"extended_token"`
     PoAReference            string    `json:"poa_reference"`
     AuthorizationChainHash  string    `json:"authorization_chain_hash"`
@@ -326,11 +326,11 @@ type MCPResponse struct {
     Result   map[string]interface{} `json:"result,omitempty"`
     Error    *MCPError              `json:"error,omitempty"`
     
-    // GAuth extension (response metadata)
-    GAuthMetadata *GAuthResponseMetadata `json:"gauth_metadata,omitempty"`
+    // AgentAuth extension (response metadata)
+    AgentAuthMetadata *AgentAuthResponseMetadata `json:"gauth_metadata,omitempty"`
 }
 
-type GAuthResponseMetadata struct {
+type AgentAuthResponseMetadata struct {
     Enforced      bool      `json:"enforced"`
     EnforcementID string    `json:"enforcement_id"`
     ComplianceEvent string  `json:"compliance_event_id"`
@@ -342,13 +342,13 @@ type GAuthResponseMetadata struct {
 
 ```go
 // Example usage
-client := mcp.NewGAuthClient(
+client := mcp.NewAgentAuthClient(
     "https://ai-service.example.com",
     extendedTokenService,
     pep,
 )
 
-// Send request with automatic GAuth handling
+// Send request with automatic AgentAuth handling
 response, err := client.Execute(ctx, &mcp.Request{
     Method: "analyze_contract",
     Params: map[string]interface{}{
@@ -364,13 +364,13 @@ response, err := client.Execute(ctx, &mcp.Request{
 
 ### Unit Tests
 - MCP message serialization/deserialization
-- GAuth context extraction
+- AgentAuth context extraction
 - Token validation in MCP flow
 - PEP enforcement for MCP requests
 
 ### Integration Tests
-- HTTP transport with GAuth
-- WebSocket transport with GAuth
+- HTTP transport with AgentAuth
+- WebSocket transport with AgentAuth
 - End-to-end MCP request/response
 - Authorization chain extension
 
@@ -389,7 +389,7 @@ response, err := client.Execute(ctx, &mcp.Request{
 3. **Message Integrity** - Sign MCP messages with AI agent keys
 4. **Replay Protection** - Include nonce/timestamp in MCP messages
 5. **Rate Limiting** - Implement per-agent rate limits
-6. **Audit Trail** - Log all MCP-GAuth interactions
+6. **Audit Trail** - Log all MCP-AgentAuth interactions
 7. **Chain Depth Limits** - Prevent excessive delegation chains
 8. **Scope Reduction** - Ensure delegated PoA has reduced scope
 
@@ -401,7 +401,7 @@ response, err := client.Execute(ctx, &mcp.Request{
 - MCP Protocol Specification (if available)
 - AI agent SDKs with MCP support
 
-**Internal GAuth:**
+**Internal AgentAuth:**
 - ExtendedTokenService ✅ (exists)
 - PowerEnforcementPoint ✅ (exists)
 - AuthorizationChainValidator ✅ (exists)
@@ -417,8 +417,8 @@ response, err := client.Execute(ctx, &mcp.Request{
 ## Success Criteria
 
 **Phase 1 Complete:**
-- [ ] MCP messages can carry GAuth extended tokens
-- [ ] HTTP transport working with GAuth
+- [ ] MCP messages can carry AgentAuth extended tokens
+- [ ] HTTP transport working with AgentAuth
 - [ ] Unit tests passing (>90% coverage)
 
 **Phase 2 Complete:**
@@ -442,13 +442,13 @@ response, err := client.Execute(ctx, &mcp.Request{
 
 **For Existing AI Agents:**
 
-1. **Update to support GAuth tokens**
+1. **Update to support AgentAuth tokens**
    - Add extended token to existing API calls
    - Implement token validation
 
 2. **Adopt MCP protocol**
    - Replace proprietary protocols with MCP
-   - Add GAuth context to MCP messages
+   - Add AgentAuth context to MCP messages
 
 3. **Enable delegation**
    - Request PoA from owners
@@ -467,7 +467,7 @@ response, err := client.Execute(ctx, &mcp.Request{
 - MCP Specification (link TBD)
 - MCP SDKs and libraries
 
-**GAuth Implementation:**
+**AgentAuth Implementation:**
 - `pkg/gauth/extended_token_service.go`
 - `pkg/gauth/pep.go`
 - `docs/Gifo_0111_CORRECTED_FLOW.md`
@@ -491,7 +491,7 @@ response, err := client.Execute(ctx, &mcp.Request{
 2. **Prototype** (1 week)
    - Build minimal MCP adapter
    - Test with simple AI agent
-   - Validate GAuth token flow
+   - Validate AgentAuth token flow
 
 3. **Phase 1 Implementation** (2 weeks)
    - Implement full MCP adapter
@@ -499,7 +499,7 @@ response, err := client.Execute(ctx, &mcp.Request{
    - Write unit tests
 
 4. **Community Feedback**
-   - Share prototype with Gimel Foundation
+   - Share prototype with AgentAuth Community
    - Gather requirements from AI agent developers
    - Refine design based on feedback
 
@@ -507,7 +507,7 @@ response, err := client.Execute(ctx, &mcp.Request{
 
 ## Conclusion
 
-MCP integration will enable GAuth to become the authorization protocol for AI agent ecosystems. This plan provides a clear roadmap for implementation while maintaining RFC compliance and security best practices.
+MCP integration will enable AgentAuth to become the authorization protocol for AI agent ecosystems. This plan provides a clear roadmap for implementation while maintaining RFC compliance and security best practices.
 
 **Current Status:**  
 🟡 **Planning Phase** - Ready for Phase 1 prototype
@@ -516,7 +516,7 @@ MCP integration will enable GAuth to become the authorization protocol for AI ag
 📅 **Phase 2 Enhancement** - After PAP service completion
 
 **Contact:**  
-For questions or to contribute to MCP integration, refer to the GAuth_go repository.
+For questions or to contribute to MCP integration, refer to the AgentAuth_go repository.
 
 ---
 

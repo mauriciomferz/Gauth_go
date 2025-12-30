@@ -1,4 +1,4 @@
-// Package web provides HTTP server components for the GAuth demo including JWKS publication.
+// Package web provides HTTP server components for the AgentAuth demo including JWKS publication.
 package web
 
 // Legacy EdDSA accessor removed: the server now directly references the global registry via

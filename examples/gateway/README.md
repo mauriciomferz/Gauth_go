@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates an API Gateway with resilience patterns using the GAuth framework. It covers global and service-level rate limiting, circuit breaker, retry, bulkhead isolation, and simulated backend failures.
+This example demonstrates an API Gateway with resilience patterns using the AgentAuth framework. It covers global and service-level rate limiting, circuit breaker, retry, bulkhead isolation, and simulated backend failures.
 
 ## Key Concepts
 - **APIGateway**: Manages routes, services, and resilience patterns.

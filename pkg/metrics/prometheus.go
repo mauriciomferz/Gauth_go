@@ -264,64 +264,64 @@ var (
 		},
 	)
 
-	// GAuth+ Metrics
-	GAuthPlusValidationsTotal = promauto.NewCounterVec(
+	// AgentAuth+ Metrics
+	AgentAuthPlusValidationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_validations_total",
-			Help: "Total number of GAuth+ validations performed",
+			Help: "Total number of AgentAuth+ validations performed",
 		},
 		[]string{"feature", "result"},
 	)
 
-	GAuthPlusValidationDuration = promauto.NewHistogramVec(
+	AgentAuthPlusValidationDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "gauthplus_validation_duration_seconds",
-			Help:    "Duration of GAuth+ feature validations in seconds",
+			Help:    "Duration of AgentAuth+ feature validations in seconds",
 			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5},
 		},
 		[]string{"feature"},
 	)
 
-	GAuthPlusCacheHits = promauto.NewCounterVec(
+	AgentAuthPlusCacheHits = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_cache_hits_total",
-			Help: "Total number of GAuth+ cache hits",
+			Help: "Total number of AgentAuth+ cache hits",
 		},
 		[]string{"cache_type"},
 	)
 
-	GAuthPlusCacheMisses = promauto.NewCounterVec(
+	AgentAuthPlusCacheMisses = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_cache_misses_total",
-			Help: "Total number of GAuth+ cache misses",
+			Help: "Total number of AgentAuth+ cache misses",
 		},
 		[]string{"cache_type"},
 	)
 
-	GAuthPlusCacheSize = promauto.NewGaugeVec(
+	AgentAuthPlusCacheSize = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "gauthplus_cache_size",
-			Help: "Current number of entries in GAuth+ caches",
+			Help: "Current number of entries in AgentAuth+ caches",
 		},
 		[]string{"cache_type"},
 	)
 
-	GAuthPlusPolicyViolations = promauto.NewCounterVec(
+	AgentAuthPlusPolicyViolations = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_policy_violations_total",
-			Help: "Total number of GAuth+ policy violations detected",
+			Help: "Total number of AgentAuth+ policy violations detected",
 		},
 		[]string{"policy_type", "severity"},
 	)
 
-	GAuthPlusSuccessorActivations = promauto.NewCounter(
+	AgentAuthPlusSuccessorActivations = promauto.NewCounter(
 		prometheus.CounterOpts{
 			Name: "gauthplus_successor_activations_total",
 			Help: "Total number of successor AI activations",
 		},
 	)
 
-	GAuthPlusDelegationDepth = promauto.NewHistogram(
+	AgentAuthPlusDelegationDepth = promauto.NewHistogram(
 		prometheus.HistogramOpts{
 			Name:    "gauthplus_delegation_depth",
 			Help:    "Distribution of delegation chain depths",
@@ -329,7 +329,7 @@ var (
 		},
 	)
 
-	GAuthPlusDualControlApprovals = promauto.NewCounterVec(
+	AgentAuthPlusDualControlApprovals = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_dual_control_approvals_total",
 			Help: "Total number of dual control approvals",
@@ -337,7 +337,7 @@ var (
 		[]string{"action_type", "status"},
 	)
 
-	GAuthPlusCapabilityLevel = promauto.NewGaugeVec(
+	AgentAuthPlusCapabilityLevel = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "gauthplus_capability_level",
 			Help: "Current capability level of AI agents (L0-L5 mapped to 0-5)",
@@ -345,7 +345,7 @@ var (
 		[]string{"agent_id"},
 	)
 
-	GAuthPlusFiduciaryViolations = promauto.NewCounterVec(
+	AgentAuthPlusFiduciaryViolations = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_fiduciary_violations_total",
 			Help: "Total number of fiduciary duty violations",
@@ -447,50 +447,50 @@ func RecordAuditLog(eventType string, duration float64) {
 	AuditLogWriteDuration.Observe(duration)
 }
 
-// GAuth+ Metric Recording Functions
+// AgentAuth+ Metric Recording Functions
 
-// RecordGAuthPlusValidation records a GAuth+ feature validation
-func RecordGAuthPlusValidation(feature, result string, duration float64) {
-	GAuthPlusValidationsTotal.WithLabelValues(feature, result).Inc()
-	GAuthPlusValidationDuration.WithLabelValues(feature).Observe(duration)
+// RecordAgentAuthPlusValidation records a AgentAuth+ feature validation
+func RecordAgentAuthPlusValidation(feature, result string, duration float64) {
+	AgentAuthPlusValidationsTotal.WithLabelValues(feature, result).Inc()
+	AgentAuthPlusValidationDuration.WithLabelValues(feature).Observe(duration)
 }
 
-// RecordGAuthPlusCacheOperation records a cache hit or miss
-func RecordGAuthPlusCacheOperation(cacheType string, hit bool) {
+// RecordAgentAuthPlusCacheOperation records a cache hit or miss
+func RecordAgentAuthPlusCacheOperation(cacheType string, hit bool) {
 	if hit {
-		GAuthPlusCacheHits.WithLabelValues(cacheType).Inc()
+		AgentAuthPlusCacheHits.WithLabelValues(cacheType).Inc()
 	} else {
-		GAuthPlusCacheMisses.WithLabelValues(cacheType).Inc()
+		AgentAuthPlusCacheMisses.WithLabelValues(cacheType).Inc()
 	}
 }
 
-// UpdateGAuthPlusCacheSize updates the current cache size
-func UpdateGAuthPlusCacheSize(cacheType string, size int) {
-	GAuthPlusCacheSize.WithLabelValues(cacheType).Set(float64(size))
+// UpdateAgentAuthPlusCacheSize updates the current cache size
+func UpdateAgentAuthPlusCacheSize(cacheType string, size int) {
+	AgentAuthPlusCacheSize.WithLabelValues(cacheType).Set(float64(size))
 }
 
-// RecordGAuthPlusPolicyViolation records a policy violation
-func RecordGAuthPlusPolicyViolation(policyType, severity string) {
-	GAuthPlusPolicyViolations.WithLabelValues(policyType, severity).Inc()
+// RecordAgentAuthPlusPolicyViolation records a policy violation
+func RecordAgentAuthPlusPolicyViolation(policyType, severity string) {
+	AgentAuthPlusPolicyViolations.WithLabelValues(policyType, severity).Inc()
 }
 
-// RecordGAuthPlusSuccessorActivation records a successor activation
-func RecordGAuthPlusSuccessorActivation() {
-	GAuthPlusSuccessorActivations.Inc()
+// RecordAgentAuthPlusSuccessorActivation records a successor activation
+func RecordAgentAuthPlusSuccessorActivation() {
+	AgentAuthPlusSuccessorActivations.Inc()
 }
 
-// RecordGAuthPlusDelegationDepth records the depth of a delegation chain
-func RecordGAuthPlusDelegationDepth(depth int) {
-	GAuthPlusDelegationDepth.Observe(float64(depth))
+// RecordAgentAuthPlusDelegationDepth records the depth of a delegation chain
+func RecordAgentAuthPlusDelegationDepth(depth int) {
+	AgentAuthPlusDelegationDepth.Observe(float64(depth))
 }
 
-// RecordGAuthPlusDualControlApproval records a dual control approval
-func RecordGAuthPlusDualControlApproval(actionType, status string) {
-	GAuthPlusDualControlApprovals.WithLabelValues(actionType, status).Inc()
+// RecordAgentAuthPlusDualControlApproval records a dual control approval
+func RecordAgentAuthPlusDualControlApproval(actionType, status string) {
+	AgentAuthPlusDualControlApprovals.WithLabelValues(actionType, status).Inc()
 }
 
-// UpdateGAuthPlusCapabilityLevel updates an agent's capability level (L0-L5 → 0-5)
-func UpdateGAuthPlusCapabilityLevel(agentID, level string) {
+// UpdateAgentAuthPlusCapabilityLevel updates an agent's capability level (L0-L5 → 0-5)
+func UpdateAgentAuthPlusCapabilityLevel(agentID, level string) {
 	var numericLevel float64
 	switch level {
 	case "L0":
@@ -508,10 +508,10 @@ func UpdateGAuthPlusCapabilityLevel(agentID, level string) {
 	default:
 		numericLevel = 0
 	}
-	GAuthPlusCapabilityLevel.WithLabelValues(agentID).Set(numericLevel)
+	AgentAuthPlusCapabilityLevel.WithLabelValues(agentID).Set(numericLevel)
 }
 
-// RecordGAuthPlusFiduciaryViolation records a fiduciary duty violation
-func RecordGAuthPlusFiduciaryViolation(dutyType, severity string) {
-	GAuthPlusFiduciaryViolations.WithLabelValues(dutyType, severity).Inc()
+// RecordAgentAuthPlusFiduciaryViolation records a fiduciary duty violation
+func RecordAgentAuthPlusFiduciaryViolation(dutyType, severity string) {
+	AgentAuthPlusFiduciaryViolations.WithLabelValues(dutyType, severity).Inc()
 }

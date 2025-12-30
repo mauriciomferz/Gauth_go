@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates a minimal service setup for token management in GAuth.
+This example demonstrates a minimal service setup for token management in AgentAuth.
 
 ## Key Concepts
 - **Service Initialization**: Shows how to initialize a token management service.

@@ -1,4 +1,4 @@
-# Official GiFo-RFC-0115 PoA-Definition Implementation
+# Official AAP-RFC-0115 PoA-Definition Implementation
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -7,29 +7,29 @@
 
 ---
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+Operated by AgentAuth Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
 ## 📋 **Official RFC Specification**
 
-- **GiFo-Request for Comments**: 0115
+- **AAP-Request for Comments**: 0115
 - **Author**: Dr. Götz G. Wehberg
 - **Organization**: Digital Supply Institute (DSI)
 - **Category**: Standards Track
-- **Status**: Gimel Foundation Standards Track Document
+- **Status**: AgentAuth Community Standards Track Document
 - **Obsoletes**: - 15. September 2025
 - **License**: Apache 2.0
 
 ## 🎯 **Abstract**
 
-The Power-of-Attorney Credential Definition (PoA-Definition) enables a structured, standardized way of sharing machine-readable attributes and parameters, which are being leveraged for granting power of attorney along both the subscription as well as request-specific Extended Tokens of the GAuth protocol.
+The Power-of-Attorney Credential Definition (PoA-Definition) enables a structured, standardized way of sharing machine-readable attributes and parameters, which are being leveraged for granting power of attorney along both the subscription as well as request-specific Extended Tokens of the AgentAuth protocol.
 
 ## 🔒 **Mandatory Exclusions (Section 2)**
 
 ### **❌ Prohibited Integrations**
-Users of GAuth and this PoA-Definition **Must Not** integrate:
+Users of AgentAuth and this PoA-Definition **Must Not** integrate:
 
 1. **Web3/Blockchain Technology**:
    - No blockchain technology for extended tokens
@@ -46,7 +46,7 @@ Users of GAuth and this PoA-Definition **Must Not** integrate:
    - No AI identity theft risk tracking
 
 ### **📝 Usage Restriction**
-PoA-Definition **Must Not** be used in contexts other than together with GAuth unless approved by Gimel Foundation in writing.
+PoA-Definition **Must Not** be used in contexts other than together with AgentAuth unless approved by AgentAuth Community in writing.
 
 ## 🚀 **Running the Demo**
 
@@ -58,7 +58,7 @@ go run main.go
 ✅ RFC-0115 exclusions validated (Web3, AI operators, DNA identities excluded)
 ✅ PoA-Definition structure validated for RFC-0115 compliance
 ✅ Mandatory exclusions enforced (Section 2)
-✅ Official Gimel Foundation gGmbH i.G. attribution
+✅ Official AgentAuth Community gGmbH i.G. attribution
 
 ## 📊 **Compliance Features**
 

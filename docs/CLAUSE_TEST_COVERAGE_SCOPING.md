@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC 0111 / RFC 0115 Clause-to-Test Coverage Scoping
+# AAP-001 / AAP-002 Clause-to-Test Coverage Scoping
 
 > Draft: 2025-10-20
 > Purpose: Establish a structured mapping framework linking specification clauses to concrete test cases and code artifacts to enable measurable compliance progression.

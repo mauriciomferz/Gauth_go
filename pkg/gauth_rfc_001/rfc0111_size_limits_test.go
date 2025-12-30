@@ -11,7 +11,7 @@ import (
 )
 
 // NOTE: These tests exercise default limits (hard-coded defaults applied via ValidationLimits.applyDefaults).
-// Configurable override tests live in rfc0111_validation_limits_test.go.
+// Configurable override tests live in aap001_validation_limits_test.go.
 
 func newSvcForLimits() *Service {
 	return NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer())

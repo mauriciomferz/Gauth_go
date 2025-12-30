@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Getting Started with GAuth RFC Implementation
+# Getting Started with AgentAuth RFC Implementation
 
 > Last Updated: 2025-10-19
 > Status: Active
@@ -15,22 +15,22 @@ owners: [system]
 
 **🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+Operated by AgentAuth Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
-This guide will help you get started with the official Gimel Foundation GAuth implementation, featuring complete GiFo-RFC-0115 PoA-Definition compliance.
+This guide will help you get started with the official AgentAuth Community AgentAuth implementation, featuring complete AAP-RFC-0115 PoA-Definition compliance.
 
 ## 🚀 Quick Installation
 
 ### 1. **Install the Package**
 
 ```bash
-go get github.com/Gimel-Foundation/gauth
+go get github.com/AgentAuth-Foundation/gauth
 ```
 
 ### 2. **Build and Test**
@@ -88,8 +88,8 @@ Implementation notes:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0
-cd GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0
+git clone https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
+cd AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
 
 # Build the package
 go build ./pkg/auth
@@ -98,9 +98,9 @@ go build ./pkg/auth
 go run examples/official_rfc_compliance_test/main.go
 ```
 
-## 🎯 **First GAuth-RFC-001 (formerly RFC 111) Implementation**
+## 🎯 **First AgentAuth-RFC-001 (formerly RFC 111) Implementation**
 
-### **Basic GAuth Authorization**
+### **Basic AgentAuth Authorization**
 
 Create your first RFC-compliant authorization:
 
@@ -111,7 +111,7 @@ import (
     "context"
     "fmt"
     "time"
-    "github.com/Gimel-Foundation/gauth/pkg/auth"
+    "github.com/AgentAuth-Foundation/gauth/pkg/auth"
 )
 
 func main() {
@@ -154,8 +154,8 @@ func main() {
         },
     }
     
-    // 3. Create GAuth request
-    request := auth.GAuthRequest{
+    // 3. Create AgentAuth request
+    request := auth.AgentAuthRequest{
         ClientID:     "my_ai_assistant",
         ResponseType: "code",
         Scope:        []string{"information_sharing"},
@@ -167,7 +167,7 @@ func main() {
     }
     
     // 4. Authorize with RFC validation
-    response, err := service.AuthorizeGAuth(context.Background(), request)
+    response, err := service.AuthorizeAgentAuth(context.Background(), request)
     if err != nil {
         fmt.Printf("❌ Authorization failed: %v\n", err)
         return

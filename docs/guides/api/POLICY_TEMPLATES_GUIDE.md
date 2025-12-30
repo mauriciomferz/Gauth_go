@@ -1,7 +1,7 @@
 # Policy Templates Guide
 
 ## Overview
-GAuth provides three pre-configured policy templates for authorization management, each designed for different security and usability requirements. These templates can be selected during tenant/subscriber onboarding and are used to configure the authorization policy framework.
+AgentAuth provides three pre-configured policy templates for authorization management, each designed for different security and usability requirements. These templates can be selected during tenant/subscriber onboarding and are used to configure the authorization policy framework.
 
 **Location:** Subscribers Management → Step 4: Policy Templates  
 **Purpose:** Simplify policy configuration by providing pre-defined authorization rules

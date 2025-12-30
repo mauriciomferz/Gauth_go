@@ -1,15 +1,15 @@
-# GiFo-RFC 0111 - CORRECTED PROTOCOL FLOW
+# AAP-AAP-001 - CORRECTED PROTOCOL FLOW
 ## Critical Fix: Protocol Architecture Clarification
 
 **Date:** November 15, 2025  
 **Status:** ERRATA - Critical Correction Required  
-**Original RFC:** GiFo-0111 (August 2025)
+**Original RFC:** AAP-0111 (August 2025)
 
 ---
 
 ## PROTOCOL ARCHITECTURE CLARIFICATION
 
-**GAuth builds on OAuth 2.0 and OpenID Connect as its foundation.** The protocol layers are:
+**AgentAuth builds on OAuth 2.0 and OpenID Connect as its foundation.** The protocol layers are:
 
 ### Layer 1: OAuth 2.0 / OpenID Connect Foundation (Inherited)
 - **Resource Server (RS)** - Validates tokens and serves protected resources
@@ -19,7 +19,7 @@
 - **Authorization Grants** - Credentials representing RO authorization
 - **Access Tokens** - Bearer tokens for accessing protected resources
 
-### Layer 2: GAuth Extensions (What GAuth Defines/Adds)
+### Layer 2: AgentAuth Extensions (What AgentAuth Defines/Adds)
 - **Extended Tokens** - Enhanced tokens beyond OAuth access tokens, includes PoA context and authorization chain
 - **P*P Architecture Roles** - PEP (Enforcement), PDP (Decision), PAP (Administration), PIP (Information), PVP (Validation)
 - **Power of Attorney (PoA)** - AI legitimization framework with verifiable authorization chains
@@ -29,18 +29,18 @@
 - **AI-Specific Endpoints** - `/transaction`, `/decision`, `/action` for AI operations
 
 **Critical Distinction:**
-- GAuth **uses** the OAuth/OIDC Authorization Server but **extends its token issuance** to include PoA validation
-- GAuth **uses** the OAuth/OIDC Resource Server but **extends its enforcement** to validate PoA claims
-- GAuth **adds** entirely new roles (Owner's Authorizer, P*P architecture) not present in OAuth/OIDC
+- AgentAuth **uses** the OAuth/OIDC Authorization Server but **extends its token issuance** to include PoA validation
+- AgentAuth **uses** the OAuth/OIDC Resource Server but **extends its enforcement** to validate PoA claims
+- AgentAuth **adds** entirely new roles (Owner's Authorizer, P*P architecture) not present in OAuth/OIDC
 
 ---
 
 ## CRITICAL ISSUE IDENTIFIED
 
-The original GiFo-0111 RFC **omits the Resource Server** from the protocol flow diagram, despite:
+The original AAP-0111 RFC **omits the Resource Server** from the protocol flow diagram, despite:
 
 1. Resource Server being part of the inherited OAuth/OIDC foundation
-2. Resource Server being defined in GAuth nomenclature (Section 3)
+2. Resource Server being defined in AgentAuth nomenclature (Section 3)
 3. Resource Server appearing in subscription step VIII
 4. OAuth RFC 6749 explicitly showing Resource Server in canonical flow
 5. The flow diagram being incomplete without showing where resources are actually accessed
@@ -54,7 +54,7 @@ The original GiFo-0111 RFC **omits the Resource Server** from the protocol flow 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
 │               CORRECTED GAUTH PROTOCOL FLOW (with Resource Server)            │
-│                         RFC 0111 ERRATA - November 2025                       │
+│                         AAP-001 ERRATA - November 2025                       │
 └───────────────────────────────────────────────────────────────────────────────┘
 
    ┌──────────────┐          ┌──────────────────┐          ┌──────────────┐
@@ -379,7 +379,7 @@ Details:
 
 ## COMPARISON: ORIGINAL vs CORRECTED
 
-### Original RFC 0111 (INCORRECT)
+### Original AAP-001 (INCORRECT)
 ```
 (a) Client requests authorization from resource owner
 (b) Validation via AS
@@ -392,7 +392,7 @@ Details:
 (i) AS tracks compliance
 ```
 
-### Corrected RFC 0111 v1.1
+### Corrected AAP-001 v1.1
 ```
 (a) Client requests authorization from resource owner
 (a.1) Resource owner authenticates & consents ← NEW
@@ -416,27 +416,27 @@ Details:
 
 ### 6.1 Resource Server Role (Inherited from OAuth/OIDC)
 
-**IMPORTANT:** The Resource Server is part of the **OAuth 2.0 / OpenID Connect foundation** that GAuth builds upon. This section clarifies how Resource Servers interact with **GAuth-specific extensions** (Extended Tokens, PoA validation, P*P policy enforcement).
+**IMPORTANT:** The Resource Server is part of the **OAuth 2.0 / OpenID Connect foundation** that AgentAuth builds upon. This section clarifies how Resource Servers interact with **AgentAuth-specific extensions** (Extended Tokens, PoA validation, P*P policy enforcement).
 
-The Resource Server in a GAuth-enabled system:
+The Resource Server in a AgentAuth-enabled system:
 
-1. **Receives client requests** with extended tokens (GAuth extension to OAuth access tokens)
+1. **Receives client requests** with extended tokens (AgentAuth extension to OAuth access tokens)
 2. **Validates extended tokens** (locally or via AS introspection - standard OAuth pattern)
 3. **Enforces authorization policies** based on:
    - Standard OAuth scopes (OAuth/OIDC)
-   - **PoA claims** (GAuth extension)
-   - **P*P policy attributes** (GAuth extension)
+   - **PoA claims** (AgentAuth extension)
+   - **P*P policy attributes** (AgentAuth extension)
 4. **Executes authorized transactions/decisions/actions** (business logic)
 5. **Returns results** to clients (standard HTTP responses)
-6. **Reports compliance events** to authorization server for audit (**GAuth extension** for AI governance)
+6. **Reports compliance events** to authorization server for audit (**AgentAuth extension** for AI governance)
 
-**What GAuth Adds to Resource Server Behavior:**
+**What AgentAuth Adds to Resource Server Behavior:**
 - Extended token validation (beyond OAuth access tokens)
 - PoA (Power of Attorney) claim verification
 - P*P architecture policy enforcement (PEP role at RS)
 - Compliance event reporting for AI action tracking
 
-**What GAuth Inherits from OAuth/OIDC:**
+**What AgentAuth Inherits from OAuth/OIDC:**
 - Token presentation via Authorization header
 - Token introspection protocol (RFC 7662)
 - Error response codes (401, 403)
@@ -452,7 +452,7 @@ Authorization: Bearer <extended-token>
 
 Alternative headers MAY be supported:
 ```http
-X-GAuth-Token: <extended-token>
+X-AgentAuth-Token: <extended-token>
 ```
 
 ### 6.1.2 Token Validation Methods
@@ -499,19 +499,19 @@ Process:
   4. Enforce based on response
 ```
 
-### 6.1.3 Standard Endpoints (GAuth Extension)
+### 6.1.3 Standard Endpoints (AgentAuth Extension)
 
-**GAuth Extension:** Resource Servers implementing GAuth SHOULD expose AI-specific endpoints:
+**AgentAuth Extension:** Resource Servers implementing AgentAuth SHOULD expose AI-specific endpoints:
 
 ```
-POST   /api/v1/transaction    - Execute AI-authorized transaction (GAuth-specific)
-POST   /api/v1/decision       - Execute AI-authorized decision (GAuth-specific)
-POST   /api/v1/action         - Execute AI-authorized action (GAuth-specific)
+POST   /api/v1/transaction    - Execute AI-authorized transaction (AgentAuth-specific)
+POST   /api/v1/decision       - Execute AI-authorized decision (AgentAuth-specific)
+POST   /api/v1/action         - Execute AI-authorized action (AgentAuth-specific)
 GET    /api/v1/status         - Check action/transaction status
 DELETE /api/v1/transaction/{id} - Cancel pending transaction
 ```
 
-**Note:** These are **GAuth-specific business endpoints** for AI agent actions. Standard OAuth protected resources (REST APIs, user data, etc.) continue to work as defined in OAuth/OIDC.
+**Note:** These are **AgentAuth-specific business endpoints** for AI agent actions. Standard OAuth protected resources (REST APIs, user data, etc.) continue to work as defined in OAuth/OIDC.
 
 ### 6.1.4 Error Responses (OAuth Standard)
 
@@ -558,17 +558,17 @@ Resource Servers MUST return standardized errors per OAuth 2.0 Bearer Token Usag
 2. ✅ **Added explicit RS interaction in step (g)** - client → RS request
 3. ✅ **Detailed RS token validation in step (h)** - two methods specified
 4. ✅ **Added RS → Client response in step (i)** - resource/result return
-5. ✅ **Added RS → AS reporting in step (j)** - compliance events (GAuth extension)
+5. ✅ **Added RS → AS reporting in step (j)** - compliance events (AgentAuth extension)
 6. ✅ **Added new step (a.1)** - explicit resource owner consent
 7. ✅ **Reordered steps (e) and (f)** - validate grant BEFORE token issuance
-8. ✅ **Clarified protocol layering** - OAuth/OIDC foundation vs GAuth extensions
+8. ✅ **Clarified protocol layering** - OAuth/OIDC foundation vs AgentAuth extensions
 
 ### New Sections Added
 - Protocol Architecture Clarification (Layer 1 vs Layer 2)
 - 6.1 Resource Server Integration (with OAuth/OIDC attribution)
 - 6.1.1 Token Presentation (OAuth Standard)
-- 6.1.2 Token Validation Methods (OAuth + GAuth extensions)
-- 6.1.3 Standard Endpoints (GAuth-specific AI endpoints)
+- 6.1.2 Token Validation Methods (OAuth + AgentAuth extensions)
+- 6.1.3 Standard Endpoints (AgentAuth-specific AI endpoints)
 - 6.1.4 Error Responses (OAuth Standard)
 
 ### Documentation Improvements
@@ -577,11 +577,11 @@ Resource Servers MUST return standardized errors per OAuth 2.0 Bearer Token Usag
 - Optional vs required interactions clarified
 - Error handling specified
 - Security considerations added
-- **Protocol boundaries clearly defined** - what's OAuth/OIDC vs what's GAuth
+- **Protocol boundaries clearly defined** - what's OAuth/OIDC vs what's AgentAuth
 
 ### Protocol Layering Clarification
 
-**What GAuth Inherits from OAuth 2.0 / OpenID Connect:**
+**What AgentAuth Inherits from OAuth 2.0 / OpenID Connect:**
 - **Resource Server (RS)** - Core role and behavior for serving protected resources
 - **Authorization Server (AS)** - Core role for authorization flows and token issuance
 - **Client, Resource Owner** - Standard OAuth roles
@@ -592,12 +592,12 @@ Resource Servers MUST return standardized errors per OAuth 2.0 Bearer Token Usag
 - **Error codes** - 401 Unauthorized, 403 Forbidden (RFC 6750)
 - **Client authentication** - client_id, client_secret, PKCE
 
-**What GAuth Extends (Behavior Additions to OAuth/OIDC Components):**
+**What AgentAuth Extends (Behavior Additions to OAuth/OIDC Components):**
 - **Extended AS behavior** - PoA validation during token issuance
 - **Extended RS behavior** - PoA claim enforcement, compliance event reporting
 - **Extended Token structure** - PoA claims, authorization chain, P*P attributes
 
-**What GAuth Defines (Entirely New Concepts):**
+**What AgentAuth Defines (Entirely New Concepts):**
 - **Extended Tokens** - Token type with PoA context beyond OAuth access tokens
 - **Power of Attorney (PoA)** - AI legitimization framework with delegation chains
 - **P*P Architecture** - PEP, PDP, PAP, PIP, PVP roles for policy-based authorization
@@ -608,7 +608,7 @@ Resource Servers MUST return standardized errors per OAuth 2.0 Bearer Token Usag
 
 ## IMPLEMENTATION STATUS IN GAUTH_GO CODEBASE
 
-The GAuth_go implementation **ALREADY IMPLEMENTS THE CORRECTED FLOW**:
+The AgentAuth_go implementation **ALREADY IMPLEMENTS THE CORRECTED FLOW**:
 
 ✅ **Resource Server Mocked**: `pkg/gauth/mocks.go` - MockResourceServer  
 ✅ **Token Validation**: `pkg/gauth/extended_token_service.go` - ValidateExtendedToken  
@@ -622,12 +622,12 @@ The GAuth_go implementation **ALREADY IMPLEMENTS THE CORRECTED FLOW**:
 
 ## RECOMMENDATION
 
-**RFC 0111 should be republished as RFC 0111 v1.1** with these corrections, or an **official errata document** should be issued immediately.
+**AAP-001 should be republished as AAP-001 v1.1** with these corrections, or an **official errata document** should be issued immediately.
 
 ---
 
 **Document Status:** ERRATA - Critical Correction  
 **Impact:** HIGH - Affects all implementations  
-**Action Required:** Update RFC 0111 to version 1.1  
+**Action Required:** Update AAP-001 to version 1.1  
 **Date:** November 15, 2025  
-**Author:** GAuth Implementation Team
+**Author:** AgentAuth Implementation Team

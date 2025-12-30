@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# GAuth Beta Web Interface Startup Script
+# AgentAuth Beta Web Interface Startup Script
 # ⚠️ Beta Implementation - Not for Production Use
 
 set -e
@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}�️ GAuth Beta Web Interface${NC}"
+echo -e "${BLUE}�️ AgentAuth Beta Web Interface${NC}"
 echo -e "${YELLOW}⚠️  BETA IMPLEMENTATION ONLY${NC}"
 echo -e "${BLUE}📚 RFC-0150 Go Learning Environment${NC}"
 echo ""

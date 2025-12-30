@@ -1,4 +1,4 @@
-// Copyright (c) 2025 GAuth. All rights reserved.
+// Copyright (c) 2025 AgentAuth. All rights reserved.
 
 // Package collectors provides MetricsCollector implementations for various backends.
 package collectors
@@ -86,7 +86,7 @@ func (o *OpenTelemetryCollector) getOrCreateCounter(name string) (metric.Int64Co
 
 	counter, err := o.meter.Int64Counter(
 		name,
-		metric.WithDescription(fmt.Sprintf("GAuth counter: %s", name)),
+		metric.WithDescription(fmt.Sprintf("AgentAuth counter: %s", name)),
 	)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ func (o *OpenTelemetryCollector) getOrCreateHistogram(name string) (metric.Float
 
 	histo, err := o.meter.Float64Histogram(
 		name,
-		metric.WithDescription(fmt.Sprintf("GAuth histogram: %s", name)),
+		metric.WithDescription(fmt.Sprintf("AgentAuth histogram: %s", name)),
 		metric.WithUnit("ms"),
 	)
 	if err != nil {

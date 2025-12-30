@@ -8,7 +8,7 @@ owners: [system]
 
 # Replay Protection Architecture
 
-This document describes the layered replay protection mechanisms implemented in GAuth for delegation artifacts, tokens, and attestation-like signatures.
+This document describes the layered replay protection mechanisms implemented in AgentAuth for delegation artifacts, tokens, and attestation-like signatures.
 
 ## Layers
 

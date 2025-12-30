@@ -29,7 +29,7 @@ spec:
         fsGroup: 1000
       
       containers:
-      # Main GAuth application
+      # Main AgentAuth application
       - name: gauth
         image: gauth:latest
         imagePullPolicy: IfNotPresent

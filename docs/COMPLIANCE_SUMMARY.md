@@ -6,12 +6,12 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Compliance Summary
+# AgentAuth Compliance Summary
 
 _Last updated: 2025-10-24_
 
 ## Overview
-This document summarizes compliance-related mechanisms implemented in the GAuth Go codebase, covering:
+This document summarizes compliance-related mechanisms implemented in the AgentAuth Go codebase, covering:
 - Jurisdiction enforcement (GDPR, CCPA, UK GDPR, PIPEDA, APPI, Privacy Act AU)
 - Legal framework validation and rule modeling
 - Policy version lifecycle and rollback safety
@@ -107,7 +107,7 @@ All suites currently pass after fixes (including latency metric recording and ro
 7. Integrity: periodically re-verify entire audit hash chain asynchronously with anomaly alerting.
 
 ## Compliance Assurance Summary
-GAuth’s Go implementation provides layered enforcement combining jurisdiction rules, legal framework validation, policy lifecycle governance, and cryptographic audit integrity. Cross-border and residency controls enforce geo-data constraints; consent and opt-out logic ensure regulatory alignment. Hash-chained ledgers plus external anchoring enhance tamper-evidence. Current test coverage exercises core compliance pathways; metrics expose operational insight for monitoring.
+AgentAuth’s Go implementation provides layered enforcement combining jurisdiction rules, legal framework validation, policy lifecycle governance, and cryptographic audit integrity. Cross-border and residency controls enforce geo-data constraints; consent and opt-out logic ensure regulatory alignment. Hash-chained ledgers plus external anchoring enhance tamper-evidence. Current test coverage exercises core compliance pathways; metrics expose operational insight for monitoring.
 
 ## Quick Verification Checklist
 - Jurisdiction rules initialized: ✅

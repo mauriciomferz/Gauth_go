@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "[web-smoke-test] Starting GAuth beta web smoke test (legacy educational fallback enabled)" >&2
+echo "[web-smoke-test] Starting AgentAuth beta web smoke test (legacy educational fallback enabled)" >&2
 
 PORT=${1:-}
 if [[ -z "${PORT}" ]]; then
@@ -37,7 +37,7 @@ check() { echo "[web-smoke-test] ✓ $*" >&2; }
 curl_silent() { curl -fsS "$@"; }
 
 HTML=$(curl_silent "${BASE}/") || fail "Root page fetch failed"
-[[ "${HTML}" == *"GAuth Beta"* || "${HTML}" == *"GAuth Educational Demo"* ]] || fail "Root page missing expected beta or legacy text"
+[[ "${HTML}" == *"AgentAuth Beta"* || "${HTML}" == *"AgentAuth Educational Demo"* ]] || fail "Root page missing expected beta or legacy text"
 check "Root page OK"
 
 HEALTH=$(curl_silent "${BASE}/api/v1/beta/health" || curl_silent "${BASE}/api/v1/educational/health") || fail "Health endpoint failed"

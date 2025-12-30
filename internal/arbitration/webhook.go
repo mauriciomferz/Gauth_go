@@ -1,4 +1,4 @@
-// Package arbitration provides webhook support for external dispute resolution systems (RFC 0111 sec4.item3).
+// Package arbitration provides webhook support for external dispute resolution systems (AAP-001 sec4.item3).
 package arbitration
 
 import (
@@ -249,14 +249,14 @@ func (w *WebhookClient) deliver(ctx context.Context, payload WebhookPayload) err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "GAuth-Arbitration-Webhook/1.0")
-	req.Header.Set("X-GAuth-Event", string(payload.Event))
-	req.Header.Set("X-GAuth-Timestamp", payload.Timestamp.Format(time.RFC3339))
+	req.Header.Set("User-Agent", "AgentAuth-Arbitration-Webhook/1.0")
+	req.Header.Set("X-AgentAuth-Event", string(payload.Event))
+	req.Header.Set("X-AgentAuth-Timestamp", payload.Timestamp.Format(time.RFC3339))
 
 	// Generate HMAC signature if secret is configured
 	if w.config.Secret != "" {
 		signature := w.generateSignature(body)
-		req.Header.Set("X-GAuth-Signature", signature)
+		req.Header.Set("X-AgentAuth-Signature", signature)
 	}
 
 	// Send request

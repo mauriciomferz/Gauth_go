@@ -82,7 +82,7 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 	chain *AuthorizationChain,
 ) (*ChainValidationResult, error) {
 	if chain == nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "missing_chain",
 			Message: "Authorization chain is required",
 		}
@@ -171,21 +171,21 @@ func (v *AuthorizationChainValidator) validateChainStructure(
 	result *ChainValidationResult,
 ) error {
 	if chain.OwnersAuthorizer == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_authorizer",
 			Message: "Authorization chain must start with owner's authorizer",
 		}
 	}
 
 	if chain.ClientOwner == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_owner",
 			Message: "Authorization chain must include client owner",
 		}
 	}
 
 	if chain.Client == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_client",
 			Message: "Authorization chain must end with client",
 		}
@@ -195,7 +195,7 @@ func (v *AuthorizationChainValidator) validateChainStructure(
 	chainDepth := v.calculateChainDepth(chain)
 	result.ValidatedChainDepth = chainDepth
 	if chainDepth > v.maxChainDepth {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "chain_too_deep",
 			Message: fmt.Sprintf("Authorization chain depth %d exceeds maximum %d", chainDepth, v.maxChainDepth),
 		}
@@ -218,14 +218,14 @@ func (v *AuthorizationChainValidator) validateChainStructure(
 
 	// Validate chain linkage
 	if chain.ClientOwner.AuthorizedBy != chain.OwnersAuthorizer.EntityID {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "broken_chain",
 			Message: "Client owner must be authorized by owner's authorizer",
 		}
 	}
 
 	if chain.Client.AuthorizedBy != chain.ClientOwner.EntityID {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "broken_chain",
 			Message: "Client must be authorized by client owner",
 		}
@@ -264,7 +264,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 	if chain.OwnersAuthorizer != nil {
 		entityID := chain.OwnersAuthorizer.EntityID
 		if seen[entityID] {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "circular_reference",
 				Message: fmt.Sprintf("Circular reference detected: entity %s appears multiple times", entityID),
 			}
@@ -276,7 +276,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 	if chain.ClientOwner != nil {
 		entityID := chain.ClientOwner.EntityID
 		if seen[entityID] {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "circular_reference",
 				Message: fmt.Sprintf("Circular reference detected: entity %s appears multiple times", entityID),
 			}
@@ -285,7 +285,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 
 		// Check if owner is authorizing itself
 		if chain.OwnersAuthorizer != nil && entityID == chain.OwnersAuthorizer.EntityID {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "self_authorization",
 				Message: "Entity cannot authorize itself",
 			}
@@ -296,7 +296,7 @@ func (v *AuthorizationChainValidator) detectCircularReferences(chain *Authorizat
 	if chain.Client != nil {
 		entityID := chain.Client.EntityID
 		if seen[entityID] {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "circular_reference",
 				Message: fmt.Sprintf("Circular reference detected: entity %s appears multiple times", entityID),
 			}
@@ -318,7 +318,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 		if chain.ClientOwner.AuthorizationType == "delegated" {
 			// This is a delegated authorization - count as delegation hop
 			if chain.ClientOwner.AuthorizedBy == "" {
-				return &GAuthError{
+				return &AgentAuthError{
 					Code:    "missing_delegator",
 					Message: "Delegated authorization must specify authorizer",
 				}
@@ -330,7 +330,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 		// Client must be authorized by Client Owner
 		if chain.Client.AuthorizationType == "delegated" {
 			if chain.Client.AuthorizedBy == "" {
-				return &GAuthError{
+				return &AgentAuthError{
 					Code:    "missing_delegator",
 					Message: "Delegated client must specify authorizer",
 				}
@@ -339,7 +339,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 
 		// Verify client status is active
 		if chain.Client.Status != string(PolicyStatusActive) {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "inactive_client",
 				Message: fmt.Sprintf("Client has invalid status: %s", chain.Client.Status),
 			}
@@ -359,7 +359,7 @@ func (v *AuthorizationChainValidator) validateChainExpiration(chain *Authorizati
 		validUntil := chain.OwnersAuthorizer.ValidUntil
 
 		if now.After(validUntil) {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "authorizer_expired",
 				Message: fmt.Sprintf("Owner's authorizer expired at %v", validUntil),
 			}
@@ -376,7 +376,7 @@ func (v *AuthorizationChainValidator) validateChainExpiration(chain *Authorizati
 		validUntil := chain.ClientOwner.ValidUntil
 
 		if now.After(validUntil) {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "owner_expired",
 				Message: fmt.Sprintf("Client owner authorization expired at %v", validUntil),
 			}
@@ -393,7 +393,7 @@ func (v *AuthorizationChainValidator) validateChainExpiration(chain *Authorizati
 		validUntil := chain.Client.ValidUntil
 
 		if now.After(validUntil) {
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "client_expired",
 				Message: fmt.Sprintf("Client authorization expired at %v", validUntil),
 			}
@@ -426,7 +426,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 		result.Valid = false
 		result.FailureReason = "Identity not verified"
 		result.Checks["identity_verified"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "identity_not_verified",
 			Message: "Owner's authorizer identity must be verified",
 		}
@@ -438,7 +438,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid status: %s", authorizer.Status)
 		result.Checks["status_active"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "invalid_status",
 			Message: fmt.Sprintf("Owner's authorizer status must be active, got: %s", authorizer.Status),
 		}
@@ -451,7 +451,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 		result.Valid = false
 		result.FailureReason = "Not yet valid"
 		result.Checks["temporal_validity"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "not_yet_valid",
 			Message: "Owner's authorizer authorization not yet valid",
 		}
@@ -460,7 +460,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 		result.Valid = false
 		result.FailureReason = "Expired"
 		result.Checks["temporal_validity"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "expired",
 			Message: "Owner's authorizer authorization has expired",
 		}
@@ -473,7 +473,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 			result.Valid = false
 			result.FailureReason = "Missing statutory authority"
 			result.Checks["statutory_authority"] = false
-			return result, &GAuthError{
+			return result, &AgentAuthError{
 				Code:    "missing_statutory_authority",
 				Message: "Owner's authorizer must have statutory authority per RFC-0111",
 			}
@@ -500,7 +500,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 			if !registerValid && v.strictMode {
 				result.Valid = false
 				result.FailureReason = "Commercial register verification failed"
-				return result, &GAuthError{
+				return result, &AgentAuthError{
 					Code:    "commercial_register_invalid",
 					Message: "Owner's authorizer commercial register entry is invalid",
 				}
@@ -511,7 +511,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 		if v.strictMode && authorizer.LegalBasis != nil && authorizer.LegalBasis.BasisType == "company_law" {
 			result.Valid = false
 			result.FailureReason = "Missing commercial register reference"
-			return result, &GAuthError{
+			return result, &AgentAuthError{
 				Code:    "missing_commercial_register",
 				Message: "Owner's authorizer with company law basis must have commercial register reference",
 			}
@@ -534,7 +534,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 			if !proofValid && v.strictMode {
 				result.Valid = false
 				result.FailureReason = "Verification proof invalid"
-				return result, &GAuthError{
+				return result, &AgentAuthError{
 					Code:    "verification_proof_invalid",
 					Message: "Owner's authorizer verification proof is invalid",
 				}
@@ -550,7 +550,7 @@ func (v *AuthorizationChainValidator) validateOwnersAuthorizer(
 			result.Valid = false
 			result.FailureReason = "Missing legal basis"
 			result.Checks["legal_basis"] = false
-			return result, &GAuthError{
+			return result, &AgentAuthError{
 				Code:    "missing_legal_basis",
 				Message: "Owner's authorizer must have legal basis",
 			}
@@ -583,7 +583,7 @@ func (v *AuthorizationChainValidator) validateClientOwner(
 		result.Valid = false
 		result.FailureReason = "Identity not verified"
 		result.Checks["identity_verified"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "identity_not_verified",
 			Message: "Client owner identity must be verified",
 		}
@@ -595,7 +595,7 @@ func (v *AuthorizationChainValidator) validateClientOwner(
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid status: %s", owner.Status)
 		result.Checks["status_active"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "invalid_status",
 			Message: fmt.Sprintf("Client owner status must be active, got: %s", owner.Status),
 		}
@@ -608,7 +608,7 @@ func (v *AuthorizationChainValidator) validateClientOwner(
 		result.Valid = false
 		result.FailureReason = "Temporal validity check failed"
 		result.Checks["temporal_validity"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "temporal_validity_failed",
 			Message: "Client owner authorization is not temporally valid",
 		}
@@ -620,7 +620,7 @@ func (v *AuthorizationChainValidator) validateClientOwner(
 		result.Valid = false
 		result.FailureReason = "Authorization linkage broken"
 		result.Checks["authorization_linkage"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "broken_authorization_chain",
 			Message: "Client owner not properly authorized by owner's authorizer",
 		}
@@ -640,7 +640,7 @@ func (v *AuthorizationChainValidator) validateClientOwner(
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid authorization type: %s", owner.AuthorizationType)
 		result.Checks["authorization_type"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "invalid_authorization_type",
 			Message: fmt.Sprintf("Client owner has invalid authorization type: %s", owner.AuthorizationType),
 		}
@@ -677,7 +677,7 @@ func (v *AuthorizationChainValidator) validateClient(
 		result.Valid = false
 		result.FailureReason = "Identity not verified"
 		result.Checks["identity_verified"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "identity_not_verified",
 			Message: "Client identity must be verified",
 		}
@@ -689,7 +689,7 @@ func (v *AuthorizationChainValidator) validateClient(
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid status: %s", client.Status)
 		result.Checks["status_active"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "invalid_status",
 			Message: fmt.Sprintf("Client status must be active, got: %s", client.Status),
 		}
@@ -702,7 +702,7 @@ func (v *AuthorizationChainValidator) validateClient(
 		result.Valid = false
 		result.FailureReason = "Temporal validity check failed"
 		result.Checks["temporal_validity"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "temporal_validity_failed",
 			Message: "Client authorization is not temporally valid",
 		}
@@ -714,7 +714,7 @@ func (v *AuthorizationChainValidator) validateClient(
 		result.Valid = false
 		result.FailureReason = "Authorization linkage broken"
 		result.Checks["authorization_linkage"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "broken_authorization_chain",
 			Message: "Client not properly authorized by client owner",
 		}
@@ -734,7 +734,7 @@ func (v *AuthorizationChainValidator) validateClient(
 		result.Valid = false
 		result.FailureReason = fmt.Sprintf("Invalid entity type: %s", client.EntityType)
 		result.Checks["entity_type"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "invalid_entity_type",
 			Message: fmt.Sprintf("Client has invalid entity type: %s (expected AI system types)", client.EntityType),
 		}
@@ -880,13 +880,13 @@ func (v *AuthorizationChainValidator) validateChainContinuity(chain *Authorizati
 
 	// Client owner must be valid during authorizer's validity period
 	if chain.ClientOwner.ValidFrom.Before(chain.OwnersAuthorizer.ValidFrom) {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "temporal_discontinuity",
 			Message: "Client owner validity starts before authorizer's validity",
 		}
 	}
 	if chain.ClientOwner.ValidUntil.After(chain.OwnersAuthorizer.ValidUntil) {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "temporal_discontinuity",
 			Message: "Client owner validity extends beyond authorizer's validity",
 		}
@@ -894,13 +894,13 @@ func (v *AuthorizationChainValidator) validateChainContinuity(chain *Authorizati
 
 	// Client must be valid during owner's validity period
 	if chain.Client.ValidFrom.Before(chain.ClientOwner.ValidFrom) {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "temporal_discontinuity",
 			Message: "Client validity starts before owner's validity",
 		}
 	}
 	if chain.Client.ValidUntil.After(chain.ClientOwner.ValidUntil) {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "temporal_discontinuity",
 			Message: "Client validity extends beyond owner's validity",
 		}

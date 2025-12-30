@@ -15,7 +15,7 @@ owners: [system]
 ## 1. Executive Summary
 Substantial progress has exceeded original milestone scope: cryptographic authenticity (mandatory canonical POA signatures), semantic PoA validation prototype, immutable audit ledger with anchoring artifacts, capability registry governance & anchoring metrics (including notarization prototype), advanced observability (histograms, percentiles, anomaly detector), replay protection (in-memory + Redis), validation limits configuration, and consistency proof V2 optimizations (streaming prefix decomposition + interval path prototype) — the latter not listed in milestone deliverables.
 
-Overall Compliance Trajectory: RFC 0111 & 0115 coverage improved materially; multi-signature, obligations/advice, full PoA embedding, and external notarization remain top gaps.
+Overall Compliance Trajectory: AAP-001 & 0115 coverage improved materially; multi-signature, obligations/advice, full PoA embedding, and external notarization remain top gaps.
 
 ## 2. Planned vs Delivered (Milestone 2B)
 | Planned Deliverable | Status | Notes |

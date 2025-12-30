@@ -1,4 +1,4 @@
-# GAuth JWE Encryption - Production Deployment Guide
+# AgentAuth JWE Encryption - Production Deployment Guide
 
 **Version**: 1.0  
 **Date**: November 12, 2025  
@@ -22,7 +22,7 @@
 
 ## Overview
 
-GAuth implements JWE (JSON Web Encryption) for Extended Token protection, providing:
+AgentAuth implements JWE (JSON Web Encryption) for Extended Token protection, providing:
 
 - **Encryption**: RSA-OAEP-256 + AES-256-GCM (default)
 - **Compression**: DEFLATE (reduces token size)
@@ -672,5 +672,5 @@ kubectl logs -f deployment/gauth-server -n gauth | grep JWE
 
 **Document Version**: 1.0  
 **Last Updated**: November 12, 2025  
-**Maintainer**: GAuth Development Team  
+**Maintainer**: AgentAuth Development Team  
 **License**: See LICENSE file

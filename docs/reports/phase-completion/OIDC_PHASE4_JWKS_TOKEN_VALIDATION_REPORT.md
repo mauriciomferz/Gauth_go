@@ -414,7 +414,7 @@ ef031c8f feat: OIDC Phase 4 Day 1 - JWKS Fetcher & External Token Validator
 ### Upstream Dependencies
 1. **DiscoveryCache**: JWKS URI lookup
 2. **ProviderRegistry**: Provider configuration
-3. **IDTokenService**: GAuth token issuance
+3. **IDTokenService**: AgentAuth token issuance
 
 ### Downstream Consumers
 1. **Token Exchange Service**: Primary consumer

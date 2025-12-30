@@ -18,7 +18,7 @@ refreshCadence: annually
 
 ## Executive Summary
 
-This document outlines disaster recovery procedures for the GAuth application, covering complete system recovery scenarios including cluster failures, data center outages, and catastrophic data loss.
+This document outlines disaster recovery procedures for the AgentAuth application, covering complete system recovery scenarios including cluster failures, data center outages, and catastrophic data loss.
 
 **Recovery Objectives:**
 - **RTO (Recovery Time Objective):** 30 minutes
@@ -29,11 +29,11 @@ This document outlines disaster recovery procedures for the GAuth application, c
 
 ## 🎯 Disaster Scenarios
 
-### Scenario 1: Complete Pod Failure (All GAuth Pods Down)
+### Scenario 1: Complete Pod Failure (All AgentAuth Pods Down)
 - **Likelihood:** Medium
 - **Impact:** High
 - **RTO:** 10 minutes
-- **Runbook:** [GAuthServiceUnavailable](./runbooks/GAuthServiceUnavailable.md)
+- **Runbook:** [AgentAuthServiceUnavailable](./runbooks/AgentAuthServiceUnavailable.md)
 
 ### Scenario 2: Database Failure (PostgreSQL Down)
 - **Likelihood:** Low
@@ -168,7 +168,7 @@ kubectl wait --for=condition=ready pod -l app=redis -n gauth-staging --timeout=3
 kubectl exec -n gauth-staging <redis-pod> -- redis-cli PING
 ```
 
-### Step 6: Deploy GAuth Application
+### Step 6: Deploy AgentAuth Application
 
 ```bash
 # Apply deployment manifest
@@ -332,7 +332,7 @@ kubectl apply -f k8s-redis.yaml
 
 After recovery, verify:
 
-- [ ] All pods running (3 GAuth, 1 PostgreSQL, 1 Redis)
+- [ ] All pods running (3 AgentAuth, 1 PostgreSQL, 1 Redis)
 - [ ] Database accessible and data intact
 - [ ] Redis operational (data optional)
 - [ ] Health checks passing

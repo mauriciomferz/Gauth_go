@@ -151,7 +151,7 @@ func TestExtendedToken_Validate(t *testing.T) {
 			IssuedBy: &AuthorizationServerInfo{
 				ServerID:   "auth-server-001",
 				ServerURL:  "https://auth.example.com",
-				ServerName: "GAuth Authorization Server",
+				ServerName: "AgentAuth Authorization Server",
 				Issuer:     "https://auth.example.com",
 				IssueTime:  now,
 			},

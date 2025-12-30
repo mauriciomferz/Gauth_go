@@ -1,6 +1,6 @@
-// Package crypto provides cryptographic signature algorithm abstraction for GAuth.
+// Package crypto provides cryptographic signature algorithm abstraction for AgentAuth.
 //
-// This package implements algorithm agility, allowing GAuth to support multiple
+// This package implements algorithm agility, allowing AgentAuth to support multiple
 // signature algorithms (Ed25519, RSA-PSS, ECDSA P-256) for both signing and
 // verification operations. This enables gradual migration between algorithms
 // and interoperability with systems using different cryptographic standards.
@@ -84,7 +84,7 @@ type SignatureAlgorithm interface {
 }
 
 // Ed25519Provider implements SignatureAlgorithm for Ed25519 (EdDSA).
-// This is the default algorithm for GAuth, providing fast signatures with
+// This is the default algorithm for AgentAuth, providing fast signatures with
 // small key sizes (32 bytes) and signatures (64 bytes).
 type Ed25519Provider struct{}
 

@@ -8,7 +8,7 @@
 
 ## Overview
 
-The G-Agent API provides AI-assisted authorization enforcement for GAuth, connecting to the enforcement package's `AIIntegrationInterface`. G-Agents analyze enforcement requests using policy evaluation, context analysis, and risk scoring to generate intelligent authorization recommendations.
+The G-Agent API provides AI-assisted authorization enforcement for AgentAuth, connecting to the enforcement package's `AIIntegrationInterface`. G-Agents analyze enforcement requests using policy evaluation, context analysis, and risk scoring to generate intelligent authorization recommendations.
 
 **Key Features:**
 - AI-powered authorization decision support
@@ -76,7 +76,7 @@ A G-Agent instance that evaluates enforcement requests:
 ```go
 agent := gagent.NewAgent(
     "agent-1",              // Agent ID
-    "GAuth Primary Agent",  // Display name
+    "AgentAuth Primary Agent",  // Display name
     "gpt-4",                // Model name
     "openai",               // Provider
     0.8,                    // Confidence threshold
@@ -417,14 +417,14 @@ package main
 import (
     "log"
     "github.com/gin-gonic/gin"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gagent"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gagent"
 )
 
 func main() {
     // Create G-Agent
     agent := gagent.NewAgent(
         "agent-1",
-        "GAuth Primary Agent",
+        "AgentAuth Primary Agent",
         "gpt-4",
         "openai",
         0.8,
@@ -472,8 +472,8 @@ agent.SetRiskScorer(&CustomRiskScorer{})
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/enforcement"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gagent"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/enforcement"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gagent"
 )
 
 // Create enforcement engine
@@ -733,4 +733,4 @@ func TestGAgentIntegration(t *testing.T) {
 **Tests**: pkg/gagent/*_test.go  
 **Examples**: See "Usage Examples" section above
 
-For issues or questions, consult the GAuth main README.md and ORGANIZATION.md.
+For issues or questions, consult the AgentAuth main README.md and ORGANIZATION.md.

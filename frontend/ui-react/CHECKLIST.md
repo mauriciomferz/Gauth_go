@@ -1,4 +1,4 @@
-# GAuth React UI - Implementation Checklist
+# AgentAuth React UI - Implementation Checklist
 
 ## ✅ Phase 1: Project Setup (COMPLETE)
 
@@ -42,7 +42,7 @@
 - [x] `src/lib/api.ts` - Complete API client (308 lines)
   - [x] Axios instance configured
   - [x] Error interceptor
-  - [x] 20+ typed methods covering all GAuth endpoints
+  - [x] 20+ typed methods covering all AgentAuth endpoints
   - [x] 15+ TypeScript interfaces
 
 **Status**: 6/6 files created ✅

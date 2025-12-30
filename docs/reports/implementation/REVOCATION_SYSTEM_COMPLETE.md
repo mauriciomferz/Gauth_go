@@ -9,7 +9,7 @@
 
 ## 🎯 Executive Summary
 
-The Emergency Revocation System for GAuth Power-of-Attorney credentials is **complete and production-ready**. This implementation provides three complementary revocation strategies with full web server integration, comprehensive testing, CI/CD automation, and complete documentation.
+The Emergency Revocation System for AgentAuth Power-of-Attorney credentials is **complete and production-ready**. This implementation provides three complementary revocation strategies with full web server integration, comprehensive testing, CI/CD automation, and complete documentation.
 
 ### Key Achievements
 
@@ -110,7 +110,7 @@ The Emergency Revocation System for GAuth Power-of-Attorney credentials is **com
 
 ```
 ┌─────────────────────────────────────────────┐
-│         GAuth Web Server (BetaServer)       │
+│         AgentAuth Web Server (BetaServer)       │
 │                                             │
 │  ┌───────────────────────────────────────┐ │
 │  │    RevocationService (web/revocation.go)│ │

@@ -18,7 +18,7 @@ refreshCadence: quarterly
 
 ## Overview
 
-This document describes backup and restore procedures for all GAuth system components including PostgreSQL database, Redis cache, and monitoring data.
+This document describes backup and restore procedures for all AgentAuth system components including PostgreSQL database, Redis cache, and monitoring data.
 
 ---
 

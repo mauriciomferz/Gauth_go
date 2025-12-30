@@ -11,7 +11,7 @@
 
 ## EXECUTIVE SUMMARY
 
-**MCP Phase 3 (Agent Integration & Audit Logging) is complete**, bringing the GAuth 1.0 system's Model Context Protocol integration from **60% to 85% compliance**. This phase implements:
+**MCP Phase 3 (Agent Integration & Audit Logging) is complete**, bringing the AgentAuth 1.0 system's Model Context Protocol integration from **60% to 85% compliance**. This phase implements:
 
 1. ✅ **MCP Agent Wrapper** (`pkg/gagent/mcp_integration.go` - 233 lines)
 2. ✅ **Audit Logger** (`pkg/mcp/audit_logger.go` - 304 lines)
@@ -30,7 +30,7 @@
 
 ### 1. MCP Agent Wrapper (`pkg/gagent/mcp_integration.go`)
 
-**Purpose**: High-level API for AI agents to access MCP resources with automatic GAuth authorization enforcement.
+**Purpose**: High-level API for AI agents to access MCP resources with automatic AgentAuth authorization enforcement.
 
 **Key Components**:
 
@@ -41,7 +41,7 @@ type MCPAgent struct {
     authBridge  AuthorizationBridge  // Authorization bridge
     auditLogger AuditLogger          // Audit logger (optional)
     agentID     string               // Unique agent identifier
-    token       *ExtendedToken       // GAuth authorization token
+    token       *ExtendedToken       // AgentAuth authorization token
 }
 ```
 
@@ -112,8 +112,8 @@ func (a *MCPAgent) GetPrompt(ctx context.Context, promptName string, arguments m
 type AuditLogEntry struct {
     Timestamp   time.Time              // Operation timestamp
     AgentID     string                 // Agent identifier
-    RequestID   string                 // GAuth request ID
-    GrantID     string                 // GAuth grant ID
+    RequestID   string                 // AgentAuth request ID
+    GrantID     string                 // AgentAuth grant ID
     Operation   string                 // "resource_read", "tool_call", "prompt_get"
     Target      string                 // Resource URI, tool name, or prompt name
     Authorized  bool                   // Authorization result

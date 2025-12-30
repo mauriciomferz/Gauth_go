@@ -221,7 +221,7 @@ go test ./pkg/revocation -bench=. -benchmem
 
 ---
 
-## Integration with GAuth System
+## Integration with AgentAuth System
 
 ### Step 1: Initialize Oracle
 

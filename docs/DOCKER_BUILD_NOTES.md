@@ -11,7 +11,7 @@ owners: [system]
 > Last Updated: 2025-10-17
 > Status: Active
 
-This document captures recent improvements and guidance for the beta demonstration GAuth Docker build process.
+This document captures recent improvements and guidance for the beta demonstration AgentAuth Docker build process.
 
 ## Recent Changes
 

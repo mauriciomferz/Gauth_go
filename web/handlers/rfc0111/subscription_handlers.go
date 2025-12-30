@@ -1,4 +1,4 @@
-// Package rfc0111 provides HTTP handlers for RFC-0111 subscription and authorization flows.
+// Package aap001 provides HTTP handlers for RFC-0111 subscription and authorization flows.
 //
 // NOTE: These handlers are basic stubs that demonstrate the REST API structure.
 // Full implementation requires:
@@ -36,7 +36,7 @@ func NewSubscriptionHandlers(manager *gauth.SubscriptionFlowManager, store gauth
 	}
 }
 
-// CreateSubscription handles POST /api/v1/rfc0111/subscriptions
+// CreateSubscription handles POST /api/v1/aap001/subscriptions
 // RFC-0111 Step I: Owner's Authorizer Identity Proof
 func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 	var req struct {
@@ -83,7 +83,7 @@ func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 		identityProofRequest,
 	)
 	if err != nil {
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error":   gauthErr.Code,
 				"message": gauthErr.Message,
@@ -105,7 +105,7 @@ func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 	})
 }
 
-// GetSubscription handles GET /api/v1/rfc0111/subscriptions/:id
+// GetSubscription handles GET /api/v1/aap001/subscriptions/:id
 func (h *SubscriptionHandlers) GetSubscription(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
@@ -133,7 +133,7 @@ func (h *SubscriptionHandlers) GetSubscription(c *gin.Context) {
 	})
 }
 
-// ListSubscriptions handles GET /api/v1/rfc0111/subscriptions?client_id=xxx
+// ListSubscriptions handles GET /api/v1/aap001/subscriptions?client_id=xxx
 func (h *SubscriptionHandlers) ListSubscriptions(c *gin.Context) {
 	clientID := c.Query("client_id")
 	if clientID == "" {
@@ -168,7 +168,7 @@ func (h *SubscriptionHandlers) ListSubscriptions(c *gin.Context) {
 	})
 }
 
-// ExecuteStepII handles POST /api/v1/rfc0111/subscriptions/:id/step-ii
+// ExecuteStepII handles POST /api/v1/aap001/subscriptions/:id/step-ii
 // RFC-0111 Step II: Owner's Authorizer Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 	subscriptionID := c.Param("id")
@@ -194,7 +194,7 @@ func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			if gauthErr.Code == "step_ii_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
@@ -214,7 +214,7 @@ func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 	})
 }
 
-// ExecuteStepIII handles POST /api/v1/rfc0111/subscriptions/:id/step-iii
+// ExecuteStepIII handles POST /api/v1/aap001/subscriptions/:id/step-iii
 // RFC-0111 Step III: Client Owner Identity Proof
 func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 	subscriptionID := c.Param("id")
@@ -250,7 +250,7 @@ func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			code = http.StatusBadRequest
 			c.JSON(code, gin.H{
 				"error":   gauthErr.Code,
@@ -271,7 +271,7 @@ func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 	})
 }
 
-// ExecuteStepIV handles POST /api/v1/rfc0111/subscriptions/:id/step-iv
+// ExecuteStepIV handles POST /api/v1/aap001/subscriptions/:id/step-iv
 // RFC-0111 Step IV: Client Owner Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	subscriptionID := c.Param("id")
@@ -295,7 +295,7 @@ func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			if gauthErr.Code == "step_iv_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
@@ -315,7 +315,7 @@ func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	})
 }
 
-// ExecuteStepV handles POST /api/v1/rfc0111/subscriptions/:id/step-v
+// ExecuteStepV handles POST /api/v1/aap001/subscriptions/:id/step-v
 // RFC-0111 Step V: Client Authorization
 func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	subscriptionID := c.Param("id")
@@ -380,7 +380,7 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			if gauthErr.Code == "step_v_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
@@ -400,7 +400,7 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	})
 }
 
-// ExecuteStepVI handles POST /api/v1/rfc0111/subscriptions/:id/step-vi
+// ExecuteStepVI handles POST /api/v1/aap001/subscriptions/:id/step-vi
 // RFC-0111 Step VI: Resource Owner Identity Proof
 func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 	subscriptionID := c.Param("id")
@@ -436,7 +436,7 @@ func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			code = http.StatusBadRequest
 			c.JSON(code, gin.H{
 				"error":   gauthErr.Code,
@@ -457,7 +457,7 @@ func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 	})
 }
 
-// ExecuteStepVII handles POST /api/v1/rfc0111/subscriptions/:id/step-vii
+// ExecuteStepVII handles POST /api/v1/aap001/subscriptions/:id/step-vii
 // RFC-0111 Step VII: Resource Owner Authorization Proof
 func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	subscriptionID := c.Param("id")
@@ -481,7 +481,7 @@ func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			if gauthErr.Code == "step_vii_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
@@ -501,7 +501,7 @@ func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	})
 }
 
-// ExecuteStepVIII handles POST /api/v1/rfc0111/subscriptions/:id/step-viii
+// ExecuteStepVIII handles POST /api/v1/aap001/subscriptions/:id/step-viii
 // RFC-0111 Step VIII: Resource Server Authorization
 func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 	subscriptionID := c.Param("id")
@@ -531,7 +531,7 @@ func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.GAuthError); ok {
+		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
 			if gauthErr.Code == "step_viii_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}

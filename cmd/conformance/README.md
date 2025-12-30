@@ -8,11 +8,11 @@ owners: [system]
 
 # Conformance CLI Tool
 
-Automated conformance analysis tool for RFC 0111 and RFC 0115 compliance verification.
+Automated conformance analysis tool for AAP-001 and AAP-002 compliance verification.
 
 ## Overview
 
-The conformance CLI tool analyzes your GAuth implementation against RFC 0111 (GAuth Core) and RFC 0115 (Power of Attorney) specifications. It:
+The conformance CLI tool analyzes your AgentAuth implementation against AAP-001 (AgentAuth Core) and AAP-002 (Power of Attorney) specifications. It:
 
 - Scans the codebase for required symbols and test coverage
 - Generates compliance reports in multiple formats (JSON, Markdown, CSV)
@@ -120,7 +120,7 @@ Use `-1` to disable a threshold (default).
 ### Summary Output
 
 ```
-🔍 GAuth RFC 0111/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/0115 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 
@@ -138,7 +138,7 @@ Use `-1` to disable a threshold (default).
 ### Threshold Violation
 
 ```
-🔍 GAuth RFC 0111/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/0115 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 

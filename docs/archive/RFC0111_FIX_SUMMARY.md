@@ -127,7 +127,7 @@ Can be performed multiple times after subscription is complete:
 `web/server_clean.go` lines 5950-6050:
 ```go
 if rfc0111Components, tokenStore, err := InitRFC0111FromEnv(); err == nil && rfc0111Components != nil {
-    // Create GAuth service with RFC-0111 compliance enabled
+    // Create AgentAuth service with RFC-0111 compliance enabled
     extendedTokenService := gauth.NewExtendedTokenService(...)
     
     gauthService, err := gauth.New(

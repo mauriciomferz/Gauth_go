@@ -1,6 +1,6 @@
-// Official GiFo-RFC-0111 Implementation Demo (Beta Demonstration)
+// Official AAP-0111 Implementation Demo (Beta Demonstration)
 //
-// Copyright (c) 2025 Gimel Foundation gGmbH i.G.
+// Copyright (c) 2025 AgentAuth Community
 // Licensed under Apache 2.0
 //
 // ⚠️  BETA DEMONSTRATION NOTICE
@@ -9,8 +9,8 @@
 // nuance handling, and verified identity assurance workflows required for regulated use.
 // See DISCLAIMER.md and docs/DEPRECATION_TIMELINE.md for lifecycle & removal roadmap.
 //
-// Demonstrates the complete GAuth 1.0 Authorization Framework
-// as specified in GiFo-RFC-0111 by Dr. Götz G. Wehberg
+// Demonstrates the complete AgentAuth 1.0 Authorization Framework
+// as specified in AAP-0111 by The AgentAuth Community
 
 package main
 
@@ -46,16 +46,16 @@ type scenarioParams struct {
 	performRevoke        bool                         // if false, skip revoke
 	postRevokeValidation bool                         // if true, attempt post-revoke validation
 	largeJSON            bool                         // if true, force JSON truncation path
-	modifyConfig         func(*gauth_rfc_001.RFC0111Config) // optional mutator to trigger config errors
+	modifyConfig         func(*gauth_rfc_001.AAP001Config) // optional mutator to trigger config errors
 }
 
 // runDemoInternal executes the scenario described by params and returns DemoResult or error explaining failure.
 func runDemoInternal(p scenarioParams) (*DemoResult, error) {
-	cfg := createRFC0111Config()
+	cfg := createAAP001Config()
 	if p.modifyConfig != nil {
 		p.modifyConfig(cfg)
 	}
-	if err := gauth_rfc_001.ValidateRFC0111Compliance(cfg); err != nil {
+	if err := gauth_rfc_001.ValidateAAP001Compliance(cfg); err != nil {
 		return nil, fmt.Errorf("config invalid: %w", err)
 	}
 	auditLogger := audit.NewMemoryLogger(nil)
@@ -87,7 +87,7 @@ func runDemoInternal(p scenarioParams) (*DemoResult, error) {
 	} else if !p.allowInvalidAction { // action unexpectedly allowed
 		return nil, fmt.Errorf("expected invalid action rejection")
 	}
-	framework := gauth_rfc_001.GAuth10Framework{AuthServer: cfg.AuthorizationServerURL, Clients: []string{p.grantee}}
+	framework := gauth_rfc_001.AgentAuth10Framework{AuthServer: cfg.AuthorizationServerURL, Clients: []string{p.grantee}}
 	meta, _ := framework.ToJSON()
 	out := map[string]interface{}{"delegation": delegation.POA, "auth_token": delegation.AuthToken, "framework": json.RawMessage(meta)}
 	if p.largeJSON {
@@ -162,8 +162,8 @@ func RunDemoExpectFailure() error {
 }
 
 func main() {
-	fmt.Println("=== GiFo-RFC-0111 GAuth 1.0 Authorization Framework Demo (Beta) ===")
-	fmt.Println("This walkthrough uses the current rfc0111 service API (delegations) instead of deprecated deep struct graph.")
+	fmt.Println("=== AAP-0111 AgentAuth 1.0 Authorization Framework Demo (Beta) ===")
+	fmt.Println("This walkthrough uses the current aap001 service API (delegations) instead of deprecated deep struct graph.")
 	fmt.Println()
 	res, err := RunDemo()
 	if err != nil {
@@ -184,10 +184,10 @@ func main() {
 	fmt.Println("\nAll RFC-0111 demo steps completed (beta demonstration – non-production).")
 }
 
-func createRFC0111Config() *gauth_rfc_001.RFC0111Config {
-	return &gauth_rfc_001.RFC0111Config{
+func createAAP001Config() *gauth_rfc_001.AAP001Config {
+	return &gauth_rfc_001.AAP001Config{
 		AuthorizationServerURL:    "https://auth.gimelfoundation.com",
-		TrustServiceProvider:      "Gimel Foundation Trust Services",
+		TrustServiceProvider:      "AgentAuth Community Trust Services",
 		RequireNotarization:       true,
 		MaxDelegationDepth:        3,
 		DefaultTokenValidity:      24 * time.Hour,

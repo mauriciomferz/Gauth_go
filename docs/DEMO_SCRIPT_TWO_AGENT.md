@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Two-Agent GAuth Demo Script (Rotation, PoA, Attestation, Throttle)
+# Two-Agent AgentAuth Demo Script (Rotation, PoA, Attestation, Throttle)
 
 Objective: Demonstrate governance transparency and reactive controls as two autonomous agents negotiate authorization, verify integrity artifacts, and handle anomaly-induced throttling.
 

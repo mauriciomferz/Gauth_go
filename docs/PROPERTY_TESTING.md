@@ -14,7 +14,7 @@ owners: [system]
 
 ## Overview
 
-Property-based testing validates universal properties that should hold for all inputs within a domain, rather than testing specific examples. This document describes the property test implementations for GAuth parsing and validation logic.
+Property-based testing validates universal properties that should hold for all inputs within a domain, rather than testing specific examples. This document describes the property test implementations for AgentAuth parsing and validation logic.
 
 ## Architecture
 
@@ -390,7 +390,7 @@ For all inputs in domain D → Property P holds
 - [QuickCheck](https://en.wikipedia.org/wiki/QuickCheck): Original property testing framework (Haskell)
 - [Hypothesis](https://hypothesis.readthedocs.io/): Python property testing
 - [Go testing/quick](https://pkg.go.dev/testing/quick): Go standard library (deprecated)
-- [GAuth Canonical Digest Tests](../pkg/rfc0111/canonical_prop_test.go): Existing property tests in this codebase
+- [AgentAuth Canonical Digest Tests](../pkg/rfc0111/canonical_prop_test.go): Existing property tests in this codebase
 
 ## Contributing
 

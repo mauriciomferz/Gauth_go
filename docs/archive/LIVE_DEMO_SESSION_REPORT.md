@@ -1,4 +1,4 @@
-# GAuth+ System Live Demo - Session Report
+# AgentAuth+ System Live Demo - Session Report
 
 **Date**: November 26, 2025  
 **Session Duration**: ~30 minutes  
@@ -20,10 +20,10 @@
 # Database
 ✓ PostgreSQL:    localhost:5432 (UP - 5+ hours)
 
-# GAuth Service  
+# AgentAuth Service  
 ✓ Web Server:    http://localhost:8080 (UP)
   - PID: 97514
-  - All 27 GAuth+ endpoints active
+  - All 27 AgentAuth+ endpoints active
   - Metrics exposed at /metrics
   - Admin UI at /admin/gauthplus
 ```
@@ -105,7 +105,7 @@ gauthplus_capability_level
 **Status**: Dashboard provisioned and displaying data
 
 **12 Panels Available**:
-1. GAuth+ Validations Rate (timeseries)
+1. AgentAuth+ Validations Rate (timeseries)
 2. Total Validation Rate (gauge)
 3. P95 Validation Duration (gauge)
 4. Cache Hit Rate (timeseries) 
@@ -128,15 +128,15 @@ gauthplus_capability_level
 ```
 User: postgres
 Database: gauth
-Tables: All GAuth+ tables created via migrations
+Tables: All AgentAuth+ tables created via migrations
 Status: Connected and operational
 ```
 
-### GAuth+ Features Enabled ✅
+### AgentAuth+ Features Enabled ✅
 ```
-[GAuth+] Performance optimization: Caching enabled
-[GAuth+] Enforcement mode: ADVISORY
-[GAuth+] Features enabled:
+[AgentAuth+] Performance optimization: Caching enabled
+[AgentAuth+] Enforcement mode: ADVISORY
+[AgentAuth+] Features enabled:
   - Successor Management
   - Delegation Chains  
   - Dual Control
@@ -146,7 +146,7 @@ Status: Connected and operational
 
 ### API Endpoints ✅
 ```
-27 GAuth+ management endpoints registered
+27 AgentAuth+ management endpoints registered
 16 admin handlers registered
 All RFC-0111 endpoints operational
 ```
@@ -157,7 +157,7 @@ All RFC-0111 endpoints operational
 
 | Service | URL | Status |
 |---------|-----|--------|
-| **GAuth Service** | http://localhost:8080 | ✅ UP |
+| **AgentAuth Service** | http://localhost:8080 | ✅ UP |
 | **Admin UI** | http://localhost:8080/admin/gauthplus | ✅ UP |
 | **Metrics** | http://localhost:8080/metrics | ✅ UP |
 | **Grafana** | http://localhost:3000 | ✅ UP |
@@ -192,7 +192,7 @@ Created: `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test-traffic.sh
 ## What's Working
 
 ### ✅ Complete Feature Set
-- All 5 GAuth+ features operational
+- All 5 AgentAuth+ features operational
 - 27 REST API endpoints responding
 - Admin UI accessible
 - Database persistence working
@@ -303,7 +303,7 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
 
 1. **test-traffic.sh** (117 lines)
    - Automated test data generation
-   - Creates all 5 GAuth+ entity types
+   - Creates all 5 AgentAuth+ entity types
    - Tests cache performance
    - Ready for repeated use
 
@@ -315,7 +315,7 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
 
 3. **Modified**: `deployments/docker/monitoring/prometheus.yml`
    - Fixed scrape target: `host.docker.internal:8080`
-   - Now successfully scraping GAuth service
+   - Now successfully scraping AgentAuth service
 
 ---
 
@@ -323,7 +323,7 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
 
 ### Stop Services
 ```bash
-# Stop GAuth server
+# Stop AgentAuth server
 lsof -ti :8080 | xargs kill
 
 # Stop monitoring stack
@@ -340,7 +340,7 @@ docker stop gauth-postgres
 cd deployments/docker
 docker compose -f docker-compose.monitoring.yml up -d
 
-# Start GAuth server
+# Start AgentAuth server
 cd ../..
 GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 \
 GAUTH_USE_JWT_LIB=1 GAUTH_GAUTHPLUS_ENABLED=1 \
@@ -358,7 +358,7 @@ go run ./cmd/web-server > /tmp/gauth.log 2>&1 &
 **Status**: ✅ Complete monitoring stack deployed and operational
 
 **Achievement**: 
-- Full GAuth+ system running
+- Full AgentAuth+ system running
 - All 27 endpoints active
 - Monitoring infrastructure live
 - Test data generated

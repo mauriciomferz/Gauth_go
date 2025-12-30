@@ -17,7 +17,7 @@ refreshCadence: weekly
 
 ## Executive Summary
 
-This guide documents the process for pushing code to GitHub, triggering the CI/CD pipeline, and monitoring the deployment to the staging environment. The pipeline consists of 5 jobs that will validate, build, and deploy the GAuth application automatically.
+This guide documents the process for pushing code to GitHub, triggering the CI/CD pipeline, and monitoring the deployment to the staging environment. The pipeline consists of 5 jobs that will validate, build, and deploy the AgentAuth application automatically.
 
 **Status**: Ready to push 23 commits to trigger pipeline  
 **Prerequisites**: GitHub secrets must be configured (see `GITHUB_ACTIONS_SETUP.md`)  
@@ -107,7 +107,7 @@ Test Slack webhook:
 ```bash
 # Send test message
 curl -X POST -H 'Content-type: application/json' \
-  --data '{"text":"🚀 GAuth CI/CD Pipeline Test - Ready for deployment!"}' \
+  --data '{"text":"🚀 AgentAuth CI/CD Pipeline Test - Ready for deployment!"}' \
   https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 # Expected: HTTP 200 OK and message appears in Slack channel
@@ -340,7 +340,7 @@ kubectl get hpa -n gauth-staging --watch
    - Expected: 2500+ tests pass
    - Expected: >80% coverage
 6. **Run RFC compliance tests**: `go test -tags=compliance ./test/conformance/...`
-   - Expected: All RFC 2104, RFC 5869, RFC 6238, RFC 6979, RFC 8032, RFC 8235, GAuth-RFC-001 (formerly RFC 111), RFC 7519 tests pass
+   - Expected: All RFC 2104, RFC 5869, RFC 6238, RFC 6979, RFC 8032, RFC 8235, AgentAuth-RFC-001 (formerly RFC 111), RFC 7519 tests pass
 7. **Run security regression tests**: `go test -tags=security ./test/security/...`
    - Expected: All SSRF, timing attack, injection tests pass
 8. **Upload coverage**: Upload coverage.out to Codecov (optional)
@@ -576,7 +576,7 @@ Running smoke tests...
 | HPA | gauth-hpa | min=3, max=10 | - | - |
 
 **Total Resources**:
-- **Pods**: 5 (3 GAuth + 1 PostgreSQL + 1 Redis)
+- **Pods**: 5 (3 AgentAuth + 1 PostgreSQL + 1 Redis)
 - **CPU**: 11 cores (requested: 5.5 cores)
 - **Memory**: 22Gi (requested: 11Gi)
 - **Storage**: 25Gi (20Gi PostgreSQL + 5Gi Redis)
@@ -626,7 +626,7 @@ Sending Slack notification...
 
 **Slack Notification** (failure + rollback):
 ```
-❌ GAuth Deployment Failed
+❌ AgentAuth Deployment Failed
 Environment: staging
 Commit: 05721f73
 Reason: Deployment timeout after 5 minutes
@@ -643,7 +643,7 @@ View logs: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
 
 #### 1. Deployment Started
 ```
-🚀 GAuth Deployment Started
+🚀 AgentAuth Deployment Started
 Environment: staging
 Branch: main
 Commit: 05721f73 - docs: Add Week 4 Day 3 CI/CD setup
@@ -653,7 +653,7 @@ View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
 
 #### 2. Deployment Success
 ```
-✅ GAuth Deployment Successful
+✅ AgentAuth Deployment Successful
 Environment: staging
 Commit: 05721f73
 Duration: 15m 32s
@@ -668,7 +668,7 @@ View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
 
 #### 3. Deployment Failure
 ```
-❌ GAuth Deployment Failed
+❌ AgentAuth Deployment Failed
 Environment: staging
 Commit: 05721f73
 Duration: 8m 14s
@@ -915,7 +915,7 @@ echo "CVE-2024-XXXX" >> .trivyignore
 ```bash
 # Test webhook locally
 curl -X POST -H 'Content-type: application/json' \
-  --data '{"text":"🚀 GAuth CI/CD Pipeline Test"}' \
+  --data '{"text":"🚀 AgentAuth CI/CD Pipeline Test"}' \
   https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 # Expected response: ok
@@ -990,7 +990,7 @@ curl -v https://gauth-staging.yourdomain.com/metrics | head -20
 kubectl logs -f -n gauth-staging -l app=gauth --tail=100
 
 # Expected output:
-# 2025-11-09T12:15:00Z INFO Starting GAuth server version=beta port=8080
+# 2025-11-09T12:15:00Z INFO Starting AgentAuth server version=beta port=8080
 # 2025-11-09T12:15:00Z INFO Database connection established host=gauth-postgres
 # 2025-11-09T12:15:00Z INFO Redis connection established host=gauth-redis
 # 2025-11-09T12:15:00Z INFO Server listening on :8080
@@ -1115,7 +1115,7 @@ After successful pipeline execution and verification:
 | Secrets | 1 | - | - | - |
 
 **Total Resources**:
-- **Pods**: 5 (3 GAuth + 1 PostgreSQL + 1 Redis)
+- **Pods**: 5 (3 AgentAuth + 1 PostgreSQL + 1 Redis)
 - **CPU**: 11000m (11 cores requested)
 - **Memory**: 22Gi (18Gi requested)
 - **Storage**: 25Gi (20Gi PostgreSQL + 5Gi Redis)
@@ -1131,5 +1131,5 @@ After successful pipeline execution and verification:
 
 **Document Version**: 1.0  
 **Created**: November 9, 2025  
-**Author**: GitHub Copilot (GAuth Pre-Production Team)  
+**Author**: GitHub Copilot (AgentAuth Pre-Production Team)  
 **Status**: Ready for execution

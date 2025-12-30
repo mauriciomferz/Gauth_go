@@ -579,7 +579,7 @@ type Key struct {
 
 **Security Features:**
 - ✅ Private keys excluded from JSON serialization (`json:"-"`)
-- ✅ Deprecation warnings (RFC 0115 compliance)
+- ✅ Deprecation warnings (AAP-002 compliance)
 - ✅ Grace period for old key validation
 - ✅ Automatic cleanup of expired keys
 
@@ -1011,7 +1011,7 @@ security-scan:
 
 **Recommendation:** ⚠️ **CONDITIONAL APPROVAL**
 
-The GAuth system demonstrates strong cryptographic foundations and secure key management practices. However, **3 critical issues must be resolved before production deployment:**
+The AgentAuth system demonstrates strong cryptographic foundations and secure key management practices. However, **3 critical issues must be resolved before production deployment:**
 
 1. 🔴 Fix weak RNG in `internal/anchor/anchor.go:98` (5 min)
 2. 🔴 Fix weak RNG in `internal/notary/notary.go:161` (10 min)
@@ -1036,7 +1036,7 @@ The GAuth system demonstrates strong cryptographic foundations and secure key ma
 5. ✅ Commit remediation to repository
 
 **Week 3 Day 2 (Next):**
-- RFC 0111 compliance validation
+- AAP-001 compliance validation
 - Proof-of-authority implementation review
 - Delegation semantics verification
 
@@ -1124,5 +1124,5 @@ GAUTH_TLS_KEY_PATH=/etc/gauth/key.pem
 
 **Report Status:** ✅ COMPLETE - READY FOR REMEDIATION
 
-**Next Report:** Week 3 Day 2 (RFC 0111 Compliance Validation)
+**Next Report:** Week 3 Day 2 (AAP-001 Compliance Validation)
 

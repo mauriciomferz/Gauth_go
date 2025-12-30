@@ -5,7 +5,7 @@
 
 ## Executive Summary
 
-Successfully implemented complete RFC-0111 compliance infrastructure for GAuth 1.0, including:
+Successfully implemented complete RFC-0111 compliance infrastructure for AgentAuth 1.0, including:
 - Subscription flow management (Steps I-VIII)
 - Authorization flow orchestration (Steps a-i)
 - Compliance tracking and monitoring
@@ -211,7 +211,7 @@ extendedTokenService := gauth.NewExtendedTokenService(...)
 complianceValidator := gauth.NewComplianceValidator(...)
 complianceTracker := gauth.NewMemoryComplianceTracker(complianceValidator)
 
-// 6. Create GAuth service with RFC compliance
+// 6. Create AgentAuth service with RFC compliance
 gauthService := gauth.New(
     gauth.WithRFCCompliance(
         subscriptionStore, extendedTokenService, complianceValidator,

@@ -6,10 +6,10 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Learning Lab - Complete Restructuring Plan
+# AgentAuth Learning Lab - Complete Restructuring Plan
 
 ## Executive Summary
-This document outlines the comprehensive overhaul of the GAuth Learning Lab web application to achieve 100% functionality and professional presentation matching Microsoft Entra ID standards.
+This document outlines the comprehensive overhaul of the AgentAuth Learning Lab web application to achieve 100% functionality and professional presentation matching Microsoft Entra ID standards.
 
 ## Current State Analysis
 

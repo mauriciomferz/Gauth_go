@@ -374,14 +374,14 @@ func (c *RevocationChain) aggregateHash() string {
 	// We intentionally DO NOT sort to preserve sequence semantics; however we also compute a secondary digest that is
 	// order-insensitive for optional comparison by sorting by ID then hashing again and concatenating, giving two dimensions.
 	seqBytes, _ := json.Marshal(arr)
-	hSeq := sha256.Sum256(append([]byte("GAuthRevocationChain_v1_seq:"), seqBytes...))
+	hSeq := sha256.Sum256(append([]byte("AgentAuthRevocationChain_v1_seq:"), seqBytes...))
 
 	// Order-insensitive component
 	sorted := make([]mini, len(arr))
 	copy(sorted, arr)
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i].ID < sorted[j].ID })
 	setBytes, _ := json.Marshal(sorted)
-	hSet := sha256.Sum256(append([]byte("GAuthRevocationChain_v1_set:"), setBytes...))
+	hSet := sha256.Sum256(append([]byte("AgentAuthRevocationChain_v1_set:"), setBytes...))
 
 	combo := sha256.Sum256(append(hSeq[:], hSet[:]...))
 	return hex.EncodeToString(combo[:])

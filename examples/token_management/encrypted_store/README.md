@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates how to wrap a GAuth token store with AES-GCM encryption for secure token value storage.
+This example demonstrates how to wrap a AgentAuth token store with AES-GCM encryption for secure token value storage.
 
 ## Key Concepts
 - **EncryptedStore**: Wraps a token store, encrypting token values using AES-GCM.

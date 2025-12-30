@@ -43,8 +43,8 @@ groups:
           severity: critical
           component: system
         annotations:
-          summary: "GAuth service is down"
-          description: "GAuth service has been down for more than 1 minute"
+          summary: "AgentAuth service is down"
+          description: "AgentAuth service has been down for more than 1 minute"
           
       # High Memory Usage Alert
       - alert: HighMemoryUsage

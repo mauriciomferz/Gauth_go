@@ -44,13 +44,13 @@ function initMobileNav(){
 }
 
 function initTabSystem(){
-  console.log('[GAuth] Initializing tab system...');
+  console.log('[AgentAuth] Initializing tab system...');
   const buttons = document.querySelectorAll('.tab-button');
-  console.log('[GAuth] Found', buttons.length, 'tab buttons');
+  console.log('[AgentAuth] Found', buttons.length, 'tab buttons');
   buttons.forEach(btn => {
     btn.addEventListener('click', ()=>{
       const target = btn.getAttribute('data-tab');
-      console.log('[GAuth] Tab clicked:', target);
+      console.log('[AgentAuth] Tab clicked:', target);
       if(!target) return;
       buttons.forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
       btn.classList.add('active');
@@ -58,7 +58,7 @@ function initTabSystem(){
       document.querySelectorAll('.tab-content').forEach(c=>{
         if(c.id === target){ 
           c.classList.remove('hidden'); 
-          console.log('[GAuth] Showing tab:', target);
+          console.log('[AgentAuth] Showing tab:', target);
         } else { 
           c.classList.add('hidden'); 
         }
@@ -79,36 +79,36 @@ function initPanels(){
 }
 
 export function initModules() {
-  console.log("[GAuth] Initializing feature modules...");
-  try { initTokens(); console.log("[GAuth] ✓ tokens"); } catch (e) { console.error("❌ Token module init failed:", e); }
-  try { metricsInit(); console.log("[GAuth] ✓ metrics"); } catch (e) { console.error("❌ Metrics module init failed:", e); }
-  try { auditInit(); console.log("[GAuth] ✓ audit"); } catch (e) { console.error("❌ Audit module init failed:", e); }
-  try { samplesInit(); console.log("[GAuth] ✓ samples"); } catch (e) { console.error("❌ Samples module init failed:", e); }
-  try { authzInit(); console.log("[GAuth] ✓ authz"); } catch (e) { console.error("❌ Authz module init failed:", e); }
-  try { jobLogsInit(); console.log("[GAuth] ✓ joblogs"); } catch (e) { console.error("❌ JobLogs module init failed:", e); }
-  try { policyInit(); console.log("[GAuth] ✓ policy"); } catch (e) { console.error("❌ Policy module init failed:", e); }
-  console.log("[GAuth] ✅ Module initialization complete");
+  console.log("[AgentAuth] Initializing feature modules...");
+  try { initTokens(); console.log("[AgentAuth] ✓ tokens"); } catch (e) { console.error("❌ Token module init failed:", e); }
+  try { metricsInit(); console.log("[AgentAuth] ✓ metrics"); } catch (e) { console.error("❌ Metrics module init failed:", e); }
+  try { auditInit(); console.log("[AgentAuth] ✓ audit"); } catch (e) { console.error("❌ Audit module init failed:", e); }
+  try { samplesInit(); console.log("[AgentAuth] ✓ samples"); } catch (e) { console.error("❌ Samples module init failed:", e); }
+  try { authzInit(); console.log("[AgentAuth] ✓ authz"); } catch (e) { console.error("❌ Authz module init failed:", e); }
+  try { jobLogsInit(); console.log("[AgentAuth] ✓ joblogs"); } catch (e) { console.error("❌ JobLogs module init failed:", e); }
+  try { policyInit(); console.log("[AgentAuth] ✓ policy"); } catch (e) { console.error("❌ Policy module init failed:", e); }
+  console.log("[AgentAuth] ✅ Module initialization complete");
   return true;
 }
 
 // Public API (attach to window for backward compatibility testing)
 export function initAll(){
-  console.log('[GAuth] ========================================');
-  console.log('[GAuth] Starting initialization...');
-  console.log('[GAuth] ========================================');
+  console.log('[AgentAuth] ========================================');
+  console.log('[AgentAuth] Starting initialization...');
+  console.log('[AgentAuth] ========================================');
   initThemeToggle();
   initMobileNav();
   initTabSystem();
   initPanels();
   initModules();
-  console.log('[GAuth] ========================================');
-  console.log('[GAuth] ✅ Initialization complete!');
-  console.log('[GAuth] ========================================');
+  console.log('[AgentAuth] ========================================');
+  console.log('[AgentAuth] ✅ Initialization complete!');
+  console.log('[AgentAuth] ========================================');
 }
 
 // For immediate backward compatibility, attach a minimal namespace
-window.GAuth = window.GAuth || { state: demoState, setCurrentToken, addAuditEntry, addConsoleOutput };
-window.GAuth.initModules = initModules;
+window.AgentAuth = window.AgentAuth || { state: demoState, setCurrentToken, addAuditEntry, addConsoleOutput };
+window.AgentAuth.initModules = initModules;
 
 // Auto-init when DOM ready (safe idempotent)
 if (document.readyState === 'loading') {

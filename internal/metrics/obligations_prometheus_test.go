@@ -9,7 +9,7 @@ import (
 // TestPrometheusObligationsCounters ensures obligations executed/failed counters register and increment.
 func TestPrometheusObligationsCounters(t *testing.T) {
 	reg := prom.NewRegistry()
-	pm := NewPrometheusMetrics(PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
+	pm := NewPrometheusMetrics(PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
 	// Increment executed twice, failed once.
 	pm.IncObligationsExecuted()
 	pm.IncObligationsExecuted()
@@ -21,12 +21,12 @@ func TestPrometheusObligationsCounters(t *testing.T) {
 	var exec, fail float64
 	for _, mf := range mfs {
 		switch mf.GetName() {
-		case "gauth_rfc0111_obligations_executed_total":
+		case "gauth_aap001_obligations_executed_total":
 			if len(mf.Metric) == 0 {
 				t.Fatalf("executed metric empty")
 			}
 			exec = mf.Metric[0].Counter.GetValue()
-		case "gauth_rfc0111_obligations_failed_total":
+		case "gauth_aap001_obligations_failed_total":
 			if len(mf.Metric) == 0 {
 				t.Fatalf("failed metric empty")
 			}

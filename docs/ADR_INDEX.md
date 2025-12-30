@@ -11,11 +11,11 @@ refreshCadence: on-change
 
 - Aggregated signature schemes (BLS, batch) and multi-algorithm support added to signature abstraction.
 - Registry and interfaces updated for extensibility; placeholders for BLS/batch logic present.
-- Compliance with RFC 0111/0115 strengthened; future cryptographic schemes can be integrated with minimal changes.
+- Compliance with AAP-001/0115 strengthened; future cryptographic schemes can be integrated with minimal changes.
 
 # ADR Index
 
-This index lists Architecture Decision Records for the GAuth beta-refactor branch.
+This index lists Architecture Decision Records for the AgentAuth beta-refactor branch.
 
 Related Design Docs (non-ADR):
 - `DISCOVERY_ENDPOINT.md` (RB3) – JSON schema, caching, ETag semantics for `/api/v1/discovery` transparency surface.

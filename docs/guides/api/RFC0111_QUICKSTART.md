@@ -9,7 +9,7 @@ owners: [system]
 # RFC-0111 Quick Start Guide
 
 ## Overview
-This guide helps you quickly get started with the RFC-0111 implementation in GAuth 1.0.
+This guide helps you quickly get started with the RFC-0111 implementation in AgentAuth 1.0.
 
 ## What Was Implemented
 
@@ -115,7 +115,7 @@ Persistence layer:
 package main
 
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
 func main() {
@@ -132,7 +132,7 @@ func main() {
         store,
     )
     
-    // 3. Create GAuth service with RFC compliance
+    // 3. Create AgentAuth service with RFC compliance
     service := gauth.New(
         gauth.WithRFCCompliance(
             store,

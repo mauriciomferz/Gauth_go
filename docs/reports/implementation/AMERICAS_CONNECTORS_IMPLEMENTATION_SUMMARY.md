@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document provides a comprehensive summary of the Americas region identity verification connectors implemented for the GAuth system. The implementation covers **3 major countries** across North, Central, and South America, providing identity verification capabilities for over **500 million** people.
+This document provides a comprehensive summary of the Americas region identity verification connectors implemented for the AgentAuth system. The implementation covers **3 major countries** across North, Central, and South America, providing identity verification capabilities for over **500 million** people.
 
 ### Coverage Overview
 

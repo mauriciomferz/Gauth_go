@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates an advanced RFC111 protocol flow using the GAuth token API. It covers owner proof, grant, multi-attestation, chained delegation, revocation, and compliance checks.
+This example demonstrates an advanced RFC111 protocol flow using the AgentAuth token API. It covers owner proof, grant, multi-attestation, chained delegation, revocation, and compliance checks.
 
 ## Key Concepts
 - **Owner Proof**: Initial verification of token owner.

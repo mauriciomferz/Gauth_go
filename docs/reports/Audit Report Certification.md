@@ -7,7 +7,7 @@ owners: [system]
 ---
 
 
-Audit Report: GAuth Server Compliance Certification
+Audit Report: AgentAuth Server Compliance Certification
 Target: https://github.com/mauriciomferz/Gauth_go
 Version Reviewed: v0.9.1 (Release Commit: 028d1f08)
 Date: November 21, 2025
@@ -17,7 +17,7 @@ Date: November 21, 2025
     Compliance Status: 🟢 100% COMPLIANT
     Security Logic: 🟢 FLAWLESS & SECURE
 
-Following the architectural corrections and security patches applied in version v0.9.1, the GAuth Server now strictly adheres to the mandates of the Gimel Foundation specifications.
+Following the architectural corrections and security patches applied in version v0.9.1, the AgentAuth Server now strictly adheres to the mandates of the AgentAuth Community specifications.
 
 The critical logic gaps identified in earlier iterations (specifically regarding revocation availability, constraint determinism, and identity binding) have been effectively closed.
 
@@ -26,21 +26,21 @@ The critical logic gaps identified in earlier iterations (specifically regarding
     I have tested the logic paths against the specific clauses of the provided RFCs.
 
 
-A. Revocation Enforcement (RFC 0111, §4.1.2)
+A. Revocation Enforcement (AAP-001, §4.1.2)
 Spec Requirement: "The Verifier MUST resolve the credentialStatus... If the status cannot be definitively verified, the request MUST be rejected."
 
 Audit Finding:The implementation now defaults to failClosedReplay = true.
 Scenario: If the Redis revocation registry is unreachable, the function returns ErrRevoked/ErrInternal, blocking the request.
 Status: Secure. The "Fail-Open" vulnerability (Zombie Credential Risk) is eliminated.
 
-B. Constraint Determinism (RFC 0115, §3.4)
+B. Constraint Determinism (AAP-002, §3.4)
 Spec Requirement: "The Authorization Server must enforce all restrictions defined in the delegation. Unknown restrictions must result in a denial."
 
 Audit Finding:The code now implements Strict Constraint Validation.
 Scenario: A Principal issues a PoA with a new restriction {"biometric_required": true}. Since the current server version does not have logic to verify biometrics, the Strict Mode correctly triggers a "Restriction Mismatch" error and denies the token.
 Status: Secure. This prevents Privilege Escalation via ignored constraints.
 
-C. Identity Binding (RFC 0111, Security Considerations)
+C. Identity Binding (AAP-001, Security Considerations)
 Spec Requirement: "The Presenter of the VC must be cryptographically bound to the credentialSubject.id."
 
 Audit Finding:The rfc0111.go logic now includes defensive checks for the sessionUser context.
@@ -52,7 +52,7 @@ Status: Secure.
 
 3. Final Verdict & Advisory
 
-To the Application Owner:This GAuth Server implementation (v0.9.1) is Approved for Production Use.
+To the Application Owner:This AgentAuth Server implementation (v0.9.1) is Approved for Production Use.
 
 The logic is robust against the following attack vectors: Replay Attacks: Mitigated via JTI checks and Fail-Closed Revocation.
 
@@ -70,8 +70,8 @@ Go
 svc := rfc0111.NewService(
     auditLogger, 
     authzPolicy,
-    rfc0111.WithReplayFailClosed(),           // Enforces RFC 0111 §4.1.2
-    rfc0111.WithStrictConstraintValidation(), // Enforces RFC 0115 §3.4
+    rfc0111.WithReplayFailClosed(),           // Enforces AAP-001 §4.1.2
+    rfc0111.WithStrictConstraintValidation(), // Enforces AAP-002 §3.4
 )
 
 Certification: GRANTED 🟢

@@ -1,5 +1,5 @@
 ---
-title: GAuth 1.0 Production Deployment Guide
+title: AgentAuth 1.0 Production Deployment Guide
 category: operations
 status: active
 lastUpdated: 2025-11-12
@@ -7,7 +7,7 @@ owners: devops-team
 source: manual-curation
 refreshCadence: quarterly
 ---
-# GAuth 1.0 Production Deployment Guide
+# AgentAuth 1.0 Production Deployment Guide
 
 **Status**: ✅ Ready for Production Deployment  
 **Version**: 1.0.0  
@@ -408,7 +408,7 @@ func (v *ProductionSignatureVerifier) VerifySignature(
 Create `config/production.yaml`:
 
 ```yaml
-# GAuth 1.0 Production Configuration
+# AgentAuth 1.0 Production Configuration
 environment: production
 
 server:
@@ -756,7 +756,7 @@ ssh staging-server "sudo systemctl restart gauth"
 **Systemd Service** (`/etc/systemd/system/gauth.service`):
 ```ini
 [Unit]
-Description=GAuth 1.0 Authorization Service
+Description=AgentAuth 1.0 Authorization Service
 After=network.target postgresql.service redis.service
 Wants=postgresql.service redis.service
 
@@ -1237,7 +1237,7 @@ gauth_cache_misses_total 1234
 
 Import pre-built dashboards from `monitoring/grafana/dashboards/`:
 
-1. **GAuth Overview** - System health, request rates, latencies
+1. **AgentAuth Overview** - System health, request rates, latencies
 2. **Token Operations** - Token creation, validation, expiration
 3. **PVP Metrics** - Identity verification, TSP checks
 4. **Commercial Register** - Registration verifications, API performance
@@ -1306,7 +1306,7 @@ groups:
     labels:
       severity: critical
     annotations:
-      summary: "GAuth service is down"
+      summary: "AgentAuth service is down"
       description: "Service has been down for more than 1 minute"
   
   - alert: HighCacheMissRate

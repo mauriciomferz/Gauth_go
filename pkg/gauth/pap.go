@@ -9,7 +9,7 @@ import (
 
 // PowerAdministrationPoint represents a power administration point
 type PowerAdministrationPoint struct {
-	GAuth           GAuth
+	AgentAuth           AgentAuth
 	ID              string      `json:"id"`
 	Name            string      `json:"name"`
 	Description     string      `json:"description"`
@@ -42,8 +42,8 @@ func NewPowerAdministrationPointWithStore(id, name, description string, store Po
 
 // InvalidateToken invalidates a token
 func (p *PowerAdministrationPoint) InvalidateToken(token string) error {
-	// Delegate to the underlying GAuth service
-	_, err := p.GAuth.ValidateToken(token)
+	// Delegate to the underlying AgentAuth service
+	_, err := p.AgentAuth.ValidateToken(token)
 	if err != nil {
 		return err
 	}

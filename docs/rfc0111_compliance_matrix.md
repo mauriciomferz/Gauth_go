@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC 0111 / 0115 Compliance Matrix (Post Remediation: Version & Embedded Weights, Strict Authenticity, Mandatory JTI)
+# AAP-001 / 0115 Compliance Matrix (Post Remediation: Version & Embedded Weights, Strict Authenticity, Mandatory JTI)
 
 Generated: 2025-10-25
 Status Categories: Implemented, Partial, Missing
@@ -43,7 +43,7 @@ Legend:
 | 0115:9 | Canonical Serialization | Implemented | Deterministic JSON (sorted scope, restrictions, weights) + domain separation. | `canonical.go`, property tests |
 | 0115:10 | Revocation Semantics | Partial | Basic revocation chain; advanced partial revocation & conditional revocation absent. | `delegation/revocation_chain.go` |
 
-(Other unmapped clauses in RFC 0111/0115 exist beyond current harness scope; see Gap Matrix.)
+(Other unmapped clauses in AAP-001/0115 exist beyond current harness scope; see Gap Matrix.)
 
 ## Remediation Delta
 | Feature | Previous State | Current State | Security Gain |

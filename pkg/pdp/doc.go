@@ -1,4 +1,4 @@
-// Package pdp provides the Policy Decision Point for GAuth authorization.
+// Package pdp provides the Policy Decision Point for AgentAuth authorization.
 //
 // The PDP is the central authorization decision engine that evaluates policies
 // against authorization requests. It supports ABAC (Attribute-Based Access Control),

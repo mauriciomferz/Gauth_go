@@ -8,7 +8,7 @@ owners: [system]
 
 # Lifecycle Status Model
 
-This document defines the lifecycle status taxonomy and transition semantics for GAuth delegations (Power of Attorney) and internal tokens.
+This document defines the lifecycle status taxonomy and transition semantics for AgentAuth delegations (Power of Attorney) and internal tokens.
 
 ## Delegation Statuses
 

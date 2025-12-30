@@ -107,7 +107,7 @@ Successfully completed **Option 1: Production Deployment Preparation**, transfor
 **Prometheus Configuration** (`monitoring/prometheus-prod.yml`)
 
 **Scrape Targets**:
-- GAuth backend metrics (10s interval)
+- AgentAuth backend metrics (10s interval)
 - Prometheus self-monitoring
 - Node exporter (system metrics)
 - PostgreSQL exporter

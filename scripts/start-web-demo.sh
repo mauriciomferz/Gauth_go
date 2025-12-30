@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# GAuth Beta Web Interface Startup Script
+# AgentAuth Beta Web Interface Startup Script
 # Provides optional .env loading, persistent secrets, and PID management.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

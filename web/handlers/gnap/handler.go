@@ -132,7 +132,7 @@ func (h *Handler) GrantRequest(c *gin.Context) {
 		return
 	}
 
-	// Validate PoACredentialRef if provided (GAuth Extension)
+	// Validate PoACredentialRef if provided (AgentAuth Extension)
 	if req.PoACredentialRef != "" && h.Verif != nil {
 		poaVerif, err := h.Verif.VerifyPowerOfAttorney(c.Request.Context(), req.PoACredentialRef)
 		if err != nil || !poaVerif.Valid {
@@ -346,8 +346,8 @@ func (h *Handler) buildGrantResponse(ctx context.Context, grant *gnap.Grant, req
 		resp.AccessToken = h.issueToken(grant, req)
 	}
 
-	// GAuth extension: Populate PoA info and AuthorizationChain
-	h.linkGAuthContext(ctx, resp, req)
+	// AgentAuth extension: Populate PoA info and AuthorizationChain
+	h.linkAgentAuthContext(ctx, resp, req)
 
 	// Assign client instance ID if not present
 	if req.Client != nil && req.Client.InstanceID == "" {
@@ -400,7 +400,7 @@ func (h *Handler) issueToken(grant *gnap.Grant, req *gnap.GrantRequest) *gnap.Ac
 		URI: h.BaseURL + "/gnap/token/" + grant.ID,
 	}
 
-	// GAuth extension: link PoA if present
+	// AgentAuth extension: link PoA if present
 	if req.PoACredentialRef != "" {
 		token.PoAID = req.PoACredentialRef
 	}
@@ -419,8 +419,8 @@ func generateShortCode() string {
 	return string(code[:4]) + "-" + string(code[4:])
 }
 
-// linkGAuthContext populates GNAP response with GAuth-specific context.
-func (h *Handler) linkGAuthContext(ctx context.Context, resp *gnap.GrantResponse, req *gnap.GrantRequest) {
+// linkAgentAuthContext populates GNAP response with AgentAuth-specific context.
+func (h *Handler) linkAgentAuthContext(ctx context.Context, resp *gnap.GrantResponse, req *gnap.GrantRequest) {
 	if h.Verif == nil || req.PoACredentialRef == "" {
 		return
 	}

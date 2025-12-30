@@ -39,11 +39,11 @@ refreshCadence: on-change
 
 ### Purpose
 
-This document defines the architecture for integrating **OpenID Connect (OIDC)** as a required building block into the GAuth 1.0 implementation, ensuring full compliance with RFC-0111 Section 1 (Scope) requirements.
+This document defines the architecture for integrating **OpenID Connect (OIDC)** as a required building block into the AgentAuth 1.0 implementation, ensuring full compliance with RFC-0111 Section 1 (Scope) requirements.
 
 ### Current Gap
 
-**Finding**: GAuth currently uses custom `IdentityProofRequest/Result` structures for identity verification instead of standard OIDC ID tokens.
+**Finding**: AgentAuth currently uses custom `IdentityProofRequest/Result` structures for identity verification instead of standard OIDC ID tokens.
 
 **Evidence from Audit**:
 ```
@@ -63,12 +63,12 @@ This document defines the architecture for integrating **OpenID Connect (OIDC)**
 
 ### Solution Approach
 
-**Hybrid Integration Model**: Extend existing GAuth structures with OIDC compatibility while maintaining backward compatibility with current RFC-0111 implementation.
+**Hybrid Integration Model**: Extend existing AgentAuth structures with OIDC compatibility while maintaining backward compatibility with current RFC-0111 implementation.
 
 **Key Strategy**:
 1. Implement OIDC as identity verification layer
-2. Map OIDC ID tokens to GAuth identity structures
-3. Support standard OIDC flows alongside GAuth subscription flow
+2. Map OIDC ID tokens to AgentAuth identity structures
+3. Support standard OIDC flows alongside AgentAuth subscription flow
 4. Enable interoperability with major OIDC providers (Google, Okta, Auth0, Keycloak)
 
 ### Expected Outcomes
@@ -86,7 +86,7 @@ This document defines the architecture for integrating **OpenID Connect (OIDC)**
 ### Section 1: Scope - Building Blocks
 
 **Direct Quote from RFC-0111**:
-> "GAuth builds on the following standards as building blocks:
+> "AgentAuth builds on the following standards as building blocks:
 > 
 > **OpenID Connect or its alternatives, including but not limited to:**
 > - OpenID Connect Discovery 1.0
@@ -161,12 +161,12 @@ type IdentityProofResult struct {
 
 1. **RFC-0111 Compliance**: Satisfy OIDC building block requirement
 2. **Interoperability**: Work with major OIDC providers (Google, Microsoft Azure AD, Okta, Auth0, Keycloak)
-3. **Backward Compatibility**: Don't break existing GAuth subscription flow
+3. **Backward Compatibility**: Don't break existing AgentAuth subscription flow
 4. **Enterprise-Grade**: Support enterprise identity requirements (SSO, MFA, ACR levels)
 
 ### Non-Goals
 
-- ❌ Replace existing GAuth authorization chain (keep GAuth's unique PoA model)
+- ❌ Replace existing AgentAuth authorization chain (keep AgentAuth's unique PoA model)
 - ❌ Implement full OAuth 2.0 server (focus on OIDC as identity layer)
 - ❌ Support all optional OIDC features (focus on core + Discovery)
 
@@ -178,7 +178,7 @@ type IdentityProofResult struct {
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                    GAuth Authorization Server                       │
+│                    AgentAuth Authorization Server                       │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌──────────────────────────────────────────────────────────────┐ │
@@ -201,7 +201,7 @@ type IdentityProofResult struct {
 │  └──────────────────────────────────────────────────────────────┘ │
 │                            ↓                                        │
 │  ┌──────────────────────────────────────────────────────────────┐ │
-│  │  Existing GAuth Subscription Flow (Steps I-VIII)             │ │
+│  │  Existing AgentAuth Subscription Flow (Steps I-VIII)             │ │
 │  ├──────────────────────────────────────────────────────────────┤ │
 │  │ • Step I: Owner's Authorizer Identity (uses OIDC)            │ │
 │  │ • Step III: Client Owner Identity (uses OIDC)                │ │
@@ -222,8 +222,8 @@ type IdentityProofResult struct {
 ### Component Layers
 
 1. **OIDC Protocol Layer** - Standard OIDC endpoints (Discovery, Token, UserInfo, JWKS)
-2. **Identity Bridge Layer** - Converts OIDC tokens to GAuth identity structures
-3. **GAuth Application Layer** - Existing subscription flow and authorization logic
+2. **Identity Bridge Layer** - Converts OIDC tokens to AgentAuth identity structures
+3. **AgentAuth Application Layer** - Existing subscription flow and authorization logic
 
 ---
 
@@ -286,22 +286,22 @@ func NewDiscoveryService(issuerURL string) *DiscoveryService {
             SubjectTypesSupported:  []string{"public"},
             IDTokenSigningAlgValues: []string{"RS256", "HS256"},
             
-            // GAuth-specific scopes
+            // AgentAuth-specific scopes
             ScopesSupported: []string{
                 "openid", "profile", "email",
                 "gauth:owner", "gauth:client", "gauth:resource",
             },
             
-            // Standard OIDC claims + GAuth extensions
+            // Standard OIDC claims + AgentAuth extensions
             ClaimsSupported: []string{
                 "sub", "name", "email", "email_verified",
                 "given_name", "family_name", "picture",
-                // GAuth extensions
+                // AgentAuth extensions
                 "entity_type", "entity_id", "commercial_register",
                 "legal_entity_name", "jurisdiction",
             },
             
-            // Trust levels (maps to GAuth TrustLevel)
+            // Trust levels (maps to AgentAuth TrustLevel)
             ACRValuesSupported: []string{
                 "substantial", "high", "loa-2", "loa-3", "loa-4",
             },
@@ -354,7 +354,7 @@ type IDTokenClaims struct {
     AMR               []string `json:"amr,omitempty"` // Authentication Methods References
     AuthTime          int64  `json:"auth_time,omitempty"`
     
-    // GAuth extensions (for legal entities)
+    // AgentAuth extensions (for legal entities)
     EntityType        string `json:"entity_type,omitempty"` // "natural_person", "legal_entity"
     EntityID          string `json:"entity_id,omitempty"` // Commercial register ID
     LegalEntityName   string `json:"legal_entity_name,omitempty"`
@@ -454,7 +454,7 @@ func (s *IDTokenService) ValidateIDToken(
 
 ### 3. Identity Bridge
 
-**Purpose**: Convert OIDC ID tokens to GAuth `IdentityProofResult`.
+**Purpose**: Convert OIDC ID tokens to AgentAuth `IdentityProofResult`.
 
 **File**: `pkg/oidc/identity_bridge.go`
 
@@ -466,10 +466,10 @@ import (
     "fmt"
     "time"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
-// IdentityBridge converts OIDC identity to GAuth identity structures
+// IdentityBridge converts OIDC identity to AgentAuth identity structures
 type IdentityBridge struct {
     idTokenService *IDTokenService
     trustMapper    *TrustLevelMapper
@@ -483,7 +483,7 @@ func NewIdentityBridge(idTokenService *IDTokenService) *IdentityBridge {
     }
 }
 
-// ConvertIDTokenToIdentityProof converts OIDC ID token to GAuth identity proof
+// ConvertIDTokenToIdentityProof converts OIDC ID token to AgentAuth identity proof
 func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
     ctx context.Context,
     idToken string,
@@ -507,7 +507,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
         identity = claims.LegalEntityName
     }
     
-    // Map ACR to GAuth trust level
+    // Map ACR to AgentAuth trust level
     trustLevel := b.trustMapper.MapACRToTrustLevel(claims.ACR)
     
     return &gauth.IdentityProofResult{
@@ -519,7 +519,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
     }, nil
 }
 
-// TrustLevelMapper maps OIDC ACR to GAuth trust levels
+// TrustLevelMapper maps OIDC ACR to AgentAuth trust levels
 type TrustLevelMapper struct {
     acrMappings map[string]string
 }
@@ -528,7 +528,7 @@ type TrustLevelMapper struct {
 func NewTrustLevelMapper() *TrustLevelMapper {
     return &TrustLevelMapper{
         acrMappings: map[string]string{
-            // OIDC ACR → GAuth TrustLevel
+            // OIDC ACR → AgentAuth TrustLevel
             "loa-1":        "low",
             "loa-2":        "medium",
             "loa-3":        "substantial",
@@ -539,7 +539,7 @@ func NewTrustLevelMapper() *TrustLevelMapper {
     }
 }
 
-// MapACRToTrustLevel converts OIDC ACR to GAuth trust level
+// MapACRToTrustLevel converts OIDC ACR to AgentAuth trust level
 func (m *TrustLevelMapper) MapACRToTrustLevel(acr string) string {
     if level, ok := m.acrMappings[acr]; ok {
         return level
@@ -547,7 +547,7 @@ func (m *TrustLevelMapper) MapACRToTrustLevel(acr string) string {
     return "medium" // Default trust level
 }
 
-// MapTrustLevelToACR converts GAuth trust level to OIDC ACR
+// MapTrustLevelToACR converts AgentAuth trust level to OIDC ACR
 func (m *TrustLevelMapper) MapTrustLevelToACR(trustLevel string) string {
     // Reverse mapping
     for acr, level := range m.acrMappings {
@@ -698,7 +698,7 @@ import (
     "context"
     "fmt"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/oidc"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/oidc"
 )
 
 // OIDCPowerVerificationPoint implements PowerVerificationPoint with OIDC support
@@ -746,7 +746,7 @@ func (pvp *OIDCPowerVerificationPoint) VerifyIdentityProof(
     }
 }
 
-// verifyOIDCIDToken validates GAuth-issued ID token
+// verifyOIDCIDToken validates AgentAuth-issued ID token
 func (pvp *OIDCPowerVerificationPoint) verifyOIDCIDToken(
     ctx context.Context,
     request *IdentityProofRequest,
@@ -808,7 +808,7 @@ func (pvp *OIDCPowerVerificationPoint) verifyExternalOIDC(
         }, nil
     }
     
-    // Convert to GAuth identity proof
+    // Convert to AgentAuth identity proof
     return pvp.identityBridge.ConvertIDTokenToIdentityProof(
         ctx,
         idToken,
@@ -837,11 +837,11 @@ func (m *SubscriptionFlowManager) ExecuteStepI(
         // Use OIDC-enabled PVP
         result, err := m.pvpClient.VerifyIdentityProof(ctx, request)
         if err != nil {
-            return NewGAuthError(ErrCodeIdentityVerificationFailed, err.Error())
+            return NewAgentAuthError(ErrCodeIdentityVerificationFailed, err.Error())
         }
         
         if !result.Valid {
-            return NewGAuthError(ErrCodeInvalidIdentityProof, result.FailureReason)
+            return NewAgentAuthError(ErrCodeInvalidIdentityProof, result.FailureReason)
         }
         
         // Store identity proof result
@@ -950,7 +950,7 @@ oidc:
 **Acceptance Criteria**:
 - Can authenticate users via Google/Okta/Azure
 - ID tokens from external providers validated correctly
-- External identities map to GAuth subscription flow
+- External identities map to AgentAuth subscription flow
 
 **Effort**: 5-6 days
 
@@ -1123,8 +1123,8 @@ func (pvp *OIDCPowerVerificationPoint) VerifyIdentityProof(
 ### Integration Tests
 
 **Test Scenarios**:
-1. **GAuth OIDC Flow**:
-   - User authenticates via GAuth OIDC
+1. **AgentAuth OIDC Flow**:
+   - User authenticates via AgentAuth OIDC
    - Receives ID token
    - Uses ID token in Step I/III/VI
    - Subscription flow completes
@@ -1138,7 +1138,7 @@ func (pvp *OIDCPowerVerificationPoint) VerifyIdentityProof(
 
 3. **Mixed Flow**:
    - Step I uses Google OIDC
-   - Step III uses GAuth OIDC
+   - Step III uses AgentAuth OIDC
    - Step VI uses Okta OIDC
    - Subscription completes with federated identities
 
@@ -1152,7 +1152,7 @@ func (pvp *OIDCPowerVerificationPoint) VerifyIdentityProof(
 - Automated browser testing (Playwright)
 
 **Test Flow**:
-1. Start GAuth server with OIDC enabled
+1. Start AgentAuth server with OIDC enabled
 2. User initiates subscription flow
 3. System redirects to mock OIDC provider
 4. User authenticates (automated)
@@ -1283,5 +1283,5 @@ oidc:
 
 **Document Status**: Ready for Implementation  
 **Next Review**: After Phase 1 completion (Week 1)  
-**Owner**: GAuth Development Team  
+**Owner**: AgentAuth Development Team  
 **Stakeholders**: RFC-0111 Compliance Team, Security Team, Architecture Team

@@ -222,4 +222,4 @@
 
 ---
 
-*GAuth is production-ready in 3-4 months, not 6-8. Core functionality is solid. Focus on MCP, testing, and security hardening.*
+*AgentAuth is production-ready in 3-4 months, not 6-8. Core functionality is solid. Focus on MCP, testing, and security hardening.*

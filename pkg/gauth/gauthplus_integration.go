@@ -1,5 +1,5 @@
-// Package gauth - GAuth+ Integration for Authorization Chain Validation
-// Integrates GAuth+ features (successor management, delegation policies, dual control,
+// Package gauth - AgentAuth+ Integration for Authorization Chain Validation
+// Integrates AgentAuth+ features (successor management, delegation policies, dual control,
 // fiduciary duties, capability assessment) into RFC-0111 authorization flow
 package gauth
 
@@ -13,8 +13,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
-// GAuthPlusValidator validates GAuth+ policies during authorization
-type GAuthPlusValidator struct {
+// AgentAuthPlusValidator validates AgentAuth+ policies during authorization
+type AgentAuthPlusValidator struct {
 	successorService    *gauthplus.PostgreSQLSuccessorService
 	delegationService   gauthplus.DelegationService // Use interface for caching support
 	dualControlService  *gauthplus.PostgreSQLDualControlService
@@ -25,16 +25,16 @@ type GAuthPlusValidator struct {
 	enforceFiduciary    bool
 }
 
-// NewGAuthPlusValidator creates a new GAuth+ validator
+// NewAgentAuthPlusValidator creates a new AgentAuth+ validator
 // Accepts interface types for delegation and capability services to support caching
-func NewGAuthPlusValidator(
+func NewAgentAuthPlusValidator(
 	successorService *gauthplus.PostgreSQLSuccessorService,
 	delegationService gauthplus.DelegationService,
 	dualControlService *gauthplus.PostgreSQLDualControlService,
 	fiduciaryService *gauthplus.PostgreSQLFiduciaryDutyService,
 	capabilityService gauthplus.CapabilityAssessmentService,
-) *GAuthPlusValidator {
-	return &GAuthPlusValidator{
+) *AgentAuthPlusValidator {
+	return &AgentAuthPlusValidator{
 		successorService:    successorService,
 		delegationService:   delegationService,
 		dualControlService:  dualControlService,
@@ -46,8 +46,8 @@ func NewGAuthPlusValidator(
 	}
 }
 
-// GAuthPlusValidationResult contains results from GAuth+ validation
-type GAuthPlusValidationResult struct {
+// AgentAuthPlusValidationResult contains results from AgentAuth+ validation
+type AgentAuthPlusValidationResult struct {
 	Valid            bool                    `json:"valid"`
 	SuccessorCheck   *SuccessorCheckResult   `json:"successor_check,omitempty"`
 	DelegationCheck  *DelegationCheckResult  `json:"delegation_check,omitempty"`
@@ -108,17 +108,17 @@ type FiduciaryCheckResult struct {
 	BlockingAction       bool                                `json:"blocking_action"` // whether violations block authorization
 }
 
-// ValidatePoAWithGAuthPlus performs comprehensive GAuth+ validation for a PoA
+// ValidatePoAWithAgentAuthPlus performs comprehensive AgentAuth+ validation for a PoA
 // This is called during RFC-0111 authorization chain validation to enforce
-// GAuth+ policies (successor management, delegation, dual control, capabilities, fiduciary duties)
-func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
+// AgentAuth+ policies (successor management, delegation, dual control, capabilities, fiduciary duties)
+func (v *AgentAuthPlusValidator) ValidatePoAWithAgentAuthPlus(
 	ctx context.Context,
 	poaID string,
 	poaDef *poa.PoADefinition,
 	agentID string,
 	actionType string,
-) (*GAuthPlusValidationResult, error) {
-	result := &GAuthPlusValidationResult{
+) (*AgentAuthPlusValidationResult, error) {
+	result := &AgentAuthPlusValidationResult{
 		Valid:    true,
 		Warnings: []string{},
 	}
@@ -213,14 +213,14 @@ func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
 }
 
 // checkSuccessorStatus checks if a successor AI is active
-func (v *GAuthPlusValidator) checkSuccessorStatus(
+func (v *AgentAuthPlusValidator) checkSuccessorStatus(
 	ctx context.Context,
 	poaID string,
 	primaryAgentID string,
 ) (*SuccessorCheckResult, error) {
 	start := time.Now()
 	defer func() {
-		metrics.RecordGAuthPlusValidation("successor", "checked", time.Since(start).Seconds())
+		metrics.RecordAgentAuthPlusValidation("successor", "checked", time.Since(start).Seconds())
 	}()
 
 	result := &SuccessorCheckResult{
@@ -243,21 +243,21 @@ func (v *GAuthPlusValidator) checkSuccessorStatus(
 		result.SuccessorActive = true
 		result.ActiveSuccessor = activeSuccessor
 		result.EffectiveAgentID = activeSuccessor.SuccessorAgentID
-		metrics.RecordGAuthPlusSuccessorActivation()
+		metrics.RecordAgentAuthPlusSuccessorActivation()
 	}
 
 	return result, nil
 }
 
 // checkDelegationChain validates the AI-to-AI delegation chain
-func (v *GAuthPlusValidator) checkDelegationChain(
+func (v *AgentAuthPlusValidator) checkDelegationChain(
 	ctx context.Context,
 	poaID string,
 	agentID string,
 ) (*DelegationCheckResult, error) {
 	start := time.Now()
 	defer func() {
-		metrics.RecordGAuthPlusValidation("delegation", "checked", time.Since(start).Seconds())
+		metrics.RecordAgentAuthPlusValidation("delegation", "checked", time.Since(start).Seconds())
 	}()
 
 	result := &DelegationCheckResult{
@@ -283,7 +283,7 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 
 	// Record delegation depth metric
 	if len(chain) > 0 {
-		metrics.RecordGAuthPlusDelegationDepth(len(chain))
+		metrics.RecordAgentAuthPlusDelegationDepth(len(chain))
 	}
 
 	// Check max depth from first delegation (if any)
@@ -323,7 +323,7 @@ func (v *GAuthPlusValidator) checkDelegationChain(
 }
 
 // checkDualControlRequirements validates dual control approval requirements
-func (v *GAuthPlusValidator) checkDualControlRequirements(
+func (v *AgentAuthPlusValidator) checkDualControlRequirements(
 	ctx context.Context,
 	poaID string,
 	agentID string,
@@ -378,7 +378,7 @@ func (v *GAuthPlusValidator) checkDualControlRequirements(
 }
 
 // checkCapabilityRequirements validates AI capability against requirements
-func (v *GAuthPlusValidator) checkCapabilityRequirements(
+func (v *AgentAuthPlusValidator) checkCapabilityRequirements(
 	ctx context.Context,
 	agentID string,
 	poaDef *poa.PoADefinition,
@@ -435,7 +435,7 @@ func (v *GAuthPlusValidator) checkCapabilityRequirements(
 }
 
 // checkFiduciaryDuties checks for fiduciary duty violations
-func (v *GAuthPlusValidator) checkFiduciaryDuties(
+func (v *AgentAuthPlusValidator) checkFiduciaryDuties(
 	ctx context.Context,
 	agentID string,
 	poaID string,
@@ -485,7 +485,7 @@ func (v *GAuthPlusValidator) checkFiduciaryDuties(
 
 // compareCapabilityLevels compares two capability levels
 // Returns true if actual >= required
-func (v *GAuthPlusValidator) compareCapabilityLevels(actual, required string) bool {
+func (v *AgentAuthPlusValidator) compareCapabilityLevels(actual, required string) bool {
 	levels := map[string]int{
 		"L0": 0,
 		"L1": 1,
@@ -506,16 +506,16 @@ func (v *GAuthPlusValidator) compareCapabilityLevels(actual, required string) bo
 }
 
 // SetEnforceCapabilities enables/disables capability enforcement
-func (v *GAuthPlusValidator) SetEnforceCapabilities(enforce bool) {
+func (v *AgentAuthPlusValidator) SetEnforceCapabilities(enforce bool) {
 	v.enforceCapabilities = enforce
 }
 
 // SetEnforceDualControl enables/disables dual control enforcement
-func (v *GAuthPlusValidator) SetEnforceDualControl(enforce bool) {
+func (v *AgentAuthPlusValidator) SetEnforceDualControl(enforce bool) {
 	v.enforceDualControl = enforce
 }
 
 // SetEnforceFiduciary enables/disables fiduciary duty enforcement
-func (v *GAuthPlusValidator) SetEnforceFiduciary(enforce bool) {
+func (v *AgentAuthPlusValidator) SetEnforceFiduciary(enforce bool) {
 	v.enforceFiduciary = enforce
 }

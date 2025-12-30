@@ -17,7 +17,7 @@ data:
       interval: 30s
       rules:
       # Pod down for more than 2 minutes
-      - alert: GAuthPodDown
+      - alert: AgentAuthPodDown
         expr: up{job="gauth-service"} == 0
         for: 2m
         labels:
@@ -25,12 +25,12 @@ data:
           component: pod
           category: availability
         annotations:
-          summary: "GAuth pod is down"
+          summary: "AgentAuth pod is down"
           description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been down for more than 2 minutes"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthPodDown.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthPodDown.md"
           
       # No healthy pods available
-      - alert: GAuthServiceUnavailable
+      - alert: AgentAuthServiceUnavailable
         expr: sum(up{job="gauth-service"}) == 0
         for: 1m
         labels:
@@ -38,12 +38,12 @@ data:
           component: service
           category: availability
         annotations:
-          summary: "GAuth service completely unavailable"
-          description: "All GAuth pods are down - service is unavailable"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthServiceUnavailable.md"
+          summary: "AgentAuth service completely unavailable"
+          description: "All AgentAuth pods are down - service is unavailable"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthServiceUnavailable.md"
       
       # Very high p99 latency (>2 seconds for 5 minutes)
-      - alert: GAuthVeryHighLatency
+      - alert: AgentAuthVeryHighLatency
         expr: |
           histogram_quantile(0.99, 
             rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])
@@ -56,10 +56,10 @@ data:
         annotations:
           summary: "Very high p99 latency detected"
           description: "p99 signature verification latency is {{ $value | humanizeDuration }} (threshold: 2s)"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthVeryHighLatency.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthVeryHighLatency.md"
       
       # Memory usage approaching limit (>95% for 5 minutes)
-      - alert: GAuthCriticalMemory
+      - alert: AgentAuthCriticalMemory
         expr: |
           (
             container_memory_usage_bytes{namespace="gauth-staging",pod=~"gauth-.*"} 
@@ -74,10 +74,10 @@ data:
         annotations:
           summary: "Critical memory usage"
           description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }} of limit - may be OOMKilled soon"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthCriticalMemory.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthCriticalMemory.md"
       
       # Pod restart loop (>5 restarts in 15 minutes)
-      - alert: GAuthPodRestartLoop
+      - alert: AgentAuthPodRestartLoop
         expr: |
           increase(kube_pod_container_status_restarts_total{namespace="gauth-staging",pod=~"gauth-.*"}[15m]) > 5
         for: 5m
@@ -88,7 +88,7 @@ data:
         annotations:
           summary: "Pod in restart loop"
           description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthPodRestartLoop.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthPodRestartLoop.md"
     
     # ========================================
     # Performance Alerts
@@ -97,7 +97,7 @@ data:
       interval: 30s
       rules:
       # High error rate (>5% for 5 minutes)
-      - alert: GAuthHighErrorRate
+      - alert: AgentAuthHighErrorRate
         expr: |
           (
             sum(rate(gauth_errors_total[5m])) 
@@ -112,10 +112,10 @@ data:
         annotations:
           summary: "High error rate detected"
           description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthHighErrorRate.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthHighErrorRate.md"
       
       # High p95 latency (>1 second for 5 minutes)
-      - alert: GAuthHighLatency
+      - alert: AgentAuthHighLatency
         expr: |
           histogram_quantile(0.95, 
             rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])
@@ -128,7 +128,7 @@ data:
         annotations:
           summary: "High p95 latency detected"
           description: "p95 signature verification latency is {{ $value | humanizeDuration }} (threshold: 1s)"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthHighLatency.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthHighLatency.md"
     
     # ========================================
     # Resource Alerts
@@ -137,7 +137,7 @@ data:
       interval: 30s
       rules:
       # High CPU usage (>80% for 10 minutes)
-      - alert: GAuthHighCPU
+      - alert: AgentAuthHighCPU
         expr: |
           sum(rate(container_cpu_usage_seconds_total{namespace="gauth-staging",pod=~"gauth-.*"}[5m])) 
           by (pod) > 0.8
@@ -149,10 +149,10 @@ data:
         annotations:
           summary: "High CPU usage"
           description: "Pod {{ $labels.pod }} CPU usage is {{ $value | humanizePercentage }} (threshold: 80%)"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthHighCPU.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthHighCPU.md"
       
       # High memory usage (>85% of limit for 10 minutes)
-      - alert: GAuthHighMemory
+      - alert: AgentAuthHighMemory
         expr: |
           (
             container_memory_usage_bytes{namespace="gauth-staging",pod=~"gauth-.*"} 
@@ -167,7 +167,7 @@ data:
         annotations:
           summary: "High memory usage"
           description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }} of limit (threshold: 85%)"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthHighMemory.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthHighMemory.md"
     
     # ========================================
     # Business Logic Alerts
@@ -176,7 +176,7 @@ data:
       interval: 60s
       rules:
       # Rotation chain not growing (no new continuity updates in 30 minutes)
-      - alert: GAuthRotationChainStale
+      - alert: AgentAuthRotationChainStale
         expr: |
           increase(gauth_rotation_v2_continuity_updates_total[30m]) == 0
           and
@@ -189,10 +189,10 @@ data:
         annotations:
           summary: "Rotation chain appears stale"
           description: "No continuity updates in the last 30 minutes - chain may be stale"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthRotationChainStale.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthRotationChainStale.md"
       
       # Summary head age is very old (>24 hours)
-      - alert: GAuthSummaryHeadOld
+      - alert: AgentAuthSummaryHeadOld
         expr: gauth_rotation_summary_head_age_seconds > 86400
         for: 15m
         labels:
@@ -202,10 +202,10 @@ data:
         annotations:
           summary: "Summary head is very old"
           description: "Summary head age is {{ $value | humanizeDuration }} (threshold: 24 hours)"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthSummaryHeadOld.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthSummaryHeadOld.md"
       
       # Last anchor age is very old (>48 hours)
-      - alert: GAuthLastAnchorOld
+      - alert: AgentAuthLastAnchorOld
         expr: gauth_rotation_summary_last_anchor_age_seconds > 172800
         for: 15m
         labels:
@@ -215,7 +215,7 @@ data:
         annotations:
           summary: "Last anchor is very old"
           description: "Last anchor age is {{ $value | humanizeDuration }} (threshold: 48 hours)"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthLastAnchorOld.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthLastAnchorOld.md"
     
     # ========================================
     # Kubernetes Alerts
@@ -224,7 +224,7 @@ data:
       interval: 30s
       rules:
       # Pod not ready for extended period
-      - alert: GAuthPodNotReady
+      - alert: AgentAuthPodNotReady
         expr: |
           kube_pod_status_ready{namespace="gauth-staging",pod=~"gauth-.*",condition="false"} == 1
         for: 10m
@@ -235,7 +235,7 @@ data:
         annotations:
           summary: "Pod not ready"
           description: "Pod {{ $labels.pod }} has been in not-ready state for more than 10 minutes"
-          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/GAuthPodNotReady.md"
+          runbook_url: "https://github.com/mauriciomferz/Gauth_go/blob/main/docs/runbooks/AgentAuthPodNotReady.md"
     
     # ========================================
     # Database (PostgreSQL) Alerts - NEW

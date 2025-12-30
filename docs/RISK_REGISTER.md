@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Risk Register (Initial Beta)
+# AgentAuth Risk Register (Initial Beta)
 
 Generated: 2025-10-28
 Scope: Architectural & operational risks for RFC-0111 / RFC-0115 compliance features. Updated per remediation milestone.

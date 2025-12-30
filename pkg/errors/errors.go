@@ -57,8 +57,8 @@ type ErrorDetails struct {
 	HTTPStatusCode int                    `json:"http_status_code,omitempty"` // legacy compatibility
 }
 
-// GAuthError represents a structured error
-type GAuthError struct {
+// AgentAuthError represents a structured error
+type AgentAuthError struct {
 	Code      ErrorCode     `json:"code"`
 	Message   string        `json:"message"`
 	Details   *ErrorDetails `json:"details,omitempty"`
@@ -69,10 +69,10 @@ type GAuthError struct {
 }
 
 // Error is a compatibility type alias expected by legacy examples.
-type Error = GAuthError
+type Error = AgentAuthError
 
 // Error implements the error interface
-func (e *GAuthError) Error() string {
+func (e *AgentAuthError) Error() string {
 	if e.File != "" && e.Line != 0 {
 		return fmt.Sprintf("[%s] %s (%s:%d)", e.Code, e.Message, e.File, e.Line)
 	}
@@ -80,7 +80,7 @@ func (e *GAuthError) Error() string {
 }
 
 // WithDetails adds details to the error
-func (e *GAuthError) WithDetails(details interface{}) *GAuthError {
+func (e *AgentAuthError) WithDetails(details interface{}) *AgentAuthError {
 	if e.Details == nil {
 		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
@@ -93,7 +93,7 @@ func (e *GAuthError) WithDetails(details interface{}) *GAuthError {
 }
 
 // WithCause adds a cause to the error
-func (e *GAuthError) WithCause(cause error) *GAuthError {
+func (e *AgentAuthError) WithCause(cause error) *AgentAuthError {
 	if e.Details == nil {
 		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
@@ -105,7 +105,7 @@ func (e *GAuthError) WithCause(cause error) *GAuthError {
 }
 
 // WithFields adds fields to the error (accepts both map[string]interface{} and map[string]string)
-func (e *GAuthError) WithFields(fields interface{}) *GAuthError {
+func (e *AgentAuthError) WithFields(fields interface{}) *AgentAuthError {
 	if e.Details == nil {
 		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
@@ -128,12 +128,12 @@ func (e *GAuthError) WithFields(fields interface{}) *GAuthError {
 }
 
 // --- Compatibility chain methods (no-op enrichers used by examples) ---
-func (e *GAuthError) WithSource(source string) *GAuthError {
+func (e *AgentAuthError) WithSource(source string) *AgentAuthError {
 	e.Source = source
 	return e
 }
 
-func (e *GAuthError) WithRequestInfo(parts ...interface{}) *GAuthError {
+func (e *AgentAuthError) WithRequestInfo(parts ...interface{}) *AgentAuthError {
 	if e.Details == nil {
 		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
@@ -144,7 +144,7 @@ func (e *GAuthError) WithRequestInfo(parts ...interface{}) *GAuthError {
 	return e
 }
 
-func (e *GAuthError) WithHTTPInfo(parts ...interface{}) *GAuthError {
+func (e *AgentAuthError) WithHTTPInfo(parts ...interface{}) *AgentAuthError {
 	if e.Details == nil {
 		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
@@ -161,7 +161,7 @@ func (e *GAuthError) WithHTTPInfo(parts ...interface{}) *GAuthError {
 	return e
 }
 
-func (e *GAuthError) AddInfo(k string, v interface{}) *GAuthError {
+func (e *AgentAuthError) AddInfo(k string, v interface{}) *AgentAuthError {
 	if e.Details == nil {
 		e.Details = &ErrorDetails{Timestamp: e.Timestamp}
 	}
@@ -172,13 +172,13 @@ func (e *GAuthError) AddInfo(k string, v interface{}) *GAuthError {
 	return e
 }
 
-// New creates a new GAuthError
-func New(codeOrError interface{}, message string) *GAuthError {
+// New creates a new AgentAuthError
+func New(codeOrError interface{}, message string) *AgentAuthError {
 	_, file, line, _ := runtime.Caller(1)
 
-	// Handle case where first argument is a *GAuthError (for compatibility with examples)
-	if gErr, ok := codeOrError.(*GAuthError); ok {
-		newErr := &GAuthError{
+	// Handle case where first argument is a *AgentAuthError (for compatibility with examples)
+	if gErr, ok := codeOrError.(*AgentAuthError); ok {
+		newErr := &AgentAuthError{
 			Code:      gErr.Code,
 			Message:   message,
 			Timestamp: time.Now(),
@@ -191,7 +191,7 @@ func New(codeOrError interface{}, message string) *GAuthError {
 
 	// Handle normal case where first argument is an ErrorCode
 	if code, ok := codeOrError.(ErrorCode); ok {
-		newErr := &GAuthError{
+		newErr := &AgentAuthError{
 			Code:      code,
 			Message:   message,
 			Timestamp: time.Now(),
@@ -203,7 +203,7 @@ func New(codeOrError interface{}, message string) *GAuthError {
 	}
 
 	// Fallback to internal error
-	newErr := &GAuthError{
+	newErr := &AgentAuthError{
 		Code:      ErrCodeInternal,
 		Message:   message,
 		Timestamp: time.Now(),
@@ -214,14 +214,14 @@ func New(codeOrError interface{}, message string) *GAuthError {
 	return newErr
 }
 
-// Newf creates a new GAuthError with formatted message
-func Newf(code ErrorCode, format string, args ...interface{}) *GAuthError {
+// Newf creates a new AgentAuthError with formatted message
+func Newf(code ErrorCode, format string, args ...interface{}) *AgentAuthError {
 	return New(code, fmt.Sprintf(format, args...))
 }
 
 // IsRateLimitError checks if an error is a rate limit error
 func IsRateLimitError(err error) bool {
-	if gErr, ok := err.(*GAuthError); ok {
+	if gErr, ok := err.(*AgentAuthError); ok {
 		return gErr.Code == ErrCodeRateLimit
 	}
 	return false
@@ -229,7 +229,7 @@ func IsRateLimitError(err error) bool {
 
 // GetRetryAfter extracts retry-after duration from error details
 func GetRetryAfter(err error) time.Duration {
-	if gErr, ok := err.(*GAuthError); ok {
+	if gErr, ok := err.(*AgentAuthError); ok {
 		if gErr.Details != nil && gErr.Details.AdditionalInfo != nil {
 			if retryAfter, ok := gErr.Details.AdditionalInfo["retry_after"]; ok {
 				if duration, ok := retryAfter.(time.Duration); ok {
@@ -242,10 +242,10 @@ func GetRetryAfter(err error) time.Duration {
 }
 
 // Wrap wraps an existing error with additional context
-func Wrap(err error, code ErrorCode, message string) *GAuthError {
-	if gErr, ok := err.(*GAuthError); ok {
-		// If it's already a GAuthError, preserve the original but add context
-		newErr := &GAuthError{
+func Wrap(err error, code ErrorCode, message string) *AgentAuthError {
+	if gErr, ok := err.(*AgentAuthError); ok {
+		// If it's already a AgentAuthError, preserve the original but add context
+		newErr := &AgentAuthError{
 			Code:      code,
 			Message:   fmt.Sprintf("%s: %s", message, gErr.Message),
 			Timestamp: time.Now(),
@@ -260,7 +260,7 @@ func Wrap(err error, code ErrorCode, message string) *GAuthError {
 	}
 
 	_, file, line, _ := runtime.Caller(1)
-	return &GAuthError{
+	return &AgentAuthError{
 		Code:      code,
 		Message:   fmt.Sprintf("%s: %v", message, err),
 		Timestamp: time.Now(),
@@ -271,7 +271,7 @@ func Wrap(err error, code ErrorCode, message string) *GAuthError {
 
 // IsCode checks if the error has a specific code
 func IsCode(err error, code ErrorCode) bool {
-	if gErr, ok := err.(*GAuthError); ok {
+	if gErr, ok := err.(*AgentAuthError); ok {
 		return gErr.Code == code
 	}
 	return false
@@ -279,7 +279,7 @@ func IsCode(err error, code ErrorCode) bool {
 
 // GetCode extracts the error code from an error
 func GetCode(err error) ErrorCode {
-	if gErr, ok := err.(*GAuthError); ok {
+	if gErr, ok := err.(*AgentAuthError); ok {
 		return gErr.Code
 	}
 	return ErrCodeInternal
@@ -362,8 +362,8 @@ func Middleware() func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if err := recover(); err != nil {
-					var gErr *GAuthError
-					if e, ok := err.(*GAuthError); ok {
+					var gErr *AgentAuthError
+					if e, ok := err.(*AgentAuthError); ok {
 						gErr = New(ErrCodeInternal, fmt.Sprintf("Internal server error: %v", e))
 					} else {
 						gErr = New(ErrCodeInternal, fmt.Sprintf("Internal server error: %v", err))

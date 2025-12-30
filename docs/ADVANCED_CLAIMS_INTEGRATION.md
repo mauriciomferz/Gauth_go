@@ -78,7 +78,7 @@ type TimeWindow struct {
 | typ Value            | Description                         | Validation Rules                                           |
 |----------------------|-------------------------------------|------------------------------------------------------------|
 | `gauth.delegation`   | RFC0111 delegation tokens           | Must have non-empty `delegation_id` and `scope`            |
-| `gauth.token`        | Generic GAuth tokens                | Standard validation only (no special rules)                |
+| `gauth.token`        | Generic AgentAuth tokens                | Standard validation only (no special rules)                |
 | `gauth.capability`   | Capability-based access tokens      | Must have at least one scope prefixed with `cap:`          |
 
 Unknown `typ` values are **rejected (fail-closed)** for security.
@@ -385,6 +385,6 @@ go test -v -run TestAdvancedClaims ./pkg/rfc0111/
 - **Added**: AdvancedClaims population in generateAuthToken() (~75 lines, feature-gated)
 - **Added**: typ semantic validation in VerifyToken() (~40 lines, feature-gated)
 - **Added**: Delegation chain depth calculation (traverse ParentPOAID up to 100 levels)
-- **Added**: GAuth typ values (gauth.delegation, gauth.token, gauth.capability) to isValidTokenType()
+- **Added**: AgentAuth typ values (gauth.delegation, gauth.token, gauth.capability) to isValidTokenType()
 - **Added**: Comprehensive test suite (4 tests, all passing)
 - **Status**: sec1.item2 **Implemented** (claims set metadata, typ semantic enforcement, delegation chain depth tracking)

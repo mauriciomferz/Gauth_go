@@ -1,7 +1,7 @@
--- Migration 009: GAuth+ Enhancements
+-- Migration 009: AgentAuth+ Enhancements
 -- Adds successor AI, delegation policy, dual control, and fiduciary duties support
 
--- Add GAuth+ fields to power_of_attorney table
+-- Add AgentAuth+ fields to power_of_attorney table
 ALTER TABLE power_of_attorney 
 ADD COLUMN IF NOT EXISTS successor_id VARCHAR(255),
 ADD COLUMN IF NOT EXISTS delegation_policy JSONB,
@@ -132,15 +132,15 @@ CREATE INDEX IF NOT EXISTS idx_capability_assessments_valid_until ON ai_capabili
 CREATE INDEX IF NOT EXISTS idx_capability_assessments_risk_score ON ai_capability_assessments(risk_score);
 
 -- Add comments for documentation
-COMMENT ON COLUMN power_of_attorney.successor_id IS 'GAuth+: Backup AI agent to activate if primary agent fails or is unavailable';
-COMMENT ON COLUMN power_of_attorney.delegation_policy IS 'GAuth+: JSON policy defining delegation rules {can_delegate:bool, max_depth:int, allowed_delegates:[]}';
-COMMENT ON COLUMN power_of_attorney.fiduciary_duties IS 'GAuth+: JSON array of fiduciary duties this agent must uphold [care, loyalty, good_faith, etc.]';
-COMMENT ON COLUMN power_of_attorney.obligation_type IS 'GAuth+: permissive (do-unless) or mandatory (need-to-do)';
-COMMENT ON COLUMN power_of_attorney.capability_requirements IS 'GAuth+: Required AI capability levels for this PoA';
-COMMENT ON COLUMN power_of_attorney.dual_control_required IS 'GAuth+: Whether high-risk actions require second-level approval';
+COMMENT ON COLUMN power_of_attorney.successor_id IS 'AgentAuth+: Backup AI agent to activate if primary agent fails or is unavailable';
+COMMENT ON COLUMN power_of_attorney.delegation_policy IS 'AgentAuth+: JSON policy defining delegation rules {can_delegate:bool, max_depth:int, allowed_delegates:[]}';
+COMMENT ON COLUMN power_of_attorney.fiduciary_duties IS 'AgentAuth+: JSON array of fiduciary duties this agent must uphold [care, loyalty, good_faith, etc.]';
+COMMENT ON COLUMN power_of_attorney.obligation_type IS 'AgentAuth+: permissive (do-unless) or mandatory (need-to-do)';
+COMMENT ON COLUMN power_of_attorney.capability_requirements IS 'AgentAuth+: Required AI capability levels for this PoA';
+COMMENT ON COLUMN power_of_attorney.dual_control_required IS 'AgentAuth+: Whether high-risk actions require second-level approval';
 
-COMMENT ON TABLE successor_activations IS 'GAuth+: Tracks when successor AIs are activated to replace primary agents';
-COMMENT ON TABLE ai_delegations IS 'GAuth+: Tracks AI-to-AI delegations with depth limits and policy enforcement';
-COMMENT ON TABLE dual_control_approvals IS 'GAuth+: Second-level approval workflow for high-risk AI actions';
-COMMENT ON TABLE fiduciary_duty_violations IS 'GAuth+: Tracks and manages fiduciary duty breaches by AI agents';
-COMMENT ON TABLE ai_capability_assessments IS 'GAuth+: Periodic capability assessments to match AI capabilities with authorization scope';
+COMMENT ON TABLE successor_activations IS 'AgentAuth+: Tracks when successor AIs are activated to replace primary agents';
+COMMENT ON TABLE ai_delegations IS 'AgentAuth+: Tracks AI-to-AI delegations with depth limits and policy enforcement';
+COMMENT ON TABLE dual_control_approvals IS 'AgentAuth+: Second-level approval workflow for high-risk AI actions';
+COMMENT ON TABLE fiduciary_duty_violations IS 'AgentAuth+: Tracks and manages fiduciary duty breaches by AI agents';
+COMMENT ON TABLE ai_capability_assessments IS 'AgentAuth+: Periodic capability assessments to match AI capabilities with authorization scope';

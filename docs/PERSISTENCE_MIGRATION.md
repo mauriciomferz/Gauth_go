@@ -11,7 +11,7 @@ owners: [system]
 Date: 2025-10-30
 
 ## Overview
-The GAuth Beta introduces optional persistent storage for Power of Attorney (PoA) records and audit ledgers using BoltDB. Persistence is activated via the environment variable `GAUTH_PERSIST_PATH`. When set, the service will:
+The AgentAuth Beta introduces optional persistent storage for Power of Attorney (PoA) records and audit ledgers using BoltDB. Persistence is activated via the environment variable `GAUTH_PERSIST_PATH`. When set, the service will:
 
 1. Initialize a BoltDB-backed PoA repository (file created if absent).
 2. Store all new PoA issuance, status transitions, and revocation workflow states durably.

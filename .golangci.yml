@@ -1,4 +1,4 @@
-# GolangCI-Lint Configuration for GAuth Project
+# GolangCI-Lint Configuration for AgentAuth Project
 # This configuration excludes archived and historical files from linting
 
 run:

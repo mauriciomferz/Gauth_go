@@ -14,7 +14,7 @@ import (
 // Composite demo flow:
 // 1. Issue a demo JWT token with scopes.
 // 2. Build authorization request using token claims (roles + scopes + env conditions).
-// 3. Create a POA delegation under RFC0111 service (allowed by role & scopes).
+// 3. Create a POA delegation under AAP001 service (allowed by role & scopes).
 // 4. Revoke the POA and demonstrate subsequent validation failure due to revocation chain.
 func main() {
 	ctx := context.Background()
@@ -28,7 +28,7 @@ func main() {
 	az := authz.NewMemoryAuthorizer()
 	// Policies leveraging roles & required scopes & ABAC conditions
 	az.AddPolicy(authz.Policy{ID: "create-poa-role", Roles: []string{"grantor"}, Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow, RequiredScopes: []string{"delegation:create"}, Conditions: []authz.Condition{{Key: "env", Operator: "equals", Values: []string{"prod"}}}})
-	// Subject-based policy for RFC0111 internal authorization (since service does not propagate roles/scopes yet)
+	// Subject-based policy for AAP001 internal authorization (since service does not propagate roles/scopes yet)
 	az.AddPolicy(authz.Policy{ID: "create-poa-subject", Subject: "alice", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	az.AddPolicy(authz.Policy{ID: "revoke-poa", Subject: "alice", Resource: "*", Actions: []string{"revoke_delegation"}, Effect: authz.Allow, RequiredScopes: []string{"delegation:create"}})
 	az.AddPolicy(authz.Policy{ID: "revoke-poa-subject", Subject: "alice", Resource: "*", Actions: []string{"revoke_delegation"}, Effect: authz.Allow})
@@ -45,7 +45,7 @@ func main() {
 		return
 	}
 
-	// --- RFC0111 service with revocation chain ---
+	// --- AAP001 service with revocation chain ---
 	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(nil), az)
 	delResp, err := svc.CreateDelegationCtx(ctx, gauth_rfc_001.DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, Restrictions: map[string]string{"classification": "public"}, Duration: time.Hour})
 	if err != nil {

@@ -5,7 +5,7 @@
 
 **Date**: November 12, 2025  
 **Auditor**: Quality Manager (AI)  
-**Scope**: RFC-0111 (GAuth 1.0) & RFC-0115 (PoA-Definition) Compliance  
+**Scope**: RFC-0111 (AgentAuth 1.0) & RFC-0115 (PoA-Definition) Compliance  
 **User Directive**: *"be very precise, honest and thorough on your analisis, don´t hold back and be bruttaly honest"*
 
 ---

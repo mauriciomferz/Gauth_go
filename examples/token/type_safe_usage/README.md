@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates type-safe token operations using the GAuth token API. It covers token creation, validation, listing, revocation, and rotation with strongly-typed metadata.
+This example demonstrates type-safe token operations using the AgentAuth token API. It covers token creation, validation, listing, revocation, and rotation with strongly-typed metadata.
 
 ## Key Concepts
 - **Type Safety**: All token operations use strongly-typed structs and filters.
@@ -30,7 +30,7 @@ go run main.go
 For more, see the [Architecture Guide](../../../docs/ARCHITECTURE.md).
 # Type-Safe Token Usage Example
 
-This example demonstrates the use of strongly-typed token management in GAuth. It shows how to:
+This example demonstrates the use of strongly-typed token management in AgentAuth. It shows how to:
 
 1. Create and configure a type-safe token store
 2. Generate tokens with proper typing

@@ -1,4 +1,4 @@
--- GAuth Database Initialization Script
+-- AgentAuth Database Initialization Script
 
 -- Create extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

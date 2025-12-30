@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-Successfully created the missing `cmd/conformance` CLI tool that was documented in the conformance README but didn't exist in the codebase. The tool provides automated RFC 0111/0115 conformance verification with history tracking and trend analysis.
+Successfully created the missing `cmd/conformance` CLI tool that was documented in the conformance README but didn't exist in the codebase. The tool provides automated AAP-001/0115 conformance verification with history tracking and trend analysis.
 
 ## What Was Built
 
@@ -104,7 +104,7 @@ Exit code `2` if any threshold is violated.
 ### Basic Execution
 ```bash
 $ ./bin/conformance
-🔍 GAuth RFC 0111/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/0115 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 
@@ -120,7 +120,7 @@ $ ./bin/conformance \
   --history-file=artifacts/history.csv \
   --trend-markdown-out=artifacts/history_trend.md
 
-🔍 GAuth RFC 0111/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/0115 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 
@@ -138,7 +138,7 @@ $ ./bin/conformance \
 ### Threshold Enforcement
 ```bash
 $ ./bin/conformance --min-coverage=90
-🔍 GAuth RFC 0111/0115 Conformance Analyzer
+🔍 AgentAuth AAP-001/0115 Conformance Analyzer
 ============================================
 ✅ Analysis complete: 68.8% coverage (33/48 symbols)
 

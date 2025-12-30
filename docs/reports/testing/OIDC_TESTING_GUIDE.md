@@ -212,7 +212,7 @@ If you have multiple providers configured:
 
 1. **Register Application** in Azure Portal:
    - App registrations → New registration
-   - Name: "GAuth Development"
+   - Name: "AgentAuth Development"
    - Redirect URI: `http://localhost:8080/auth/callback`
    - Platform: Web
 
@@ -222,7 +222,7 @@ If you have multiple providers configured:
    - Copy secret value
    - Configure scopes: `openid`, `profile`, `email`
 
-3. **In GAuth Admin UI**:
+3. **In AgentAuth Admin UI**:
    - Create new OIDC provider
    - Type: Azure AD
    - Client ID: {from Azure}
@@ -252,7 +252,7 @@ If you have multiple providers configured:
    - Copy client secret
    - Enable Google+ API (for user info)
 
-3. **In GAuth Admin UI**:
+3. **In AgentAuth Admin UI**:
    - Create new OIDC provider
    - Type: Google
    - Client ID: {from Google}
@@ -278,7 +278,7 @@ If you have multiple providers configured:
    - Copy client secret
    - Note your Okta domain
 
-3. **In GAuth Admin UI**:
+3. **In AgentAuth Admin UI**:
    - Create new OIDC provider
    - Type: Okta
    - Client ID: {from Okta}

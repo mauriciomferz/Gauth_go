@@ -1,6 +1,6 @@
 # US Identity Verification Architecture
 
-**Project**: GAuth RFC-0111 External Connectors Enhancement  
+**Project**: AgentAuth RFC-0111 External Connectors Enhancement  
 **Component**: US Identity Verification System  
 **Date**: November 12, 2025  
 **Status**: Design Phase  
@@ -10,11 +10,11 @@
 
 ## Executive Summary
 
-This document defines the architecture for US identity verification integration within the GAuth system. The implementation extends the existing PVP (Power Verification Point) framework to support multiple US identity document types and verification methods, addressing the gap in non-European identity verification capabilities.
+This document defines the architecture for US identity verification integration within the AgentAuth system. The implementation extends the existing PVP (Power Verification Point) framework to support multiple US identity document types and verification methods, addressing the gap in non-European identity verification capabilities.
 
 ### Objectives
 
-1. **Geographic Expansion**: Enable GAuth to support US-based identity verification
+1. **Geographic Expansion**: Enable AgentAuth to support US-based identity verification
 2. **Multi-Document Support**: Verify US passports, driver's licenses, state IDs, and SSN
 3. **Compliance**: Meet RFC-0111 PVP requirements with US-specific adaptations
 4. **Integration**: Seamlessly integrate with existing PVPClient framework
@@ -43,7 +43,7 @@ This document defines the architecture for US identity verification integration 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        GAuth Application                        │
+│                        AgentAuth Application                        │
 │                                                                 │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │            Identity Verification Service                  │  │
@@ -447,8 +447,8 @@ func (s *IdentityVerificationService) VerifyUSPassport(
         return nil, err
     }
     
-    // Convert to GAuth format
-    return convertToGAuthResult(result.(*external.IdentityVerificationResult)), nil
+    // Convert to AgentAuth format
+    return convertToAgentAuthResult(result.(*external.IdentityVerificationResult)), nil
 }
 ```
 
@@ -1110,7 +1110,7 @@ log.Warn("Identity verification failed",
 
 ## Conclusion
 
-This architecture provides a comprehensive, secure, and scalable solution for US identity verification within the GAuth system. By leveraging commercial API providers (Persona primary, Trulioo fallback), integrating with the existing PVP framework, and implementing state-specific validation logic, the system will support all major US identity document types while maintaining high performance, reliability, and compliance with data protection regulations.
+This architecture provides a comprehensive, secure, and scalable solution for US identity verification within the AgentAuth system. By leveraging commercial API providers (Persona primary, Trulioo fallback), integrating with the existing PVP framework, and implementing state-specific validation logic, the system will support all major US identity document types while maintaining high performance, reliability, and compliance with data protection regulations.
 
 **Next Steps**:
 1. Review and approve architecture

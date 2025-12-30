@@ -28,7 +28,7 @@ refreshCadence: monthly
 
 ## Overview
 
-The Gap G10 integration test suite validates RFC-0111 (GAuth 1.0) and RFC-0115 (Power of Attorney) compliance across all authorization components. The suite includes:
+The Gap G10 integration test suite validates RFC-0111 (AgentAuth 1.0) and RFC-0115 (Power of Attorney) compliance across all authorization components. The suite includes:
 
 - **91 functional tests** across 6 test files
 - **19 performance benchmarks** (16 component + 3 E2E)
@@ -692,7 +692,7 @@ See [GAP_G10_PHASE7_PERFORMANCE_REPORT.md](./GAP_G10_PHASE7_PERFORMANCE_REPORT.m
 ## Additional Resources
 
 ### Documentation
-- [RFC-0111: GAuth 1.0 Specification](./docs/RFC-0111.md)
+- [RFC-0111: AgentAuth 1.0 Specification](./docs/RFC-0111.md)
 - [RFC-0115: Power of Attorney](./docs/RFC-0115.md)
 - [Gap G10 Integration Tests Progress](./GAP_G10_INTEGRATION_TESTS_PROGRESS.md)
 - [Phase 6: E2E Tests Completion](./GAP_G10_PHASE6_E2E_TESTS_COMPLETION.md)

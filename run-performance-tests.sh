@@ -22,7 +22,7 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 mkdir -p "$RESULTS_DIR"
 
 echo -e "${BLUE}╔═══════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║     GAuth Performance Testing Suite           ║${NC}"
+echo -e "${BLUE}║     AgentAuth Performance Testing Suite           ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════╝${NC}"
 echo ""
 

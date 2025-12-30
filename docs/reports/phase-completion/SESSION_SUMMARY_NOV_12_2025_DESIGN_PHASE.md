@@ -33,7 +33,7 @@ This session focused on **designing comprehensive architectures** for the two re
 **Architecture Components**:
 1. **OIDC Discovery Service** - `.well-known/openid-configuration` endpoint
 2. **ID Token Service** - Issue/validate OIDC ID tokens (RS256 signing)
-3. **Identity Bridge** - Convert OIDC ID tokens → GAuth `IdentityProofResult`
+3. **Identity Bridge** - Convert OIDC ID tokens → AgentAuth `IdentityProofResult`
 4. **External Provider Client** - Federate with Google, Okta, Azure AD, Keycloak
 5. **OIDC-Enabled PowerVerificationPoint** - Extend existing PVP interface
 
@@ -56,7 +56,7 @@ This session focused on **designing comprehensive architectures** for the two re
 **Key Features**:
 - Standards-based identity verification (OpenID Connect Core 1.0)
 - Enterprise SSO integration
-- Trust level mapping (OIDC ACR → GAuth TrustLevel)
+- Trust level mapping (OIDC ACR → AgentAuth TrustLevel)
 - Backward compatibility with existing proof methods
 - Security: ID token validation, JWKS key rotation, nonce-based replay protection
 
@@ -70,7 +70,7 @@ This session focused on **designing comprehensive architectures** for the two re
 **Architecture Components**:
 1. **MCP Client SDK** - Go implementation of MCP protocol (JSON-RPC 2.0)
 2. **Connection Manager** - Manage connections to multiple MCP servers
-3. **Authorization Bridge** - Map GAuth Extended Tokens → MCP permissions
+3. **Authorization Bridge** - Map AgentAuth Extended Tokens → MCP permissions
 4. **PDP Integration** - Validate MCP operations against policies
 5. **Audit Logger** - Log all MCP resource reads and tool calls
 6. **MCP Agent** - Wrap AI agents with MCP capabilities
@@ -113,25 +113,25 @@ mcp:prompt:get                 - Access prompt templates
    - Studied OpenID Connect Core 1.0 specification
    - Reviewed OIDC Discovery 1.0
    - Analyzed integration patterns from major providers (Google, Okta, Azure AD)
-   - Mapped OIDC ACR to GAuth trust levels
+   - Mapped OIDC ACR to AgentAuth trust levels
 
 2. **MCP Research**:
    - Studied official MCP specification (https://modelcontextprotocol.io/)
    - Reviewed Anthropic's reference implementation (TypeScript SDK)
    - Analyzed JSON-RPC 2.0 transport requirements
-   - Mapped MCP primitives to GAuth authorization model
+   - Mapped MCP primitives to AgentAuth authorization model
 
 ### Design Principles
 
 1. **RFC-0111 Compliance First** - Both designs explicitly satisfy building block requirements
 2. **Standards-Based** - Use official specifications (OIDC, MCP, JSON-RPC 2.0)
 3. **Security by Design** - Zero-trust, policy enforcement, audit logging
-4. **Backward Compatibility** - Maintain existing GAuth functionality
+4. **Backward Compatibility** - Maintain existing AgentAuth functionality
 5. **Production-Ready** - Complete error handling, monitoring, testing strategies
 
 ### Architecture Patterns
 
-1. **Bridge Pattern**: Identity Bridge (OIDC → GAuth), Authorization Bridge (GAuth → MCP)
+1. **Bridge Pattern**: Identity Bridge (OIDC → AgentAuth), Authorization Bridge (AgentAuth → MCP)
 2. **Adapter Pattern**: PDP request converters for OIDC/MCP
 3. **Manager Pattern**: Connection Manager (MCP), Discovery Service (OIDC)
 4. **Strategy Pattern**: Policy evaluation, transport selection
@@ -268,7 +268,7 @@ mcp:prompt:get                 - Access prompt templates
 - Trust level mapping (ACR → TrustLevel)
 
 **Integration Tests**:
-- GAuth OIDC flow (authenticate, issue ID token, use in subscription)
+- AgentAuth OIDC flow (authenticate, issue ID token, use in subscription)
 - External provider flow (redirect, authenticate, callback, exchange code)
 - Mixed flow (multiple identity providers in single subscription)
 
@@ -486,7 +486,7 @@ This session successfully **designed comprehensive, production-ready architectur
 ✅ **Risk assessment** with mitigation strategies  
 ✅ **Clear path to 75% compliance** (production-ready threshold)
 
-**Status**: Both designs are **ready for immediate implementation**. The GAuth system now has a clear roadmap to achieve production readiness within 3 months.
+**Status**: Both designs are **ready for immediate implementation**. The AgentAuth system now has a clear roadmap to achieve production readiness within 3 months.
 
 ---
 

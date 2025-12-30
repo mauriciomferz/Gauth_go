@@ -176,7 +176,7 @@ func (m *SubscriptionFlowManager) ExecuteStepI(
 	}
 
 	if !proof.Valid {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_i_identity_invalid",
 			Message: fmt.Sprintf("Owner's authorizer identity could not be verified: %s", proof.FailureReason),
 		}
@@ -210,7 +210,7 @@ func (m *SubscriptionFlowManager) ExecuteStepII(
 	}
 
 	if sub.OwnersAuthorizerIdentity == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_ii_prerequisite_failed",
 			Message: "Step I must be completed before Step II",
 		}
@@ -218,7 +218,7 @@ func (m *SubscriptionFlowManager) ExecuteStepII(
 
 	// Check if Step II has already been completed
 	if sub.AuthorizationProof != nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_ii_already_completed",
 			Message: "Step II has already been completed for this subscription",
 		}
@@ -231,7 +231,7 @@ func (m *SubscriptionFlowManager) ExecuteStepII(
 	}
 
 	if !entry.Active {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_ii_register_not_active",
 			Message: "Commercial register entry not active",
 		}
@@ -239,7 +239,7 @@ func (m *SubscriptionFlowManager) ExecuteStepII(
 
 	// Verify the owner's authorizer is actually authorized
 	if !m.verifyAuthorizerInRegister(sub.OwnersAuthorizerIdentity, entry) {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_ii_authorization_invalid",
 			Message: "Owner's authorizer is not listed in commercial register",
 		}
@@ -275,7 +275,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIII(
 	}
 
 	if sub.AuthorizationProof == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_iii_prerequisite_failed",
 			Message: "Step II must be completed before Step III",
 		}
@@ -288,7 +288,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIII(
 	}
 
 	if !proof.Valid {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_iii_identity_invalid",
 			Message: fmt.Sprintf("Client owner identity could not be verified: %s", proof.FailureReason),
 		}
@@ -315,7 +315,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIV(
 	}
 
 	if sub.ClientOwnerIdentity == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_iv_prerequisite_failed",
 			Message: "Step III must be completed before Step IV",
 		}
@@ -328,7 +328,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIV(
 	}
 
 	if !chainResult.Valid {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_iv_chain_invalid",
 			Message: fmt.Sprintf("Authorization chain validation failed: %s", chainResult.FailureReason),
 		}
@@ -336,7 +336,7 @@ func (m *SubscriptionFlowManager) ExecuteStepIV(
 
 	// Verify chain links owner's authorizer to client owner
 	if !m.verifyChainConnectsParties(authorizationChain, sub.OwnersAuthorizerIdentity.SubjectID, sub.ClientOwnerIdentity.SubjectID) {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_iv_chain_incomplete",
 			Message: "Authorization chain does not connect owner's authorizer to client owner",
 		}
@@ -371,7 +371,7 @@ func (m *SubscriptionFlowManager) ExecuteStepV(
 	}
 
 	if sub.ClientOwnerAuthProof == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_v_prerequisite_failed",
 			Message: "Step IV must be completed before Step V",
 		}
@@ -400,7 +400,7 @@ func (m *SubscriptionFlowManager) ExecuteStepV(
 			if len(formalResult.Issues) > 0 {
 				issuesStr = fmt.Sprintf(": %s", formalResult.Issues[0])
 			}
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "step_v_formal_requirements_failed",
 				Message: fmt.Sprintf("Formal requirements validation failed%s", issuesStr),
 			}
@@ -440,7 +440,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVI(
 	}
 
 	if sub.ClientAuthorizationGrant == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_vi_prerequisite_failed",
 			Message: "Step V must be completed before Step VI",
 		}
@@ -453,7 +453,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVI(
 	}
 
 	if !proof.Valid {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_vi_identity_invalid",
 			Message: fmt.Sprintf("Resource owner identity could not be verified: %s", proof.FailureReason),
 		}
@@ -479,7 +479,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVII(
 	}
 
 	if sub.ResourceOwnerIdentity == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_vii_prerequisite_failed",
 			Message: "Step VI must be completed before Step VII",
 		}
@@ -492,7 +492,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVII(
 	}
 
 	if !chainResult.Valid {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_vii_chain_invalid",
 			Message: fmt.Sprintf("Authorization chain validation failed: %s", chainResult.FailureReason),
 		}
@@ -526,7 +526,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVIII(
 	}
 
 	if sub.ResourceOwnerAuthProof == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "step_viii_prerequisite_failed",
 			Message: "Step VII must be completed before Step VIII",
 		}

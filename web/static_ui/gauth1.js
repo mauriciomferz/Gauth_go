@@ -1,4 +1,4 @@
-// GAuth 1.0 Dashboard - Interactive Application
+// AgentAuth 1.0 Dashboard - Interactive Application
 
 // API Base URL
 const API_BASE = '/api/v1/gauth';

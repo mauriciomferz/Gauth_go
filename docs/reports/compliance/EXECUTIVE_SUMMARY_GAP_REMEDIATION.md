@@ -26,7 +26,7 @@
 **What was wrong:**
 ```go
 // Line 168 of extended_token_service.go
-return nil, &GAuthError{
+return nil, &AgentAuthError{
     Message: "Extended token parsing not implemented",
 }
 ```
@@ -75,7 +75,7 @@ complianceValidator := NewComplianceValidator(
 **What was wrong:**
 - No OIDC Discovery endpoint
 - No ID token issuance/validation
-- No identity bridging between OIDC and GAuth
+- No identity bridging between OIDC and AgentAuth
 - Steps I, III, VI only supported mock identity providers
 
 **What we fixed:**
@@ -84,7 +84,7 @@ complianceValidator := NewComplianceValidator(
 - ✅ Created pkg/oidc/types.go (238 lines) - OIDC data structures
 - ✅ Created pkg/oidc/discovery.go (239 lines) - Discovery Service
 - ✅ Created pkg/oidc/id_token.go (288 lines) - ID Token Service
-- ✅ Created pkg/oidc/identity_bridge.go (282 lines) - OIDC ↔ GAuth bridge
+- ✅ Created pkg/oidc/identity_bridge.go (282 lines) - OIDC ↔ AgentAuth bridge
 - ✅ Added 3 test files (1,146 lines, 86 test cases)
 - ✅ Achieved 88.4% test coverage
 
@@ -219,8 +219,8 @@ TOTAL DOCUMENTATION:                           ~5,400 lines
 ✅ OIDC Discovery endpoint (/.well-known/openid-configuration)
 ✅ ID token issuance with RS256/384/512 signing
 ✅ ID token validation (7-step OIDC spec compliance)
-✅ OIDC ↔ GAuth identity bridging
-✅ Trust level mapping (ACR ↔ GAuth)
+✅ OIDC ↔ AgentAuth identity bridging
+✅ Trust level mapping (ACR ↔ AgentAuth)
 ✅ PowerVerificationPoint for OIDC
 ✅ PVP Router for multi-method support
 ✅ Steps I, III, VI support OIDC ID tokens
@@ -249,7 +249,7 @@ TOTAL DOCUMENTATION:                           ~5,400 lines
 - **Architecture:** Clean separation of concerns
   - Discovery Service with HTTP handler
   - ID Token Service with JWT lifecycle
-  - Identity Bridge for OIDC ↔ GAuth conversion
+  - Identity Bridge for OIDC ↔ AgentAuth conversion
   - PVP Router for extensibility
 - **Maintainability:** Highly extensible design
   - Easy to add new proof methods
@@ -342,7 +342,7 @@ d70cf63b  feat: implement OIDC Phase 2 - PVP Integration
 ✅ Bridge pattern enabled clean integration  
 ✅ OIDC modular design (types → discovery → id_token → bridge) enabled rapid Phase 2  
 ✅ PVP Router pattern provides elegant multi-method support  
-✅ Trust level mapping (ACR ↔ GAuth) bridges OIDC and internal authorization
+✅ Trust level mapping (ACR ↔ AgentAuth) bridges OIDC and internal authorization
 
 ### Lessons Learned
 💡 Brutal honesty in audits leads to real progress  
@@ -352,7 +352,7 @@ d70cf63b  feat: implement OIDC Phase 2 - PVP Integration
 💡 Documentation is as important as code  
 💡 OIDC standards compliance requires careful JWT claims validation (azp, aud, exp, iat)  
 💡 Router pattern with reflection enables elegant method selection without if/else chains  
-💡 eIDAS/NIST trust level mappings must be bidirectional (GAuth ↔ OIDC)  
+💡 eIDAS/NIST trust level mappings must be bidirectional (AgentAuth ↔ OIDC)  
 💡 Integration tests validate real-world flows better than unit tests alone
 
 ### Technical Insights
@@ -394,7 +394,7 @@ d70cf63b  feat: implement OIDC Phase 2 - PVP Integration
 > 
 > **Session 2:** OIDC Phase 1 delivered production-grade infrastructure. Discovery, ID Token, and Identity Bridge components form a solid foundation with 88.4% test coverage and full standards compliance (OIDC Core 1.0, Discovery 1.0, JWT RFC 7519).
 > 
-> **Session 3:** OIDC Phase 2 integrated OIDC into GAuth's authentication flow. The PVP Router pattern provides elegant multi-method support, and integration tests (408 lines) validate real-world subscription flows. Steps I, III, VI now support OIDC ID tokens with proper trust level mapping.
+> **Session 3:** OIDC Phase 2 integrated OIDC into AgentAuth's authentication flow. The PVP Router pattern provides elegant multi-method support, and integration tests (408 lines) validate real-world subscription flows. Steps I, III, VI now support OIDC ID tokens with proper trust level mapping.
 > 
 > **Progress is real, measurable, and verified:**
 > - +10% absolute compliance increase (55% → 65%)
@@ -404,7 +404,7 @@ d70cf63b  feat: implement OIDC Phase 2 - PVP Integration
 > - System now operational with OIDC support
 > - 1,795 production lines + 2,531 test lines delivered
 > 
-> **OIDC Implementation: 50% complete** (Phase 2 of 4). Phase 1 & 2 focused on core infrastructure and GAuth integration. Phases 3 & 4 will add external providers and production hardening.
+> **OIDC Implementation: 50% complete** (Phase 2 of 4). Phase 1 & 2 focused on core infrastructure and AgentAuth integration. Phases 3 & 4 will add external providers and production hardening.
 > 
 > **Still not production-ready**, but on a clear path. With OIDC Phases 3 & 4 (external providers + hardening), compliance → 68%. With MCP (P1 requirement), compliance → 75%. With advanced features and security hardening, 90% is achievable.
 > 
@@ -467,14 +467,14 @@ We turned a non-functional prototype with critical blockers into a functional, O
 - ✅ Validate authorization chains end-to-end
 - ✅ Support distributed service architecture
 - ✅ Issue and validate OIDC ID tokens (Discovery, signing, validation)
-- ✅ Bridge OIDC identities to GAuth authentication
-- ✅ Map trust levels between OIDC ACR and GAuth (eIDAS/NIST)
+- ✅ Bridge OIDC identities to AgentAuth authentication
+- ✅ Map trust levels between OIDC ACR and AgentAuth (eIDAS/NIST)
 - ✅ Support OIDC in Steps I, III, VI (PVP + Router)
 - ✅ Validate real-world flows with integration tests (408 lines)
 
 **From the audit's "This is NOT production-ready" (55%)** to **"OIDC-capable, Phase 2/4 complete (65%)"** - that's real, measurable progress with a 10% compliance increase in one day.
 
-**OIDC Status:** Phase 1 & 2 complete (Core + GAuth Integration). Phases 3 & 4 next (External Providers + Production Hardening).
+**OIDC Status:** Phase 1 & 2 complete (Core + AgentAuth Integration). Phases 3 & 4 next (External Providers + Production Hardening).
 
 ---
 

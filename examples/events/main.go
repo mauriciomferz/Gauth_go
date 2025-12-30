@@ -1,5 +1,5 @@
 // Typed Event System Example
-// Demonstrates creation, dispatch, and handling of events with strongly-typed metadata using GAuth.
+// Demonstrates creation, dispatch, and handling of events with strongly-typed metadata using AgentAuth.
 // Shows authentication, audit, and error event patterns with custom handlers.
 
 package main

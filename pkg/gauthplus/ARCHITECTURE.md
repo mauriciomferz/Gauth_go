@@ -1,4 +1,4 @@
-# GAuth+ Verification Service Architecture
+# AgentAuth+ Verification Service Architecture
 
 The `gauthplus` package provides a high-level verification service that aggregates multiple sources of truth to determine the validity of a Power of Attorney (PoA) and the entities involved.
 
@@ -13,11 +13,11 @@ The `VerificationService` is the primary entry point for verifying authorization
 
 ## Attestation Proof Generation (Phase 11)
 
-One of the key features of GAuth+ is the ability to issue **Authoritative Attestations**. When the service verifies a condition (e.g., that a representative is indeed authorized by their organization), it can generate a cryptographically signed proof.
+One of the key features of AgentAuth+ is the ability to issue **Authoritative Attestations**. When the service verifies a condition (e.g., that a representative is indeed authorized by their organization), it can generate a cryptographically signed proof.
 
 ### Components
 - **`AttestationSigner`**: Interface for creating Ed25519 signatures over attestation data.
-- **`AttestationVerifier`**: Interface for validating those signatures, allowing GAuth+ to verify its own proofs locally.
+- **`AttestationVerifier`**: Interface for validating those signatures, allowing AgentAuth+ to verify its own proofs locally.
 - **`VerificationReport`**: Aggregates all individual attestations into a single, verifiable package for relying parties.
 
 ### Workflow

@@ -11,12 +11,12 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates an RFC111-style advanced delegation and attestation flow using the canonical GAuth API.
+This example demonstrates an RFC111-style advanced delegation and attestation flow using the canonical AgentAuth API.
 
 ## Key Concepts
 - **Delegation**: Initiate authorization for delegated actions (e.g., signing contracts).
 - **Attestation**: Issue and validate tokens for delegated grants.
-- **GAuth API**: Uses canonical methods for authorization, token issuance, and validation.
+- **AgentAuth API**: Uses canonical methods for authorization, token issuance, and validation.
 
 ## How to Run
 ```bash

@@ -370,7 +370,7 @@ Start Phase 2B: pkg/poa testing
 |------|-------|-------|----------------|--------|
 | **token_validation_test.go** | 330 | 16 | JWT validation, malformed tokens | ✅ Complete |
 | **authentication_flow_test.go** | 389 | 14 | Credential validation, context | ✅ Complete |
-| **authorization_test.go** | 571 | 15 | RFC 0111/115 compliance | ✅ Complete |
+| **authorization_test.go** | 571 | 15 | AAP-001/115 compliance | ✅ Complete |
 | **professional_service_test.go** | 368 | 17 | Professional auth service | ✅ Complete |
 | **user_management_test.go** | 362 | 15 | User structs, lookups | ✅ Complete |
 | **refresh_token_test.go** | ~720 | 23 | RefreshToken method | ✅ Complete |

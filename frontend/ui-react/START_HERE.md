@@ -1,4 +1,4 @@
-# 🎉 GAuth React UI - Start Here!
+# 🎉 AgentAuth React UI - Start Here!
 
 ## Quick Start (30 Seconds)
 

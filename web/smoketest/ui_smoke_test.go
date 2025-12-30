@@ -47,12 +47,12 @@ func TestUISmoke(t *testing.T) {
 		return
 	}
 	checks := map[string]string{
-		"page title":       "GAuth Dashboard",
-		"hero title":       "GAuth Beta Dashboard",
+		"page title":       "AgentAuth Dashboard",
+		"hero title":       "AgentAuth Beta Dashboard",
 		"revocation panel": "Revocation Head",
 		"rotation panel":   "Rotation Summary",
 		"errors panel":     "Error Catalog",
-		"footer copyright": "© 2025 GAuth Beta",
+		"footer copyright": "© 2025 AgentAuth Beta",
 	}
 	for label, token := range checks {
 		if !strings.Contains(body, token) {

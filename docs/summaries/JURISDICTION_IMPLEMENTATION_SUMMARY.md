@@ -32,7 +32,7 @@ October 23, 2025
    - Thread-safe enforcement with metrics
 
 2. **Server Integration** (`internal/jurisdiction/server_integration.go`)
-   - Seamless integration with GAuth server
+   - Seamless integration with AgentAuth server
    - Automatic jurisdiction extraction from claims/context
    - Entity type validation
    - Monetary value extraction and validation
@@ -270,8 +270,8 @@ October 23, 2025
 
 ## Integration Points
 
-### Existing GAuth Server Integration
-The jurisdiction enforcement system is designed to integrate seamlessly with the existing GAuth capability enforcement:
+### Existing AgentAuth Server Integration
+The jurisdiction enforcement system is designed to integrate seamlessly with the existing AgentAuth capability enforcement:
 
 ```go
 // Example integration
@@ -395,7 +395,7 @@ if !jurisdictionDecision.Allowed {
 ### New Dependencies
 - Uses existing `pkg/compliance` package
 - Integrates with existing legal framework validator
-- Compatible with existing GAuth server infrastructure
+- Compatible with existing AgentAuth server infrastructure
 
 ### No Breaking Changes
 - Purely additive implementation

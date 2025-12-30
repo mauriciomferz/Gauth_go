@@ -11,7 +11,7 @@ refreshCadence: monthly
 # Week 6 Roadmap: Production Hardening & State Management
 
 **Date:** November 10, 2025  
-**Project:** GAuth_go Production Readiness  
+**Project:** AgentAuth_go Production Readiness  
 **Phase:** Week 6 - Database Integration & Production Hardening
 
 ---
@@ -40,7 +40,7 @@ Week 6 focuses on completing the production readiness journey by adding persiste
 
 ### Objectives
 
-Deploy and integrate PostgreSQL and Redis to provide persistent state management for the GAuth service.
+Deploy and integrate PostgreSQL and Redis to provide persistent state management for the AgentAuth service.
 
 ### Tasks
 
@@ -60,9 +60,9 @@ Deploy and integrate PostgreSQL and Redis to provide persistent state management
    - Health checks and readiness probes
 
 3. **Database Schema Initialization**
-   - Create GAuth database and user
+   - Create AgentAuth database and user
    - Apply schema migrations (if any)
-   - Configure connection from GAuth pods
+   - Configure connection from AgentAuth pods
 
 4. **Integration Testing**
    - Test database connectivity
@@ -73,7 +73,7 @@ Deploy and integrate PostgreSQL and Redis to provide persistent state management
 **Deliverables:**
 - `k8s-postgres.yaml` (PostgreSQL deployment manifest)
 - Database initialization scripts
-- Connection configuration in GAuth
+- Connection configuration in AgentAuth
 - Integration test results
 
 #### Day 2: Redis Deployment
@@ -91,8 +91,8 @@ Deploy and integrate PostgreSQL and Redis to provide persistent state management
    - AOF persistence enabled
    - Memory limits configured
 
-3. **Integration with GAuth**
-   - Configure Redis connection in GAuth pods
+3. **Integration with AgentAuth**
+   - Configure Redis connection in AgentAuth pods
    - Update deployment manifests
    - Test caching functionality
    - Monitor cache hit rates
@@ -106,14 +106,14 @@ Deploy and integrate PostgreSQL and Redis to provide persistent state management
 **Deliverables:**
 - `k8s-redis.yaml` (Redis deployment manifest)
 - Redis configuration and tuning
-- Cache integration in GAuth
+- Cache integration in AgentAuth
 - Performance benchmarks
 
 ### Success Criteria
 
 - ✅ PostgreSQL deployed and accessible
 - ✅ Redis deployed and accessible
-- ✅ GAuth pods successfully connecting to both
+- ✅ AgentAuth pods successfully connecting to both
 - ✅ Data persists across pod restarts
 - ✅ Performance impact < 5% compared to Week 5 baseline
 - ✅ All health checks passing
@@ -129,7 +129,7 @@ Transform the deployment from 2 basic replicas to a production-grade high availa
 ### Tasks
 
 1. **Increase Replica Count**
-   - Scale GAuth deployment to 3 replicas (minimum for HA)
+   - Scale AgentAuth deployment to 3 replicas (minimum for HA)
    - Configure pod anti-affinity rules
    - Test rolling updates with 3 pods
 
@@ -146,7 +146,7 @@ Transform the deployment from 2 basic replicas to a production-grade high availa
 
 4. **Network Policies**
    - Define egress/ingress rules
-   - Restrict database access to GAuth pods only
+   - Restrict database access to AgentAuth pods only
    - Validate monitoring access
 
 5. **Resource Limits & Requests**
@@ -284,7 +284,7 @@ Harden the monitoring stack for production use with high availability, persisten
 **Infrastructure Components:**
 - PostgreSQL (StatefulSet, 1 replica, 10Gi PVC)
 - Redis (StatefulSet, 1 replica, 5Gi PVC)
-- GAuth (Deployment, 3 replicas, HPA, PDB)
+- AgentAuth (Deployment, 3 replicas, HPA, PDB)
 - Prometheus (StatefulSet, 3 replicas, 20Gi PVC)
 - Grafana (Deployment, 1 replica, 5Gi PVC)
 - AlertManager (Deployment, 3 replicas)

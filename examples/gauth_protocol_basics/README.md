@@ -1,22 +1,22 @@
 ---
-title: "GAuth Protocol Basics – Minimal Examples"
+title: "AgentAuth Protocol Basics – Minimal Examples"
 category: example
 status: active
 lastUpdated: 2025-11-12
 owners: architecture-team
 refreshCadence: on-change
 ---
-# GAuth Protocol Basics – Minimal Examples
+# AgentAuth Protocol Basics – Minimal Examples
 
 > Last Updated: 2025-10-17
 > Status: Active
 
 
-This directory contains clear, concise Go examples demonstrating the core GAuth protocol flows:
+This directory contains clear, concise Go examples demonstrating the core AgentAuth protocol flows:
 
 - **Power of Attorney (POA) Request/Response**
-- **Advanced POA (GAuth-RFC-001 (formerly RFC 111)) Scenarios**
-- **Delegation (GAuth-RFC-002 (formerly RFC 115)) Request/Response**
+- **Advanced POA (AgentAuth-RFC-001 (formerly RFC 111)) Scenarios**
+- **Delegation (AgentAuth-RFC-002 (formerly RFC 115)) Request/Response**
 - **Token Creation and Validation**
 
 Each example is self-contained and annotated for Beta demonstration clarity.
@@ -28,9 +28,9 @@ Each example is self-contained and annotated for Beta demonstration clarity.
 
 - Shows how a client requests a POA and receives a response.
 
-## 1a. Advanced POA (GAuth-RFC-001 (formerly RFC 111)) Scenarios
+## 1a. Advanced POA (AgentAuth-RFC-001 (formerly RFC 111)) Scenarios
 
-- Demonstrates negative and positive cases for GAuth-RFC-001 (formerly RFC 111) POA validation:
+- Demonstrates negative and positive cases for AgentAuth-RFC-001 (formerly RFC 111) POA validation:
 	- Invalid jurisdiction (should fail)
 	- Disallowed scope (should fail)
 	- Missing required fields (should fail)
@@ -42,7 +42,7 @@ Each example is self-contained and annotated for Beta demonstration clarity.
 
 ## 3. Token Creation & Validation
 
-- Illustrates how to create and validate a token using the GAuth service.
+- Illustrates how to create and validate a token using the AgentAuth service.
 
 ---
 
@@ -53,7 +53,7 @@ Run any example with:
 cd examples/gauth_protocol_basics
 # For Minimal POA
 go run minimal_poa
-# For Advanced POA (GAuth-RFC-001 (formerly RFC 111))
+# For Advanced POA (AgentAuth-RFC-001 (formerly RFC 111))
 go run advanced_poa
 # For Delegation
 go run delegation

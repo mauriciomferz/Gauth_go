@@ -77,7 +77,7 @@ func main() {
 				"action":     "login",
 				"result":     "success",
 				"ip":         "192.168.1.100",
-				"user_agent": "GAuth-Client/1.0",
+				"user_agent": "AgentAuth-Client/1.0",
 			},
 		},
 		{

@@ -85,7 +85,7 @@
           "refId": "A"
         }
       ],
-      "title": "GAuth+ Validations Rate",
+      "title": "AgentAuth+ Validations Rate",
       "type": "timeseries"
     },
     {
@@ -888,7 +888,7 @@
     "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"]
   },
   "timezone": "",
-  "title": "GAuth+ Monitoring Dashboard",
+  "title": "AgentAuth+ Monitoring Dashboard",
   "uid": "gauthplus-monitoring",
   "version": 1
 }

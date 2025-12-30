@@ -8,7 +8,7 @@ owners: [system]
 
 # RFC Source Ingestion (Phase 0)
 
-This directory will hold canonical (or near-canonical) text extracts for RFC 0111 and RFC 0115 sections.
+This directory will hold canonical (or near-canonical) text extracts for AAP-001 and AAP-002 sections.
 
 ## Goals (Phase 0)
 - Provide stable text inputs for automated clause indexing.
@@ -16,8 +16,8 @@ This directory will hold canonical (or near-canonical) text extracts for RFC 011
 - Emit a JSON index mapping: `rfc`, `section_id`, `title`, `normative_level`, `raw_text`, `hash`.
 
 ## Files
-- `rfc0111.md` – Placeholder structured content for RFC 0111.
-- `rfc0115.md` – Placeholder structured content for RFC 0115.
+- `rfc0111.md` – Placeholder structured content for AAP-001.
+- `rfc0115.md` – Placeholder structured content for AAP-002.
 - `CLAUSE_INDEX_SPEC.md` – Schema definition for generated clause index.
 
 ## Not Canonical

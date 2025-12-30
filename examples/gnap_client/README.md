@@ -8,11 +8,11 @@ owners: [system]
 
 # GNAP Client Example
 
-This example demonstrates how to use the Grant Negotiation and Authorization Protocol (RFC 9635) with GAuth.
+This example demonstrates how to use the Grant Negotiation and Authorization Protocol (RFC 9635) with AgentAuth.
 
 ## Prerequisites
 
-Start the GAuth server:
+Start the AgentAuth server:
 
 ```bash
 GAUTH_JWT_SIGNING_KEY=your-secret-key go run ./cmd/web-server

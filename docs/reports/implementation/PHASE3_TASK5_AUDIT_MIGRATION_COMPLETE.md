@@ -270,7 +270,7 @@ CREATE INDEX idx_audit_events_resource_type ON audit_events(resource_type);
 ```go
 import (
     "github.com/jackc/pgx/v5/pgxpool"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/audit"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/audit"
 )
 ```
 

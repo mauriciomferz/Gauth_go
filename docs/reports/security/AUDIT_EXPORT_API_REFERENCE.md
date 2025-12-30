@@ -242,16 +242,16 @@ evt-124,2025-11-26T10:05:00Z,tenant-1,user-456,poa.revoke,poa-789,poa,success,ac
 
 **Structure**:
 ```
-CEF:0|Gimel Foundation|GAuth|1.0|access|poa.create|5|rt=1732618800000 tenantId=tenant-1 suser=user-123 act=poa.create src=192.168.1.1 outcome=success cat=access
-CEF:0|Gimel Foundation|GAuth|1.0|access|poa.revoke|8|rt=1732619100000 tenantId=tenant-1 suser=user-456 act=poa.revoke src=192.168.1.2 outcome=success cat=access
+CEF:0|AgentAuth Community|AgentAuth|1.0|access|poa.create|5|rt=1732618800000 tenantId=tenant-1 suser=user-123 act=poa.create src=192.168.1.1 outcome=success cat=access
+CEF:0|AgentAuth Community|AgentAuth|1.0|access|poa.revoke|8|rt=1732619100000 tenantId=tenant-1 suser=user-456 act=poa.revoke src=192.168.1.2 outcome=success cat=access
 ```
 
 **Content-Type**: `text/plain` (or `application/gzip` if compressed)
 
 **Format**:
 - Version: `CEF:0`
-- Device Vendor: `Gimel Foundation`
-- Device Product: `GAuth`
+- Device Vendor: `AgentAuth Community`
+- Device Product: `AgentAuth`
 - Device Version: `1.0`
 - Signature ID: Event category
 - Name: Action performed

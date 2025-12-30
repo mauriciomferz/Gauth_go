@@ -214,7 +214,7 @@ func createTestToken() *gauth.ExtendedToken {
 		IssuedBy: &gauth.AuthorizationServerInfo{
 			ServerID:  "gauth-server-1",
 			ServerURL: "https://auth.example.com",
-			Issuer:    "GAuth Authorization Server",
+			Issuer:    "AgentAuth Authorization Server",
 			IssueTime: now,
 		},
 		VerificationProof: &gauth.IdentityVerificationChain{

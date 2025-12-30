@@ -2,7 +2,7 @@
 set -e
 
 echo "================================================"
-echo "GAuth+ Standalone Deployment Script"
+echo "AgentAuth+ Standalone Deployment Script"
 echo "================================================"
 echo ""
 

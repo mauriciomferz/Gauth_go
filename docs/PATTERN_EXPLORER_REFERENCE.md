@@ -6,10 +6,10 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Pattern Explorer - Comprehensive Pattern Reference
+# AgentAuth Pattern Explorer - Comprehensive Pattern Reference
 
 ## Overview
-The GAuth Pattern Explorer now includes comprehensive authorization patterns across four major categories:
+The AgentAuth Pattern Explorer now includes comprehensive authorization patterns across four major categories:
 - **Simple Delegation** (4 patterns)
 - **Hierarchical** (5 patterns) 
 - **Revocation** (4 patterns)
@@ -181,7 +181,7 @@ Each pattern includes:
 
 ## Usage Instructions
 
-1. **Access Pattern Explorer**: Navigate to the GAuth webapp Interactive Pattern Explorer section
+1. **Access Pattern Explorer**: Navigate to the AgentAuth webapp Interactive Pattern Explorer section
 2. **Select Category**: Choose from Simple Delegation, Hierarchical, Revocation, or Multi-Signature
 3. **Choose Pattern**: Select specific pattern from the organized dropdown
 4. **View Visualization**: Pattern diagram appears automatically

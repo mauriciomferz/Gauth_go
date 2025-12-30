@@ -6,8 +6,8 @@
 
 ---
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com  
-Official Go implementation of GiFo-RFC-0111 and GiFo-RFC-0115 specifications
+**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com  
+Official Go implementation of AAP-RFC-0111 and AAP-RFC-0115 specifications
 
 ---
 
@@ -83,7 +83,7 @@ For security vulnerabilities in the development RFC implementation:
 
 ## 📜 **Legal & Compliance**
 
-This security policy operates under German law and EU regulations, consistent with Gimel Foundation's legal framework.
+This security policy operates under German law and EU regulations, consistent with AgentAuth Community's legal framework.
 
 **Jurisdictional Coverage**: DE, EU, International (as applicable)
 **Compliance Standards**: GDPR, ISO 27001 principles, German corporate law

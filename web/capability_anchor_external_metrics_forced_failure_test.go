@@ -24,7 +24,7 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 	// Force exactly one initial failure.
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Wait for initial attempt & possible retry.
@@ -47,9 +47,9 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 		}
 		return nil
 	}
-	attempts := find("gauth_rfc0111_external_anchor_attempts_total")
-	failures := find("gauth_rfc0111_external_anchor_failures_total")
-	forced := find("gauth_rfc0111_external_anchor_forced_failures_total")
+	attempts := find("gauth_aap001_external_anchor_attempts_total")
+	failures := find("gauth_aap001_external_anchor_failures_total")
+	forced := find("gauth_aap001_external_anchor_forced_failures_total")
 	if attempts == nil || failures == nil || forced == nil {
 		t.Fatalf("missing one of attempts/failures/forced counters")
 	}
@@ -63,7 +63,7 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 		t.Fatalf("expected general failures >= forced failures got failures=%f forced=%f", fCount, ffCount)
 	}
 	// Provider-labeled forced failures
-	forcedProv := find("gauth_rfc0111_external_anchor_forced_failures_provider_total")
+	forcedProv := find("gauth_aap001_external_anchor_forced_failures_provider_total")
 	if forcedProv == nil {
 		t.Fatalf("provider forced failures vec missing")
 	}
@@ -80,7 +80,7 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 		t.Fatalf("expected provider forced failures == %f got %f", ffCount, providerForced)
 	}
 	// Ensure at least one success occurred after forced failure (latency histogram sample present)
-	latProv := find("gauth_rfc0111_external_anchor_latency_provider_seconds")
+	latProv := find("gauth_aap001_external_anchor_latency_provider_seconds")
 	if latProv == nil {
 		t.Fatalf("latency provider histogram missing")
 	}

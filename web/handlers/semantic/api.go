@@ -40,13 +40,13 @@ func (a *API) HandleCounters(c *gin.Context) {
 // HandlePrometheus exposes semantic counters in Prometheus format.
 func (a *API) HandlePrometheus(c *gin.Context) {
 	if a.Handler.Service == nil {
-		c.String(200, "# RFC0111 Service not wired\n")
+		c.String(200, "# AAP001 Service not wired\n")
 		return
 	}
 
 	ss := a.Handler.Service.SemanticSnapshot()
 	var sb strings.Builder
-	sb.WriteString("# HELP gauth_poa_semantic_counter Prototype RFC0111 semantic counters\n")
+	sb.WriteString("# HELP gauth_poa_semantic_counter Prototype AAP001 semantic counters\n")
 	sb.WriteString("# TYPE gauth_poa_semantic_counter counter\n")
 	for k, v := range ss {
 		// sanitization simple

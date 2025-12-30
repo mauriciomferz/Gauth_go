@@ -1,4 +1,4 @@
-# GAuth JWE Encryption - Security Audit Report
+# AgentAuth JWE Encryption - Security Audit Report
 
 **Version**: 1.0  
 **Date**: November 12, 2025  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This security audit evaluates the JWE (JSON Web Encryption) implementation in GAuth for compliance with cryptographic best practices, security standards, and threat mitigation.
+This security audit evaluates the JWE (JSON Web Encryption) implementation in AgentAuth for compliance with cryptographic best practices, security standards, and threat mitigation.
 
 **Overall Security Rating**: ⭐⭐⭐⭐ (4/5 - Good)
 
@@ -477,7 +477,7 @@ curl -H "Authorization: Bearer $JWE" http://localhost:8080/api/test
 
 ---
 
-**Audit Conducted By**: GAuth Security Team  
+**Audit Conducted By**: AgentAuth Security Team  
 **Date**: November 12, 2025  
 **Next Audit**: November 12, 2026 (annual review)  
 **Approved By**: Chief Security Officer

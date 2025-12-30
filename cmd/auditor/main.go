@@ -54,7 +54,7 @@ func getVerifier() *cryptoReg.Manager {
 }
 
 func main() {
-	baseURL := flag.String("base-url", "http://localhost:8080", "Base URL of running GAuth server")
+	baseURL := flag.String("base-url", "http://localhost:8080", "Base URL of running AgentAuth server")
 	mode := flag.String("mode", "help", "Operation: rotation|rotation-v2-remote|rotation-v2-file|poa-verify|poa-file|attestation-file|attestation-remote|revocation|revocation-proof|revocation-consistency|help")
 	rotV2Prev := flag.String("rotation-v2-prev", "", "Expected previous artifact digest for continuity check (rotation-v2 modes)")
 	rotV2File := flag.String("rotation-v2-file", "", "Path to rotation V2 artifact JSON (rotation-v2-file mode)")
@@ -137,7 +137,7 @@ func main() {
 }
 
 func printHelp() {
-	fmt.Print(`GAuth Auditor CLI
+	fmt.Print(`AgentAuth Auditor CLI
 
 Usage:
 	auditor --mode rotation --base-url http://localhost:8080

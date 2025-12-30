@@ -363,7 +363,7 @@ func (s *ExportService) exportSyslog(w io.Writer, events []AuditEvent) error {
 func (s *ExportService) exportCEF(w io.Writer, events []AuditEvent) error {
 	for _, event := range events {
 		// CEF Format: CEF:Version|Device Vendor|Device Product|Device Version|Signature ID|Name|Severity|Extension
-		line := fmt.Sprintf("CEF:0|Gimel Foundation|GAuth|1.0|%s|%s|%d|rt=%d tenantId=%s suser=%s act=%s src=%s outcome=%s cat=%s\n",
+		line := fmt.Sprintf("CEF:0|AgentAuth Community|AgentAuth|1.0|%s|%s|%d|rt=%d tenantId=%s suser=%s act=%s src=%s outcome=%s cat=%s\n",
 			event.Category,
 			event.Action,
 			s.severityToCEF(event.Severity),

@@ -287,7 +287,7 @@ NewMemoryCache() ← Automatic fallback
 
 ### 1. pkg/handlers Import Path Conflicts (FIXED)
 - Files were using wrong mauriciomferz/Gauth_go imports
-- Fixed to use Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0
+- Fixed to use AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
 - Some webhook types may still be undefined
 
 ### 2. Missing Gorilla Mux Dependency

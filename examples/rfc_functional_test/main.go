@@ -25,7 +25,7 @@ func truncate(s string, n int) string {
 func main() {
 	passed := 0
 	failed := 0
-	fmt.Println("🧪 GAuth RFC Implementation - Functional Validation Test")
+	fmt.Println("🧪 AgentAuth RFC Implementation - Functional Validation Test")
 	fmt.Println("========================================================")
 	fmt.Println("Testing ACTUAL implementation (not stubs)")
 	fmt.Println("")

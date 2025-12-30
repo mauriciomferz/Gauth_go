@@ -153,7 +153,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 	}
 
 	if subscription.Status != SubscriptionStatusCompleted {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "subscription_incomplete",
 			Message: fmt.Sprintf("Subscription must be completed (current status: %s)", subscription.Status),
 		}
@@ -231,7 +231,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 	}
 
 	if !complianceResult.Valid {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "request_compliance_failed",
 			Message: "Request does not comply with client's authorized powers",
 		}
@@ -296,7 +296,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 	}
 
 	if !grantValidation.Valid {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "grant_compliance_failed",
 			Message: "Grant does not comply with resource owner/server powers",
 		}
@@ -330,7 +330,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 	// Build RFC-compliant response
 	response := &RFCCompliantTokenResponse{
 		ExtendedToken:   extendedToken,
-		TokenType:       "GAuth-Extended-Token",
+		TokenType:       "AgentAuth-Extended-Token",
 		ExpiresIn:       int(extendedToken.ExpiresIn),
 		Scope:           request.RequestedScope,
 		GrantValidation: grantValidation,
@@ -350,16 +350,16 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 // validateRequestStructure performs basic validation of request structure
 func (o *ProtocolOrchestrator) validateRequestStructure(request *RFCCompliantAuthorizationRequest) error {
 	if request.ClientID == "" {
-		return &GAuthError{Code: "missing_client_id", Message: "Client ID is required"}
+		return &AgentAuthError{Code: "missing_client_id", Message: "Client ID is required"}
 	}
 	if request.SubscriptionID == "" {
-		return &GAuthError{Code: "missing_subscription", Message: "Subscription ID is required"}
+		return &AgentAuthError{Code: "missing_subscription", Message: "Subscription ID is required"}
 	}
 	if request.ResourceOwnerID == "" {
-		return &GAuthError{Code: "missing_resource_owner", Message: "Resource owner ID is required"}
+		return &AgentAuthError{Code: "missing_resource_owner", Message: "Resource owner ID is required"}
 	}
 	if request.RequestedScope == nil {
-		return &GAuthError{Code: "missing_scope", Message: "Requested scope is required"}
+		return &AgentAuthError{Code: "missing_scope", Message: "Requested scope is required"}
 	}
 	return nil
 }

@@ -202,7 +202,7 @@
 ### Session 37 Challenges
 
 #### Challenge 1: Module Import Path Mismatch
-**Issue**: Used `github.com/mauriciomferz/Gauth_go/pkg/authz` but actual module is `github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0`
+**Issue**: Used `github.com/mauriciomferz/Gauth_go/pkg/authz` but actual module is `github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0`
 
 **Solution**: Checked go.mod for correct module path
 

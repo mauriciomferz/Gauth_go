@@ -1,4 +1,4 @@
-# GAuth Multi-Region Deployment Architecture
+# AgentAuth Multi-Region Deployment Architecture
 
 **Version**: 1.0  
 **Date**: November 26, 2025  
@@ -26,7 +26,7 @@
 
 ## Executive Summary
 
-GAuth's multi-region deployment architecture provides:
+AgentAuth's multi-region deployment architecture provides:
 
 - **99.99% Availability** - Geographic redundancy across 3+ regions
 - **<100ms Global Latency** - Regional endpoints with edge caching
@@ -65,7 +65,7 @@ GAuth's multi-region deployment architecture provides:
         ┌──────────┼──────────┐      │                │
         │          │          │      │                │
    ┌────▼────┐┌───▼───┐┌────▼────┐   │                │
-   │ GAuth   ││Postgres││  Redis  │  │                │
+   │ AgentAuth   ││Postgres││  Redis  │  │                │
    │3 Replicas││Primary ││ Cluster│  │                │
    └─────────┘└────────┘└─────────┘  │                │
                    │                 │                │
@@ -75,7 +75,7 @@ GAuth's multi-region deployment architecture provides:
 ### Regional Components
 
 Each region contains:
-- **GAuth Application** - 3+ replicas with horizontal autoscaling
+- **AgentAuth Application** - 3+ replicas with horizontal autoscaling
 - **PostgreSQL** - Primary or replica with streaming replication
 - **Redis Cluster** - 6 nodes (3 masters, 3 replicas)
 - **Monitoring Stack** - Regional Prometheus/Grafana
@@ -823,7 +823,7 @@ scrape_configs:
 ```json
 {
   "dashboard": {
-    "title": "GAuth - Global Multi-Region Overview",
+    "title": "AgentAuth - Global Multi-Region Overview",
     "panels": [
       {
         "title": "Request Rate by Region",
@@ -874,7 +874,7 @@ groups:
           severity: critical
         annotations:
           summary: "Region {{ $labels.region }} is down"
-          description: "GAuth in {{ $labels.region }} has been unreachable for 2 minutes"
+          description: "AgentAuth in {{ $labels.region }} has been unreachable for 2 minutes"
       
       # High Cross-Region Latency
       - alert: HighCrossRegionLatency
@@ -1050,7 +1050,7 @@ echo "Disaster recovery complete!"
 
 ## Conclusion
 
-GAuth's multi-region architecture provides:
+AgentAuth's multi-region architecture provides:
 
 ✅ **99.99% Availability** - Automatic failover across 3+ regions  
 ✅ **Global Low Latency** - <100ms for 95% of users  
@@ -1059,7 +1059,7 @@ GAuth's multi-region architecture provides:
 ✅ **Cost Optimized** - 33% savings through smart resource management  
 ✅ **Security Compliant** - Regional data isolation and encryption  
 
-**Compliance Achievement**: With this multi-region deployment, GAuth reaches **98/100 compliance** (+1.0 point for geographic redundancy and high availability).
+**Compliance Achievement**: With this multi-region deployment, AgentAuth reaches **98/100 compliance** (+1.0 point for geographic redundancy and high availability).
 
 **Next Steps**:
 - Advanced Security Features (+1.0) → 99/100

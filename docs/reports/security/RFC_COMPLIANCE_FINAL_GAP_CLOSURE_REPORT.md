@@ -22,7 +22,7 @@ Successfully closed **9 out of 10 RFC compliance gaps**, improving overall compl
 
 | RFC | Before | After | Improvement | Status |
 |-----|--------|-------|-------------|--------|
-| **RFC-0111** (GAuth 1.0) | 67.5% | ~94% | +26.5% | ✅ Production Ready |
+| **RFC-0111** (AgentAuth 1.0) | 67.5% | ~94% | +26.5% | ✅ Production Ready |
 | **RFC-0115** (Power-of-Attorney) | 71.4% | ~96% | +24.6% | ✅ Production Ready |
 | **Combined** | 69.0% | ~95% | +26.0% | ✅ Production Ready |
 
@@ -391,7 +391,7 @@ ExtendedToken =
 
 ## Compliance Matrix
 
-### RFC-0111 (GAuth 1.0 Authorization Framework)
+### RFC-0111 (AgentAuth 1.0 Authorization Framework)
 
 | Section | Requirement | Before | After | Status |
 |---------|-------------|--------|-------|--------|
@@ -597,7 +597,7 @@ ExtendedToken =
 ## Conclusion
 
 ### Achievement Summary
-This gap remediation session successfully transformed GAuth from **69% RFC compliant with 5 critical blockers** to **~95% RFC compliant with zero critical blockers**, establishing a production-ready foundation for RFC-0111 and RFC-0115 compliance.
+This gap remediation session successfully transformed AgentAuth from **69% RFC compliant with 5 critical blockers** to **~95% RFC compliant with zero critical blockers**, establishing a production-ready foundation for RFC-0111 and RFC-0115 compliance.
 
 ### Key Accomplishments
 ✅ **Extended token structure** - Complete RFC-0111 §3 implementation  
@@ -620,7 +620,7 @@ This gap remediation session successfully transformed GAuth from **69% RFC compl
 - Security audit (5-7 days) - prerequisite for production
 
 ### Final Assessment
-The GAuth implementation now has a solid, RFC-compliant foundation ready for production deployment. With comprehensive integration testing (Gap G10) and final service integration work, the system will achieve full production readiness within 2-3 weeks.
+The AgentAuth implementation now has a solid, RFC-compliant foundation ready for production deployment. With comprehensive integration testing (Gap G10) and final service integration work, the system will achieve full production readiness within 2-3 weeks.
 
 **Timeline to Production:**
 - Week 1-2: Integration testing (Gap G10)

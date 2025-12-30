@@ -1,4 +1,4 @@
-// Example: Advanced Delegation & Attestation Flow (RFC111-style, using canonical GAuth API)
+// Example: Advanced Delegation & Attestation Flow (RFC111-style, using canonical AgentAuth API)
 package main
 
 import (
@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// Initialize GAuth service
+	// Initialize AgentAuth service
 	svc, err := gauth.New(gauth.Config{
 		AuthServerURL:     "https://example-auth-server",
 		ClientID:          "test-client",
@@ -18,7 +18,7 @@ func main() {
 		AccessTokenExpiry: 24 * time.Hour,
 	})
 	if err != nil {
-		panic(fmt.Sprintf("Failed to initialize GAuth: %v", err))
+		panic(fmt.Sprintf("Failed to initialize AgentAuth: %v", err))
 	}
 
 	// Step 1: Initiate authorization (delegation)

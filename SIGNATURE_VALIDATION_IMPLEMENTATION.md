@@ -8,7 +8,7 @@ owners: [system]
 
 # Enhanced Token Signature Validation
 
-This document outlines the implementation of a new, extensible token signature validation system in GAuth.
+This document outlines the implementation of a new, extensible token signature validation system in AgentAuth.
 
 ## Summary
 
@@ -16,7 +16,7 @@ The previous signature validation logic was limited and not easily extensible. T
 
 ### Key Features
 
-- **Multiple Algorithm Support**: GAuth can now validate tokens signed with various algorithms, including:
+- **Multiple Algorithm Support**: AgentAuth can now validate tokens signed with various algorithms, including:
   - HMAC (e.g., `HS256`)
   - RSA (e.g., `RS256`)
   - ECDSA (e.g., `ES256`)
@@ -60,4 +60,4 @@ Unit tests are located in `pkg/token/signature_validator_test.go`. These tests c
 - The `ValidatorRegistry`'s ability to correctly dispatch to the right validator.
 - Handling of unsupported algorithms and malformed tokens.
 
-This robust implementation significantly enhances the security and maintainability of GAuth's token handling.
+This robust implementation significantly enhances the security and maintainability of AgentAuth's token handling.

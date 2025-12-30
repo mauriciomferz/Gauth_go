@@ -11,7 +11,7 @@ refreshCadence: quarterly
 
 ## Overview
 
-The GAuth secret provider now supports transparent **encryption at rest** through `EncryptedProvider`, ensuring sensitive credentials, keys, and secrets are never stored in plaintext.
+The AgentAuth secret provider now supports transparent **encryption at rest** through `EncryptedProvider`, ensuring sensitive credentials, keys, and secrets are never stored in plaintext.
 
 ## Architecture
 
@@ -63,7 +63,7 @@ base64url(nonce[12] || ciphertext || tag[16])
 ### Basic Setup
 
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/secret"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/secret"
 
 // Create encrypted provider
 backend := secret.NewMemory()
@@ -140,7 +140,7 @@ All tests passing (0.845s).
 
 ## Integration
 
-### With RFC 0111 Service
+### With AAP-001 Service
 
 ```go
 // In pkg/rfc0111/rfc0111.go initialization
@@ -171,7 +171,7 @@ export GAUTH_SECRET_ENCRYPTION_KEY=$(openssl rand -hex 32)
 export GAUTH_SECRET_ENCRYPTION_KEY="dev-passphrase-sufficient-length"
 ```
 
-## RFC 0111 Compliance
+## AAP-001 Compliance
 
 Implements **sec8.item1** requirements:
 
@@ -208,7 +208,7 @@ Implements **sec8.item1** requirements:
 
 ## References
 
-- RFC 0111: GAuth Authorization Protocol
+- AAP-001: AgentAuth Authorization Protocol
 - NIST SP 800-38D: GCM Specification
 - NIST SP 800-132: PBKDF2 Recommendation
 - Go crypto/aes: https://pkg.go.dev/crypto/aes

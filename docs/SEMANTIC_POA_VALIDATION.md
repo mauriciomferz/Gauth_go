@@ -329,7 +329,7 @@ import (
     "os"
     "time"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
 )
 
 func main() {
@@ -370,7 +370,7 @@ func main() {
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
 )
 
 // Implement DailyLimitStore
@@ -412,7 +412,7 @@ import (
     "fmt"
     "strings"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
 )
 
 // Simple conditional engine
@@ -445,7 +445,7 @@ func CreateValidatorWithConditions() *rfc0111.EnhancedPoAValidator {
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
 )
 
 // Simple metrics recorder
@@ -489,7 +489,7 @@ func CreateValidatorWithMetrics() *rfc0111.EnhancedPoAValidator {
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
 )
 
 // Custom business rule validator
@@ -755,4 +755,4 @@ type ValidationWarning struct {
 
 ---
 
-Copyright © 2025 Gimel Foundation. Licensed under Apache 2.0.
+Copyright © 2025 AgentAuth Community. Licensed under Apache 2.0.

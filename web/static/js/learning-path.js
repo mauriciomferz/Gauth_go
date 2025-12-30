@@ -1,8 +1,8 @@
 /**
- * GAuth Learning Path - Interactive Educational System
+ * AgentAuth Learning Path - Interactive Educational System
  * Provides comprehensive learning modules for Authorization, PoA, Delegation, etc.
  */
-class GAuthLearningPath {
+class AgentAuthLearningPath {
     constructor(apiClient) {
         this.api = apiClient;
         this.currentModule = null;
@@ -42,7 +42,7 @@ class GAuthLearningPath {
         return {
             'auth-fundamentals': {
                 title: 'Authorization Fundamentals',
-                description: 'Learn the core concepts of authorization in GAuth',
+                description: 'Learn the core concepts of authorization in AgentAuth',
                 duration: '15 minutes',
                 difficulty: 'Beginner',
                 steps: [
@@ -248,7 +248,7 @@ class GAuthLearningPath {
             <div class="learning-content">
                 <h3 class="text-xl font-bold mb-4">Subject, Resource, Action Model</h3>
                 <div class="space-y-4">
-                    <p class="text-gray-700">The SRA (Subject-Resource-Action) model is the foundation of authorization decisions in GAuth.</p>
+                    <p class="text-gray-700">The SRA (Subject-Resource-Action) model is the foundation of authorization decisions in AgentAuth.</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="bg-blue-50 p-4 rounded-lg">
@@ -307,7 +307,7 @@ class GAuthLearningPath {
             <div class="learning-content">
                 <h3 class="text-xl font-bold mb-4">Policy-Based Access Control</h3>
                 <div class="space-y-4">
-                    <p class="text-gray-700">GAuth uses policies to define access rules. Policies are evaluated to make allow/deny decisions.</p>
+                    <p class="text-gray-700">AgentAuth uses policies to define access rules. Policies are evaluated to make allow/deny decisions.</p>
                     
                     <div class="bg-indigo-50 p-4 rounded-lg">
                         <h4 class="font-semibold text-indigo-800 mb-2">Policy Structure:</h4>
@@ -395,7 +395,7 @@ class GAuthLearningPath {
             <div class="learning-content">
                 <h3 class="text-xl font-bold mb-4">Understanding Power of Attorney (PoA)</h3>
                 <div class="space-y-4">
-                    <p class="text-gray-700">Power of Attorney in GAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
+                    <p class="text-gray-700">Power of Attorney in AgentAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
                     
                     <div class="bg-blue-50 p-4 rounded-lg">
                         <h4 class="font-semibold text-blue-800 mb-2">Core Concepts:</h4>
@@ -671,7 +671,7 @@ class GAuthLearningPath {
     }
 
     getRFC150Step2() {
-        return `<div class="learning-content"><h3 class="text-xl font-bold mb-4">Protocol Implementation</h3><p>How GAuth implements the RFC-150 protocol.</p></div>`;
+        return `<div class="learning-content"><h3 class="text-xl font-bold mb-4">Protocol Implementation</h3><p>How AgentAuth implements the RFC-150 protocol.</p></div>`;
     }
 
     getRFC150Step3() {
@@ -965,4 +965,4 @@ class GAuthLearningPath {
 }
 
 // Export for use in other modules
-window.GAuthLearningPath = GAuthLearningPath;
+window.AgentAuthLearningPath = AgentAuthLearningPath;

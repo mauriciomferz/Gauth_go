@@ -1636,7 +1636,7 @@ console.log('[PoA] poa-viz module loaded', { ts: new Date().toISOString(), expor
 
 /**
  * ============================================================================
- * GAuth Protocol Flow Patterns - 95% RFC Compliance
+ * AgentAuth Protocol Flow Patterns - 95% RFC Compliance
  * ============================================================================
  * These patterns visualize the RFC-0111 and RFC-0115 authorization flow stages
  * Enhanced with 30 substeps (from 19) across 6 phases:

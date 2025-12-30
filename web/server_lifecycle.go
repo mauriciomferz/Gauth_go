@@ -68,8 +68,8 @@ func (s *BetaServer) Run() error {
 		if km := s.getKeyManager(); km != nil {
 			km.Stop()
 		}
-		// Shut down GAuth+ components (caches)
-		ShutdownGAuthPlus()
+		// Shut down AgentAuth+ components (caches)
+		ShutdownAgentAuthPlus()
 		return srv.Shutdown(ctx)
 
 	case err := <-errCh:
@@ -127,11 +127,11 @@ func (s *BetaServer) Shutdown() {
 	// Checking server_clean.go logic.
 	// It says "Flush limits persistence".
 
-	// Shut down GAuth+ components (caches)
+	// Shut down AgentAuth+ components (caches)
 	if s.systemClockMonitor != nil {
 		s.systemClockMonitor.Stop()
 	}
-	ShutdownGAuthPlus()
+	ShutdownAgentAuthPlus()
 }
 
 // getKeyManager helper used in Run()

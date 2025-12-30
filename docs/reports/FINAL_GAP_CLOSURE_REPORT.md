@@ -13,7 +13,7 @@ owners: [system]
 
 ## Executive Summary
 
-Closed **11 gaps** across all priority levels (P0-P2), bringing the GAuth RFC 0111/0115 implementation to **production-ready status** with enterprise-grade features for security, durability, governance, and compliance.
+Closed **11 gaps** across all priority levels (P0-P2), bringing the AgentAuth AAP-001/0115 implementation to **production-ready status** with enterprise-grade features for security, durability, governance, and compliance.
 
 ## Complete Gap Closure Breakdown
 
@@ -294,11 +294,11 @@ export GAUTH_AI_ENFORCEMENT_ENABLED=true
 #### Phase 1: Infrastructure Setup
 - [ ] Deploy HashiCorp Vault cluster
 - [ ] Configure KV v2 secrets engine
-- [ ] Create Vault policy for GAuth
+- [ ] Create Vault policy for AgentAuth
 - [ ] Generate Vault token with appropriate permissions
 - [ ] Set up audit log storage (file system or remote)
 
-#### Phase 2: GAuth Configuration
+#### Phase 2: AgentAuth Configuration
 - [ ] Set all environment variables
 - [ ] Initialize BoltDB replay store
 - [ ] Test Vault connectivity
@@ -457,7 +457,7 @@ systemctl restart gauth
 
 **Status**: ✅ **PRODUCTION READY**
 
-The GAuth RFC 0111/0115 implementation has achieved production readiness with:
+The AgentAuth AAP-001/0115 implementation has achieved production readiness with:
 
 - ✅ **100% P0 critical gaps closed** (6/6)
 - ✅ **78% P1 high-priority gaps closed** (7/9)

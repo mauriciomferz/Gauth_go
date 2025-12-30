@@ -6,12 +6,12 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Events System
+# AgentAuth Events System
 
 > Last Updated: 2025-10-17
 > Status: Active
 
-The GAuth events system provides a type-safe mechanism for generating, handling, and auditing events across the authentication framework. It uses a fluent API design for creating and managing events.
+The AgentAuth events system provides a type-safe mechanism for generating, handling, and auditing events across the authentication framework. It uses a fluent API design for creating and managing events.
 
 ## Event Structure
 

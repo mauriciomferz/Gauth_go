@@ -45,12 +45,12 @@ func (s *BetaServer) registerRB3Discovery() {
 			algs = append([]string{legacyAlg}, tail...)
 		}
 		// Digest domains static list (exposed previously in well-known)
-		digestDomains := []string{"GAUTH_RFC0111_POA_V1", "GAUTH_RFC0111_POA_V2", "GAUTH_RFC0111_POA_V3|tax=1"}
+		digestDomains := []string{"GAUTH_AAP001_POA_V1", "GAUTH_AAP001_POA_V2", "GAUTH_AAP001_POA_V3|tax=1"}
 		taxonomySupported := true // RB2 added unconditional taxonomy support; future toggle could gate this.
-		activeDigestDomain := "GAUTH_RFC0111_POA_V1"
+		activeDigestDomain := "GAUTH_AAP001_POA_V1"
 		poaVersionCurrent := 1
 		if taxonomySupported { // prefer taxonomy domain for single-sig issuance baseline
-			activeDigestDomain = "GAUTH_RFC0111_POA_V3|tax=1"
+			activeDigestDomain = "GAUTH_AAP001_POA_V3|tax=1"
 			poaVersionCurrent = 3
 		}
 		// Replay strict mode if durable WAL configured for token issuance replay store.

@@ -141,7 +141,7 @@ kubectl get nodes
 
 # Test Slack webhook
 curl -X POST -H 'Content-type: application/json' \
-  --data '{"text":"🚀 GAuth CI/CD Test"}' \
+  --data '{"text":"🚀 AgentAuth CI/CD Test"}' \
   https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 ```
 
@@ -283,7 +283,7 @@ kubectl describe deployment gauth-deployment -n gauth-staging > deployment-detai
 
 ### Kubernetes
 - ✅ Namespace: `gauth-staging` created
-- ✅ Pods: 5 running (3 GAuth + 1 PostgreSQL + 1 Redis)
+- ✅ Pods: 5 running (3 AgentAuth + 1 PostgreSQL + 1 Redis)
 - ✅ Services: 3 created (gauth-service, gauth-postgres, gauth-redis)
 - ✅ Ingress: 1 configured (gauth-ingress)
 - ✅ HPA: 1 configured (min=3, max=10)
@@ -294,7 +294,7 @@ kubectl describe deployment gauth-deployment -n gauth-staging > deployment-detai
 - ✅ Metrics: `https://gauth-staging.yourdomain.com/metrics` → HTTP 200
 
 ### Slack
-- ✅ Notification received: "✅ GAuth Deployment Successful"
+- ✅ Notification received: "✅ AgentAuth Deployment Successful"
 - ✅ Contains: environment, commit, duration, endpoints, resources
 
 ---

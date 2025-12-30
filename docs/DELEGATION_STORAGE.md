@@ -286,5 +286,5 @@ repo.PruneExpired(cutoff)
 ---
 
 **Last Updated**: 2025-11-05  
-**Maintainer**: GAuth Development Team  
+**Maintainer**: AgentAuth Development Team  
 **Status**: ✅ Production Ready

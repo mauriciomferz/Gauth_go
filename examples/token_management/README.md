@@ -12,7 +12,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This directory contains comprehensive examples demonstrating the token management features of the GAuth library.
+This directory contains comprehensive examples demonstrating the token management features of the AgentAuth library.
 
 ## Core Examples
 
@@ -180,7 +180,7 @@ When adapting these examples for further development:
 ## Dependencies
 
 - Go 1.21 or later
-- GAuth library
+- AgentAuth library
 - JWT libraries (as needed)
 
 ---

@@ -1,6 +1,6 @@
 # Phase 2C Enhancement Plan: Metrics/Prometheus Integration
 
-**Project**: GAuth Enterprise IAM Platform  
+**Project**: AgentAuth Enterprise IAM Platform  
 **Phase**: Phase 2C - Metrics Page Integration with Prometheus  
 **Date**: November 15, 2025  
 **Status**: 🚧 In Progress  

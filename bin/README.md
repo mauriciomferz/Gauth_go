@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This directory contains compiled binaries and executables for the GAuth implementation.
+This directory contains compiled binaries and executables for the AgentAuth implementation.
 
 ## Current Status: 🎓 BETA BINARIES
 
@@ -15,7 +15,7 @@ All binaries build successfully for beta and testing purposes.
 
 ```
 bin/
-├── gauth-server          # ✅ Main GAuth server binary (working)
+├── gauth-server          # ✅ Main AgentAuth server binary (working)
 ├── examples/             # ✅ Example binaries and demos
 │   └── rfc-demo          # ✅ RFC compliance demonstration
 └── README.md             # This file
@@ -27,7 +27,7 @@ bin/
 - **File**: `gauth-server`
 - **Status**: ✅ **BUILDS AND RUNS SUCCESSFULLY**
 - **Size**: ~2.4MB (optimized Go binary)
-- **Purpose**: Complete GAuth server implementation
+- **Purpose**: Complete AgentAuth server implementation
 
 ```bash
 # Build the server (WORKS ✅)
@@ -69,11 +69,11 @@ go test ./cmd/gauth-server/...   # All tests pass ✅
 
 ## Binary Features
 
-### GAuth Server Binary
+### AgentAuth Server Binary
 - ✅ **Token Management**: Complete lifecycle with revocation
 - ✅ **Event System**: Typed events with structured handlers
 - ✅ **Resilience Patterns**: Circuit breaker, rate limiting, retry
-- ✅ **Authorization Flow**: Full GAuth protocol implementation
+- ✅ **Authorization Flow**: Full AgentAuth protocol implementation
 - ✅ **Audit Logging**: Transaction and authorization tracking
 - ✅ **Configuration**: File and environment variable support
 
@@ -130,7 +130,7 @@ go mod tidy && go mod verify
 
 The binaries are designed for:
 - 🎓 **Learning environments** - Beta testing and exploration
-- 📚 **Demonstration purposes** - Showing GAuth concepts
+- 📚 **Demonstration purposes** - Showing AgentAuth concepts
 - 🔬 **Experimentation** - Testing ideas and understanding flows
 - 🧪 **Development learning** - Understanding build and deployment concepts
 

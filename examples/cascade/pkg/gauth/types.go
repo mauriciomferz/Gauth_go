@@ -1,4 +1,4 @@
-// Package gauth provides the core functionality for the GAuth authentication and authorization system.
+// Package gauth provides the core functionality for the AgentAuth authentication and authorization system.
 package gauth
 
 import "time"
@@ -79,7 +79,7 @@ type RateLimitConfig struct {
 	WindowSize        int `json:"window_size"`         // Time window in seconds
 }
 
-// Config represents the configuration for GAuth
+// Config represents the configuration for AgentAuth
 type Config struct {
 	AuthServerURL     string          // URL of the authorization server
 	ClientID          string          // Client identifier

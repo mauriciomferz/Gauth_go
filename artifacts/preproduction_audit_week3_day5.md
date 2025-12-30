@@ -337,7 +337,7 @@ The gosec warnings remain because:
 |-------------|--------|----------|-------|
 | **Static Security Analysis** | ✅ COMPLETE | Day 1 gosec scan (171 issues) | 2 P0 fixes applied |
 | **Cryptographic Validation** | ✅ COMPLETE | Day 1 crypto review | Ed25519, ECDSA P-256, AES-256-GCM |
-| **RFC 0111/0115 Compliance** | ✅ COMPLETE | Day 2 conformance (100%) | 78/78 symbols, 26/26 clauses |
+| **AAP-001/0115 Compliance** | ✅ COMPLETE | Day 2 conformance (100%) | 78/78 symbols, 26/26 clauses |
 | **Penetration Testing** | ✅ COMPLETE | Day 3 security tests (298/298 PASS) | All attack vectors handled |
 | **Compliance Documentation** | ✅ COMPLETE | Day 4 compliance matrix | 79% controls implemented |
 | **P0 Security Remediation** | ✅ COMPLETE | Day 5 fixes (commit d1c90474) | 2 weak RNG issues fixed |
@@ -357,7 +357,7 @@ The gosec warnings remain because:
 
 #### Approval Statement
 
-Based on comprehensive security remediation completed during Week 3 Day 5 (November 9, 2025), I hereby approve the GAuth authorization framework for production deployment:
+Based on comprehensive security remediation completed during Week 3 Day 5 (November 9, 2025), I hereby approve the AgentAuth authorization framework for production deployment:
 
 1. ✅ **P0 Security Issues Resolved**: All 2 P0 weak RNG issues fixed and validated
 2. ✅ **Test Suite Passes**: 298 security tests, 19 notary tests, 4 anchor tests (0 failures)
@@ -379,7 +379,7 @@ Based on comprehensive security remediation completed during Week 3 Day 5 (Novem
 | Day | Activity | Duration | Status | Evidence |
 |-----|----------|----------|--------|----------|
 | **Day 1** | Security Audit & Crypto Review | 4-6 hours | ✅ COMPLETE | preproduction_audit_week3_day1.md (1122 lines) |
-| **Day 2** | RFC 0111/0115 Compliance | 4-6 hours | ✅ COMPLETE | preproduction_audit_week3_day2.md (890 lines) |
+| **Day 2** | AAP-001/0115 Compliance | 4-6 hours | ✅ COMPLETE | preproduction_audit_week3_day2.md (890 lines) |
 | **Day 3** | Penetration Testing | 3-4 hours | ✅ COMPLETE | preproduction_audit_week3_day3.md (619 lines) |
 | **Day 4** | Compliance Documentation | 2-3 hours | ✅ COMPLETE | preproduction_audit_week3_day4.md (761 lines) |
 | **Day 5** | Security Remediation | 45 min | ✅ COMPLETE | preproduction_audit_week3_day5.md (this document) |
@@ -404,7 +404,7 @@ Based on comprehensive security remediation completed during Week 3 Day 5 (Novem
 - LOW Issues Deferred: 54
 
 **Compliance:**
-- RFC 0111/0115: 100% core compliance
+- AAP-001/0115: 100% core compliance
 - OWASP Top 10: 80% compliant
 - Security Controls: 79% fully implemented
 - GAP Items: 45 (8 implemented, 16 partial, 19 missing)
@@ -452,7 +452,7 @@ Based on comprehensive security remediation completed during Week 3 Day 5 (Novem
 
 **Objectives:**
 - Set up staging environment
-- Deploy GAuth to staging
+- Deploy AgentAuth to staging
 - Smoke testing
 - Performance validation
 - Production cutover planning
@@ -504,7 +504,7 @@ Based on comprehensive security remediation completed during Week 3 Day 5 (Novem
    ```bash
    git tag -a week3-complete -m "Week 3 Security & Compliance Complete
    - Security audit (171 gosec issues, 2 P0 fixed)
-   - RFC 0111/0115 compliance (100% coverage)
+   - AAP-001/0115 compliance (100% coverage)
    - Penetration testing (298 tests, all PASS)
    - Compliance documentation (79% controls implemented)
    - P0 remediation (2 weak RNG fixes)
@@ -547,7 +547,7 @@ Based on comprehensive security remediation completed during Week 3 Day 5 (Novem
 
 Week 3 Day 5 security remediation successfully resolved all P0 production blockers. Both weak RNG issues have been fixed by implementing crypto/rand-based seeding for test stubs. All tests pass with no regressions. The system demonstrates strong security posture with 79% of security controls fully implemented and 100% RFC compliance.
 
-**The GAuth authorization framework is APPROVED FOR PRODUCTION DEPLOYMENT.**
+**The AgentAuth authorization framework is APPROVED FOR PRODUCTION DEPLOYMENT.**
 
 ---
 
@@ -570,7 +570,7 @@ Week 3 Day 5 security remediation successfully resolved all P0 production blocke
 | Document | Location | Lines | Purpose |
 |----------|----------|-------|---------|
 | **Week 3 Day 1** | artifacts/preproduction_audit_week3_day1.md | 1122 | Security audit, gosec scan, crypto review |
-| **Week 3 Day 2** | artifacts/preproduction_audit_week3_day2.md | 890 | RFC 0111/0115 compliance validation |
+| **Week 3 Day 2** | artifacts/preproduction_audit_week3_day2.md | 890 | AAP-001/0115 compliance validation |
 | **Week 3 Day 3** | artifacts/preproduction_audit_week3_day3.md | 619 | Penetration testing & security validation |
 | **Week 3 Day 4** | artifacts/preproduction_audit_week3_day4.md | 761 | Compliance documentation & attestation |
 | **Week 3 Day 5** | artifacts/preproduction_audit_week3_day5.md | This document | P0 remediation & production approval |

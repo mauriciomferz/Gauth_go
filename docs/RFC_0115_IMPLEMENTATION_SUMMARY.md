@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GiFo-RFC-0115 Implementation Summary
+# AAP-RFC-0115 Implementation Summary
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -16,17 +16,17 @@ owners: [system]
 > This is a **beta demonstration** of RFC-0115 concepts (pre-release; not production).
 > **NOT production ready. This is for beta demonstration and learning purposes only. Do NOT use for real security, production, or commercial deployment.**
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+Operated by AgentAuth Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
 ## Overview
 
-This document summarizes the complete implementation of **GiFo-RFC-0115 Power-of-Attorney Credential Definition (PoA-Definition)** within the GAuth framework. The implementation provides a complete, type-safe Go implementation of the official Gimel Foundation standard.
+This document summarizes the complete implementation of **AAP-RFC-0115 Power-of-Attorney Credential Definition (PoA-Definition)** within the AgentAuth framework. The implementation provides a complete, type-safe Go implementation of the official AgentAuth Community standard.
 
 ## Implementation Status: ✅ COMPLETE
 
@@ -117,17 +117,17 @@ examples/rfc_0115_poa_definition/
 ├── main.go                   # Working demonstration
 ├── README.md                 # Implementation documentation
 docs/
-├── RFC_ARCHITECTURE.md       # Updated with official Gimel Foundation info
+├── RFC_ARCHITECTURE.md       # Updated with official AgentAuth Community info
 ├── DEVELOPMENT.md           # RFC-0115 compliance documentation
 ```
 
 ## Legal Compliance
 
-### Gimel Foundation Attribution ✅
-- **Official Organization**: Gimel Foundation gGmbH i.G.
+### AgentAuth Community Attribution ✅
+- **Official Organization**: AgentAuth Community gGmbH i.G.
 - **Leadership**: MD Bjørn Baunbæk, Dr. Götz G. Wehberg, Chairman Daniel Hartert
 - **Registration**: Siegburg HRB 18660, Hardtweg 31, D-53639 Königswinter
-- **Websites**: www.GimelFoundation.com, www.GimelID.com
+- **Websites**: www.AgentAuthFoundation.com, www.AgentAuthID.com
 - **License**: Apache 2.0
 
 ### Regulatory Framework ✅
@@ -148,7 +148,7 @@ poaDefinition := &poa.PoADefinition{
             Type: poa.PrincipalTypeOrganization,
             Organization: &poa.Organization{
                 Type: poa.OrgTypeNonProfit,
-                Name: "Gimel Foundation gGmbH i.G.",
+                Name: "AgentAuth Community gGmbH i.G.",
                 RegisterEntry: "Siegburg HRB 18660",
                 ManagingDirector: "Bjørn Baunbæk, Dr. Götz G. Wehberg",
                 RegisteredAuthority: true,
@@ -169,7 +169,7 @@ jsonData, _ := json.MarshalIndent(poaDefinition, "", "  ")
 - **Structure**: Demonstrates RFC-0115 compliant data structures
 - **Type Safety**: Shows Go type system concepts
 - **Documentation**: Beta learning materials and examples
-- **Legal Framework**: Proper Gimel Foundation attribution for beta usage
+- **Legal Framework**: Proper AgentAuth Community attribution for beta usage
 
 ### ⚠️ Requires Full Implementation
 - **Cryptography**: Replace demonstration crypto with real cryptographic libraries
@@ -190,16 +190,16 @@ go run main.go
 Expected output includes:
 - Complete JSON structure with all RFC-0115 sections
 - Type safety demonstration
-- Gimel Foundation attribution
+- AgentAuth Community attribution
 - Success confirmation
 
 ## Conclusion
 
-The GiFo-RFC-0115 implementation is **COMPLETE** and **COMPLIANT** with the official Gimel Foundation standard. The implementation provides:
+The AAP-RFC-0115 implementation is **COMPLETE** and **COMPLIANT** with the official AgentAuth Community standard. The implementation provides:
 
 1. **100% RFC-0115 Coverage**: All sections (3.A, 3.B, 3.C) fully implemented
 2. **Complete Implementation Structure**: Type-safe, documented, tested
-3. **Official Attribution**: Proper Gimel Foundation gGmbH i.G. licensing
+3. **Official Attribution**: Proper AgentAuth Community gGmbH i.G. licensing
 4. **Legal Compliance**: German law jurisdiction, proper regulatory framework
 5. **Beta Architecture**: Demonstrates concepts for learning purposes
 

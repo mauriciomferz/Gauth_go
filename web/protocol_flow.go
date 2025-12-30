@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ProtocolFlowStep represents a step in the GAuth protocol flow
+// ProtocolFlowStep represents a step in the AgentAuth protocol flow
 type ProtocolFlowStep struct {
 	ID          string                 `json:"id"`
 	Name        string                 `json:"name"`

@@ -27,4 +27,4 @@ if (!document.getElementById('toast-style')){
   document.head.appendChild(style);
 }
 
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { showToast });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { showToast });

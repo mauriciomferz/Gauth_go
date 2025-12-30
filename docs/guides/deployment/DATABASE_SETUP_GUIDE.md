@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Database Setup Guide - GAuth Admin Handlers
+# Database Setup Guide - AgentAuth Admin Handlers
 
 ## Option 1: Docker Setup (Recommended)
 
@@ -242,7 +242,7 @@ psql -U postgres -d gauth -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA publi
 
 After database setup:
 
-1. **Start GAuth server:**
+1. **Start AgentAuth server:**
 ```bash
 export GAUTH_JWT_SIGNING_KEY="your-secret-key"
 export DB_HOST=localhost

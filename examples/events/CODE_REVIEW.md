@@ -12,7 +12,7 @@ owners: [system]
 > Status: Active
 
 ## Overview
-This example demonstrates the GAuth typed event system, including event creation, dispatching, handling, and metadata usage.
+This example demonstrates the AgentAuth typed event system, including event creation, dispatching, handling, and metadata usage.
 
 ## Key Concepts
 - **Typed Metadata**: Strongly-typed event metadata for safety and clarity.

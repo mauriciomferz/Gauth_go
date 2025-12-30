@@ -220,7 +220,7 @@ fmt.Sprintf("%s|%s|%d", ..., time.Now().Unix())  // Correct: %d for int64
 --- PASS: TestDefaultPVP_BindIdentityToCryptographicKey (0.00s)
 
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/verification       0.260s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/verification       0.260s
 ```
 
 **Result**: ✅ **15/15 tests passing** in 0.260s

@@ -51,8 +51,8 @@ func main() {
 	)
 	fmt.Println("✅ Enhanced PoA validator created")
 
-	// 2. Create RFC0111 service with enhanced validator integration
-	fmt.Println("\n🔧 Step 2: Creating RFC0111 service with enhanced validator...")
+	// 2. Create AAP001 service with enhanced validator integration
+	fmt.Println("\n🔧 Step 2: Creating AAP001 service with enhanced validator...")
 
 	// Create key provider for signatures
 	kp, err := cr.NewInMemoryEd25519Provider()
@@ -85,7 +85,7 @@ func main() {
 		gauth_rfc_001.WithEnhancedValidator(enhancedValidator),
 		gauth_rfc_001.WithSignerProvider(kp.ActiveSigner),
 	)
-	fmt.Println("✅ RFC0111 service created with enhanced validation")
+	fmt.Println("✅ AAP001 service created with enhanced validation")
 
 	// 3. Demonstrate delegation creation with warning collection
 	fmt.Println("\n🧪 Step 3: Creating delegations with enhanced validation...")

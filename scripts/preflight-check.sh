@@ -9,7 +9,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  GAuth CI/CD Pre-Flight Checklist${NC}"
+echo -e "${BLUE}  AgentAuth CI/CD Pre-Flight Checklist${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
@@ -251,7 +251,7 @@ read -p "Enter Slack webhook URL (or press Enter to skip): " SLACK_WEBHOOK_URL
 if [ -n "$SLACK_WEBHOOK_URL" ]; then
     # Test Slack webhook
     RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H 'Content-type: application/json' \
-        --data '{"text":"✅ GAuth CI/CD pre-flight check successful"}' \
+        --data '{"text":"✅ AgentAuth CI/CD pre-flight check successful"}' \
         "$SLACK_WEBHOOK_URL")
     
     if [ "$RESPONSE" == "200" ]; then

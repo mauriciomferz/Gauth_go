@@ -6,16 +6,16 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth+ Grafana Dashboard Guide
+# AgentAuth+ Grafana Dashboard Guide
 
 ## Overview
 
-This guide provides instructions for setting up, using, and customizing the GAuth+ Grafana monitoring dashboard.
+This guide provides instructions for setting up, using, and customizing the AgentAuth+ Grafana monitoring dashboard.
 
 ## Dashboard Components
 
 ### 1. Validation Metrics
-- **GAuth+ Validations Rate**: Real-time rate of all GAuth+ feature validations (successor, delegation, capability, fiduciary)
+- **AgentAuth+ Validations Rate**: Real-time rate of all AgentAuth+ feature validations (successor, delegation, capability, fiduciary)
 - **Total Validation Rate**: Aggregated validation rate across all features
 - **P95 Validation Duration**: 95th percentile latency for validations (threshold: 100ms)
 
@@ -57,11 +57,11 @@ docker compose up -d
 
 ### Step 3: Verify Dashboard
 
-The GAuth+ Monitoring Dashboard should be automatically provisioned:
+The AgentAuth+ Monitoring Dashboard should be automatically provisioned:
 
 1. Navigate to **Dashboards** → **Browse**
-2. Look for folder: **GAuth+**
-3. Open: **GAuth+ Monitoring Dashboard**
+2. Look for folder: **AgentAuth+**
+3. Open: **AgentAuth+ Monitoring Dashboard**
 
 ### Step 4: Verify Data Source
 
@@ -149,52 +149,52 @@ The dashboard integrates with Prometheus AlertManager for proactive monitoring.
 
 ### Configured Alerts
 
-1. **GAuthPlusHighValidationFailureRate**
+1. **AgentAuthPlusHighValidationFailureRate**
    - Trigger: > 10% validation failures for 5 minutes
    - Severity: Warning
    - Action: Check logs for error patterns
 
-2. **GAuthPlusCacheHitRateLow**
+2. **AgentAuthPlusCacheHitRateLow**
    - Trigger: < 70% hit rate for 10 minutes
    - Severity: Warning
    - Action: Increase TTL or review cache invalidation
 
-3. **GAuthPlusHighPolicyViolationRate**
+3. **AgentAuthPlusHighPolicyViolationRate**
    - Trigger: > 1 violation/second for 5 minutes
    - Severity: Critical
    - Action: Immediate investigation required
 
-4. **GAuthPlusHighValidationLatency**
+4. **AgentAuthPlusHighValidationLatency**
    - Trigger: P95 > 100ms for 5 minutes
    - Severity: Warning
    - Action: Check cache and database performance
 
-5. **GAuthPlusExcessiveDelegationDepth**
+5. **AgentAuthPlusExcessiveDelegationDepth**
    - Trigger: P95 depth > 5 for 5 minutes
    - Severity: Warning
    - Action: Review delegation policies
 
-6. **GAuthPlusFrequentSuccessorActivations**
+6. **AgentAuthPlusFrequentSuccessorActivations**
    - Trigger: > 0.1 activations/second for 10 minutes
    - Severity: Warning
    - Action: Investigate agent incapacitations
 
-7. **GAuthPlusCriticalFiduciaryViolations**
+7. **AgentAuthPlusCriticalFiduciaryViolations**
    - Trigger: Any critical fiduciary violation
    - Severity: Critical
    - Action: Immediate review and remediation
 
-8. **GAuthPlusDualControlFailures**
+8. **AgentAuthPlusDualControlFailures**
    - Trigger: > 20% rejection rate for 5 minutes
    - Severity: Warning
    - Action: Review approval workflow
 
-9. **GAuthPlusServiceDown**
+9. **AgentAuthPlusServiceDown**
    - Trigger: Service unavailable for 2 minutes
    - Severity: Critical
    - Action: Check service health and logs
 
-10. **GAuthPlusCacheSizeExcessive**
+10. **AgentAuthPlusCacheSizeExcessive**
     - Trigger: Cache > 50,000 entries for 10 minutes
     - Severity: Warning
     - Action: Review cache configuration and cleanup
@@ -336,7 +336,7 @@ rate(gauthplus_dual_control_approvals_total[5m])
 **Symptoms**: Dashboard loads but panels show "No data"
 
 **Solutions**:
-1. Verify GAuth service is running and exposing metrics:
+1. Verify AgentAuth service is running and exposing metrics:
    ```bash
    curl http://localhost:8080/metrics | grep gauthplus
    ```
@@ -438,9 +438,9 @@ rate(gauthplus_dual_control_approvals_total[5m])
    - Grafana caches query results
    - Consistent time ranges improve cache hits
 
-## Integration with GAuth+ Services
+## Integration with AgentAuth+ Services
 
-### Enabling Metrics in GAuth+
+### Enabling Metrics in AgentAuth+
 
 Metrics are automatically collected when the service starts. No additional configuration needed.
 
@@ -449,13 +449,13 @@ Metrics are automatically collected when the service starts. No additional confi
 # Check metrics endpoint
 curl http://localhost:8080/metrics | head -20
 
-# Filter GAuth+ metrics
+# Filter AgentAuth+ metrics
 curl http://localhost:8080/metrics | grep gauthplus_ | head -10
 ```
 
 **Expected output**:
 ```
-# HELP gauthplus_validations_total Total number of GAuth+ validations performed
+# HELP gauthplus_validations_total Total number of AgentAuth+ validations performed
 # TYPE gauthplus_validations_total counter
 gauthplus_validations_total{feature="successor",result="success"} 42
 gauthplus_validations_total{feature="delegation",result="success"} 128
@@ -468,8 +468,8 @@ The caching layer automatically records metrics:
 
 ```go
 // Automatic metric recording in cache.go
-metrics.RecordGAuthPlusCacheOperation("capability", hit)
-metrics.UpdateGAuthPlusCacheSize("capability", len(c.cache))
+metrics.RecordAgentAuthPlusCacheOperation("capability", hit)
+metrics.UpdateAgentAuthPlusCacheSize("capability", len(c.cache))
 ```
 
 No manual instrumentation required in application code.
@@ -482,7 +482,7 @@ Validation methods automatically track duration:
 // Automatic timing in gauthplus_integration.go
 start := time.Now()
 defer func() {
-    metrics.RecordGAuthPlusValidation("successor", "checked", time.Since(start).Seconds())
+    metrics.RecordAgentAuthPlusValidation("successor", "checked", time.Since(start).Seconds())
 }()
 ```
 
@@ -579,7 +579,7 @@ scrape_configs:
 - **Prometheus Documentation**: https://prometheus.io/docs/
 - **Grafana Documentation**: https://grafana.com/docs/
 - **PromQL Guide**: https://prometheus.io/docs/prometheus/latest/querying/basics/
-- **GAuth+ Implementation**: See `GAUTHPLUS_CACHING_IMPLEMENTATION.md`
+- **AgentAuth+ Implementation**: See `GAUTHPLUS_CACHING_IMPLEMENTATION.md`
 - **Metrics Reference**: See `pkg/metrics/prometheus.go`
 
 ## Quick Reference
@@ -588,7 +588,7 @@ scrape_configs:
 - **Grafana**: http://localhost:3000
 - **Prometheus**: http://localhost:9090
 - **AlertManager**: http://localhost:9093
-- **GAuth Metrics**: http://localhost:8080/metrics
+- **AgentAuth Metrics**: http://localhost:8080/metrics
 
 ### Default Credentials
 - **Grafana**: admin / admin

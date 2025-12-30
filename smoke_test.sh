@@ -4,7 +4,7 @@ set -e
 BASE_URL="http://localhost:8090"
 FRONTEND_URL="http://localhost:3002"
 
-echo "=== GAuth Production Smoke Test ==="
+echo "=== AgentAuth Production Smoke Test ==="
 
 # 1. Check Backend Health
 echo -n "[Backend] Checking health... "
@@ -19,8 +19,8 @@ fi
 # 2. Check Frontend Index (Content Verification)
 echo -n "[Frontend] Checking index.html content... "
 CONTENT=$(curl -s "$FRONTEND_URL")
-if [[ "$CONTENT" == *"GAuth"* ]]; then
-    echo "OK (Found 'GAuth' in title)"
+if [[ "$CONTENT" == *"AgentAuth"* ]]; then
+    echo "OK (Found 'AgentAuth' in title)"
 else
     echo "FAIL (Title verification failed)"
     echo "Preview: $(echo "$CONTENT" | head -n 5)"

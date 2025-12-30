@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Docker Build Verification Script for GAuth
+# Docker Build Verification Script for AgentAuth
 # This script verifies that the Docker build process works correctly
 
 set -e
 
-echo "🐳 GAuth Docker Build Verification"
+echo "🐳 AgentAuth Docker Build Verification"
 echo "=================================="
 
 # Check if Docker is available

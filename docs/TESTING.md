@@ -15,7 +15,7 @@ owners: [system]
 
 ## Overview
 
-This guide explains how to effectively test GAuth components and extensions. It covers:
+This guide explains how to effectively test AgentAuth components and extensions. It covers:
 - Unit testing patterns
 - Integration testing
 - Performance benchmarking

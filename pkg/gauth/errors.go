@@ -5,22 +5,22 @@ import (
 	"fmt"
 )
 
-// GAuthError represents a GAuth error
-type GAuthError struct {
+// AgentAuthError represents a AgentAuth error
+type AgentAuthError struct {
 	Code    string
 	Message string
 }
 
-func (e *GAuthError) Error() string {
+func (e *AgentAuthError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
 
 // Error definitions
 var (
-	ErrInvalidToken          = &GAuthError{Code: "invalid_token", Message: "Invalid token"}
-	ErrUnauthorized          = &GAuthError{Code: "unauthorized", Message: "Unauthorized access"}
-	ErrTokenExpired          = &GAuthError{Code: "token_expired", Message: "Token has expired"}
-	ErrInvalidGrant          = &GAuthError{Code: "invalid_grant", Message: "Invalid authorization grant"}
-	ErrInvalidClient         = &GAuthError{Code: "invalid_client", Message: "Invalid client credentials"}
+	ErrInvalidToken          = &AgentAuthError{Code: "invalid_token", Message: "Invalid token"}
+	ErrUnauthorized          = &AgentAuthError{Code: "unauthorized", Message: "Unauthorized access"}
+	ErrTokenExpired          = &AgentAuthError{Code: "token_expired", Message: "Token has expired"}
+	ErrInvalidGrant          = &AgentAuthError{Code: "invalid_grant", Message: "Invalid authorization grant"}
+	ErrInvalidClient         = &AgentAuthError{Code: "invalid_client", Message: "Invalid client credentials"}
 	ErrStrictAuthKeyRequired = errors.New("strict auth mode requires explicit SigningKey of >=32 bytes")
 )

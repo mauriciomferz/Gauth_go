@@ -1,5 +1,5 @@
 // Package oidc - Identity Bridge
-// Converts OIDC ID tokens to GAuth identity proof structures
+// Converts OIDC ID tokens to AgentAuth identity proof structures
 package oidc
 
 import (
@@ -10,7 +10,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
-// IdentityBridge converts between OIDC and GAuth identity structures
+// IdentityBridge converts between OIDC and AgentAuth identity structures
 // This enables using OIDC ID tokens as identity proofs in RFC-0111 flow
 type IdentityBridge struct {
 	idTokenService *IDTokenService
@@ -25,7 +25,7 @@ func NewIdentityBridge(idTokenService *IDTokenService) *IdentityBridge {
 	}
 }
 
-// ConvertIDTokenToIdentityProof converts OIDC ID token to GAuth IdentityProofResult
+// ConvertIDTokenToIdentityProof converts OIDC ID token to AgentAuth IdentityProofResult
 // This is the core bridge function enabling OIDC in RFC-0111 Steps I, III, VI
 func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 	ctx context.Context,
@@ -50,7 +50,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 		identity = claims.LegalEntityName
 	}
 
-	// Map OIDC ACR to GAuth TrustLevel
+	// Map OIDC ACR to AgentAuth TrustLevel
 	trustLevel := b.trustMapper.MapACRToTrustLevel(claims.ACR)
 
 	// Build successful identity proof result
@@ -64,8 +64,8 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 	}, nil
 }
 
-// ConvertIdentityProofToIDToken converts GAuth identity proof to OIDC ID token
-// This enables GAuth to issue OIDC-compliant ID tokens
+// ConvertIdentityProofToIDToken converts AgentAuth identity proof to OIDC ID token
+// This enables AgentAuth to issue OIDC-compliant ID tokens
 func (b *IdentityBridge) ConvertIdentityProofToIDToken(
 	ctx context.Context,
 	proof *gauth.IdentityProofResult,
@@ -92,7 +92,7 @@ func (b *IdentityBridge) ConvertIdentityProofToIDToken(
 	)
 }
 
-// TrustLevelMapper maps between OIDC ACR and GAuth TrustLevel
+// TrustLevelMapper maps between OIDC ACR and AgentAuth TrustLevel
 type TrustLevelMapper struct {
 	acrToTrustLevel map[string]string
 	trustLevelToACR map[string]string
@@ -107,7 +107,7 @@ func NewTrustLevelMapper() *TrustLevelMapper {
 
 	// Initialize default mappings from DefaultACRMappings
 	for _, mapping := range DefaultACRMappings {
-		mapper.acrToTrustLevel[mapping.ACR] = mapping.GAuthTrustLevel
+		mapper.acrToTrustLevel[mapping.ACR] = mapping.AgentAuthTrustLevel
 	}
 
 	// Reverse mappings (trust level → ACR)
@@ -118,7 +118,7 @@ func NewTrustLevelMapper() *TrustLevelMapper {
 	return mapper
 }
 
-// MapACRToTrustLevel maps OIDC ACR value to GAuth trust level
+// MapACRToTrustLevel maps OIDC ACR value to AgentAuth trust level
 func (m *TrustLevelMapper) MapACRToTrustLevel(acr string) string {
 	if trustLevel, exists := m.acrToTrustLevel[acr]; exists {
 		return trustLevel
@@ -128,7 +128,7 @@ func (m *TrustLevelMapper) MapACRToTrustLevel(acr string) string {
 	return trustLevelLow
 }
 
-// MapTrustLevelToACR maps GAuth trust level to OIDC ACR value
+// MapTrustLevelToACR maps AgentAuth trust level to OIDC ACR value
 func (m *TrustLevelMapper) MapTrustLevelToACR(trustLevel string) string {
 	if acr, exists := m.trustLevelToACR[trustLevel]; exists {
 		return acr

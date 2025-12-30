@@ -34,9 +34,9 @@ func NewMetricsHandler(registry *prometheus.Registry, db *pgxpool.Pool) *Metrics
 	registry.MustRegister(collectors.NewGoCollector())
 	registry.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 
-	// Register custom GAuth collector
+	// Register custom AgentAuth collector
 	if db != nil {
-		registry.MustRegister(NewGAuthCollector(db))
+		registry.MustRegister(NewAgentAuthCollector(db))
 	}
 
 	return &MetricsHandler{
@@ -47,17 +47,17 @@ func NewMetricsHandler(registry *prometheus.Registry, db *pgxpool.Pool) *Metrics
 	}
 }
 
-// GAuthCollector implements prometheus.Collector for custom business metrics
-type GAuthCollector struct {
+// AgentAuthCollector implements prometheus.Collector for custom business metrics
+type AgentAuthCollector struct {
 	db                  *pgxpool.Pool
 	auditEventsTotal    *prometheus.Desc
 	apiKeysTotal        *prometheus.Desc
 	activePoliciesTotal *prometheus.Desc
 }
 
-// NewGAuthCollector creates a new GAuthCollector
-func NewGAuthCollector(db *pgxpool.Pool) *GAuthCollector {
-	return &GAuthCollector{
+// NewAgentAuthCollector creates a new AgentAuthCollector
+func NewAgentAuthCollector(db *pgxpool.Pool) *AgentAuthCollector {
+	return &AgentAuthCollector{
 		db: db,
 		auditEventsTotal: prometheus.NewDesc(
 			"gauth_audit_events_total",
@@ -78,14 +78,14 @@ func NewGAuthCollector(db *pgxpool.Pool) *GAuthCollector {
 }
 
 // Describe implements prometheus.Collector
-func (c *GAuthCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c *AgentAuthCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.auditEventsTotal
 	ch <- c.apiKeysTotal
 	ch <- c.activePoliciesTotal
 }
 
 // Collect implements prometheus.Collector
-func (c *GAuthCollector) Collect(ch chan<- prometheus.Metric) {
+func (c *AgentAuthCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
 
 	// 1. Audit Events (Table: audit_events, Column: status)

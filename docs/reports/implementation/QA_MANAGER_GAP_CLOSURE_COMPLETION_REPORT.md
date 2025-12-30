@@ -513,7 +513,7 @@ This is a **refactoring task**, not a missing implementation. All underlying fun
 | Section 2 (Exclusions) | 95% | 95% | ✅ No change - already excellent |
 | Section 3 (Nomenclature) | 65% | 95% | ✅ +30% - Full P*P implementation |
 | Section 4 (PIP) | 60% | 95% | ✅ +35% - Unified PIP complete |
-| Section 5 (What GAuth Is) | 60% | 90% | ✅ +30% - Authorization flow complete |
+| Section 5 (What AgentAuth Is) | 60% | 90% | ✅ +30% - Authorization flow complete |
 | Section 6 (How It Works) | 42% | 95% | ✅ +53% - ALL STEPS IMPLEMENTED |
 
 **Section 6 Breakdown (Critical)**:

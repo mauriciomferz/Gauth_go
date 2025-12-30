@@ -85,7 +85,7 @@ This document summarizes the gap analysis and closure work performed in response
 - ✅ Combining strategies (deny-overrides, permit-overrides, first-applicable)
 - ✅ Caching, metrics, obligations
 - ✅ Conflict detection
-- ✅ Bridge to GAuth (`pdp_bridge.go`)
+- ✅ Bridge to AgentAuth (`pdp_bridge.go`)
 
 **Code Stats**:
 - Production: ~1,500+ lines
@@ -123,7 +123,7 @@ This document summarizes the gap analysis and closure work performed in response
 **Plan**:
 1. Implement MCP client for context provision
 2. Implement MCP server for authorization context
-3. Integrate with GAuth authorization flow
+3. Integrate with AgentAuth authorization flow
 4. Add context propagation in extended tokens
 
 ---
@@ -379,4 +379,4 @@ This document summarizes the gap analysis and closure work performed in response
 
 ---
 
-*This summary demonstrates that the GAuth implementation is significantly more complete than initially assessed. With focused effort on confirmed gaps (MCP, E2E tests, security), production readiness can be achieved in 3-4 months instead of 6-8 months.*
+*This summary demonstrates that the AgentAuth implementation is significantly more complete than initially assessed. With focused effort on confirmed gaps (MCP, E2E tests, security), production readiness can be achieved in 3-4 months instead of 6-8 months.*

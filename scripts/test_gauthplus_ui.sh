@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# GAuth+ Admin UI - Quick Verification Test
+# AgentAuth+ Admin UI - Quick Verification Test
 # Tests that the React UI can communicate with the backend API
 
 set -e
 
 echo "=========================================="
-echo "GAuth+ Admin UI Verification Test"
+echo "AgentAuth+ Admin UI Verification Test"
 echo "=========================================="
 echo ""
 
@@ -116,7 +116,7 @@ echo "3. API Client File Check"
 echo "------------------------"
 
 API_CLIENT="frontend/ui-react/src/lib/gauthplus-api.ts"
-MAIN_PAGE="frontend/ui-react/src/pages/admin/GAuthPlus.tsx"
+MAIN_PAGE="frontend/ui-react/src/pages/admin/AgentAuthPlus.tsx"
 
 echo -n "Checking API client... "
 if [ -f "$API_CLIENT" ]; then
@@ -173,7 +173,7 @@ echo ""
 if [ $TESTS_FAILED -eq 0 ]; then
     echo -e "${GREEN}✓ ALL TESTS PASSED${NC}"
     echo ""
-    echo "GAuth+ Admin UI is ready to use!"
+    echo "AgentAuth+ Admin UI is ready to use!"
     echo "Access at: $FRONTEND_URL/admin/gauthplus"
     exit 0
 else

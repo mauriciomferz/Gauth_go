@@ -36,7 +36,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("GAuth Demo Application")
+	fmt.Println("AgentAuth Demo Application")
 	fmt.Println("======================")
 	enableProm := config.Get("GAUTH_METRICS", "") == "prometheus"
 	if enableProm {
@@ -89,7 +89,7 @@ func main() {
 	}
 	authService, err := gauth.New(gconfig)
 	if err != nil {
-		fmt.Println("Error creating GAuth instance:", err)
+		fmt.Println("Error creating AgentAuth instance:", err)
 		return
 	}
 

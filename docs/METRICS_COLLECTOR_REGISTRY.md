@@ -12,7 +12,7 @@ owners: [system]
 
 ## Overview
 
-The Metrics Collector Registry Framework provides a pluggable architecture for collecting and exporting GAuth metrics to multiple backends simultaneously. This allows production deployments to use Prometheus for monitoring, StatsD for aggregation, and JSON files for debugging—all at the same time.
+The Metrics Collector Registry Framework provides a pluggable architecture for collecting and exporting AgentAuth metrics to multiple backends simultaneously. This allows production deployments to use Prometheus for monitoring, StatsD for aggregation, and JSON files for debugging—all at the same time.
 
 ### Key Features
 
@@ -221,7 +221,7 @@ registry.Register(collectors.NewPrometheusCollector("prom", promMetrics, "Dashbo
 registry.Register(NewStatsDCollector("statsd", "localhost:8125", "gauth"))
 
 // CloudWatch for AWS monitoring
-registry.Register(NewCloudWatchCollector(cwClient, "GAuth/Production"))
+registry.Register(NewCloudWatchCollector(cwClient, "AgentAuth/Production"))
 ```
 
 ### Testing (Mock Collector)

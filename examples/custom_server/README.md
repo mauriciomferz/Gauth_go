@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates how to extend the GAuth ResourceServer with custom transaction processing and metrics.
+This example demonstrates how to extend the AgentAuth ResourceServer with custom transaction processing and metrics.
 
 ## Key Concepts
 - **CustomResourceServer**: Extends base ResourceServer for custom logic and metrics.
@@ -31,4 +31,4 @@ go run main.go
 
 ---
 
-For more, see the [GAuth Package Documentation](../../pkg/gauth/doc.go).
+For more, see the [AgentAuth Package Documentation](../../pkg/gauth/doc.go).

@@ -576,7 +576,7 @@ Response:
 {
   "extended_token": {
     "access_token": "ext_eyJhbGc...",
-    "token_type": "GAuth-Extended-Token",
+    "token_type": "AgentAuth-Extended-Token",
     "expires_in": 3600,
     // RFC-0111 Extended Fields:
     "power_of_attorney": { ... },

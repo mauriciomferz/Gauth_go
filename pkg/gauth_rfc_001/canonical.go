@@ -30,11 +30,11 @@ import (
 	"time"
 )
 
-const poaDigestDomainV1 = "GAUTH_RFC0111_POA_V1\n" // trailing newline as delimiter (legacy)
+const poaDigestDomainV1 = "GAUTH_AAP001_POA_V1\n" // trailing newline as delimiter (legacy)
 // V3 domain adds taxonomy sentinel to prevent cross-version digest collision when new fields introduced.
-// Format extension: GAUTH_RFC0111_POA_V3|tax=1 (weights/threshold logic still uses V2 multi-sig domain when threshold>1).
+// Format extension: GAUTH_AAP001_POA_V3|tax=1 (weights/threshold logic still uses V2 multi-sig domain when threshold>1).
 // V2 multi-sig domain (threshold + weights binding). Stable ordering of weights keys.
-// Format: GAUTH_RFC0111_POA_V2|thr=<threshold>|w=<signer1>=<w1>,<signer2>=<w2>,...\n
+// Format: GAUTH_AAP001_POA_V2|thr=<threshold>|w=<signer1>=<w1>,<signer2>=<w2>,...\n
 
 // CanonicalPOADigest returns (digestHex, canonicalJSON, error) for the supplied POA.
 // digestHex = SHA256( domain || canonicalJSON ) in lowercase hex.
@@ -189,10 +189,10 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 	domain := poaDigestDomainV1
 	if p.Version >= 4 && !(p.Threshold > 1 && len(p.Signers) > 0) {
 		// Hierarchical+taxonomy (if taxonomy present). Sentinel indicates presence of hierarchy fields in canonical JSON.
-		domain = "GAUTH_RFC0111_POA_V4|hier=1\n"
+		domain = "GAUTH_AAP001_POA_V4|hier=1\n"
 	} else if p.Version >= 3 && !(p.Threshold > 1 && len(p.Signers) > 0) {
 		// Taxonomy-only upgrade path (non multi-sig & non hierarchical)
-		domain = "GAUTH_RFC0111_POA_V3|tax=1\n"
+		domain = "GAUTH_AAP001_POA_V3|tax=1\n"
 	}
 	if p.Threshold > 1 && len(p.Signers) > 0 { // multi-sig overrides other domains
 		weightParts := []string{}
@@ -202,7 +202,7 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 			}
 			sort.Strings(weightParts)
 		}
-		domain = fmt.Sprintf("GAUTH_RFC0111_POA_V2|thr=%d|w=%s\n", p.Threshold, strings.Join(weightParts, ","))
+		domain = fmt.Sprintf("GAUTH_AAP001_POA_V2|thr=%d|w=%s\n", p.Threshold, strings.Join(weightParts, ","))
 	}
 	h := sha256.Sum256(append([]byte(domain), canonical...))
 	return hex.EncodeToString(h[:]), canonical, nil

@@ -195,7 +195,7 @@ kubectl scale statefulset redis -n gauth-staging --replicas=1
    kubectl exec <redis-pod> -n gauth-staging -- redis-cli DBSIZE
    ```
 
-4. **GAuth can use cache**
+4. **AgentAuth can use cache**
    ```bash
    kubectl logs <gauth-pod> -n gauth-staging | grep -i "redis connection"
    ```

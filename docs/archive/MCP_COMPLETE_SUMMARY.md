@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The Model Context Protocol (MCP) integration for GAuth 1.0 is **complete and production-ready**. This implementation enables GAuth-authorized AI agents to securely access external resources and invoke tools through standardized MCP servers, with enterprise-grade reliability, scalability, and security.
+The Model Context Protocol (MCP) integration for AgentAuth 1.0 is **complete and production-ready**. This implementation enables AgentAuth-authorized AI agents to securely access external resources and invoke tools through standardized MCP servers, with enterprise-grade reliability, scalability, and security.
 
 ### Implementation Timeline
 
@@ -41,7 +41,7 @@ The Model Context Protocol (MCP) integration for GAuth 1.0 is **complete and pro
 #### Client & Protocol (957 lines)
 - **MCP Client SDK** (237 lines) - JSON-RPC 2.0 protocol implementation
 - **Protocol Types** (120 lines) - MCP message structures
-- **Authorization Bridge** (400 lines) - GAuth token → MCP permissions
+- **Authorization Bridge** (400 lines) - AgentAuth token → MCP permissions
 - **Audit Logger** (304 lines) - Comprehensive operation logging (2.3M+ entries/sec)
 
 #### Integration & Testing (1,392 lines)
@@ -67,7 +67,7 @@ The Model Context Protocol (MCP) integration for GAuth 1.0 is **complete and pro
 - **Idle Cleanup**: Automatic resource cleanup (5 minute timeout)
 
 ### ✅ Security & Compliance
-- **Authorization**: GAuth token validation with MCP scope checking
+- **Authorization**: AgentAuth token validation with MCP scope checking
 - **Audit Logging**: 2.3M+ entries/sec performance
 - **Rate Limiting**: 100 req/sec per server (configurable)
 - **Circuit Breakers**: Prevent cascade failures (5 failures → open)
@@ -243,24 +243,24 @@ fmt.Printf("Active: %d, Circuit: %s\n",
 ### Agent Integration
 
 ```go
-// Create MCP agent with GAuth authorization
+// Create MCP agent with AgentAuth authorization
 agent, _ := gagent.NewMCPAgent(&gagent.MCPAgentConfig{
     AgentID:     "ai-agent-001",
-    Token:       gauthToken,      // GAuth extended token
+    Token:       gauthToken,      // AgentAuth extended token
     MCPClient:   mcpClient,       // MCP client instance
     AuthBridge:  authBridge,      // Authorization bridge
     AuditLogger: auditLogger,     // Audit logger
 })
 defer agent.Close()
 
-// Read resource (authorized via GAuth)
+// Read resource (authorized via AgentAuth)
 content, err := agent.ReadResource(ctx, "file:///data/report.pdf")
 if err != nil {
     // Handle authorization or read errors
     log.Fatal(err)
 }
 
-// Call tool (authorized via GAuth)
+// Call tool (authorized via AgentAuth)
 result, err := agent.CallTool(ctx, "calculator", map[string]interface{}{
     "expression": "123 * 456",
 })

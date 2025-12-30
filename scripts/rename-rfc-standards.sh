@@ -1,17 +1,17 @@
 #!/bin/bash
 # RFC Standards Rename Script
-# Renames RFC-111 to GAuth-RFC-001 and RFC-115 to GAuth-RFC-002
+# Renames RFC-111 to AgentAuth-RFC-001 and RFC-115 to AgentAuth-RFC-002
 # This eliminates namespace collision with IETF standards
 
 set -e
 
 echo "=========================================="
-echo "GAuth RFC Standards Rename Script"
+echo "AgentAuth RFC Standards Rename Script"
 echo "=========================================="
 echo ""
 echo "Purpose: Rename internal RFC references to avoid IETF collision"
-echo "- RFC-111 → GAuth-RFC-001"
-echo "- RFC-115 → GAuth-RFC-002"
+echo "- RFC-111 → AgentAuth-RFC-001"
+echo "- RFC-115 → AgentAuth-RFC-002"
 echo ""
 echo "Affected:"
 echo "- Package names (pkg/rfc0111 → pkg/gauth_rfc_001)"
@@ -56,10 +56,10 @@ echo "Step 3: Updating documentation..."
 echo "----------------------------------"
 
 # Update documentation references (preserve historical IETF context)
-find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC 111/GAuth-RFC-001 (formerly RFC 111)/g' {} +
-find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC-111/GAuth-RFC-001/g' {} +
-find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC 115/GAuth-RFC-002 (formerly RFC 115)/g' {} +
-find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC-115/GAuth-RFC-002/g' {} +
+find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC 111/AgentAuth-RFC-001 (formerly RFC 111)/g' {} +
+find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC-111/AgentAuth-RFC-001/g' {} +
+find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC 115/AgentAuth-RFC-002 (formerly RFC 115)/g' {} +
+find . -type f \( -name "*.md" -o -name "*.txt" \) -not -path "*/vendor/*" -not -path "*/.git/*" -exec sed -i '' 's/RFC-115/AgentAuth-RFC-002/g' {} +
 echo "✓ Updated documentation references"
 
 # Update JSON examples
@@ -131,7 +131,7 @@ echo "Next steps:"
 echo "1. Review changes: git diff"
 echo "2. Run tests: go test ./..."
 echo "3. Update external documentation referencing RFC-111/115"
-echo "4. Commit changes: git add . && git commit -m 'Rename RFC-111/115 to GAuth-RFC-001/002'"
+echo "4. Commit changes: git add . && git commit -m 'Rename RFC-111/115 to AgentAuth-RFC-001/002'"
 echo ""
 echo "Note: This rename eliminates collision with IETF standards:"
 echo "- IETF RFC 111: Network Control Protocol (1971)"

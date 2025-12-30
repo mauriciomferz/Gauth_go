@@ -8,12 +8,12 @@ import (
 // SUPER ULTIMATE FIX: Use interface directly, not pointer to interface
 type ResourceServer struct {
 	name string
-	auth GAuth // Direct interface - NOT pointer to interface
+	auth AgentAuth // Direct interface - NOT pointer to interface
 }
 
 // NewResourceServer creates a new resource server instance
 // SUPER ULTIMATE FIX: Accept interface directly and dereference if needed
-func NewResourceServer(name string, auth GAuth) *ResourceServer {
+func NewResourceServer(name string, auth AgentAuth) *ResourceServer {
 	return &ResourceServer{
 		name: name,
 		auth: auth,
@@ -23,7 +23,7 @@ func NewResourceServer(name string, auth GAuth) *ResourceServer {
 // ProcessTransaction processes a transaction with the given token
 func (s *ResourceServer) ProcessTransaction(tx TransactionDetails, token string) (string, error) {
 	// SUPER ULTIMATE NUCLEAR SOLUTION: Direct interface method call
-	// Since GAuth interface explicitly defines ValidateToken, this MUST work
+	// Since AgentAuth interface explicitly defines ValidateToken, this MUST work
 	tokenData, err := s.auth.ValidateToken(token)
 	if err != nil {
 		return "", err

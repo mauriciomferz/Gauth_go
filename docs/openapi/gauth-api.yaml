@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
-  title: GAuth API
+  title: AgentAuth API
   version: 1.0.0-beta
   description: |
-    # GAuth - OAuth 2.0 Authorization Server with RFC-0111 Compliance
+    # AgentAuth - OAuth 2.0 Authorization Server with RFC-0111 Compliance
     
-    GAuth is a comprehensive OAuth 2.0 authorization server implementing RFC-0111 subscription flow,
+    AgentAuth is a comprehensive OAuth 2.0 authorization server implementing RFC-0111 subscription flow,
     Power of Attorney (PoA) management, policy-based authorization, and advanced security features.
     
     ## Key Features
@@ -54,7 +54,7 @@ info:
     - Email: support@gauth.example.com
   
   contact:
-    name: GAuth Support
+    name: AgentAuth Support
     email: support@gauth.example.com
     url: https://github.com/mauriciomferz/Gauth_go
   
@@ -113,7 +113,7 @@ paths:
     get:
       tags: [System]
       summary: Health check endpoint
-      description: Returns the health status of the GAuth server
+      description: Returns the health status of the AgentAuth server
       operationId: getHealth
       responses:
         '200':

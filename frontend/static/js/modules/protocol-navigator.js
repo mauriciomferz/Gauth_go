@@ -1,5 +1,5 @@
-// protocol-navigator.js - GAuth Protocol Flow Navigator
-// Peer-level menu system showing current position in GAuth workflow
+// protocol-navigator.js - AgentAuth Protocol Flow Navigator
+// Peer-level menu system showing current position in AgentAuth workflow
 // Inspired by Entra Agent ID style navigation
 //
 // Updated: November 16, 2025 - Phase 2A Integration & Token Security
@@ -18,7 +18,7 @@
 // Environment: Requires GAUTH_RFC0111_ENABLED=1
 
 /**
- * GAuth Protocol Flow Steps
+ * AgentAuth Protocol Flow Steps
  * Based on RFC-0111 and RFC-0115 authorization flow
  */
 const PROTOCOL_STEPS = {
@@ -368,7 +368,7 @@ class ProtocolNavigatorUI {
         const html = `
             <div class="protocol-navigator-wrapper">
                 <div class="navigator-header">
-                    <h2>🚀 GAuth Protocol Flow</h2>
+                    <h2>🚀 AgentAuth Protocol Flow</h2>
                     <div class="navigator-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%"></div>

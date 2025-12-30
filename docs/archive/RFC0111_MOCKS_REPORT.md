@@ -229,8 +229,8 @@ func TestCompleteRFC0111Flow(t *testing.T) {
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth/mocks"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth/mocks"
 )
 
 // 1. Create mocks
@@ -255,7 +255,7 @@ subscriptionManager := gauth.NewSubscriptionFlowManager(
 // 5. Create compliance tracker
 complianceTracker := gauth.NewMemoryComplianceTracker(complianceValidator)
 
-// 6. Use in GAuth service
+// 6. Use in AgentAuth service
 gauthService := gauth.New(
     gauth.WithRFCCompliance(
         subscriptionStore, extendedTokenService, complianceValidator,

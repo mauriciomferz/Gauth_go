@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GAuth Beta Examples API
+  title: AgentAuth Beta Examples API
   version: 0.3.0
   description: |
     Minimal OpenAPI specification for the embedded beta demonstration server.

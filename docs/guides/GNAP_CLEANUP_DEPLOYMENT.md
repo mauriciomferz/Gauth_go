@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides production deployment instructions for the GNAP CleanupManager, ensuring proper resource management and preventing memory leaks in GAuth deployments.
+This guide provides production deployment instructions for the GNAP CleanupManager, ensuring proper resource management and preventing memory leaks in AgentAuth deployments.
 
 ## Quick Facts
 

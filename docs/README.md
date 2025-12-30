@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Documentation
+# AgentAuth Documentation
 
 ## Directory Structure
 
@@ -26,11 +26,11 @@ owners: [system]
 - **[architecture/](architecture/)** - System architecture documents and design decisions
 
 ### ✨ Features
-- **[gauthplus/](features/gauthplus/)** - GAuth+ advanced governance features
+- **[gauthplus/](features/gauthplus/)** - AgentAuth+ advanced governance features
 - **[mcp/](features/mcp/)** - Model Context Protocol integration
 - **[oidc/](features/oidc/)** - OpenID Connect authentication
 - **[jwe/](features/jwe/)** - JSON Web Encryption
-- **[rfc0111/](features/rfc0111/)** - RFC 0111 compliance
+- **[rfc0111/](features/rfc0111/)** - AAP-001 compliance
 - **[admin/](features/admin/)** - Admin portal documentation
 - **[revocation/](features/revocation/)** - Token revocation features
 - **[policy/](features/policy/)** - Policy management
@@ -46,6 +46,6 @@ owners: [system]
 
 - [Main README](../README.md)
 - [API Reference](guides/api/API_REFERENCE.md)
-- [GAuth+ Documentation](features/gauthplus/GAUTHPLUS_README.md)
+- [AgentAuth+ Documentation](features/gauthplus/GAUTHPLUS_README.md)
 - [Deployment Guide](guides/deployment/DEPLOYMENT_GUIDE.md)
 - [Database Setup](guides/deployment/DATABASE_SETUP_GUIDE.md)

@@ -18,7 +18,7 @@ rule_files:
 
 # Scrape configurations
 scrape_configs:
-  # GAuth application metrics
+  # AgentAuth application metrics
   - job_name: 'gauth'
     static_configs:
       - targets: ['host.docker.internal:8080']
@@ -51,7 +51,7 @@ scrape_configs:
     static_configs:
       - targets: ['alertmanager:9093']
 
-  # Additional GAuth endpoints
+  # Additional AgentAuth endpoints
   - job_name: 'gauth-authz'
     static_configs:
       - targets: ['host.docker.internal:8080']

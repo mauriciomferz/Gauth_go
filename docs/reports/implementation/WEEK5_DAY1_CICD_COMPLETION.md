@@ -168,7 +168,7 @@ A  docs/CICD_DOCKER_AUTOMATION.md      (+485 lines)
 ### Workflow Run Details
 
 **ID**: 19219027437  
-**Workflow**: GAuth CI  
+**Workflow**: AgentAuth CI  
 **Branch**: main  
 **Event**: push  
 **Status**: 🔄 In Progress  
@@ -243,7 +243,7 @@ kubectl port-forward -n gauth-staging svc/gauth-service 8080:80
 
 # Test health endpoint
 curl http://localhost:8080/api/v1/beta/health
-# Should return GAuth health response (not mock)
+# Should return AgentAuth health response (not mock)
 ```
 
 ## Comparison: Local vs CI/CD Build

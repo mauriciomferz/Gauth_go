@@ -283,7 +283,7 @@ func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 		opts.Namespace = "gauth"
 	}
 	if opts.Subsystem == "" {
-		opts.Subsystem = "rfc0111"
+		opts.Subsystem = "aap001"
 	}
 	if len(opts.Buckets) == 0 {
 		opts.Buckets = DefaultBuckets

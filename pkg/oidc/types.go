@@ -1,4 +1,4 @@
-// Package oidc implements OpenID Connect integration for GAuth
+// Package oidc implements OpenID Connect integration for AgentAuth
 // RFC-0111 Building Block: OpenID Connect as identity verification mechanism
 package oidc
 
@@ -29,7 +29,7 @@ type OIDCConfiguration struct {
 	TokenEndpointAuthMethodsSupported []string `json:"token_endpoint_auth_methods_supported"`
 	ClaimsSupported                   []string `json:"claims_supported"`
 
-	// GAuth Extensions - ACR/LOA Support
+	// AgentAuth Extensions - ACR/LOA Support
 	ACRValuesSupported []string `json:"acr_values_supported"`
 
 	// Metadata
@@ -62,7 +62,7 @@ type IDTokenClaims struct {
 	UpdatedAt           int64  `json:"updated_at,omitempty"`
 
 	// Authentication Context Class Reference (ACR)
-	// Maps to GAuth TrustLevel: "substantial", "high", "loa-4", etc.
+	// Maps to AgentAuth TrustLevel: "substantial", "high", "loa-4", etc.
 	ACR string `json:"acr,omitempty"`
 
 	// Authentication Methods References (AMR)
@@ -75,13 +75,13 @@ type IDTokenClaims struct {
 	// Nonce - For replay attack prevention
 	Nonce string `json:"nonce,omitempty"`
 
-	// GAuth Extensions - Legal Entity Support
+	// AgentAuth Extensions - Legal Entity Support
 	EntityType      string `json:"entity_type,omitempty"`       // "natural_person", "legal_entity"
 	EntityID        string `json:"entity_id,omitempty"`         // Tax ID, registration number
 	LegalEntityName string `json:"legal_entity_name,omitempty"` // Company name
 	Jurisdiction    string `json:"jurisdiction,omitempty"`      // "DE", "US", "EU", etc.
 
-	// GAuth Extensions - Trust Service Provider
+	// AgentAuth Extensions - Trust Service Provider
 	TSPName string `json:"tsp_name,omitempty"` // Trust Service Provider name
 	TSPID   string `json:"tsp_id,omitempty"`   // TSP identifier
 }
@@ -116,13 +116,13 @@ type ExternalProviderConfig struct {
 	ClientSecret string            `json:"client_secret"`
 	RedirectURI  string            `json:"redirect_uri"`
 	Scopes       []string          `json:"scopes"`      // ["openid", "profile", "email"]
-	ACRMapping   map[string]string `json:"acr_mapping"` // Provider ACR → GAuth TrustLevel
+	ACRMapping   map[string]string `json:"acr_mapping"` // Provider ACR → AgentAuth TrustLevel
 }
 
-// TrustLevelMapping maps OIDC ACR values to GAuth trust levels
+// TrustLevelMapping maps OIDC ACR values to AgentAuth trust levels
 type TrustLevelMapping struct {
 	ACR             string `json:"acr"`               // OIDC ACR value
-	GAuthTrustLevel string `json:"gauth_trust_level"` // "low", "substantial", "high"
+	AgentAuthTrustLevel string `json:"gauth_trust_level"` // "low", "substantial", "high"
 	MinMFARequired  bool   `json:"min_mfa_required"`
 	Description     string `json:"description"`
 }
@@ -131,49 +131,49 @@ type TrustLevelMapping struct {
 var DefaultACRMappings = []TrustLevelMapping{
 	{
 		ACR:             "0",
-		GAuthTrustLevel: "low",
+		AgentAuthTrustLevel: "low",
 		MinMFARequired:  false,
 		Description:     "No specific authentication context",
 	},
 	{
 		ACR:             "1",
-		GAuthTrustLevel: "low",
+		AgentAuthTrustLevel: "low",
 		MinMFARequired:  false,
 		Description:     "Basic authentication (password only)",
 	},
 	{
 		ACR:             "2",
-		GAuthTrustLevel: "substantial",
+		AgentAuthTrustLevel: "substantial",
 		MinMFARequired:  true,
 		Description:     "Multi-factor authentication",
 	},
 	{
 		ACR:             "substantial",
-		GAuthTrustLevel: "substantial",
+		AgentAuthTrustLevel: "substantial",
 		MinMFARequired:  true,
 		Description:     "eIDAS Substantial - MFA required",
 	},
 	{
 		ACR:             "high",
-		GAuthTrustLevel: "high",
+		AgentAuthTrustLevel: "high",
 		MinMFARequired:  true,
 		Description:     "eIDAS High - Hardware token required",
 	},
 	{
 		ACR:             "loa-4",
-		GAuthTrustLevel: "high",
+		AgentAuthTrustLevel: "high",
 		MinMFARequired:  true,
 		Description:     "NIST LOA-4 - Highest assurance",
 	},
 	{
 		ACR:             "urn:mace:incommon:iap:silver",
-		GAuthTrustLevel: "substantial",
+		AgentAuthTrustLevel: "substantial",
 		MinMFARequired:  true,
 		Description:     "InCommon Silver - Research/Education institutions",
 	},
 	{
 		ACR:             "urn:mace:incommon:iap:bronze",
-		GAuthTrustLevel: "low",
+		AgentAuthTrustLevel: "low",
 		MinMFARequired:  false,
 		Description:     "InCommon Bronze - Basic authentication",
 	},
@@ -232,6 +232,6 @@ const (
 
 // ProofMethod constants for OIDC
 const (
-	ProofMethodOIDCIDToken  = "oidc_id_token" // #nosec G101 // GAuth-issued ID token
+	ProofMethodOIDCIDToken  = "oidc_id_token" // #nosec G101 // AgentAuth-issued ID token
 	ProofMethodOIDCExternal = "oidc_external" // External provider (Google, Okta, etc.)
 )

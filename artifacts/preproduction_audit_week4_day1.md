@@ -16,7 +16,7 @@ owners: compliance-team
 
 ## Executive Summary
 
-Week 4 Day 1 focused on designing and implementing a production-ready Kubernetes staging environment for the GAuth authorization system. Building on the security foundations established in Week 3 (P0 security fixes, RFC compliance, penetration testing), this phase delivers comprehensive deployment infrastructure, monitoring systems, and operational runbooks.
+Week 4 Day 1 focused on designing and implementing a production-ready Kubernetes staging environment for the AgentAuth authorization system. Building on the security foundations established in Week 3 (P0 security fixes, RFC compliance, penetration testing), this phase delivers comprehensive deployment infrastructure, monitoring systems, and operational runbooks.
 
 ### Key Achievements
 - ✅ **7 Kubernetes manifests** created (namespace, configmap, secrets, deployment, service, ingress, RBAC/HPA/PDB/NetworkPolicy)
@@ -66,7 +66,7 @@ Week 4 Day 1 focused on designing and implementing a production-ready Kubernetes
         │                   │                   │
         ▼                   ▼                   ▼
 ┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│ GAuth Pod 1   │   │ GAuth Pod 2   │   │ GAuth Pod 3   │
+│ AgentAuth Pod 1   │   │ AgentAuth Pod 2   │   │ AgentAuth Pod 3   │
 │ - App: 8080   │   │ - App: 8080   │   │ - App: 8080   │
 │ - Metrics:9090│   │ - Metrics:9090│   │ - Metrics:9090│
 └───────┬───────┘   └───────┬───────┘   └───────┬───────┘
@@ -165,7 +165,7 @@ Defines 4 secret resources:
 ### 4. Deployment
 **File**: `deployments/k8s/staging/deployment.yaml`
 
-**GAuth Application Deployment**:
+**AgentAuth Application Deployment**:
 - **Replicas**: 3 (high availability)
 - **Strategy**: RollingUpdate (maxSurge=1, maxUnavailable=0)
 - **Init Containers**: wait-for-postgres, wait-for-redis
@@ -224,7 +224,7 @@ Defines 3 ingress resources:
 - Basic authentication for monitoring endpoints
 
 **Endpoints Exposed**:
-- `/api` → GAuth API endpoints
+- `/api` → AgentAuth API endpoints
 - `/healthz` → Health check
 - `/metrics` → Prometheus metrics (restricted)
 - `/` → Web UI
@@ -249,7 +249,7 @@ Defines 3 ingress resources:
 - Principle of least privilege
 
 **NetworkPolicy**:
-- Ingress: Allow from NGINX ingress controller, Prometheus, other GAuth pods
+- Ingress: Allow from NGINX ingress controller, Prometheus, other AgentAuth pods
 - Egress: Allow to DNS, PostgreSQL, Redis, HTTPS (external APIs)
 - Default deny (whitelist approach)
 
@@ -272,7 +272,7 @@ Defines 3 ingress resources:
 5. **Security Headers**: HSTS, CSP, X-Frame-Options, etc.
 
 ### Secrets Management
-1. **Separate Secrets**: Per-service secrets (PostgreSQL, Redis, GAuth)
+1. **Separate Secrets**: Per-service secrets (PostgreSQL, Redis, AgentAuth)
 2. **No Hardcoded Secrets**: All secrets injected via environment variables
 3. **TLS Certificates**: Automated rotation (cert-manager)
 4. **JWT Keys**: RSA 2048-bit (production-grade)
@@ -290,14 +290,14 @@ Defines 3 ingress resources:
 
 ### Prometheus Configuration
 **Scrape Targets**:
-1. GAuth pods (service discovery via Kubernetes API)
+1. AgentAuth pods (service discovery via Kubernetes API)
 2. PostgreSQL exporter (database metrics)
 3. Redis exporter (cache metrics)
 4. Node exporter (system metrics)
 5. NGINX ingress controller (request metrics)
 
 **Scrape Intervals**:
-- GAuth application: 5s
+- AgentAuth application: 5s
 - Infrastructure: 15s
 - Kubernetes API: 15s
 
@@ -329,7 +329,7 @@ Defines 3 ingress resources:
 
 ### Grafana Dashboards
 **Planned Dashboards**:
-1. **GAuth Overview**: Request rate, error rate, latency, uptime
+1. **AgentAuth Overview**: Request rate, error rate, latency, uptime
 2. **Resource Usage**: CPU, memory, network, disk I/O
 3. **Database Metrics**: Connection pool, query duration, transaction rate
 4. **Cache Metrics**: Hit rate, eviction rate, memory usage
@@ -467,7 +467,7 @@ Defines 3 ingress resources:
 **Monitoring Configuration** (existing):
 1. `monitoring/prometheus.yml`: Basic scrape configs
 2. `monitoring/alertmanager.yml`: Placeholder
-3. `deployments/observability/recording-rules-envelopes.yaml`: RFC 0111 metrics
+3. `deployments/observability/recording-rules-envelopes.yaml`: AAP-001 metrics
 
 **Scripts**:
 1. `start-web-demo.sh`: Local development server startup
@@ -604,7 +604,7 @@ kubesec scan deployments/k8s/staging/deployment.yaml
 ### Week 4 Day 4 - Smoke Testing
 - [ ] Automated health check suite
 - [ ] Authorization flow validation (token issuance, validation, revocation)
-- [ ] RFC 0111/0115 compliance tests (envelope V2, rotation descriptors)
+- [ ] AAP-001/0115 compliance tests (envelope V2, rotation descriptors)
 - [ ] Database connectivity tests
 - [ ] Cache connectivity tests
 - [ ] Metrics endpoint validation
@@ -689,7 +689,7 @@ From `artifacts/preproduction_audit_week3_day4.md`:
 7. **Monitoring & Alerting** (SEC-7):
    - Prometheus metrics ✅
    - AlertManager integration ✅
-   - RFC 0111 envelope metrics ✅
+   - AAP-001 envelope metrics ✅
    - Security event alerting
 
 ### P0 Security Fixes (Week 3 Day 5)
@@ -763,7 +763,7 @@ From `artifacts/preproduction_audit_week3_day5.md`:
 **Tasks**:
 1. Implement health check automation (curl scripts)
 2. Create authorization flow tests (token lifecycle)
-3. Validate RFC 0111/0115 compliance (envelope V2, rotations)
+3. Validate AAP-001/0115 compliance (envelope V2, rotations)
 4. Test database connectivity (psql scripts)
 5. Test cache connectivity (redis-cli scripts)
 6. Validate metrics endpoint (Prometheus query tests)
@@ -837,7 +837,7 @@ deployments/k8s/staging/
 ├── namespace.yaml                      # Namespace, ResourceQuota, LimitRange
 ├── configmap.yaml                      # Application config, Prometheus, AlertManager
 ├── secrets.yaml                        # Secrets (placeholders)
-├── deployment.yaml                     # GAuth Deployment (3 replicas)
+├── deployment.yaml                     # AgentAuth Deployment (3 replicas)
 ├── service.yaml                        # Services (7 services)
 ├── ingress.yaml                        # Ingress (3 ingresses with TLS)
 ├── hpa-pdb-rbac-netpol.yaml           # HPA, PDB, RBAC, NetworkPolicy
@@ -891,7 +891,7 @@ deployments/k8s/staging/
 2. `deployments/docker/docker-compose.yml` (Local development)
 3. `deployments/k8s/development/gauth-deployment.yaml` (Development namespace)
 4. `monitoring/prometheus.yml` (Prometheus scrape config)
-5. `deployments/observability/recording-rules-envelopes.yaml` (RFC 0111 metrics)
+5. `deployments/observability/recording-rules-envelopes.yaml` (AAP-001 metrics)
 
 ### Operational Procedures
 1. `deployments/k8s/staging/DEPLOYMENT_RUNBOOK.md` (Deployment procedures, 407 lines)

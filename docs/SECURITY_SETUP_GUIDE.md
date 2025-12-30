@@ -15,7 +15,7 @@ refreshCadence: quarterly
 
 ## Overview
 
-This guide helps you enable and configure security features for the GAuth Go Beta repository, including Code Scanning, Secret Scanning, and Dependency Review.
+This guide helps you enable and configure security features for the AgentAuth Go Beta repository, including Code Scanning, Secret Scanning, and Dependency Review.
 
 ---
 
@@ -83,7 +83,7 @@ To analyze more files, ensure all packages are included:
 Create `.github/codeql/codeql-config.yml`:
 
 ```yaml
-name: "GAuth CodeQL Config"
+name: "AgentAuth CodeQL Config"
 
 paths:
   - 'cmd/**'
@@ -288,7 +288,7 @@ If a security incident occurs:
 
 ### Implemented Standards
 
-- ✅ **RFC-0150** - GAuth Protocol Compliance
+- ✅ **RFC-0150** - AgentAuth Protocol Compliance
 - ✅ **RFC-0111** - Semantic Validation
 - ✅ **RFC-0115** - Authorization Framework
 - ✅ **OWASP** - Security best practices (partial)
@@ -337,7 +337,7 @@ type RotationEvent struct {
 ### Short Term (1-2 weeks)
 
 1. Increase CodeQL coverage from 43.8% to 80%+
-2. Add custom CodeQL queries for GAuth-specific patterns
+2. Add custom CodeQL queries for AgentAuth-specific patterns
 3. Implement automated security testing in CI
 4. Review and remediate all High/Critical alerts
 5. Document security architecture

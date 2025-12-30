@@ -10,7 +10,7 @@ import (
 
 // RunDemo runs the advanced delegation & attestation flow
 func RunDemo() {
-	// Initialize GAuth service with example config
+	// Initialize AgentAuth service with example config
 	svc, err := gauth.New(gauth.Config{
 		AuthServerURL:     "https://example-auth-server",
 		ClientID:          "test-client",
@@ -19,7 +19,7 @@ func RunDemo() {
 		AccessTokenExpiry: 24 * time.Hour,
 	})
 	if err != nil {
-		panic(fmt.Sprintf("Failed to initialize GAuth: %v", err))
+		panic(fmt.Sprintf("Failed to initialize AgentAuth: %v", err))
 	}
 
 	// Step 1: Initiate authorization (delegation)

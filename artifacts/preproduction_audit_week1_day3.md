@@ -16,7 +16,7 @@ owners: compliance-team
 
 ## Executive Summary
 
-Comprehensive test coverage analysis performed on GAuth codebase after Go 1.25.4 upgrade. Overall project coverage at **39.2%** with core authorization packages showing strong coverage (68-84%). Identified specific gaps in advanced features (distributed PDP, BLS aggregation, obligation execution) that are non-blocking for production deployment.
+Comprehensive test coverage analysis performed on AgentAuth codebase after Go 1.25.4 upgrade. Overall project coverage at **39.2%** with core authorization packages showing strong coverage (68-84%). Identified specific gaps in advanced features (distributed PDP, BLS aggregation, obligation execution) that are non-blocking for production deployment.
 
 ### Key Findings
 - ✅ **Core Authorization**: 68-84% coverage (production-ready)
@@ -145,7 +145,7 @@ Test Execution Time: ~4 minutes (including load tests)
 ✅ Authorization caching (pkg/authz)
 ✅ Delegation chain verification (pkg/delegation)
 ✅ Ledger audit trails (pkg/ledger)
-✅ RFC 0111 compliance (pkg/rfc0111 - 66.3%, core paths 100%)
+✅ AAP-001 compliance (pkg/rfc0111 - 66.3%, core paths 100%)
 ```
 
 ---

@@ -150,7 +150,7 @@ evt-123,2025-01-22T10:00:00Z,tenant-1,user-123,poa.create,poa-456,poa,success,me
 
 ### 4. CEF - SIEM Integration
 ```
-CEF:0|Gimel Foundation|GAuth|1.0|poa.create|PoA Created|5|suser=user-123 dvc=192.168.1.1 act=poa.create outcome=success
+CEF:0|AgentAuth Community|AgentAuth|1.0|poa.create|PoA Created|5|suser=user-123 dvc=192.168.1.1 act=poa.create outcome=success
 ```
 
 ---

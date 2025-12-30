@@ -153,8 +153,8 @@ Session 24 delivered **outstanding progress** on test coverage improvements for 
   - Many attesters (5)
 
 **Value Delivered**:
-- Validates RFC 0111 Power of Attorney compliance
-- Validates GAuth-RFC-002 (formerly RFC 115) Advanced Delegation compliance
+- Validates AAP-001 Power of Attorney compliance
+- Validates AgentAuth-RFC-002 (formerly RFC 115) Advanced Delegation compliance
 - Documents jurisdiction validation requirements
 - Establishes scope enforcement patterns
 - Validates attestation requirements
@@ -189,7 +189,7 @@ Session 24 delivered **outstanding progress** on test coverage improvements for 
 
 ### RFC Compliance Validation
 
-- ✅ **RFC 0111**: Power of Attorney authorization flows
+- ✅ **AAP-001**: Power of Attorney authorization flows
   - Jurisdiction validation (US, EU, UK, DE)
   - Disallowed scope enforcement
   - Required field validation
@@ -197,7 +197,7 @@ Session 24 delivered **outstanding progress** on test coverage improvements for 
   - Legal compliance flags
   - Audit record tracking
 
-- ✅ **GAuth-RFC-002 (formerly RFC 115)**: Advanced Delegation creation
+- ✅ **AgentAuth-RFC-002 (formerly RFC 115)**: Advanced Delegation creation
   - Principal/Delegate ID requirements
   - Validity period calculation
   - Attestation requirements
@@ -250,7 +250,7 @@ The test suite provides comprehensive documentation for:
 
 1. **Token Validation Patterns**: JWT signature verification, expiration handling, claims validation
 2. **Authentication Security**: Credential validation, context handling, concurrent access
-3. **Authorization Compliance**: RFC 0111/115 validation, jurisdiction rules, scope enforcement
+3. **Authorization Compliance**: AAP-001/115 validation, jurisdiction rules, scope enforcement
 4. **Edge Case Catalog**: 40+ comprehensive edge case variations
 5. **Production Hardening**: Clear roadmap from simplified → production implementation
 
@@ -413,7 +413,7 @@ The test suite documents clear gaps between current simplified implementation an
 **Achievements**:
 - 371% test count increase ✅
 - 65% relative coverage improvement ✅
-- RFC 0111/115 compliance validated ✅
+- AAP-001/115 compliance validated ✅
 - Thread safety verified ✅
 - Production hardening roadmap established ✅
 
@@ -432,7 +432,7 @@ The comprehensive test suite provides immediate value through:
 - ✅ **Documentation** of expected security behaviors
 - ✅ **Validation** of thread safety (20 concurrent goroutines)
 - ✅ **Coverage** of 40+ edge case variations
-- ✅ **Compliance** verification for RFC 0111 and GAuth-RFC-002 (formerly RFC 115)
+- ✅ **Compliance** verification for AAP-001 and AgentAuth-RFC-002 (formerly RFC 115)
 - ✅ **Roadmap** for production hardening
 
 With **zero regressions**, **100% test pass rate**, and **1,290 lines of production-ready test documentation**, this session establishes a solid foundation for continued quality improvements.

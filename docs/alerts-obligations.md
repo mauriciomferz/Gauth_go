@@ -51,7 +51,7 @@ sum(rate(gauth_rfc0111_obligations_failed_total[30m]))
 groups:
   - name: gauth_obligations
     rules:
-      - alert: GAuthObligationLatencyHighP95Warning
+      - alert: AgentAuthObligationLatencyHighP95Warning
         expr: histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[15m]))) > 0.025
         for: 10m
         labels:
@@ -63,7 +63,7 @@ groups:
             p95 obligation execution latency exceeded 25ms for 10m.
             Investigate slow obligation handlers or downstream services.
 
-      - alert: GAuthObligationLatencyHighP95Critical
+      - alert: AgentAuthObligationLatencyHighP95Critical
         expr: histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[15m]))) > 0.040
         for: 5m
         labels:
@@ -73,7 +73,7 @@ groups:
           summary: "Obligation latency p95 critical (>40ms)"
           description: "Sustained high latency may impact decision times or timeouts."
 
-      - alert: GAuthObligationMandatoryFailure
+      - alert: AgentAuthObligationMandatoryFailure
         expr: increase(gauth_rfc0111_mandatory_obligation_failures_total[30m]) > 0
         for: 1m
         labels:
@@ -85,7 +85,7 @@ groups:
             At least one mandatory obligation failed and flipped an allow decision to deny in the last 30 minutes.
             Examine obligation audit logs and handler errors immediately.
 
-      - alert: GAuthObligationFailureRatioWarning
+      - alert: AgentAuthObligationFailureRatioWarning
         expr: (sum(rate(gauth_rfc0111_obligations_failed_total[30m])) / sum(rate(gauth_rfc0111_obligations_executed_total[30m]))) > 0.05
         for: 15m
         labels:
@@ -96,7 +96,7 @@ groups:
           description: |
             Elevated obligation failures. Check recent deployment changes or dependency health.
 
-      - alert: GAuthObligationFailureRatioCritical
+      - alert: AgentAuthObligationFailureRatioCritical
         expr: (sum(rate(gauth_rfc0111_obligations_failed_total[30m])) / sum(rate(gauth_rfc0111_obligations_executed_total[30m]))) > 0.10
         for: 10m
         labels:
@@ -106,7 +106,7 @@ groups:
           summary: "Obligation failure ratio >10%"
           description: "High failure rate — obligations may not be completing reliably."
 
-      - alert: GAuthObligationLatencyHighP99
+      - alert: AgentAuthObligationLatencyHighP99
         expr: histogram_quantile(0.99, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[1h]))) > 0.050
         for: 15m
         labels:
@@ -151,7 +151,7 @@ Histogram enables global aggregation (multi-instance PDP) and percentile calcula
 Short windows catch fast regressions; longer windows inform tuning and reduce false positives.
 
 **Q: Can mandatory failures alert be silenced for known maintenance?**
-Yes, route the alert through Alertmanager matching labels (e.g. `severity=critical, alertname=GAuthObligationMandatoryFailure`).
+Yes, route the alert through Alertmanager matching labels (e.g. `severity=critical, alertname=AgentAuthObligationMandatoryFailure`).
 
 ---
 Last updated: 2025-10-24

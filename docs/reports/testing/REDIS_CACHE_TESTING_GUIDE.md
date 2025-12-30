@@ -32,7 +32,7 @@ export CACHE_TYPE=memory
 export CACHE_MAX_SIZE=1000
 ```
 
-### 3. Start GAuth Server
+### 3. Start AgentAuth Server
 ```bash
 # Use existing task
 go run ./cmd/web-server
@@ -229,7 +229,7 @@ docker exec -it gauth-redis redis-cli PING
 4. Verify JWT token is valid for admin endpoints
 
 ### Memory Cache Fallback
-If Redis is not available, GAuth automatically falls back to memory cache:
+If Redis is not available, AgentAuth automatically falls back to memory cache:
 ```
 [WARNING] Failed to connect to Redis: dial tcp 127.0.0.1:6379: connect: connection refused
 [INFO] Falling back to memory cache

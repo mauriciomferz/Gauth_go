@@ -1,6 +1,6 @@
 # React UI + Go Backend Integration Guide
 
-This guide explains how to integrate the new React dashboard with the existing GAuth Go backend.
+This guide explains how to integrate the new React dashboard with the existing AgentAuth Go backend.
 
 ## 🔌 Integration Options
 
@@ -203,13 +203,13 @@ Create `.env` files for different environments:
 **Development** (`.env.development`):
 ```env
 VITE_API_BASE_URL=http://localhost:8080/api/v1
-VITE_APP_TITLE=GAuth 1.0 Dashboard (Dev)
+VITE_APP_TITLE=AgentAuth 1.0 Dashboard (Dev)
 ```
 
 **Production** (`.env.production`):
 ```env
 VITE_API_BASE_URL=/api/v1
-VITE_APP_TITLE=GAuth 1.0 Dashboard
+VITE_APP_TITLE=AgentAuth 1.0 Dashboard
 ```
 
 **Usage in React**:
@@ -522,4 +522,4 @@ npx vite-bundle-visualizer
 ---
 
 *Last Updated: November 12, 2025*  
-*GAuth 1.0 React Dashboard Integration Guide*
+*AgentAuth 1.0 React Dashboard Integration Guide*

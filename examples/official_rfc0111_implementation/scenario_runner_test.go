@@ -36,7 +36,7 @@ func TestScenarioRunnerMissingRevokePolicy(t *testing.T) {
 }
 
 func TestScenarioRunnerConfigMutationFailure(t *testing.T) {
-	_, err := runDemoInternal(scenarioParams{grantor: "cm@example.com", grantee: "cg@example.com", allowCreatePolicy: true, modifyConfig: func(cfg *gauth_rfc_001.RFC0111Config) { cfg.MaxDelegationDepth = 0 }})
+	_, err := runDemoInternal(scenarioParams{grantor: "cm@example.com", grantee: "cg@example.com", allowCreatePolicy: true, modifyConfig: func(cfg *gauth_rfc_001.AAP001Config) { cfg.MaxDelegationDepth = 0 }})
 	if err == nil {
 		t.Fatalf("expected config validation failure")
 	}

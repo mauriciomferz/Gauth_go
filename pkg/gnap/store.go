@@ -73,12 +73,12 @@ type Grant struct {
 	// ExpiresAt for grant timeout
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 
-	// --- GAuth Extensions ---
+	// --- AgentAuth Extensions ---
 
 	// PoAID if linked to Power of Attorney
 	PoAID string `json:"poa_id,omitempty"`
 
-	// SubscriptionID if linked to GAuth subscription
+	// SubscriptionID if linked to AgentAuth subscription
 	SubscriptionID string `json:"subscription_id,omitempty"`
 }
 
@@ -123,7 +123,7 @@ func (s *MemoryGrantStore) Create(req *GrantRequest) (*Grant, error) {
 		s.byClient[g.ClientInstanceID] = append(s.byClient[g.ClientInstanceID], g.ID)
 	}
 
-	// Link to GAuth subscription if present
+	// Link to AgentAuth subscription if present
 	if req.SubscriptionID != "" {
 		g.SubscriptionID = req.SubscriptionID
 	}

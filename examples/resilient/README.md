@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates key resilience patterns using the GAuth framework:
+This example demonstrates key resilience patterns using the AgentAuth framework:
 
 - **Token Bucket Rate Limiting**
 - **Sliding Window Rate Limiting**
@@ -49,13 +49,13 @@ Request 3: ❌ service temporarily unavailable (Circuit State: Open)
 ```
 
 ## Beta Notes
-- All patterns are implemented using GAuth's built-in packages.
+- All patterns are implemented using AgentAuth's built-in packages.
 - The code is fully tested and idiomatic Go.
 - See `main.go` and `patterns.go` for implementation details.
 
 ---
 
-For more, see the [GAuth Architecture Guide](../../docs/ARCHITECTURE.md).
+For more, see the [AgentAuth Architecture Guide](../../docs/ARCHITECTURE.md).
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

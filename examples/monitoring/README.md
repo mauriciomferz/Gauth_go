@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates basic monitoring and rate limiting in a web server using GAuth internal packages.
+This example demonstrates basic monitoring and rate limiting in a web server using AgentAuth internal packages.
 
 ## Key Concepts
 - **Monitor**: Tracks requests and errors for observability.

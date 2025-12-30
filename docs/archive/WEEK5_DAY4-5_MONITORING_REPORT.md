@@ -11,19 +11,19 @@ refreshCadence: none
 # Week 5 Day 4-5: Monitoring & Observability Setup
 
 **Date:** November 10, 2025  
-**Project:** GAuth_go Monitoring Infrastructure  
-**Objective:** Deploy comprehensive monitoring and observability stack for GAuth service
+**Project:** AgentAuth_go Monitoring Infrastructure  
+**Objective:** Deploy comprehensive monitoring and observability stack for AgentAuth service
 
 ---
 
 ## Executive Summary
 
-Successfully deployed a complete monitoring and observability solution for the GAuth service using Prometheus and Grafana on Kubernetes. The infrastructure includes:
+Successfully deployed a complete monitoring and observability solution for the AgentAuth service using Prometheus and Grafana on Kubernetes. The infrastructure includes:
 
 - ✅ **Prometheus 2.48.0** - Metrics collection and alerting
 - ✅ **Grafana 10.2.2** - Visualization and dashboards
 - ✅ **50+ Prometheus metrics** - Already instrumented in application
-- ✅ **4 comprehensive dashboards** - Service health, performance, business, RFC 0111
+- ✅ **4 comprehensive dashboards** - Service health, performance, business, AAP-001
 - ✅ **15 alerting rules** - Critical, performance, resource, and business alerts
 - ✅ **Kubernetes service discovery** - Automatic pod detection and scraping
 - ✅ **RBAC configured** - Cluster-wide read access for metrics
@@ -52,7 +52,7 @@ Successfully deployed a complete monitoring and observability solution for the G
 │           │ every 5s                                        │
 │           ▼                                                 │
 │  ┌──────────────────┐                                       │
-│  │  GAuth Service   │                                       │
+│  │  AgentAuth Service   │                                       │
 │  │  (gauth-staging) │                                       │
 │  │  /metrics        │                                       │
 │  └──────────────────┘                                       │
@@ -105,7 +105,7 @@ kubectl port-forward -n monitoring svc/prometheus 9090:9090
 
 ### 2.1 Available Metrics
 
-The GAuth application exposes **50+ Prometheus metrics** across multiple categories:
+The AgentAuth application exposes **50+ Prometheus metrics** across multiple categories:
 
 #### Rotation Metrics
 - `gauth_rotation_signature_verify_latency_seconds` - Histogram of signature verification latency
@@ -116,7 +116,7 @@ The GAuth application exposes **50+ Prometheus metrics** across multiple categor
 - `gauth_rotation_v2_chain_starts_total` - Counter of chain start events
 - `gauth_rotation_v2_continuity_updates_total` - Counter of continuity updates
 
-#### RFC 0111 Metrics
+#### AAP-001 Metrics
 - `gauth_rfc0111_detached_issued_total` - Counter of detached PoA issued
 - `gauth_rfc0111_detached_verify_total` - Counter of detached PoA verifications (by result)
 
@@ -138,7 +138,7 @@ The GAuth application exposes **50+ Prometheus metrics** across multiple categor
 - Scrape interval: 15 seconds (global)
 - Evaluation interval: 15 seconds (alert rules)
 
-**GAuth Service Job:**
+**AgentAuth Service Job:**
 - Job name: `gauth-service`
 - Scrape interval: 5 seconds (faster than global)
 - Metrics path: `/metrics`
@@ -170,7 +170,7 @@ scrape_configs:
 
 Four comprehensive dashboards have been created as JSON files, ready for import into Grafana:
 
-#### Dashboard 1: GAuth Service Health
+#### Dashboard 1: AgentAuth Service Health
 **File:** `grafana-dashboards/gauth-service-health.json`  
 **Purpose:** Monitor infrastructure health and resource usage  
 **Refresh:** 10 seconds
@@ -197,7 +197,7 @@ sum(container_spec_memory_limit_bytes{namespace="gauth-staging",pod=~"gauth-.*"}
 * 100
 ```
 
-#### Dashboard 2: GAuth Performance Metrics
+#### Dashboard 2: AgentAuth Performance Metrics
 **File:** `grafana-dashboards/gauth-performance.json`  
 **Purpose:** Monitor application performance and latency  
 **Refresh:** 10 seconds
@@ -223,7 +223,7 @@ histogram_quantile(0.95,
 sum(rate(gauth_rotation_signature_verify_latency_seconds_count[5m]))
 ```
 
-#### Dashboard 3: GAuth Business Metrics
+#### Dashboard 3: AgentAuth Business Metrics
 **File:** `grafana-dashboards/gauth-business-metrics.json`  
 **Purpose:** Monitor business operations and PoA lifecycle  
 **Refresh:** 30 seconds
@@ -231,25 +231,25 @@ sum(rate(gauth_rotation_signature_verify_latency_seconds_count[5m]))
 **Panels:**
 1. **Chain Starts (Total)** (Stat) - Total chain start events
 2. **Continuity Updates (Total)** (Stat) - Total continuity updates
-3. **RFC 0111 Detached Issued** (Stat) - Total detached PoA issued
-4. **RFC 0111 Verifications** (Stat) - Total verifications
+3. **AAP-001 Detached Issued** (Stat) - Total detached PoA issued
+4. **AAP-001 Verifications** (Stat) - Total verifications
 5. **Chain Starts Rate** (Timeseries) - Chain starts per second
 6. **Continuity Updates Rate** (Timeseries) - Updates per second
-7. **RFC 0111 Detached PoA Operations** (Timeseries) - Issued vs verified rate
-8. **RFC 0111 Verification Results** (Piechart) - Success vs failure breakdown
+7. **AAP-001 Detached PoA Operations** (Timeseries) - Issued vs verified rate
+8. **AAP-001 Verification Results** (Piechart) - Success vs failure breakdown
 
 **Key Queries:**
 ```promql
 # Chain starts rate
 rate(gauth_rotation_v2_chain_starts_total[5m])
 
-# RFC 0111 operations
+# AAP-001 operations
 rate(gauth_rfc0111_detached_issued_total[5m])
 ```
 
-#### Dashboard 4: GAuth RFC 0111 Compliance
+#### Dashboard 4: AgentAuth AAP-001 Compliance
 **File:** `grafana-dashboards/gauth-rfc0111-compliance.json`  
-**Purpose:** Monitor RFC 0111 rotation chain compliance  
+**Purpose:** Monitor AAP-001 rotation chain compliance  
 **Refresh:** 30 seconds
 
 **Panels:**
@@ -280,7 +280,7 @@ gauth_rotation_summary_head_age_seconds / 3600
 5. Select **Prometheus** as the data source
 6. Click **Import**
 
-All dashboards will be immediately functional with live data from the GAuth service.
+All dashboards will be immediately functional with live data from the AgentAuth service.
 
 ---
 
@@ -298,12 +298,12 @@ All dashboards will be immediately functional with live data from the GAuth serv
 **Interval:** 30 seconds
 
 **Alerts:**
-1. **GAuthPodDown** (Critical)
+1. **AgentAuthPodDown** (Critical)
    - Condition: `up{job="gauth-service"} == 0`
    - Duration: 2 minutes
    - Description: Individual pod is down
    
-2. **GAuthServiceUnavailable** (Critical)
+2. **AgentAuthServiceUnavailable** (Critical)
    - Condition: `sum(up{job="gauth-service"}) == 0`
    - Duration: 1 minute
    - Description: All pods are down - complete service outage
@@ -313,15 +313,15 @@ All dashboards will be immediately functional with live data from the GAuth serv
 **Interval:** 30 seconds
 
 **Alerts:**
-3. **GAuthHighErrorRate** (Warning)
+3. **AgentAuthHighErrorRate** (Warning)
    - Condition: Error rate > 5% for 5 minutes
    - Query: `(sum(rate(gauth_errors_total[5m])) / sum(rate(gauth_requests_total[5m]))) > 0.05`
    
-4. **GAuthHighLatency** (Warning)
+4. **AgentAuthHighLatency** (Warning)
    - Condition: p95 latency > 1 second for 5 minutes
    - Query: `histogram_quantile(0.95, rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])) > 1.0`
    
-5. **GAuthVeryHighLatency** (Critical)
+5. **AgentAuthVeryHighLatency** (Critical)
    - Condition: p99 latency > 2 seconds for 5 minutes
    - Query: `histogram_quantile(0.99, rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])) > 2.0`
 
@@ -330,15 +330,15 @@ All dashboards will be immediately functional with live data from the GAuth serv
 **Interval:** 30 seconds
 
 **Alerts:**
-6. **GAuthHighCPU** (Warning)
+6. **AgentAuthHighCPU** (Warning)
    - Condition: CPU usage > 80% for 10 minutes
    - Query: `sum(rate(container_cpu_usage_seconds_total{namespace="gauth-staging",pod=~"gauth-.*"}[5m])) by (pod) > 0.8`
    
-7. **GAuthHighMemory** (Warning)
+7. **AgentAuthHighMemory** (Warning)
    - Condition: Memory > 85% of limit for 10 minutes
    - Query: `(container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.85`
    
-8. **GAuthCriticalMemory** (Critical)
+8. **AgentAuthCriticalMemory** (Critical)
    - Condition: Memory > 95% of limit for 5 minutes
    - Description: Pod may be OOMKilled soon
 
@@ -347,15 +347,15 @@ All dashboards will be immediately functional with live data from the GAuth serv
 **Interval:** 60 seconds
 
 **Alerts:**
-9. **GAuthRotationChainStale** (Warning)
+9. **AgentAuthRotationChainStale** (Warning)
    - Condition: No continuity updates in 30 minutes (when chain exists)
    - Query: `increase(gauth_rotation_v2_continuity_updates_total[30m]) == 0 and gauth_rotation_summary_chain_length > 0`
    
-10. **GAuthSummaryHeadOld** (Warning)
+10. **AgentAuthSummaryHeadOld** (Warning)
     - Condition: Summary head age > 24 hours
     - Query: `gauth_rotation_summary_head_age_seconds > 86400`
     
-11. **GAuthLastAnchorOld** (Warning)
+11. **AgentAuthLastAnchorOld** (Warning)
     - Condition: Last anchor age > 48 hours
     - Query: `gauth_rotation_summary_last_anchor_age_seconds > 172800`
 
@@ -364,11 +364,11 @@ All dashboards will be immediately functional with live data from the GAuth serv
 **Interval:** 30 seconds
 
 **Alerts:**
-12. **GAuthPodRestartLoop** (Critical)
+12. **AgentAuthPodRestartLoop** (Critical)
     - Condition: > 5 restarts in 15 minutes
     - Query: `increase(kube_pod_container_status_restarts_total{namespace="gauth-staging",pod=~"gauth-.*"}[15m]) > 5`
     
-13. **GAuthPodNotReady** (Warning)
+13. **AgentAuthPodNotReady** (Warning)
     - Condition: Pod not ready for 10 minutes
     - Query: `kube_pod_status_ready{namespace="gauth-staging",pod=~"gauth-.*",condition="false"} == 1`
 
@@ -441,7 +441,7 @@ kubectl port-forward -n monitoring svc/grafana 3000:3000
 
 **Metrics Endpoint:**
 ```bash
-# Verify GAuth metrics exposed
+# Verify AgentAuth metrics exposed
 kubectl run curl-metrics --rm -i --image=curlimages/curl:latest \
   --restart=Never -n gauth-staging --command -- \
   sh -c 'curl -s http://gauth-service/metrics | head -50'
@@ -454,7 +454,7 @@ kubectl run curl-metrics --rm -i --image=curlimages/curl:latest \
 |-----------|--------|---------|
 | Prometheus | ✅ Healthy | 1/1 pods running, scraping every 5s |
 | Grafana | ✅ Healthy | 1/1 pods running, datasource connected |
-| GAuth Metrics | ✅ Healthy | 50+ metrics exposed at /metrics |
+| AgentAuth Metrics | ✅ Healthy | 50+ metrics exposed at /metrics |
 | Service Discovery | ✅ Healthy | Auto-detecting gauth-service endpoints |
 | Alerting Rules | ✅ Loaded | 15 rules across 5 groups |
 | RBAC | ✅ Configured | Cluster-wide read access granted |
@@ -462,13 +462,13 @@ kubectl run curl-metrics --rm -i --image=curlimages/curl:latest \
 ### 5.3 Performance Impact
 
 **Before Monitoring:**
-- GAuth CPU: 2.4% under 200 req/sec load
-- GAuth Memory: 3.85 MB allocations
+- AgentAuth CPU: 2.4% under 200 req/sec load
+- AgentAuth Memory: 3.85 MB allocations
 - No monitoring overhead
 
 **With Monitoring:**
-- GAuth CPU: No measurable increase (metrics collection is passive)
-- GAuth Memory: < 1 MB additional for Prometheus client
+- AgentAuth CPU: No measurable increase (metrics collection is passive)
+- AgentAuth Memory: < 1 MB additional for Prometheus client
 - Prometheus CPU: 100m-500m (0.1-0.5 cores)
 - Prometheus Memory: 256Mi-512Mi
 - Grafana CPU: 100m-200m (0.1-0.2 cores)
@@ -542,7 +542,7 @@ kubectl wait --for=condition=ready pod -l app=prometheus -n monitoring
 
 ### 6.3 Troubleshooting
 
-**Problem: Prometheus not scraping GAuth service**
+**Problem: Prometheus not scraping AgentAuth service**
 
 Check service discovery:
 ```bash
@@ -585,7 +585,7 @@ kubectl logs -n monitoring -l app=prometheus | grep -i "alert\|rule"
    - Service Health dashboard
    - Performance Metrics dashboard
    - Business Metrics dashboard
-   - RFC 0111 Compliance dashboard
+   - AAP-001 Compliance dashboard
 
 2. **Configure AlertManager** (Optional)
    - Deploy AlertManager for notification routing
@@ -698,7 +698,7 @@ curl -s http://localhost:9090/api/v1/label/__name__/values | jq length
 - Performance thresholds
 
 **grafana-dashboards/gauth-business-metrics.json** (148 lines)
-- 8 panels: chain starts, continuity updates, RFC 0111 operations
+- 8 panels: chain starts, continuity updates, AAP-001 operations
 - 30-second refresh
 - Business operation tracking
 
@@ -759,7 +759,7 @@ curl -s http://localhost:9090/api/v1/label/__name__/values | jq length
 ✅ **Kubernetes Integration:** RBAC, service discovery, pod metrics  
 ✅ **Visualization:** 4 dashboards covering all aspects  
 ✅ **Documentation:** Complete setup and troubleshooting guide  
-✅ **Zero Downtime:** Deployed without impacting GAuth service  
+✅ **Zero Downtime:** Deployed without impacting AgentAuth service  
 ✅ **Scalable:** Ready for additional targets and metrics  
 
 **Status:** Production-ready monitoring infrastructure deployed and validated.
@@ -789,10 +789,10 @@ git commit -m "feat(monitoring): Add comprehensive monitoring stack with Grafana
 
 - Deploy Prometheus 2.48.0 with Kubernetes service discovery
 - Deploy Grafana 10.2.2 with Prometheus datasource
-- Create 4 Grafana dashboards (service health, performance, business, RFC 0111)
+- Create 4 Grafana dashboards (service health, performance, business, AAP-001)
 - Configure 15 alerting rules across 5 groups
 - Set up RBAC for cluster-wide metrics access
-- Scrape GAuth service every 5 seconds
+- Scrape AgentAuth service every 5 seconds
 - 50+ metrics already exposed and collecting
 
 Infrastructure:
@@ -803,8 +803,8 @@ Infrastructure:
 Dashboards:
 1. Service Health (8 panels): pod status, restarts, memory, CPU, network
 2. Performance (8 panels): latency percentiles, request rate, error rate
-3. Business Metrics (8 panels): chain operations, RFC 0111 PoA lifecycle
-4. RFC 0111 Compliance (8 panels): chain length, head age, anchor age
+3. Business Metrics (8 panels): chain operations, AAP-001 PoA lifecycle
+4. AAP-001 Compliance (8 panels): chain length, head age, anchor age
 
 Alerting:
 - Critical: pod down, service unavailable, restart loops, OOM risk
@@ -835,11 +835,11 @@ Status: Production-ready monitoring stack deployed and validated."
 
 ## 11. Conclusion
 
-Successfully deployed a **production-ready monitoring and observability infrastructure** for the GAuth service, completing Week 5 Day 4-5 objectives. The solution provides:
+Successfully deployed a **production-ready monitoring and observability infrastructure** for the AgentAuth service, completing Week 5 Day 4-5 objectives. The solution provides:
 
 ✅ **Real-time visibility** into service health and performance  
 ✅ **Comprehensive alerting** for critical conditions  
-✅ **Business metrics tracking** for RFC 0111 compliance  
+✅ **Business metrics tracking** for AAP-001 compliance  
 ✅ **Scalable architecture** ready for production workloads  
 ✅ **Complete documentation** for operations and troubleshooting  
 
@@ -855,5 +855,5 @@ Successfully deployed a **production-ready monitoring and observability infrastr
 
 **Report Generated:** November 10, 2025  
 **Author:** AI Agent (GitHub Copilot)  
-**Project:** GAuth_go Week 5 Monitoring Infrastructure  
+**Project:** AgentAuth_go Week 5 Monitoring Infrastructure  
 **Status:** Production Ready ✅

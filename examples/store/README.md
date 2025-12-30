@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This directory contains examples for using the `store` package in GAuth.
+This directory contains examples for using the `store` package in AgentAuth.
 
 ## Basic Example
 

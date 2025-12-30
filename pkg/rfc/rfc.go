@@ -8,14 +8,14 @@ import (
 )
 
 // Summary types (lightweight – do not duplicate full config domain models)
-type RFC0111Summary struct {
+type AAP001Summary struct {
 	Version     string
 	Compliance  bool
 	Features    []string
 	LastUpdated time.Time
 }
 
-type RFC0115Summary struct {
+type AAP002Summary struct {
 	Version     string
 	Compliance  bool
 	Features    []string
@@ -30,13 +30,13 @@ type RFC0150Summary struct {
 }
 
 type ComplianceInfo struct {
-	RFC0111 RFC0111Summary
-	RFC0115 RFC0115Summary
+	AAP001 AAP001Summary
+	AAP002 AAP002Summary
 	RFC0150 RFC0150Summary
 }
 
-func GetRFC0111Compliance() RFC0111Summary {
-	return RFC0111Summary{
+func GetAAP001Compliance() AAP001Summary {
+	return AAP001Summary{
 		Version:    "1.0",
 		Compliance: true,
 		Features: []string{
@@ -49,8 +49,8 @@ func GetRFC0111Compliance() RFC0111Summary {
 	}
 }
 
-func GetRFC0115Compliance() RFC0115Summary {
-	return RFC0115Summary{
+func GetAAP002Compliance() AAP002Summary {
+	return AAP002Summary{
 		Version:    "1.0",
 		Compliance: true,
 		Features: []string{
@@ -79,8 +79,8 @@ func GetRFC0150Compliance() RFC0150Summary {
 
 func GetComplianceInfo() ComplianceInfo {
 	return ComplianceInfo{
-		RFC0111: GetRFC0111Compliance(),
-		RFC0115: GetRFC0115Compliance(),
+		AAP001: GetAAP001Compliance(),
+		AAP002: GetAAP002Compliance(),
 		RFC0150: GetRFC0150Compliance(),
 	}
 }
@@ -97,4 +97,4 @@ func ValidateCompliance(code string) bool {
 
 func GetSupportedRFCs() []string { return []string{"RFC-0111", "RFC-0115", "RFC-0150"} }
 
-// Methods ValidateRFC0111Flow, TestRFC0115Features, DemoRFC0111PowerOfAttorney have been moved to pkg/rfcdemo to avoid import cycles.
+// Methods ValidateAAP001Flow, TestAAP002Features, DemoAAP001PowerOfAttorney have been moved to pkg/rfcdemo to avoid import cycles.

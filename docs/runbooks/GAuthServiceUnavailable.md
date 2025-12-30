@@ -1,14 +1,14 @@
 ---
-title: "GAuth Service Unavailable Alert Runbook"
+title: "AgentAuth Service Unavailable Alert Runbook"
 category: runbook
 status: active
 lastUpdated: 2025-11-12
 owners: devops-team
 refreshCadence: monthly
 ---
-# Alert Runbook: GAuthServiceUnavailable
+# Alert Runbook: AgentAuthServiceUnavailable
 
-**Alert Name:** `GAuthServiceUnavailable`  
+**Alert Name:** `AgentAuthServiceUnavailable`  
 **Severity:** Critical  
 **Component:** Service  
 **Category:** Availability
@@ -17,7 +17,7 @@ refreshCadence: monthly
 
 ## Summary
 
-All GAuth pods are down, making the entire service unavailable. This is a **SEVERE OUTAGE** requiring immediate attention.
+All AgentAuth pods are down, making the entire service unavailable. This is a **SEVERE OUTAGE** requiring immediate attention.
 
 ---
 
@@ -40,7 +40,7 @@ sum(up{job="gauth-service"}) == 0
 1. **Declare Incident**
    ```bash
    # Post to Slack
-   /incident declare "GAuth Complete Outage - All Pods Down"
+   /incident declare "AgentAuth Complete Outage - All Pods Down"
    ```
 
 2. **Quick Status Check**
@@ -198,9 +198,9 @@ kubectl get events --all-namespaces --sort-by='.lastTimestamp' | head -50
 
 ### Initial Notification (Within 5 minutes)
 ```
-🚨 INCIDENT: GAuth Complete Outage
+🚨 INCIDENT: AgentAuth Complete Outage
 Status: Investigating
-Impact: All GAuth services unavailable
+Impact: All AgentAuth services unavailable
 Start Time: [TIME]
 ETA: TBD
 Actions: [Current actions being taken]
@@ -208,7 +208,7 @@ Actions: [Current actions being taken]
 
 ### Update Notification (Every 15 minutes)
 ```
-📊 UPDATE: GAuth Outage
+📊 UPDATE: AgentAuth Outage
 Status: [Investigating/Mitigating/Resolved]
 Progress: [What's been done]
 Next Steps: [What's next]
@@ -217,7 +217,7 @@ ETA: [Updated ETA]
 
 ### Resolution Notification
 ```
-✅ RESOLVED: GAuth Outage
+✅ RESOLVED: AgentAuth Outage
 Duration: [Total time]
 Root Cause: [Brief explanation]
 Resolution: [What fixed it]
@@ -298,8 +298,8 @@ This is a P0 incident - escalate immediately to:
 
 ## Related Alerts
 
-- `GAuthPodDown` - Individual pod failures
-- `GAuthPodRestartLoop` - Pods crash looping
+- `AgentAuthPodDown` - Individual pod failures
+- `AgentAuthPodRestartLoop` - Pods crash looping
 - `PostgreSQLDown` - Database unavailable
 - `RedisDown` - Cache unavailable
 

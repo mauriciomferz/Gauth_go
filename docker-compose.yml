@@ -35,7 +35,7 @@ services:
     networks:
       - gauth-network
 
-  # GAuth backend API server
+  # AgentAuth backend API server
   backend:
     build:
       context: .

@@ -1,6 +1,6 @@
-// Copyright (c) 2025 GAuth. All rights reserved.
+// Copyright (c) 2025 AgentAuth. All rights reserved.
 
-// Package metrics provides a pluggable metrics collector registry for GAuth.
+// Package metrics provides a pluggable metrics collector registry for AgentAuth.
 //
 // P3.2 (sec7.item2): Metrics collector registration framework for extensible observability.
 package metrics

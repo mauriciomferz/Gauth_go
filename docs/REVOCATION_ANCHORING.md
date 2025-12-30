@@ -270,7 +270,7 @@ svc := rfc0111.NewService(audit, authz)
 **Action**: Test anchoring infrastructure without TSA dependency
 
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/notary"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/notary"
 
 // Use in-memory notarizer (no external dependency)
 memNotarizer := notary.NewMemory()
@@ -539,6 +539,6 @@ time curl -X POST https://freetsa.org/tsr \
 
 ---
 
-**Report Prepared By**: GAuth Core Team  
+**Report Prepared By**: AgentAuth Core Team  
 **Implementation Date**: November 6, 2025  
 **Status**: ✅ Production-Ready (Feature-Gated, Best-Effort)

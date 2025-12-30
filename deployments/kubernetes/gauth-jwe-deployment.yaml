@@ -1,4 +1,4 @@
-# Kubernetes Deployment for GAuth with JWE Encryption
+# Kubernetes Deployment for AgentAuth with JWE Encryption
 # Includes: Deployment, Service, ConfigMap, Secrets, HPA
 
 ---

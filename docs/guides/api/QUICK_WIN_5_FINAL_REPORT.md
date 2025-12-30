@@ -72,7 +72,7 @@ type ExportJob struct {
 
 4. **CEF** - Common Event Format for SIEM
    ```
-   CEF:0|Gimel Foundation|GAuth|1.0|poa.create|PoA Created|5|suser=user-123 dvc=192.168.1.1
+   CEF:0|AgentAuth Community|AgentAuth|1.0|poa.create|PoA Created|5|suser=user-123 dvc=192.168.1.1
    ```
 
 **Compression**:

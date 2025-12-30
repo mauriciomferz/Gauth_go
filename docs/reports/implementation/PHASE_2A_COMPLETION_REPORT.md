@@ -375,7 +375,7 @@ $ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 
 **Rationale**:
 1. **Highest Value**: AI agent authorization is cutting-edge requirement
-2. **Strategic**: Positions GAuth as AI-ready authorization system
+2. **Strategic**: Positions AgentAuth as AI-ready authorization system
 3. **Complete Design**: MCP_INTEGRATION_PLAN.md already exists (525 lines)
 4. **Timing**: Q1 2026 perfect for AI/LLM market trends
 5. **Differentiation**: Few authorization systems support agent-to-agent flows

@@ -1,10 +1,10 @@
 #!/bin/bash
-# Comprehensive linting fix script for GAuth Go project
+# Comprehensive linting fix script for AgentAuth Go project
 # This script addresses the most critical linting issues systematically
 
 set -e
 
-echo "🔧 Starting comprehensive linting fixes for GAuth Go..."
+echo "🔧 Starting comprehensive linting fixes for AgentAuth Go..."
 
 # Function to fix unused parameters
 fix_unused_parameters() {

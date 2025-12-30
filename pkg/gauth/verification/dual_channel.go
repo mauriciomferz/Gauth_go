@@ -78,13 +78,13 @@ func (d *DualChannelVerifier) RequestVerification(ctx context.Context, poaID str
 
 	d.challenges.Store(challengeID, challenge)
 
-	smsMessage := fmt.Sprintf("GAuth Security: Confirm Power of Attorney creation with code: %s (expires in 5 min)", code)
+	smsMessage := fmt.Sprintf("AgentAuth Security: Confirm Power of Attorney creation with code: %s (expires in 5 min)", code)
 	if err := d.smsGateway.SendSMS(ctx, principal.PhoneNumber, smsMessage); err != nil {
 		d.challenges.Delete(challengeID)
 		return "", fmt.Errorf("failed to send SMS: %w", err)
 	}
 
-	emailSubject := "GAuth: Confirm Power of Attorney Creation"
+	emailSubject := "AgentAuth: Confirm Power of Attorney Creation"
 	emailBody := fmt.Sprintf("Verification Code: %s\nThis code expires in 5 minutes.\nPoA ID: %s", code, poaID)
 
 	if err := d.emailService.SendEmail(ctx, principal.Email, emailSubject, emailBody); err != nil {

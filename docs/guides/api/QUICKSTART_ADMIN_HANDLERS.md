@@ -10,7 +10,7 @@ owners: [system]
 
 ## TL;DR
 
-All 5 admin handlers are now integrated into the GAuth server at `/api/admin/*` endpoints.
+All 5 admin handlers are now integrated into the AgentAuth server at `/api/admin/*` endpoints.
 
 ## Start Server
 

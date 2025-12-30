@@ -1,7 +1,7 @@
 package signalgo
 
 // Package signalgo provides a lightweight signature algorithm registry to enable
-// future cryptographic agility (RFC0111:6). The initial implementation registers
+// future cryptographic agility (AAP001:6). The initial implementation registers
 // Ed25519 as the default algorithm. A stub ECDSA P256 implementation is provided
 // behind an environment flag for forward compatibility but is not used by core
 // signing flows yet. Canonical digests remain unchanged; this layer only abstracts

@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-The External Audit Anchor system provides comprehensive external timestamping and immutable anchoring capabilities for the GAuth audit ledger. It integrates BoltDB-backed audit ledgers with pluggable external anchor providers (TSA services, blockchain, transparency logs) to create tamper-evident audit trails with external verification.
+The External Audit Anchor system provides comprehensive external timestamping and immutable anchoring capabilities for the AgentAuth audit ledger. It integrates BoltDB-backed audit ledgers with pluggable external anchor providers (TSA services, blockchain, transparency logs) to create tamper-evident audit trails with external verification.
 
 ## Architecture
 
@@ -78,8 +78,8 @@ The External Audit Anchor system provides comprehensive external timestamping an
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/anchor"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/ledger"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/anchor"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/ledger"
 )
 
 // Create external anchor provider
@@ -225,7 +225,7 @@ client := ledger.NewExternalAnchorClient(provider, receiptStore)
 
 ### Prometheus Metrics
 
-The system exposes comprehensive metrics compatible with existing GAuth monitoring:
+The system exposes comprehensive metrics compatible with existing AgentAuth monitoring:
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
@@ -344,7 +344,7 @@ The demo showcases:
 
 ### Existing System Integration
 
-The external audit anchor system integrates seamlessly with existing GAuth components:
+The external audit anchor system integrates seamlessly with existing AgentAuth components:
 
 1. **BoltDB Ledger Compatibility**
    - Extends existing `pkg/ledger/bolt.go` functionality

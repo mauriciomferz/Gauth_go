@@ -93,7 +93,7 @@ Successfully completed **comprehensive remediation** of all **5 CRITICAL vulnera
 - **TEE_ATTESTATION_ARCHITECTURE.md** (comprehensive design document)
 - Intel SGX and AMD SEV-SNP attestation flows
 - Quote verification protocols
-- Integration with GAuth key management
+- Integration with AgentAuth key management
 
 **Architecture Highlights**:
 
@@ -103,7 +103,7 @@ Successfully completed **comprehensive remediation** of all **5 CRITICAL vulnera
 2. TEE generates attestation quote (EREPORT/SNP_REPORT)
 3. Quote includes: Enclave measurement, signer identity, TCB version
 4. Platform Certification Enclave (PCE) signs quote
-5. GAuth verifies quote against Intel/AMD attestation service
+5. AgentAuth verifies quote against Intel/AMD attestation service
 6. If valid: Agent receives PoA, else: Denied
 ```
 
@@ -290,11 +290,11 @@ ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/constraints    0.157s
 
 **Problem Statement**:
 ```
-Before: RFC 0111 (both GAuth and Ethereum use same identifier)
+Before: AAP-001 (both AgentAuth and Ethereum use same identifier)
 After:  gauth_rfc_001 (unique namespace, no collision)
 
-Conflict: Ethereum RFC 0111 defines "Account Abstraction"
-          GAuth RFC 0111 defines "Power of Attorney Lifecycle"
+Conflict: Ethereum AAP-001 defines "Account Abstraction"
+          AgentAuth AAP-001 defines "Power of Attorney Lifecycle"
           
 Impact: Tooling confusion, governance conflicts, implementation ambiguity
 ```
@@ -365,7 +365,7 @@ Reality:       Private keys can be stolen (phishing, malware, social engineering
 Attack Scenario:
 1. Attacker phishes Principal's private key (seed phrase)
 2. Attacker signs malicious PoA with stolen key
-3. GAuth validates signature (✅ cryptographically valid)
+3. AgentAuth validates signature (✅ cryptographically valid)
 4. PoA immediately active (no liveness check)
 5. Attacker's AI drains funds
 6. Principal discovers theft weeks later (too late)
@@ -405,7 +405,7 @@ func (d *DualChannelVerifier) RequestVerification(ctx context.Context,
     
     // Send via SMS
     smsMessage := fmt.Sprintf(
-        "GAuth Security: Confirm PoA creation with code: %s (expires in 5 min)",
+        "AgentAuth Security: Confirm PoA creation with code: %s (expires in 5 min)",
         code,
     )
     d.smsGateway.SendSMS(ctx, principal.PhoneNumber, smsMessage)
@@ -490,7 +490,7 @@ func (t *TimelockPoA) CreateWithDelay(ctx context.Context, poa *PoAData) (string
     
     // Send multi-channel notification
     notification := fmt.Sprintf(`
-🔔 GAuth: New Power of Attorney Created
+🔔 AgentAuth: New Power of Attorney Created
 
 ⏰ Activation Time: %s (24 hours from now)
 
@@ -537,7 +537,7 @@ func (t *TimelockPoA) CancelPoA(ctx context.Context, poaID string) error {
     
     // Send cancellation confirmation
     notification := fmt.Sprintf(`
-GAuth: Power of Attorney Cancelled
+AgentAuth: Power of Attorney Cancelled
 
 Your PoA (ID: %s) has been successfully cancelled.
 
@@ -554,7 +554,7 @@ If you did not request this cancellation, contact security@gauth.example.com imm
 
 **Initial Alert** (sent immediately):
 ```
-🔔 GAuth: New Power of Attorney Created
+🔔 AgentAuth: New Power of Attorney Created
 
 IMPORTANT: A new Power of Attorney has been created for your account.
 
@@ -575,7 +575,7 @@ delay gives you time to cancel the fraudulent PoA before it becomes active.
 
 **12-Hour Reminder**:
 ```
-⏰ GAuth Reminder: PoA Activates Soon
+⏰ AgentAuth Reminder: PoA Activates Soon
 
 Your Power of Attorney will activate in approximately 12 hours.
 
@@ -588,7 +588,7 @@ To cancel: https://gauth.example.com/cancel/poa_abc123
 
 **Activation Confirmation**:
 ```
-✅ GAuth: Power of Attorney Activated
+✅ AgentAuth: Power of Attorney Activated
 
 Your Power of Attorney is now ACTIVE.
 
@@ -605,9 +605,9 @@ $ go test ./pkg/gauth/verification -v -cover
 
 === RUN   TestDualChannelVerifier_RequestVerification
 [MOCK SMS] To: +1234567890
-Message: GAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A
+Message: AgentAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A
 [MOCK EMAIL] To: principal@example.com
-Subject: GAuth: Confirm Power of Attorney Creation
+Subject: AgentAuth: Confirm Power of Attorney Creation
 --- PASS: TestDualChannelVerifier_RequestVerification (0.00s)
 
 === RUN   TestDualChannelVerifier_ConfirmVerification
@@ -697,22 +697,22 @@ Trade-off:      +5 seconds latency for massive security gain
 
 **1. Ronin Bridge Hack ($600M, March 2022)**:
 - **Attack**: Compromised 5 of 9 validator keys
-- **GAuth Defense**: Dual-channel verification (attacker needs SMS/Email access)
+- **AgentAuth Defense**: Dual-channel verification (attacker needs SMS/Email access)
 - **Result**: Attack blocked at verification stage
 
 **2. Beanstalk Governance Attack ($196M, April 2022)**:
 - **Attack**: Flash loan → malicious governance proposal → drain treasury
-- **GAuth Defense**: Semantic constraints (max transaction size, allowed functions)
+- **AgentAuth Defense**: Semantic constraints (max transaction size, allowed functions)
 - **Result**: Proposal rejected by constraint validator
 
 **3. Rari Capital Hack ($80M, April 2022)**:
 - **Attack**: Unconstrained flash loan → reentrancy → fund drainage
-- **GAuth Defense**: Function-level constraints (no unconstrained flash loans)
+- **AgentAuth Defense**: Function-level constraints (no unconstrained flash loans)
 - **Result**: Transaction rejected by constraint engine
 
 **4. Wormhole Bridge Hack ($325M, February 2022)**:
 - **Attack**: Signature verification bypass → mint tokens without collateral
-- **GAuth Defense**: TEE attestation + semantic constraints
+- **AgentAuth Defense**: TEE attestation + semantic constraints
 - **Result**: Signature verification requires hardware attestation
 
 ### Attack Surface Reduction

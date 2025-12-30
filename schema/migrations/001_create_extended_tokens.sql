@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS extended_tokens (
     access_token VARCHAR(512) PRIMARY KEY,
     
     -- OAuth 2.0 fields
-    token_type VARCHAR(50) NOT NULL DEFAULT 'GAuth-Extended-Token',
+    token_type VARCHAR(50) NOT NULL DEFAULT 'AgentAuth-Extended-Token',
     expires_in BIGINT NOT NULL,
     refresh_token VARCHAR(512),
     scope TEXT[], -- Array of scope strings

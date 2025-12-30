@@ -16,7 +16,7 @@ Purpose: Provide inputs for generating visually consistent diagrams (PlantUML / 
 Nodes:
 - Client (Agent A)
 - Client (Agent B)
-- GAuth Web Server
+- AgentAuth Web Server
 - Replay WAL Store (durable) *(RB1)*
 - Capability Manifest Store
 - Rotation Ledger (append-only + signatures) *(RB5)*

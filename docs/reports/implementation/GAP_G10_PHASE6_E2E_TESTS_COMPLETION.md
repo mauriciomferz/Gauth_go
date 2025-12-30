@@ -242,7 +242,7 @@ During test development, the following API mismatches were discovered and correc
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/InvalidCommercialRegisterEntry (0.10s)
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/BrokenAuthorizationChain (0.00s)
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/test/integration       0.635s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/test/integration       0.635s
 ```
 
 ## Integration Test Statistics Summary

@@ -28,7 +28,7 @@ The `protocol_flow.go` file (created as part of Item 2: Protocol Flow Navigation
 **File:** `web/server_clean.go` (line 420)
 
 ```go
-// Protocol flow manager for interactive GAuth flow guidance
+// Protocol flow manager for interactive AgentAuth flow guidance
 protocolFlowManager *ProtocolFlowManager
 ```
 
@@ -91,7 +91,7 @@ go test ./internal/... -timeout 30s -short
 
 ## Protocol Flow Manager Context
 
-The `ProtocolFlowManager` was introduced in Item 2 (Protocol Flow Navigation) to provide interactive guidance through the GAuth authorization flow. It manages:
+The `ProtocolFlowManager` was introduced in Item 2 (Protocol Flow Navigation) to provide interactive guidance through the AgentAuth authorization flow. It manages:
 
 1. **Session Management:** Create and retrieve protocol flow sessions
 2. **Step Navigation:** Navigate between workflow steps and substeps
@@ -172,7 +172,7 @@ web/protocol_flow.go:316:13: s.protocolFlowManager undefined
 
 **Impact:**
 Resolves CI/CD test failure in internal package compilation.
-Protocol flow manager enables interactive GAuth flow guidance
+Protocol flow manager enables interactive AgentAuth flow guidance
 for Item 8 (Admin Cockpit) integration.
 ```
 

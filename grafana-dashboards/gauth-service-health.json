@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "GAuth Service Health",
+    "title": "AgentAuth Service Health",
     "tags": ["gauth", "health", "kubernetes"],
     "timezone": "browser",
     "refresh": "10s",

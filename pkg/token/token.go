@@ -71,7 +71,7 @@ type DeviceInfo struct {
 	Version   string
 }
 
-// Token represents a token in the GAuth system
+// Token represents a token in the AgentAuth system
 // Token layout optimized: pointer/slice fields grouped, times grouped, smaller scalars last.
 type Token struct {
 	Metadata         *Metadata

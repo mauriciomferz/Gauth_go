@@ -1,4 +1,4 @@
-// Package attestation provides cryptographic proof and evidence for compliance attestations (RFC 0111 sec4.item2).
+// Package attestation provides cryptographic proof and evidence for compliance attestations (AAP-001 sec4.item2).
 package attestation
 
 import (

@@ -10,7 +10,7 @@ owners: [system]
 
 Date: 2025-10-29
 
-This document maps conceptual RFC0111 actors & functional planes (traditional OAuth-style roles + GAuth P*P components) to current code artifacts or identifies gaps.
+This document maps conceptual RFC0111 actors & functional planes (traditional OAuth-style roles + AgentAuth P*P components) to current code artifacts or identifies gaps.
 
 ## Legend
 | Role | Description |

@@ -1,20 +1,20 @@
 ---
-title: RFC 9396 (Rich Authorization Requests) vs GAuth (RFC 0111/0115)
+title: RFC 9396 (Rich Authorization Requests) vs AgentAuth (AAP-001/0115)
 category: guide
 status: active
 lastUpdated: 2025-11-19
 owners: architecture-team
 ---
 
-# RFC 9396 (Rich Authorization Requests) vs GAuth (RFC 0111/0115)
+# RFC 9396 (Rich Authorization Requests) vs AgentAuth (AAP-001/0115)
 
 ## Executive Summary
 
 **RFC 9396** is an OAuth 2.0 extension that enables **fine-grained, structured authorization requests** using the `authorization_details` parameter.
 
-**GAuth** is a Gimel Foundation framework focused on **legal delegation chains and Power of Attorney** for AI agents.
+**AgentAuth** is a AgentAuth Community framework focused on **legal delegation chains and Power of Attorney** for AI agents.
 
-**Key Finding**: These frameworks address **different aspects** of OAuth 2.0 authorization but are **highly complementary**. GAuth provides the legal framework and authorization chains, while RFC 9396 provides fine-grained resource permissions.
+**Key Finding**: These frameworks address **different aspects** of OAuth 2.0 authorization but are **highly complementary**. AgentAuth provides the legal framework and authorization chains, while RFC 9396 provides fine-grained resource permissions.
 
 ---
 
@@ -48,7 +48,7 @@ owners: architecture-team
 
 ## 2. High-Level Comparison
 
-| Aspect | **GAuth (RFC 0111/0115)** | **RFC 9396 (RAR)** |
+| Aspect | **AgentAuth (AAP-001/0115)** | **RFC 9396 (RAR)** |
 |:-------|:--------------------------|:-------------------|
 | **Primary Focus** | Legal delegation chains & Power of Attorney | Fine-grained resource authorization |
 | **Authorization Model** | Multi-party chains (3+ levels) | Single request with detailed permissions |
@@ -66,17 +66,17 @@ owners: architecture-team
 
 ### 3.1 Scope Expression
 
-#### GAuth - Structured Authorization Chains
+#### AgentAuth - Structured Authorization Chains
 
 ```go
-// Current GAuth approach
+// Current AgentAuth approach
 type AuthorizationScope struct {
     Read   []string  // Resource types readable
     Write  []string  // Resource types writable
     Admin  []string  // Administrative actions
 }
 
-// GAuth Extended Token
+// AgentAuth Extended Token
 {
   "power_of_attorney": {
     "issuer": "Owner's Authorizer",
@@ -119,7 +119,7 @@ type AuthorizationScope struct {
 
 ### 3.2 Delegation Model
 
-#### GAuth - Multi-Level Authorization Chains
+#### AgentAuth - Multi-Level Authorization Chains
 
 ```
 Owner's Authorizer (PAP)
@@ -165,12 +165,12 @@ Resource Server validates permissions
 
 ### 3.3 Token Structure
 
-#### GAuth Extended Token
+#### AgentAuth Extended Token
 
 ```json
 {
   "access_token": "gauth_at_...",
-  "token_type": "GAuth-Extended",
+  "token_type": "AgentAuth-Extended",
   "expires_in": 3600,
   "power_of_attorney": {
     "poa_id": "poa_xyz789",
@@ -220,14 +220,14 @@ Resource Server validates permissions
 
 ## 4. Complementary Nature
 
-### GAuth + RFC 9396 Integration
+### AgentAuth + RFC 9396 Integration
 
-GAuth could integrate RFC 9396 for richer authorization requests:
+AgentAuth could integrate RFC 9396 for richer authorization requests:
 
 ```go
-// Enhanced GAuth with RAR support
+// Enhanced AgentAuth with RAR support
 type ExtendedTokenRequest struct {
-    // Existing GAuth fields
+    // Existing AgentAuth fields
     GrantID         string
     PowerOfAttorney *poa.PoADefinition
     
@@ -249,7 +249,7 @@ type AuthorizationDetail struct {
 
 ## 5. Use Case Matrix
 
-### Use GAuth (RFC 0111/0115) When:
+### Use AgentAuth (AAP-001/0115) When:
 
 ✅ AI agents need **legal authority** to act  
 ✅ **Multi-party delegation chains** required (Board → Company → AI → User)  
@@ -296,7 +296,7 @@ An AI diagnostic assistant needs to access specific patient records with legal a
 {
   "grant_id": "sub_abc123",
   
-  // GAuth: Legal authority chain
+  // AgentAuth: Legal authority chain
   "power_of_attorney": {
     "poa_id": "poa_xyz789",
     "authorization_chain": {
@@ -325,17 +325,17 @@ An AI diagnostic assistant needs to access specific patient records with legal a
 ```
 
 **Result**:
-- ✅ **GAuth validates** the legal authority chain (Guardian → Patient → AI)
+- ✅ **AgentAuth validates** the legal authority chain (Guardian → Patient → AI)
 - ✅ **RFC 9396 specifies** exactly what data can be accessed and how
 - ✅ **Combined security**: Legal authority + fine-grained permissions
 
 ---
 
-## 7. Implementation in GAuth
+## 7. Implementation in AgentAuth
 
 ### Current State
 
-**GAuth Today**:
+**AgentAuth Today**:
 - ✅ Structured authorization scopes (Read/Write/Admin)
 - ✅ Geographic scope restrictions
 - ✅ PoA credential embedding
@@ -347,7 +347,7 @@ An AI diagnostic assistant needs to access specific patient records with legal a
 // pkg/gauth/authorization.go
 
 type RichAuthorizationRequest struct {
-    // Existing GAuth fields
+    // Existing AgentAuth fields
     GrantID         string
     PowerOfAttorney *poa.PoADefinition
     
@@ -366,7 +366,7 @@ type AuthorizationDetail struct {
 }
 ```
 
-**This would make GAuth the first authorization server combining:**
+**This would make AgentAuth the first authorization server combining:**
 - Legal delegation chains
 - Power of Attorney validation
 - Fine-grained resource permissions (RFC 9396)
@@ -375,13 +375,13 @@ type AuthorizationDetail struct {
 
 ## 8. Comparison Summary Table
 
-| Feature | GAuth | RFC 9396 (RAR) | Combined |
+| Feature | AgentAuth | RFC 9396 (RAR) | Combined |
 |:--------|:------|:---------------|:---------|
-| **Legal Authority** | ✅ Full PoA support | ❌ Not defined | ✅ GAuth provides |
-| **Authorization Chains** | ✅ Multi-level | ❌ Single-level | ✅ GAuth provides |
+| **Legal Authority** | ✅ Full PoA support | ❌ Not defined | ✅ AgentAuth provides |
+| **Authorization Chains** | ✅ Multi-level | ❌ Single-level | ✅ AgentAuth provides |
 | **Fine-Grained Permissions** | ⚠️ Basic | ✅ Rich details | ✅ Best of both |
-| **Commercial Register** | ✅ Integrated | ❌ Not defined | ✅ GAuth provides |
-| **Identity Verification** | ✅ PVP (18 countries) | ❌ Not defined | ✅ GAuth provides |
+| **Commercial Register** | ✅ Integrated | ❌ Not defined | ✅ AgentAuth provides |
+| **Identity Verification** | ✅ PVP (18 countries) | ❌ Not defined | ✅ AgentAuth provides |
 | **Resource Constraints** | ⚠️ Value limits | ✅ Full constraints | ✅ Best of both |
 | **Data Type Filtering** | ❌ Not supported | ✅ Supported | ✅ RAR provides |
 | **Action Granularity** | ⚠️ Basic | ✅ Fine-grained | ✅ Best of both |
@@ -435,13 +435,13 @@ func (v *ComplianceValidator) ValidateAuthorizationDetails(
 
 ## 10. Conclusion
 
-**RFC 9396 and GAuth solve different problems but are highly complementary:**
+**RFC 9396 and AgentAuth solve different problems but are highly complementary:**
 
 - **RFC 9396 (RAR)**: Fine-grained resource permissions within OAuth 2.0
-- **GAuth**: Legal delegation chains and Power of Attorney for AI agents
+- **AgentAuth**: Legal delegation chains and Power of Attorney for AI agents
 
 **They are NOT competing** - they work together:
-- GAuth provides the **legal framework** (authorization chains, PoA validation)
+- AgentAuth provides the **legal framework** (authorization chains, PoA validation)
 - RFC 9396 provides **fine-grained resource permissions** (specific data types, actions, amounts)
 
 **Together, they offer unparalleled authorization control for AI systems with legal authority.**
@@ -452,6 +452,6 @@ func (v *ComplianceValidator) ValidateAuthorizationDetails(
 
 - [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9396/)
 - [OAuth 2.0 RFC 6749](https://datatracker.ietf.org/doc/rfc6749/)
-- [GiFo-RFC 0111 - GAuth 1.0 Authorization Framework](Gifo_0111.md)
-- [GAuth Gap Matrix](GAP_MATRIX.auto.md)
-- [GAuth Architecture](../ARCHITECTURE_SOLUTION.md)
+- [AAP-AAP-001 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
+- [AgentAuth Gap Matrix](GAP_MATRIX.auto.md)
+- [AgentAuth Architecture](../ARCHITECTURE_SOLUTION.md)

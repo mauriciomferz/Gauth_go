@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document provides comprehensive guidance for implementing quantum-resistant cryptographic algorithms in GAuth 1.0 per RFC-0111 §4.3 requirements. As quantum computing advances threaten traditional cryptographic systems (RSA, ECC), GAuth implementations must prepare for post-quantum security.
+This document provides comprehensive guidance for implementing quantum-resistant cryptographic algorithms in AgentAuth 1.0 per RFC-0111 §4.3 requirements. As quantum computing advances threaten traditional cryptographic systems (RSA, ECC), AgentAuth implementations must prepare for post-quantum security.
 
 **Key Requirements:**
 - Support for NIST-standardized post-quantum algorithms
@@ -46,7 +46,7 @@ NIST finalized post-quantum standards in 2024:
   - ML-KEM-512: ~AES-128 equivalent
   - ML-KEM-768: ~AES-192 equivalent
   - ML-KEM-1024: ~AES-256 equivalent
-- **Recommended:** ML-KEM-768 for GAuth tokens
+- **Recommended:** ML-KEM-768 for AgentAuth tokens
 
 #### 2. **ML-DSA (Module-Lattice-Based Digital Signature)**
 - **Standard:** FIPS 204 (formerly CRYSTALS-Dilithium)
@@ -55,7 +55,7 @@ NIST finalized post-quantum standards in 2024:
   - ML-DSA-44: ~128-bit security
   - ML-DSA-65: ~192-bit security
   - ML-DSA-87: ~256-bit security
-- **Recommended:** ML-DSA-65 for GAuth authorization chains
+- **Recommended:** ML-DSA-65 for AgentAuth authorization chains
 
 #### 3. **SLH-DSA (Stateless Hash-Based Signatures)**
 - **Standard:** FIPS 205 (formerly SPHINCS+)
@@ -72,7 +72,7 @@ NIST finalized post-quantum standards in 2024:
 
 ### Hybrid Cryptographic Approach
 
-GAuth MUST support **hybrid schemes** combining classical and post-quantum algorithms:
+AgentAuth MUST support **hybrid schemes** combining classical and post-quantum algorithms:
 
 ```
 Token Signature = ClassicalSig(token) || QuantumResistantSig(token)
@@ -95,7 +95,7 @@ Verification Success = VerifyClassical(sig1) AND VerifyQuantum(sig2)
 
 ---
 
-## GAuth Token Format Extensions
+## AgentAuth Token Format Extensions
 
 ### Extended Token with Quantum Resistance
 
@@ -289,7 +289,7 @@ func main() {
     }
     
     // Sign message
-    message := []byte("GAuth token data")
+    message := []byte("AgentAuth token data")
     signature, err := signer.Sign(message)
     if err != nil {
         panic(err)
@@ -561,7 +561,7 @@ func VerifyHybridToken(token *ExtendedToken, classicalPubKey ed25519.PublicKey, 
 3. **NIST FIPS 205:** Stateless Hash-Based Digital Signature Standard
    - https://csrc.nist.gov/pubs/fips/205/final
 
-4. **RFC-0111:** GAuth 1.0 Authorization Framework
+4. **RFC-0111:** AgentAuth 1.0 Authorization Framework
    - §4.3 Quantum Resistance Requirements
 
 ### Technical Resources
@@ -610,7 +610,7 @@ func VerifyHybridToken(token *ExtendedToken, classicalPubKey ed25519.PublicKey, 
 
 ## Conclusion
 
-Quantum resistance is a critical requirement for future-proof GAuth implementations. This guide provides:
+Quantum resistance is a critical requirement for future-proof AgentAuth implementations. This guide provides:
 
 ✅ **Clear roadmap** from classical to quantum-resistant cryptography  
 ✅ **Hybrid approach** balancing security and practicality  
@@ -632,4 +632,4 @@ Quantum resistance is a critical requirement for future-proof GAuth implementati
 **Document Version:** 1.0  
 **Last Updated:** November 10, 2025  
 **Next Review:** Q2 2026  
-**Owner:** GAuth Security Team
+**Owner:** AgentAuth Security Team

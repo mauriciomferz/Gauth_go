@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: GAuth Learning Lab API
+  title: AgentAuth Learning Lab API
   version: 1.0.0
   description: >-
     RFC-0150 compliant authorization framework API for learning, experimentation, and compliance validation.
-    This comprehensive implementation provides endpoints for evaluation and demonstration of GAuth concepts,
+    This comprehensive implementation provides endpoints for evaluation and demonstration of AgentAuth concepts,
     authorization pattern testing, and RFC-0150 compliance verification.
     
     **Learning Features:**
@@ -21,8 +21,8 @@ info:
     - Cryptographic Standards: ✅ Complete
     - API & Integration: ✅ Complete
 externalDocs:
-  description: GAuth Learning Lab Documentation & RFC-0150 Compliance Guide
-  url: https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/tree/main/docs
+  description: AgentAuth Learning Lab Documentation & RFC-0150 Compliance Guide
+  url: https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/tree/main/docs
 tags:
   - name: learning
     description: Educational and learning path management
@@ -64,7 +64,7 @@ paths:
       tags: [learning]
       operationId: getLearningProgress
       description: |
-        Returns the user's progress through the GAuth learning modules including completed concepts,
+        Returns the user's progress through the AgentAuth learning modules including completed concepts,
         patterns explored, experiments conducted, and validations passed.
       responses:
         '200':

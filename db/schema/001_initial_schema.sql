@@ -1,4 +1,4 @@
--- GAuth Admin Portal - Initial Database Schema
+-- AgentAuth Admin Portal - Initial Database Schema
 -- PostgreSQL 14+ with Row-Level Security (RLS) for multi-tenant isolation
 -- Version: 1.0.0
 -- Created: 2025-11-22

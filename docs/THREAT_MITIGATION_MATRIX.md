@@ -8,7 +8,7 @@
 
 ## Overview
 
-This matrix links threats from [`THREAT_MODEL.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/THREAT_MODEL.md) to their corresponding mitigations implemented in the GAuth codebase. It serves as a compliance verification tool and ensures no threats are left unaddressed.
+This matrix links threats from [`THREAT_MODEL.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/THREAT_MODEL.md) to their corresponding mitigations implemented in the AgentAuth codebase. It serves as a compliance verification tool and ensures no threats are left unaddressed.
 
 ---
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🧪 Running GAuth Functional Tests..."
+echo "🧪 Running AgentAuth Functional Tests..."
 echo "=================================="
 
 # Test 1: Advanced Revocation Flow
@@ -52,4 +52,4 @@ fi
 
 echo ""
 echo "🎉 Functional Test Summary Complete!"
-echo "✅ GAuth core functionality verified working"
+echo "✅ AgentAuth core functionality verified working"

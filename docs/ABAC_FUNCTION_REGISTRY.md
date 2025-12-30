@@ -113,7 +113,7 @@ package main
 import (
     "fmt"
     "time"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp/expr"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp/expr"
 )
 
 func main() {
@@ -524,4 +524,4 @@ None required - function registry is always enabled.
 
 ---
 
-Copyright © 2025 Gimel Foundation. Licensed under Apache 2.0.
+Copyright © 2025 AgentAuth Community. Licensed under Apache 2.0.

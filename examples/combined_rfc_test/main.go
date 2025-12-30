@@ -1,6 +1,6 @@
 // Simple Combined RFC Test
 // Demonstrates validation and compliance checks for RFC-0111 & RFC-0115 configurations.
-// Shows how to create, validate, and inspect combined RFC configuration for GAuth.
+// Shows how to create, validate, and inspect combined RFC configuration for AgentAuth.
 
 package main
 
@@ -26,7 +26,7 @@ func main() {
 
 	// Display Exclusions Compliance (structured fields)
 	fmt.Println("\n� RFC-0111 Exclusions Compliance:")
-	ex := combinedConfig.RFC0111.Exclusions
+	ex := combinedConfig.AAP001.Exclusions
 	fmt.Printf("  🚫 Web3 Blockchain: prohibited=%v license_required=%v\n", ex.Web3Blockchain.Prohibited, ex.Web3Blockchain.LicenseRequired)
 	fmt.Printf("  � AI Operators: prohibited=%v license_required=%v\n", ex.AIOperators.Prohibited, ex.AIOperators.LicenseRequired)
 	fmt.Printf("  🚫 DNA Based Identities: prohibited=%v license_required=%v\n", ex.DNABasedIdentities.Prohibited, ex.DNABasedIdentities.LicenseRequired)
@@ -40,10 +40,10 @@ func main() {
 
 	fmt.Printf("  ✅ RFC-0115 PoA Definition: Included\n")
 	// Create detailed PoA definition and show nested data
-	poaDef := rfc.CreateDefaultPoADefinition(combinedConfig.RFC0115.PoADefinition)
+	poaDef := rfc.CreateDefaultPoADefinition(combinedConfig.AAP002.PoADefinition)
 	fmt.Printf("  🤖 Authorized Client Type: %s\n", poaDef.Parties.AuthorizedClient.Type)
-	fmt.Printf("  🏗️ GAuth Integration: %s role\n", poaDef.GAuthContext.PPArchitectureRole)
-	fmt.Printf("  🔒 Exclusions Compliant: %v\n", poaDef.GAuthContext.ExclusionsCompliant)
+	fmt.Printf("  🏗️ AgentAuth Integration: %s role\n", poaDef.AgentAuthContext.PPArchitectureRole)
+	fmt.Printf("  🔒 Exclusions Compliant: %v\n", poaDef.AgentAuthContext.ExclusionsCompliant)
 
 	fmt.Println("\n🎉 Combined RFC Implementation Test Completed Successfully!")
 	fmt.Println("═══════════════════════════════════════════════════════════")

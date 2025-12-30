@@ -3,7 +3,7 @@ groups:
     interval: 30s
     rules:
       # High validation failure rate
-      - alert: GAuthPlusHighValidationFailureRate
+      - alert: AgentAuthPlusHighValidationFailureRate
         expr: |
           (rate(gauthplus_validations_total{result="failed"}[5m]) 
           / rate(gauthplus_validations_total[5m])) > 0.1
@@ -12,11 +12,11 @@ groups:
           severity: warning
           component: gauthplus
         annotations:
-          summary: "High GAuth+ validation failure rate"
-          description: "GAuth+ validation failure rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+          summary: "High AgentAuth+ validation failure rate"
+          description: "AgentAuth+ validation failure rate is {{ $value | humanizePercentage }} (threshold: 10%)"
 
       # Cache hit rate too low
-      - alert: GAuthPlusCacheHitRateLow
+      - alert: AgentAuthPlusCacheHitRateLow
         expr: |
           (rate(gauthplus_cache_hits_total[5m]) 
           / (rate(gauthplus_cache_hits_total[5m]) + rate(gauthplus_cache_misses_total[5m]))) < 0.7
@@ -25,11 +25,11 @@ groups:
           severity: warning
           component: gauthplus
         annotations:
-          summary: "Low GAuth+ cache hit rate for {{ $labels.cache_type }}"
+          summary: "Low AgentAuth+ cache hit rate for {{ $labels.cache_type }}"
           description: "Cache hit rate is {{ $value | humanizePercentage }} for {{ $labels.cache_type }} (threshold: 70%)"
 
       # High policy violation rate
-      - alert: GAuthPlusHighPolicyViolationRate
+      - alert: AgentAuthPlusHighPolicyViolationRate
         expr: rate(gauthplus_policy_violations_total[5m]) > 1
         for: 5m
         labels:
@@ -40,7 +40,7 @@ groups:
           description: "Policy violations of type {{ $labels.policy_type }} ({{ $labels.severity }}) occurring at {{ $value | humanize }} per second"
 
       # Validation latency too high
-      - alert: GAuthPlusHighValidationLatency
+      - alert: AgentAuthPlusHighValidationLatency
         expr: |
           histogram_quantile(0.95, 
             rate(gauthplus_validation_duration_seconds_bucket[5m])
@@ -50,11 +50,11 @@ groups:
           severity: warning
           component: gauthplus
         annotations:
-          summary: "High GAuth+ validation latency"
+          summary: "High AgentAuth+ validation latency"
           description: "P95 validation duration for {{ $labels.feature }} is {{ $value }}s (threshold: 0.1s)"
 
       # Excessive delegation depth
-      - alert: GAuthPlusExcessiveDelegationDepth
+      - alert: AgentAuthPlusExcessiveDelegationDepth
         expr: |
           histogram_quantile(0.95, 
             rate(gauthplus_delegation_depth_bucket[5m])
@@ -68,7 +68,7 @@ groups:
           description: "P95 delegation depth is {{ $value }} (threshold: 5)"
 
       # Frequent successor activations
-      - alert: GAuthPlusFrequentSuccessorActivations
+      - alert: AgentAuthPlusFrequentSuccessorActivations
         expr: rate(gauthplus_successor_activations_total[5m]) > 0.1
         for: 10m
         labels:
@@ -79,7 +79,7 @@ groups:
           description: "Successor activations occurring at {{ $value | humanize }} per second"
 
       # Critical fiduciary violations
-      - alert: GAuthPlusCriticalFiduciaryViolations
+      - alert: AgentAuthPlusCriticalFiduciaryViolations
         expr: rate(gauthplus_fiduciary_violations_total{severity="critical"}[5m]) > 0
         for: 1m
         labels:
@@ -90,7 +90,7 @@ groups:
           description: "Critical {{ $labels.duty_type }} violations occurring at {{ $value | humanize }} per second"
 
       # Dual control approval failures
-      - alert: GAuthPlusDualControlFailures
+      - alert: AgentAuthPlusDualControlFailures
         expr: |
           (rate(gauthplus_dual_control_approvals_total{status="rejected"}[5m])
           / rate(gauthplus_dual_control_approvals_total[5m])) > 0.2
@@ -102,19 +102,19 @@ groups:
           summary: "High dual control rejection rate"
           description: "Dual control rejections for {{ $labels.action_type }} at {{ $value | humanizePercentage }} (threshold: 20%)"
 
-      # GAuth+ service unavailable
-      - alert: GAuthPlusServiceDown
+      # AgentAuth+ service unavailable
+      - alert: AgentAuthPlusServiceDown
         expr: up{job="gauth-service"} == 0
         for: 2m
         labels:
           severity: critical
           component: gauthplus
         annotations:
-          summary: "GAuth+ service is down"
-          description: "GAuth+ service has been unavailable for more than 2 minutes"
+          summary: "AgentAuth+ service is down"
+          description: "AgentAuth+ service has been unavailable for more than 2 minutes"
 
       # Cache size growing unexpectedly
-      - alert: GAuthPlusCacheSizeExcessive
+      - alert: AgentAuthPlusCacheSizeExcessive
         expr: gauthplus_cache_size > 50000
         for: 10m
         labels:

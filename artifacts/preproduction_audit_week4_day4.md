@@ -29,7 +29,7 @@ Week 4 Day 4 focuses on executing the CI/CD pipeline by pushing code to GitHub a
 - **Expected Duration**: 15-20 minutes
 - **Triggers**: Push to main branch
 - **Deployment Target**: Kubernetes staging environment (gauth-staging namespace)
-- **Resources**: 5 pods (3 GAuth + 1 PostgreSQL + 1 Redis)
+- **Resources**: 5 pods (3 AgentAuth + 1 PostgreSQL + 1 Redis)
 
 ### Current Status
 - **Git Status**: Clean working tree, 23 commits ahead of origin/main
@@ -149,7 +149,7 @@ git push origin main
   5. Send Slack notification on success
 - Success Criteria: All manifests applied, 5 pods running (1/1 Ready), smoke tests pass
 - Resources Created:
-  * 5 pods: 3 GAuth + 1 PostgreSQL + 1 Redis
+  * 5 pods: 3 AgentAuth + 1 PostgreSQL + 1 Redis
   * 11 cores CPU requested (11000m)
   * 22Gi memory requested
   * 25Gi storage (20Gi PostgreSQL + 5Gi Redis)
@@ -173,7 +173,7 @@ git push origin main
 
 **Example Success Notification**:
 ```
-✅ GAuth Deployment Successful
+✅ AgentAuth Deployment Successful
 Environment: staging
 Commit: 05721f73
 Duration: 15m 32s
@@ -411,7 +411,7 @@ nothing to commit, working tree clean
 - **Required**: ✅ Yes
 - **How to Generate**:
   1. Navigate to: https://github.com/settings/tokens/new
-  2. Token name: "GAuth CI/CD - GHCR Push"
+  2. Token name: "AgentAuth CI/CD - GHCR Push"
   3. Expiration: 90 days (or longer)
   4. Scopes:
      - ✅ `write:packages` (Upload packages to GHCR)
@@ -471,7 +471,7 @@ kubectl get namespace gauth-staging
 - **How to Generate**:
   1. Navigate to: https://api.slack.com/apps
   2. Click "Create New App" → "From scratch"
-  3. App name: "GAuth CI/CD Notifications"
+  3. App name: "AgentAuth CI/CD Notifications"
   4. Workspace: Select your workspace
   5. Click "Create App"
   6. Navigate to "Incoming Webhooks"
@@ -485,7 +485,7 @@ kubectl get namespace gauth-staging
 **Test Slack Webhook Locally**:
 ```bash
 curl -X POST -H 'Content-type: application/json' \
-  --data '{"text":"🚀 GAuth CI/CD Pipeline Test - Ready for deployment!"}' \
+  --data '{"text":"🚀 AgentAuth CI/CD Pipeline Test - Ready for deployment!"}' \
   https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 # Expected: HTTP 200 OK, message appears in Slack channel
@@ -783,11 +783,11 @@ watch -n 5 'kubectl top pods -n gauth-staging'
 | 10:00 | Manifests applied | 9 YAML files applied to gauth-staging namespace |
 | 11:00 | Rollout waiting | PostgreSQL StatefulSet ready (1/1) |
 | 12:00 | Rollout waiting | Redis StatefulSet ready (1/1) |
-| 13:00 | Rollout waiting | GAuth deployment rolling out (3 replicas) |
+| 13:00 | Rollout waiting | AgentAuth deployment rolling out (3 replicas) |
 | 14:00 | Rollout complete | All 5 pods running (1/1 Ready) |
 | 14:30 | Smoke tests | Testing /healthz, /api/v1/beta/health, /metrics |
 | 15:00 | Deploy job complete | All smoke tests passed ✅ |
-| 15:00 | Slack notification | "✅ GAuth Deployment Successful" sent |
+| 15:00 | Slack notification | "✅ AgentAuth Deployment Successful" sent |
 | 15:00 | **Workflow complete** | **All jobs passed** ✅ |
 
 **Total Duration**: ~15 minutes  
@@ -1048,4 +1048,4 @@ The system is fully prepared for Week 4 Day 4 execution:
 
 **Document Version**: 1.0  
 **Created**: November 9, 2025  
-**Author**: GitHub Copilot (GAuth Pre-Production Team)
+**Author**: GitHub Copilot (AgentAuth Pre-Production Team)

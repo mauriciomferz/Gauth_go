@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GAuth+ Authorization API
+  title: AgentAuth+ Authorization API
   description: |
     Enterprise-grade authorization system with AI-powered capabilities, featuring comprehensive 
     Power of Attorney (PoA) management, blockchain-backed verification, and advanced delegation 
@@ -20,7 +20,7 @@ info:
     
   version: 1.0.0
   contact:
-    name: GAuth+ Team
+    name: AgentAuth+ Team
     url: https://github.com/mauriciomferz/Gauth_go
   license:
     name: MIT
@@ -1895,7 +1895,7 @@ components:
               blockchain_state:
                 type: object
 
-    GAuthError:
+    AgentAuthError:
       type: object
       properties:
         type:
@@ -1991,28 +1991,28 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GAuthError'
+            $ref: '#/components/schemas/AgentAuthError'
 
     Unauthorized:
       description: Unauthorized - Authentication required
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GAuthError'
+            $ref: '#/components/schemas/AgentAuthError'
 
     NotFound:
       description: Not found - Resource does not exist
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GAuthError'
+            $ref: '#/components/schemas/AgentAuthError'
 
     InternalServerError:
       description: Internal server error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/GAuthError'
+            $ref: '#/components/schemas/AgentAuthError'
 
     SemanticCountersResponse:
       type: object

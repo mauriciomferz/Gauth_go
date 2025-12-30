@@ -126,7 +126,7 @@ type ExtendedToken struct {
 
 ## Compliance Score Evolution
 
-### RFC-0111 (GAuth 1.0 Authorization Framework)
+### RFC-0111 (AgentAuth 1.0 Authorization Framework)
 | Section | Before | After | Improvement |
 |---------|--------|-------|-------------|
 | §3 Extended Token | 0% | 100% | +100% |
@@ -396,7 +396,7 @@ Power Verification Point (PVP)
 ## Conclusion
 
 ### Achievement Summary
-This session successfully transformed the GAuth implementation from **69% RFC compliant with 5 production blockers** to **~90% RFC compliant with zero critical blockers**. The implementation now has:
+This session successfully transformed the AgentAuth implementation from **69% RFC compliant with 5 production blockers** to **~90% RFC compliant with zero critical blockers**. The implementation now has:
 
 - ✅ RFC-0111 compliant extended tokens
 - ✅ Complete authorization chain hierarchy

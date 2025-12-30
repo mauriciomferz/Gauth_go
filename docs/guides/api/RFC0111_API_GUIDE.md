@@ -859,7 +859,7 @@ To enable RFC-0111 endpoints in your web server:
 
 ```go
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
 // In your server initialization:
@@ -893,7 +893,7 @@ complianceValidator := gauth.NewComplianceValidator(/* params */)
 // 6. Create compliance tracker
 complianceTracker := gauth.NewMemoryComplianceTracker(complianceValidator)
 
-// 7. Create GAuth service with RFC compliance
+// 7. Create AgentAuth service with RFC compliance
 gauthService := gauth.New(
     gauth.WithRFCCompliance(
         subscriptionStore,
@@ -1256,7 +1256,7 @@ All API endpoints follow a consistent error response format:
 |------------|-------------|-------------|----------|
 | `invalid_request` | 400 | Malformed request or missing required fields | Check request format and required fields |
 | `step_X_prerequisite_failed` | 400 | Previous step not completed | Complete prerequisite steps first |
-| `step_X_failed` | 400 | Step execution failed (GAuth error) | Review error message for specific issue |
+| `step_X_failed` | 400 | Step execution failed (AgentAuth error) | Review error message for specific issue |
 | `step_X_identity_invalid` | 400 | Identity verification failed | Verify identity proof data is correct |
 | `step_X_authorization_invalid` | 400 | Authorization proof invalid | Check authorization documents |
 | `step_X_chain_invalid` | 400 | Authorization chain validation failed | Verify chain structure and validity |

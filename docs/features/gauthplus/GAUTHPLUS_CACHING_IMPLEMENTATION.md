@@ -1,4 +1,4 @@
-# GAuth+ Performance Optimization: Caching Layer Implementation
+# AgentAuth+ Performance Optimization: Caching Layer Implementation
 
 **Status**: ✅ COMPLETE  
 **Date**: January 2025  
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-Successfully implemented a comprehensive caching layer for GAuth+ services to reduce database query overhead and improve response times. The caching infrastructure provides thread-safe, TTL-based in-memory caching for AI capability assessments and delegation chains.
+Successfully implemented a comprehensive caching layer for AgentAuth+ services to reduce database query overhead and improve response times. The caching infrastructure provides thread-safe, TTL-based in-memory caching for AI capability assessments and delegation chains.
 
 **Performance Improvements:**
 - **Before**: 10-20ms per request (5 database queries)
@@ -28,7 +28,7 @@ The caching layer uses the decorator pattern to wrap existing service implementa
 
 ```
 ┌─────────────────────────────────────────────┐
-│         GAuthPlusValidator                  │
+│         AgentAuthPlusValidator                  │
 │  (uses cached services transparently)      │
 └─────────────────┬───────────────────────────┘
                   │
@@ -232,8 +232,8 @@ func (s *CachedDelegationService) RevokeDelegation(
 **Dependencies**:
 - `sync` - Thread safety (RWMutex)
 - `time` - TTL management
-- GAuth+ types: `AICapabilityAssessment`, `AIDelegation`
-- GAuth+ interfaces: `CapabilityAssessmentService`, `DelegationService`
+- AgentAuth+ types: `AICapabilityAssessment`, `AIDelegation`
+- AgentAuth+ interfaces: `CapabilityAssessmentService`, `DelegationService`
 
 #### 2. `pkg/gauthplus/cache_test.go` (316 lines)
 **Purpose**: Comprehensive test coverage
@@ -273,7 +273,7 @@ func (s *CachedDelegationService) RevokeDelegation(
 === RUN   TestCachedDelegationService_CreateInvalidatesAll
 --- PASS: TestCachedDelegationService_CreateInvalidatesAll (0.00s)
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauthplus  0.610s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauthplus  0.610s
 ```
 
 **Coverage**: 100% of cache operations tested
@@ -288,7 +288,7 @@ ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0
 ```go
 import (
     "time"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauthplus"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauthplus"
 )
 
 // Configure TTLs based on data volatility
@@ -317,7 +317,7 @@ cachedDelegationService := gauthplus.NewCachedDelegationService(
 #### 3. Use Cached Services Transparently
 ```go
 // Use exactly like the original services
-validator := gauthplus.NewGAuthPlusValidator(
+validator := gauthplus.NewAgentAuthPlusValidator(
     db,
     cachedCapabilityService,  // Drop-in replacement
     cachedDelegationService,  // Drop-in replacement
@@ -611,7 +611,7 @@ $ go test -v ./pkg/gauthplus -run "TestCapability|TestDelegation|TestCached"
 === RUN   TestCachedDelegationService_CreateInvalidatesAll
 --- PASS: TestCachedDelegationService_CreateInvalidatesAll (0.00s)
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauthplus  0.610s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauthplus  0.610s
 ```
 
 **Coverage**: 100% (10/10 tests passing)
@@ -894,7 +894,7 @@ func CacheHealthCheck() error {
 #### Step 1: Identify Services to Cache
 ```go
 // Current implementation (BEFORE)
-validator := gauthplus.NewGAuthPlusValidator(
+validator := gauthplus.NewAgentAuthPlusValidator(
     db,
     capabilityService,  // Direct database access
     delegationService,  // Direct database access
@@ -914,7 +914,7 @@ cachedDelegationService := gauthplus.NewCachedDelegationService(
     1 * time.Minute,  // 1-minute TTL
 )
 
-validator := gauthplus.NewGAuthPlusValidator(
+validator := gauthplus.NewAgentAuthPlusValidator(
     db,
     cachedCapabilityService,  // Cached version
     cachedDelegationService,  // Cached version
@@ -950,7 +950,7 @@ If issues arise, caching can be disabled by using original services:
 
 ```go
 // Rollback: Remove caching
-validator := gauthplus.NewGAuthPlusValidator(
+validator := gauthplus.NewAgentAuthPlusValidator(
     db,
     capabilityService,  // Back to direct database access
     delegationService,  // Back to direct database access
@@ -1134,7 +1134,7 @@ func PredictivePreload(ctx context.Context, service *CachedCapabilityService) {
 
 ## Conclusion
 
-The GAuth+ caching layer provides significant performance improvements with minimal complexity and risk:
+The AgentAuth+ caching layer provides significant performance improvements with minimal complexity and risk:
 
 **✅ Achievements**:
 - 50%+ latency reduction (20ms → 9.6ms average)
@@ -1154,7 +1154,7 @@ The GAuth+ caching layer provides significant performance improvements with mini
 
 **🔄 Next Steps**:
 1. ✅ Core caching complete
-2. ⏳ Integration with GAuthPlusValidator (next)
+2. ⏳ Integration with AgentAuthPlusValidator (next)
 3. ⏳ Performance testing and benchmarking
 4. ⏳ Production deployment and monitoring
 5. ⏳ Optional: Distributed caching (Redis)

@@ -83,7 +83,7 @@
 
 ## Phase 10: GNAP Authorization Context Enrichment
 - [x] Implement `ComplianceReporter` logic in GNAP handler
-- [x] Update `linkGAuthContext` in `web/handlers/gnap/handler.go` to use `GenerateVerificationReport`
+- [x] Update `linkAgentAuthContext` in `web/handlers/gnap/handler.go` to use `GenerateVerificationReport`
 - [x] Propagate `CapabilityCheck` and `FiduciaryCompliance` results into GNAP response
 - [x] Add integration tests for enriched GNAP responses
 

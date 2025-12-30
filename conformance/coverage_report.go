@@ -65,7 +65,7 @@ func ExtractTests(root string) ([]string, error) {
 	return tests, nil
 }
 
-// DiscoverClauseTags maps tests to clause IDs by looking for inline comments like: // CLAUSE: RFC0111-3.2.1
+// DiscoverClauseTags maps tests to clause IDs by looking for inline comments like: // CLAUSE: AAP001-3.2.1
 func DiscoverClauseTags(root string) (map[string][]string, error) {
 	mapping := make(map[string][]string)
 	fset := token.NewFileSet()

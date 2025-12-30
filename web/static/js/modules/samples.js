@@ -313,8 +313,8 @@ export function samplesInit(){
     const rerunBtn = e.target.closest('[data-rerun-sample]');
     if (rerunBtn) {
       const exampleId = rerunBtn.getAttribute('data-rerun-sample');
-      if (exampleId && window.GAuth.runSample) {
-        window.GAuth.runSample(exampleId);
+      if (exampleId && window.AgentAuth.runSample) {
+        window.AgentAuth.runSample(exampleId);
       }
     }
   });
@@ -331,5 +331,5 @@ export function samplesInit(){
 }
 
 // Legacy global bridge (for compatibility)
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { runSample, runAllBasics, runAdvancedSuite, runAllSamples, cancelAllSamples, viewExample, samplesInit });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { runSample, runAllBasics, runAdvancedSuite, runAllSamples, cancelAllSamples, viewExample, samplesInit });
 // Removed automatic cancellation/autorun to give user full control

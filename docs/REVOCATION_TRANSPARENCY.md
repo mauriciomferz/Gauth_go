@@ -483,7 +483,7 @@ Instead of duplicating HTTP + cryptographic logic, consumers can import the reus
 ```go
 import (
   "net/http"
-  "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/verification"
+  "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/verification"
 )
 
 func verify(base string, targetHash string) error {

@@ -8,7 +8,7 @@ source: internal
 refreshCadence: annually
 ---
 
-# GAuth Beta Compliance Assessment (RFC-0111 / RFC-0115)
+# AgentAuth Beta Compliance Assessment (RFC-0111 / RFC-0115)
 
 Generated: 2025-10-28
 Scope: Repository internal artifacts only (no external sources). All evidence references point to concrete code, tests, or metrics instrumentation currently in the repo.

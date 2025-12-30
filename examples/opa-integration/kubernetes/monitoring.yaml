@@ -12,7 +12,7 @@ spec:
       app: gauth
       component: web-server
   endpoints:
-  # GAuth metrics
+  # AgentAuth metrics
   - port: http
     path: /metrics
     interval: 15s
@@ -111,8 +111,8 @@ spec:
         description: "OPA sidecar has been unavailable for 2 minutes"
         runbook: "Check pod status: kubectl describe pod -n gauth-system -l app=gauth"
 
-    # Alert: GAuth pods not ready
-    - alert: GAuthPodsNotReady
+    # Alert: AgentAuth pods not ready
+    - alert: AgentAuthPodsNotReady
       expr: |
         kube_deployment_status_replicas_ready{
           namespace="gauth-system",
@@ -126,8 +126,8 @@ spec:
         severity: warning
         component: gauth
       annotations:
-        summary: "GAuth pods not ready"
-        description: "{{ $value }} GAuth pods are not ready"
+        summary: "AgentAuth pods not ready"
+        description: "{{ $value }} AgentAuth pods are not ready"
         runbook: "Check pod status and logs"
 
   - name: gauth.opa.capacity
@@ -183,8 +183,8 @@ spec:
         severity: info
         component: gauth
       annotations:
-        summary: "GAuth approaching max replicas"
-        description: "GAuth has {{ $value }} replicas (max: 10)"
+        summary: "AgentAuth approaching max replicas"
+        description: "AgentAuth has {{ $value }} replicas (max: 10)"
         runbook: "Consider increasing HPA max replicas or investigating high load"
 
 ---
@@ -199,7 +199,7 @@ data:
   gauth-opa-dashboard.json: |
     {
       "dashboard": {
-        "title": "GAuth + OPA Performance",
+        "title": "AgentAuth + OPA Performance",
         "panels": [
           {
             "title": "OPA Request Rate",

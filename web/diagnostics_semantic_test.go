@@ -12,10 +12,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
 )
 
-// TestSemanticDiagnostics_Unwired verifies payload fields when no RFC0111 service is wired (wired=false).
+// TestSemanticDiagnostics_Unwired verifies payload fields when no AAP001 service is wired (wired=false).
 func TestSemanticDiagnostics_Unwired(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	t.Setenv("GAUTH_DISABLE_RFC0111_SERVICE", "1")
+	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "1")
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
 	w := httptest.NewRecorder()
@@ -54,7 +54,7 @@ func TestSemanticDiagnostics_Unwired(t *testing.T) {
 // TestSemanticDiagnostics_UnwiredStrictUnavailable verifies error response when strict wiring is required.
 func TestSemanticDiagnostics_UnwiredStrictUnavailable(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	t.Setenv("GAUTH_DISABLE_RFC0111_SERVICE", "1")
+	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "1")
 	t.Setenv("GAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED", "1")
 	s := NewBetaServer("")
 	t.Cleanup(func() { s.Shutdown() })
@@ -73,25 +73,25 @@ func TestSemanticDiagnostics_UnwiredStrictUnavailable(t *testing.T) {
 	}
 }
 
-// mockRFC0111Service provides deterministic counter snapshots for wired diagnostics testing.
-type mockRFC0111Service struct {
+// mockAAP001Service provides deterministic counter snapshots for wired diagnostics testing.
+type mockAAP001Service struct {
 	snapshots []map[string]uint64
 	idx       int
 }
 
 // Revocation workflow methods (no-op) to satisfy extended interface for tests.
 // They return nil to simulate successful operations without affecting snapshots.
-func (m *mockRFC0111Service) InitiateRevocation(ctx context.Context, req gauth_rfc_001.RevocationRequest) error {
+func (m *mockAAP001Service) InitiateRevocation(ctx context.Context, req gauth_rfc_001.RevocationRequest) error {
 	return nil
 }
-func (m *mockRFC0111Service) ApproveRevocation(ctx context.Context, poaID, approver string) error {
+func (m *mockAAP001Service) ApproveRevocation(ctx context.Context, poaID, approver string) error {
 	return nil
 }
-func (m *mockRFC0111Service) CancelRevocation(ctx context.Context, poaID, actor string) error {
+func (m *mockAAP001Service) CancelRevocation(ctx context.Context, poaID, actor string) error {
 	return nil
 }
 
-func (m *mockRFC0111Service) SemanticSnapshot() map[string]uint64 {
+func (m *mockAAP001Service) SemanticSnapshot() map[string]uint64 {
 	if len(m.snapshots) == 0 {
 		return map[string]uint64{}
 	}
@@ -113,7 +113,7 @@ func TestSemanticDiagnostics_Wired(t *testing.T) {
 	t.Cleanup(func() { s.Shutdown() })
 	// Inject mock service with stable history then a massive spike to trigger anomaly.
 	// Needs enough history to establish low variance, then a spike.
-	mockSvc := &mockRFC0111Service{snapshots: []map[string]uint64{
+	mockSvc := &mockAAP001Service{snapshots: []map[string]uint64{
 		{"scope_violation": 100, "restriction_mismatch": 10},
 		{"scope_violation": 200, "restriction_mismatch": 20}, // Rate ~10/0.1s in theory but here 1s sleep
 		{"scope_violation": 305, "restriction_mismatch": 30}, // Slight jitter
@@ -121,7 +121,7 @@ func TestSemanticDiagnostics_Wired(t *testing.T) {
 		{"scope_violation": 505, "restriction_mismatch": 50},
 		{"scope_violation": 150000, "restriction_mismatch": 6000}, // SPIKE
 	}}
-	s.rfc0111Service = mockSvc
+	s.aap001Service = mockSvc
 	if s.semanticHandler != nil {
 		s.semanticHandler.Service = mockSvc
 	}

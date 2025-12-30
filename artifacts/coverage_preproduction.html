@@ -10541,11 +10541,11 @@ func main() <span class="cov0" title="0">{
 // - GiFo-RFC-0111: The GAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
 // - GiFo-RFC-0115: Power-of-Attorney Credential Definition (PoA-Definition)
 //
-// Copyright (c) 2025 Gimel Foundation gGmbH i.G.
+// Copyright (c) 2025 AgentAuth Community gGmbH i.G.
 // Licensed under Apache 2.0
 //
-// Official Gimel Foundation Implementation
-// Gimel Foundation gGmbH i.G., www.GimelFoundation.com
+// Official AgentAuth Community Implementation
+// AgentAuth Community gGmbH i.G., www.GimelFoundation.com
 // Operated by Gimel Technologies GmbH
 // MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartett
 // Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
@@ -14830,10 +14830,10 @@ import (
 )
 
 func main() <span class="cov0" title="0">{
-        fmt.Println("🎯 GAuth RFC Implementation - Official Gimel Foundation Compliance Test")
+        fmt.Println("🎯 GAuth RFC Implementation - Official AgentAuth Community Compliance Test")
         fmt.Println("=====================================================================")
         fmt.Println("Testing RFC 0111 (GAuth 1.0) &amp; RFC 0115 (PoA Definition)")
-        fmt.Println("Based on official Gimel Foundation gGmbH i.G. specifications")
+        fmt.Println("Based on official AgentAuth Community gGmbH i.G. specifications")
         fmt.Println("")
 
         // All references to undefined variables are commented out to ensure the file builds cleanly.
@@ -14872,8 +14872,8 @@ func main() <span class="cov0" title="0">{
         fmt.Println("RFC 0111 (GAuth 1.0): PARTIAL / DEMO ONLY - cryptographic tokens now prototype-quality (PASETO), delegation chain &amp; external trust service missing")
         fmt.Println("RFC 0115 (PoA Definition):", rfc0115Status)
         fmt.Println("")
-        fmt.Println("🏢 Gimel Foundation Compliance:")
-        fmt.Println("   - Copyright (c) 2025 Gimel Foundation gGmbH i.G.")
+        fmt.Println("🏢 AgentAuth Community Compliance:")
+        fmt.Println("   - Copyright (c) 2025 AgentAuth Community gGmbH i.G.")
         fmt.Println("   - Apache 2.0 License (OAuth, OpenID Connect building blocks)")
         fmt.Println("   - MIT License (MCP building blocks)")
         fmt.Println("   - Development JWT foundation maintained")
@@ -16330,7 +16330,7 @@ func errString(err error) string <span class="cov0" title="0">{
 		
 		<pre class="file" id="file100" style="display: none">// Official GiFo-RFC-0115 PoA-Definition Implementation Demo
 //
-// Copyright (c) 2025 Gimel Foundation gGmbH i.G.
+// Copyright (c) 2025 AgentAuth Community gGmbH i.G.
 // Licensed under Apache 2.0
 //
 // Demonstrates the complete Power-of-Attorney Credential Definition (PoA-Definition)
@@ -16356,7 +16356,7 @@ func main() <span class="cov0" title="0">{
         fmt.Println("Category: Standards Track")
         fmt.Println("Obsoletes: - 15. September 2025")
         fmt.Println()
-        fmt.Println("Gimel Foundation gGmbH i.G., www.GimelFoundation.com")
+        fmt.Println("AgentAuth Community gGmbH i.G., www.GimelFoundation.com")
         fmt.Println("Operated by Gimel Technologies GmbH")
         fmt.Println("MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert")
         fmt.Println("Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com")
@@ -16404,7 +16404,7 @@ func main() <span class="cov0" title="0">{
                 log.Fatalf("PoA-Definition validation failed: %v", err)
         }</span>
         <span class="cov0" title="0">fmt.Println("✅ PoA-Definition structure validated for RFC-0115 compliance")
-        fmt.Println("✅ Official Gimel Foundation gGmbH i.G. attribution")
+        fmt.Println("✅ Official AgentAuth Community gGmbH i.G. attribution")
         fmt.Println()
 
         fmt.Println("✅ RFC-0115 PoA-Definition implementation successfully demonstrated")</span>
@@ -16423,7 +16423,7 @@ func createExamplePoADefinition() *poa.PoADefinition <span class="cov0" title="0
                                 Identity: "gimel-foundation-ggmbh-ig",
                                 Organization: &amp;poa.Organization{
                                         Type:                poa.OrgTypeNonProfit,
-                                        Name:                "Gimel Foundation gGmbH i.G.",
+                                        Name:                "AgentAuth Community gGmbH i.G.",
                                         RegisterEntry:       "Siegburg HRB 18660",
                                         ManagingDirector:    "Bjørn Baunbæk, Dr. Götz G. Wehberg",
                                         RegisteredAuthority: true,
@@ -16568,7 +16568,7 @@ func createExamplePoADefinition() *poa.PoADefinition <span class="cov0" title="0
                                 GoverningLaw:        "German Federal Law",
                                 PlaceOfJurisdiction: "Königswinter, Germany",
                                 AttachedDocuments: []string{
-                                        "Gimel Foundation Articles of Association",
+                                        "AgentAuth Community Articles of Association",
                                         "Corporate Power of Attorney Certificate",
                                         "Technical Implementation Specifications",
                                 },
@@ -20974,7 +20974,7 @@ func (h *APIHandler) GetAPIDocumentation() map[string]any <span class="cov0" tit
 }</span>
 </pre>
 		
-		<pre class="file" id="file132" style="display: none">// Copyright 2025 Gimel Foundation
+		<pre class="file" id="file132" style="display: none">// Copyright 2025 AgentAuth Community
 // SPDX-License-Identifier: Apache-2.0
 
 package ai
@@ -57433,7 +57433,7 @@ func WithDurableReplayFromEnvUsingFactory() Option <span class="cov0" title="0">
 }
 </pre>
 		
-		<pre class="file" id="file264" style="display: none">// Copyright 2025 Gimel Foundation
+		<pre class="file" id="file264" style="display: none">// Copyright 2025 AgentAuth Community
 // SPDX-License-Identifier: Apache-2.0
 
 package gauth
@@ -57617,7 +57617,7 @@ func (s *BoltReplayStore) Count() (int, error) <span class="cov3" title="2">{
 }
 </pre>
 		
-		<pre class="file" id="file265" style="display: none">// Copyright 2025 Gimel Foundation
+		<pre class="file" id="file265" style="display: none">// Copyright 2025 AgentAuth Community
 // SPDX-License-Identifier: Apache-2.0
 
 package gauth

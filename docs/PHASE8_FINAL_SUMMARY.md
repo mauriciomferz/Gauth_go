@@ -151,7 +151,7 @@ Complete documentation:
 ## 🏗️ Architecture Overview
 
 ```
-GAuth OIDC Server (95% RFC Compliant)
+AgentAuth OIDC Server (95% RFC Compliant)
 │
 ├── Authentication Flows
 │   ├── Authorization Code Flow (RFC 6749)
@@ -419,7 +419,7 @@ $ wc -l pkg/oidc/{device_authorization,pushed_authorization,storage*,rate_limite
 
 ## 🎉 Conclusion
 
-Phase 8 successfully delivers **production-ready infrastructure** for the GAuth OIDC server:
+Phase 8 successfully delivers **production-ready infrastructure** for the AgentAuth OIDC server:
 
 ### Summary of Achievements
 ✅ **3,355 lines** of production code  
@@ -447,7 +447,7 @@ Phase 8 successfully delivers **production-ready infrastructure** for the GAuth 
 ✅ Comprehensive documentation  
 
 ### System Capabilities
-The GAuth OIDC server now supports:
+The AgentAuth OIDC server now supports:
 - ✅ Traditional web/mobile authentication flows
 - ✅ Browserless device flows (smart TVs, IoT)
 - ✅ High-security scenarios (PAR, PKCE)

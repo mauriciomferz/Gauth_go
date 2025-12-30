@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GAuth Governance & Observability Fragment
+  title: AgentAuth Governance & Observability Fragment
   version: 0.3.1-beta-refactor
   description: |
     This fragment documents governance and observability endpoints for integration.

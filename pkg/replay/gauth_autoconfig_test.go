@@ -8,9 +8,9 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
 )
 
-// TestGAuthDurableReplayAutoConfig demonstrates automatic durable replay store configuration
+// TestAgentAuthDurableReplayAutoConfig demonstrates automatic durable replay store configuration
 // using the factory pattern. This tests sec6.item1 P1 completion.
-func TestGAuthDurableReplayAutoConfig(t *testing.T) {
+func TestAgentAuthDurableReplayAutoConfig(t *testing.T) {
 	// Setup: Configure environment variables
 	walPath := "./testdata/gauth_autoconfig_replay.wal"
 	defer os.RemoveAll("./testdata")
@@ -24,7 +24,7 @@ func TestGAuthDurableReplayAutoConfig(t *testing.T) {
 
 	// Register the replay factory (this would typically be done in init() or main())
 	gauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (gauth.ReplayStore, error) {
-		return NewGAuthReplayStoreFromEnv(metrics)
+		return NewAgentAuthReplayStoreFromEnv(metrics)
 	})
 
 	// Create gauth service with auto-configured durable replay store
@@ -93,8 +93,8 @@ func TestGAuthDurableReplayAutoConfig(t *testing.T) {
 	t.Logf("   - All validations passed")
 }
 
-// TestGAuthDurableReplayPersistence tests that replay protection persists across restarts.
-func TestGAuthDurableReplayPersistence(t *testing.T) {
+// TestAgentAuthDurableReplayPersistence tests that replay protection persists across restarts.
+func TestAgentAuthDurableReplayPersistence(t *testing.T) {
 	walPath := "./testdata/gauth_persist_replay.wal"
 	defer os.RemoveAll("./testdata")
 
@@ -107,7 +107,7 @@ func TestGAuthDurableReplayPersistence(t *testing.T) {
 
 	// Register factory
 	gauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (gauth.ReplayStore, error) {
-		return NewGAuthReplayStoreFromEnv(metrics)
+		return NewAgentAuthReplayStoreFromEnv(metrics)
 	})
 
 	config := gauth.Config{
@@ -195,8 +195,8 @@ func TestGAuthDurableReplayPersistence(t *testing.T) {
 	t.Logf("   - WAL recovery successful")
 }
 
-// TestGAuthDurableReplayEvictionPolicies tests different eviction policies.
-func TestGAuthDurableReplayEvictionPolicies(t *testing.T) {
+// TestAgentAuthDurableReplayEvictionPolicies tests different eviction policies.
+func TestAgentAuthDurableReplayEvictionPolicies(t *testing.T) {
 	testCases := []struct {
 		name   string
 		policy string
@@ -222,7 +222,7 @@ func TestGAuthDurableReplayEvictionPolicies(t *testing.T) {
 			defer os.Unsetenv("GAUTH_REPLAY_EVICTION_MAX_SIZE")
 
 			gauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (gauth.ReplayStore, error) {
-				return NewGAuthReplayStoreFromEnv(metrics)
+				return NewAgentAuthReplayStoreFromEnv(metrics)
 			})
 
 			config := gauth.Config{

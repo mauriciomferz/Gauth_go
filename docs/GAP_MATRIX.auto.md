@@ -1,4 +1,4 @@
-# GAuth RFC Gap Matrix (Generated)
+# AgentAuth RFC Gap Matrix (Generated)
 
 > Generated: 2025-12-25T15:01:14Z
 

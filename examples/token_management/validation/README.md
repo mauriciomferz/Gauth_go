@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates custom and chain-based token validation using GAuth's token package.
+This example demonstrates custom and chain-based token validation using AgentAuth's token package.
 
 ## Key Concepts
 - **CustomValidator**: Implements issuer-based validation logic.

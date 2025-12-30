@@ -1,6 +1,6 @@
 <!-- trunk-ignore-all(prettier) -->
 ---
-title: GAuth 1.0 Architecture Documentation
+title: AgentAuth 1.0 Architecture Documentation
 category: architecture
 status: active
 lastUpdated: 2025-12-07
@@ -8,7 +8,7 @@ owners: architecture-team
 source: manual-curation
 refreshCadence: quarterly
 ---
-# GAuth 1.0 - Architecture Documentation
+# AgentAuth 1.0 - Architecture Documentation
 
 **Version**: 1.0  
 **Last Updated**: December 7, 2025  
@@ -32,7 +32,7 @@ refreshCadence: quarterly
 
 ## Overview
 
-GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core Authorization Protocol) and RFC 0115 (Proof-of-Authorization Tokens). It provides:
+AgentAuth 1.0 is a comprehensive authorization framework implementing AAP-001 (Core Authorization Protocol) and AAP-002 (Proof-of-Authorization Tokens). It provides:
 
 - **Delegated Authorization** - Chain of authority with cryptographic proofs
 - **Policy-Based Access Control** - ABAC, RBAC, and hybrid models
@@ -47,7 +47,7 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 3. **Auditability** - Complete audit trail for all operations
 4. **Extensibility** - Plugin architecture for custom policies
 5. **Performance** - Sub-millisecond authorization decisions
-6. **Standards Compliance** - RFC 0111/0115 conformance
+6. **Standards Compliance** - AAP-001/0115 conformance
 
 ---
 
@@ -130,7 +130,7 @@ GAuth 1.0 is a comprehensive authorization framework implementing RFC 0111 (Core
 - **Delegation** (`pkg/delegation`): Delegation chain management
 
 #### 3. Core Engine Layer
-- **GAuth Engine** (`pkg/gauth`): Central orchestration
+- **AgentAuth Engine** (`pkg/gauth`): Central orchestration
 - **POA Management** (`pkg/poa`): Proof-of-authorization tokens
 - **Policy Decision Point** (`pkg/pdp`): Advanced policy evaluation
 
@@ -322,7 +322,7 @@ Alice (Root Authority)
 - POA token issuance
 - Multi-signature coordination
 - CBOR encoding/decoding
-- RFC 0115 compliance validation
+- AAP-002 compliance validation
 - Chain serialization
 
 **Test Coverage**: 49.1% (practical limit) ✅
@@ -640,7 +640,7 @@ Old Key Archived (verification only)
 
 ```
 ┌─────────────────────────────────┐
-│      GAuth Standalone           │
+│      AgentAuth Standalone           │
 │                                 │
 │  - All-in-one binary            │
 │  - SQLite/BoltDB storage        │
@@ -679,7 +679,7 @@ Old Key Archived (verification only)
 │  └────┬────┘            │
 │       │                 │
 │  ┌────┴────┐            │
-│  │ GAuth   │            │
+│  │ AgentAuth   │            │
 │  │ Sidecar │            │
 │  └─────────┘            │
 └─────────────────────────┘
@@ -699,7 +699,7 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
     // Extract authorization token
     token := r.Header.Get("Authorization")
     
-    // Call GAuth service
+    // Call AgentAuth service
     resp, err := gauthClient.Authorize(&AuthRequest{
         Token:    token,
         Resource: "/api/documents/123",
@@ -722,7 +722,7 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 ### 2. Middleware Integration
 
 ```go
-// GAuth authorization middleware
+// AgentAuth authorization middleware
 func AuthzMiddleware(gauthClient *gauth.Client) func(next http.Handler) http.Handler {
     return func(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -740,7 +740,7 @@ func AuthzMiddleware(gauthClient *gauth.Client) func(next http.Handler) http.Han
 ### 3. Service Mesh Integration
 
 ```yaml
-# Envoy filter for GAuth
+# Envoy filter for AgentAuth
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
@@ -758,7 +758,7 @@ spec:
 
 ## Conclusion
 
-GAuth 1.0 provides a comprehensive, production-ready authorization framework with:
+AgentAuth 1.0 provides a comprehensive, production-ready authorization framework with:
 
 - ✅ **Security**: Cryptographic verification, zero trust
 - ✅ **Performance**: Sub-millisecond authorization decisions

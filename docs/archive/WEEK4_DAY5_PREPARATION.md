@@ -41,7 +41,7 @@
 ## Week 4 Day 5 Objectives
 
 ### Primary Goal
-**Deploy GAuth to actual Kubernetes staging cluster and validate blue-green deployment strategy under real-world conditions.**
+**Deploy AgentAuth to actual Kubernetes staging cluster and validate blue-green deployment strategy under real-world conditions.**
 
 ### Detailed Objectives
 

@@ -12,18 +12,18 @@ func TestSemanticRatesPrometheus(t *testing.T) {
 	t.Setenv("GAUTH_SEMANTIC_PERSIST_PATH", "") // disable persistence interference
 	srv := NewBetaServer("8123")
 	t.Cleanup(func() { srv.Shutdown() })
-	if srv.rfc0111Service == nil {
-		t.Fatalf("RFC0111 service not initialized; GAUTH_DISABLE_RFC0111_SERVICE should not be set")
+	if srv.aap001Service == nil {
+		t.Fatalf("AAP001 service not initialized; GAUTH_DISABLE_AAP001_SERVICE should not be set")
 	}
 	// Inject Mock Service
-	mockSvc := &mockRFC0111Service{
+	mockSvc := &mockAAP001Service{
 		snapshots: []map[string]uint64{
 			{"scope_violation": 10},
 			{"scope_violation": 20}, // Rate ~10/sec (if delay 1s)
 			{"scope_violation": 30},
 		},
 	}
-	srv.rfc0111Service = mockSvc
+	srv.aap001Service = mockSvc
 	srv.semanticHandler.Service = mockSvc
 
 	// Update to establish baseline

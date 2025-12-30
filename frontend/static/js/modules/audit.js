@@ -193,4 +193,4 @@ export function auditInit() {
 }
 
 // Legacy global bridge (for compatibility)
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { viewAuditLog, generateReport, downloadAuditLog });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { viewAuditLog, generateReport, downloadAuditLog });

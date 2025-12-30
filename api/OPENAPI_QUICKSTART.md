@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth+ OpenAPI Documentation - Quick Reference
+# AgentAuth+ OpenAPI Documentation - Quick Reference
 
 ## 📚 Files in this Directory
 

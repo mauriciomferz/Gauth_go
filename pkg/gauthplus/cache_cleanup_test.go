@@ -54,7 +54,7 @@ func TestDelegationChainCache_CleanupLoop(t *testing.T) {
 	assert.Equal(t, 0, cache.Size(), "Delegation cache should be empty after cleanup loop")
 }
 
-func TestGAuthPlusCaches_Lifecycle(t *testing.T) {
+func TestAgentAuthPlusCaches_Lifecycle(t *testing.T) {
 	// Verify no panics/leaks on rapid open/close
 	c1 := NewCapabilityCache(time.Minute)
 	c1.Close()

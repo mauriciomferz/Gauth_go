@@ -129,9 +129,9 @@ func TestGeographicScopeValidation_Failure(t *testing.T) {
 		t.Error("Expected error for unauthorized region, got nil")
 	}
 
-	gauthErr, ok := err.(*GAuthError)
+	gauthErr, ok := err.(*AgentAuthError)
 	if !ok {
-		t.Errorf("Expected GAuthError, got %T", err)
+		t.Errorf("Expected AgentAuthError, got %T", err)
 	} else if gauthErr.Code != "geographic_scope_violation" {
 		t.Errorf("Expected error code 'geographic_scope_violation', got '%s'", gauthErr.Code)
 	}
@@ -254,9 +254,9 @@ func TestGeographicScopeValidation_NoScopeStrict(t *testing.T) {
 		t.Error("Expected error in strict mode for PoA without geographic scope, got nil")
 	}
 
-	gauthErr, ok := err.(*GAuthError)
+	gauthErr, ok := err.(*AgentAuthError)
 	if !ok {
-		t.Errorf("Expected GAuthError, got %T", err)
+		t.Errorf("Expected AgentAuthError, got %T", err)
 	} else if gauthErr.Code != "no_geographic_scope" {
 		t.Errorf("Expected error code 'no_geographic_scope', got '%s'", gauthErr.Code)
 	}

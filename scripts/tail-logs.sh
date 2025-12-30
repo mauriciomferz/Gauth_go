@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Tail logs for GAuth web demo
+# Tail logs for AgentAuth web demo
 LOG_FILE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/gauth-web.log"
 
 if [[ ! -f "$LOG_FILE" ]]; then

@@ -1,11 +1,11 @@
 #!/bin/bash
-# Performance Testing Script for GAuth QA Enhancements
+# Performance Testing Script for AgentAuth QA Enhancements
 # Task 8: Performance Testing & Optimization
 
 set -e
 
 echo "=================================="
-echo "GAuth Performance Testing Suite"
+echo "AgentAuth Performance Testing Suite"
 echo "Task 8: QA Enhancement Initiative"
 echo "=================================="
 echo ""
@@ -92,7 +92,7 @@ echo "=== 8. Performance Summary ==="
 SUMMARY_FILE="$OUTPUT_DIR/summary_${TIMESTAMP}.txt"
 
 {
-    echo "GAuth Performance Test Summary"
+    echo "AgentAuth Performance Test Summary"
     echo "=============================="
     echo "Date: $(date)"
     echo "Go Version: $(go version)"

@@ -1,4 +1,4 @@
-# GAuth Multi-Region Deployment Guide
+# AgentAuth Multi-Region Deployment Guide
 
 **Version**: 1.0  
 **Date**: November 26, 2025  
@@ -660,6 +660,6 @@ See `monitoring/prometheus/alerts/multi-region-alerts.yml` for complete alert de
 
 **Deployment Complete! 🎉**
 
-GAuth is now deployed across multiple regions with automatic failover, achieving **98/100 compliance**.
+AgentAuth is now deployed across multiple regions with automatic failover, achieving **98/100 compliance**.
 
 For support, contact: infrastructure-team@example.com

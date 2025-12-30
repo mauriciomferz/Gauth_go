@@ -194,7 +194,7 @@ gauth:session:{sessionID}      # User sessions
 After completing Quick Wins, the following items remain:
 
 1. **Smart Contract Deployment** (+2 points)
-   - Deploy GAuth smart contracts to Ethereum Sepolia testnet
+   - Deploy AgentAuth smart contracts to Ethereum Sepolia testnet
    - Verify contracts on Etherscan
    - Estimated effort: 2-3 days
 

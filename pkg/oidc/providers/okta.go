@@ -16,7 +16,7 @@ const (
 	OktaDefaultTrust = "substantial"
 )
 
-// OktaClaimMappings defines how Okta OIDC claims map to GAuth claims.
+// OktaClaimMappings defines how Okta OIDC claims map to AgentAuth claims.
 // Okta provides enterprise-grade claims with group information.
 var OktaClaimMappings = map[string]string{
 	"sub":                "user_id",        // Unique user identifier
@@ -166,7 +166,7 @@ func (p *OktaProvider) hasMFA(claims *oidc.IDTokenClaims) bool {
 	return false
 }
 
-// MapClaims maps Okta OIDC claims to GAuth format.
+// MapClaims maps Okta OIDC claims to AgentAuth format.
 func (p *OktaProvider) MapClaims(claims map[string]interface{}) map[string]interface{} {
 	mapped := make(map[string]interface{})
 
@@ -191,7 +191,7 @@ func (p *OktaProvider) MapClaims(claims map[string]interface{}) map[string]inter
 func (p *OktaProvider) GetTrustLevel(claims *oidc.IDTokenClaims) string {
 	// Check if ACR is present in claims
 	if claims.ACR != "" {
-		// Map Okta ACR to GAuth trust level
+		// Map Okta ACR to AgentAuth trust level
 		switch claims.ACR {
 		case "urn:okta:loa:2fa:any", "urn:okta:loa:2fa:any:ifpossible":
 			return "high" // Two-factor authentication

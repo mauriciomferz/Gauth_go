@@ -1,5 +1,5 @@
-// GAuth Demo Handlers - Connect webapp UI to real backend functionality
-class GAuthDemoHandlers {
+// AgentAuth Demo Handlers - Connect webapp UI to real backend functionality
+class AgentAuthDemoHandlers {
     constructor(apiClient) {
         this.api = apiClient;
         this.activeStreams = new Map();
@@ -809,7 +809,7 @@ class GAuthDemoHandlers {
         const target = document.getElementById('learning-path');
         if (target) {
             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            this.showSuccess('Starting your GAuth learning journey!');
+            this.showSuccess('Starting your AgentAuth learning journey!');
         }
     }
 
@@ -826,12 +826,12 @@ class GAuthDemoHandlers {
 // Initialize demo handlers when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     // Wait for API client to be available
-    if (window.GAuthAPI) {
-        window.gAuthDemo = new GAuthDemoHandlers(window.GAuthAPI);
-        console.log('GAuth Demo Handlers initialized');
+    if (window.AgentAuthAPI) {
+        window.gAuthDemo = new AgentAuthDemoHandlers(window.AgentAuthAPI);
+        console.log('AgentAuth Demo Handlers initialized');
     } else {
-        console.error('GAuth API Client not available');
+        console.error('AgentAuth API Client not available');
     }
 });
 
-console.log('GAuth Demo Handlers loaded');
+console.log('AgentAuth Demo Handlers loaded');

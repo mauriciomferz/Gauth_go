@@ -432,7 +432,7 @@ func TestSignatureManager_GetSignatures(t *testing.T) {
 		t.Fatalf("SubmitSignature failed: %v", err)
 	}
 
-	// Get signatures in RFC0111 format
+	// Get signatures in AAP001 format
 	signatures, err := manager.GetSignatures(ctx, "poa-8")
 	if err != nil {
 		t.Fatalf("Failed to get signatures: %v", err)

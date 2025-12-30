@@ -1,4 +1,4 @@
--- Create GAuth+ Subsystem Tables
+-- Create AgentAuth+ Subsystem Tables
 
 -- 1. successor_activations
 CREATE TABLE IF NOT EXISTS successor_activations (

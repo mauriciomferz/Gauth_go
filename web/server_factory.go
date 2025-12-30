@@ -749,8 +749,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	gnapRSStore := gnapPkg.NewMemoryResourceServerStore() // RFC 9767 Support
 	gnapBaseURL := envFallback("GAUTH_GNAP_BASE_URL", "http://localhost:8080")
 
-	// Create VerificationService for GNAP-GAuth integration (nil for now - wire later with DB services)
-	// Create VerificationService for GNAP-GAuth integration
+	// Create VerificationService for GNAP-AgentAuth integration (nil for now - wire later with DB services)
+	// Create VerificationService for GNAP-AgentAuth integration
 	var gnapVerificationService gauthplus.VerificationService
 
 	if s.db != nil {
@@ -779,7 +779,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		gnapVerificationService = gauthplus.NewVerificationService(
 			poaStore, delSvc, capSvc, fidSvc, principalVerifier, attestationVerifier, attestationSigner, registerService,
 		)
-		fmt.Println("GAuth+ VerificationService wired with PostgreSQL storage (cached) and Hardened Verifiers")
+		fmt.Println("AgentAuth+ VerificationService wired with PostgreSQL storage (cached) and Hardened Verifiers")
 	}
 
 	gnapHandler := gnapHandlers.NewHandler(gnapStore, gnapVerificationService, gnapBaseURL)
@@ -1020,7 +1020,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			// Note: s.violationHandler.Service field needs to be set.
 			// server_clean.go line 1963: s.violationHandler.Service = primary
 			if s.tokenHandler != nil {
-				s.tokenHandler.SetGAuthService(primary)
+				s.tokenHandler.SetAgentAuthService(primary)
 			}
 			// Wait, check type compatibility: primary(*gauth.Service) vs ViolationProvider interface.
 			// Assuming it satisfies it.
@@ -1032,10 +1032,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 
-	// Initialize RFC0111 Semantic Interoperability Service
-	// Initialize RFC0111 service (semantic counters) unless disabled (GAUTH_DISABLE_RFC0111_SERVICE=1)
-	if os.Getenv("GAUTH_DISABLE_RFC0111_SERVICE") != "1" {
-		// Create an RFC0111 service using in-memory audit logger and existing authorizer policies.
+	// Initialize AAP001 Semantic Interoperability Service
+	// Initialize AAP001 service (semantic counters) unless disabled (GAUTH_DISABLE_AAP001_SERVICE=1)
+	if os.Getenv("GAUTH_DISABLE_AAP001_SERVICE") != "1" {
+		// Create an AAP001 service using in-memory audit logger and existing authorizer policies.
 		memAudit := audit.NewMemoryLogger(nil)
 		if s.authorizer == nil {
 			s.authorizer = authz.NewMemoryAuthorizer()
@@ -1047,8 +1047,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			rfcOpts = append(rfcOpts, gauth_rfc_001.WithReplayStoreRedis(s.redisClient.GetClient(), "gauth", 5*time.Minute))
 		}
 		svc := gauth_rfc_001.NewService(memAudit, s.authorizer, rfcOpts...)
-		s.rfc0111Service = svc
-		fmt.Fprintln(os.Stderr, "[rfc0111] service initialized (semantic counters active)")
+		s.aap001Service = svc
+		fmt.Fprintln(os.Stderr, "[aap001] service initialized (semantic counters active)")
 		// Mount dual-control revocation workflow HTTP endpoints.
 		// NOTE: s.mountRevocationWorkflow() method must be present in server_clean.go (or extracted).
 		// Since we are in the same package 'web', we can call it if it exists on *BetaServer.
@@ -1057,7 +1057,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Initialize Semantic Handler (duplicate init logic if NewBetaServerWithMetrics is standalone)
 	// Inject the service into the handler
-	s.semanticHandler.Service = s.rfc0111Service
+	s.semanticHandler.Service = s.aap001Service
 	s.semanticAPI = semantic.NewAPI(s.semanticHandler)
 	if err := s.semanticHandler.Load(); err != nil {
 		fmt.Printf("semantic load error: %v\n", err)
@@ -1125,9 +1125,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			metricsHandler := adminHandlers.NewMetricsHandler(registry, dbPool)
 			metricsHandler.RegisterRoutes(adminGroup)
 
-			// Register custom GAuth collector with global default registry for /metrics endpoint
+			// Register custom AgentAuth collector with global default registry for /metrics endpoint
 			// Ignore AlreadyRegisteredError to be safe in test environments
-			if err := prometheus.Register(adminHandlers.NewGAuthCollector(dbPool)); err != nil {
+			if err := prometheus.Register(adminHandlers.NewAgentAuthCollector(dbPool)); err != nil {
 				if _, ok := err.(prometheus.AlreadyRegisteredError); !ok {
 					fmt.Fprintf(os.Stderr, "[metrics] failed to register global custom collector: %v\n", err)
 				}
@@ -1179,18 +1179,18 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			adminGroup.POST("/policy-templates/:id/clone", policyTemplatesHandler.ClonePolicyTemplate)
 			adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
 
-			// GAuth+ enhanced authorization handler (Admin API)
-			gauthPlusHandler := adminHandlers.NewGAuthPlusHandler(dbPool)
+			// AgentAuth+ enhanced authorization handler (Admin API)
+			gauthPlusHandler := adminHandlers.NewAgentAuthPlusHandler(dbPool)
 			gauthPlusHandler.RegisterRoutes(adminGroup)
 
-			// GAuth+ Public API (v1) - Create services sharing the pool
+			// AgentAuth+ Public API (v1) - Create services sharing the pool
 			gplusDB := &database.DB{Pool: dbPool}
 			succSvc := gauthplus.NewPostgreSQLSuccessorService(gplusDB)
 			delSvc := gauthplus.NewPostgreSQLDelegationService(gplusDB)
 			dualSvc := gauthplus.NewPostgreSQLDualControlService(gplusDB)
 			capSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(gplusDB)
 			fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(gplusDB)
-			s.RegisterGAuthPlusEndpoints(succSvc, delSvc, dualSvc, capSvc, fidSvc)
+			s.RegisterAgentAuthPlusEndpoints(succSvc, delSvc, dualSvc, capSvc, fidSvc)
 
 			fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, gauthplus (17 total)") // OIDC authentication flow handler
 			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
@@ -1364,7 +1364,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 	// Background semantic anomaly sampler (optional): GAUTH_SEMANTIC_ANOMALY_BG_SEC (min 5s)
-	if s.rfc0111Service != nil && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
+	if s.aap001Service != nil && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
 		bgInterval := 0
 		if raw := os.Getenv("GAUTH_SEMANTIC_ANOMALY_BG_SEC"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil {
@@ -1560,8 +1560,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 							o.ObserveFloat64(g, sum300)
 						}
 					}
-					if s.rfc0111Service != nil {
-						ss := s.rfc0111Service.SemanticSnapshot()
+					if s.aap001Service != nil {
+						ss := s.aap001Service.SemanticSnapshot()
 						for k, g := range semanticGauges {
 							if v, ok := ss[k]; ok {
 								if v > math.MaxInt64 {
@@ -1927,7 +1927,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Middleware: Add global headers or checks
 	s.router.Use(func(c *gin.Context) {
-		c.Header("X-GAuth-Version", "beta-1.0")
+		c.Header("X-AgentAuth-Version", "beta-1.0")
 		c.Next()
 	})
 
@@ -1941,7 +1941,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.router.GET("/debug/state", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": "running",
-			"subs":   len(s.rfc0111Service.SemanticSnapshot()), // Example of peering into service
+			"subs":   len(s.aap001Service.SemanticSnapshot()), // Example of peering into service
 		})
 	})
 

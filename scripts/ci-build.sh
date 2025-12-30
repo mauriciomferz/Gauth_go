@@ -4,7 +4,7 @@
 
 set -e
 
-echo "🚀 GAuth CI Build Script"
+echo "🚀 AgentAuth CI Build Script"
 echo "========================"
 
 # Function to find gauth-server source

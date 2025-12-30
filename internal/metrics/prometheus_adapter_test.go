@@ -27,10 +27,10 @@ func TestAttestationTrustAnchorMetricsExposure(t *testing.T) {
 	}
 
 	wanted := map[string]float64{
-		"gauth_rfc0111_attestation_proof_trust_anchor_missing_total":            0,
-		"gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total": 0,
-		"gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total":       0,
-		"gauth_rfc0111_crypto_signature_missing_total":                          0,
+		"gauth_aap001_attestation_proof_trust_anchor_missing_total":            0,
+		"gauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total": 0,
+		"gauth_aap001_attestation_proof_trust_anchor_key_mismatch_total":       0,
+		"gauth_aap001_crypto_signature_missing_total":                          0,
 	}
 
 	seen := map[string]bool{}

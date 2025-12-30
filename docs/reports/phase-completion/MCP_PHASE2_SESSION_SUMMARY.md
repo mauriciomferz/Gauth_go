@@ -9,7 +9,7 @@
 
 ## Session Objectives
 
-**Primary Goal**: Implement MCP Phase 2 - Authorization Bridge to connect GAuth Extended Tokens with MCP operations through PDP policy evaluation.
+**Primary Goal**: Implement MCP Phase 2 - Authorization Bridge to connect AgentAuth Extended Tokens with MCP operations through PDP policy evaluation.
 
 **Success Criteria**:
 - ✅ Authorization bridge created for resource/tool/prompt operations
@@ -221,7 +221,7 @@ type AuthorizationResult struct {
 - Next phase will integrate bridge checks into client methods
 - Example: `client.ReadResource()` will call `bridge.AuthorizeResourceRead()` first
 
-### With Existing GAuth Components
+### With Existing AgentAuth Components
 - **Extended Token**: New MCP scope methods integrate seamlessly
 - **PDP Engine**: No changes required, works with existing policies
 - **PEP**: Authorization bridge can be called from PEP for MCP operations
@@ -291,7 +291,7 @@ $ go build ./...
 2. **Audit Logging** (2 days)
    - Create `pkg/mcp/audit_logger.go`
    - Log all MCP operations (authorized, denied, errors)
-   - Integration with GAuth audit system
+   - Integration with AgentAuth audit system
 
 3. **REST API Endpoints** (2 days)
    - Expose MCP operations via REST
@@ -330,7 +330,7 @@ $ go build ./...
 
 **Phase 2 Status**: ✅ **COMPLETE AND OPERATIONAL**
 
-The Authorization Bridge successfully bridges GAuth's comprehensive authorization framework with MCP operations. AI agents can now securely access external resources with:
+The Authorization Bridge successfully bridges AgentAuth's comprehensive authorization framework with MCP operations. AI agents can now securely access external resources with:
 
 - ✅ Full token validation
 - ✅ Scope-based access control

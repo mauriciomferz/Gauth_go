@@ -242,7 +242,7 @@ kubectl delete namespace gauth-staging
 
 ## Next Steps for Production
 
-1. **Replace mock server with actual GAuth application**
+1. **Replace mock server with actual AgentAuth application**
    - Build proper multi-arch Docker image
    - Update k8s-test-blue.yaml and k8s-test-green.yaml
    - Load new images into cluster

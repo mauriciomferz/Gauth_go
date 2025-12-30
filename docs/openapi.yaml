@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: GAuth Learning Lab API
+  title: AgentAuth Learning Lab API
   version: 0.4.0-beta
   description: >-
     RFC-0150 compliant authorization framework API for learning, experimentation, and compliance validation.
-    This comprehensive implementation provides endpoints for evaluation and demonstration of GAuth concepts,
+    This comprehensive implementation provides endpoints for evaluation and demonstration of AgentAuth concepts,
     authorization pattern testing, and RFC-0150 compliance verification.
     
     **Learning Features:**
@@ -21,8 +21,8 @@ info:
     - Cryptographic Standards: ✅ Complete
     - API & Integration: ✅ Complete
 externalDocs:
-  description: GAuth Learning Lab Documentation & RFC-0150 Compliance Guide
-  url: https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/tree/main/docs
+  description: AgentAuth Learning Lab Documentation & RFC-0150 Compliance Guide
+  url: https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/tree/main/docs
 tags:
   - name: learning
     description: Educational and learning path management
@@ -64,7 +64,7 @@ paths:
       tags: [learning]
       operationId: getLearningProgress
       description: |
-        Returns the user's progress through the GAuth learning modules including completed concepts,
+        Returns the user's progress through the AgentAuth learning modules including completed concepts,
         patterns explored, experiments conducted, and validations passed.
       responses:
         '200':
@@ -1030,11 +1030,11 @@ paths:
 
   /.well-known/gauth-configuration:
     get:
-      summary: GAuth configuration discovery
+      summary: AgentAuth configuration discovery
       tags: [discovery]
-      operationId: getGAuthConfiguration
+      operationId: getAgentAuthConfiguration
       description: |
-        Returns GAuth server configuration including supported algorithms,
+        Returns AgentAuth server configuration including supported algorithms,
         endpoints, and capabilities (similar to OAuth .well-known).
       responses:
         '200':
@@ -3047,7 +3047,7 @@ paths:
 
   /api/openapi/gauth.yaml:
     get:
-      summary: GAuth OpenAPI spec
+      summary: AgentAuth OpenAPI spec
       tags: [discovery]
       operationId: getOpenAPIGauthYaml
       responses:
@@ -3059,12 +3059,12 @@ paths:
 
   /api/v1/.well-known/gauth:
     get:
-      summary: GAuth well-known config
+      summary: AgentAuth well-known config
       tags: [discovery]
       operationId: getWellKnownGauth
       responses:
         '200':
-          description: GAuth configuration
+          description: AgentAuth configuration
           content:
             application/json:
               schema:
@@ -3521,7 +3521,7 @@ paths:
 
   /api/v1/gauth/action:
     post:
-      summary: GAuth action
+      summary: AgentAuth action
       tags: [learning]
       operationId: postGauthAction
       requestBody:

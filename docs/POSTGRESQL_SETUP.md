@@ -8,11 +8,11 @@ owners: [system]
 
 # PostgreSQL Setup Guide
 
-This guide covers setting up and using PostgreSQL persistence for RFC-0111 Extended Tokens in GAuth.
+This guide covers setting up and using PostgreSQL persistence for RFC-0111 Extended Tokens in AgentAuth.
 
 ## Overview
 
-GAuth now supports persistent storage for RFC-0111 extended tokens using PostgreSQL with JSONB storage for complex authorization structures. This enables:
+AgentAuth now supports persistent storage for RFC-0111 extended tokens using PostgreSQL with JSONB storage for complex authorization structures. This enables:
 
 - **Token Persistence**: Tokens survive server restarts
 - **Distributed Deployments**: Multiple server instances share token state
@@ -76,7 +76,7 @@ The `extended_tokens` table stores RFC-0111 tokens with:
 
 **OAuth 2.0 Fields:**
 - `access_token` (VARCHAR 512, PRIMARY KEY)
-- `token_type` (VARCHAR 50, default: 'GAuth-Extended-Token')
+- `token_type` (VARCHAR 50, default: 'AgentAuth-Extended-Token')
 - `expires_in` (BIGINT)
 - `refresh_token` (VARCHAR 512, nullable)
 - `scope` (TEXT[], nullable)
@@ -242,7 +242,7 @@ WHERE schemaname = 'public';
 ```go
 import (
     "context"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
 // Create PostgreSQL token store from DSN
@@ -564,7 +564,7 @@ docker-compose exec -T postgres psql -U gauth -d gauth < backup_20231115.sql
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/16/)
 - [JSONB Performance Tips](https://www.postgresql.org/docs/16/datatype-json.html)
 - [RFC-0111 Specification](../RFC0111_README.md)
-- [GAuth Architecture](../ARCHITECTURE.md)
+- [AgentAuth Architecture](../ARCHITECTURE.md)
 
 ## Support
 

@@ -11,7 +11,7 @@ owners: [system]
 > **Status**: Production-Ready (77 tests, 100% pass rate, 67k ops/sec, P99 <30ms)  
 > **Last Updated**: November 26, 2025
 
-This package implements comprehensive revocation for GAuth Power-of-Attorney (PoA) credentials with three complementary strategies: **Two-Phase Revocation** (TOCTOU prevention), **Optimistic Revocation** (fairness), and **Circuit Breaker** (automated protection).
+This package implements comprehensive revocation for AgentAuth Power-of-Attorney (PoA) credentials with three complementary strategies: **Two-Phase Revocation** (TOCTOU prevention), **Optimistic Revocation** (fairness), and **Circuit Breaker** (automated protection).
 
 ## 📚 Documentation
 

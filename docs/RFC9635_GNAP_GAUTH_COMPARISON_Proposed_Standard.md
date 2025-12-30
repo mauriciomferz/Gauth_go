@@ -1,28 +1,28 @@
 ---
-title: RFC 9635 (GNAP) vs GAuth (RFC 0111/0115) - Comprehensive Comparison
+title: RFC 9635 (GNAP) vs AgentAuth (AAP-001/0115) - Comprehensive Comparison
 category: guide
 status: active
 lastUpdated: 2025-11-19
 owners: architecture-team
 ---
 
-# RFC 9635 (GNAP) vs GAuth (RFC 0111/0115) - Comprehensive Comparison
+# RFC 9635 (GNAP) vs AgentAuth (AAP-001/0115) - Comprehensive Comparison
 
 ## Executive Summary
 
 **RFC 9635** is an IETF Standards Track specification (October 2024) that defines the Grant Negotiation and Authorization Protocol (GNAP) - a next-generation authorization framework designed to replace OAuth 2.0.
 
-**GAuth** is a Gimel Foundation specification (RFC 0111/0115, August 2025) designed as a comprehensive authorization framework specifically for AI governance, Power of Attorney delegation, and legal compliance.
+**AgentAuth** is a AgentAuth Community specification (AAP-001/0115, August 2025) designed as a comprehensive authorization framework specifically for AI governance, Power of Attorney delegation, and legal compliance.
 
-**Key Finding**: GNAP is a **modern successor to OAuth 2.0** focused on flexible, negotiated authorization, while GAuth is a **specialized framework for AI systems** that builds on OAuth 2.0 with added legal/compliance layers. They address related but distinct problem spaces.
+**Key Finding**: GNAP is a **modern successor to OAuth 2.0** focused on flexible, negotiated authorization, while AgentAuth is a **specialized framework for AI systems** that builds on OAuth 2.0 with added legal/compliance layers. They address related but distinct problem spaces.
 
 ---
 
 ## 1. High-Level Comparison
 
-| Aspect | **RFC 9635 (GNAP)** | **GAuth (RFC 0111/0115)** |
+| Aspect | **RFC 9635 (GNAP)** | **AgentAuth (AAP-001/0115)** |
 |:-------|:-------------------|:--------------------------|
-| **Standards Body** | IETF (Internet Engineering Task Force) | Gimel Foundation |
+| **Standards Body** | IETF (Internet Engineering Task Force) | AgentAuth Community |
 | **Publication Date** | October 2024 | August 2025 |
 | **Primary Goal** | Modern, flexible authorization protocol to replace OAuth 2.0 | AI authorization framework with Power of Attorney |
 | **Built On** | New protocol (not OAuth 2.0 extension) | OAuth 2.0, OpenID Connect, MCP |
@@ -63,7 +63,7 @@ Processing → Pending → Approved → Finalized
 - Continuation access tokens
 - Token rotation and management API
 
-#### GAuth (RFC 0111/0115)
+#### AgentAuth (AAP-001/0115)
 
 **Roles** (P*P Architecture):
 - **PEP** (Power Enforcement Point): Supply & demand side
@@ -149,7 +149,7 @@ Access token issued
 }
 ```
 
-#### GAuth Authorization Flow
+#### AgentAuth Authorization Flow
 
 ```
 Subscription Setup (One-time)
@@ -166,7 +166,7 @@ Per-Request Flow
   c-i. Extended token issuance
 ```
 
-**Example GAuth Request**:
+**Example AgentAuth Request**:
 ```json
 {
   "subscription_id": "sub_abc123",
@@ -178,7 +178,7 @@ Per-Request Flow
 }
 ```
 
-**Example GAuth Response**:
+**Example AgentAuth Response**:
 ```json
 {
   "extended_token": {
@@ -227,12 +227,12 @@ Per-Request Flow
 - **Multiple Tokens**: Can request multiple labeled tokens
 - **Negotiable Rights**: AS can modify requested access
 
-#### GAuth Extended Tokens
+#### AgentAuth Extended Tokens
 
 ```json
 {
   "access_token": "gauth_at_...",
-  "token_type": "GAuth-Extended",
+  "token_type": "AgentAuth-Extended",
   "power_of_attorney": {
     "poa_id": "poa_xyz789",
     "issuer": "Owner's Authorizer",
@@ -298,7 +298,7 @@ Per-Request Flow
 - **Dynamic Registration**: AS can return instance_id
 - **Key Rotation**: Supports rotation
 
-#### GAuth
+#### AgentAuth
 
 **Client Identification**:
 ```json
@@ -350,7 +350,7 @@ Per-Request Flow
 - **Interaction Hash**: Cryptographic binding (hash = BASE64URL(SHA-256(nonce + finish_nonce + interact_ref + AS_URI)))
 - **One-Time Use**: Interaction references expire after use
 
-#### GAuth Interaction
+#### AgentAuth Interaction
 
 **Subscription Phase** (One-Time):
 - Identity verification (PVP)
@@ -397,7 +397,7 @@ Signature: sig1=...
 - **Key Formats**: JWK, JWKS URI, certificate
 - **Asymmetric Preferred**: Symmetric keys discouraged
 
-#### GAuth
+#### AgentAuth
 
 **Proofing Methods**:
 - HTTP Signature (same as GNAP)
@@ -416,7 +416,7 @@ Signature: sig1=...
 
 ### 3.1 Problem Space
 
-| GNAP | GAuth |
+| GNAP | AgentAuth |
 |:-----|:------|
 | **General-purpose authorization** | **AI-specific authorization** |
 | Replace OAuth 2.0 limitations | Regulate AI agents with legal authority |
@@ -431,7 +431,7 @@ Signature: sig1=...
 - **Continuation**: Single grant continues across interactions
 - **State Transitions**: Complex state machine
 
-#### GAuth
+#### AgentAuth
 - **Subscription-Based**: Upfront relationship establishment
 - **Fixed Scope**: Scope defined in subscription
 - **Per-Request**: New token per transaction
@@ -452,7 +452,7 @@ End User ───→ Client Instance
 
 **Single-Level Delegation**: RO delegates to client
 
-#### GAuth
+#### AgentAuth
 ```
 Owner's Authorizer (Statutory Authority)
          ↓
@@ -475,7 +475,7 @@ Resource Server validates chain
 - Resource Server Connections ([RFC 9396] - if ever published) would add introspection
 - Token management API (rotate/revoke)
 
-#### GAuth
+#### AgentAuth
 - **Self-contained validation** primary method
 - Optional compliance tracking via AS
 - Revocation checking
@@ -485,9 +485,9 @@ Resource Server validates chain
 
 ## 4. Similarities
 
-Despite their differences, GNAP and GAuth share several concepts:
+Despite their differences, GNAP and AgentAuth share several concepts:
 
-| Feature | GNAP | GAuth |
+| Feature | GNAP | AgentAuth |
 |:--------|:-----|:------|
 | **Stateful Protocol** | ✅ Explicit state machine | ✅ Subscription + Request state |
 | **Key-Bound Tokens** | ✅ Preferred (bearer optional) | ✅ Always (no bearer) |
@@ -501,15 +501,15 @@ Despite their differences, GNAP and GAuth share several concepts:
 
 ## 5. Integration Possibilities
 
-### Can GAuth Use GNAP?
+### Can AgentAuth Use GNAP?
 
-**Conceptually Possible**: GAuth could adopt GNAP's interaction modes and token management while retaining its PoA/compliance layer.
+**Conceptually Possible**: AgentAuth could adopt GNAP's interaction modes and token management while retaining its PoA/compliance layer.
 
 **Potential Integration**:
 
 ```
 ┌────────────────────────────────────┐
-│    GAuth Legal/Compliance Logic    │
+│    AgentAuth Legal/Compliance Logic    │
 │  • Power of Attorney               │
 │  • Authorization Chains            │
 │  • Commercial Register             │
@@ -525,7 +525,7 @@ Despite their differences, GNAP and GAuth share several concepts:
 
 **Integration Steps**:
 
-1. **Map GAuth Subscription to GNAP Client Registration**
+1. **Map AgentAuth Subscription to GNAP Client Registration**
    - Use GNAP's dynamic instance_id
    - Store PoA credentials with instance
 
@@ -551,7 +551,7 @@ Despite their differences, GNAP and GAuth share several concepts:
   "expires_in": 3600,
   "manage": {...},
   
-  // GAuth extensions
+  // AgentAuth extensions
   "power_of_attorney": {
     "poa_id": "poa_xyz",
     "issuer": "Owner's Authorizer"
@@ -581,7 +581,7 @@ Despite their differences, GNAP and GAuth share several concepts:
 - API platforms
 - Microservices authorization
 
-### Use GAuth (RFC 0111/0115) When:
+### Use AgentAuth (AAP-001/0115) When:
 
 ✅ Authorizing **AI agents** or autonomous systems  
 ✅ **Legal power of attorney** relationships must be modeled  
@@ -600,7 +600,7 @@ Despite their differences, GNAP and GAuth share several concepts:
 ### Use Both Together When:
 
 ✅ Building **modern authorization** for **AI systems with legal authority**  
-✅ Want **GNAP's flexibility** + **GAuth's compliance**  
+✅ Want **GNAP's flexibility** + **AgentAuth's compliance**  
 ✅ Need **grant negotiation** + **authorization chains**  
 ✅ Regulatory **AI systems** needing **interoperability**  
 
@@ -608,24 +608,24 @@ Despite their differences, GNAP and GAuth share several concepts:
 
 ## 7. Technical Comparison Summary
 
-| Feature | GNAP | GAuth | Winner |
+| Feature | GNAP | AgentAuth | Winner |
 |:--------|:-----|:------|:-------|
 | **Flexibility** | High (Grant negotiation) | Medium (Subscription fixed) | GNAP |
-| **Legal Framework** | None | Comprehensive (PoA, compliance) | GAuth |
+| **Legal Framework** | None | Comprehensive (PoA, compliance) | AgentAuth |
 | **Interaction Modes** | 4+ modes | Subscription + request | GNAP |
 | **State Management** | Explicit states | Implicit (subscription-based) | GNAP |
-| **Token Security** | Optional bearer | Always bound | GAuth |
-| **Delegation Depth** | Single-level | Multi-level chains | GAuth |
-| **Compliance Tracking** | None | Built-in | GAuth |
-| **Standards Ecosystem** | IETF | Gimel Foundation | GNAP |
-| **AI Governance** | Not addressed | Core feature | GAuth |
-| **Commercial Register** | Not addressed | Integrated | GAuth |
+| **Token Security** | Optional bearer | Always bound | AgentAuth |
+| **Delegation Depth** | Single-level | Multi-level chains | AgentAuth |
+| **Compliance Tracking** | None | Built-in | AgentAuth |
+| **Standards Ecosystem** | IETF | AgentAuth Community | GNAP |
+| **AI Governance** | Not addressed | Core feature | AgentAuth |
+| **Commercial Register** | Not addressed | Integrated | AgentAuth |
 
 ---
 
 ## 8. Evolution and Timeline
 
-### OAuth 2.0 → GNAP → GAuth
+### OAuth 2.0 → GNAP → AgentAuth
 
 ```
 OAuth 2.0 (2012)
@@ -642,14 +642,14 @@ GNAP (2024)
 • Multiple interaction modes
 • Token management
     ↓
-GAuth (2025)
+AgentAuth (2025)
 • Builds on OAuth 2.0 concepts
 • Adds PoA framework
 • Adds compliance layer
 • Specialized for AI
 ```
 
-**Key Insight**: GNAP is OAuth 2.0's **successor**, while GAuth is OAuth 2.0's **specialized extension**.
+**Key Insight**: GNAP is OAuth 2.0's **successor**, while AgentAuth is OAuth 2.0's **specialized extension**.
 
 ---
 
@@ -685,7 +685,7 @@ Signature: sig1=...
 }
 ```
 
-### GAuth Request
+### AgentAuth Request
 
 ```http
 POST /v1/token/rfc HTTP/1.1
@@ -707,14 +707,14 @@ Signature: ...
 
 ## 10. Conclusion
 
-**GNAP and GAuth serve different purposes**:
+**GNAP and AgentAuth serve different purposes**:
 
 - **GNAP (RFC 9635)**: Modern, flexible authorization protocol designed to replace OAuth 2.0 for general-purpose use cases
-- **GAuth (RFC 0111/0115)**: Specialized authorization framework for AI systems with legal power of attorney and compliance requirements
+- **AgentAuth (AAP-001/0115)**: Specialized authorization framework for AI systems with legal power of attorney and compliance requirements
 
-**They are NOT competing** - GNAP provides technical authorization flexibility, while GAuth provides legal/compliance governance for AI.
+**They are NOT competing** - GNAP provides technical authorization flexibility, while AgentAuth provides legal/compliance governance for AI.
 
-**Potential Synergy**: GAuth could adopt GNAP's interaction modes and token management while maintaining its unique PoA and compliance features, creating a powerful hybrid for regulated AI systems.
+**Potential Synergy**: AgentAuth could adopt GNAP's interaction modes and token management while maintaining its unique PoA and compliance features, creating a powerful hybrid for regulated AI systems.
 
 ---
 
@@ -722,7 +722,7 @@ Signature: ...
 
 - [RFC 9635 - Grant Negotiation and Authorization Protocol (GNAP)](https://datatracker.ietf.org/doc/rfc9635/)
 - [RFC 6749 - OAuth 2.0](https://datatracker.ietf.org/doc/rfc6749/)
-- [GiFo-RFC 0111 - GAuth 1.0 Authorization Framework](Gifo_0111.md)
-- [GAuth Gap Matrix](GAP_MATRIX.auto.md)
-- [GAuth Architecture](../ARCHITECTURE_SOLUTION.md)
+- [AAP-AAP-001 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
+- [AgentAuth Gap Matrix](GAP_MATRIX.auto.md)
+- [AgentAuth Architecture](../ARCHITECTURE_SOLUTION.md)
 - [RFC 9493 - Subject Identifiers for Security Event Tokens](https://datatracker.ietf.org/doc/rfc9493/)

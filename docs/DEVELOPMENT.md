@@ -6,22 +6,22 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Development Guide
+# AgentAuth Development Guide
 
 > Last Updated: 2025-10-17
 > Status: Active
 
-**Gimel Foundation RFC Implementation - Developer Documentation**
+**AgentAuth Community RFC Implementation - Developer Documentation**
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+Operated by AgentAuth Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
-Development guide for the GiFo-RFC-0111 and GiFo-RFC-0115 implementation, featuring complete RFC-0115 PoA-Definition compliance.
+Development guide for the AAP-RFC-0111 and AAP-RFC-0115 implementation, featuring complete RFC-0115 PoA-Definition compliance.
 
 ## Policy Chain / Provenance
 Experimental endpoints (beta):
@@ -188,7 +188,7 @@ Next Enhancements:
 ### **1. RFC-Compliant Authorization**
 
 ```go
-import "github.com/Gimel-Foundation/gauth/pkg/auth"
+import "github.com/AgentAuth-Foundation/gauth/pkg/auth"
 
 // Create RFC service prototype
 service, err := auth.NewRFCCompliantService("YourCompany", "ai-authorization")
@@ -196,7 +196,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-// Create comprehensive PoA Definition (GAuth-RFC-002 (formerly RFC 115))
+// Create comprehensive PoA Definition (AgentAuth-RFC-002 (formerly RFC 115))
 poa := auth.PoADefinition{
     Principal: auth.Principal{
         Type:     auth.PrincipalTypeOrganization,
@@ -207,11 +207,11 @@ poa := auth.PoADefinition{
             RegisteredAuthority: true,
         },
     },
-    // ... complete GAuth-RFC-002 (formerly RFC 115) structure
+    // ... complete AgentAuth-RFC-002 (formerly RFC 115) structure
 }
 
 // Authorize with full RFC validation
-response, err := service.AuthorizeGAuth(ctx, auth.GAuthRequest{
+response, err := service.AuthorizeAgentAuth(ctx, auth.AgentAuthRequest{
     ClientID:      "ai-client-id",
     PoADefinition: poa,
     Jurisdiction:  "US",
@@ -221,7 +221,7 @@ response, err := service.AuthorizeGAuth(ctx, auth.GAuthRequest{
 ### **2. Development JWT Foundation**
 
 ```go
-import "github.com/Gimel-Foundation/gauth/pkg/auth"
+import "github.com/AgentAuth-Foundation/gauth/pkg/auth"
 
 // JWT service with RSA-256 signatures
 jwtService, err := auth.NewProperJWTService("issuer", "audience")
@@ -479,7 +479,7 @@ chmod +x .githooks/pre-commit
 
 ## New: Mandatory Signatures & Semantic PoA Validation (2025-10-17)
 
-Two hardening features were introduced to strengthen issuance integrity and RFC 0115 alignment:
+Two hardening features were introduced to strengthen issuance integrity and AAP-002 alignment:
 
 ### Mandatory Signatures
 Issuance can now enforce that every PowerOfAttorney is digitally signed over a canonical digest.

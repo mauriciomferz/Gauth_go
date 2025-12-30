@@ -1,4 +1,4 @@
-# Kubernetes mTLS Configuration for GAuth
+# Kubernetes mTLS Configuration for AgentAuth
 # This file contains all necessary Kubernetes manifests for implementing mTLS
 
 ---
@@ -103,7 +103,7 @@ spec:
           name: cert-manager-vault
 
 ---
-# Server Certificate for GAuth API
+# Server Certificate for AgentAuth API
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -116,7 +116,7 @@ spec:
   
   subject:
     organizations:
-      - GAuth
+      - AgentAuth
     organizationalUnits:
       - API Services
       
@@ -162,7 +162,7 @@ spec:
   
   subject:
     organizations:
-      - GAuth
+      - AgentAuth
     organizationalUnits:
       - Internal Services
     serialNumber: "gauth-internal-001"

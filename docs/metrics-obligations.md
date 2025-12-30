@@ -8,7 +8,7 @@ owners: [system]
 
 # Obligation Execution Metrics
 
-This document describes the new obligation execution observability primitives added to GAuth.
+This document describes the new obligation execution observability primitives added to AgentAuth.
 
 ## Overview
 Obligations (and advice) are post-decision actions executed by the PDP engine. Two production concerns motivated new instrumentation:

@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// TestDurableReplayStoreGAuthIntegration tests DurableReplayStore with gauth ReplayStore interface.
-func TestDurableReplayStoreGAuthIntegration(t *testing.T) {
+// TestDurableReplayStoreAgentAuthIntegration tests DurableReplayStore with gauth ReplayStore interface.
+func TestDurableReplayStoreAgentAuthIntegration(t *testing.T) {
 	dir := t.TempDir()
 	walPath := filepath.Join(dir, "integration.wal")
 

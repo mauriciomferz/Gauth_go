@@ -17,7 +17,7 @@ func TestSemanticEWMAStatePersistence(t *testing.T) {
 	dir := t.TempDir()
 	persistPath := filepath.Join(dir, "semantic.json")
 
-	// Set up Handler with real RFC0111 service to provide snapshots
+	// Set up Handler with real AAP001 service to provide snapshots
 	memAuthz := authz.NewMemoryAuthorizer()
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-all-alice", Subject: "alice", Resource: "*", Actions: []string{"*"}, Effect: authz.Allow})
 	svc := gauth_rfc_001.NewService(audit.NewMemoryLogger(nil), memAuthz)

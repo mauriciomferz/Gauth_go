@@ -16,12 +16,12 @@ import (
 	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
 )
 
-// MockGAuthService mocks gauth.GAuth interface
-type MockGAuthService struct {
+// MockAgentAuthService mocks gauth.AgentAuth interface
+type MockAgentAuthService struct {
 	mock.Mock
 }
 
-func (m *MockGAuthService) RequestToken(req gauth.TokenRequest) (*gauth.TokenResponse, error) {
+func (m *MockAgentAuthService) RequestToken(req gauth.TokenRequest) (*gauth.TokenResponse, error) {
 	args := m.Called(req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -29,7 +29,7 @@ func (m *MockGAuthService) RequestToken(req gauth.TokenRequest) (*gauth.TokenRes
 	return args.Get(0).(*gauth.TokenResponse), args.Error(1)
 }
 
-func (m *MockGAuthService) InitiateAuthorization(req gauth.AuthorizationRequest) (*gauth.AuthorizationGrant, error) {
+func (m *MockAgentAuthService) InitiateAuthorization(req gauth.AuthorizationRequest) (*gauth.AuthorizationGrant, error) {
 	args := m.Called(req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -37,7 +37,7 @@ func (m *MockGAuthService) InitiateAuthorization(req gauth.AuthorizationRequest)
 	return args.Get(0).(*gauth.AuthorizationGrant), args.Error(1)
 }
 
-func (m *MockGAuthService) ValidateToken(token string) (*gauth.TokenValidationResult, error) {
+func (m *MockAgentAuthService) ValidateToken(token string) (*gauth.TokenValidationResult, error) {
 	args := m.Called(token)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -45,18 +45,18 @@ func (m *MockGAuthService) ValidateToken(token string) (*gauth.TokenValidationRe
 	return args.Get(0).(*gauth.TokenValidationResult), args.Error(1)
 }
 
-func (m *MockGAuthService) Close() error {
+func (m *MockAgentAuthService) Close() error {
 	return nil
 }
 
 func TestRFC9396_CreateToken_RAR(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	mockSvc := new(MockGAuthService)
+	mockSvc := new(MockAgentAuthService)
 
 	// Setup Handler with Mock Service
 	h := &token.Handler{} // Initialize empty, then set service
-	h.SetGAuthService(mockSvc)
+	h.SetAgentAuthService(mockSvc)
 
 	router := gin.New()
 	router.POST("/token", h.Create)

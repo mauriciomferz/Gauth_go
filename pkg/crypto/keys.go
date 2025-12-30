@@ -1,5 +1,5 @@
 // Package crypto implements EdDSA key management (rotation, persistence and optional
-// immutable audit logging) for the GAuth demo. It is intentionally minimal and not a
+// immutable audit logging) for the AgentAuth demo. It is intentionally minimal and not a
 // production-grade HSM integration.
 package crypto
 
@@ -30,8 +30,8 @@ type Key struct {
 	ID              string             `json:"kid"`
 	CreatedAt       time.Time          `json:"created_at"`
 	ExpiresAt       time.Time          `json:"expires_at"`
-	DeprecatedAfter time.Time          `json:"deprecated_after,omitempty"` // RFC0115 deprecation warning timestamp (recommended: 80% of TTL)
-	SunsetAfter     time.Time          `json:"sunset_after,omitempty"`     // RFC0115 hard cutoff timestamp (same as ExpiresAt)
+	DeprecatedAfter time.Time          `json:"deprecated_after,omitempty"` // AAP002 deprecation warning timestamp (recommended: 80% of TTL)
+	SunsetAfter     time.Time          `json:"sunset_after,omitempty"`     // AAP002 hard cutoff timestamp (same as ExpiresAt)
 	Private         ed25519.PrivateKey `json:"-"`
 	Public          ed25519.PublicKey  `json:"public"`
 	Alg             string             `json:"alg"` // EdDSA

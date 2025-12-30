@@ -8,7 +8,7 @@ owners: [system]
 
 # Auditor CLI
 
-The Auditor CLI provides offline verification of core transparency and authorization artifacts emitted by a running GAuth server.
+The Auditor CLI provides offline verification of core transparency and authorization artifacts emitted by a running AgentAuth server.
 
 ## Features (current)
 ## Features (current)

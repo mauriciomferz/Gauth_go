@@ -6,24 +6,24 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Beta Web Interface
+# AgentAuth Beta Web Interface
 
 > Last Updated: 2025-10-17
 > Status: Active
 
 ⚠️ **BETA IMPLEMENTATION NOTICE**
-# GAuth Beta Web Interface
+# AgentAuth Beta Web Interface
 This web interface is a beta demonstration environment. It showcases the RFC-0150 implementation and related authorization concepts for evaluation and feedback. It is NOT production ready and should not be deployed in any production environment or relied upon for security decisions.
 
-This directory contains a modern, interactive web interface for the GAuth RFC-0150 beta implementation. The interface provides hands-on experiential workflows for understanding authorization concepts, power-of-attorney flows, and AI-native authentication patterns.
+This directory contains a modern, interactive web interface for the AgentAuth RFC-0150 beta implementation. The interface provides hands-on experiential workflows for understanding authorization concepts, power-of-attorney flows, and AI-native authentication patterns.
 ## Features
 
 ### 🧪 Beta Demonstration Focus
 - **Interactive Demos**: Hands-on exploration of token management, authorization flows, and event systems
-- **Real-time Visualization**: Live demonstration of GAuth concepts with immediate feedback
+- **Real-time Visualization**: Live demonstration of AgentAuth concepts with immediate feedback
 - **Comprehensive Examples**: Access to 37+ working code examples from the repository
 - **Beta Disclaimers**: Clear warnings that this is an evaluation/demo environment. NOT production ready.
-### 🔐 GAuth Concepts Demonstrated
+### 🔐 AgentAuth Concepts Demonstrated
 - **Token Lifecycle Management**: Create, validate, and revoke beta demo tokens
 - **Event System**: Typed events with structured metadata handling
 - **Audit Trail**: Compliance logging and reporting capabilities
@@ -93,7 +93,7 @@ For local development with hot reload:
 - Go 1.21 or higher
 - Gin web framework (`go get github.com/gin-gonic/gin`)
    ```bash
-   cd /path/to/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0
+   cd /path/to/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
    ```
 
 2. **(Quick) Ephemeral run (auto-generated secrets each restart):**
@@ -109,9 +109,9 @@ For local development with hot reload:
    - Beta API: `http://localhost:8080/api/v1/beta/`
    - Health check: `http://localhost:8080/api/v1/beta/health`
 
-This beta interface is part of the broader GAuth evaluation ecosystem:
+This beta interface is part of the broader AgentAuth evaluation ecosystem:
 ### Port Resolution Order
-**Beta Demonstration Notice**: This web interface is designed exclusively for evaluation and demonstration. It implements beta demonstration versions of GAuth concepts to help users understand authorization patterns, power-of-attorney flows, and AI-native authentication. This implementation is NOT production ready and should not be used in production environments or for any security-critical applications.
+**Beta Demonstration Notice**: This web interface is designed exclusively for evaluation and demonstration. It implements beta demonstration versions of AgentAuth concepts to help users understand authorization patterns, power-of-attorney flows, and AI-native authentication. This implementation is NOT production ready and should not be used in production environments or for any security-critical applications.
 
 ### Stable vs Ephemeral Tokens
 If you do not export `GAUTH_CLIENT_SECRET` / `GAUTH_SIGNING_KEY`, the server generates ephemeral values (tokens invalid after restart). Using the script + `.env` gives deterministic secrets for the session (still insecure for real use).
@@ -119,7 +119,7 @@ If you do not export `GAUTH_CLIENT_SECRET` / `GAUTH_SIGNING_KEY`, the server gen
 ## Beta Learning Path
 
 ### 1. Overview Section
-- Understanding GAuth framework concepts
+- Understanding AgentAuth framework concepts
 - RFC-0150 compliance and standards
 - AI-native authorization principles
 
@@ -158,7 +158,7 @@ If you do not export `GAUTH_CLIENT_SECRET` / `GAUTH_SIGNING_KEY`, the server gen
 ### 4. Examples Repository
 - Browse 37+ working code examples
 - Understand implementation patterns and best practices
-- See real Go code demonstrating GAuth concepts
+- See real Go code demonstrating AgentAuth concepts
 - **Learning Focus**: Practical implementation, code patterns, best practices
 
 ## Beta API Endpoints
@@ -227,18 +227,18 @@ All API endpoints are under `/api/v1/beta`:
 - [Examples Repository](../examples/) - 37+ working code examples
 
 ### RFC Standards
-- **GiFo-RFC-0111**: Power of Attorney Framework
-- **GiFo-RFC-0115**: Authorization Implementation
-- **GiFo-RFC-0150**: Go Implementation Guidelines
+- **AAP-RFC-0111**: Power of Attorney Framework
+- **AAP-RFC-0115**: Authorization Implementation
+- **AAP-RFC-0150**: Go Implementation Guidelines
 
 ### External Links
-- [Gimel Foundation](https://gimelfoundation.com) - Organization behind GAuth
-- [GitHub Repository](https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0) - Source code
-- [RFC Repository](https://github.com/Gimel-Foundation/RFCs) - Official RFC documents
+- [AgentAuth Community](https://gimelfoundation.com) - Organization behind AgentAuth
+- [GitHub Repository](https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0) - Source code
+- [RFC Repository](https://github.com/AgentAuth-Foundation/RFCs) - Official RFC documents
 
 ---
 
-**Beta Implementation Notice**: This web interface is designed exclusively for evaluation and demonstration. It implements beta versions of GAuth concepts to help users understand authorization patterns, power-of-attorney flows, and AI-native authentication. This implementation is NOT production ready and should not be used in production environments or for any security-critical applications.
+**Beta Implementation Notice**: This web interface is designed exclusively for evaluation and demonstration. It implements beta versions of AgentAuth concepts to help users understand authorization patterns, power-of-attorney flows, and AI-native authentication. This implementation is NOT production ready and should not be used in production environments or for any security-critical applications.
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

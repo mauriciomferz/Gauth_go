@@ -25,8 +25,8 @@ Transformed the Gauth backend from a "Degraded Mode" state to a fully functional
 - **API Connectivity**: Configured `VITE_API_BASE_URL` to `/api/v1` in `docker-compose.production.yml` to route requests through the Nginx proxy, resolving CORS issues and 404s.
 - **Production Mode**: Added `DB_HOST` to backend environment variables (mapped to `GAUTH_DB_HOST`), ensuring the application starts in Production Mode.
 - **Service Configuration**: Disabled Postgres SSL requirement (`GAUTH_DB_SSL_MODE=disable`) and removed Redis authentication to align with the provided Docker images, resolving startup failures.
-- **Frontend Routing**: Updated `nginx.conf` to correctly proxy `/gnap/` and `/.well-known/` requests, and resolved GAuth+ pathing.
-- **Database Schema**: Created `004_create_gauthplus_tables.sql` and corrected volume mount path to `./schema/migrations` to fix "relation does not exist" errors for GAuth+ features.
+- **Frontend Routing**: Updated `nginx.conf` to correctly proxy `/gnap/` and `/.well-known/` requests, and resolved AgentAuth+ pathing.
+- **Database Schema**: Created `004_create_gauthplus_tables.sql` and corrected volume mount path to `./schema/migrations` to fix "relation does not exist" errors for AgentAuth+ features.
 - **Audit Trail**: Created `005_create_audit_and_subscriber_tables.sql` to resolve 500 errors on Audit APIs caused by missing `audit_events` and `subscribers` tables.
 - **Subscribers & Tokens**: Created `006_create_tokens_table.sql` and updated `005` with legacy columns (`subscriber_id`, `subscriber_name`) to resolve 500 errors on `/api/admin/subscribers` and `/api/admin/tokens`.
 - **Power of Attorney**: Created `007_create_poa_tables.sql` to resolve 500 errors on `/api/admin/poa`, defining `power_of_attorney` and `poa_templates` tables.
@@ -42,7 +42,7 @@ Transformed the Gauth backend from a "Degraded Mode" state to a fully functional
 ### Deployment Verification
 - **Container Startup**: PASSED (All services Healthy)
 - **Database Connection**: PASSED (Production Mode active, Role `gauth_prod_user` authn success)
-- **Admin Handlers**: PASSED (GAuth+ endpoints registered)
+- **Admin Handlers**: PASSED (AgentAuth+ endpoints registered)
 - **Frontend Health**: PASSED (Reachable on port 3002)
 - **CORS**: PASSED (Nginx proxy on `/api/v1` handles backend communication correctly)
 - **Logs**: No fatal errors observed after volume reset.

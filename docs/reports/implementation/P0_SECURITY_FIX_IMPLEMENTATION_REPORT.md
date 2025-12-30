@@ -447,7 +447,7 @@ As outlined in SECURITY_AUDIT_CRITICAL_REVIEW.md:
 - Support external policy engines
 
 ### 3. OAuth 2.0 Migration Study (P1)
-- Conduct feasibility analysis: GiFo-RFC vs OAuth 2.0
+- Conduct feasibility analysis: AAP-RFC vs OAuth 2.0
 - Document migration path to standard protocols
 - Cost-benefit analysis for Q2 2026 decision
 

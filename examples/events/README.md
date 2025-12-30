@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates how to use the GAuth typed event system. The event system provides a way to create, dispatch, and handle events with strongly-typed metadata.
+This example demonstrates how to use the AgentAuth typed event system. The event system provides a way to create, dispatch, and handle events with strongly-typed metadata.
 
 ## Features Demonstrated
 
@@ -98,7 +98,7 @@ func (h *CustomHandler) Handle(event events.Event) {
 
 ## Migration Note
 
-This example uses the latest GAuth event system with strongly-typed metadata and event handlers. If you are migrating from code that used untyped `map[string]interface{}` for event metadata or legacy handler patterns, see the Migration Guide in `docs/CODE_IMPROVEMENTS.md` for details on updating to the new type-safe event system.
+This example uses the latest AgentAuth event system with strongly-typed metadata and event handlers. If you are migrating from code that used untyped `map[string]interface{}` for event metadata or legacy handler patterns, see the Migration Guide in `docs/CODE_IMPROVEMENTS.md` for details on updating to the new type-safe event system.
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

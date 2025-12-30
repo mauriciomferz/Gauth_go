@@ -78,7 +78,7 @@ spec:
       environment: staging
   unhealthyPodEvictionPolicy: IfHealthyBudget
 ---
-# Service Account for GAuth pods
+# Service Account for AgentAuth pods
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -89,7 +89,7 @@ metadata:
     environment: staging
 automountServiceAccountToken: true
 ---
-# Role for GAuth service account (minimal permissions)
+# Role for AgentAuth service account (minimal permissions)
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -114,7 +114,7 @@ rules:
   resources: ["pods"]
   verbs: ["get", "list"]
 ---
-# RoleBinding for GAuth service account
+# RoleBinding for AgentAuth service account
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -132,7 +132,7 @@ roleRef:
   name: gauth-role
   apiGroup: rbac.authorization.k8s.io
 ---
-# NetworkPolicy: Restrict traffic to GAuth pods
+# NetworkPolicy: Restrict traffic to AgentAuth pods
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -171,7 +171,7 @@ spec:
     - protocol: TCP
       port: 8080
   
-  # Allow traffic from other GAuth pods (for distributed caching)
+  # Allow traffic from other AgentAuth pods (for distributed caching)
   - from:
     - podSelector:
         matchLabels:

@@ -11,7 +11,7 @@ import (
 
 // TestSignatureAgilityEd25519Basic ensures Ed25519 algorithm registry path matches
 // direct ed25519 usage semantics for signing & verification without altering
-// canonical digest logic (RFC0111 cryptographic agility foundation).
+// canonical digest logic (AAP001 cryptographic agility foundation).
 func TestSignatureAgilityEd25519Basic(t *testing.T) {
 	algo, ok := signalgo.Get("Ed25519")
 	if !ok {

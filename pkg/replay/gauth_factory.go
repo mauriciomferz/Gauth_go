@@ -4,17 +4,17 @@ import (
 	"fmt"
 )
 
-// GAuthReplayStore is the minimal interface needed by pkg/gauth for replay protection.
+// AgentAuthReplayStore is the minimal interface needed by pkg/gauth for replay protection.
 // This avoids importing the full gauth package here (circular dependency prevention).
-type GAuthReplayStore interface {
+type AgentAuthReplayStore interface {
 	CheckAndStore(jti string) error
 }
 
-// GAuthReplayStoreFactory is a function signature that creates a replay store from environment.
+// AgentAuthReplayStoreFactory is a function signature that creates a replay store from environment.
 // This matches the signature expected by gauth.RegisterDurableReplayStoreFactory.
-type GAuthReplayStoreFactory func(metrics interface{}) (GAuthReplayStore, error)
+type AgentAuthReplayStoreFactory func(metrics interface{}) (AgentAuthReplayStore, error)
 
-// NewGAuthReplayStoreFromEnv creates a DurableReplayStore configured from environment variables
+// NewAgentAuthReplayStoreFromEnv creates a DurableReplayStore configured from environment variables
 // and wraps it in an adapter that implements gauth.ReplayStore interface.
 //
 // This function can be registered with gauth.RegisterDurableReplayStoreFactory() to enable
@@ -28,7 +28,7 @@ type GAuthReplayStoreFactory func(metrics interface{}) (GAuthReplayStore, error)
 //	)
 //
 //	func init() {
-//	    gauth.RegisterDurableReplayStoreFactory(replay.NewGAuthReplayStoreFromEnv)
+//	    gauth.RegisterDurableReplayStoreFactory(replay.NewAgentAuthReplayStoreFromEnv)
 //	}
 //
 // Supported environment variables:
@@ -37,7 +37,7 @@ type GAuthReplayStoreFactory func(metrics interface{}) (GAuthReplayStore, error)
 //   - GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC (default: 300 = 5 minutes)
 //   - GAUTH_REPLAY_EVICTION_POLICY (default: ttl, options: ttl|lru|size|ttl+size)
 //   - GAUTH_REPLAY_EVICTION_MAX_SIZE (default: 10000)
-func NewGAuthReplayStoreFromEnv(metrics interface{}) (GAuthReplayStore, error) {
+func NewAgentAuthReplayStoreFromEnv(metrics interface{}) (AgentAuthReplayStore, error) {
 	// Convert metrics to DurableReplayMetrics if possible, otherwise use noop
 	var durableMetrics DurableReplayMetrics
 	if m, ok := metrics.(DurableReplayMetrics); ok {

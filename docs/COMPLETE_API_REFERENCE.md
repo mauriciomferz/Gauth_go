@@ -1,5 +1,5 @@
 ---
-title: GAuth Complete API Reference
+title: AgentAuth Complete API Reference
  category: api-reference
  status: active
  lastUpdated: 2025-11-12
@@ -7,16 +7,16 @@ title: GAuth Complete API Reference
  refreshCadence: on-change
  source: source-code
  ---
-# GAuth 1.0 Complete API Reference
+# AgentAuth 1.0 Complete API Reference
 
  > Last Updated: 2025-10-19
 > Status: Active
 
-**Official Gimel Foundation Implementation - Combined Library & Web API Documentation**
+**Official AgentAuth Community Implementation - Combined Library & Web API Documentation**
 
 > Note: This reference now includes the Decision Metrics governance endpoint (`/api/v1/beta/metrics/decisions`) documenting structured lifecycle decision aggregation.
 
-Complete API reference for GiFo-RFC-0111 (GAuth 1.0) and GiFo-RFC-0115 (PoA Definition) implementation, including both the Go library API and the web demonstration API.
+Complete API reference for AAP-RFC-0111 (AgentAuth 1.0) and AAP-RFC-0115 (PoA Definition) implementation, including both the Go library API and the web demonstration API.
 
 ## 📋 **Table of Contents**
 
@@ -490,8 +490,8 @@ Host: localhost:8080
 [
   {
     "id": "rfc0111-basic",
-    "name": "RFC-0111 Basic GAuth 1.0",
-    "description": "Basic RFC-0111 GAuth 1.0 scenario with P*P Architecture",
+    "name": "RFC-0111 Basic AgentAuth 1.0",
+    "description": "Basic RFC-0111 AgentAuth 1.0 scenario with P*P Architecture",
     "config": {
       "p2p_enabled": true,
       "exclusions": ["resource1", "resource2"],
@@ -586,9 +586,9 @@ Authenticates using a selected demo scenario and returns a mock authentication t
 {
   "success": true,
   "token": "gauth_abc123def456...",
-  "message": "Authentication successful for RFC-0111 Basic GAuth 1.0",
+  "message": "Authentication successful for RFC-0111 Basic AgentAuth 1.0",
   "metadata": {
-    "scenario": "RFC-0111 Basic GAuth 1.0",
+    "scenario": "RFC-0111 Basic AgentAuth 1.0",
     "rfc_type": "RFC-0111",
     "timestamp": 1696260000,
     "config": {
@@ -1034,7 +1034,7 @@ Serves the frontend application files from the `/frontend/` directory.
 
 The existing library API documentation in the original API_REFERENCE.md file covers:
 - RFCCompliantService
-- RFC-0111 Authorization API (AuthorizeGAuth)
+- RFC-0111 Authorization API (AuthorizeAgentAuth)
 - RFC-0115 PoA Definition structures
 - Professional Foundation API (ProperJWTService)
 - Legal Framework Validation

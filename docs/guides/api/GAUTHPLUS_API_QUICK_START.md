@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth+ API Quick Start Guide
+# AgentAuth+ API Quick Start Guide
 
 **Date:** November 26, 2025  
 **Status:** Production Ready  
@@ -18,7 +18,7 @@ owners: [system]
 # Start PostgreSQL database
 docker-compose -f docker-compose.database.yml up -d
 
-# Start GAuth+ enabled server
+# Start AgentAuth+ enabled server
 GAUTH_DEV_INDEX=1 \
 GAUTH_RFC0111_ENABLED=1 \
 GAUTH_USE_JWT_LIB=1 \
@@ -330,7 +330,7 @@ WHERE id = '00000000-0000-0000-0000-000000000001';
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `GAUTH_GAUTHPLUS_ENABLED` | Yes | `0` | Enable GAuth+ features |
+| `GAUTH_GAUTHPLUS_ENABLED` | Yes | `0` | Enable AgentAuth+ features |
 | `GAUTH_RFC0111_ENABLED` | Yes | `0` | Enable RFC-0111 support |
 | `DB_HOST` | Yes | - | PostgreSQL host |
 | `DB_PORT` | Yes | - | PostgreSQL port |

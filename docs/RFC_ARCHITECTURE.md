@@ -1,5 +1,5 @@
 ---
-title: GAuth RFC Implementation Architecture
+title: AgentAuth RFC Implementation Architecture
  category: architecture-spec
  status: active
  lastUpdated: 2025-11-12
@@ -7,28 +7,28 @@ title: GAuth RFC Implementation Architecture
  refreshCadence: on-change
  source: design-session
  ---
-# GAuth RFC Implementation Architecture
+# AgentAuth RFC Implementation Architecture
 
 > Last Updated: 2025-10-17
 > Status: Active
 
 **🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-This document describes the architecture of the GAuth RFC implementation demonstrating compliance with:
-- **GiFo-RFC-0111**: GAuth 1.0 Authorization Framework
-- **GiFo-RFC-0115**: Power-of-Attorney Credential Definition (PoA-Definition) ✅ **COMPLETE**
+This document describes the architecture of the AgentAuth RFC implementation demonstrating compliance with:
+- **AAP-RFC-0111**: AgentAuth 1.0 Authorization Framework
+- **AAP-RFC-0115**: Power-of-Attorney Credential Definition (PoA-Definition) ✅ **COMPLETE**
 
-**Gimel Foundation gGmbH i.G.**
-**Website**: www.GimelFoundation.com
-**Operated by**: Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**
+**Website**: www.AgentAuthFoundation.com
+**Operated by**: AgentAuth Technologies GmbH
 **Managing Directors**: Bjørn Baunbæk, Dr. Götz G. Wehberg
 **Chairman of the Board**: Daniel Hartert
 **Address**: Hardtweg 31, D-53639 Königswinter, Germany
 **Registration**: Siegburg HRB 18660
-**Additional Info**: www.GimelID.com
+**Additional Info**: www.AgentAuthID.com
 
 ## 🎯 **RFC Compliance Architecture Overview**
 
@@ -47,10 +47,10 @@ This document describes the architecture of the GAuth RFC implementation demonst
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🏗️ **GAuth-RFC-001 (formerly RFC 111): P*P Architecture Implementation**
+## 🏗️ **AgentAuth-RFC-001 (formerly RFC 111): P*P Architecture Implementation**
 
 ### **Power*Point (P*P) Components**
-The GAuth implementation follows the P*P architecture as specified in GiFo-RFC-0111, emphasizing "Power" rather than "Policy":
+The AgentAuth implementation follows the P*P architecture as specified in AAP-RFC-0111, emphasizing "Power" rather than "Policy":
 
 ```go
 type RFCCompliantService struct {
@@ -116,10 +116,10 @@ func (d *DemandSidePEP) ValidateClientCompliance(ctx context.Context, req *Enfor
 ```
 
 #### **🎯 Power Decision Point (PDP)**
-Central authorization decisions based on GAuth-RFC-002 (formerly RFC 115) PoA Definition:
+Central authorization decisions based on AgentAuth-RFC-002 (formerly RFC 115) PoA Definition:
 
 ```go
-func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthRequest) (*GAuthResponse, error) {
+func (s *RFCCompliantService) AuthorizeAgentAuth(ctx context.Context, req AgentAuthRequest) (*AgentAuthResponse, error) {
     // PDP validates complete PoA Definition
     validation, err := s.validatePoADefinition(ctx, req.PoADefinition)
     if err != nil {
@@ -183,23 +183,23 @@ func (v *LegalFrameworkValidator) VerifyIdentities(ctx context.Context, poa PoAD
 }
 ```
 
-## 📋 **GAuth-RFC-002 (formerly RFC 115): PoA Definition Architecture**
+## 📋 **AgentAuth-RFC-002 (formerly RFC 115): PoA Definition Architecture**
 
 ### **Complete PoA Definition Structure**
-The architecture implements the full GAuth-RFC-002 (formerly RFC 115) specification:
+The architecture implements the full AgentAuth-RFC-002 (formerly RFC 115) specification:
 
 ```go
 type PoADefinition struct {
-    // A. Parties (GAuth-RFC-002 (formerly RFC 115) Section 3.A)
+    // A. Parties (AgentAuth-RFC-002 (formerly RFC 115) Section 3.A)
     Principal    Principal    `json:"principal"`     // Entity granting authority
     Authorizer   Authorizer   `json:"authorizer"`    // Representatives & authority chain
     Client       ClientAI     `json:"client"`       // AI system receiving authority
     
-    // B. Type and Scope of Authorization (GAuth-RFC-002 (formerly RFC 115) Section 3.B)
+    // B. Type and Scope of Authorization (AgentAuth-RFC-002 (formerly RFC 115) Section 3.B)
     AuthorizationType AuthorizationType `json:"authorization_type"` // Sole/joint representation
     ScopeDefinition   ScopeDefinition   `json:"scope_definition"`   // Industries, regions, actions
     
-    // C. Requirements (GAuth-RFC-002 (formerly RFC 115) Section 3.C)
+    // C. Requirements (AgentAuth-RFC-002 (formerly RFC 115) Section 3.C)
     Requirements Requirements `json:"requirements"` // Validity, limits, legal, security
 }
 ```
@@ -273,13 +273,13 @@ type ProperCrypto struct {
 
 ### **Multi-Layer Security Validation**
 ```go
-func (s *RFCCompliantService) validateComprehensively(ctx context.Context, req GAuthRequest) error {
-    // Layer 1: PoA Definition validation (GAuth-RFC-002 (formerly RFC 115))
+func (s *RFCCompliantService) validateComprehensively(ctx context.Context, req AgentAuthRequest) error {
+    // Layer 1: PoA Definition validation (AgentAuth-RFC-002 (formerly RFC 115))
     if err := s.validatePoADefinition(ctx, req.PoADefinition); err != nil {
         return fmt.Errorf("PoA validation failed: %w", err)
     }
     
-    // Layer 2: Principal capacity validation (GAuth-RFC-001 (formerly RFC 111))
+    // Layer 2: Principal capacity validation (AgentAuth-RFC-001 (formerly RFC 111))
     if err := s.validatePrincipalCapacity(ctx, req.PrincipalID, req.PowerType); err != nil {
         return fmt.Errorf("principal validation failed: %w", err)
     }
@@ -394,7 +394,7 @@ type ExtendedToken struct {
     ExpiresIn    int      `json:"expires_in"`
     Scope       []string `json:"scope"`
     
-    // GAuth GAuth-RFC-001 (formerly RFC 111) extensions
+    // AgentAuth AgentAuth-RFC-001 (formerly RFC 111) extensions
     ExtendedMetadata ExtendedMetadata `json:"extended_metadata"`
 }
 
@@ -420,8 +420,8 @@ type ExtendedMetadata struct {
 
 ### **Complete RFC Authorization Flow**
 ```
-1. GAuth Request Reception
-   ├─ Parse PoA Definition (GAuth-RFC-002 (formerly RFC 115))
+1. AgentAuth Request Reception
+   ├─ Parse PoA Definition (AgentAuth-RFC-002 (formerly RFC 115))
    ├─ Extract Principal/Client/Authorizer
    └─ Validate request structure
 
@@ -485,7 +485,7 @@ type ClientAI struct {
 type AuditRecord struct {
     ID                string                `json:"id"`
     Timestamp         time.Time            `json:"timestamp"`
-    RequestContext    GAuthRequest         `json:"request_context"`
+    RequestContext    AgentAuthRequest         `json:"request_context"`
     ValidationResults PoAValidationResult  `json:"validation_results"`
     Decision          AuthorizationDecision `json:"decision"`
     ComplianceProof   []string             `json:"compliance_proof"`
@@ -506,7 +506,7 @@ type AuditRecord struct {
 - **🗃️ Database Agnostic**: Support for multiple storage backends
 - **⚖️ Load Distribution**: JWT validation can be distributed across instances
 
-## 🏢 **Gimel Foundation Compliance Architecture**
+## 🏢 **AgentAuth Community Compliance Architecture**
 
 ### **License Compliance Structure**
 ```go
@@ -523,7 +523,7 @@ type MITCompliance struct {
     LicenseAttributions   []LicenseAttribution   // Required attributions
 }
 
-// Gimel Foundation exclusions compliance
+// AgentAuth Community exclusions compliance
 type ExclusionCompliance struct {
     Web3Excluded          bool `json:"web3_excluded"`          // No blockchain/smart contracts
     AILifecycleExcluded   bool `json:"ai_lifecycle_excluded"`  // No AI-controlled deployment
@@ -533,7 +533,7 @@ type ExclusionCompliance struct {
 
 ---
 
-*This is an educational implementation of the Gimel Foundation RFC specifications, designed for learning and demonstration purposes only. It should NOT be used for production, real security, or any commercial purposes.*
+*This is an educational implementation of the AgentAuth Community RFC specifications, designed for learning and demonstration purposes only. It should NOT be used for production, real security, or any commercial purposes.*
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

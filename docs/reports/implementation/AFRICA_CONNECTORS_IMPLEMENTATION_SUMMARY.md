@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document provides a comprehensive summary of the Africa region identity verification connectors implemented for the GAuth system. The implementation covers **3 major countries** across Sub-Saharan Africa, providing identity verification capabilities for over **300 million** people.
+This document provides a comprehensive summary of the Africa region identity verification connectors implemented for the AgentAuth system. The implementation covers **3 major countries** across Sub-Saharan Africa, providing identity verification capabilities for over **300 million** people.
 
 ### Coverage Overview
 

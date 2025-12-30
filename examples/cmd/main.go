@@ -23,7 +23,7 @@ func main() {
 	)
 	flag.Parse()
 
-	fmt.Println("🚀 GAuth Command Line Interface")
+	fmt.Println("🚀 AgentAuth Command Line Interface")
 	fmt.Println("===============================")
 
 	switch *command {
@@ -70,13 +70,13 @@ func showHelp() {
 func createToken(userID, scopesStr string, duration time.Duration) {
 	fmt.Printf("\n🔨 Creating token for user: %s\n", userID)
 
-	// Create GAuth service
+	// Create AgentAuth service
 	service, err := gauth.New(gauth.Config{
 		AccessTokenExpiry: duration,
 		ClientID:          "gauth-cli",
 	})
 	if err != nil {
-		log.Fatalf("❌ Failed to create GAuth service: %v", err)
+		log.Fatalf("❌ Failed to create AgentAuth service: %v", err)
 	}
 
 	// Create token request
@@ -101,10 +101,10 @@ func createToken(userID, scopesStr string, duration time.Duration) {
 func validateToken(tokenValue string) {
 	fmt.Printf("\n🔍 Validating token: %s...\n", tokenValue[:min(len(tokenValue), 20)]+"...")
 
-	// Create GAuth service
+	// Create AgentAuth service
 	service, err := gauth.New(gauth.Config{ClientID: "gauth-cli"})
 	if err != nil {
-		log.Fatalf("❌ Failed to create GAuth service: %v", err)
+		log.Fatalf("❌ Failed to create AgentAuth service: %v", err)
 	}
 
 	// Validate token
@@ -168,11 +168,11 @@ func listTokens() {
 }
 
 func runDemo() {
-	fmt.Println("\n🎭 Running Full GAuth CLI Demo")
+	fmt.Println("\n🎭 Running Full AgentAuth CLI Demo")
 	fmt.Println("==============================")
 
 	// Step 1: Create a service
-	fmt.Println("\n1️⃣  Creating GAuth service...")
+	fmt.Println("\n1️⃣  Creating AgentAuth service...")
 	service, err := gauth.New(gauth.Config{
 		AccessTokenExpiry: 30 * time.Minute,
 		ClientID:          "gauth-cli-demo",

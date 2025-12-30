@@ -5,6 +5,6 @@ status: archived
 lastUpdated: 2025-11-12
 owners: compliance-team
 ---
-# GAuth Pre-Production Audit - Week 4 Day 3: CI/CD Integration Testing Setup
+# AgentAuth Pre-Production Audit - Week 4 Day 3: CI/CD Integration Testing Setup
 
 [Content truncated — original stored under artifacts before migration]

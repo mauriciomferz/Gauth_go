@@ -1,4 +1,4 @@
-# GAuth API Reference
+# AgentAuth API Reference
 
 **Version**: 1.0.0  
 **Base URL**: `http://localhost:8080`  
@@ -8,7 +8,7 @@
 
 - [Authentication](#authentication)
 - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
-- [GAuth+ Advanced Features](#gauth-advanced-features)
+- [AgentAuth+ Advanced Features](#gauth-advanced-features)
 - [Admin APIs](#admin-apis)
 - [Revocation APIs](#revocation-apis)
 - [Authorization APIs](#authorization-apis)
@@ -392,7 +392,7 @@ Content-Type: application/json
 
 ---
 
-## GAuth+ Advanced Features
+## AgentAuth+ Advanced Features
 
 **Status**: ✅ Operational (December 1, 2025)  
 **Activation**: Set `GAUTH_GAUTHPLUS_ENABLED=1` environment variable  
@@ -589,7 +589,7 @@ GET /api/v1/gauthplus/capabilities/certifications/:agentID
 
 ### Enforcement Modes
 
-GAuth+ supports multiple enforcement modes controlled by environment variables:
+AgentAuth+ supports multiple enforcement modes controlled by environment variables:
 
 - **ADVISORY** (default): Logs warnings, allows requests
 - **STRICT**: Blocks requests on violations (`GAUTH_GAUTHPLUS_ENFORCE=1`)

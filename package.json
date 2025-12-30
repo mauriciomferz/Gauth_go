@@ -2,7 +2,7 @@
   "type": "module",
   "name": "gauth-web-modular",
   "version": "1.0.0",
-  "description": "Modularized GAuth web frontend",
+  "description": "Modularized AgentAuth web frontend",
   "main": "web/static/js/modules/main.js",
   "scripts": {
     "lint": "eslint web/static/js/modules/*.js web/static/js/app.js",

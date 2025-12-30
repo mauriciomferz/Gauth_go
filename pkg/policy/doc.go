@@ -2,7 +2,7 @@
 //
 // This package implements policy persistence, policy adapters for different
 // authorization systems, and policy registry management. It serves as the
-// policy administration point (PAP) in the GAuth architecture.
+// policy administration point (PAP) in the AgentAuth architecture.
 //
 // # Policy Storage
 //

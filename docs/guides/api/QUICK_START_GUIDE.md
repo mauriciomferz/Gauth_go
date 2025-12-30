@@ -1,5 +1,5 @@
 # 🚀 QUICK START GUIDE
-## GAuth RFC-0111/RFC-0115 Implementation
+## AgentAuth RFC-0111/RFC-0115 Implementation
 
 **Status**: ✅ **90-95% RFC Compliant** | ✅ **Production-Ready** (pending tests)  
 **Date**: November 10, 2025
@@ -42,7 +42,7 @@
 ### 1. Authorization Chain Validation
 
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 
 validator := gauth.NewAuthorizationChainValidator(
     commercialRegister,

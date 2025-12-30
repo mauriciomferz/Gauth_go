@@ -8,7 +8,7 @@
 
 ## Overview
 
-While wildcard patterns (P1.1) handle **90% of authorization scenarios**, complex use cases require a full-featured policy engine. This guide shows how to integrate **Open Policy Agent (OPA)** with GAuth.
+While wildcard patterns (P1.1) handle **90% of authorization scenarios**, complex use cases require a full-featured policy engine. This guide shows how to integrate **Open Policy Agent (OPA)** with AgentAuth.
 
 ### Why OPA?
 
@@ -30,7 +30,7 @@ OPA provides:
        │ 1. Authorization Request
        ▼
 ┌─────────────────────┐
-│   GAuth Server      │
+│   AgentAuth Server      │
 │  ┌──────────────┐   │
 │  │ PEP (Policy  │   │ 2. Policy Query
 │  │ Enforcement  ├───┼──────────┐
@@ -48,7 +48,7 @@ OPA provides:
 ```
 
 **Deployment Options:**
-1. **OPA Sidecar** (Recommended): OPA container alongside GAuth in same Pod
+1. **OPA Sidecar** (Recommended): OPA container alongside AgentAuth in same Pod
 2. **OPA Cluster**: Centralized OPA service for multiple applications
 3. **Embedded OPA**: In-process OPA using Go SDK
 
@@ -443,7 +443,7 @@ spec:
         app: gauth
     spec:
       containers:
-      # GAuth application
+      # AgentAuth application
       - name: gauth
         image: ghcr.io/mauriciomferz/gauth:latest
         ports:
@@ -520,7 +520,7 @@ spec:
 # Create namespace
 kubectl create namespace gauth
 
-# Deploy GAuth with OPA sidecar
+# Deploy AgentAuth with OPA sidecar
 kubectl apply -f k8s/gauth-with-opa.yaml
 
 # Verify deployment
@@ -624,7 +624,7 @@ OPA Cluster (remote)         ~10-20ms  Full network roundtrip
 ### Optimization Tips
 
 1. **Use OPA Sidecar** for lowest latency (3-5ms acceptable for authz)
-2. **Cache decisions** in GAuth for frequently checked permissions
+2. **Cache decisions** in AgentAuth for frequently checked permissions
 3. **Batch policy queries** when checking multiple permissions
 4. **Pre-compile policies** at startup (embedded OPA)
 5. **Monitor OPA metrics** (decision count, latency, errors)
@@ -748,7 +748,7 @@ P99 latency > 100ms
 Solutions:
 1. Check OPA resource limits (increase CPU)
 2. Optimize Rego policy (avoid expensive operations)
-3. Add caching layer in GAuth
+3. Add caching layer in AgentAuth
 4. Use OPA bundles for faster policy loading
 ```
 
@@ -760,7 +760,7 @@ Solutions:
 - [Rego Playground](https://play.openpolicyagent.org/)
 - [OPA Kubernetes Tutorial](https://www.openpolicyagent.org/docs/latest/kubernetes-tutorial/)
 - [OPA Go SDK](https://pkg.go.dev/github.com/open-policy-agent/opa/rego)
-- [GAuth Wildcard Patterns Guide](./WILDCARD_SCOPE_PATTERNS_GUIDE.md)
+- [AgentAuth Wildcard Patterns Guide](./WILDCARD_SCOPE_PATTERNS_GUIDE.md)
 
 ---
 

@@ -1,6 +1,6 @@
 # Phase 7 Completion Report: Advanced Token Operations
 
-**Project**: GAuth OIDC Implementation (RFC-0111)  
+**Project**: AgentAuth OIDC Implementation (RFC-0111)  
 **Phase**: 7 - Advanced Token Operations  
 **Date**: November 12, 2025  
 **Compliance Progress**: 75% → 85% (+10%)
@@ -505,7 +505,7 @@ Phase 7 successfully delivers advanced token lifecycle management with **1,626 l
 
 **Compliance Achievement**: **75% → 85%** (+10 percentage points)
 
-Phase 7 establishes GAuth as a fully-featured OIDC token management system, ready for enterprise deployment.
+Phase 7 establishes AgentAuth as a fully-featured OIDC token management system, ready for enterprise deployment.
 
 ---
 

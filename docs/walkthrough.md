@@ -1,6 +1,6 @@
-## GAuth Implementation Walkthrough
+## AgentAuth Implementation Walkthrough
 
-This document provides a comprehensive overview of the implemented features, design decisions, testing strategies, and verification results for the GAuth authorization server.
+This document provides a comprehensive overview of the implemented features, design decisions, testing strategies, and verification results for the AgentAuth authorization server.
 
 ---
 
@@ -56,7 +56,7 @@ Enhanced the existing RFC 7523 implementation to align with the latest RFC 7523b
 ## AI Agent Collaboration - Phase 2: MCP Integration & GNAP Linking
 
 ### Overview
-Deepened the integration between GAuth's authorization system and AI agent protocols by enhancing the Model Context Protocol (MCP) bridge and establishing critical links between GNAP and GAuth's Power of Attorney infrastructure.
+Deepened the integration between AgentAuth's authorization system and AI agent protocols by enhancing the Model Context Protocol (MCP) bridge and establishing critical links between GNAP and AgentAuth's Power of Attorney infrastructure.
 
 ### MCP Authorization Enhancements
 
@@ -79,22 +79,22 @@ Created [`pkg/mcp/mcp_integration_test.go`](file:///Users/mauricio.fernandez_fer
 - ✅ Monetary limit enforcement (denies calls exceeding `value_limit`)
 - ✅ Wildcard MCP scope verification (`mcp:*` grants)
 
-### GNAP-GAuth Integration
+### GNAP-AgentAuth Integration
 
 #### VerificationService Integration
-Established the critical link between GNAP grant requests and GAuth's Power of Attorney system by integrating [`pkg/gauthplus/VerificationService`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauthplus/verification.go) into the GNAP handler:
+Established the critical link between GNAP grant requests and AgentAuth's Power of Attorney system by integrating [`pkg/gauthplus/VerificationService`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauthplus/verification.go) into the GNAP handler:
 
 **Modified Files:**
 - [`web/handlers/gnap/handler.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/gnap/handler.go#L25): Added `VerificationService` to `Handler` struct
 - Updated `NewHandler` signature to accept `VerificationService`
-- Implemented `linkGAuthContext` helper function
+- Implemented `linkAgentAuthContext` helper function
 
 #### Authorization Chain Propagation
 When a GNAP grant request includes a `PoACredentialRef`, the handler now:
 1. Verifies the Power of Attorney using `VerificationService.VerifyPowerOfAttorney`
 2. Populates `PowerOfAttorneyRef` in the grant response with issuer, grantee, and scope
 3. Fetches and transforms the full authorization chain via `VerifyAuthorizationChain`
-4. Converts GAuth `AuthorityLink` structures to GNAP `ChainLink` format
+4. Converts AgentAuth `AuthorityLink` structures to GNAP `ChainLink` format
 5. Sets `ComplianceLevel` based on verification results
 
 This enables GNAP clients to:
@@ -133,9 +133,9 @@ TestIntrospectRS
 
 **MCP Integration Tests:** ✅ All passing
 ```
-TestMCP_GAuth_Integration/FullAuthorizationFlow_ToolCall
-TestMCP_GAuth_Integration/EnforceMonetaryLimits
-TestMCP_GAuth_Integration/WildcardMCPScoping
+TestMCP_AgentAuth_Integration/FullAuthorizationFlow_ToolCall
+TestMCP_AgentAuth_Integration/EnforceMonetaryLimits
+TestMCP_AgentAuth_Integration/WildcardMCPScoping
 TestE2E_RealWorldScenario
 TestE2E_AuditLoggerPerformance
 ```
@@ -153,7 +153,7 @@ MCP Authorization Bridge
   ↓
 Policy Decision Point (PDP)
   ↓
-GAuth Token (with PoA)
+AgentAuth Token (with PoA)
   ↓
 GNAP Grant Request
   → PoACredentialRef validation
@@ -183,7 +183,7 @@ Completed integration of `VerificationService` into production server initializa
 - Added placeholder for future DB service wiring (TODO comment)
 - All GNAP tests passing ✅
 
-**Status**: Foundation complete - `linkGAuthContext` will activate when VerificationService is properly wired with database services.
+**Status**: Foundation complete - `linkAgentAuthContext` will activate when VerificationService is properly wired with database services.
 
 ### Gosec G115 (Integer Overflow) Remediation
 
@@ -576,7 +576,7 @@ config := TSAConfig{
 
 ## Summary
 
-This walkthrough documents the completed implementation of RFC 7523bis hardening and AI Agent Collaboration Phase 2. The RFC 7523bis implementation adds critical security features including JTI replay protection, algorithm agility, and flexible audience validation. Phase 2 deepens MCP integration with AI agent identity propagation and monetary value validation, while establishing the crucial link between GNAP and GAuth's Power of Attorney system through `VerificationService` integration. All changes are fully tested and verified, with gosec security findings reduced from 251 to 247.
+This walkthrough documents the completed implementation of RFC 7523bis hardening and AI Agent Collaboration Phase 2. The RFC 7523bis implementation adds critical security features including JTI replay protection, algorithm agility, and flexible audience validation. Phase 2 deepens MCP integration with AI agent identity propagation and monetary value validation, while establishing the crucial link between GNAP and AgentAuth's Power of Attorney system through `VerificationService` integration. All changes are fully tested and verified, with gosec security findings reduced from 251 to 247.
 
 ### Admin Config 404 & Stale Assets
 - **Issue**: `/api/admin/config/yaml` returned 404 in dev mode (no DB).
@@ -747,27 +747,27 @@ GNAP authorization responses now include rich compliance and entity metadata der
     - `conditional`: Capability assessment insufficient.
     - `non_compliant`: Verification failed.
 - **Enriched Authorization Chains**: Chain links now include `entity_type` (`human` vs `ai_agent`), providing relying parties with better context for automated decisions.
-- **Action-Aware Reporting**: The GNAP handler now translates requested access rights into GAuth `Action` objects for accurate verification reporting.
+- **Action-Aware Reporting**: The GNAP handler now translates requested access rights into AgentAuth `Action` objects for accurate verification reporting.
 
 ### Verification Results
 Integration tests in `web/handlers/gnap/gauth_enrichment_test.go` verify the end-to-end mapping from verification results to GNAP response fields.
 
 ```bash
-$ go test -v ./web/handlers/gnap/... -run TestHandler_LinkGAuthContext_Enrichment
-=== RUN   TestHandler_LinkGAuthContext_Enrichment
-=== RUN   TestHandler_LinkGAuthContext_Enrichment/FullEnrichment_Success
-=== RUN   TestHandler_LinkGAuthContext_Enrichment/Compliance_Degraded_Fiduciary
-=== RUN   TestHandler_LinkGAuthContext_Enrichment/Compliance_Conditional_Capability
---- PASS: TestHandler_LinkGAuthContext_Enrichment (0.00s)
+$ go test -v ./web/handlers/gnap/... -run TestHandler_LinkAgentAuthContext_Enrichment
+=== RUN   TestHandler_LinkAgentAuthContext_Enrichment
+=== RUN   TestHandler_LinkAgentAuthContext_Enrichment/FullEnrichment_Success
+=== RUN   TestHandler_LinkAgentAuthContext_Enrichment/Compliance_Degraded_Fiduciary
+=== RUN   TestHandler_LinkAgentAuthContext_Enrichment/Compliance_Conditional_Capability
+--- PASS: TestHandler_LinkAgentAuthContext_Enrichment (0.00s)
 PASS
 ```
 
 ## Phase 9: Attestation Verification Integration
 
-The `VerificationService` now supports cryptographic attestation verification by bridging the GAuth+ model with the compliance framework.
+The `VerificationService` now supports cryptographic attestation verification by bridging the AgentAuth+ model with the compliance framework.
 
 ### Key Enhancements
-- **Attestation Bridge**: A new `DefaultAttestationVerifier` was implemented in `pkg/gauthplus` that adapts GAuth+ attestations to the `compliance.Attestation` model.
+- **Attestation Bridge**: A new `DefaultAttestationVerifier` was implemented in `pkg/gauthplus` that adapts AgentAuth+ attestations to the `compliance.Attestation` model.
 - **Cryptographic Verification**: The bridge leverages `pkg/compliance.DefaultAttestationVerifier` (Ed25519) to verify cryptographic proofs attached to attestations.
 - **Enhanced Status Propagation**: The `VerifyAttestations` method now correctly handles verification status transitions (e.g., `pending` -> `verified` or `verification_failed`).
 
@@ -813,7 +813,7 @@ To ensure the system is truly production-ready, we performed a final simulation 
     *   Updated `GAP_MATRIX.md` to formally close Phase 20 (CI/CD & Deployment).
     *   Updated `production_readiness.md` to sign off on the Deployment Checklist.
 
-**Conclusion**: The GAuth system is fully implemented, tested, and ready for deployment to the staging environment.
+**Conclusion**: The AgentAuth system is fully implemented, tested, and ready for deployment to the staging environment.
 
 ### Frontend Fixes & Polish (2025-12-27)
 

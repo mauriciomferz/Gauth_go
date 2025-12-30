@@ -221,7 +221,7 @@ type AuthorizationServerInfo struct {
 
 // IdentityVerificationChain represents the PVP verification chain
 // RFC-0111 Section 3, Page 8: "Power Verification Point (PVP) – verification of the
-// identities that perform a specific role along the GAuth processing."
+// identities that perform a specific role along the AgentAuth processing."
 type IdentityVerificationChain struct {
 	ChainID              string                    `json:"chain_id"`
 	VerificationLevels   []VerificationLevel       `json:"verification_levels"`
@@ -285,7 +285,7 @@ func (et *ExtendedToken) Validate() error {
 
 	// Validate authorization chain
 	if et.AuthorizationChain == nil {
-		return &GAuthError{Code: "missing_authorization_chain", Message: "Extended token must include authorization chain"}
+		return &AgentAuthError{Code: "missing_authorization_chain", Message: "Extended token must include authorization chain"}
 	}
 
 	if err := et.AuthorizationChain.Validate(); err != nil {
@@ -294,27 +294,27 @@ func (et *ExtendedToken) Validate() error {
 
 	// Validate client owner
 	if et.ClientOwner == nil {
-		return &GAuthError{Code: "missing_client_owner", Message: "Extended token must include client owner"}
+		return &AgentAuthError{Code: "missing_client_owner", Message: "Extended token must include client owner"}
 	}
 
 	// Validate owner's authorizer
 	if et.OwnersAuthorizer == nil {
-		return &GAuthError{Code: "missing_owners_authorizer", Message: "Extended token must include owner's authorizer"}
+		return &AgentAuthError{Code: "missing_owners_authorizer", Message: "Extended token must include owner's authorizer"}
 	}
 
 	// Validate verification chain
 	if et.VerificationProof == nil {
-		return &GAuthError{Code: "missing_verification_proof", Message: "Extended token must include identity verification proof"}
+		return &AgentAuthError{Code: "missing_verification_proof", Message: "Extended token must include identity verification proof"}
 	}
 
 	// Validate legal framework
 	if et.LegalFramework == nil {
-		return &GAuthError{Code: "missing_legal_framework", Message: "Extended token must include legal framework"}
+		return &AgentAuthError{Code: "missing_legal_framework", Message: "Extended token must include legal framework"}
 	}
 
 	// Validate issuer
 	if et.IssuedBy == nil {
-		return &GAuthError{Code: "missing_issuer", Message: "Extended token must include authorization server info"}
+		return &AgentAuthError{Code: "missing_issuer", Message: "Extended token must include authorization server info"}
 	}
 
 	return nil
@@ -323,24 +323,24 @@ func (et *ExtendedToken) Validate() error {
 // Validate performs validation of authorization chain
 func (ac *AuthorizationChain) Validate() error {
 	if ac.OwnersAuthorizer == nil {
-		return &GAuthError{Code: "invalid_chain", Message: "Authorization chain must start with owner's authorizer"}
+		return &AgentAuthError{Code: "invalid_chain", Message: "Authorization chain must start with owner's authorizer"}
 	}
 
 	if ac.ClientOwner == nil {
-		return &GAuthError{Code: "invalid_chain", Message: "Authorization chain must include client owner"}
+		return &AgentAuthError{Code: "invalid_chain", Message: "Authorization chain must include client owner"}
 	}
 
 	if ac.Client == nil {
-		return &GAuthError{Code: "invalid_chain", Message: "Authorization chain must end with client"}
+		return &AgentAuthError{Code: "invalid_chain", Message: "Authorization chain must end with client"}
 	}
 
 	// Validate chain linkage
 	if ac.ClientOwner.AuthorizedBy != ac.OwnersAuthorizer.EntityID {
-		return &GAuthError{Code: "broken_chain", Message: "Client owner must be authorized by owner's authorizer"}
+		return &AgentAuthError{Code: "broken_chain", Message: "Client owner must be authorized by owner's authorizer"}
 	}
 
 	if ac.Client.AuthorizedBy != ac.ClientOwner.EntityID {
-		return &GAuthError{Code: "broken_chain", Message: "Client must be authorized by client owner"}
+		return &AgentAuthError{Code: "broken_chain", Message: "Client must be authorized by client owner"}
 	}
 
 	// Validate all links are active
@@ -360,19 +360,19 @@ func (ac *AuthorizationChain) Validate() error {
 // Validate performs validation of authorization link
 func (al *AuthorizationLink) Validate() error {
 	if al.EntityID == "" {
-		return &GAuthError{Code: "invalid_link", Message: "Authorization link must have entity ID"}
+		return &AgentAuthError{Code: "invalid_link", Message: "Authorization link must have entity ID"}
 	}
 
 	if al.Status != "active" {
-		return &GAuthError{Code: "inactive_link", Message: "Authorization link must be active"}
+		return &AgentAuthError{Code: "inactive_link", Message: "Authorization link must be active"}
 	}
 
 	if time.Now().After(al.ValidUntil) {
-		return &GAuthError{Code: "expired_link", Message: "Authorization link has expired"}
+		return &AgentAuthError{Code: "expired_link", Message: "Authorization link has expired"}
 	}
 
 	if !al.IdentityVerified {
-		return &GAuthError{Code: "unverified_identity", Message: "Authorization link identity must be verified"}
+		return &AgentAuthError{Code: "unverified_identity", Message: "Authorization link identity must be verified"}
 	}
 
 	return nil

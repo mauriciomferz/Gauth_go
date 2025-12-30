@@ -1,5 +1,5 @@
-// Copyright 2025 Gimel Foundation
-// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 AgentAuth Contributors
+// SPDX-License-Identifier: MIT
 
 package poa
 

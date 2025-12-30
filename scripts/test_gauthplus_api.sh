@@ -1,5 +1,5 @@
 #!/bin/bash
-# GAuth+ API Integration Test Suite
+# AgentAuth+ API Integration Test Suite
 # Tests all 27 endpoints with various scenarios
 
 set -e
@@ -9,7 +9,7 @@ TEST_POA_ID="00000000-0000-0000-0000-000000000001"
 TIMESTAMP=$(date +%s)
 
 echo "========================================="
-echo "GAuth+ API Integration Test Suite"
+echo "AgentAuth+ API Integration Test Suite"
 echo "========================================="
 echo
 

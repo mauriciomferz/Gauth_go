@@ -1,10 +1,10 @@
 #!/bin/bash
-# Database setup script for GAuth admin handlers
+# Database setup script for AgentAuth admin handlers
 # This script starts PostgreSQL and runs migrations
 
 set -e
 
-echo "🗄️  GAuth Database Setup"
+echo "🗄️  AgentAuth Database Setup"
 echo "======================="
 echo ""
 

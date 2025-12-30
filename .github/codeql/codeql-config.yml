@@ -1,4 +1,4 @@
-name: "GAuth CodeQL Configuration"
+name: "AgentAuth CodeQL Configuration"
 
 # Paths to analyze
 paths:

@@ -1,6 +1,6 @@
-# GAuth+ System Validation & Demo Guide
+# AgentAuth+ System Validation & Demo Guide
 
-**Purpose**: Validate that all GAuth+ components are working correctly and demonstrate the complete system in action.
+**Purpose**: Validate that all AgentAuth+ components are working correctly and demonstrate the complete system in action.
 
 **Date**: November 26, 2025  
 **Prerequisites**: Monitoring stack running (Grafana, Prometheus, AlertManager)
@@ -41,19 +41,19 @@ curl -s http://localhost:3000/api/health | jq
 
 **Browser**: http://localhost:3000
 - Login: `admin` / `admin`
-- Navigate: **Dashboards** → **Browse** → **GAuth+**
-- Should see: **GAuth+ Monitoring Dashboard**
+- Navigate: **Dashboards** → **Browse** → **AgentAuth+**
+- Should see: **AgentAuth+ Monitoring Dashboard**
 
 ---
 
 ## Complete System Walkthrough
 
-### Phase 1: Core GAuth+ Features
+### Phase 1: Core AgentAuth+ Features
 
 #### Test 1: Verify Database Schema
 
 ```bash
-# Check GAuth+ tables exist
+# Check AgentAuth+ tables exist
 psql -U postgres -d gauth -c "
 SELECT table_name 
 FROM information_schema.tables 
@@ -74,10 +74,10 @@ AND table_name LIKE '%gauthplus%' OR table_name IN (
 - dual_control_approvals
 - fiduciary_duty_violations
 
-#### Test 2: Verify GAuth+ Services Load
+#### Test 2: Verify AgentAuth+ Services Load
 
 ```bash
-# Start GAuth server with GAuth+ enabled
+# Start AgentAuth server with AgentAuth+ enabled
 cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
 
 GAUTH_RFC0111_ENABLED=1 \
@@ -92,9 +92,9 @@ GAUTH_JWT_SIGNING_KEY=dev-secret \
 go run ./cmd/web-server &
 
 # Wait for startup, then check logs for:
-# [GAuth+] Enforcement mode: ADVISORY
-# [GAuth+] Performance optimization: Caching enabled
-# [GAuth+] Features enabled: successor, delegation, dual_control, capability, fiduciary
+# [AgentAuth+] Enforcement mode: ADVISORY
+# [AgentAuth+] Performance optimization: Caching enabled
+# [AgentAuth+] Features enabled: successor, delegation, dual_control, capability, fiduciary
 ```
 
 ---
@@ -276,7 +276,7 @@ time curl -s http://localhost:8080/api/v1/gauthplus/capabilities/agent-001/lates
 #### Test 11: Verify All 11 Metrics
 
 ```bash
-# Check all GAuth+ metrics are exposed
+# Check all AgentAuth+ metrics are exposed
 curl -s http://localhost:8080/metrics | grep "^gauthplus_" | cut -d' ' -f1 | sort -u
 ```
 
@@ -320,10 +320,10 @@ rate(gauthplus_validations_total[5m])
 #### Test 13: Dashboard Panels Verification
 
 **Browser**: http://localhost:3000
-- Navigate: **Dashboards** → **GAuth+** → **GAuth+ Monitoring Dashboard**
+- Navigate: **Dashboards** → **AgentAuth+** → **AgentAuth+ Monitoring Dashboard**
 
 **Verify All 12 Panels**:
-1. ✅ GAuth+ Validations Rate (shows data if APIs called)
+1. ✅ AgentAuth+ Validations Rate (shows data if APIs called)
 2. ✅ Total Validation Rate (gauge)
 3. ✅ P95 Validation Duration (gauge)
 4. ✅ Cache Hit Rate (line graph)
@@ -341,16 +341,16 @@ rate(gauthplus_validations_total[5m])
 **Browser**: http://localhost:9090/alerts
 
 **Expected Alert Rules** (10 total):
-- GAuthPlusHighValidationFailureRate
-- GAuthPlusCacheHitRateLow
-- GAuthPlusHighPolicyViolationRate
-- GAuthPlusHighValidationLatency
-- GAuthPlusExcessiveDelegationDepth
-- GAuthPlusFrequentSuccessorActivations
-- GAuthPlusCriticalFiduciaryViolations
-- GAuthPlusDualControlFailures
-- GAuthPlusServiceDown
-- GAuthPlusCacheSizeExcessive
+- AgentAuthPlusHighValidationFailureRate
+- AgentAuthPlusCacheHitRateLow
+- AgentAuthPlusHighPolicyViolationRate
+- AgentAuthPlusHighValidationLatency
+- AgentAuthPlusExcessiveDelegationDepth
+- AgentAuthPlusFrequentSuccessorActivations
+- AgentAuthPlusCriticalFiduciaryViolations
+- AgentAuthPlusDualControlFailures
+- AgentAuthPlusServiceDown
+- AgentAuthPlusCacheSizeExcessive
 
 **Status**: All should be in **Pending** state (green) unless thresholds exceeded
 
@@ -432,7 +432,7 @@ curl -s http://localhost:8080/metrics | grep gauthplus_validations_total
 ## Validation Checklist
 
 ### Core Features ✅
-- [x] 5 GAuth+ features operational
+- [x] 5 AgentAuth+ features operational
 - [x] PostgreSQL database connected
 - [x] All tables created via migrations
 - [x] Advisory mode enforcement working
@@ -501,7 +501,7 @@ curl -s http://localhost:8080/metrics | grep gauthplus_validations_total
 
 **Solution**:
 ```bash
-# 1. Verify GAuth service is running and exposing metrics
+# 1. Verify AgentAuth service is running and exposing metrics
 curl http://localhost:8080/metrics | grep gauthplus
 
 # 2. Check Prometheus is scraping

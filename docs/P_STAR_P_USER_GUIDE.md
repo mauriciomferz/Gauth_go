@@ -1,12 +1,12 @@
 ---
-title: GAuth P*P Architecture User Guide
+title: AgentAuth P*P Architecture User Guide
 category: guide
 status: active
 lastUpdated: 2025-11-19
 owners: core-maintainers
 ---
 
-# GAuth P*P Architecture User Guide
+# AgentAuth P*P Architecture User Guide
 
 **Complete Guide to Policy Administration, Decision, Information, Verification, and Enforcement Points**
 
@@ -25,7 +25,7 @@ owners: core-maintainers
 
 ## Introduction
 
-The **P*P Architecture** (pronounced "P-Star-P") is the core authorization framework of GAuth 1.0, implementing RFC-0111 compliant policy-based access control. It consists of five interoperating components:
+The **P*P Architecture** (pronounced "P-Star-P") is the core authorization framework of AgentAuth 1.0, implementing RFC-0111 compliant policy-based access control. It consists of five interoperating components:
 
 - **PAP** (Policy Administration Point) - Creates and manages authorization policies
 - **PDP** (Policy Decision Point) - Makes authorization decisions based on policies
@@ -122,7 +122,7 @@ func main() {
     pap := gauth.NewPowerAdministrationPoint(
         "pap-001",
         "Production PAP",
-        "Main policy administration point for GAuth",
+        "Main policy administration point for AgentAuth",
     )
 
     ctx := context.Background()
@@ -430,7 +430,7 @@ if decision.Decision == "allow" {
 #### 3. Distributed PDP with Caching
 
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/pdp"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/pdp"
 
 // Create distributed PDP with caching
 config := &pdp.PDPConfig{
@@ -575,7 +575,7 @@ The **Policy Information Point** retrieves contextual attributes and information
 package main
 
 import (
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pip"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pip"
 )
 
 func main() {
@@ -725,7 +725,7 @@ package main
 
 import (
     "context"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
 func main() {
@@ -1081,7 +1081,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
 func main() {
@@ -1287,7 +1287,7 @@ GAUTH_PEP_AUDIT_ENABLED=true
 ### Common Commands
 
 ```bash
-# Start GAuth server with P*P features
+# Start AgentAuth server with P*P features
 GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 GAUTH_USE_JWT_LIB=1 go run ./cmd/web-server
 
 # Test PAP policy creation

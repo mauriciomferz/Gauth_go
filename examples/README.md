@@ -6,7 +6,7 @@ lastUpdated: 2025-11-12
 owners: architecture-team
 refreshCadence: on-change
 ---
-# GAuth Examples
+# AgentAuth Examples
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -16,23 +16,23 @@ refreshCadence: on-change
 > These examples are for **beta demonstration purposes only**.
 > **NOT production ready. This is for beta demonstration purposes only. Do NOT use for real security, production, or commercial deployment.**
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+Operated by AgentAuth Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
-This directory contains beta examples demonstrating RFC-0115 PoA-Definition concepts and other GAuth learning materials. Each example is designed for learning and understanding GAuth principles.
+This directory contains beta examples demonstrating RFC-0115 PoA-Definition concepts and other AgentAuth learning materials. Each example is designed for learning and understanding AgentAuth principles.
 
 ## ⭐ **Featured Example - RFC-0115 PoA-Definition**
 
 **[RFC-0115 PoA-Definition Implementation](rfc_0115_poa_definition/README.md)** ✅ **COMPLETE**
-- Complete GiFo-RFC-0115 PoA-Definition structure
+- Complete AAP-RFC-0115 PoA-Definition structure
 - Full type safety with Go type system
 - JSON serialization and validation
-- Gimel Foundation compliance demonstration
+- AgentAuth Community compliance demonstration
 - **Status**: Fully functional and tested
 
 ```bash

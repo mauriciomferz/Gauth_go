@@ -1,5 +1,5 @@
 // Package loadtest provides comprehensive load and stress testing harness
-// for GAuth high-volume scenarios.
+// for AgentAuth high-volume scenarios.
 package loadtest
 
 import (

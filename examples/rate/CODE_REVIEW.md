@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates rate limiting patterns using the GAuth framework. It covers token bucket, concurrent clients, window sliding, and reset/retry logic.
+This example demonstrates rate limiting patterns using the AgentAuth framework. It covers token bucket, concurrent clients, window sliding, and reset/retry logic.
 
 ## Key Concepts
 - **TokenBucket**: Implements rate limiting with burst and window controls.

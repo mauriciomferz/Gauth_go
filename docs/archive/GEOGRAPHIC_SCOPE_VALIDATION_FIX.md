@@ -88,7 +88,7 @@ func (v *ComplianceValidator) validateGeographicScope(
 ) error {
     // 1. Check PoA exists
     if request.PowerOfAttorney == nil {
-        return &GAuthError{Code: "missing_poa", Message: "..."}
+        return &AgentAuthError{Code: "missing_poa", Message: "..."}
     }
 
     // 2. Get applicable regions from PoA
@@ -98,7 +98,7 @@ func (v *ComplianceValidator) validateGeographicScope(
     if len(applicableRegions) == 0 {
         if v.strictMode {
             result.Checks["geographic_scope"] = false
-            return &GAuthError{Code: "no_geographic_scope", Message: "..."}
+            return &AgentAuthError{Code: "no_geographic_scope", Message: "..."}
         }
         result.Warnings = append(result.Warnings, "...")
         return nil
@@ -107,7 +107,7 @@ func (v *ComplianceValidator) validateGeographicScope(
     // 4. Check authorization using existing helper
     if !poa.IsAuthorizedInRegion(applicableRegions, request.Jurisdiction) {
         result.Checks["geographic_scope"] = false
-        return &GAuthError{
+        return &AgentAuthError{
             Code: "geographic_scope_violation",
             Message: fmt.Sprintf("Operation in jurisdiction '%s' not authorized. Authorized regions: %v", ...)
         }
@@ -580,7 +580,7 @@ level=warn msg="Geographic scope violation"
 
 ## Conclusion
 
-The geographic scope validation fix closes a critical security gap in the GAuth 1.0 implementation, ensuring full RFC-0111 compliance and preventing unauthorized cross-border operations. The solution is:
+The geographic scope validation fix closes a critical security gap in the AgentAuth 1.0 implementation, ensuring full RFC-0111 compliance and preventing unauthorized cross-border operations. The solution is:
 
 - ✅ **Secure**: Prevents unauthorized operations outside PoA scope
 - ✅ **Complete**: 100% test coverage with all scenarios validated

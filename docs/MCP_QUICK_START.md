@@ -2,7 +2,7 @@
 
 ## Overview
 
-The MCP (Model Context Protocol) integration in GAuth allows you to register and manage MCP servers, browse their resources, and invoke tools through both REST API and web UI interfaces.
+The MCP (Model Context Protocol) integration in AgentAuth allows you to register and manage MCP servers, browse their resources, and invoke tools through both REST API and web UI interfaces.
 
 **Protocol:** JSON-RPC 2.0  
 **Transports:** stdio (implemented), WebSocket (planned), HTTP-SSE (planned)  
@@ -527,7 +527,7 @@ See "Option B: Using the REST API" section above for detailed curl examples.
 ### Current Implementation
 - MCP servers run as subprocess with stdio transport
 - No authentication required by default (can be enabled per server)
-- Servers run with same permissions as GAuth process
+- Servers run with same permissions as AgentAuth process
 
 ### Best Practices
 1. **Limit Directory Access:** When using filesystem server, specify only necessary directories
@@ -597,7 +597,7 @@ async function readUserDocument(userId, filename) {
 
 - **MCP Protocol Specification:** https://spec.modelcontextprotocol.io/
 - **Official MCP SDK:** https://github.com/modelcontextprotocol/typescript-sdk
-- **GAuth RFC-0111 Documentation:** `/docs/RFC_0111_IMPLEMENTATION.md`
+- **AgentAuth RFC-0111 Documentation:** `/docs/RFC_0111_IMPLEMENTATION.md`
 - **Phase 2B Completion Report:** `/PHASE_2B_MCP_COMPLETION_REPORT.md`
 
 ---

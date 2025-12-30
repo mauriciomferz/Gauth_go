@@ -8,7 +8,7 @@ source: internal
 refreshCadence: quarterly
 ---
 # Threat Mitigations Matrix
-## GAuth RFC 0111/0115 Security Implementation
+## AgentAuth AAP-001/0115 Security Implementation
 
 **Document Version**: 1.0  
 **Last Updated**: 2025-01  
@@ -154,7 +154,7 @@ See `docs/RESIDUAL_RISKS.md` for unmitigated risks requiring future work (sec14.
 
 ## References
 
-- RFC 0111: GAuth Protocol Specification
-- RFC 0115: Power of Attorney Definition
+- AAP-001: AgentAuth Protocol Specification
+- AAP-002: Power of Attorney Definition
 - [GAP_MATRIX.md](GAP_MATRIX.md): Detailed conformance tracking
 - [REMAINING_GAPS_ANALYSIS.md](REMAINING_GAPS_ANALYSIS.md): Architectural gaps discussion

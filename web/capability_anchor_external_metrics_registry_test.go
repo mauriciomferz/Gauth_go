@@ -14,7 +14,7 @@ import (
 func TestExternalAnchorMetricsIsolatedRegistry(t *testing.T) {
 	t.Setenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001", Registry: reg})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm
@@ -38,11 +38,11 @@ func TestExternalAnchorMetricsIsolatedRegistry(t *testing.T) {
 		t.Fatalf("gather error: %v", err)
 	}
 	want := map[string]bool{
-		"gauth_rfc0111_external_anchor_latency_seconds": false,
-		"gauth_rfc0111_external_anchor_attempts_total":  false,
-		"gauth_rfc0111_external_anchor_failures_total":  false,
-		"gauth_rfc0111_external_anchor_age_seconds":     false,
-		"gauth_rfc0111_external_anchor_last_hash_len":   false,
+		"gauth_aap001_external_anchor_latency_seconds": false,
+		"gauth_aap001_external_anchor_attempts_total":  false,
+		"gauth_aap001_external_anchor_failures_total":  false,
+		"gauth_aap001_external_anchor_age_seconds":     false,
+		"gauth_aap001_external_anchor_last_hash_len":   false,
 	}
 	for _, mf := range mfs {
 		name := mf.GetName()

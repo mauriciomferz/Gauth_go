@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-**Phase 2C implements database persistence, caching layers, and distributed deployment patterns** to scale GAuth from development/demo workloads to production enterprise scale. These enhancements are **triggered by specific performance or reliability requirements** rather than being mandatory for initial deployment.
+**Phase 2C implements database persistence, caching layers, and distributed deployment patterns** to scale AgentAuth from development/demo workloads to production enterprise scale. These enhancements are **triggered by specific performance or reliability requirements** rather than being mandatory for initial deployment.
 
 ### Current System Performance ✅
 
@@ -222,7 +222,7 @@ pap:
 **Redis Cache Architecture**:
 ```
 ┌─────────────────────────────────────────────────┐
-│              GAuth Instances                     │
+│              AgentAuth Instances                     │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐      │
 │  │Instance 1│  │Instance 2│  │Instance 3│      │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘      │
@@ -492,7 +492,7 @@ var (
             ┌─────────────────────┼─────────────────────┐
             │                     │                     │
     ┌───────▼────────┐    ┌──────▼──────┐    ┌────────▼───────┐
-    │  GAuth Pod 1   │    │ GAuth Pod 2 │    │  GAuth Pod 3   │
+    │  AgentAuth Pod 1   │    │ AgentAuth Pod 2 │    │  AgentAuth Pod 3   │
     │  (us-east-1a)  │    │(us-east-1b) │    │ (us-east-1c)   │
     └───────┬────────┘    └──────┬──────┘    └────────┬───────┘
             │                     │                     │
@@ -826,7 +826,7 @@ spec:
     - name: gauth
       interval: 30s
       rules:
-        - alert: GAuthHighErrorRate
+        - alert: AgentAuthHighErrorRate
           expr: |
             rate(http_requests_total{status=~"5.."}[5m]) / 
             rate(http_requests_total[5m]) > 0.05
@@ -837,7 +837,7 @@ spec:
             summary: "High error rate detected"
             description: "{{ $value | humanizePercentage }} errors"
         
-        - alert: GAuthHighLatency
+        - alert: AgentAuthHighLatency
           expr: |
             histogram_quantile(0.95, 
               rate(http_request_duration_seconds_bucket[5m])
@@ -849,7 +849,7 @@ spec:
             summary: "High latency detected"
             description: "P95 latency: {{ $value }}s"
         
-        - alert: GAuthPodCrashLooping
+        - alert: AgentAuthPodCrashLooping
           expr: |
             rate(kube_pod_container_status_restarts_total{
               namespace="gauth-system",

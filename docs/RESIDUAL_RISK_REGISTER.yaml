@@ -1,10 +1,10 @@
-# GAuth Residual Risk Register
+# AgentAuth Residual Risk Register
 # Tracks remaining security exposures after mitigation implementation
 # Completes sec14.item2 (P3) - Residual risk register
 
 version: "1.0"
 last_updated: "2025-11-06"
-scope: "GAuth RFC 0111/0115 Implementation"
+scope: "AgentAuth AAP-001/0115 Implementation"
 reference_matrix: "docs/THREAT_MITIGATIONS_MATRIX.yaml"
 
 # Risk Scoring

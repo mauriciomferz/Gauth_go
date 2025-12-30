@@ -974,7 +974,7 @@ func (v *VerificationServiceImpl) VerifyAuthorizationChain(ctx context.Context, 
 			}
 		} else {
 			// This is a direct PoA but issuer is NOT human (e.g. an AI system issuing powers?)
-			// GAuth+ requires a human at the top.
+			// AgentAuth+ requires a human at the top.
 			// Check if this AI was delegated power by someone else?
 			// But if SourcePOAID is nil, it's a root. If root issuer isn't human, it's invalid in our policy.
 			break

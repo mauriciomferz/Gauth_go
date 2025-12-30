@@ -1,10 +1,10 @@
-// Official GiFo-RFC-0115 PoA-Definition Implementation Demo
+// Official AAP-0115 PoA-Definition Implementation Demo
 //
-// Copyright (c) 2025 Gimel Foundation gGmbH i.G.
+// Copyright (c) 2025 AgentAuth Community
 // Licensed under Apache 2.0
 //
 // Demonstrates the complete Power-of-Attorney Credential Definition (PoA-Definition)
-// structure as specified in GiFo-RFC-0115 by Dr. Götz G. Wehberg
+// structure as specified in AAP-0115 by The AgentAuth Community
 //
 // Digital Supply Institute - Standards Track Document
 // Obsoletes: - 15. September 2025
@@ -22,15 +22,15 @@ import (
 )
 
 func main() {
-	fmt.Println("=== GiFo-RFC-0115 PoA-Definition Implementation Demo ===")
+	fmt.Println("=== AAP-0115 PoA-Definition Implementation Demo ===")
 	fmt.Println("Digital Supply Institute")
 	fmt.Println("Category: Standards Track")
 	fmt.Println("Obsoletes: - 15. September 2025")
 	fmt.Println()
-	fmt.Println("Gimel Foundation gGmbH i.G., www.GimelFoundation.com")
-	fmt.Println("Operated by Gimel Technologies GmbH")
-	fmt.Println("MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert")
-	fmt.Println("Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com")
+	fmt.Println("AgentAuth Community, www.AgentAuthFoundation.com")
+	fmt.Println("Operated by AgentAuth Technologies GmbH")
+	fmt.Println("MD: Open Source Maintainers – Chairman of the Board: Community Board")
+	fmt.Println("Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com")
 	fmt.Println()
 
 	// Create a comprehensive PoA-Definition example
@@ -64,8 +64,8 @@ func main() {
 	fmt.Println("==============================")
 
 	// Create RFC-0115 compliant configuration
-	config := poa.CreateRFC0115CompliantConfig()
-	if err := poa.ValidateRFC0115Compliance(config); err != nil {
+	config := poa.CreateAAP002CompliantConfig()
+	if err := poa.ValidateAAP002Compliance(config); err != nil {
 		log.Fatalf("RFC-0115 compliance validation failed: %v", err)
 	}
 	fmt.Println("✅ RFC-0115 exclusions validated (Web3, AI operators, DNA identities excluded)")
@@ -75,7 +75,7 @@ func main() {
 		log.Fatalf("PoA-Definition validation failed: %v", err)
 	}
 	fmt.Println("✅ PoA-Definition structure validated for RFC-0115 compliance")
-	fmt.Println("✅ Official Gimel Foundation gGmbH i.G. attribution")
+	fmt.Println("✅ Official AgentAuth Community attribution")
 	fmt.Println()
 
 	fmt.Println("✅ RFC-0115 PoA-Definition implementation successfully demonstrated")
@@ -94,15 +94,15 @@ func createExamplePoADefinition() *poa.PoADefinition {
 				Identity: "gimel-foundation-ggmbh-ig",
 				Organization: &poa.Organization{
 					Type:                poa.OrgTypeNonProfit,
-					Name:                "Gimel Foundation gGmbH i.G.",
+					Name:                "AgentAuth Community",
 					RegisterEntry:       "Siegburg HRB 18660",
-					ManagingDirector:    "Bjørn Baunbæk, Dr. Götz G. Wehberg",
+					ManagingDirector:    "Open Source Maintainers",
 					RegisteredAuthority: true,
 				},
 			},
 			Representative: &poa.Representative{
 				ClientOwner: &poa.ClientOwnerInfo{
-					Name:                      "Daniel Hartert",
+					Name:                      "Community Board",
 					RegisteredPowerOfAttorney: true,
 					CommercialRegisterEntry:   true,
 				},
@@ -241,7 +241,7 @@ func createExamplePoADefinition() *poa.PoADefinition {
 				GoverningLaw:        "German Federal Law",
 				PlaceOfJurisdiction: "Königswinter, Germany",
 				AttachedDocuments: []string{
-					"Gimel Foundation Articles of Association",
+					"AgentAuth Community Articles of Association",
 					"Corporate Power of Attorney Certificate",
 					"Technical Implementation Specifications",
 				},

@@ -1,4 +1,4 @@
-# Advanced Security Deployment Guide for GAuth
+# Advanced Security Deployment Guide for AgentAuth
 
 **Version**: 1.0  
 **Date**: November 2025  
@@ -139,7 +139,7 @@ kubectl exec -n vault vault-0 -- vault secrets tune -max-lease-ttl=87600h pki
 
 # Generate root CA
 kubectl exec -n vault vault-0 -- vault write -field=certificate pki/root/generate/internal \
-    common_name="GAuth Root CA" \
+    common_name="AgentAuth Root CA" \
     ttl=87600h \
     key_bits=4096 > /tmp/gauth-root-ca.crt
 
@@ -154,7 +154,7 @@ kubectl exec -n vault vault-0 -- vault secrets tune -max-lease-ttl=43800h pki_in
 
 # Generate intermediate CSR
 kubectl exec -n vault vault-0 -- vault write -format=json pki_int/intermediate/generate/internal \
-    common_name="GAuth Services Intermediate CA" \
+    common_name="AgentAuth Services Intermediate CA" \
     ttl=43800h | jq -r '.data.csr' > /tmp/pki_intermediate.csr
 
 # Sign intermediate with root CA

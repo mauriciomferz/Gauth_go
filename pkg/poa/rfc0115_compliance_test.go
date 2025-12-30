@@ -8,14 +8,14 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
-// TestCreateRFC0115CompliantConfig tests the CreateRFC0115CompliantConfig function
-func TestCreateRFC0115CompliantConfig(t *testing.T) {
-	config := CreateRFC0115CompliantConfig()
+// TestCreateAAP002CompliantConfig tests the CreateAAP002CompliantConfig function
+func TestCreateAAP002CompliantConfig(t *testing.T) {
+	config := CreateAAP002CompliantConfig()
 
-	// Verify it returns RFC0115Config type
-	rfcConfig, ok := config.(RFC0115Config)
+	// Verify it returns AAP002Config type
+	rfcConfig, ok := config.(AAP002Config)
 	if !ok {
-		t.Fatalf("CreateRFC0115CompliantConfig() returned type %T, want RFC0115Config", config)
+		t.Fatalf("CreateAAP002CompliantConfig() returned type %T, want AAP002Config", config)
 	}
 
 	// Verify all exclusion flags are true
@@ -35,17 +35,17 @@ func TestCreateRFC0115CompliantConfig(t *testing.T) {
 	}
 }
 
-// TestValidateRFC0115Compliance_Config tests ValidateRFC0115Compliance with RFC0115Config
-func TestValidateRFC0115Compliance_Config(t *testing.T) {
+// TestValidateAAP002Compliance_Config tests ValidateAAP002Compliance with AAP002Config
+func TestValidateAAP002Compliance_Config(t *testing.T) {
 	tests := []struct {
 		name    string
-		config  RFC0115Config
+		config  AAP002Config
 		wantErr bool
 		errMsg  string
 	}{
 		{
 			name: "Valid config - all flags true, valid days",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -55,7 +55,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Invalid - ExcludeWeb3 false",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          false,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -66,7 +66,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Invalid - ExcludeAIOperators false",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   false,
 				ExcludeDNAIdentities: true,
@@ -77,7 +77,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Invalid - ExcludeDNAIdentities false",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: false,
@@ -88,7 +88,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Invalid - MaxValidityDays zero",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -99,7 +99,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Invalid - MaxValidityDays negative",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -110,7 +110,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Invalid - MaxValidityDays exceeds 730",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -121,7 +121,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Valid - MaxValidityDays at boundary 730",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -131,7 +131,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 		},
 		{
 			name: "Valid - MaxValidityDays minimum boundary 1",
-			config: RFC0115Config{
+			config: AAP002Config{
 				ExcludeWeb3:          true,
 				ExcludeAIOperators:   true,
 				ExcludeDNAIdentities: true,
@@ -143,9 +143,9 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateRFC0115Compliance(tt.config)
+			err := ValidateAAP002Compliance(tt.config)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidateRFC0115Compliance() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ValidateAAP002Compliance() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.wantErr && tt.errMsg != "" && err != nil {
@@ -159,7 +159,7 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 						}
 					}
 					if !found {
-						t.Errorf("ValidateRFC0115Compliance() error = %v, want substring %v", err, tt.errMsg)
+						t.Errorf("ValidateAAP002Compliance() error = %v, want substring %v", err, tt.errMsg)
 					}
 				}
 			}
@@ -167,10 +167,10 @@ func TestValidateRFC0115Compliance_Config(t *testing.T) {
 	}
 }
 
-// TestValidateRFC0115Compliance_Definition tests ValidateRFC0115Compliance with PoADefinition
+// TestValidateAAP002Compliance_Definition tests ValidateAAP002Compliance with PoADefinition
 // Note: This test uses the actual PoADefinition structure from the implementation
-func TestValidateRFC0115Compliance_Definition(t *testing.T) {
-	// ValidateRFC0115Compliance for PoADefinition calls ValidatePoADefinition first,
+func TestValidateAAP002Compliance_Definition(t *testing.T) {
+	// ValidateAAP002Compliance for PoADefinition calls ValidatePoADefinition first,
 	// then performs additional semantic checks. Most coverage comes from the config tests.
 	// This test focuses on ensuring the PoADefinition path is exercised.
 
@@ -188,16 +188,16 @@ func TestValidateRFC0115Compliance_Definition(t *testing.T) {
 			},
 		}
 
-		err := ValidateRFC0115Compliance(def)
+		err := ValidateAAP002Compliance(def)
 		if err == nil {
-			t.Error("ValidateRFC0115Compliance() expected error for invalid definition, got nil")
+			t.Error("ValidateAAP002Compliance() expected error for invalid definition, got nil")
 		}
 	})
 }
 
-// TestValidateRFC0115Compliance_CompositeMap tests ValidateRFC0115Compliance with map[string]interface{}
-func TestValidateRFC0115Compliance_CompositeMap(t *testing.T) {
-	validConfig := RFC0115Config{
+// TestValidateAAP002Compliance_CompositeMap tests ValidateAAP002Compliance with map[string]interface{}
+func TestValidateAAP002Compliance_CompositeMap(t *testing.T) {
+	validConfig := AAP002Config{
 		ExcludeWeb3:          true,
 		ExcludeAIOperators:   true,
 		ExcludeDNAIdentities: true,
@@ -220,7 +220,7 @@ func TestValidateRFC0115Compliance_CompositeMap(t *testing.T) {
 		{
 			name: "Invalid config in composite",
 			input: map[string]interface{}{
-				"config": RFC0115Config{
+				"config": AAP002Config{
 					ExcludeWeb3:          false,
 					ExcludeAIOperators:   true,
 					ExcludeDNAIdentities: true,
@@ -239,9 +239,9 @@ func TestValidateRFC0115Compliance_CompositeMap(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateRFC0115Compliance(tt.input)
+			err := ValidateAAP002Compliance(tt.input)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidateRFC0115Compliance() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ValidateAAP002Compliance() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.wantErr && tt.errMsg != "" && err != nil {
@@ -254,15 +254,15 @@ func TestValidateRFC0115Compliance_CompositeMap(t *testing.T) {
 					}
 				}
 				if !found {
-					t.Errorf("ValidateRFC0115Compliance() error = %v, want substring %v", err, tt.errMsg)
+					t.Errorf("ValidateAAP002Compliance() error = %v, want substring %v", err, tt.errMsg)
 				}
 			}
 		})
 	}
 }
 
-// TestValidateRFC0115Compliance_UnsupportedType tests ValidateRFC0115Compliance with unsupported types
-func TestValidateRFC0115Compliance_UnsupportedType(t *testing.T) {
+// TestValidateAAP002Compliance_UnsupportedType tests ValidateAAP002Compliance with unsupported types
+func TestValidateAAP002Compliance_UnsupportedType(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   interface{}
@@ -287,9 +287,9 @@ func TestValidateRFC0115Compliance_UnsupportedType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateRFC0115Compliance(tt.input)
+			err := ValidateAAP002Compliance(tt.input)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidateRFC0115Compliance() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ValidateAAP002Compliance() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if tt.wantErr && err != nil {
@@ -304,7 +304,7 @@ func TestValidateRFC0115Compliance_UnsupportedType(t *testing.T) {
 					}
 				}
 				if !found {
-					t.Errorf("ValidateRFC0115Compliance() error = %v, want to contain 'unsupported'", err)
+					t.Errorf("ValidateAAP002Compliance() error = %v, want to contain 'unsupported'", err)
 				}
 			}
 		})
@@ -747,11 +747,11 @@ func errorContains(err error, substr string) bool {
 }
 
 // ============================================================================
-// Session 34: Additional ValidateRFC0115Compliance edge cases
+// Session 34: Additional ValidateAAP002Compliance edge cases
 // ============================================================================
 
-func TestValidateRFC0115Compliance_UnsupportedInputType(t *testing.T) {
-	// Test with completely unsupported type (not RFC0115Config, not PoADefinition, not map)
+func TestValidateAAP002Compliance_UnsupportedInputType(t *testing.T) {
+	// Test with completely unsupported type (not AAP002Config, not PoADefinition, not map)
 	tests := []interface{}{
 		123,
 		"string",
@@ -762,18 +762,18 @@ func TestValidateRFC0115Compliance_UnsupportedInputType(t *testing.T) {
 
 	for _, input := range tests {
 		t.Run(fmt.Sprintf("Type_%T", input), func(t *testing.T) {
-			err := ValidateRFC0115Compliance(input)
+			err := ValidateAAP002Compliance(input)
 			if err == nil {
 				t.Errorf("Expected error for unsupported type %T", input)
 			}
-			if !errorContains(err, "unsupported RFC0115 compliance object type") {
-				t.Errorf("Error = %v, want 'unsupported RFC0115 compliance object type'", err)
+			if !errorContains(err, "unsupported AAP002 compliance object type") {
+				t.Errorf("Error = %v, want 'unsupported AAP002 compliance object type'", err)
 			}
 		})
 	}
 }
 
-func TestValidateRFC0115Compliance_PoADefinition_NoRegions(t *testing.T) {
+func TestValidateAAP002Compliance_PoADefinition_NoRegions(t *testing.T) {
 	// Test PoADefinition validation when ApplicableRegions is empty
 	baseTime := time.Now()
 
@@ -801,7 +801,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NoRegions(t *testing.T) {
 		},
 	}
 
-	err := ValidateRFC0115Compliance(def)
+	err := ValidateAAP002Compliance(def)
 	if err == nil {
 		t.Fatal("Expected error for empty ApplicableRegions")
 	}
@@ -810,7 +810,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NoRegions(t *testing.T) {
 	}
 }
 
-func TestValidateRFC0115Compliance_PoADefinition_NoActions(t *testing.T) {
+func TestValidateAAP002Compliance_PoADefinition_NoActions(t *testing.T) {
 	// Test PoADefinition validation when all action arrays are empty
 	baseTime := time.Now()
 
@@ -842,7 +842,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NoActions(t *testing.T) {
 		},
 	}
 
-	err := ValidateRFC0115Compliance(def)
+	err := ValidateAAP002Compliance(def)
 	if err == nil {
 		t.Fatal("Expected error for no actions")
 	}
@@ -851,7 +851,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NoActions(t *testing.T) {
 	}
 }
 
-func TestValidateRFC0115Compliance_PoADefinition_NegativeDuration(t *testing.T) {
+func TestValidateAAP002Compliance_PoADefinition_NegativeDuration(t *testing.T) {
 	// Test PoADefinition validation when validity period is negative
 	baseTime := time.Now()
 
@@ -881,7 +881,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NegativeDuration(t *testing.T) 
 		},
 	}
 
-	err := ValidateRFC0115Compliance(def)
+	err := ValidateAAP002Compliance(def)
 	if err == nil {
 		t.Fatal("Expected error for negative duration")
 	}
@@ -892,7 +892,7 @@ func TestValidateRFC0115Compliance_PoADefinition_NegativeDuration(t *testing.T) 
 	}
 }
 
-func TestValidateRFC0115Compliance_PoADefinition_ExceedsTwoYears(t *testing.T) {
+func TestValidateAAP002Compliance_PoADefinition_ExceedsTwoYears(t *testing.T) {
 	// Test PoADefinition validation when validity period > 2 years
 	baseTime := time.Now()
 
@@ -922,7 +922,7 @@ func TestValidateRFC0115Compliance_PoADefinition_ExceedsTwoYears(t *testing.T) {
 		},
 	}
 
-	err := ValidateRFC0115Compliance(def)
+	err := ValidateAAP002Compliance(def)
 	if err == nil {
 		t.Fatal("Expected error for duration exceeding 2 years")
 	}
@@ -931,7 +931,7 @@ func TestValidateRFC0115Compliance_PoADefinition_ExceedsTwoYears(t *testing.T) {
 	}
 }
 
-func TestValidateRFC0115Compliance_PoADefinition_OnlyDecisions(t *testing.T) {
+func TestValidateAAP002Compliance_PoADefinition_OnlyDecisions(t *testing.T) {
 	// Test PoADefinition validation with only Decisions (no Transactions)
 	baseTime := time.Now()
 
@@ -961,13 +961,13 @@ func TestValidateRFC0115Compliance_PoADefinition_OnlyDecisions(t *testing.T) {
 		},
 	}
 
-	err := ValidateRFC0115Compliance(def)
+	err := ValidateAAP002Compliance(def)
 	if err != nil {
 		t.Errorf("Unexpected error for valid PoADefinition with only Decisions: %v", err)
 	}
 }
 
-func TestValidateRFC0115Compliance_PoADefinition_OnlyNonPhysicalActions(t *testing.T) {
+func TestValidateAAP002Compliance_PoADefinition_OnlyNonPhysicalActions(t *testing.T) {
 	// Test PoADefinition validation with only NonPhysicalActions
 	baseTime := time.Now()
 
@@ -997,13 +997,13 @@ func TestValidateRFC0115Compliance_PoADefinition_OnlyNonPhysicalActions(t *testi
 		},
 	}
 
-	err := ValidateRFC0115Compliance(def)
+	err := ValidateAAP002Compliance(def)
 	if err != nil {
 		t.Errorf("Unexpected error for valid PoADefinition with only NonPhysicalActions: %v", err)
 	}
 }
 
-func TestValidateRFC0115Compliance_CompositeMap_InvalidDefinition(t *testing.T) {
+func TestValidateAAP002Compliance_CompositeMap_InvalidDefinition(t *testing.T) {
 	// Test composite map with invalid definition (missing sectors)
 	baseTime := time.Now()
 
@@ -1037,7 +1037,7 @@ func TestValidateRFC0115Compliance_CompositeMap_InvalidDefinition(t *testing.T) 
 		"definition": invalidDef,
 	}
 
-	err := ValidateRFC0115Compliance(composite)
+	err := ValidateAAP002Compliance(composite)
 	if err == nil {
 		t.Fatal("Expected error for invalid definition in composite")
 	}
@@ -1046,11 +1046,11 @@ func TestValidateRFC0115Compliance_CompositeMap_InvalidDefinition(t *testing.T) 
 	}
 }
 
-func TestValidateRFC0115Compliance_CompositeMap_BothConfigAndDefinition(t *testing.T) {
+func TestValidateAAP002Compliance_CompositeMap_BothConfigAndDefinition(t *testing.T) {
 	// Test composite map with both config and definition
 	baseTime := time.Now()
 
-	validConfig := RFC0115Config{
+	validConfig := AAP002Config{
 		ExcludeWeb3:          true,
 		ExcludeAIOperators:   true,
 		ExcludeDNAIdentities: true,
@@ -1088,7 +1088,7 @@ func TestValidateRFC0115Compliance_CompositeMap_BothConfigAndDefinition(t *testi
 		"definition": validDef,
 	}
 
-	err := ValidateRFC0115Compliance(composite)
+	err := ValidateAAP002Compliance(composite)
 	if err != nil {
 		t.Errorf("Unexpected error for valid composite with both config and definition: %v", err)
 	}

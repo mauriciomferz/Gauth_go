@@ -49,7 +49,7 @@
 ✅ Step VIII: Resource server authorization
 ```
 
-**Impact**: GAuth can now properly enroll AI systems with full legal authorization chain
+**Impact**: AgentAuth can now properly enroll AI systems with full legal authorization chain
 
 ---
 
@@ -158,8 +158,8 @@ func (s *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
    extendedToken.ExpiresAt → time.Duration(extendedToken.ExpiresIn) * time.Second
    ```
 
-4. **GAuthError Details Field**
-   - Problem: `GAuthError` doesn't have `Details` field
+4. **AgentAuthError Details Field**
+   - Problem: `AgentAuthError` doesn't have `Details` field
    - Solution: Use formatted `Message` field instead
    ```go
    // Before:
@@ -459,7 +459,7 @@ type ComplianceTracker interface {
 2. **Type Mismatches**: Fixed by studying existing types first
 3. **Field Name Differences**: Corrected by reading actual struct definitions
 4. **Missing Fields**: Used alternative fields or generated values
-5. **Error Types**: Aligned with existing GAuthError structure
+5. **Error Types**: Aligned with existing AgentAuthError structure
 
 ### Best Practices Applied
 1. **Read existing code first** before creating new types
@@ -504,8 +504,8 @@ type ComplianceTracker interface {
 
 This session achieved **major progress** on RFC-0111 compliance:
 
-**Before**: GAuth was 66/100 compliant with 5 critical gaps
-**After**: GAuth is 85/100 compliant with 1 critical gap remaining
+**Before**: AgentAuth was 66/100 compliant with 5 critical gaps
+**After**: AgentAuth is 85/100 compliant with 1 critical gap remaining
 
 The two new files (`subscription_flow.go` and `protocol_orchestrator.go`) form the **backbone of RFC-0111 compliance** and connect all existing validation functions into a cohesive, standards-compliant authorization framework.
 

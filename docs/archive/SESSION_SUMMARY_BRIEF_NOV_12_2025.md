@@ -1,4 +1,4 @@
-# GAuth Development Session Summary - November 12, 2025
+# AgentAuth Development Session Summary - November 12, 2025
 
 ## Session Overview
 

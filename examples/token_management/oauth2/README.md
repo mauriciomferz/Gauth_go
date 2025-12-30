@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates OAuth2 flows using the GAuth token management API:
+This example demonstrates OAuth2 flows using the AgentAuth token management API:
 
 - **Authorization Code Flow**: Issues access and refresh tokens for a user and client.
 - **Refresh Token Flow**: Issues a new access token using a valid refresh token.
@@ -45,7 +45,7 @@ Refreshing OAuth2 token: ...
 
 ## Beta Notes
 - Demonstrates secure token lifecycle management and RFC-compliant flows.
-- All code is compatible with the GAuth framework and standards.
+- All code is compatible with the AgentAuth framework and standards.
 - See `main.go` for OAuth2Flow implementation and usage.
 
 ---

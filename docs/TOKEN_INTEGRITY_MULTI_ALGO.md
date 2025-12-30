@@ -11,7 +11,7 @@ refreshCadence: quarterly
 
 ## Overview
 
-GAuth now supports multiple signature algorithms for token integrity verification, providing cryptographic agility and enhanced security options beyond the initial Ed25519-only implementation.
+AgentAuth now supports multiple signature algorithms for token integrity verification, providing cryptographic agility and enhanced security options beyond the initial Ed25519-only implementation.
 
 ## Supported Algorithms
 
@@ -62,8 +62,8 @@ GAuth now supports multiple signature algorithms for token integrity verificatio
 
 ```go
 import (
-	cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/rfc0111"
+	cr "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
+	"github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
 )
 
 // Create Ed25519 key provider
@@ -84,7 +84,7 @@ svc := rfc0111.NewService(
 ### ECDSA P-256 Signing
 
 ```go
-import cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
+import cr "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 
 // Create ECDSA P-256 key provider
 kp, err := cr.NewInMemoryECDSAProvider()
@@ -104,7 +104,7 @@ svc := rfc0111.NewService(
 ### BLS12-381 Signing
 
 ```go
-import cr "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
+import cr "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 
 // Create BLS12-381 key provider
 kp, err := cr.NewInMemoryBLSProvider()
@@ -273,7 +273,7 @@ type TokenVerificationResult struct {
 - [RFC 8032: Edwards-Curve Digital Signature Algorithm (EdDSA)](https://datatracker.ietf.org/doc/html/rfc8032)
 - [FIPS 186-4: Digital Signature Standard (DSS)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf)
 - [BLS Signatures Spec](https://github.com/cfrg/draft-irtf-cfrg-bls-signature)
-- [GAuth Threat Model](./THREAT_MODEL.md)
+- [AgentAuth Threat Model](./THREAT_MODEL.md)
 
 ---
 

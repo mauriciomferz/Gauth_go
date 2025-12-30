@@ -1,6 +1,6 @@
 // Package multisig provides multi-signature Power of Attorney (PoA) orchestration.
 //
-// This implements RFC0115 Section B (Authorization Type) joint/collective signature
+// This implements AAP002 Section B (Authorization Type) joint/collective signature
 // enforcement (GAP_MATRIX sec3.item3) with M-of-N threshold policies, signature
 // collection workflow, and weighted voting support.
 //
@@ -324,7 +324,7 @@ func (sm *SignatureManager) GetSignatures(ctx context.Context, poaID string) (ma
 		return nil, fmt.Errorf("no signature collection for PoA %s", poaID)
 	}
 
-	// Convert to RFC0111 format
+	// Convert to AAP001 format
 	result := make(map[string]*gauth_rfc_001.POASignature, len(state.Signatures))
 	for signerID, record := range state.Signatures {
 		result[signerID] = &gauth_rfc_001.POASignature{

@@ -8,7 +8,7 @@ owners: [system]
 
 # Revocation Merkle Inclusion Proof
 
-This document explains the structure and verification process of a GAuth revocation inclusion proof artifact.
+This document explains the structure and verification process of a AgentAuth revocation inclusion proof artifact.
 
 ## Artifact Structure
 Example: `examples/revocation_inclusion_proof.json`

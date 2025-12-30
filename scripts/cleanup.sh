@@ -1,7 +1,7 @@
 #!/bin/bash
-# Script to clean and fix common issues in the GAuth codebase
+# Script to clean and fix common issues in the AgentAuth codebase
 
-echo "Starting GAuth codebase cleanup..."
+echo "Starting AgentAuth codebase cleanup..."
 
 # Fix permissions for go modules directory
 echo "Fixing Go module permissions..."

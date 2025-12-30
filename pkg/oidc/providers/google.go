@@ -17,7 +17,7 @@ const (
 	GoogleProviderName = "Google"
 )
 
-// GoogleClaimMappings defines how Google OIDC claims map to GAuth claims.
+// GoogleClaimMappings defines how Google OIDC claims map to AgentAuth claims.
 // Google follows standard OIDC claims closely.
 var GoogleClaimMappings = map[string]string{
 	"sub":            "user_id",        // Unique user identifier
@@ -134,7 +134,7 @@ func (p *GoogleProvider) ValidateIDToken(ctx context.Context, idToken string, au
 	return claims, nil
 }
 
-// MapClaims maps Google OIDC claims to GAuth format.
+// MapClaims maps Google OIDC claims to AgentAuth format.
 func (p *GoogleProvider) MapClaims(claims map[string]interface{}) map[string]interface{} {
 	mapped := make(map[string]interface{})
 
@@ -160,7 +160,7 @@ func (p *GoogleProvider) MapClaims(claims map[string]interface{}) map[string]int
 func (p *GoogleProvider) GetTrustLevel(claims *oidc.IDTokenClaims) string {
 	// Check if ACR is present in claims
 	if claims.ACR != "" {
-		// Map Google ACR to GAuth trust level
+		// Map Google ACR to AgentAuth trust level
 		switch claims.ACR {
 		case "http://schemas.openid.net/pape/policies/2007/06/multi-factor":
 			return trustLevelHigh // Multi-factor authentication

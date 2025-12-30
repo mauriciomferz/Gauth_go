@@ -22,7 +22,7 @@ func main() {
 
 	files := []struct{ Name, ID string }{
 		{"gauth_rfc_001.md", "0111"},
-		{"rfc0115.md", "0115"},
+		{"aap002.md", "0115"},
 	}
 
 	var all []rfc.Clause

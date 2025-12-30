@@ -8,7 +8,7 @@ source: internal
 refreshCadence: quarterly
 ---
 
-# GAuth Testing Guide
+# AgentAuth Testing Guide
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -63,7 +63,7 @@ Running `go test ./... -v` fails due to:
 ```
 --- PASS: TestAdvancedRevocationFlowOutput (0.00s)
 PASS
-ok  github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/examples/token/advanced_revocation_flow
+ok  github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/examples/token/advanced_revocation_flow
 ```
 
 ## 🎯 **Best Practices**
@@ -123,7 +123,7 @@ cd examples/token/advanced_revocation_flow && go test && echo "✅ Tests pass"
 
 ---
 
-**Summary**: The core GAuth functionality is fully working and tested. Use the functional test script for reliable testing while some examples need API updates.
+**Summary**: The core AgentAuth functionality is fully working and tested. Use the functional test script for reliable testing while some examples need API updates.
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

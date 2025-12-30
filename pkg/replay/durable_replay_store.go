@@ -630,22 +630,22 @@ func (d *DurableReplayStore) Stats() DurableReplayStoreStats {
 	}
 }
 
-// WithContext wraps DurableReplayStore to satisfy RFC0111 ReplayStore interface.
+// WithContext wraps DurableReplayStore to satisfy AAP001 ReplayStore interface.
 type DurableReplayStoreAdapter struct {
 	store *DurableReplayStore
 }
 
-// NewDurableReplayStoreAdapter creates an adapter for RFC0111 integration.
+// NewDurableReplayStoreAdapter creates an adapter for AAP001 integration.
 func NewDurableReplayStoreAdapter(store *DurableReplayStore) *DurableReplayStoreAdapter {
 	return &DurableReplayStoreAdapter{store: store}
 }
 
-// Seen implements RFC0111 ReplayStore.Seen.
+// Seen implements AAP001 ReplayStore.Seen.
 func (a *DurableReplayStoreAdapter) Seen(jti string) (bool, error) {
 	return a.store.Seen(jti)
 }
 
-// Record implements RFC0111 ReplayStore.Record.
+// Record implements AAP001 ReplayStore.Record.
 func (a *DurableReplayStoreAdapter) Record(jti string, at time.Time) error {
 	return a.store.Record(jti, at)
 }

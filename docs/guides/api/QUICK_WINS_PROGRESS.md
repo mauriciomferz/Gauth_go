@@ -1,4 +1,4 @@
-# GAuth+ Quick Wins Implementation Progress
+# AgentAuth+ Quick Wins Implementation Progress
 
 ## Goal
 Add 4 compliance points through high-impact features to reach 96/100 compliance score.
@@ -33,7 +33,7 @@ Add 4 compliance points through high-impact features to reach 96/100 compliance 
 #### Key Features:
 - All 37+ endpoints documented with full request/response schemas
 - Support for SDK generation in 50+ languages (TypeScript, Python, Go, Java, etc.)
-- Interactive Swagger UI with custom GAuth+ branding
+- Interactive Swagger UI with custom AgentAuth+ branding
 - Authentication scheme definitions (JWT Bearer + public endpoints)
 - Example requests and responses for common use cases
 

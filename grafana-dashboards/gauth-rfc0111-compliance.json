@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "GAuth RFC 0111 Compliance",
+    "title": "AgentAuth AAP-001 Compliance",
     "tags": ["gauth", "rfc0111", "compliance", "rotation"],
     "timezone": "browser",
     "refresh": "30s",

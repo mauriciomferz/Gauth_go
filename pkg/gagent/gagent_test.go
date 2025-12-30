@@ -9,7 +9,7 @@ import (
 
 // TestNewAgent tests agent creation
 func TestNewAgent(t *testing.T) {
-	agent := NewAgent("agent-1", "GAuth Agent", "gpt-4", "openai", 0.8)
+	agent := NewAgent("agent-1", "AgentAuth Agent", "gpt-4", "openai", 0.8)
 
 	if agent == nil {
 		t.Fatal("NewAgent returned nil")
@@ -24,8 +24,8 @@ func TestNewAgent(t *testing.T) {
 	}
 
 	info := agent.GetInfo()
-	if info.Name != "GAuth Agent" {
-		t.Errorf("Expected name 'GAuth Agent', got '%s'", info.Name)
+	if info.Name != "AgentAuth Agent" {
+		t.Errorf("Expected name 'AgentAuth Agent', got '%s'", info.Name)
 	}
 
 	if info.Model != "gpt-4" {

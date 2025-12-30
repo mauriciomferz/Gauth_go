@@ -1,6 +1,6 @@
 # JWE Encryption Security Assessment
 
-**Project**: GAuth RFC-0111 Implementation  
+**Project**: AgentAuth RFC-0111 Implementation  
 **Date**: November 12, 2025  
 **Assessment Type**: Security Architecture Review  
 **Subject**: JSON Web Encryption (JWE) Implementation Necessity  
@@ -13,7 +13,7 @@
 
 ### Current State: JWT Signing Only
 
-The GAuth implementation currently uses **JWT (JSON Web Token) with HMAC-SHA256 signing** for token integrity and authentication. Tokens are **signed but NOT encrypted**, meaning:
+The AgentAuth implementation currently uses **JWT (JSON Web Token) with HMAC-SHA256 signing** for token integrity and authentication. Tokens are **signed but NOT encrypted**, meaning:
 
 ✅ **What we have**:
 - Token integrity verification (tamper detection)
@@ -253,7 +253,7 @@ tokenString, err := jwtToken.SignedString(s.signingKey)
 - JWT signing sufficient for **public tokens** (e.g., ID tokens)
 - JWE required for **private tokens** (e.g., refresh tokens, access tokens with PII)
 
-**Conclusion**: Industry consensus favors JWE for tokens containing sensitive data (like GAuth Extended Tokens).
+**Conclusion**: Industry consensus favors JWE for tokens containing sensitive data (like AgentAuth Extended Tokens).
 
 ---
 

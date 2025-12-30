@@ -142,10 +142,10 @@ func TestExportFormats(t *testing.T) {
 		if !strings.Contains(content, "CEF:0") {
 			t.Error("CEF should start with CEF:0")
 		}
-		if !strings.Contains(content, "Gimel Foundation") {
+		if !strings.Contains(content, "AgentAuth Community") {
 			t.Error("CEF should contain vendor name")
 		}
-		if !strings.Contains(content, "GAuth") {
+		if !strings.Contains(content, "AgentAuth") {
 			t.Error("CEF should contain product name")
 		}
 	})

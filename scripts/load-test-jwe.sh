@@ -1,5 +1,5 @@
 #!/bin/bash
-# GAuth JWE Encryption - Load Testing Script
+# AgentAuth JWE Encryption - Load Testing Script
 # Tests performance and scalability under realistic load
 
 set -e
@@ -17,7 +17,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo "========================================"
-echo "GAuth JWE Load Testing"
+echo "AgentAuth JWE Load Testing"
 echo "========================================"
 echo "Target: $TARGET_URL"
 echo "Duration: ${DURATION}s"
@@ -234,7 +234,7 @@ fi
 
 # Generate summary report
 cat > "$RESULT_DIR/SUMMARY.md" <<EOF
-# GAuth JWE Load Test Summary
+# AgentAuth JWE Load Test Summary
 
 **Date**: $(date)
 **Target**: $TARGET_URL

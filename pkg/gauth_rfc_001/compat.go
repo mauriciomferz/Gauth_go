@@ -1,7 +1,7 @@
 package gauth_rfc_001
 
 // Compatibility layer for legacy RFC-0111 example code.
-// The official_rfc0111_implementation example expects a configuration
+// The official_aap001_implementation example expects a configuration
 // struct and a validation helper that previously lived in an earlier
 // iteration of the project. Instead of rewriting the example to use the
 // newer consolidated rfc package config we provide a thin shim here.
@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-// RFC0111Config represents high-level configuration required by the
+// AAP001Config represents high-level configuration required by the
 // official RFC-0111 implementation demo. All fields are intentionally
 // kept exactly as referenced in the example for backwards compatibility.
-type RFC0111Config struct {
+type AAP001Config struct {
 	AuthorizationServerURL    string        `json:"authorization_server_url"`
 	TrustServiceProvider      string        `json:"trust_service_provider"`
 	RequireNotarization       bool          `json:"require_notarization"`
@@ -29,13 +29,13 @@ type RFC0111Config struct {
 	ExcludeDNAIdentities bool `json:"exclude_dna_identities"`
 }
 
-// ValidateRFC0111Compliance performs minimal semantic checks required by the
+// ValidateAAP001Compliance performs minimal semantic checks required by the
 // example. It intentionally does NOT try to replicate deeper domain logic –
 // the goal is to confirm that mandatory exclusions are enforced and that
 // key numeric / duration parameters are sensible.
-func ValidateRFC0111Compliance(cfg *RFC0111Config) error {
+func ValidateAAP001Compliance(cfg *AAP001Config) error {
 	if cfg == nil {
-		return fmt.Errorf("rfc0111 config cannot be nil")
+		return fmt.Errorf("aap001 config cannot be nil")
 	}
 	if cfg.AuthorizationServerURL == "" {
 		return fmt.Errorf("authorization server URL required")

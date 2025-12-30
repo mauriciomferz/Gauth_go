@@ -70,7 +70,7 @@ type Handler struct {
 	KeyProvider   crypto.KeyProvider
 	JWTKeyManager keys.KeyManager
 	ETagUpdater   JWKSETagUpdater
-	GAuthService  gauth.GAuth
+	AgentAuthService  gauth.AgentAuth
 	ClockStatus   ClockStatusProvider
 
 	// Configs

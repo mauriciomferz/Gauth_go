@@ -9,7 +9,7 @@ owners: compliance-team
 ## Dependency Audit & Vulnerability Assessment
 
 **Generated**: November 9, 2025  
-**Project**: GAuth 1.0 Implementation  
+**Project**: AgentAuth 1.0 Implementation  
 **Phase**: Pre-Production Verification - Dependency Security  
 **Status**: ⚠️ **ACTION REQUIRED** - Go version upgrade needed
 
@@ -51,16 +51,16 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `crypto/x509@go1.25.2`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4013
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Path**: `pkg/poa/raw_poa_stream.go:242` → `io.ReadFull` → `x509.Certificate.Verify`
 - **Risk**: Attacker could cause service crash with crafted DSA certificate
-- **Likelihood**: Low (GAuth uses Ed25519/RSA-PSS/ECDSA, not DSA)
+- **Likelihood**: Low (AgentAuth uses Ed25519/RSA-PSS/ECDSA, not DSA)
 - **Severity**: HIGH (denial of service potential)
 
 **Exploit Scenario**:
 ```
 1. Attacker presents certificate chain with DSA public key
-2. GAuth calls x509.Certificate.Verify during TLS handshake
+2. AgentAuth calls x509.Certificate.Verify during TLS handshake
 3. Panic occurs → service crash → availability impact
 ```
 
@@ -76,21 +76,21 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `net/http@go1.25.2`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4012
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Paths**:
   1. `internal/crypto/vault_keystore.go:456` → `http.Client.Do`
   2. `cmd/gauth-server/main.go:32` → `http.Client.Get`
   3. `cmd/verify/verify.go:160` → `http.Get`
   4. `pkg/ledger/revocation_anchor.go:56` → `http.Post`
 - **Risk**: Malicious HTTP response with crafted cookies causes OOM
-- **Likelihood**: Medium (GAuth makes external HTTP requests)
+- **Likelihood**: Medium (AgentAuth makes external HTTP requests)
 - **Severity**: HIGH (memory exhaustion → service unavailability)
 
 **Exploit Scenario**:
 ```
 1. Attacker controls external service (Vault, revocation anchor, etc.)
 2. Returns HTTP response with unbounded cookie header
-3. GAuth HTTP client parses cookies without limit
+3. AgentAuth HTTP client parses cookies without limit
 4. Memory exhaustion → OOM → service crash
 ```
 
@@ -106,7 +106,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `encoding/asn1@go1.25.2`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4011
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Path**: `internal/notary/rotation_v2.go:462` → `asn1.Unmarshal`
 - **Risk**: Crafted ASN.1 structure causes excessive memory allocation
 - **Likelihood**: Low (signature verification path, attacker needs signing key)
@@ -132,7 +132,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `net/url@go1.25.2`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4010
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Paths**:
   1. `internal/crypto/vault_keystore.go:451` → `http.NewRequestWithContext` → `url.Parse`
   2. `web/testutil.go:21` → `httptest.NewRequest` → `url.ParseRequestURI`
@@ -160,7 +160,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `encoding/pem@go1.25.2`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4009
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Path**: `pkg/crypto/algorithm_agility.go:402` → `ECDSAP256Provider.UnmarshalPublicKey` → `pem.Decode`
 - **Risk**: Crafted PEM input causes CPU exhaustion (quadratic parsing time)
 - **Likelihood**: Low (key loading from trusted sources)
@@ -169,7 +169,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Exploit Scenario**:
 ```
 1. Attacker provides malformed PEM file for ECDSA public key
-2. GAuth calls pem.Decode during key unmarshaling
+2. AgentAuth calls pem.Decode during key unmarshaling
 3. Quadratic parsing complexity → CPU spike
 4. Multiple requests → resource exhaustion
 ```
@@ -186,7 +186,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `crypto/tls@go1.25.2`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4008
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Paths**:
   1. `examples/token_management/cmd/key_rotation/main.go:134` → `http.Server.ListenAndServe` → `tls.Conn.HandshakeContext`
   2. `pkg/poa/raw_poa_stream.go:242` → `io.ReadFull` → `tls.Conn.Read`
@@ -209,7 +209,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `crypto/x509@go1.25.3`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4007
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Paths** (8 total):
   1. `pkg/poa/raw_poa_stream.go:242` → `x509.Certificate.Verify`
   2. `web/jwt_keys.go:50` → `x509.MarshalPKCS1PrivateKey`
@@ -226,7 +226,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Exploit Scenario**:
 ```
 1. Attacker presents certificate with deeply nested name constraints
-2. GAuth verifies certificate during TLS or key loading
+2. AgentAuth verifies certificate during TLS or key loading
 3. Quadratic complexity in constraint checking
 4. CPU exhaustion → performance degradation
 ```
@@ -243,7 +243,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Fixed**: `net/mail@go1.25.2`  
 **Info**: https://pkg.go.dev/vuln/GO-2025-4006
 
-**Impact on GAuth**:
+**Impact on AgentAuth**:
 - **Call Path**: `internal/crypto/rotation_api.go:238` → `gin.Context.ShouldBindJSON` → `mail.ParseAddress`
 - **Risk**: Malformed email address in JSON causes CPU spike
 - **Likelihood**: Very Low (key rotation API, authenticated endpoint)
@@ -263,7 +263,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 
 ### Dependency Vulnerabilities (Non-callable)
 
-**Good News**: 1 vulnerability found in imported package, but **NOT called by GAuth code**.
+**Good News**: 1 vulnerability found in imported package, but **NOT called by AgentAuth code**.
 
 ```
 This scan also found 1 vulnerability in packages you import and 1 vulnerability

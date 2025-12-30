@@ -42,7 +42,7 @@ func (c *CustomResourceServer) ProcessCustomTransaction(tx gauth.TransactionDeta
 }
 
 func main() {
-	// Initialize GAuth
+	// Initialize AgentAuth
 	config := gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "custom-client",
@@ -53,7 +53,7 @@ func main() {
 
 	auth, err := gauth.New(config)
 	if err != nil {
-		log.Fatalf("Failed to initialize GAuth: %v", err)
+		log.Fatalf("Failed to initialize AgentAuth: %v", err)
 	}
 
 	// Create custom resource server

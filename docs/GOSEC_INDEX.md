@@ -7,7 +7,7 @@
 
 ## 📚 Documentation Suite
 
-This directory contains comprehensive documentation for gosec security scanning implementation in GAuth CI/CD pipelines.
+This directory contains comprehensive documentation for gosec security scanning implementation in AgentAuth CI/CD pipelines.
 
 ### Quick Navigation
 

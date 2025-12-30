@@ -1,5 +1,5 @@
 // Package enforcement provides rule-based and disclosure-based enforcement mechanisms
-// for the GAuth authorization framework with AI integration points.
+// for the AgentAuth authorization framework with AI integration points.
 package enforcement
 
 import (

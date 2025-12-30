@@ -5,7 +5,7 @@
 
 ## Overview
 
-RFC-0111 subscription and authorization flow endpoints have been successfully integrated into the GAuth web server with mock external services. This enables complete testing and development of RFC-0111 compliant applications without requiring real external service connections.
+RFC-0111 subscription and authorization flow endpoints have been successfully integrated into the AgentAuth web server with mock external services. This enables complete testing and development of RFC-0111 compliant applications without requiring real external service connections.
 
 ---
 

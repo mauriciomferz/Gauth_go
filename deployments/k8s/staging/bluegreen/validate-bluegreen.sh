@@ -17,7 +17,7 @@ VALIDATION_PASSED=0
 VALIDATION_FAILED=0
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║     GAuth Blue-Green Deployment Validation Suite          ║${NC}"
+echo -e "${BLUE}║     AgentAuth Blue-Green Deployment Validation Suite          ║${NC}"
 echo -e "${BLUE}║     Week 4 Day 4 - November 10, 2025                      ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""

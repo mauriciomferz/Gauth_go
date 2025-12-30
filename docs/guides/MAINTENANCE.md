@@ -5,7 +5,7 @@ status: active
 lastUpdated: 2025-11-12
 owners: maintainers
 ---
-# GAuth Project Maintenance Guide
+# AgentAuth Project Maintenance Guide
 
 This guide documents the lightweight hygiene workflow to keep the codebase healthy, reproducible, and compliant with RFC-0111 implementation quality standards.
 

@@ -31,7 +31,7 @@ Following the brutal honest audit that revealed **55-60% actual compliance** (vs
 > 
 > Evidence: Line 168 of extended_token_service.go returns:
 > ```
-> return nil, &GAuthError{
+> return nil, &AgentAuthError{
 >     Code:    "not_implemented",
 >     Message: "Extended token parsing from string not fully implemented (requires JWT/JWE parser)",
 > }

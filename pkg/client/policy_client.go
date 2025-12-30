@@ -18,7 +18,7 @@ type PolicyClientConfig struct {
 	CircuitBreaker *external.CircuitBreaker
 }
 
-// PolicyClient interacts with the GAuth Policy API.
+// PolicyClient interacts with the AgentAuth Policy API.
 type PolicyClient struct {
 	config     *PolicyClientConfig
 	httpClient *http.Client

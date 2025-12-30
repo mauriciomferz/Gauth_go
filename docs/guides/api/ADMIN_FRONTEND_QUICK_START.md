@@ -25,7 +25,7 @@ DB_SSLMODE="disable" \
 go run ./cmd/web-server
 
 # Option B: Using VS Code Task
-# Press Cmd+Shift+P -> "Tasks: Run Task" -> "Start GAuth Web Server"
+# Press Cmd+Shift+P -> "Tasks: Run Task" -> "Start AgentAuth Web Server"
 ```
 
 Backend will start on: **http://localhost:8080**

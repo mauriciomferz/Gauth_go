@@ -8,7 +8,7 @@ owners: [system]
 
 # Demo Readiness Checklist (Beta)
 
-This checklist enumerates remaining polish items to ensure a clear, compelling live demonstration of GAuth’s protocol features (RFC111) and semantic diagnostics (RFC115).
+This checklist enumerates remaining polish items to ensure a clear, compelling live demonstration of AgentAuth’s protocol features (RFC111) and semantic diagnostics (RFC115).
 
 ## Core Demonstration Flow
 1. Issue Delegation (PoA) with scoped restrictions.

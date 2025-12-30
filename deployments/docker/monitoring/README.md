@@ -6,9 +6,9 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth+ Monitoring Configuration
+# AgentAuth+ Monitoring Configuration
 
-This directory contains all configuration files for monitoring GAuth+ services using Prometheus, Grafana, and AlertManager.
+This directory contains all configuration files for monitoring AgentAuth+ services using Prometheus, Grafana, and AlertManager.
 
 ## Directory Structure
 
@@ -24,7 +24,7 @@ monitoring/
     │   └── dashboards/
     │       └── gauthplus.yml  # Dashboard provisioning
     └── dashboards/
-        └── gauthplus-monitoring.json  # GAuth+ dashboard
+        └── gauthplus-monitoring.json  # AgentAuth+ dashboard
 ```
 
 ## Quick Start
@@ -39,7 +39,7 @@ docker compose up -d
 ```
 
 This starts:
-- **GAuth Service** (port 8080) - Exposes metrics at `/metrics`
+- **AgentAuth Service** (port 8080) - Exposes metrics at `/metrics`
 - **Prometheus** (port 9090) - Scrapes and stores metrics
 - **Grafana** (port 3000) - Visualizes metrics
 - **AlertManager** (port 9093) - Manages alerts
@@ -48,11 +48,11 @@ This starts:
 
 1. Open browser: http://localhost:3000
 2. Login: admin / admin
-3. Navigate to **Dashboards** → **GAuth+** → **GAuth+ Monitoring Dashboard**
+3. Navigate to **Dashboards** → **AgentAuth+** → **AgentAuth+ Monitoring Dashboard**
 
 ### 3. Verify Metrics
 
-Check that GAuth+ is exposing metrics:
+Check that AgentAuth+ is exposing metrics:
 
 ```bash
 curl http://localhost:8080/metrics | grep gauthplus
@@ -77,18 +77,18 @@ Configures Prometheus scraping and alerting:
 
 ### alert-rules.yml
 
-Defines 10 alert rules for GAuth+:
+Defines 10 alert rules for AgentAuth+:
 
-1. **GAuthPlusHighValidationFailureRate** - Validation failures > 10%
-2. **GAuthPlusCacheHitRateLow** - Cache hit rate < 70%
-3. **GAuthPlusHighPolicyViolationRate** - Policy violations > 1/sec
-4. **GAuthPlusHighValidationLatency** - P95 latency > 100ms
-5. **GAuthPlusExcessiveDelegationDepth** - P95 depth > 5
-6. **GAuthPlusFrequentSuccessorActivations** - > 0.1/sec
-7. **GAuthPlusCriticalFiduciaryViolations** - Any critical violations
-8. **GAuthPlusDualControlFailures** - Rejection rate > 20%
-9. **GAuthPlusServiceDown** - Service unavailable
-10. **GAuthPlusCacheSizeExcessive** - Cache > 50k entries
+1. **AgentAuthPlusHighValidationFailureRate** - Validation failures > 10%
+2. **AgentAuthPlusCacheHitRateLow** - Cache hit rate < 70%
+3. **AgentAuthPlusHighPolicyViolationRate** - Policy violations > 1/sec
+4. **AgentAuthPlusHighValidationLatency** - P95 latency > 100ms
+5. **AgentAuthPlusExcessiveDelegationDepth** - P95 depth > 5
+6. **AgentAuthPlusFrequentSuccessorActivations** - > 0.1/sec
+7. **AgentAuthPlusCriticalFiduciaryViolations** - Any critical violations
+8. **AgentAuthPlusDualControlFailures** - Rejection rate > 20%
+9. **AgentAuthPlusServiceDown** - Service unavailable
+10. **AgentAuthPlusCacheSizeExcessive** - Cache > 50k entries
 
 ### alertmanager.yml
 
@@ -108,17 +108,17 @@ Auto-provisions Prometheus as Grafana datasource:
 
 ### grafana/provisioning/dashboards/gauthplus.yml
 
-Auto-provisions GAuth+ dashboards:
+Auto-provisions AgentAuth+ dashboards:
 
-- **Folder**: GAuth+
+- **Folder**: AgentAuth+
 - **Path**: /var/lib/grafana/dashboards
 - **Update Interval**: 10 seconds
 
 ### grafana/dashboards/gauthplus-monitoring.json
 
-Complete GAuth+ monitoring dashboard with 12 panels:
+Complete AgentAuth+ monitoring dashboard with 12 panels:
 
-1. **GAuth+ Validations Rate** - Real-time validation rates by feature
+1. **AgentAuth+ Validations Rate** - Real-time validation rates by feature
 2. **Total Validation Rate** - Aggregated validation gauge
 3. **P95 Validation Duration** - Latency gauge
 4. **Cache Hit Rate** - Hit rate by cache type
@@ -133,7 +133,7 @@ Complete GAuth+ monitoring dashboard with 12 panels:
 
 ## Metrics Reference
 
-### GAuth+ Metrics Exposed
+### AgentAuth+ Metrics Exposed
 
 All metrics are prefixed with `gauthplus_`:
 
@@ -160,7 +160,7 @@ All metrics are prefixed with `gauthplus_`:
 
 1. Add metric to `pkg/metrics/prometheus.go`
 2. Record metric in relevant code
-3. Restart GAuth service
+3. Restart AgentAuth service
 4. Create dashboard panel in Grafana
 
 ### Modifying Alert Thresholds
@@ -168,7 +168,7 @@ All metrics are prefixed with `gauthplus_`:
 Edit `alert-rules.yml`:
 
 ```yaml
-- alert: GAuthPlusCacheHitRateLow
+- alert: AgentAuthPlusCacheHitRateLow
   expr: |
     (rate(gauthplus_cache_hits_total[5m]) 
     / (rate(gauthplus_cache_hits_total[5m]) + rate(gauthplus_cache_misses_total[5m]))) < 0.8  # Changed from 0.7
@@ -204,7 +204,7 @@ curl http://localhost:9090/api/v1/targets
 Or navigate to: http://localhost:9090/targets
 
 If `gauth-service` shows as DOWN:
-- Verify GAuth service is running: `docker compose ps gauth`
+- Verify AgentAuth service is running: `docker compose ps gauth`
 - Check metrics endpoint: `curl http://localhost:8080/metrics`
 - Review network connectivity: `docker compose exec prometheus ping gauth`
 
@@ -382,4 +382,4 @@ For issues or questions:
 
 **Version**: 1.0  
 **Last Updated**: November 26, 2025  
-**Maintainer**: GAuth+ Team
+**Maintainer**: AgentAuth+ Team

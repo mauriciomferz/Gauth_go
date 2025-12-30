@@ -8,7 +8,7 @@
 
 ## 📋 Overview
 
-The revocation system is now fully integrated into the GAuth web server (`cmd/web-server`). This provides production-ready HTTP endpoints for emergency revocation, two-phase revocation, optimistic revocation, and circuit breaker functionality.
+The revocation system is now fully integrated into the AgentAuth web server (`cmd/web-server`). This provides production-ready HTTP endpoints for emergency revocation, two-phase revocation, optimistic revocation, and circuit breaker functionality.
 
 ### Key Features
 - ✅ **13 HTTP Endpoints**: Complete REST API for all revocation operations

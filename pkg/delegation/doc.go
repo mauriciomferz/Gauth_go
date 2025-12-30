@@ -1,4 +1,4 @@
-// Package delegation provides delegation chain management for GAuth authorization.
+// Package delegation provides delegation chain management for AgentAuth authorization.
 //
 // This package implements authorization delegation, allowing principals to
 // delegate their authority to other principals. It supports delegation chains,

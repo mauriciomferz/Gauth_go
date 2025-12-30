@@ -10,8 +10,8 @@ import (
 	pkg_replay "github.com/mauriciomferz/Gauth_go/pkg/replay"
 )
 
-// TestDurableReplayStoreGAuthIntegration tests DurableReplayStore with gauth ReplayStore interface.
-func TestDurableReplayStoreGAuthIntegration(t *testing.T) {
+// TestDurableReplayStoreAgentAuthIntegration tests DurableReplayStore with gauth ReplayStore interface.
+func TestDurableReplayStoreAgentAuthIntegration(t *testing.T) {
 	dir := t.TempDir()
 	walPath := filepath.Join(dir, "integration.wal")
 

@@ -1,4 +1,4 @@
-name: GAuth CI
+name: AgentAuth CI
 
 on:
   push:

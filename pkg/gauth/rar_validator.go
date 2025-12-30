@@ -23,7 +23,7 @@ func (v *RARValidator) ValidateAuthorizationDetails(
 	details []AuthorizationDetail,
 ) error {
 	if poaDef == nil {
-		return &GAuthError{Code: "missing_poa", Message: "Power of Attorney is required for rar validation"}
+		return &AgentAuthError{Code: "missing_poa", Message: "Power of Attorney is required for rar validation"}
 	}
 
 	for i, detail := range details {
@@ -195,7 +195,7 @@ func (v *RARValidator) EvaluateAccess(
 	action string,
 ) error {
 	if len(details) == 0 {
-		return &GAuthError{Code: "missing_authorization_details", Message: "No authorization details provided"}
+		return &AgentAuthError{Code: "missing_authorization_details", Message: "No authorization details provided"}
 	}
 
 	for _, detail := range details {
@@ -245,7 +245,7 @@ func (v *RARValidator) EvaluateAccess(
 		}
 	}
 
-	return &GAuthError{
+	return &AgentAuthError{
 		Code:    "insufficient_authorization",
 		Message: fmt.Sprintf("Access denied for action '%s' on resource '%s'", action, resource),
 	}

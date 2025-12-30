@@ -40,7 +40,7 @@ This implementation represents **SUBSTANTIAL PROGRESS** toward RFC-0111 and RFC-
 
 ### Section 1: Scope Requirements
 
-**RFC Requirement**: GAuth must provide AI control protocol with OAuth, OpenID Connect, and MCP building blocks.
+**RFC Requirement**: AgentAuth must provide AI control protocol with OAuth, OpenID Connect, and MCP building blocks.
 
 **Compliance**: 🟡 **PARTIAL (60%)**
 
@@ -405,7 +405,7 @@ type ExtendedToken struct {
     RefreshToken string    ✅ PRESENT
     Scope        string    ✅ PRESENT
     
-    // GAuth Extensions
+    // AgentAuth Extensions
     Issuer                    string                   ✅ PRESENT
     IssuedAt                  time.Time                ✅ PRESENT
     NotBefore                 time.Time                ✅ PRESENT

@@ -3,12 +3,12 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates distributed resource management and authorization using the GAuth framework. It simulates a cluster of resource nodes, node registration, health checks, and distributed authorization requests.
+This example demonstrates distributed resource management and authorization using the AgentAuth framework. It simulates a cluster of resource nodes, node registration, health checks, and distributed authorization requests.
 
 ## Key Concepts
 - **ResourceNode**: Represents a node in the distributed cluster.
 - **DistributedResourceManager**: Manages nodes, health checks, and token cache.
-- **GAuth Integration**: Handles node registration and authorization using GAuth APIs.
+- **AgentAuth Integration**: Handles node registration and authorization using AgentAuth APIs.
 - **Simulation**: Demonstrates distributed authorization requests routed to healthy nodes.
 
 ## How to Run
@@ -25,7 +25,7 @@ go run cluster.go
 
 ## Educational Comments
 - See `cluster.go` for all logic: node management, health checks, and distributed authorization simulation.
-- All GAuth API calls are clearly marked and explained.
+- All AgentAuth API calls are clearly marked and explained.
 
 ---
 

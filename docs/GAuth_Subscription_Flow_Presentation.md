@@ -1,7 +1,7 @@
-                                                                                                                                                # GAuth Subscription Flow Architecture
+                                                                                                                                                # AgentAuth Subscription Flow Architecture
 ## RFC-0111 Implementation vs. Industry Standards
 
-**Comparing GAuth with Azure AD, Okta, and AWS IAM**
+**Comparing AgentAuth with Azure AD, Okta, and AWS IAM**
 
 Mauricio Fernandez  
 November 19, 2025
@@ -11,7 +11,7 @@ November 19, 2025
 ## Table of Contents
 
 1. Executive Summary
-2. GAuth RFC-0111 Subscription Flow
+2. AgentAuth RFC-0111 Subscription Flow
 3. Azure AD/Entra Comparison
 4. Okta Comparison
 5. AWS IAM/Cognito Comparison
@@ -25,9 +25,9 @@ November 19, 2025
 
 ## 1. Executive Summary
 
-### What is GAuth?
+### What is AgentAuth?
 
-**GAuth** is a specialized OAuth 2.0 authorization server implementing **RFC-0111**, designed specifically for **AI agent authorization** with **Power of Attorney (PoA)** delegation scenarios.
+**AgentAuth** is a specialized OAuth 2.0 authorization server implementing **RFC-0111**, designed specifically for **AI agent authorization** with **Power of Attorney (PoA)** delegation scenarios.
 
 ### Key Value Proposition
 
@@ -46,11 +46,11 @@ November 19, 2025
 
 ---
 
-## 2. GAuth RFC-0111 Subscription Flow
+## 2. AgentAuth RFC-0111 Subscription Flow
 
 ### Overview: 8-Step One-Time Subscription Process
 
-The GAuth subscription flow establishes a **multi-party authorization chain** before any AI agent can request access tokens.
+The AgentAuth subscription flow establishes a **multi-party authorization chain** before any AI agent can request access tokens.
 
 ---
 
@@ -277,9 +277,9 @@ type ResourceServerAuthorization struct {
 
 ---
 
-### Key Differences: GAuth vs. Azure AD
+### Key Differences: AgentAuth vs. Azure AD
 
-| Feature | GAuth RFC-0111 | Azure AD/Entra |
+| Feature | AgentAuth RFC-0111 | Azure AD/Entra |
 |---------|----------------|----------------|
 | **Primary Use** | AI agent authorization | Human user SSO |
 | **Identity Focus** | Legal entity validation | Employee/user authentication |
@@ -302,7 +302,7 @@ type ResourceServerAuthorization struct {
 - ✅ Standard RBAC is sufficient
 - ✅ No legal delegation required
 
-**Use GAuth RFC-0111 When:**
+**Use AgentAuth RFC-0111 When:**
 - ✅ AI agents need legal authorization
 - ✅ Power of Attorney validation required
 - ✅ Multi-party authorization chains (3+ levels)
@@ -346,9 +346,9 @@ type ResourceServerAuthorization struct {
 
 ---
 
-### Key Differences: GAuth vs. Okta
+### Key Differences: AgentAuth vs. Okta
 
-| Feature | GAuth RFC-0111 | Okta |
+| Feature | AgentAuth RFC-0111 | Okta |
 |---------|----------------|------|
 | **Primary Use** | AI agent authorization | User SSO & identity management |
 | **Identity Source** | National ID systems (18 countries) | LDAP, AD, HR systems |
@@ -371,7 +371,7 @@ type ResourceServerAuthorization struct {
 - ✅ Standard SSO requirements
 - ✅ Adaptive MFA for workforce
 
-**Use GAuth RFC-0111 When:**
+**Use AgentAuth RFC-0111 When:**
 - ✅ AI agents acting with legal authority
 - ✅ Statutory representative validation required
 - ✅ Complex delegation scenarios (corporate hierarchies)
@@ -427,9 +427,9 @@ type ResourceServerAuthorization struct {
 
 ---
 
-### Key Differences: GAuth vs. AWS
+### Key Differences: AgentAuth vs. AWS
 
-| Feature | GAuth RFC-0111 | AWS IAM/Cognito |
+| Feature | AgentAuth RFC-0111 | AWS IAM/Cognito |
 |---------|----------------|-----------------|
 | **Primary Use** | AI agent authorization | AWS resource access control |
 | **Identity Model** | Legal entity with PoA | AWS users/roles |
@@ -453,7 +453,7 @@ type ResourceServerAuthorization struct {
 - ✅ AWS service-to-service authorization
 - ✅ Temporary credentials (STS) required
 
-**Use GAuth RFC-0111 When:**
+**Use AgentAuth RFC-0111 When:**
 - ✅ AI agents need legal authorization
 - ✅ Resources span multiple cloud platforms
 - ✅ Power of Attorney validation required
@@ -464,11 +464,11 @@ type ResourceServerAuthorization struct {
 
 ## 6. Key Differentiators
 
-### What Makes GAuth Unique?
+### What Makes AgentAuth Unique?
 
 #### 1. Legal Authority Validation
 
-**GAuth:**
+**AgentAuth:**
 - ✅ Commercial register verification (18 countries)
 - ✅ Statutory representative validation
 - ✅ Power of Attorney credential embedding
@@ -483,7 +483,7 @@ type ResourceServerAuthorization struct {
 
 #### 2. Multi-Party Authorization Chains
 
-**GAuth:**
+**AgentAuth:**
 ```
 Owner's Authorizer (Board Member)
         ↓
@@ -509,7 +509,7 @@ Resource
 
 #### 3. Per-Request Compliance Validation
 
-**GAuth RFC-0111 (Steps a-i):**
+**AgentAuth RFC-0111 (Steps a-i):**
 
 Every authorization request validates:
 - Authorization chain integrity
@@ -529,7 +529,7 @@ Simple token validation:
 
 #### 4. AI Agent-First Design
 
-**GAuth:**
+**AgentAuth:**
 - ✅ Designed for autonomous AI systems
 - ✅ Legal delegation scenarios
 - ✅ Long-lived authorization chains
@@ -544,7 +544,7 @@ Simple token validation:
 
 #### 5. EU Regulatory Compliance
 
-**GAuth:**
+**AgentAuth:**
 - ✅ eIDAS integration (18 EU countries)
 - ✅ GDPR-compliant identity handling
 - ✅ EU AI Act considerations
@@ -564,7 +564,7 @@ Simple token validation:
 **Business Need:**
 A multinational corporation deploys an AI agent to manage HR records across EU subsidiaries. The agent needs legal authority to act on behalf of the company.
 
-**GAuth Solution:**
+**AgentAuth Solution:**
 1. **Step I-II:** Board member proves identity and authority
 2. **Step III-IV:** Company registration validated
 3. **Step V:** AI agent granted PoA with limited scope
@@ -584,7 +584,7 @@ A multinational corporation deploys an AI agent to manage HR records across EU s
 **Business Need:**
 A healthcare AI assistant needs to access patient records with explicit Power of Attorney from patients unable to consent (e.g., elderly, disabled).
 
-**GAuth Solution:**
+**AgentAuth Solution:**
 1. **Subscription:** Hospital's statutory representative establishes authority
 2. **PoA Credential:** Patient or legal guardian grants PoA to AI system
 3. **Authorization Chain:** Guardian → Patient → AI Agent
@@ -603,7 +603,7 @@ A healthcare AI assistant needs to access patient records with explicit Power of
 **Business Need:**
 A fintech AI operates across 10 EU countries, requiring different statutory authorities and commercial register validations per jurisdiction.
 
-**GAuth Solution:**
+**AgentAuth Solution:**
 1. **18-Country Connector System:** Validates identity per jurisdiction
 2. **Geographic Scope Validation:** Enforces country-specific restrictions
 3. **Commercial Register Integration:** Per-country authority verification
@@ -619,7 +619,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ## 8. Technical Architecture
 
-### GAuth Core Components
+### AgentAuth Core Components
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -661,7 +661,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ### Token Structure Comparison
 
-#### GAuth RFC-0111 Token
+#### AgentAuth RFC-0111 Token
 
 ```json
 {
@@ -738,7 +738,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ### Key Token Differences
 
-| Feature | GAuth RFC-0111 | Azure/Okta/AWS |
+| Feature | AgentAuth RFC-0111 | Azure/Okta/AWS |
 |---------|----------------|----------------|
 | **PoA Credential** | ✅ Embedded | ❌ Not included |
 | **Authorization Chain** | ✅ 3+ levels | ❌ Not included |
@@ -751,7 +751,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ## 9. Compliance & Security
 
-### GAuth Security Features
+### AgentAuth Security Features
 
 #### Identity Verification (18 Countries)
 
@@ -800,7 +800,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ### Compliance Scorecard
 
-| Compliance Area | GAuth RFC-0111 | Status |
+| Compliance Area | AgentAuth RFC-0111 | Status |
 |----------------|----------------|--------|
 | **RFC-0111** | Authorization Protocol | 100% ✅ |
 | **RFC-0115** | Token Structure | 100% ✅ |
@@ -852,9 +852,9 @@ LAYER 5: Audit & Monitoring
 
 ## 10. Conclusion
 
-### GAuth vs. Industry Standards: Summary
+### AgentAuth vs. Industry Standards: Summary
 
-| Aspect | GAuth RFC-0111 | Azure AD | Okta | AWS IAM/Cognito |
+| Aspect | AgentAuth RFC-0111 | Azure AD | Okta | AWS IAM/Cognito |
 |--------|----------------|----------|------|-----------------|
 | **Purpose** | AI agent authorization | Enterprise SSO | User identity management | AWS resource control |
 | **PoA Support** | ✅ Native | ❌ No | ❌ No | ❌ No |
@@ -866,9 +866,9 @@ LAYER 5: Audit & Monitoring
 
 ---
 
-### When to Choose GAuth
+### When to Choose AgentAuth
 
-**✅ Choose GAuth RFC-0111 When:**
+**✅ Choose AgentAuth RFC-0111 When:**
 
 1. **AI agents need legal authorization**
    - Autonomous AI systems acting on behalf of legal entities
@@ -918,7 +918,7 @@ LAYER 5: Audit & Monitoring
 
 ---
 
-### GAuth Implementation Status
+### AgentAuth Implementation Status
 
 **Current State (November 19, 2025):**
 
@@ -950,7 +950,7 @@ LAYER 5: Audit & Monitoring
 
 **For Business Development:**
 1. Identify target verticals (healthcare, finance, legal)
-2. Position GAuth as specialized AI authorization platform
+2. Position AgentAuth as specialized AI authorization platform
 3. Develop case studies for AI agent delegation scenarios
 4. Partner with commercial register providers
 
@@ -969,7 +969,7 @@ LAYER 5: Audit & Monitoring
 **Technical Support:**
 - Mauricio Fernandez - mauriciomferz@gmail.com
 
-**Version:** GAuth 1.0 (RFC-0150 Implementation)  
+**Version:** AgentAuth 1.0 (RFC-0150 Implementation)  
 **Last Updated:** November 19, 2025
 
 ---

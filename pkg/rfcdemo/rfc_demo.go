@@ -9,10 +9,10 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/token"
 )
 
-// ValidateRFC0111Flow performs a minimal validation sequence on a gauth Service.
+// ValidateAAP001Flow performs a minimal validation sequence on a gauth Service.
 // NOTE: The caller must have already issued a token to supply here; this helper focuses on
 // validation + revocation semantics only. (Examples perform full grant/token issuance flows.)
-func ValidateRFC0111Flow(svc *gauth.Service, issuedToken string) error {
+func ValidateAAP001Flow(svc *gauth.Service, issuedToken string) error {
 	if svc == nil {
 		return fmt.Errorf("service cannot be nil")
 	}
@@ -42,8 +42,8 @@ func ValidateRFC0111Flow(svc *gauth.Service, issuedToken string) error {
 	return nil
 }
 
-// TestRFC0115Features exercises basic token store operations for RFC 0115 style features.
-func TestRFC0115Features() error {
+// TestAAP002Features exercises basic token store operations for AAP-002 style features.
+func TestAAP002Features() error {
 	store := token.NewMemoryStore()
 	ctx := context.Background()
 
@@ -69,9 +69,9 @@ func TestRFC0115Features() error {
 	return nil
 }
 
-// DemoRFC0111PowerOfAttorney demonstrates an RFC 0111 style issuance + revocation cycle.
-func DemoRFC0111PowerOfAttorney() error {
-	fmt.Println("=== RFC 0111 Power-of-Attorney Demonstration ===")
+// DemoAAP001PowerOfAttorney demonstrates an AAP-001 style issuance + revocation cycle.
+func DemoAAP001PowerOfAttorney() error {
+	fmt.Println("=== AAP-001 Power-of-Attorney Demonstration ===")
 
 	cfg := gauth.Config{
 		AuthServerURL:     "https://auth.example.com",
@@ -84,7 +84,7 @@ func DemoRFC0111PowerOfAttorney() error {
 	if err != nil {
 		return fmt.Errorf("create service: %w", err)
 	}
-	fmt.Println("✅ GAuth service initialized")
+	fmt.Println("✅ AgentAuth service initialized")
 
 	fmt.Println("\n📋 Step 1: Authorization Request")
 	grant, err := svc.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: cfg.ClientID, Scopes: []string{"transaction:execute"}})
@@ -124,6 +124,6 @@ func DemoRFC0111PowerOfAttorney() error {
 	}
 	fmt.Printf("   ✅ Token validation confirmed - token is invalid\n")
 
-	fmt.Println("\n🎉 RFC 0111 Power-of-Attorney flow completed successfully!")
+	fmt.Println("\n🎉 AAP-001 Power-of-Attorney flow completed successfully!")
 	return nil
 }

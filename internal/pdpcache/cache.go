@@ -1,4 +1,4 @@
-// Package pdpcache provides distributed policy decision point caching (RFC 0111 sec2.item5).
+// Package pdpcache provides distributed policy decision point caching (AAP-001 sec2.item5).
 package pdpcache
 
 import (

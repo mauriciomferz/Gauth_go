@@ -1,4 +1,4 @@
-# Advanced Security Architecture for GAuth
+# Advanced Security Architecture for AgentAuth
 
 **Version**: 1.0  
 **Date**: November 2025  
@@ -25,7 +25,7 @@
 
 ## Executive Summary
 
-This document outlines the **Advanced Security Architecture** for GAuth, implementing enterprise-grade security controls including:
+This document outlines the **Advanced Security Architecture** for AgentAuth, implementing enterprise-grade security controls including:
 
 - **Mutual TLS (mTLS)**: End-to-end encryption with client certificate authentication
 - **HashiCorp Vault**: Centralized secrets management with dynamic credentials
@@ -143,8 +143,8 @@ Mutual TLS provides **bidirectional authentication** where both client and serve
 #### Root CA Certificate
 ```yaml
 subject:
-  commonName: "GAuth Root CA"
-  organization: "GAuth"
+  commonName: "AgentAuth Root CA"
+  organization: "AgentAuth"
   country: "US"
 keyUsage:
   - keyCertSign
@@ -159,8 +159,8 @@ keySize: 4096 bits
 #### Intermediate CA Certificate (Services)
 ```yaml
 subject:
-  commonName: "GAuth Services Intermediate CA"
-  organization: "GAuth"
+  commonName: "AgentAuth Services Intermediate CA"
+  organization: "AgentAuth"
   organizationalUnit: "Services"
 keyUsage:
   - keyCertSign
@@ -173,11 +173,11 @@ validity: 730 days (2 years)
 keySize: 2048 bits
 ```
 
-#### Server Certificate (GAuth API)
+#### Server Certificate (AgentAuth API)
 ```yaml
 subject:
   commonName: "gauth-api.example.com"
-  organization: "GAuth"
+  organization: "AgentAuth"
   organizationalUnit: "API Services"
 subjectAltNames:
   - DNS:gauth-api.example.com
@@ -197,7 +197,7 @@ keySize: 2048 bits
 ```yaml
 subject:
   commonName: "app-client-001"
-  organization: "GAuth"
+  organization: "AgentAuth"
   organizationalUnit: "Client Applications"
   serialNumber: "uuid-12345"
 keyUsage:
@@ -357,7 +357,7 @@ spec:
   renewBefore: 24h  # Renew 1 day before expiry
   subject:
     organizations:
-      - GAuth
+      - AgentAuth
     organizationalUnits:
       - API Services
   commonName: gauth-api.example.com
@@ -412,7 +412,7 @@ HashiCorp Vault provides **centralized secrets management** with dynamic credent
         ┌───────────────────┼───────────────────┐
         │                   │                   │
   ┌─────▼─────┐      ┌─────▼─────┐      ┌─────▼─────┐
-  │   GAuth   │      │PostgreSQL │      │   Redis   │
+  │   AgentAuth   │      │PostgreSQL │      │   Redis   │
   │    API    │      │  Dynamic  │      │  Dynamic  │
   │           │      │   Creds   │      │   Creds   │
   └───────────┘      └───────────┘      └───────────┘
@@ -476,7 +476,7 @@ vault secrets tune -max-lease-ttl=87600h pki  # 10 years
 
 # Generate root certificate
 vault write -field=certificate pki/root/generate/internal \
-  common_name="GAuth Root CA" \
+  common_name="AgentAuth Root CA" \
   ttl=87600h \
   key_bits=4096 \
   exclude_cn_from_sans=true \
@@ -494,7 +494,7 @@ vault secrets tune -max-lease-ttl=43800h pki_int  # 5 years
 
 # Generate intermediate CSR
 vault write -format=json pki_int/intermediate/generate/internal \
-  common_name="GAuth Services Intermediate CA" \
+  common_name="AgentAuth Services Intermediate CA" \
   ttl=43800h \
   | jq -r '.data.csr' > pki_intermediate.csr
 
@@ -583,7 +583,7 @@ vault write auth/kubernetes/config \
   kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
   token_reviewer_jwt=@/var/run/secrets/kubernetes.io/serviceaccount/token
 
-# Create policy for GAuth application
+# Create policy for AgentAuth application
 vault policy write gauth-app - <<EOF
 # Read static secrets
 path "secret/data/gauth/*" {
@@ -628,7 +628,7 @@ vault write auth/kubernetes/role/gauth-app \
 # Enable AppRole auth
 vault auth enable approle
 
-# Create AppRole for GAuth
+# Create AppRole for AgentAuth
 vault write auth/approle/role/gauth-app \
   secret_id_ttl=24h \
   token_num_uses=0 \
@@ -944,7 +944,7 @@ notify_slack() {
                 \"color\": \"$color\",
                 \"title\": \"Certificate Rotation\",
                 \"text\": \"$message\",
-                \"footer\": \"GAuth Security\",
+                \"footer\": \"AgentAuth Security\",
                 \"ts\": $(date +%s)
             }]
         }"

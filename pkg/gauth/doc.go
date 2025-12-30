@@ -1,8 +1,8 @@
-// Package gauth provides the core GAuth 1.0 authorization framework implementation.
+// Package gauth provides the core AgentAuth 1.0 authorization framework implementation.
 //
-// GAuth (Generic Authorization) is a comprehensive authorization system that supports
+// AgentAuth (Generic Authorization) is a comprehensive authorization system that supports
 // delegated authorization, proof-of-authorization tokens, and multi-signature validation.
-// This package implements the core RFC 0111 and RFC 0115 specifications.
+// This package implements the core AAP-001 and AAP-002 specifications.
 //
 // # Key Features
 //
@@ -48,7 +48,7 @@
 //
 // # Delegation Chains
 //
-// GAuth supports delegation chains where authority can be delegated from one
+// AgentAuth supports delegation chains where authority can be delegated from one
 // principal to another:
 //
 //	// Alice delegates to Bob
@@ -69,7 +69,7 @@
 //
 // # Multi-Signature Validation
 //
-// For high-security operations, GAuth supports multi-signature validation:
+// For high-security operations, AgentAuth supports multi-signature validation:
 //
 //	// Create context requiring 2 of 3 signatures
 //	ctx := &gauth.MultiSigContext{
@@ -88,7 +88,7 @@
 //
 // # Revocation
 //
-// GAuth provides cryptographically verifiable revocation:
+// AgentAuth provides cryptographically verifiable revocation:
 //
 //	// Revoke a token
 //	err := svc.Revoke(tokenID, "Security incident")
@@ -119,7 +119,7 @@
 //   - Use TLS for all network communication
 //   - Implement rate limiting to prevent abuse
 //
-// For more details, see the GAuth RFC specifications:
-//   - RFC 0111: Core Authorization Protocol
-//   - RFC 0115: Proof-of-Authorization (POA) Tokens
+// For more details, see the AgentAuth RFC specifications:
+//   - AAP-001: Core Authorization Protocol
+//   - AAP-002: Proof-of-Authorization (POA) Tokens
 package gauth

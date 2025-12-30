@@ -69,7 +69,7 @@ type AuditorResult struct {
 
 ## github.com/mauriciomferz/Gauth_go/cmd/conformance
 ```go
-Package main provides the conformance CLI tool for verifying RFC 0111/0115
+Package main provides the conformance CLI tool for verifying AAP-001/0115
 compliance.
 ```
 
@@ -118,9 +118,9 @@ working demonstration showing end-to-end authorization and delegation flows.
 
 ## github.com/mauriciomferz/Gauth_go/cmd/gauth-server
 ```go
-Package main provides a demonstration of the GAuth protocol implementation
+Package main provides a demonstration of the AgentAuth protocol implementation
 
-This demo shows the basic flow of the GAuth protocol, including: - Authorization
+This demo shows the basic flow of the AgentAuth protocol, including: - Authorization
 request and grant - Token issuance - Transaction processing - Audit logging -
 Token expiration
 ```
@@ -283,7 +283,7 @@ and consistency proofs.
 ## github.com/mauriciomferz/Gauth_go/cmd/verify-manifest
 ```go
 Command verify-manifest verifies the signed policy manifest emitted by the
-GAuth server. It fetches (or reads from file) the /api/v1/policy/manifest JSON,
+AgentAuth server. It fetches (or reads from file) the /api/v1/policy/manifest JSON,
 reconstructs the canonical unsigned portion, recomputes the sha256 hash,
 and verifies the Ed25519 signature using domain separation prefix
 "GAUTH_POLICY_MANIFEST:".
@@ -307,7 +307,7 @@ Exit codes:
 
 ## github.com/mauriciomferz/Gauth_go/cmd/web-server
 ```go
-The web-server command launches the GAuth beta HTTP API including metrics,
+The web-server command launches the AgentAuth beta HTTP API including metrics,
 policy, delegation and token endpoints. It is a demonstration binary and NOT
 production hardened.
 ```
@@ -1475,10 +1475,10 @@ func VerifyRevocationProof(eventHash string, proof []delegation.MerkleProofStep,
 ```go
 package auth // import "github.com/mauriciomferz/Gauth_go/pkg/auth"
 
-Package auth provides authentication and token validation for the GAuth
+Package auth provides authentication and token validation for the AgentAuth
 framework.
 
-This package implements the authentication layer for GAuth, handling token
+This package implements the authentication layer for AgentAuth, handling token
 validation, signature verification, and principal extraction. It supports
 multiple cryptographic algorithms and provides comprehensive validation
 including expiration, revocation, and replay attack protection.
@@ -2292,7 +2292,7 @@ type ValidityPeriod struct {
 package authz // import "github.com/mauriciomferz/Gauth_go/pkg/authz"
 
 Package authz provides authorization enforcement and policy evaluation for
-GAuth.
+AgentAuth.
 
 This package implements the authorization layer, including policy-based access
 control, decision caching, and obligation execution. It supports both role-based
@@ -4071,7 +4071,7 @@ TYPES
 type PolicyClient struct {
 	// Has unexported fields.
 }
-    PolicyClient interacts with the GAuth Policy API.
+    PolicyClient interacts with the AgentAuth Policy API.
 
 func NewPolicyClient(config *PolicyClientConfig) *PolicyClient
     NewPolicyClient creates a new policy client.
@@ -4105,7 +4105,7 @@ type ProvenanceResponse struct {
 ```go
 package common // import "github.com/mauriciomferz/Gauth_go/pkg/common"
 
-Package common provides common types and utilities for the GAuth implementation
+Package common provides common types and utilities for the AgentAuth implementation
 
 TYPES
 
@@ -4121,7 +4121,7 @@ func DefaultConfig() *Config
     DefaultConfig returns a default configuration
 
 type EventType string
-    EventType represents different types of events in the GAuth system
+    EventType represents different types of events in the AgentAuth system
 
 const (
 	// TokenCreated represents a token creation event
@@ -4135,7 +4135,7 @@ const (
 	// AuthorizationDenied represents an authorization denial event
 	AuthorizationDenied EventType = "authorization.denied"
 
-	// Delegation events (RFC 0111)
+	// Delegation events (AAP-001)
 	DelegationCreated   EventType = "delegation.created"
 	DelegationRevoked   EventType = "delegation.revoked"
 	DelegationValidated EventType = "delegation.validated"
@@ -4794,15 +4794,15 @@ signatures. This implementation uses BLS (Boneh-Lynn-Shacham) signatures which
 allow signature aggregation - multiple signatures can be combined into a single
 signature.
 
-Package crypto provides cryptographic signature algorithm abstraction for GAuth.
+Package crypto provides cryptographic signature algorithm abstraction for AgentAuth.
 
-This package implements algorithm agility, allowing GAuth to support multiple
+This package implements algorithm agility, allowing AgentAuth to support multiple
 signature algorithms (Ed25519, RSA-PSS, ECDSA P-256) for both signing and
 verification operations. This enables gradual migration between algorithms and
 interoperability with systems using different cryptographic standards.
 
 Package crypto implements EdDSA key management (rotation, persistence and
-optional immutable audit logging) for the GAuth demo. It is intentionally
+optional immutable audit logging) for the AgentAuth demo. It is intentionally
 minimal and not a production-grade HSM integration.
 
 CONSTANTS
@@ -5228,7 +5228,7 @@ func (s *ECDSASigner) Verify(msg, sig []byte) bool
 
 type Ed25519Provider struct{}
     Ed25519Provider implements SignatureAlgorithm for Ed25519 (EdDSA). This is
-    the default algorithm for GAuth, providing fast signatures with small key
+    the default algorithm for AgentAuth, providing fast signatures with small key
     sizes (32 bytes) and signatures (64 bytes).
 
 func (p *Ed25519Provider) AlgorithmID() string
@@ -6529,7 +6529,7 @@ func (m *Migrator) Version() (uint, bool, error)
 ```go
 package delegation // import "github.com/mauriciomferz/Gauth_go/pkg/delegation"
 
-Package delegation provides delegation chain management for GAuth authorization.
+Package delegation provides delegation chain management for AgentAuth authorization.
 
 This package implements authorization delegation, allowing principals to
 delegate their authority to other principals. It supports delegation chains,
@@ -7356,7 +7356,7 @@ type TokenResponse struct {
 package enforcement // import "github.com/mauriciomferz/Gauth_go/pkg/enforcement"
 
 Package enforcement provides rule-based and disclosure-based enforcement
-mechanisms for the GAuth authorization framework with AI integration points.
+mechanisms for the AgentAuth authorization framework with AI integration points.
 
 Package enforcement - PEP (Power Enforcement Point) Implementation This file
 implements the RFC-0111 PEP architecture with supply-side and demand-side
@@ -7629,7 +7629,7 @@ func Middleware() func(http.Handler) http.Handler
 
 TYPES
 
-type Error = GAuthError
+type Error = AgentAuthError
     Error is a compatibility type alias expected by legacy examples.
 
 type ErrorCode string
@@ -7684,7 +7684,7 @@ type ErrorDetails struct {
 }
     ErrorDetails represents structured error details
 
-type GAuthError struct {
+type AgentAuthError struct {
 	Code      ErrorCode     `json:"code"`
 	Message   string        `json:"message"`
 	Details   *ErrorDetails `json:"details,omitempty"`
@@ -7693,37 +7693,37 @@ type GAuthError struct {
 	File      string        `json:"file,omitempty"`
 	Line      int           `json:"line,omitempty"`
 }
-    GAuthError represents a structured error
+    AgentAuthError represents a structured error
 
-func New(codeOrError interface{}, message string) *GAuthError
-    New creates a new GAuthError
+func New(codeOrError interface{}, message string) *AgentAuthError
+    New creates a new AgentAuthError
 
-func Newf(code ErrorCode, format string, args ...interface{}) *GAuthError
-    Newf creates a new GAuthError with formatted message
+func Newf(code ErrorCode, format string, args ...interface{}) *AgentAuthError
+    Newf creates a new AgentAuthError with formatted message
 
-func Wrap(err error, code ErrorCode, message string) *GAuthError
+func Wrap(err error, code ErrorCode, message string) *AgentAuthError
     Wrap wraps an existing error with additional context
 
-func (e *GAuthError) AddInfo(k string, v interface{}) *GAuthError
+func (e *AgentAuthError) AddInfo(k string, v interface{}) *AgentAuthError
 
-func (e *GAuthError) Error() string
+func (e *AgentAuthError) Error() string
     Error implements the error interface
 
-func (e *GAuthError) WithCause(cause error) *GAuthError
+func (e *AgentAuthError) WithCause(cause error) *AgentAuthError
     WithCause adds a cause to the error
 
-func (e *GAuthError) WithDetails(details interface{}) *GAuthError
+func (e *AgentAuthError) WithDetails(details interface{}) *AgentAuthError
     WithDetails adds details to the error
 
-func (e *GAuthError) WithFields(fields interface{}) *GAuthError
+func (e *AgentAuthError) WithFields(fields interface{}) *AgentAuthError
     WithFields adds fields to the error (accepts both map[string]interface{} and
     map[string]string)
 
-func (e *GAuthError) WithHTTPInfo(parts ...interface{}) *GAuthError
+func (e *AgentAuthError) WithHTTPInfo(parts ...interface{}) *AgentAuthError
 
-func (e *GAuthError) WithRequestInfo(parts ...interface{}) *GAuthError
+func (e *AgentAuthError) WithRequestInfo(parts ...interface{}) *AgentAuthError
 
-func (e *GAuthError) WithSource(source string) *GAuthError
+func (e *AgentAuthError) WithSource(source string) *AgentAuthError
     --- Compatibility chain methods (no-op enrichers used by examples) ---
 
 type MultiError struct {
@@ -7763,7 +7763,7 @@ func (v *ValidationError) Error() string
 ```go
 package events // import "github.com/mauriciomferz/Gauth_go/pkg/events"
 
-Package events provides an event system for the GAuth framework
+Package events provides an event system for the AgentAuth framework
 
 TYPES
 
@@ -8042,7 +8042,7 @@ package gagent // import "github.com/mauriciomferz/Gauth_go/pkg/gagent"
 Package gagent provides the G-Agent API interface for AI-assisted authorization
 enforcement connecting to the enforcement package AIIntegrationInterface.
 
-Package gagent - GAuth Agent Integration with MCP Provides high-level API for AI
+Package gagent - AgentAuth Agent Integration with MCP Provides high-level API for AI
 agents to use MCP resources with authorization
 
 CONSTANTS
@@ -8181,7 +8181,7 @@ type MCPAgent struct {
 	// Has unexported fields.
 }
     MCPAgent is a high-level wrapper for AI agents to access MCP resources with
-    automatic GAuth authorization enforcement
+    automatic AgentAuth authorization enforcement
 
 func NewMCPAgent(config *MCPAgentConfig) (*MCPAgent, error)
     NewMCPAgent creates a new MCP agent with authorization
@@ -8215,7 +8215,7 @@ func (a *MCPAgent) ReadResource(ctx context.Context, resourceURI string) (*mcp.R
 
 type MCPAgentConfig struct {
 	AgentID     string               // Unique agent identifier
-	Token       *gauth.ExtendedToken // GAuth authorization token
+	Token       *gauth.ExtendedToken // AgentAuth authorization token
 	MCPClient   MCPClient            // MCP client for server communication
 	AuthBridge  AuthorizationBridge  // Authorization bridge
 	AuditLogger mcp.AuditLogger      // Audit logger (optional)
@@ -8280,12 +8280,12 @@ RFC-0111 Section 6 Implements critical Gaps #2 and #3 from
 QUALITY_MANAGER_RFC_COMPLIANCE_FINAL_ASSESSMENT.md RFC Section 6: Two-phase
 protocol flow validation
 
-Package gauth provides the core GAuth 1.0 authorization framework
+Package gauth provides the core AgentAuth 1.0 authorization framework
 implementation.
 
-GAuth (Generic Authorization) is a comprehensive authorization system
+AgentAuth (Generic Authorization) is a comprehensive authorization system
 that supports delegated authorization, proof-of-authorization tokens, and
-multi-signature validation. This package implements the core RFC 0111 and RFC
+multi-signature validation. This package implements the core AAP-001 and RFC
 0115 specifications.
 
 # Key Features
@@ -8332,7 +8332,7 @@ Creating and validating a simple authorization token:
 
 # Delegation Chains
 
-GAuth supports delegation chains where authority can be delegated from one
+AgentAuth supports delegation chains where authority can be delegated from one
 principal to another:
 
     // Alice delegates to Bob
@@ -8353,7 +8353,7 @@ principal to another:
 
 # Multi-Signature Validation
 
-For high-security operations, GAuth supports multi-signature validation:
+For high-security operations, AgentAuth supports multi-signature validation:
 
     // Create context requiring 2 of 3 signatures
     ctx := &gauth.MultiSigContext{
@@ -8372,7 +8372,7 @@ For high-security operations, GAuth supports multi-signature validation:
 
 # Revocation
 
-GAuth provides cryptographically verifiable revocation:
+AgentAuth provides cryptographically verifiable revocation:
 
     // Revoke a token
     err := svc.Revoke(tokenID, "Security incident")
@@ -8405,9 +8405,9 @@ The underlying stores (key, replay, revocation) must also be thread-safe.
   - Use TLS for all network communication
   - Implement rate limiting to prevent abuse
 
-For more details, see the GAuth RFC specifications:
-  - RFC 0111: Core Authorization Protocol
-  - RFC 0115: Proof-of-Authorization (POA) Tokens
+For more details, see the AgentAuth RFC specifications:
+  - AAP-001: Core Authorization Protocol
+  - AAP-002: Proof-of-Authorization (POA) Tokens
 
 # Package gauth - Extended Token Implementation per RFC-0111 Section 3
 
@@ -8430,8 +8430,8 @@ framework compliance as recommended by QA Manager
 Package gauth provides formal requirements enforcement for RFC-0111/RFC-0115
 compliance
 
-Package gauth - GAuth+ Integration for Authorization Chain Validation Integrates
-GAuth+ features (successor management, delegation policies, dual control,
+Package gauth - AgentAuth+ Integration for Authorization Chain Validation Integrates
+AgentAuth+ features (successor management, delegation policies, dual control,
 fiduciary duties, capability assessment) into RFC-0111 authorization flow
 
 Package gauth - JWE (JSON Web Encryption) Configuration Implements Security
@@ -8504,11 +8504,11 @@ const (
 VARIABLES
 
 var (
-	ErrInvalidToken          = &GAuthError{Code: "invalid_token", Message: "Invalid token"}
-	ErrUnauthorized          = &GAuthError{Code: "unauthorized", Message: "Unauthorized access"}
-	ErrTokenExpired          = &GAuthError{Code: "token_expired", Message: "Token has expired"}
-	ErrInvalidGrant          = &GAuthError{Code: "invalid_grant", Message: "Invalid authorization grant"}
-	ErrInvalidClient         = &GAuthError{Code: "invalid_client", Message: "Invalid client credentials"}
+	ErrInvalidToken          = &AgentAuthError{Code: "invalid_token", Message: "Invalid token"}
+	ErrUnauthorized          = &AgentAuthError{Code: "unauthorized", Message: "Unauthorized access"}
+	ErrTokenExpired          = &AgentAuthError{Code: "token_expired", Message: "Token has expired"}
+	ErrInvalidGrant          = &AgentAuthError{Code: "invalid_grant", Message: "Invalid authorization grant"}
+	ErrInvalidClient         = &AgentAuthError{Code: "invalid_client", Message: "Invalid client credentials"}
 	ErrStrictAuthKeyRequired = errors.New("strict auth mode requires explicit SigningKey of >=32 bytes")
 )
     Error definitions
@@ -9297,11 +9297,11 @@ func NewComplianceValidator(
 ) *ComplianceValidator
     NewComplianceValidator creates a new compliance validator
 
-func (v *ComplianceValidator) SetEnforceGAuthPlus(enforce bool)
-    SetEnforceGAuthPlus enables/disables GAuth+ enforcement
+func (v *ComplianceValidator) SetEnforceAgentAuthPlus(enforce bool)
+    SetEnforceAgentAuthPlus enables/disables AgentAuth+ enforcement
 
-func (v *ComplianceValidator) SetGAuthPlusValidator(gauthPlusValidator *GAuthPlusValidator)
-    SetGAuthPlusValidator sets the GAuth+ validator and enables enforcement
+func (v *ComplianceValidator) SetAgentAuthPlusValidator(gauthPlusValidator *AgentAuthPlusValidator)
+    SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
 
 func (v *ComplianceValidator) ValidateGrantCompliance(
 	ctx context.Context,
@@ -9367,7 +9367,7 @@ type Config struct {
 	// Centralized App Config
 	AppConfig *config.Config
 }
-    Config represents the configuration for GAuth
+    Config represents the configuration for AgentAuth
 
 type ControllingEntity struct {
 	EntityID      string  `json:"entity_id"`
@@ -10109,23 +10109,23 @@ func (v *FormalRequirementsValidator) ValidateNotarialCertification(
 ) (*NotarialVerificationResult, error)
     ValidateNotarialCertification validates a notarial certification
 
-type GAuth interface {
+type AgentAuth interface {
 	InitiateAuthorization(req AuthorizationRequest) (*AuthorizationGrant, error)
 	RequestToken(req TokenRequest) (*TokenResponse, error)
 	ValidateToken(token string) (*TokenValidationResult, error)
 	Close() error
 }
-    GAuth represents the main GAuth interface
+    AgentAuth represents the main AgentAuth interface
 
-type GAuthError struct {
+type AgentAuthError struct {
 	Code    string
 	Message string
 }
-    GAuthError represents a GAuth error
+    AgentAuthError represents a AgentAuth error
 
-func (e *GAuthError) Error() string
+func (e *AgentAuthError) Error() string
 
-type GAuthPlusValidationResult struct {
+type AgentAuthPlusValidationResult struct {
 	Valid            bool                    `json:"valid"`
 	SuccessorCheck   *SuccessorCheckResult   `json:"successor_check,omitempty"`
 	DelegationCheck  *DelegationCheckResult  `json:"delegation_check,omitempty"`
@@ -10135,42 +10135,42 @@ type GAuthPlusValidationResult struct {
 	Warnings         []string                `json:"warnings,omitempty"`
 	FailureReason    string                  `json:"failure_reason,omitempty"`
 }
-    GAuthPlusValidationResult contains results from GAuth+ validation
+    AgentAuthPlusValidationResult contains results from AgentAuth+ validation
 
-type GAuthPlusValidator struct {
+type AgentAuthPlusValidator struct {
 	// Has unexported fields.
 }
-    GAuthPlusValidator validates GAuth+ policies during authorization
+    AgentAuthPlusValidator validates AgentAuth+ policies during authorization
 
-func NewGAuthPlusValidator(
+func NewAgentAuthPlusValidator(
 	successorService *gauthplus.PostgreSQLSuccessorService,
 	delegationService gauthplus.DelegationService,
 	dualControlService *gauthplus.PostgreSQLDualControlService,
 	fiduciaryService *gauthplus.PostgreSQLFiduciaryDutyService,
 	capabilityService gauthplus.CapabilityAssessmentService,
-) *GAuthPlusValidator
-    NewGAuthPlusValidator creates a new GAuth+ validator Accepts interface types
+) *AgentAuthPlusValidator
+    NewAgentAuthPlusValidator creates a new AgentAuth+ validator Accepts interface types
     for delegation and capability services to support caching
 
-func (v *GAuthPlusValidator) SetEnforceCapabilities(enforce bool)
+func (v *AgentAuthPlusValidator) SetEnforceCapabilities(enforce bool)
     SetEnforceCapabilities enables/disables capability enforcement
 
-func (v *GAuthPlusValidator) SetEnforceDualControl(enforce bool)
+func (v *AgentAuthPlusValidator) SetEnforceDualControl(enforce bool)
     SetEnforceDualControl enables/disables dual control enforcement
 
-func (v *GAuthPlusValidator) SetEnforceFiduciary(enforce bool)
+func (v *AgentAuthPlusValidator) SetEnforceFiduciary(enforce bool)
     SetEnforceFiduciary enables/disables fiduciary duty enforcement
 
-func (v *GAuthPlusValidator) ValidatePoAWithGAuthPlus(
+func (v *AgentAuthPlusValidator) ValidatePoAWithAgentAuthPlus(
 	ctx context.Context,
 	poaID string,
 	poaDef *poa.PoADefinition,
 	agentID string,
 	actionType string,
-) (*GAuthPlusValidationResult, error)
-    ValidatePoAWithGAuthPlus performs comprehensive GAuth+ validation for
+) (*AgentAuthPlusValidationResult, error)
+    ValidatePoAWithAgentAuthPlus performs comprehensive AgentAuth+ validation for
     a PoA This is called during RFC-0111 authorization chain validation to
-    enforce GAuth+ policies (successor management, delegation, dual control,
+    enforce AgentAuth+ policies (successor management, delegation, dual control,
     capabilities, fiduciary duties)
 
 type GenericPVPStub struct {
@@ -10253,7 +10253,7 @@ type GrantComplianceResult struct {
 	ValidationTime      time.Time                  `json:"validation_time"`
 	Checks              map[string]bool            `json:"checks"`
 	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
-	GAuthPlusValidation *GAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
+	AgentAuthPlusValidation *AgentAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
 	FailureReason       string                     `json:"failure_reason,omitempty"`
 	Warnings            []string                   `json:"warnings,omitempty"`
 }
@@ -10366,7 +10366,7 @@ type IdentityVerificationChain struct {
 }
     IdentityVerificationChain represents the PVP verification chain RFC-0111
     Section 3, Page 8: "Power Verification Point (PVP) – verification of the
-    identities that perform a specific role along the GAuth processing."
+    identities that perform a specific role along the AgentAuth processing."
 
 type IdentityVerificationRequest struct {
 	SubjectID     string    `json:"subject_id"`
@@ -10868,7 +10868,7 @@ type Metrics interface {
 	IncTokenValidations()
 	IncTokenValidationFailures()
 }
-    Metrics defines the minimal instrumentation surface for the basic GAuth
+    Metrics defines the minimal instrumentation surface for the basic AgentAuth
     token service. We intentionally keep this interface tiny to allow easy
     adaptation to different telemetry backends (Prometheus, OpenTelemetry,
     in-memory test collector, etc.) without importing heavy dependencies here.
@@ -11708,7 +11708,7 @@ func (s *PostgresExtendedTokenStore) SaveToken(ctx context.Context, token *Exten
     SaveToken saves a new token or updates an existing one
 
 type PowerAdministrationPoint struct {
-	GAuth       GAuth
+	AgentAuth       AgentAuth
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
@@ -11773,7 +11773,7 @@ type PowerEnforcementPoint struct {
     PowerEnforcementPoint (PEP) enforces authorization decisions at runtime
     RFC-0111 Section 3.1: "Power Enforcement Point (PEP) – usually the
     application, AI system or an intermediary that asks the PDP for a decision
-    and enforces its result. GAuth differentiates between supply-side and
+    and enforces its result. AgentAuth differentiates between supply-side and
     demand-side PEP. The client itself Must make sure it decides and acts in
     line with its authorization, thus enforces compliance from the supply-side.
     The resource owner and/or resource server Must check authorization
@@ -12066,7 +12066,7 @@ type RequestComplianceResult struct {
 	ValidationTime      time.Time                  `json:"validation_time"`
 	Checks              map[string]bool            `json:"checks"`
 	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
-	GAuthPlusValidation *GAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
+	AgentAuthPlusValidation *AgentAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
 	FailureReason       string                     `json:"failure_reason,omitempty"`
 	Warnings            []string                   `json:"warnings,omitempty"`
 }
@@ -12199,7 +12199,7 @@ func (p *SecureJSONParser) ParseSecure(data []byte, v interface{}) error
 type Service struct {
 	// Has unexported fields.
 }
-    Service represents the main GAuth service
+    Service represents the main AgentAuth service
 
 func New(cfg Config, opts ...Option) (*Service, error)
     New creates a new Service instance with optional functional options.
@@ -12349,11 +12349,11 @@ func (pdp *SimplePDP) MakeDecision(
 func (pdp *SimplePDP) RemovePolicy(policyID string) error
     RemovePolicy removes a policy from the PDP via PAP integration
 
-func (pdp *SimplePDP) SetEnforceGAuthPlus(enforce bool)
-    SetEnforceGAuthPlus enables/disables GAuth+ enforcement
+func (pdp *SimplePDP) SetEnforceAgentAuthPlus(enforce bool)
+    SetEnforceAgentAuthPlus enables/disables AgentAuth+ enforcement
 
-func (pdp *SimplePDP) SetGAuthPlusValidator(validator *GAuthPlusValidator)
-    SetGAuthPlusValidator sets the GAuth+ validator and enables enforcement
+func (pdp *SimplePDP) SetAgentAuthPlusValidator(validator *AgentAuthPlusValidator)
+    SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
 
 type SkewMetrics struct {
 	TotalValidations   int64
@@ -12838,7 +12838,7 @@ type TrustServiceProvider interface {
 }
     TrustServiceProvider defines the interface for trust service provider
     integration RFC-0111 Section 3 (PVP): "verification of the identities that
-    perform a specific role along the GAuth processing. E.g., a trust service
+    perform a specific role along the AgentAuth processing. E.g., a trust service
     provider that also runs the authorization server."
 
 type TrustServiceProviderInfo struct {
@@ -18396,7 +18396,7 @@ var AllowedSignatureAlgorithms = []string{
     during verification to prevent algorithm confusion attacks (e.g., "none",
     "HS256" when expecting "Ed25519").
 
-    RFC Compliance: GiFo-RFC-0111 Section 5.2 (Cryptographic Standards)
+    RFC Compliance: AAP-RFC-0111 Section 5.2 (Cryptographic Standards)
     Security: Prevents CVE-2015-9235 (JWT "none" algorithm bypass)
 
     Default whitelist:
@@ -18432,7 +18432,7 @@ func CompareAmounts(a, b Amount) (int, error)
       - 1 if a > b
 
 func Demo() error
-    Demo demonstrates RFC 0111 power-of-attorney functionality
+    Demo demonstrates AAP-001 power-of-attorney functionality
 
 func EnforceMaxAmount(requested, limit Amount) error
     EnforceMaxAmount validates that requested amount does not exceed limit.
@@ -18476,7 +18476,7 @@ func ValidateRFC0111Compliance(cfg *RFC0111Config) error
     numeric / duration parameters are sensible.
 
 func ValidateScope(items []ScopeItem, validator *ScopeValidator) error
-    ValidateScope performs semantic validation of scope items (RFC 0115:2).
+    ValidateScope performs semantic validation of scope items (AAP-002:2).
 
 func ValidateTaxonomy(p *PowerOfAttorney) error
     ValidateTaxonomy returns error when any non-empty taxonomy field is not part
@@ -18624,7 +18624,7 @@ type AuditLogger interface {
 	Log(context.Context, interface{}) error
 	Query(context.Context, *audit.Filter) ([]*audit.Event, error)
 }
-    Service provides RFC 0111 power-of-attorney services AuditLogger is the
+    Service provides AAP-001 power-of-attorney services AuditLogger is the
     interface subset we rely on (MemoryLogger & FileLogger both satisfy).
 
 type AuditSink interface {
@@ -18830,7 +18830,7 @@ type DailyLimit struct {
 	ResetAt         time.Time `json:"reset_at"`
 	LastTransaction time.Time `json:"last_transaction,omitempty"`
 }
-    DailyLimit represents daily transaction limits (RFC 0115:5).
+    DailyLimit represents daily transaction limits (AAP-002:5).
 
 type DailyLimitCheckRecord struct {
 	DelegationID string    `json:"delegation_id"`
@@ -18997,7 +18997,7 @@ type DutyOfCare struct {
 	Scope       []string          `json:"scope,omitempty"`
 	Evidence    map[string]string `json:"evidence,omitempty"`
 }
-    DutyOfCare represents a specific duty of care obligation (RFC 0115:6).
+    DutyOfCare represents a specific duty of care obligation (AAP-002:6).
 
 type EnhancedPoAValidator struct {
 	BasicPoAValidator
@@ -19065,15 +19065,15 @@ type FormalValidation struct {
     FormalValidation represents formal requirement validation state (RFC
     0115:4).
 
-type GAuth10Framework struct {
+type AgentAuth10Framework struct {
 	AuthServer string
 	Clients    []string
 }
 
-func (f *GAuth10Framework) GetStatus() map[string]interface{}
+func (f *AgentAuth10Framework) GetStatus() map[string]interface{}
     GetStatus returns the current status of the framework
 
-func (f *GAuth10Framework) ToJSON() ([]byte, error)
+func (f *AgentAuth10Framework) ToJSON() ([]byte, error)
     ToJSON serializes the framework to JSON
 
 type InMemoryValidationMetrics struct {
@@ -19160,7 +19160,7 @@ type Obligations struct {
 	NotificationRules map[string]string `json:"notification_rules,omitempty"`
 	ComplianceChecks  []string          `json:"compliance_checks,omitempty"`
 }
-    Obligations represents obligations under power of attorney (RFC 0115:6).
+    Obligations represents obligations under power of attorney (AAP-002:6).
 
 type Option func(*Service)
     Option configures a Service during construction.
@@ -19438,7 +19438,7 @@ type PowerLimit struct {
 	Unit         string            `json:"unit,omitempty"`
 	Metadata     map[string]string `json:"metadata,omitempty"`
 }
-    PowerLimit represents general power-of-attorney limits (RFC 0115:5).
+    PowerLimit represents general power-of-attorney limits (AAP-002:5).
 
 type PowerOfAttorney struct {
 	ID           string            `json:"id"`
@@ -19573,7 +19573,7 @@ type RequirementCheck struct {
 	Message     string    `json:"message,omitempty"`
 	CheckedAt   time.Time `json:"checked_at"`
 }
-    RequirementCheck represents a single formal requirement check (RFC 0115:4).
+    RequirementCheck represents a single formal requirement check (AAP-002:4).
 
 type RevocationBlacklistStore struct {
 	// Has unexported fields.
@@ -19686,7 +19686,7 @@ type Rights struct {
 	ValidUntil            time.Time         `json:"valid_until,omitempty"`
 	TransferableSubRights bool              `json:"transferable_sub_rights,omitempty"`
 }
-    Rights represents rights granted under power of attorney (RFC 0115:6).
+    Rights represents rights granted under power of attorney (AAP-002:6).
 
 type RuntimeEvaluation struct {
 	ExpressionID string                  `json:"expression_id"`
@@ -19722,14 +19722,14 @@ type ScopeValidator struct {
 	ConstraintRules  map[string]string `json:"constraint_rules,omitempty"`
 	StrictValidation bool              `json:"strict_validation"`
 }
-    ScopeValidator provides scope semantic validation (RFC 0115:2).
+    ScopeValidator provides scope semantic validation (AAP-002:2).
 
 type Service struct {
 	// Has unexported fields.
 }
 
 func NewService(auditLogger *audit.MemoryLogger, authorizer authz.Authorizer, opts ...Option) *Service
-    NewService creates a new RFC 0111 service (in-memory prototype) with
+    NewService creates a new AAP-001 service (in-memory prototype) with
     optional functional options. SECURITY DEFAULTS:
       - failClosedReplay: true (revocation/replay checks fail-closed on store
         errors)
@@ -19798,7 +19798,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
     matches the PoA grantee (holder-of-key binding). This prevents impersonation
     attacks where an attacker presents someone else's valid PoA.
 
-    RFC Violation Fixed: GiFo-RFC-0115 (PoA Definition) & GiFo-RFC-0111 (Token
+    RFC Violation Fixed: AAP-RFC-0115 (PoA Definition) & AAP-RFC-0111 (Token
     Exchange) Vulnerability: CVE-2025-GAUTH-001 (Broken Agent-Session Binding)
 
     Attack Scenario Prevented:
@@ -19834,7 +19834,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
     the PoA's scope and that all restrictions (e.g., max_amount, currency) are
     satisfied.
 
-    RFC Violation Fixed: GiFo-RFC-0115 Section 4 (Constraints) Vulnerability:
+    RFC Violation Fixed: AAP-RFC-0115 Section 4 (Constraints) Vulnerability:
     CVE-2025-GAUTH-003 (Unenforced Usage Constraints / Scope Bypass)
 
     Attack Scenario Prevented:
@@ -19962,7 +19962,7 @@ func (s *Service) ValidateAlgorithmWhitelist(algorithm string) error
     attacker modifies the JWT/JWS header to use weak or no-op algorithms (e.g.,
     "none", "HS256" when expecting "Ed25519").
 
-    RFC Violation Fixed: GiFo-RFC-0111 (Cryptographic Standards) Vulnerability:
+    RFC Violation Fixed: AAP-RFC-0111 (Cryptographic Standards) Vulnerability:
     CVE-2025-GAUTH-004 (Algorithm Confusion / "None" Attack)
 
     Attack Scenario Prevented:
@@ -20080,7 +20080,7 @@ type TokenResult struct {
 	Error     string                   `json:"error,omitempty"`
 }
     TokenResult represents the result of token verification or issuance
-    operations (RFC 0111:1).
+    operations (AAP-001:1).
 
 type TokenVerificationResult struct {
 	DelegationID    string            `json:"delegation_id"`
@@ -20118,7 +20118,7 @@ type TransactionLimit struct {
 	Currency        string  `json:"currency,omitempty"`
 	RequireApproval bool    `json:"require_approval,omitempty"`
 }
-    TransactionLimit represents per-transaction limits (RFC 0115:5).
+    TransactionLimit represents per-transaction limits (AAP-002:5).
 
 type ValidationContext struct {
 	Action          string            // action being performed (required)
@@ -21117,7 +21117,7 @@ package gnap // import "github.com/mauriciomferz/Gauth_go/pkg/gnap"
 
 Package gnap implements RFC 9635 Grant Negotiation and Authorization Protocol.
 This provides modern authorization with grant negotiation, flexible interaction
-modes, and token management, extended with GAuth's Power of Attorney support.
+modes, and token management, extended with AgentAuth's Power of Attorney support.
 
 CONSTANTS
 
@@ -21311,7 +21311,7 @@ type Grant struct {
 	// PoAID if linked to Power of Attorney
 	PoAID string `json:"poa_id,omitempty"`
 
-	// SubscriptionID if linked to GAuth subscription
+	// SubscriptionID if linked to AgentAuth subscription
 	SubscriptionID string `json:"subscription_id,omitempty"`
 }
     Grant represents a grant in progress or completed.
@@ -21350,7 +21350,7 @@ type GrantRequest struct {
 	// PoACredentialRef references a Power of Attorney credential
 	PoACredentialRef string `json:"poa_credential_ref,omitempty"`
 
-	// SubscriptionID links to existing GAuth subscription (migration path)
+	// SubscriptionID links to existing AgentAuth subscription (migration path)
 	SubscriptionID string `json:"subscription_id,omitempty"`
 }
     GrantRequest represents a client's request for authorization (RFC 9635 §2).
@@ -21523,7 +21523,7 @@ type IntrospectionResponse struct {
 	// Access rights granted associated with this token
 	Access []AccessRight `json:"access,omitempty"`
 
-	// PoA information (GAuth extension)
+	// PoA information (AgentAuth extension)
 	PoA *PowerOfAttorneyRef `json:"poa,omitempty"`
 
 	// Subject information associated with the token
@@ -21542,7 +21542,7 @@ type IssuedToken struct {
 	RevokedAt   time.Time     `json:"revoked_at,omitempty"`
 	Flags       []TokenFlag   `json:"flags,omitempty"`
 
-	// GAuth extensions
+	// AgentAuth extensions
 	PoAID string `json:"poa_id,omitempty"`
 }
     IssuedToken represents an access token in storage.
@@ -21616,7 +21616,7 @@ type PowerOfAttorneyRef struct {
 	Grantee string `json:"grantee"`
 	Scope   any    `json:"scope,omitempty"`
 }
-    PowerOfAttorneyRef references GAuth PoA in GNAP context.
+    PowerOfAttorneyRef references AgentAuth PoA in GNAP context.
 
 type ProofMethod string
     ProofMethod identifies key proofing mechanism.
@@ -22240,7 +22240,7 @@ package loadtest // import "github.com/mauriciomferz/Gauth_go/pkg/loadtest"
 Package loadtest provides authorization-specific load testing.
 
 Package loadtest provides comprehensive load and stress testing harness for
-GAuth high-volume scenarios.
+AgentAuth high-volume scenarios.
 
 TYPES
 
@@ -22444,7 +22444,7 @@ package mcp // import "github.com/mauriciomferz/Gauth_go/pkg/mcp"
 Package mcp - Audit Logger for MCP Operations Comprehensive logging of all MCP
 operations for compliance and security
 
-Package mcp - Authorization Bridge for GAuth + MCP Integration Maps GAuth
+Package mcp - Authorization Bridge for AgentAuth + MCP Integration Maps AgentAuth
 Extended Tokens to MCP resource/tool permissions via PDP
 
 # Package mcp provides connection pooling for MCP clients
@@ -22512,8 +22512,8 @@ func ComputeStatistics(entries []*AuditLogEntry) *AuditStatistics
 type AuthorizationBridge struct {
 	// Has unexported fields.
 }
-    AuthorizationBridge maps GAuth Extended Tokens to MCP permissions This is
-    the core integration point between GAuth authorization and MCP operations
+    AuthorizationBridge maps AgentAuth Extended Tokens to MCP permissions This is
+    the core integration point between AgentAuth authorization and MCP operations
 
 func NewAuthorizationBridge(pdpEngine pdp.Engine) *AuthorizationBridge
     NewAuthorizationBridge creates a new authorization bridge
@@ -23218,64 +23218,64 @@ var (
 		},
 	)
 
-	// GAuth+ Metrics
-	GAuthPlusValidationsTotal = promauto.NewCounterVec(
+	// AgentAuth+ Metrics
+	AgentAuthPlusValidationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_validations_total",
-			Help: "Total number of GAuth+ validations performed",
+			Help: "Total number of AgentAuth+ validations performed",
 		},
 		[]string{"feature", "result"},
 	)
 
-	GAuthPlusValidationDuration = promauto.NewHistogramVec(
+	AgentAuthPlusValidationDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "gauthplus_validation_duration_seconds",
-			Help:    "Duration of GAuth+ feature validations in seconds",
+			Help:    "Duration of AgentAuth+ feature validations in seconds",
 			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5},
 		},
 		[]string{"feature"},
 	)
 
-	GAuthPlusCacheHits = promauto.NewCounterVec(
+	AgentAuthPlusCacheHits = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_cache_hits_total",
-			Help: "Total number of GAuth+ cache hits",
+			Help: "Total number of AgentAuth+ cache hits",
 		},
 		[]string{"cache_type"},
 	)
 
-	GAuthPlusCacheMisses = promauto.NewCounterVec(
+	AgentAuthPlusCacheMisses = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_cache_misses_total",
-			Help: "Total number of GAuth+ cache misses",
+			Help: "Total number of AgentAuth+ cache misses",
 		},
 		[]string{"cache_type"},
 	)
 
-	GAuthPlusCacheSize = promauto.NewGaugeVec(
+	AgentAuthPlusCacheSize = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "gauthplus_cache_size",
-			Help: "Current number of entries in GAuth+ caches",
+			Help: "Current number of entries in AgentAuth+ caches",
 		},
 		[]string{"cache_type"},
 	)
 
-	GAuthPlusPolicyViolations = promauto.NewCounterVec(
+	AgentAuthPlusPolicyViolations = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_policy_violations_total",
-			Help: "Total number of GAuth+ policy violations detected",
+			Help: "Total number of AgentAuth+ policy violations detected",
 		},
 		[]string{"policy_type", "severity"},
 	)
 
-	GAuthPlusSuccessorActivations = promauto.NewCounter(
+	AgentAuthPlusSuccessorActivations = promauto.NewCounter(
 		prometheus.CounterOpts{
 			Name: "gauthplus_successor_activations_total",
 			Help: "Total number of successor AI activations",
 		},
 	)
 
-	GAuthPlusDelegationDepth = promauto.NewHistogram(
+	AgentAuthPlusDelegationDepth = promauto.NewHistogram(
 		prometheus.HistogramOpts{
 			Name:    "gauthplus_delegation_depth",
 			Help:    "Distribution of delegation chain depths",
@@ -23283,7 +23283,7 @@ var (
 		},
 	)
 
-	GAuthPlusDualControlApprovals = promauto.NewCounterVec(
+	AgentAuthPlusDualControlApprovals = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_dual_control_approvals_total",
 			Help: "Total number of dual control approvals",
@@ -23291,7 +23291,7 @@ var (
 		[]string{"action_type", "status"},
 	)
 
-	GAuthPlusCapabilityLevel = promauto.NewGaugeVec(
+	AgentAuthPlusCapabilityLevel = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "gauthplus_capability_level",
 			Help: "Current capability level of AI agents (L0-L5 mapped to 0-5)",
@@ -23299,7 +23299,7 @@ var (
 		[]string{"agent_id"},
 	)
 
-	GAuthPlusFiduciaryViolations = promauto.NewCounterVec(
+	AgentAuthPlusFiduciaryViolations = promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "gauthplus_fiduciary_violations_total",
 			Help: "Total number of fiduciary duty violations",
@@ -23365,26 +23365,26 @@ func RecordDatabaseQuery(operation, table, status string, duration float64)
 func RecordError(errorType, component string)
     RecordError records an error by type and component
 
-func RecordGAuthPlusCacheOperation(cacheType string, hit bool)
-    RecordGAuthPlusCacheOperation records a cache hit or miss
+func RecordAgentAuthPlusCacheOperation(cacheType string, hit bool)
+    RecordAgentAuthPlusCacheOperation records a cache hit or miss
 
-func RecordGAuthPlusDelegationDepth(depth int)
-    RecordGAuthPlusDelegationDepth records the depth of a delegation chain
+func RecordAgentAuthPlusDelegationDepth(depth int)
+    RecordAgentAuthPlusDelegationDepth records the depth of a delegation chain
 
-func RecordGAuthPlusDualControlApproval(actionType, status string)
-    RecordGAuthPlusDualControlApproval records a dual control approval
+func RecordAgentAuthPlusDualControlApproval(actionType, status string)
+    RecordAgentAuthPlusDualControlApproval records a dual control approval
 
-func RecordGAuthPlusFiduciaryViolation(dutyType, severity string)
-    RecordGAuthPlusFiduciaryViolation records a fiduciary duty violation
+func RecordAgentAuthPlusFiduciaryViolation(dutyType, severity string)
+    RecordAgentAuthPlusFiduciaryViolation records a fiduciary duty violation
 
-func RecordGAuthPlusPolicyViolation(policyType, severity string)
-    RecordGAuthPlusPolicyViolation records a policy violation
+func RecordAgentAuthPlusPolicyViolation(policyType, severity string)
+    RecordAgentAuthPlusPolicyViolation records a policy violation
 
-func RecordGAuthPlusSuccessorActivation()
-    RecordGAuthPlusSuccessorActivation records a successor activation
+func RecordAgentAuthPlusSuccessorActivation()
+    RecordAgentAuthPlusSuccessorActivation records a successor activation
 
-func RecordGAuthPlusValidation(feature, result string, duration float64)
-    RecordGAuthPlusValidation records a GAuth+ feature validation
+func RecordAgentAuthPlusValidation(feature, result string, duration float64)
+    RecordAgentAuthPlusValidation records a AgentAuth+ feature validation
 
 func RecordHTTPRequest(method, endpoint, status string, duration float64)
     RecordHTTPRequest records an HTTP request
@@ -23395,11 +23395,11 @@ func RecordMCPRequest(method, status string, duration float64)
 func RecordRedisOperation(operation, status string, duration float64)
     RecordRedisOperation records a Redis operation
 
-func UpdateGAuthPlusCacheSize(cacheType string, size int)
-    UpdateGAuthPlusCacheSize updates the current cache size
+func UpdateAgentAuthPlusCacheSize(cacheType string, size int)
+    UpdateAgentAuthPlusCacheSize updates the current cache size
 
-func UpdateGAuthPlusCapabilityLevel(agentID, level string)
-    UpdateGAuthPlusCapabilityLevel updates an agent's capability level (L0-L5 →
+func UpdateAgentAuthPlusCapabilityLevel(agentID, level string)
+    UpdateAgentAuthPlusCapabilityLevel updates an agent's capability level (L0-L5 →
     0-5)
 
 ```
@@ -23777,14 +23777,14 @@ Package oidc provides health check and readiness endpoints for monitoring.
 
 Package oidc - ID Token Service Implements OIDC ID Token issuance and validation
 
-Package oidc - Identity Bridge Converts OIDC ID tokens to GAuth identity proof
+Package oidc - Identity Bridge Converts OIDC ID tokens to AgentAuth identity proof
 structures
 
 Package oidc provides structured logging for OIDC operations.
 
 Package oidc provides Prometheus metrics instrumentation for OIDC operations.
 
-Package oidc implements OpenID Connect support for GAuth. This file provides
+Package oidc implements OpenID Connect support for AgentAuth. This file provides
 external provider configuration management.
 
 Package oidc - Pushed Authorization Requests (PAR) Implements RFC 9126 OAuth
@@ -23796,7 +23796,7 @@ implements the PowerVerificationPoint interface for OIDC ID token verification
 Integrates with RFC-0111 Subscription Flow Steps I, III, and VI
 
 Package oidc - Token Exchange Implements token exchange between external OIDC
-providers and GAuth
+providers and AgentAuth
 
 Package oidc - Token Introspection Implements RFC 7662 OAuth 2.0 Token
 Introspection
@@ -23809,7 +23809,7 @@ Package oidc - Token Revocation Implements RFC 7009 OAuth 2.0 Token Revocation
 Package oidc - Enhanced Token Validation Provides comprehensive token validation
 with security best practices
 
-Package oidc implements OpenID Connect integration for GAuth RFC-0111 Building
+Package oidc implements OpenID Connect integration for AgentAuth RFC-0111 Building
 Block: OpenID Connect as identity verification mechanism
 
 CONSTANTS
@@ -23863,7 +23863,7 @@ const (
     Standard OIDC error codes
 
 const (
-	ProofMethodOIDCIDToken  = "oidc_id_token" // GAuth-issued ID token
+	ProofMethodOIDCIDToken  = "oidc_id_token" // AgentAuth-issued ID token
 	ProofMethodOIDCExternal = "oidc_external" // External provider (Google, Okta, etc.)
 )
     ProofMethod constants for OIDC
@@ -23887,49 +23887,49 @@ var (
 var DefaultACRMappings = []TrustLevelMapping{
 	{
 		ACR:             "0",
-		GAuthTrustLevel: "low",
+		AgentAuthTrustLevel: "low",
 		MinMFARequired:  false,
 		Description:     "No specific authentication context",
 	},
 	{
 		ACR:             "1",
-		GAuthTrustLevel: "low",
+		AgentAuthTrustLevel: "low",
 		MinMFARequired:  false,
 		Description:     "Basic authentication (password only)",
 	},
 	{
 		ACR:             "2",
-		GAuthTrustLevel: "substantial",
+		AgentAuthTrustLevel: "substantial",
 		MinMFARequired:  true,
 		Description:     "Multi-factor authentication",
 	},
 	{
 		ACR:             "substantial",
-		GAuthTrustLevel: "substantial",
+		AgentAuthTrustLevel: "substantial",
 		MinMFARequired:  true,
 		Description:     "eIDAS Substantial - MFA required",
 	},
 	{
 		ACR:             "high",
-		GAuthTrustLevel: "high",
+		AgentAuthTrustLevel: "high",
 		MinMFARequired:  true,
 		Description:     "eIDAS High - Hardware token required",
 	},
 	{
 		ACR:             "loa-4",
-		GAuthTrustLevel: "high",
+		AgentAuthTrustLevel: "high",
 		MinMFARequired:  true,
 		Description:     "NIST LOA-4 - Highest assurance",
 	},
 	{
 		ACR:             "urn:mace:incommon:iap:silver",
-		GAuthTrustLevel: "substantial",
+		AgentAuthTrustLevel: "substantial",
 		MinMFARequired:  true,
 		Description:     "InCommon Silver - Research/Education institutions",
 	},
 	{
 		ACR:             "urn:mace:incommon:iap:bronze",
-		GAuthTrustLevel: "low",
+		AgentAuthTrustLevel: "low",
 		MinMFARequired:  false,
 		Description:     "InCommon Bronze - Basic authentication",
 	},
@@ -24618,13 +24618,13 @@ type ExchangeRequest struct {
     ExchangeRequest represents a token exchange request.
 
 type ExchangeResponse struct {
-	// GAuthToken is the new GAuth ID token
-	GAuthToken string
+	// AgentAuthToken is the new AgentAuth ID token
+	AgentAuthToken string
 
 	// ExpiresAt is when the token expires
 	ExpiresAt time.Time
 
-	// Claims are the normalized claims in GAuth format
+	// Claims are the normalized claims in AgentAuth format
 	Claims *IDTokenClaims
 
 	// TrustLevel is the determined trust level
@@ -24646,7 +24646,7 @@ type ExternalProviderConfig struct {
 	ClientSecret string            `json:"client_secret"`
 	RedirectURI  string            `json:"redirect_uri"`
 	Scopes       []string          `json:"scopes"`      // ["openid", "profile", "email"]
-	ACRMapping   map[string]string `json:"acr_mapping"` // Provider ACR → GAuth TrustLevel
+	ACRMapping   map[string]string `json:"acr_mapping"` // Provider ACR → AgentAuth TrustLevel
 }
     ExternalProviderConfig configures external OIDC provider (Google, Okta,
     Azure AD)
@@ -24791,7 +24791,7 @@ type IDTokenClaims struct {
 	UpdatedAt           int64  `json:"updated_at,omitempty"`
 
 	// Authentication Context Class Reference (ACR)
-	// Maps to GAuth TrustLevel: "substantial", "high", "loa-4", etc.
+	// Maps to AgentAuth TrustLevel: "substantial", "high", "loa-4", etc.
 	ACR string `json:"acr,omitempty"`
 
 	// Authentication Methods References (AMR)
@@ -24804,13 +24804,13 @@ type IDTokenClaims struct {
 	// Nonce - For replay attack prevention
 	Nonce string `json:"nonce,omitempty"`
 
-	// GAuth Extensions - Legal Entity Support
+	// AgentAuth Extensions - Legal Entity Support
 	EntityType      string `json:"entity_type,omitempty"`       // "natural_person", "legal_entity"
 	EntityID        string `json:"entity_id,omitempty"`         // Tax ID, registration number
 	LegalEntityName string `json:"legal_entity_name,omitempty"` // Company name
 	Jurisdiction    string `json:"jurisdiction,omitempty"`      // "DE", "US", "EU", etc.
 
-	// GAuth Extensions - Trust Service Provider
+	// AgentAuth Extensions - Trust Service Provider
 	TSPName string `json:"tsp_name,omitempty"` // Trust Service Provider name
 	TSPID   string `json:"tsp_id,omitempty"`   // TSP identifier
 }
@@ -24834,8 +24834,8 @@ func (s *IDTokenService) CreateIDTokenFromIdentity(
 	trustLevel string,
 	additionalClaims map[string]interface{},
 ) (string, error)
-    CreateIDTokenFromIdentity creates ID token from GAuth identity proof This
-    bridges GAuth identity structures to OIDC ID tokens
+    CreateIDTokenFromIdentity creates ID token from AgentAuth identity proof This
+    bridges AgentAuth identity structures to OIDC ID tokens
 
 func (s *IDTokenService) GetDefaultExpiry() time.Duration
     GetDefaultExpiry returns the default token expiry duration
@@ -24870,7 +24870,7 @@ type IDTokenServiceConfig struct {
 type IdentityBridge struct {
 	// Has unexported fields.
 }
-    IdentityBridge converts between OIDC and GAuth identity structures This
+    IdentityBridge converts between OIDC and AgentAuth identity structures This
     enables using OIDC ID tokens as identity proofs in RFC-0111 flow
 
 func NewIdentityBridge(idTokenService *IDTokenService) *IdentityBridge
@@ -24881,7 +24881,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 	idToken string,
 	expectedAudience string,
 ) (*gauth.IdentityProofResult, error)
-    ConvertIDTokenToIdentityProof converts OIDC ID token to GAuth
+    ConvertIDTokenToIdentityProof converts OIDC ID token to AgentAuth
     IdentityProofResult This is the core bridge function enabling OIDC in
     RFC-0111 Steps I, III, VI
 
@@ -24891,8 +24891,8 @@ func (b *IdentityBridge) ConvertIdentityProofToIDToken(
 	audience []string,
 	identityType string,
 ) (string, error)
-    ConvertIdentityProofToIDToken converts GAuth identity proof to OIDC ID token
-    This enables GAuth to issue OIDC-compliant ID tokens
+    ConvertIdentityProofToIDToken converts AgentAuth identity proof to OIDC ID token
+    This enables AgentAuth to issue OIDC-compliant ID tokens
 
 type InMemoryDiscoveryCache struct {
 	// Has unexported fields.
@@ -25543,7 +25543,7 @@ type OIDCConfiguration struct {
 	TokenEndpointAuthMethodsSupported []string `json:"token_endpoint_auth_methods_supported"`
 	ClaimsSupported                   []string `json:"claims_supported"`
 
-	// GAuth Extensions - ACR/LOA Support
+	// AgentAuth Extensions - ACR/LOA Support
 	ACRValuesSupported []string `json:"acr_values_supported"`
 
 	// Metadata
@@ -25758,7 +25758,7 @@ type ProviderConfig struct {
 	// Scopes are the OIDC scopes to request (typically: openid, profile, email)
 	Scopes []string `json:"scopes" yaml:"scopes"`
 
-	// ClaimMappings maps provider-specific claims to GAuth claims
+	// ClaimMappings maps provider-specific claims to AgentAuth claims
 	// Example: {"sub": "user_id", "email": "email", "name": "full_name"}
 	ClaimMappings map[string]string `json:"claim_mappings" yaml:"claim_mappings"`
 
@@ -25769,7 +25769,7 @@ type ProviderConfig struct {
 	// Valid values: "low", "substantial", "high"
 	DefaultTrustLevel string `json:"default_trust_level" yaml:"default_trust_level"`
 
-	// TrustMapping maps provider-specific authentication context to GAuth trust levels
+	// TrustMapping maps provider-specific authentication context to AgentAuth trust levels
 	// Example: {"mfa": "high", "password": "substantial"}
 	TrustMapping map[string]string `json:"trust_mapping,omitempty" yaml:"trust_mapping,omitempty"`
 
@@ -25780,7 +25780,7 @@ type ProviderConfig struct {
 	Enabled bool `json:"enabled" yaml:"enabled"`
 }
     ProviderConfig represents an external OIDC provider configuration. This
-    enables GAuth to act as an OIDC relying party for external providers like
+    enables AgentAuth to act as an OIDC relying party for external providers like
     Google, Okta, or Azure AD.
 
 func (p *ProviderConfig) GetDiscoveryURL() string
@@ -26390,7 +26390,7 @@ type TokenExchangeService struct {
 	// Has unexported fields.
 }
     TokenExchangeService handles token exchange between external providers and
-    GAuth.
+    AgentAuth.
 
 func NewTokenExchangeService(config TokenExchangeConfig) (*TokenExchangeService, error)
     NewTokenExchangeService creates a new token exchange service.
@@ -26400,7 +26400,7 @@ func (s *TokenExchangeService) BatchExchangeTokens(ctx context.Context, req Batc
     operation.
 
 func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRequest) (*ExchangeResponse, error)
-    ExchangeToken exchanges an external OIDC token for a GAuth token.
+    ExchangeToken exchanges an external OIDC token for a AgentAuth token.
 
 func (s *TokenExchangeService) GetProviderInfo(providerID string) (*ProviderConfig, error)
     GetProviderInfo returns configuration information for a specific provider.
@@ -26580,7 +26580,7 @@ func DefaultRotationPolicy() *TokenRotationPolicy
 type TrustLevelMapper struct {
 	// Has unexported fields.
 }
-    TrustLevelMapper maps between OIDC ACR and GAuth TrustLevel
+    TrustLevelMapper maps between OIDC ACR and AgentAuth TrustLevel
 
 func NewTrustLevelMapper() *TrustLevelMapper
     NewTrustLevelMapper creates a new trust level mapper with default mappings
@@ -26589,21 +26589,21 @@ func (m *TrustLevelMapper) AddCustomMapping(acr string, trustLevel string)
     AddCustomMapping adds a custom ACR → TrustLevel mapping
 
 func (m *TrustLevelMapper) MapACRToTrustLevel(acr string) string
-    MapACRToTrustLevel maps OIDC ACR value to GAuth trust level
+    MapACRToTrustLevel maps OIDC ACR value to AgentAuth trust level
 
 func (m *TrustLevelMapper) MapTrustLevelToACR(trustLevel string) string
-    MapTrustLevelToACR maps GAuth trust level to OIDC ACR value
+    MapTrustLevelToACR maps AgentAuth trust level to OIDC ACR value
 
 func (m *TrustLevelMapper) ValidateMinimumTrustLevel(acr string, required string) bool
     ValidateMinimumTrustLevel validates if ACR meets minimum trust requirement
 
 type TrustLevelMapping struct {
 	ACR             string `json:"acr"`               // OIDC ACR value
-	GAuthTrustLevel string `json:"gauth_trust_level"` // "low", "substantial", "high"
+	AgentAuthTrustLevel string `json:"gauth_trust_level"` // "low", "substantial", "high"
 	MinMFARequired  bool   `json:"min_mfa_required"`
 	Description     string `json:"description"`
 }
-    TrustLevelMapping maps OIDC ACR values to GAuth trust levels
+    TrustLevelMapping maps OIDC ACR values to AgentAuth trust levels
 
 type ValidationError struct {
 	Code        string
@@ -26740,7 +26740,7 @@ var AzureADClaimMappings = map[string]string{
 	"groups":             "groups",
 	"tid":                "tenant_id",
 }
-    AzureADClaimMappings defines how Azure AD OIDC claims map to GAuth claims.
+    AzureADClaimMappings defines how Azure AD OIDC claims map to AgentAuth claims.
     Azure AD provides enterprise-grade claims with role and group information.
 
 var GoogleClaimMappings = map[string]string{
@@ -26754,7 +26754,7 @@ var GoogleClaimMappings = map[string]string{
 	"locale":         "locale",
 	"hd":             "hosted_domain",
 }
-    GoogleClaimMappings defines how Google OIDC claims map to GAuth claims.
+    GoogleClaimMappings defines how Google OIDC claims map to AgentAuth claims.
     Google follows standard OIDC claims closely.
 
 var OktaClaimMappings = map[string]string{
@@ -26769,7 +26769,7 @@ var OktaClaimMappings = map[string]string{
 	"zoneinfo":           "timezone",
 	"groups":             "roles",
 }
-    OktaClaimMappings defines how Okta OIDC claims map to GAuth claims. Okta
+    OktaClaimMappings defines how Okta OIDC claims map to AgentAuth claims. Okta
     provides enterprise-grade claims with group information.
 
 
@@ -26815,7 +26815,7 @@ func (p *AzureADProvider) IsMultiTenant() bool
     IsMultiTenant checks if this provider is configured for multi-tenant use.
 
 func (p *AzureADProvider) MapClaims(claims map[string]interface{}) map[string]interface{}
-    MapClaims maps Azure AD OIDC claims to GAuth format.
+    MapClaims maps Azure AD OIDC claims to AgentAuth format.
 
 func (p *AzureADProvider) SupportsGroups() bool
     SupportsGroups checks if group claims are supported.
@@ -26872,7 +26872,7 @@ func (p *GoogleProvider) IsEnabled() bool
     IsEnabled checks if the provider is enabled.
 
 func (p *GoogleProvider) MapClaims(claims map[string]interface{}) map[string]interface{}
-    MapClaims maps Google OIDC claims to GAuth format.
+    MapClaims maps Google OIDC claims to AgentAuth format.
 
 func (p *GoogleProvider) SupportsHostedDomain() bool
     SupportsHostedDomain checks if a hosted domain is configured.
@@ -26923,7 +26923,7 @@ func (p *OktaProvider) IsEnabled() bool
     IsEnabled checks if the provider is enabled.
 
 func (p *OktaProvider) MapClaims(claims map[string]interface{}) map[string]interface{}
-    MapClaims maps Okta OIDC claims to GAuth format.
+    MapClaims maps Okta OIDC claims to AgentAuth format.
 
 func (p *OktaProvider) RequiresMFA() bool
     RequiresMFA checks if MFA is required for this provider.
@@ -26950,7 +26950,7 @@ type OktaProviderConfig struct {
 ```go
 package pdp // import "github.com/mauriciomferz/Gauth_go/pkg/pdp"
 
-Package pdp provides the Policy Decision Point for GAuth authorization.
+Package pdp provides the Policy Decision Point for AgentAuth authorization.
 
 The PDP is the central authorization decision engine that evaluates policies
 against authorization requests. It supports ABAC (Attribute-Based Access
@@ -28155,9 +28155,9 @@ Validation includes:
   - Revocation status
   - Constraint evaluation
 
-# RFC 0115 Compliance
+# AAP-002 Compliance
 
-Validate RFC 0115 compliance:
+Validate AAP-002 compliance:
 
     // Check compliance
     compliant, issues := poa.ValidateRFC0115Compliance(token)
@@ -28252,7 +28252,7 @@ This package has 49.1% test coverage (practical limit reached), including:
   - POA issuance and validation
   - Multi-signature validation
   - Delegation chain processing
-  - RFC 0115 compliance validation
+  - AAP-002 compliance validation
   - CBOR encoding/decoding
   - Error path coverage
 
@@ -30727,7 +30727,7 @@ policies.
 
 This package implements policy persistence, policy adapters for different
 authorization systems, and policy registry management. It serves as the policy
-administration point (PAP) in the GAuth architecture.
+administration point (PAP) in the AgentAuth architecture.
 
 # Policy Storage
 
@@ -32042,15 +32042,15 @@ type ExternalReplayBackend interface {
     attestation nonce replay backend. Implementations MUST be concurrency-safe.
     Size may be approximate and can return 0 on error.
 
-type GAuthReplayStore interface {
+type AgentAuthReplayStore interface {
 	CheckAndStore(jti string) error
 }
-    GAuthReplayStore is the minimal interface needed by pkg/gauth for replay
+    AgentAuthReplayStore is the minimal interface needed by pkg/gauth for replay
     protection. This avoids importing the full gauth package here (circular
     dependency prevention).
 
-func NewGAuthReplayStoreFromEnv(metrics interface{}) (GAuthReplayStore, error)
-    NewGAuthReplayStoreFromEnv creates a DurableReplayStore configured
+func NewAgentAuthReplayStoreFromEnv(metrics interface{}) (AgentAuthReplayStore, error)
+    NewAgentAuthReplayStoreFromEnv creates a DurableReplayStore configured
     from environment variables and wraps it in an adapter that implements
     gauth.ReplayStore interface.
 
@@ -32066,7 +32066,7 @@ func NewGAuthReplayStoreFromEnv(metrics interface{}) (GAuthReplayStore, error)
         )
 
         func init() {
-            gauth.RegisterDurableReplayStoreFactory(replay.NewGAuthReplayStoreFromEnv)
+            gauth.RegisterDurableReplayStoreFactory(replay.NewAgentAuthReplayStoreFromEnv)
         }
 
     Supported environment variables:
@@ -32077,8 +32077,8 @@ func NewGAuthReplayStoreFromEnv(metrics interface{}) (GAuthReplayStore, error)
         ttl|lru|size|ttl+size)
       - GAUTH_REPLAY_EVICTION_MAX_SIZE (default: 10000)
 
-type GAuthReplayStoreFactory func(metrics interface{}) (GAuthReplayStore, error)
-    GAuthReplayStoreFactory is a function signature that creates a
+type AgentAuthReplayStoreFactory func(metrics interface{}) (AgentAuthReplayStore, error)
+    AgentAuthReplayStoreFactory is a function signature that creates a
     replay store from environment. This matches the signature expected by
     gauth.RegisterDurableReplayStoreFactory.
 
@@ -32644,7 +32644,7 @@ type FlashbotsConfig struct {
 	// SigningKey is the private key for signing transactions
 	SigningKey *ecdsa.PrivateKey
 
-	// ContractAddress is the GAuth registry contract address
+	// ContractAddress is the AgentAuth registry contract address
 	ContractAddress string
 
 	// ChainID is the blockchain network ID (1=mainnet, 5=goerli, etc.)
@@ -33128,12 +33128,12 @@ type Exclusion struct {
 }
     Exclusion represents an exclusion with its properties
 
-type GAuthContext struct {
+type AgentAuthContext struct {
 	PPArchitectureRole  string `json:"pp_architecture_role"`
 	ExclusionsCompliant bool   `json:"exclusions_compliant"`
 	AIGovernanceLevel   string `json:"ai_governance_level"`
 }
-    GAuthContext represents GAuth integration context
+    AgentAuthContext represents AgentAuth integration context
 
 type GeographicRegion struct {
 	Name       string `json:"name"`
@@ -33204,22 +33204,22 @@ type RFC0111Client struct {
 	Config         *CombinedRFCConfig     `json:"config,omitempty"`
 	Endpoint       string                 `json:"endpoint,omitempty"`
 	Metadata       map[string]interface{} `json:"metadata,omitempty"`
-} // NewRFC0111Client creates a new RFC 0111 client
-    RFC0111Client represents a client for RFC 0111 operations
+} // NewRFC0111Client creates a new AAP-001 client
+    RFC0111Client represents a client for AAP-001 operations
 
 func NewRFC0111Client(config *CombinedRFCConfig, endpoint string) *RFC0111Client
 
 func (c *RFC0111Client) Initialize() error
-    Initialize initializes the RFC 0111 client
+    Initialize initializes the AAP-001 client
 
 func (c *RFC0111Client) ProcessRequest(request interface{}) error
-    ProcessRequest processes a request using RFC 0111 protocols
+    ProcessRequest processes a request using AAP-001 protocols
 
 func (c *RFC0111Client) ValidateToken(token string) error
-    ValidateToken validates a token using RFC 0111 rules
+    ValidateToken validates a token using AAP-001 rules
 
 type RFC0111ClientType string
-    RFC0111ClientType represents different types of RFC 0111 clients
+    RFC0111ClientType represents different types of AAP-001 clients
 
 const (
 	RFC0111ClientTypeDigitalAgent  RFC0111ClientType = "digital_agent"
@@ -33231,7 +33231,7 @@ type RFC0111Config struct {
 	Exclusions     RFC0111Exclusions     `json:"exclusions"`
 	PPArchitecture RFC0111PPArchitecture `json:"pp_architecture"`
 }
-    RFC0111Config represents RFC 0111 specific configuration
+    RFC0111Config represents AAP-001 specific configuration
 
 type RFC0111Exclusions struct {
 	Web3Blockchain     Exclusion `json:"web3_blockchain"`
@@ -33240,7 +33240,7 @@ type RFC0111Exclusions struct {
 	DecentralizedAuth  Exclusion `json:"decentralized_auth"`
 	EnforcementLevel   string    `json:"enforcement_level"`
 }
-    RFC0111Exclusions represents exclusions for RFC 0111
+    RFC0111Exclusions represents exclusions for AAP-001
 
 type RFC0111PPArchitecture struct {
 	PEP PolicyEnforcementPoint    `json:"pep"` // Policy Enforcement Point
@@ -33249,7 +33249,7 @@ type RFC0111PPArchitecture struct {
 	PAP PolicyAdministrationPoint `json:"pap"` // Policy Administration Point
 	PVP PolicyVerificationPoint   `json:"pvp"` // Policy Verification Point
 }
-    RFC0111PPArchitecture represents the PP architecture for RFC 0111
+    RFC0111PPArchitecture represents the PP architecture for AAP-001
 
 type RFC0111Summary struct {
 	Version     string
@@ -33265,7 +33265,7 @@ type RFC0115Config struct {
 	Enabled       bool   `json:"enabled"`
 	PoADefinition string `json:"poa_definition"`
 }
-    RFC0115Config represents RFC 0115 specific configuration
+    RFC0115Config represents AAP-002 specific configuration
 
 type RFC0115PoADefinition struct {
 	Definition    string                 `json:"definition"`
@@ -33273,9 +33273,9 @@ type RFC0115PoADefinition struct {
 	Verification  map[string]interface{} `json:"verification"`
 	Parties       PoAParties             `json:"parties"`
 	Authorization Authorization          `json:"authorization"`
-	GAuthContext  GAuthContext           `json:"gauth_context"`
+	AgentAuthContext  AgentAuthContext           `json:"gauth_context"`
 }
-    RFC0115PoADefinition represents the PoA definition for RFC 0115
+    RFC0115PoADefinition represents the PoA definition for AAP-002
 
 func CreateDefaultPoADefinition(definition string) RFC0115PoADefinition
     CreateDefaultPoADefinition creates a default PoA definition with sample data
@@ -33351,11 +33351,11 @@ package rfcdemo // import "github.com/mauriciomferz/Gauth_go/pkg/rfcdemo"
 FUNCTIONS
 
 func DemoRFC0111PowerOfAttorney() error
-    DemoRFC0111PowerOfAttorney demonstrates an RFC 0111 style issuance +
+    DemoRFC0111PowerOfAttorney demonstrates an AAP-001 style issuance +
     revocation cycle.
 
 func TestRFC0115Features() error
-    TestRFC0115Features exercises basic token store operations for RFC 0115
+    TestRFC0115Features exercises basic token store operations for AAP-002
     style features.
 
 func ValidateRFC0111Flow(svc *gauth.Service, issuedToken string) error
@@ -34391,7 +34391,7 @@ type Token struct {
 	TokenType        TokenType
 	Status           string // lifecycle: active, suspended, terminated, pending
 }
-    Token represents a token in the GAuth system Token layout optimized:
+    Token represents a token in the AgentAuth system Token layout optimized:
     pointer/slice fields grouped, times grouped, smaller scalars last.
 
 type TokenSignatureValidator interface {
@@ -35201,17 +35201,17 @@ Package web: common status and error string constants for server responses.
 
 # Package web - RFC-0111 Disclosure API Routes
 
-Package web provides HTTP server components for the GAuth demo including JWKS
+Package web provides HTTP server components for the AgentAuth demo including JWKS
 publication.
 
-learning_lab_endpoints.go - Additional API endpoints for GAuth Learning Lab
+learning_lab_endpoints.go - Additional API endpoints for AgentAuth Learning Lab
 functionality
 
 ppp_endpoints.go - PAP, PDP, PEP API endpoints for P*P architecture
 
 Package web implements the HTTP API server, capability negotiation/enforcement,
 delegation lifecycle endpoints, observability instrumentation, and ancillary
-demo/admin surfaces for the GAuth prototype. It wires together persistence,
+demo/admin surfaces for the AgentAuth prototype. It wires together persistence,
 metrics, auditing, policy, and cryptographic subsystems.
 
 CONSTANTS
@@ -35452,10 +35452,10 @@ func (s *BetaServer) GetReceiptStore() notaryHandlers.ReceiptStoreProvider
 func (s *BetaServer) GetRotationLedgerHeadHash() string
     ===== Notary Handler Deps Interface Implementations =====
 
-func (s *BetaServer) InitializeGAuthPlusEndpoints()
-    InitializeGAuthPlusEndpoints registers GAuth+ management endpoints if
+func (s *BetaServer) InitializeAgentAuthPlusEndpoints()
+    InitializeAgentAuthPlusEndpoints registers AgentAuth+ management endpoints if
     services are available. This should be called after the server router is
-    initialized and GAuth+ services are created.
+    initialized and AgentAuth+ services are created.
 
 func (s *BetaServer) LastNotarizationReceipt() (hash, timestamp, provider string, success bool)
 
@@ -35492,20 +35492,20 @@ func (s *BetaServer) RegisterDisclosureRoutes(disclosureService *gauth.Disclosur
     RegisterDisclosureRoutes registers RFC-0111 disclosure/transparency
     endpoints
 
-func (s *BetaServer) RegisterGAuthPlusEndpoints(
+func (s *BetaServer) RegisterAgentAuthPlusEndpoints(
 	successorService gauthplus.SuccessorManagementService,
 	delegationService gauthplus.DelegationService,
 	dualControlService gauthplus.DualControlService,
 	capabilityService gauthplus.CapabilityAssessmentService,
 	fiduciaryService gauthplus.FiduciaryDutyService,
 )
-    RegisterGAuthPlusEndpoints registers all GAuth+ management endpoints for
+    RegisterAgentAuthPlusEndpoints registers all AgentAuth+ management endpoints for
     the five advanced features: - Successor Management (AI takeover scenarios)
     - Delegation Service (AI-to-AI delegations) - Dual Control (multi-approver
     workflows) - Capability Assessment (AI capability evaluation) - Fiduciary
     Duty (violation tracking)
 
-    These endpoints enable operational management of GAuth+ features integrated
+    These endpoints enable operational management of AgentAuth+ features integrated
     into the RFC-0111 authorization chain.
 
 func (s *BetaServer) RegisterRFC0111Endpoints(
@@ -35741,7 +35741,7 @@ type ProtocolFlowStep struct {
 	Error       string                 `json:"error,omitempty"`
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
-    ProtocolFlowStep represents a step in the GAuth protocol flow
+    ProtocolFlowStep represents a step in the AgentAuth protocol flow
 
 type ProtocolFlowSubstep struct {
 	ID        string     `json:"id"`
@@ -36475,93 +36475,93 @@ type FlagRequest struct {
 }
     FlagRequest represents a feature flag request
 
-type GAuthPlusHandler struct {
+type AgentAuthPlusHandler struct {
 	// Has unexported fields.
 }
-    GAuthPlusHandler handles GAuth+ enhanced authorization features
+    AgentAuthPlusHandler handles AgentAuth+ enhanced authorization features
 
-func NewGAuthPlusHandler(pool *pgxpool.Pool) *GAuthPlusHandler
-    NewGAuthPlusHandler creates a new GAuth+ handler
+func NewAgentAuthPlusHandler(pool *pgxpool.Pool) *AgentAuthPlusHandler
+    NewAgentAuthPlusHandler creates a new AgentAuth+ handler
 
-func (h *GAuthPlusHandler) ActivateSuccessor(c *gin.Context)
+func (h *AgentAuthPlusHandler) ActivateSuccessor(c *gin.Context)
     ActivateSuccessor activates successor AI when primary agent fails POST
     /api/admin/gauthplus/successor/:id/activate
 
-func (h *GAuthPlusHandler) ApproveAction(c *gin.Context)
+func (h *AgentAuthPlusHandler) ApproveAction(c *gin.Context)
     ApproveAction records approver's approval POST
     /api/admin/approvals/:id/approve
 
-func (h *GAuthPlusHandler) CheckApprovalStatus(c *gin.Context)
+func (h *AgentAuthPlusHandler) CheckApprovalStatus(c *gin.Context)
     CheckApprovalStatus checks approval status GET
     /api/admin/approvals/:id/status
 
-func (h *GAuthPlusHandler) CheckCapabilityMatch(c *gin.Context)
+func (h *AgentAuthPlusHandler) CheckCapabilityMatch(c *gin.Context)
     CheckCapabilityMatch checks if agent meets requirements POST
     /api/admin/assessments/check-match
 
-func (h *GAuthPlusHandler) CreateAssessment(c *gin.Context)
+func (h *AgentAuthPlusHandler) CreateAssessment(c *gin.Context)
     CreateAssessment creates new capability assessment POST
     /api/admin/assessments
 
-func (h *GAuthPlusHandler) CreateDelegation(c *gin.Context)
+func (h *AgentAuthPlusHandler) CreateDelegation(c *gin.Context)
     CreateDelegation creates AI-to-AI delegation POST /api/admin/delegations
 
-func (h *GAuthPlusHandler) DeactivateSuccessor(c *gin.Context)
+func (h *AgentAuthPlusHandler) DeactivateSuccessor(c *gin.Context)
     DeactivateSuccessor returns control to primary AI POST
     /api/admin/gauthplus/successor/:id/deactivate
 
-func (h *GAuthPlusHandler) GetActiveSuccessor(c *gin.Context)
+func (h *AgentAuthPlusHandler) GetActiveSuccessor(c *gin.Context)
     GetActiveSuccessor returns currently active successor GET
     /api/admin/gauthplus/successor/:id/active
 
-func (h *GAuthPlusHandler) GetDelegationChain(c *gin.Context)
+func (h *AgentAuthPlusHandler) GetDelegationChain(c *gin.Context)
     GetDelegationChain returns full delegation chain GET
     /api/admin/delegations/chain/:agentId
 
-func (h *GAuthPlusHandler) GetExpiringAssessments(c *gin.Context)
+func (h *AgentAuthPlusHandler) GetExpiringAssessments(c *gin.Context)
     GetExpiringAssessments returns assessments expiring soon GET
     /api/admin/assessments/expiring?days=30
 
-func (h *GAuthPlusHandler) GetLatestAssessment(c *gin.Context)
+func (h *AgentAuthPlusHandler) GetLatestAssessment(c *gin.Context)
     GetLatestAssessment returns most recent assessment GET
     /api/admin/assessments/agent/:agentId/latest
 
-func (h *GAuthPlusHandler) GetPendingApprovals(c *gin.Context)
+func (h *AgentAuthPlusHandler) GetPendingApprovals(c *gin.Context)
     GetPendingApprovals returns approvals awaiting decision GET
     /api/admin/approvals/pending
 
-func (h *GAuthPlusHandler) GetViolations(c *gin.Context)
+func (h *AgentAuthPlusHandler) GetViolations(c *gin.Context)
     GetViolations returns violations for PoA or agent GET /api/admin/violations
 
-func (h *GAuthPlusHandler) GetViolationsBySeverity(c *gin.Context)
+func (h *AgentAuthPlusHandler) GetViolationsBySeverity(c *gin.Context)
     GetViolationsBySeverity returns violations above severity threshold GET
     /api/admin/violations/severity/:level
 
-func (h *GAuthPlusHandler) ListSuccessorHistory(c *gin.Context)
+func (h *AgentAuthPlusHandler) ListSuccessorHistory(c *gin.Context)
     ListSuccessorHistory returns activation history GET
     /api/admin/gauthplus/successor/:id/history
 
-func (h *GAuthPlusHandler) RecordViolation(c *gin.Context)
+func (h *AgentAuthPlusHandler) RecordViolation(c *gin.Context)
     RecordViolation records fiduciary duty breach POST /api/admin/violations
 
-func (h *GAuthPlusHandler) RegisterRoutes(router *gin.RouterGroup)
-    RegisterRoutes registers all GAuth+ routes
+func (h *AgentAuthPlusHandler) RegisterRoutes(router *gin.RouterGroup)
+    RegisterRoutes registers all AgentAuth+ routes
 
-func (h *GAuthPlusHandler) RejectAction(c *gin.Context)
+func (h *AgentAuthPlusHandler) RejectAction(c *gin.Context)
     RejectAction records approver's rejection POST
     /api/admin/approvals/:id/reject
 
-func (h *GAuthPlusHandler) RequestApproval(c *gin.Context)
+func (h *AgentAuthPlusHandler) RequestApproval(c *gin.Context)
     RequestApproval initiates approval workflow POST /api/admin/approvals
 
-func (h *GAuthPlusHandler) ResolveViolation(c *gin.Context)
+func (h *AgentAuthPlusHandler) ResolveViolation(c *gin.Context)
     ResolveViolation marks violation as resolved PUT
     /api/admin/violations/:id/resolve
 
-func (h *GAuthPlusHandler) RevokeDelegation(c *gin.Context)
+func (h *AgentAuthPlusHandler) RevokeDelegation(c *gin.Context)
     RevokeDelegation revokes active delegation DELETE /api/admin/delegations/:id
 
-func (h *GAuthPlusHandler) ValidateDelegation(c *gin.Context)
+func (h *AgentAuthPlusHandler) ValidateDelegation(c *gin.Context)
     ValidateDelegation checks if delegation is allowed POST
     /api/admin/delegations/validate
 
@@ -40429,7 +40429,7 @@ type Handler struct {
 	Lifecycle    LifecycleRecorder
 	KeyProvider  crypto.KeyProvider
 	ETagUpdater  JWKSETagUpdater
-	GAuthService gauth.GAuth
+	AgentAuthService gauth.AgentAuth
 
 	// Configs
 	UseJWTLib    bool
@@ -40458,8 +40458,8 @@ func (h *Handler) RegisterRoutes(r *gin.Engine)
 
 func (h *Handler) Revoke(c *gin.Context)
 
-func (h *Handler) SetGAuthService(service gauth.GAuth)
-    SetGAuthService sets the GAuth service for RFC compliant operations
+func (h *Handler) SetAgentAuthService(service gauth.AgentAuth)
+    SetAgentAuthService sets the AgentAuth service for RFC compliant operations
 
 func (h *Handler) ShouldTrace() bool
     Helper for random sampling

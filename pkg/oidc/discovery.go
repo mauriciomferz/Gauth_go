@@ -73,7 +73,7 @@ func (s *DiscoveryService) buildDefaultConfiguration() *OIDCConfiguration {
 			"phone",          // Phone number, phone_number_verified
 			"address",        // Physical address
 			"offline_access", // Refresh tokens
-			// GAuth-specific scopes
+			// AgentAuth-specific scopes
 			"gauth:owner",        // Owner authorization scope
 			"gauth:client",       // Client authorization scope
 			"gauth:resource",     // Resource access scope
@@ -94,13 +94,13 @@ func (s *DiscoveryService) buildDefaultConfiguration() *OIDCConfiguration {
 			"updated_at",
 			// Authentication Context
 			"acr", "amr",
-			// GAuth Extensions
+			// AgentAuth Extensions
 			"entity_type", "entity_id", "legal_entity_name", "jurisdiction",
 			"tsp_name", "tsp_id",
 		},
 
 		// ACR (Authentication Context Class Reference) Values
-		// Maps to GAuth TrustLevel
+		// Maps to AgentAuth TrustLevel
 		ACRValuesSupported: []string{
 			"0",                            // No specific authentication context
 			"1",                            // Basic authentication

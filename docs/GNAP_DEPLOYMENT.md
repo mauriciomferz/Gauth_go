@@ -12,7 +12,7 @@ Deploy GNAP (RFC 9635) in production with this guide.
 
 ## Prerequisites
 
-- GAuth backend running
+- AgentAuth backend running
 - PostgreSQL (for persistent stores - optional, in-memory by default)
 - HTTPS/TLS termination (required for security)
 

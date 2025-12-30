@@ -54,7 +54,7 @@ data:
   JWT_EXPIRY: "1h"
   REFRESH_TOKEN_EXPIRY: "7d"
   
-  # RFC 0111 envelope configuration
+  # AAP-001 envelope configuration
   GAUTH_RFC0111_ENFORCE_V2: "1"
   GAUTH_RFC0111_ADOPTION_THRESHOLD: "0.95"
   
@@ -168,17 +168,17 @@ data:
       - name: 'team-alerts'
         slack_configs:
           - channel: '#gauth-staging-alerts'
-            title: 'GAuth Staging Alert'
+            title: 'AgentAuth Staging Alert'
             text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}'
       
       - name: 'critical-alerts'
         slack_configs:
           - channel: '#gauth-critical'
-            title: '🚨 CRITICAL: GAuth Staging'
+            title: '🚨 CRITICAL: AgentAuth Staging'
             text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}'
       
       - name: 'high-alerts'
         slack_configs:
           - channel: '#gauth-staging-alerts'
-            title: '⚠️ HIGH: GAuth Staging'
+            title: '⚠️ HIGH: AgentAuth Staging'
             text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}'

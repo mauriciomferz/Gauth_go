@@ -1,8 +1,8 @@
-# GAuth Quick Start Guide
+# AgentAuth Quick Start Guide
 
-**Get started with GAuth in under 15 minutes!**
+**Get started with AgentAuth in under 15 minutes!**
 
-This guide will walk you through setting up GAuth, making your first API call, and implementing common workflows.
+This guide will walk you through setting up AgentAuth, making your first API call, and implementing common workflows.
 
 ---
 
@@ -32,7 +32,7 @@ This guide will walk you through setting up GAuth, making your first API call, a
 ### Option 1: Run with Docker (Recommended)
 
 ```bash
-# Pull and run GAuth
+# Pull and run AgentAuth
 docker run -p 8080:8080 ghcr.io/mauriciomferz/gauth:latest
 
 # Verify it's running
@@ -87,7 +87,7 @@ curl http://localhost:8080/api/v1/beta/health
 }
 ```
 
-✅ **Success!** Your GAuth server is running.
+✅ **Success!** Your AgentAuth server is running.
 
 ---
 
@@ -95,7 +95,7 @@ curl http://localhost:8080/api/v1/beta/health
 
 ### Step 1: Create a Subscription (Get Access Token)
 
-GAuth uses the RFC-0111 subscription flow to issue access tokens. Let's complete the flow automatically:
+AgentAuth uses the RFC-0111 subscription flow to issue access tokens. Let's complete the flow automatically:
 
 ```bash
 # Create subscription (Step I)
@@ -254,9 +254,9 @@ yarn add @gauth/client
 
 **Usage:**
 ```typescript
-import { GAuthClient } from '@gauth/client';
+import { AgentAuthClient } from '@gauth/client';
 
-const client = new GAuthClient({
+const client = new AgentAuthClient({
   baseURL: 'http://localhost:8080'
 });
 
@@ -289,9 +289,9 @@ pip install gauth-client
 
 **Usage:**
 ```python
-from gauth_client import GAuthClient
+from gauth_client import AgentAuthClient
 
-client = GAuthClient(base_url='http://localhost:8080')
+client = AgentAuthClient(base_url='http://localhost:8080')
 
 # Complete subscription flow and get token
 result = client.complete_subscription_flow(
@@ -478,7 +478,7 @@ logging:
 
 Check out our sample applications:
 
-- **React + GAuth**: [examples/react-app](../examples/react-app)
+- **React + AgentAuth**: [examples/react-app](../examples/react-app)
 - **Python Flask**: [examples/flask-app](../examples/flask-app)
 - **Go Service**: [examples/go-service](../examples/go-service)
 
@@ -489,20 +489,20 @@ Check out our sample applications:
 **Q: How do I get an API key?**  
 A: Use the RFC-0111 subscription flow to obtain an access token. API keys are for service-to-service authentication (contact support).
 
-**Q: Can I use GAuth without the subscription flow?**  
+**Q: Can I use AgentAuth without the subscription flow?**  
 A: The subscription flow is recommended for full RFC-0111 compliance, but you can also use direct token creation for simpler scenarios.
 
 **Q: How long do tokens last?**  
 A: Default token lifetime is 1 hour (3600 seconds). This can be configured during subscription.
 
-**Q: Is GAuth production-ready?**  
-A: GAuth is currently in beta. Review the [security guide](../SECURITY_COMPLIANCE_GUIDE.md) before production deployment.
+**Q: Is AgentAuth production-ready?**  
+A: AgentAuth is currently in beta. Review the [security guide](../SECURITY_COMPLIANCE_GUIDE.md) before production deployment.
 
-**Q: Can I self-host GAuth?**  
-A: Yes! GAuth is open source and can be self-hosted. See the [deployment guide](../DEPLOYMENT_GUIDE.md).
+**Q: Can I self-host AgentAuth?**  
+A: Yes! AgentAuth is open source and can be self-hosted. See the [deployment guide](../DEPLOYMENT_GUIDE.md).
 
 ---
 
-**🎉 Congratulations!** You're now ready to build with GAuth.
+**🎉 Congratulations!** You're now ready to build with AgentAuth.
 
 For more examples and advanced use cases, see [API_EXAMPLES.md](./API_EXAMPLES.md).

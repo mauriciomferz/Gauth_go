@@ -12,7 +12,7 @@ import (
 
 // PowerEnforcementPoint (PEP) enforces authorization decisions at runtime
 // RFC-0111 Section 3.1: "Power Enforcement Point (PEP) – usually the application, AI system or an
-// intermediary that asks the PDP for a decision and enforces its result. GAuth differentiates between
+// intermediary that asks the PDP for a decision and enforces its result. AgentAuth differentiates between
 // supply-side and demand-side PEP. The client itself Must make sure it decides and acts in line with
 // its authorization, thus enforces compliance from the supply-side. The resource owner and/or resource
 // server Must check authorization compliance of the transactions, actions and decisions of the client

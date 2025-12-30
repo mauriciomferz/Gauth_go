@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Successfully implemented **OIDC Phase 1: Core Infrastructure** as the first step toward RFC-0111 OpenID Connect integration. This phase delivers production-ready Discovery Service, ID Token Service, and Identity Bridge components that enable OIDC as an identity verification mechanism in GAuth.
+Successfully implemented **OIDC Phase 1: Core Infrastructure** as the first step toward RFC-0111 OpenID Connect integration. This phase delivers production-ready Discovery Service, ID Token Service, and Identity Bridge components that enable OIDC as an identity verification mechanism in AgentAuth.
 
 ### Key Achievements
 
@@ -35,7 +35,7 @@ Successfully implemented **OIDC Phase 1: Core Infrastructure** as the first step
 - ✅ Subject types: public, pairwise
 - ✅ Signing algorithms: RS256 (required), RS384, RS512, ES256, ES384, ES512
 - ✅ Standard scopes: openid, profile, email, phone, address
-- ✅ GAuth scopes: gauth:owner, gauth:client, gauth:resource, gauth:legal_entity
+- ✅ AgentAuth scopes: gauth:owner, gauth:client, gauth:resource, gauth:legal_entity
 - ✅ ACR values: 0, 1, 2, substantial, high, loa-4, InCommon IAP
 - ✅ Token auth methods: client_secret_basic, client_secret_post, private_key_jwt
 - ✅ HTTP handler with JSON response
@@ -58,7 +58,7 @@ SupportsScope(scope) bool
 - ✅ HTTP endpoint (GET/POST)
 - ✅ ACR support validation
 - ✅ Scope support validation
-- ✅ GAuth extensions verification
+- ✅ AgentAuth extensions verification
 
 ---
 
@@ -74,7 +74,7 @@ SupportsScope(scope) bool
 - ✅ Profile claims: name, given_name, family_name, email, phone
 - ✅ Authentication context: acr (Authentication Context Class Reference)
 - ✅ Authentication methods: amr (Authentication Methods References)
-- ✅ GAuth extensions: entity_type, entity_id, legal_entity_name, jurisdiction
+- ✅ AgentAuth extensions: entity_type, entity_id, legal_entity_name, jurisdiction
 - ✅ Trust Service Provider: tsp_name, tsp_id
 - ✅ Nonce support (replay attack prevention)
 - ✅ Authorized party (azp) for multiple audiences
@@ -112,12 +112,12 @@ CreateIDTokenFromIdentity(ctx, subjectID, audience, identityType, trustLevel, ad
 
 ### 3. Identity Bridge (`identity_bridge.go` - 282 lines)
 
-**Purpose**: Convert between OIDC and GAuth identity structures  
+**Purpose**: Convert between OIDC and AgentAuth identity structures  
 **Integration Point**: Enable OIDC in RFC-0111 Steps I, III, VI
 
 **Features**:
-- ✅ OIDC → GAuth conversion: ConvertIDTokenToIdentityProof()
-- ✅ GAuth → OIDC conversion: ConvertIdentityProofToIDToken()
+- ✅ OIDC → AgentAuth conversion: ConvertIDTokenToIdentityProof()
+- ✅ AgentAuth → OIDC conversion: ConvertIdentityProofToIDToken()
 - ✅ Trust level mapping: TrustLevelMapper
 - ✅ ACR → TrustLevel: low, substantial, high
 - ✅ Bidirectional mapping support
@@ -130,7 +130,7 @@ CreateIDTokenFromIdentity(ctx, subjectID, audience, identityType, trustLevel, ad
 
 **Trust Level Mappings**:
 ```
-ACR Value          → GAuth TrustLevel
+ACR Value          → AgentAuth TrustLevel
 -----------------------------------------
 0                  → low
 1                  → low
@@ -194,12 +194,12 @@ ValidateIDTokenForIdentityProof(ctx, idToken, service, audience, minTrustLevel) 
 **Default Mappings**:
 ```go
 DefaultACRMappings = []TrustLevelMapping{
-    {ACR: "0", GAuthTrustLevel: "low", MinMFARequired: false},
-    {ACR: "1", GAuthTrustLevel: "low", MinMFARequired: false},
-    {ACR: "2", GAuthTrustLevel: "substantial", MinMFARequired: true},
-    {ACR: "substantial", GAuthTrustLevel: "substantial", MinMFARequired: true},
-    {ACR: "high", GAuthTrustLevel: "high", MinMFARequired: true},
-    {ACR: "loa-4", GAuthTrustLevel: "high", MinMFARequired: true},
+    {ACR: "0", AgentAuthTrustLevel: "low", MinMFARequired: false},
+    {ACR: "1", AgentAuthTrustLevel: "low", MinMFARequired: false},
+    {ACR: "2", AgentAuthTrustLevel: "substantial", MinMFARequired: true},
+    {ACR: "substantial", AgentAuthTrustLevel: "substantial", MinMFARequired: true},
+    {ACR: "high", AgentAuthTrustLevel: "high", MinMFARequired: true},
+    {ACR: "loa-4", AgentAuthTrustLevel: "high", MinMFARequired: true},
     // InCommon IAP...
 }
 ```
@@ -212,7 +212,7 @@ DefaultACRMappings = []TrustLevelMapping{
 - `ErrorServerError`, `ErrorTemporarilyUnavailable`
 
 **Proof Methods**:
-- `ProofMethodOIDCIDToken` = "oidc_id_token" (GAuth-issued)
+- `ProofMethodOIDCIDToken` = "oidc_id_token" (AgentAuth-issued)
 - `ProofMethodOIDCExternal` = "oidc_external" (Google/Okta/Azure)
 
 ---
@@ -267,7 +267,7 @@ DefaultACRMappings = []TrustLevelMapping{
 - ✅ RS384, RS512 support
 - ✅ Key ID (kid) header
 - ✅ Standard registered claims
-- ✅ Custom claims (GAuth extensions)
+- ✅ Custom claims (AgentAuth extensions)
 
 ### eIDAS Compliance ✅
 
@@ -307,7 +307,7 @@ DefaultACRMappings = []TrustLevelMapping{
 ### Proof Methods
 
 **New Proof Methods** (defined, not yet integrated):
-- `oidc_id_token`: GAuth-issued OIDC ID tokens
+- `oidc_id_token`: AgentAuth-issued OIDC ID tokens
 - `oidc_external`: External provider ID tokens (Google, Okta, Azure)
 
 **Existing Proof Methods** (still supported):

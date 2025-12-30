@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# GAuth CI/CD Quick Validation Script
+# AgentAuth CI/CD Quick Validation Script
 # This script validates the CI/CD setup without requiring user interaction
 
 set -e
@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  GAuth CI/CD Quick Validation${NC}"
+echo -e "${BLUE}  AgentAuth CI/CD Quick Validation${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 

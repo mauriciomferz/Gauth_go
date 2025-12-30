@@ -7,8 +7,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
 )
 
-// RFC0111Config holds the configuration for RFC-0111 components
-type RFC0111Config struct {
+// AAP001Config holds the configuration for RFC-0111 components
+type AAP001Config struct {
 	// Enabled controls whether RFC-0111 functionality is active
 	Enabled bool
 
@@ -32,8 +32,8 @@ type RFC0111Config struct {
 	ComplianceTracker   ComplianceTracker
 }
 
-// RFC0111Components holds initialized RFC-0111 components
-type RFC0111Components struct {
+// AAP001Components holds initialized RFC-0111 components
+type AAP001Components struct {
 	SubscriptionStore   SubscriptionStore
 	SubscriptionManager *SubscriptionFlowManager
 	ComplianceTracker   ComplianceTracker
@@ -45,12 +45,12 @@ type RFC0111Components struct {
 	CommercialRegClient CommercialRegisterClient
 }
 
-// InitRFC0111FromEnv initializes RFC-0111 components based on environment variables.
+// InitAAP001FromEnv initializes RFC-0111 components based on environment variables.
 // This is a convenience function for web server integration.
 // Deprecated: Use internal/config.Load() and explicit initialization instead.
 // Environment variables:
-//   - GAUTH_RFC0111_ENABLED: Set to "1" to enable RFC-0111 functionality
-//   - GAUTH_RFC0111_USE_MOCKS: Set to "1" to use mock external services (default)
+//   - GAUTH_AAP001_ENABLED: Set to "1" to enable RFC-0111 functionality
+//   - GAUTH_AAP001_USE_MOCKS: Set to "1" to use mock external services (default)
 //
 // When enabled with mocks, this function creates:
 //   - Mock external service clients (PVP, PIP, Commercial Register)
@@ -58,32 +58,32 @@ type RFC0111Components struct {
 //   - All required validators
 //   - Subscription flow manager
 //   - Compliance tracker
-func InitRFC0111FromEnv() (*RFC0111Components, error) {
+func InitAAP001FromEnv() (*AAP001Components, error) {
 	// Check if RFC-0111 is enabled
-	if os.Getenv("GAUTH_RFC0111_ENABLED") != "1" {
+	if os.Getenv("GAUTH_AAP001_ENABLED") != "1" {
 		return nil, nil
 	}
 
 	// Determine whether to use mocks (default: yes)
 	useMocks := true
-	if os.Getenv("GAUTH_RFC0111_USE_MOCKS") == "0" {
+	if os.Getenv("GAUTH_AAP001_USE_MOCKS") == "0" {
 		useMocks = false
 	}
 
 	if !useMocks {
-		return nil, fmt.Errorf("RFC-0111: real external service implementations not yet available, set GAUTH_RFC0111_USE_MOCKS=1")
+		return nil, fmt.Errorf("RFC-0111: real external service implementations not yet available, set GAUTH_AAP001_USE_MOCKS=1")
 	}
 
-	return InitRFC0111WithMocks()
+	return InitAAP001WithMocks()
 }
 
-// InitRFC0111WithMocks initializes RFC-0111 components using mock external services.
+// InitAAP001WithMocks initializes RFC-0111 components using mock external services.
 // This is suitable for development, testing, and demonstrations.
-func InitRFC0111WithMocks() (*RFC0111Components, error) {
+func InitAAP001WithMocks() (*AAP001Components, error) {
 	// Import is in this file to avoid circular dependency with mocks package
 	// Instead, we'll use interface types and let callers provide mock implementations
 	// For now, this returns an error requiring explicit setup
-	return nil, fmt.Errorf("RFC-0111: use InitRFC0111WithComponents to provide mock implementations")
+	return nil, fmt.Errorf("RFC-0111: use InitAAP001WithComponents to provide mock implementations")
 }
 
 // createDefaultPDPEngine creates a PDP engine with default policies
@@ -100,7 +100,7 @@ func createDefaultPDPEngine() pdp.Engine {
 	// Add default policies for RFC-0111 compliance
 	// Policy 1: Allow authenticated requests with valid authorization chains
 	engine.AddPolicy(pdp.Policy{
-		ID:       "rfc0111-allow-valid-chain",
+		ID:       "aap001-allow-valid-chain",
 		Subjects: []string{"*"}, // Apply to all subjects
 		Rules: []pdp.Rule{
 			{
@@ -118,7 +118,7 @@ func createDefaultPDPEngine() pdp.Engine {
 
 	// Policy 2: Default deny for unknown actions
 	engine.AddPolicy(pdp.Policy{
-		ID:       "rfc0111-default-deny",
+		ID:       "aap001-default-deny",
 		Subjects: []string{"*"},
 		Rules: []pdp.Rule{
 			{
@@ -137,13 +137,13 @@ func createDefaultPDPEngine() pdp.Engine {
 	return engine
 }
 
-// InitRFC0111WithComponents initializes RFC-0111 using provided components.
+// InitAAP001WithComponents initializes RFC-0111 using provided components.
 // This gives full control over which implementations to use (mock or real).
-func InitRFC0111WithComponents(
+func InitAAP001WithComponents(
 	pvpClient PowerVerificationPoint,
 	pipClient PIPClient,
 	commercialRegClient CommercialRegisterClient,
-) (*RFC0111Components, error) {
+) (*AAP001Components, error) {
 
 	if pvpClient == nil {
 		return nil, fmt.Errorf("RFC-0111: pvpClient is required")
@@ -195,7 +195,7 @@ func InitRFC0111WithComponents(
 	// Create compliance tracker
 	complianceTracker := NewMemoryComplianceTracker(complianceValidator)
 
-	return &RFC0111Components{
+	return &AAP001Components{
 		SubscriptionStore:   subscriptionStore,
 		SubscriptionManager: subscriptionManager,
 		ComplianceTracker:   complianceTracker,

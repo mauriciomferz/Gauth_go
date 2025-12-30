@@ -8,7 +8,7 @@ owners: [system]
 
 # Error Catalog
 
-Central source of truth for public error codes exposed by GAuth APIs. Each code includes HTTP mapping, severity, and remediation guidance. This file is generated / maintained alongside the centralized registry in `internal/errors/catalog.go`.
+Central source of truth for public error codes exposed by AgentAuth APIs. Each code includes HTTP mapping, severity, and remediation guidance. This file is generated / maintained alongside the centralized registry in `internal/errors/catalog.go`.
 
 | Code | HTTP | Category | Severity | Retryable | Description | Remediation |
 |------|------|----------|----------|-----------|-------------|------------|

@@ -6,20 +6,20 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth RFC-0115 Examples Documentation
+# AgentAuth RFC-0115 Examples Documentation
 
 > Last Updated: 2025-10-17
 > Status: Active
 
 **🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**Gimel Foundation gGmbH i.G.**, www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+Operated by AgentAuth Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
 This document describes the working examples demonstrating RFC-0115 PoA-Definition implementation and related functionality.
 
@@ -28,8 +28,8 @@ This document describes the working examples demonstrating RFC-0115 PoA-Definiti
 ### **RFC-0115 PoA-Definition Implementation** ⭐
 - **Location**: `examples/rfc_0115_poa_definition/`
 - **Status**: ✅ **FULLY FUNCTIONAL**
-- **Description**: Complete demonstration of GiFo-RFC-0115 PoA-Definition structure
-- **Features**: Full type safety, JSON serialization, Gimel Foundation compliance
+- **Description**: Complete demonstration of AAP-RFC-0115 PoA-Definition structure
+- **Features**: Full type safety, JSON serialization, AgentAuth Community compliance
 
 ## Example Structure
 
@@ -50,9 +50,9 @@ Each example in the `examples/` directory follows a consistent structure:
 
 ### 2. Integration Examples
 
-- **custom_server**: Integrating GAuth with a custom HTTP server
-- **microservices**: Using GAuth in a microservices architecture
-- **gateway**: Implementing API gateway patterns with GAuth
+- **custom_server**: Integrating AgentAuth with a custom HTTP server
+- **microservices**: Using AgentAuth in a microservices architecture
+- **gateway**: Implementing API gateway patterns with AgentAuth
 
 ### 3. Advanced Pattern Examples
 
@@ -71,7 +71,7 @@ Each example in the `examples/` directory follows a consistent structure:
 
 ### Legal Framework Example
 
-The `examples/legal_framework` example demonstrates how to implement a regulatory framework for financial services using GAuth's type-safe components:
+The `examples/legal_framework` example demonstrates how to implement a regulatory framework for financial services using AgentAuth's type-safe components:
 
 ```go
 // Create a new legal framework
@@ -148,7 +148,7 @@ When creating new examples:
 
 ## Suggested Example Workflow
 
-When using examples to learn GAuth:
+When using examples to learn AgentAuth:
 
 1. Start with the basic example
 2. Move to domain-specific examples that match your use case

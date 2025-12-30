@@ -1,17 +1,17 @@
 // Combined RFC-0111 & RFC-0115 Implementation Demo
 //
 // This example demonstrates the unified implementation of:
-// - GiFo-RFC-0111: The GAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
-// - GiFo-RFC-0115: Power-of-Attorney Credential Definition (PoA-Definition)
+// - AAP-0111: The AgentAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
+// - AAP-0115: Power-of-Attorney Credential Definition (PoA-Definition)
 //
-// Copyright (c) 2025 Gimel Foundation gGmbH i.G.
+// Copyright (c) 2025 AgentAuth Community
 // Licensed under Apache 2.0
 //
-// Official Gimel Foundation Implementation
-// Gimel Foundation gGmbH i.G., www.GimelFoundation.com
-// Operated by Gimel Technologies GmbH
-// MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartett
-// Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.GimelID.com
+// Official AgentAuth Community Implementation
+// AgentAuth Community, www.AgentAuthFoundation.com
+// Operated by AgentAuth Technologies GmbH
+// MD: Open Source Maintainers – Chairman of the Board: Community Board
+// Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
 
 package main
 
@@ -23,7 +23,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
 )
 
-func displayRFC0111Exclusions(ex rfc.RFC0111Exclusions) {
+func displayAAP001Exclusions(ex rfc.AAP001Exclusions) {
 	fmt.Printf("  🚫 Web3 Blockchain: prohibited=%v license_required=%v\n", ex.Web3Blockchain.Prohibited, ex.Web3Blockchain.LicenseRequired)
 	fmt.Printf("  🚫 AI Operators: prohibited=%v license_required=%v\n", ex.AIOperators.Prohibited, ex.AIOperators.LicenseRequired)
 	fmt.Printf("  🚫 DNA Based Identities: prohibited=%v license_required=%v\n", ex.DNABasedIdentities.Prohibited, ex.DNABasedIdentities.LicenseRequired)
@@ -48,16 +48,16 @@ func main() {
 
 	// Display RFC-0111 compliance
 	fmt.Println("\n🔒 RFC-0111 Exclusions Compliance:")
-	displayRFC0111Exclusions(combinedConfig.RFC0111.Exclusions)
+	displayAAP001Exclusions(combinedConfig.AAP001.Exclusions)
 
 	// Display RFC-0111 PP Architecture
 	fmt.Println("\n🏗️ RFC-0111 Power*Point Architecture:")
-	displayPPArchitecture(combinedConfig.RFC0111.PPArchitecture)
+	displayPPArchitecture(combinedConfig.AAP001.PPArchitecture)
 
 	// Display RFC-0115 PoA Definition
-	if combinedConfig.RFC0115 != nil {
+	if combinedConfig.AAP002 != nil {
 		fmt.Println("\n📄 RFC-0115 Power-of-Attorney Definition:")
-		poaDefinition := rfc.CreateDefaultPoADefinition(combinedConfig.RFC0115.PoADefinition)
+		poaDefinition := rfc.CreateDefaultPoADefinition(combinedConfig.AAP002.PoADefinition)
 		displayPoADefinition(poaDefinition)
 	}
 
@@ -81,7 +81,7 @@ func main() {
 	fmt.Println("════════════════════════════════════════════════════════")
 }
 
-func displayPPArchitecture(pp rfc.RFC0111PPArchitecture) {
+func displayPPArchitecture(pp rfc.AAP001PPArchitecture) {
 	fmt.Printf("  🛡️ PEP (Power Enforcement Point):\n")
 	fmt.Printf("    - Supply Side: %s (%s)\n", pp.PEP.SupplySide.Entity, pp.PEP.SupplySide.Status)
 	fmt.Printf("    - Demand Side: %s (%s)\n", pp.PEP.DemandSide.Entity, pp.PEP.DemandSide.Status)
@@ -92,7 +92,7 @@ func displayPPArchitecture(pp rfc.RFC0111PPArchitecture) {
 	fmt.Printf("  ✅ PVP (Power Verification Point): %s\n", pp.PVP.TrustServiceProvider)
 }
 
-func displayPoADefinition(poa rfc.RFC0115PoADefinition) {
+func displayPoADefinition(poa rfc.AAP002PoADefinition) {
 	fmt.Printf("  👤 Principal: %s (%s)\n",
 		poa.Parties.Principal.Identity, poa.Parties.Principal.Type)
 
@@ -113,10 +113,10 @@ func displayPoADefinition(poa rfc.RFC0115PoADefinition) {
 
 	fmt.Printf("  🏭 Industry Sectors: %d sectors\n", len(poa.Authorization.ApplicableSectors))
 
-	fmt.Printf("  🔗 GAuth Integration:\n")
-	fmt.Printf("    - PP Role: %s\n", poa.GAuthContext.PPArchitectureRole)
-	fmt.Printf("    - Exclusions Compliant: %v\n", poa.GAuthContext.ExclusionsCompliant)
-	fmt.Printf("    - AI Governance Level: %s\n", poa.GAuthContext.AIGovernanceLevel)
+	fmt.Printf("  🔗 AgentAuth Integration:\n")
+	fmt.Printf("    - PP Role: %s\n", poa.AgentAuthContext.PPArchitectureRole)
+	fmt.Printf("    - Exclusions Compliant: %v\n", poa.AgentAuthContext.ExclusionsCompliant)
+	fmt.Printf("    - AI Governance Level: %s\n", poa.AgentAuthContext.AIGovernanceLevel)
 }
 
 func displayIntegrationStatus(config rfc.CombinedRFCConfig) {
@@ -155,9 +155,9 @@ func demonstrateAIClientConfigs() {
 	fmt.Printf("    - Capabilities: %v\n", humanoidRobot.AICapabilities)
 }
 
-func createDigitalAgentConfig() rfc.RFC0111Client {
-	return rfc.RFC0111Client{
-		Type:     rfc.RFC0111ClientTypeDigitalAgent,
+func createDigitalAgentConfig() rfc.AAP001Client {
+	return rfc.AAP001Client{
+		Type:     rfc.AAP001ClientTypeDigitalAgent,
 		Identity: "digital_agent_v1_0",
 		AICapabilities: []string{
 			"natural_language_processing",
@@ -172,9 +172,9 @@ func createDigitalAgentConfig() rfc.RFC0111Client {
 	}
 }
 
-func createAgenticAIConfig() rfc.RFC0111Client {
-	return rfc.RFC0111Client{
-		Type:     rfc.RFC0111ClientTypeAgenticAI,
+func createAgenticAIConfig() rfc.AAP001Client {
+	return rfc.AAP001Client{
+		Type:     rfc.AAP001ClientTypeAgenticAI,
 		Identity: "agentic_ai_team_v1_0",
 		AICapabilities: []string{
 			"multi_agent_coordination",
@@ -190,9 +190,9 @@ func createAgenticAIConfig() rfc.RFC0111Client {
 	}
 }
 
-func createHumanoidRobotConfig() rfc.RFC0111Client {
-	return rfc.RFC0111Client{
-		Type:     rfc.RFC0111ClientTypeHumanoidRobot,
+func createHumanoidRobotConfig() rfc.AAP001Client {
+	return rfc.AAP001Client{
+		Type:     rfc.AAP001ClientTypeHumanoidRobot,
 		Identity: "humanoid_robot_v2_1",
 		AICapabilities: []string{
 			"physical_interaction",

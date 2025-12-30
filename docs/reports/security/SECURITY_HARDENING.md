@@ -12,7 +12,7 @@ refreshCadence: quarterly
 > Last Updated: 2025-11-12
 > Scope: Transition from beta evaluation to production-grade deployment.
 
-This checklist enumerates additional controls and operational practices required before running GAuth in a production / regulated environment.
+This checklist enumerates additional controls and operational practices required before running AgentAuth in a production / regulated environment.
 
 ## 1. Runtime Environment
 - Enforce Go version >= 1.25.3 across build agents and runtime images (`go version`).

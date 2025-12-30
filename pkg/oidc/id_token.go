@@ -231,8 +231,8 @@ func (s *IDTokenService) validateIDTokenClaims(claims *IDTokenClaims, expectedAu
 	return nil
 }
 
-// CreateIDTokenFromIdentity creates ID token from GAuth identity proof
-// This bridges GAuth identity structures to OIDC ID tokens
+// CreateIDTokenFromIdentity creates ID token from AgentAuth identity proof
+// This bridges AgentAuth identity structures to OIDC ID tokens
 func (s *IDTokenService) CreateIDTokenFromIdentity(
 	ctx context.Context,
 	subjectID string,
@@ -248,10 +248,10 @@ func (s *IDTokenService) CreateIDTokenFromIdentity(
 		},
 	}
 
-	// Map GAuth trust level to OIDC ACR
+	// Map AgentAuth trust level to OIDC ACR
 	claims.ACR = s.mapTrustLevelToACR(trustLevel)
 
-	// Set GAuth entity type
+	// Set AgentAuth entity type
 	claims.EntityType = identityType
 
 	// Add additional claims from proof data
@@ -280,7 +280,7 @@ func (s *IDTokenService) CreateIDTokenFromIdentity(
 	return s.IssueIDToken(ctx, claims)
 }
 
-// mapTrustLevelToACR maps GAuth trust level to OIDC ACR value
+// mapTrustLevelToACR maps AgentAuth trust level to OIDC ACR value
 func (s *IDTokenService) mapTrustLevelToACR(trustLevel string) string {
 	switch trustLevel {
 	case trustLevelLow:

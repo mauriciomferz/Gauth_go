@@ -9,7 +9,7 @@
 
 ## Implementation Overview
 
-This document summarizes the comprehensive implementation of RFC-0111 (GAuth 1.0) and RFC-0115 (Power of Attorney for LLMs) specifications in Go.
+This document summarizes the comprehensive implementation of RFC-0111 (AgentAuth 1.0) and RFC-0115 (Power of Attorney for LLMs) specifications in Go.
 
 ### Session Timeline
 
@@ -315,7 +315,7 @@ This document summarizes the comprehensive implementation of RFC-0111 (GAuth 1.0
 
 ### Overall Compliance: **92-96%**
 
-#### RFC-0111 (GAuth 1.0): **95%**
+#### RFC-0111 (AgentAuth 1.0): **95%**
 - ✅ Section 3: Power of Attorney Model - 100%
 - ✅ Section 4: Authorization Chain - 100%
 - ✅ Section 5: External Integrations - 100%
@@ -481,6 +481,6 @@ This implementation provides **92-96% RFC compliance** with comprehensive covera
 ---
 
 ## References
-- RFC-0111: GAuth 1.0 - Generic Authorization Framework
+- RFC-0111: AgentAuth 1.0 - Generic Authorization Framework
 - RFC-0115: Power of Attorney for Large Language Models
-- Implementation: github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0
+- Implementation: github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0

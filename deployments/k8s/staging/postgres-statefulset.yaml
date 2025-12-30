@@ -157,7 +157,7 @@ metadata:
     environment: staging
 data:
   postgresql.conf: |
-    # PostgreSQL Configuration for GAuth Staging
+    # PostgreSQL Configuration for AgentAuth Staging
     
     # Connection Settings
     listen_addresses = '*'
@@ -221,7 +221,7 @@ metadata:
     environment: staging
 data:
   01-init-database.sql: |
-    -- Initialize GAuth database schema
+    -- Initialize AgentAuth database schema
     
     -- Create application user (if not exists)
     DO

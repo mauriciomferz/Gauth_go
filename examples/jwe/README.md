@@ -8,7 +8,7 @@ refreshCadence: on-change
 ---
 # JWE Examples
 
-This directory contains example applications demonstrating JWE (JSON Web Encryption) usage with GAuth Extended Tokens.
+This directory contains example applications demonstrating JWE (JSON Web Encryption) usage with AgentAuth Extended Tokens.
 
 ## Examples
 
@@ -128,5 +128,5 @@ openssl rsa -in private.pem -pubout -out public.pem
 
 - [RFC 7516 - JSON Web Encryption (JWE)](https://tools.ietf.org/html/rfc7516)
 - [RFC 7518 - JSON Web Algorithms (JWA)](https://tools.ietf.org/html/rfc7518)
-- [GiFo RFC-0111 - GAuth 1.0 Specification](../../RFC-0111.md)
+- [AAP RFC-0111 - AgentAuth 1.0 Specification](../../RFC-0111.md)
 - [JWE Phase 1 Completion Report](../../JWE_PHASE1_COMPLETION_REPORT.md)

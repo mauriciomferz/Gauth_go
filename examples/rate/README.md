@@ -23,7 +23,7 @@ import (
     "log"
     "time"
 
-    "github.com/Gimel-Foundation/gauth/pkg/rate"
+    "github.com/AgentAuth-Foundation/gauth/pkg/rate"
 )
 
 func main() {
@@ -61,7 +61,7 @@ import (
     "log"
     "time"
 
-    "github.com/Gimel-Foundation/gauth/pkg/rate"
+    "github.com/AgentAuth-Foundation/gauth/pkg/rate"
 )
 
 func main() {
@@ -96,7 +96,7 @@ import (
     "log"
     "time"
 
-    "github.com/Gimel-Foundation/gauth/pkg/rate"
+    "github.com/AgentAuth-Foundation/gauth/pkg/rate"
 )
 
 func main() {
@@ -136,7 +136,7 @@ import (
     "log"
     "time"
 
-    "github.com/Gimel-Foundation/gauth/pkg/rate"
+    "github.com/AgentAuth-Foundation/gauth/pkg/rate"
 )
 
 // Custom rate limiter implementation
@@ -178,7 +178,7 @@ import (
     "log"
     "time"
 
-    "github.com/Gimel-Foundation/gauth/pkg/rate"
+    "github.com/AgentAuth-Foundation/gauth/pkg/rate"
 )
 
 func main() {

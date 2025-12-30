@@ -94,8 +94,8 @@ func createStructuredFooter() *gauth.PASETOFooter {
 			"jurisdiction":   "US-CA",
 			"audit_trail_id": "audit_" + fmt.Sprintf("%d", time.Now().UnixNano()),
 			"chain_of_trust": map[string]interface{}{
-				"root_ca":      "GAuth-Root-CA-2025",
-				"intermediate": "GAuth-Intermediate-CA-West",
+				"root_ca":      "AgentAuth-Root-CA-2025",
+				"intermediate": "AgentAuth-Intermediate-CA-West",
 				"leaf":         "auth.gauth.example.com",
 			},
 		},

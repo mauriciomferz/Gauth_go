@@ -416,7 +416,7 @@ func (h *APIHandler) GetAPIDocumentation() map[string]any {
 	return map[string]any{
 		"openapi": "3.0.0",
 		"info": map[string]any{
-			"title":       "GAuth AI Capability Governance API",
+			"title":       "AgentAuth AI Capability Governance API",
 			"version":     "1.0.0",
 			"description": "API endpoints for AI capability matrix enforcement and governance",
 		},

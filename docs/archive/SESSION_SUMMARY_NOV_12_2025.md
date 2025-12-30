@@ -27,7 +27,7 @@
 **Problem:**
 ```go
 // From extended_token_service.go:168
-return nil, &GAuthError{
+return nil, &AgentAuthError{
     Code:    "not_implemented",
     Message: "Extended token parsing from string not fully implemented (requires JWT/JWE parser)",
 }

@@ -15,40 +15,40 @@ owners: [system]
 
 This example demonstrates a *beta demonstration* combination of both specifications. It is **NOT production ready** and omits critical security, compliance, operational, and performance safeguards. Do **NOT** use it for real users, regulated workloads, or commercial deployments.
 
-- **GiFo-RFC-0111**: The GAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
-- **GiFo-RFC-0115**: Power-of-Attorney Credential Definition (PoA-Definition)
+- **AAP-RFC-0111**: The AgentAuth 1.0 Authorization Framework (ISBN: 978-3-00-084039-5)
+- **AAP-RFC-0115**: Power-of-Attorney Credential Definition (PoA-Definition)
 
 ### 📋 **Referenced Specifications (For Learning Only)**
 
-**RFC-0111: GAuth 1.0 Authorization Framework**
+**RFC-0111: AgentAuth 1.0 Authorization Framework**
 - **Author**: Dr. Götz G. Wehberg
 - **Organization**: Digital Supply Institute (DSI)
 - **Category**: Standards Track
 - **ISBN**: 978-3-00-084039-5
 - **Obsoletes**: 1. August 2025
-- **Status**: Gimel Foundation Standards Track Document
+- **Status**: AgentAuth Community Standards Track Document
 
 **RFC-0115: Power-of-Attorney Credential Definition**
 - **Author**: Dr. Götz G. Wehberg
 - **Organization**: Digital Supply Institute (DSI)
 - **Category**: Standards Track
 - **Obsoletes**: 15. September 2025
-- **Status**: Gimel Foundation Standards Track Document
+- **Status**: AgentAuth Community Standards Track Document
 
-### 🏢 **Gimel Foundation Information**
+### 🏢 **AgentAuth Community Information**
 
-**Gimel Foundation gGmbH i.G.**
-- **Website**: www.GimelFoundation.com
-- **Operated by**: Gimel Technologies GmbH
+**AgentAuth Community gGmbH i.G.**
+- **Website**: www.AgentAuthFoundation.com
+- **Operated by**: AgentAuth Technologies GmbH
 - **Management**: MD: Bjørn Baunbæk, Dr. Götz G. Wehberg
 - **Chairman of the Board**: Daniel Hartert
 - **Address**: Hardtweg 31, D-53639 Königswinter
 - **Registration**: Siegburg HRB 18660
-- **Additional Info**: www.GimelID.com
+- **Additional Info**: www.AgentAuthID.com
 
 ## 🎯 **Implementation Features**
 
-### **RFC-0111 GAuth 1.0 Framework**
+### **RFC-0111 AgentAuth 1.0 Framework**
 
 #### **Power*Point (P*P) Architecture**
 - **PEP (Power Enforcement Point)**: Supply-side and demand-side enforcement
@@ -117,7 +117,7 @@ This example demonstrates a *beta demonstration* combination of both specificati
 ## 🔒 **Security & Compliance (Conceptual Only)**
 
 ### **RFC-0111 Security Feature Examples (Not Complete)**
-- **Centralized Authorization**: All AI authorization through GAuth protocol
+- **Centralized Authorization**: All AI authorization through AgentAuth protocol
 - **Exclusions Enforcement**: Mandatory prohibition of specified technologies
 - **PP Architecture**: Comprehensive governance through power points
 - **Audit Trails**: Complete tracking of authorization decisions
@@ -181,7 +181,7 @@ go run main.go
   🌍 Geographic Scope: 1 regions
     - Germany: DE (national)
   🏭 Industry Sectors: 1 sectors
-  🔗 GAuth Integration:
+  🔗 AgentAuth Integration:
     - PP Role: client
     - Exclusions Compliant: true
     - AI Governance Level: comprehensive
@@ -257,9 +257,9 @@ pkg/rfc/
 
 ## ⚖️ **Legal Notice**
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 
-This document and implementation are subject to the Gimel Foundation's Legal Provisions Relating to GiFo Documents. All rights are reserved.
+This document and implementation are subject to the AgentAuth Community's Legal Provisions Relating to AAP Documents. All rights are reserved.
 
 **License**: Apache 2.0 (see LICENSE file)
 
@@ -274,7 +274,7 @@ This repository provides **illustrative coverage of selected RFC-0111 and RFC-01
 
 ---
 
-**Official Gimel Foundation Implementation** 🏢
+**Official AgentAuth Community Implementation** 🏢
 **Supporting the future of AI governance and authorization** 🤖
 
 ---

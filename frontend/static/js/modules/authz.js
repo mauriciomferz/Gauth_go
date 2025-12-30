@@ -252,4 +252,4 @@ export function authzInit() {
     }
 }
 
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { checkAuthorization, publishEvent, subscribeEvents, downloadEventLog });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { checkAuthorization, publishEvent, subscribeEvents, downloadEventLog });

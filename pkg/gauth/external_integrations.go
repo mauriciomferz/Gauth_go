@@ -29,7 +29,7 @@ type CommercialRegisterClient interface {
 
 // TrustServiceProvider defines the interface for trust service provider integration
 // RFC-0111 Section 3 (PVP): "verification of the identities that perform a specific
-// role along the GAuth processing. E.g., a trust service provider that also runs
+// role along the AgentAuth processing. E.g., a trust service provider that also runs
 // the authorization server."
 type TrustServiceProvider interface {
 	// VerifyIdentity verifies an identity document or credential

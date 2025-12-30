@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# format.sh - Opinionated formatting helper for GAuth
+# format.sh - Opinionated formatting helper for AgentAuth
 # Usage:
 #   ./scripts/format.sh            # apply formatting & imports
 #   DRY=1 ./scripts/format.sh       # show what would change

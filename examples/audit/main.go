@@ -1,5 +1,5 @@
 // Audit Logging Example
-// Demonstrates audit logging patterns using the GAuth framework.
+// Demonstrates audit logging patterns using the AgentAuth framework.
 // Covers authentication events, token management, event chains, and log searching.
 
 package main

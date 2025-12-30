@@ -349,7 +349,7 @@ func computeStatusCounts(rows []gapRow) statusCounts {
 
 func writeAutoMarkdown(rows []gapRow, caps capabilitiesFile, drift []string, counts statusCounts) error {
 	var b strings.Builder
-	fmt.Fprintf(&b, "# GAuth RFC Gap Matrix (Generated)\n\n")
+	fmt.Fprintf(&b, "# AgentAuth RFC Gap Matrix (Generated)\n\n")
 	fmt.Fprintf(&b, "> Generated: %s\n\n", time.Now().UTC().Format(time.RFC3339))
 	fmt.Fprintf(&b, "**Status Summary:** Implemented=%d | Partial=%d | Missing=%d | Conceptual=%d | Total=%d\n\n", counts.Implemented, counts.Partial, counts.Missing, counts.Conceptual, counts.Total)
 	if len(drift) > 0 {

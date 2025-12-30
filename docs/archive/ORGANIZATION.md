@@ -23,7 +23,7 @@ refreshCadence: annually
 ## 📁 Current Structure (High-Level Overview)
 
 ```
-GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/
+AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/
 ├── pkg/                  # Core packages (auth, authz, audit, delegation, policy, token, rate/ratelimit, events, compliance, validation, etc.)
 │   ├── gauth/            # High-level service facade (authorization lifecycle)
 │   ├── auth/             # Authentication primitives
@@ -74,7 +74,7 @@ GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/
 ---
 
 **Demo Author**: [Mauricio Fernandez](https://github.com/mauriciomferz)
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

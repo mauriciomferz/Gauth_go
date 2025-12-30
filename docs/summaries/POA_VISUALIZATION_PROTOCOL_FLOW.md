@@ -6,10 +6,10 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# PoA Visualization Enhancement - GAuth Protocol Flow Integration
+# PoA Visualization Enhancement - AgentAuth Protocol Flow Integration
 
 ## Overview
-Successfully enhanced the PoA visualization to include complete GAuth Protocol Flow patterns based on RFC-0111 and RFC-0115. The visualization now supports **15 different pattern types** including 6 new protocol flow visualizations.
+Successfully enhanced the PoA visualization to include complete AgentAuth Protocol Flow patterns based on RFC-0111 and RFC-0115. The visualization now supports **15 different pattern types** including 6 new protocol flow visualizations.
 
 ## New Protocol Flow Patterns
 
@@ -108,7 +108,7 @@ Successfully enhanced the PoA visualization to include complete GAuth Protocol F
 8. **revocation** - Lifecycle states
 9. **full-pattern** - All PoA patterns combined
 
-### GAuth Protocol Flow Patterns (6)
+### AgentAuth Protocol Flow Patterns (6)
 10. **protocol-subscription** - Client registration
 11. **protocol-matching** - PoA validation
 12. **protocol-request** - Authorization request
@@ -120,7 +120,7 @@ Successfully enhanced the PoA visualization to include complete GAuth Protocol F
 
 ### Files Modified
 1. **web/templates/poa-visualization.html**
-   - Added `<optgroup>` for "GAuth Protocol Flow" patterns
+   - Added `<optgroup>` for "AgentAuth Protocol Flow" patterns
    - 6 new options in dropdown menu
 
 2. **web/static/js/modules/poa-viz.js**
@@ -186,7 +186,7 @@ export GAUTH_DEV_INDEX=1
 go run ./cmd/web-server
 
 # Or using the workspace task
-# Run Task: "Start GAuth Web Server"
+# Run Task: "Start AgentAuth Web Server"
 ```
 
 ### Accessing the Visualization
@@ -199,7 +199,7 @@ go run ./cmd/web-server
 2. **Visualization Mode**: Select "PoA Graph"
 3. **Graph Type**: Choose from dropdown:
    - Standard patterns (demo, simple, multi, etc.)
-   - GAuth Protocol Flow patterns (optgroup):
+   - AgentAuth Protocol Flow patterns (optgroup):
      - Subscription Flow
      - Matching Flow
      - Subset/Request Flow
@@ -354,7 +354,7 @@ AI Agent → Register Client → Configure Scopes → Obtain Credentials
 
 - [x] Server starts with `GAUTH_DEV_INDEX=1`
 - [x] Page loads at `/poa-visualization`
-- [x] Dropdown includes "GAuth Protocol Flow" optgroup
+- [x] Dropdown includes "AgentAuth Protocol Flow" optgroup
 - [x] 6 new protocol patterns added
 - [x] `generateDemoGraph()` function updated with new cases
 - [ ] **Manual Testing Required**:

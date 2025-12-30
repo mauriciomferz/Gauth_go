@@ -6,12 +6,12 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Performance Guide
+# AgentAuth Performance Guide
 
 > Last Updated: 2025-10-17 (post Milestone 2B authenticity instrumentation)
 > Status: Active
 
-This guide provides tips and best practices for optimizing GAuth performance in development environments.
+This guide provides tips and best practices for optimizing AgentAuth performance in development environments.
 
 ## Performance Patterns
 

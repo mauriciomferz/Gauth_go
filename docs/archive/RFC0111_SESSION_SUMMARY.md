@@ -32,7 +32,7 @@ Implemented **7 complete handlers** for subscription Steps II-VIII:
 
 **Key Features:**
 - Proper JSON request binding with validation
-- Comprehensive error handling (400 for GAuth errors, 500 for internal)
+- Comprehensive error handling (400 for AgentAuth errors, 500 for internal)
 - Prerequisite validation (steps must execute in order)
 - Consistent response format across all steps
 
@@ -268,7 +268,7 @@ Total RFC-0111 Implementation:
 
 ### 5. Error Handling Strategy
 **Pattern:** Distinguish between client errors (400) and server errors (500)  
-**Implementation:** Check for `GAuthError` type to determine appropriate status code
+**Implementation:** Check for `AgentAuthError` type to determine appropriate status code
 
 ---
 

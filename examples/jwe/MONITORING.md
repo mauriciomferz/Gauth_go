@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-This document describes monitoring metrics for JWE (JSON Web Encryption) operations in GAuth.
+This document describes monitoring metrics for JWE (JSON Web Encryption) operations in AgentAuth.
 
 ## Performance Metrics
 
@@ -258,7 +258,7 @@ scrape_configs:
 
 ### Integration with Existing Metrics
 
-GAuth already has a metrics infrastructure (`pkg/metrics/`). JWE metrics should be added to the existing Prometheus exporter:
+AgentAuth already has a metrics infrastructure (`pkg/metrics/`). JWE metrics should be added to the existing Prometheus exporter:
 
 - File: `pkg/metrics/prometheus.go`
 - Namespace: `gauth`
@@ -276,4 +276,4 @@ GAuth already has a metrics infrastructure (`pkg/metrics/`). JWE metrics should 
 
 - [Prometheus Best Practices](https://prometheus.io/docs/practices/naming/)
 - [JWE RFC 7516](https://tools.ietf.org/html/rfc7516)
-- [GAuth Metrics Package](../../pkg/metrics/)
+- [AgentAuth Metrics Package](../../pkg/metrics/)

@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates distributed caching with resilience patterns using the GAuth framework. It covers consistent hashing, rate limiting, circuit breaker, retry, and bulkhead isolation.
+This example demonstrates distributed caching with resilience patterns using the AgentAuth framework. It covers consistent hashing, rate limiting, circuit breaker, retry, and bulkhead isolation.
 
 ## Key Concepts
 - **DistributedCache**: Manages cache nodes and partitions keys using consistent hashing.

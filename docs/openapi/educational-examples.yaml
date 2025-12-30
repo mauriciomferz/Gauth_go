@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GAuth Educational Examples API (Deprecated)
+  title: AgentAuth Educational Examples API (Deprecated)
   version: 0.1.0
   description: |
     DEPRECATED: Educational endpoints retained temporarily for backward compatibility.

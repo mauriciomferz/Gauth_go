@@ -1,4 +1,4 @@
-// Copyright (c) 2025 GAuth. All rights reserved.
+// Copyright (c) 2025 AgentAuth. All rights reserved.
 package pdp_test
 
 import (

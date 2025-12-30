@@ -72,7 +72,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	request *ExtendedTokenRequest,
 ) (*ExtendedToken, error) {
 	if request == nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_request",
 			Message: "Extended token request cannot be nil",
 		}
@@ -80,7 +80,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 
 	// Step 1: Validate authorization chain
 	if request.AuthorizationChain == nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "missing_authorization_chain",
 			Message: "Authorization chain is required per RFC-0111",
 		}
@@ -91,7 +91,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		return nil, fmt.Errorf("authorization chain validation failed: %w", err)
 	}
 	if !chainResult.Valid {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_authorization_chain",
 			Message: fmt.Sprintf("Authorization chain validation failed: %s", chainResult.FailureReason),
 		}
@@ -99,7 +99,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 
 	// Step 2: Validate Power of Attorney
 	if request.PowerOfAttorney == nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "missing_poa",
 			Message: "Power of Attorney is required per RFC-0111",
 		}
@@ -112,7 +112,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 	// Step 2b: Validate Authorization Details (RFC 9396)
 	if len(request.AuthorizationDetails) > 0 {
 		if err := s.rarValidator.ValidateAuthorizationDetails(request.PowerOfAttorney, request.AuthorizationDetails); err != nil {
-			return nil, &GAuthError{
+			return nil, &AgentAuthError{
 				Code:    "invalid_authorization_details",
 				Message: fmt.Sprintf("RAR validation failed: %v", err),
 			}
@@ -121,7 +121,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 
 	// Step 3: Validate client owner information
 	if request.ClientOwnerInfo == nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "missing_client_owner",
 			Message: "Client owner information is required per RFC-0111",
 		}
@@ -129,7 +129,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 
 	// Step 4: Validate owner's authorizer information
 	if request.OwnersAuthorizerInfo == nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "missing_owners_authorizer",
 			Message: "Owner's authorizer information is required per RFC-0111",
 		}
@@ -137,7 +137,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 
 	// Step 5: Validate legal framework
 	if request.LegalFramework == nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "missing_legal_framework",
 			Message: "Legal framework is required per RFC-0111",
 		}
@@ -183,7 +183,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		IssuedBy: &AuthorizationServerInfo{
 			ServerID:   s.issuerID,
 			ServerURL:  s.issuerURL,
-			ServerName: fmt.Sprintf("GAuth AS %s", s.issuerID),
+			ServerName: fmt.Sprintf("AgentAuth AS %s", s.issuerID),
 			Issuer:     s.issuerID,
 			IssueTime:  now,
 		},
@@ -233,7 +233,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 	token *ExtendedToken,
 ) (string, error) {
 	if token == nil {
-		return "", &GAuthError{
+		return "", &AgentAuthError{
 			Code:    "nil_token",
 			Message: "Cannot encode nil token",
 		}
@@ -350,7 +350,7 @@ func (s *ExtendedTokenService) ValidateExtendedToken(
 	// Step 3: Validate expiration
 	if time.Now().After(token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second)) {
 		result.Valid = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "token_expired",
 			Message: "Extended token has expired",
 		}
@@ -369,7 +369,7 @@ func (s *ExtendedTokenService) ValidateExtendedToken(
 
 	if !chainResult.Valid {
 		result.Valid = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "invalid_authorization_chain",
 			Message: fmt.Sprintf("Authorization chain is invalid: %s", chainResult.FailureReason),
 		}
@@ -483,7 +483,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 		// Decrypt JWE to get JWT
 		decrypted, err := s.jweService.DecryptToken(ctx, tokenString)
 		if err != nil {
-			return nil, &GAuthError{
+			return nil, &AgentAuthError{
 				Code:    "jwe_decrypt_failed",
 				Message: fmt.Sprintf("Failed to decrypt JWE token: %v", err),
 			}
@@ -504,14 +504,14 @@ func (s *ExtendedTokenService) parseExtendedToken(
 	})
 
 	if err != nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "jwt_parse_failed",
 			Message: fmt.Sprintf("Failed to parse JWT: %v", err),
 		}
 	}
 
 	if !jwtToken.Valid {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_jwt",
 			Message: "JWT token is invalid",
 		}
@@ -520,7 +520,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 	// Extract claims
 	claims, ok := jwtToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_claims",
 			Message: "Failed to extract JWT claims",
 		}

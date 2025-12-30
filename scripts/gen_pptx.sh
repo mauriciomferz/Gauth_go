@@ -9,8 +9,8 @@ set -euo pipefail
 #   --engine=<name>         Force PDF engine (tectonic|weasyprint|wkhtmltopdf|pdflatex)
 #   --reference-pptx=<file> Use custom PPTX reference template
 #   --help                  Show help
-# Default deck_markdown: docs/presentations/GAuth_Executive_Tech_Business_Deck.md
-# Default out_basename: GAuth_Deck
+# Default deck_markdown: docs/presentations/AgentAuth_Executive_Tech_Business_Deck.md
+# Default out_basename: AgentAuth_Deck
 
 DECK_MD=""
 OUT_BASE=""
@@ -21,7 +21,7 @@ PPTX_ARGS=()
 
 show_help(){
   cat <<'EOF'
-gen_pptx.sh - Generate PPTX (and PDF) from GAuth markdown deck.
+gen_pptx.sh - Generate PPTX (and PDF) from AgentAuth markdown deck.
 
 Usage: ./scripts/gen_pptx.sh [options] [deck_markdown] [out_basename]
 
@@ -33,7 +33,7 @@ Options:
 
 Examples:
   ./scripts/gen_pptx.sh
-  ./scripts/gen_pptx.sh --no-pdf docs/presentations/GAuth_Executive_Tech_Business_Deck.md GAuth_NoPDF
+  ./scripts/gen_pptx.sh --no-pdf docs/presentations/AgentAuth_Executive_Tech_Business_Deck.md AgentAuth_NoPDF
   ./scripts/gen_pptx.sh --engine=tectonic --reference-pptx=branding.pptx
 EOF
 }
@@ -49,8 +49,8 @@ for arg in "$@"; do
   esac
 done
 
-DECK_MD=${ARGS[0]:-docs/presentations/GAuth_Executive_Tech_Business_Deck.md}
-OUT_BASE=${ARGS[1]:-GAuth_Deck}
+DECK_MD=${ARGS[0]:-docs/presentations/AgentAuth_Executive_Tech_Business_Deck.md}
+OUT_BASE=${ARGS[1]:-AgentAuth_Deck}
 
 if [[ ! -f "$DECK_MD" ]]; then
   echo "Error: Deck markdown '$DECK_MD' not found" >&2
@@ -173,7 +173,7 @@ if [[ -s "$PROCESSED_MD" ]]; then
     tail -n +2 "$PROCESSED_MD" > "$PROCESSED_MD.tmp" && mv "$PROCESSED_MD.tmp" "$PROCESSED_MD"
   fi
   # Prepend a synthetic title to ensure not empty / not front matter
-  { echo "# GAuth Presentation"; echo; cat "$PROCESSED_MD"; } > "$PROCESSED_MD.tmp" && mv "$PROCESSED_MD.tmp" "$PROCESSED_MD"
+  { echo "# AgentAuth Presentation"; echo; cat "$PROCESSED_MD"; } > "$PROCESSED_MD.tmp" && mv "$PROCESSED_MD.tmp" "$PROCESSED_MD"
 fi
 
 # Replace remaining slide separators '---' with non-metadata marker '***'

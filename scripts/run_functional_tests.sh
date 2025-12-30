@@ -1,9 +1,9 @@
 #!/bin/bash
-# GAuth Functional Tests - Only run tests that work
+# AgentAuth Functional Tests - Only run tests that work
 
 set -e
 
-echo "🚀 Running GAuth Functional Tests"
+echo "🚀 Running AgentAuth Functional Tests"
 echo "=================================="
 
 echo ""
@@ -38,7 +38,7 @@ cd examples/cascade && go build -o /tmp/cascade . && echo "   ✅ cascade exampl
 echo ""
 echo "✅ All Functional Tests Passed!"
 echo "================================="
-echo "Status: Core GAuth functionality is working properly"
+echo "Status: Core AgentAuth functionality is working properly"
 echo "Note: Some advanced examples have API compatibility issues but core features work"
 
 echo ""

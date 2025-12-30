@@ -1,16 +1,16 @@
-# OpenAPI Documentation for GAuth Power of Attorney & Delegation APIs
+# OpenAPI Documentation for AgentAuth Power of Attorney & Delegation APIs
 # Addresses gap sec10.item1 (P1): OpenAPI for PoA & delegation
 
 openapi: 3.0.3
 info:
-  title: GAuth Power of Attorney API
+  title: AgentAuth Power of Attorney API
   description: |
     RESTful API for issuing, verifying, and managing Power of Attorney (PoA) delegations
-    compliant with RFC 0111 and RFC 0115.
+    compliant with AAP-001 and AAP-002.
   version: 1.0.0
   contact:
-    name: Gimel Foundation
-    url: https://github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0
+    name: AgentAuth Community
+    url: https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -35,7 +35,7 @@ paths:
   /.well-known/gauth-config:
     get:
       summary: Service discovery endpoint
-      description: Returns GAuth service configuration and capabilities
+      description: Returns AgentAuth service configuration and capabilities
       tags:
         - Discovery
       responses:

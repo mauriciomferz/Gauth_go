@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates a multi-region token management architecture using GAuth.
+This example demonstrates a multi-region token management architecture using AgentAuth.
 
 ## Key Concepts
 - **Region**: Logical grouping of services and token caches.

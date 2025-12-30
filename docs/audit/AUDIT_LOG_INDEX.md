@@ -29,7 +29,7 @@ Authoritative index of migrated pre-production audit logs (Weeks 1–4). All fil
 
 ### Week 3
 8. `preproduction_audit_week3_day1.md` – Security audit & crypto validation
-9. `preproduction_audit_week3_day2.md` – RFC 0111/0115 compliance validation
+9. `preproduction_audit_week3_day2.md` – AAP-001/0115 compliance validation
 10. `preproduction_audit_week3_day3.md` – Penetration testing results
 11. `preproduction_audit_week3_day4.md` – Compliance documentation
 12. `preproduction_audit_week3_day5.md` – Security remediation & sign‑off

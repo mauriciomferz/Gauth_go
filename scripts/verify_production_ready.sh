@@ -1,10 +1,10 @@
 #!/bin/bash
-# GAuth Production Verification Script
+# AgentAuth Production Verification Script
 # Verifies that all core functionality is working correctly
 
 set -e
 
-echo "🚀 GAuth Production Verification Starting..."
+echo "🚀 AgentAuth Production Verification Starting..."
 echo "=================================================="
 
 # Function to run with status check
@@ -24,8 +24,8 @@ run_check() {
 
 # Core functionality checks
 echo "📦 Testing Core Package Builds..."
-run_check "Main GAuth server build" "go build -o /tmp/gauth-server ./cmd/gauth-server"
-run_check "GAuth package build" "go build ./pkg/gauth/..."
+run_check "Main AgentAuth server build" "go build -o /tmp/gauth-server ./cmd/gauth-server"
+run_check "AgentAuth package build" "go build ./pkg/gauth/..."
 run_check "Token package build" "go build ./pkg/token/..."
 run_check "Events package build" "go build ./pkg/events/..."
 run_check "Resilience package build" "go build ./pkg/resilience/..."
@@ -50,6 +50,6 @@ echo "  📁 Examples: $(find examples -name "*.go" | wc -l) Go files"
 echo "  📁 Tests: $(find . -name "*_test.go" | wc -l) test files"
 
 echo ""
-echo "✅ GAuth Production Verification Complete!"
+echo "✅ AgentAuth Production Verification Complete!"
 echo "🎉 Status: DEMO (BETA) IMPLEMENTATION COMPLETE"
 echo "=================================================="

@@ -1,4 +1,4 @@
-// Package gauth provides core types and interfaces for the GAuth authentication system.
+// Package gauth provides core types and interfaces for the AgentAuth authentication system.
 package gauth
 
 import "time"

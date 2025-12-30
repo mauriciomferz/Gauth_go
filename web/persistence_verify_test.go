@@ -118,11 +118,11 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 	t.Setenv("GAUTH_SEMANTIC_PERSIST_NO_THROTTLE", "1")
 	srv := NewBetaServer("8132")
 	t.Cleanup(func() { srv.Shutdown() })
-	if srv.rfc0111Service == nil {
+	if srv.aap001Service == nil {
 		t.Fatalf("semantic service not initialized")
 	}
 	// Inject mock service to ensure counters are present for persistence test
-	mockSvc := &mockRFC0111Service{
+	mockSvc := &mockAAP001Service{
 		snapshots: []map[string]uint64{
 			{"scope_violation": 10},
 			{"scope_violation": 20}, // subsequent calls get subsequent snapshots
@@ -130,7 +130,7 @@ func TestSemanticPersistenceVerify(t *testing.T) {
 			{"scope_violation": 40},
 		},
 	}
-	srv.rfc0111Service = mockSvc
+	srv.aap001Service = mockSvc
 	srv.semanticHandler.Service = mockSvc
 	// Ensure we have some data
 	srv.semanticHandler.Update()

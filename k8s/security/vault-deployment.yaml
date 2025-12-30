@@ -1,4 +1,4 @@
-# HashiCorp Vault Deployment for GAuth
+# HashiCorp Vault Deployment for AgentAuth
 # High-availability Vault cluster with Consul backend and CloudHSM auto-unseal
 
 ---
@@ -589,7 +589,7 @@ data:
   key: cGxhY2Vob2xkZXItZ29zc2lwLWtleS1jaGFuZ2UtbWU=  # Base64 encoded, CHANGE THIS
 
 ---
-# Example: GAuth App with Vault Agent Sidecar
+# Example: AgentAuth App with Vault Agent Sidecar
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -665,7 +665,7 @@ spec:
           medium: Memory
 
 ---
-# GAuth ServiceAccount for Vault access
+# AgentAuth ServiceAccount for Vault access
 apiVersion: v1
 kind: ServiceAccount
 metadata:

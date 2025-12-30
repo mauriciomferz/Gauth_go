@@ -1220,7 +1220,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 	// Add demo routes
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"service": "GAuth AI Capability Matrix Demo",
+			"service": "AgentAuth AI Capability Matrix Demo",
 			"version": "1.0.0",
 			"endpoints": []string{
 				"GET /api/v1/ai/capabilities/status",
@@ -1381,7 +1381,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		})
 	})
 
-	// Minimal PoA issuance endpoint (demo-only; not a full RFC0111 implementation)
+	// Minimal PoA issuance endpoint (demo-only; not a full AAP001 implementation)
 	router.POST("/demo/poa/issue", func(c *gin.Context) {
 		var req struct {
 			ID              string   `json:"id"`

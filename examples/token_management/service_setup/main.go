@@ -1,6 +1,6 @@
 // Token Service Setup Example
 // This minimal example demonstrates how to initialize a token management service.
-// Extend this stub to add endpoints, business logic, and integration with GAuth token management.
+// Extend this stub to add endpoints, business logic, and integration with AgentAuth token management.
 
 package main
 

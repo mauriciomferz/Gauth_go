@@ -6,11 +6,11 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth+ Monitoring Stack - Quick Start
+# AgentAuth+ Monitoring Stack - Quick Start
 
 ## Overview
 
-Complete monitoring solution for GAuth+ with Grafana dashboard, Prometheus metrics, and AlertManager alerts.
+Complete monitoring solution for AgentAuth+ with Grafana dashboard, Prometheus metrics, and AlertManager alerts.
 
 ## Quick Start (3 Minutes)
 
@@ -22,7 +22,7 @@ docker compose up -d
 ```
 
 **What this does**:
-- Starts GAuth service (port 8080) with metrics enabled
+- Starts AgentAuth service (port 8080) with metrics enabled
 - Starts Prometheus (port 9090) to collect metrics
 - Starts Grafana (port 3000) with pre-configured dashboard
 - Starts AlertManager (port 9093) for alert management
@@ -34,8 +34,8 @@ docker compose up -d
 2. Login:
    - Username: `admin`
    - Password: `admin`
-3. Navigate to: **Dashboards** → **Browse** → **GAuth+** folder
-4. Open: **GAuth+ Monitoring Dashboard**
+3. Navigate to: **Dashboards** → **Browse** → **AgentAuth+** folder
+4. Open: **AgentAuth+ Monitoring Dashboard**
 
 ### Step 3: Generate Some Traffic
 
@@ -64,7 +64,7 @@ The dashboard auto-refreshes every 10 seconds. You should see:
 
 ### 12 Dashboard Panels
 
-1. **GAuth+ Validations Rate** - Real-time validation metrics by feature
+1. **AgentAuth+ Validations Rate** - Real-time validation metrics by feature
 2. **Total Validation Rate** - Aggregated gauge
 3. **P95 Validation Duration** - Latency monitoring
 4. **Cache Hit Rate** - Performance optimization tracking
@@ -100,7 +100,7 @@ Automatically configured in Prometheus:
 
 ## Verify Everything Works
 
-### Check GAuth Metrics Endpoint
+### Check AgentAuth Metrics Endpoint
 
 ```bash
 curl http://localhost:8080/metrics | grep gauthplus | head -20
@@ -108,7 +108,7 @@ curl http://localhost:8080/metrics | grep gauthplus | head -20
 
 **Expected output**:
 ```
-# HELP gauthplus_validations_total Total number of GAuth+ validations performed
+# HELP gauthplus_validations_total Total number of AgentAuth+ validations performed
 # TYPE gauthplus_validations_total counter
 gauthplus_validations_total{feature="successor",result="success"} 0
 gauthplus_validations_total{feature="delegation",result="success"} 0
@@ -136,7 +136,7 @@ docker compose logs grafana | grep -i provision
 **Expected output**:
 ```
 Provisioning dashboards from configuration
-Dashboard "GAuth+ Monitoring Dashboard" provisioned successfully
+Dashboard "AgentAuth+ Monitoring Dashboard" provisioned successfully
 ```
 
 ## Access URLs
@@ -146,8 +146,8 @@ Dashboard "GAuth+ Monitoring Dashboard" provisioned successfully
 | **Grafana** | http://localhost:3000 | admin / admin |
 | **Prometheus** | http://localhost:9090 | None |
 | **AlertManager** | http://localhost:9093 | None |
-| **GAuth Metrics** | http://localhost:8080/metrics | None |
-| **GAuth Health** | http://localhost:8080/health | None |
+| **AgentAuth Metrics** | http://localhost:8080/metrics | None |
+| **AgentAuth Health** | http://localhost:8080/health | None |
 
 ## Common Tasks
 
@@ -267,7 +267,7 @@ docker compose restart prometheus
 
 ### Resource Usage (Typical)
 
-- **GAuth**: ~50-100MB RAM
+- **AgentAuth**: ~50-100MB RAM
 - **Prometheus**: ~200-500MB RAM (depends on retention)
 - **Grafana**: ~50-100MB RAM
 - **AlertManager**: ~20-50MB RAM
@@ -276,7 +276,7 @@ docker compose restart prometheus
 
 ### Scrape Intervals
 
-- **Prometheus scrapes GAuth**: Every 15 seconds
+- **Prometheus scrapes AgentAuth**: Every 15 seconds
 - **Dashboard auto-refresh**: Every 10 seconds
 - **Alert evaluation**: Every 30 seconds
 

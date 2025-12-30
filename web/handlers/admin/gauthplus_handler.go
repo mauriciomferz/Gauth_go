@@ -12,8 +12,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
 )
 
-// GAuthPlusHandler handles GAuth+ enhanced authorization features
-type GAuthPlusHandler struct {
+// AgentAuthPlusHandler handles AgentAuth+ enhanced authorization features
+type AgentAuthPlusHandler struct {
 	successorService   gauthplus.SuccessorManagementService
 	delegationService  gauthplus.DelegationService
 	dualControlService gauthplus.DualControlService
@@ -21,15 +21,15 @@ type GAuthPlusHandler struct {
 	capabilityService  gauthplus.CapabilityAssessmentService
 }
 
-// NewGAuthPlusHandler creates a new GAuth+ handler
-func NewGAuthPlusHandler(pool *pgxpool.Pool) *GAuthPlusHandler {
+// NewAgentAuthPlusHandler creates a new AgentAuth+ handler
+func NewAgentAuthPlusHandler(pool *pgxpool.Pool) *AgentAuthPlusHandler {
 	// Wrap pgxpool in database.DB for service compatibility
 	var db *database.DB
 	if pool != nil {
 		db = &database.DB{Pool: pool}
 	}
 
-	return &GAuthPlusHandler{
+	return &AgentAuthPlusHandler{
 		successorService:   gauthplus.NewPostgreSQLSuccessorService(db),
 		delegationService:  gauthplus.NewPostgreSQLDelegationService(db),
 		dualControlService: gauthplus.NewPostgreSQLDualControlService(db),
@@ -42,7 +42,7 @@ func NewGAuthPlusHandler(pool *pgxpool.Pool) *GAuthPlusHandler {
 
 // ActivateSuccessor activates successor AI when primary agent fails
 // POST /api/admin/gauthplus/successor/:id/activate
-func (h *GAuthPlusHandler) ActivateSuccessor(c *gin.Context) {
+func (h *AgentAuthPlusHandler) ActivateSuccessor(c *gin.Context) {
 	poaID := c.Param("id")
 
 	var req struct {
@@ -79,7 +79,7 @@ func (h *GAuthPlusHandler) ActivateSuccessor(c *gin.Context) {
 
 // DeactivateSuccessor returns control to primary AI
 // POST /api/admin/gauthplus/successor/:id/deactivate
-func (h *GAuthPlusHandler) DeactivateSuccessor(c *gin.Context) {
+func (h *AgentAuthPlusHandler) DeactivateSuccessor(c *gin.Context) {
 	var req struct {
 		ActivationID  string `json:"activation_id" binding:"required"`
 		DeactivatedBy string `json:"deactivated_by" binding:"required"`
@@ -107,7 +107,7 @@ func (h *GAuthPlusHandler) DeactivateSuccessor(c *gin.Context) {
 
 // GetActiveSuccessor returns currently active successor
 // GET /api/admin/gauthplus/successor/:id/active
-func (h *GAuthPlusHandler) GetActiveSuccessor(c *gin.Context) {
+func (h *AgentAuthPlusHandler) GetActiveSuccessor(c *gin.Context) {
 	poaID := c.Param("id")
 
 	activation, err := h.successorService.GetActiveSuccessor(c.Request.Context(), poaID)
@@ -132,7 +132,7 @@ func (h *GAuthPlusHandler) GetActiveSuccessor(c *gin.Context) {
 
 // ListSuccessorHistory returns activation history
 // GET /api/admin/gauthplus/successor/:id/history
-func (h *GAuthPlusHandler) ListSuccessorHistory(c *gin.Context) {
+func (h *AgentAuthPlusHandler) ListSuccessorHistory(c *gin.Context) {
 	poaID := c.Param("id")
 
 	history, err := h.successorService.ListSuccessorHistory(c.Request.Context(), poaID)
@@ -151,7 +151,7 @@ func (h *GAuthPlusHandler) ListSuccessorHistory(c *gin.Context) {
 
 // CreateDelegation creates AI-to-AI delegation
 // POST /api/admin/delegations
-func (h *GAuthPlusHandler) CreateDelegation(c *gin.Context) {
+func (h *AgentAuthPlusHandler) CreateDelegation(c *gin.Context) {
 	var delegation gauthplus.AIDelegation
 
 	if err := c.ShouldBindJSON(&delegation); err != nil {
@@ -180,7 +180,7 @@ func (h *GAuthPlusHandler) CreateDelegation(c *gin.Context) {
 
 // ValidateDelegation checks if delegation is allowed
 // POST /api/admin/delegations/validate
-func (h *GAuthPlusHandler) ValidateDelegation(c *gin.Context) {
+func (h *AgentAuthPlusHandler) ValidateDelegation(c *gin.Context) {
 	var req struct {
 		SourceAgentID string   `json:"source_agent_id" binding:"required"`
 		TargetAgentID string   `json:"target_agent_id" binding:"required"`
@@ -216,7 +216,7 @@ func (h *GAuthPlusHandler) ValidateDelegation(c *gin.Context) {
 
 // GetDelegationChain returns full delegation chain
 // GET /api/admin/delegations/chain/:agentId
-func (h *GAuthPlusHandler) GetDelegationChain(c *gin.Context) {
+func (h *AgentAuthPlusHandler) GetDelegationChain(c *gin.Context) {
 	agentID := c.Param("agentId")
 
 	chain, err := h.delegationService.GetDelegationChain(c.Request.Context(), agentID)
@@ -234,7 +234,7 @@ func (h *GAuthPlusHandler) GetDelegationChain(c *gin.Context) {
 
 // RevokeDelegation revokes active delegation
 // DELETE /api/admin/delegations/:id
-func (h *GAuthPlusHandler) RevokeDelegation(c *gin.Context) {
+func (h *AgentAuthPlusHandler) RevokeDelegation(c *gin.Context) {
 	delegationID := c.Param("id")
 
 	var req struct {
@@ -267,7 +267,7 @@ func (h *GAuthPlusHandler) RevokeDelegation(c *gin.Context) {
 
 // RequestApproval initiates approval workflow
 // POST /api/admin/approvals
-func (h *GAuthPlusHandler) RequestApproval(c *gin.Context) {
+func (h *AgentAuthPlusHandler) RequestApproval(c *gin.Context) {
 	var approval gauthplus.DualControlApproval
 
 	if err := c.ShouldBindJSON(&approval); err != nil {
@@ -290,7 +290,7 @@ func (h *GAuthPlusHandler) RequestApproval(c *gin.Context) {
 
 // ApproveAction records approver's approval
 // POST /api/admin/approvals/:id/approve
-func (h *GAuthPlusHandler) ApproveAction(c *gin.Context) {
+func (h *AgentAuthPlusHandler) ApproveAction(c *gin.Context) {
 	approvalID := c.Param("id")
 
 	var req struct {
@@ -329,7 +329,7 @@ func (h *GAuthPlusHandler) ApproveAction(c *gin.Context) {
 
 // RejectAction records approver's rejection
 // POST /api/admin/approvals/:id/reject
-func (h *GAuthPlusHandler) RejectAction(c *gin.Context) {
+func (h *AgentAuthPlusHandler) RejectAction(c *gin.Context) {
 	approvalID := c.Param("id")
 
 	var req struct {
@@ -361,7 +361,7 @@ func (h *GAuthPlusHandler) RejectAction(c *gin.Context) {
 
 // GetPendingApprovals returns approvals awaiting decision
 // GET /api/admin/approvals/pending
-func (h *GAuthPlusHandler) GetPendingApprovals(c *gin.Context) {
+func (h *AgentAuthPlusHandler) GetPendingApprovals(c *gin.Context) {
 	approverID := c.Query("approver_id")
 
 	approvals, err := h.dualControlService.GetPendingApprovals(c.Request.Context(), approverID)
@@ -378,7 +378,7 @@ func (h *GAuthPlusHandler) GetPendingApprovals(c *gin.Context) {
 
 // CheckApprovalStatus checks approval status
 // GET /api/admin/approvals/:id/status
-func (h *GAuthPlusHandler) CheckApprovalStatus(c *gin.Context) {
+func (h *AgentAuthPlusHandler) CheckApprovalStatus(c *gin.Context) {
 	approvalID := c.Param("id")
 
 	status, err := h.dualControlService.CheckApprovalStatus(c.Request.Context(), approvalID)
@@ -397,7 +397,7 @@ func (h *GAuthPlusHandler) CheckApprovalStatus(c *gin.Context) {
 
 // RecordViolation records fiduciary duty breach
 // POST /api/admin/violations
-func (h *GAuthPlusHandler) RecordViolation(c *gin.Context) {
+func (h *AgentAuthPlusHandler) RecordViolation(c *gin.Context) {
 	var violation gauthplus.FiduciaryDutyViolation
 
 	if err := c.ShouldBindJSON(&violation); err != nil {
@@ -418,7 +418,7 @@ func (h *GAuthPlusHandler) RecordViolation(c *gin.Context) {
 
 // GetViolations returns violations for PoA or agent
 // GET /api/admin/violations
-func (h *GAuthPlusHandler) GetViolations(c *gin.Context) {
+func (h *AgentAuthPlusHandler) GetViolations(c *gin.Context) {
 	poaID := c.Query("poa_id")
 	agentID := c.Query("agent_id")
 
@@ -436,7 +436,7 @@ func (h *GAuthPlusHandler) GetViolations(c *gin.Context) {
 
 // GetViolationsBySeverity returns violations above severity threshold
 // GET /api/admin/violations/severity/:level
-func (h *GAuthPlusHandler) GetViolationsBySeverity(c *gin.Context) {
+func (h *AgentAuthPlusHandler) GetViolationsBySeverity(c *gin.Context) {
 	minSeverity := c.Param("level")
 
 	violations, err := h.fiduciaryService.GetViolationsBySeverity(c.Request.Context(), minSeverity)
@@ -454,7 +454,7 @@ func (h *GAuthPlusHandler) GetViolationsBySeverity(c *gin.Context) {
 
 // ResolveViolation marks violation as resolved
 // PUT /api/admin/violations/:id/resolve
-func (h *GAuthPlusHandler) ResolveViolation(c *gin.Context) {
+func (h *AgentAuthPlusHandler) ResolveViolation(c *gin.Context) {
 	violationID := c.Param("id")
 
 	var req struct {
@@ -487,7 +487,7 @@ func (h *GAuthPlusHandler) ResolveViolation(c *gin.Context) {
 
 // CreateAssessment creates new capability assessment
 // POST /api/admin/assessments
-func (h *GAuthPlusHandler) CreateAssessment(c *gin.Context) {
+func (h *AgentAuthPlusHandler) CreateAssessment(c *gin.Context) {
 	var assessment gauthplus.AICapabilityAssessment
 
 	if err := c.ShouldBindJSON(&assessment); err != nil {
@@ -508,7 +508,7 @@ func (h *GAuthPlusHandler) CreateAssessment(c *gin.Context) {
 
 // GetLatestAssessment returns most recent assessment
 // GET /api/admin/assessments/agent/:agentId/latest
-func (h *GAuthPlusHandler) GetLatestAssessment(c *gin.Context) {
+func (h *AgentAuthPlusHandler) GetLatestAssessment(c *gin.Context) {
 	agentID := c.Param("agentId")
 
 	assessment, err := h.capabilityService.GetLatestAssessment(c.Request.Context(), agentID)
@@ -531,7 +531,7 @@ func (h *GAuthPlusHandler) GetLatestAssessment(c *gin.Context) {
 
 // CheckCapabilityMatch checks if agent meets requirements
 // POST /api/admin/assessments/check-match
-func (h *GAuthPlusHandler) CheckCapabilityMatch(c *gin.Context) {
+func (h *AgentAuthPlusHandler) CheckCapabilityMatch(c *gin.Context) {
 	var req struct {
 		AgentID      string                           `json:"agent_id" binding:"required"`
 		Requirements gauthplus.CapabilityRequirements `json:"requirements" binding:"required"`
@@ -562,7 +562,7 @@ func (h *GAuthPlusHandler) CheckCapabilityMatch(c *gin.Context) {
 
 // GetExpiringAssessments returns assessments expiring soon
 // GET /api/admin/assessments/expiring?days=30
-func (h *GAuthPlusHandler) GetExpiringAssessments(c *gin.Context) {
+func (h *AgentAuthPlusHandler) GetExpiringAssessments(c *gin.Context) {
 	daysStr := c.DefaultQuery("days", "30")
 	days := 30
 	if _, err := fmt.Sscanf(daysStr, "%d", &days); err != nil {
@@ -583,8 +583,8 @@ func (h *GAuthPlusHandler) GetExpiringAssessments(c *gin.Context) {
 	})
 }
 
-// RegisterRoutes registers all GAuth+ routes
-func (h *GAuthPlusHandler) RegisterRoutes(router *gin.RouterGroup) {
+// RegisterRoutes registers all AgentAuth+ routes
+func (h *AgentAuthPlusHandler) RegisterRoutes(router *gin.RouterGroup) {
 	// Successor management routes
 	router.POST("/gauthplus/successor/:id/activate", h.ActivateSuccessor)
 	router.POST("/gauthplus/successor/:id/deactivate", h.DeactivateSuccessor)

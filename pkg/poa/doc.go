@@ -1,4 +1,4 @@
-// Package poa provides Proof-of-Authorization (POA) token implementation per RFC 0115.
+// Package poa provides Proof-of-Authorization (POA) token implementation per AAP-002.
 //
 // POA tokens are cryptographic proofs that demonstrate authorization was granted
 // by a legitimate authority. They support delegation chains, multi-signature
@@ -101,12 +101,12 @@
 //   - Revocation status
 //   - Constraint evaluation
 //
-// # RFC 0115 Compliance
+// # AAP-002 Compliance
 //
-// Validate RFC 0115 compliance:
+// Validate AAP-002 compliance:
 //
 //	// Check compliance
-//	compliant, issues := poa.ValidateRFC0115Compliance(token)
+//	compliant, issues := poa.ValidateAAP002Compliance(token)
 //	if !compliant {
 //	    for _, issue := range issues {
 //	        log.Printf("Compliance issue: %s", issue)
@@ -198,7 +198,7 @@
 //   - POA issuance and validation
 //   - Multi-signature validation
 //   - Delegation chain processing
-//   - RFC 0115 compliance validation
+//   - AAP-002 compliance validation
 //   - CBOR encoding/decoding
 //   - Error path coverage
 package poa

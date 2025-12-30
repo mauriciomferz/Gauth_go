@@ -5,7 +5,7 @@ status: archived
 lastUpdated: 2025-11-12
 owners: compliance-team
 ---
-# GAuth Pre-Production Audit - Week 4 Day 3: CI/CD Integration Testing Setup
+# AgentAuth Pre-Production Audit - Week 4 Day 3: CI/CD Integration Testing Setup
 
 **Date**: November 2024  
 **Phase**: Pre-Production - Week 4 Day 3  
@@ -230,7 +230,7 @@ deployments/GITHUB_ACTIONS_SETUP.md
 **Output**:
 ```
 ========================================
-  GAuth CI/CD Pre-Flight Checklist
+  AgentAuth CI/CD Pre-Flight Checklist
 ========================================
 
 [1/7] Checking Local Tools...
@@ -316,7 +316,7 @@ Next steps:
 **Output**:
 ```
 ========================================
-  GAuth CI/CD Quick Validation
+  AgentAuth CI/CD Quick Validation
 ========================================
 
 [1/4] Validating Workflow YAML Syntax...
@@ -499,8 +499,8 @@ Next Steps:
 | `deployments/k8s/staging/namespace.yaml` | ✅ Present | Namespace, ResourceQuota, LimitRange |
 | `deployments/k8s/staging/configmap.yaml` | ✅ Present | Application config, Prometheus, AlertManager |
 | `deployments/k8s/staging/secrets.yaml` | ✅ Present | JWT keys, Ed25519 keys, passwords |
-| `deployments/k8s/staging/deployment.yaml` | ✅ Present | GAuth deployment (3 replicas, HA) |
-| `deployments/k8s/staging/service.yaml` | ✅ Present | GAuth, PostgreSQL, Redis services |
+| `deployments/k8s/staging/deployment.yaml` | ✅ Present | AgentAuth deployment (3 replicas, HA) |
+| `deployments/k8s/staging/service.yaml` | ✅ Present | AgentAuth, PostgreSQL, Redis services |
 | `deployments/k8s/staging/ingress.yaml` | ✅ Present | Ingress with TLS, security headers |
 | `deployments/k8s/staging/postgres-statefulset.yaml` | ✅ Present | PostgreSQL StatefulSet, 20GB PVC |
 | `deployments/k8s/staging/redis-statefulset.yaml` | ✅ Present | Redis StatefulSet, 5GB PVC |
@@ -548,7 +548,7 @@ Next Steps:
 **Setup Steps**:
 1. Generate GitHub Personal Access Token:
    - Go to: https://github.com/settings/tokens/new
-   - Name: `GAuth CI/CD`
+   - Name: `AgentAuth CI/CD`
    - Scopes: `write:packages`, `delete:packages`, `read:packages`
    - Expiration: 90 days (or longer)
    - Click **Generate token**
@@ -612,7 +612,7 @@ kubectl create token gauth-cicd -n gauth-staging --duration=876000h > /tmp/sa-to
 **Steps**:
 1. Create Slack app: https://api.slack.com/apps
 2. Click **Create New App** → **From scratch**
-3. App Name: `GAuth CI/CD`, select workspace
+3. App Name: `AgentAuth CI/CD`, select workspace
 4. Go to **Incoming Webhooks** → toggle **On**
 5. Click **Add New Webhook to Workspace**
 6. Select channel: `#gauth-cicd` (or create new)
@@ -620,7 +620,7 @@ kubectl create token gauth-cicd -n gauth-staging --duration=876000h > /tmp/sa-to
 8. Test webhook:
    ```bash
    curl -X POST -H 'Content-type: application/json' \
-     --data '{"text":"✅ GAuth CI/CD test"}' \
+     --data '{"text":"✅ AgentAuth CI/CD test"}' \
      $SLACK_WEBHOOK_URL
    ```
 

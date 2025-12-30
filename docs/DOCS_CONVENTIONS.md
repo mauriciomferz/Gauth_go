@@ -38,7 +38,7 @@ If a file lacks this header, add it on next touch (do **not** retroactively bump
 | ADR | `ADR-<slug>.md` | `ADR-key-rotation-scheduler-vault-integration.md` |
 | Release Notes | `RELEASE_NOTES_<version>.md` or `.auto.md` | `RELEASE_NOTES_beta.md` |
 | Generated | `*.auto.md` suffix | `GAP_MATRIX.auto.md` |
-| Runbook | PascalCase service event | `RedisDown.md`, `GAuthServiceUnavailable.md` |
+| Runbook | PascalCase service event | `RedisDown.md`, `AgentAuthServiceUnavailable.md` |
 | Report (phase/session) | `PHASE<number>_COMPLETION_REPORT.md` | `PHASE6_COMPLETION_REPORT.md` |
 | Roadmap | `ROADMAP_<scope>.md` | `ROADMAP_NEXT_SPRINT.md` |
 | Compliance Matrix | `*_COMPLIANCE_MATRIX.md` | `rfc0111_compliance_matrix.md` |

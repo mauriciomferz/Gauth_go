@@ -75,7 +75,7 @@ func DocsLandingHandler(c *gin.Context) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAuth API Documentation</title>
+    <title>AgentAuth API Documentation</title>
     <style>
         * {
             margin: 0;
@@ -202,7 +202,7 @@ func DocsLandingHandler(c *gin.Context) {
 </head>
 <body>
     <div class="container">
-        <h1>🔐 GAuth API Documentation</h1>
+        <h1>🔐 AgentAuth API Documentation</h1>
         <p class="subtitle">OAuth 2.0 Authorization Server with RFC-0111 Compliance</p>
         <div class="version-badge">v1.0.0-beta</div>
         
@@ -249,7 +249,7 @@ func DocsLandingHandler(c *gin.Context) {
                 <a href="/api/v1/beta/health">Health Check</a>
             </p>
             <p style="margin-top: 10px;">
-                Made with ❤️ by the GAuth Team
+                Made with ❤️ by the AgentAuth Team
             </p>
         </div>
     </div>

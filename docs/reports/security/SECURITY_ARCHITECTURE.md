@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document provides a comprehensive analysis of the GAuth authentication system's security architecture, addressing the security audit findings and documenting implemented mitigations for all identified vulnerabilities.
+This document provides a comprehensive analysis of the AgentAuth authentication system's security architecture, addressing the security audit findings and documenting implemented mitigations for all identified vulnerabilities.
 
 **Critical Finding:** The audit identified 5 potential vulnerabilities. Analysis reveals:
 - ✅ **4 vulnerabilities ALREADY MITIGATED** through existing implementations
@@ -239,7 +239,7 @@ func validateAlgorithm(alg string) error {
 // Attacker modifies token header
 {
   "alg": "none",
-  "typ": "GAuth"
+  "typ": "AgentAuth"
 }
 
 // Result: Validation checks whitelist → "none" NOT IN ["Ed25519", "ECDSA_P256"] → REJECTED
@@ -250,7 +250,7 @@ func validateAlgorithm(alg string) error {
 // Attacker changes RSA→HMAC, signs with public key as secret
 {
   "alg": "HS256",
-  "typ": "GAuth"
+  "typ": "AgentAuth"
 }
 
 // Result: Validation checks whitelist → "HS256" NOT IN ["Ed25519", "ECDSA_P256"] → REJECTED
@@ -464,7 +464,7 @@ export GAUTH_MAX_DELEGATION_DEPTH=10
 **Minimal Secure Configuration:**
 ```bash
 #!/bin/bash
-# GAuth Secure Production Configuration
+# AgentAuth Secure Production Configuration
 
 # Replay Protection (CRITICAL)
 export GAUTH_REPLAY_STORE_REDIS_ENABLED=1

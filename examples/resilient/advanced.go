@@ -12,13 +12,13 @@ import (
 
 // HighlyResilientService combines tracing and multiple resilience patterns
 type HighlyResilientService struct {
-	auth      *gauth.GAuth
+	auth      *gauth.AgentAuth
 	server    *gauth.ResourceServer
 	composite *resilience.Composite
 	tracer    *tracing.TracerProvider
 }
 
-func NewHighlyResilientService(auth *gauth.GAuth) (*HighlyResilientService, error) {
+func NewHighlyResilientService(auth *gauth.AgentAuth) (*HighlyResilientService, error) {
 	// Initialize tracer
 	tracerProvider, _ := tracing.NewTracerProvider(tracing.Config{
 		ServiceName:    "resilient-gauth",

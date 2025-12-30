@@ -73,7 +73,7 @@ export GAUTH_PDP_CACHE_TTL=10m
 ```go
 import (
     "time"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 // Option 1: Environment-based configuration (recommended)
@@ -102,7 +102,7 @@ import (
     "fmt"
     "time"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/pdp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -447,7 +447,7 @@ go test -v ./pkg/pdp/... -run TestInMemoryEngine_WithCache
 - **Implementation**: pkg/pdp/cache.go (400+ lines)
 - **Tests**: pkg/pdp/cache_test.go (10 tests + 2 benchmarks)
 - **Engine Integration**: pkg/pdp/engine.go (WithCache, InvalidateCache, Evaluate)
-- **RFC**: RFC 0150 (GAuth 1.0) - Section 2 (PDP Performance)
+- **RFC**: RFC 0150 (AgentAuth 1.0) - Section 2 (PDP Performance)
 
 ## FAQ
 

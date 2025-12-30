@@ -20,7 +20,7 @@ const (
 	trustLevelSubstantial = "substantial"
 )
 
-// AzureADClaimMappings defines how Azure AD OIDC claims map to GAuth claims.
+// AzureADClaimMappings defines how Azure AD OIDC claims map to AgentAuth claims.
 // Azure AD provides enterprise-grade claims with role and group information.
 var AzureADClaimMappings = map[string]string{
 	"oid":                "user_id",            // Object ID (unique identifier)
@@ -225,7 +225,7 @@ func (p *AzureADProvider) isTenantAllowed(tenantID string, allowedTenants []stri
 	return false
 }
 
-// MapClaims maps Azure AD OIDC claims to GAuth format.
+// MapClaims maps Azure AD OIDC claims to AgentAuth format.
 func (p *AzureADProvider) MapClaims(claims map[string]interface{}) map[string]interface{} {
 	mapped := make(map[string]interface{})
 
@@ -250,7 +250,7 @@ func (p *AzureADProvider) MapClaims(claims map[string]interface{}) map[string]in
 func (p *AzureADProvider) GetTrustLevel(claims *oidc.IDTokenClaims) string {
 	// Check if ACR is present in claims
 	if claims.ACR != "" {
-		// Map Azure AD ACR to GAuth trust level
+		// Map Azure AD ACR to AgentAuth trust level
 		switch claims.ACR {
 		case "0":
 			return "low" // No specific authentication context

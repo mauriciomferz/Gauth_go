@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates distributed token management using GAuth, simulating a cluster of nodes with event-driven token creation and revocation.
+This example demonstrates distributed token management using AgentAuth, simulating a cluster of nodes with event-driven token creation and revocation.
 
 ## Key Concepts
 - **Cluster Nodes**: Each node manages its own token store and listens for token events.

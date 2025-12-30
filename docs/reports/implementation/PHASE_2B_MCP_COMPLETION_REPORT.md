@@ -15,7 +15,7 @@ Phase 2B MCP (Model Context Protocol) Integration is now **complete**. The exist
 - **MCP Protocol Client** (client.go) - JSON-RPC 2.0 implementation
 - **Transport Layer** (transport_stdio.go) - Process-based MCP server communication  
 - **Connection Manager** (connection_manager.go) - Multi-server lifecycle management
-- **Authorization Bridge** (auth_bridge.go) - GAuth token integration
+- **Authorization Bridge** (auth_bridge.go) - AgentAuth token integration
 - **Audit Logger** (audit_logger.go) - Compliance and activity logging
 - **Test Coverage:** 45.2% with all tests passing
 
@@ -367,7 +367,7 @@ cd web/ui-react && npm run dev
 ```
 
 ### Security Features:
-- GAuth token integration via auth_bridge.go
+- AgentAuth token integration via auth_bridge.go
 - Authorization checks on MCP operations
 - Audit logging for compliance
 - Server allowlist via registration

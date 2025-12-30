@@ -14,7 +14,7 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "GAuth %s environment - OK\n", version)
+		fmt.Fprintf(w, "AgentAuth %s environment - OK\n", version)
 	})
 
 	http.HandleFunc("/api/v1/beta/health", func(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +27,7 @@ func main() {
 		port = "8080"
 	}
 
-	fmt.Printf("Starting GAuth %s on port %s\n", version, port)
+	fmt.Printf("Starting AgentAuth %s on port %s\n", version, port)
 	server := &http.Server{
 		Addr:         ":" + port,
 		ReadTimeout:  10 * time.Second,

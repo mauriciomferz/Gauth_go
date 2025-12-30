@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}=== GAuth Blue-Green Traffic Switcher ===${NC}"
+echo -e "${BLUE}=== AgentAuth Blue-Green Traffic Switcher ===${NC}"
 echo ""
 
 # Validate input

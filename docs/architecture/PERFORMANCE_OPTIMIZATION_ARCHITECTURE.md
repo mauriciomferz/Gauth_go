@@ -1,4 +1,4 @@
-# Performance Optimization Architecture for GAuth
+# Performance Optimization Architecture for AgentAuth
 
 **Version**: 1.0  
 **Date**: November 2025  
@@ -718,7 +718,7 @@ func NewDatabaseConnection() (*pgx.Conn, error) {
               │ (10% miss)             │ (20% miss)
               │                         │
     ┌─────────▼──────────┐   ┌─────────▼──────────┐
-    │   S3 Origin        │   │   GAuth API        │
+    │   S3 Origin        │   │   AgentAuth API        │
     │   Static Assets    │   │   Application      │
     └────────────────────┘   └────────────────────┘
 ```
@@ -728,7 +728,7 @@ func NewDatabaseConnection() (*pgx.Conn, error) {
 ```yaml
 # infrastructure/cdn/cloudfront-distribution.yaml
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFront Distribution for GAuth
+Description: CloudFront Distribution for AgentAuth
 
 Resources:
   CloudFrontDistribution:
@@ -736,7 +736,7 @@ Resources:
     Properties:
       DistributionConfig:
         Enabled: true
-        Comment: GAuth CDN Distribution
+        Comment: AgentAuth CDN Distribution
         
         # Origins
         Origins:
@@ -824,7 +824,7 @@ Resources:
     Type: AWS::CloudFront::CachePolicy
     Properties:
       CachePolicyConfig:
-        Name: GAuthAPICachePolicy
+        Name: AgentAuthAPICachePolicy
         DefaultTTL: 300      # 5 minutes
         MaxTTL: 3600         # 1 hour
         MinTTL: 0
@@ -850,7 +850,7 @@ Resources:
     Type: AWS::CloudFront::OriginRequestPolicy
     Properties:
       OriginRequestPolicyConfig:
-        Name: GAuthAPIOriginRequestPolicy
+        Name: AgentAuthAPIOriginRequestPolicy
         QueryStringsConfig:
           QueryStringBehavior: all
         HeadersConfig:
@@ -867,7 +867,7 @@ Resources:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
       CloudFrontOriginAccessIdentityConfig:
-        Comment: OAI for GAuth static assets
+        Comment: OAI for AgentAuth static assets
 
 Outputs:
   DistributionId:
@@ -1773,7 +1773,7 @@ groups:
 
 ## Conclusion
 
-The Performance Optimization Enhancement completes GAuth's journey to **100/100 compliance**, delivering:
+The Performance Optimization Enhancement completes AgentAuth's journey to **100/100 compliance**, delivering:
 
 🚀 **4x Throughput Increase**: 1,000 → 4,000 req/s  
 ⚡ **60-70% Latency Reduction**: p95 130ms → 50ms  

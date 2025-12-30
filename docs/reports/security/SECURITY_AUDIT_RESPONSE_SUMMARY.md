@@ -8,7 +8,7 @@
 
 ## Overview
 
-An external security researcher conducted a comprehensive audit of the Gauth_go authentication framework, focusing on GiFo-RFC-0115 (Power of Attorney) implementation and potential architectural vulnerabilities. This document provides an executive summary of findings and remediation status.
+An external security researcher conducted a comprehensive audit of the Gauth_go authentication framework, focusing on AAP-RFC-0115 (Power of Attorney) implementation and potential architectural vulnerabilities. This document provides an executive summary of findings and remediation status.
 
 ---
 

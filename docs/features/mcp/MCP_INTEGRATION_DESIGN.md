@@ -30,7 +30,7 @@
 
 ### Purpose
 
-This document defines the architecture for integrating the **Model Context Protocol (MCP)** as a required building block into the GAuth 1.0 implementation, ensuring full compliance with RFC-0111 Section 1 (Scope) requirements.
+This document defines the architecture for integrating the **Model Context Protocol (MCP)** as a required building block into the AgentAuth 1.0 implementation, ensuring full compliance with RFC-0111 Section 1 (Scope) requirements.
 
 ### What is MCP?
 
@@ -40,7 +40,7 @@ This document defines the architecture for integrating the **Model Context Proto
 
 ### Current Gap
 
-**Finding**: GAuth has NO MCP implementation whatsoever.
+**Finding**: AgentAuth has NO MCP implementation whatsoever.
 
 **Evidence from Audit**:
 ```bash
@@ -61,13 +61,13 @@ MCP Compliance: 0%
 
 ### Solution Approach
 
-**Hybrid Integration Model**: Implement MCP as the "AI client connectivity layer" that enables GAuth-authorized AI agents to access external resources through standardized MCP servers.
+**Hybrid Integration Model**: Implement MCP as the "AI client connectivity layer" that enables AgentAuth-authorized AI agents to access external resources through standardized MCP servers.
 
 **Key Strategy**:
-1. **GAuth as MCP Client Host** - AI agents authorized by GAuth connect to MCP servers
-2. **Authorization Bridge** - GAuth Extended Tokens authorize MCP resource access
+1. **AgentAuth as MCP Client Host** - AI agents authorized by AgentAuth connect to MCP servers
+2. **Authorization Bridge** - AgentAuth Extended Tokens authorize MCP resource access
 3. **Policy Enforcement** - PDP validates MCP tool invocations and data access
-4. **Audit Trail** - All MCP interactions logged in GAuth compliance system
+4. **Audit Trail** - All MCP interactions logged in AgentAuth compliance system
 
 ### Expected Outcomes
 
@@ -84,12 +84,12 @@ MCP Compliance: 0%
 ### Section 1: Scope - Building Blocks
 
 **Direct Quote from RFC-0111**:
-> "GAuth builds on the following standards as building blocks:
+> "AgentAuth builds on the following standards as building blocks:
 > 
 > **MCP or its alternatives, including but not limited to:**
 > - MCP Implementation on Github (https://github.com/modelcontextprotocol)"
 
-### Section 3: Why GAuth (Context)
+### Section 3: Why AgentAuth (Context)
 
 **RFC-0111 on MCP's Role**:
 > "In this context, the Model Context Protocol (MCP) was developed by the company Anthropic together with a developer community and represents an open standard that enables developers to establish bidirectional connections between data sources and AI-supported tools. Although it represents a step forward in the integration of AI, it does not comprehensively address governance aspects, in particular the question of authorizing and legitimizing AI for its decisions or actions. MCP applications typically use OAuth together with OpenID Connect or comparable standards.
@@ -98,15 +98,15 @@ MCP Compliance: 0%
 
 ### Compliance Interpretation
 
-**GAuth's Relationship to MCP**:
+**AgentAuth's Relationship to MCP**:
 - **MCP**: Provides connectivity layer (AI ↔ external resources)
-- **GAuth**: Provides governance layer (authorization, legitimacy, power of attorney)
-- **Integration**: GAuth Extended Tokens authorize MCP connections and tool invocations
+- **AgentAuth**: Provides governance layer (authorization, legitimacy, power of attorney)
+- **Integration**: AgentAuth Extended Tokens authorize MCP connections and tool invocations
 
 **MUST Implement**:
-1. **MCP Client** - GAuth acts as MCP client host for AI agents
+1. **MCP Client** - AgentAuth acts as MCP client host for AI agents
 2. **MCP Server Integration** - Connect to external MCP servers (databases, tools, APIs)
-3. **Authorization Bridge** - Map GAuth tokens to MCP resource access permissions
+3. **Authorization Bridge** - Map AgentAuth tokens to MCP resource access permissions
 4. **Policy Enforcement** - PDP validates MCP operations before execution
 5. **Audit Logging** - Record all MCP interactions for compliance
 
@@ -190,7 +190,7 @@ MCP Compliance: 0%
 
 ## Current State Analysis
 
-### Existing GAuth Components Relevant to MCP
+### Existing AgentAuth Components Relevant to MCP
 
 **1. AI Agent Management** (`pkg/gagent/`):
 ```go
@@ -278,7 +278,7 @@ func (b *PDPBridge) EvaluatePolicy(ctx context.Context,
 
 1. **MCP Client SDK** - Go implementation of MCP protocol
 2. **MCP Connection Manager** - Manage connections to multiple MCP servers
-3. **Authorization Bridge** - Convert GAuth tokens → MCP permissions
+3. **Authorization Bridge** - Convert AgentAuth tokens → MCP permissions
 4. **Resource Discovery** - Query available resources from MCP servers
 5. **Tool Registry** - Catalog of MCP tools with authorization policies
 6. **Audit Logger** - Log all MCP interactions for compliance
@@ -291,7 +291,7 @@ func (b *PDPBridge) EvaluatePolicy(ctx context.Context,
 ### Primary Goals
 
 1. **RFC-0111 Compliance**: Satisfy MCP building block requirement
-2. **AI Governance**: Apply GAuth authorization to MCP resource access
+2. **AI Governance**: Apply AgentAuth authorization to MCP resource access
 3. **Standardization**: Use official MCP protocol specification
 4. **Auditability**: Full audit trail of AI-resource interactions
 5. **Security**: Zero-trust policy enforcement on MCP operations
@@ -310,7 +310,7 @@ func (b *PDPBridge) EvaluatePolicy(ctx context.Context,
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                      GAuth Authorization Server                         │
+│                      AgentAuth Authorization Server                         │
 │                     (with MCP Client Integration)                       │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
@@ -380,7 +380,7 @@ func (b *PDPBridge) EvaluatePolicy(ctx context.Context,
    │
    ├─> Agent: "Read customer database"
    │
-   └─> GAuth: Validate agent has Extended Token
+   └─> AgentAuth: Validate agent has Extended Token
 
 2. Authorization Check
    │
@@ -834,7 +834,7 @@ func (m *ConnectionManager) DisconnectServer(serverID string) error {
 
 ### 3. Authorization Bridge
 
-**Purpose**: Map GAuth Extended Tokens to MCP permissions.
+**Purpose**: Map AgentAuth Extended Tokens to MCP permissions.
 
 **File**: `pkg/mcp/authorization_bridge.go`
 
@@ -846,10 +846,10 @@ import (
     "fmt"
     "strings"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 )
 
-// AuthorizationBridge maps GAuth tokens to MCP permissions
+// AuthorizationBridge maps AgentAuth tokens to MCP permissions
 type AuthorizationBridge struct {
     pdpClient gauth.PDPClient
 }
@@ -1188,8 +1188,8 @@ import (
     "context"
     "fmt"
     
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/mcp"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/mcp"
 )
 
 // MCPAgent wraps Agent with MCP capabilities
@@ -1623,7 +1623,7 @@ mcp:
 
 **Behavior**:
 - MCP components inactive
-- Existing GAuth functionality unchanged
+- Existing AgentAuth functionality unchanged
 - MCP scopes ignored
 
 ---
@@ -1689,10 +1689,10 @@ mcp:
 
 ### RFC-0111 Context
 
-1. **RFC-0111 (GAuth 1.0)** - Section 3: Why GAuth  
+1. **RFC-0111 (AgentAuth 1.0)** - Section 3: Why AgentAuth  
    Discusses MCP's role and limitations
 
-2. **RFC-0111 (GAuth 1.0)** - Section 1: Scope  
+2. **RFC-0111 (AgentAuth 1.0)** - Section 1: Scope  
    Lists MCP as required building block
 
 ---
@@ -1722,5 +1722,5 @@ mcp:
 
 **Document Status**: Ready for Implementation  
 **Next Review**: After Phase 1 completion (Week 1)  
-**Owner**: GAuth Development Team  
+**Owner**: AgentAuth Development Team  
 **Stakeholders**: RFC-0111 Compliance Team, Security Team, AI Governance Team

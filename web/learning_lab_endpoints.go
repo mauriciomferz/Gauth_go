@@ -1,4 +1,4 @@
-// learning_lab_endpoints.go - Additional API endpoints for GAuth Learning Lab functionality
+// learning_lab_endpoints.go - Additional API endpoints for AgentAuth Learning Lab functionality
 package web
 
 import (
@@ -40,7 +40,7 @@ func (s *BetaServer) AddLearningLabEndpoints() {
 	// Validation endpoints
 	s.router.POST("/api/v1/validation/*action", s.apiValidationOperation)
 
-	// Generic GAuth action endpoint
+	// Generic AgentAuth action endpoint
 	s.router.POST("/api/v1/gauth/action", s.apiGenericAction)
 }
 
@@ -246,7 +246,7 @@ func (s *BetaServer) apiValidationOperation(c *gin.Context) {
 	})
 }
 
-// apiGenericAction handles generic GAuth actions
+// apiGenericAction handles generic AgentAuth actions
 func (s *BetaServer) apiGenericAction(c *gin.Context) {
 	var req struct {
 		Action  string `json:"action"`
@@ -264,7 +264,7 @@ func (s *BetaServer) apiGenericAction(c *gin.Context) {
 		"success":   true,
 		"action_id": actionID,
 		"status":    "completed",
-		"message":   fmt.Sprintf("GAuth action '%s' executed successfully in %s context", req.Action, req.Context),
+		"message":   fmt.Sprintf("AgentAuth action '%s' executed successfully in %s context", req.Action, req.Context),
 		"details": gin.H{
 			"timestamp": time.Now().Format(time.RFC3339),
 			"context":   req.Context,

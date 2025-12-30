@@ -533,7 +533,7 @@ func TestCrashRecovery(t *testing.T) {
 
 ## References
 
-- **RFC0111**: GAuth 1.0 Authorization Protocol (replay protection requirements)
+- **RFC0111**: AgentAuth 1.0 Authorization Protocol (replay protection requirements)
 - **WALStore**: `pkg/replay/wal_store.go` (write-ahead log implementation)
 - **ReplayNonceStore**: `web/replay_store.go` (original in-memory implementation)
 - **GAP Matrix**: `docs/GAP_MATRIX.auto.md` (sec6.item3 implementation status)
@@ -551,5 +551,5 @@ func TestCrashRecovery(t *testing.T) {
 ---
 
 **Last Updated**: 2025-01-15  
-**Maintainer**: GAuth Development Team  
+**Maintainer**: AgentAuth Development Team  
 **Status**: ✅ Production Ready

@@ -10,7 +10,7 @@ owners: [system]
 ---
 
 # OAuth 2.0 Migration Feasibility Study
-## Strategic Comparison: GiFo-RFC vs OAuth 2.0 + Token Exchange
+## Strategic Comparison: AAP-RFC vs OAuth 2.0 + Token Exchange
 
 > **Document Status**: P1.3 HIGH Priority Security Enhancement  
 > **Created**: November 30, 2025  
@@ -21,13 +21,13 @@ owners: [system]
 
 ## Executive Summary
 
-**Question**: Should GAuth migrate from GiFo-RFC-0111/0115 to standard OAuth 2.0 + RFC 8693 (Token Exchange)?
+**Question**: Should AgentAuth migrate from AAP-RFC-0111/0115 to standard OAuth 2.0 + RFC 8693 (Token Exchange)?
 
-**Answer**: **NO** - Migration not recommended. GiFo-RFC and OAuth 2.0 + RFC 8693 serve **fundamentally different purposes** and are not interchangeable.
+**Answer**: **NO** - Migration not recommended. AAP-RFC and OAuth 2.0 + RFC 8693 serve **fundamentally different purposes** and are not interchangeable.
 
-**Key Finding**: GiFo-RFC provides unique legal delegation capabilities that OAuth 2.0 + RFC 8693 **cannot replace**. However, **GiFo-RFC can integrate RFC 8693** for enhanced functionality.
+**Key Finding**: AAP-RFC provides unique legal delegation capabilities that OAuth 2.0 + RFC 8693 **cannot replace**. However, **AAP-RFC can integrate RFC 8693** for enhanced functionality.
 
-**Recommendation**: **Retain GiFo-RFC as core framework** and **adopt RFC 8693 selectively** where token exchange patterns would improve interoperability with standard OAuth 2.0 ecosystems.
+**Recommendation**: **Retain AAP-RFC as core framework** and **adopt RFC 8693 selectively** where token exchange patterns would improve interoperability with standard OAuth 2.0 ecosystems.
 
 ---
 
@@ -35,7 +35,7 @@ owners: [system]
 
 ### 1.1 High-Level Overview
 
-| Aspect | **GiFo-RFC-0111/0115** | **OAuth 2.0 + RFC 8693** |
+| Aspect | **AAP-RFC-0111/0115** | **OAuth 2.0 + RFC 8693** |
 |:-------|:-----------------------|:-------------------------|
 | **Primary Purpose** | Legal delegation chains with Power of Attorney | Token exchange for impersonation/delegation |
 | **Delegation Model** | Multi-level (3+) with legal authority | Single-level with composite tokens |
@@ -46,14 +46,14 @@ owners: [system]
 | **Authorization Chain** | Explicit multi-party chain | Actor claim (current + history) |
 | **Scope Model** | Structured (Read/Write/Admin) | String-based scopes |
 | **Compliance** | EU eIDAS, PoA laws, GDPR | Industry-specific (PSD2, FHIR) |
-| **Standards Body** | Gimel Foundation | IETF (RFC 8693) |
+| **Standards Body** | AgentAuth Community | IETF (RFC 8693) |
 | **Use Case** | AI agents with legal authority | Service-to-service token exchange |
 
 ---
 
 ## 2. Detailed Analysis
 
-### 2.1 GiFo-RFC-0111/0115 Capabilities
+### 2.1 AAP-RFC-0111/0115 Capabilities
 
 #### Core Features
 
@@ -81,7 +81,7 @@ Resource Server (Authorization Validated)
 ```json
 {
   "access_token": "gauth_at_...",
-  "token_type": "GAuth-Extended",
+  "token_type": "AgentAuth-Extended",
   "power_of_attorney": {
     "poa_id": "poa_xyz789",
     "issuer": "Owner's Authorizer",
@@ -275,9 +275,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 ## 3. Gap Analysis
 
-### 3.1 What GiFo-RFC Has That OAuth 2.0 + RFC 8693 Cannot Provide
+### 3.1 What AAP-RFC Has That OAuth 2.0 + RFC 8693 Cannot Provide
 
-| Capability | GiFo-RFC | OAuth 2.0 + RFC 8693 | Gap Severity |
+| Capability | AAP-RFC | OAuth 2.0 + RFC 8693 | Gap Severity |
 |:-----------|:---------|:---------------------|:-------------|
 | **Legal Power of Attorney** | ✅ Core feature | ❌ Not addressed | **CRITICAL** |
 | **Commercial Register Integration** | ✅ Real-time | ❌ Not addressed | **CRITICAL** |
@@ -292,15 +292,15 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 | **eIDAS Compliance** | ✅ Native | ❌ Not addressed | **CRITICAL** |
 | **Notarization Support** | ✅ Optional | ❌ Not addressed | **HIGH** |
 
-**Summary**: OAuth 2.0 + RFC 8693 **cannot replace** GiFo-RFC for AI systems requiring **legal authority to act**.
+**Summary**: OAuth 2.0 + RFC 8693 **cannot replace** AAP-RFC for AI systems requiring **legal authority to act**.
 
 ---
 
-### 3.2 What OAuth 2.0 + RFC 8693 Has That GiFo-RFC Lacks
+### 3.2 What OAuth 2.0 + RFC 8693 Has That AAP-RFC Lacks
 
-| Capability | OAuth 2.0 + RFC 8693 | GiFo-RFC | Benefit |
+| Capability | OAuth 2.0 + RFC 8693 | AAP-RFC | Benefit |
 |:-----------|:---------------------|:---------|:--------|
-| **IETF Standard** | ✅ RFC 8693 | ⚠️ Gimel Foundation | **HIGH** - Industry adoption |
+| **IETF Standard** | ✅ RFC 8693 | ⚠️ AgentAuth Community | **HIGH** - Industry adoption |
 | **Token Exchange Protocol** | ✅ Standardized | ❌ Not implemented | **MEDIUM** - Interoperability |
 | **Service-to-Service Pattern** | ✅ Optimized | ⚠️ Can support | **MEDIUM** - Microservices |
 | **Multiple Token Formats** | ✅ JWT, SAML, etc. | ✅ JWT + custom | **LOW** - Flexibility |
@@ -314,9 +314,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 ## 4. Migration Scenarios Analysis
 
-### 4.1 Scenario 1: Full Migration (GiFo-RFC → OAuth 2.0 + RFC 8693)
+### 4.1 Scenario 1: Full Migration (AAP-RFC → OAuth 2.0 + RFC 8693)
 
-**Approach**: Replace entire GiFo-RFC implementation with OAuth 2.0 + RFC 8693.
+**Approach**: Replace entire AAP-RFC implementation with OAuth 2.0 + RFC 8693.
 
 **Assessment**: ❌ **NOT FEASIBLE**
 
@@ -343,15 +343,15 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    - ❌ Corporate AI with board authority → IMPOSSIBLE
    - ❌ Financial AI with statutory power → IMPOSSIBLE
 
-**Conclusion**: Full migration would **eliminate GAuth's core value proposition**.
+**Conclusion**: Full migration would **eliminate AgentAuth's core value proposition**.
 
 **Recommendation**: **DO NOT MIGRATE**
 
 ---
 
-### 4.2 Scenario 2: Hybrid Approach (GiFo-RFC + RFC 8693)
+### 4.2 Scenario 2: Hybrid Approach (AAP-RFC + RFC 8693)
 
-**Approach**: Retain GiFo-RFC for legal delegation, add RFC 8693 for token exchange.
+**Approach**: Retain AAP-RFC for legal delegation, add RFC 8693 for token exchange.
 
 **Assessment**: ✅ **FEASIBLE AND RECOMMENDED**
 
@@ -386,12 +386,12 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &audience=urn:example:backend-service
 
 // Authorization Server:
-// 1. Validates GAuth extended token (PoA, chain, etc.)
+// 1. Validates AgentAuth extended token (PoA, chain, etc.)
 // 2. Extracts subject + actor from PoA chain
 // 3. Issues RFC 8693 compliant token with act claim
 // 4. Embeds PoA metadata in custom claims
 
-// Result: RFC 8693 token with GAuth context
+// Result: RFC 8693 token with AgentAuth context
 {
   "access_token": "eyJhbGci...",
   "issued_token_type": "urn:ietf:params:oauth:token-type:access_token",
@@ -404,7 +404,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
     "sub": "service@example.com"
   },
   
-  // GAuth extensions (custom claims)
+  // AgentAuth extensions (custom claims)
   "poa_id": "poa_xyz789",
   "authorization_chain": [
     {"entity": "Owner's Authorizer", "authority": "Statutory"},
@@ -419,11 +419,11 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  GAuth Authorization Server                             │
-│  (GiFo-RFC-0111/0115 + RFC 8693)                        │
+│  AgentAuth Authorization Server                             │
+│  (AAP-RFC-0111/0115 + RFC 8693)                        │
 └───────┬─────────────────────────────────┬───────────────┘
         │                                 │
-        │ GAuth Extended Token            │ RFC 8693 Token Exchange
+        │ AgentAuth Extended Token            │ RFC 8693 Token Exchange
         │ (PoA + Chain)                   │ (service-to-service)
         ↓                                 ↓
 ┌───────────────────┐             ┌────────────────────┐
@@ -441,7 +441,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 - Implement token exchange endpoint
 - Add `act` and `may_act` claim support
 - Create RFC 8693 token generator
-- Add GAuth → RFC 8693 token converter
+- Add AgentAuth → RFC 8693 token converter
 
 **Phase 2: Backend Integration (1 week)**
 - Enable service-to-service token exchange
@@ -461,7 +461,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 ### 4.3 Scenario 3: Parallel Systems
 
-**Approach**: Run GiFo-RFC and OAuth 2.0 + RFC 8693 as separate authorization systems.
+**Approach**: Run AAP-RFC and OAuth 2.0 + RFC 8693 as separate authorization systems.
 
 **Assessment**: ⚠️ **POSSIBLE BUT NOT RECOMMENDED**
 
@@ -541,12 +541,12 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 ### 6.1 Strategic Decision
 
-**DO NOT migrate from GiFo-RFC to OAuth 2.0 + RFC 8693.**
+**DO NOT migrate from AAP-RFC to OAuth 2.0 + RFC 8693.**
 
 **Instead, ADOPT HYBRID APPROACH:**
-1. ✅ **Retain GiFo-RFC-0111/0115** as core authorization framework
+1. ✅ **Retain AAP-RFC-0111/0115** as core authorization framework
 2. ✅ **Add RFC 8693 token exchange** for service-to-service patterns
-3. ✅ **Maintain backward compatibility** with existing GAuth clients
+3. ✅ **Maintain backward compatibility** with existing AgentAuth clients
 4. ✅ **Document integration patterns** for OAuth 2.0 ecosystems
 
 ### 6.2 Implementation Roadmap
@@ -559,7 +559,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 // TokenExchangeRequest implements RFC 8693 token exchange
 type TokenExchangeRequest struct {
     GrantType         string   `json:"grant_type"`          // urn:ietf:params:oauth:grant-type:token-exchange
-    SubjectToken      string   `json:"subject_token"`       // GAuth extended token
+    SubjectToken      string   `json:"subject_token"`       // AgentAuth extended token
     SubjectTokenType  string   `json:"subject_token_type"`  // urn:gimel:params:gauth:token-type:extended
     ActorToken        string   `json:"actor_token,omitempty"`
     ActorTokenType    string   `json:"actor_token_type,omitempty"`
@@ -579,9 +579,9 @@ type TokenExchangeResponse struct {
     RefreshToken    string `json:"refresh_token,omitempty"`
 }
 
-// ExchangeToken exchanges a GAuth extended token for an RFC 8693 token
+// ExchangeToken exchanges a AgentAuth extended token for an RFC 8693 token
 func (s *Service) ExchangeToken(ctx context.Context, req TokenExchangeRequest) (*TokenExchangeResponse, error) {
-    // 1. Validate subject_token (GAuth extended token)
+    // 1. Validate subject_token (AgentAuth extended token)
     result, err := s.VerifyToken(ctx, req.SubjectToken)
     if err != nil {
         return nil, fmt.Errorf("invalid subject_token: %w", err)
@@ -635,7 +635,7 @@ type RFC8693Claims struct {
     Act      *ActClaim `json:"act,omitempty"`      // RFC 8693 actor claim
     MayAct   *ActClaim `json:"may_act,omitempty"`  // RFC 8693 authorization
     
-    // GAuth extensions (custom namespace)
+    // AgentAuth extensions (custom namespace)
     PoAID               string                 `json:"gauth:poa_id,omitempty"`
     AuthorizationChain  []ChainElement         `json:"gauth:chain,omitempty"`
     ComplianceLevel     string                 `json:"gauth:compliance,omitempty"`
@@ -648,7 +648,7 @@ type ActClaim struct {
     Act *ActClaim `json:"act,omitempty"` // Nested delegation
 }
 
-// ChainElement represents one level of GAuth authorization chain
+// ChainElement represents one level of AgentAuth authorization chain
 type ChainElement struct {
     Entity    string `json:"entity"`
     Authority string `json:"authority"` // Statutory, Delegated, Granted
@@ -767,7 +767,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 - ✅ Integration: Works with Auth0, Okta, Google OAuth libraries
 
 **Business Metrics:**
-- ✅ Zero disruption to existing GAuth clients
+- ✅ Zero disruption to existing AgentAuth clients
 - ✅ New service-to-service use cases enabled
 - ✅ Reduced integration effort for OAuth 2.0 ecosystems
 - ✅ Maintained legal delegation capabilities
@@ -783,7 +783,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 | **Development Effort** | 🔴 6 months | 🟢 4 weeks | 🟡 3 months | 🟢 0 |
 | **Client Impact** | 🔴 Breaking | 🟢 None | 🟡 Optional | 🟢 None |
 | **Compliance** | ❌ Lost | ✅ Retained | ✅ Retained | ✅ Retained |
-| **Standards** | ✅ IETF | ✅ IETF + Gimel | ⚠️ Mixed | ⚠️ Gimel only |
+| **Standards** | ✅ IETF | ✅ IETF + AgentAuth | ⚠️ Mixed | ⚠️ AgentAuth only |
 | **Complexity** | 🟢 Low | 🟡 Medium | 🔴 High | 🟢 Low |
 | **Cost** | 🔴 $500K-750K | 🟢 $15K-25K | 🟡 $100K-200K | 🟢 $0 |
 | **ROI** | 🔴 Negative | 🟢 Positive | ⚠️ Neutral | ⚠️ Neutral |
@@ -805,24 +805,24 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 ### 8.1 Key Findings
 
-1. **GiFo-RFC and OAuth 2.0 + RFC 8693 are NOT interchangeable**
-   - GiFo-RFC: Legal delegation with Power of Attorney
+1. **AAP-RFC and OAuth 2.0 + RFC 8693 are NOT interchangeable**
+   - AAP-RFC: Legal delegation with Power of Attorney
    - RFC 8693: Service-to-service token exchange
 
-2. **Full migration would destroy GAuth's core value**
+2. **Full migration would destroy AgentAuth's core value**
    - Loss of legal authority framework
    - Loss of compliance capabilities
    - Loss of identity verification
 
 3. **Hybrid approach provides best of both worlds**
-   - Retain legal delegation (GiFo-RFC)
+   - Retain legal delegation (AAP-RFC)
    - Add token exchange (RFC 8693)
    - Maintain backward compatibility
    - Low cost, high value
 
 ### 8.2 Final Recommendation
 
-✅ **ADOPT HYBRID APPROACH**: Implement RFC 8693 token exchange while retaining GiFo-RFC-0111/0115 core framework.
+✅ **ADOPT HYBRID APPROACH**: Implement RFC 8693 token exchange while retaining AAP-RFC-0111/0115 core framework.
 
 **Implementation Timeline**: 4 weeks (fits P1 30-day window)
 
@@ -839,15 +839,15 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 - [RFC 6749 - OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
 - [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693)
 - [RFC 9396 - Rich Authorization Requests (RAR)](https://datatracker.ietf.org/doc/html/rfc9396)
-- [GiFo-RFC-0111 - GAuth 1.0 Authorization Framework](Gifo_0111.md)
-- [GiFo-RFC-0115 - Power-of-Attorney Credential Definition](RFC_ARCHITECTURE.md)
+- [AAP-RFC-0111 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
+- [AAP-RFC-0115 - Power-of-Attorney Credential Definition](RFC_ARCHITECTURE.md)
 
-### GAuth Documentation
+### AgentAuth Documentation
 
-- [RFC 9396 vs GAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON_Proposed_Standard.md)
+- [RFC 9396 vs AgentAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON_Proposed_Standard.md)
 - [P1.1 - Wildcard Scope Patterns](WILDCARD_SCOPE_PATTERNS_GUIDE.md)
 - [P1.2 - OPA Integration Guide](OPA_INTEGRATION_GUIDE.md)
-- [GAuth Architecture](RFC_ARCHITECTURE.md)
+- [AgentAuth Architecture](RFC_ARCHITECTURE.md)
 - [Security Audit Response](AUDIT_RESPONSE_ARCHITECTURAL_CLARIFICATIONS.md)
 
 ### Industry Examples
@@ -874,9 +874,9 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 - [ ] Error responses (`invalid_request`, `invalid_target`)
 - [ ] Client authentication (RFC 6749 Section 2.3)
 
-**GAuth Extensions:**
+**AgentAuth Extensions:**
 
-- [ ] GAuth extended token as subject_token
+- [ ] AgentAuth extended token as subject_token
 - [ ] PoA metadata in custom claims (`gauth:poa_id`, etc.)
 - [ ] Authorization chain embedding
 - [ ] Compliance level indicator
@@ -908,7 +908,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 **Flow**:
 
-1. **Initial Authorization** (GiFo-RFC)
+1. **Initial Authorization** (AAP-RFC)
    ```
    Guardian → Hospital → Healthcare AI
    (PoA validated, chain verified, extended token issued)
@@ -954,7 +954,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 **Flow**:
 
-1. **Initial Authorization** (GiFo-RFC)
+1. **Initial Authorization** (AAP-RFC)
    ```
    Board → Company → Financial AI
    (Commercial register verified, statutory authority validated)

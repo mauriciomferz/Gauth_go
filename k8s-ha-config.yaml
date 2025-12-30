@@ -1,9 +1,9 @@
-# High Availability Resources for GAuth Application
+# High Availability Resources for AgentAuth Application
 # Week 6 Day 3: HA Configuration
 
 ---
 # Horizontal Pod Autoscaler
-# Automatically scales GAuth pods based on CPU and memory utilization
+# Automatically scales AgentAuth pods based on CPU and memory utilization
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

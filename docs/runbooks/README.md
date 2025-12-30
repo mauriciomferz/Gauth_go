@@ -8,7 +8,7 @@ refreshCadence: monthly
 ---
 # Operational Runbooks - Index
 
-This directory contains operational runbooks for all GAuth monitoring alerts. Each runbook provides detailed procedures for responding to specific alerts.
+This directory contains operational runbooks for all AgentAuth monitoring alerts. Each runbook provides detailed procedures for responding to specific alerts.
 
 ## 📋 Runbook Categories
 
@@ -16,11 +16,11 @@ This directory contains operational runbooks for all GAuth monitoring alerts. Ea
 
 | Alert | Severity | Component | Runbook |
 |-------|----------|-----------|---------|
-| GAuthServiceUnavailable | Critical | Service | [Link](./GAuthServiceUnavailable.md) |
-| GAuthPodDown | Critical | Pod | [Link](./GAuthPodDown.md) |
-| GAuthVeryHighLatency | Critical | Performance | [Link](./GAuthVeryHighLatency.md) |
-| GAuthCriticalMemory | Critical | Resources | [Link](./GAuthCriticalMemory.md) |
-| GAuthPodRestartLoop | Critical | Kubernetes | [Link](./GAuthPodRestartLoop.md) |
+| AgentAuthServiceUnavailable | Critical | Service | [Link](./AgentAuthServiceUnavailable.md) |
+| AgentAuthPodDown | Critical | Pod | [Link](./AgentAuthPodDown.md) |
+| AgentAuthVeryHighLatency | Critical | Performance | [Link](./AgentAuthVeryHighLatency.md) |
+| AgentAuthCriticalMemory | Critical | Resources | [Link](./AgentAuthCriticalMemory.md) |
+| AgentAuthPodRestartLoop | Critical | Kubernetes | [Link](./AgentAuthPodRestartLoop.md) |
 | PostgreSQLDown | Critical | Database | [Link](./PostgreSQLDown.md) |
 | PostgreSQLCriticalConnectionPoolUsage | Critical | Database | [Link](./PostgreSQLCriticalConnectionPoolUsage.md) |
 | RedisDown | Critical | Redis | [Link](./RedisDown.md) |
@@ -30,14 +30,14 @@ This directory contains operational runbooks for all GAuth monitoring alerts. Ea
 
 | Alert | Component | Runbook |
 |-------|-----------|---------|
-| GAuthHighErrorRate | Performance | [Link](./GAuthHighErrorRate.md) |
-| GAuthHighLatency | Performance | [Link](./GAuthHighLatency.md) |
-| GAuthHighCPU | Resources | [Link](./GAuthHighCPU.md) |
-| GAuthHighMemory | Resources | [Link](./GAuthHighMemory.md) |
-| GAuthRotationChainStale | Business | [Link](./GAuthRotationChainStale.md) |
-| GAuthSummaryHeadOld | Business | [Link](./GAuthSummaryHeadOld.md) |
-| GAuthLastAnchorOld | Business | [Link](./GAuthLastAnchorOld.md) |
-| GAuthPodNotReady | Kubernetes | [Link](./GAuthPodNotReady.md) |
+| AgentAuthHighErrorRate | Performance | [Link](./AgentAuthHighErrorRate.md) |
+| AgentAuthHighLatency | Performance | [Link](./AgentAuthHighLatency.md) |
+| AgentAuthHighCPU | Resources | [Link](./AgentAuthHighCPU.md) |
+| AgentAuthHighMemory | Resources | [Link](./AgentAuthHighMemory.md) |
+| AgentAuthRotationChainStale | Business | [Link](./AgentAuthRotationChainStale.md) |
+| AgentAuthSummaryHeadOld | Business | [Link](./AgentAuthSummaryHeadOld.md) |
+| AgentAuthLastAnchorOld | Business | [Link](./AgentAuthLastAnchorOld.md) |
+| AgentAuthPodNotReady | Kubernetes | [Link](./AgentAuthPodNotReady.md) |
 | PostgreSQLHighConnectionPoolUsage | Database | [Link](./PostgreSQLHighConnectionPoolUsage.md) |
 | PostgreSQLSlowQueries | Database | [Link](./PostgreSQLSlowQueries.md) |
 | PostgreSQLHighDiskUsage | Database | [Link](./PostgreSQLHighDiskUsage.md) |

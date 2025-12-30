@@ -11,7 +11,7 @@ owners: [system]
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates functional validation of RFC-0111 and RFC-0115 compliance in the GAuth framework. It runs a series of automated tests to verify:
+This example demonstrates functional validation of RFC-0111 and RFC-0115 compliance in the AgentAuth framework. It runs a series of automated tests to verify:
 
 - Power-of-Attorney request handling
 - Jurisdiction and AI capability validation

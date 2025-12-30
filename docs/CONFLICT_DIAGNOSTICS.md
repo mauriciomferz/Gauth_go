@@ -441,4 +441,4 @@ go test ./pkg/pdp -v
 
 ---
 
-Copyright © 2025 Gimel Foundation. Licensed under Apache 2.0.
+Copyright © 2025 AgentAuth Community. Licensed under Apache 2.0.

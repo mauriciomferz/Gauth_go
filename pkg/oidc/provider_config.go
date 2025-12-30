@@ -1,4 +1,4 @@
-// Package oidc implements OpenID Connect support for GAuth.
+// Package oidc implements OpenID Connect support for AgentAuth.
 // This file provides external provider configuration management.
 package oidc
 
@@ -11,7 +11,7 @@ import (
 )
 
 // ProviderConfig represents an external OIDC provider configuration.
-// This enables GAuth to act as an OIDC relying party for external providers
+// This enables AgentAuth to act as an OIDC relying party for external providers
 // like Google, Okta, or Azure AD.
 type ProviderConfig struct {
 	// ID is a unique identifier for this provider (e.g., "google", "okta-prod")
@@ -33,7 +33,7 @@ type ProviderConfig struct {
 	// Scopes are the OIDC scopes to request (typically: openid, profile, email)
 	Scopes []string `json:"scopes" yaml:"scopes"`
 
-	// ClaimMappings maps provider-specific claims to GAuth claims
+	// ClaimMappings maps provider-specific claims to AgentAuth claims
 	// Example: {"sub": "user_id", "email": "email", "name": "full_name"}
 	ClaimMappings map[string]string `json:"claim_mappings" yaml:"claim_mappings"`
 
@@ -44,7 +44,7 @@ type ProviderConfig struct {
 	// Valid values: "low", "substantial", "high"
 	DefaultTrustLevel string `json:"default_trust_level" yaml:"default_trust_level"`
 
-	// TrustMapping maps provider-specific authentication context to GAuth trust levels
+	// TrustMapping maps provider-specific authentication context to AgentAuth trust levels
 	// Example: {"mfa": "high", "password": "substantial"}
 	TrustMapping map[string]string `json:"trust_mapping,omitempty" yaml:"trust_mapping,omitempty"`
 

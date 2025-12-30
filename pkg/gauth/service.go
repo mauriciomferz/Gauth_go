@@ -21,7 +21,7 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/poa"
 )
 
-// Config represents the configuration for GAuth
+// Config represents the configuration for AgentAuth
 
 // Shared constants for signature modes and default demo key identifier.
 // Centralizing these reduces literal duplication for goconst lint hygiene.
@@ -35,15 +35,15 @@ const (
 	legacyHeaderHS256 = `{"alg":"HS256","typ":"JWT"}`
 )
 
-// GAuth represents the main GAuth interface
-type GAuth interface {
+// AgentAuth represents the main AgentAuth interface
+type AgentAuth interface {
 	InitiateAuthorization(req AuthorizationRequest) (*AuthorizationGrant, error)
 	RequestToken(req TokenRequest) (*TokenResponse, error)
 	ValidateToken(token string) (*TokenValidationResult, error)
 	Close() error
 }
 
-// Service represents the main GAuth service
+// Service represents the main AgentAuth service
 type Service struct {
 	config         Config
 	signingKey     []byte // legacy HMAC key
@@ -700,5 +700,5 @@ func convertRFCResponseToTokenResponse(rfcResp *RFCCompliantTokenResponse) *Toke
 	}
 }
 
-// Ensure Service implements GAuth interface
-var _ GAuth = (*Service)(nil)
+// Ensure Service implements AgentAuth interface
+var _ AgentAuth = (*Service)(nil)

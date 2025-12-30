@@ -19,7 +19,7 @@
 
 ## Overview
 
-The GAuth Revocation System provides **sub-second revocation** of Power-of-Attorney (PoA) tokens with three complementary strategies:
+The AgentAuth Revocation System provides **sub-second revocation** of Power-of-Attorney (PoA) tokens with three complementary strategies:
 
 ### **1. Two-Phase Revocation** (TOCTOU Prevention)
 Eliminates Time-of-Check-Time-of-Use vulnerabilities with a reversible disable phase followed by permanent revocation.
@@ -140,7 +140,7 @@ func (l *SimpleLogger) Errorf(format string, args ...interface{}) { log.Printf("
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    GAuth Revocation System                  │
+│                    AgentAuth Revocation System                  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │

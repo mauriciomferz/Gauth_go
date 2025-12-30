@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates GAuth's type-safe structures for improved code safety and readability.
+This example demonstrates AgentAuth's type-safe structures for improved code safety and readability.
 
 ## Overview
 
@@ -34,7 +34,7 @@ This starts a server on `localhost:8080` with several endpoints demonstrating ty
 
 ### 1. Typed Event Metadata
 
-Instead of using `map[string]interface{}` for event metadata, the example uses GAuth's strongly-typed `Metadata`:
+Instead of using `map[string]interface{}` for event metadata, the example uses AgentAuth's strongly-typed `Metadata`:
 
 ```go
 metadata := events.NewMetadata()
@@ -111,7 +111,7 @@ Accesses a protected resource, using typed metadata to track access details.
 
 ## Migration Note
 
-This example uses the latest GAuth APIs for token management:
+This example uses the latest AgentAuth APIs for token management:
 - `RequestToken` for token creation
 - `ValidateToken` for token validation
 - `InvalidateToken` for token revocation

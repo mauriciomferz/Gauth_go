@@ -138,7 +138,7 @@ type AuthorizationPolicy struct {
 
 1. **Introduction & Architecture**
    - Component overview
-   - Integration with GAuth AS
+   - Integration with AgentAuth AS
    - Architecture diagram
 
 2. **Deployment Pattern 1: Embedded PEP (Recommended for Go)**
@@ -181,7 +181,7 @@ type AuthorizationPolicy struct {
 
 9. **Error Responses**
    - OAuth 2.0 standard errors
-   - GAuth-specific extensions
+   - AgentAuth-specific extensions
    - HTTP status codes
    - Error JSON structure
 
@@ -210,7 +210,7 @@ type AuthorizationPolicy struct {
 
 **Embedded PEP Middleware (Go):**
 ```go
-func GAuthMiddleware(tokenService *gauth.ExtendedTokenService, 
+func AgentAuthMiddleware(tokenService *gauth.ExtendedTokenService, 
                      pep *gauth.PowerEnforcementPoint) gin.HandlerFunc {
     return func(c *gin.Context) {
         // Extract token
@@ -283,8 +283,8 @@ spec:
 
 **Phase 1: Foundation (2 weeks)**
 - MCP package structure (`pkg/mcp/`)
-- Message types with GAuth extensions
-- GAuthMCPAdapter interface
+- Message types with AgentAuth extensions
+- AgentAuthMCPAdapter interface
 - HTTP and WebSocket transports
 - Integration with ExtendedTokenService
 
@@ -318,10 +318,10 @@ spec:
 │  │ (Client) │       │ (Server) │           │
 │  └────┬─────┘       └────┬─────┘           │
 │       │                  │                  │
-│       │ GAuth Token      │ GAuth Validation │
+│       │ AgentAuth Token      │ AgentAuth Validation │
 │       ▼                  ▼                  │
 │  ┌────────────────────────────────────┐    │
-│  │  GAuth Authorization Server (AS)   │    │
+│  │  AgentAuth Authorization Server (AS)   │    │
 │  │  - Extended token issuance         │    │
 │  │  - PoA validation                  │    │
 │  │  - MCP protocol adapter            │    │
@@ -329,7 +329,7 @@ spec:
 └─────────────────────────────────────────────┘
 ```
 
-#### MCP + GAuth Message Format
+#### MCP + AgentAuth Message Format
 
 **Extended MCP Request:**
 ```json
@@ -354,7 +354,7 @@ spec:
    - Alice authorizes her AI assistant
    - AI assistant requests extended token
    - AI assistant sends MCP request to Bob's service
-   - Bob's service validates via GAuth PEP
+   - Bob's service validates via AgentAuth PEP
 
 2. **Multi-Agent Workflow**
    - Orchestrator → Analysis AI → Decision AI
@@ -363,26 +363,26 @@ spec:
 
 3. **Cross-Organization Collaboration**
    - Company A AI ←MCP→ Company B AI
-   - Federated GAuth validation
+   - Federated AgentAuth validation
    - Audit trail for compliance
 
 #### API Design
 
-**GAuthMCPAdapter Interface:**
+**AgentAuthMCPAdapter Interface:**
 ```go
-type GAuthMCPAdapter struct {
+type AgentAuthMCPAdapter struct {
     extendedTokenService *gauth.ExtendedTokenService
     pep                  *gauth.PowerEnforcementPoint
     complianceTracker    *gauth.ComplianceTracker
 }
 
-func (adapter *GAuthMCPAdapter) SendMCPRequest(
+func (adapter *AgentAuthMCPAdapter) SendMCPRequest(
     ctx context.Context,
     request *MCPRequest,
     extendedToken string,
 ) (*MCPResponse, error)
 
-func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
+func (adapter *AgentAuthMCPAdapter) ValidateMCPRequest(
     ctx context.Context,
     request *MCPRequest,
 ) (*ValidationResult, error)
@@ -402,7 +402,7 @@ func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
 #### Success Criteria
 
 **Phase 1 Complete:**
-- MCP messages carry GAuth tokens
+- MCP messages carry AgentAuth tokens
 - HTTP transport working
 - Unit tests >90% coverage
 
@@ -736,7 +736,7 @@ func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
 
 5. **MCP Integration - Phase 1**
    - Create `pkg/mcp/` package
-   - Implement GAuthMCPAdapter
+   - Implement AgentAuthMCPAdapter
    - Add HTTP/WebSocket transports
    - Write unit tests
 
@@ -804,7 +804,7 @@ func (adapter *GAuthMCPAdapter) ValidateMCPRequest(
 - main: ✅ Up to date (8082f3e1)
 - ci-fixes-nov-2025: ✅ Up to date (8082f3e1)
 
-**gimel** (Gimel-Foundation/Gimel_Platform-GAuth_Server_Prototype)
+**gimel** (AgentAuth-Foundation/AgentAuth_Platform-AgentAuth_Server_Prototype)
 - ci-fixes-nov-2025: ✅ Up to date (8082f3e1)
 
 ### Build Status
@@ -825,7 +825,7 @@ Successfully closed all identified RFC-0111 implementation gaps through:
 3. **Complete MCP integration roadmap** with clear 6-week implementation plan
 4. **Updated coverage documentation** reflecting 95% RFC compliance
 
-The GAuth_go implementation now provides:
+The AgentAuth_go implementation now provides:
 - ✅ Solid foundation for complete RFC-0111 compliance
 - ✅ Production-ready deployment guidance
 - ✅ Clear roadmap for Phase 2 enhancements
@@ -1073,7 +1073,7 @@ PASS: TestPAP_ValidatePolicy (0.00s)
 PASS: TestPAP_GetPolicyStatistics (0.00s)
 PASS: TestPAP_ConcurrentAccess (0.01s)
 PASS: TestPAP_PolicyLifecycleFlow (0.00s)
-ok      github.com/Gimel-Foundation/.../pkg/gauth       0.272s
+ok      github.com/AgentAuth-Foundation/.../pkg/gauth       0.272s
 ```
 
 **Total:** 13 test suites, 59 individual test cases, 100% passing
@@ -1278,7 +1278,7 @@ Successfully closed all identified RFC-0111 implementation gaps and **exceeded t
 5. **Complete MCP integration roadmap** (525 lines) - Clear 6-week implementation plan
 6. **Updated coverage documentation** (98% RFC compliance) - Accurate metrics and next steps
 
-The GAuth_go implementation now provides:
+The AgentAuth_go implementation now provides:
 - ✅ Complete RFC-0111 P*P architecture (100% coverage)
 - ✅ Production-ready deployment guidance
 - ✅ Clear roadmap for Phase 2 enhancements

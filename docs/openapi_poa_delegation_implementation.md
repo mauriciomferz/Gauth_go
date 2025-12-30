@@ -15,7 +15,7 @@ owners: [system]
 
 ## Summary
 
-Comprehensive OpenAPI 3.1 specification documenting all Power-of-Attorney (PoA) and delegation REST endpoints in the GAuth implementation. This resolves **sec10.item1** from `Partial` → `Implemented` status.
+Comprehensive OpenAPI 3.1 specification documenting all Power-of-Attorney (PoA) and delegation REST endpoints in the AgentAuth implementation. This resolves **sec10.item1** from `Partial` → `Implemented` status.
 
 ## Specification Details
 
@@ -361,7 +361,7 @@ sec10.item1,OpenAPI for PoA & delegation,Implemented,P1,Complete OpenAPI 3.1 spe
 
 - ✅ **OpenAPI 3.1.0** standard compliance
 - ✅ **RFC0115** Power-of-Attorney specification alignment
-- ✅ **RFC0111** GAuth 1.0 integration
+- ✅ **RFC0111** AgentAuth 1.0 integration
 - ✅ **Multi-signature workflow** complete documentation
 - ✅ **Delegation lifecycle** comprehensive coverage
 - ✅ **Error handling** standardized response schemas

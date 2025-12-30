@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates token lifecycle monitoring and statistics collection using GAuth.
+This example demonstrates token lifecycle monitoring and statistics collection using AgentAuth.
 
 ## Key Concepts
 - **TokenMonitor**: Tracks token creation, revocation, and expiration.

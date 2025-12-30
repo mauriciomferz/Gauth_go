@@ -1,6 +1,6 @@
-# GAuth+ API Usage Examples
+# AgentAuth+ API Usage Examples
 
-Complete examples for using the GAuth+ admin API endpoints.
+Complete examples for using the AgentAuth+ admin API endpoints.
 
 ---
 

@@ -148,7 +148,7 @@ func (d *Dispatcher) deliverWebhook(ctx context.Context, job *deliveryJob) {
 
 	// Set headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "GAuth-Webhook/1.0")
+	req.Header.Set("User-Agent", "AgentAuth-Webhook/1.0")
 	req.Header.Set("X-Webhook-ID", job.webhook.ID)
 	req.Header.Set("X-Event-Type", string(job.event.Type))
 	req.Header.Set("X-Event-ID", job.event.ID)

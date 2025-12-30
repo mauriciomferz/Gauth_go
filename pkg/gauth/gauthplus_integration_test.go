@@ -12,8 +12,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
 )
 
-// TestGAuthPlusIntegration_SuccessorTakeover tests successor AI activation
-func TestGAuthPlusIntegration_SuccessorTakeover(t *testing.T) {
+// TestAgentAuthPlusIntegration_SuccessorTakeover tests successor AI activation
+func TestAgentAuthPlusIntegration_SuccessorTakeover(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
@@ -22,15 +22,15 @@ func TestGAuthPlusIntegration_SuccessorTakeover(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
 
-	// Initialize GAuth+ services
+	// Initialize AgentAuth+ services
 	successorService := gauthplus.NewPostgreSQLSuccessorService(db)
 	delegationService := gauthplus.NewPostgreSQLDelegationService(db)
 	dualControlService := gauthplus.NewPostgreSQLDualControlService(db)
 	fiduciaryService := gauthplus.NewPostgreSQLFiduciaryDutyService(db)
 	capabilityService := gauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 
-	// Create GAuth+ validator
-	validator := gauth.NewGAuthPlusValidator(
+	// Create AgentAuth+ validator
+	validator := gauth.NewAgentAuthPlusValidator(
 		successorService,
 		delegationService,
 		dualControlService,
@@ -46,7 +46,7 @@ func TestGAuthPlusIntegration_SuccessorTakeover(t *testing.T) {
 	// Test 1: No successor active - should use primary agent
 	t.Run("NoSuccessorActive", func(t *testing.T) {
 		poaDef := createTestPoADefinition(primaryAgentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, primaryAgentID, "read")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, primaryAgentID, "read")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -87,7 +87,7 @@ func TestGAuthPlusIntegration_SuccessorTakeover(t *testing.T) {
 
 		// Validate with successor active
 		poaDef := createTestPoADefinition(primaryAgentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, primaryAgentID, "read")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, primaryAgentID, "read")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -130,7 +130,7 @@ func TestGAuthPlusIntegration_SuccessorTakeover(t *testing.T) {
 
 		// Validate - should use primary again
 		poaDef := createTestPoADefinition(primaryAgentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, primaryAgentID, "read")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, primaryAgentID, "read")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -147,8 +147,8 @@ func TestGAuthPlusIntegration_SuccessorTakeover(t *testing.T) {
 	})
 }
 
-// TestGAuthPlusIntegration_DelegationDepth tests delegation chain depth enforcement
-func TestGAuthPlusIntegration_DelegationDepth(t *testing.T) {
+// TestAgentAuthPlusIntegration_DelegationDepth tests delegation chain depth enforcement
+func TestAgentAuthPlusIntegration_DelegationDepth(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
@@ -158,7 +158,7 @@ func TestGAuthPlusIntegration_DelegationDepth(t *testing.T) {
 
 	// Initialize services
 	delegationService := gauthplus.NewPostgreSQLDelegationService(db)
-	validator := createTestGAuthPlusValidator(db)
+	validator := createTestAgentAuthPlusValidator(db)
 
 	ctx := context.Background()
 	poaID := "550e8400-e29b-41d4-a716-446655440002" // Valid UUID
@@ -190,7 +190,7 @@ func TestGAuthPlusIntegration_DelegationDepth(t *testing.T) {
 	// Test: Agent at depth 3 should succeed
 	t.Run("DepthThreeShouldSucceed", func(t *testing.T) {
 		poaDef := createTestPoADefinition(agentIDs[2]) // agent-3 at depth 3
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentIDs[2], "read")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentIDs[2], "read")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -208,7 +208,7 @@ func TestGAuthPlusIntegration_DelegationDepth(t *testing.T) {
 	// Test: Agent at depth 4 should fail (exceeds max depth 3)
 	t.Run("DepthFourShouldFail", func(t *testing.T) {
 		poaDef := createTestPoADefinition(agentIDs[3]) // agent-4 at depth 4
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentIDs[3], "read")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentIDs[3], "read")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -228,8 +228,8 @@ func TestGAuthPlusIntegration_DelegationDepth(t *testing.T) {
 	})
 }
 
-// TestGAuthPlusIntegration_CapabilityEnforcement tests capability assessment enforcement
-func TestGAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
+// TestAgentAuthPlusIntegration_CapabilityEnforcement tests capability assessment enforcement
+func TestAgentAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
@@ -238,7 +238,7 @@ func TestGAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 	defer cleanup()
 
 	capabilityService := gauthplus.NewPostgreSQLCapabilityAssessmentService(db)
-	validator := createTestGAuthPlusValidator(db)
+	validator := createTestAgentAuthPlusValidator(db)
 	validator.SetEnforceCapabilities(true) // Enable capability enforcement
 
 	ctx := context.Background()
@@ -248,7 +248,7 @@ func TestGAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 	// Test 1: No capability assessment - should fail
 	t.Run("NoAssessmentShouldFail", func(t *testing.T) {
 		poaDef := createTestPoADefinition(agentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, "execute")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, "execute")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -286,7 +286,7 @@ func TestGAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 		}
 
 		poaDef := createTestPoADefinition(agentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, "execute")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, "execute")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -329,7 +329,7 @@ func TestGAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 		}
 
 		poaDef := createTestPoADefinition(agentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, "execute")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, "execute")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -370,7 +370,7 @@ func TestGAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 		}
 
 		poaDef := createTestPoADefinition("agent-expired")
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, "550e8400-e29b-41d4-a716-446655440005", poaDef, "agent-expired", "execute")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, "550e8400-e29b-41d4-a716-446655440005", poaDef, "agent-expired", "execute")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -385,8 +385,8 @@ func TestGAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 	})
 }
 
-// TestGAuthPlusIntegration_FiduciaryViolations tests fiduciary duty enforcement
-func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
+// TestAgentAuthPlusIntegration_FiduciaryViolations tests fiduciary duty enforcement
+func TestAgentAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
@@ -395,7 +395,7 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 	defer cleanup()
 
 	fiduciaryService := gauthplus.NewPostgreSQLFiduciaryDutyService(db)
-	validator := createTestGAuthPlusValidator(db)
+	validator := createTestAgentAuthPlusValidator(db)
 	validator.SetEnforceFiduciary(true)     // Enable fiduciary enforcement
 	validator.SetEnforceCapabilities(false) // Disable capability enforcement for this test
 
@@ -406,7 +406,7 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 	// Test 1: No violations - should succeed
 	t.Run("NoViolationsShouldSucceed", func(t *testing.T) {
 		poaDef := createTestPoADefinition(agentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, "read")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, "read")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -440,7 +440,7 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 		}
 
 		poaDef := createTestPoADefinition(agentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, "read")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, "read")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -478,7 +478,7 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 		}
 
 		poaDef := createTestPoADefinition(agentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, "execute")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, "execute")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -516,7 +516,7 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 		}
 
 		poaDef := createTestPoADefinition(agentID)
-		result, err := validator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, "execute")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, "execute")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)
@@ -532,8 +532,8 @@ func TestGAuthPlusIntegration_FiduciaryViolations(t *testing.T) {
 	})
 }
 
-// TestGAuthPlusIntegration_ComplianceValidator tests integration with ComplianceValidator
-func TestGAuthPlusIntegration_ComplianceValidator(t *testing.T) {
+// TestAgentAuthPlusIntegration_ComplianceValidator tests integration with ComplianceValidator
+func TestAgentAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
@@ -544,14 +544,14 @@ func TestGAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 	// Setup validators
 	chainValidator := createMockChainValidator()
 	complianceValidator := gauth.NewComplianceValidator(chainValidator, nil, nil)
-	gauthPlusValidator := createTestGAuthPlusValidator(db)
+	gauthPlusValidator := createTestAgentAuthPlusValidator(db)
 
-	complianceValidator.SetGAuthPlusValidator(gauthPlusValidator)
-	complianceValidator.SetEnforceGAuthPlus(true)
+	complianceValidator.SetAgentAuthPlusValidator(gauthPlusValidator)
+	complianceValidator.SetEnforceAgentAuthPlus(true)
 
 	ctx := context.Background()
 
-	t.Run("RequestValidationWithGAuthPlus", func(t *testing.T) {
+	t.Run("RequestValidationWithAgentAuthPlus", func(t *testing.T) {
 		agentID := "550e8400-e29b-41d4-a716-446655440001" // Valid UUID
 		request := &gauth.ExtendedAuthorizationRequest{
 			AuthorizationRequest: &gauth.AuthorizationRequest{
@@ -569,9 +569,9 @@ func TestGAuthPlusIntegration_ComplianceValidator(t *testing.T) {
 			t.Logf("Validation error (expected in test): %v", err)
 		}
 
-		// Check that GAuth+ validation was performed
-		if result.GAuthPlusValidation == nil {
-			t.Error("Expected GAuth+ validation result")
+		// Check that AgentAuth+ validation was performed
+		if result.AgentAuthPlusValidation == nil {
+			t.Error("Expected AgentAuth+ validation result")
 		}
 	})
 }
@@ -684,14 +684,14 @@ func setupTestDB(t *testing.T) (*database.DB, func()) {
 	return db, cleanup
 }
 
-func createTestGAuthPlusValidator(db *database.DB) *gauth.GAuthPlusValidator {
+func createTestAgentAuthPlusValidator(db *database.DB) *gauth.AgentAuthPlusValidator {
 	successorService := gauthplus.NewPostgreSQLSuccessorService(db)
 	delegationService := gauthplus.NewPostgreSQLDelegationService(db)
 	dualControlService := gauthplus.NewPostgreSQLDualControlService(db)
 	fiduciaryService := gauthplus.NewPostgreSQLFiduciaryDutyService(db)
 	capabilityService := gauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 
-	return gauth.NewGAuthPlusValidator(
+	return gauth.NewAgentAuthPlusValidator(
 		successorService,
 		delegationService,
 		dualControlService,

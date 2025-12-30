@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates audit logging patterns using the GAuth framework. It covers authentication events, token management, event chains, and log searching.
+This example demonstrates audit logging patterns using the AgentAuth framework. It covers authentication events, token management, event chains, and log searching.
 
 ## Key Concepts
 - **AuditLogger**: Central logger for audit events.

@@ -14,11 +14,11 @@ import (
 // ComplianceValidator performs RFC-0111 Section 6 compliance validation
 type ComplianceValidator struct {
 	chainValidator     *AuthorizationChainValidator
-	gauthPlusValidator *GAuthPlusValidator
+	gauthPlusValidator *AgentAuthPlusValidator
 	pipClient          PIPClient
 	pdpClient          PDPClient
 	strictMode         bool
-	enforceGAuthPlus   bool
+	enforceAgentAuthPlus   bool
 }
 
 // NewComplianceValidator creates a new compliance validator
@@ -32,19 +32,19 @@ func NewComplianceValidator(
 		pipClient:        pipClient,
 		pdpClient:        pdpClient,
 		strictMode:       true,
-		enforceGAuthPlus: false, // Disabled by default for backward compatibility
+		enforceAgentAuthPlus: false, // Disabled by default for backward compatibility
 	}
 }
 
-// SetGAuthPlusValidator sets the GAuth+ validator and enables enforcement
-func (v *ComplianceValidator) SetGAuthPlusValidator(gauthPlusValidator *GAuthPlusValidator) {
+// SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
+func (v *ComplianceValidator) SetAgentAuthPlusValidator(gauthPlusValidator *AgentAuthPlusValidator) {
 	v.gauthPlusValidator = gauthPlusValidator
-	v.enforceGAuthPlus = true
+	v.enforceAgentAuthPlus = true
 }
 
-// SetEnforceGAuthPlus enables/disables GAuth+ enforcement
-func (v *ComplianceValidator) SetEnforceGAuthPlus(enforce bool) {
-	v.enforceGAuthPlus = enforce
+// SetEnforceAgentAuthPlus enables/disables AgentAuth+ enforcement
+func (v *ComplianceValidator) SetEnforceAgentAuthPlus(enforce bool) {
+	v.enforceAgentAuthPlus = enforce
 }
 
 // ExtendedAuthorizationRequest represents an RFC-0111 compliant authorization request
@@ -129,7 +129,7 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 		}
 		result.Checks["power_of_attorney"] = true
 
-		// Step 4a: Validate GAuth+ policies (successor, delegation, dual control, capabilities, fiduciary)
+		// Step 4a: Validate AgentAuth+ policies (successor, delegation, dual control, capabilities, fiduciary)
 		actionType := ""
 		if len(request.RequestedActions) > 0 {
 			actionType = request.RequestedActions[0]
@@ -138,9 +138,9 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 		// Note: PoADefinition doesn't have ID field, using agent identity as placeholder
 		// In production, PoA ID should be tracked separately in request metadata
 		poaID := agentID // TODO: Get actual PoA ID from request metadata
-		if err := v.validatePoAWithGAuthPlus(ctx, poaID, request.PowerOfAttorney, agentID, actionType, result); err != nil {
+		if err := v.validatePoAWithAgentAuthPlus(ctx, poaID, request.PowerOfAttorney, agentID, actionType, result); err != nil {
 			result.Valid = false
-			result.FailureReason = fmt.Sprintf("GAuth+ validation failed: %v", err)
+			result.FailureReason = fmt.Sprintf("AgentAuth+ validation failed: %v", err)
 			return result, err
 		}
 
@@ -161,7 +161,7 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 			result.Valid = false
 			result.FailureReason = "Power of Attorney is required per RFC-0111"
 			result.Checks["power_of_attorney"] = false
-			return result, &GAuthError{
+			return result, &AgentAuthError{
 				Code:    "missing_poa",
 				Message: "Power of Attorney is required per RFC-0111",
 			}
@@ -259,13 +259,13 @@ func (v *ComplianceValidator) ValidateGrantCompliance(
 		result.Valid = false
 		result.FailureReason = "Authorization chain is required in grant per RFC-0111"
 		result.Checks["authorization_chain"] = false
-		return result, &GAuthError{
+		return result, &AgentAuthError{
 			Code:    "missing_authorization_chain",
 			Message: "Authorization chain is required in grant per RFC-0111",
 		}
 	}
 
-	// Step 5a: Validate GAuth+ policies for the grant
+	// Step 5a: Validate AgentAuth+ policies for the grant
 	if grant.PowerOfAttorney != nil {
 		actionType := ""
 		if len(grant.GrantedActions) > 0 {
@@ -275,22 +275,22 @@ func (v *ComplianceValidator) ValidateGrantCompliance(
 		// Note: PoADefinition doesn't have ID field, using agent identity as placeholder
 		poaID := agentID // TODO: Get actual PoA ID from grant metadata
 
-		// Create a temporary request result for GAuth+ validation
+		// Create a temporary request result for AgentAuth+ validation
 		grantResult := &RequestComplianceResult{
 			Valid:    true,
 			Checks:   make(map[string]bool),
 			Warnings: make([]string, 0),
 		}
 
-		if err := v.validatePoAWithGAuthPlus(ctx, poaID, grant.PowerOfAttorney, agentID, actionType, grantResult); err != nil {
+		if err := v.validatePoAWithAgentAuthPlus(ctx, poaID, grant.PowerOfAttorney, agentID, actionType, grantResult); err != nil {
 			result.Valid = false
-			result.FailureReason = fmt.Sprintf("GAuth+ validation failed: %v", err)
-			result.GAuthPlusValidation = grantResult.GAuthPlusValidation
+			result.FailureReason = fmt.Sprintf("AgentAuth+ validation failed: %v", err)
+			result.AgentAuthPlusValidation = grantResult.AgentAuthPlusValidation
 			return result, err
 		}
 
-		// Transfer GAuth+ validation results to grant result
-		result.GAuthPlusValidation = grantResult.GAuthPlusValidation
+		// Transfer AgentAuth+ validation results to grant result
+		result.AgentAuthPlusValidation = grantResult.AgentAuthPlusValidation
 		result.Warnings = append(result.Warnings, grantResult.Warnings...)
 	}
 
@@ -325,7 +325,7 @@ func (v *ComplianceValidator) validateRequestStructure(
 	result *RequestComplianceResult,
 ) error {
 	if request == nil || request.AuthorizationRequest == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "invalid_request",
 			Message: "Authorization request cannot be nil",
 		}
@@ -333,7 +333,7 @@ func (v *ComplianceValidator) validateRequestStructure(
 
 	if request.ClientID == "" {
 		result.Checks["client_id"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_client_id",
 			Message: "Client ID is required",
 		}
@@ -342,7 +342,7 @@ func (v *ComplianceValidator) validateRequestStructure(
 
 	if len(request.Scopes) == 0 {
 		result.Checks["scope"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_scope",
 			Message: "Request scope is required",
 		}
@@ -367,7 +367,7 @@ func (v *ComplianceValidator) validateClientIdentification(
 		}
 		if clientInfo == nil {
 			result.Checks["client_exists"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "unknown_client",
 				Message: fmt.Sprintf("Client not found: %s", request.ClientID),
 			}
@@ -388,7 +388,7 @@ func (v *ComplianceValidator) validatePoA(
 	result *RequestComplianceResult,
 ) error {
 	if poaDef == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "invalid_poa",
 			Message: "PoA definition cannot be nil",
 		}
@@ -401,7 +401,7 @@ func (v *ComplianceValidator) validatePoA(
 
 	// Check PoA authorized client operational status
 	if poaDef.Parties.AuthorizedClient.StatusEnum != poa.OperationalStatusActive {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "inactive_poa",
 			Message: fmt.Sprintf("PoA authorized client is not active: %s", poaDef.Parties.AuthorizedClient.StatusEnum),
 		}
@@ -410,8 +410,8 @@ func (v *ComplianceValidator) validatePoA(
 	return nil
 }
 
-// validatePoAWithGAuthPlus performs GAuth+ validation on the PoA
-func (v *ComplianceValidator) validatePoAWithGAuthPlus(
+// validatePoAWithAgentAuthPlus performs AgentAuth+ validation on the PoA
+func (v *ComplianceValidator) validatePoAWithAgentAuthPlus(
 	ctx context.Context,
 	poaID string,
 	poaDef *poa.PoADefinition,
@@ -419,27 +419,27 @@ func (v *ComplianceValidator) validatePoAWithGAuthPlus(
 	actionType string,
 	result *RequestComplianceResult,
 ) error {
-	if !v.enforceGAuthPlus || v.gauthPlusValidator == nil {
-		// GAuth+ enforcement disabled or validator not set
+	if !v.enforceAgentAuthPlus || v.gauthPlusValidator == nil {
+		// AgentAuth+ enforcement disabled or validator not set
 		return nil
 	}
 
-	gauthPlusResult, err := v.gauthPlusValidator.ValidatePoAWithGAuthPlus(ctx, poaID, poaDef, agentID, actionType)
+	gauthPlusResult, err := v.gauthPlusValidator.ValidatePoAWithAgentAuthPlus(ctx, poaID, poaDef, agentID, actionType)
 	if err != nil {
-		return fmt.Errorf("GAuth+ validation failed: %w", err)
+		return fmt.Errorf("AgentAuth+ validation failed: %w", err)
 	}
 
-	result.GAuthPlusValidation = gauthPlusResult
+	result.AgentAuthPlusValidation = gauthPlusResult
 	result.Checks["gauthplus_validation"] = gauthPlusResult.Valid
 
-	// Merge GAuth+ warnings into result warnings
+	// Merge AgentAuth+ warnings into result warnings
 	if len(gauthPlusResult.Warnings) > 0 {
 		result.Warnings = append(result.Warnings, gauthPlusResult.Warnings...)
 	}
 
-	// If GAuth+ validation failed, add failure reason
+	// If AgentAuth+ validation failed, add failure reason
 	if !gauthPlusResult.Valid {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "gauthplus_validation_failed",
 			Message: gauthPlusResult.FailureReason,
 		}
@@ -455,7 +455,7 @@ func (v *ComplianceValidator) validateGeographicScope(
 	result *RequestComplianceResult,
 ) error {
 	if request.PowerOfAttorney == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_poa",
 			Message: "Cannot validate geographic scope without PoA",
 		}
@@ -468,7 +468,7 @@ func (v *ComplianceValidator) validateGeographicScope(
 	if len(applicableRegions) == 0 {
 		if v.strictMode {
 			result.Checks["geographic_scope"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "no_geographic_scope",
 				Message: "PoA does not define any geographic scope - authorization denied",
 			}
@@ -480,7 +480,7 @@ func (v *ComplianceValidator) validateGeographicScope(
 	// Check if the requested jurisdiction is authorized
 	if !poa.IsAuthorizedInRegion(applicableRegions, request.Jurisdiction) {
 		result.Checks["geographic_scope"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code: "geographic_scope_violation",
 			Message: fmt.Sprintf("Operation in jurisdiction '%s' is not authorized by PoA. Authorized regions: %v",
 				request.Jurisdiction, formatRegions(applicableRegions)),
@@ -526,7 +526,7 @@ func (v *ComplianceValidator) validateRequestedScope(
 		if !hasTransactions && !hasDecisions && !hasPhysicalActions && !hasNonPhysicalActions {
 			if v.strictMode {
 				result.Checks["scope_allowed"] = false
-				return &GAuthError{
+				return &AgentAuthError{
 					Code:    "no_authorized_actions",
 					Message: "PoA does not define any authorized actions",
 				}
@@ -552,7 +552,7 @@ func (v *ComplianceValidator) validateLegalFramework(
 	if request.LegalFramework == nil {
 		if v.strictMode {
 			result.Checks["legal_framework"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "missing_legal_framework",
 				Message: "Legal framework is required per RFC-0111",
 			}
@@ -588,7 +588,7 @@ func (v *ComplianceValidator) validateTemporalRequirements(
 
 		if !validFrom.IsZero() && now.Before(validFrom) {
 			result.Checks["temporal_validity"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "poa_not_yet_valid",
 				Message: "PoA validity period has not started",
 			}
@@ -596,7 +596,7 @@ func (v *ComplianceValidator) validateTemporalRequirements(
 
 		if !validUntil.IsZero() && now.After(validUntil) {
 			result.Checks["temporal_validity"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "poa_expired",
 				Message: "PoA validity period has expired",
 			}
@@ -638,7 +638,7 @@ func (v *ComplianceValidator) validateGrantStructure(
 	result *GrantComplianceResult,
 ) error {
 	if grant == nil {
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "invalid_grant",
 			Message: "Authorization grant cannot be nil",
 		}
@@ -646,7 +646,7 @@ func (v *ComplianceValidator) validateGrantStructure(
 
 	if grant.GrantID == "" {
 		result.Checks["grant_id"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_grant_id",
 			Message: "Grant ID is required",
 		}
@@ -655,7 +655,7 @@ func (v *ComplianceValidator) validateGrantStructure(
 
 	if grant.ClientID == "" {
 		result.Checks["client_id"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_client_id",
 			Message: "Client ID is required in grant",
 		}
@@ -664,7 +664,7 @@ func (v *ComplianceValidator) validateGrantStructure(
 
 	if len(grant.Scope) == 0 {
 		result.Checks["scope"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_scope",
 			Message: "Grant scope is required",
 		}
@@ -682,7 +682,7 @@ func (v *ComplianceValidator) validateIssuerAuthority(
 ) error {
 	if grant.IssuerID == "" {
 		result.Checks["issuer_authority"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "missing_issuer",
 			Message: "Grant must have issuer ID",
 		}
@@ -697,7 +697,7 @@ func (v *ComplianceValidator) validateIssuerAuthority(
 		}
 		if issuerInfo == nil {
 			result.Checks["issuer_authority"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "unknown_issuer",
 				Message: fmt.Sprintf("Issuer not found: %s", grant.IssuerID),
 			}
@@ -720,7 +720,7 @@ func (v *ComplianceValidator) validateResourceOwnerConsent(
 	if grant.ResourceOwnerID == "" {
 		if v.strictMode {
 			result.Checks["resource_owner_consent"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "missing_resource_owner",
 				Message: "Resource owner ID is required in grant",
 			}
@@ -761,7 +761,7 @@ func (v *ComplianceValidator) validateGrantLegalFramework(
 	if grant.LegalFramework == nil {
 		if v.strictMode {
 			result.Checks["legal_framework"] = false
-			return &GAuthError{
+			return &AgentAuthError{
 				Code:    "missing_legal_framework",
 				Message: "Legal framework is required in grant per RFC-0111",
 			}
@@ -790,7 +790,7 @@ func (v *ComplianceValidator) validateGrantExpiration(
 
 	if now.After(grant.ExpiresAt) {
 		result.Checks["expiration"] = false
-		return &GAuthError{
+		return &AgentAuthError{
 			Code:    "expired_grant",
 			Message: "Grant has expired",
 		}
@@ -820,7 +820,7 @@ type RequestComplianceResult struct {
 	ValidationTime      time.Time                  `json:"validation_time"`
 	Checks              map[string]bool            `json:"checks"`
 	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
-	GAuthPlusValidation *GAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
+	AgentAuthPlusValidation *AgentAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
 	FailureReason       string                     `json:"failure_reason,omitempty"`
 	Warnings            []string                   `json:"warnings,omitempty"`
 }
@@ -831,7 +831,7 @@ type GrantComplianceResult struct {
 	ValidationTime      time.Time                  `json:"validation_time"`
 	Checks              map[string]bool            `json:"checks"`
 	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
-	GAuthPlusValidation *GAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
+	AgentAuthPlusValidation *AgentAuthPlusValidationResult `json:"gauthplus_validation,omitempty"`
 	FailureReason       string                     `json:"failure_reason,omitempty"`
 	Warnings            []string                   `json:"warnings,omitempty"`
 }

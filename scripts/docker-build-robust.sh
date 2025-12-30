@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🐳 GAuth Docker Build with Cache Key Workaround"
+echo "🐳 AgentAuth Docker Build with Cache Key Workaround"
 echo "==============================================="
 
 # Get the script directory

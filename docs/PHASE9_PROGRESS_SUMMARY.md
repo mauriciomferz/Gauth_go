@@ -284,7 +284,7 @@ github.com/golang-migrate/migrate      # Database migrations
 ✅ **Production Ready**: Monitoring infrastructure complete  
 
 ### Impact
-The GAuth OIDC server now has:
+The AgentAuth OIDC server now has:
 - Real-time performance visibility
 - Request tracing with correlation IDs
 - Automatic error tracking

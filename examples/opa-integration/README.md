@@ -6,15 +6,15 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth OPA Integration Example
+# AgentAuth OPA Integration Example
 
-This directory contains working examples of integrating OPA (Open Policy Agent) with GAuth for advanced authorization policies.
+This directory contains working examples of integrating OPA (Open Policy Agent) with AgentAuth for advanced authorization policies.
 
 ## Contents
 
 - `main.go` - Embedded OPA SDK examples (in-process)
 - `http_client.go` - OPA HTTP API client examples (sidecar pattern)
-- `policies/scope_validation.rego` - Complete Rego policy for GAuth
+- `policies/scope_validation.rego` - Complete Rego policy for AgentAuth
 - `kubernetes/` - Kubernetes deployment manifests
 
 ## Quick Start

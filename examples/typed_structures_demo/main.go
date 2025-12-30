@@ -1,6 +1,6 @@
 package main
 
-// This demo shows how to use GAuth's type-safe structures for event metadata and token operations.
+// This demo shows how to use AgentAuth's type-safe structures for event metadata and token operations.
 
 import (
 	"fmt"
@@ -45,16 +45,16 @@ func main() {
 	bus := events.NewEventBus()
 	bus.Subscribe(eventHandler)
 
-	// Create a new GAuth instance (update config fields as needed)
+	// Create a new AgentAuth instance (update config fields as needed)
 	auth, err := gauth.New(gauth.Config{
-		// Create a GAuth instance with sensible defaults.
+		// Create a AgentAuth instance with sensible defaults.
 		// Fill in required config fields if needed, e.g.:
 		// AuthServerURL: "http://localhost:8080",
 		// ClientID:      "demo-client",
 		AccessTokenExpiry: time.Hour,
 	})
 	if err != nil {
-		log.Fatalf("failed to create GAuth instance: %v", err)
+		log.Fatalf("failed to create AgentAuth instance: %v", err)
 	}
 
 	// (Restrictions omitted or update to match current API if needed)
@@ -123,7 +123,7 @@ func main() {
 
 		// Validate the token
 		_, err := auth.ValidateToken(tokenStr)
-		// Validate the token using GAuth.
+		// Validate the token using AgentAuth.
 		status := "success"
 		if err != nil {
 			status = "failure"
@@ -168,7 +168,7 @@ func main() {
 		metadata.SetTime("revocation_time", time.Now())
 
 		// Revoke the token (invalidate)
-		p := &gauth.PowerAdministrationPoint{GAuth: auth}
+		p := &gauth.PowerAdministrationPoint{AgentAuth: auth}
 		// Use PowerAdministrationPoint for token revocation.
 		err := p.InvalidateToken(tokenStr)
 		if err != nil {

@@ -181,7 +181,7 @@ func ValidateEnvironment() []string {
 
 // PrintEnvironmentHelp prints help text for JWE environment variables
 func PrintEnvironmentHelp() {
-	fmt.Println("GAuth JWE Environment Variables:")
+	fmt.Println("AgentAuth JWE Environment Variables:")
 	fmt.Println()
 	fmt.Println("  GAUTH_JWE_ENABLED         Enable/disable JWE encryption (true/false, default: true)")
 	fmt.Println("  GAUTH_JWE_ALGORITHM       Key encryption algorithm (RSA-OAEP-256/A256KW, default: RSA-OAEP-256)")

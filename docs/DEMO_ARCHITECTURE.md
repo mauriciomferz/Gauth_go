@@ -7,7 +7,7 @@ title: Demo Architecture & Two-Agent Interaction
  refreshCadence: on-change
  source: design-session
  ---
-# Demo Architecture & Two-Agent Interaction (GAuth Beta)
+# Demo Architecture & Two-Agent Interaction (AgentAuth Beta)
 Generated: 2025-10-26
 
 ## Overview
@@ -32,7 +32,7 @@ The live demo illustrates:
 sequenceDiagram
     participant A as Agent A
     participant B as Agent B
-    participant S as GAuth Server
+    participant S as AgentAuth Server
     A->>S: GET /api/v1/beta/rotations/summary
     S-->>A: Rotation summary (multi-sig)
     A->>S: PoA issuance request

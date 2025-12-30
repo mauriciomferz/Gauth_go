@@ -9,16 +9,16 @@
 
 ## Executive Summary
 
-**Phase 2B implements Model Context Protocol (MCP) as the AI-to-system connectivity layer**, enabling GAuth-authorized AI agents to access external data sources and tools through standardized bidirectional connections. This brings GAuth from 68% to 75% RFC-0111 compliance by satisfying the MCP building block requirement.
+**Phase 2B implements Model Context Protocol (MCP) as the AI-to-system connectivity layer**, enabling AgentAuth-authorized AI agents to access external data sources and tools through standardized bidirectional connections. This brings AgentAuth from 68% to 75% RFC-0111 compliance by satisfying the MCP building block requirement.
 
 ### Why MCP Integration?
 
 **RFC-0111 Requirement**:
-> "GAuth builds on the following standards as building blocks: MCP or its alternatives, including but not limited to: MCP Implementation on Github"
+> "AgentAuth builds on the following standards as building blocks: MCP or its alternatives, including but not limited to: MCP Implementation on Github"
 
-**Current Gap**: GAuth has NO MCP implementation (0% coverage)  
+**Current Gap**: AgentAuth has NO MCP implementation (0% coverage)  
 **Impact**: Cannot authorize AI agents to access external resources  
-**Strategic Value**: Positions GAuth as the authorization layer for AI-to-AI and AI-to-system interactions
+**Strategic Value**: Positions AgentAuth as the authorization layer for AI-to-AI and AI-to-system interactions
 
 ### What Is MCP?
 
@@ -30,7 +30,7 @@
 - 🔄 Bidirectional communication between AI and systems
 - 🌐 Standardized resource discovery and tool execution
 
-**GAuth's Role**: Authorization layer ensuring AI agents only access resources they're authorized for via Extended Tokens with MCP scopes.
+**AgentAuth's Role**: Authorization layer ensuring AI agents only access resources they're authorized for via Extended Tokens with MCP scopes.
 
 ---
 
@@ -47,7 +47,7 @@
 - RFC-0111 compliance mapping
 
 **Key Design Decisions**:
-1. **Hybrid Model**: GAuth as MCP client host (not MCP server)
+1. **Hybrid Model**: AgentAuth as MCP client host (not MCP server)
 2. **Authorization Bridge**: Extended Tokens authorize MCP resource access
 3. **Policy Enforcement**: PDP validates all MCP operations
 4. **Audit Trail**: Complete logging of AI-to-resource interactions
@@ -163,7 +163,7 @@ mcp:
 ### Phase 2B.3: Authorization Bridge (Week 3)
 
 **Duration**: 1 week  
-**Objective**: Integrate GAuth authorization with MCP operations
+**Objective**: Integrate AgentAuth authorization with MCP operations
 
 #### Deliverables
 
@@ -370,7 +370,7 @@ examples/mcp/
 
 **3. Integration Guide** (`docs/MCP_INTEGRATION_GUIDE.md` - 800 lines)
 - MCP overview and concepts
-- GAuth authorization model
+- AgentAuth authorization model
 - Registering MCP servers
 - Creating Extended Tokens with MCP scopes
 - Resource access examples
@@ -405,7 +405,7 @@ examples/mcp/
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        GAuth System                          │
+│                        AgentAuth System                          │
 │                                                              │
 │  ┌──────────────┐        ┌──────────────┐                  │
 │  │  AI Agent    │──────▶ │   Extended   │                  │
@@ -451,14 +451,14 @@ examples/mcp/
 
 **1. Agent Requests Resource Access**
 ```
-AI Agent → GAuth → Validate Extended Token → Check MCP Scopes → 
+AI Agent → AgentAuth → Validate Extended Token → Check MCP Scopes → 
 Authorize Operation → Connect to MCP Server → Read Resource → 
 Audit Log → Return Content → AI Agent
 ```
 
 **2. Agent Calls Tool**
 ```
-AI Agent → GAuth → Validate Token → Check Tool Permission → 
+AI Agent → AgentAuth → Validate Token → Check Tool Permission → 
 PDP Evaluates Policy → Connect to MCP Server → Execute Tool → 
 Audit Log → Return Result → AI Agent
 ```
@@ -783,7 +783,7 @@ mcp:
 
 ## Conclusion
 
-**Phase 2B brings GAuth from 68% to 75% RFC-0111 compliance** by implementing the MCP building block requirement. This strategic initiative positions GAuth as the authorization layer for the emerging AI agent ecosystem, enabling secure, auditable, policy-driven access to external resources and tools.
+**Phase 2B brings AgentAuth from 68% to 75% RFC-0111 compliance** by implementing the MCP building block requirement. This strategic initiative positions AgentAuth as the authorization layer for the emerging AI agent ecosystem, enabling secure, auditable, policy-driven access to external resources and tools.
 
 **Key Value Propositions**:
 1. ✅ RFC-0111 compliance achieved (MCP requirement)

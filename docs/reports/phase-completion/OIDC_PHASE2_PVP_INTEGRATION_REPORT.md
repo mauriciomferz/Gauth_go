@@ -227,7 +227,7 @@ Router → OIDC PVP → IdentityBridge → IDTokenService
   2. Extract id_token + audience
   3. Validate ID token (signature, expiry, issuer)
   4. Extract claims (sub, name, ACR, entity_type)
-  5. Map ACR → GAuth trust level
+  5. Map ACR → AgentAuth trust level
   6. Validate minimum trust level
   7. Return IdentityProofResult
 
@@ -245,8 +245,8 @@ Authorization Server ← Result
 
 ### Trust Level Enforcement
 
-**ACR → GAuth Trust Level Mapping**:
-| ACR Value    | GAuth Trust Level | Description |
+**ACR → AgentAuth Trust Level Mapping**:
+| ACR Value    | AgentAuth Trust Level | Description |
 |--------------|-------------------|-------------|
 | 0, 1         | low               | Basic authentication |
 | 2            | substantial       | MFA required |
@@ -271,7 +271,7 @@ Authorization Server ← Result
 - ✅ Signature verification
 - ✅ ACR (Authentication Context Class Reference)
 
-### RFC-0111 (GAuth)
+### RFC-0111 (AgentAuth)
 - ✅ Step I: Owner's Authorizer Identity Proof
 - ✅ Step III: Client Owner Identity Proof
 - ✅ Step VI: Resource Owner Identity Proof
@@ -387,7 +387,7 @@ Authorization Server ← Result
 2. **External Provider PVP**:
    - Validate tokens from external issuers
    - Trust external JWKS
-   - Map external claims → GAuth identity
+   - Map external claims → AgentAuth identity
 
 3. **Multi-Provider Support**:
    - Provider registration and management

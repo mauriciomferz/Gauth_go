@@ -168,7 +168,7 @@ kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELEC
    kubectl get svc postgresql -n gauth-staging -o yaml
    ```
 
-2. **Test connectivity from GAuth pod**
+2. **Test connectivity from AgentAuth pod**
    ```bash
    kubectl exec <gauth-pod> -n gauth-staging -- \
      nc -zv postgresql 5432
@@ -195,7 +195,7 @@ kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELEC
      psql -U gauth -d gauth -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname = 'public'"
    ```
 
-3. **GAuth can connect**
+3. **AgentAuth can connect**
    ```bash
    kubectl logs <gauth-pod> -n gauth-staging | grep -i "database connection"
    ```

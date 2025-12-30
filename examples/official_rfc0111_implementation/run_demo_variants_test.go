@@ -29,9 +29,9 @@ func TestRunDemoExpectFailure(t *testing.T) {
 // Additional negative scenarios to cover error return branches indirectly.
 func TestRunDemoFailureScenarios(t *testing.T) {
 	// Scenario 1: Invalid config (delegation depth 0)
-	cfg := createRFC0111Config()
+	cfg := createAAP001Config()
 	cfg.MaxDelegationDepth = 0
-	if err := gauth_rfc_001.ValidateRFC0111Compliance(cfg); err == nil {
+	if err := gauth_rfc_001.ValidateAAP001Compliance(cfg); err == nil {
 		t.Fatalf("expected config validation failure for depth=0")
 	}
 	// Scenario 2: Missing revoke permission (simulate by crafting custom function locally)

@@ -6,7 +6,7 @@ lastUpdated: 2025-11-12
 owners: architecture-team
 refreshCadence: on-change
 ---
-# Official GiFo-RFC-0111 Implementation (Refactored Beta Demo)
+# Official AAP-RFC-0111 Implementation (Refactored Beta Demo)
 
 > Last Updated: 2025-10-17
 > Status: Active
@@ -31,11 +31,11 @@ The intent: keep the example runnable and aligned with the real code while still
 
 ## RFC-0111 Specification Details
 
-- **GiFo-Request for Comments**: 0111
+- **AAP-Request for Comments**: 0111
 - **Digital Supply Institute**
 - **Category**: Standards Track
 - **ISBN**: 978-3-00-084039-5
-- **Status**: Gimel Foundation Standards Track Document
+- **Status**: AgentAuth Community Standards Track Document
 - **Author**: Dr. Götz G. Wehberg
 
 ## Key Demonstrated Features
@@ -177,32 +177,32 @@ pip := &rfc0111.RFC0111PowerInformationPoint{
 ## Example Output
 
 ```
-=== GiFo-RFC-0111 GAuth 1.0 Authorization Framework Demo ===
+=== AAP-RFC-0111 AgentAuth 1.0 Authorization Framework Demo ===
 Digital Supply Institute
 ISBN: 978-3-00-084039-5
 Category: Standards Track
 
-Gimel Foundation gGmbH i.G., www.GimelFoundation.com
-Operated by Gimel Technologies GmbH
+AgentAuth Community gGmbH i.G., www.AgentAuthFoundation.com
+Operated by AgentAuth Technologies GmbH
 MD: Bjørn Baunbæk, Dr. Götz G. Wehberg – Chairman of the Board: Daniel Hartert
 
 1. RFC-0111 Compliance Validation:
 ✅ RFC-0111 Exclusions validated (Web3, AI operators, DNA identities excluded)
 
 2. Core RFC-0111 Authorization Framework:
-Resource Owner: Gimel Foundation gGmbH i.G. (organization)
+Resource Owner: AgentAuth Community gGmbH i.G. (organization)
 AI Client: gauth-agent-v1.0 (digital_agent)
 Extended Token: rfc0111-token-1738519234 (valid until 2025-10-03 16:13)
 
 3. Power*Point (P*P) Architecture:
-Power Decision Point: gimel-foundation-pdp (Owner: Gimel Foundation gGmbH i.G.)
+Power Decision Point: gimel-foundation-pdp (Owner: AgentAuth Community gGmbH i.G.)
 Power Information Point: gimel-foundation-pip (2 data sources)
-Power Verification Point: gimel-foundation-pvp (Trust Service: Gimel Foundation Trust Services)
+Power Verification Point: gimel-foundation-pvp (Trust Service: AgentAuth Community Trust Services)
 
-✅ GiFo-RFC-0111 GAuth 1.0 Authorization Framework demonstration complete
+✅ AAP-RFC-0111 AgentAuth 1.0 Authorization Framework demonstration complete
 ✅ All mandatory exclusions enforced (Section 2)
 ✅ Complete P*P Architecture implemented
-✅ Official Gimel Foundation gGmbH i.G. attribution
+✅ Official AgentAuth Community gGmbH i.G. attribution
 ```
 
 ## Running
@@ -264,7 +264,7 @@ Following the official RFC-0111 specification provides:
 3. **Verifiable**: High transparency and independent management of approval rules
 4. **Automated**: Learning-capable authorization server for continuous improvement
 5. **Compounding**: Builds on OAuth/OpenID Connect standards
-6. **Upgradable**: Compatible with GAuth+ exclusive features (Web3, AI operators, DNA identities)
+6. **Upgradable**: Compatible with AgentAuth+ exclusive features (Web3, AI operators, DNA identities)
 
 ## Next Steps
 
@@ -273,18 +273,18 @@ As per RFC-0111 Section 8:
 - **Subsequent Specifications**: Extended token attributes and comprehensive authorization methods
 - **Post-Quantum Cryptography**: NIST-compatible implementations
 - **Next-Level AI Models**: JEPA-compatible architectures
-- **GAuth+ Integration**: Licensed exclusive features from Gimel Technologies GmbH
+- **AgentAuth+ Integration**: Licensed exclusive features from AgentAuth Technologies GmbH
 
 ## Related Documentation
 
-- [GAuth Main Documentation](../../README.md)
+- [AgentAuth Main Documentation](../../README.md)
 - [RFC-0115 PoA-Definition](../rfc_0115_poa_definition/)
 - [Architecture Guide](../../docs/ARCHITECTURE.md)
 - [Security Policy](../../SECURITY.md)
 
 ---
 
-**Official Gimel Foundation Implementation**  
+**Official AgentAuth Community Implementation**  
 **Status**: RFC-0111 Standards Track Compliant  
 **Version**: 1.0 (Initial Implementation)  
 **License**: Apache 2.0

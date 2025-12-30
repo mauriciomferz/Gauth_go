@@ -1,6 +1,6 @@
-# GAuth+ Admin User Guide
+# AgentAuth+ Admin User Guide
 
-Quick reference guide for GAuth+ administrators.
+Quick reference guide for AgentAuth+ administrators.
 
 ---
 

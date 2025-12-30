@@ -5,15 +5,15 @@ import (
 	gauthplushandlers "github.com/mauriciomferz/Gauth_go/web/handlers/gauthplus"
 )
 
-// RegisterGAuthPlusEndpoints registers all GAuth+ management endpoints for the five advanced features:
+// RegisterAgentAuthPlusEndpoints registers all AgentAuth+ management endpoints for the five advanced features:
 // - Successor Management (AI takeover scenarios)
 // - Delegation Service (AI-to-AI delegations)
 // - Dual Control (multi-approver workflows)
 // - Capability Assessment (AI capability evaluation)
 // - Fiduciary Duty (violation tracking)
 //
-// These endpoints enable operational management of GAuth+ features integrated into the RFC-0111 authorization chain.
-func (s *BetaServer) RegisterGAuthPlusEndpoints(
+// These endpoints enable operational management of AgentAuth+ features integrated into the RFC-0111 authorization chain.
+func (s *BetaServer) RegisterAgentAuthPlusEndpoints(
 	successorService gauthplus.SuccessorManagementService,
 	delegationService gauthplus.DelegationService,
 	dualControlService gauthplus.DualControlService,

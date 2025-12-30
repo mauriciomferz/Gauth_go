@@ -73,7 +73,7 @@ The External Connectors system provides comprehensive identity verification capa
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    GAuth Authorization System               │
+│                    AgentAuth Authorization System               │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼

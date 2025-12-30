@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth 1.0 Modern Dashboard
+# AgentAuth 1.0 Modern Dashboard
 
 **A production-ready web interface for RFC-0111 & RFC-0115 compliant authorization testing and demonstration.**
 
@@ -40,7 +40,7 @@ http://localhost:8080/gauth1.html
 ### Overview Tab
 - **System Statistics**: Real-time metrics showing 91 passing tests, 19 benchmarks, 72.6% coverage
 - **RFC Compliance**: Visual indicators for RFC-0111 and RFC-0115 compliance
-- **System Components**: Status of all GAuth 1.0 components
+- **System Components**: Status of all AgentAuth 1.0 components
 - **Quick Start Guide**: Step-by-step instructions for new users
 
 ### Extended Tokens Tab
@@ -184,7 +184,7 @@ go test -bench=. -benchmem ./pkg/...
 
 ## 📖 RFC Compliance
 
-### RFC-0111 (GAuth 1.0)
+### RFC-0111 (AgentAuth 1.0)
 ✅ **100% Compliant**
 - §3: Extended Token Structure
 - §3: 3-Level Authorization Chain

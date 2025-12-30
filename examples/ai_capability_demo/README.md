@@ -8,7 +8,7 @@ refreshCadence: on-change
 ---
 # AI Capability Matrix Enforcement Demo
 
-This example (`ai_capability_demo`) showcases how to integrate and enforce AI capability governance using the GAuth AI Capability Matrix. It spins up a local Gin server exposing a small API surface plus interactive scenarios demonstrating compliance gates, human authorization requirements, audit levels, risk tiers, and jurisdiction / industry frameworks.
+This example (`ai_capability_demo`) showcases how to integrate and enforce AI capability governance using the AgentAuth AI Capability Matrix. It spins up a local Gin server exposing a small API surface plus interactive scenarios demonstrating compliance gates, human authorization requirements, audit levels, risk tiers, and jurisdiction / industry frameworks.
 
 ## Key Concepts
 

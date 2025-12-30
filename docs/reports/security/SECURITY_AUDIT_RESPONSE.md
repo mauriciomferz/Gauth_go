@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-An external security audit identified 4 "critical" vulnerabilities in the GAuth implementation. Upon investigation, **all four vulnerabilities have already been addressed** in the current codebase through Phases 1 and 2 security enhancements.
+An external security audit identified 4 "critical" vulnerabilities in the AgentAuth implementation. Upon investigation, **all four vulnerabilities have already been addressed** in the current codebase through Phases 1 and 2 security enhancements.
 
 This document provides evidence that each reported vulnerability is **already fixed** with code references and test coverage.
 

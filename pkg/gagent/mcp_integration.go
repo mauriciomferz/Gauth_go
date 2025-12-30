@@ -1,4 +1,4 @@
-// Package gagent - GAuth Agent Integration with MCP
+// Package gagent - AgentAuth Agent Integration with MCP
 // Provides high-level API for AI agents to use MCP resources with authorization
 package gagent
 
@@ -30,7 +30,7 @@ type AuthorizationBridge interface {
 }
 
 // MCPAgent is a high-level wrapper for AI agents to access MCP resources
-// with automatic GAuth authorization enforcement
+// with automatic AgentAuth authorization enforcement
 type MCPAgent struct {
 	mcpClient   MCPClient
 	authBridge  AuthorizationBridge
@@ -42,7 +42,7 @@ type MCPAgent struct {
 // MCPAgentConfig configures an MCP agent instance
 type MCPAgentConfig struct {
 	AgentID     string               // Unique agent identifier
-	Token       *gauth.ExtendedToken // GAuth authorization token
+	Token       *gauth.ExtendedToken // AgentAuth authorization token
 	MCPClient   MCPClient            // MCP client for server communication
 	AuthBridge  AuthorizationBridge  // Authorization bridge
 	AuditLogger mcp.AuditLogger      // Audit logger (optional)

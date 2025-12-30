@@ -47,7 +47,7 @@ func AuthorizeRequest(poa *Credential, requestScope string) (string, error) {
 
 Based on the file structure you referenced, you appear to have audited a **completely different codebase**, possibly:
 - A minimal proof-of-concept implementation
-- A different GAuth implementation (not `Gauth_go`)
+- A different AgentAuth implementation (not `Gauth_go`)
 - A hypothetical/example implementation from documentation
 - A different branch or fork
 

@@ -98,7 +98,7 @@ web/ui-react/                           # React SPA Root Directory
 ### Layout.tsx (136 lines)
 ```
 Header (sticky)
-├── Logo (Shield icon + "GAuth 1.0")
+├── Logo (Shield icon + "AgentAuth 1.0")
 ├── Badge ("Production Ready")
 ├── Navigation (8 links with icons)
 │   ├── Overview (Home icon)

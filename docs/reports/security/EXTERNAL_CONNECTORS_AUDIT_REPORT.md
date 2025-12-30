@@ -1,6 +1,6 @@
 # External Connectors and Integrations Audit Report
 
-**Project**: GAuth RFC-0111 Implementation  
+**Project**: AgentAuth RFC-0111 Implementation  
 **Date**: November 12, 2025  
 **Auditor**: GitHub Copilot (AI Code Analysis)  
 **Priority**: P1 - CRITICAL PATH TO PRODUCTION  
@@ -436,7 +436,7 @@ func checkOCSP(cert, issuer *x509.Certificate) error {
 - `crypto/x509` - CRL parsing built-in
 - `github.com/go-ldap/ldap/v3` - LDAP client (if needed)
 
-#### GAuth-Specific Revocation (Priority 1)
+#### AgentAuth-Specific Revocation (Priority 1)
 
 **Current Implementation** (✅ Partial):
 - ✅ Internal revocation lists (token revocation)
@@ -464,7 +464,7 @@ func checkOCSP(cert, issuer *x509.Certificate) error {
 5. Delta CRL support
 6. LDAP CRL distribution
 
-**Phase 3: GAuth Integration (1-2 weeks)**
+**Phase 3: AgentAuth Integration (1-2 weeks)**
 7. Certificate chain revocation checking
 8. Periodic re-validation
 9. Revocation event logging
@@ -796,7 +796,7 @@ func checkOCSP(cert, issuer *x509.Certificate) error {
 
 ```
 ┌─────────────────────────────────────────────────┐
-│           GAuth Core Application                │
+│           AgentAuth Core Application                │
 └───────────────────┬─────────────────────────────┘
                     │
 ┌───────────────────▼─────────────────────────────┐
@@ -973,7 +973,7 @@ external_connectors:
 
 ### 8.1 Current State
 
-The GAuth RFC-0111 implementation has **excellent architectural foundations** for external connectors:
+The AgentAuth RFC-0111 implementation has **excellent architectural foundations** for external connectors:
 - ✅ Comprehensive interface definitions (300+ lines)
 - ✅ Well-structured data types
 - ✅ High-quality mock implementations for development and testing

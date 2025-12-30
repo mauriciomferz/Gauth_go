@@ -1,4 +1,4 @@
-// Package main demonstrates GNAP client usage with GAuth.
+// Package main demonstrates GNAP client usage with AgentAuth.
 package main
 
 import (

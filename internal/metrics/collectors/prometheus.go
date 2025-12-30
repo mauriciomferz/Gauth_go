@@ -1,4 +1,4 @@
-// Copyright (c) 2025 GAuth. All rights reserved.
+// Copyright (c) 2025 AgentAuth. All rights reserved.
 
 // Package collectors provides example MetricsCollector implementations.
 package collectors

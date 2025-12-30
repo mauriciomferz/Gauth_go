@@ -90,7 +90,7 @@ func (h *Handler) Create(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 
 	// RFC 9396 / RFC-0111 Flow Integration
-	if h.GAuthService != nil && (len(req.AuthorizationDetails) > 0 || req.GrantID != "") {
+	if h.AgentAuthService != nil && (len(req.AuthorizationDetails) > 0 || req.GrantID != "") {
 		tokenReq := gauth.TokenRequest{
 			GrantID:              req.GrantID,
 			Scope:                req.Scope,
@@ -98,7 +98,7 @@ func (h *Handler) Create(c *gin.Context) {
 			Context:              map[string]interface{}{"nonce": req.Nonce, "meta": req.Meta},
 		}
 
-		resp, err := h.GAuthService.RequestToken(tokenReq)
+		resp, err := h.AgentAuthService.RequestToken(tokenReq)
 		if err != nil {
 			c.JSON(400, gin.H{"success": false, "error": "token_request_failed", "detail": err.Error()})
 			return

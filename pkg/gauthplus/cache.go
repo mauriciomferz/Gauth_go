@@ -65,17 +65,17 @@ func (c *CapabilityCache) Get(agentID string) (*AICapabilityAssessment, bool) {
 
 	entry, exists := c.cache[agentID]
 	if !exists {
-		metrics.RecordGAuthPlusCacheOperation("capability", false)
+		metrics.RecordAgentAuthPlusCacheOperation("capability", false)
 		return nil, false
 	}
 
 	// Check if expired
 	if time.Now().After(entry.expiresAt) {
-		metrics.RecordGAuthPlusCacheOperation("capability", false)
+		metrics.RecordAgentAuthPlusCacheOperation("capability", false)
 		return nil, false
 	}
 
-	metrics.RecordGAuthPlusCacheOperation("capability", true)
+	metrics.RecordAgentAuthPlusCacheOperation("capability", true)
 	return entry.data, true
 }
 
@@ -88,7 +88,7 @@ func (c *CapabilityCache) Set(agentID string, assessment *AICapabilityAssessment
 		data:      assessment,
 		expiresAt: time.Now().Add(c.ttl),
 	}
-	metrics.UpdateGAuthPlusCacheSize("capability", len(c.cache))
+	metrics.UpdateAgentAuthPlusCacheSize("capability", len(c.cache))
 }
 
 // Invalidate removes a specific entry from cache
@@ -145,7 +145,7 @@ func (c *CapabilityCache) CleanExpired() int {
 	}
 
 	if removed > 0 {
-		metrics.UpdateGAuthPlusCacheSize("capability", len(c.cache))
+		metrics.UpdateAgentAuthPlusCacheSize("capability", len(c.cache))
 	}
 
 	return removed
@@ -166,17 +166,17 @@ func (d *DelegationChainCache) Get(agentID string) ([]*AIDelegation, bool) {
 
 	entry, exists := d.cache[agentID]
 	if !exists {
-		metrics.RecordGAuthPlusCacheOperation("delegation", false)
+		metrics.RecordAgentAuthPlusCacheOperation("delegation", false)
 		return nil, false
 	}
 
 	// Check if expired
 	if time.Now().After(entry.expiresAt) {
-		metrics.RecordGAuthPlusCacheOperation("delegation", false)
+		metrics.RecordAgentAuthPlusCacheOperation("delegation", false)
 		return nil, false
 	}
 
-	metrics.RecordGAuthPlusCacheOperation("delegation", true)
+	metrics.RecordAgentAuthPlusCacheOperation("delegation", true)
 	return entry.data, true
 }
 
@@ -189,7 +189,7 @@ func (d *DelegationChainCache) Set(agentID string, chain []*AIDelegation) {
 		data:      chain,
 		expiresAt: time.Now().Add(d.ttl),
 	}
-	metrics.UpdateGAuthPlusCacheSize("delegation", len(d.cache))
+	metrics.UpdateAgentAuthPlusCacheSize("delegation", len(d.cache))
 }
 
 // Invalidate removes a specific entry from cache
@@ -255,7 +255,7 @@ func (d *DelegationChainCache) CleanExpired() int {
 	}
 
 	if removed > 0 {
-		metrics.UpdateGAuthPlusCacheSize("delegation", len(d.cache))
+		metrics.UpdateAgentAuthPlusCacheSize("delegation", len(d.cache))
 	}
 
 	return removed

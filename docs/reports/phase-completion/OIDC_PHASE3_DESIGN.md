@@ -10,7 +10,7 @@
 
 ## 📋 Executive Summary
 
-OIDC Phase 3 extends our internal OIDC implementation (Phases 1 & 2) to support external identity providers (Google, Okta, Azure AD). This enables GAuth to act as both an OIDC provider (internal) and an OIDC client/relying party (external), facilitating federated authentication across multiple identity domains.
+OIDC Phase 3 extends our internal OIDC implementation (Phases 1 & 2) to support external identity providers (Google, Okta, Azure AD). This enables AgentAuth to act as both an OIDC provider (internal) and an OIDC client/relying party (external), facilitating federated authentication across multiple identity domains.
 
 **Key Goals:**
 1. Support major external OIDC providers (Google, Okta, Azure AD)
@@ -27,7 +27,7 @@ OIDC Phase 3 extends our internal OIDC implementation (Phases 1 & 2) to support 
 ### Primary Objectives
 - ✅ **Multi-Provider Support:** Register and manage multiple OIDC providers
 - ✅ **Provider Discovery:** Auto-discover provider endpoints via OIDC Discovery
-- ✅ **Claim Mapping:** Normalize provider-specific claims to GAuth format
+- ✅ **Claim Mapping:** Normalize provider-specific claims to AgentAuth format
 - ✅ **Token Exchange:** Handle provider-specific token formats
 - ✅ **Configuration Management:** Support provider-specific configurations
 - ✅ **Caching:** Cache discovery documents to reduce latency
@@ -46,7 +46,7 @@ OIDC Phase 3 extends our internal OIDC implementation (Phases 1 & 2) to support 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        GAuth System                          │
+│                        AgentAuth System                          │
 │                                                               │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │             OIDC Phase 3: External Providers          │  │
@@ -70,7 +70,7 @@ OIDC Phase 3 extends our internal OIDC implementation (Phases 1 & 2) to support 
 │  │        OIDC Phase 1 & 2 (Existing)                   │  │
 │  │  - Discovery Service                                  │  │
 │  │  - ID Token Service                                   │  │
-│  │  - Identity Bridge (ACR ↔ GAuth Trust)              │  │
+│  │  - Identity Bridge (ACR ↔ AgentAuth Trust)              │  │
 │  │  - PowerVerificationPoint (PVP)                      │  │
 │  │  - PVP Router                                        │  │
 │  └───────────────────────────────────────────────────────┘  │
@@ -98,7 +98,7 @@ type ProviderConfig struct {
     ClientID       string            // OAuth2 client ID
     ClientSecret   string            // OAuth2 client secret
     Scopes         []string          // Required scopes (openid, profile, email)
-    ClaimMappings  map[string]string // Provider claim → GAuth claim mapping
+    ClaimMappings  map[string]string // Provider claim → AgentAuth claim mapping
     TenantID       string            // For multi-tenant providers (Azure AD)
     Metadata       map[string]any    // Provider-specific metadata
     Enabled        bool              // Provider enabled/disabled
@@ -215,7 +215,7 @@ var AzureADClaimMappings = map[string]string{
 - Validate external provider ID tokens
 - Extract and normalize claims
 - Map trust levels based on provider ACR/AMR
-- Convert to GAuth internal format
+- Convert to AgentAuth internal format
 - Handle provider-specific quirks
 
 **Key Functions:**
@@ -332,8 +332,8 @@ func MapTrustLevel(
 - [ ] Register and manage 3+ external providers
 - [ ] Fetch and cache provider discovery documents
 - [ ] Validate ID tokens from external providers
-- [ ] Map provider claims to GAuth format
-- [ ] Convert provider trust levels to GAuth trust levels
+- [ ] Map provider claims to AgentAuth format
+- [ ] Convert provider trust levels to AgentAuth trust levels
 - [ ] Support Google, Okta, Azure AD out-of-the-box
 
 ### Quality Requirements
@@ -467,7 +467,7 @@ func MapTrustLevel(
 
 **Deliverables:**
 - Token exchange logic ✅
-- Full integration with GAuth ✅
+- Full integration with AgentAuth ✅
 - 30+ integration tests
 
 ### Day 6: Documentation & Polish

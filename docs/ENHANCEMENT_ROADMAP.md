@@ -1,4 +1,4 @@
-# GAuth Enhancement Roadmap (2026)
+# AgentAuth Enhancement Roadmap (2026)
 
 **Date**: November 16, 2025  
 **Document Version**: 1.0  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This roadmap consolidates all planned enhancements for GAuth following the completion of core development phases (Frontend, Deployment, Testing, Security, Documentation). The system is **currently production-ready** at 98% RFC-0111 compliance. These enhancements are **strategic improvements** that add AI capabilities, scale, and polish but are not blocking for v1.0.0 release.
+This roadmap consolidates all planned enhancements for AgentAuth following the completion of core development phases (Frontend, Deployment, Testing, Security, Documentation). The system is **currently production-ready** at 98% RFC-0111 compliance. These enhancements are **strategic improvements** that add AI capabilities, scale, and polish but are not blocking for v1.0.0 release.
 
 ### Current System Status ✅
 
@@ -95,7 +95,7 @@ This roadmap consolidates all planned enhancements for GAuth following the compl
 **Key Deliverables**:
 - MCP client implementation (JSON-RPC 2.0)
 - Multi-server connection management
-- Authorization bridge (GAuth tokens → MCP permissions)
+- Authorization bridge (AgentAuth tokens → MCP permissions)
 - Audit trail for AI operations
 - HTTP API for MCP operations
 - React UI for MCP management
@@ -103,7 +103,7 @@ This roadmap consolidates all planned enhancements for GAuth following the compl
 
 **Why Critical**:
 1. RFC-0111 MCP building block requirement
-2. Positions GAuth for AI agent authorization market
+2. Positions AgentAuth for AI agent authorization market
 3. Enables secure AI-to-resource access
 4. Strategic differentiation from competitors
 
@@ -115,7 +115,7 @@ This roadmap consolidates all planned enhancements for GAuth following the compl
 **Priority**: P2 - Performance  
 **Investment**: $25k-50k + $770-1800/month operational
 
-**Purpose**: Scale GAuth from development/demo workloads to enterprise production scale with database persistence, caching, and distributed deployment.
+**Purpose**: Scale AgentAuth from development/demo workloads to enterprise production scale with database persistence, caching, and distributed deployment.
 
 **Three Modules**:
 
@@ -664,7 +664,7 @@ Decision Tree:
 
 ## Conclusion
 
-This enhancement roadmap provides a structured approach to evolving GAuth from a production-ready authorization system to an AI-enabled, enterprise-scale platform. The phased approach allows for:
+This enhancement roadmap provides a structured approach to evolving AgentAuth from a production-ready authorization system to an AI-enabled, enterprise-scale platform. The phased approach allows for:
 
 1. **Strategic Focus**: Phase 2B (MCP) for AI market positioning
 2. **Performance**: Phase 2C modules as scale demands
@@ -728,4 +728,4 @@ This enhancement roadmap provides a structured approach to evolving GAuth from a
 **Document Status**: Final  
 **Last Updated**: November 16, 2025  
 **Next Review**: Before Phase 2B kickoff (Q1 2026)  
-**Owner**: GAuth Product Team
+**Owner**: AgentAuth Product Team

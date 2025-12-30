@@ -195,7 +195,7 @@ export function policyInit(){
   setInterval(loadTimeline, 15000);
 }
 
-window.GAuth = window.GAuth || {}; Object.assign(window.GAuth, { loadProvenance, loadChainPage, checkConsistency, evaluatePolicy, submitBundle, refreshPolicyGovernance });
+window.AgentAuth = window.AgentAuth || {}; Object.assign(window.AgentAuth, { loadProvenance, loadChainPage, checkConsistency, evaluatePolicy, submitBundle, refreshPolicyGovernance });
 
 // Timeline fetch & render
 async function loadTimeline(){

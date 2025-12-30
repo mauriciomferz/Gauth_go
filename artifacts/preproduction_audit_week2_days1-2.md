@@ -22,7 +22,7 @@ owners: compliance-team
 ### Key Findings
 1. **Integration testing**: Comprehensive coverage across all critical paths
 2. **Performance**: Sub-millisecond operations for most core functions
-3. **Issue discovered**: RFC 0111 audit queue overflow under high load
+3. **Issue discovered**: AAP-001 audit queue overflow under high load
 4. **Recommendation**: Increase audit queue size or implement backpressure
 
 ---
@@ -41,15 +41,15 @@ owners: compliance-team
 3. `internal/crypto` - Key rotation and cryptographic operations (1.099s)
 4. `internal/notary` - Snapshot CLI and notarization (6.427s)
 5. `pkg/enforcement` - Policy enforcement integration (2.180s)
-6. `pkg/gauth` - Advanced GAuth service integration (2.183s)
+6. `pkg/gauth` - Advanced AgentAuth service integration (2.183s)
 7. `pkg/pdp` - Policy Decision Point integration (3.653s)
 8. `pkg/replay` - Replay protection and WAL integration (3.365s)
-9. `pkg/rfc0111` - RFC 0111 compliance integration (3.006s)
+9. `pkg/rfc0111` - AAP-001 compliance integration (3.006s)
 10. `web` - Web API integration (0.309s)
 
 ### Integration Test Categories
 
-#### 1. RFC 0111 Compliance Tests
+#### 1. AAP-001 Compliance Tests
 **Location**: `pkg/rfc0111/*_integration_test.go`
 
 **Tests**:

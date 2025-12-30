@@ -10,13 +10,13 @@ owners: api-team
 > Last Updated: 2025-11-05
 > Status: Active - Enhanced with Complete OpenAPI Specification
 
-This directory contains the API definitions and specifications for the GAuth implementation.
+This directory contains the API definitions and specifications for the AgentAuth implementation.
 
 ## Current Status: 🎓 BETA IMPLEMENTATION - Production-Grade Specifications
 
 > **⚠️ Beta Purpose Only**: This implementation is designed for learning and demonstration. It is NOT production ready. Do NOT use for real security, production, or commercial deployment.
 
-The GAuth beta implementation provides a demonstration Go API through the `pkg/gauth` package for learning purposes, now with complete OpenAPI specifications for all endpoints.
+The AgentAuth beta implementation provides a demonstration Go API through the `pkg/gauth` package for learning purposes, now with complete OpenAPI specifications for all endpoints.
 
 ## Directory Structure
 
@@ -62,13 +62,13 @@ tokenStore := tokenstore.NewMemoryStore()
 eventBus := events.NewBus()
 eventBus.Subscribe("token.revoked", handler)
 eventBus.Publish("token.created", eventData)
-## Beta GAuth API
+## Beta AgentAuth API
 
-The beta GAuth API demonstrates authorization, token, tracing, metrics, and RFC compliance concepts in Go. Key surfaces:
+The beta AgentAuth API demonstrates authorization, token, tracing, metrics, and RFC compliance concepts in Go. Key surfaces:
 
 ### Core Service API
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
 
 cfg := gauth.Config{AuthServerURL: "https://auth.example.com", ClientID: "demo", ClientSecret: "secret"}
 svc, err := gauth.New(cfg)
@@ -90,7 +90,7 @@ _ = svc.InvalidateToken(tok.Token)
 
 ### Token Store (RFC‑0115 style features)
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/token"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/token"
 
 store := token.NewMemoryStore()
 ctx := context.Background()
@@ -102,7 +102,7 @@ _ = store.Revoke(ctx, t.ID, "demo-reason")
 
 ### Event System
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/events"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/events"
 
 bus := events.NewBus()
 bus.Subscribe("token.revoked", func(e events.Event){ /* ... */ })
@@ -112,7 +112,7 @@ bus.Publish("token.revoked", events.Event{Type: "token.revoked", Subject: "id-1"
 ### Unified Rate Limiter API
 All limiters expose a single method signature: `Allow(ctx context.Context, key string) error`.
 ```go
-import rl "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/ratelimit"
+import rl "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/ratelimit"
 
 lim := rl.WrapTokenBucket(&rl.Config{RequestsPerSecond: 100, WindowSize: 1, BurstSize: 20})
 if err := lim.Allow(ctx, "user:123"); err != nil { /* rate limited */ }
@@ -120,7 +120,7 @@ if err := lim.Allow(ctx, "user:123"); err != nil { /* rate limited */ }
 
 ### Tracing (Lightweight Demo Layer)
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/tracing"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/tracing"
 
 tp, _ := tracing.NewTracerProvider(tracing.Config{ServiceName: "demo"})
 ctx, span := tp.StartSpan(ctx, "operation", tracing.AttributeTransactionType.String("txn"))
@@ -130,7 +130,7 @@ tracing.AddEvent(span, "step", tracing.Attribute{Key: "phase", Value: 1})
 
 ### Metrics Collector (Enhanced)
 ```go
-import m "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/monitoring"
+import m "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/monitoring"
 mc := m.NewMetricsCollector()
 mc.IncrementWithLabels("transactions_total", map[string]string{"status": "success"})
 mc.GaugeWithLabels("response_time_seconds", 0.123, map[string]string{"endpoint": "/token"})
@@ -150,7 +150,7 @@ Legacy example compatibility (official RFC‑0111 demo) uses `pkg/rfc0111.RFC011
 
 ### PoA Definition (RFC‑0115 Demo)
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/poa"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/poa"
 
 def := poa.PoADefinition{ /* fill Parties, Authorization, Requirements */ }
 if err := poa.ValidatePoADefinition(def); err != nil { /* handle */ }
@@ -352,12 +352,12 @@ While the current Go API is fully functional, future work may include:
 - OpenAPI/Swagger specifications
 - gRPC Protocol Buffer services
 - GraphQL schema definitions
- - RFC 0111/0115 compliance maturation (see `docs/rfc0111_compliance_matrix.md`)
+ - AAP-001/0115 compliance maturation (see `docs/rfc0111_compliance_matrix.md`)
 
 ## Beta Use
 
 This API is designed for:
-- 🎓 **Learning environments** - Demonstration of GAuth concepts
+- 🎓 **Learning environments** - Demonstration of AgentAuth concepts
 - 📚 **Beta scenarios** - Understanding authorization flows
 - 🔬 **Experimentation** - Testing ideas and patterns
 - 🧪 **Prototype development** - Exploring extension possibilities

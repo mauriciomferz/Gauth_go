@@ -1,14 +1,14 @@
 ---
-title: "GAuth Pod Down Alert Runbook"
+title: "AgentAuth Pod Down Alert Runbook"
 category: runbook
 status: active
 lastUpdated: 2025-11-12
 owners: devops-team
 refreshCadence: monthly
 ---
-# Alert Runbook: GAuthPodDown
+# Alert Runbook: AgentAuthPodDown
 
-**Alert Name:** `GAuthPodDown`  
+**Alert Name:** `AgentAuthPodDown`  
 **Severity:** Critical  
 **Component:** Pod  
 **Category:** Availability
@@ -17,7 +17,7 @@ refreshCadence: monthly
 
 ## Summary
 
-One or more GAuth pods have been down for more than 2 minutes, indicating a pod failure or crash.
+One or more AgentAuth pods have been down for more than 2 minutes, indicating a pod failure or crash.
 
 ---
 
@@ -245,18 +245,18 @@ After resolution, verify:
 
 ## Related Alerts
 
-- `GAuthServiceUnavailable` - All pods down
-- `GAuthPodRestartLoop` - Pod restarting repeatedly
-- `GAuthCriticalMemory` - Memory exhaustion
-- `GAuthPodNotReady` - Pod not passing readiness checks
+- `AgentAuthServiceUnavailable` - All pods down
+- `AgentAuthPodRestartLoop` - Pod restarting repeatedly
+- `AgentAuthCriticalMemory` - Memory exhaustion
+- `AgentAuthPodNotReady` - Pod not passing readiness checks
 
 ---
 
 ## Additional Resources
 
-- [GAuth Deployment Guide](../PRODUCTION_DEPLOYMENT_GUIDE.md)
+- [AgentAuth Deployment Guide](../PRODUCTION_DEPLOYMENT_GUIDE.md)
 - [Kubernetes Debugging Guide](https://kubernetes.io/docs/tasks/debug/)
-- [GAuth Architecture Documentation](../README.md)
+- [AgentAuth Architecture Documentation](../README.md)
 
 ---
 

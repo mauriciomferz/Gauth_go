@@ -110,7 +110,7 @@ sequenceDiagram
 - Inclusion proof: add optional batch verification endpoint.
 - Multi-signature rotation summaries (threshold >1).
 - External transparency log publishing for revocation & rotation roots.
-# GAuth Mermaid Diagrams
+# AgentAuth Mermaid Diagrams
 
 ## Token Issuance Flow
 ```mermaid
@@ -222,7 +222,7 @@ Generated diagrams reflect current endpoint & error taxonomy conventions (codes 
 sequenceDiagram
     autonumber
     participant RS as Resource Server
-    participant AS as GAuth AS
+    participant AS as AgentAuth AS
     participant Client
     
     Note over RS, AS: Dynamic Registration
@@ -244,7 +244,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Client
-    participant AS as GAuth Authentication Endpoint
+    participant AS as AgentAuth Authentication Endpoint
     participant User as User (Authentication Device)
     
     Client->>AS: POST /bc-authorize {login_hint, binding_message}
@@ -271,7 +271,7 @@ flowchart TD
         IDP[External IdP]
     end
     
-    subgraph GAuth System
+    subgraph AgentAuth System
         SP[SAML SP Handler]
         SCIM[SCIM Handler]
         UserStore[(User Store)]

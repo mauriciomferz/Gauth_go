@@ -1,4 +1,4 @@
--- Migration to create GAuth+ (Advanced Features) tables
+-- Migration to create AgentAuth+ (Advanced Features) tables
 
 -- 1. Successor Activations
 CREATE TABLE successor_activations (

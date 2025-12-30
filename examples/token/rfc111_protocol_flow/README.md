@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates a full RFC111-compliant token protocol flow using the GAuth token API. It covers owner proof, grant, attestation, revocation, and compliance checks.
+This example demonstrates a full RFC111-compliant token protocol flow using the AgentAuth token API. It covers owner proof, grant, attestation, revocation, and compliance checks.
 
 ## Key Concepts
 - **Owner Proof**: Subject provides proof of control.

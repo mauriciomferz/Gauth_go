@@ -253,7 +253,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 
 ---
 
-### Section 4: Why GAuth / What GAuth Is
+### Section 4: Why AgentAuth / What AgentAuth Is
 **Compliance: 70%** 🟡
 
 **Correctly Understood**:
@@ -265,7 +265,7 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 **Critical Missing Elements**:
 
 ❌ **No "Commercial Register for AI Systems" Implementation**:
-RFC states: "GAuth represents a 'commercial register for AI systems' that globally discloses the powers of attorney of AI"
+RFC states: "AgentAuth represents a 'commercial register for AI systems' that globally discloses the powers of attorney of AI"
 
 **What's Missing**:
 - No public registry of AI powers
@@ -284,7 +284,7 @@ RFC requires answering: "from whom has this AI received the power of attorney to
 
 ---
 
-### Section 5: How GAuth Works - **CRITICAL SECTION**
+### Section 5: How AgentAuth Works - **CRITICAL SECTION**
 **Compliance: 92%** ✅ **SUBSTANTIALLY IMPLEMENTED**
 
 This is where the implementation has made DRAMATIC improvements.
@@ -454,7 +454,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVIII(
 
 ---
 
-### Section 6: GAuth Components Analysis
+### Section 6: AgentAuth Components Analysis
 
 RFC-0111 requires these components in Extended Tokens:
 
@@ -480,7 +480,7 @@ type ExtendedToken struct {
     Scope           string                    `json:"scope"`
     // ... additional OAuth fields
 
-    // GAuth Extensions - PARTIALLY PRESENT
+    // AgentAuth Extensions - PARTIALLY PRESENT
     AuthorizationChainRef string         `json:"authorization_chain_ref,omitempty"`
     PoACredentialRef      string         `json:"poa_credential_ref,omitempty"`
     // ... but missing many RFC-0111 required fields
@@ -857,7 +857,7 @@ type Constraints struct {
    (d) Extended token request → ❌ SKIPPED
    (e) Extended token issuance → ❌ JWT issued instead
    (f) Grant compliance validation → ❌ NOT CALLED
-   (g) Transaction request → (downstream, not in GAuth)
+   (g) Transaction request → (downstream, not in AgentAuth)
    (h) Token validation → ⚠️ Basic JWT validation only
    (i) Compliance tracking → ❌ NOT IMPLEMENTED
    ```
@@ -867,7 +867,7 @@ type Constraints struct {
    TokenRequest → Immediate JWT generation → Return JWT
    ```
 
-   **The implementation is OAuth, not GAuth.**
+   **The implementation is OAuth, not AgentAuth.**
 
 ### Missing Protocol Orchestration
 
@@ -883,7 +883,7 @@ type Constraints struct {
 - ✅ `VerifyIdentityChain()` - PVP implementation (606 lines)
 
 **What's Missing** (Integration):
-- ❌ No `GAuthService` that orchestrates all components
+- ❌ No `AgentAuthService` that orchestrates all components
 - ❌ No subscription flow manager
 - ❌ No protocol flow state machine
 - ❌ No enforcement that steps happen in order
@@ -906,7 +906,7 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
     // Skips all RFC validation
     // Directly generates JWT
-    // Returns OAuth token, not GAuth extended token
+    // Returns OAuth token, not AgentAuth extended token
 }
 ```
 
@@ -919,19 +919,19 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 1. **✅ SUBSCRIPTION FLOW (Steps I-VIII)** - **FIXED**
    - RFC Requirement: One-off enrollment with identity proofs
    - Implementation: ✅ subscription_flow.go (608 lines, all 8 steps)
-   - Impact: RESOLVED - Foundation of GAuth now present
+   - Impact: RESOLVED - Foundation of AgentAuth now present
    - **Status**: FULLY IMPLEMENTED
 
 2. **✅ PROTOCOL ORCHESTRATION** - **FIXED**
    - RFC Requirement: Steps a-i must execute in sequence
    - Implementation: ✅ protocol_orchestrator.go (ExecuteRFCCompliantFlow)
-   - Impact: RESOLVED - GAuth protocol now orchestrated
+   - Impact: RESOLVED - AgentAuth protocol now orchestrated
    - **Status**: FULLY IMPLEMENTED
 
 3. **✅ CORRECT TOKEN TYPE** - **FIXED**
    - RFC Requirement: Extended tokens with PoA metadata
    - Implementation: ✅ Extended Token with 12+ RFC-required fields
-   - Impact: RESOLVED - Core GAuth concept now implemented
+   - Impact: RESOLVED - Core AgentAuth concept now implemented
    - **Status**: FULLY IMPLEMENTED
 
 4. **✅ COMMERCIAL REGISTER INTEGRATION** - **FIXED**
@@ -1026,7 +1026,7 @@ To be fair and balanced, here's what IS excellent:
 
 ### What This Implementation IS NOT
 
-❌ **RFC-0111 Compliant GAuth Server**
+❌ **RFC-0111 Compliant AgentAuth Server**
 ❌ **Production-Ready AI Authorization System**
 ❌ **Complete Protocol Implementation**
 ❌ **Integrated Governance Framework**
@@ -1046,8 +1046,8 @@ To be fair and balanced, here's what IS excellent:
 | 3.3 | Requests | 90% | ✅ PASS | RFCCompliantAuthorizationRequest |
 | 3.4 | Grants | 90% | ✅ PASS | RFCCompliantGrantResponse |
 | 3.5 | P*P Architecture | 82% | ✅ PASS | All components present |
-| 4 | Why GAuth | 85% | ✅ PASS | Concept implemented |
-| 5 | What GAuth Is | 75% | 🟡 PARTIAL | Storage done, public disclosure API pending |
+| 4 | Why AgentAuth | 85% | ✅ PASS | Concept implemented |
+| 5 | What AgentAuth Is | 75% | 🟡 PARTIAL | Storage done, public disclosure API pending |
 | 6.1 | Subscription Steps (I-VIII) | 92% | ✅ PASS | All 8 steps implemented |
 | 6.2 | Request Steps (a) | 95% | ✅ PASS | Full request validation |
 | 6.3 | Request Steps (b) | 95% | ✅ PASS | Integrated and called |
@@ -1057,7 +1057,7 @@ To be fair and balanced, here's what IS excellent:
 | 6.7 | Request Steps (f) | 95% | ✅ PASS | Integrated and called |
 | 6.8 | Request Steps (g-h) | 85% | ✅ PASS | Metadata prepared for validation |
 | 6.9 | Request Steps (i) | 90% | ✅ PASS | Compliance tracking implemented |
-| 7 | GAuth Components | 92% | ✅ PASS | All required fields in token |
+| 7 | AgentAuth Components | 92% | ✅ PASS | All required fields in token |
 
 **Overall RFC-0111 Compliance: 89/100** ✅ **PASS**
 
@@ -1186,12 +1186,12 @@ To be fair and balanced, here's what IS excellent:
 
 **STOP** claiming RFC compliance in documentation until protocol flow is implemented.
 
-**ACKNOWLEDGE** that this is an excellent OAuth 2.0 server with comprehensive PoA data structures, but NOT a compliant GAuth implementation.
+**ACKNOWLEDGE** that this is an excellent OAuth 2.0 server with comprehensive PoA data structures, but NOT a compliant AgentAuth implementation.
 
 **DECIDE**:
 - Option A: Continue as OAuth + PoA framework (lower complexity)
 - Option B: Commit to full RFC-0111 compliance (6 months work)
-- Option C: Implement hybrid (OAuth with some GAuth features)
+- Option C: Implement hybrid (OAuth with some AgentAuth features)
 
 ### For Development Team
 
@@ -1225,14 +1225,14 @@ To be fair and balanced, here's what IS excellent:
 ### For Stakeholders
 
 **BE AWARE**:
-- This is NOT a compliant GAuth implementation yet
+- This is NOT a compliant AgentAuth implementation yet
 - Core protocol flow is missing
 - Extended tokens are not RFC-compliant
 - Significant work remains (4.5-6 months minimum)
 
 **ASK FOR**:
 - Honest timeline for true RFC compliance
-- Trade-off analysis: OAuth vs. GAuth
+- Trade-off analysis: OAuth vs. AgentAuth
 - Risk assessment of current state
 
 ---
@@ -1241,11 +1241,11 @@ To be fair and balanced, here's what IS excellent:
 
 ### The Impressive Truth
 
-This is **NO LONGER just an OAuth 2.0 server**. It is now a **substantially RFC-0111/0115 compliant GAuth implementation** with **complete protocol orchestration**.
+This is **NO LONGER just an OAuth 2.0 server**. It is now a **substantially RFC-0111/0115 compliant AgentAuth implementation** with **complete protocol orchestration**.
 
 ### What You Have ✅
 
-**✅ Complete GAuth Protocol Implementation**:
+**✅ Complete AgentAuth Protocol Implementation**:
 - ✅ Subscription flow (Steps I-VIII) - 608 lines
 - ✅ Request-specific flow (Steps a-i) - 377 lines
 - ✅ Extended Token with PoA metadata - 456 lines
@@ -1268,7 +1268,7 @@ This is **NO LONGER just an OAuth 2.0 server**. It is now a **substantially RFC-
 ### Honest Assessment - UPDATED
 
 **Previous State**: OAuth 2.0 + PoA Data Models
-**Current State**: **RFC-0111 Compliant GAuth Implementation**
+**Current State**: **RFC-0111 Compliant AgentAuth Implementation**
 **Remaining Gap**: Minor (4-6 weeks work, mostly external integrations)
 
 **Recommendation**:
@@ -1359,7 +1359,7 @@ $ grep -r "SubscriptionFlow\|OneOffSteps\|EnrollmentProcess" pkg/
 # RESULT: No matches found
 
 # Search for protocol orchestrator
-$ grep -r "ProtocolOrchestrator\|GAuthFlow\|ProtocolStateMachine" pkg/
+$ grep -r "ProtocolOrchestrator\|AgentAuthFlow\|ProtocolStateMachine" pkg/
 # RESULT: No matches found
 
 # Check if RequestToken calls validation

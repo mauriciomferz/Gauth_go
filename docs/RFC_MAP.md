@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC 0111 / 0115 Clause → Implementation → Test Map
+# AAP-001 / 0115 Clause → Implementation → Test Map
 
 Generated: 2025-10-17
 Status: Draft (placeholder clause numbering until official spec ingestion)
@@ -16,7 +16,7 @@ Legend:
 - Status: Implemented | Partial | Missing
 - Each row should eventually include line references (file:line-range) auto-updated by CI script.
 
-## RFC 0111 (GAuth Protocol Core)
+## AAP-001 (AgentAuth Protocol Core)
 | Clause ID | Title | Implementation Symbols | Tests | Status | Notes |
 |-----------|-------|------------------------|-------|--------|-------|
 | RFC111-C1 | Policy Bundle Hash Chaining | `policy.Registry`, `AddBundle`, `VerifyChain` | pkg/policy/registry_tamper_test.go | Implemented | Verified multi-hop tamper detection |
@@ -28,7 +28,7 @@ Legend:
 | RFC111-C7 | Token Integrity (Public) | `Service.RequestToken`, `Service.ValidateToken`, `New` | web/token_public_integrity_test.go | Implemented | Verified RS256 JWT public key validation |
 | RFC111-C8 | Policy Evaluation Combining | `policy.ChainEngine` | pkg/policy/eval_combining_test.go | Implemented | Need conflict diagnostic metadata |
 
-## RFC 0115 (Power-of-Attorney Definition)
+## AAP-002 (Power-of-Attorney Definition)
 | Clause ID | Title | Implementation Symbols | Tests | Status | Notes |
 |-----------|-------|------------------------|-------|--------|-------|
 | RFC115-C1 | Parties Structure | `poa.Parties`, `Principal`, `Organization`, `ClientOwnerInfo` | pkg/poa/parties_validation_test.go | Implemented | Verified strict structure validation |
@@ -116,9 +116,9 @@ Implementation lines (approximate):
 - HTTP Handlers: `web/handlers/gnap/handler.go`
 - Client Example: `examples/gnap_client/`
 
-### GAuth Extensions to GNAP
+### AgentAuth Extensions to GNAP
 - `PowerOfAttorneyRef` - Links GNAP grants to PoA credentials
-- `AuthorizationChain` - Recursive delegation attestation per RFC 0111
+- `AuthorizationChain` - Recursive delegation attestation per AAP-001
 - `ComplianceLevel` - Policy compliance attestation
 
 ---

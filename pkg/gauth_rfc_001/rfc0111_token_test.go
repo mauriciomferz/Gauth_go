@@ -118,7 +118,7 @@ func TestTokenRoundTripEnvKey(t *testing.T) {
 	if claims.Status != string(dr.POA.Status) {
 		t.Fatalf("status mismatch: %s vs %s", claims.Status, dr.POA.Status)
 	}
-	if claims.Version == "" || !strings.HasPrefix(claims.Version, "gauth-rfc0111-env") {
+	if claims.Version == "" || !strings.HasPrefix(claims.Version, "gauth-aap001-env") {
 		t.Fatalf("unexpected version field: %s", claims.Version)
 	}
 	if claims.Kid == "" {

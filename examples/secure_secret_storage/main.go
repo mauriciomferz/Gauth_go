@@ -1,4 +1,4 @@
-// Package main demonstrates secure secret storage implementations available in GAuth.
+// Package main demonstrates secure secret storage implementations available in AgentAuth.
 //
 // This example showcases both secret provider implementations confirming that
 // sec8.item1 (Secure Secret Storage) is IMPLEMENTED (resolving DRIFT ISSUE):

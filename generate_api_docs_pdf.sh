@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# GAuth API Documentation PDF Generator
+# AgentAuth API Documentation PDF Generator
 # Generates professional PDFs from API markdown documentation
 #
 # Usage: ./generate_api_docs_pdf.sh
@@ -14,7 +14,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  GAuth API Documentation PDF Generator${NC}"
+echo -e "${BLUE}  AgentAuth API Documentation PDF Generator${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
@@ -74,7 +74,7 @@ if [ "$PDF_ENGINE" == "html" ]; then
           --toc \
           --toc-depth=3 \
           --css=https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css \
-          --metadata title="GAuth - $basename" \
+          --metadata title="AgentAuth - $basename" \
           2>&1 && echo -e "  ${GREEN}✓${NC} ${basename}.html created" || echo -e "  ${RED}✗${NC} Failed"
     done
     
@@ -106,8 +106,8 @@ pandoc API_EXAMPLES.md \
   -V linkcolor=blue \
   -V urlcolor=blue \
   -V toccolor=black \
-  --metadata title="GAuth API Examples" \
-  --metadata author="Gimel Foundation" \
+  --metadata title="AgentAuth API Examples" \
+  --metadata author="AgentAuth Community" \
   --metadata date="November 17, 2025" \
   2>&1
 
@@ -131,8 +131,8 @@ pandoc API_REFERENCE.md \
   -V linkcolor=blue \
   -V urlcolor=blue \
   -V toccolor=black \
-  --metadata title="GAuth API Reference" \
-  --metadata author="Gimel Foundation" \
+  --metadata title="AgentAuth API Reference" \
+  --metadata author="AgentAuth Community" \
   --metadata date="November 17, 2025" \
   2>&1
 
@@ -156,8 +156,8 @@ pandoc API_VERSIONING.md \
   -V linkcolor=blue \
   -V urlcolor=blue \
   -V toccolor=black \
-  --metadata title="GAuth API Versioning" \
-  --metadata author="Gimel Foundation" \
+  --metadata title="AgentAuth API Versioning" \
+  --metadata author="AgentAuth Community" \
   --metadata date="November 17, 2025" \
   2>&1
 
@@ -172,12 +172,12 @@ echo -e "${BLUE}Step 2: Generating combined PDF...${NC}"
 echo ""
 
 # Generate combined PDF
-echo -e "${GREEN}→${NC} Creating GAuth_API_Complete_Documentation.pdf..."
+echo -e "${GREEN}→${NC} Creating AgentAuth_API_Complete_Documentation.pdf..."
 pandoc \
   API_EXAMPLES.md \
   API_REFERENCE.md \
   API_VERSIONING.md \
-  -o GAuth_API_Complete_Documentation.pdf \
+  -o AgentAuth_API_Complete_Documentation.pdf \
   --pdf-engine=$PDF_ENGINE \
   --toc \
   --toc-depth=3 \
@@ -189,14 +189,14 @@ pandoc \
   -V linkcolor=blue \
   -V urlcolor=blue \
   -V toccolor=black \
-  --metadata title="GAuth 1.0 - Complete API Documentation" \
+  --metadata title="AgentAuth 1.0 - Complete API Documentation" \
   --metadata subtitle="RFC-0111/0115 Compliant Authorization Framework" \
-  --metadata author="Gimel Foundation" \
+  --metadata author="AgentAuth Community" \
   --metadata date="November 17, 2025" \
   2>&1
 
 if [ $? -eq 0 ]; then
-    echo -e "  ${GREEN}✓${NC} GAuth_API_Complete_Documentation.pdf created"
+    echo -e "  ${GREEN}✓${NC} AgentAuth_API_Complete_Documentation.pdf created"
 else
     echo -e "  ${RED}✗${NC} Failed to create combined PDF"
 fi
@@ -210,7 +210,7 @@ echo -e "${YELLOW}Generated files in docs/ directory:${NC}"
 echo -e "  • API_EXAMPLES.pdf"
 echo -e "  • API_REFERENCE.pdf"
 echo -e "  • API_VERSIONING.pdf"
-echo -e "  • GAuth_API_Complete_Documentation.pdf (combined)"
+echo -e "  • AgentAuth_API_Complete_Documentation.pdf (combined)"
 echo ""
 echo -e "${BLUE}PDF Engine Used:${NC} $PDF_ENGINE"
 echo ""

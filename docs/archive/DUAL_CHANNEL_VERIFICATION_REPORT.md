@@ -164,10 +164,10 @@ challengeID, err := verifier.RequestVerification(ctx, "poa_abc123", PrincipalCon
 **Generated Messages**:
 ```
 [SMS to +1234567890]
-GAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A (expires in 5 min)
+AgentAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A (expires in 5 min)
 
 [Email to principal@example.com]
-Subject: GAuth: Confirm Power of Attorney Creation
+Subject: AgentAuth: Confirm Power of Attorney Creation
 Body:
 Verification Code: VA3R-XZ3A
 This code expires in 5 minutes.
@@ -214,7 +214,7 @@ poaID, cancelURL, err := timelock.CreateWithDelay(ctx, poa)
 
 **Notification Sent**:
 ```
-🔔 GAuth: New Power of Attorney Created
+🔔 AgentAuth: New Power of Attorney Created
 
 IMPORTANT: A new Power of Attorney has been created for your account.
 
@@ -235,7 +235,7 @@ This 24-hour delay gives you time to cancel fraudulent PoAs.
 **Step 2: Automatic Reminders**
 ```
 [12 hours later]
-⏰ GAuth Reminder: PoA Activates Soon
+⏰ AgentAuth Reminder: PoA Activates Soon
 
 Reminder: Your Power of Attorney will activate in approximately 12 hours.
 
@@ -261,7 +261,7 @@ err := timelock.CancelPoA(ctx, "poa_abc123")
 
 **Cancellation Confirmation**:
 ```
-GAuth: Power of Attorney Cancelled
+AgentAuth: Power of Attorney Cancelled
 
 Your Power of Attorney (ID: poa_abc123) has been successfully cancelled.
 
@@ -292,9 +292,9 @@ $ go test ./pkg/gauth/verification -v -cover
 
 === RUN   TestDualChannelVerifier_RequestVerification
 [MOCK SMS] To: +1234567890
-Message: GAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A
+Message: AgentAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A
 [MOCK EMAIL] To: principal@example.com
-Subject: GAuth: Confirm Power of Attorney Creation
+Subject: AgentAuth: Confirm Power of Attorney Creation
 --- PASS: TestDualChannelVerifier_RequestVerification (0.00s)
 
 === RUN   TestDualChannelVerifier_ConfirmVerification
@@ -371,7 +371,7 @@ ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/verification    0.213s
 - **0-hour delay** - funds drained immediately
 - **No out-of-band confirmation**
 
-**How GAuth Prevents This**:
+**How AgentAuth Prevents This**:
 1. **Dual-channel verification**: Attacker needs SMS + Email access (unlikely)
 2. **24-hour delay**: Principal has time to detect and cancel
 3. **Multi-channel notifications**: SMS + Email alerts increase detection probability
@@ -412,7 +412,7 @@ type SendGridEmailService struct {
 
 func (s *SendGridEmailService) SendEmail(ctx context.Context, to, subject, body string) error {
     message := mail.NewSingleEmail(
-        mail.NewEmail("GAuth Security", "security@gauth.example.com"),
+        mail.NewEmail("AgentAuth Security", "security@gauth.example.com"),
         subject,
         mail.NewEmail("", to),
         body,
@@ -514,15 +514,15 @@ func (m *SecurityMonitor) CheckSuspiciousActivity(principal string) error {
 
 ### Banking 2FA
 - **Standard**: SMS or Email code for wire transfers
-- **GAuth**: **Dual-channel** (SMS + Email) for higher security
+- **AgentAuth**: **Dual-channel** (SMS + Email) for higher security
 
 ### Hardware Wallets
 - **Ledger/Trezor**: Physical button press + PIN
-- **GAuth**: Dual-channel + 24-hour delay (compatible with software wallets)
+- **AgentAuth**: Dual-channel + 24-hour delay (compatible with software wallets)
 
 ### DeFi Governance
 - **Compound/Uniswap**: Time-delayed execution (24-48 hours)
-- **GAuth**: 24-hour delay with **multi-channel notifications** (not just blockchain events)
+- **AgentAuth**: 24-hour delay with **multi-channel notifications** (not just blockchain events)
 
 ---
 

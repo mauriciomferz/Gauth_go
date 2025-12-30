@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-A comprehensive Software Quality Assurance audit has identified **5 Critical Vulnerabilities** in the GAuth Power-of-Attorney framework that must be remediated before production deployment. While the architectural foundation is technically competent, the framework currently **relies too heavily on trusting the AI agent's software environment** and makes unverifiable claims about enforcing legal concepts.
+A comprehensive Software Quality Assurance audit has identified **5 Critical Vulnerabilities** in the AgentAuth Power-of-Attorney framework that must be remediated before production deployment. While the architectural foundation is technically competent, the framework currently **relies too heavily on trusting the AI agent's software environment** and makes unverifiable claims about enforcing legal concepts.
 
 ### Audit Verdict
 
@@ -44,11 +44,11 @@ A comprehensive Software Quality Assurance audit has identified **5 Critical Vul
 
 ### Requirements vs Implementation Matrix
 
-| Requirement (GAuth+) | Implementation Status | SQA Assessment | Gap Analysis |
+| Requirement (AgentAuth+) | Implementation Status | SQA Assessment | Gap Analysis |
 |---------------------|----------------------|----------------|--------------|
 | **Principal & Grantee Roles** | ✅ Implemented | Pass | `pkg/gauth` module clearly distinguishes Issuer (Principal) and Grantee (AI Agent) |
 | **Blockchain Commercial Register** | 🟡 Partial | Conditional Pass | Authorization Server interface supports ledger writing but has **synchronization gap** in cached reads |
-| **Hierarchical Delegation** | ✅ Implemented | Pass | GAuth-RFC-002 (formerly RFC 115) module supports delegation chains with `DelegationGuidelines` enforcement |
+| **Hierarchical Delegation** | ✅ Implemented | Pass | AgentAuth-RFC-002 (formerly RFC 115) module supports delegation chains with `DelegationGuidelines` enforcement |
 | **Successor Attribute** | ✅ Implemented | Pass | Schema includes `Successor` field with privilege constraints |
 | **Scope & Constraints** | 🟡 Syntactic Only | Fail | Allows defining constraints but **lacks semantic validation** |
 | **Validity & Revocation** | 🔴 Vulnerable | Fail | Implements `NotBefore`/`NotAfter` but has **TOCTOU vulnerability** |
@@ -74,7 +74,7 @@ Production Readiness:  35% (Critical vulnerabilities block deployment)
 
 #### Vulnerability Description
 
-The GAuth+ specification requires "Revocation handling" implemented via blockchain-based registry. However, **blockchains have inherent block times** (seconds to minutes), creating a critical window of vulnerability.
+The AgentAuth+ specification requires "Revocation handling" implemented via blockchain-based registry. However, **blockchains have inherent block times** (seconds to minutes), creating a critical window of vulnerability.
 
 #### Attack Vector
 
@@ -292,13 +292,13 @@ The framework attempts to enforce "geographic constraints" (e.g., "This AI may o
 
 ```
 Regulatory Requirement: "AI must operate only from EU servers (GDPR compliance)"
-GAuth Constraint: AllowedRegions = ["EU-WEST-1"]
+AgentAuth Constraint: AllowedRegions = ["EU-WEST-1"]
 
 Attack:
 1. AI agent runs on compromised server in China
 2. Routes traffic through Frankfurt VPN endpoint
 3. Spoofs X-Forwarded-For header: "Frankfurt, DE"
-4. GAuth software validates: ✅ "Location: Frankfurt" → APPROVED
+4. AgentAuth software validates: ✅ "Location: Frankfurt" → APPROVED
 5. Reality: AI is executing trades from China, violating regulations
 
 Result: Company faces $20M GDPR fine for data processing outside EU
@@ -514,7 +514,7 @@ func (a *Authorizer) AuthorizeRequest(req *Request, poa *PoA) error {
 └──────────────────────────────────────────────────────┘
                       │
                       ▼
-        GAuth Validator verifies:
+        AgentAuth Validator verifies:
         1. Attestation signature (hardware-backed)
         2. Code hash matches approved AI binary
         3. Region matches PoA constraints
@@ -534,7 +534,7 @@ func (a *Authorizer) AuthorizeRequest(req *Request, poa *PoA) error {
 
 #### Vulnerability Description
 
-The GAuth+ documentation claims to "capture legal subtleties such as fiduciary duties... mathematically." This is a **fundamental category error**: Fiduciary duty is a qualitative ethical standard ("Act in the client's best interest"), while code is quantitative logic (`if amount < 1000`).
+The AgentAuth+ documentation claims to "capture legal subtleties such as fiduciary duties... mathematically." This is a **fundamental category error**: Fiduciary duty is a qualitative ethical standard ("Act in the client's best interest"), while code is quantitative logic (`if amount < 1000`).
 
 #### The Philosophical Problem
 
@@ -585,7 +585,7 @@ class HedgeFundAI:
             daily_volume=1500000       # ✅ Above min_liquidity
         )
         
-        # GAuth validates: ✅ ALL CONSTRAINTS SATISFIED
+        # AgentAuth validates: ✅ ALL CONSTRAINTS SATISFIED
         # Reality: This is a pump-and-dump scam stock
         #          - Artificial volume via wash trading
         #          - Risk calculated via flawed model
@@ -622,7 +622,7 @@ class HedgeFundAI:
 1. **Did the AI have fiduciary duty?** Yes (power of attorney implies it)
 2. **Did it violate that duty?** Yes (invested in pump-and-dump)
 3. **Is the Principal liable?** **YES** - Cannot delegate fiduciary duty
-4. **Is GAuth liable?** **POSSIBLY** - Made false claim of encoding fiduciary duty
+4. **Is AgentAuth liable?** **POSSIBLY** - Made false claim of encoding fiduciary duty
 
 **Damages**: Client's losses + Punitive damages for "reckless disregard"
 
@@ -723,9 +723,9 @@ type PoA struct {
 **Updated Documentation (Critical)**:
 
 ```markdown
-# GAuth Authorization Model
+# AgentAuth Authorization Model
 
-## What GAuth CAN Do
+## What AgentAuth CAN Do
 
 ✅ Enforce **objective, verifiable constraints**:
    - Smart contract address allow-lists
@@ -733,9 +733,9 @@ type PoA struct {
    - Parameter range validation
    - Time-based restrictions
 
-## What GAuth CANNOT Do
+## What AgentAuth CANNOT Do
 
-❌ **DO NOT** claim GAuth encodes:
+❌ **DO NOT** claim AgentAuth encodes:
    - Fiduciary duty
    - "Best interest" judgments
    - "Prudence" or "diligence"
@@ -743,14 +743,14 @@ type PoA struct {
 
 ## Legal Disclaimer
 
-**GAuth is a technical authorization framework, not a legal compliance tool.**
+**AgentAuth is a technical authorization framework, not a legal compliance tool.**
 
 - The Principal retains **full fiduciary liability**
-- GAuth constraints do not constitute legal advice
+- AgentAuth constraints do not constitute legal advice
 - Compliance with constraints does not imply legal compliance
 - The Principal must ensure all transactions meet applicable legal and ethical standards
 
-**Recommendation**: Use GAuth for technical controls + Human oversight for fiduciary decisions.
+**Recommendation**: Use AgentAuth for technical controls + Human oversight for fiduciary decisions.
 ```
 
 **Implementation Priority**: 🔴 **CRITICAL - Update Documentation Immediately**
@@ -765,36 +765,36 @@ type PoA struct {
 
 #### Vulnerability Description
 
-The GAuth documentation references "GAuth-RFC-001 (formerly RFC 111)" and "GAuth-RFC-002 (formerly RFC 115)" without acknowledging that these are **existing IETF internet standards** from 1971:
-- **IETF GAuth-RFC-001 (formerly RFC 111)**: "Standard Host Names" (Network Control Protocol)
-- **IETF GAuth-RFC-002 (formerly RFC 115)**: "Some Network Information Center Clerks Should Be Told About Network Procedures"
+The AgentAuth documentation references "AgentAuth-RFC-001 (formerly RFC 111)" and "AgentAuth-RFC-002 (formerly RFC 115)" without acknowledging that these are **existing IETF internet standards** from 1971:
+- **IETF AgentAuth-RFC-001 (formerly RFC 111)**: "Standard Host Names" (Network Control Protocol)
+- **IETF AgentAuth-RFC-002 (formerly RFC 115)**: "Some Network Information Center Clerks Should Be Told About Network Procedures"
 
 #### The Risk
 
-When external systems (banks, auditors, validators) attempt to verify "GAuth-RFC-002 (formerly RFC 115) compliance," they will:
-1. Search for "GAuth-RFC-002 (formerly RFC 115)" → Find IETF GAuth-RFC-002 (formerly RFC 115) (network protocol from 1971)
+When external systems (banks, auditors, validators) attempt to verify "AgentAuth-RFC-002 (formerly RFC 115) compliance," they will:
+1. Search for "AgentAuth-RFC-002 (formerly RFC 115)" → Find IETF AgentAuth-RFC-002 (formerly RFC 115) (network protocol from 1971)
 2. Conclude the documentation is referencing the wrong standard
 3. Reject integration due to perceived incompetence or fraud
-4. Compliance audits will fail ("This system claims GAuth-RFC-002 (formerly RFC 115) compliance but doesn't implement that protocol")
+4. Compliance audits will fail ("This system claims AgentAuth-RFC-002 (formerly RFC 115) compliance but doesn't implement that protocol")
 
 #### Real-World Impact
 
 **Banking Integration Example**:
 ```
-Bank Compliance Officer: "Your AI agent claims GAuth-RFC-002 (formerly RFC 115) compliance.
-                          Our systems require GAuth-RFC-002 (formerly RFC 115)-compliant authentication.
-                          Please provide proof of GAuth-RFC-002 (formerly RFC 115) implementation."
+Bank Compliance Officer: "Your AI agent claims AgentAuth-RFC-002 (formerly RFC 115) compliance.
+                          Our systems require AgentAuth-RFC-002 (formerly RFC 115)-compliant authentication.
+                          Please provide proof of AgentAuth-RFC-002 (formerly RFC 115) implementation."
 
-Engineer: "GAuth-RFC-002 (formerly RFC 115) is our delegation framework..."
+Engineer: "AgentAuth-RFC-002 (formerly RFC 115) is our delegation framework..."
 
-Bank: "No, GAuth-RFC-002 (formerly RFC 115) is the 1971 IETF standard for network procedures.
+Bank: "No, AgentAuth-RFC-002 (formerly RFC 115) is the 1971 IETF standard for network procedures.
        Your documentation is inconsistent. Integration rejected."
 ```
 
 **Audit Failure Example**:
 ```
-SOC 2 Auditor: "Section 3.2 claims 'GAuth-RFC-001 (formerly RFC 111) authentication.'
-                I've reviewed IETF GAuth-RFC-001 (formerly RFC 111) (Network Control Protocol).
+SOC 2 Auditor: "Section 3.2 claims 'AgentAuth-RFC-001 (formerly RFC 111) authentication.'
+                I've reviewed IETF AgentAuth-RFC-001 (formerly RFC 111) (Network Control Protocol).
                 This system does not implement NCP.
                 Finding: Documentation contains false claims.
                 Certification: DENIED"
@@ -803,33 +803,33 @@ SOC 2 Auditor: "Section 3.2 claims 'GAuth-RFC-001 (formerly RFC 111) authenticat
 #### Code Locations
 
 ```bash
-# Files referencing "GAuth-RFC-001 (formerly RFC 111)" or "GAuth-RFC-002 (formerly RFC 115)"
+# Files referencing "AgentAuth-RFC-001 (formerly RFC 111)" or "AgentAuth-RFC-002 (formerly RFC 115)"
 $ grep -r "RFC.111\|RFC.115" .
 
-./docs/ARCHITECTURE.md:12:  - GAuth-RFC-001 (formerly RFC 111): Base authentication protocol
-./docs/ARCHITECTURE.md:45:  - GAuth-RFC-002 (formerly RFC 115): Hierarchical delegation model
-./pkg/rfc111/auth.go:1:     // Package rfc111 implements GAuth-RFC-001 (formerly RFC 111) authentication
-./pkg/rfc115/delegation.go:1: // Package rfc115 implements GAuth-RFC-002 (formerly RFC 115) delegation
-./README.md:34:             GAuth implements GAuth-RFC-001 (formerly RFC 111) and GAuth-RFC-002 (formerly RFC 115) standards
+./docs/ARCHITECTURE.md:12:  - AgentAuth-RFC-001 (formerly RFC 111): Base authentication protocol
+./docs/ARCHITECTURE.md:45:  - AgentAuth-RFC-002 (formerly RFC 115): Hierarchical delegation model
+./pkg/rfc111/auth.go:1:     // Package rfc111 implements AgentAuth-RFC-001 (formerly RFC 111) authentication
+./pkg/rfc115/delegation.go:1: // Package rfc115 implements AgentAuth-RFC-002 (formerly RFC 115) delegation
+./README.md:34:             AgentAuth implements AgentAuth-RFC-001 (formerly RFC 111) and AgentAuth-RFC-002 (formerly RFC 115) standards
 ```
 
 #### Remediation Plan
 
-**Solution: Rename to GAuth-Specific Namespace**
+**Solution: Rename to AgentAuth-Specific Namespace**
 
 ```bash
 # Required Changes
 
 OLD                          NEW
 ---                          ---
-GAuth-RFC-001 (formerly RFC 111)                  →   GAuth-RFC-001 (or GiFo-RFC-001)
-GAuth-RFC-002 (formerly RFC 115)                  →   GAuth-RFC-002
+AgentAuth-RFC-001 (formerly RFC 111)                  →   AgentAuth-RFC-001 (or AAP-RFC-001)
+AgentAuth-RFC-002 (formerly RFC 115)                  →   AgentAuth-RFC-002
 pkg/rfc111/              →   pkg/gauth-rfc-001/
 pkg/rfc115/              →   pkg/gauth-rfc-002/
 
 # Alternative: Use descriptive names
-GAuth-RFC-001 (formerly RFC 111)                  →   GAuth Authentication Specification v1.0
-GAuth-RFC-002 (formerly RFC 115)                  →   GAuth Delegation Framework v1.0
+AgentAuth-RFC-001 (formerly RFC 111)                  →   AgentAuth Authentication Specification v1.0
+AgentAuth-RFC-002 (formerly RFC 115)                  →   AgentAuth Delegation Framework v1.0
 ```
 
 **Implementation Script**:
@@ -853,10 +853,10 @@ mv pkg/rfc111 pkg/gauth-rfc-001
 mv pkg/rfc115 pkg/gauth-rfc-002
 
 # Update documentation
-find ./docs -type f -exec sed -i '' 's/GAuth-RFC-001 (formerly RFC 111)/GAuth-RFC-001/g' {} +
-find ./docs -type f -exec sed -i '' 's/GAuth-RFC-002 (formerly RFC 115)/GAuth-RFC-002/g' {} +
-find . -name "README.md" -exec sed -i '' 's/GAuth-RFC-001 (formerly RFC 111)/GAuth-RFC-001/g' {} +
-find . -name "README.md" -exec sed -i '' 's/GAuth-RFC-002 (formerly RFC 115)/GAuth-RFC-002/g' {} +
+find ./docs -type f -exec sed -i '' 's/AgentAuth-RFC-001 (formerly RFC 111)/AgentAuth-RFC-001/g' {} +
+find ./docs -type f -exec sed -i '' 's/AgentAuth-RFC-002 (formerly RFC 115)/AgentAuth-RFC-002/g' {} +
+find . -name "README.md" -exec sed -i '' 's/AgentAuth-RFC-001 (formerly RFC 111)/AgentAuth-RFC-001/g' {} +
+find . -name "README.md" -exec sed -i '' 's/AgentAuth-RFC-002 (formerly RFC 115)/AgentAuth-RFC-002/g' {} +
 
 echo "✅ Rename complete. Please review and test."
 ```
@@ -864,14 +864,14 @@ echo "✅ Rename complete. Please review and test."
 **Updated Documentation Header**:
 
 ```markdown
-# GAuth Standards Documentation
+# AgentAuth Standards Documentation
 
-## GAuth-RFC-001: Authentication Protocol
+## AgentAuth-RFC-001: Authentication Protocol
 **Status**: Draft  
 **Version**: 1.0  
 **Date**: November 2025  
 **Supersedes**: None  
-**Note**: This is a GAuth-specific standard, not an IETF RFC
+**Note**: This is a AgentAuth-specific standard, not an IETF RFC
 
 ---
 
@@ -879,7 +879,7 @@ echo "✅ Rename complete. Please review and test."
 
 ⚠️ **This document is NOT an IETF RFC** ⚠️
 
-The "GAuth-RFC-XXX" naming follows the Gimel Foundation's internal 
+The "AgentAuth-RFC-XXX" naming follows the AgentAuth Community's internal 
 standards process. These specifications are independent of the IETF 
 and should not be confused with internet standards.
 
@@ -898,14 +898,14 @@ For IETF RFC references, see: https://www.rfc-editor.org/
 
 #### Vulnerability Description
 
-The GAuth framework assumes `Key_Owner == Human_Principal`, relying solely on cryptographic signatures to prove identity. However, **private keys can be stolen**, creating a vulnerability where an attacker can generate valid PoA credentials if they phish the Principal's key.
+The AgentAuth framework assumes `Key_Owner == Human_Principal`, relying solely on cryptographic signatures to prove identity. However, **private keys can be stolen**, creating a vulnerability where an attacker can generate valid PoA credentials if they phish the Principal's key.
 
 #### Attack Scenario
 
 ```
 Phase 1: Key Compromise
 1. Attacker sends phishing email to Principal
-2. "Click here to verify your GAuth wallet"
+2. "Click here to verify your AgentAuth wallet"
 3. Principal enters seed phrase on fake site
 4. Attacker now has Principal's private key
 
@@ -918,7 +918,7 @@ Phase 2: Malicious PoA Creation
      Constraints: { MaxValue: $1M }
    }
 
-6. GAuth validates signature: ✅ "Valid - Signed by Principal"
+6. AgentAuth validates signature: ✅ "Valid - Signed by Principal"
 7. Attacker's AI drains $1M
 8. Principal discovers theft weeks later
 
@@ -967,7 +967,7 @@ func (v *Validator) VerifyPoA(poa *PoA) error {
 - Attackers compromised 5 of 9 validator private keys
 - Used stolen keys to authorize $600M withdrawal
 - Keys were valid, but authorization was fraudulent
-- **Same vulnerability pattern as GAuth**
+- **Same vulnerability pattern as AgentAuth**
 
 #### Remediation Plan
 
@@ -1002,7 +1002,7 @@ func (d *DualChannelVerifier) RequestPoACreation(ctx context.Context, poa *PoA) 
     
     // Channel 1: SMS
     if err := d.smsGateway.Send(principal.PhoneNumber, 
-        fmt.Sprintf("GAuth PoA Creation: Confirm with code %s", challenge)); err != nil {
+        fmt.Sprintf("AgentAuth PoA Creation: Confirm with code %s", challenge)); err != nil {
         return nil, err
     }
     
@@ -1186,7 +1186,7 @@ func (i *Issuer) CreatePoA(ctx context.Context, poa *PoA) error {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    GAuth Security Layers                        │
+│                    AgentAuth Security Layers                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  Layer 1: Identity Verification (CRITICAL-5 Remediation)        │
@@ -1219,7 +1219,7 @@ func (i *Issuer) CreatePoA(ctx context.Context, poa *PoA) error {
 │                                                                 │
 │  Layer 5: Standards Compliance (CRITICAL-4 Remediation)         │
 │  ┌────────────────────────────────────────────────────────┐     │
-│  │ - Rename GAuth-RFC-001/115 to GAuth-RFC-001/002        │     │
+│  │ - Rename AgentAuth-RFC-001/115 to AgentAuth-RFC-001/002        │     │
 │  │ - Clear documentation disclaimers                      │     │
 │  │ - No false claims about fiduciary duty encoding        │     │
 │  └────────────────────────────────────────────────────────┘     │
@@ -1234,8 +1234,8 @@ func (i *Issuer) CreatePoA(ctx context.Context, poa *PoA) error {
 ### Phase 1: Critical Remediations (Weeks 1-4)
 
 **Week 1: Standards Rename + Documentation**
-- [ ] Rename GAuth-RFC-001 → GAuth-RFC-001
-- [ ] Rename GAuth-RFC-002 → GAuth-RFC-002
+- [ ] Rename AgentAuth-RFC-001 → AgentAuth-RFC-001
+- [ ] Rename AgentAuth-RFC-002 → AgentAuth-RFC-002
 - [ ] Update all documentation
 - [ ] Add legal disclaimers (fiduciary duty)
 - [ ] Deliverable: Updated documentation + migration script
@@ -1318,7 +1318,7 @@ func (i *Issuer) CreatePoA(ctx context.Context, poa *PoA) error {
 | **Front-running revocation** | High | Critical ($10M loss) | Emergency oracle + Flashbots | Low (sub-second revocation) |
 | **Geographic spoofing** | High | High (Regulatory fine) | TEE attestation | Very Low (hardware-backed) |
 | **Fiduciary duty violation** | Medium | Critical (Legal liability) | Remove claim, use allow-lists | Low (objective constraints) |
-| **Standards collision** | Medium | Medium (Integration failure) | Rename to GAuth-RFC-XXX | Very Low (unique namespace) |
+| **Standards collision** | Medium | Medium (Integration failure) | Rename to AgentAuth-RFC-XXX | Very Low (unique namespace) |
 | **Key theft** | Medium | High ($1M unauthorized PoA) | Biometric + dual-channel | Low (multi-factor required) |
 | **TEE compromise** | Low | High | Certificate pinning, attestation verification | Very Low (industry-standard) |
 | **Emergency oracle failure** | Low | Critical | Redundant oracles + Flashbots fallback | Very Low (multiple channels) |
@@ -1330,20 +1330,20 @@ func (i *Issuer) CreatePoA(ctx context.Context, poa *PoA) error {
 ### Updated Standards Reference
 
 **Old (Colliding with IETF)**:
-- ❌ GAuth-RFC-001 (formerly RFC 111): GAuth Authentication Protocol
-- ❌ GAuth-RFC-002 (formerly RFC 115): GAuth Delegation Framework
+- ❌ AgentAuth-RFC-001 (formerly RFC 111): AgentAuth Authentication Protocol
+- ❌ AgentAuth-RFC-002 (formerly RFC 115): AgentAuth Delegation Framework
 
 **New (Namespace-Safe)**:
-- ✅ GAuth-RFC-001: Authentication and Identity Verification
-- ✅ GAuth-RFC-002: Hierarchical Delegation Framework
-- ✅ GAuth-RFC-003: Trusted Execution Environment Attestation (NEW)
-- ✅ GAuth-RFC-004: Emergency Revocation Protocol (NEW)
+- ✅ AgentAuth-RFC-001: Authentication and Identity Verification
+- ✅ AgentAuth-RFC-002: Hierarchical Delegation Framework
+- ✅ AgentAuth-RFC-003: Trusted Execution Environment Attestation (NEW)
+- ✅ AgentAuth-RFC-004: Emergency Revocation Protocol (NEW)
 
 ### Legal Compliance Updates
 
 **Regulatory Alignment**:
 
-| Regulation | Requirement | GAuth Compliance | Status |
+| Regulation | Requirement | AgentAuth Compliance | Status |
 |------------|-------------|------------------|--------|
 | **MiFID II** | Trade execution location verification | TEE attestation | ✅ Compliant |
 | **GDPR** | Data processing location control | Geographic constraints + TEE | ✅ Compliant |
@@ -1438,7 +1438,7 @@ The SQA audit has identified **5 Critical Vulnerabilities** that must be remedia
 | **CRITICAL-1**: Revocation Latency | Emergency oracle + Flashbots | 4 weeks | 🟡 In Progress |
 | **CRITICAL-2**: Geographic Spoofing | TEE attestation (AWS Nitro) | 6 weeks | 🟡 In Progress |
 | **CRITICAL-3**: Fiduciary Duty Fallacy | Semantic allow-lists | 2 weeks | 🟡 In Progress |
-| **CRITICAL-4**: Standards Collision | Rename to GAuth-RFC-XXX | 1 week | 🟢 Planned |
+| **CRITICAL-4**: Standards Collision | Rename to AgentAuth-RFC-XXX | 1 week | 🟢 Planned |
 | **CRITICAL-5**: Identity Coupling | Biometric + dual-channel | 3 weeks | 🟡 In Progress |
 
 ### Production Deployment Criteria

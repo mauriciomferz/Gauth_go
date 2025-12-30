@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# GAuth React UI - Quick Setup Script
+# AgentAuth React UI - Quick Setup Script
 # This script installs dependencies and starts the development server
 
 set -e
 
-echo "🚀 GAuth React UI - Quick Setup"
+echo "🚀 AgentAuth React UI - Quick Setup"
 echo "================================"
 echo ""
 

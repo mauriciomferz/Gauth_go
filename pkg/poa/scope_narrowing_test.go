@@ -38,7 +38,7 @@ func (m *DefaultScopeMatcher) Matches(held, requested string) bool {
 	// Escape meta chars except '*'
 	quoted := regexp.QuoteMeta(held)
 	// Replace \* with .*? (non-greedy match) or [^:]+ for path segments?
-	// RFC 0115 usually implies hierarchy. Let's assume '*' matches anything in that segment.
+	// AAP-002 usually implies hierarchy. Let's assume '*' matches anything in that segment.
 	// For "resource:*" -> "resource:.*"
 	regexStr := "^" + strings.ReplaceAll(quoted, "\\*", ".*") + "$"
 	matched, _ := regexp.MatchString(regexStr, requested)

@@ -1,17 +1,17 @@
 ---
-title: "GAuth Error Handling Example"
+title: "AgentAuth Error Handling Example"
 category: example
 status: active
 lastUpdated: 2025-11-12
 owners: architecture-team
 refreshCadence: on-change
 ---
-# GAuth Error Handling Example
+# AgentAuth Error Handling Example
 
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates the use of the GAuth structured error handling system in a web server context.
+This example demonstrates the use of the AgentAuth structured error handling system in a web server context.
 
 ## Components
 

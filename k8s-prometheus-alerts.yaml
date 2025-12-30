@@ -11,32 +11,32 @@ data:
       interval: 30s
       rules:
       # Pod down for more than 2 minutes
-      - alert: GAuthPodDown
+      - alert: AgentAuthPodDown
         expr: up{job="gauth-service"} == 0
         for: 2m
         labels:
           severity: critical
           component: pod
         annotations:
-          summary: "GAuth pod is down"
+          summary: "AgentAuth pod is down"
           description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been down for more than 2 minutes"
           
       # No healthy pods available
-      - alert: GAuthServiceUnavailable
+      - alert: AgentAuthServiceUnavailable
         expr: sum(up{job="gauth-service"}) == 0
         for: 1m
         labels:
           severity: critical
           component: service
         annotations:
-          summary: "GAuth service completely unavailable"
-          description: "All GAuth pods are down - service is unavailable"
+          summary: "AgentAuth service completely unavailable"
+          description: "All AgentAuth pods are down - service is unavailable"
     
     - name: gauth_performance
       interval: 30s
       rules:
       # High error rate (>5% for 5 minutes)
-      - alert: GAuthHighErrorRate
+      - alert: AgentAuthHighErrorRate
         expr: |
           (
             sum(rate(gauth_errors_total[5m])) 
@@ -52,7 +52,7 @@ data:
           description: "Error rate is {{ $value | humanizePercentage }} over the last 5 minutes"
       
       # High p95 latency (>1 second for 5 minutes)
-      - alert: GAuthHighLatency
+      - alert: AgentAuthHighLatency
         expr: |
           histogram_quantile(0.95, 
             rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])
@@ -66,7 +66,7 @@ data:
           description: "p95 signature verification latency is {{ $value | humanizeDuration }} (threshold: 1s)"
       
       # High p99 latency (>2 seconds for 5 minutes)
-      - alert: GAuthVeryHighLatency
+      - alert: AgentAuthVeryHighLatency
         expr: |
           histogram_quantile(0.99, 
             rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])
@@ -83,7 +83,7 @@ data:
       interval: 30s
       rules:
       # High CPU usage (>80% for 10 minutes)
-      - alert: GAuthHighCPU
+      - alert: AgentAuthHighCPU
         expr: |
           sum(rate(container_cpu_usage_seconds_total{namespace="gauth-staging",pod=~"gauth-.*"}[5m])) 
           by (pod) > 0.8
@@ -96,7 +96,7 @@ data:
           description: "Pod {{ $labels.pod }} CPU usage is {{ $value | humanizePercentage }} (threshold: 80%)"
       
       # High memory usage (>85% of limit for 10 minutes)
-      - alert: GAuthHighMemory
+      - alert: AgentAuthHighMemory
         expr: |
           (
             container_memory_usage_bytes{namespace="gauth-staging",pod=~"gauth-.*"} 
@@ -112,7 +112,7 @@ data:
           description: "Pod {{ $labels.pod }} memory usage is {{ $value | humanizePercentage }} of limit (threshold: 85%)"
       
       # Memory usage approaching limit (>95% for 5 minutes)
-      - alert: GAuthCriticalMemory
+      - alert: AgentAuthCriticalMemory
         expr: |
           (
             container_memory_usage_bytes{namespace="gauth-staging",pod=~"gauth-.*"} 
@@ -131,7 +131,7 @@ data:
       interval: 60s
       rules:
       # Rotation chain not growing (no new continuity updates in 30 minutes)
-      - alert: GAuthRotationChainStale
+      - alert: AgentAuthRotationChainStale
         expr: |
           increase(gauth_rotation_v2_continuity_updates_total[30m]) == 0
           and
@@ -145,7 +145,7 @@ data:
           description: "No continuity updates in the last 30 minutes - chain may be stale"
       
       # Summary head age is very old (>24 hours)
-      - alert: GAuthSummaryHeadOld
+      - alert: AgentAuthSummaryHeadOld
         expr: gauth_rotation_summary_head_age_seconds > 86400
         for: 15m
         labels:
@@ -156,7 +156,7 @@ data:
           description: "Summary head age is {{ $value | humanizeDuration }} (threshold: 24 hours)"
       
       # Last anchor age is very old (>48 hours)
-      - alert: GAuthLastAnchorOld
+      - alert: AgentAuthLastAnchorOld
         expr: gauth_rotation_summary_last_anchor_age_seconds > 172800
         for: 15m
         labels:
@@ -170,7 +170,7 @@ data:
       interval: 30s
       rules:
       # Pod restart loop (>5 restarts in 15 minutes)
-      - alert: GAuthPodRestartLoop
+      - alert: AgentAuthPodRestartLoop
         expr: |
           increase(kube_pod_container_status_restarts_total{namespace="gauth-staging",pod=~"gauth-.*"}[15m]) > 5
         for: 5m
@@ -182,7 +182,7 @@ data:
           description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
       
       # Pod not ready for extended period
-      - alert: GAuthPodNotReady
+      - alert: AgentAuthPodNotReady
         expr: |
           kube_pod_status_ready{namespace="gauth-staging",pod=~"gauth-.*",condition="false"} == 1
         for: 10m

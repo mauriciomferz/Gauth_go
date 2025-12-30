@@ -162,7 +162,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 				Scopes:   []string{"read", "write"},
 			},
 			LegalFramework: &LegalFrameworkInfo{
-				ApplicableLaws: []string{"GAuth-Law-2025"},
+				ApplicableLaws: []string{"AgentAuth-Law-2025"},
 				Jurisdiction:   "DE",
 			},
 			PowerOfAttorney:    poaDef,
@@ -207,7 +207,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 			ExpiresAt:          time.Now().Add(10 * time.Minute),
 			IssuerID:           "test-issuer",
 			LegalFramework: &LegalFrameworkInfo{
-				ApplicableLaws: []string{"GAuth-Law-2025"},
+				ApplicableLaws: []string{"AgentAuth-Law-2025"},
 				Jurisdiction:   "DE",
 			},
 		}
@@ -244,7 +244,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 				OwnerID: "owner-001",
 			},
 			LegalFramework: &LegalFrameworkInfo{
-				ApplicableLaws: []string{"GAuth-Law-2025"},
+				ApplicableLaws: []string{"AgentAuth-Law-2025"},
 				Jurisdiction:   "DE",
 			},
 			RequestID: "req-001",
@@ -314,7 +314,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 				OwnerID: "owner-001",
 			},
 			LegalFramework: &LegalFrameworkInfo{
-				ApplicableLaws: []string{"GAuth-Law-2025"},
+				ApplicableLaws: []string{"AgentAuth-Law-2025"},
 				Jurisdiction:   "DE",
 			},
 			RequestID: "req-002",

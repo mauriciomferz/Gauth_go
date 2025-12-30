@@ -176,7 +176,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>© 2025 Gimel Foundation. Licensed under MIT.</p>
+            <p>© 2025 AgentAuth Community. Licensed under MIT.</p>
           </div>
         </div>
       </footer>

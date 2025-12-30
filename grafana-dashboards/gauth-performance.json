@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "GAuth Performance Metrics",
+    "title": "AgentAuth Performance Metrics",
     "tags": ["gauth", "performance", "latency"],
     "timezone": "browser",
     "refresh": "10s",

@@ -25,9 +25,9 @@ func performJSONPostEvidence(s *BetaServer, path string, body any) *httptest.Res
 
 func createTestPOA(srv *BetaServer) (string, error) {
 	// Create a delegation through the service
-	svc, ok := srv.rfc0111Service.(*gauth_rfc_001.Service)
+	svc, ok := srv.aap001Service.(*gauth_rfc_001.Service)
 	if !ok || svc == nil {
-		return "", fmt.Errorf("RFC0111 service not available")
+		return "", fmt.Errorf("AAP001 service not available")
 	}
 
 	resp, err := svc.CreateDelegationCtx(context.Background(), gauth_rfc_001.DelegationRequest{
@@ -46,10 +46,10 @@ func createTestPOA(srv *BetaServer) (string, error) {
 func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 	t.Skip("Test requires proper authorization setup - skipping until policy configuration is fixed")
 
-	// Enable RFC0111 service and policy seeding
-	t.Setenv("GAUTH_DISABLE_RFC0111_SERVICE", "0")
+	// Enable AAP001 service and policy seeding
+	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("GAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -89,9 +89,9 @@ func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 	t.Skip("Test requires proper authorization setup - skipping until policy configuration is fixed")
 
-	t.Setenv("GAUTH_DISABLE_RFC0111_SERVICE", "0")
+	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("GAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -121,9 +121,9 @@ func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 func TestEvidenceAttachment_NotFound(t *testing.T) {
 	t.Skip("Test requires proper authorization setup - skipping until policy configuration is fixed")
 
-	t.Setenv("GAUTH_DISABLE_RFC0111_SERVICE", "0")
+	t.Setenv("GAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("GAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "aap001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	payload := map[string]any{"hashes": []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}

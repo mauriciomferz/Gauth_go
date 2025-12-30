@@ -8,8 +8,8 @@ type Exclusion struct {
 	LicenseRequired bool `json:"license_required"`
 }
 
-// RFC0111Exclusions represents exclusions for RFC 0111
-type RFC0111Exclusions struct {
+// AAP001Exclusions represents exclusions for AAP-001
+type AAP001Exclusions struct {
 	Web3Blockchain     Exclusion `json:"web3_blockchain"`
 	AIOperators        Exclusion `json:"ai_operators"`
 	DNABasedIdentities Exclusion `json:"dna_based_identities"`
@@ -49,8 +49,8 @@ type PolicyVerificationPoint struct {
 	TrustServiceProvider string `json:"trust_service_provider"`
 }
 
-// RFC0111PPArchitecture represents the PP architecture for RFC 0111
-type RFC0111PPArchitecture struct {
+// AAP001PPArchitecture represents the PP architecture for AAP-001
+type AAP001PPArchitecture struct {
 	PEP PolicyEnforcementPoint    `json:"pep"` // Policy Enforcement Point
 	PDP PolicyDecisionPoint       `json:"pdp"` // Policy Decision Point
 	PIP PolicyInformationPoint    `json:"pip"` // Policy Information Point
@@ -98,40 +98,40 @@ type PoAParties struct {
 	AuthorizedClient AuthorizedClient `json:"authorized_client"`
 }
 
-// GAuthContext represents GAuth integration context
-type GAuthContext struct {
+// AgentAuthContext represents AgentAuth integration context
+type AgentAuthContext struct {
 	PPArchitectureRole  string `json:"pp_architecture_role"`
 	ExclusionsCompliant bool   `json:"exclusions_compliant"`
 	AIGovernanceLevel   string `json:"ai_governance_level"`
 }
 
-// RFC0115PoADefinition represents the PoA definition for RFC 0115
-type RFC0115PoADefinition struct {
+// AAP002PoADefinition represents the PoA definition for AAP-002
+type AAP002PoADefinition struct {
 	Definition    string                 `json:"definition"`
 	Attestation   string                 `json:"attestation"`
 	Verification  map[string]interface{} `json:"verification"`
 	Parties       PoAParties             `json:"parties"`
 	Authorization Authorization          `json:"authorization"`
-	GAuthContext  GAuthContext           `json:"gauth_context"`
+	AgentAuthContext  AgentAuthContext           `json:"gauth_context"`
 }
 
-// RFC0111Config represents RFC 0111 specific configuration
-type RFC0111Config struct {
+// AAP001Config represents AAP-001 specific configuration
+type AAP001Config struct {
 	Enabled        bool                  `json:"enabled"`
-	Exclusions     RFC0111Exclusions     `json:"exclusions"`
-	PPArchitecture RFC0111PPArchitecture `json:"pp_architecture"`
+	Exclusions     AAP001Exclusions     `json:"exclusions"`
+	PPArchitecture AAP001PPArchitecture `json:"pp_architecture"`
 }
 
-// RFC0115Config represents RFC 0115 specific configuration
-type RFC0115Config struct {
+// AAP002Config represents AAP-002 specific configuration
+type AAP002Config struct {
 	Enabled       bool   `json:"enabled"`
 	PoADefinition string `json:"poa_definition"`
 }
 
 // CombinedRFCConfig represents configuration for combined RFC compliance
 type CombinedRFCConfig struct {
-	RFC0111          *RFC0111Config         `json:"rfc_0111"`
-	RFC0115          *RFC0115Config         `json:"rfc_0115"`
+	AAP001          *AAP001Config         `json:"rfc_0111"`
+	AAP002          *AAP002Config         `json:"rfc_0115"`
 	IntegrationLevel string                 `json:"integration_level"`
 	CombinedVersion  string                 `json:"combined_version"`
 	Compatibility    map[string]interface{} `json:"compatibility"`
@@ -139,16 +139,16 @@ type CombinedRFCConfig struct {
 } // CreateCombinedRFCConfig creates a new combined RFC configuration
 func CreateCombinedRFCConfig() *CombinedRFCConfig {
 	return &CombinedRFCConfig{
-		RFC0111: &RFC0111Config{
+		AAP001: &AAP001Config{
 			Enabled: true,
-			Exclusions: RFC0111Exclusions{
+			Exclusions: AAP001Exclusions{
 				Web3Blockchain:     Exclusion{Prohibited: false, LicenseRequired: true},
 				AIOperators:        Exclusion{Prohibited: false, LicenseRequired: true},
 				DNABasedIdentities: Exclusion{Prohibited: true, LicenseRequired: false},
 				DecentralizedAuth:  Exclusion{Prohibited: false, LicenseRequired: true},
 				EnforcementLevel:   "strict",
 			},
-			PPArchitecture: RFC0111PPArchitecture{
+			PPArchitecture: AAP001PPArchitecture{
 				PEP: PolicyEnforcementPoint{
 					SupplySide: PowerComponent{Entity: "Supply Authority", Status: "Active"},
 					DemandSide: PowerComponent{Entity: "Demand Controller", Status: "Active"},
@@ -159,7 +159,7 @@ func CreateCombinedRFCConfig() *CombinedRFCConfig {
 				PVP: PolicyVerificationPoint{TrustServiceProvider: "trust_service_provider_v1"},
 			},
 		},
-		RFC0115: &RFC0115Config{
+		AAP002: &AAP002Config{
 			Enabled:       true,
 			PoADefinition: "proof_of_authorization_with_attestation",
 		},
@@ -174,8 +174,8 @@ func CreateCombinedRFCConfig() *CombinedRFCConfig {
 }
 
 // CreateDefaultPoADefinition creates a default PoA definition with sample data
-func CreateDefaultPoADefinition(definition string) RFC0115PoADefinition {
-	return RFC0115PoADefinition{
+func CreateDefaultPoADefinition(definition string) AAP002PoADefinition {
+	return AAP002PoADefinition{
 		Definition:  definition,
 		Attestation: "standard",
 		Verification: map[string]interface{}{
@@ -205,7 +205,7 @@ func CreateDefaultPoADefinition(definition string) RFC0115PoADefinition {
 			},
 			ApplicableSectors: []string{"energy_trading", "grid_management", "renewable_sources"},
 		},
-		GAuthContext: GAuthContext{
+		AgentAuthContext: AgentAuthContext{
 			PPArchitectureRole:  "policy_enforcement_point",
 			ExclusionsCompliant: true,
 			AIGovernanceLevel:   "level_3_supervised",
@@ -219,29 +219,29 @@ func ValidateCombinedRFCConfig(config *CombinedRFCConfig) error {
 		return fmt.Errorf("config cannot be nil")
 	}
 
-	if config.RFC0111 == nil && config.RFC0115 == nil {
+	if config.AAP001 == nil && config.AAP002 == nil {
 		return fmt.Errorf("at least one RFC configuration must be provided")
 	}
 
-	if config.RFC0111 != nil && !config.RFC0111.Enabled && config.RFC0115 != nil && !config.RFC0115.Enabled {
+	if config.AAP001 != nil && !config.AAP001.Enabled && config.AAP002 != nil && !config.AAP002.Enabled {
 		return fmt.Errorf("at least one RFC must be enabled")
 	}
 
 	return nil
 }
 
-// RFC0111ClientType represents different types of RFC 0111 clients
-type RFC0111ClientType string
+// AAP001ClientType represents different types of AAP-001 clients
+type AAP001ClientType string
 
 const (
-	RFC0111ClientTypeDigitalAgent  RFC0111ClientType = "digital_agent"
-	RFC0111ClientTypeAgenticAI     RFC0111ClientType = "agentic_ai"
-	RFC0111ClientTypeHumanoidRobot RFC0111ClientType = "humanoid_robot"
+	AAP001ClientTypeDigitalAgent  AAP001ClientType = "digital_agent"
+	AAP001ClientTypeAgenticAI     AAP001ClientType = "agentic_ai"
+	AAP001ClientTypeHumanoidRobot AAP001ClientType = "humanoid_robot"
 )
 
-// RFC0111Client represents a client for RFC 0111 operations
-type RFC0111Client struct {
-	Type           RFC0111ClientType      `json:"type"`
+// AAP001Client represents a client for AAP-001 operations
+type AAP001Client struct {
+	Type           AAP001ClientType      `json:"type"`
 	Identity       string                 `json:"identity"`
 	AutonomyLevel  string                 `json:"autonomy_level"`
 	AICapabilities []string               `json:"ai_capabilities"`
@@ -250,33 +250,33 @@ type RFC0111Client struct {
 	Config         *CombinedRFCConfig     `json:"config,omitempty"`
 	Endpoint       string                 `json:"endpoint,omitempty"`
 	Metadata       map[string]interface{} `json:"metadata,omitempty"`
-} // NewRFC0111Client creates a new RFC 0111 client
-func NewRFC0111Client(config *CombinedRFCConfig, endpoint string) *RFC0111Client {
-	return &RFC0111Client{
+} // NewAAP001Client creates a new AAP-001 client
+func NewAAP001Client(config *CombinedRFCConfig, endpoint string) *AAP001Client {
+	return &AAP001Client{
 		Config:   config,
 		Endpoint: endpoint,
 		Metadata: make(map[string]interface{}),
 	}
 }
 
-// Initialize initializes the RFC 0111 client
-func (c *RFC0111Client) Initialize() error {
+// Initialize initializes the AAP-001 client
+func (c *AAP001Client) Initialize() error {
 	if c.Config == nil {
 		return fmt.Errorf("config is required")
 	}
 	return nil
 }
 
-// ValidateToken validates a token using RFC 0111 rules
-func (c *RFC0111Client) ValidateToken(token string) error {
+// ValidateToken validates a token using AAP-001 rules
+func (c *AAP001Client) ValidateToken(token string) error {
 	if token == "" {
 		return fmt.Errorf("token cannot be empty")
 	}
 	return nil
 }
 
-// ProcessRequest processes a request using RFC 0111 protocols
-func (c *RFC0111Client) ProcessRequest(request interface{}) error {
+// ProcessRequest processes a request using AAP-001 protocols
+func (c *AAP001Client) ProcessRequest(request interface{}) error {
 	if request == nil {
 		return fmt.Errorf("request cannot be nil")
 	}

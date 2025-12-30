@@ -1,5 +1,5 @@
 /**
- * GAuth Authorization Sandbox & Comprehensive Test Runner
+ * AgentAuth Authorization Sandbox & Comprehensive Test Runner
  * Fully functional experimental playground for testing authorization scenarios
  */
 class AuthorizationSandbox {
@@ -118,7 +118,7 @@ class AuthorizationSandbox {
                             <h4 class="text-lg font-semibold text-gray-900 mb-4">Results & Analysis</h4>
                             <div id="sandbox-terminal" class="bg-gray-900 rounded-lg p-4 h-80 overflow-auto">
                                 <div class="text-green-400 font-mono text-sm">
-                                    <div class="text-gray-500"># GAuth Authorization Sandbox v2.0</div>
+                                    <div class="text-gray-500"># AgentAuth Authorization Sandbox v2.0</div>
                                     <div class="text-gray-500"># Ready for experiments...</div>
                                     <div class="text-blue-400 mt-2">sandbox></div>
                                     <span class="blinking-cursor">_</span>

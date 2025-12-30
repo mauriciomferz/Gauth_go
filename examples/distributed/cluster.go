@@ -23,7 +23,7 @@ type ResourceNode struct {
 
 // DistributedResourceManager manages a cluster of resource nodes
 type DistributedResourceManager struct {
-	auth         gauth.GAuth
+	auth         gauth.AgentAuth
 	nodes        map[string]*ResourceNode
 	nodesMutex   sync.RWMutex
 	tokenCache   map[string]time.Time
@@ -31,7 +31,7 @@ type DistributedResourceManager struct {
 	healthChecks chan string
 }
 
-func NewDistributedResourceManager(auth gauth.GAuth) *DistributedResourceManager {
+func NewDistributedResourceManager(auth gauth.AgentAuth) *DistributedResourceManager {
 	drm := &DistributedResourceManager{
 		auth:         auth,
 		nodes:        make(map[string]*ResourceNode),
@@ -51,7 +51,7 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 	drm.nodesMutex.Lock()
 	defer drm.nodesMutex.Unlock()
 
-	// Validate node registration with GAuth
+	// Validate node registration with AgentAuth
 	tx := gauth.TransactionDetails{
 		Type:       "node_registration",
 		ResourceID: node.ID,
@@ -261,7 +261,7 @@ func (drm *DistributedResourceManager) checkNodeHealth(nodeID string) {
 }
 
 func main() {
-	// Initialize GAuth with environment variables for secrets
+	// Initialize AgentAuth with environment variables for secrets
 	clientSecret := os.Getenv("CLUSTER_CLIENT_SECRET")
 	if clientSecret == "" {
 		clientSecret = "cluster-secret" // Default for development only
@@ -277,7 +277,7 @@ func main() {
 
 	auth, err := gauth.New(config)
 	if err != nil {
-		log.Fatalf("Failed to initialize GAuth: %v", err)
+		log.Fatalf("Failed to initialize AgentAuth: %v", err)
 	}
 
 	// Create distributed resource manager

@@ -75,7 +75,7 @@ type Metrics interface {
 	SetEnvelopeV1SunsetPhase(phase int)
 	// SetSunsetPhaseSatisfactionProgress sets a gauge (0..1) representing fraction of current phase promotion window satisfied.
 	SetSunsetPhaseSatisfactionProgress(p float64)
-	// RawPOA embedding counters (RFC0115 sec3.item2 implementation progress)
+	// RawPOA embedding counters (AAP002 sec3.item2 implementation progress)
 	IncEnvelopeRawPOAEmbedded() // successful embedding of canonical RawPOA into EnvelopeV2
 	IncEnvelopeRawPOATooLarge() // attempted embedding omitted due to size > GAUTH_MAX_RAW_POA_BYTES
 	IncMultiSignatureVerifications()

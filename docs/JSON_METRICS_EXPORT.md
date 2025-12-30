@@ -54,7 +54,7 @@ internal/metrics/json_exporter_test.go     - Comprehensive tests (450+ lines)
 
 #### JSONMetricsExporter
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/metrics"
 
 // Create exporter
 exporter := metrics.NewJSONMetricsExporter(
@@ -162,7 +162,7 @@ package main
 import (
     "net/http"
     "github.com/gin-gonic/gin"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/metrics"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/metrics"
 )
 
 var jsonExporter *metrics.JSONMetricsExporter

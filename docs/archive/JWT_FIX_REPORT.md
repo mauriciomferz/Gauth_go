@@ -20,7 +20,7 @@ Following the brutal honest audit that revealed actual RFC compliance at 55-60% 
 **File:** `extended_token_service.go:168`  
 **Evidence:**
 ```go
-return nil, &GAuthError{
+return nil, &AgentAuthError{
     Code:    "not_implemented",
     Message: "Extended token parsing from string not fully implemented (requires JWT/JWE parser)",
 }
@@ -117,7 +117,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
     })
     
     if err != nil || !jwtToken.Valid {
-        return nil, &GAuthError{
+        return nil, &AgentAuthError{
             Code:    "invalid_token",
             Message: fmt.Sprintf("Token validation failed: %v", err),
         }
@@ -126,7 +126,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
     // Extract claims
     claims, ok := jwtToken.Claims.(jwt.MapClaims)
     if !ok {
-        return nil, &GAuthError{
+        return nil, &AgentAuthError{
             Code:    "invalid_token",
             Message: "Failed to extract token claims",
         }

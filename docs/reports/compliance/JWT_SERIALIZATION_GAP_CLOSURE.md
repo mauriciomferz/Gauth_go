@@ -79,14 +79,14 @@ func (s *ExtendedTokenService) parseExtendedToken(
 	})
 
 	if err != nil {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_token",
 			Message: fmt.Sprintf("Token parsing failed: %v", err),
 		}
 	}
 
 	if !parsedToken.Valid {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_token",
 			Message: "Token validation failed",
 		}
@@ -94,7 +94,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, &GAuthError{
+		return nil, &AgentAuthError{
 			Code:    "invalid_claims",
 			Message: "Failed to extract claims",
 		}
@@ -313,7 +313,7 @@ The `CreateExtendedToken` function is called by:
 2. `go.mod` - Library dependency (jwt/v5 v5.3.0)
 3. RFC 7519 - JSON Web Token (JWT) specification
 4. RFC 7515 - JSON Web Signature (JWS) - Compact Serialization
-5. RFC-0111 - GAuth 1.0 Authorization Framework (extended claims)
+5. RFC-0111 - AgentAuth 1.0 Authorization Framework (extended claims)
 
 **Validation Date**: November 12, 2025  
 **Validator**: AI Code Analysis + Manual Code Review

@@ -27,7 +27,7 @@ type NoopPoAValidator struct{}
 func (NoopPoAValidator) Validate(*PowerOfAttorney) error { return nil }
 
 // BasicPoAValidator provides minimal semantic rules intended to preserve backwards
-// compatibility with earlier RFC0111 test fixtures. Stricter governance rules
+// compatibility with earlier AAP001 test fixtures. Stricter governance rules
 // (currency requirement for financial scopes, duration caps, wildcard gating, business
 // hour / weekday gating, aggregate scope length limits, etc.) are reserved for the
 // AdvancedPoAValidator to avoid breaking existing integrations when the basic mode
@@ -221,7 +221,7 @@ func (AdvancedPoAValidator) Validate(p *PowerOfAttorney) error {
 func selectPoAValidator() PoAValidator {
 	switch strings.ToLower(os.Getenv("GAUTH_POA_VALIDATOR")) {
 	case "semantic":
-		// Full RFC0115 semantic validation with enhanced checks
+		// Full AAP002 semantic validation with enhanced checks
 		return NewEnhancedPoAValidator()
 	case "advanced":
 		return AdvancedPoAValidator{}

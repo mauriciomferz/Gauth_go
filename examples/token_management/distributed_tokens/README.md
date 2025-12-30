@@ -11,7 +11,7 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates the token management capabilities of the GAuth library, specifically:
+This example demonstrates the token management capabilities of the AgentAuth library, specifically:
 
 1. Distributed token storage with Redis
 2. Token validation with configurable rules
@@ -71,7 +71,7 @@ The example will show:
 ## Code Structure
 
 - `main.go`: Example implementation
-- Uses `github.com/Gimel-Foundation/gauth/pkg/token` package
+- Uses `github.com/AgentAuth-Foundation/gauth/pkg/token` package
 - Demonstrates all major token management features
 
 ## Key Concepts

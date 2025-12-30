@@ -73,7 +73,7 @@ func main() {
 	// Add a simple welcome endpoint
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "GAuth Multi-Tenant Key Rotation System",
+			"message": "AgentAuth Multi-Tenant Key Rotation System",
 			"version": "1.0.0",
 			"endpoints": gin.H{
 				"rotation_status":      "GET /api/v1/keys/rotation/status",
@@ -137,7 +137,7 @@ func main() {
 
 	// Start the server
 	port := ":8080"
-	log.Printf("Starting GAuth Key Rotation API server on %s", port)
+	log.Printf("Starting AgentAuth Key Rotation API server on %s", port)
 	log.Printf("Access the API at: http://localhost%s", port)
 	log.Printf("View status: http://localhost%s/api/v1/keys/rotation/status", port)
 	log.Printf("Health check: http://localhost%s/api/v1/keys/health", port)

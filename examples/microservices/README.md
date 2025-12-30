@@ -3,7 +3,7 @@
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates resilience patterns in a microservices architecture using GAuth. It covers circuit breaker, rate limiting, retry, and service chaining.
+This example demonstrates resilience patterns in a microservices architecture using AgentAuth. It covers circuit breaker, rate limiting, retry, and service chaining.
 
 ## Key Concepts
 - **MicroserviceExample**: Simulates a microservice with latency and failure rate.

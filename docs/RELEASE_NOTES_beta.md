@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Beta Release Notes
+# AgentAuth Beta Release Notes
 
 > Version: Beta (2025-10-26)
 > Scope: RFC-0111 / RFC-0115 Compliance Enhancements

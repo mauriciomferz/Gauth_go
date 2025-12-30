@@ -6,9 +6,9 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth 1.0 React Dashboard
+# AgentAuth 1.0 React Dashboard
 
-Modern React-based Single Page Application (SPA) for the GAuth 1.0 RFC-0111/0115 compliant authorization framework.
+Modern React-based Single Page Application (SPA) for the AgentAuth 1.0 RFC-0111/0115 compliant authorization framework.
 
 ## 🚀 Features
 
@@ -41,12 +41,12 @@ Modern React-based Single Page Application (SPA) for the GAuth 1.0 RFC-0111/0115
 ### Prerequisites
 
 - Node.js 18+ and npm (or yarn/pnpm)
-- GAuth Go backend running on `localhost:8080`
+- AgentAuth Go backend running on `localhost:8080`
 - **IMPORTANT**: Backend must have `GAUTH_RFC0111_ENABLED=1` environment variable set (Phase 2A endpoints)
 
 ### Installation
 
-1. **Start the GAuth backend** (from project root):
+1. **Start the AgentAuth backend** (from project root):
    ```bash
    # REQUIRED: Set GAUTH_RFC0111_ENABLED=1 to enable Phase 2A endpoints
    GAUTH_DEV_INDEX=1 GAUTH_RFC0111_ENABLED=1 go run ./cmd/web-server
@@ -137,7 +137,7 @@ web/ui-react/
 
 ### API Integration
 
-The `lib/api.ts` file provides a complete API client with TypeScript types for all GAuth backend endpoints:
+The `lib/api.ts` file provides a complete API client with TypeScript types for all AgentAuth backend endpoints:
 
 - **Token operations** - Create, validate (RFC-0111)
 - **PVP identity verification** - `POST /api/v1/beta/pvp/verify` ✅ Phase 2A
@@ -306,7 +306,7 @@ Configure your Go backend to handle API requests separately.
 
 ## 📄 License
 
-MIT License - Same as parent GAuth project
+MIT License - Same as parent AgentAuth project
 
 ## 🤝 Contributing
 
@@ -327,4 +327,4 @@ MIT License - Same as parent GAuth project
 
 ---
 
-**Built with ❤️ for GAuth 1.0 - Production-Ready Authorization Framework**
+**Built with ❤️ for AgentAuth 1.0 - Production-Ready Authorization Framework**

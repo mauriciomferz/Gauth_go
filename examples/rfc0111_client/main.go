@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const apiBase = "http://localhost:8080/api/v1/rfc0111"
+const apiBase = "http://localhost:8080/api/v1/aap001"
 
 // Example demonstrating how to use the RFC-0111 REST API programmatically
 func main() {

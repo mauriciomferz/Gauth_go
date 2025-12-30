@@ -134,7 +134,7 @@ await expect(page.getByText(/Validate Token/i).first()).toBeVisible()
 | Page | Issue | Solution |
 |------|-------|----------|
 | **Tokens** | Expected "Token List", but "Recent Tokens" is conditional | Changed to check for always-visible cards |
-| **Layout** | Multiple "GAuth 1.0" headings caused strict mode errors | Used `getByRole('banner')` to target header |
+| **Layout** | Multiple "AgentAuth 1.0" headings caused strict mode errors | Used `getByRole('banner')` to target header |
 | **Footer** | RFC text appears 3 times (header, main, footer) | Used `getByRole('contentinfo')` to target footer |
 
 ### 3. Wait Strategy Optimization
@@ -309,5 +309,5 @@ Successfully achieved **100% pass rate** on all active E2E tests (21/21), signif
 
 **Report Generated**: November 12, 2025  
 **Test Framework**: Playwright 1.56.1  
-**Project**: GAuth 1.0 Dashboard  
+**Project**: AgentAuth 1.0 Dashboard  
 **Status**: ✅ Ready for Staging

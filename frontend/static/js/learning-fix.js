@@ -27,8 +27,8 @@ function runDiagnostic() {
     console.log('Learning Content Container:', learningContent ? '✅ Found' : '❌ Missing');
     
     // Check for required classes
-    console.log('GAuthAPIClient:', typeof window.GAuthAPIClient !== 'undefined' ? '✅' : '❌');
-    console.log('GAuthLearningPath:', typeof window.GAuthLearningPath !== 'undefined' ? '✅' : '❌');
+    console.log('AgentAuthAPIClient:', typeof window.AgentAuthAPIClient !== 'undefined' ? '✅' : '❌');
+    console.log('AgentAuthLearningPath:', typeof window.AgentAuthLearningPath !== 'undefined' ? '✅' : '❌');
     
     // Check if any existing event listeners
     const hasListeners = buttons.length > 0 && buttons[0].onclick !== null;
@@ -39,8 +39,8 @@ function runDiagnostic() {
     return {
         buttons: buttons.length,
         container: !!learningContent,
-        apiClient: typeof window.GAuthAPIClient !== 'undefined',
-        learningPath: typeof window.GAuthLearningPath !== 'undefined'
+        apiClient: typeof window.AgentAuthAPIClient !== 'undefined',
+        learningPath: typeof window.AgentAuthLearningPath !== 'undefined'
     };
 }
 
@@ -207,7 +207,7 @@ function getModuleData(moduleId) {
                     
                     <div class="bg-green-50 border-l-4 border-green-400 p-6">
                         <h3 class="text-xl font-bold text-green-800 mb-3">Policy-Based Access Control</h3>
-                        <p class="text-green-700 mb-4">GAuth uses policies to define access rules that are evaluated to make allow/deny decisions.</p>
+                        <p class="text-green-700 mb-4">AgentAuth uses policies to define access rules that are evaluated to make allow/deny decisions.</p>
                         
                         <div class="bg-white p-4 rounded-lg">
                             <h4 class="font-semibold text-green-800 mb-2">Policy Evaluation Process:</h4>

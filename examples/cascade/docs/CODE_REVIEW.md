@@ -12,7 +12,7 @@ owners: [system]
 > Status: Active
 
 ## Overview
-This example demonstrates cascading failures in a microservices mesh using GAuth resilience patterns. It simulates load, service dependencies, and health monitoring.
+This example demonstrates cascading failures in a microservices mesh using AgentAuth resilience patterns. It simulates load, service dependencies, and health monitoring.
 
 ## Key Concepts
 - **Service Mesh**: Manages multiple services and their loads.

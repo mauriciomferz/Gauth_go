@@ -466,7 +466,7 @@ Failed Tests: 0
 
 **Pipeline Execution Results** (November 10, 2025 - 00:02 UTC):
 
-#### Main GAuth CI Workflow (Run ID: 19216428327) ✅ PASSED
+#### Main AgentAuth CI Workflow (Run ID: 19216428327) ✅ PASSED
 - ✅ **Test Job**: All tests pass (8m38s)
   - Unit tests: PASS
   - Linter: PASS
@@ -514,7 +514,7 @@ Goroutine conflict:
 
 | Workflow | Status | Duration | Outcome |
 |----------|--------|----------|---------|
-| GAuth CI | ✅ PASS | 8m38s | Production ready (minus crypto refactoring) |
+| AgentAuth CI | ✅ PASS | 8m38s | Production ready (minus crypto refactoring) |
 | CodeQL Advanced | ✅ PASS | 2m17s | No security vulnerabilities |
 | CodeQL Security Scanning | ✅ PASS | 2m37s | Clean scan |
 | Deploy to Staging | ❌ FAIL | 2m55s | Expected failure (deferred crypto issues) |
@@ -646,7 +646,7 @@ Goroutine conflict:
 
 The project uses a multi-workflow GitHub Actions setup:
 
-1. **GAuth CI** (.github/workflows/ci.yml):
+1. **AgentAuth CI** (.github/workflows/ci.yml):
    - Triggers: Push to main, pull requests
    - Jobs: Test (Go 1.25), Build, Security Scan
    - Redis & PostgreSQL services for integration testing

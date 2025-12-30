@@ -197,4 +197,4 @@ For issues or questions:
 
 **Status**: ✅ Production Ready  
 **Last Updated**: December 25, 2025  
-**Maintainers**: GAuth Core Team
+**Maintainers**: AgentAuth Core Team

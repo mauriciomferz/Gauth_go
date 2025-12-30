@@ -5,7 +5,7 @@ status: archived
 lastUpdated: 2025-11-12
 owners: compliance-team
 ---
-# GAuth Pre-Production Audit - Week 4 Day 2: CI/CD Pipeline Setup
+# AgentAuth Pre-Production Audit - Week 4 Day 2: CI/CD Pipeline Setup
 
 **Date**: December 2024  
 **Phase**: Pre-Production - Week 4 Day 2  
@@ -16,7 +16,7 @@ owners: compliance-team
 
 ## Executive Summary
 
-Week 4 Day 2 successfully establishes a comprehensive CI/CD pipeline for GAuth's staging environment with:
+Week 4 Day 2 successfully establishes a comprehensive CI/CD pipeline for AgentAuth's staging environment with:
 
 - **GitHub Actions Workflow**: 5-job pipeline (test, security, build, deploy, rollback)
 - **Blue-Green Deployment**: Zero-downtime deployment strategy with instant rollback
@@ -95,7 +95,7 @@ Week 4 Day 2 successfully establishes a comprehensive CI/CD pipeline for GAuth's
    - Race detector enabled (`-race`)
    - Coverage report generated (`-coverprofile`)
 5. **RFC compliance tests**: `go test ./pkg/rfc0111/... -run "(RFC|Envelope|Rotation)"`
-   - Tests RFC 0111 envelope format
+   - Tests AAP-001 envelope format
    - Tests key rotation behavior
 6. **Security regression tests**: `go test ./pkg/rfc0111/... ./pkg/gauth/... ./pkg/audit/... -run "(Replay|Tamper|Scope)"`
    - Replay attack detection
@@ -313,7 +313,7 @@ on:
 - Coverage report: `coverage.out` uploaded to Codecov
 
 **RFC Compliance Tests** (`go test ./pkg/rfc0111/... -run "(RFC|Envelope|Rotation)"`):
-- RFC 0111 envelope format validation
+- AAP-001 envelope format validation
 - Key rotation behavior
 - Signature verification
 - Timestamp validation
@@ -940,7 +940,7 @@ slowlog-max-len 128
 latency-monitor-threshold 100  # Log events > 100ms
 ```
 
-#### **Use Cases in GAuth**:
+#### **Use Cases in AgentAuth**:
 - **Session storage**: Store active sessions (TTL-based expiration)
 - **Rate limiting**: Track request counts per IP/user
 - **Cache**: Cache authorization decisions (short TTL)
@@ -962,7 +962,7 @@ latency-monitor-threshold 100  # Log events > 100ms
 **Source**: Week 4 Day 1 `configmap.yaml` (prometheus-config ConfigMap)
 
 **Scrape Targets**:
-1. **GAuth Pods**: 
+1. **AgentAuth Pods**: 
    - Selector: `app=gauth`
    - Port: 8080
    - Path: `/metrics`
@@ -986,7 +986,7 @@ latency-monitor-threshold 100  # Log events > 100ms
 
 ### 4.3 Key Metrics
 
-**GAuth Application Metrics** (`/metrics` endpoint):
+**AgentAuth Application Metrics** (`/metrics` endpoint):
 - `gauth_requests_total`: Total HTTP requests (labels: method, path, status)
 - `gauth_request_duration_seconds`: Request latency histogram (p50, p95, p99)
 - `gauth_tokens_issued_total`: Total tokens issued
@@ -1100,8 +1100,8 @@ latency-monitor-threshold 100  # Log events > 100ms
 ### 7.2 Kubernetes Security
 
 **Pod Security**:
-- Non-root user: UID 1000 (GAuth), 999 (PostgreSQL, Redis)
-- Read-only root filesystem: Enabled for GAuth (disabled for databases due to write needs)
+- Non-root user: UID 1000 (AgentAuth), 999 (PostgreSQL, Redis)
+- Read-only root filesystem: Enabled for AgentAuth (disabled for databases due to write needs)
 - Drop all capabilities: `capabilities.drop: [ALL]`
 - No privilege escalation: `allowPrivilegeEscalation: false`
 - Seccomp profile: `RuntimeDefault`
@@ -1259,7 +1259,7 @@ latency-monitor-threshold 100  # Log events > 100ms
 
 ## 10. Conclusion
 
-Week 4 Day 2 successfully delivers a comprehensive CI/CD pipeline for GAuth's staging environment with:
+Week 4 Day 2 successfully delivers a comprehensive CI/CD pipeline for AgentAuth's staging environment with:
 
 ✅ **GitHub Actions Workflow**: 5-job pipeline (390 lines) with test, security, build, deploy, rollback  
 ✅ **Blue-Green Deployment**: Zero-downtime strategy with instant rollback (760 lines)  

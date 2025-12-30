@@ -1,4 +1,4 @@
-// GAuth Learning Lab - Interactive Education Platform
+// AgentAuth Learning Lab - Interactive Education Platform
 // RFC-0150 Compliance Testing and Authorization Pattern Evaluation
 
 // Stub for bundle.js compatibility
@@ -407,7 +407,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
         }
     };
 
-    // API Client for real GAuth server interactions
+    // API Client for real AgentAuth server interactions
     const APIClient = {
         baseURL: window.location.origin,
         
@@ -988,7 +988,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
             const target = document.getElementById('learning-path');
             if (target) {
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                this.showNotification('Starting your GAuth learning journey!', 'success');
+                this.showNotification('Starting your AgentAuth learning journey!', 'success');
             }
         },
         
@@ -1397,7 +1397,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                         title: 'Policy-Based Access Control',
                         content: `
                             <div class="space-y-4">
-                                <p>GAuth uses policies to define authorization rules. Policies are evaluated to make access decisions.</p>
+                                <p>AgentAuth uses policies to define authorization rules. Policies are evaluated to make access decisions.</p>
                                 <div class="bg-green-50 p-4 border-l-4 border-green-500">
                                     <h4 class="font-semibold text-green-900">Policy Structure:</h4>
                                     <pre class="mt-2 text-sm text-green-800 bg-green-100 p-2 rounded">
@@ -1691,7 +1691,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                         title: 'RFC-0150 Overview',
                         content: `
                             <div class="space-y-4">
-                                <p>RFC-0150 defines the GAuth authorization framework specification and implementation requirements.</p>
+                                <p>RFC-0150 defines the AgentAuth authorization framework specification and implementation requirements.</p>
                                 <div class="bg-blue-50 p-4 border-l-4 border-blue-500">
                                     <h4 class="font-semibold text-blue-900">Key Requirements:</h4>
                                     <ul class="mt-2 space-y-1 text-blue-800">
@@ -2403,7 +2403,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
 
     // Initialize everything when DOM is ready
     document.addEventListener('DOMContentLoaded', async function() {
-        console.log('🧪 GAuth Learning Lab - Real Implementation Loading...');
+        console.log('🧪 AgentAuth Learning Lab - Real Implementation Loading...');
         
         try {
             // Initialize all components with real data
@@ -2413,7 +2413,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
             RealTimeMonitor.initialize();
             ThemeManager.init();
             
-            console.log('✅ All learning modules connected to real GAuth APIs');
+            console.log('✅ All learning modules connected to real AgentAuth APIs');
             
             // Show initial success notification with tutorial option
             setTimeout(() => {
@@ -2423,10 +2423,10 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                     <div class="flex items-start space-x-3">
                         <i class="fas fa-graduation-cap text-xl"></i>
                         <div class="flex-1">
-                            <p class="font-semibold">GAuth Learning Lab Ready!</p>
+                            <p class="font-semibold">AgentAuth Learning Lab Ready!</p>
                             <p class="text-sm opacity-90 mt-1">Connected to live APIs. Start with a tutorial?</p>
                             <div class="mt-2 space-x-2">
-                                <button onclick="window.GAuthLab.TutorialSystem.startTutorial('gauth-basics')" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-30">
+                                <button onclick="window.AgentAuthLab.TutorialSystem.startTutorial('gauth-basics')" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-30">
                                     Start Basics Tutorial
                                 </button>
                                 <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-30">
@@ -2453,7 +2453,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
         }
         
         // Add global functions for debugging and advanced use
-        window.GAuthLab = {
+        window.AgentAuthLab = {
             LearningTracker,
             ComplianceDashboard,
             InteractiveElements,
@@ -2472,6 +2472,6 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
             TutorialSystem.closeTutorial();
         });
         
-        console.log('🚀 GAuth Learning Lab fully operational with real RFC-0150 implementation');
+        console.log('🚀 AgentAuth Learning Lab fully operational with real RFC-0150 implementation');
     });
 })();

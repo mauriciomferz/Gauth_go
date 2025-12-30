@@ -1,4 +1,4 @@
-// Command verify-manifest verifies the signed policy manifest emitted by the GAuth server.
+// Command verify-manifest verifies the signed policy manifest emitted by the AgentAuth server.
 // It fetches (or reads from file) the /api/v1/policy/manifest JSON, reconstructs the
 // canonical unsigned portion, recomputes the sha256 hash, and verifies the Ed25519 signature
 // using domain separation prefix "GAUTH_POLICY_MANIFEST:".

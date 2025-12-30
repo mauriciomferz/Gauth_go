@@ -1,4 +1,4 @@
-# Prometheus Configuration for GAuth Production
+# Prometheus Configuration for AgentAuth Production
 # Scrapes metrics from backend and system components
 
 global:
@@ -21,7 +21,7 @@ rule_files:
 
 # Scrape configurations
 scrape_configs:
-  # GAuth Backend Metrics
+  # AgentAuth Backend Metrics
   - job_name: 'gauth-backend'
     static_configs:
       - targets: ['backend:8080']

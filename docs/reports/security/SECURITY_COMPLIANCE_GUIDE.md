@@ -6,9 +6,9 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Security & Compliance Guide
+# AgentAuth Security & Compliance Guide
 
-Comprehensive security implementation and compliance documentation for the GAuth OAuth 2.0 server.
+Comprehensive security implementation and compliance documentation for the AgentAuth OAuth 2.0 server.
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@ Comprehensive security implementation and compliance documentation for the GAuth
 
 ## Security Overview
 
-The GAuth application implements multiple layers of security controls to protect against common web application vulnerabilities and ensure compliance with industry standards.
+The AgentAuth application implements multiple layers of security controls to protect against common web application vulnerabilities and ensure compliance with industry standards.
 
 ### Security Layers
 
@@ -296,7 +296,7 @@ GAUTH_AUDIT_LOG_STDOUT=1
 package main
 
 import (
-	"github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/internal/security"
+	"github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/security"
 	"github.com/gin-gonic/gin"
 )
 

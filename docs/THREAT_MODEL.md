@@ -8,13 +8,13 @@ source: internal
 refreshCadence: quarterly
 ---
 
-# GAuth Threat Model (RFC 0111 / 0115 Delegation Prototype)
+# AgentAuth Threat Model (AAP-001 / 0115 Delegation Prototype)
 
 > Status: Updated – October 17, 2025
 > Scope: beta-refactor branch including replay protection (in-memory + Redis distributed JTI store), scope/restriction size limits, delegation issuance, revocation chain, token envelope (with JTI), BoltDB repository, metrics (replay hit/miss/store errors/latency), anchoring stub
 
 ## 1. Overview
-The GAuth prototype implements RFC 0111 delegation (PowerOfAttorney) with optional RFC 0115 definition integration. This threat model documents assets, trust boundaries, key threats, existing mitigations, and gaps to guide hardening work toward production readiness.
+The AgentAuth prototype implements AAP-001 delegation (PowerOfAttorney) with optional AAP-002 definition integration. This threat model documents assets, trust boundaries, key threats, existing mitigations, and gaps to guide hardening work toward production readiness.
 
 ## 2. Assets
 | Asset | Description | Security Objectives |
@@ -93,7 +93,7 @@ The GAuth prototype implements RFC 0111 delegation (PowerOfAttorney) with option
 - (Completed) Discovery hardening: JWKS signatures and deprecation schedules now exposed via `/.well-known/gauth-configuration`.
 - (Completed) RFC-3161 verification: Cryptographic verification of TimeStampToken CMS structures implemented.
 - (Completed) Capability registry anchoring: External TSA anchoring integrated for capability governance audit trail.
-- (Completed) MCP Security: GAuth-secured MCP REST integration with mandatory authorization and auditing.
+- (Completed) MCP Security: AgentAuth-secured MCP REST integration with mandatory authorization and auditing.
 - Public key distribution and persistence missing (verification relies on key ring only).
 - No integrity seal / checksum for BoltDB file (tampering offline undetected on startup).
 - Lack of structured authorization policy around List operations (privacy risk).

@@ -486,6 +486,6 @@ docker history ghcr.io/mauriciomferz/gauth:latest
 
 ---
 
-**Maintained by**: GAuth Development Team  
+**Maintained by**: AgentAuth Development Team  
 **Last Updated**: November 10, 2025  
 **Version**: 1.0.0

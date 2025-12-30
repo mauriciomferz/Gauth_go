@@ -1,4 +1,4 @@
-// Package security provides comprehensive security middleware for the GAuth application,
+// Package security provides comprehensive security middleware for the AgentAuth application,
 // including security headers, CORS configuration, rate limiting, input validation,
 // and audit logging capabilities.
 package security

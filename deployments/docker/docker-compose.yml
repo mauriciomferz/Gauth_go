@@ -1,6 +1,6 @@
 
 services:
-  # Main GAuth service
+  # Main AgentAuth service
   gauth:
     build:
       context: ../..

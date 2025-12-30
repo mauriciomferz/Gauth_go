@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The GAuth replay store supports a **fail-closed mode** that prioritizes security over availability during JTI (JWT ID) verification failures. This document outlines the operational implications, risk trade-offs, and recommended deployment strategies for this critical security feature.
+The AgentAuth replay store supports a **fail-closed mode** that prioritizes security over availability during JTI (JWT ID) verification failures. This document outlines the operational implications, risk trade-offs, and recommended deployment strategies for this critical security feature.
 
 > [!WARNING]
 > Fail-closed mode can cause service denials during transient replay store outages. Operators must balance security requirements against availability SLAs.
@@ -38,7 +38,7 @@ Fail-closed behavior is implemented in [`pkg/gauth_rfc_001/rfc0111.go`](file:///
 
 **Advantages**:
 - ✅ Prevents replay attacks during infrastructure failures
-- ✅ Maintains strict compliance with RFC 0111 requirements
+- ✅ Maintains strict compliance with AAP-001 requirements
 - ✅ No degradation of security posture during outages
 
 **Disadvantages**:
@@ -55,7 +55,7 @@ Fail-closed behavior is implemented in [`pkg/gauth_rfc_001/rfc0111.go`](file:///
 
 **Disadvantages**:
 - ❌ **Critical Security Risk**: Replay attacks possible during outages
-- ❌ Compliance violations (RFC 0111 mandates replay protection)
+- ❌ Compliance violations (AAP-001 mandates replay protection)
 - ❌ Audit trail gaps
 
 ---
@@ -111,7 +111,7 @@ rate(gauth_replay_store_errors_total[5m]) / rate(gauth_replay_checks_total[5m]) 
 
 **Immediate actions**:
 1. **Verify Redis health**: Check connectivity, CPU, memory
-2. **Check network**: Confirm network path between GAuth and Redis
+2. **Check network**: Confirm network path between AgentAuth and Redis
 3. **Review logs**: Search for `replay store check failed` entries
 4. **Consider temporary fail-open** (requires executive approval):
    ```bash
@@ -192,7 +192,7 @@ Measure fail-closed impact on throughput:
 
 ## References
 
-- [RFC 0111 Specification](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/Gifo_0111.md)
+- [AAP-001 Specification](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/Gifo_0111.md)
 - [THREAT_MODEL.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/THREAT_MODEL.md)
 - [RESIDUAL_RISKS.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/RESIDUAL_RISKS.md)
 - [GAP_MATRIX.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/GAP_MATRIX.md)

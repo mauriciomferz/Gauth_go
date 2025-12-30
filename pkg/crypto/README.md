@@ -6,12 +6,12 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Cryptography Module
+# AgentAuth Cryptography Module
 
 > Last Updated: 2025-10-24
 > Status: Active
 
-This module implements all major cryptographic primitives and key management features for the GAuth RFC demonstration, including:
+This module implements all major cryptographic primitives and key management features for the AgentAuth RFC demonstration, including:
 
 ## Features
 - Ed25519, ECDSA, and BLS signature schemes

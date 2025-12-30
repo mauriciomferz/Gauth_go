@@ -1,4 +1,4 @@
-// Package observability provides lightweight in-memory metrics primitives used by GAuth.
+// Package observability provides lightweight in-memory metrics primitives used by AgentAuth.
 // It purposefully avoids external dependencies so core validation logic remains portable.
 // Adapters can export these counters to Prometheus, OpenTelemetry or custom collectors.
 package observability

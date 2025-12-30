@@ -1,9 +1,9 @@
 #!/bin/bash
-# Generate test traffic for GAuth+ monitoring dashboard
+# Generate test traffic for AgentAuth+ monitoring dashboard
 
 BASE_URL="http://localhost:8080"
 
-echo "=== Generating GAuth+ Test Traffic ==="
+echo "=== Generating AgentAuth+ Test Traffic ==="
 echo ""
 
 # 1. Create capability assessments (varying levels)

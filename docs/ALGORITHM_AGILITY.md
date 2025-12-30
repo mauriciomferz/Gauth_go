@@ -6,11 +6,11 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Algorithm Agility in GAuth
+# Algorithm Agility in AgentAuth
 
 ## Overview
 
-GAuth implements **algorithm agility**, supporting multiple cryptographic signature algorithms for authorization tokens. This enables gradual migration between algorithms, interoperability with diverse systems, and future-proofing against cryptographic advances.
+AgentAuth implements **algorithm agility**, supporting multiple cryptographic signature algorithms for authorization tokens. This enables gradual migration between algorithms, interoperability with diverse systems, and future-proofing against cryptographic advances.
 
 ### Supported Algorithms
 
@@ -66,7 +66,7 @@ algorithms := registry.ListAlgorithms()  // ["EdDSA", "PS256", "ES256"]
 #### Ed25519 (Default - Fastest)
 
 ```go
-import "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 
 // Create provider
 provider := &crypto.Ed25519Provider{}
@@ -163,7 +163,7 @@ if err := newProvider.Verify(newPubKey, message, newSig); err == nil {
 // 4. After migration period, switch to new key only
 ```
 
-## Integration with GAuth
+## Integration with AgentAuth
 
 ### Token Signing
 
@@ -172,7 +172,7 @@ Add algorithm identifier to token header:
 ```go
 import (
     "encoding/json"
-    "github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/crypto"
+    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 )
 
 type TokenHeader struct {
@@ -184,7 +184,7 @@ func SignToken(provider crypto.SignatureAlgorithm, privKey interface{}, payload 
     // Create header
     header := TokenHeader{
         Algorithm: provider.AlgorithmID(),  // "EdDSA", "PS256", or "ES256"
-        Type:      "GAuth",
+        Type:      "AgentAuth",
     }
     
     headerJSON, _ := json.Marshal(header)
@@ -573,7 +573,7 @@ This implementation follows [RFC 7518](https://tools.ietf.org/html/rfc7518) (JSO
 
 ## Summary
 
-Algorithm agility in GAuth provides:
+Algorithm agility in AgentAuth provides:
 
 ✅ **Flexibility**: Support for Ed25519, RSA-PSS, and ECDSA P-256  
 ✅ **Interoperability**: Compatible with diverse systems and requirements  

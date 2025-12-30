@@ -1,11 +1,11 @@
-// Package common provides common types and utilities for the GAuth implementation
+// Package common provides common types and utilities for the AgentAuth implementation
 package common
 
 import (
 	"time"
 )
 
-// EventType represents different types of events in the GAuth system
+// EventType represents different types of events in the AgentAuth system
 type EventType string
 
 const (
@@ -20,7 +20,7 @@ const (
 	// AuthorizationDenied represents an authorization denial event
 	AuthorizationDenied EventType = "authorization.denied"
 
-	// Delegation events (RFC 0111)
+	// Delegation events (AAP-001)
 	DelegationCreated   EventType = "delegation.created"
 	DelegationRevoked   EventType = "delegation.revoked"
 	DelegationValidated EventType = "delegation.validated"

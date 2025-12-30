@@ -1,4 +1,4 @@
-# GAuth Learning Lab - Visual Improvements Guide
+# AgentAuth Learning Lab - Visual Improvements Guide
 
 ## 🎨 What You'll See When You Visit http://localhost:8080/index.html
 
@@ -7,7 +7,7 @@
 ### 1. **Sticky Navigation Bar**
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  🧪 GAuth  [Learning] [Compliance] [Patterns] [Playground] ...  │ ← STAYS AT TOP
+│  🧪 AgentAuth  [Learning] [Compliance] [Patterns] [Playground] ...  │ ← STAYS AT TOP
 └─────────────────────────────────────────────────────────────────┘
 ```
 **Features:**
@@ -24,7 +24,7 @@
 │                                                                 │
 │      [🧪 RFC-0150 Compliant Authorization Platform]             │
 │                                                                 │
-│            GAuth Learning Lab                                   │
+│            AgentAuth Learning Lab                                   │
 │       Interactive RFC-0150 Testing Platform                     │
 │                                                                 │
 │    [12 Modules]  [15+ Patterns]  [RFC-0150 Ready]               │
@@ -255,13 +255,13 @@ When page loads:
 ### Testing in Console
 ```javascript
 // Show test notification
-window.GAuthButtonSystem.showNotification('Test!', 'success');
+window.AgentAuthButtonSystem.showNotification('Test!', 'success');
 
 // Check available handlers
-console.log(Object.keys(window.GAuthButtonSystem.handlers));
+console.log(Object.keys(window.AgentAuthButtonSystem.handlers));
 
 // Reinitialize system
-window.GAuthButtonSystem.reinitialize();
+window.AgentAuthButtonSystem.reinitialize();
 ```
 
 ---

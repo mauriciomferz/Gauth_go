@@ -8,7 +8,7 @@ import (
 // RegisterBetaExternalServiceEndpoints registers HTTP endpoints that expose
 // mock external services (PVP, Commercial Registry, PoA) for UI integration.
 // This is part of Phase 2A Enhancement to convert UI mocks to real backend endpoints.
-func (s *BetaServer) RegisterBetaExternalServiceEndpoints(components *gauth.RFC0111Components) {
+func (s *BetaServer) RegisterBetaExternalServiceEndpoints(components *gauth.AAP001Components) {
 	// Create handlers wrapping the RFC-0111 mock clients
 	pvpHandler := beta.NewPVPHandler(components.PVPClient)
 	registryHandler := beta.NewRegistryHandler(components.CommercialRegClient)

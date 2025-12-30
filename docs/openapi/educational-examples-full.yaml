@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: GAuth Educational Examples API (Full)
+  title: AgentAuth Educational Examples API (Full)
   version: 0.2.0
   description: |
     Aggregated OpenAPI spec for the educational demo server, including planned/future endpoints.

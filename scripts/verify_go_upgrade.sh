@@ -5,7 +5,7 @@
 set -e
 
 echo "=================================================="
-echo "GAuth Go 1.25.3 Upgrade Verification"
+echo "AgentAuth Go 1.25.3 Upgrade Verification"
 echo "=================================================="
 echo ""
 

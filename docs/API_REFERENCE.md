@@ -1,5 +1,5 @@
 ---
-title: GAuth RFC API Reference
+title: AgentAuth RFC API Reference
  category: api-reference
  status: active
  lastUpdated: 2025-11-12
@@ -722,7 +722,7 @@ Security Considerations:
 - TTL tuning balances memory footprint vs. replay window risk; choose a value aligned with average token lifetime.
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
-# (Metadata moved to top) GAuth RFC API Reference
+# (Metadata moved to top) AgentAuth RFC API Reference
 
 > Last Updated: 2025-10-21
 > Status: Active
@@ -731,15 +731,15 @@ Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
 
 **Beta Demonstration API Documentation (NOT Production Ready)**
 
-Complete Go library API reference for GiFo-RFC-0111 (GAuth 1.0) and GiFo-RFC-0115 (PoA Definition) implementation.
+Complete Go library API reference for AAP-RFC-0111 (AgentAuth 1.0) and AAP-RFC-0115 (PoA Definition) implementation.
 
 > **📝 Note**: This document covers the Go library API. For the web demonstration API documentation, see [COMPLETE_API_REFERENCE.md](./COMPLETE_API_REFERENCE.md) which includes both library and web API documentation.
 
 ## 📋 **Table of Contents**
 
 1. [Core Service API](#core-service-api)
-2. [GAuth-RFC-001 (formerly RFC 111) Authorization API](#rfc-111-authorization-api)
-3. [GAuth-RFC-002 (formerly RFC 115) PoA Definition API](#rfc-115-poa-definition-api)
+2. [AgentAuth-RFC-001 (formerly RFC 111) Authorization API](#rfc-111-authorization-api)
+3. [AgentAuth-RFC-002 (formerly RFC 115) PoA Definition API](#rfc-115-poa-definition-api)
 4. [Professional Foundation API](#professional-foundation-api)
 5. [Data Types Reference](#data-types-reference)
 6. [Error Handling](#error-handling)
@@ -758,7 +758,7 @@ Complete Go library API reference for GiFo-RFC-0111 (GAuth 1.0) and GiFo-RFC-011
 
 ### **RFCCompliantService**
 
-The main service implementing both GAuth-RFC-001 (formerly RFC 111) and GAuth-RFC-002 (formerly RFC 115) specifications.
+The main service implementing both AgentAuth-RFC-001 (formerly RFC 111) and AgentAuth-RFC-002 (formerly RFC 115) specifications.
 
 ```go
 type RFCCompliantService struct {
@@ -786,7 +786,7 @@ func NewRFCCompliantService(issuer, audience string) (*RFCCompliantService, erro
 **Example:**
 ```go
 service, err := auth.NewRFCCompliantService("my-company", "ai-authorization")
-### Signature & Semantic Validation Options (RFC 0111 Service)
+### Signature & Semantic Validation Options (AAP-001 Service)
 
 The lower-level `rfc0111.Service` (delegation issuance / token verification) now supports additional functional options:
 
@@ -843,27 +843,27 @@ if err != nil {
 }
 ```
 
-## 🎯 **GAuth-RFC-001 (formerly RFC 111) Authorization API**
+## 🎯 **AgentAuth-RFC-001 (formerly RFC 111) Authorization API**
 
-### **AuthorizeGAuth**
+### **AuthorizeAgentAuth**
 
-Main authorization method implementing complete GAuth-RFC-001 (formerly RFC 111) flow with GAuth-RFC-002 (formerly RFC 115) PoA Definition validation.
+Main authorization method implementing complete AgentAuth-RFC-001 (formerly RFC 111) flow with AgentAuth-RFC-002 (formerly RFC 115) PoA Definition validation.
 
 ```go
-func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthRequest) (*GAuthResponse, error)
+func (s *RFCCompliantService) AuthorizeAgentAuth(ctx context.Context, req AgentAuthRequest) (*AgentAuthResponse, error)
 ```
 
 **Parameters:**
 - `ctx` (context.Context): Request context for cancellation and timeout
-- `req` (GAuthRequest): Complete RFC-compliant authorization request
+- `req` (AgentAuthRequest): Complete RFC-compliant authorization request
 
 **Returns:**
-- `*GAuthResponse`: Authorization response with compliance validation
+- `*AgentAuthResponse`: Authorization response with compliance validation
 - `error`: Authorization or validation error
 
 **Process Flow:**
-1. Validates PoA Definition (GAuth-RFC-002 (formerly RFC 115))
-2. Validates principal capacity (GAuth-RFC-001 (formerly RFC 111))
+1. Validates PoA Definition (AgentAuth-RFC-002 (formerly RFC 115))
+2. Validates principal capacity (AgentAuth-RFC-001 (formerly RFC 111))
 3. Validates AI client capabilities
 4. Validates legal compliance
 5. Generates authorization code
@@ -871,7 +871,7 @@ func (s *RFCCompliantService) AuthorizeGAuth(ctx context.Context, req GAuthReque
 
 **Example:**
 ```go
-response, err := service.AuthorizeGAuth(ctx, auth.GAuthRequest{
+response, err := service.AuthorizeAgentAuth(ctx, auth.AgentAuthRequest{
     ClientID:     "ai_agent_v1",
     ResponseType: "code",
     Scope:        []string{"financial_advisory"},
@@ -879,23 +879,23 @@ response, err := service.AuthorizeGAuth(ctx, auth.GAuthRequest{
     PrincipalID:  "corp_ceo_123",
     AIAgentID:    "ai_financial_advisor",
     Jurisdiction: "US",
-    PoADefinition: poaDefinition, // Complete GAuth-RFC-002 (formerly RFC 115) structure
+    PoADefinition: poaDefinition, // Complete AgentAuth-RFC-002 (formerly RFC 115) structure
 })
 ```
 
-### **CreateGAuthToken** (Future Enhancement)
+### **CreateAgentAuthToken** (Future Enhancement)
 
 Exchange authorization code for extended token with comprehensive metadata.
 
 ```go
-func (s *RFCCompliantService) CreateGAuthToken(ctx context.Context, authCode string) (*GAuthToken, error)
+func (s *RFCCompliantService) CreateAgentAuthToken(ctx context.Context, authCode string) (*AgentAuthToken, error)
 ```
 
-## 📋 **GAuth-RFC-002 (formerly RFC 115) PoA Definition API**
+## 📋 **AgentAuth-RFC-002 (formerly RFC 115) PoA Definition API**
 
 ### **PoA Definition Structure**
 
-Complete implementation of GAuth-RFC-002 (formerly RFC 115) Power-of-Attorney Credential Definition.
+Complete implementation of AgentAuth-RFC-002 (formerly RFC 115) Power-of-Attorney Credential Definition.
 
 ```go
 type PoADefinition struct {
@@ -1216,10 +1216,10 @@ func (v *LegalFrameworkValidator) ValidateFramework(ctx context.Context, framewo
 
 ## 📊 **Response Types**
 
-### **GAuthResponse**
+### **AgentAuthResponse**
 
 ```go
-type GAuthResponse struct {
+type AgentAuthResponse struct {
     AuthorizationCode string              `json:"code"`              // OAuth authorization code
     State            string              `json:"state"`             // CSRF protection state
     ExtendedToken    string              `json:"extended_token"`    // Optional immediate token
@@ -1242,10 +1242,10 @@ type PoAValidationResult struct {
 }
 ```
 
-### **GAuthToken**
+### **AgentAuthToken**
 
 ```go
-type GAuthToken struct {
+type AgentAuthToken struct {
     AccessToken      string           `json:"access_token"`      // JWT access token
     TokenType        string           `json:"token_type"`        // "bearer"
     ExpiresIn        int              `json:"expires_in"`        // Token expiration (seconds)
@@ -1314,7 +1314,7 @@ import (
     "context"
     "fmt"
     "time"
-    "github.com/Gimel-Foundation/gauth/pkg/auth"
+    "github.com/AgentAuth-Foundation/gauth/pkg/auth"
 )
 
 func main() {
@@ -1397,8 +1397,8 @@ func main() {
         },
     }
     
-    // Create GAuth request
-    request := auth.GAuthRequest{
+    // Create AgentAuth request
+    request := auth.AgentAuthRequest{
         ClientID:     "ai_financial_advisor_v3",
         ResponseType: "code",
         Scope:        []string{"financial_advisory", "asset_management"},
@@ -1411,7 +1411,7 @@ func main() {
     }
     
     // Authorize with full RFC validation
-    response, err := service.AuthorizeGAuth(context.Background(), request)
+    response, err := service.AuthorizeAgentAuth(context.Background(), request)
     if err != nil {
         fmt.Printf("❌ Authorization failed: %v\n", err)
         return
@@ -1428,7 +1428,7 @@ func main() {
 
 ---
 
-*This API reference provides complete documentation for the official Gimel Foundation GAuth RFC implementation. For additional examples and guides, see the [Getting Started Guide](../docs/GETTING_STARTED.md) and [RFC Architecture Documentation](../docs/RFC_ARCHITECTURE.md).*
+*This API reference provides complete documentation for the official AgentAuth Community AgentAuth RFC implementation. For additional examples and guides, see the [Getting Started Guide](../docs/GETTING_STARTED.md) and [RFC Architecture Documentation](../docs/RFC_ARCHITECTURE.md).*
 
 ---
 

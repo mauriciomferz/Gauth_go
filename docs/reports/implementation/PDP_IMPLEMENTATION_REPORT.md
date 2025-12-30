@@ -208,7 +208,7 @@ func createDefaultPDPEngine() pdp.Engine {
 === RUN   TestPDPBridge_ConvertMapRequest
 --- PASS: TestPDPBridge_ConvertMapRequest (0.00s)
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth      0.481s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth      0.481s
 ```
 
 ---

@@ -7,5 +7,5 @@ owners: architecture-team
 refreshCadence: on-change
 source: design-session
 ---
-# Demo Architecture & Two-Agent Interaction (GAuth Beta)
+# Demo Architecture & Two-Agent Interaction (AgentAuth Beta)
 (Original content retained; relocated to mapped directory.)

@@ -122,7 +122,7 @@ The React UI modernization is **complete at the foundation level** with all infr
 
 | File | Lines | Purpose | Features |
 |------|-------|---------|----------|
-| `api.ts` | 308 | API client | Complete GAuth endpoint coverage with TypeScript types |
+| `api.ts` | 308 | API client | Complete AgentAuth endpoint coverage with TypeScript types |
 | `utils.ts` | 18 | Helpers | cn(), formatDate(), formatDuration(), generateId() |
 | `theme.ts` | 39 | Theme store | Zustand store with localStorage persistence |
 

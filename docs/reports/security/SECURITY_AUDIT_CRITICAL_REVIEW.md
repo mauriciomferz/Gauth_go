@@ -22,7 +22,7 @@ The initial assessment (v2.0) focused on tactical code-level fixes while **faili
 
 **Problem Statement:**
 
-The framework is built on **GiFo-RFC-0111 and GiFo-RFC-0115**, which are:
+The framework is built on **AAP-RFC-0111 and AAP-RFC-0115**, which are:
 - ❌ NOT IETF-approved standards
 - ❌ NOT peer-reviewed by the broader security community
 - ❌ NOT battle-tested in production at scale
@@ -39,7 +39,7 @@ The framework is built on **GiFo-RFC-0111 and GiFo-RFC-0115**, which are:
 
 **Comparison to Industry Standards:**
 
-| Feature | GiFo-RFC-0111 | OAuth 2.0 (RFC 6749) | OIDC (RFC ????) |
+| Feature | AAP-RFC-0111 | OAuth 2.0 (RFC 6749) | OIDC (RFC ????) |
 |---------|---------------|---------------------|------------------|
 | Standards Body | None (Proprietary) | IETF | OpenID Foundation |
 | Peer Review | Unknown | Extensive | Extensive |
@@ -513,14 +513,14 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 | OAuth 2.0 (RFC 6749) | Billions of users | Extensive | LOW |
 | OIDC | Billions of users | Extensive | LOW |
 | SAML 2.0 | Millions of enterprises | Extensive | LOW |
-| GiFo-RFC-0111 | **This project only** | **None** | **HIGH** |
-| GiFo-RFC-0115 | **This project only** | **None** | **HIGH** |
+| AAP-RFC-0111 | **This project only** | **None** | **HIGH** |
+| AAP-RFC-0115 | **This project only** | **None** | **HIGH** |
 
 **Consequences:**
 
 1. **Security Vulnerabilities:**
    - No independent security audits of the specification
-   - No CVE database for GiFo-RFC issues
+   - No CVE database for AAP-RFC issues
    - No security research community analyzing the protocol
 
 2. **Interoperability Failures:**
@@ -539,7 +539,7 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 
 **Recommendation:**
 
-> **STRATEGIC PRIORITY 1:** Conduct a formal analysis comparing GiFo-RFC-0111/0115 to OAuth 2.0 + proven delegation extensions. Prepare a migration path to standards-based authentication.
+> **STRATEGIC PRIORITY 1:** Conduct a formal analysis comparing AAP-RFC-0111/0115 to OAuth 2.0 + proven delegation extensions. Prepare a migration path to standards-based authentication.
 
 ---
 
@@ -596,7 +596,7 @@ export GAUTH_REPLAY_FAIL_CLOSED=1
 **1. README.md:**
 ```markdown
 ⚠️ **SECURITY NOTICE:**
-This framework uses proprietary GiFo-RFC specifications (0111/0115) 
+This framework uses proprietary AAP-RFC specifications (0111/0115) 
 which have NOT been vetted by IETF or the broader security community. 
 Production use is NOT RECOMMENDED for:
 - Enterprise identity management
@@ -628,7 +628,7 @@ For production systems, use OAuth 2.0 + OIDC with proven delegation extensions.
 ### P0 - CRITICAL (Immediate)
 
 1. **[ ] Update Documentation:**
-   - Add security warnings about GiFo-RFC limitations
+   - Add security warnings about AAP-RFC limitations
    - Deprecate BoltDB for production use
    - Mandate Redis for containerized deployments
 
@@ -653,7 +653,7 @@ For production systems, use OAuth 2.0 + OIDC with proven delegation extensions.
    - Document how to replace validateInheritedScope with OPA Rego
 
 6. **[ ] Conduct Standards Analysis:**
-   - Formal comparison: GiFo-RFC vs OAuth 2.0 + Token Exchange
+   - Formal comparison: AAP-RFC vs OAuth 2.0 + Token Exchange
    - Cost-benefit analysis of migration to IETF standards
 
 ### P2 - MEDIUM (Within 90 Days)
@@ -680,7 +680,7 @@ For production systems, use OAuth 2.0 + OIDC with proven delegation extensions.
 ### Revised Assessment (v3.0)
 > "The system has **known structural limitations** that prevent unconditional production readiness:
 > 
-> 1. **Proprietary Standards Risk:** Built on unproven GiFo-RFC specifications not vetted by security community
+> 1. **Proprietary Standards Risk:** Built on unproven AAP-RFC specifications not vetted by security community
 > 2. **Scope Validation Fragility:** String matching insufficient for complex authorization scenarios
 > 3. **Replay Protection Gap:** BoltDB option is unsafe for containerized deployments (common in production)
 > 
@@ -698,7 +698,7 @@ For production systems, use OAuth 2.0 + OIDC with proven delegation extensions.
 
 While the development team has demonstrated **tactical competence** in patching specific vulnerabilities (DoS mitigation, basic replay protection), the framework suffers from **strategic architectural risks** that cannot be resolved through incremental code fixes:
 
-1. **Non-Standard Protocol:** GiFo-RFC-0111/0115 lack industry vetting
+1. **Non-Standard Protocol:** AAP-RFC-0111/0115 lack industry vetting
 2. **Brittle Authorization:** String matching insufficient for modern permissions
 3. **Deployment Anti-Pattern:** BoltDB option encourages unsafe configurations
 
@@ -736,13 +736,13 @@ The team should be commended for **thorough remediation of tactical vulnerabilit
 
 **Phase 3: Strategic (Q2-Q3 2026)**
 - Design OAuth 2.0 + Token Exchange migration
-- Implement dual-mode support (GiFo + OAuth)
+- Implement dual-mode support (AAP + OAuth)
 - Gradual feature parity migration
 
 **Phase 4: Sunset (Q4 2026)**
-- Deprecate GiFo-RFC mode
+- Deprecate AAP-RFC mode
 - Full migration to standards-based auth
-- Archive GiFo-RFC as historical reference
+- Archive AAP-RFC as historical reference
 
 ### Appendix B: Container Restart Test
 

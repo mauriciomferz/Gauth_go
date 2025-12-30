@@ -536,7 +536,7 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "GAuth+ System Metrics",
+    "title": "AgentAuth+ System Metrics",
     "uid": "gauth-system",
     "version": 1
 }

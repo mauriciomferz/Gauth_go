@@ -57,7 +57,7 @@ func handleReceiptVerification(base, receipts string, receiptsURL, jsonOut, quie
 }
 
 func main() {
-	base := flag.String("base", "http://localhost:8080", "Base URL of GAuth server")
+	base := flag.String("base", "http://localhost:8080", "Base URL of AgentAuth server")
 	hash := flag.String("hash", "", "Revocation event hash to verify (optional)")
 	receipts := flag.String("receipt-file", "", "Path to receipt chain persistence file to verify (optional)")
 	receiptsURL := flag.Bool("receipt-remote", false, "Verify remote receipt chain via /api/v1/beta/notarization/receipts/verify")

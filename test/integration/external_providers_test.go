@@ -37,16 +37,16 @@ func TestExternalProvidersIntegration(t *testing.T) {
 	}
 
 	// Run integration test scenarios
-	t.Run("Google to GAuth Exchange", func(t *testing.T) {
-		testGoogleToGAuthExchange(t, ctx, privateKey, tokenExchange)
+	t.Run("Google to AgentAuth Exchange", func(t *testing.T) {
+		testGoogleToAgentAuthExchange(t, ctx, privateKey, tokenExchange)
 	})
 
-	t.Run("Okta to GAuth Exchange", func(t *testing.T) {
-		testOktaToGAuthExchange(t, ctx, privateKey, tokenExchange)
+	t.Run("Okta to AgentAuth Exchange", func(t *testing.T) {
+		testOktaToAgentAuthExchange(t, ctx, privateKey, tokenExchange)
 	})
 
-	t.Run("Azure AD to GAuth Exchange", func(t *testing.T) {
-		testAzureADToGAuthExchange(t, ctx, privateKey, tokenExchange)
+	t.Run("Azure AD to AgentAuth Exchange", func(t *testing.T) {
+		testAzureADToAgentAuthExchange(t, ctx, privateKey, tokenExchange)
 	})
 
 	t.Run("Multi-Provider Batch Exchange", func(t *testing.T) {
@@ -164,7 +164,7 @@ func registerAzureADProvider(t *testing.T, registry *oidc.InMemoryProviderRegist
 	}
 }
 
-func testGoogleToGAuthExchange(t *testing.T, ctx context.Context, privateKey *rsa.PrivateKey, tokenExchange *oidc.TokenExchangeService) {
+func testGoogleToAgentAuthExchange(t *testing.T, ctx context.Context, privateKey *rsa.PrivateKey, tokenExchange *oidc.TokenExchangeService) {
 	// Create mock Google token with typical claims
 	googleClaims := &oidc.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -218,7 +218,7 @@ func testGoogleToGAuthExchange(t *testing.T, ctx context.Context, privateKey *rs
 	t.Logf("  - Mock claims prepared for: %s (%s)", googleClaims.Email, googleClaims.Subject)
 }
 
-func testOktaToGAuthExchange(t *testing.T, ctx context.Context, privateKey *rsa.PrivateKey, tokenExchange *oidc.TokenExchangeService) {
+func testOktaToAgentAuthExchange(t *testing.T, ctx context.Context, privateKey *rsa.PrivateKey, tokenExchange *oidc.TokenExchangeService) {
 	// Create mock Okta token with MFA and groups
 	oktaClaims := &oidc.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -258,7 +258,7 @@ func testOktaToGAuthExchange(t *testing.T, ctx context.Context, privateKey *rsa.
 	t.Logf("  - AMR includes: %v", oktaClaims.AMR)
 }
 
-func testAzureADToGAuthExchange(t *testing.T, ctx context.Context, privateKey *rsa.PrivateKey, tokenExchange *oidc.TokenExchangeService) {
+func testAzureADToAgentAuthExchange(t *testing.T, ctx context.Context, privateKey *rsa.PrivateKey, tokenExchange *oidc.TokenExchangeService) {
 	// Create mock Azure AD token with enterprise features
 	azureClaims := &oidc.IDTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{

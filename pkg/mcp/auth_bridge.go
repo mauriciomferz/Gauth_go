@@ -1,5 +1,5 @@
-// Package mcp - Authorization Bridge for GAuth + MCP Integration
-// Maps GAuth Extended Tokens to MCP resource/tool permissions via PDP
+// Package mcp - Authorization Bridge for AgentAuth + MCP Integration
+// Maps AgentAuth Extended Tokens to MCP resource/tool permissions via PDP
 package mcp
 
 import (
@@ -12,8 +12,8 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
 )
 
-// AuthorizationBridge maps GAuth Extended Tokens to MCP permissions
-// This is the core integration point between GAuth authorization and MCP operations
+// AuthorizationBridge maps AgentAuth Extended Tokens to MCP permissions
+// This is the core integration point between AgentAuth authorization and MCP operations
 type AuthorizationBridge struct {
 	pdpEngine pdp.Engine
 }

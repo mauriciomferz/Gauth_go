@@ -6,12 +6,12 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Troubleshooting Guide
+# AgentAuth Troubleshooting Guide
 
 > Last Updated: 2025-10-17
 > Status: Active
 
-This guide helps you diagnose and fix common issues in GAuth.
+This guide helps you diagnose and fix common issues in AgentAuth.
 
 ## Common Issues
 
@@ -25,7 +25,7 @@ This guide helps you diagnose and fix common issues in GAuth.
 #### Diagnostic Steps
 1. Check token format:
 ```go
-import "github.com/Gimel-Foundation/gauth/pkg/token"
+import "github.com/AgentAuth-Foundation/gauth/pkg/token"
 
 // Inspect token details
 token, err := tokenManager.Inspect(ctx, tokenString)
@@ -89,7 +89,7 @@ if err != nil {
 #### Diagnostic Steps
 1. Check rate limit configuration:
 ```go
-import "github.com/Gimel-Foundation/gauth/pkg/rate"
+import "github.com/AgentAuth-Foundation/gauth/pkg/rate"
 
 // Inspect rate limiter
 config := limiter.GetConfig()
@@ -150,7 +150,7 @@ for i := 0; i < 10; i++ {
 #### Diagnostic Steps
 1. Check token store performance:
 ```go
-import "github.com/Gimel-Foundation/gauth/pkg/monitoring"
+import "github.com/AgentAuth-Foundation/gauth/pkg/monitoring"
 
 // Monitor store operations
 metrics := monitoring.NewStoreMetrics()
@@ -308,7 +308,7 @@ log.Printf("Diagnostics: %+v", diag)
 
 ## Support Resources
 
-1. [GitHub Issues](https://github.com/Gimel-Foundation/gauth/issues)
+1. [GitHub Issues](https://github.com/AgentAuth-Foundation/gauth/issues)
 2. [Documentation](https://gauth.dev/docs)
 3. [Community Forum](https://gauth.dev/forum)
 

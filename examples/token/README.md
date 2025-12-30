@@ -11,15 +11,15 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This directory contains examples for using the token package in GAuth.
+This directory contains examples for using the token package in AgentAuth.
 
 ## Recommended Usage
 
-When working with tokens in GAuth, we recommend using the main token package implementations:
+When working with tokens in AgentAuth, we recommend using the main token package implementations:
 
 ```go
 import (
-    "github.com/Gimel-Foundation/gauth/pkg/token"
+    "github.com/AgentAuth-Foundation/gauth/pkg/token"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 
 ## Store Implementations
 
-GAuth provides multiple store implementations for different use cases:
+AgentAuth provides multiple store implementations for different use cases:
 
 1. `MemoryStore`: In-memory token storage with optional automatic cleanup
    - Best for single-instance applications or testing
@@ -55,7 +55,7 @@ All deprecated in-memory store implementations (`memoryStoreV1`, `token/store`) 
 
 ## Migration Note
 
-GAuth now uses the following APIs for token management:
+AgentAuth now uses the following APIs for token management:
 - `RequestToken` for token creation
 - `ValidateToken` for token validation
 - `InvalidateToken` for token revocation

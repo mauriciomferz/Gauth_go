@@ -11,11 +11,11 @@ refreshCadence: on-change
 > Last Updated: 2025-10-17
 > Status: Active
 
-This example demonstrates compliance testing for GAuth RFC 0111 (Authorization Framework) and RFC 0115 (PoA Definition) as specified by the Gimel Foundation.
+This example demonstrates compliance testing for AgentAuth AAP-001 (Authorization Framework) and AAP-002 (PoA Definition) as specified by the AgentAuth Community.
 
 ## Key Concepts
-- **RFC 0111 Compliance**: Tests P*P architecture, extended tokens, authorization server, legal validation, and AI agent authorization.
-- **RFC 0115 Compliance**: Tests PoA definition structure, parties, authorization type/scope, requirements, industry codes, and geographic scope.
+- **AAP-001 Compliance**: Tests P*P architecture, extended tokens, authorization server, legal validation, and AI agent authorization.
+- **AAP-002 Compliance**: Tests PoA definition structure, parties, authorization type/scope, requirements, industry codes, and geographic scope.
 - **Validation Logic**: Demonstrates validation, error handling, and configuration checks.
 
 ## How to Run
@@ -31,4 +31,4 @@ go run main.go
 
 ---
 
-For more, see the [GAuth RFC Documentation](../../docs/COMPLETE_API_REFERENCE.md).
+For more, see the [AgentAuth RFC Documentation](../../docs/COMPLETE_API_REFERENCE.md).

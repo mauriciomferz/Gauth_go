@@ -37,7 +37,7 @@ type FlashbotsConfig struct {
 	// SigningKey is the private key for signing transactions
 	SigningKey *ecdsa.PrivateKey
 
-	// ContractAddress is the GAuth registry contract address
+	// ContractAddress is the AgentAuth registry contract address
 	ContractAddress string
 
 	// ChainID is the blockchain network ID (1=mainnet, 5=goerli, etc.)

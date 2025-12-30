@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# GAuth Backup and Disaster Recovery Script
+# AgentAuth Backup and Disaster Recovery Script
 # This script handles automated backups and disaster recovery procedures
 
 set -euo pipefail

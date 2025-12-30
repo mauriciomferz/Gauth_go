@@ -1,6 +1,6 @@
 
 services:
-  # GAuth Authorization Server with JWE Encryption
+  # AgentAuth Authorization Server with JWE Encryption
   gauth-server:
     build:
       context: ../..

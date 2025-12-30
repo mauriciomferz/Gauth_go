@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-OIDC Phase 3 successfully implements comprehensive external provider integration, enabling GAuth to federate with major identity providers (Google, Okta, Azure AD) while maintaining security and trust level integrity. The implementation includes provider-specific integrations, token exchange services, and complete test coverage.
+OIDC Phase 3 successfully implements comprehensive external provider integration, enabling AgentAuth to federate with major identity providers (Google, Okta, Azure AD) while maintaining security and trust level integrity. The implementation includes provider-specific integrations, token exchange services, and complete test coverage.
 
 ### Key Achievements
 
@@ -177,15 +177,15 @@ OIDC Phase 3 successfully implements comprehensive external provider integration
 1. Validate exchange request (provider ID, token, audience)
 2. Lookup and verify provider is enabled
 3. Validate external token (provider-specific)
-4. Normalize claims to GAuth format
+4. Normalize claims to AgentAuth format
 5. Map trust level from ACR/AMR
 6. Handle additional claims
-7. Issue new GAuth ID token
+7. Issue new AgentAuth ID token
 8. Return exchange response
 
 **Trust Level Mapping**:
-- eIDAS ACR: `high`, `substantial`, `low` → GAuth levels
-- eIDAS URN: `urn:eidas:loa:{high,substantial,low}` → GAuth levels
+- eIDAS ACR: `high`, `substantial`, `low` → AgentAuth levels
+- eIDAS URN: `urn:eidas:loa:{high,substantial,low}` → AgentAuth levels
 - MFA in AMR: `mfa`, `otp`, `sms`, `hwk`, `swk`, `tel` → high trust
 - Provider defaults: Falls back to DefaultTrustLevel
 - Custom mappings: Via provider metadata `trust_mapping`
@@ -204,9 +204,9 @@ OIDC Phase 3 successfully implements comprehensive external provider integration
 
 **Test Scenarios**:
 1. **TestExternalProvidersIntegration**: End-to-end provider integration
-   - Google → GAuth exchange flow
-   - Okta → GAuth exchange flow
-   - Azure AD → GAuth exchange flow
+   - Google → AgentAuth exchange flow
+   - Okta → AgentAuth exchange flow
+   - Azure AD → AgentAuth exchange flow
    - Multi-provider batch exchanges
    - Trust level preservation across providers
    - Claim normalization verification
@@ -238,7 +238,7 @@ OIDC Phase 3 successfully implements comprehensive external provider integration
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    GAuth Application                         │
+│                    AgentAuth Application                         │
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       ▼
@@ -313,7 +313,7 @@ External Provider Token
 └──────────┬───────────┘
            │
            ▼
-     GAuth Token
+     AgentAuth Token
   (with trust level)
 ```
 
@@ -321,7 +321,7 @@ External Provider Token
 
 ## Compliance Impact
 
-### RFC-0111 GAuth 1.0 Compliance
+### RFC-0111 AgentAuth 1.0 Compliance
 
 **Before Phase 3**: 65%  
 **After Phase 3**: 68%  
@@ -534,7 +534,7 @@ ok  test/integration  0.751s
 
 1. **Update Dependencies**
    ```bash
-   go get github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0@latest
+   go get github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0@latest
    ```
 
 2. **Configure Providers**
@@ -648,7 +648,7 @@ See `examples/external_providers/` for complete setup examples.
 
 ## Conclusion
 
-OIDC Phase 3 successfully delivers comprehensive external provider integration for GAuth, enabling secure federation with major identity providers while maintaining trust level integrity and security standards. The implementation provides a solid foundation for enterprise SSO scenarios and future provider additions.
+OIDC Phase 3 successfully delivers comprehensive external provider integration for AgentAuth, enabling secure federation with major identity providers while maintaining trust level integrity and security standards. The implementation provides a solid foundation for enterprise SSO scenarios and future provider additions.
 
 ### Success Criteria Met
 

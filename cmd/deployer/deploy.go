@@ -22,7 +22,7 @@ import (
 
 func main() {
 	log.SetFlags(0)
-	log.Println("GAuth+ Smart Contract Deployer")
+	log.Println("AgentAuth+ Smart Contract Deployer")
 	log.Println("==============================")
 
 	// 1. Load Configuration

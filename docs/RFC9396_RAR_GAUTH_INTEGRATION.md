@@ -1,17 +1,17 @@
 ---
-title: GAuth + RFC 9396 (Rich Authorization Requests) Integration Guide
+title: AgentAuth + RFC 9396 (Rich Authorization Requests) Integration Guide
 category: architecture
 status: proposed
 lastUpdated: 2025-11-19
 owners: architecture-team
 ---
 
-# GAuth + RFC 9396 (Rich Authorization Requests) Integration Guide
+# AgentAuth + RFC 9396 (Rich Authorization Requests) Integration Guide
 
 ## Purpose
 
-This document provides a practical implementation guide for integrating RFC 9396 (Rich Authorization Requests) into GAuth to combine:
-- **GAuth**: Legal delegation chains and Power of Attorney framework
+This document provides a practical implementation guide for integrating RFC 9396 (Rich Authorization Requests) into AgentAuth to combine:
+- **AgentAuth**: Legal delegation chains and Power of Attorney framework
 - **RFC 9396**: Fine-grained resource-level permissions
 
 ---
@@ -20,7 +20,7 @@ This document provides a practical implementation guide for integrating RFC 9396
 
 ### Combined Strengths
 
-| Capability | GAuth Provides | RFC 9396 Provides |
+| Capability | AgentAuth Provides | RFC 9396 Provides |
 |:-----------|:---------------|:------------------|
 | **Legal Authority** | ✅ Power of Attorney | - |
 | **Authorization Chains** | ✅ Multi-level validation | - |
@@ -80,7 +80,7 @@ type Account struct {
 // pkg/gauth/token_request.go
 
 type RFCCompliantAuthorizationRequest struct {
-    // Existing GAuth fields
+    // Existing AgentAuth fields
     SubscriptionID   string
     RequestedScope   map[string]interface{}
     PoACredentialRef string
@@ -341,7 +341,7 @@ func (rs *ResourceServer) ValidateExtendedToken(
     requestedAction string,
 ) error {
     
-    // 1. GAuth validation (existing)
+    // 1. AgentAuth validation (existing)
     if err := rs.validatePowerOfAttorney(token.PowerOfAttorney); err != nil {
         return err
     }
@@ -430,7 +430,7 @@ func (rs *ResourceServer) validateAuthorizationDetails(
 ```
 
 **Validation**:
-- ✅ GAuth validates legal guardian authority chain
+- ✅ AgentAuth validates legal guardian authority chain
 - ✅ RFC 9396 ensures only authorized data types are accessed
 - ✅ Time-based and content-based constraints enforced
 
@@ -477,7 +477,7 @@ func (rs *ResourceServer) validateAuthorizationDetails(
 ```
 
 **Validation**:
-- ✅ GAuth validates board authorization chain
+- ✅ AgentAuth validates board authorization chain
 - ✅ Commercial register verification
 - ✅ RFC 9396 ensures amount limits and geographic restrictions
 - ✅ Dual approval enforcement
@@ -486,7 +486,7 @@ func (rs *ResourceServer) validateAuthorizationDetails(
 
 ## Migration Guide
 
-### For Existing GAuth Implementations
+### For Existing AgentAuth Implementations
 
 #### Step 1: Add RAR Support (Backward Compatible)
 
@@ -500,7 +500,7 @@ type TokenRequest struct {
     AuthorizationDetails []AuthorizationDetail `json:"authorization_details,omitempty"`
 }
 
-// If authorization_details is empty, use existing GAuth flow
+// If authorization_details is empty, use existing AgentAuth flow
 // If populated, validate against PoA and include in token
 ```
 
@@ -578,7 +578,7 @@ Content-Type: application/json
 {
   "extended_token": {
     "access_token": "gauth_at_...",
-    "token_type": "GAuth-Extended",
+    "token_type": "AgentAuth-Extended",
     "expires_in": 3600,
     "power_of_attorney": {
       "poa_id": "poa_456",
@@ -662,13 +662,13 @@ func TestValidateAuthorizationDetails_UnauthorizedAction(t *testing.T) {
 ## Benefits Summary
 
 ### For AI Systems
-✅ Legal authority validation (GAuth)  
+✅ Legal authority validation (AgentAuth)  
 ✅ Fine-grained resource control (RFC 9396)  
 ✅ Reduced over-privileging  
 ✅ Clear audit trail  
 
 ### For Resource Servers
-✅ Self-contained tokens (GAuth)  
+✅ Self-contained tokens (AgentAuth)  
 ✅ Detailed permission validation (RFC 9396)  
 ✅ No need for scope guessing  
 ✅ Compliance enforcement  
@@ -683,7 +683,7 @@ func TestValidateAuthorizationDetails_UnauthorizedAction(t *testing.T) {
 
 ## Conclusion
 
-Integrating RFC 9396 (Rich Authorization Requests) into GAuth creates **the first authorization framework combining legal delegation chains with fine-grained resource permissions**.
+Integrating RFC 9396 (Rich Authorization Requests) into AgentAuth creates **the first authorization framework combining legal delegation chains with fine-grained resource permissions**.
 
 **Implementation is straightforward**:
 1. Add `authorization_details` field to token requests
@@ -691,13 +691,13 @@ Integrating RFC 9396 (Rich Authorization Requests) into GAuth creates **the firs
 3. Embed details in Extended Tokens
 4. Validate at Resource Server
 
-This makes GAuth suitable for **regulated AI systems** requiring both legal authority and precise resource control.
+This makes AgentAuth suitable for **regulated AI systems** requiring both legal authority and precise resource control.
 
 ---
 
 ## References
 
 - [RFC 9396 - Rich Authorization Requests](https://datatracker.ietf.org/doc/rfc9396/)
-- [GiFo-RFC 0111 - GAuth Authorization Framework](../Gifo_0111.md)
-- [GAuth Architecture](../../ARCHITECTURE_SOLUTION.md)
-- [RFC 9396 vs GAuth Comparison](RFC9396_RAR_GAUTH_COMPARISON.md)
+- [AAP-AAP-001 - AgentAuth Authorization Framework](../Gifo_0111.md)
+- [AgentAuth Architecture](../../ARCHITECTURE_SOLUTION.md)
+- [RFC 9396 vs AgentAuth Comparison](RFC9396_RAR_GAUTH_COMPARISON.md)

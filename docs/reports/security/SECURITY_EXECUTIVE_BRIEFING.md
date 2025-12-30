@@ -27,7 +27,7 @@ Following an external security audit (V-2025 series), our initial assessment con
 
 ### 1. Proprietary Standards Risk ⚠️ HIGH
 
-**Issue:** System built on GiFo-RFC-0111/0115 (custom protocols)
+**Issue:** System built on AAP-RFC-0111/0115 (custom protocols)
 
 **Problem:**
 - NOT approved by IETF (Internet Engineering Task Force)
@@ -44,7 +44,7 @@ Following an external security audit (V-2025 series), our initial assessment con
 **Comparison:**
 ```
 OAuth 2.0: Billions of users, 15+ years of security research
-GiFo-RFC:  This project only, zero external validation
+AAP-RFC:  This project only, zero external validation
 ```
 
 **Recommendation:** Conduct feasibility study for migration to OAuth 2.0 + OIDC standards
@@ -176,7 +176,7 @@ T=140s: Attacker replays captured token → ACCEPTED ❌
 **Impact:** ✅ Enterprise authorization scenarios enabled
 
 **4. Standards Migration Study** ✅ **COMPLETE**
-- [x] Formal analysis: GiFo-RFC vs OAuth 2.0 + RFC 8693 (P1.3 - commit 896f2d8f)
+- [x] Formal analysis: AAP-RFC vs OAuth 2.0 + RFC 8693 (P1.3 - commit 896f2d8f)
 - [x] Cost-benefit analysis of migration scenarios
 - [x] Timeline and resource requirements
 - [x] Strategic recommendation
@@ -184,7 +184,7 @@ T=140s: Attacker replays captured token → ACCEPTED ❌
 **Delivered:**
 - 995-line comprehensive feasibility study
 - 3 migration scenarios analyzed (Full, Hybrid, Parallel)
-- **Recommendation: HYBRID APPROACH** - Retain GiFo-RFC + Add RFC 8693
+- **Recommendation: HYBRID APPROACH** - Retain AAP-RFC + Add RFC 8693
 - Implementation roadmap: 4 weeks, $15K-$25K
 - ROI analysis: Positive ROI, zero breaking changes
 
@@ -208,9 +208,9 @@ T=140s: Attacker replays captured token → ACCEPTED ❌
 
 **6. Standards Migration (If Approved)**
 - [ ] Design OAuth 2.0 + Token Exchange implementation
-- [ ] Implement dual-mode support (GiFo + OAuth)
+- [ ] Implement dual-mode support (AAP + OAuth)
 - [ ] Gradual feature parity migration
-- [ ] Sunset GiFo-RFC mode in v5.0
+- [ ] Sunset AAP-RFC mode in v5.0
 
 **Cost:** 3-6 engineering months  
 **Impact:** Long-term maintainability, compliance, ecosystem integration
@@ -288,7 +288,7 @@ T=140s: Attacker replays captured token → ACCEPTED ❌
 | **Auth0** | OAuth 2.0 + OIDC | Redis/PostgreSQL | RBAC + ABAC | LOW |
 | **Okta** | OAuth 2.0 + OIDC | Distributed DB | Policy Engine | LOW |
 | **Keycloak** | OAuth 2.0 + OIDC | Infinispan | Role Mapping | LOW |
-| **Gauth_go** | **GiFo-RFC (custom)** | **BoltDB/Redis** | **String Matching** | **MEDIUM-HIGH** |
+| **Gauth_go** | **AAP-RFC (custom)** | **BoltDB/Redis** | **String Matching** | **MEDIUM-HIGH** |
 
 **Market Positioning:**
 - Current: Niche/experimental market only

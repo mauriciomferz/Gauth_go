@@ -11,7 +11,7 @@ owners: [system]
 > Last Updated: 2025-10-17
 > Status: Active
 
-This guide explains GAuth's benchmarks and how to use them effectively.
+This guide explains AgentAuth's benchmarks and how to use them effectively.
 
 ## Running Benchmarks
 

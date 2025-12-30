@@ -8,14 +8,14 @@ import (
 	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
 )
 
-// JurisdictionEnforcement provides optional jurisdiction-specific runtime enforcement for RFC0111 operations.
+// JurisdictionEnforcement provides optional jurisdiction-specific runtime enforcement for AAP001 operations.
 // When enabled, all delegation creation and token verification operations are subject to jurisdiction
 // rules including GDPR consent, CCPA opt-out, cross-border data transfer, data residency, and blocked actions.
 //
 // Integration is opt-in for backward compatibility. To enable:
 //
 //	integration := jurisdiction.NewServerIntegration()
-//	svc := rfc0111.NewService(auditLogger, authorizer, rfc0111.WithJurisdictionEnforcement(integration))
+//	svc := aap001.NewService(auditLogger, authorizer, aap001.WithJurisdictionEnforcement(integration))
 //
 // Jurisdiction is derived from:
 //  1. PowerOfAttorney.Jurisdiction field (primary)

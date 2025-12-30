@@ -7,7 +7,7 @@
       "fragment_id": "1",
       "title": "1. Introduction",
       "normative_statements": null,
-      "raw_block": "## 1. Introduction\nGAuth Core Protocol describes mechanisms for delegation, policy evaluation, audit traceability and revocation. (Placeholder text.)\n",
+      "raw_block": "## 1. Introduction\nAgentAuth Core Protocol describes mechanisms for delegation, policy evaluation, audit traceability and revocation. (Placeholder text.)\n",
       "block_hash": "sha256-f827cc53bf08e6f625ccef55b2aaeb68f907b61c1d969dbf9d2bb793e8b7493d",
       "source_file": "rfc0111.md"
     },

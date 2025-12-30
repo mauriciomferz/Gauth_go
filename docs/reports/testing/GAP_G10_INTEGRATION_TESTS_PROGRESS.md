@@ -77,7 +77,7 @@ Started comprehensive integration testing for RFC-0111/0115 compliance as part o
 === RUN   TestExtendedToken_RestrictionsValidation
 --- PASS: TestExtendedToken_RestrictionsValidation (0.00s)
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/gauth      0.246s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth      0.246s
 ```
 
 #### Key Validations Covered:
@@ -185,7 +185,7 @@ Dependencies:
 === RUN   TestEntityDetails_Validation
 --- PASS: TestEntityDetails_Validation (0.00s)
 PASS
-ok      github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/pkg/registry   6.324s
+ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/registry   6.324s
 ```
 
 **Results**: ✅ **28/28 tests passing** in 6.324s (includes 100ms simulated delays)
@@ -549,7 +549,7 @@ Dependencies:
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/InvalidCommercialRegisterEntry (0.10s)
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/BrokenAuthorizationChain (0.00s)
 PASS
-ok  github.com/Gimel-Foundation/GiFo-RFC-0150-Go-Implementation-of-GAuth-1.0/test/integration  0.635s
+ok  github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/test/integration  0.635s
 ```
 
 **Results**: ✅ **4/4 main tests + 12/12 subtests PASSING** (100% pass rate)
@@ -641,7 +641,7 @@ Dependencies:
 
 ## RFC Compliance Coverage
 
-### RFC-0111 (GAuth 1.0) - Test Coverage
+### RFC-0111 (AgentAuth 1.0) - Test Coverage
 
 | Section | Requirement | Test Status |
 |---------|-------------|-------------|
@@ -800,7 +800,7 @@ Dependencies:
 
 ### RFC Compliance Coverage
 
-**RFC-0111 (GAuth 1.0)**: ✅ COMPLETE
+**RFC-0111 (AgentAuth 1.0)**: ✅ COMPLETE
 - §3 Extended Token Structure
 - §3 Authorization Chain (3-level hierarchy)
 - §5 PIP Data Consolidation

@@ -1,4 +1,4 @@
--- Migration: Initial schema for GAuth Admin Portal
+-- Migration: Initial schema for AgentAuth Admin Portal
 -- Version: 001
 -- Description: Creates all tables for multi-tenant admin portal with RLS
 

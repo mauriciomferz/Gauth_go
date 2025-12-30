@@ -1,5 +1,5 @@
 // RFC 111 & 115 Implementation Demo
-// Demonstrates GAuth 1.0 specification compliance using professional implementation
+// Demonstrates AgentAuth 1.0 specification compliance using professional implementation
 
 package main
 
@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🏛️ GAuth 1.0 - RFC 111 & 115 Implementation Demo")
+	fmt.Println("🏛️ AgentAuth 1.0 - RFC 111 & 115 Implementation Demo")
 	fmt.Println("==================================================")
 	fmt.Println("Power-of-Attorney Protocol (P*P) Implementation")
 	fmt.Println("")
@@ -123,7 +123,7 @@ func main() {
 	fmt.Println("   - Professional Error Handling ✅")
 	fmt.Println("   - Professional Configuration Management ✅")
 	fmt.Println("")
-	fmt.Println("🎉 GAuth 1.0 RFC Implementation Complete!")
+	fmt.Println("🎉 AgentAuth 1.0 RFC Implementation Complete!")
 	fmt.Println("   Your project now implements the full RFC 111 & 115 specifications")
 	fmt.Println("   built on your development JWT foundation!")
 }

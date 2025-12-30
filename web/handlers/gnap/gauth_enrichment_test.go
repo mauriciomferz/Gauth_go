@@ -18,7 +18,7 @@ func (m *mockVerifService) GenerateVerificationReport(ctx context.Context, poaID
 	return m.report, nil
 }
 
-func TestHandler_LinkGAuthContext_Enrichment(t *testing.T) {
+func TestHandler_LinkAgentAuthContext_Enrichment(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	// Setup mock report
@@ -65,7 +65,7 @@ func TestHandler_LinkGAuthContext_Enrichment(t *testing.T) {
 			},
 		}
 
-		handler.linkGAuthContext(context.Background(), resp, req)
+		handler.linkAgentAuthContext(context.Background(), resp, req)
 
 		if resp.ComplianceLevel != "high" {
 			t.Errorf("Expected compliance_level 'high', got '%s'", resp.ComplianceLevel)
@@ -88,7 +88,7 @@ func TestHandler_LinkGAuthContext_Enrichment(t *testing.T) {
 		resp := &gnap.GrantResponse{}
 		req := &gnap.GrantRequest{PoACredentialRef: "poa-123"}
 
-		handler.linkGAuthContext(context.Background(), resp, req)
+		handler.linkAgentAuthContext(context.Background(), resp, req)
 
 		if resp.ComplianceLevel != "degraded" {
 			t.Errorf("Expected compliance_level 'degraded', got '%s'", resp.ComplianceLevel)
@@ -101,7 +101,7 @@ func TestHandler_LinkGAuthContext_Enrichment(t *testing.T) {
 		resp := &gnap.GrantResponse{}
 		req := &gnap.GrantRequest{PoACredentialRef: "poa-123"}
 
-		handler.linkGAuthContext(context.Background(), resp, req)
+		handler.linkAgentAuthContext(context.Background(), resp, req)
 
 		if resp.ComplianceLevel != "conditional" {
 			t.Errorf("Expected compliance_level 'conditional', got '%s'", resp.ComplianceLevel)

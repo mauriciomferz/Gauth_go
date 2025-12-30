@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Web UI Usage Guide
+# AgentAuth Web UI Usage Guide
 
 ## ✅ Status: All Pages Operational
 
@@ -22,7 +22,7 @@ All web pages are loading correctly and serving proper resources:
 
 ### 1. Protocol Flow Navigator (`/protocol-flow.html`)
 
-**Purpose**: Interactive visualization of GAuth RFC-0111 protocol flow
+**Purpose**: Interactive visualization of AgentAuth RFC-0111 protocol flow
 
 **How to Use**:
 1. Navigate to `http://localhost:8080/protocol-flow.html`
@@ -65,7 +65,7 @@ All web pages are loading correctly and serving proper resources:
 
 ### 3. Comprehensive Demo (`/demo.html`)
 
-**Purpose**: Complete GAuth demonstration page
+**Purpose**: Complete AgentAuth demonstration page
 
 **How to Use**:
 1. Navigate to `http://localhost:8080/demo.html`

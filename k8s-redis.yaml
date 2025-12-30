@@ -99,7 +99,7 @@ metadata:
 type: Opaque
 stringData:
   REDIS_PASSWORD: gauth_redis_password_changeme
-  # Connection string for GAuth application
+  # Connection string for AgentAuth application
   REDIS_URL: redis://:gauth_redis_password_changeme@redis-service.gauth-data.svc.cluster.local:6379/0
 
 ---

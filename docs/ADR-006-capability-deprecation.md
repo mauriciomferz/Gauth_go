@@ -2,14 +2,14 @@
 
 **Status**: Accepted  
 **Date**: 2025-12-27  
-**Authors**: GAuth Security Team  
+**Authors**: AgentAuth Security Team  
 **Stakeholders**: Platform Team, Security Engineering, Compliance
 
 ---
 
 ## Context
 
-The GAuth capability registry allows service providers to register cryptographic capabilities (e.g., signature algorithms, key IDs) for use in PoA token issuance. Over time, capabilities may need to be deprecated due to:
+The AgentAuth capability registry allows service providers to register cryptographic capabilities (e.g., signature algorithms, key IDs) for use in PoA token issuance. Over time, capabilities may need to be deprecated due to:
 - **Algorithm deprecation** (e.g., RSA-2048 → RSA-4096, SHA-256 → SHA-512)
 - **Key rotation** (scheduled or emergency)
 - **Security vulnerabilities** (e.g., algorithm breaks, key compromise)
@@ -157,7 +157,7 @@ See [`docs/playbooks/capability-rollover.md`](file:///Users/mauricio.fernandez_f
 
 ## References
 - [Capability Registry Implementation](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry.go)
-- [RFC 0111 § Capability Management](https://example.com/rfc-0111#capabilities)
+- [AAP-001 § Capability Management](https://example.com/rfc-0111#capabilities)
 - [NIST SP 800-57: Key Management Guidelines](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final)
 
 ---

@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# GAuth Key Rotation Log Format and Verification
+# AgentAuth Key Rotation Log Format and Verification
 
 ## Format
 Each key rotation event is recorded as a JSON line in the rotation log file. Example entry:

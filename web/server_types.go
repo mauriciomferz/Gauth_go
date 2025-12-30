@@ -64,9 +64,9 @@ type BetaServer struct {
 	// stopCh closes to signal background goroutines to exit gracefully.
 	stopCh  chan struct{}
 	stopped atomic.Bool // indicates Shutdown() invoked
-	// RFC0111 delegation service (prototype) to surface semantic counters and dual-control revocation workflow methods.
-	// These are no-ops when GAUTH_DISABLE_RFC0111_SERVICE=1 (service nil) and handlers will fail closed.
-	rfc0111Service interface {
+	// AAP001 delegation service (prototype) to surface semantic counters and dual-control revocation workflow methods.
+	// These are no-ops when GAUTH_DISABLE_AAP001_SERVICE=1 (service nil) and handlers will fail closed.
+	aap001Service interface {
 		SemanticSnapshot() map[string]uint64
 		InitiateRevocation(ctx context.Context, req gauth_rfc_001.RevocationRequest) error
 		ApproveRevocation(ctx context.Context, poaID, approver string) error
@@ -113,7 +113,7 @@ type BetaServer struct {
 	// ok=1 mismatch=0 legacy=-1 unconfigured=-2
 	violationIntegrityStatus string
 	semanticIntegrityStatus  string
-	// Delegation lifecycle prototype store (id -> status). Real implementation would live in RFC0111 service repo.
+	// Delegation lifecycle prototype store (id -> status). Real implementation would live in AAP001 service repo.
 	port string // bound address (":8080" style)
 	// Policy Handler (Refactored)
 	policyHandler *policyHandler.Handler
@@ -167,7 +167,7 @@ type BetaServer struct {
 	// SLA freshness tracking for capability anchor (stale detection)
 	// Capability audit hash chain persistence (tracking capability-related audit entries: create, revoke, enforce)
 	// Moved to capabilities.Handler
-	// Protocol flow manager for interactive GAuth flow guidance
+	// Protocol flow manager for interactive AgentAuth flow guidance
 	protocolFlowManager *ProtocolFlowManager
 	// Capability registry external anchor artifact (periodic file emission)
 	capAnchorFilePath      string

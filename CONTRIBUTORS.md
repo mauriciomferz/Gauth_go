@@ -18,7 +18,7 @@ refreshCadence: quarterly
 - GitHub: https://github.com/mauriciomferz
 - Role: Demo Implementation Author & Lead Developer
 - Contributions:
-  - Go implementation of GAuth framework demo
+  - Go implementation of AgentAuth framework demo
   - Interactive web interface with 25+ authorization patterns
   - Model limit enforcement and delegation depth control
   - Comprehensive test coverage (100% conformance)
@@ -31,12 +31,12 @@ refreshCadence: quarterly
 
 ## Original Framework
 
-**Gimel Foundation gGmbH i.G.**
-- Website: www.GimelFoundation.com
+**AgentAuth Community gGmbH i.G.**
+- Website: www.AgentAuthFoundation.com
 - Role: Framework Design and Specification
 - Contributions:
-  - GiFo-RFC-0111 GAuth 1.0 Authorization Framework
-  - GiFo-RFC-0115 Power-of-Attorney Credential Definition
+  - AAP-RFC-0111 AgentAuth 1.0 Authorization Framework
+  - AAP-RFC-0115 Power-of-Attorney Credential Definition
   - System architecture and security concepts
 
 ## Acknowledgments
@@ -48,7 +48,7 @@ This demo implementation is built on top of excellent open-source foundations:
 
 ---
 
-**Copyright (c) 2025 Gimel Foundation gGmbH i.G.**
+**Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
 **Demo Implementation**: Mauricio Fernandez - https://github.com/mauriciomferz

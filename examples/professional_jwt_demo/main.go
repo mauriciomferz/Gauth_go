@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("🚀 GAuth Development JWT Implementation Demo")
+	fmt.Println("🚀 AgentAuth Development JWT Implementation Demo")
 	fmt.Println("==============================================")
 
 	// Create a development JWT service

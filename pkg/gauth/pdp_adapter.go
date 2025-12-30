@@ -126,7 +126,7 @@ func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *Viol
 		l.metrics.IncPEPViolations(entry.ViolationType, entry.Severity)
 		l.metrics.SetPEPAuditBufferSize(len(l.enforcements), len(l.violations))
 		// Note: High-severity violations (critical/high) should be monitored via
-		// Prometheus alerts configured externally (e.g., rate(gauth_rfc0111_pep_violations_total{severity="critical"}[5m]) > threshold)
+		// Prometheus alerts configured externally (e.g., rate(gauth_aap001_pep_violations_total{severity="critical"}[5m]) > threshold)
 	}
 
 	return nil
@@ -219,15 +219,15 @@ func (v *simpleTokenValidator) ValidateExtendedToken(ctx context.Context, token 
 // It provides policy-based authorization decisions with centralized policy management
 type SimplePDP struct {
 	pap                *PowerAdministrationPoint
-	gauthPlusValidator *GAuthPlusValidator
-	enforceGAuthPlus   bool
+	gauthPlusValidator *AgentAuthPlusValidator
+	enforceAgentAuthPlus   bool
 }
 
 // NewSimplePDP creates a new SimplePDP instance
 func NewSimplePDP() *SimplePDP {
 	return &SimplePDP{
 		pap:              nil,   // No PAP integration by default (backward compatible)
-		enforceGAuthPlus: false, // GAuth+ disabled by default
+		enforceAgentAuthPlus: false, // AgentAuth+ disabled by default
 	}
 }
 
@@ -235,19 +235,19 @@ func NewSimplePDP() *SimplePDP {
 func NewSimplePDPWithPAP(pap *PowerAdministrationPoint) *SimplePDP {
 	return &SimplePDP{
 		pap:              pap,
-		enforceGAuthPlus: false,
+		enforceAgentAuthPlus: false,
 	}
 }
 
-// SetGAuthPlusValidator sets the GAuth+ validator and enables enforcement
-func (pdp *SimplePDP) SetGAuthPlusValidator(validator *GAuthPlusValidator) {
+// SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
+func (pdp *SimplePDP) SetAgentAuthPlusValidator(validator *AgentAuthPlusValidator) {
 	pdp.gauthPlusValidator = validator
-	pdp.enforceGAuthPlus = true
+	pdp.enforceAgentAuthPlus = true
 }
 
-// SetEnforceGAuthPlus enables/disables GAuth+ enforcement
-func (pdp *SimplePDP) SetEnforceGAuthPlus(enforce bool) {
-	pdp.enforceGAuthPlus = enforce
+// SetEnforceAgentAuthPlus enables/disables AgentAuth+ enforcement
+func (pdp *SimplePDP) SetEnforceAgentAuthPlus(enforce bool) {
+	pdp.enforceAgentAuthPlus = enforce
 }
 
 // MakeDecision implements the PowerDecisionPoint interface
@@ -291,13 +291,13 @@ func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bo
 		return false, "authorization chain not validated"
 	}
 
-	// Step 3: Check GAuth+ policies (if enabled)
-	if pdp.enforceGAuthPlus && pdp.gauthPlusValidator != nil {
+	// Step 3: Check AgentAuth+ policies (if enabled)
+	if pdp.enforceAgentAuthPlus && pdp.gauthPlusValidator != nil {
 		agentID := request.PowerOfAttorney.Parties.AuthorizedClient.Identity
 		// Note: Using agent identity as PoA ID placeholder
 		// In production, track PoA ID separately in AuthorizationDecisionRequest
 		poaID := agentID // TODO: Get actual PoA ID from request
-		gauthPlusResult, err := pdp.gauthPlusValidator.ValidatePoAWithGAuthPlus(
+		gauthPlusResult, err := pdp.gauthPlusValidator.ValidatePoAWithAgentAuthPlus(
 			context.Background(),
 			poaID,
 			request.PowerOfAttorney,
@@ -306,17 +306,17 @@ func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bo
 		)
 
 		if err != nil {
-			return false, fmt.Sprintf("GAuth+ validation error: %v", err)
+			return false, fmt.Sprintf("AgentAuth+ validation error: %v", err)
 		}
 
 		if !gauthPlusResult.Valid {
-			return false, fmt.Sprintf("GAuth+ policy violation: %s", gauthPlusResult.FailureReason)
+			return false, fmt.Sprintf("AgentAuth+ policy violation: %s", gauthPlusResult.FailureReason)
 		}
 
-		// Log any GAuth+ warnings (successor takeover, capability expiration, etc.)
+		// Log any AgentAuth+ warnings (successor takeover, capability expiration, etc.)
 		if len(gauthPlusResult.Warnings) > 0 {
 			for _, warning := range gauthPlusResult.Warnings {
-				log.Printf("GAuth+ Warning: %s", warning)
+				log.Printf("AgentAuth+ Warning: %s", warning)
 			}
 		}
 	}
@@ -332,7 +332,7 @@ func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bo
 	}
 
 	// All checks passed
-	return true, "authorization granted per PoA, chain, and GAuth+ validation"
+	return true, "authorization granted per PoA, chain, and AgentAuth+ validation"
 }
 
 // isActionAuthorized checks if the action type is allowed in the PoA

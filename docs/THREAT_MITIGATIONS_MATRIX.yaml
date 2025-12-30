@@ -1,10 +1,10 @@
-# GAuth Threat Mitigations Matrix
+# AgentAuth Threat Mitigations Matrix
 # Structured mapping of threats to implemented security controls
 # Completes sec14.item1 (P2) - Threat model synchronization
 
 version: "1.0"
 last_updated: "2025-11-06"
-scope: "GAuth RFC 0111/0115 Implementation"
+scope: "AgentAuth AAP-001/0115 Implementation"
 
 # STRIDE categorization reference
 stride_categories:

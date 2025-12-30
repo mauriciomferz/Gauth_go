@@ -1,4 +1,4 @@
-# RFC 0111/0115 Conformance - Gaps Analysis (ARCHIVED)
+# AAP-001/0115 Conformance - Gaps Analysis (ARCHIVED)
 
 ## Date: 2025-12-28
 ## Status: **SUPERSEDED** - All gaps listed below have been closed as of Phase 17.

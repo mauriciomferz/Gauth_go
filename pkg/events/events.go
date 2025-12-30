@@ -1,4 +1,4 @@
-// Package events provides an event system for the GAuth framework
+// Package events provides an event system for the AgentAuth framework
 package events
 
 import (

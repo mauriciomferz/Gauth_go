@@ -454,7 +454,7 @@ func TestAuditSinkIntegration_FilterByEventType(t *testing.T) {
 		t.Fatalf("CreateDelegation failed: %v", err)
 	}
 
-	// All RFC0111 events are TypeAuth, so should pass filter
+	// All AAP001 events are TypeAuth, so should pass filter
 	events := baseSink.Events()
 	if len(events) == 0 {
 		t.Fatal("Expected filtered sink to receive TypeAuth events but got none")

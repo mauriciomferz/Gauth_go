@@ -47,7 +47,7 @@ fi
 cat <<EOF
 
 ====================================================
-GAuth Dev Environment Started
+AgentAuth Dev Environment Started
 ====================================================
 Backend:   http://localhost:$BACKEND_PORT
 UI:        http://localhost:$UI_PORT
