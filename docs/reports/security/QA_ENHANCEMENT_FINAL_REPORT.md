@@ -18,7 +18,7 @@ The comprehensive QA Enhancement Initiative, as recommended by the QA Manager as
 
 | Task | Status | Lines Added | Key Achievement |
 |------|--------|-------------|-----------------|
-| 1. Public Disclosure API | ✅ Complete | 588 | Transparency endpoints for RFC-0111 |
+| 1. Public Disclosure API | ✅ Complete | 588 | Transparency endpoints for AAP-001 |
 | 2. External Service Integration | ✅ Complete | 397 | PVP/PIP clients with resilience |
 | 3. Enhanced Error Handling | ✅ Complete | - | Type alignment & structured errors |
 | 4. Integration Tests | ✅ Complete | - | 38/38 tests passing |
@@ -35,14 +35,14 @@ The comprehensive QA Enhancement Initiative, as recommended by the QA Manager as
 ### Implementation Complete
 
 **Created**:
-1. ✅ `pkg/gauth/formal_requirements_bench_test.go` (180 lines)
+1. ✅ `pkg/agentauth/formal_requirements_bench_test.go` (180 lines)
    - 9 comprehensive benchmarks
    - Jurisdiction lookup: 8.6ns/op (116M ops/sec)
    - EU-27 coverage: 7.9ns/op (zero allocations)
    - Service initialization: 7.7µs (acceptable)
    - Cache performance: 7x improvement
 
-2. ✅ `pkg/gauth/monitoring_bench_test.go` (270 lines)
+2. ✅ `pkg/agentauth/monitoring_bench_test.go` (270 lines)
    - 15 monitoring service benchmarks
    - Metrics recording: 83ns/op (12M ops/sec)
    - Concurrent metrics: 158ns/op (good scaling)
@@ -124,8 +124,8 @@ The comprehensive QA Enhancement Initiative, as recommended by the QA Manager as
 
 | Metric | Before | After | Improvement |
 |--------|--------|-------|-------------|
-| RFC-0111 (AgentAuth 1.0) | 89% | **95%** | +6% |
-| RFC-0115 (PoA for LLMs) | 93% | **95%** | +2% |
+| AAP-001 (AgentAuth 1.0) | 89% | **95%** | +6% |
+| AAP-002 (PoA for LLMs) | 93% | **95%** | +2% |
 | Overall Compliance | 85% | **92%** | +7% |
 | Production Readiness | 78% | **95%** | +17% |
 

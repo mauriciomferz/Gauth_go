@@ -3,7 +3,7 @@ package modellimits
 // ModelLimitsAttestation models the attestation response for model limits governance.
 // Structured as a deterministic JSON serialization target to enable stable Ed25519 signing.
 // Optional signature fields (signature, sig_kid, sig_mode) are added only when
-// GAUTH_MODEL_LIMIT_ATTEST_SIGN=1 and a GlobalEdDSARegistry active key exists.
+// AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN=1 and a GlobalEdDSARegistry active key exists.
 // Exported for handler usage.
 type ModelLimitsAttestation struct {
 	Success    bool   `json:"success"`

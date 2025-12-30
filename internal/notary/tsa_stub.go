@@ -47,10 +47,10 @@ type TSA interface {
 // and always "succeeds" unless the hash is empty. Environment variables configure basic
 // behavior:
 //
-//	GAUTH_TSA_STUB_MIN_LATENCY_MS (default 30)
-//	GAUTH_TSA_STUB_MAX_LATENCY_MS (default 120)
-//	GAUTH_TSA_STUB_PROVIDER_NAME  (default "tsa_stub")
-//	GAUTH_TSA_STUB_POLICY_OID     (default "1.3.6.1.4.1.example.stub")
+//	AGENTAUTH_TSA_STUB_MIN_LATENCY_MS (default 30)
+//	AGENTAUTH_TSA_STUB_MAX_LATENCY_MS (default 120)
+//	AGENTAUTH_TSA_STUB_PROVIDER_NAME  (default "tsa_stub")
+//	AGENTAUTH_TSA_STUB_POLICY_OID     (default "1.3.6.1.4.1.example.stub")
 //
 // Latency is uniform in [min,max].
 type StubTSA struct {
@@ -62,13 +62,13 @@ type StubTSA struct {
 
 // NewStubTSA constructs a StubTSA from environment configuration.
 func NewStubTSA() *StubTSA {
-	minMs := parseIntEnvBounds("GAUTH_TSA_STUB_MIN_LATENCY_MS", 30, 0, 2000)
-	maxMs := parseIntEnvBounds("GAUTH_TSA_STUB_MAX_LATENCY_MS", 120, minMs, 5000)
-	provider := os.Getenv("GAUTH_TSA_STUB_PROVIDER_NAME")
+	minMs := parseIntEnvBounds("AGENTAUTH_TSA_STUB_MIN_LATENCY_MS", 30, 0, 2000)
+	maxMs := parseIntEnvBounds("AGENTAUTH_TSA_STUB_MAX_LATENCY_MS", 120, minMs, 5000)
+	provider := os.Getenv("AGENTAUTH_TSA_STUB_PROVIDER_NAME")
 	if provider == "" {
 		provider = "tsa_stub"
 	}
-	oid := os.Getenv("GAUTH_TSA_STUB_POLICY_OID")
+	oid := os.Getenv("AGENTAUTH_TSA_STUB_POLICY_OID")
 	if oid == "" {
 		oid = "1.3.6.1.4.1.example.stub"
 	}

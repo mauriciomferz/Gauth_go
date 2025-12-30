@@ -6,11 +6,11 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC-0111 Authorization Protocol Implementation
+# AAP-001 Authorization Protocol Implementation
 
 ## Overview
 
-This directory contains the complete implementation of the RFC-0111 Authorization Protocol for AI systems, including multi-party authorization chains, Power of Attorney integration, and comprehensive compliance validation.
+This directory contains the complete implementation of the AAP-001 Authorization Protocol for AI systems, including multi-party authorization chains, Power of Attorney integration, and comprehensive compliance validation.
 
 ## Quick Start
 
@@ -18,22 +18,22 @@ This directory contains the complete implementation of the RFC-0111 Authorizatio
 
 - Go 1.21 or later
 - Server running on `http://localhost:8080`
-- RFC-0111 feature enabled: `GAUTH_AAP-001_ENABLED=1`
+- AAP-001 feature enabled: `AGENTAUTH_AAP-001_ENABLED=1`
 
 ### Running Tests
 
 ```bash
 # Test complete end-to-end flow
-./scripts/test_rfc0111_end_to_end.sh
+./scripts/test_aap001_end_to_end.sh
 
 # Test subscription flow only (Steps I-VIII)
-./scripts/test_rfc0111_subscription_flow.sh
+./scripts/test_aap001_subscription_flow.sh
 
 # Test error handling
-./scripts/test_rfc0111_error_handling.sh
+./scripts/test_aap001_error_handling.sh
 
 # Test performance
-./scripts/test_rfc0111_performance.sh
+./scripts/test_aap001_performance.sh
 ```
 
 ## Architecture
@@ -63,7 +63,7 @@ Step VIII → Subscription Confirmation
 
 ### Authorization Flow (Steps a-i)
 
-The authorization flow issues RFC-0111 compliant tokens with embedded compliance metadata:
+The authorization flow issues AAP-001 compliant tokens with embedded compliance metadata:
 
 ```
 Step (a) → Client Authorization Request
@@ -79,7 +79,7 @@ Step (i) → Compliance Tracking
 
 **Key Components**:
 - `ProtocolOrchestrator` - Orchestrates authorization protocol steps
-- `ComplianceValidator` - Validates RFC-0111 compliance requirements
+- `ComplianceValidator` - Validates AAP-001 compliance requirements
 - `ExtendedTokenService` - Creates extended tokens with full metadata
 - `AuthorizationChainValidator` - Validates multi-party authorization chains
 
@@ -89,7 +89,7 @@ Step (i) → Compliance Tracking
 
 ```bash
 # Create subscription
-POST /api/v1/rfc0111/subscriptions
+POST /api/v1/aap001/subscriptions
 {
   "client_id": "client-app-123",
   "client_owner_identity": {"subject_id": "client-owner-67890"},
@@ -99,23 +99,23 @@ POST /api/v1/rfc0111/subscriptions
 }
 
 # Get subscription
-GET /api/v1/rfc0111/subscriptions/{id}
+GET /api/v1/aap001/subscriptions/{id}
 
 # Execute subscription steps
-POST /api/v1/rfc0111/subscriptions/{id}/step-ii
-POST /api/v1/rfc0111/subscriptions/{id}/step-iii
-POST /api/v1/rfc0111/subscriptions/{id}/step-iv
-POST /api/v1/rfc0111/subscriptions/{id}/step-v
-POST /api/v1/rfc0111/subscriptions/{id}/step-vi
-POST /api/v1/rfc0111/subscriptions/{id}/step-vii
-POST /api/v1/rfc0111/subscriptions/{id}/step-viii
+POST /api/v1/aap001/subscriptions/{id}/step-ii
+POST /api/v1/aap001/subscriptions/{id}/step-iii
+POST /api/v1/aap001/subscriptions/{id}/step-iv
+POST /api/v1/aap001/subscriptions/{id}/step-v
+POST /api/v1/aap001/subscriptions/{id}/step-vi
+POST /api/v1/aap001/subscriptions/{id}/step-vii
+POST /api/v1/aap001/subscriptions/{id}/step-viii
 ```
 
 ### Authorization Endpoints
 
 ```bash
 # Request authorization token
-POST /api/v1/rfc0111/authorize
+POST /api/v1/aap001/authorize
 {
   "client_id": "client-app-123",
   "subscription_id": "sub_1234567890",
@@ -126,7 +126,7 @@ POST /api/v1/rfc0111/authorize
 }
 
 # Response includes:
-# - extended_token: Full RFC-0111 compliant token
+# - extended_token: Full AAP-001 compliant token
 # - compliance_status: Compliance validation result
 # - scope: Authorized actions
 ```
@@ -135,28 +135,28 @@ POST /api/v1/rfc0111/authorize
 
 ```bash
 # Validate token (Note: Currently limited - see Known Limitations)
-POST /api/v1/rfc0111/token/validate
-{"token": "gauth_at_..."}
+POST /api/v1/aap001/token/validate
+{"token": "agentauth_at_..."}
 
 # Introspect token (RFC 7662)
-POST /api/v1/rfc0111/token/introspect
-{"token": "gauth_at_..."}
+POST /api/v1/aap001/token/introspect
+{"token": "agentauth_at_..."}
 
 # Revoke token (RFC 7009)
-POST /api/v1/rfc0111/token/revoke
-{"token": "gauth_at_..."}
+POST /api/v1/aap001/token/revoke
+{"token": "agentauth_at_..."}
 ```
 
 ## Extended Token Structure
 
-RFC-0111 extended tokens include comprehensive metadata:
+AAP-001 extended tokens include comprehensive metadata:
 
 ```json
 {
-  "access_token": "gauth_at_...",
+  "access_token": "agentauth_at_...",
   "token_type": "Bearer",
   "expires_in": 3600,
-  "refresh_token": "gauth_rt_...",
+  "refresh_token": "agentauth_rt_...",
   
   "power_of_attorney": {
     "parties": {
@@ -205,7 +205,7 @@ RFC-0111 extended tokens include comprehensive metadata:
 
 ## Compliance Validation
 
-The implementation validates multiple RFC-0111 compliance requirements:
+The implementation validates multiple AAP-001 compliance requirements:
 
 ### Request Compliance (Step b)
 - ✅ Request structure (client ID, scopes)
@@ -228,9 +228,9 @@ The implementation validates multiple RFC-0111 compliance requirements:
 
 ## OAuth Scope Mapping
 
-OAuth 2.0 scopes are automatically mapped to RFC-0111 action types:
+OAuth 2.0 scopes are automatically mapped to AAP-001 action types:
 
-| OAuth Scope | RFC-0111 Action |
+| OAuth Scope | AAP-001 Action |
 |-------------|-----------------|
 | `read`      | `ActionNonPhysicalAnalyzing` |
 | `write`     | `ActionNonPhysicalDocumenting` |
@@ -255,7 +255,7 @@ Maps to:
 ## Known Limitations
 
 ### Token Validation
-Extended tokens are **not persisted** after creation. The token validation, introspection, and revocation endpoints exist but don't work with RFC-0111 extended tokens.
+Extended tokens are **not persisted** after creation. The token validation, introspection, and revocation endpoints exist but don't work with AAP-001 extended tokens.
 
 **Workaround**: Resource servers can validate tokens using embedded metadata:
 - Authorization chain validation
@@ -284,24 +284,24 @@ Uses **in-memory storage** for subscriptions and tokens. Data is lost on server 
 
 ### Test Scripts
 
-1. **`test_rfc0111_end_to_end.sh`**
+1. **`test_aap001_end_to_end.sh`**
    - Complete subscription + authorization flow
    - Verifies all metadata fields
    - Checks compliance status
    - **Status**: ✅ All tests passing
 
-2. **`test_rfc0111_subscription_flow.sh`**
+2. **`test_aap001_subscription_flow.sh`**
    - Tests all 8 subscription steps
    - Verifies state transitions
    - Tests error handling
    - **Status**: ✅ 11/11 tests passing
 
-3. **`test_rfc0111_error_handling.sh`**
+3. **`test_aap001_error_handling.sh`**
    - Tests various error scenarios
    - Validates error responses
    - Tests idempotency protection
 
-4. **`test_rfc0111_performance.sh`**
+4. **`test_aap001_performance.sh`**
    - Sequential request performance
    - Concurrent load testing
    - End-to-end timing
@@ -309,17 +309,17 @@ Uses **in-memory storage** for subscriptions and tokens. Data is lost on server 
 ### Manual Testing
 
 ```bash
-# 1. Start server with RFC-0111 enabled
-GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+# 1. Start server with AAP-001 enabled
+AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 # 2. Create subscription
-./scripts/test_rfc0111_subscription_flow.sh
+./scripts/test_aap001_subscription_flow.sh
 
 # 3. Extract subscription ID
-SUB_ID=$(curl -s "http://localhost:8080/api/v1/rfc0111/subscriptions" | jq -r '.[-1].subscription_id')
+SUB_ID=$(curl -s "http://localhost:8080/api/v1/aap001/subscriptions" | jq -r '.[-1].subscription_id')
 
 # 4. Request authorization
-curl -X POST "http://localhost:8080/api/v1/rfc0111/authorize" \
+curl -X POST "http://localhost:8080/api/v1/aap001/authorize" \
   -H "Content-Type: application/json" \
   -d "{
     \"client_id\": \"client-app-123\",
@@ -336,13 +336,13 @@ curl -X POST "http://localhost:8080/api/v1/rfc0111/authorize" \
 ### Code Structure
 
 ```
-web/handlers/rfc0111/
+web/handlers/aap001/
 ├── authorization_handlers.go    # Authorization endpoints
 └── subscription_handlers.go     # Subscription endpoints
 
-pkg/gauth/
+pkg/agentauth/
 ├── protocol_orchestrator.go     # Authorization flow orchestration
-├── compliance_validation.go     # RFC-0111 compliance validation
+├── compliance_validation.go     # AAP-001 compliance validation
 ├── extended_token_service.go    # Extended token creation
 ├── authorization_chain.go       # Chain validation
 └── subscription_manager.go      # Subscription lifecycle
@@ -353,10 +353,10 @@ pkg/poa/
 └── validation.go                # PoA validation logic
 
 scripts/
-├── test_rfc0111_end_to_end.sh       # E2E tests
-├── test_rfc0111_subscription_flow.sh # Subscription tests
-├── test_rfc0111_error_handling.sh    # Error tests
-└── test_rfc0111_performance.sh       # Performance tests
+├── test_aap001_end_to_end.sh       # E2E tests
+├── test_aap001_subscription_flow.sh # Subscription tests
+├── test_aap001_error_handling.sh    # Error tests
+└── test_aap001_performance.sh       # Performance tests
 ```
 
 ### Adding New Features

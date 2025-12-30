@@ -43,7 +43,7 @@ The UI will be available at **http://localhost:3000**
 ### 3. Start the Go Backend (in a separate terminal)
 
 ```bash
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 go run ./cmd/web-server
 ```
 

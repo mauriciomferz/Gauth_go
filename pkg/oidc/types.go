@@ -122,7 +122,7 @@ type ExternalProviderConfig struct {
 // TrustLevelMapping maps OIDC ACR values to AgentAuth trust levels
 type TrustLevelMapping struct {
 	ACR             string `json:"acr"`               // OIDC ACR value
-	AgentAuthTrustLevel string `json:"gauth_trust_level"` // "low", "substantial", "high"
+	AgentAuthTrustLevel string `json:"agentauth_trust_level"` // "low", "substantial", "high"
 	MinMFARequired  bool   `json:"min_mfa_required"`
 	Description     string `json:"description"`
 }

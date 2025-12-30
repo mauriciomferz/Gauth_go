@@ -407,7 +407,7 @@ func (r *Repository) GetSubscriberMetrics(ctx context.Context, tenantID string) 
 	tokenQuery := `
 		SELECT 
 			COUNT(*) AS total_tokens,
-			COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW()) AS active_tokens,
+			COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW() AS active_tokens,
 			COUNT(*) FILTER (WHERE revoked_at IS NOT NULL) AS revoked_tokens,
 			MAX(last_used_at) AS last_activity
 		FROM tokens

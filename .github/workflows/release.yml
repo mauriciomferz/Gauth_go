@@ -39,9 +39,9 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            gauth-server
-            gauth-http-server
-            gauth-web
+            agentauth-server
+            agentauth-http-server
+            agentauth-web
           draft: false
           prerelease: false
         env:
@@ -50,5 +50,5 @@ jobs:
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: gauth-binaries
+          name: agentauth-binaries
           path: ./bin/

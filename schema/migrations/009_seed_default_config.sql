@@ -1,5 +1,5 @@
 -- Migration: Seed default configuration
--- Covers: Inserting default gauth-config for test-tenant-1
+-- Covers: Inserting default agentauth-config for test-tenant-1
 -- Version: 009
 -- Created: 2025-12-21
 
@@ -8,7 +8,7 @@ INSERT INTO config_files (
     checksum, size_bytes, version, updated_by
 ) VALUES (
     'test-tenant-1', 
-    'gauth-config', 
+    'agentauth-config', 
     'yaml', 
     'system:
   log_level: info

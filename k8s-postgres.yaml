@@ -3,9 +3,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gauth-data
+  name: agentauth-data
   labels:
-    name: gauth-data
+    name: agentauth-data
 
 ---
 # PostgreSQL ConfigMap
@@ -13,10 +13,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-config
-  namespace: gauth-data
+  namespace: agentauth-data
 data:
-  POSTGRES_DB: gauth
-  POSTGRES_USER: gauth
+  POSTGRES_DB: agentauth
+  POSTGRES_USER: agentauth
   # PostgreSQL configuration
   postgresql.conf: |
     # Connection settings
@@ -54,12 +54,12 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: postgres-secret
-  namespace: gauth-data
+  namespace: agentauth-data
 type: Opaque
 stringData:
-  POSTGRES_PASSWORD: gauth_dev_password_changeme
+  POSTGRES_PASSWORD: agentauth_dev_password_changeme
   # Connection string for AgentAuth application
-  DATABASE_URL: postgresql://gauth:gauth_dev_password_changeme@postgres-service.gauth-data.svc.cluster.local:5432/gauth?sslmode=disable
+  DATABASE_URL: postgresql://agentauth:agentauth_dev_password_changeme@postgres-service.agentauth-data.svc.cluster.local:5432/agentauth?sslmode=disable
 
 ---
 # PostgreSQL Service
@@ -67,7 +67,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-service
-  namespace: gauth-data
+  namespace: agentauth-data
   labels:
     app: postgres
 spec:
@@ -87,7 +87,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: gauth-data
+  namespace: agentauth-data
   labels:
     app: postgres
 spec:
@@ -131,7 +131,7 @@ spec:
             command:
             - /bin/sh
             - -c
-            - pg_isready -U gauth -d gauth
+            - pg_isready -U agentauth -d agentauth
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
@@ -141,7 +141,7 @@ spec:
             command:
             - /bin/sh
             - -c
-            - pg_isready -U gauth -d gauth
+            - pg_isready -U agentauth -d agentauth
           initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 3
@@ -166,7 +166,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-exporter
-  namespace: gauth-data
+  namespace: agentauth-data
   labels:
     app: postgres-exporter
 spec:
@@ -184,7 +184,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-exporter
-  namespace: gauth-data
+  namespace: agentauth-data
   labels:
     app: postgres-exporter
 spec:

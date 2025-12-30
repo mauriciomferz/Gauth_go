@@ -145,7 +145,7 @@ evt-123,2025-01-22T10:00:00Z,tenant-1,user-123,poa.create,poa-456,poa,success,me
 
 ### 3. Syslog - RFC 5424
 ```
-<134>1 2025-01-22T10:00:00Z gauth-audit - - - [audit tenant="tenant-1" user="user-123"] Action=poa.create ResourceType=poa Status=success
+<134>1 2025-01-22T10:00:00Z agentauth-audit - - - [audit tenant="tenant-1" user="user-123"] Action=poa.create ResourceType=poa Status=success
 ```
 
 ### 4. CEF - SIEM Integration

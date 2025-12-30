@@ -6,9 +6,9 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gauth-security
+  name: agentauth-security
   labels:
-    app: gauth
+    app: agentauth
     component: security
     istio-injection: enabled
 
@@ -71,11 +71,11 @@ subjects:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: gauth-vault-issuer
+  name: agentauth-vault-issuer
 spec:
   vault:
     server: https://vault.vault.svc.cluster.local:8200
-    path: pki_int/sign/gauth-server
+    path: pki_int/sign/agentauth-server
     caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLgo=  # Base64 encoded CA cert
     auth:
       kubernetes:
@@ -89,11 +89,11 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: gauth-vault-client-issuer
+  name: agentauth-vault-client-issuer
 spec:
   vault:
     server: https://vault.vault.svc.cluster.local:8200
-    path: pki_int/sign/gauth-client
+    path: pki_int/sign/agentauth-client
     caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi4uLgo=
     auth:
       kubernetes:
@@ -107,10 +107,10 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: gauth-api-server-cert
-  namespace: gauth
+  name: agentauth-api-server-cert
+  namespace: agentauth
 spec:
-  secretName: gauth-api-server-tls
+  secretName: agentauth-api-server-tls
   duration: 168h  # 7 days
   renewBefore: 24h  # Renew 1 day before expiry
   
@@ -120,13 +120,13 @@ spec:
     organizationalUnits:
       - API Services
       
-  commonName: gauth-api.example.com
+  commonName: agentauth-api.example.com
   
   dnsNames:
-    - gauth-api.example.com
-    - "*.gauth-api.example.com"
-    - gauth-api.gauth.svc.cluster.local
-    - gauth-api.internal
+    - agentauth-api.example.com
+    - "*.agentauth-api.example.com"
+    - agentauth-api.agentauth.svc.cluster.local
+    - agentauth-api.internal
     - localhost
     
   ipAddresses:
@@ -144,7 +144,7 @@ spec:
     rotationPolicy: Always
     
   issuerRef:
-    name: gauth-vault-issuer
+    name: agentauth-vault-issuer
     kind: ClusterIssuer
     group: cert-manager.io
 
@@ -153,10 +153,10 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: gauth-internal-client-cert
-  namespace: gauth
+  name: agentauth-internal-client-cert
+  namespace: agentauth
 spec:
-  secretName: gauth-internal-client-tls
+  secretName: agentauth-internal-client-tls
   duration: 720h  # 30 days
   renewBefore: 168h  # Renew 7 days before expiry
   
@@ -165,13 +165,13 @@ spec:
       - AgentAuth
     organizationalUnits:
       - Internal Services
-    serialNumber: "gauth-internal-001"
+    serialNumber: "agentauth-internal-001"
       
-  commonName: gauth-internal.client.gauth.internal
+  commonName: agentauth-internal.client.agentauth.internal
   
   dnsNames:
-    - gauth-internal.client.gauth.internal
-    - "*.gauth.svc.cluster.local"
+    - agentauth-internal.client.agentauth.internal
+    - "*.agentauth.svc.cluster.local"
     
   usages:
     - digital signature
@@ -184,7 +184,7 @@ spec:
     rotationPolicy: Always
     
   issuerRef:
-    name: gauth-vault-client-issuer
+    name: agentauth-vault-client-issuer
     kind: ClusterIssuer
     group: cert-manager.io
 
@@ -193,8 +193,8 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gauth-ca-bundle
-  namespace: gauth
+  name: agentauth-ca-bundle
+  namespace: agentauth
 data:
   ca-bundle.crt: |
     -----BEGIN CERTIFICATE-----
@@ -210,7 +210,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-mtls-config
-  namespace: gauth
+  namespace: agentauth
 data:
   nginx.conf: |
     user nginx;
@@ -264,17 +264,17 @@ data:
         limit_req_status 429;
 
         # Upstream backend
-        upstream gauth_backend {
+        upstream agentauth_backend {
             least_conn;
-            server gauth-api:8080 max_fails=3 fail_timeout=30s;
-            server gauth-api:8080 max_fails=3 fail_timeout=30s backup;
+            server agentauth-api:8080 max_fails=3 fail_timeout=30s;
+            server agentauth-api:8080 max_fails=3 fail_timeout=30s backup;
             keepalive 32;
         }
 
         # mTLS Server
         server {
             listen 443 ssl http2;
-            server_name gauth-api.example.com;
+            server_name agentauth-api.example.com;
 
             # Server certificate (auto-rotated)
             ssl_certificate /etc/nginx/certs/tls.crt;
@@ -334,7 +334,7 @@ data:
                 proxy_send_timeout 60s;
                 proxy_read_timeout 60s;
 
-                proxy_pass http://gauth_backend;
+                proxy_pass http://agentauth_backend;
 
                 # Connection settings
                 proxy_http_version 1.1;
@@ -345,7 +345,7 @@ data:
             location /health {
                 ssl_verify_client optional;
                 access_log off;
-                proxy_pass http://gauth_backend/health;
+                proxy_pass http://agentauth_backend/health;
             }
 
             # Metrics endpoint (internal only)
@@ -353,14 +353,14 @@ data:
                 allow 10.0.0.0/8;
                 deny all;
                 ssl_verify_client optional_no_ca;
-                proxy_pass http://gauth_backend/metrics;
+                proxy_pass http://agentauth_backend/metrics;
             }
         }
 
         # HTTP redirect to HTTPS
         server {
             listen 80;
-            server_name gauth-api.example.com;
+            server_name agentauth-api.example.com;
             return 301 https://$server_name$request_uri;
         }
     }
@@ -371,7 +371,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-mtls
-  namespace: gauth
+  namespace: agentauth
   labels:
     app: nginx-mtls
     component: ingress
@@ -479,10 +479,10 @@ spec:
           name: nginx-mtls-config
       - name: server-certs
         secret:
-          secretName: gauth-api-server-tls
+          secretName: agentauth-api-server-tls
       - name: ca-bundle
         configMap:
-          name: gauth-ca-bundle
+          name: agentauth-ca-bundle
 
 ---
 # Service for Nginx
@@ -490,7 +490,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx-mtls
-  namespace: gauth
+  namespace: agentauth
   labels:
     app: nginx-mtls
   annotations:
@@ -521,7 +521,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: nginx-mtls-pdb
-  namespace: gauth
+  namespace: agentauth
 spec:
   minAvailable: 2
   selector:
@@ -534,7 +534,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: nginx-mtls-hpa
-  namespace: gauth
+  namespace: agentauth
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
@@ -575,7 +575,7 @@ apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
   name: default-mtls-strict
-  namespace: gauth
+  namespace: agentauth
 spec:
   mtls:
     mode: STRICT
@@ -585,19 +585,19 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: gauth-api-authz
-  namespace: gauth
+  name: agentauth-api-authz
+  namespace: agentauth
 spec:
   selector:
     matchLabels:
-      app: gauth-api
+      app: agentauth-api
   action: ALLOW
   rules:
   # Allow requests with valid mTLS certificates
   - from:
     - source:
-        principals: ["cluster.local/ns/gauth/sa/*"]
-        notPrincipals: ["cluster.local/ns/gauth/sa/unauthorized"]
+        principals: ["cluster.local/ns/agentauth/sa/*"]
+        notPrincipals: ["cluster.local/ns/agentauth/sa/unauthorized"]
     to:
     - operation:
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
@@ -605,7 +605,7 @@ spec:
         notPaths: ["/api/internal/*"]
     when:
     - key: request.auth.claims[aud]
-      values: ["gauth-api"]
+      values: ["agentauth-api"]
   
   # Allow health checks from anywhere
   - to:
@@ -618,17 +618,17 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: gauth-api-mtls
-  namespace: gauth
+  name: agentauth-api-mtls
+  namespace: agentauth
 spec:
-  host: gauth-api.gauth.svc.cluster.local
+  host: agentauth-api.agentauth.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
       clientCertificate: /etc/certs/cert-chain.pem
       privateKey: /etc/certs/key.pem
       caCertificates: /etc/certs/root-cert.pem
-      sni: gauth-api.gauth.svc.cluster.local
+      sni: agentauth-api.agentauth.svc.cluster.local
     connectionPool:
       tcp:
         maxConnections: 1000
@@ -647,12 +647,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: gauth-api-network-policy
-  namespace: gauth
+  name: agentauth-api-network-policy
+  namespace: agentauth
 spec:
   podSelector:
     matchLabels:
-      app: gauth-api
+      app: agentauth-api
   policyTypes:
   - Ingress
   - Egress
@@ -667,11 +667,11 @@ spec:
     - protocol: TCP
       port: 8080
   
-  # Allow from other gauth services (with mTLS via Istio)
+  # Allow from other agentauth services (with mTLS via Istio)
   - from:
     - podSelector:
         matchLabels:
-          app: gauth
+          app: agentauth
     ports:
     - protocol: TCP
       port: 8080

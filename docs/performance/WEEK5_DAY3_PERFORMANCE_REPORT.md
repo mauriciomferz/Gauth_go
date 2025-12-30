@@ -12,9 +12,9 @@ refreshCadence: none
 
 **Date**: November 10, 2025  
 **Session**: Week 5 Day 3 - Performance Optimization  
-**Repository**: mauriciomferz/Gauth_go  
+**Repository**: mauriciomferz/AgentAuth  
 **Branch**: main  
-**Environment**: kind cluster (gauth-staging) on Apple M3 Pro (ARM64)
+**Environment**: kind cluster (agentauth-staging) on Apple M3 Pro (ARM64)
 
 ---
 
@@ -59,9 +59,9 @@ import (
     // ...
 )
 
-// Enable pprof profiling endpoints if GAUTH_ENABLE_PPROF=1
-if os.Getenv("GAUTH_ENABLE_PPROF") == "1" {
-    pprofPort := os.Getenv("GAUTH_PPROF_PORT")
+// Enable pprof profiling endpoints if AGENTAUTH_ENABLE_PPROF=1
+if os.Getenv("AGENTAUTH_ENABLE_PPROF") == "1" {
+    pprofPort := os.Getenv("AGENTAUTH_PPROF_PORT")
     if pprofPort == "" {
         pprofPort = "6060"
     }
@@ -81,8 +81,8 @@ if os.Getenv("GAUTH_ENABLE_PPROF") == "1" {
 ```
 
 **Configuration**:
-- **GAUTH_ENABLE_PPROF**: Set to "1" to enable profiling (default: disabled)
-- **GAUTH_PPROF_PORT**: Port for pprof server (default: 6060)
+- **AGENTAUTH_ENABLE_PPROF**: Set to "1" to enable profiling (default: disabled)
+- **AGENTAUTH_PPROF_PORT**: Port for pprof server (default: 6060)
 
 **Available Endpoints**:
 - `/debug/pprof/` - Index of all available profiles
@@ -106,9 +106,9 @@ ports:
   name: pprof
 
 env:
-- name: GAUTH_ENABLE_PPROF
+- name: AGENTAUTH_ENABLE_PPROF
   value: "1"
-- name: GAUTH_PPROF_PORT
+- name: AGENTAUTH_PPROF_PORT
   value: "6060"
 ```
 
@@ -138,29 +138,29 @@ RUN CGO_ENABLED=1 \
 
 FROM alpine:3.19
 RUN apk add --no-cache ca-certificates tzdata libstdc++ libgcc
-RUN addgroup -g 1000 gauth && adduser -D -u 1000 -G gauth gauth
+RUN addgroup -g 1000 agentauth && adduser -D -u 1000 -G agentauth agentauth
 WORKDIR /app
 COPY --from=builder /build/web-server /app/web-server
 COPY --from=builder /build/web/templates /app/web/templates
 COPY --from=builder /build/web/static /app/web/static
 COPY --from=builder /build/web/static_ui /app/web/static_ui
-RUN mkdir -p /app/data /app/logs && chown -R gauth:gauth /app
-USER gauth
+RUN mkdir -p /app/data /app/logs && chown -R agentauth:agentauth /app
+USER agentauth
 EXPOSE 8080 6060
 
-ENV GAUTH_WEB_PORT=8080 \
-    GAUTH_LOG_LEVEL=info \
-    GAUTH_ENV=staging \
-    GAUTH_ENABLE_PPROF=1 \
-    GAUTH_PPROF_PORT=6060
+ENV AGENTAUTH_WEB_PORT=8080 \
+    AGENTAUTH_LOG_LEVEL=info \
+    AGENTAUTH_ENV=staging \
+    AGENTAUTH_ENABLE_PPROF=1 \
+    AGENTAUTH_PPROF_PORT=6060
 
 ENTRYPOINT ["/app/web-server"]
 ```
 
 **Build and Load**:
 ```bash
-docker build -f Dockerfile.local-arm64 -t gauth-local-arm64:latest .
-kind load docker-image gauth-local-arm64:latest --name gauth-staging
+docker build -f Dockerfile.local-arm64 -t agentauth-local-arm64:latest .
+kind load docker-image agentauth-local-arm64:latest --name agentauth-staging
 ```
 
 ---
@@ -616,8 +616,8 @@ go tool pprof /tmp/cpu-under-load.prof
 
 **Port-Forward to pprof Endpoint**:
 ```bash
-POD=$(kubectl get pods -n gauth-staging -l app=gauth -o jsonpath='{.items[0].metadata.name}')
-kubectl port-forward -n gauth-staging $POD 6060:6060
+POD=$(kubectl get pods -n agentauth-staging -l app=agentauth -o jsonpath='{.items[0].metadata.name}')
+kubectl port-forward -n agentauth-staging $POD 6060:6060
 ```
 
 **Capture Profiles Remotely**:
@@ -635,10 +635,10 @@ curl 'http://localhost:6060/debug/pprof/goroutine' > goroutine.prof
 **Via kubectl exec**:
 ```bash
 # CPU profile
-kubectl exec -n gauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/profile?seconds=10' > cpu.prof
+kubectl exec -n agentauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/profile?seconds=10' > cpu.prof
 
 # Heap profile
-kubectl exec -n gauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/heap' > heap.prof
+kubectl exec -n agentauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/heap' > heap.prof
 ```
 
 ---
@@ -832,9 +832,9 @@ kubectl exec -n gauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/p
 **Baseline Test (100 requests)**:
 ```bash
 kubectl run load-test --rm -i --image=curlimages/curl:latest \
-  --restart=Never -n gauth-staging --command -- sh -c '
+  --restart=Never -n agentauth-staging --command -- sh -c '
 for i in $(seq 1 100); do
-  curl -s http://gauth-service/api/v1/beta/health > /dev/null &
+  curl -s http://agentauth-service/api/v1/beta/health > /dev/null &
 done
 wait
 '
@@ -843,9 +843,9 @@ wait
 **Intensive Test (2000 requests)**:
 ```bash
 kubectl run load-test-intensive --rm -i --image=curlimages/curl:latest \
-  --restart=Never -n gauth-staging --command -- sh -c '
+  --restart=Never -n agentauth-staging --command -- sh -c '
 for i in $(seq 1 2000); do
-  curl -s http://gauth-service/api/v1/beta/health > /dev/null &
+  curl -s http://agentauth-service/api/v1/beta/health > /dev/null &
 done
 wait
 '
@@ -854,10 +854,10 @@ wait
 **Sustained Load Test (6000 requests over 30s)**:
 ```bash
 kubectl run load-test-sustained --rm -i --image=curlimages/curl:latest \
-  --restart=Never -n gauth-staging --command -- sh -c '
+  --restart=Never -n agentauth-staging --command -- sh -c '
 for batch in $(seq 1 30); do
   for i in $(seq 1 200); do
-    curl -s http://gauth-service/api/v1/beta/health > /dev/null &
+    curl -s http://agentauth-service/api/v1/beta/health > /dev/null &
   done
   sleep 1
 done
@@ -869,18 +869,18 @@ wait
 
 **CPU Profile (15 seconds)**:
 ```bash
-POD=$(kubectl get pods -n gauth-staging -l app=gauth -o jsonpath='{.items[0].metadata.name}')
-kubectl exec -n gauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/profile?seconds=15' > /tmp/cpu-under-load.prof
+POD=$(kubectl get pods -n agentauth-staging -l app=agentauth -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -n agentauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/profile?seconds=15' > /tmp/cpu-under-load.prof
 ```
 
 **Heap Profile**:
 ```bash
-kubectl exec -n gauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/heap' > /tmp/heap.prof
+kubectl exec -n agentauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/heap' > /tmp/heap.prof
 ```
 
 **Goroutine Profile**:
 ```bash
-kubectl exec -n gauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/goroutine' > /tmp/goroutine.prof
+kubectl exec -n agentauth-staging $POD -- wget -q -O- 'http://localhost:6060/debug/pprof/goroutine' > /tmp/goroutine.prof
 ```
 
 ### Profile Analysis Commands
@@ -913,8 +913,8 @@ go tool pprof -text /tmp/goroutine.prof
 **Message**: feat(performance): Add pprof profiling endpoints
 
 - Add runtime/pprof HTTP handlers to web-server
-- Enable pprof server on port 6060 (configurable via GAUTH_PPROF_PORT)
-- Controlled via GAUTH_ENABLE_PPROF environment variable
+- Enable pprof server on port 6060 (configurable via AGENTAUTH_PPROF_PORT)
+- Controlled via AGENTAUTH_ENABLE_PPROF environment variable
 - Update k8s-test-blue.yaml to expose pprof port
 - Add environment variables for pprof configuration
 

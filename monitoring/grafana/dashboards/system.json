@@ -436,7 +436,7 @@
             },
             "targets": [
                 {
-                    "expr": "gauth_audit_events_total",
+                    "expr": "agentauth_audit_events_total",
                     "legendFormat": "{{status}}",
                     "refId": "A"
                 }
@@ -516,7 +516,7 @@
             },
             "targets": [
                 {
-                    "expr": "gauth_api_keys_total",
+                    "expr": "agentauth_api_keys_total",
                     "legendFormat": "{{status}}",
                     "refId": "A"
                 }
@@ -537,6 +537,6 @@
     "timepicker": {},
     "timezone": "",
     "title": "AgentAuth+ System Metrics",
-    "uid": "gauth-system",
+    "uid": "agentauth-system",
     "version": 1
 }

@@ -112,7 +112,7 @@ func (s *BetaServer) registerPolicyManifest() {
 		// Signing prerequisites - use s.keyProvider if available, fallback to global
 		kp := s.keyProvider
 
-		if os.Getenv("GAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || kp == nil {
+		if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || kp == nil {
 			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP-001:policy_manifest", nil)
 			return
 		}
@@ -122,7 +122,7 @@ func (s *BetaServer) registerPolicyManifest() {
 			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP-001:policy_manifest", sErr.Error())
 			return
 		}
-		msg := append([]byte("GAUTH_POLICY_MANIFEST:"), raw...)
+		msg := append([]byte("AGENTAUTH_POLICY_MANIFEST:"), raw...)
 		sigBytes, sErr := signer.Sign(msg)
 		if sErr != nil {
 			respondError(c, 500, "signing_unavailable", "signing_unavailable", "active eddsa key unavailable", "AAP-001:policy_manifest", sErr.Error())

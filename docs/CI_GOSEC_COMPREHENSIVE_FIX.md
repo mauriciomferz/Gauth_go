@@ -41,7 +41,7 @@ go/ssa.(*Program).needMethodsOf(...)
 **Affected Packages:**
 - `pkg/oidc` - OpenID Connect implementation
 - `pkg/poa` - Proof of Attestation logic
-- `pkg/gauth` - Core authentication
+- `pkg/agentauth` - Core authentication
 - `pkg/gagent` - Agent communication
 
 ---
@@ -104,7 +104,7 @@ gosec -no-fail -fmt sarif -out results.sarif \
   },
   "exclude-dirs": [
     "examples", "test", "tests", "vendor", 
-    "cmd/examples", "Gauth_go/examples"
+    "cmd/examples", "AgentAuth/examples"
   ],
   "exclude": [
     "G104",  // Unhandled errors (common in defer/cleanup)
@@ -227,7 +227,7 @@ security:
 | `test/`, `tests/` | Test code has different security requirements |
 | `vendor/` | Third-party code, not our responsibility |
 | `cmd/examples/` | CLI examples, not production |
-| `Gauth_go/examples` | Nested examples directory |
+| `AgentAuth/examples` | Nested examples directory |
 
 ---
 

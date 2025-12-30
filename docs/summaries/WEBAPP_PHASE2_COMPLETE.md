@@ -284,22 +284,22 @@ Unified Button Handler System
 ### Deployment Information
 
 **Server:**
-- Binary: `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/bin/web-server`
+- Binary: `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/bin/web-server`
 - PID: 33187
 - Port: 8080
-- Environment: `GAUTH_DEV_INDEX=1`
+- Environment: `AGENTAUTH_DEV_INDEX=1`
 - Status: ✅ Running
 
 **Build:**
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 go build -o bin/web-server ./cmd/web-server
-pkill -f web-server && sleep 1 && GAUTH_DEV_INDEX=1 ./bin/web-server &
+pkill -f web-server && sleep 1 && AGENTAUTH_DEV_INDEX=1 ./bin/web-server &
 ```
 
 **Access:**
 - URL: http://localhost:8080/index.html
-- Template: `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/templates/index.html`
+- Template: `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/templates/index.html`
 - Size: 12,751 lines (increased from 12,569)
 
 ### Known Limitations

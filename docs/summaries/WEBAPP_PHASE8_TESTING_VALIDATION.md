@@ -35,11 +35,11 @@
 **Server Restart Procedure:**
 ```bash
 # 1. Build server
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 go build -o bin/web-server ./cmd/web-server
 
 # 2. Start server
-GAUTH_DEV_INDEX=1 ./bin/web-server &
+AGENTAUTH_DEV_INDEX=1 ./bin/web-server &
 
 # 3. Verify
 ps aux | grep "[w]eb-server"
@@ -202,7 +202,7 @@ curl -s http://localhost:8080/index.html | head -20
 
 **Next Steps:**
 1. ✅ **Rebuild server:** `go build -o bin/web-server ./cmd/web-server`
-2. ✅ **Start server:** `GAUTH_DEV_INDEX=1 ./bin/web-server &`
+2. ✅ **Start server:** `AGENTAUTH_DEV_INDEX=1 ./bin/web-server &`
 3. ⏳ **Verify server:** `ps aux | grep web-server`
 4. ⏳ **Access webapp:** http://localhost:8080/index.html
 5. ⏳ **Execute test plan above**

@@ -54,7 +54,7 @@ type CoverageReport struct {
 //nolint:gocyclo // Spec coverage report generation
 func GenerateCoverage(specPath string) (*CoverageReport, error) {
 	// Ensure JWT route inclusion before server creation
-	os.Setenv("GAUTH_USE_JWT_LIB", "1")
+	os.Setenv("AGENTAUTH_USE_JWT_LIB", "1")
 	bs := webpkg.NewBetaServer("0")
 	// Read spec file
 	data, err := os.ReadFile(specPath)

@@ -15,9 +15,9 @@ Refer to [`CODE_STYLE.md`](CODE_STYLE.md) for canonical code formatting, lint ta
 
 ## Multi-Signature Verification Enhancements
 
-Default count mode: number of valid signatures must be >= `GAUTH_MULTI_SIG_THRESHOLD`.
+Default count mode: number of valid signatures must be >= `AGENTAUTH_MULTI_SIG_THRESHOLD`.
 
-Weighted mode (enabled by `GAUTH_MULTI_SIG_WEIGHTS` – comma-separated integers matching signer order):
+Weighted mode (enabled by `AGENTAUTH_MULTI_SIG_WEIGHTS` – comma-separated integers matching signer order):
 * Structural count pre-check relaxed (fewer signers than threshold permitted if cumulative weight >= threshold).
 * Cumulative weight of valid signatures compared directly to threshold.
 * Metric: `multi_signature_weight_failures_total` increments on insufficient cumulative weight.
@@ -112,7 +112,7 @@ Intended usage:
 Outcome-labeled latency completed; percentiles implemented. Reservoir size kept intentionally small (64) for low overhead; can be tuned later.
 
 Persistence (metrics prototype):
-* Environment variable `GAUTH_METRICS_PERSIST_PATH` enables file-backed persistence.
+* Environment variable `AGENTAUTH_METRICS_PERSIST_PATH` enables file-backed persistence.
 * On startup: if file exists, labeled counters (`decision_counts`, `decision_reason_counts`, `lifecycle_counts`) and status transition counters restored.
 * On graceful shutdown (signal or server close): snapshot saved (JSON) to path.
 * Use cases: retain counters across deployments; cold-start dashboards without losing historical transition volume.
@@ -146,10 +146,10 @@ Implementation details:
 * Backing fields (unexported) in `metrics.Memory` with accessor methods (e.g., `InvalidPayloadFailures()`).
 * Persistence extended to include these counters in the metrics snapshot JSON.
 * Prometheus exposition (`apiPolicyMetricsPrometheus`) now emits HELP/TYPE and counter lines:
-	- `gauth_validation_invalid_payload_total`
-	- `gauth_validation_unsupported_status_total`
-	- `gauth_validation_invalid_transition_total`
-	- `gauth_validation_not_found_total`
+	- `agentauth_validation_invalid_payload_total`
+	- `agentauth_validation_unsupported_status_total`
+	- `agentauth_validation_invalid_transition_total`
+	- `agentauth_validation_not_found_total`
 * Handlers (`apiTokenStatusUpdate`, `apiDelegationStatusUpdate`) increment counters in failure branches in addition to existing lifecycle failure counters.
 
 Rationale & Usage:
@@ -165,19 +165,19 @@ Testing:
 Suggested initial alert rules (Prometheus-style pseudo syntax) leveraging new counters:
 
 1. Spike in malformed client requests (potential client regression):
-	- Expr: increase(gauth_validation_invalid_payload_total[5m]) > 25
+	- Expr: increase(agentauth_validation_invalid_payload_total[5m]) > 25
 	- Action: Page if sustained 3 intervals; annotate deployment timeline.
 
 2. Unexpected growth in unsupported status usage (possible abuse / outdated clients):
-	- Expr: increase(gauth_validation_unsupported_status_total[15m]) > 5
+	- Expr: increase(agentauth_validation_unsupported_status_total[15m]) > 5
 	- Action: Create low-priority ticket; correlate with user agent logs.
 
 3. Invalid transition anomaly (potential resurrection attempts or logic bug):
-	- Expr: rate(gauth_validation_invalid_transition_total[10m]) > 0.1
+	- Expr: rate(agentauth_validation_invalid_transition_total[10m]) > 0.1
 	- Action: Security review if coupled with authz deny spikes.
 
 4. Not-found churn (guessing IDs / enumeration):
-	- Expr: rate(gauth_validation_not_found_total[5m]) / rate(token_status_transitions_total[5m]) > 0.3
+	- Expr: rate(agentauth_validation_not_found_total[5m]) / rate(token_status_transitions_total[5m]) > 0.3
 	- Action: Trigger rate limiting review; consider IP-based throttling.
 
 5. Lifecycle latency SLO (success transitions):

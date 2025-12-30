@@ -24,19 +24,19 @@ Property tests validate **invariants** that should hold regardless of specific i
 
 - **Determinism**: Same input → same output
 - **Idempotence**: Operation can be repeated without changing result
-- **Round-trip**: encode(decode(x)) ≈ x
+- **Round-trip**: encode(decode(x) ≈ x
 - **Monotonicity**: Increasing constraint severity → increasing restriction
 - **Composability**: Operations can be combined predictably
 
 ### Test Structure
 
 ```
-pkg/gauth/
-├── gauth_prop_test.go          # Existing lightweight property test (300 iterations)
-├── gauth_parsing_prop_test.go  # NEW: Comprehensive parsing properties (2700+ iterations)
-└── gauth_fuzz_test.go          # Existing fuzz tests
+pkg/agentauth/
+├── agentauth_prop_test.go          # Existing lightweight property test (300 iterations)
+├── agentauth_parsing_prop_test.go  # NEW: Comprehensive parsing properties (2700+ iterations)
+└── agentauth_fuzz_test.go          # Existing fuzz tests
 
-pkg/rfc0111/
+pkg/aap001/
 ├── canonical_prop_test.go      # Existing digest determinism tests
 ├── canonical_fuzz_test.go      # Existing digest fuzz tests
 └── validator_semantic_prop_test.go  # FUTURE: Semantic validation properties
@@ -44,7 +44,7 @@ pkg/rfc0111/
 
 ## Parsing Property Tests
 
-**File**: `pkg/gauth/gauth_parsing_prop_test.go`  
+**File**: `pkg/agentauth/agentauth_parsing_prop_test.go`  
 **Total Iterations**: 2700+  
 **Pass Rate**: 83% (5/6 tests passing)
 
@@ -54,7 +54,7 @@ pkg/rfc0111/
 **Iterations**: 1000  
 **Status**: ✅ PASS
 
-**Property**: For all valid claim sets `C`, `decode(encode(C)) ≈ C` (modulo type coercion)
+**Property**: For all valid claim sets `C`, `decode(encode(C) ≈ C` (modulo type coercion)
 
 **Validation**:
 - Generates random claims (sub, scope, exp, iat, iss, aud, nbf, jti)
@@ -152,16 +152,16 @@ pkg/rfc0111/
 
 ```bash
 # Run all parsing property tests
-go test -v -run "TestParsingProperty" ./pkg/gauth/
+go test -v -run "TestParsingProperty" ./pkg/agentauth/
 
 # Run specific property test
-go test -v -run "TestParsingPropertyRoundTrip" ./pkg/gauth/
+go test -v -run "TestParsingPropertyRoundTrip" ./pkg/agentauth/
 
 # Run with timeout (some tests iterate extensively)
-go test -v -timeout=60s -run "TestParsingProperty" ./pkg/gauth/
+go test -v -timeout=60s -run "TestParsingProperty" ./pkg/agentauth/
 
 # Run existing lightweight property test
-go test -v -run "TestJSONParseProperty" ./pkg/gauth/
+go test -v -run "TestJSONParseProperty" ./pkg/agentauth/
 ```
 
 ### Example Output
@@ -178,14 +178,14 @@ go test -v -run "TestJSONParseProperty" ./pkg/gauth/
 === RUN   TestParsingPropertyNullAndEmpty
 --- PASS: TestParsingPropertyNullAndEmpty (0.00s)
 PASS
-ok      github.com/.../pkg/gauth        0.873s
+ok      github.com/.../pkg/agentauth        0.873s
 ```
 
 ## Existing Property Tests
 
 ### Canonical Digest Determinism
 
-**File**: `pkg/rfc0111/canonical_prop_test.go`
+**File**: `pkg/aap001/canonical_prop_test.go`
 
 **Tests**:
 - `TestMultiSigDomainSeparationDeterminism`: Weight map ordering invariance
@@ -199,7 +199,7 @@ ok      github.com/.../pkg/gauth        0.873s
 
 ### Lightweight Parsing Property Test
 
-**File**: `pkg/gauth/gauth_prop_test.go`
+**File**: `pkg/agentauth/agentauth_prop_test.go`
 
 **Test**: `TestJSONParseProperty` (300 iterations)
 
@@ -266,7 +266,7 @@ ok      github.com/.../pkg/gauth        0.873s
 
 ### Semantic Validation Property Tests
 
-**File**: `pkg/rfc0111/validator_semantic_prop_test.go` (planned)
+**File**: `pkg/aap001/validator_semantic_prop_test.go` (planned)
 
 **Properties to Validate**:
 1. **Determinism**: `validate(p) == validate(p)` for all PoAs `p`
@@ -390,7 +390,7 @@ For all inputs in domain D → Property P holds
 - [QuickCheck](https://en.wikipedia.org/wiki/QuickCheck): Original property testing framework (Haskell)
 - [Hypothesis](https://hypothesis.readthedocs.io/): Python property testing
 - [Go testing/quick](https://pkg.go.dev/testing/quick): Go standard library (deprecated)
-- [AgentAuth Canonical Digest Tests](../pkg/rfc0111/canonical_prop_test.go): Existing property tests in this codebase
+- [AgentAuth Canonical Digest Tests](../pkg/aap001/canonical_prop_test.go): Existing property tests in this codebase
 
 ## Contributing
 

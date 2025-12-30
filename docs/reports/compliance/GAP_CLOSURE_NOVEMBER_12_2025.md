@@ -15,19 +15,19 @@ owners: [system]
 ## IMPLEMENTED FIXES
 
 ### 1. ✅ One-Off Subscription Orchestrator (Steps I-VIII)
-**File**: `/pkg/gauth/subscription_orchestrator.go` (653 lines)
-- Complete workflow state machine for RFC-0111 subscription steps
+**File**: `/pkg/agentauth/subscription_orchestrator.go` (653 lines)
+- Complete workflow state machine for AAP-001 subscription steps
 - All 8 steps implemented and orchestrated
 - **Gap #1 CLOSED**
 
 ### 2. ✅ Power Enforcement Point (PEP)
-**File**: `/pkg/gauth/pep.go` (335 lines)
+**File**: `/pkg/agentauth/pep.go` (335 lines)
 - Runtime restriction enforcement
 - Action validation, limit enforcement
 - **Gap #4 CLOSED**
 
 ### 3. ✅ Compliance Tracking System
-**File**: `/pkg/gauth/compliance_tracker.go` (ALREADY EXISTS)
+**File**: `/pkg/agentauth/compliance_tracker.go` (ALREADY EXISTS)
 - Behavior tracking, violation monitoring, alerting
 - **Gap #5 WAS ALREADY IMPLEMENTED**
 
@@ -37,7 +37,7 @@ owners: [system]
 **Current**: **79% overall** 🟢
 **Improvement**: +17%
 
-### RFC-0111: 70% → 79% (+9%)
+### AAP-001: 70% → 79% (+9%)
 - Subscription Steps (I-VIII): 15% → 94% ✨
 - Request Steps (a-i): 40% → 60% ✨
 - P*P Architecture: 70% → 84% ✨

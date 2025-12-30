@@ -138,9 +138,9 @@ func (p *GoogleProvider) ValidateIDToken(ctx context.Context, idToken string, au
 func (p *GoogleProvider) MapClaims(claims map[string]interface{}) map[string]interface{} {
 	mapped := make(map[string]interface{})
 
-	for googleClaim, gauthClaim := range GoogleClaimMappings {
+	for googleClaim, agentauthClaim := range GoogleClaimMappings {
 		if value, exists := claims[googleClaim]; exists {
-			mapped[gauthClaim] = value
+			mapped[agentauthClaim] = value
 		}
 	}
 

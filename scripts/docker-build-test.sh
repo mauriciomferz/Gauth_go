@@ -28,12 +28,12 @@ print_status "✅ Docker daemon is running" "$GREEN"
 
 # Clean up any existing test containers/images
 echo "🧹 Cleaning up previous test artifacts..."
-docker rm -f gauth-test-container 2>/dev/null || true
-docker rmi -f gauth-test 2>/dev/null || true
+docker rm -f agentauth-test-container 2>/dev/null || true
+docker rmi -f agentauth-test 2>/dev/null || true
 
 # Build the Docker image
 print_status "🔨 Building Docker image..." "$YELLOW"
-if docker build -t gauth-test .; then
+if docker build -t agentauth-test .; then
     print_status "✅ Docker build successful!" "$GREEN"
 else
     print_status "❌ Docker build failed!" "$RED"
@@ -42,14 +42,14 @@ fi
 
 # Test running the container (without starting the server)
 print_status "🧪 Testing container startup..." "$YELLOW"
-if docker run --name gauth-test-container --rm -d -p 8080:8080 gauth-test; then
+if docker run --name agentauth-test-container --rm -d -p 8080:8080 agentauth-test; then
     print_status "✅ Container started successfully!" "$GREEN"
     
     # Wait a moment for startup
     sleep 3
     
     # Check if container is still running
-    if docker ps | grep -q gauth-test-container; then
+    if docker ps | grep -q agentauth-test-container; then
         print_status "✅ Container is running!" "$GREEN"
         
         # Test health check endpoint (if available)
@@ -62,11 +62,11 @@ if docker run --name gauth-test-container --rm -d -p 8080:8080 gauth-test; then
         fi
         
         # Stop the container
-        docker stop gauth-test-container &> /dev/null
+        docker stop agentauth-test-container &> /dev/null
         print_status "✅ Container stopped cleanly" "$GREEN"
     else
         print_status "❌ Container failed to stay running" "$RED"
-        docker logs gauth-test-container
+        docker logs agentauth-test-container
         exit 1
     fi
 else
@@ -76,12 +76,12 @@ fi
 
 # Clean up
 print_status "🧹 Cleaning up test artifacts..." "$YELLOW"
-docker rmi gauth-test &> /dev/null || true
+docker rmi agentauth-test &> /dev/null || true
 
 print_status "🎉 Docker build test completed successfully!" "$GREEN"
 print_status "⚠️  Dockerfile build verified - FOR BETA DEMONSTRATION / NON-PRODUCTION USE ONLY" "$YELLOW"
 
 echo ""
 echo "To build and run manually:"
-echo "  docker build -t gauth-server ."
-echo "  docker run -d -p 8080:8080 --name gauth gauth-server"
+echo "  docker build -t agentauth-server ."
+echo "  docker run -d -p 8080:8080 --name agentauth agentauth-server"

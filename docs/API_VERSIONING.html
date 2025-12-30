@@ -98,8 +98,8 @@
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a href="#gauth-api-versioning-deprecation-policy"
-id="toc-gauth-api-versioning-deprecation-policy">AgentAuth API Versioning
+<li><a href="#agentauth-api-versioning-deprecation-policy"
+id="toc-agentauth-api-versioning-deprecation-policy">AgentAuth API Versioning
 &amp; Deprecation Policy</a>
 <ul>
 <li><a href="#table-of-contents" id="toc-table-of-contents">Table of
@@ -216,7 +216,7 @@ Issues</a></li>
 </ul></li>
 </ul>
 </nav>
-<h1 id="gauth-api-versioning-deprecation-policy">AgentAuth API Versioning
+<h1 id="agentauth-api-versioning-deprecation-policy">AgentAuth API Versioning
 &amp; Deprecation Policy</h1>
 <p><strong>Version</strong>: 1.0<br />
 <strong>Effective Date</strong>: November 2025<br />
@@ -258,7 +258,7 @@ experience and ease of migration</li>
 <h3 id="url-based-versioning">URL-Based Versioning</h3>
 <p>AgentAuth uses <strong>URL-based versioning</strong> as the primary
 versioning mechanism:</p>
-<pre><code>https://api.gauth.example.com/api/{version}/{endpoint}</code></pre>
+<pre><code>https://api.agentauth.example.com/api/{version}/{endpoint}</code></pre>
 <p><strong>Examples:</strong> - <code>/api/v1/beta/health</code> -
 Version 1 (beta) - <code>/api/v1/rfc0111/subscriptions</code> - Version
 1 (stable) - <code>/api/v2/subscriptions</code> - Version 2 (future)</p>
@@ -340,8 +340,8 @@ available</li>
 X-API-Deprecated: true
 X-API-Deprecated-Date: 2025-11-15T00:00:00Z
 X-API-Sunset-Date: 2026-11-15T00:00:00Z
-X-API-Migration-Guide: https://docs.gauth.example.com/migration/v1-to-v2
-Link: &lt;https://api.gauth.example.com/api/v2/subscriptions&gt;; rel=&quot;successor-version&quot;</code></pre>
+X-API-Migration-Guide: https://docs.agentauth.example.com/migration/v1-to-v2
+Link: &lt;https://api.agentauth.example.com/api/v2/subscriptions&gt;; rel=&quot;successor-version&quot;</code></pre>
 <h3 id="deprecation-response-body">Deprecation Response Body</h3>
 <p>Deprecated endpoints include a warning in the response:</p>
 <div class="sourceCode" id="cb4"><pre
@@ -351,7 +351,7 @@ class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;deprecated_at&quot;</span><span class="fu">:</span> <span class="st">&quot;2025-11-15T00:00:00Z&quot;</span><span class="fu">,</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;sunset_at&quot;</span><span class="fu">:</span> <span class="st">&quot;2026-11-15T00:00:00Z&quot;</span><span class="fu">,</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;This endpoint is deprecated and will be removed on 2026-11-15&quot;</span><span class="fu">,</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;migration_guide&quot;</span><span class="fu">:</span> <span class="st">&quot;https://docs.gauth.example.com/migration/v1-to-v2&quot;</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;migration_guide&quot;</span><span class="fu">:</span> <span class="st">&quot;https://docs.agentauth.example.com/migration/v1-to-v2&quot;</span><span class="fu">,</span></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;successor&quot;</span><span class="fu">:</span> <span class="st">&quot;/api/v2/subscriptions&quot;</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
@@ -399,12 +399,12 @@ versions</strong>:</p>
 <h4 id="step-1-review-the-changelog">Step 1: Review the Changelog</h4>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check the API changelog</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api.gauth.example.com/api/changelog</span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api.agentauth.example.com/api/changelog</span></code></pre></div>
 <h4 id="step-2-test-against-new-version">Step 2: Test Against New
 Version</h4>
 <div class="sourceCode" id="cb6"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Use the new version in a test environment</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api-staging.gauth.example.com/api/v2/subscriptions</span></code></pre></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api-staging.agentauth.example.com/api/v2/subscriptions</span></code></pre></div>
 <h4 id="step-3-update-your-code">Step 3: Update Your Code</h4>
 <p><strong>Before (v1):</strong></p>
 <div class="sourceCode" id="cb7"><pre
@@ -427,10 +427,10 @@ class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-
 <h4 id="step-4-update-sdk-version">Step 4: Update SDK Version</h4>
 <div class="sourceCode" id="cb9"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># JavaScript/TypeScript</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install @gauth/client@2.0.0</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install @agentauth/client@2.0.0</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Python</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install gauth-client==2.0.0</span></code></pre></div>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install agentauth-client==2.0.0</span></code></pre></div>
 <h4 id="step-5-deploy-and-monitor">Step 5: Deploy and Monitor</h4>
 <ul>
 <li>Deploy to staging first</li>
@@ -584,30 +584,30 @@ retired</p>
 <h3 id="api-changelog-endpoint">API Changelog Endpoint</h3>
 <div class="sourceCode" id="cb13"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get changelog for current version</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api.gauth.example.com/api/changelog</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api.agentauth.example.com/api/changelog</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Get changelog for specific version</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api.gauth.example.com/api/changelog<span class="pp">?</span>version=v1</span></code></pre></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://api.agentauth.example.com/api/changelog<span class="pp">?</span>version=v1</span></code></pre></div>
 <h3 id="github-releases">GitHub Releases</h3>
 <p>All versions are tagged and released on GitHub:</p>
-<p>https://github.com/mauriciomferz/Gauth_go/releases</p>
+<p>https://github.com/mauriciomferz/AgentAuth/releases</p>
 <h3 id="rss-feed">RSS Feed</h3>
 <p>Subscribe to changelog updates:</p>
-<p>https://api.gauth.example.com/api/changelog.rss</p>
+<p>https://api.agentauth.example.com/api/changelog.rss</p>
 <hr />
 <h2 id="support-and-contact">Support and Contact</h2>
 <h3 id="questions-about-versioning">Questions About Versioning?</h3>
 <ul>
-<li><strong>Email</strong>: api-support@gauth.example.com</li>
+<li><strong>Email</strong>: api-support@agentauth.example.com</li>
 <li><strong>GitHub Discussions</strong>:
-https://github.com/mauriciomferz/Gauth_go/discussions</li>
-<li><strong>Slack</strong>: #gauth-api-versioning</li>
+https://github.com/mauriciomferz/AgentAuth/discussions</li>
+<li><strong>Slack</strong>: #agentauth-api-versioning</li>
 </ul>
 <h3 id="report-issues">Report Issues</h3>
 <ul>
 <li><strong>GitHub Issues</strong>:
-https://github.com/mauriciomferz/Gauth_go/issues</li>
-<li><strong>Security Issues</strong>: security@gauth.example.com</li>
+https://github.com/mauriciomferz/AgentAuth/issues</li>
+<li><strong>Security Issues</strong>: security@agentauth.example.com</li>
 </ul>
 <hr />
 <h2 id="references">References</h2>

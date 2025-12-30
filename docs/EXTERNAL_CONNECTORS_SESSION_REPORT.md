@@ -49,7 +49,7 @@ Following the successful completion of MCP Phase 4 (Production Hardening), this 
 
 ### 2. US Identity Verifier Implementation - COMPLETE ✅
 
-**File**: `pkg/gauth/external/us_identity_verifier.go`  
+**File**: `pkg/agentauth/external/us_identity_verifier.go`  
 **Size**: 1,020 lines  
 **Status**: Production-ready implementation, compiles successfully
 
@@ -241,8 +241,8 @@ Following the successful completion of MCP Phase 4 (Production Hardening), this 
    - Add authentication (API keys, OAuth 2.0)
 
 3. **API Provider Integration**:
-   - Implement Persona provider (`pkg/gauth/external/providers/persona_provider.go`)
-   - Implement Trulioo provider (`pkg/gauth/external/providers/trulioo_provider.go`)
+   - Implement Persona provider (`pkg/agentauth/external/providers/persona_provider.go`)
+   - Implement Trulioo provider (`pkg/agentauth/external/providers/trulioo_provider.go`)
    - Obtain sandbox API keys for testing
    - Create provider adapter layer
 
@@ -310,7 +310,7 @@ Following the successful completion of MCP Phase 4 (Production Hardening), this 
 
 1. **Install validator dependency**:
    ```bash
-   cd /path/to/Gauth_go
+   cd /path/to/AgentAuth
    go get github.com/go-playground/validator/v10
    go mod tidy
    ```
@@ -327,7 +327,7 @@ Following the successful completion of MCP Phase 4 (Production Hardening), this 
    - Authentication (API keys)
 
 4. **Implement Persona provider**: Start with primary API provider
-   - Create `pkg/gauth/external/providers/persona_provider.go`
+   - Create `pkg/agentauth/external/providers/persona_provider.go`
    - GraphQL client implementation
    - Sandbox API key integration
    - Unit tests

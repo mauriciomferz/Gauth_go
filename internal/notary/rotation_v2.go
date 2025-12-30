@@ -57,20 +57,20 @@ type PublicKeyRecord struct {
 
 // --- Metrics (exported gauges) ---
 var (
-	rotationV2ThresholdWeight        = promauto.NewGauge(prom.GaugeOpts{Name: "gauth_rotation_v2_threshold_weight", Help: "Configured threshold weight for rotation V2 artifact."})
-	rotationV2EffectiveWeight        = promauto.NewGauge(prom.GaugeOpts{Name: "gauth_rotation_v2_effective_weight", Help: "Sum of verified signer weights for rotation V2 artifact (placeholder: sum of configured weights)."})
-	rotationV2SignerWeight           = promauto.NewGaugeVec(prom.GaugeOpts{Name: "gauth_rotation_v2_signer_weight", Help: "Configured weight per signer id for rotation V2."}, []string{"signer"})
-	rotationV2VerifiedWeight         = promauto.NewGauge(prom.GaugeOpts{Name: "gauth_rotation_v2_verified_weight", Help: "Sum of weights from signatures that verified for latest served artifact."})
-	rotationV2SignatureFailures      = promauto.NewCounterVec(prom.CounterOpts{Name: "gauth_rotation_v2_signature_failures_total", Help: "Total V2 signature verification failures by reason."}, []string{"reason"})
-	rotationV2ThresholdViolations    = promauto.NewCounter(prom.CounterOpts{Name: "gauth_rotation_v2_threshold_violations_total", Help: "Total times V2 served artifact failed to meet threshold (pre-enforcement)."})
-	rotationV2VerifiedWeightByAlg    = promauto.NewGaugeVec(prom.GaugeOpts{Name: "gauth_rotation_v2_verified_weight_alg", Help: "Verified weight contributed per algorithm."}, []string{"alg"})
-	rotationV2SignatureFailuresByAlg = promauto.NewCounterVec(prom.CounterOpts{Name: "gauth_rotation_v2_signature_failures_by_alg_total", Help: "Signature verification failures partitioned by algorithm and reason."}, []string{"alg", "reason"})
-	RotationV2ChainStarts            = promauto.NewCounter(prom.CounterOpts{Name: "gauth_rotation_v2_chain_starts_total", Help: "Number of times a rotation V2 chain started (empty previous hash)."})
+	rotationV2ThresholdWeight        = promauto.NewGauge(prom.GaugeOpts{Name: "agentauth_rotation_v2_threshold_weight", Help: "Configured threshold weight for rotation V2 artifact."})
+	rotationV2EffectiveWeight        = promauto.NewGauge(prom.GaugeOpts{Name: "agentauth_rotation_v2_effective_weight", Help: "Sum of verified signer weights for rotation V2 artifact (placeholder: sum of configured weights)."})
+	rotationV2SignerWeight           = promauto.NewGaugeVec(prom.GaugeOpts{Name: "agentauth_rotation_v2_signer_weight", Help: "Configured weight per signer id for rotation V2."}, []string{"signer"})
+	rotationV2VerifiedWeight         = promauto.NewGauge(prom.GaugeOpts{Name: "agentauth_rotation_v2_verified_weight", Help: "Sum of weights from signatures that verified for latest served artifact."})
+	rotationV2SignatureFailures      = promauto.NewCounterVec(prom.CounterOpts{Name: "agentauth_rotation_v2_signature_failures_total", Help: "Total V2 signature verification failures by reason."}, []string{"reason"})
+	rotationV2ThresholdViolations    = promauto.NewCounter(prom.CounterOpts{Name: "agentauth_rotation_v2_threshold_violations_total", Help: "Total times V2 served artifact failed to meet threshold (pre-enforcement)."})
+	rotationV2VerifiedWeightByAlg    = promauto.NewGaugeVec(prom.GaugeOpts{Name: "agentauth_rotation_v2_verified_weight_alg", Help: "Verified weight contributed per algorithm."}, []string{"alg"})
+	rotationV2SignatureFailuresByAlg = promauto.NewCounterVec(prom.CounterOpts{Name: "agentauth_rotation_v2_signature_failures_by_alg_total", Help: "Signature verification failures partitioned by algorithm and reason."}, []string{"alg", "reason"})
+	RotationV2ChainStarts            = promauto.NewCounter(prom.CounterOpts{Name: "agentauth_rotation_v2_chain_starts_total", Help: "Number of times a rotation V2 chain started (empty previous hash)."})
 
 	// RotationV2ContinuityUpdates -> metrics.RotationContinuityUpdatesTotal
 
-	rotationV2PublicKeysEmbedded = promauto.NewCounter(prom.CounterOpts{Name: "gauth_rotation_v2_public_keys_embedded_total", Help: "Total artifacts where public key embedding flag enabled."})
-	rotationV2EmbeddedKeyCount   = promauto.NewGauge(prom.GaugeOpts{Name: "gauth_rotation_v2_embedded_public_key_count", Help: "Count of embedded public keys in latest artifact."})
+	rotationV2PublicKeysEmbedded = promauto.NewCounter(prom.CounterOpts{Name: "agentauth_rotation_v2_public_keys_embedded_total", Help: "Total artifacts where public key embedding flag enabled."})
+	rotationV2EmbeddedKeyCount   = promauto.NewGauge(prom.GaugeOpts{Name: "agentauth_rotation_v2_embedded_public_key_count", Help: "Count of embedded public keys in latest artifact."})
 )
 
 // cryptoGlobalEdDSAResolve removed in favor of injected resolver.
@@ -184,7 +184,7 @@ func AttachEd25519Signature(art *WeightedRotationArtifact, priv ed25519.PrivateK
 		art.CanonicalDigest = computeWeightedRotationDigest(*art)
 	}
 	// Domain-separated signing over canonical digest string bytes.
-	preimage := []byte("GAUTH_ROTATION_V2:" + art.CanonicalDigest)
+	preimage := []byte("AGENTAUTH_ROTATION_V2:" + art.CanonicalDigest)
 	sig := ed25519.Sign(priv, preimage)
 	// Assign (post sort find index)
 	for i := range art.Signers {
@@ -222,7 +222,7 @@ func AttachECDSASignature(art *WeightedRotationArtifact, priv *ecdsa.PrivateKey,
 		sort.Slice(art.Signers, func(i, j int) bool { return art.Signers[i].ID < art.Signers[j].ID })
 		art.CanonicalDigest = computeWeightedRotationDigest(*art)
 	}
-	preimage := []byte("GAUTH_ROTATION_V2:" + art.CanonicalDigest)
+	preimage := []byte("AGENTAUTH_ROTATION_V2:" + art.CanonicalDigest)
 	h := sha256.Sum256(preimage)
 	r, s, err := ecdsa.Sign(rand.Reader, priv, h[:])
 	if err != nil {
@@ -329,11 +329,11 @@ func BuildArtifactFromConfig(cfg *WeightsConfig, prevHash string, now time.Time,
 	}
 	signers := make([]WeightedRotationSigner, 0, len(cfg.Signers))
 	eff := 0
-	embedFlag := os.Getenv("GAUTH_ROTATIONS_V2_EMBED_PUBS") == "1"
+	embedFlag := os.Getenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS") == "1"
 	embeddedCount := 0
 	for _, s := range cfg.Signers {
 		signer := WeightedRotationSigner{ID: s.ID, Alg: s.Alg, Weight: s.Weight}
-		// Optional embedding: GAUTH_ROTATIONS_V2_EMBED_PUBS=1 attempts to resolve public key and embed.
+		// Optional embedding: AGENTAUTH_ROTATIONS_V2_EMBED_PUBS=1 attempts to resolve public key and embed.
 		if embedFlag {
 			algUpper := strings.ToUpper(s.Alg)
 			switch algUpper {
@@ -345,8 +345,8 @@ func BuildArtifactFromConfig(cfg *WeightsConfig, prevHash string, now time.Time,
 					}
 				}
 			case "ECDSA-P256", "ECDSA_P256", "ECDSA-P256-SHA256":
-				// Environment stub GAUTH_ROTATIONS_V2_ECDSA_KEYS="id:base64urlUncompressed,id2:base64urlUncompressed"
-				rawMap := os.Getenv("GAUTH_ROTATIONS_V2_ECDSA_KEYS")
+				// Environment stub AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS="id:base64urlUncompressed,id2:base64urlUncompressed"
+				rawMap := os.Getenv("AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS")
 				if rawMap != "" {
 					entries := strings.Split(rawMap, ",")
 					for _, e := range entries {
@@ -401,7 +401,7 @@ func VerifyArtifactSignatures(art *WeightedRotationArtifact, resolver PublicKeyR
 	var failures []string
 	verified := 0
 	byAlgWeight := map[string]int{}
-	preimage := []byte("GAUTH_ROTATION_V2:" + art.CanonicalDigest)
+	preimage := []byte("AGENTAUTH_ROTATION_V2:" + art.CanonicalDigest)
 	for _, s := range art.Signers {
 		if s.Signature == "" {
 			continue

@@ -38,7 +38,7 @@ The repository includes a lightweight embedded beta web interface showcasing Pow
 Run it directly:
 ```bash
 go run ./cmd/web-server
-# Visit http://localhost:8080 (set GAUTH_WEB_PORT to override port)
+# Visit http://localhost:8080 (set AGENTAUTH_WEB_PORT to override port)
 ```
 
 Key endpoints:
@@ -58,7 +58,7 @@ curl -s http://localhost:8080/api/v1/beta/examples/catalog | jq
 
 # Start one
 JOB_ID=$(curl -s -X POST -H 'Content-Type: application/json' \
-    -d '{"id":"gauth_protocol_basics:minimal_poa"}' \
+    -d '{"id":"agentauth_protocol_basics:minimal_poa"}' \
     http://localhost:8080/api/v1/beta/examples/run | jq -r .job_id)
 
 # Check status
@@ -83,8 +83,8 @@ Implementation notes:
 
 ```bash
 # Clone the repository
-git clone https://github.com/mauriciomferz/Gauth_go
-cd Gauth_go
+git clone https://github.com/mauriciomferz/AgentAuth
+cd AgentAuth
 
 # Build the package
 go build ./pkg/auth
@@ -217,11 +217,11 @@ See how tokens are:
 To restrict sensitive actions (token issuance, delegation create/revoke, capability reload, audit export) you can enable capability enforcement:
 
 1. Provide a versioned capability file (see `docs/examples/capabilities.v1.json`).
-2. Set environment variable `GAUTH_CAPABILITIES_PATH` to its absolute path.
-3. Set `GAUTH_CAPABILITY_ENFORCE=1` to activate enforcement.
+2. Set environment variable `AGENTAUTH_CAPABILITIES_PATH` to its absolute path.
+3. Set `AGENTAUTH_CAPABILITY_ENFORCE=1` to activate enforcement.
 4. (Optional) Reload at runtime via `POST /api/v1/beta/capabilities/reload`.
 
-Discovery endpoint `/.well-known/gauth-configuration` will expose:
+Discovery endpoint `/.well-known/agentauth-configuration` will expose:
 - `capability_registry_schema_version`
 - `capability_registry_hash` (canonical SHA256 for integrity monitoring)
 - Current `capability_registry` and `action_capabilities`.
@@ -237,9 +237,9 @@ Recommended next hardening steps (future releases): external hash anchoring, mul
 
 To enable tamper-evident persistence of external capability anchoring receipts (hash-chain):
 
-1. Set `GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER` (e.g. `memory` or `tsa_stub`).
-2. Provide a writable file path via `GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH` (will be created if absent).
-3. (Optional) Set `GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_VERIFY_INTERVAL` (seconds, default disabled) to run a background integrity verification loop.
+1. Set `AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER` (e.g. `memory` or `tsa_stub`).
+2. Provide a writable file path via `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH` (will be created if absent).
+3. (Optional) Set `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_VERIFY_INTERVAL` (seconds, default disabled) to run a background integrity verification loop.
 
 Endpoints exposed when persistence is configured and at least one receipt exists:
 | Endpoint | Purpose |
@@ -304,7 +304,7 @@ curl -X POST http://localhost:8080/token/revoke \
 
 1. **Basic Setup**
 ```go
-auth := gauth.New(gauth.Config{
+auth := agentauth.New(agentauth.Config{
     AuthServerURL: "https://auth.example.com",
     ClientID:     "client-123",
     ClientSecret: "secret-456",
@@ -313,9 +313,9 @@ auth := gauth.New(gauth.Config{
 
 2. **With Rate Limiting**
 ```go
-auth := gauth.New(gauth.Config{
+auth := agentauth.New(agentauth.Config{
     // ... basic config ...
-    RateLimit: gauth.RateLimitConfig{
+    RateLimit: agentauth.RateLimitConfig{
         RequestsPerSecond: 100,
         WindowSize:       60,
         BurstSize:       10,
@@ -325,7 +325,7 @@ auth := gauth.New(gauth.Config{
 
 3. **With Custom Token Store**
 ```go
-auth := gauth.New(gauth.Config{
+auth := agentauth.New(agentauth.Config{
     // ... basic config ...
     TokenStore: myCustomStore,
 })
@@ -368,7 +368,7 @@ curl http://localhost:8080/metrics | grep auth
 ## Next Steps
 
 1. Read the [Development Guide](DEVELOPMENT.md) for implementation details
-2. Explore the [API Documentation](pkg/gauth/doc.go)
+2. Explore the [API Documentation](pkg/agentauth/doc.go)
 3. Try the [Advanced Examples](examples/advanced/)
 
 ## Community Resources

@@ -41,16 +41,16 @@ owners: compliance-team
 3. `internal/crypto` - Key rotation and cryptographic operations (1.099s)
 4. `internal/notary` - Snapshot CLI and notarization (6.427s)
 5. `pkg/enforcement` - Policy enforcement integration (2.180s)
-6. `pkg/gauth` - Advanced AgentAuth service integration (2.183s)
+6. `pkg/agentauth` - Advanced AgentAuth service integration (2.183s)
 7. `pkg/pdp` - Policy Decision Point integration (3.653s)
 8. `pkg/replay` - Replay protection and WAL integration (3.365s)
-9. `pkg/rfc0111` - AAP-001 compliance integration (3.006s)
+9. `pkg/aap001` - AAP-001 compliance integration (3.006s)
 10. `web` - Web API integration (0.309s)
 
 ### Integration Test Categories
 
 #### 1. AAP-001 Compliance Tests
-**Location**: `pkg/rfc0111/*_integration_test.go`
+**Location**: `pkg/aap001/*_integration_test.go`
 
 **Tests**:
 - `TestEnhancedValidatorServiceIntegration_WarningCollection` ✅
@@ -64,7 +64,7 @@ owners: compliance-team
 **Coverage**: Delegation creation, validation, revocation, audit logging, jurisdiction enforcement
 
 #### 2. Authentication Service Integration
-**Location**: `pkg/gauth/advanced_integration_test.go`
+**Location**: `pkg/agentauth/advanced_integration_test.go`
 
 **Tests**:
 - Advanced token operations
@@ -84,7 +84,7 @@ owners: compliance-team
 **Status**: ✅ All pass (3.653s)
 
 #### 4. Replay Protection Integration
-**Location**: `pkg/replay/gauth_integration_test.go`
+**Location**: `pkg/replay/agentauth_integration_test.go`
 
 **Tests**:
 - `TestReplayNonceStore_WALIntegration` ✅
@@ -133,10 +133,10 @@ Total Execution Time: ~23 seconds
 ✅ internal/crypto          1.099s
 ✅ internal/notary          6.427s  (longest - snapshot operations)
 ✅ pkg/enforcement          2.180s
-✅ pkg/gauth                2.183s
+✅ pkg/agentauth                2.183s
 ✅ pkg/pdp                  3.653s
 ✅ pkg/replay               3.365s
-✅ pkg/rfc0111              3.006s
+✅ pkg/aap001              3.006s
 ✅ web                      0.309s
 ```
 
@@ -156,14 +156,14 @@ Total Execution Time: ~23 seconds
 
 **Total Benchmark Files**: 28+  
 **Key Packages Benchmarked**:
-- `pkg/gauth` - Token parsing and claims processing
-- `pkg/rfc0111` - Delegation operations
+- `pkg/agentauth` - Token parsing and claims processing
+- `pkg/aap001` - Delegation operations
 - `pkg/authz` - Authorization decisions
 - `pkg/delegation` - Merkle tree operations and consistency proofs
 
 ### Performance Baselines Established
 
-#### 1. Token Operations (pkg/gauth)
+#### 1. Token Operations (pkg/agentauth)
 **Platform**: Apple M3 Pro (ARM64)
 
 ```
@@ -177,7 +177,7 @@ BenchmarkStdlibUnmarshal-11       789,183 ops     1,375 ns/op     1,328 B/op    
 - **Memory**: Reasonable allocation (<3KB per parse)
 - **Verdict**: ✅ Excellent performance for token parsing
 
-#### 2. Delegation Operations (pkg/rfc0111)
+#### 2. Delegation Operations (pkg/aap001)
 
 ```
 BenchmarkCreateDelegation-11                131,034 ops     8,889 ns/op    11,161 B/op    73 allocs/op

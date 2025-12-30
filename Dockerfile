@@ -36,13 +36,13 @@ RUN echo "=== Checking source files ===" && \
 RUN echo "=== Starting Go build ===" && \
     CGO_ENABLED=1 GOOS=linux go build \
     -ldflags='-w -s' \
-    -o gauth-server ./cmd/web-server && \
+    -o agentauth-server ./cmd/web-server && \
     echo "=== Build completed successfully ==="
 
 # Verify binary
 RUN echo "=== Verifying binary ===" && \
-    ls -la gauth-server && \
-    file gauth-server && \
+    ls -la agentauth-server && \
+    file agentauth-server && \
     echo "=== Binary verified ==="
 
 # Production stage
@@ -52,20 +52,20 @@ FROM alpine:3.18.4
 RUN apk update && apk add --no-cache ca-certificates tzdata wget curl libstdc++ libgcc
 
 # Create non-root user
-RUN adduser -D -s /bin/sh gauth
+RUN adduser -D -s /bin/sh agentauth
 
 # Set working directory
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /app/gauth-server .
+COPY --from=builder /app/agentauth-server .
 
 # Create necessary directories
 RUN mkdir -p ./configs ./logs && \
-    chown -R gauth:gauth /app
+    chown -R agentauth:agentauth /app
 
 # Switch to non-root user
-USER gauth
+USER agentauth
 
 # Expose ports
 EXPOSE 8080
@@ -75,4 +75,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
 # Default command (can be overridden)
-CMD ["./gauth-server"]
+CMD ["./agentauth-server"]

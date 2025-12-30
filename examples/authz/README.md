@@ -22,7 +22,7 @@ import (
     "context"
     "log"
 
-    "github.com/AgentAuth-Foundation/gauth/pkg/authz"
+    "github.com/AgentAuth-Foundation/agentauth/pkg/authz"
 )
 
 func main() {
@@ -76,7 +76,7 @@ import (
     "context"
     "log"
 
-    "github.com/AgentAuth-Foundation/gauth/pkg/authz"
+    "github.com/AgentAuth-Foundation/agentauth/pkg/authz"
 )
 
 func main() {
@@ -135,7 +135,7 @@ import (
     "context"
     "log"
 
-    "github.com/AgentAuth-Foundation/gauth/pkg/authz"
+    "github.com/AgentAuth-Foundation/agentauth/pkg/authz"
 )
 
 func main() {
@@ -191,7 +191,7 @@ import (
     "context"
     "log"
 
-    "github.com/AgentAuth-Foundation/gauth/pkg/authz"
+    "github.com/AgentAuth-Foundation/agentauth/pkg/authz"
 )
 
 func main() {

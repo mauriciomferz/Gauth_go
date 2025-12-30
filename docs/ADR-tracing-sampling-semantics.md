@@ -20,13 +20,13 @@ Phase RB9 introduced in-repo tracing spans for core flows (`token.issue`, `token
 - Provide deterministic behavior for unit tests.
 
 Environment variables:
-- `GAUTH_TRACING_ENABLED` (new primary flag) and legacy `GAUTH_OTEL_ENABLE` (backward compatibility).
-- `GAUTH_TRACING_SAMPLE_RATIO` numeric string in [0,1].
+- `AGENTAUTH_TRACING_ENABLED` (new primary flag) and legacy `AGENTAUTH_OTEL_ENABLE` (backward compatibility).
+- `AGENTAUTH_TRACING_SAMPLE_RATIO` numeric string in [0,1].
 
 ## Decision Drivers
 1. Simplicity: Single float ratio without multi-parameter configuration.
 2. Low friction for dev: Full sampling by default (unset ratio -> 1.0).
-3. Backward compatibility: Preserve `GAUTH_OTEL_ENABLE` for existing deployments.
+3. Backward compatibility: Preserve `AGENTAUTH_OTEL_ENABLE` for existing deployments.
 4. Testability: Ability to force deterministic span presence.
 5. Performance: Avoid allocation when spans are skipped.
 
@@ -39,7 +39,7 @@ Environment variables:
 | D | Token bucket / rate-per-second sampling | Precise control under burst load | Over-engineered for Phase 1; increases code complexity |
 
 ## Decision Outcome
-Selected Option B (ratio <= 0 interpreted as "always sample"). This reduces initial complexity and allows using `GAUTH_TRACING_SAMPLE_RATIO=0` in tests to guarantee span emission. The disabled state is governed solely by absence of `GAUTH_TRACING_ENABLED`/`GAUTH_OTEL_ENABLE`.
+Selected Option B (ratio <= 0 interpreted as "always sample"). This reduces initial complexity and allows using `AGENTAUTH_TRACING_SAMPLE_RATIO=0` in tests to guarantee span emission. The disabled state is governed solely by absence of `AGENTAUTH_TRACING_ENABLED`/`AGENTAUTH_OTEL_ENABLE`.
 
 ## Implementation Summary
 Code snippet (conceptual):
@@ -65,7 +65,7 @@ if tracerProvider != nil && (sampleRatio <= 0 || rand.Float64() < sampleRatio) {
 ## Mitigations & Future Work
 - Documentation: Explicit note in `OBSERVABILITY.md` highlighting current semantics and pending change consideration.
 - Transition Plan (if semantics inverted later):
-  1. Introduce `GAUTH_TRACING_SAMPLE_MODE` with values `legacy` (current) / `standard`.
+  1. Introduce `AGENTAUTH_TRACING_SAMPLE_MODE` with values `legacy` (current) / `standard`.
   2. Default new deployments to `standard` (0 => no sample) while honoring legacy when unset.
   3. After 2 sprints, deprecate `legacy` mode.
 - Add mid-ratio statistical test (0.5) with multi-iteration to assert distribution before any semantic change.
@@ -79,8 +79,8 @@ if tracerProvider != nil && (sampleRatio <= 0 || rand.Float64() < sampleRatio) {
 - Span tags avoid sensitive values (no raw payloads, keys, or secrets stored).
 
 ## Operations
-- To fully disable tracing: ensure neither `GAUTH_TRACING_ENABLED` nor `GAUTH_OTEL_ENABLE` are set.
-- To force all spans for debugging: set either enable flag plus `GAUTH_TRACING_SAMPLE_RATIO=0`.
+- To fully disable tracing: ensure neither `AGENTAUTH_TRACING_ENABLED` nor `AGENTAUTH_OTEL_ENABLE` are set.
+- To force all spans for debugging: set either enable flag plus `AGENTAUTH_TRACING_SAMPLE_RATIO=0`.
 
 ## Acceptance Criteria
 - Unit tests: enabled (ratio=1) emits spans, disabled (no env) emits none, ratio=0 emits spans.

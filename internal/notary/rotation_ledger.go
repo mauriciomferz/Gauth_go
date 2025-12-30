@@ -106,7 +106,7 @@ func (l *RotationLedger) AppendDescriptor(rd *KeyRotationDescriptor) (RotationLe
 	rec := RotationLedgerRecord{Index: len(l.entries), Hash: fmt.Sprintf("%x", h), PrevHash: prev, Descriptor: rd, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
 	// RB5: optional entry signature (domain separated) if signer configured
 	if len(l.signerPriv) == ed25519.PrivateKeySize {
-		payload := append([]byte("GAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(prev), msg...)...)
+		payload := append([]byte("AGENTAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(prev), msg...)...)
 		sig := ed25519.Sign(l.signerPriv, payload)
 		rec.Signature = base64.RawURLEncoding.EncodeToString(sig)
 		if l.signerKid == "" {
@@ -178,7 +178,7 @@ func VerifyRotationLedger(entries []RotationLedgerRecord, strict bool, pubResolv
 			if len(pub) != ed25519.PublicKeySize {
 				invalidSigs++
 			} else {
-				payload := append([]byte("GAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(rec.PrevHash), msg...)...)
+				payload := append([]byte("AGENTAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(rec.PrevHash), msg...)...)
 				sigBytes, err := base64.RawURLEncoding.DecodeString(rec.Signature)
 				if err != nil || len(sigBytes) != ed25519.SignatureSize || !ed25519.Verify(pub, payload, sigBytes) {
 					invalidSigs++
@@ -247,7 +247,7 @@ func SignRotationSummary(sum *RotationSummary, priv ed25519.PrivateKey, kid stri
 	if err != nil {
 		return err
 	}
-	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+	msg := append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), enc...)
 	sig := ed25519.Sign(priv, msg)
 	sum.Kid = kid
 	sum.Signature = base64.RawURLEncoding.EncodeToString(sig)
@@ -269,7 +269,7 @@ func AppendSignatureToSummary(sum *RotationSummary, priv ed25519.PrivateKey, kid
 	if err != nil {
 		return err
 	}
-	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+	msg := append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), enc...)
 	sig := ed25519.Sign(priv, msg)
 	sigStr := base64.RawURLEncoding.EncodeToString(sig)
 	// If legacy fields empty, populate for backward compatibility.
@@ -320,7 +320,7 @@ func VerifyRotationSummary(sum *RotationSummary, pub ed25519.PublicKey) (bool, s
 		metrics.RotationSignatureVerifyLatency.Observe(time.Since(start).Seconds())
 		return false, reasonSerializationFail
 	}
-	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+	msg := append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), enc...)
 	sigBytes, err := base64.RawURLEncoding.DecodeString(sum.Signature)
 	if err != nil {
 		rotationSignatureVerifyFailures.WithLabelValues(reasonSignatureInvalid).Inc()

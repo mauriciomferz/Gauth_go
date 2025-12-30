@@ -112,15 +112,15 @@ cat ~/.kube/config | base64 -w 0     # Linux
 **Option 2: Create dedicated kubeconfig (recommended)**:
 ```bash
 # Create a service account for CI/CD
-kubectl create serviceaccount gauth-cicd -n gauth-staging
+kubectl create serviceaccount agentauth-cicd -n agentauth-staging
 
 # Create ClusterRoleBinding (or RoleBinding for namespace-scoped)
-kubectl create clusterrolebinding gauth-cicd-binding \
+kubectl create clusterrolebinding agentauth-cicd-binding \
   --clusterrole=cluster-admin \
-  --serviceaccount=gauth-staging:gauth-cicd
+  --serviceaccount=agentauth-staging:agentauth-cicd
 
 # Get the service account token (Kubernetes 1.24+)
-kubectl create token gauth-cicd -n gauth-staging --duration=876000h > /tmp/sa-token
+kubectl create token agentauth-cicd -n agentauth-staging --duration=876000h > /tmp/sa-token
 
 # Get cluster info
 CLUSTER_NAME=$(kubectl config view -o jsonpath='{.clusters[0].name}')
@@ -128,7 +128,7 @@ CLUSTER_SERVER=$(kubectl config view -o jsonpath='{.clusters[0].cluster.server}'
 CLUSTER_CA=$(kubectl config view --raw -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
 
 # Create dedicated kubeconfig
-cat > /tmp/gauth-cicd-kubeconfig.yaml <<EOF
+cat > /tmp/agentauth-cicd-kubeconfig.yaml <<EOF
 apiVersion: v1
 kind: Config
 clusters:
@@ -139,22 +139,22 @@ clusters:
 contexts:
 - context:
     cluster: ${CLUSTER_NAME}
-    namespace: gauth-staging
-    user: gauth-cicd
-  name: gauth-cicd-context
-current-context: gauth-cicd-context
+    namespace: agentauth-staging
+    user: agentauth-cicd
+  name: agentauth-cicd-context
+current-context: agentauth-cicd-context
 users:
-- name: gauth-cicd
+- name: agentauth-cicd
   user:
     token: $(cat /tmp/sa-token)
 EOF
 
 # Base64 encode for GitHub secret
-cat /tmp/gauth-cicd-kubeconfig.yaml | base64 | pbcopy  # macOS
-cat /tmp/gauth-cicd-kubeconfig.yaml | base64 -w 0     # Linux
+cat /tmp/agentauth-cicd-kubeconfig.yaml | base64 | pbcopy  # macOS
+cat /tmp/agentauth-cicd-kubeconfig.yaml | base64 -w 0     # Linux
 
 # Cleanup
-rm /tmp/sa-token /tmp/gauth-cicd-kubeconfig.yaml
+rm /tmp/sa-token /tmp/agentauth-cicd-kubeconfig.yaml
 ```
 
 **Value**: Base64-encoded kubeconfig (paste from clipboard)
@@ -171,7 +171,7 @@ rm /tmp/sa-token /tmp/gauth-cicd-kubeconfig.yaml
 1. Go to your Slack workspace
 2. Navigate to **Apps** → **Incoming Webhooks** (or create one at https://api.slack.com/apps)
 3. Click **Add to Slack**
-4. Choose channel (e.g., `#gauth-cicd`)
+4. Choose channel (e.g., `#agentauth-cicd`)
 5. Click **Add Incoming WebHooks integration**
 6. Copy **Webhook URL**
 
@@ -186,7 +186,7 @@ rm /tmp/sa-token /tmp/gauth-cicd-kubeconfig.yaml
 **Creation Steps**:
 1. Go to https://codecov.io/
 2. Sign in with GitHub
-3. Add your repository (`mauriciomferz/Gauth_go`)
+3. Add your repository (`mauriciomferz/AgentAuth`)
 4. Copy **Repository Upload Token**
 
 **Value**: Codecov token (or leave blank if not using Codecov)
@@ -208,11 +208,11 @@ rm /tmp/sa-token /tmp/gauth-cicd-kubeconfig.yaml
 echo $GITHUB_PAT | docker login ghcr.io -u mauriciomferz --password-stdin
 
 # Tag and push test image
-docker build -t ghcr.io/mauriciomferz/gauth:test .
-docker push ghcr.io/mauriciomferz/gauth:test
+docker build -t ghcr.io/mauriciomferz/agentauth:test .
+docker push ghcr.io/mauriciomferz/agentauth:test
 
 # Verify image
-docker pull ghcr.io/mauriciomferz/gauth:test
+docker pull ghcr.io/mauriciomferz/agentauth:test
 ```
 
 **GitHub Secrets**:
@@ -242,12 +242,12 @@ apt install awscli   # Linux
 aws configure
 
 # Create ECR repository
-aws ecr create-repository --repository-name gauth --region us-east-1
+aws ecr create-repository --repository-name agentauth --region us-east-1
 
 # Get registry URL
-aws ecr describe-repositories --repository-names gauth --region us-east-1 \
+aws ecr describe-repositories --repository-names agentauth --region us-east-1 \
   --query 'repositories[0].repositoryUri' --output text
-# Output: 123456789012.dkr.ecr.us-east-1.amazonaws.com/gauth
+# Output: 123456789012.dkr.ecr.us-east-1.amazonaws.com/agentauth
 
 # Login locally (test)
 aws ecr get-login-password --region us-east-1 | \
@@ -255,8 +255,8 @@ aws ecr get-login-password --region us-east-1 | \
   123456789012.dkr.ecr.us-east-1.amazonaws.com
 
 # Tag and push test image
-docker build -t 123456789012.dkr.ecr.us-east-1.amazonaws.com/gauth:test .
-docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/gauth:test
+docker build -t 123456789012.dkr.ecr.us-east-1.amazonaws.com/agentauth:test .
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/agentauth:test
 ```
 
 **GitHub Secrets**:
@@ -311,31 +311,31 @@ gcloud config set project YOUR_PROJECT_ID
 gcloud services enable containerregistry.googleapis.com
 
 # Create service account
-gcloud iam service-accounts create gauth-cicd \
+gcloud iam service-accounts create agentauth-cicd \
   --display-name "AgentAuth CI/CD" \
   --project YOUR_PROJECT_ID
 
 # Grant permissions
 gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
-  --member="serviceAccount:gauth-cicd@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
+  --member="serviceAccount:agentauth-cicd@YOUR_PROJECT_ID.iam.gserviceaccount.com" \
   --role="roles/storage.admin"
 
 # Create and download key
-gcloud iam service-accounts keys create ~/gauth-cicd-key.json \
-  --iam-account gauth-cicd@YOUR_PROJECT_ID.iam.gserviceaccount.com
+gcloud iam service-accounts keys create ~/agentauth-cicd-key.json \
+  --iam-account agentauth-cicd@YOUR_PROJECT_ID.iam.gserviceaccount.com
 
 # Login locally (test)
-cat ~/gauth-cicd-key.json | docker login -u _json_key --password-stdin gcr.io
+cat ~/agentauth-cicd-key.json | docker login -u _json_key --password-stdin gcr.io
 
 # Tag and push test image
-docker build -t gcr.io/YOUR_PROJECT_ID/gauth:test .
-docker push gcr.io/YOUR_PROJECT_ID/gauth:test
+docker build -t gcr.io/YOUR_PROJECT_ID/agentauth:test .
+docker push gcr.io/YOUR_PROJECT_ID/agentauth:test
 ```
 
 **GitHub Secrets**:
 - `DOCKER_REGISTRY`: `gcr.io/YOUR_PROJECT_ID`
 - `DOCKER_USERNAME`: `_json_key`
-- `DOCKER_PASSWORD`: (Full JSON content of `~/gauth-cicd-key.json`)
+- `DOCKER_PASSWORD`: (Full JSON content of `~/agentauth-cicd-key.json`)
 
 **Security Note**: Store JSON key securely. Consider using [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) for GKE.
 
@@ -462,7 +462,7 @@ kubectl get nodes
 kubectl get storageclass
 
 # Check namespace
-kubectl get namespace gauth-staging
+kubectl get namespace agentauth-staging
 ```
 
 ---
@@ -482,7 +482,7 @@ kubectl get namespace gauth-staging
 1. In your app settings, go to **Incoming Webhooks**
 2. Toggle **Activate Incoming Webhooks** to **On**
 3. Click **Add New Webhook to Workspace**
-4. Select channel: `#gauth-cicd` (or create new channel)
+4. Select channel: `#agentauth-cicd` (or create new channel)
 5. Click **Allow**
 6. Copy **Webhook URL** (looks like `https://hooks.slack.com/services/...`)
 7. Save as `SLACK_WEBHOOK_URL` GitHub secret
@@ -582,13 +582,13 @@ git status
 git push origin main
 
 # Watch workflow
-# Go to: https://github.com/mauriciomferz/Gauth_go/actions
+# Go to: https://github.com/mauriciomferz/AgentAuth/actions
 ```
 
 **Option 2: Manual workflow dispatch** (test without push):
 ```bash
 # Go to GitHub Actions UI
-# 1. Navigate to: https://github.com/mauriciomferz/Gauth_go/actions
+# 1. Navigate to: https://github.com/mauriciomferz/AgentAuth/actions
 # 2. Click "Deploy to Staging" workflow
 # 3. Click "Run workflow"
 # 4. Select environment: staging
@@ -626,19 +626,19 @@ gh run view --log
 **Via kubectl** (check deployed pods):
 ```bash
 # Watch pods
-watch -n 2 kubectl get pods -n gauth-staging
+watch -n 2 kubectl get pods -n agentauth-staging
 
 # Check rollout status
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 
 # Check logs
-kubectl logs -f deployment/gauth-deployment -n gauth-staging
+kubectl logs -f deployment/agentauth-deployment -n agentauth-staging
 
 # Check service
-kubectl get svc -n gauth-staging
+kubectl get svc -n agentauth-staging
 
 # Check ingress
-kubectl get ingress -n gauth-staging
+kubectl get ingress -n agentauth-staging
 ```
 
 ---
@@ -687,7 +687,7 @@ kubectl create secret docker-registry regcred \
   --docker-server=$DOCKER_REGISTRY \
   --docker-username=$DOCKER_USERNAME \
   --docker-password=$DOCKER_PASSWORD \
-  --namespace=gauth-staging
+  --namespace=agentauth-staging
 
 # Add imagePullSecrets to deployment
 # spec:
@@ -702,18 +702,18 @@ kubectl create secret docker-registry regcred \
 **Solution**:
 ```bash
 # Check pod status
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 
 # Describe pod
-kubectl describe pod <pod-name> -n gauth-staging
+kubectl describe pod <pod-name> -n agentauth-staging
 
 # Check logs
-kubectl logs <pod-name> -n gauth-staging
+kubectl logs <pod-name> -n agentauth-staging
 
 # Common causes:
 # - Database connection failure (check postgres-service)
 # - Redis connection failure (check redis-service)
-# - Missing secrets (check gauth-secrets)
+# - Missing secrets (check agentauth-secrets)
 # - Health check misconfiguration
 ```
 
@@ -808,10 +808,10 @@ gh run download <run-id>
 **Check Kubernetes events**:
 ```bash
 # All events in namespace
-kubectl get events -n gauth-staging --sort-by='.lastTimestamp'
+kubectl get events -n agentauth-staging --sort-by='.lastTimestamp'
 
 # Watch events
-kubectl get events -n gauth-staging --watch
+kubectl get events -n agentauth-staging --watch
 ```
 
 ---
@@ -829,7 +829,7 @@ Before pushing to GitHub, verify:
 - [ ] NGINX Ingress Controller installed
 - [ ] cert-manager installed with ClusterIssuer
 - [ ] metrics-server installed
-- [ ] Namespace `gauth-staging` created
+- [ ] Namespace `agentauth-staging` created
 - [ ] Secrets applied with actual JWT/Ed25519 keys and passwords
 - [ ] Docker registry accessible (test `docker login`)
 - [ ] Slack webhook tested (test `curl`)
@@ -839,7 +839,7 @@ Once all checklist items are verified:
 git push origin main
 ```
 
-Then monitor the workflow at: https://github.com/mauriciomferz/Gauth_go/actions
+Then monitor the workflow at: https://github.com/mauriciomferz/AgentAuth/actions
 
 ---
 

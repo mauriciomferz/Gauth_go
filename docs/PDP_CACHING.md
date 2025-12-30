@@ -49,7 +49,7 @@ This ensures:
 
 - **Per entry**: ~1KB (decision + metadata + cache bookkeeping)
 - **Default capacity**: 1000 entries = ~1MB memory
-- **Configurable**: Set via `GAUTH_PDP_CACHE_SIZE` environment variable
+- **Configurable**: Set via `AGENTAUTH_PDP_CACHE_SIZE` environment variable
 
 ## Configuration
 
@@ -59,13 +59,13 @@ This ensures:
 # Cache capacity (number of entries)
 # Default: 1000
 # Set to 0 to disable caching
-export GAUTH_PDP_CACHE_SIZE=5000
+export AGENTAUTH_PDP_CACHE_SIZE=5000
 
 # Cache TTL (time-to-live for each entry)
 # Default: 5m
 # Format: duration string (e.g., "1m", "30s", "1h")
 # Set to 0 for no expiration (not recommended)
-export GAUTH_PDP_CACHE_TTL=10m
+export AGENTAUTH_PDP_CACHE_TTL=10m
 ```
 
 ### Code Configuration
@@ -73,7 +73,7 @@ export GAUTH_PDP_CACHE_TTL=10m
 ```go
 import (
     "time"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 // Option 1: Environment-based configuration (recommended)
@@ -102,7 +102,7 @@ import (
     "fmt"
     "time"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -249,16 +249,16 @@ For workloads with **80% cache hit rate** (typical for authorization patterns):
 
 ```bash
 # High-traffic API gateway
-export GAUTH_PDP_CACHE_SIZE=50000
-export GAUTH_PDP_CACHE_TTL=15m
+export AGENTAUTH_PDP_CACHE_SIZE=50000
+export AGENTAUTH_PDP_CACHE_TTL=15m
 
 # Microservice with frequent policy updates
-export GAUTH_PDP_CACHE_SIZE=5000
-export GAUTH_PDP_CACHE_TTL=1m
+export AGENTAUTH_PDP_CACHE_SIZE=5000
+export AGENTAUTH_PDP_CACHE_TTL=1m
 
 # Single-tenant SaaS application
-export GAUTH_PDP_CACHE_SIZE=10000
-export GAUTH_PDP_CACHE_TTL=10m
+export AGENTAUTH_PDP_CACHE_SIZE=10000
+export AGENTAUTH_PDP_CACHE_TTL=10m
 ```
 
 ## Cache Invalidation Strategy
@@ -405,7 +405,7 @@ func (s *PolicyService) UpdatePolicy(policy Policy) error {
 **Option 3: Short TTL**
 ```bash
 # Use shorter TTL for multi-instance (accept some cache staleness)
-export GAUTH_PDP_CACHE_TTL=1m
+export AGENTAUTH_PDP_CACHE_TTL=1m
 ```
 
 ## Testing
@@ -455,7 +455,7 @@ go test -v ./pkg/pdp/... -run TestInMemoryEngine_WithCache
 A: No. Cache entries expire via TTL and can be invalidated on policy changes. The cache is transparent to decision logic.
 
 **Q: What happens if cache is disabled?**  
-A: Setting `GAUTH_PDP_CACHE_SIZE=0` disables caching. All decisions go through policy evaluation (no performance benefit).
+A: Setting `AGENTAUTH_PDP_CACHE_SIZE=0` disables caching. All decisions go through policy evaluation (no performance benefit).
 
 **Q: Can I use external cache (Redis)?**  
 A: Not yet. This is planned for Phase 3. Current implementation is in-memory only.

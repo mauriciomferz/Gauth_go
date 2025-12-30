@@ -116,7 +116,7 @@ go tool pprof mem.prof
 # - Manual workflow dispatch
 
 # View results:
-# https://github.com/mauriciomferz/Gauth_go/actions/workflows/revocation-benchmarks.yml
+# https://github.com/mauriciomferz/AgentAuth/actions/workflows/revocation-benchmarks.yml
 ```
 
 ---

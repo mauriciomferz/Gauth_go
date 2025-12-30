@@ -151,7 +151,7 @@ COMMENT ON TABLE webhook_events IS 'Available webhook event types';
 COMMENT ON VIEW webhook_stats IS 'Webhook delivery statistics and success rates';
 
 -- Grant permissions (adjust based on your user setup)
--- GRANT SELECT, INSERT, UPDATE, DELETE ON webhooks TO gauth_app;
--- GRANT SELECT, INSERT, UPDATE ON webhook_deliveries TO gauth_app;
--- GRANT SELECT ON webhook_events TO gauth_app;
--- GRANT SELECT ON webhook_stats TO gauth_app;
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON webhooks TO agentauth_app;
+-- GRANT SELECT, INSERT, UPDATE ON webhook_deliveries TO agentauth_app;
+-- GRANT SELECT ON webhook_events TO agentauth_app;
+-- GRANT SELECT ON webhook_stats TO agentauth_app;

@@ -1,15 +1,15 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gauth-hpa
-  namespace: gauth-system
+  name: agentauth-hpa
+  namespace: agentauth-system
   labels:
-    app: gauth
+    app: agentauth
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gauth-with-opa
+    name: agentauth-with-opa
   minReplicas: 3
   maxReplicas: 10
   metrics:
@@ -61,8 +61,8 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gauth-hpa-config
-  namespace: gauth-system
+  name: agentauth-hpa-config
+  namespace: agentauth-system
 data:
   scaling-notes: |
     HPA Configuration Notes:
@@ -85,4 +85,4 @@ data:
     - Maximum: 10 (cost control)
     
     Monitoring:
-    kubectl get hpa gauth-hpa -n gauth-system -w
+    kubectl get hpa agentauth-hpa -n agentauth-system -w

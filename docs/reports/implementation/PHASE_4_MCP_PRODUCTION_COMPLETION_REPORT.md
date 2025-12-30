@@ -403,10 +403,10 @@ if err != nil {
 
 ---
 
-## RFC-0111 Compliance Impact
+## AAP-001 Compliance Impact
 
-**Before Phase 4:** 85% RFC-0111 compliance  
-**After Phase 4:** **95% RFC-0111 compliance** (+10%)
+**Before Phase 4:** 85% AAP-001 compliance  
+**After Phase 4:** **95% AAP-001 compliance** (+10%)
 
 **MCP-Specific Compliance:**
 - **Phase 1 (Core):** 30% → Client functional
@@ -816,7 +816,7 @@ manager.CloseAll()
    - Connection pool exhaustion
    - Rate limit violations
 
-**Impact:** RFC-0111 compliance 95% → **98%** (+3%)
+**Impact:** AAP-001 compliance 95% → **98%** (+3%)
 
 ---
 
@@ -831,7 +831,7 @@ Phase 4 MCP Production Hardening is **complete and production-ready** for all tr
 ✅ **Auto-Reconnection** - Exponential backoff, max 5 attempts  
 ✅ **Health Monitoring** - Periodic connection checks  
 ✅ **Real-time Metrics** - Comprehensive observability  
-✅ **RFC-0111 Compliance** - 95% achieved (+10% from Phase 3)  
+✅ **AAP-001 Compliance** - 95% achieved (+10% from Phase 3)  
 
 The MCP integration is ready for:
 - Enterprise-scale production deployments
@@ -848,7 +848,7 @@ The MCP integration is ready for:
 **Session Duration:** ~1.5 hours  
 **Lines of Code Added:** 1,250 lines (3 transports + pooling)  
 **Test Coverage:** 35.2% (needs transport-specific tests)  
-**RFC-0111 Compliance:** 95% (+10%) ✅
+**AAP-001 Compliance:** 95% (+10%) ✅
 
 ---
 

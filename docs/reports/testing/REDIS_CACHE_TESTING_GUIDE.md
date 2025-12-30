@@ -12,7 +12,7 @@ owners: [system]
 
 ### 1. Start Redis (Docker)
 ```bash
-docker run -d -p 6379:6379 --name gauth-redis redis:7-alpine
+docker run -d -p 6379:6379 --name agentauth-redis redis:7-alpine
 ```
 
 ### 2. Configure Environment
@@ -192,19 +192,19 @@ watch -n 1 'curl -s -X GET http://localhost:8080/api/v1/admin/cache/stats \
 ### Monitor Redis (if using Redis)
 ```bash
 # Connect to Redis CLI
-docker exec -it gauth-redis redis-cli
+docker exec -it agentauth-redis redis-cli
 
 # Monitor commands
 MONITOR
 
 # Get all keys
-KEYS gauth:*
+KEYS agentauth:*
 
 # Get specific key
-GET gauth:poa:123
+GET agentauth:poa:123
 
 # Get TTL
-TTL gauth:poa:123
+TTL agentauth:poa:123
 ```
 
 ## Troubleshooting
@@ -215,10 +215,10 @@ TTL gauth:poa:123
 docker ps | grep redis
 
 # Check Redis logs
-docker logs gauth-redis
+docker logs agentauth-redis
 
 # Test Redis connection
-docker exec -it gauth-redis redis-cli PING
+docker exec -it agentauth-redis redis-cli PING
 # Should return: PONG
 ```
 
@@ -252,14 +252,14 @@ Cache is automatically invalidated on:
 
 ### Cache Keys
 ```
-gauth:poa:{poaID}              # Individual PoA
-gauth:poa:list:{userID}        # User's PoA list
-gauth:user:{userID}            # User data
-gauth:verification:{poaID}     # Verification results
-gauth:stats:{statType}         # Statistics
-gauth:blockchain:sync:{poaID}  # Blockchain sync
-gauth:blockchain:verify:{poaID}# Blockchain verification
-gauth:session:{sessionID}      # User sessions
+agentauth:poa:{poaID}              # Individual PoA
+agentauth:poa:list:{userID}        # User's PoA list
+agentauth:user:{userID}            # User data
+agentauth:verification:{poaID}     # Verification results
+agentauth:stats:{statType}         # Statistics
+agentauth:blockchain:sync:{poaID}  # Blockchain sync
+agentauth:blockchain:verify:{poaID}# Blockchain verification
+agentauth:session:{sessionID}      # User sessions
 ```
 
 ## Integration Status

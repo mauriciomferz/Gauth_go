@@ -11,7 +11,7 @@
 The QA audit claimed JWT/JWE serialization was **MISSING**. Investigation reveals this is **INCORRECT** - comprehensive JWT serialization implementation exists in `extended_token_service.go` using the industry-standard `golang-jwt/jwt/v5` library (v5.3.0).
 
 **Implementation Status**: **100% COMPLETE**  
-**Code Location**: `pkg/gauth/extended_token_service.go`  
+**Code Location**: `pkg/agentauth/extended_token_service.go`  
 **Library**: `github.com/golang-jwt/jwt/v5` v5.3.0
 
 ---
@@ -36,7 +36,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		"token_type": token.TokenType,
 		"scope":      token.Scope,
 		
-		// RFC-0111 extended claims
+		// AAP-001 extended claims
 		"client_owner":      token.ClientOwner,
 		"owners_authorizer": token.OwnersAuthorizer,
 		"resource_owner":    token.ResourceOwner,
@@ -58,7 +58,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 
 **Features**:
 - ✅ Standard JWT claims (iss, sub, aud, exp, iat, jti)
-- ✅ RFC-0111 extended claims (grant_id, client_owner, legal_framework)
+- ✅ AAP-001 extended claims (grant_id, client_owner, legal_framework)
 - ✅ HMAC-SHA256 signing
 - ✅ Compact serialization format (header.payload.signature)
 - ✅ Error handling
@@ -115,7 +115,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 	}
 	...
 
-	// Extract RFC-0111 extended claims
+	// Extract AAP-001 extended claims
 	if grantID, ok := claims["grant_id"].(string); ok {
 		token.GrantID = grantID
 	}
@@ -200,7 +200,7 @@ github.com/golang-jwt/jwt/v5 v5.3.0
 
 ---
 
-## RFC-0111 Compliance
+## AAP-001 Compliance
 
 ### Token Format
 
@@ -227,7 +227,7 @@ SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 | `iat` (Issued At) | ✅ | Line 224: `token.IssuedAt.Unix()` |
 | `jti` (JWT ID) | ✅ | Line 225: `token.AccessToken` (unique ID) |
 
-### Extended Claims (RFC-0111)
+### Extended Claims (AAP-001)
 
 | Claim | Status | Implementation |
 |-------|--------|----------------|
@@ -248,7 +248,7 @@ SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 
 ### Existing Unit Tests
 
-**File**: `pkg/gauth/extended_token_service_test.go`
+**File**: `pkg/agentauth/extended_token_service_test.go`
 
 Tests for token creation (which internally uses JWT encoding):
 - `TestExtendedTokenService_CreateExtendedToken`
@@ -298,7 +298,7 @@ The `CreateExtendedToken` function is called by:
 - Using industry-standard library (golang-jwt/jwt/v5)
 - Comprehensive error handling
 - RFC 7519 compliant
-- RFC-0111 extended claims support
+- AAP-001 extended claims support
 - Active production use
 
 **Time to Production**: **0 months** (already deployed)
@@ -309,11 +309,11 @@ The `CreateExtendedToken` function is called by:
 
 ## References
 
-1. `pkg/gauth/extended_token_service.go` - Primary implementation
+1. `pkg/agentauth/extended_token_service.go` - Primary implementation
 2. `go.mod` - Library dependency (jwt/v5 v5.3.0)
 3. RFC 7519 - JSON Web Token (JWT) specification
 4. RFC 7515 - JSON Web Signature (JWS) - Compact Serialization
-5. RFC-0111 - AgentAuth 1.0 Authorization Framework (extended claims)
+5. AAP-001 - AgentAuth 1.0 Authorization Framework (extended claims)
 
 **Validation Date**: November 12, 2025  
 **Validator**: AI Code Analysis + Manual Code Review

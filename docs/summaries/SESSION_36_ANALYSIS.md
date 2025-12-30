@@ -97,7 +97,7 @@ To reach 75% coverage would require:
   - EncodeRawPOAChain: 83.3%
   
 - **Comprehensive test scenarios:**
-  - RFC-0115 compliance validation
+  - AAP-002 compliance validation
   - CBOR streaming encoding/decoding
   - Memory service CRUD operations
   - Edge cases and error handling
@@ -147,7 +147,7 @@ If 75% target is mandatory:
 4. **Revise target** to "50% coverage" (achieved) rather than "75%" (impractical)
 
 ### For Future Phases
-1. **Phase 3:** Move to next priority package (e.g., pkg/rfc0111)
+1. **Phase 3:** Move to next priority package (e.g., pkg/aap001)
 2. **Code quality:** Consider refactoring pkg/poa for better testability as separate initiative
 3. **CBOR compatibility:** Address encoder/decoder issues in dedicated session
 4. **Testing infrastructure:** Build mocking capabilities for future use

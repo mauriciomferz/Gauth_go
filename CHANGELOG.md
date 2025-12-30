@@ -60,7 +60,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 
 ### Deployed
 - **GitHub Repositories**: Successfully pushed updates to both repositories
-  - mauriciomferz/Gauth_go (main branch)
+  - mauriciomferz/AgentAuth (main branch)
   - AgentAuth-Foundation/AgentAuth_Platform-AgentAuth_Server_Prototype (web-interactive-forms-fix branch)
 
 - `DISCLAIMER.md` centralizing NOT production ready rationale and enumerating intentionally missing controls.
@@ -170,7 +170,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 
 ## 2025-10-20
 ### Added
-- Revocation auto-sign instrumentation: internal counters (emitted, skipped_empty, skipped_duplicate) with Prometheus exposition endpoint `GET /api/v1/beta/metrics/revocation/auto-sign/prometheus` and OpenTelemetry observable gauges (`gauth_revocation_auto_sign_emitted`, `..._skipped_empty`, `..._skipped_duplicate`).
+- Revocation auto-sign instrumentation: internal counters (emitted, skipped_empty, skipped_duplicate) with Prometheus exposition endpoint `GET /api/v1/beta/metrics/revocation/auto-sign/prometheus` and OpenTelemetry observable gauges (`agentauth_revocation_auto_sign_emitted`, `..._skipped_empty`, `..._skipped_duplicate`).
 - Prometheus test coverage ensuring revocation counters appear with expected values after simulated rotations (`web/revocation_prometheus_metrics_test.go`).
 ### Changed
 - OpenTelemetry metrics initialization now guarded via `sync.Once` to prevent duplicate exporter setup when multiple `BetaServer` instances are constructed in test processes (eliminates noisy duplicate metric registrations and ensures idempotent instrumentation).
@@ -182,7 +182,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 ### Added
 - Multi-signature verification granular metrics: counters for structural, digest, public key missing, invalid signature, threshold, and weight failures plus dedicated latency histogram (`multi_signature_verification_latency_seconds`).
 - Satisfied signature/weight fields surfaced in `PowerOfAttorney` struct after successful multi-signature validation.
-- Domain separation v2 (`GAUTH_MULTI_SIG_DOMAIN_V2=1`) embedding threshold and sorted weight map into digest prefix to prevent cross-mode collisions.
+- Domain separation v2 (`AGENTAUTH_MULTI_SIG_DOMAIN_V2=1`) embedding threshold and sorted weight map into digest prefix to prevent cross-mode collisions.
 ### Changed
 - Hardened weight map parsing (duplicate keys, unknown signer, non-positive / overflow weights, total possible weight < threshold invalidates weighted mode fallback to count-based semantics).
 - Verification path instrumentation now records granular counters before generic failure counter increments.
@@ -192,8 +192,8 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 - Domain v2 disabled by default for backward compatibility; enabling requires re-issuance of multi-signature delegations. Future roadmap includes dual-domain acceptance window.
 
 ### Added (Migration & Sunset Instrumentation)
-- Envelope versioning rollout monitoring: gauge `gauth_rfc0111_envelope_v2_adoption_ratio` computing V2 issuance ratio vs total (updated each issuance).
-- Digest integrity counter `gauth_rfc0111_envelope_digest_mismatch_total` detecting canonical digest mismatches during verification.
+- Envelope versioning rollout monitoring: gauge `agentauth_rfc0111_envelope_v2_adoption_ratio` computing V2 issuance ratio vs total (updated each issuance).
+- Digest integrity counter `agentauth_rfc0111_envelope_digest_mismatch_total` detecting canonical digest mismatches during verification.
 - `OBSERVABILITY.md` extended with rollout monitoring & mismatch troubleshooting sections (alert examples, ratio thresholds, security considerations).
 - ADR `docs/ADR-envelope-v1-sunset.md` defining phased deprecation lifecycle: Pilot → Broad → Stabilization → Soft Deprecation → Sunset → Post-Verification.
 - GAP matrix updated to reflect implemented adoption ratio gauge & mismatch counter, and to adjust remediation targets toward sunset execution tasks.
@@ -203,15 +203,15 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 - `AAP-001_0115_remediation_plan.md` updated: new epic for Envelope V1 Sunset Execution; success metrics extended with adoption & mismatch criteria.
 
 ### Added (Cadence & Phase Instrumentation)
-- Issuance cadence histogram (`gauth_rfc0111_envelope_issuance_cadence_seconds`) recording inter-issuance intervals.
-- Sunset phase gauge (`gauth_rfc0111_envelope_v1_sunset_phase`) exposing lifecycle phase (Pilot→Post-Verification) for V1 deprecation governance.
+- Issuance cadence histogram (`agentauth_rfc0111_envelope_issuance_cadence_seconds`) recording inter-issuance intervals.
+- Sunset phase gauge (`agentauth_rfc0111_envelope_v1_sunset_phase`) exposing lifecycle phase (Pilot→Post-Verification) for V1 deprecation governance.
 
 ### Added (Policy Governance)
 - Policy bundle versioning: each appended bundle assigned monotonically increasing `version` incorporated into provenance hash.
 - Rollback API endpoint: `POST /api/v1/beta/policy/rollback?version=NN` allowing temporary reversion to historical bundle without mutating chain history.
 - Policy evaluation response now includes `policy_version` tagging decisions with effective bundle version for audit correlation.
 - Chain pagination endpoint extended with `versions` array aligned to returned `hashes` plus `active_version` field.
-- Prometheus metrics: `gauth_policy_revisions_total` (counter) and `gauth_policy_active_version` (gauge) for governance observability and rollback detection.
+- Prometheus metrics: `agentauth_policy_revisions_total` (counter) and `agentauth_policy_active_version` (gauge) for governance observability and rollback detection.
 - Test coverage: version auto-increment, rollback activation, rollback clearing on new append, evaluation version tagging (`web/policy_version_rollback_test.go`).
 
 ### Changed (Policy Governance)
@@ -267,7 +267,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 
 ### Cryptography Upgrade (Ed25519 JWKS)
 #### Added
-- Dual token signing modes (`GAUTH_TOKEN_SIG_MODE=hmac|eddsa`) with Ed25519 (EdDSA) public-key issuance.
+- Dual token signing modes (`AGENTAUTH_TOKEN_SIG_MODE=hmac|eddsa`) with Ed25519 (EdDSA) public-key issuance.
 - Unified JWKS endpoint now publishes OKP Ed25519 keys (`kty=OKP`, `crv=Ed25519`, `alg=EdDSA`, `use=sig`, `kid`, `expires_at`).
 - Discovery document fields: `eddsa_enabled`, `eddsa_keys`, `eddsa_rotation_hours` for client introspection.
 - Manual rotation utility (`cmd/rotate-key`) and Makefile targets: `crypto-rotate`, `crypto-test`.
@@ -298,31 +298,31 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 ### Changed
 - Conformance CLI consolidated: legacy deprecated entry point replaced with minimal stub printing migration notice. Canonical runner is `cmd/conformance`.
 ### Deprecated
-- `conformance/cmd/gauth-conformance` stub scheduled for removal after 2025-10-25; external scripts should migrate now.
+- `conformance/cmd/agentauth-conformance` stub scheduled for removal after 2025-10-25; external scripts should migrate now.
 ### Notes
 - Full removal will occur in subsequent refactor once CI/scripts confirm no lingering dependence on legacy path.
 
 ## 2025-10-20
 ### Added
 - Rotation ledger signed summary Prometheus metrics:
-	- `gauth_rotation_summary_latency_seconds` (histogram)
-	- `gauth_rotation_summary_total{outcome}` (success/error)
-	- `gauth_rotation_summary_anchor_total{result}` (anchored/skipped/error)
+	- `agentauth_rotation_summary_latency_seconds` (histogram)
+	- `agentauth_rotation_summary_total{outcome}` (success/error)
+	- `agentauth_rotation_summary_anchor_total{result}` (anchored/skipped/error)
 - README documentation section: "Rotation Summary Metrics" with operational guidance, failure modes, and troubleshooting steps.
 - Client verification helper (`pkg/verification/rotation_summary.go`) for fetching & verifying signed rotation summary (unit tests for valid + tampered signature).
- - Rotation summary gauges: `gauth_rotation_summary_chain_length` and `gauth_rotation_summary_head_age_seconds` providing instantaneous ledger size and freshness metrics; README updated.
- - Rotation summary gauge: `gauth_rotation_summary_last_anchor_age_seconds` tracking seconds since last successful anchor to detect missed anchoring cadence; README updated.
+ - Rotation summary gauges: `agentauth_rotation_summary_chain_length` and `agentauth_rotation_summary_head_age_seconds` providing instantaneous ledger size and freshness metrics; README updated.
+ - Rotation summary gauge: `agentauth_rotation_summary_last_anchor_age_seconds` tracking seconds since last successful anchor to detect missed anchoring cadence; README updated.
  - Canonical rotation summary signing payload helper ensuring deterministic JSON ordering across signer and verifier (eliminates prior non-deterministic signature failures under map serialization). Added stability test and README rationale section.
  - External capability anchor receipt persistence (append-only hash chain):
-	 - New env vars: `GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH`, `GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_VERIFY_INTERVAL`.
+	 - New env vars: `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH`, `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_VERIFY_INTERVAL`.
 	 - New endpoints: `/api/v1/beta/capabilities/anchor/external/receipts`, `/latest`, `/verify`.
 	 - Metrics: `capability_external_anchor_receipts_integrity`, `capability_external_anchor_receipts_last_verify_age_seconds`, `capability_external_anchor_receipts_total`.
 	 - Background verification loop with integrity + age gauges.
 	 - Test coverage for persistence, chain integrity, and tamper detection (see `web/external_anchor_receipt_persistence_test.go`).
 	 - Architecture & Getting Started docs updated with feature overview and alerting guidance.
-	 - Deterministic test seeding env var `GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED` for `tsa_stub` provider (eliminates probabilistic flakiness in external anchor retry metrics tests; documented in `OBSERVABILITY.md`).
-	 - Forced initial failures env var `GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS` enabling guaranteed failure-before-success sequences for retry metrics validation (takes precedence over probability; documented in `OBSERVABILITY.md`).
-	 - New Prometheus counters distinguishing deterministic forced failures from probabilistic failures: `gauth_rfc0111_external_anchor_forced_failures_total` and provider-labeled `gauth_rfc0111_external_anchor_forced_failures_provider_total` (subset of `external_anchor_failures_total`). Provides clean separation for organic failure alerting; tests added (`web/capability_anchor_external_metrics_forced_failure_test.go`).
+	 - Deterministic test seeding env var `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED` for `tsa_stub` provider (eliminates probabilistic flakiness in external anchor retry metrics tests; documented in `OBSERVABILITY.md`).
+	 - Forced initial failures env var `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS` enabling guaranteed failure-before-success sequences for retry metrics validation (takes precedence over probability; documented in `OBSERVABILITY.md`).
+	 - New Prometheus counters distinguishing deterministic forced failures from probabilistic failures: `agentauth_rfc0111_external_anchor_forced_failures_total` and provider-labeled `agentauth_rfc0111_external_anchor_forced_failures_provider_total` (subset of `external_anchor_failures_total`). Provides clean separation for organic failure alerting; tests added (`web/capability_anchor_external_metrics_forced_failure_test.go`).
 ### Changed
 - `/api/v1/beta/rotations/summary` endpoint instrumented to record latency, outcome, and anchoring result in a single code path.
 ### Notes

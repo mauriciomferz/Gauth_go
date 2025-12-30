@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
-	pkgauthz "github.com/mauriciomferz/AgentAuth/pkg/authz"
+	pkagentauthz "github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
@@ -20,8 +20,8 @@ type PolicyEvaluator interface {
 
 // Authorizer abstracts the legacy memory authorizer.
 type Authorizer interface {
-	GetMetricsSnapshot() pkgauthz.MetricsSnapshot
-	Authorize(ctx context.Context, req pkgauthz.Request) (pkgauthz.Decision, error)
+	GetMetricsSnapshot() pkagentauthz.MetricsSnapshot
+	Authorize(ctx context.Context, req pkagentauthz.Request) (pkagentauthz.Decision, error)
 }
 
 // MetricsProvider is replaced by direct usage of metrics.Metrics to allow optional SnapshotEx
@@ -197,7 +197,7 @@ func (a *API) Evaluate(c *gin.Context) {
 	}
 
 	// Legacy evaluation
-	d, err := a.Authorizer.Authorize(c.Request.Context(), pkgauthz.Request{
+	d, err := a.Authorizer.Authorize(c.Request.Context(), pkagentauthz.Request{
 		Subject:  req.Subject,
 		Resource: req.Resource,
 		Action:   req.Action,
@@ -217,11 +217,11 @@ func (a *API) PrometheusHandler(c *gin.Context) {
 		return
 	}
 	// Type assert to MemoryAuthorizer for Prometheus handler
-	mem, ok := a.Authorizer.(*pkgauthz.MemoryAuthorizer)
+	mem, ok := a.Authorizer.(*pkagentauthz.MemoryAuthorizer)
 	if !ok {
 		c.String(http.StatusInternalServerError, "authorizer type not supported for prometheus")
 		return
 	}
-	handler := pkgauthz.PrometheusHandler(mem)
+	handler := pkagentauthz.PrometheusHandler(mem)
 	handler.ServeHTTP(c.Writer, c.Request)
 }

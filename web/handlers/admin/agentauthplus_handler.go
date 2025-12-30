@@ -1,0 +1,618 @@
+package admin
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
+)
+
+// AgentAuthPlusHandler handles AgentAuth+ enhanced authorization features
+type AgentAuthPlusHandler struct {
+	successorService   agentauthplus.SuccessorManagementService
+	delegationService  agentauthplus.DelegationService
+	dualControlService agentauthplus.DualControlService
+	fiduciaryService   agentauthplus.FiduciaryDutyService
+	capabilityService  agentauthplus.CapabilityAssessmentService
+}
+
+// NewAgentAuthPlusHandler creates a new AgentAuth+ handler
+func NewAgentAuthPlusHandler(pool *pgxpool.Pool) *AgentAuthPlusHandler {
+	// Wrap pgxpool in database.DB for service compatibility
+	var db *database.DB
+	if pool != nil {
+		db = &database.DB{Pool: pool}
+	}
+
+	return &AgentAuthPlusHandler{
+		successorService:   agentauthplus.NewPostgreSQLSuccessorService(db),
+		delegationService:  agentauthplus.NewPostgreSQLDelegationService(db),
+		dualControlService: agentauthplus.NewPostgreSQLDualControlService(db),
+		fiduciaryService:   agentauthplus.NewPostgreSQLFiduciaryDutyService(db),
+		capabilityService:  agentauthplus.NewPostgreSQLCapabilityAssessmentService(db),
+	}
+}
+
+// ====== Successor Management Endpoints ======
+
+// ActivateSuccessor activates successor AI when primary agent fails
+// POST /api/admin/agentauthplus/successor/:id/activate
+func (h *AgentAuthPlusHandler) ActivateSuccessor(c *gin.Context) {
+	poaID := c.Param("id")
+
+	var req struct {
+		PrimaryAgentID   string `json:"primary_agent_id" binding:"required"`
+		SuccessorAgentID string `json:"successor_agent_id" binding:"required"`
+		Reason           string `json:"reason" binding:"required,oneof=unavailable failure manual timeout"`
+		ActivatedBy      string `json:"activated_by" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	activation, err := h.successorService.ActivateSuccessor(
+		c.Request.Context(),
+		poaID,
+		req.PrimaryAgentID,
+		req.SuccessorAgentID,
+		req.Reason,
+		req.ActivatedBy,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success":    true,
+		"activation": activation,
+	})
+}
+
+// DeactivateSuccessor returns control to primary AI
+// POST /api/admin/agentauthplus/successor/:id/deactivate
+func (h *AgentAuthPlusHandler) DeactivateSuccessor(c *gin.Context) {
+	var req struct {
+		ActivationID  string `json:"activation_id" binding:"required"`
+		DeactivatedBy string `json:"deactivated_by" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.successorService.DeactivateSuccessor(
+		c.Request.Context(),
+		req.ActivationID,
+		req.DeactivatedBy,
+	); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Successor deactivated successfully",
+	})
+}
+
+// GetActiveSuccessor returns currently active successor
+// GET /api/admin/agentauthplus/successor/:id/active
+func (h *AgentAuthPlusHandler) GetActiveSuccessor(c *gin.Context) {
+	poaID := c.Param("id")
+
+	activation, err := h.successorService.GetActiveSuccessor(c.Request.Context(), poaID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if activation == nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			StatusActive: false,
+			"message":    "No active successor",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		StatusActive: true,
+		"activation": activation,
+	})
+}
+
+// ListSuccessorHistory returns activation history
+// GET /api/admin/agentauthplus/successor/:id/history
+func (h *AgentAuthPlusHandler) ListSuccessorHistory(c *gin.Context) {
+	poaID := c.Param("id")
+
+	history, err := h.successorService.ListSuccessorHistory(c.Request.Context(), poaID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"history": history,
+		"total":   len(history),
+	})
+}
+
+// ====== Delegation Management Endpoints ======
+
+// CreateDelegation creates AI-to-AI delegation
+// POST /api/admin/delegations
+func (h *AgentAuthPlusHandler) CreateDelegation(c *gin.Context) {
+	var delegation agentauthplus.AIDelegation
+
+	if err := c.ShouldBindJSON(&delegation); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Set defaults
+	if delegation.ID == "" {
+		delegation.ID = uuid.New().String()
+	}
+	delegation.CreatedAt = time.Now().UTC()
+	delegation.UpdatedAt = time.Now().UTC()
+	delegation.Status = statusActive
+
+	if err := h.delegationService.CreateDelegation(c.Request.Context(), &delegation); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success":    true,
+		"delegation": delegation,
+	})
+}
+
+// ValidateDelegation checks if delegation is allowed
+// POST /api/admin/delegations/validate
+func (h *AgentAuthPlusHandler) ValidateDelegation(c *gin.Context) {
+	var req struct {
+		SourceAgentID string   `json:"source_agent_id" binding:"required"`
+		TargetAgentID string   `json:"target_agent_id" binding:"required"`
+		Scope         []string `json:"scope" binding:"required"`
+		Depth         int      `json:"depth" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.delegationService.ValidateDelegation(
+		c.Request.Context(),
+		req.SourceAgentID,
+		req.TargetAgentID,
+		req.Scope,
+		req.Depth,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"valid":  false,
+			"reason": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"valid": true,
+	})
+}
+
+// GetDelegationChain returns full delegation chain
+// GET /api/admin/delegations/chain/:agentId
+func (h *AgentAuthPlusHandler) GetDelegationChain(c *gin.Context) {
+	agentID := c.Param("agentId")
+
+	chain, err := h.delegationService.GetDelegationChain(c.Request.Context(), agentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"agent_id": agentID,
+		"chain":    chain,
+		"depth":    len(chain),
+	})
+}
+
+// RevokeDelegation revokes active delegation
+// DELETE /api/admin/delegations/:id
+func (h *AgentAuthPlusHandler) RevokeDelegation(c *gin.Context) {
+	delegationID := c.Param("id")
+
+	var req struct {
+		RevokedBy string `json:"revoked_by" binding:"required"`
+		Reason    string `json:"reason" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.delegationService.RevokeDelegation(
+		c.Request.Context(),
+		delegationID,
+		req.RevokedBy,
+		req.Reason,
+	); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Delegation revoked successfully",
+	})
+}
+
+// ====== Dual Control Approval Endpoints ======
+
+// RequestApproval initiates approval workflow
+// POST /api/admin/approvals
+func (h *AgentAuthPlusHandler) RequestApproval(c *gin.Context) {
+	var approval agentauthplus.DualControlApproval
+
+	if err := c.ShouldBindJSON(&approval); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	approvalID, err := h.dualControlService.RequestApproval(c.Request.Context(), &approval)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success":     true,
+		"approval_id": approvalID,
+		"status":      "pending",
+	})
+}
+
+// ApproveAction records approver's approval
+// POST /api/admin/approvals/:id/approve
+func (h *AgentAuthPlusHandler) ApproveAction(c *gin.Context) {
+	approvalID := c.Param("id")
+
+	var req struct {
+		ApproverID string `json:"approver_id" binding:"required"`
+		Comments   string `json:"comments"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.dualControlService.ApproveAction(
+		c.Request.Context(),
+		approvalID,
+		req.ApproverID,
+		req.Comments,
+	); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check final status
+	status, err := h.dualControlService.CheckApprovalStatus(c.Request.Context(), approvalID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"status":  status,
+		"message": "Approval recorded",
+	})
+}
+
+// RejectAction records approver's rejection
+// POST /api/admin/approvals/:id/reject
+func (h *AgentAuthPlusHandler) RejectAction(c *gin.Context) {
+	approvalID := c.Param("id")
+
+	var req struct {
+		ApproverID string `json:"approver_id" binding:"required"`
+		Comments   string `json:"comments" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.dualControlService.RejectAction(
+		c.Request.Context(),
+		approvalID,
+		req.ApproverID,
+		req.Comments,
+	); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"status":  "rejected",
+		"message": "Rejection recorded",
+	})
+}
+
+// GetPendingApprovals returns approvals awaiting decision
+// GET /api/admin/approvals/pending
+func (h *AgentAuthPlusHandler) GetPendingApprovals(c *gin.Context) {
+	approverID := c.Query("approver_id")
+
+	approvals, err := h.dualControlService.GetPendingApprovals(c.Request.Context(), approverID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"approvals": approvals,
+		"total":     len(approvals),
+	})
+}
+
+// CheckApprovalStatus checks approval status
+// GET /api/admin/approvals/:id/status
+func (h *AgentAuthPlusHandler) CheckApprovalStatus(c *gin.Context) {
+	approvalID := c.Param("id")
+
+	status, err := h.dualControlService.CheckApprovalStatus(c.Request.Context(), approvalID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"approval_id": approvalID,
+		"status":      status,
+	})
+}
+
+// ====== Fiduciary Duty Endpoints ======
+
+// RecordViolation records fiduciary duty breach
+// POST /api/admin/violations
+func (h *AgentAuthPlusHandler) RecordViolation(c *gin.Context) {
+	var violation agentauthplus.FiduciaryDutyViolation
+
+	if err := c.ShouldBindJSON(&violation); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.fiduciaryService.RecordViolation(c.Request.Context(), &violation); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success":   true,
+		"violation": violation,
+	})
+}
+
+// GetViolations returns violations for PoA or agent
+// GET /api/admin/violations
+func (h *AgentAuthPlusHandler) GetViolations(c *gin.Context) {
+	poaID := c.Query("poa_id")
+	agentID := c.Query("agent_id")
+
+	violations, err := h.fiduciaryService.GetViolations(c.Request.Context(), poaID, agentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"violations": violations,
+		"total":      len(violations),
+	})
+}
+
+// GetViolationsBySeverity returns violations above severity threshold
+// GET /api/admin/violations/severity/:level
+func (h *AgentAuthPlusHandler) GetViolationsBySeverity(c *gin.Context) {
+	minSeverity := c.Param("level")
+
+	violations, err := h.fiduciaryService.GetViolationsBySeverity(c.Request.Context(), minSeverity)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"min_severity": minSeverity,
+		"violations":   violations,
+		"total":        len(violations),
+	})
+}
+
+// ResolveViolation marks violation as resolved
+// PUT /api/admin/violations/:id/resolve
+func (h *AgentAuthPlusHandler) ResolveViolation(c *gin.Context) {
+	violationID := c.Param("id")
+
+	var req struct {
+		ReviewedBy string `json:"reviewed_by" binding:"required"`
+		Notes      string `json:"notes" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.fiduciaryService.ResolveViolation(
+		c.Request.Context(),
+		violationID,
+		req.ReviewedBy,
+		req.Notes,
+	); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Violation resolved successfully",
+	})
+}
+
+// ====== Capability Assessment Endpoints ======
+
+// CreateAssessment creates new capability assessment
+// POST /api/admin/assessments
+func (h *AgentAuthPlusHandler) CreateAssessment(c *gin.Context) {
+	var assessment agentauthplus.AICapabilityAssessment
+
+	if err := c.ShouldBindJSON(&assessment); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.capabilityService.CreateAssessment(c.Request.Context(), &assessment); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success":    true,
+		"assessment": assessment,
+	})
+}
+
+// GetLatestAssessment returns most recent assessment
+// GET /api/admin/assessments/agent/:agentId/latest
+func (h *AgentAuthPlusHandler) GetLatestAssessment(c *gin.Context) {
+	agentID := c.Param("agentId")
+
+	assessment, err := h.capabilityService.GetLatestAssessment(c.Request.Context(), agentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if assessment == nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "No assessment found for agent",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"assessment": assessment,
+	})
+}
+
+// CheckCapabilityMatch checks if agent meets requirements
+// POST /api/admin/assessments/check-match
+func (h *AgentAuthPlusHandler) CheckCapabilityMatch(c *gin.Context) {
+	var req struct {
+		AgentID      string                           `json:"agent_id" binding:"required"`
+		Requirements agentauthplus.CapabilityRequirements `json:"requirements" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	matches, reasons, err := h.capabilityService.CheckCapabilityMatch(
+		c.Request.Context(),
+		req.AgentID,
+		&req.Requirements,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"agent_id": req.AgentID,
+		"matches":  matches,
+		"reasons":  reasons,
+	})
+}
+
+// GetExpiringAssessments returns assessments expiring soon
+// GET /api/admin/assessments/expiring?days=30
+func (h *AgentAuthPlusHandler) GetExpiringAssessments(c *gin.Context) {
+	daysStr := c.DefaultQuery("days", "30")
+	days := 30
+	if _, err := fmt.Sscanf(daysStr, "%d", &days); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid days parameter"})
+		return
+	}
+
+	assessments, err := h.capabilityService.GetExpiringAssessments(c.Request.Context(), days)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"days_until_expiry": days,
+		"count":             len(assessments),
+		"assessments":       assessments,
+	})
+}
+
+// RegisterRoutes registers all AgentAuth+ routes
+func (h *AgentAuthPlusHandler) RegisterRoutes(router *gin.RouterGroup) {
+	// Successor management routes
+	router.POST("/agentauthplus/successor/:id/activate", h.ActivateSuccessor)
+	router.POST("/agentauthplus/successor/:id/deactivate", h.DeactivateSuccessor)
+	router.GET("/agentauthplus/successor/:id/active", h.GetActiveSuccessor)
+	router.GET("/agentauthplus/successor/:id/history", h.ListSuccessorHistory)
+
+	// Delegation routes
+	router.POST("/agentauthplus/delegations", h.CreateDelegation)
+	router.POST("/agentauthplus/delegations/validate", h.ValidateDelegation)
+	router.GET("/agentauthplus/delegations/chain/:agentId", h.GetDelegationChain)
+	router.DELETE("/agentauthplus/delegations/:id", h.RevokeDelegation)
+
+	// Dual control approval routes
+	router.POST("/agentauthplus/approvals", h.RequestApproval)
+	router.POST("/agentauthplus/approvals/:id/approve", h.ApproveAction)
+	router.POST("/agentauthplus/approvals/:id/reject", h.RejectAction)
+	router.GET("/agentauthplus/approvals/pending", h.GetPendingApprovals)
+	router.GET("/agentauthplus/approvals/:id/status", h.CheckApprovalStatus)
+
+	// Fiduciary duty violation routes
+	router.POST("/agentauthplus/violations", h.RecordViolation)
+	router.GET("/agentauthplus/violations", h.GetViolations)
+	router.GET("/agentauthplus/violations/severity/:level", h.GetViolationsBySeverity)
+	router.PUT("/agentauthplus/violations/:id/resolve", h.ResolveViolation)
+
+	// Capability assessment routes
+	router.POST("/agentauthplus/assessments", h.CreateAssessment)
+	router.GET("/agentauthplus/assessments/agent/:agentId/latest", h.GetLatestAssessment)
+	router.POST("/agentauthplus/assessments/check-match", h.CheckCapabilityMatch)
+	router.GET("/agentauthplus/assessments/expiring", h.GetExpiringAssessments)
+}

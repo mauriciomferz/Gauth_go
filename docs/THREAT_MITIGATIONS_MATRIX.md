@@ -25,26 +25,26 @@ This document maps identified security threats to their implemented mitigations,
 | Threat ID | Threat Description | Severity | Mitigation Strategy | Implementation | Status | Evidence |
 |-----------|-------------------|----------|---------------------|----------------|--------|----------|
 | T1.1 | Token replay attacks | **Critical** | Durable JTI tracking with fail-closed mode | pkg/replay/durable_replay_store.go | ✅ Complete | WAL persistence, automatic snapshots, CheckAndStore() rejects duplicates |
-| T1.2 | Token expiration bypass | **High** | Temporal validation at every verification | pkg/gauth/gauth.go ValidateToken() | ✅ Complete | ValidUntil/NotBefore checks, clock skew tolerance |
-| T1.3 | Token forgery | **Critical** | Ed25519 signature verification | pkg/gauth/gauth.go:VerifySignature() | ✅ Complete | Cryptographic signature validation on every token |
-| T1.4 | Weak random JTI | **High** | Cryptographically secure random generation | pkg/gauth/gauth.go generateJTI() | ✅ Complete | crypto/rand UUID generation |
+| T1.2 | Token expiration bypass | **High** | Temporal validation at every verification | pkg/agentauth/agentauth.go ValidateToken() | ✅ Complete | ValidUntil/NotBefore checks, clock skew tolerance |
+| T1.3 | Token forgery | **Critical** | Ed25519 signature verification | pkg/agentauth/agentauth.go:VerifySignature() | ✅ Complete | Cryptographic signature validation on every token |
+| T1.4 | Weak random JTI | **High** | Cryptographically secure random generation | pkg/agentauth/agentauth.go generateJTI() | ✅ Complete | crypto/rand UUID generation |
 
 ### 2. Delegation Authority Threats
 
 | Threat ID | Threat Description | Severity | Mitigation Strategy | Implementation | Status | Evidence |
 |-----------|-------------------|----------|---------------------|----------------|--------|----------|
-| T2.1 | Unauthorized delegation creation | **Critical** | PDP authorization checks before issuance | pkg/rfc0111/rfc0111.go:1892-1924 | ✅ Complete | Evaluate() call gates all delegations |
-| T2.2 | Scope escalation in sub-delegations | **Critical** | Scope inheritance validation | pkg/rfc0111/rfc0111.go:1885-1888 | ✅ Complete | validateInheritedScope() enforces subset semantics |
-| T2.3 | Excessive delegation depth | **High** | Configurable max depth enforcement | pkg/rfc0111/rfc0111.go:1873-1884 | ✅ Complete | GAUTH_MAX_DELEGATION_DEPTH env var (default 5) |
-| T2.4 | Delegation without consent | **High** | Explicit grantor/grantee validation | pkg/rfc0111/rfc0111.go:3410-3420 | ✅ Complete | validateDelegationRequest() checks principals |
+| T2.1 | Unauthorized delegation creation | **Critical** | PDP authorization checks before issuance | pkg/aap001/aap001.go:1892-1924 | ✅ Complete | Evaluate() call gates all delegations |
+| T2.2 | Scope escalation in sub-delegations | **Critical** | Scope inheritance validation | pkg/aap001/aap001.go:1885-1888 | ✅ Complete | validateInheritedScope() enforces subset semantics |
+| T2.3 | Excessive delegation depth | **High** | Configurable max depth enforcement | pkg/aap001/aap001.go:1873-1884 | ✅ Complete | AGENTAUTH_MAX_DELEGATION_DEPTH env var (default 5) |
+| T2.4 | Delegation without consent | **High** | Explicit grantor/grantee validation | pkg/aap001/aap001.go:3410-3420 | ✅ Complete | validateDelegationRequest() checks principals |
 
 ### 3. Cryptographic Integrity Threats
 
 | Threat ID | Threat Description | Severity | Mitigation Strategy | Implementation | Status | Evidence |
 |-----------|-------------------|----------|---------------------|----------------|--------|----------|
-| T3.1 | Canonical digest tampering | **Critical** | Deterministic canonical serialization + fuzzing | pkg/rfc0111/canonical.go + canonical_fuzz_test.go | ✅ Complete | Property tests validate idempotence |
-| T3.2 | Digest mismatch detection | **Critical** | Envelope V2 detached signatures | pkg/rfc0111/rfc0111.go:858-910 + metrics_detached.go | ✅ Complete | Feature-gated Ed25519 signatures, metrics tracking |
-| T3.3 | Multi-signature threshold bypass | **Critical** | M-of-N threshold verification | pkg/rfc0111/rfc0111.go:verifyMultiSignatures() | ✅ Complete | Weighted signatures, 8 failure categorization counters |
+| T3.1 | Canonical digest tampering | **Critical** | Deterministic canonical serialization + fuzzing | pkg/aap001/canonical.go + canonical_fuzz_test.go | ✅ Complete | Property tests validate idempotence |
+| T3.2 | Digest mismatch detection | **Critical** | Envelope V2 detached signatures | pkg/aap001/aap001.go:858-910 + metrics_detached.go | ✅ Complete | Feature-gated Ed25519 signatures, metrics tracking |
+| T3.3 | Multi-signature threshold bypass | **Critical** | M-of-N threshold verification | pkg/aap001/aap001.go:verifyMultiSignatures() | ✅ Complete | Weighted signatures, 8 failure categorization counters |
 | T3.4 | Key rotation without audit | **High** | Rotation audit trail with ledger | internal/crypto/multitenant_manager.go | ✅ Complete | RotationEvent callbacks, hash-chained ledger |
 
 ### 4. Data Integrity & Audit Threats
@@ -69,9 +69,9 @@ This document maps identified security threats to their implemented mitigations,
 
 | Threat ID | Threat Description | Severity | Mitigation Strategy | Implementation | Status | Evidence |
 |-----------|-------------------|----------|---------------------|----------------|--------|----------|
-| T6.1 | Invalid UTF-8 injection | **Medium** | UTF-8 validation with metrics | pkg/rfc0111/rfc0111.go:3425-3456 | ✅ Complete | utf8.ValidString() checks, Prometheus counters |
-| T6.2 | Control character injection | **Medium** | ASCII control character filtering | pkg/rfc0111/rfc0111.go:3436-3443 | ✅ Complete | Blocks 0x00-0x1F and 0x7F |
-| T6.3 | Numeric limit bypass | **High** | Structured amount parsing with currency validation | pkg/rfc0111/amount.go | ✅ Complete | Amount struct, ParseAmount() with ISO 4217 validation |
+| T6.1 | Invalid UTF-8 injection | **Medium** | UTF-8 validation with metrics | pkg/aap001/aap001.go:3425-3456 | ✅ Complete | utf8.ValidString() checks, Prometheus counters |
+| T6.2 | Control character injection | **Medium** | ASCII control character filtering | pkg/aap001/aap001.go:3436-3443 | ✅ Complete | Blocks 0x00-0x1F and 0x7F |
+| T6.3 | Numeric limit bypass | **High** | Structured amount parsing with currency validation | pkg/aap001/amount.go | ✅ Complete | Amount struct, ParseAmount() with ISO 4217 validation |
 | T6.4 | Restriction mismatch | **Medium** | Semantic counters for violations | internal/observability/violations.go | ✅ Complete | Per-category counters + adaptive anomaly detection |
 
 ### 7. Jurisdiction & Compliance Threats
@@ -96,10 +96,10 @@ This document maps identified security threats to their implemented mitigations,
 
 | Threat ID | Threat Description | Severity | Mitigation Strategy | Implementation | Status | Evidence |
 |-----------|-------------------|----------|---------------------|----------------|--------|----------|
-| T9.1 | Unauthorized revocation | **Critical** | Grantor-only revocation checks | pkg/rfc0111/rfc0111.go:2945 | ✅ Complete | Only grantor can suspend/revoke |
+| T9.1 | Unauthorized revocation | **Critical** | Grantor-only revocation checks | pkg/aap001/aap001.go:2945 | ✅ Complete | Only grantor can suspend/revoke |
 | T9.2 | Cascade revocation failures | **High** | Transactional cascade processing | internal/cascade/processor.go | ✅ Complete | Notify/modify modes, depth-first traversal |
-| T9.3 | Dual-control revocation bypass | **Medium** | Quorum-based approval workflow | pkg/rfc0111/rfc0111.go PendingRevocationState | ✅ Complete | RequiredCount/RequiredWeight thresholds |
-| T9.4 | Suspended delegation misuse | **High** | Status checks during validation | pkg/rfc0111/rfc0111.go:1050 | ✅ Complete | Rejects suspended POAs in validation |
+| T9.3 | Dual-control revocation bypass | **Medium** | Quorum-based approval workflow | pkg/aap001/aap001.go PendingRevocationState | ✅ Complete | RequiredCount/RequiredWeight thresholds |
+| T9.4 | Suspended delegation misuse | **High** | Status checks during validation | pkg/aap001/aap001.go:1050 | ✅ Complete | Rejects suspended POAs in validation |
 
 ### 10. Observability Blind Spots
 

@@ -47,11 +47,11 @@ func (v *StartupValidator) ValidateAll() error {
 
 // validateJWTSigningKey ensures JWT signing key is secure
 func (v *StartupValidator) validateJWTSigningKey() {
-	signingKey := os.Getenv("GAUTH_JWT_SIGNING_KEY")
+	signingKey := os.Getenv("AGENTAUTH_JWT_SIGNING_KEY")
 
 	// CRITICAL: Must be set
 	if signingKey == "" {
-		v.errors = append(v.errors, "GAUTH_JWT_SIGNING_KEY is not set - server cannot start without a signing key")
+		v.errors = append(v.errors, "AGENTAUTH_JWT_SIGNING_KEY is not set - server cannot start without a signing key")
 		return
 	}
 
@@ -69,7 +69,7 @@ func (v *StartupValidator) validateJWTSigningKey() {
 	for _, weak := range weakKeys {
 		if signingKey == weak {
 			v.errors = append(v.errors, fmt.Sprintf(
-				"GAUTH_JWT_SIGNING_KEY is set to known weak value '%s' - this allows attackers to forge PoA tokens and bypass all PDP checks. Set a strong random key (min 32 bytes).",
+				"AGENTAUTH_JWT_SIGNING_KEY is set to known weak value '%s' - this allows attackers to forge PoA tokens and bypass all PDP checks. Set a strong random key (min 32 bytes).",
 				weak,
 			))
 			return
@@ -79,7 +79,7 @@ func (v *StartupValidator) validateJWTSigningKey() {
 	// WARNING: Short keys in production
 	if v.productionMode && len(signingKey) < 32 {
 		v.warnings = append(v.warnings, fmt.Sprintf(
-			"GAUTH_JWT_SIGNING_KEY is only %d bytes - recommended minimum is 32 bytes for production use",
+			"AGENTAUTH_JWT_SIGNING_KEY is only %d bytes - recommended minimum is 32 bytes for production use",
 			len(signingKey),
 		))
 	}
@@ -91,7 +91,7 @@ func (v *StartupValidator) validateJWTSigningKey() {
 		for _, pattern := range devPatterns {
 			if strings.Contains(lowercaseKey, pattern) {
 				v.warnings = append(v.warnings, fmt.Sprintf(
-					"GAUTH_JWT_SIGNING_KEY contains '%s' - ensure this is not a development key",
+					"AGENTAUTH_JWT_SIGNING_KEY contains '%s' - ensure this is not a development key",
 					pattern,
 				))
 				break
@@ -107,42 +107,42 @@ func (v *StartupValidator) validateProductionMode() {
 	}
 
 	// In production, these MUST be disabled
-	if os.Getenv("GAUTH_DEV_INDEX") == "1" {
-		v.errors = append(v.errors, "GAUTH_DEV_INDEX=1 exposes debug UI and development endpoints - MUST be disabled in production (unset or set to 0)")
+	if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
+		v.errors = append(v.errors, "AGENTAUTH_DEV_INDEX=1 exposes debug UI and development endpoints - MUST be disabled in production (unset or set to 0)")
 	}
 
-	if os.Getenv("GAUTH_DEV_MODE") == "true" || os.Getenv("GAUTH_DEV_MODE") == "1" {
-		v.errors = append(v.errors, "GAUTH_DEV_MODE enables development shortcuts - MUST be disabled in production")
+	if os.Getenv("AGENTAUTH_DEV_MODE") == "true" || os.Getenv("AGENTAUTH_DEV_MODE") == "1" {
+		v.errors = append(v.errors, "AGENTAUTH_DEV_MODE enables development shortcuts - MUST be disabled in production")
 	}
 
 	// Rate limiting should be enabled in production
-	if os.Getenv("GAUTH_RATE_LIMIT_ENABLED") == "false" || os.Getenv("GAUTH_RATE_LIMIT_ENABLED") == "0" {
-		v.warnings = append(v.warnings, "GAUTH_RATE_LIMIT_ENABLED is disabled - strongly recommended for production")
+	if os.Getenv("AGENTAUTH_RATE_LIMIT_ENABLED") == "false" || os.Getenv("AGENTAUTH_RATE_LIMIT_ENABLED") == "0" {
+		v.warnings = append(v.warnings, "AGENTAUTH_RATE_LIMIT_ENABLED is disabled - strongly recommended for production")
 	}
 
 	// External identity verification should be configured
-	pvpProvider := os.Getenv("GAUTH_PVP_PROVIDER")
+	pvpProvider := os.Getenv("AGENTAUTH_PVP_PROVIDER")
 	if pvpProvider == "" || pvpProvider == "mock" {
-		v.warnings = append(v.warnings, "GAUTH_PVP_PROVIDER not set or set to 'mock' - production should use external identity verification (e.g., 'stripe', 'idemia', 'veriff')")
+		v.warnings = append(v.warnings, "AGENTAUTH_PVP_PROVIDER not set or set to 'mock' - production should use external identity verification (e.g., 'stripe', 'idemia', 'veriff')")
 	}
 }
 
 // validateCORSConfiguration checks CORS settings
 func (v *StartupValidator) validateCORSConfiguration() {
-	corsAllow := os.Getenv("GAUTH_CORS_ALLOW")
+	corsAllow := os.Getenv("AGENTAUTH_CORS_ALLOW")
 
 	if corsAllow == "*" && v.productionMode {
-		v.errors = append(v.errors, "GAUTH_CORS_ALLOW='*' allows any origin - MUST be restricted to specific domains in production")
+		v.errors = append(v.errors, "AGENTAUTH_CORS_ALLOW='*' allows any origin - MUST be restricted to specific domains in production")
 	}
 
 	if strings.Contains(corsAllow, "localhost") && v.productionMode {
-		v.warnings = append(v.warnings, "GAUTH_CORS_ALLOW contains 'localhost' - typically not needed in production")
+		v.warnings = append(v.warnings, "AGENTAUTH_CORS_ALLOW contains 'localhost' - typically not needed in production")
 	}
 }
 
 // validateDatabaseCredentials checks database security
 func (v *StartupValidator) validateDatabaseCredentials() {
-	dbPassword := os.Getenv("GAUTH_DB_PASSWORD")
+	dbPassword := os.Getenv("AGENTAUTH_DB_PASSWORD")
 
 	weakPasswords := []string{
 		"dev-password-please-change",
@@ -158,12 +158,12 @@ func (v *StartupValidator) validateDatabaseCredentials() {
 		if dbPassword == weak {
 			if v.productionMode {
 				v.errors = append(v.errors, fmt.Sprintf(
-					"GAUTH_DB_PASSWORD is set to known weak value '%s' - database is vulnerable to credential stuffing attacks",
+					"AGENTAUTH_DB_PASSWORD is set to known weak value '%s' - database is vulnerable to credential stuffing attacks",
 					weak,
 				))
 			} else {
 				v.warnings = append(v.warnings, fmt.Sprintf(
-					"GAUTH_DB_PASSWORD is set to development default '%s' - change before deploying to production",
+					"AGENTAUTH_DB_PASSWORD is set to development default '%s' - change before deploying to production",
 					weak,
 				))
 			}
@@ -180,8 +180,8 @@ func (v *StartupValidator) validateReplayStore() {
 
 	if inContainer {
 		// In containers, BoltDB is extremely risky
-		if os.Getenv("GAUTH_REPLAY_STORE") == "bolt" || os.Getenv("GAUTH_REPLAY_STORE_PATH") != "" {
-			if os.Getenv("GAUTH_ALLOW_UNSAFE_BOLTDB") == "1" {
+		if os.Getenv("AGENTAUTH_REPLAY_STORE") == "bolt" || os.Getenv("AGENTAUTH_REPLAY_STORE_PATH") != "" {
+			if os.Getenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB") == "1" {
 				v.warnings = append(v.warnings, fmt.Sprintf(
 					"BoltDB replay store enabled in %s with safety bypass - UNSAFE for production (CV-2025-005). "+
 						"Replay protection will FAIL after container restart unless using persistent volume. "+
@@ -216,7 +216,7 @@ func (v *StartupValidator) validateReplayStore() {
 	// General production recommendations
 	if v.productionMode {
 		// Check for in-memory replay store in production
-		if os.Getenv("GAUTH_REPLAY_STORE") == "memory" {
+		if os.Getenv("AGENTAUTH_REPLAY_STORE") == "memory" {
 			v.warnings = append(v.warnings,
 				"In-memory replay store detected in production - replay protection will not persist across restarts. "+
 					"Use Redis or distributed store for production.")
@@ -383,20 +383,20 @@ func isPrivateIP(ip net.IP) bool {
 
 // ProductionModeDetector determines if server is running in production
 func ProductionModeDetector() bool {
-	env := strings.ToLower(os.Getenv("GAUTH_ENV"))
+	env := strings.ToLower(os.Getenv("AGENTAUTH_ENV"))
 	if env == "production" || env == "prod" {
 		return true
 	}
 
-	mode := strings.ToLower(os.Getenv("GAUTH_MODE"))
+	mode := strings.ToLower(os.Getenv("AGENTAUTH_MODE"))
 	if mode == "production" || mode == "prod" {
 		return true
 	}
 
 	// Absence of dev indicators suggests production
-	if os.Getenv("GAUTH_DEV_MODE") == "" && os.Getenv("GAUTH_DEV_INDEX") == "" {
+	if os.Getenv("AGENTAUTH_DEV_MODE") == "" && os.Getenv("AGENTAUTH_DEV_INDEX") == "" {
 		// Check for production-like port binding
-		port := os.Getenv("GAUTH_PORT")
+		port := os.Getenv("AGENTAUTH_PORT")
 		if port == "443" || port == "8443" {
 			return true
 		}

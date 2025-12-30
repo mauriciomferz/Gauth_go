@@ -99,7 +99,7 @@ export default function PAP() {
   }
 
   const handleSearchPolicy = async () => {
-    if (!searchId.trim()) {
+    if (!searchId.trim() {
       toast.error('Please enter a policy ID')
       return
     }
@@ -118,7 +118,7 @@ export default function PAP() {
   }
 
   const handlePolicyAction = async (policyId: string, action: string) => {
-    if (!confirm(`Are you sure you want to ${action} this policy?`)) {
+    if (!confirm(`Are you sure you want to ${action} this policy?`) {
       return
     }
 

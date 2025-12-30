@@ -25,7 +25,7 @@ Goal: Achieve demonstrable RFC alignment for public beta (security, determinism,
 | P1-4 | Semantic counters diagnostics | Add `/api/v1/diagnostics/semantic` returning counters snapshot | Endpoint returns counters, tests compare increments | TBD | Pending |
 | P1-5 | Multi-sig POA issuance endpoint | Endpoint to collect individual signer signatures, produce aggregated metadata | `/api/v1/poa/multi/issue` returns canonical digest + signer checklist | TBD | Pending |
 | P1-6 | Rights & obligations serialization | Extend POA schema with `obligations`, `advice` arrays and record evaluation in validation | Canonical digest includes arrays (empty omitted) + basic enforcement stub | TBD | Pending |
-| P1-7 | OpenAPI spec upgrades (skew & integrity codes) | Document `GAUTH_CLOCK_SKEW_SECONDS`, multi-sig integrity failure codes, mismatch reasons | Spec includes parameter + enumerated error codes | TBD | Pending |
+| P1-7 | OpenAPI spec upgrades (skew & integrity codes) | Document `AGENTAUTH_CLOCK_SKEW_SECONDS`, multi-sig integrity failure codes, mismatch reasons | Spec includes parameter + enumerated error codes | TBD | Pending |
 
 ## P2 Items
 | ID | Task | Description | Acceptance Criteria | Status |

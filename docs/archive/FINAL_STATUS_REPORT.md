@@ -11,7 +11,7 @@
 
 ### What We Built
 
-A complete, production-ready implementation of **RFC-0111 (AgentAuth 1.0)** and **RFC-0115 (Power of Attorney for LLMs)** with:
+A complete, production-ready implementation of **AAP-001 (AgentAuth 1.0)** and **AAP-002 (Power of Attorney for LLMs)** with:
 
 - ✅ **Complete Authorization Framework** (5,516 lines of production code)
 - ✅ **Comprehensive Test Suite** (38 integration tests, 100% passing)
@@ -50,7 +50,7 @@ A complete, production-ready implementation of **RFC-0111 (AgentAuth 1.0)** and 
 
 | Package | Coverage | Status |
 |---------|----------|--------|
-| `pkg/gauth` | 69.6% | ✅ Good |
+| `pkg/agentauth` | 69.6% | ✅ Good |
 | `pkg/verification` | 76.7% | ✅ Excellent |
 | `pkg/registry` | 91.4% | ⭐ Outstanding |
 | `pkg/pip` | 72.9% | ✅ Good |
@@ -60,7 +60,7 @@ A complete, production-ready implementation of **RFC-0111 (AgentAuth 1.0)** and 
 
 ## 🎯 RFC Compliance Breakdown
 
-### RFC-0111 (AgentAuth 1.0): 95% Compliant ✅
+### AAP-001 (AgentAuth 1.0): 95% Compliant ✅
 
 | Section | Component | Compliance | Status |
 |---------|-----------|------------|--------|
@@ -73,7 +73,7 @@ A complete, production-ready implementation of **RFC-0111 (AgentAuth 1.0)** and 
 
 **Non-compliant**: External service production integration pending (Phase 1)
 
-### RFC-0115 (PoA for LLMs): 93% Compliant ✅
+### AAP-002 (PoA for LLMs): 93% Compliant ✅
 
 | Section | Component | Compliance | Status |
 |---------|-----------|------------|--------|
@@ -198,10 +198,10 @@ A complete, production-ready implementation of **RFC-0111 (AgentAuth 1.0)** and 
 
 ### Web Dashboard (3 Files)
 
-1. ✅ **gauth1.html** - Complete dashboard structure
-2. ✅ **gauth1.css** - Modern, responsive styling
-3. ✅ **gauth1.js** - Interactive application logic
-4. ✅ **README_GAUTH1.md** - Dashboard documentation
+1. ✅ **agentauth1.html** - Complete dashboard structure
+2. ✅ **agentauth1.css** - Modern, responsive styling
+3. ✅ **agentauth1.js** - Interactive application logic
+4. ✅ **README_AGENTAUTH1.md** - Dashboard documentation
 
 ### Documentation (20+ Files)
 
@@ -329,13 +329,13 @@ A complete, production-ready implementation of **RFC-0111 (AgentAuth 1.0)** and 
 
 ### RFC Compliance
 
-1. **RFC-0111 (95% Compliant)**
+1. **AAP-001 (95% Compliant)**
    - Complete authorization chain implementation
    - Extended token structure fully compliant
    - PIP integration framework complete
    - Only external service integration pending
 
-2. **RFC-0115 (93% Compliant)**
+2. **AAP-002 (93% Compliant)**
    - Complete action taxonomy (54 types!)
    - All representative types implemented
    - Geographic and sector restrictions
@@ -443,7 +443,7 @@ A complete, production-ready implementation of **RFC-0111 (AgentAuth 1.0)** and 
 
 **Mission Status**: ✅ **ACCOMPLISHED**
 
-We have successfully built a complete, production-ready implementation of RFC-0111 and RFC-0115 with:
+We have successfully built a complete, production-ready implementation of AAP-001 and AAP-002 with:
 
 - ✅ **100% of development goals achieved**
 - ✅ **92-96% RFC compliance**
@@ -462,7 +462,7 @@ The system is **ready for production deployment** following the 3-phase plan in 
 - **Quick Start**: `QUICK_START_GUIDE.md`
 - **Deployment**: `DEPLOYMENT_GUIDE.md`
 - **Testing**: `GAP_G10_TESTING_GUIDE.md`
-- **Web Dashboard**: `web/static_ui/README_GAUTH1.md`
+- **Web Dashboard**: `web/static_ui/README_AGENTAUTH1.md`
 
 ---
 

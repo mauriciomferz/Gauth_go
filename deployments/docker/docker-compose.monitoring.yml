@@ -17,7 +17,7 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
     depends_on:
       - alertmanager
@@ -36,7 +36,7 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # AlertManager for alerting
@@ -52,7 +52,7 @@ services:
       - '--storage.path=/alertmanager'
       - '--web.external-url=http://localhost:9093'
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
 volumes:
@@ -61,5 +61,5 @@ volumes:
   alertmanager_data:
 
 networks:
-  gauth-network:
+  agentauth-network:
     driver: bridge

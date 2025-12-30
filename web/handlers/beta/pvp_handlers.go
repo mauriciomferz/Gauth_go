@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // PVPVerifyRequest represents the request payload for PVP identity verification
@@ -50,11 +50,11 @@ type VerificationDetails struct {
 
 // PVPHandler wraps a PowerVerificationPoint for HTTP exposure
 type PVPHandler struct {
-	pvpClient gauth.PowerVerificationPoint
+	pvpClient agentauth.PowerVerificationPoint
 }
 
 // NewPVPHandler creates a new PVP HTTP handler
-func NewPVPHandler(pvpClient gauth.PowerVerificationPoint) *PVPHandler {
+func NewPVPHandler(pvpClient agentauth.PowerVerificationPoint) *PVPHandler {
 	return &PVPHandler{
 		pvpClient: pvpClient,
 	}
@@ -124,7 +124,7 @@ func (h *PVPHandler) HandleVerify(c *gin.Context) {
 	// In production, this would be more sophisticated
 	subjectID := req.DocumentNumber
 
-	pvpRequest := &gauth.IdentityProofRequest{
+	pvpRequest := &agentauth.IdentityProofRequest{
 		SubjectID:     subjectID,
 		IdentityType:  "natural_person",
 		ProofMethod:   "government_id",

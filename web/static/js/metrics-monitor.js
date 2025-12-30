@@ -682,7 +682,7 @@ class AgentAuthMetricsMonitor {
 // Initialize metrics monitor when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     if (window.AgentAuthAPI) {
-        window.gAuthMetrics = new AgentAuthMetricsMonitor(window.AgentAuthAPI);
+        window.agentAuthMetrics = new AgentAuthMetricsMonitor(window.AgentAuthAPI);
         console.log('AgentAuth Metrics Monitor initialized');
     } else {
         console.error('AgentAuth API Client not available for metrics');

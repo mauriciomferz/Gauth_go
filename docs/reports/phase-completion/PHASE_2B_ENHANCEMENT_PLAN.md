@@ -139,7 +139,7 @@ async checkAuthorization(data: AuthorizationRequest): Promise<AuthorizationRespo
     })
     return this.mapAuthzResponse(response.data, data)
   } catch (error) {
-    if (axios.isAxiosError(error)) {
+    if (axios.isAxiosError(error) {
       throw new Error(error.response?.data?.message || 'Authorization check failed')
     }
     throw error

@@ -29,9 +29,9 @@ This document summarizes the gap analysis and closure work performed in response
 
 **QA Audit Claimed**: "CRITICAL - NOT IMPLEMENTED. Tokens exist only as Go structs."
 
-**Actual Status**: Fully implemented in `pkg/gauth/extended_token_service.go`
+**Actual Status**: Fully implemented in `pkg/agentauth/extended_token_service.go`
 - ✅ `EncodeExtendedToken()` - Lines 125-189
-- ✅ JWT encoding with standard + RFC-0111 extended claims
+- ✅ JWT encoding with standard + AAP-001 extended claims
 - ✅ HMAC-SHA256 signing
 - ✅ Using `github.com/golang-jwt/jwt/v5`
 
@@ -43,7 +43,7 @@ This document summarizes the gap analysis and closure work performed in response
 
 **QA Audit Claimed**: "CRITICAL - Returns 'not implemented' error. Token validation completely broken."
 
-**Actual Status**: Fully implemented in `pkg/gauth/extended_token_service.go`
+**Actual Status**: Fully implemented in `pkg/agentauth/extended_token_service.go`
 - ✅ `parseExtendedToken()` - Lines 415-547
 - ✅ JWT parsing with signature verification
 - ✅ Claims extraction and deserialization
@@ -250,7 +250,7 @@ This document summarizes the gap analysis and closure work performed in response
 
 ### QA Audit Issues
 
-1. **Search Too Narrow**: Only searched `pkg/gauth/*.go`
+1. **Search Too Narrow**: Only searched `pkg/agentauth/*.go`
    - Missed `pkg/oidc/` (OIDC implementation)
    - Missed `pkg/pdp/` (PDP implementation)
 
@@ -281,7 +281,7 @@ This document summarizes the gap analysis and closure work performed in response
 
 2. **Search broadly across packages**
    ```bash
-   # Not just pkg/gauth/*.go
+   # Not just pkg/agentauth/*.go
    find pkg -name "*.go" -exec grep -l "pattern" {} \;
    ```
 
@@ -330,7 +330,7 @@ This document summarizes the gap analysis and closure work performed in response
 
 ### Revised Reality ✅
 
-**Actual RFC-0111 Compliance: 75-80%**
+**Actual AAP-001 Compliance: 75-80%**
 
 **Production Readiness: 3-4 months** (not 6-8 months)
 

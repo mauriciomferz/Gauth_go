@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 	"github.com/mauriciomferz/AgentAuth/pkg/pvp"
 	"github.com/mauriciomferz/AgentAuth/pkg/registry"
@@ -26,13 +26,13 @@ type PowerInformationPoint interface {
 	GetPoADefinition(ctx context.Context, poaID string) (*poa.PoADefinition, error)
 
 	// GetAuthorizationChain retrieves the complete authorization chain for a client
-	GetAuthorizationChain(ctx context.Context, clientID string) (*gauth.AuthorizationChain, error)
+	GetAuthorizationChain(ctx context.Context, clientID string) (*agentauth.AuthorizationChain, error)
 
 	// GetClientOwnerInfo retrieves client owner information
-	GetClientOwnerInfo(ctx context.Context, ownerID string) (*gauth.ClientOwnerInfo, error)
+	GetClientOwnerInfo(ctx context.Context, ownerID string) (*agentauth.ClientOwnerInfo, error)
 
 	// GetOwnersAuthorizerInfo retrieves owner's authorizer information
-	GetOwnersAuthorizerInfo(ctx context.Context, authorizerID string) (*gauth.OwnersAuthorizerInfo, error)
+	GetOwnersAuthorizerInfo(ctx context.Context, authorizerID string) (*agentauth.OwnersAuthorizerInfo, error)
 
 	// VerifyCommercialRegister verifies commercial register entry
 	VerifyCommercialRegister(ctx context.Context, registrationNumber, jurisdiction string) (*registry.RegistrationVerificationResult, error)
@@ -81,7 +81,7 @@ type AuthorizationValidationRequest struct {
 // AuthorizationValidationResult represents the result of authorization validation
 type AuthorizationValidationResult struct {
 	Authorized         bool
-	AuthorizationChain *gauth.AuthorizationChain
+	AuthorizationChain *agentauth.AuthorizationChain
 	ValidatedActions   []string
 	Restrictions       []string
 	Warnings           []string
@@ -150,7 +150,7 @@ func (pip *DefaultPIP) GetPoADefinition(ctx context.Context, poaID string) (*poa
 }
 
 // GetAuthorizationChain retrieves the complete authorization chain
-func (pip *DefaultPIP) GetAuthorizationChain(ctx context.Context, clientID string) (*gauth.AuthorizationChain, error) {
+func (pip *DefaultPIP) GetAuthorizationChain(ctx context.Context, clientID string) (*agentauth.AuthorizationChain, error) {
 	// Check cache
 	if cached := pip.cache.GetAuthorizationChain(clientID); cached != nil {
 		pip.recordCacheHit()
@@ -166,7 +166,7 @@ func (pip *DefaultPIP) GetAuthorizationChain(ctx context.Context, clientID strin
 	// 4. Verify each link in the chain
 
 	// Placeholder implementation
-	chain := &gauth.AuthorizationChain{
+	chain := &agentauth.AuthorizationChain{
 		// Would populate OwnersAuthorizer, ClientOwner, Client
 	}
 
@@ -177,7 +177,7 @@ func (pip *DefaultPIP) GetAuthorizationChain(ctx context.Context, clientID strin
 }
 
 // GetClientOwnerInfo retrieves client owner information
-func (pip *DefaultPIP) GetClientOwnerInfo(ctx context.Context, ownerID string) (*gauth.ClientOwnerInfo, error) {
+func (pip *DefaultPIP) GetClientOwnerInfo(ctx context.Context, ownerID string) (*agentauth.ClientOwnerInfo, error) {
 	// Check cache
 	if cached := pip.cache.GetClientOwner(ownerID); cached != nil {
 		pip.recordCacheHit()
@@ -191,7 +191,7 @@ func (pip *DefaultPIP) GetClientOwnerInfo(ctx context.Context, ownerID string) (
 }
 
 // GetOwnersAuthorizerInfo retrieves owner's authorizer information
-func (pip *DefaultPIP) GetOwnersAuthorizerInfo(ctx context.Context, authorizerID string) (*gauth.OwnersAuthorizerInfo, error) {
+func (pip *DefaultPIP) GetOwnersAuthorizerInfo(ctx context.Context, authorizerID string) (*agentauth.OwnersAuthorizerInfo, error) {
 	// Check cache
 	if cached := pip.cache.GetOwnersAuthorizer(authorizerID); cached != nil {
 		pip.recordCacheHit()
@@ -502,17 +502,17 @@ type cachedPoA struct {
 }
 
 type cachedAuthChain struct {
-	data      *gauth.AuthorizationChain
+	data      *agentauth.AuthorizationChain
 	timestamp time.Time
 }
 
 type cachedClientOwner struct {
-	data      *gauth.ClientOwnerInfo
+	data      *agentauth.ClientOwnerInfo
 	timestamp time.Time
 }
 
 type cachedOwnersAuthorizer struct {
-	data      *gauth.OwnersAuthorizerInfo
+	data      *agentauth.OwnersAuthorizerInfo
 	timestamp time.Time
 }
 
@@ -570,7 +570,7 @@ func (c *AuthorizationCache) SetPoA(poaID string, poa *poa.PoADefinition) {
 	c.evictIfNeeded()
 }
 
-func (c *AuthorizationCache) GetAuthorizationChain(clientID string) *gauth.AuthorizationChain {
+func (c *AuthorizationCache) GetAuthorizationChain(clientID string) *agentauth.AuthorizationChain {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -581,7 +581,7 @@ func (c *AuthorizationCache) GetAuthorizationChain(clientID string) *gauth.Autho
 	return cached.data
 }
 
-func (c *AuthorizationCache) SetAuthorizationChain(clientID string, chain *gauth.AuthorizationChain) {
+func (c *AuthorizationCache) SetAuthorizationChain(clientID string, chain *agentauth.AuthorizationChain) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -592,7 +592,7 @@ func (c *AuthorizationCache) SetAuthorizationChain(clientID string, chain *gauth
 	c.evictIfNeeded()
 }
 
-func (c *AuthorizationCache) GetClientOwner(ownerID string) *gauth.ClientOwnerInfo {
+func (c *AuthorizationCache) GetClientOwner(ownerID string) *agentauth.ClientOwnerInfo {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -603,7 +603,7 @@ func (c *AuthorizationCache) GetClientOwner(ownerID string) *gauth.ClientOwnerIn
 	return cached.data
 }
 
-func (c *AuthorizationCache) GetOwnersAuthorizer(authorizerID string) *gauth.OwnersAuthorizerInfo {
+func (c *AuthorizationCache) GetOwnersAuthorizer(authorizerID string) *agentauth.OwnersAuthorizerInfo {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 

@@ -78,12 +78,12 @@ go run resource_server.go "$TOKEN"
 
 All examples use environment variables for configuration:
 
-- `GAUTH_JWE_ENABLED` - Enable/disable JWE (default: true)
-- `GAUTH_JWE_PUBLIC_KEY` - Path to RSA public key PEM file
-- `GAUTH_JWE_PRIVATE_KEY` - Path to RSA private key PEM file
-- `GAUTH_JWE_KEY_ID` - Key identifier for rotation (default: "gauth-prod-2025-11")
-- `GAUTH_JWE_ALGORITHM` - Key encryption algorithm (default: "RSA-OAEP-256")
-- `GAUTH_JWE_ENCRYPTION` - Content encryption (default: "A256GCM")
+- `AGENTAUTH_JWE_ENABLED` - Enable/disable JWE (default: true)
+- `AGENTAUTH_JWE_PUBLIC_KEY` - Path to RSA public key PEM file
+- `AGENTAUTH_JWE_PRIVATE_KEY` - Path to RSA private key PEM file
+- `AGENTAUTH_JWE_KEY_ID` - Key identifier for rotation (default: "agentauth-prod-2025-11")
+- `AGENTAUTH_JWE_ALGORITHM` - Key encryption algorithm (default: "RSA-OAEP-256")
+- `AGENTAUTH_JWE_ENCRYPTION` - Content encryption (default: "A256GCM")
 
 ## Performance Notes
 
@@ -108,7 +108,7 @@ JWE adds approximately 97% size overhead to JWT tokens (typical: 487 bytes → 9
 ## Troubleshooting
 
 ### "Public key file not found"
-Ensure `GAUTH_JWE_PUBLIC_KEY` points to a valid PEM file or generate keys:
+Ensure `AGENTAUTH_JWE_PUBLIC_KEY` points to a valid PEM file or generate keys:
 ```bash
 openssl genrsa -out private.pem 2048
 openssl rsa -in private.pem -pubout -out public.pem

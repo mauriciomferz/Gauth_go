@@ -70,13 +70,13 @@ docker-build:
 
 **Before**:
 ```yaml
-image: gauth:blue-v2
+image: agentauth:blue-v2
 imagePullPolicy: Never
 ```
 
 **After**:
 ```yaml
-image: ghcr.io/mauriciomferz/gauth:blue
+image: ghcr.io/mauriciomferz/agentauth:blue
 imagePullPolicy: Always
 ```
 
@@ -138,8 +138,8 @@ Created comprehensive `docs/CICD_DOCKER_AUTOMATION.md` covering:
 
 | Aspect | Implementation | Status |
 |--------|---------------|--------|
-| Blue manifest | ghcr.io/mauriciomferz/gauth:blue | ✅ Updated |
-| Green manifest | ghcr.io/mauriciomferz/gauth:green | ✅ Updated |
+| Blue manifest | ghcr.io/mauriciomferz/agentauth:blue | ✅ Updated |
+| Green manifest | ghcr.io/mauriciomferz/agentauth:green | ✅ Updated |
 | Pull policy | Always (from registry) | ✅ Changed |
 | Image size | ~27.7MB (compressed) | ✅ Optimized |
 | CGO support | BLS library included | ✅ Working |
@@ -207,16 +207,16 @@ gh run view 19219027437
 ### 2. Verify GHCR Image Published
 ```bash
 # Check GitHub UI
-open https://github.com/mauriciomferz/Gauth_go/pkgs/container/gauth
+open https://github.com/mauriciomferz/AgentAuth/pkgs/container/agentauth
 
 # Or pull locally
-docker pull ghcr.io/mauriciomferz/gauth:latest
-docker images ghcr.io/mauriciomferz/gauth
+docker pull ghcr.io/mauriciomferz/agentauth:latest
+docker images ghcr.io/mauriciomferz/agentauth
 ```
 
 ### 3. Inspect Image
 ```bash
-docker inspect ghcr.io/mauriciomferz/gauth:latest
+docker inspect ghcr.io/mauriciomferz/agentauth:latest
 # Verify:
 # - Architecture: amd64
 # - Size: ~27.7MB
@@ -229,17 +229,17 @@ docker inspect ghcr.io/mauriciomferz/gauth:latest
 kubectl apply -f k8s-test-blue.yaml
 
 # Watch rollout
-kubectl rollout status deployment/gauth-blue -n gauth-staging
+kubectl rollout status deployment/agentauth-blue -n agentauth-staging
 
 # Verify pods running
-kubectl get pods -n gauth-staging -l version=blue
+kubectl get pods -n agentauth-staging -l version=blue
 # Should show 2/2 Running
 ```
 
 ### 5. Validate Application
 ```bash
 # Port forward
-kubectl port-forward -n gauth-staging svc/gauth-service 8080:80
+kubectl port-forward -n agentauth-staging svc/agentauth-service 8080:80
 
 # Test health endpoint
 curl http://localhost:8080/api/v1/beta/health

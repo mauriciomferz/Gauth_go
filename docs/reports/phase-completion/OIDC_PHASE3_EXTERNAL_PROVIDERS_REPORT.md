@@ -321,7 +321,7 @@ External Provider Token
 
 ## Compliance Impact
 
-### RFC-0111 AgentAuth 1.0 Compliance
+### AAP-001 AgentAuth 1.0 Compliance
 
 **Before Phase 3**: 65%  
 **After Phase 3**: 68%  
@@ -329,22 +329,22 @@ External Provider Token
 
 ### Newly Compliant Requirements
 
-1. **External Provider Federation** (RFC-0111 §8.3)
+1. **External Provider Federation** (AAP-001 §8.3)
    - ✅ Google integration with hosted domain support
    - ✅ Okta integration with MFA awareness
    - ✅ Azure AD integration with multi-tenant support
 
-2. **Token Exchange** (RFC-0111 §8.4)
+2. **Token Exchange** (AAP-001 §8.4)
    - ✅ Provider-agnostic exchange service
    - ✅ Claim normalization across providers
    - ✅ Trust level preservation
 
-3. **Trust Level Mapping** (RFC-0111 §5.2)
+3. **Trust Level Mapping** (AAP-001 §5.2)
    - ✅ eIDAS ACR support (high, substantial, low)
    - ✅ MFA detection from AMR claims
    - ✅ Provider-specific trust mapping
 
-4. **Discovery Protocol** (RFC-0111 §7.1)
+4. **Discovery Protocol** (AAP-001 §7.1)
    - ✅ OIDC discovery document caching
    - ✅ Automatic cache refresh
    - ✅ Provider endpoint resolution
@@ -534,7 +534,7 @@ ok  test/integration  0.751s
 
 1. **Update Dependencies**
    ```bash
-   go get github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0@latest
+   go get github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0@latest
    ```
 
 2. **Configure Providers**
@@ -567,7 +567,7 @@ ok  test/integration  0.751s
    response, err := tokenExchange.ExchangeToken(ctx, oidc.ExchangeRequest{
        ProviderID:    "google",
        ExternalToken: externalToken,
-       Audience:      "your-gauth-audience",
+       Audience:      "your-agentauth-audience",
    })
    ```
 

@@ -22,7 +22,7 @@ owners: [system]
 |-------|-------------------------|---------------|
 | A Demo Hardening | Durable replay + PoA canonical digest | Restart replay test passes; digest stable tests green |
 | B Transparency | Auditor CLI + PoA revocation anchoring | CLI verifies all artifacts; PoA revocation appears in Merkle proof |
-| C Interop | OpenAPI + discovery config | `/api/openapi.json` + `/.well-known/gauth/config` served |
+| C Interop | OpenAPI + discovery config | `/api/openapi.json` + `/.well-known/agentauth/config` served |
 | D Polish | Conditional interpreter + diagrams + risk register | Conditions enforced in issuance; diagrams finalized; risks documented |
 
 ## Detailed Epics
@@ -53,7 +53,7 @@ owners: [system]
 
 ### Epic F: Durable Replay Store (Merged into Epic A)
 - Persistent store (Redis + WAL fallback) storing used JTIs until expiry.
-- Config flag `GAUTH_REPLAY_FAIL_CLOSED` to deny decisions if store unreachable.
+- Config flag `AGENTAUTH_REPLAY_FAIL_CLOSED` to deny decisions if store unreachable.
 
 ### (Deferred) Jurisdiction & Legal Validator
 - `LegalFrameworkValidator` with rule set (JSON DSL) mapping jurisdiction codes to constraints (e.g. max amounts, restricted actions).
@@ -61,13 +61,13 @@ owners: [system]
 
 ### Epic H: OpenAPI Spec & Discovery (Phase C)
 - Generate OpenAPI from handlers; publish at `/openapi.json`.
-- Add `/.well-known/gauth-configuration` returning algorithms, endpoints, supported PoA features.
+- Add `/.well-known/agentauth-configuration` returning algorithms, endpoints, supported PoA features.
 
 ### (Deferred) Rights & Obligations Engine
 - Parse & enforce rights/obligations inside evaluation (pre/post decision). Distinguish must vs advisory obligations.
 
 ### Epic J: Metrics Additions (Selective)
-- Export labeled counters: `gauth_decisions_total{action,resource,allow}`.
+- Export labeled counters: `agentauth_decisions_total{action,resource,allow}`.
 - OTel spans: issuance → delegation issuance → decision evaluation chain.
 
 ### Epic K: PoA & Rotation Anchor Scheduler (Phase B/C)

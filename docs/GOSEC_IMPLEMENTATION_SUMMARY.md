@@ -33,7 +33,7 @@ Successfully implemented comprehensive gosec security scanning resilience in Age
 **Root Cause:** Gosec v2.22.x has known SSA analysis bugs with:
 - Go 1.25.x bleeding edge features
 - Complex generic type constraints
-- Interface assertions in `pkg/oidc`, `pkg/poa`, `pkg/gauth`
+- Interface assertions in `pkg/oidc`, `pkg/poa`, `pkg/agentauth`
 
 ### After Implementation
 
@@ -70,7 +70,7 @@ Successfully implemented comprehensive gosec security scanning resilience in Age
   },
   "exclude-dirs": [
     "examples", "test", "tests", "vendor", 
-    "cmd/examples", "Gauth_go/examples"
+    "cmd/examples", "AgentAuth/examples"
   ],
   "exclude": [
     "G104",  // Unhandled errors (defer cleanup)
@@ -287,7 +287,7 @@ Check weekly:
 
 **CLI Check:**
 ```bash
-gh api repos/{owner}/gauth/code-scanning/alerts \
+gh api repos/{owner}/agentauth/code-scanning/alerts \
   --jq '[.[] | select(.tool.name == "gosec")] | 
         group_by(.rule.severity) | 
         map({severity: .[0].rule.severity, count: length})'

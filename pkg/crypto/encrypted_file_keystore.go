@@ -73,7 +73,7 @@ func loadMasterKey(config EncryptedStoreConfig) ([]byte, error) {
 		}
 
 		// Derive 32-byte key using PBKDF2
-		return pbkdf2.Key(key, []byte("gauth-encryption-salt"), 100000, 32, sha256.New), nil
+		return pbkdf2.Key(key, []byte("agentauth-encryption-salt"), 100000, 32, sha256.New), nil
 	}
 
 	// Load from environment variable
@@ -91,7 +91,7 @@ func loadMasterKey(config EncryptedStoreConfig) ([]byte, error) {
 		}
 
 		// Derive key from passphrase
-		return pbkdf2.Key([]byte(keyStr), []byte("gauth-encryption-salt"), 100000, 32, sha256.New), nil
+		return pbkdf2.Key([]byte(keyStr), []byte("agentauth-encryption-salt"), 100000, 32, sha256.New), nil
 	}
 
 	return nil, errors.New("no master key source configured (set MasterKeyPath or MasterKeyEnv)")

@@ -9,11 +9,11 @@
 
 ## Executive Summary
 
-**Phase 2B implements Model Context Protocol (MCP) as the AI-to-system connectivity layer**, enabling AgentAuth-authorized AI agents to access external data sources and tools through standardized bidirectional connections. This brings AgentAuth from 68% to 75% RFC-0111 compliance by satisfying the MCP building block requirement.
+**Phase 2B implements Model Context Protocol (MCP) as the AI-to-system connectivity layer**, enabling AgentAuth-authorized AI agents to access external data sources and tools through standardized bidirectional connections. This brings AgentAuth from 68% to 75% AAP-001 compliance by satisfying the MCP building block requirement.
 
 ### Why MCP Integration?
 
-**RFC-0111 Requirement**:
+**AAP-001 Requirement**:
 > "AgentAuth builds on the following standards as building blocks: MCP or its alternatives, including but not limited to: MCP Implementation on Github"
 
 **Current Gap**: AgentAuth has NO MCP implementation (0% coverage)  
@@ -44,7 +44,7 @@
 - Security considerations and threat models
 - Testing strategy (unit, integration, E2E)
 - Migration path (3 phases)
-- RFC-0111 compliance mapping
+- AAP-001 compliance mapping
 
 **Key Design Decisions**:
 1. **Hybrid Model**: AgentAuth as MCP client host (not MCP server)
@@ -170,7 +170,7 @@ mcp:
 **1. Authorization Bridge** (`pkg/mcp/authorization_bridge.go` - 400 lines)
 ```go
 type AuthorizationBridge struct {
-    pdp *gauth.PDP
+    pdp *agentauth.PDP
     scopeParser *MCPScopeParser
 }
 
@@ -255,7 +255,7 @@ type MCPAuditEvent struct {
 
 func (l *MCPAuditLogger) LogResourceRead(event *MCPAuditEvent)
 func (l *MCPAuditLogger) LogToolCall(event *MCPAuditEvent)
-func (l *MCPAuditLogger) LogAuthorizationFailure(event *MCPAuditEvent)
+func (l *MCPAuditLogger) LoagentAuthorizationFailure(event *MCPAuditEvent)
 func (l *MCPAuditLogger) GenerateComplianceReport(start, end time.Time) (*Report, error)
 ```
 
@@ -331,7 +331,7 @@ async readMCPResource(serverID: string, uri: string): Promise<ResourceContent>
 async callMCPTool(serverID, toolName, args): Promise<ToolResult>
 ```
 
-**4. OpenAPI Spec Updates** (`docs/openapi/gauth-api.yaml` - +200 lines)
+**4. OpenAPI Spec Updates** (`docs/openapi/agentauth-api.yaml` - +200 lines)
 - MCP endpoint documentation
 - Request/response schemas
 - Authentication requirements
@@ -661,7 +661,7 @@ mcp:
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
 | Low adoption | Medium | Low | Documentation, examples |
-| MCP standard not adopted | Low | High | RFC-0111 still requires it |
+| MCP standard not adopted | Low | High | AAP-001 still requires it |
 | Competition | Low | Low | First-mover advantage |
 
 ---
@@ -687,7 +687,7 @@ mcp:
 - [ ] Comprehensive documentation
 
 ### Compliance Requirements
-- [ ] RFC-0111 MCP requirement satisfied
+- [ ] AAP-001 MCP requirement satisfied
 - [ ] All operations auditable
 - [ ] Compliance reports generated
 - [ ] Security best practices followed
@@ -783,10 +783,10 @@ mcp:
 
 ## Conclusion
 
-**Phase 2B brings AgentAuth from 68% to 75% RFC-0111 compliance** by implementing the MCP building block requirement. This strategic initiative positions AgentAuth as the authorization layer for the emerging AI agent ecosystem, enabling secure, auditable, policy-driven access to external resources and tools.
+**Phase 2B brings AgentAuth from 68% to 75% AAP-001 compliance** by implementing the MCP building block requirement. This strategic initiative positions AgentAuth as the authorization layer for the emerging AI agent ecosystem, enabling secure, auditable, policy-driven access to external resources and tools.
 
 **Key Value Propositions**:
-1. ✅ RFC-0111 compliance achieved (MCP requirement)
+1. ✅ AAP-001 compliance achieved (MCP requirement)
 2. 🤖 AI-ready authorization system
 3. 🔒 Secure AI-to-system interactions
 4. 📊 Complete audit trail for compliance

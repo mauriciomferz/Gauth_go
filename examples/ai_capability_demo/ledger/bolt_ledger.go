@@ -1,6 +1,6 @@
 package ledger
 
-// Experimental BoltDB-backed ledger (append-only) used when GAUTH_AI_DEMO_LEDGER_DB_PATH is set.
+// Experimental BoltDB-backed ledger (append-only) used when AGENTAUTH_AI_DEMO_LEDGER_DB_PATH is set.
 // For MVP we store entries sequentially in a single bucket and recompute roots in-memory on demand.
 
 import (

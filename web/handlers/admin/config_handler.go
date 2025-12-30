@@ -260,7 +260,7 @@ func (h *ConfigHandler) DeleteVariable(c *gin.Context) {
 func (h *ConfigHandler) GetYAMLConfig(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 
-	file, err := h.repo.GetConfigFile(c.Request.Context(), tenantID, "gauth-config", "yaml")
+	file, err := h.repo.GetConfigFile(c.Request.Context(), tenantID, "agentauth-config", "yaml")
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration not found"})
 		return
@@ -284,7 +284,7 @@ func (h *ConfigHandler) UpdateYAMLConfig(c *gin.Context) {
 
 	file := config.ConfigFileRecord{
 		TenantID:    &tenantID,
-		FileName:    "gauth-config",
+		FileName:    "agentauth-config",
 		FileFormat:  "yaml",
 		FileContent: req.Content,
 		SizeBytes:   func(s string) *int { l := len(s); return &l }(req.Content),
@@ -305,7 +305,7 @@ func (h *ConfigHandler) UpdateYAMLConfig(c *gin.Context) {
 func (h *ConfigHandler) GetJSONConfig(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
 
-	file, err := h.repo.GetConfigFile(c.Request.Context(), tenantID, "gauth-config", "json")
+	file, err := h.repo.GetConfigFile(c.Request.Context(), tenantID, "agentauth-config", "json")
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Configuration not found"})
 		return
@@ -329,7 +329,7 @@ func (h *ConfigHandler) UpdateJSONConfig(c *gin.Context) {
 
 	file := config.ConfigFileRecord{
 		TenantID:    &tenantID,
-		FileName:    "gauth-config",
+		FileName:    "agentauth-config",
 		FileFormat:  "json",
 		FileContent: req.Content,
 		SizeBytes:   func(s string) *int { l := len(s); return &l }(req.Content),

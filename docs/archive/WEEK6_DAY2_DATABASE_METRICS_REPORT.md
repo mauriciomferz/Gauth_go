@@ -36,8 +36,8 @@ Successfully integrated PostgreSQL and Redis metrics into the monitoring infrast
 ### 1. Prometheus Configuration Update
 
 **Changes Made**:
-- Added `postgres-exporter` scrape job targeting `gauth-data` namespace (port 9187, 15s interval)
-- Added `redis-exporter` scrape job targeting `gauth-data` namespace (port 9121, 15s interval)
+- Added `postgres-exporter` scrape job targeting `agentauth-data` namespace (port 9187, 15s interval)
+- Added `redis-exporter` scrape job targeting `agentauth-data` namespace (port 9121, 15s interval)
 - Fixed alerts volume mount issue (moved from `/etc/prometheus/alerts.yml` to `/etc/prometheus-alerts/`)
 
 **Scrape Configuration**:
@@ -47,7 +47,7 @@ Successfully integrated PostgreSQL and Redis metrics into the monitoring infrast
     - role: endpoints
       namespaces:
         names:
-          - gauth-data
+          - agentauth-data
   relabel_configs:
     - source_labels: [__meta_kubernetes_service_name]
       regex: postgres-exporter
@@ -60,7 +60,7 @@ Successfully integrated PostgreSQL and Redis metrics into the monitoring infrast
     - role: endpoints
       namespaces:
         names:
-          - gauth-data
+          - agentauth-data
   relabel_configs:
     - source_labels: [__meta_kubernetes_service_name]
       regex: redis-exporter
@@ -88,16 +88,16 @@ Health Checks:
 **8 Panels Implemented**:
 
 1. **Active Database Connections** (Gauge)
-   - Query: `pg_stat_activity_count{datname="gauth"}`
+   - Query: `pg_stat_activity_count{datname="agentauth"}`
    - Thresholds: Green (0-140), Yellow (140-180), Red (180-200)
    - Max: 200 (configured max_connections)
 
 2. **Transaction Rate** (Timeseries)
-   - Commits/sec: `rate(pg_stat_database_xact_commit{datname="gauth"}[5m])`
-   - Rollbacks/sec: `rate(pg_stat_database_xact_rollback{datname="gauth"}[5m])`
+   - Commits/sec: `rate(pg_stat_database_xact_commit{datname="agentauth"}[5m])`
+   - Rollbacks/sec: `rate(pg_stat_database_xact_rollback{datname="agentauth"}[5m])`
 
 3. **Cache Hit Ratio** (Gauge)
-   - Query: `rate(pg_stat_database_blks_hit{datname="gauth"}[5m]) / (rate(pg_stat_database_blks_hit{datname="gauth"}[5m]) + rate(pg_stat_database_blks_read{datname="gauth"}[5m])) * 100`
+   - Query: `rate(pg_stat_database_blks_hit{datname="agentauth"}[5m]) / (rate(pg_stat_database_blks_hit{datname="agentauth"}[5m]) + rate(pg_stat_database_blks_read{datname="agentauth"}[5m]) * 100`
    - Thresholds: Red (0-85%), Yellow (85-95%), Green (95-100%)
 
 4. **Database Operations Rate** (Timeseries)
@@ -105,17 +105,17 @@ Health Checks:
    - Uses `pg_stat_database_tup_*` metrics
 
 5. **Database Size** (Stat)
-   - Query: `pg_database_size_bytes{datname="gauth"}`
+   - Query: `pg_database_size_bytes{datname="agentauth"}`
    - Unit: Bytes
 
 6. **Connection States** (Timeseries)
-   - Active: `pg_stat_activity_count{datname="gauth", state="active"}`
-   - Idle: `pg_stat_activity_count{datname="gauth", state="idle"}`
-   - Idle in Transaction: `pg_stat_activity_count{datname="gauth", state="idle in transaction"}`
+   - Active: `pg_stat_activity_count{datname="agentauth", state="active"}`
+   - Idle: `pg_stat_activity_count{datname="agentauth", state="idle"}`
+   - Idle in Transaction: `pg_stat_activity_count{datname="agentauth", state="idle in transaction"}`
 
 7. **Database Conflicts & Deadlocks** (Timeseries)
-   - Conflicts/sec: `rate(pg_stat_database_conflicts{datname="gauth"}[5m])`
-   - Deadlocks/sec: `rate(pg_stat_database_deadlocks{datname="gauth"}[5m])`
+   - Conflicts/sec: `rate(pg_stat_database_conflicts{datname="agentauth"}[5m])`
+   - Deadlocks/sec: `rate(pg_stat_database_deadlocks{datname="agentauth"}[5m])`
 
 8. **PostgreSQL UP** (Stat)
    - Query: `pg_up`
@@ -130,8 +130,8 @@ Health Checks:
 **Dashboard Features**:
 - Auto-refresh every 5 seconds
 - 15-minute time window (configurable)
-- Tags: postgresql, database, gauth
-- UID: `postgresql-gauth`
+- Tags: postgresql, database, agentauth
+- UID: `postgresql-agentauth`
 
 ### 3. Redis Dashboard
 
@@ -149,7 +149,7 @@ Health Checks:
    - Current client count
 
 3. **Cache Hit Rate** (Gauge)
-   - Query: `rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) * 100`
+   - Query: `rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]) * 100`
    - Thresholds: Red (0-80%), Yellow (80-90%), Green (90-100%)
 
 4. **Redis UP** (Stat)
@@ -184,8 +184,8 @@ Health Checks:
 **Dashboard Features**:
 - Auto-refresh every 5 seconds
 - 15-minute time window (configurable)
-- Tags: redis, cache, gauth
-- UID: `redis-gauth`
+- Tags: redis, cache, agentauth
+- UID: `redis-agentauth`
 
 ## Infrastructure State
 
@@ -197,12 +197,12 @@ Total Services: 6
 Total PVCs: 2 (10Gi + 5Gi)
 
 Breakdown:
-- gauth-staging: 2 pods (application)
-- gauth-data: 4 pods (postgres, redis, 2 exporters)
+- agentauth-staging: 2 pods (application)
+- agentauth-data: 4 pods (postgres, redis, 2 exporters)
 - monitoring: 2 pods (prometheus, grafana)
 
 Metrics Endpoints:
-- gauth-service:80/metrics (50+ application metrics)
+- agentauth-service:80/metrics (50+ application metrics)
 - postgres-exporter:9187/metrics (100+ database metrics)
 - redis-exporter:9121/metrics (50+ cache metrics)
 - prometheus:9090 (monitoring metrics)
@@ -212,7 +212,7 @@ Metrics Endpoints:
 ```
 Active Targets: 3
 Scrape Interval:
-  - gauth-service: 5s
+  - agentauth-service: 5s
   - postgres-exporter: 15s
   - redis-exporter: 15s
 

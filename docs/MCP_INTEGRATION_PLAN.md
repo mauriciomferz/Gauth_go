@@ -118,7 +118,7 @@ Company A AI ←MCP→ Company B AI
   "id": "msg-001",
   "method": "execute_action",
   "params": { },
-  "gauth": {
+  "agentauth": {
     "extended_token": "eyJhbGc...",
     "poa_reference": "PoA-2025-001",
     "authorization_chain_hash": "sha256:abc123...",
@@ -153,7 +153,7 @@ ws = new WebSocket("wss://ai-service.example.com/mcp");
 ws.send(JSON.stringify({
   protocol: "mcp/1.0",
   type: "request",
-  gauth_token: extendedToken,
+  agentauth_token: extendedToken,
   method: "execute_action",
   params: {...}
 }));
@@ -166,9 +166,9 @@ ws.send(JSON.stringify({
 package mcp
 
 type AgentAuthMCPAdapter struct {
-    extendedTokenService *gauth.ExtendedTokenService
-    pep                  *gauth.PowerEnforcementPoint
-    complianceTracker    *gauth.ComplianceTracker
+    extendedTokenService *agentauth.ExtendedTokenService
+    pep                  *agentauth.PowerEnforcementPoint
+    complianceTracker    *agentauth.ComplianceTracker
 }
 
 // SendMCPRequest sends an MCP request with AgentAuth extended token
@@ -212,7 +212,7 @@ func (adapter *AgentAuthMCPAdapter) ValidateMCPRequest(
     }
     
     // Enforce authorization via PEP
-    enforcementReq := &gauth.EnforcementRequest{
+    enforcementReq := &agentauth.EnforcementRequest{
         ExtendedToken: extendedToken,
         Action:        request.Method,
         Resource:      request.Target,
@@ -308,7 +308,7 @@ type MCPRequest struct {
     Target   string                 `json:"target"`   // Target AI service
     
     // AgentAuth extension
-    AgentAuth    *AgentAuthContext          `json:"gauth,omitempty"`
+    AgentAuth    *AgentAuthContext          `json:"agentauth,omitempty"`
 }
 
 type AgentAuthContext struct {
@@ -327,7 +327,7 @@ type MCPResponse struct {
     Error    *MCPError              `json:"error,omitempty"`
     
     // AgentAuth extension (response metadata)
-    AgentAuthMetadata *AgentAuthResponseMetadata `json:"gauth_metadata,omitempty"`
+    AgentAuthMetadata *AgentAuthResponseMetadata `json:"agentauth_metadata,omitempty"`
 }
 
 type AgentAuthResponseMetadata struct {
@@ -468,8 +468,8 @@ response, err := client.Execute(ctx, &mcp.Request{
 - MCP SDKs and libraries
 
 **AgentAuth Implementation:**
-- `pkg/gauth/extended_token_service.go`
-- `pkg/gauth/pep.go`
+- `pkg/agentauth/extended_token_service.go`
+- `pkg/agentauth/pep.go`
 - `docs/Gifo_0111_CORRECTED_FLOW.md`
 - `docs/RFC_IMPLEMENTATION_COVERAGE.md`
 

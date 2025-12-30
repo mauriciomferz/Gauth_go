@@ -60,17 +60,17 @@ func NewAgentAuthCollector(db *pgxpool.Pool) *AgentAuthCollector {
 	return &AgentAuthCollector{
 		db: db,
 		auditEventsTotal: prometheus.NewDesc(
-			"gauth_audit_events_total",
+			"agentauth_audit_events_total",
 			"Total number of audit events recorded",
 			[]string{"status"}, nil,
 		),
 		apiKeysTotal: prometheus.NewDesc(
-			"gauth_api_keys_total",
+			"agentauth_api_keys_total",
 			"Total number of API keys",
 			[]string{"status"}, nil,
 		),
 		activePoliciesTotal: prometheus.NewDesc(
-			"gauth_active_policies_total",
+			"agentauth_active_policies_total",
 			"Total number of active authorization policies",
 			nil, nil,
 		),

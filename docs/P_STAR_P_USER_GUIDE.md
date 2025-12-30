@@ -25,7 +25,7 @@ owners: core-maintainers
 
 ## Introduction
 
-The **P*P Architecture** (pronounced "P-Star-P") is the core authorization framework of AgentAuth 1.0, implementing RFC-0111 compliant policy-based access control. It consists of five interoperating components:
+The **P*P Architecture** (pronounced "P-Star-P") is the core authorization framework of AgentAuth 1.0, implementing AAP-001 compliant policy-based access control. It consists of five interoperating components:
 
 - **PAP** (Policy Administration Point) - Creates and manages authorization policies
 - **PDP** (Policy Decision Point) - Makes authorization decisions based on policies
@@ -114,12 +114,12 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 func main() {
     // Initialize PAP
-    pap := gauth.NewPowerAdministrationPoint(
+    pap := agentauth.NewPowerAdministrationPoint(
         "pap-001",
         "Production PAP",
         "Main policy administration point for AgentAuth",
@@ -128,20 +128,20 @@ func main() {
     ctx := context.Background()
 
     // Create a Power of Attorney policy
-    createRequest := &gauth.PolicyCreateRequest{
-        PolicyType:       gauth.PolicyTypePoA,
+    createRequest := &agentauth.PolicyCreateRequest{
+        PolicyType:       agentauth.PolicyTypePoA,
         PolicyName:       "Healthcare Data Access Policy",
         Description:      "Allows healthcare providers to access patient records",
         ClientOwner:      "hospital-client-001",
         OwnersAuthorizer: "ceo-authorizer-001",
         
-        PolicyRules: gauth.PolicyRules{
+        PolicyRules: agentauth.PolicyRules{
             AllowedActions:   []string{"read", "write", "update"},
             ResourcePatterns: []string{"/api/patients/*", "/api/records/*"},
             DeniedActions:    []string{"delete"},
         },
         
-        Scope: &gauth.PolicyScope{
+        Scope: &agentauth.PolicyScope{
             Countries: []string{"US", "CA"},
             Sectors:   []string{"healthcare"},
             Regions:   []string{"US-CA", "US-NY"},
@@ -185,10 +185,10 @@ fmt.Println("✅ Policy activated and enforced")
 #### 3. Update a Policy (Draft Only)
 
 ```go
-updateRequest := &gauth.PolicyUpdateRequest{
+updateRequest := &agentauth.PolicyUpdateRequest{
     PolicyName: ptr("Updated Healthcare Policy Name"),
     Description: ptr("Updated description"),
-    PolicyRules: &gauth.PolicyRules{
+    PolicyRules: &agentauth.PolicyRules{
         AllowedActions: []string{"read", "write", "update", "export"},
     },
     Tags: []string{"healthcare", "production", "updated"},
@@ -207,9 +207,9 @@ fmt.Printf("✅ Policy updated to version %d\n", updatedPolicy.PolicyVersion)
 
 ```go
 // Search for healthcare policies
-criteria := &gauth.PolicySearchCriteria{
-    PolicyType: ptr(gauth.PolicyTypePoA),
-    Status:     ptr(gauth.PolicyStatusActive),
+criteria := &agentauth.PolicySearchCriteria{
+    PolicyType: ptr(agentauth.PolicyTypePoA),
+    Status:     ptr(agentauth.PolicyStatusActive),
     Tags:       []string{"healthcare"},
     Countries:  []string{"US"},
 }
@@ -304,9 +304,9 @@ GET /api/v1/pap/statistics
 
 ### Implementation Details
 
-- **Location**: [`pkg/gauth/gauth.go`](../pkg/gauth/gauth.go) (1,279+ lines)
-- **Tests**: [`pkg/gauth/pap_test.go`](../pkg/gauth/pap_test.go) (13 test suites, 97.8% coverage)
-- **Types**: [`pkg/gauth/pap_types.go`](../pkg/gauth/pap_types.go)
+- **Location**: [`pkg/agentauth/agentauth.go`](../pkg/agentauth/agentauth.go) (1,279+ lines)
+- **Tests**: [`pkg/agentauth/pap_test.go`](../pkg/agentauth/pap_test.go) (13 test suites, 97.8% coverage)
+- **Types**: [`pkg/agentauth/pap_types.go`](../pkg/agentauth/pap_types.go)
 - **API Routes**: [`web/server_clean.go`](../web/server_clean.go) (12 endpoints)
 
 ---
@@ -376,15 +376,15 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 func main() {
     // Create PAP
-    pap := gauth.NewPowerAdministrationPoint("pap-001", "Production PAP", "")
+    pap := agentauth.NewPowerAdministrationPoint("pap-001", "Production PAP", "")
 
     // Create PDP with PAP integration
-    pdp := gauth.NewSimplePDPWithPAP(pap)
+    pdp := agentauth.NewSimplePDPWithPAP(pap)
 
     fmt.Println("✅ PDP initialized with PAP integration")
 }
@@ -394,7 +394,7 @@ func main() {
 
 ```go
 // Create authorization request
-request := &gauth.AuthorizationDecisionRequest{
+request := &agentauth.AuthorizationDecisionRequest{
     Subject:  "user:alice@example.com",
     Resource: "/api/patients/12345",
     Action:   "read",
@@ -430,7 +430,7 @@ if decision.Decision == "allow" {
 #### 3. Distributed PDP with Caching
 
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/pdp"
+import "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/pdp"
 
 // Create distributed PDP with caching
 config := &pdp.PDPConfig{
@@ -474,15 +474,15 @@ fmt.Printf("Decision: %s (from node: %s)\n", response.Decision, response.NodeID)
 
 ```go
 // Add policy through PDP (uses PAP internally)
-policy := &gauth.AuthorizationPolicy{
+policy := &agentauth.AuthorizationPolicy{
     PolicyName:       "API Access Policy",
-    PolicyType:       gauth.PolicyTypePoA,
+    PolicyType:       agentauth.PolicyTypePoA,
     ClientOwner:      "api-team",
     OwnersAuthorizer: "tech-lead",
-    PolicyRules: gauth.PolicyRules{
+    PolicyRules: agentauth.PolicyRules{
         AllowedActions: []string{"read", "write"},
     },
-    Scope: &gauth.PolicyScope{
+    Scope: &agentauth.PolicyScope{
         Countries: []string{"US"},
     },
 }
@@ -528,7 +528,7 @@ Content-Type: application/json
 
 ### Implementation Details
 
-- **Location**: [`pkg/gauth/pdp_adapter.go`](../pkg/gauth/pdp_adapter.go) (SimplePDP)
+- **Location**: [`pkg/agentauth/pdp_adapter.go`](../pkg/agentauth/pdp_adapter.go) (SimplePDP)
 - **Distributed**: [`internal/pdp/distributed_pdp.go`](../internal/pdp/distributed_pdp.go)
 - **Decision Types**: DecisionPermit, DecisionDeny, DecisionNotApplicable, DecisionIndeterminate
 
@@ -575,7 +575,7 @@ The **Policy Information Point** retrieves contextual attributes and information
 package main
 
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pip"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pip"
 )
 
 func main() {
@@ -725,20 +725,20 @@ package main
 
 import (
     "context"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 
 func main() {
     // Create PVP client (mock for development)
-    pvpClient := gauth.NewMockPVPClient(false)
+    pvpClient := agentauth.NewMockPVPClient(false)
 
     ctx := context.Background()
 
     // Verify natural person identity
-    identityProof, err := pvpClient.VerifyIdentity(ctx, gauth.IdentityVerificationRequest{
+    identityProof, err := pvpClient.VerifyIdentity(ctx, agentauth.IdentityVerificationRequest{
         SubjectID:        "person-alice-001",
-        IdentityType:     gauth.IdentityTypeNaturalPerson,
-        ProofMethod:      gauth.ProofMethodEIDAS,
+        IdentityType:     agentauth.IdentityTypeNaturalPerson,
+        ProofMethod:      agentauth.ProofMethodEIDAS,
         Jurisdiction:     "DE",
         ProofData: map[string]interface{}{
             "verified":     true,
@@ -766,10 +766,10 @@ func main() {
 
 ```go
 // Verify legal entity (company)
-identityProof, err := pvpClient.VerifyIdentity(ctx, gauth.IdentityVerificationRequest{
+identityProof, err := pvpClient.VerifyIdentity(ctx, agentauth.IdentityVerificationRequest{
     SubjectID:    "company-acme-001",
-    IdentityType: gauth.IdentityTypeLegalEntity,
-    ProofMethod:  gauth.ProofMethodCommercialRegister,
+    IdentityType: agentauth.IdentityTypeLegalEntity,
+    ProofMethod:  agentauth.ProofMethodCommercialRegister,
     Jurisdiction: "DE",
     ProofData: map[string]interface{}{
         "registration_number": "HRB-12345-DE",
@@ -786,9 +786,9 @@ fmt.Printf("Company Verified: %v\n", identityProof.Verified)
 
 ```go
 // Verify complete authorization chain
-chainValid, err := pvpClient.VerifyAuthorizationChain(ctx, gauth.AuthorizationChainRequest{
+chainValid, err := pvpClient.VerifyAuthorizationChain(ctx, agentauth.AuthorizationChainRequest{
     ChainID: "chain-001",
-    Steps: []gauth.ChainStep{
+    Steps: []agentauth.ChainStep{
         {
             Subject:    "company-acme",
             Authorizer: "director-001",
@@ -926,24 +926,24 @@ The **Policy Enforcement Point** intercepts requests, validates tokens, consults
 package main
 
 import (
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 func main() {
     // Create token validator
-    tokenValidator := gauth.NewJWTValidator(secretKey)
+    tokenValidator := agentauth.NewJWTValidator(secretKey)
 
     // Create PDP
-    pdp := gauth.NewSimplePDPWithPAP(pap)
+    pdp := agentauth.NewSimplePDPWithPAP(pap)
 
     // Create audit logger
-    auditLogger := gauth.NewFileAuditLogger("/var/log/gauth/enforcement.log")
+    auditLogger := agentauth.NewFileAuditLogger("/var/log/agentauth/enforcement.log")
 
     // Create compliance tracker
-    complianceTracker := gauth.NewComplianceTracker()
+    complianceTracker := agentauth.NewComplianceTracker()
 
     // Create PEP
-    pep := gauth.NewPowerEnforcementPoint(
+    pep := agentauth.NewPowerEnforcementPoint(
         tokenValidator,
         pdp,
         auditLogger,
@@ -959,7 +959,7 @@ func main() {
 
 ```go
 // HTTP middleware for authorization enforcement
-func AuthorizationMiddleware(pep *gauth.PowerEnforcementPoint) gin.HandlerFunc {
+func AuthorizationMiddleware(pep *agentauth.PowerEnforcementPoint) gin.HandlerFunc {
     return func(c *gin.Context) {
         // Extract token from Authorization header
         token := c.GetHeader("Authorization")
@@ -973,7 +973,7 @@ func AuthorizationMiddleware(pep *gauth.PowerEnforcementPoint) gin.HandlerFunc {
         token = strings.TrimPrefix(token, "Bearer ")
 
         // Create enforcement request
-        request := &gauth.EnforcementRequest{
+        request := &agentauth.EnforcementRequest{
             Token:    token,
             Resource: c.Request.URL.Path,
             Action:   c.Request.Method,
@@ -1016,7 +1016,7 @@ router.Use(AuthorizationMiddleware(pep))
 
 ```go
 // Create PEP in advisory mode (logs but doesn't block)
-pep := gauth.NewPowerEnforcementPoint(
+pep := agentauth.NewPowerEnforcementPoint(
     tokenValidator,
     pdp,
     auditLogger,
@@ -1065,7 +1065,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 ### Implementation Details
 
-- **Location**: [`pkg/gauth/pep.go`](../pkg/gauth/pep.go)
+- **Location**: [`pkg/agentauth/pep.go`](../pkg/agentauth/pep.go)
 - **Components**: tokenValidator, pdp, auditLogger, complianceTracker
 - **Modes**: strict (blocking), advisory (logging only)
 
@@ -1081,25 +1081,25 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 
 func main() {
     ctx := context.Background()
 
     // 1. Initialize P*P Components
-    pap := gauth.NewPowerAdministrationPoint("pap-001", "Main PAP", "")
-    pdp := gauth.NewSimplePDPWithPAP(pap)
+    pap := agentauth.NewPowerAdministrationPoint("pap-001", "Main PAP", "")
+    pdp := agentauth.NewSimplePDPWithPAP(pap)
     pipClient := pip.NewClient(pip.Config{
         RegistryURL: "http://localhost:8080",
     })
-    pvpClient := gauth.NewMockPVPClient(false)
+    pvpClient := agentauth.NewMockPVPClient(false)
     
-    tokenValidator := gauth.NewJWTValidator(secretKey)
-    auditLogger := gauth.NewFileAuditLogger("/var/log/gauth/audit.log")
-    complianceTracker := gauth.NewComplianceTracker()
+    tokenValidator := agentauth.NewJWTValidator(secretKey)
+    auditLogger := agentauth.NewFileAuditLogger("/var/log/agentauth/audit.log")
+    complianceTracker := agentauth.NewComplianceTracker()
     
-    pep := gauth.NewPowerEnforcementPoint(
+    pep := agentauth.NewPowerEnforcementPoint(
         tokenValidator,
         pdp,
         auditLogger,
@@ -1108,16 +1108,16 @@ func main() {
     )
 
     // 2. Create Authorization Policy (PAP)
-    createRequest := &gauth.PolicyCreateRequest{
-        PolicyType:       gauth.PolicyTypePoA,
+    createRequest := &agentauth.PolicyCreateRequest{
+        PolicyType:       agentauth.PolicyTypePoA,
         PolicyName:       "Healthcare Access Policy",
         ClientOwner:      "hospital-001",
         OwnersAuthorizer: "ceo-001",
-        PolicyRules: gauth.PolicyRules{
+        PolicyRules: agentauth.PolicyRules{
             AllowedActions: []string{"read", "write"},
             ResourcePatterns: []string{"/api/patients/*"},
         },
-        Scope: &gauth.PolicyScope{
+        Scope: &agentauth.PolicyScope{
             Countries: []string{"US", "CA"},
             Sectors:   []string{"healthcare"},
         },
@@ -1136,10 +1136,10 @@ func main() {
     fmt.Println("✅ Policy activated")
 
     // 4. Verify Identity (PVP)
-    identityProof, err := pvpClient.VerifyIdentity(ctx, gauth.IdentityVerificationRequest{
+    identityProof, err := pvpClient.VerifyIdentity(ctx, agentauth.IdentityVerificationRequest{
         SubjectID:     "doctor-alice",
-        IdentityType:  gauth.IdentityTypeNaturalPerson,
-        ProofMethod:   gauth.ProofMethodEIDAS,
+        IdentityType:  agentauth.IdentityTypeNaturalPerson,
+        ProofMethod:   agentauth.ProofMethodEIDAS,
         Jurisdiction:  "DE",
         RequiredLevel: "high",
     })
@@ -1150,7 +1150,7 @@ func main() {
     fmt.Printf("✅ Attributes retrieved: roles=%v\n", subjectAttrs["roles"])
 
     // 6. Make Authorization Decision (PDP)
-    decisionRequest := &gauth.AuthorizationDecisionRequest{
+    decisionRequest := &agentauth.AuthorizationDecisionRequest{
         Subject:  "doctor-alice",
         Resource: "/api/patients/12345",
         Action:   "read",
@@ -1167,7 +1167,7 @@ func main() {
     fmt.Printf("✅ PDP Decision: %s (reason: %s)\n", decision.Decision, decision.Reason)
 
     // 7. Enforce Decision (PEP)
-    enforcementRequest := &gauth.EnforcementRequest{
+    enforcementRequest := &agentauth.EnforcementRequest{
         Token:    "jwt-token-here",
         Resource: "/api/patients/12345",
         Action:   "read",
@@ -1268,27 +1268,27 @@ func main() {
 
 ```bash
 # Enable P*P features
-GAUTH_AAP-001_ENABLED=1
-GAUTH_USE_JWT_LIB=1
+AGENTAUTH_AAP-001_ENABLED=1
+AGENTAUTH_USE_JWT_LIB=1
 
 # PIP Configuration
-GAUTH_PIP_ENABLED=true
-GAUTH_PIP_CACHE_TTL=300s
+AGENTAUTH_PIP_ENABLED=true
+AGENTAUTH_PIP_CACHE_TTL=300s
 
 # PDP Configuration
-GAUTH_PDP_CACHE_ENABLED=true
-GAUTH_PDP_CACHE_TTL=300s
+AGENTAUTH_PDP_CACHE_ENABLED=true
+AGENTAUTH_PDP_CACHE_TTL=300s
 
 # PEP Configuration
-GAUTH_PEP_MODE=strict  # or "advisory"
-GAUTH_PEP_AUDIT_ENABLED=true
+AGENTAUTH_PEP_MODE=strict  # or "advisory"
+AGENTAUTH_PEP_AUDIT_ENABLED=true
 ```
 
 ### Common Commands
 
 ```bash
 # Start AgentAuth server with P*P features
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 GAUTH_USE_JWT_LIB=1 go run ./cmd/web-server
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_USE_JWT_LIB=1 go run ./cmd/web-server
 
 # Test PAP policy creation
 curl -X POST http://localhost:8080/api/v1/pap/policies \
@@ -1305,9 +1305,9 @@ curl -X POST http://localhost:8080/api/v1/pdp/authorize \
 
 ## Additional Resources
 
-- [RFC-0111 Specification](../ARCHITECTURE_SOLUTION.md)
+- [AAP-001 Specification](../ARCHITECTURE_SOLUTION.md)
 - [API Documentation](../docs/openapi.yaml)
-- [PAP Implementation Tests](../pkg/gauth/pap_test.go)
+- [PAP Implementation Tests](../pkg/agentauth/pap_test.go)
 - [PDP Integration Guide](SESSION_REPORT_NOV_15_2025_AFTERNOON.md)
 - [Phase 2A Quick Start](PHASE_2A_QUICK_START.md)
 

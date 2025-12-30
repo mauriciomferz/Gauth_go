@@ -104,7 +104,7 @@ sequenceDiagram
 ### Legend
 - rfc111:* indicates governance & integrity related clauses.
 - rfc115:* indicates semantic diagnostics & reactive controls.
-- EdDSA signatures domain separated (GAUTH_ROTATION_SUMMARY:, GAUTH_ROTATION_DESCRIPTOR:).
+- EdDSA signatures domain separated (AGENTAUTH_ROTATION_SUMMARY:, AGENTAUTH_ROTATION_DESCRIPTOR:).
 
 ### Future Extensions
 - Inclusion proof: add optional batch verification endpoint.

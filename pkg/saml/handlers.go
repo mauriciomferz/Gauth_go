@@ -177,11 +177,11 @@ func (h *Handler) Metadata(c *gin.Context) {
 	// Generate static metadata for this SP
 	// Real impl: Sign this XML
 	metadata := fmt.Sprintf(`
-<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://gauth.example.com/api/saml/acs/%s">
+<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://agentauth.example.com/api/saml/acs/%s">
   <md:SPSSODescriptor AuthnRequestsSigned="false" WantAssertionsSigned="true" `+
 		`protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
     <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" `+
-		`Location="https://gauth.example.com/api/saml/acs/%s" index="1"/>
+		`Location="https://agentauth.example.com/api/saml/acs/%s" index="1"/>
   </md:SPSSODescriptor>
 </md:EntityDescriptor>`, providerID, providerID)
 

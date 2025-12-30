@@ -53,7 +53,7 @@ func (v *OPAHTTPValidator) ValidateScope(ctx context.Context, parent, child []st
 	}
 
 	// Send to OPA
-	url := fmt.Sprintf("%s/v1/data/gauth/authz/allow", v.baseURL)
+	url := fmt.Sprintf("%s/v1/data/agentauth/authz/allow", v.baseURL)
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
@@ -105,7 +105,7 @@ func (v *OPAHTTPValidator) ValidateWithDetails(ctx context.Context, parent, chil
 	}
 
 	// Query decision_details endpoint
-	url := fmt.Sprintf("%s/v1/data/gauth/authz/decision_details", v.baseURL)
+	url := fmt.Sprintf("%s/v1/data/agentauth/authz/decision_details", v.baseURL)
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return false, nil, fmt.Errorf("failed to create request: %w", err)

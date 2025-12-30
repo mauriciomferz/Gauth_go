@@ -94,7 +94,7 @@ Declare a disaster when:
 ### Prerequisites
 
 - [ ] Access to backup cluster or fresh Kubernetes cluster
-- [ ] Access to S3 backup bucket: `s3://gauth-backups/`
+- [ ] Access to S3 backup bucket: `s3://agentauth-backups/`
 - [ ] Latest configuration files from Git
 - [ ] AWS credentials configured
 - [ ] kubectl configured for target cluster
@@ -103,12 +103,12 @@ Declare a disaster when:
 
 ```bash
 # Check latest backups
-aws s3 ls s3://gauth-backups/postgresql/ --recursive | tail -5
-aws s3 ls s3://gauth-backups/redis/ --recursive | tail -5
+aws s3 ls s3://agentauth-backups/postgresql/ --recursive | tail -5
+aws s3 ls s3://agentauth-backups/redis/ --recursive | tail -5
 
 # Verify backup integrity
-LATEST_DB_BACKUP=$(aws s3 ls s3://gauth-backups/postgresql/ --recursive | tail -1 | awk '{print $4}')
-aws s3 cp s3://gauth-backups/${LATEST_DB_BACKUP} /tmp/test_backup.dump.gz
+LATEST_DB_BACKUP=$(aws s3 ls s3://agentauth-backups/postgresql/ --recursive | tail -1 | awk '{print $4}')
+aws s3 cp s3://agentauth-backups/${LATEST_DB_BACKUP} /tmp/test_backup.dump.gz
 gunzip -t /tmp/test_backup.dump.gz && echo "Backup OK" || echo "Backup CORRUPTED"
 ```
 
@@ -116,13 +116,13 @@ gunzip -t /tmp/test_backup.dump.gz && echo "Backup OK" || echo "Backup CORRUPTED
 
 ```bash
 # Create namespace
-kubectl create namespace gauth-staging
+kubectl create namespace agentauth-staging
 
 # Create secrets
-kubectl create secret generic gauth-secrets \
-  --from-literal=database-url="postgresql://gauth:password@postgresql:5432/gauth" \
+kubectl create secret generic agentauth-secrets \
+  --from-literal=database-url="postgresql://agentauth:password@postgresql:5432/agentauth" \
   --from-literal=redis-url="redis://redis:6379" \
-  -n gauth-staging
+  -n agentauth-staging
 
 # Apply network policies
 kubectl apply -f k8s-network-policies.yaml
@@ -135,10 +135,10 @@ kubectl apply -f k8s-network-policies.yaml
 kubectl apply -f k8s-postgres.yaml
 
 # Wait for pod to be ready
-kubectl wait --for=condition=ready pod -l app=postgresql -n gauth-staging --timeout=300s
+kubectl wait --for=condition=ready pod -l app=postgresql -n agentauth-staging --timeout=300s
 
 # Verify PostgreSQL is running
-kubectl exec -n gauth-staging $(kubectl get pod -n gauth-staging -l app=postgresql -o jsonpath='{.items[0].metadata.name}') -- psql -U postgres -c "SELECT version()"
+kubectl exec -n agentauth-staging $(kubectl get pod -n agentauth-staging -l app=postgresql -o jsonpath='{.items[0].metadata.name}') -- psql -U postgres -c "SELECT version()"
 ```
 
 ### Step 4: Restore Database
@@ -148,8 +148,8 @@ kubectl exec -n gauth-staging $(kubectl get pod -n gauth-staging -l app=postgres
 ./scripts/restore-postgresql.sh <latest-backup-date>
 
 # Verify database content
-kubectl exec -n gauth-staging <postgres-pod> -- \
-  psql -U gauth -d gauth -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname='public'"
+kubectl exec -n agentauth-staging <postgres-pod> -- \
+  psql -U agentauth -d agentauth -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname='public'"
 ```
 
 ### Step 5: Deploy Redis
@@ -159,13 +159,13 @@ kubectl exec -n gauth-staging <postgres-pod> -- \
 kubectl apply -f k8s-redis.yaml
 
 # Wait for pod to be ready
-kubectl wait --for=condition=ready pod -l app=redis -n gauth-staging --timeout=300s
+kubectl wait --for=condition=ready pod -l app=redis -n agentauth-staging --timeout=300s
 
 # Restore Redis data (if needed)
 ./scripts/restore-redis.sh <latest-backup-date>
 
 # Verify Redis
-kubectl exec -n gauth-staging <redis-pod> -- redis-cli PING
+kubectl exec -n agentauth-staging <redis-pod> -- redis-cli PING
 ```
 
 ### Step 6: Deploy AgentAuth Application
@@ -175,11 +175,11 @@ kubectl exec -n gauth-staging <redis-pod> -- redis-cli PING
 kubectl apply -f k8s-test-blue.yaml
 
 # Wait for pods to be ready
-kubectl wait --for=condition=ready pod -l app=gauth -n gauth-staging --timeout=300s
+kubectl wait --for=condition=ready pod -l app=agentauth -n agentauth-staging --timeout=300s
 
 # Verify health
 kubectl run test-health --rm -i --image=curlimages/curl --restart=Never \
-  -n gauth-staging -- curl -f http://gauth-service/api/v1/beta/health
+  -n agentauth-staging -- curl -f http://agentauth-service/api/v1/beta/health
 ```
 
 ### Step 7: Deploy Monitoring Stack
@@ -191,11 +191,11 @@ kubectl apply -f k8s-alertmanager.yaml
 kubectl apply -f k8s-prometheus-alerts-enhanced.yaml
 
 # Wait for monitoring pods
-kubectl wait --for=condition=ready pod -l app=prometheus -n gauth-staging --timeout=300s
-kubectl wait --for=condition=ready pod -l app=grafana -n gauth-staging --timeout=300s
+kubectl wait --for=condition=ready pod -l app=prometheus -n agentauth-staging --timeout=300s
+kubectl wait --for=condition=ready pod -l app=grafana -n agentauth-staging --timeout=300s
 
 # Verify Prometheus targets
-kubectl port-forward -n gauth-staging svc/prometheus 9090:9090 &
+kubectl port-forward -n agentauth-staging svc/prometheus 9090:9090 &
 curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | {job, health}'
 ```
 
@@ -206,18 +206,18 @@ curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | {job, he
 ./scripts/validate-deployment.sh
 
 # Check all pods
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 
 # Run smoke tests
 kubectl run smoke-test --rm -i --image=curlimages/curl --restart=Never \
-  -n gauth-staging -- sh -c '
+  -n agentauth-staging -- sh -c '
   for i in $(seq 1 10); do
-    curl -s http://gauth-service/api/v1/beta/health && echo " - OK"
+    curl -s http://agentauth-service/api/v1/beta/health && echo " - OK"
     sleep 1
   done'
 
 # Check metrics
-kubectl port-forward -n gauth-staging svc/grafana 3000:3000 &
+kubectl port-forward -n agentauth-staging svc/grafana 3000:3000 &
 # Open http://localhost:3000 and verify dashboards
 ```
 
@@ -229,12 +229,12 @@ kubectl port-forward -n gauth-staging svc/grafana 3000:3000 &
 
 ```bash
 # 1. Identify corruption
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  psql -U postgres -d gauth -c "SELECT pg_database.datname FROM pg_database"
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  psql -U postgres -d agentauth -c "SELECT pg_database.datname FROM pg_database"
 
 # 2. Attempt REINDEX
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  psql -U postgres -d gauth -c "REINDEX DATABASE gauth"
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  psql -U postgres -d agentauth -c "REINDEX DATABASE agentauth"
 
 # 3. If corruption persists, restore from backup
 ./scripts/restore-postgresql.sh <backup-date>
@@ -250,13 +250,13 @@ kubectl exec <postgres-pod> -n gauth-staging -- \
 # Rebuild cache from database queries
 
 # 1. Clear Redis
-kubectl exec <redis-pod> -n gauth-staging -- redis-cli FLUSHALL
+kubectl exec <redis-pod> -n agentauth-staging -- redis-cli FLUSHALL
 
 # 2. Restart application to rebuild cache
-kubectl rollout restart deployment/gauth-blue -n gauth-staging
+kubectl rollout restart deployment/agentauth-blue -n agentauth-staging
 
 # 3. Monitor cache hit rate
-kubectl port-forward -n gauth-staging svc/grafana 3000:3000
+kubectl port-forward -n agentauth-staging svc/grafana 3000:3000
 # Check Redis dashboard - hit rate will improve over time
 ```
 
@@ -270,17 +270,17 @@ If entire cluster must be rebuilt:
 
 ```bash
 # 1. Create new kind cluster (for local testing)
-kind create cluster --name gauth-dr --config kind-cluster-config.yaml
+kind create cluster --name agentauth-dr --config kind-cluster-config.yaml
 
 # 2. Configure kubectl context
-kubectl config use-context kind-gauth-dr
+kubectl config use-context kind-agentauth-dr
 
 # 3. Follow "Complete Cluster Recovery" procedure above
 
 # For production: Use cloud provider to provision new cluster
-# AWS EKS: eksctl create cluster --name gauth-prod-dr --region us-east-1
-# GCP GKE: gcloud container clusters create gauth-prod-dr --region us-central1
-# Azure AKS: az aks create --resource-group gauth-rg --name gauth-prod-dr
+# AWS EKS: eksctl create cluster --name agentauth-prod-dr --region us-east-1
+# GCP GKE: gcloud container clusters create agentauth-prod-dr --region us-central1
+# Azure AKS: az aks create --resource-group agentauth-rg --name agentauth-prod-dr
 ```
 
 ### Storage Recovery
@@ -289,7 +289,7 @@ kubectl config use-context kind-gauth-dr
 # If PVCs are corrupted or lost
 
 # 1. Delete existing PVCs
-kubectl delete pvc -n gauth-staging --all
+kubectl delete pvc -n agentauth-staging --all
 
 # 2. Recreate PVCs
 kubectl apply -f k8s-postgres.yaml
@@ -309,7 +309,7 @@ kubectl apply -f k8s-redis.yaml
 **Schedule:** First Saturday of each month, 10:00 AM UTC
 
 **Procedure:**
-1. Create test namespace `gauth-dr-test`
+1. Create test namespace `agentauth-dr-test`
 2. Execute complete cluster recovery
 3. Validate all services
 4. Document timing and issues

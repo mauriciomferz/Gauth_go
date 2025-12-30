@@ -32,7 +32,7 @@ Test Job → Build Job → Docker Build Job → Trivy Scan → Security Scan (Go
 ### Image Registry
 
 - **Registry**: GitHub Container Registry (GHCR)
-- **Base URL**: `ghcr.io/mauriciomferz/gauth`
+- **Base URL**: `ghcr.io/mauriciomferz/agentauth`
 - **Authentication**: Automatic via `GITHUB_TOKEN`
 - **Visibility**: Public (configurable in repository settings)
 
@@ -42,11 +42,11 @@ The workflow automatically generates multiple tags for each build:
 
 | Tag Pattern | Example | Purpose |
 |------------|---------|---------|
-| `latest` | `ghcr.io/mauriciomferz/gauth:latest` | Latest main branch build |
-| `blue` | `ghcr.io/mauriciomferz/gauth:blue` | Blue environment deployment |
-| `green` | `ghcr.io/mauriciomferz/gauth:green` | Green environment deployment |
-| `main-{SHA}` | `ghcr.io/mauriciomferz/gauth:main-a1b2c3d` | Specific commit reference |
-| `{branch}` | `ghcr.io/mauriciomferz/gauth:feature-123` | Branch-specific builds |
+| `latest` | `ghcr.io/mauriciomferz/agentauth:latest` | Latest main branch build |
+| `blue` | `ghcr.io/mauriciomferz/agentauth:blue` | Blue environment deployment |
+| `green` | `ghcr.io/mauriciomferz/agentauth:green` | Green environment deployment |
+| `main-{SHA}` | `ghcr.io/mauriciomferz/agentauth:main-a1b2c3d` | Specific commit reference |
+| `{branch}` | `ghcr.io/mauriciomferz/agentauth:feature-123` | Branch-specific builds |
 
 ## Workflow Configuration
 
@@ -90,7 +90,7 @@ docker-build:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository_owner }}/gauth
+        images: ghcr.io/${{ github.repository_owner }}/agentauth
         tags: |
           type=ref,event=branch
           type=sha,prefix={{branch}}-,format=short
@@ -140,15 +140,15 @@ docker-build:
    - Build time: ~45-60 seconds
 2. **Runtime** (`alpine:3.19`):
    - Minimal runtime with libstdc++, libgcc
-   - Non-root user (gauth:1000)
+   - Non-root user (agentauth:1000)
    - Health check integration
 
 **Image Size**: ~27.7MB (compressed)
 
 **Environment Variables**:
-- `GAUTH_WEB_PORT`: Application port (default: 8080)
-- `GAUTH_ENV`: Environment name (staging/production)
-- `GAUTH_LOG_LEVEL`: Logging verbosity (info/debug/warn/error)
+- `AGENTAUTH_WEB_PORT`: Application port (default: 8080)
+- `AGENTAUTH_ENV`: Environment name (staging/production)
+- `AGENTAUTH_LOG_LEVEL`: Logging verbosity (info/debug/warn/error)
 
 ## Kubernetes Integration
 
@@ -159,16 +159,16 @@ Both `k8s-test-blue.yaml` and `k8s-test-green.yaml` have been updated to pull fr
 **Before** (local images):
 ```yaml
 containers:
-- name: gauth
-  image: gauth:blue-v2
+- name: agentauth
+  image: agentauth:blue-v2
   imagePullPolicy: Never
 ```
 
 **After** (GHCR):
 ```yaml
 containers:
-- name: gauth
-  image: ghcr.io/mauriciomferz/gauth:blue
+- name: agentauth
+  image: ghcr.io/mauriciomferz/agentauth:blue
   imagePullPolicy: Always
 ```
 
@@ -177,8 +177,8 @@ containers:
 1. **Build Phase**: CI pushes images with tags: `latest`, `blue`, `green`, `main-{SHA}`
 2. **Deploy Blue/Green**:
    ```bash
-   kubectl apply -f k8s-test-blue.yaml   # Pulls ghcr.io/mauriciomferz/gauth:blue
-   kubectl apply -f k8s-test-green.yaml  # Pulls ghcr.io/mauriciomferz/gauth:green
+   kubectl apply -f k8s-test-blue.yaml   # Pulls ghcr.io/mauriciomferz/agentauth:blue
+   kubectl apply -f k8s-test-green.yaml  # Pulls ghcr.io/mauriciomferz/agentauth:green
    ```
 3. **Validation**: Pods pull fresh images from GHCR on each deployment
 4. **Rollback**: Use previous SHA tags if needed
@@ -208,15 +208,15 @@ gh run view <run-id>
 
 ### Viewing Published Images
 
-1. **GitHub UI**: Navigate to `https://github.com/mauriciomferz/Gauth_go/pkgs/container/gauth`
+1. **GitHub UI**: Navigate to `https://github.com/mauriciomferz/AgentAuth/pkgs/container/agentauth`
 2. **CLI**:
    ```bash
    # List tags
-   docker pull ghcr.io/mauriciomferz/gauth:latest
-   docker images ghcr.io/mauriciomferz/gauth
+   docker pull ghcr.io/mauriciomferz/agentauth:latest
+   docker images ghcr.io/mauriciomferz/agentauth
    
    # Inspect image
-   docker inspect ghcr.io/mauriciomferz/gauth:latest
+   docker inspect ghcr.io/mauriciomferz/agentauth:latest
    ```
 
 ### Deploying to Kubernetes
@@ -226,25 +226,25 @@ gh run view <run-id>
 kubectl apply -f k8s-test-blue.yaml
 
 # Watch rollout
-kubectl rollout status deployment/gauth-blue -n gauth-staging
+kubectl rollout status deployment/agentauth-blue -n agentauth-staging
 
 # Verify pods are running
-kubectl get pods -n gauth-staging -l version=blue
+kubectl get pods -n agentauth-staging -l version=blue
 
 # Test application
 kubectl run test-client --rm -i --tty \
   --image=curlimages/curl --restart=Never \
-  -n gauth-staging -- \
-  curl -s http://gauth-service/api/v1/beta/health
+  -n agentauth-staging -- \
+  curl -s http://agentauth-service/api/v1/beta/health
 ```
 
 ### Using Specific Versions
 
 ```bash
 # Deploy specific commit SHA
-kubectl set image deployment/gauth-blue \
-  gauth=ghcr.io/mauriciomferz/gauth:main-a1b2c3d \
-  -n gauth-staging
+kubectl set image deployment/agentauth-blue \
+  agentauth=ghcr.io/mauriciomferz/agentauth:main-a1b2c3d \
+  -n agentauth-staging
 
 # Or edit manifest directly
 vi k8s-test-blue.yaml  # Change image tag
@@ -279,7 +279,7 @@ kubectl apply -f k8s-test-blue.yaml
 **Solution**:
 ```bash
 # Check token permissions
-gh api /repos/mauriciomferz/Gauth_go/actions/permissions
+gh api /repos/mauriciomferz/AgentAuth/actions/permissions
 
 # Should show: "default_workflow_permissions": "write"
 ```
@@ -291,12 +291,12 @@ gh api /repos/mauriciomferz/Gauth_go/actions/permissions
 **Check**:
 1. Verify image exists in GHCR:
    ```bash
-   docker pull ghcr.io/mauriciomferz/gauth:blue
+   docker pull ghcr.io/mauriciomferz/agentauth:blue
    ```
 2. Check GHCR package visibility (should be public)
 3. Inspect pod events:
    ```bash
-   kubectl describe pod <pod-name> -n gauth-staging
+   kubectl describe pod <pod-name> -n agentauth-staging
    ```
 
 **Common Causes**:
@@ -312,12 +312,12 @@ kubectl create secret docker-registry ghcr-secret \
   --docker-server=ghcr.io \
   --docker-username=mauriciomferz \
   --docker-password=$GITHUB_TOKEN \
-  -n gauth-staging
+  -n agentauth-staging
 
 # Add to deployment
-kubectl patch deployment gauth-blue \
+kubectl patch deployment agentauth-blue \
   -p '{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"ghcr-secret"}]}}}}' \
-  -n gauth-staging
+  -n agentauth-staging
 ```
 
 ### Application Startup Failures
@@ -326,18 +326,18 @@ kubectl patch deployment gauth-blue \
 
 **Check Logs**:
 ```bash
-kubectl logs -n gauth-staging -l version=blue --tail=100
+kubectl logs -n agentauth-staging -l version=blue --tail=100
 ```
 
 **Common Issues**:
-- Missing environment variables (GAUTH_WEB_PORT, etc.)
+- Missing environment variables (AGENTAUTH_WEB_PORT, etc.)
 - Resource limits too low (check OOMKilled events)
 - Health check failures (check `/api/v1/beta/health` endpoint)
 
 **Debug**:
 ```bash
 # Exec into pod
-kubectl exec -it <pod-name> -n gauth-staging -- /bin/sh
+kubectl exec -it <pod-name> -n agentauth-staging -- /bin/sh
 
 # Check process
 ps aux | grep web-server
@@ -386,7 +386,7 @@ Currently NOT integrated in this workflow. Recommend adding:
 - name: Run Trivy vulnerability scanner
   uses: aquasecurity/trivy-action@master
   with:
-    image-ref: ghcr.io/mauriciomferz/gauth:${{ github.sha }}
+    image-ref: ghcr.io/mauriciomferz/agentauth:${{ github.sha }}
     format: 'sarif'
     output: 'trivy-results.sarif'
     severity: 'CRITICAL,HIGH'
@@ -404,10 +404,10 @@ Currently NOT integrated in this workflow. Recommend adding:
 
 ```bash
 # Verify image digest
-docker inspect ghcr.io/mauriciomferz/gauth:latest | jq '.[0].RepoDigests'
+docker inspect ghcr.io/mauriciomferz/agentauth:latest | jq '.[0].RepoDigests'
 
 # Check layers
-docker history ghcr.io/mauriciomferz/gauth:latest
+docker history ghcr.io/mauriciomferz/agentauth:latest
 ```
 
 ## Best Practices

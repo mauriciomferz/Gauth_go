@@ -22,7 +22,7 @@ Target End: 2025-11-07 (approx. 10 working days)
 ## RB5: Ledger Entry Signatures
 ### Objectives
 - Sign every rotation ledger append: payload = `prev_hash || new_hash || timestamp || entry_index`.
-- Provide verification CLI: `gauth-ledger-verify <path>` returns chain validity + first tamper index.
+- Provide verification CLI: `agentauth-ledger-verify <path>` returns chain validity + first tamper index.
 - Integrate signing with existing Ed25519 key manager (reuse active signing key).
 
 ### Tasks
@@ -53,7 +53,7 @@ Target End: 2025-11-07 (approx. 10 working days)
 
 ### Tasks
 - Add `internal/revocation/merkle.go` (structure: nodes, Append(id), Root(), Proof(id)).
-- Persist minimal subtree checkpoints every N revocations (tunable via env `GAUTH_REVOCATION_PROOF_CHECKPOINT_INTERVAL`).
+- Persist minimal subtree checkpoints every N revocations (tunable via env `AGENTAUTH_REVOCATION_PROOF_CHECKPOINT_INTERVAL`).
 - HTTP handler module `web/handlers/revocation/proofs.go`.
 - Tests:
   - Single revocation inclusion proof.
@@ -72,7 +72,7 @@ Target End: 2025-11-07 (approx. 10 working days)
 
 ## RB11: Replay WAL Metrics & Alerts
 ### Objectives
-- Expose metrics: `gauth_wal_pending_entries`, `gauth_wal_flush_latency_seconds` (histogram), `gauth_wal_snapshot_duration_seconds` (histogram), `gauth_wal_last_flush_age_seconds` (gauge).
+- Expose metrics: `agentauth_wal_pending_entries`, `agentauth_wal_flush_latency_seconds` (histogram), `agentauth_wal_snapshot_duration_seconds` (histogram), `agentauth_wal_last_flush_age_seconds` (gauge).
 - Alert rules: flush latency p95 > 0.250s, snapshot duration p95 > 1s, pending entries > 500.
 - Document operational runbook.
 
@@ -84,8 +84,8 @@ Target End: 2025-11-07 (approx. 10 working days)
 - Add optional debug endpoint `/api/v1/wal/status` returning current counters.
 
 ### Edge Cases
-- WAL flush failure: increment `gauth_wal_flush_failures_total`; alert if >0 over 5m window.
-- Snapshot interruption: record partial state metric `gauth_wal_snapshot_incomplete_total`.
+- WAL flush failure: increment `agentauth_wal_flush_failures_total`; alert if >0 over 5m window.
+- Snapshot interruption: record partial state metric `agentauth_wal_snapshot_incomplete_total`.
 
 ### Acceptance Criteria
 - Metrics visible on `/metrics` after simulated workload (test harness).
@@ -93,7 +93,7 @@ Target End: 2025-11-07 (approx. 10 working days)
 - Documentation includes troubleshooting (high latency, backlog growth).
 
 ## Cross-Cutting Concerns
-- Backward compatibility: unsigned ledger entries accepted unless strict mode env `GAUTH_LEDGER_STRICT_SIGN`=1.
+- Backward compatibility: unsigned ledger entries accepted unless strict mode env `AGENTAUTH_LEDGER_STRICT_SIGN`=1.
 - Performance: revocation Merkle operations O(log n) for proofs; append amortized O(1) with rolling hash strategy.
 - Security: Signatures verify before trusting ledger chain; proof API rejects unknown revocation IDs gracefully.
 

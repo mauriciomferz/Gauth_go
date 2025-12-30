@@ -17,14 +17,14 @@ import (
 var (
 	validationAttempts = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauthtoken_validation_attempts_total",
+			Name: "agentauthtoken_validation_attempts_total",
 			Help: "Total number of token validation attempts.",
 		},
 		[]string{"algorithm", "status"},
 	)
 	validationDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauthtoken_validation_duration_seconds",
+			Name:    "agentauthtoken_validation_duration_seconds",
 			Help:    "Histogram of token validation durations.",
 			Buckets: prometheus.ExponentialBuckets(0.0001, 2, 15),
 		},

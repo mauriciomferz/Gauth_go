@@ -5,15 +5,15 @@ set -euo pipefail
 # Provides optional .env loading, persistent secrets, and PID management.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PID_FILE="$ROOT_DIR/gauth-web.pid"
-LOG_FILE="$ROOT_DIR/gauth-web.log"
-PORT="${GAUTH_PORT:-8080}"
+PID_FILE="$ROOT_DIR/agentauth-web.pid"
+LOG_FILE="$ROOT_DIR/agentauth-web.log"
+PORT="${AGENTAUTH_PORT:-8080}"
 
 # Preflight (empty Go file detection) unless skipped
-if [[ "${GAUTH_SKIP_PREFLIGHT:-0}" != "1" ]]; then
+if [[ "${AGENTAUTH_SKIP_PREFLIGHT:-0}" != "1" ]]; then
   if [[ -x "$ROOT_DIR/scripts/preflight-dev.sh" ]]; then
     if ! "$ROOT_DIR/scripts/preflight-dev.sh"; then
-      echo "[start-web-demo] Preflight failed; aborting startup (set GAUTH_SKIP_PREFLIGHT=1 to bypass)" >&2
+      echo "[start-web-demo] Preflight failed; aborting startup (set AGENTAUTH_SKIP_PREFLIGHT=1 to bypass)" >&2
       exit 1
     fi
   fi
@@ -39,19 +39,19 @@ if [[ -f "$ROOT_DIR/.env" ]]; then
 fi
 
 # Ensure stable secrets if not provided
-if [[ -z "${GAUTH_CLIENT_SECRET:-}" ]]; then
-  export GAUTH_CLIENT_SECRET="demo-client-secret-change-me"
-  echo "[start-web-demo] GAUTH_CLIENT_SECRET not set; using demo default (beta)." >&2
+if [[ -z "${AGENTAUTH_CLIENT_SECRET:-}" ]]; then
+  export AGENTAUTH_CLIENT_SECRET="demo-client-secret-change-me"
+  echo "[start-web-demo] AGENTAUTH_CLIENT_SECRET not set; using demo default (beta)." >&2
 fi
-if [[ -z "${GAUTH_SIGNING_KEY:-}" ]]; then
-  export GAUTH_SIGNING_KEY="demo-signing-key-change-me-32-bytes-minimum-1234"
-  echo "[start-web-demo] GAUTH_SIGNING_KEY not set; using demo default (beta)." >&2
+if [[ -z "${AGENTAUTH_SIGNING_KEY:-}" ]]; then
+  export AGENTAUTH_SIGNING_KEY="demo-signing-key-change-me-32-bytes-minimum-1234"
+  echo "[start-web-demo] AGENTAUTH_SIGNING_KEY not set; using demo default (beta)." >&2
 fi
 
-export GAUTH_MODE="${GAUTH_MODE:-development}"
-export GAUTH_PORT="$PORT"
-export GAUTH_DEV_MODULES="${GAUTH_DEV_MODULES:-1}" # serve modules from disk for live reload
-export GAUTH_DEV_INDEX="${GAUTH_DEV_INDEX:-1}" # serve index.html from disk for live reload
+export AGENTAUTH_MODE="${AGENTAUTH_MODE:-development}"
+export AGENTAUTH_PORT="$PORT"
+export AGENTAUTH_DEV_MODULES="${AGENTAUTH_DEV_MODULES:-1}" # serve modules from disk for live reload
+export AGENTAUTH_DEV_INDEX="${AGENTAUTH_DEV_INDEX:-1}" # serve index.html from disk for live reload
 
 cd "$ROOT_DIR" || exit 1
 

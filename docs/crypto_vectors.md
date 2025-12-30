@@ -77,9 +77,9 @@ Metrics (when constructed via `NewBLSSimpleAggregatorWithMetrics`):
 
 ### 5. Detached Signature Enforcement
 
-Hook: `EnforceDetachedSignature(payload, sig []byte)` returns error if `COMPLIANCE_REQUIRE_SIGNATURE=1` (or `GAUTH_REQUIRE_DETACHED_SIGNATURE=1`) and `sig` is empty.
+Hook: `EnforceDetachedSignature(payload, sig []byte)` returns error if `COMPLIANCE_REQUIRE_SIGNATURE=1` (or `AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1`) and `sig` is empty.
 
-Metric implemented (Prometheus): `gauth_crypto_signature_missing_total` counting enforcement failures where a required detached signature was absent. This enables dashboards & alerting on systematic signature omission.
+Metric implemented (Prometheus): `agentauth_crypto_signature_missing_total` counting enforcement failures where a required detached signature was absent. This enables dashboards & alerting on systematic signature omission.
 
 ### 6. Future Work (Phase 2+)
 | Item | Description |

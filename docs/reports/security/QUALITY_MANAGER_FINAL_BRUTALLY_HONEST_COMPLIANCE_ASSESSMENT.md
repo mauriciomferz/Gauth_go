@@ -13,13 +13,13 @@ After an exhaustive, line-by-line analysis of the entire codebase against both R
 
 ### 🔴 **OVERALL COMPLIANCE: 62% - INSUFFICIENT FOR PRODUCTION**
 
-**The implementation is NOT ready for production deployment under the RFC-0111 and RFC-0115 standards.**
+**The implementation is NOT ready for production deployment under the AAP-001 and AAP-002 standards.**
 
 While the team has built impressive infrastructure with monitoring, CI/CD, and web interfaces, **the core AgentAuth protocol implementation has critical gaps that fundamentally compromise RFC compliance.**
 
 ---
 
-## PART 1: RFC-0111 COMPLIANCE ANALYSIS
+## PART 1: AAP-001 COMPLIANCE ANALYSIS
 
 ### 1.1 Core Nomenclature & Roles - 🟡 **55% COMPLIANT**
 
@@ -30,7 +30,7 @@ While the team has built impressive infrastructure with monitoring, CI/CD, and w
 
 **Implementation Reality:**
 ```go
-// pkg/gauth/gauth.go:77-81
+// pkg/agentauth/agentauth.go:77-81
 type TokenResponse struct {
 	Token      string
 	Scope      []string
@@ -98,7 +98,7 @@ The RFC defines 5 distinct Power*Point roles:
 | **PEP** | ✅ Implemented | `pkg/enforcement/pep.go` - Supply & Demand Side | **90%** |
 | **PDP** | ✅ Implemented | `pkg/pdp/` - Policy engine with ABAC/RBAC | **85%** |
 | **PIP** | 🟡 Partial | Data scattered across packages | **60%** |
-| **PAP** | ✅ Implemented | `pkg/gauth/gauth.go:931` PowerAdministrationPoint | **85%** |
+| **PAP** | ✅ Implemented | `pkg/agentauth/agentauth.go:931` PowerAdministrationPoint | **85%** |
 | **PVP** | 🔴 **CRITICAL GAP** | NO identity verification chain | **35%** |
 
 #### **CRITICAL FINDING #3: PVP (Power Verification Point) Failure**
@@ -195,7 +195,7 @@ Must NOT integrate:
 
 ---
 
-## PART 2: RFC-0115 (PoA DEFINITION) COMPLIANCE ANALYSIS
+## PART 2: AAP-002 (PoA DEFINITION) COMPLIANCE ANALYSIS
 
 ### 2.1 Section A: PARTIES - 🟡 **58% COMPLIANT**
 
@@ -425,7 +425,7 @@ type PowerLimitSet struct {
 }
 ```
 
-**Status:** **EXCELLENT** - One of the strongest RFC-0115 implementations.
+**Status:** **EXCELLENT** - One of the strongest AAP-002 implementations.
 
 #### C.4 Rights and Obligations - 🟢 **92% COMPLIANT**
 
@@ -478,11 +478,11 @@ type RightsObligationSet struct {
 
 | # | Gap | RFC Section | Impact | Effort |
 |---|-----|-------------|--------|--------|
-| **G1** | **Extended Token NOT Implemented** | RFC-0111 §3, p.6 | **CRITICAL** - Core protocol violation | **10-14 days** |
-| **G2** | **Owner's Authorizer Chain Missing** | RFC-0111 §3, p.7 | **CRITICAL** - No legal accountability | **8-10 days** |
-| **G3** | **PVP Identity Verification Missing** | RFC-0111 §3, p.8 | **CRITICAL** - Cannot verify authorization | **10-12 days** |
-| **G4** | **Commercial Register Integration Missing** | RFC-0111 §6, Steps II/VII | **HIGH** - Compliance failure | **15-20 days** |
-| **G5** | **Token NOT Embedding PoA Credentials** | RFC-0111 §3, p.6 | **HIGH** - Token inadequate | **7-10 days** |
+| **G1** | **Extended Token NOT Implemented** | AAP-001 §3, p.6 | **CRITICAL** - Core protocol violation | **10-14 days** |
+| **G2** | **Owner's Authorizer Chain Missing** | AAP-001 §3, p.7 | **CRITICAL** - No legal accountability | **8-10 days** |
+| **G3** | **PVP Identity Verification Missing** | AAP-001 §3, p.8 | **CRITICAL** - Cannot verify authorization | **10-12 days** |
+| **G4** | **Commercial Register Integration Missing** | AAP-001 §6, Steps II/VII | **HIGH** - Compliance failure | **15-20 days** |
+| **G5** | **Token NOT Embedding PoA Credentials** | AAP-001 §3, p.6 | **HIGH** - Token inadequate | **7-10 days** |
 
 **Total Critical Gap Remediation: 50-66 working days (10-13 weeks)**
 
@@ -490,10 +490,10 @@ type RightsObligationSet struct {
 
 | # | Gap | RFC Section | Impact | Effort |
 |---|-----|-------------|--------|--------|
-| **G6** | Non-Physical Actions Incomplete | RFC-0115 §B.4.4 | **MEDIUM** - Functional incompleteness | **3-4 days** |
-| **G7** | Owner's Authorizer Not Distinct Entity | RFC-0115 §A.2 | **MEDIUM** - Authorization hierarchy unclear | **5-7 days** |
-| **G8** | Quantum Resistance Not Cryptographically Proven | RFC-0115 §C.7 | **MEDIUM** - Security claim unverified | **8-10 days** |
-| **G9** | PIP Scattered Data Sources | RFC-0111 §3, p.8 | **MEDIUM** - Architectural weakness | **6-8 days** |
+| **G6** | Non-Physical Actions Incomplete | AAP-002 §B.4.4 | **MEDIUM** - Functional incompleteness | **3-4 days** |
+| **G7** | Owner's Authorizer Not Distinct Entity | AAP-002 §A.2 | **MEDIUM** - Authorization hierarchy unclear | **5-7 days** |
+| **G8** | Quantum Resistance Not Cryptographically Proven | AAP-002 §C.7 | **MEDIUM** - Security claim unverified | **8-10 days** |
+| **G9** | PIP Scattered Data Sources | AAP-001 §3, p.8 | **MEDIUM** - Architectural weakness | **6-8 days** |
 
 **Total High-Priority Gap Remediation: 22-29 working days (4.5-6 weeks)**
 
@@ -501,7 +501,7 @@ type RightsObligationSet struct {
 
 ## PART 4: COMPLIANCE SCORING MATRIX
 
-### RFC-0111 Compliance by Section
+### AAP-001 Compliance by Section
 
 | Section | Requirement | Weight | Score | Weighted |
 |---------|-------------|--------|-------|----------|
@@ -514,9 +514,9 @@ type RightsObligationSet struct {
 | **§7** | Benefits | 5% | 80% | 4.00% |
 | **§8** | Next Steps | 10% | 60% | 6.00% |
 
-**RFC-0111 TOTAL COMPLIANCE: 67.50%**
+**AAP-001 TOTAL COMPLIANCE: 67.50%**
 
-### RFC-0115 Compliance by Section
+### AAP-002 Compliance by Section
 
 | Section | Requirement | Weight | Score | Weighted |
 |---------|-------------|--------|-------|----------|
@@ -524,12 +524,12 @@ type RightsObligationSet struct {
 | **§B** | Authorization Scope | 40% | **72%** | **28.80%** |
 | **§C** | Requirements | 30% | 84% | 25.20% |
 
-**RFC-0115 TOTAL COMPLIANCE: 71.40%**
+**AAP-002 TOTAL COMPLIANCE: 71.40%**
 
 ### Combined RFC Compliance
 
 ```
-Overall AgentAuth RFC Compliance = (RFC-0111 × 60%) + (RFC-0115 × 40%)
+Overall AgentAuth RFC Compliance = (AAP-001 × 60%) + (AAP-002 × 40%)
                              = (67.50% × 0.6) + (71.40% × 0.4)
                              = 40.50% + 28.56%
                              = 69.06%
@@ -582,7 +582,7 @@ Overall AgentAuth RFC Compliance = (RFC-0111 × 60%) + (RFC-0115 × 40%)
 - ✅ Comprehensive CI/CD pipelines
 - ✅ Good test coverage (80%+)
 - ✅ Beautiful web dashboard
-- ✅ Strong PoA data structures (RFC-0115 sections B & C)
+- ✅ Strong PoA data structures (AAP-002 sections B & C)
 - ✅ PEP enforcement architecture
 - ✅ Good PDP policy engine
 
@@ -610,7 +610,7 @@ Overall AgentAuth RFC Compliance = (RFC-0111 × 60%) + (RFC-0115 × 40%)
 - **80% effort on infrastructure, 20% on RFC compliance**
 
 **Root Cause 4: Incomplete RFC Reading**
-- RFC-0111 Section 6 (Protocol Flow) was partially implemented
+- AAP-001 Section 6 (Protocol Flow) was partially implemented
 - Steps II, IV, VII (commercial register) treated as optional
 - PVP requirements were underestimated
 
@@ -626,7 +626,7 @@ Overall AgentAuth RFC Compliance = (RFC-0111 × 60%) + (RFC-0115 × 40%)
 
 **Priority:** P0 - Showstopper  
 **Effort:** 10-14 days  
-**Outcome:** Token that embeds PoA credentials per RFC-0111 §3
+**Outcome:** Token that embeds PoA credentials per AAP-001 §3
 
 **Design Approach:**
 ```go
@@ -637,8 +637,8 @@ type ExtendedToken struct {
     ExpiresIn     int64
     Scope         []string
     
-    // AgentAuth RFC-0111 Extensions
-    PowerOfAttorney *PoADefinition        // Full RFC-0115 credential
+    // AgentAuth AAP-001 Extensions
+    PowerOfAttorney *PoADefinition        // Full AAP-002 credential
     AuthorizationChain AuthorizationChain  // Owner's Authorizer → Client Owner → Client
     ClientOwner    *ClientOwnerInfo
     OwnersAuthorizer *AuthorizerInfo
@@ -697,7 +697,7 @@ type OwnersAuthorizerInfo struct {
 
 **Priority:** P2 - Medium  
 **Effort:** 3-4 days  
-**Add Missing RFC-0115 §B.4.4 Actions:**
+**Add Missing AAP-002 §B.4.4 Actions:**
 - Brainstorming/discussing
 - Researching (RAG operations)
 - Data aggregation
@@ -763,7 +763,7 @@ type OwnersAuthorizerInfo struct {
 │  ├─ Non-physical actions completion                         │
 │  ├─ PIP data consolidation                                  │
 │  ├─ Quantum resistance verification                         │
-│  └─ Additional RFC-0115 enhancements                        │
+│  └─ Additional AAP-002 enhancements                        │
 │                                                              │
 │  Week 12: Integration Testing                               │
 │  ├─ End-to-end RFC compliance testing                       │
@@ -838,7 +838,7 @@ type OwnersAuthorizerInfo struct {
 
 ## CONCLUSION: THE BRUTALLY HONEST TRUTH
 
-This implementation represents **significant engineering effort** with **beautiful infrastructure**, but **falls short of RFC-0111 and RFC-0115 compliance** in critical areas.
+This implementation represents **significant engineering effort** with **beautiful infrastructure**, but **falls short of AAP-001 and AAP-002 compliance** in critical areas.
 
 The team built a **world-class DevOps platform** for a **partially-implemented protocol**.
 
@@ -886,23 +886,23 @@ The 15-week investment to do this properly will:
 
 ## APPENDIX: COMPLIANCE EVIDENCE MATRIX
 
-### RFC-0111 Evidence Mapping
+### AAP-001 Evidence Mapping
 
 | Section | Requirement | Evidence Location | Status |
 |---------|-------------|-------------------|--------|
 | §2 Exclusions | No Web3/AI/DNA | Codebase scan | ✅ Compliant |
-| §3 Extended Token | Comprehensive credential | `pkg/gauth/gauth.go:77-81` | ❌ **Non-compliant** |
+| §3 Extended Token | Comprehensive credential | `pkg/agentauth/agentauth.go:77-81` | ❌ **Non-compliant** |
 | §3 Client Owner | AI system owner | `pkg/poa/poa.go:33-36` | 🟡 Partial |
 | §3 Owner's Authorizer | Authorizer entity | MISSING | ❌ **Non-compliant** |
 | §3 PEP | Power enforcement | `pkg/enforcement/pep.go` | ✅ Compliant |
 | §3 PDP | Power decision | `pkg/pdp/` | ✅ Compliant |
 | §3 PIP | Power information | Scattered | 🟡 Partial |
-| §3 PAP | Power administration | `pkg/gauth/gauth.go:931` | ✅ Compliant |
+| §3 PAP | Power administration | `pkg/agentauth/agentauth.go:931` | ✅ Compliant |
 | §3 PVP | Power verification | MISSING | ❌ **Non-compliant** |
 | §6 Step II | Commercial register | Boolean flag only | ❌ **Non-compliant** |
 | §6 Step VII | Owner authorization proof | `pkg/auth/legal_framework_integration.go` | 🟡 Partial |
 
-### RFC-0115 Evidence Mapping
+### AAP-002 Evidence Mapping
 
 | Section | Requirement | Evidence Location | Status |
 |---------|-------------|-------------------|--------|

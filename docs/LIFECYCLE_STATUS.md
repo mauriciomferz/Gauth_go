@@ -70,7 +70,7 @@ New counters added (memory & Prometheus):
 - token_status_transitions_total / token_status_transition_failures_total (reserved; prototype audit-only implementation).
 
 ## Weighted Multi-Signature Threshold
-If `GAUTH_MULTI_SIG_WEIGHTS` is set (format signer=weight,...), the multi-signature verification path interprets `Threshold` as required cumulative `weight` of valid signatures instead of raw count. Failures increment `multi_signature_weight_failures_total`.
+If `AGENTAUTH_MULTI_SIG_WEIGHTS` is set (format signer=weight,...), the multi-signature verification path interprets `Threshold` as required cumulative `weight` of valid signatures instead of raw count. Failures increment `multi_signature_weight_failures_total`.
 
 ## Future Enhancements
 - Persistent delegation status updates wired to AAP-001 service repository.

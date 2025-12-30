@@ -129,7 +129,7 @@ function MyComponent() {
 - **4 Services** orchestrated:
   1. **postgres**: PostgreSQL 16 Alpine
      - Port: 5432
-     - Credentials: gauth/gauth
+     - Credentials: agentauth/agentauth
      - Volume: postgres_data + migrations
      - Health check: pg_isready
   2. **redis**: Redis 7 Alpine
@@ -138,7 +138,7 @@ function MyComponent() {
   3. **backend**: AgentAuth web server
      - Build: Dockerfile.production
      - Port: 8080
-     - Environment: RFC-0111 enabled, DB/Redis config, GIN_MODE=release
+     - Environment: AAP-001 enabled, DB/Redis config, GIN_MODE=release
      - Depends on: postgres, redis (with health checks)
      - Health check: wget /api/v1/beta/health
   4. **frontend**: React UI with Nginx
@@ -146,7 +146,7 @@ function MyComponent() {
      - Port: 80
      - Depends on: backend
      - Health check: wget /health
-- **Networking**: gauth-network (bridge mode)
+- **Networking**: agentauth-network (bridge mode)
 - **Volumes**: postgres_data (persistent storage)
 
 **Deployment Commands**:
@@ -231,7 +231,7 @@ docker-compose down
    - ⚠️ PIP page: Authorization form heading (0/2 passing)
    - ⚠️ PIP page: Cache statistics display
    - ⚠️ PoA page: PoA creation form (0/2 passing)
-   - ⚠️ PoA page: RFC-0115 compliance
+   - ⚠️ PoA page: AAP-002 compliance
    - ⚠️ Metrics page: Dashboard heading (0/2 passing)
    - ⚠️ Metrics page: Stat cards
    - **Result**: 2/8 passing (25%)
@@ -344,7 +344,7 @@ docker-compose down
 - **Framework**: Gin (HTTP server)
 - **Database**: PostgreSQL 16
 - **Cache**: Redis 7
-- **RFC Compliance**: 95% RFC-0111, 100% RFC-0115
+- **RFC Compliance**: 95% AAP-001, 100% AAP-002
 - **Endpoints**: 80+ API routes
 - **Codebase**: ~50K lines Go
 
@@ -429,7 +429,7 @@ docker-compose down
 ### Development Environment
 ```bash
 # Terminal 1: Start Backend
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 ./bin/web-server
 # Backend running on http://localhost:8080
 
@@ -524,7 +524,7 @@ docker-compose down
 1. **Navigation Timeout**: Registry link not found (possible naming mismatch)
 2. **Header/Footer Consistency**: Different structures across pages (by design)
 3. **PIP Page**: Heading text doesn't match test expectations
-4. **PoA Page**: RFC-0115 text placement differs from tests
+4. **PoA Page**: AAP-002 text placement differs from tests
 5. **Metrics Page**: Element structure needs alignment
 
 **Resolution**: These are NOT critical bugs. They represent:
@@ -728,7 +728,7 @@ curl http://localhost:8080/api/v1/beta/capabilities
 ## Appendix B: File Structure
 
 ```
-Gauth_go/
+AgentAuth/
 ├── web/ui-react/
 │   ├── src/
 │   │   ├── lib/

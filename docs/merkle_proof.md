@@ -35,10 +35,10 @@ Example: `examples/revocation_inclusion_proof.json`
 ```
 
 ## Verification Steps
-1. Canonical serialization of `revocation_event` → hash = `leaf_hash` (SHA-256 domain separation recommended, e.g. prefix `GAUTH_REVOCATION_EVENT:`).
+1. Canonical serialization of `revocation_event` → hash = `leaf_hash` (SHA-256 domain separation recommended, e.g. prefix `AGENTAUTH_REVOCATION_EVENT:`).
 2. Iteratively combine `current = H( left || right )` using sibling ordering determined by bits of `index` (LSB first) until `computed_root` derived.
 3. Assert `computed_root == signed_tree_head.merkle_root`.
-4. Canonical tree head payload (excluding signatures) signed with Ed25519 under prefix `GAUTH_REVOCATION_STH:`.
+4. Canonical tree head payload (excluding signatures) signed with Ed25519 under prefix `AGENTAUTH_REVOCATION_STH:`.
 5. Verify all signatures; ensure `satisfied_weight >= threshold`.
 6. Accept inclusion if all checks pass.
 

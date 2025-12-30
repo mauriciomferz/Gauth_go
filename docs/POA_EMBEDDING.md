@@ -10,7 +10,7 @@ owners: [system]
 
 **Status**: Implemented (P1.1 High Priority Feature)  
 **RFC Reference**: AAP-002 sec3.item2  
-**Implementation**: pkg/rfc0111/rfc0111.go, pkg/rfc0111/embedding_test.go
+**Implementation**: pkg/aap001/aap001.go, pkg/aap001/embedding_test.go
 
 ## Overview
 
@@ -27,7 +27,7 @@ Tokens are PASETO v2.local encrypted envelopes containing delegation claims. Wit
 
 ```json
 {
-  "version": "gauth-rfc0111-env2",
+  "version": "agentauth-aap001-env2",
   "delegation_id": "poa_1762353667180814000",
   "grantor": "alice",
   "grantee": "bob",
@@ -50,15 +50,15 @@ The `raw_poa` field contains **canonical JSON** (AAP-002 canonical digest format
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_EMBED_FULL_POA` | `0` | Enable PoA embedding (`1` = enabled) |
-| `GAUTH_MAX_RAW_POA_BYTES` | `8192` | Maximum embedded PoA size (bytes) |
-| `GAUTH_POA_ENVELOPE_V2` | `0` | Required for embedding (`1` = enabled) |
-| `GAUTH_OFFLINE_VERIFICATION` | `0` | Prefer embedded PoA over repository (`1` = enabled) |
+| `AGENTAUTH_EMBED_FULL_POA` | `0` | Enable PoA embedding (`1` = enabled) |
+| `AGENTAUTH_MAX_RAW_POA_BYTES` | `8192` | Maximum embedded PoA size (bytes) |
+| `AGENTAUTH_POA_ENVELOPE_V2` | `0` | Required for embedding (`1` = enabled) |
+| `AGENTAUTH_OFFLINE_VERIFICATION` | `0` | Prefer embedded PoA over repository (`1` = enabled) |
 
 ### Size Limits
 
 - **Default limit**: 8KB (8192 bytes)
-- **Maximum limit**: 10MB (configurable via `GAUTH_MAX_RAW_POA_BYTES`)
+- **Maximum limit**: 10MB (configurable via `AGENTAUTH_MAX_RAW_POA_BYTES`)
 - **Exceeded behavior**: PoA not embedded, `raw_poa` field empty, metric `envelope_raw_poa_too_large_total` incremented
 
 ### Performance Impact
@@ -75,15 +75,15 @@ The `raw_poa` field contains **canonical JSON** (AAP-002 canonical digest format
 ### 1. Enable Embedding (Issuance Side)
 
 ```bash
-export GAUTH_EMBED_FULL_POA=1
-export GAUTH_POA_ENVELOPE_V2=1
-export GAUTH_MAX_RAW_POA_BYTES=8192  # Optional: tune size limit
+export AGENTAUTH_EMBED_FULL_POA=1
+export AGENTAUTH_POA_ENVELOPE_V2=1
+export AGENTAUTH_MAX_RAW_POA_BYTES=8192  # Optional: tune size limit
 ```
 
 ```go
 // Create delegation - RawPOA automatically embedded
-svc := rfc0111.NewService(audit, authz)
-resp, _ := svc.CreateDelegationCtx(ctx, rfc0111.DelegationRequest{
+svc := aap001.NewService(audit, authz)
+resp, _ := svc.CreateDelegationCtx(ctx, aap001.DelegationRequest{
     Grantor:  "alice",
     Grantee:  "bob",
     Scope:    []string{"finance:read"},
@@ -92,7 +92,7 @@ resp, _ := svc.CreateDelegationCtx(ctx, rfc0111.DelegationRequest{
 
 // Token contains embedded PoA
 result, _ := svc.VerifyToken(ctx, resp.AuthToken)
-fmt.Println(len(result.RawPOA)) // Non-zero if embedding succeeded
+fmt.Println(len(result.RawPOA) // Non-zero if embedding succeeded
 ```
 
 ### 2. Extract Embedded PoA (Verification Side)
@@ -105,7 +105,7 @@ if err != nil {
 }
 
 // Extract embedded PoA (offline verification)
-poa, err := rfc0111.ExtractEmbeddedPoA(result)
+poa, err := aap001.ExtractEmbeddedPoA(result)
 if err != nil {
     // Fall back to repository lookup
     poa, _ = svc.repo.Get(result.DelegationID)
@@ -120,9 +120,9 @@ if !containsScope(poa.Scope, requiredAction) {
 ### 3. Offline Verification Mode
 
 ```bash
-export GAUTH_OFFLINE_VERIFICATION=1  # Prefer embedded PoA
-export GAUTH_EMBED_FULL_POA=1
-export GAUTH_POA_ENVELOPE_V2=1
+export AGENTAUTH_OFFLINE_VERIFICATION=1  # Prefer embedded PoA
+export AGENTAUTH_EMBED_FULL_POA=1
+export AGENTAUTH_POA_ENVELOPE_V2=1
 ```
 
 ```go
@@ -134,7 +134,7 @@ if err != nil {
 }
 
 // Token verified entirely offline if RawPOA present
-poa, _ := rfc0111.ExtractEmbeddedPoA(result)
+poa, _ := aap001.ExtractEmbeddedPoA(result)
 fmt.Printf("Verified offline: %s -> %s\n", poa.Grantor, poa.Grantee)
 ```
 
@@ -147,7 +147,7 @@ fmt.Printf("Verified offline: %s -> %s\n", poa.Grantor, poa.Grantee)
    - `envelope_raw_poa_embedded_total`: Successful embeddings
    - `envelope_raw_poa_too_large_total`: Size limit exceeded
 3. **Validate offline verification** with test tokens
-4. **Tune `GAUTH_MAX_RAW_POA_BYTES`** based on observed sizes
+4. **Tune `AGENTAUTH_MAX_RAW_POA_BYTES`** based on observed sizes
 
 ### Phase 2: Gradual Rollout (Weeks 3-4)
 
@@ -158,7 +158,7 @@ fmt.Printf("Verified offline: %s -> %s\n", poa.Grantor, poa.Grantee)
 
 ### Phase 3: Full Deployment (Week 5+)
 
-1. **Enable globally** (`GAUTH_EMBED_FULL_POA=1`)
+1. **Enable globally** (`AGENTAUTH_EMBED_FULL_POA=1`)
 2. **Set default** in infrastructure templates
 3. **Document** in API guides and runbooks
 4. **Monitor** long-term metrics for anomalies
@@ -169,7 +169,7 @@ fmt.Printf("Verified offline: %s -> %s\n", poa.Grantor, poa.Grantee)
 
 | Error | Cause | Resolution |
 |-------|-------|------------|
-| `no embedded poa definition` | `GAUTH_EMBED_FULL_POA=0` at issuance | Enable embedding or fall back to repository |
+| `no embedded poa definition` | `AGENTAUTH_EMBED_FULL_POA=0` at issuance | Enable embedding or fall back to repository |
 | `invalid embedded poa json` | Corrupted RawPOA field | Reject token, investigate corruption |
 | `embedded poa id mismatch` | Envelope/PoA ID inconsistency | Reject token, investigate tampering |
 | `missing grantor` | Malformed embedded PoA | Reject token, investigate issuance bug |
@@ -198,7 +198,7 @@ Tokens issued without embedding (due to size limit) are still **valid** and use 
 **Risk**: Attackers create large PoAs to amplify token size, increasing storage/bandwidth costs.
 
 **Mitigation**:
-- `GAUTH_MAX_RAW_POA_BYTES` enforced (default 8KB)
+- `AGENTAUTH_MAX_RAW_POA_BYTES` enforced (default 8KB)
 - Scope validation limits (max 32 scopes)
 - Restriction key/value length limits
 
@@ -224,7 +224,7 @@ Tokens issued without embedding (due to size limit) are still **valid** and use 
 
 ### Tokens Without Embedding
 
-Tokens issued with `GAUTH_EMBED_FULL_POA=0` (default) are fully compatible:
+Tokens issued with `AGENTAUTH_EMBED_FULL_POA=0` (default) are fully compatible:
 
 ```go
 result, _ := svc.VerifyToken(ctx, tokenString)
@@ -260,7 +260,7 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 
 ```go
 result, _ := svc.VerifyToken(ctx, tokenString)
-poa, err := rfc0111.ExtractEmbeddedPoA(result)
+poa, err := aap001.ExtractEmbeddedPoA(result)
 if err != nil {
     log.Printf("Extraction failed: %v", err)
     return err
@@ -273,13 +273,13 @@ fmt.Printf("PoA: %s -> %s, Scope: %v\n", poa.Grantor, poa.Grantee, poa.Scope)
 ### Unit Tests
 
 ```bash
-go test -v ./pkg/rfc0111 -run "TestEmbedding"
+go test -v ./pkg/aap001 -run "TestEmbedding"
 ```
 
 **Test Coverage**:
 - ✅ Round-trip embedding/extraction
-- ✅ Size limit enforcement (exceeding `GAUTH_MAX_RAW_POA_BYTES`)
-- ✅ Offline verification mode (`GAUTH_OFFLINE_VERIFICATION=1`)
+- ✅ Size limit enforcement (exceeding `AGENTAUTH_MAX_RAW_POA_BYTES`)
+- ✅ Offline verification mode (`AGENTAUTH_OFFLINE_VERIFICATION=1`)
 - ✅ Backward compatibility (tokens without `raw_poa`)
 - ✅ Error handling (nil result, ID mismatch, missing fields)
 - ✅ Canonical version parsing (string→int conversion)
@@ -288,14 +288,14 @@ go test -v ./pkg/rfc0111 -run "TestEmbedding"
 
 ```bash
 # Enable embedding
-export GAUTH_EMBED_FULL_POA=1
-export GAUTH_POA_ENVELOPE_V2=1
+export AGENTAUTH_EMBED_FULL_POA=1
+export AGENTAUTH_POA_ENVELOPE_V2=1
 
 # Run delegation creation
 go run examples/delegation/main.go
 
 # Verify token offline
-export GAUTH_OFFLINE_VERIFICATION=1
+export AGENTAUTH_OFFLINE_VERIFICATION=1
 go run examples/verification/main.go
 ```
 
@@ -320,6 +320,6 @@ go run examples/verification/main.go
 ## References
 
 - AAP-002 Specification: `docs/AAP-002_POA_DEFINITION.md`
-- Canonical Digest: `pkg/rfc0111/canonical.go`
+- Canonical Digest: `pkg/aap001/canonical.go`
 - Token Integrity: `docs/TOKEN_INTEGRITY_MULTI_ALGO.md`
 - EnvelopeV2 Format: `pkg/token/envelope.go`

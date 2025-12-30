@@ -35,7 +35,7 @@ receivers:
   # Default receiver (catches all)
   - name: 'default'
     slack_configs:
-      - channel: '#gauth-alerts'
+      - channel: '#agentauth-alerts'
         title: 'AgentAuth Alert'
         text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
         send_resolved: true
@@ -46,7 +46,7 @@ receivers:
       - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
         description: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
     slack_configs:
-      - channel: '#gauth-critical'
+      - channel: '#agentauth-critical'
         title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
         text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
         send_resolved: true
@@ -55,7 +55,7 @@ receivers:
   # Warning alerts
   - name: 'warning'
     slack_configs:
-      - channel: '#gauth-warnings'
+      - channel: '#agentauth-warnings'
         title: '⚠️ WARNING: {{ .GroupLabels.alertname }}'
         text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
         send_resolved: true
@@ -65,9 +65,9 @@ receivers:
   - name: 'info'
     email_configs:
       - to: 'ops-team@example.com'
-        from: 'alertmanager@gauth.example.com'
+        from: 'alertmanager@agentauth.example.com'
         smarthost: 'smtp.example.com:587'
-        auth_username: 'alertmanager@gauth.example.com'
+        auth_username: 'alertmanager@agentauth.example.com'
         auth_password: 'YOUR_EMAIL_PASSWORD'
         headers:
           Subject: 'AgentAuth Info Alert: {{ .GroupLabels.alertname }}'

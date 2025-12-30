@@ -22,9 +22,9 @@ Current rotation & attestation model assumes uniform signer weight (each signatu
 Accepted (Verified-weight enforcement implemented; initial multi-algorithm schema + metrics added; full ECDSA/BLS verification & auditor tooling pending)
 - Preserve deterministic canonical digest while incorporating weight semantics for verification.
 - Enable threshold definition in terms of aggregate weight instead of number of signatures.
-* Phase 2 (CURRENT): Verified-weight enforcement using Ed25519 signatures. Threshold must be satisfied by sum of weights for signatures passing cryptographic verification. Metrics: `gauth_rotation_v2_verified_weight`, `gauth_rotation_v2_signature_failures_total{reason}`, `gauth_rotation_v2_threshold_violations_total`.
-* Phase 2a (Incremental): Multi-algorithm schema extension. Signer entries now persist an `alg` field (defaulting to `ED25519` if omitted for backward compatibility). OpenAPI updated to expose `alg` per signer. Additional metrics introduced: `gauth_rotation_v2_verified_weight_alg{alg}` and `gauth_rotation_v2_signature_failures_by_alg_total{alg,reason}` to support per-algorithm observability.
-* Phase 2b (Current): Optional public key embedding behind environment flag `GAUTH_ROTATIONS_V2_EMBED_PUBS=1`, enabling offline artifact signature verification (auditor CLI) without relying on server-side key registries.
+* Phase 2 (CURRENT): Verified-weight enforcement using Ed25519 signatures. Threshold must be satisfied by sum of weights for signatures passing cryptographic verification. Metrics: `agentauth_rotation_v2_verified_weight`, `agentauth_rotation_v2_signature_failures_total{reason}`, `agentauth_rotation_v2_threshold_violations_total`.
+* Phase 2a (Incremental): Multi-algorithm schema extension. Signer entries now persist an `alg` field (defaulting to `ED25519` if omitted for backward compatibility). OpenAPI updated to expose `alg` per signer. Additional metrics introduced: `agentauth_rotation_v2_verified_weight_alg{alg}` and `agentauth_rotation_v2_signature_failures_by_alg_total{alg,reason}` to support per-algorithm observability.
+* Phase 2b (Current): Optional public key embedding behind environment flag `AGENTAUTH_ROTATIONS_V2_EMBED_PUBS=1`, enabling offline artifact signature verification (auditor CLI) without relying on server-side key registries.
 
 ## Non-Goals
 * Adding new algorithms requires extending verification logic and possibly resolver interfaces without altering canonical digest (which already binds signer algorithm identifiers). The digest preimage includes each signer's `id|alg|weight` tuple, so algorithm substitution is a detectable change.
@@ -62,7 +62,7 @@ Canonical digest input (ordered normalization):
 Rationale for excluding signatures & public keys from digest:
 * Prevents digest mutation when adding or re-attaching a signature (avoid circular dependency between digest preimage and signature bytes).
 * Allows embedding of public keys as a transport optimization without altering the artifact integrity root.
-* Mitigates replay or swap attacks through domain-separated signature preimage: `GAUTH_ROTATION_V2:<canonical_digest>` binds signatures to the digest even though signature bytes are not part of the digest calculation.
+* Mitigates replay or swap attacks through domain-separated signature preimage: `AGENTAUTH_ROTATION_V2:<canonical_digest>` binds signatures to the digest even though signature bytes are not part of the digest calculation.
 
 Integrity considerations:
 Public Key Encoding Standardization:
@@ -76,7 +76,7 @@ Public Key Encoding Standardization:
 ### Verification Logic
 
 1. Parse artifact; recompute canonical digest from non-signature, non-public-key fields.
-2. Construct domain-separated preimage: `GAUTH_ROTATION_V2:<canonical_digest>`.
+2. Construct domain-separated preimage: `AGENTAUTH_ROTATION_V2:<canonical_digest>`.
 3. Verify each signature using appropriate algorithm path (Ed25519; ECDSA-P256; future BLS) with resolver/embedded public key.
 4. Accumulate weights for signatures that verify; compare sum to `threshold_weight`.
 5. Threshold enforcement performed server-side (artifact withheld if verified weight insufficient) and externally verifiable via auditor when public keys embedded.
@@ -89,7 +89,7 @@ Introduce optional `attestation_signers` with weights; threshold may differ from
 
 - If `version` absent or <2: fallback to legacy uniform model (count signatures; threshold interpreted as count).
 - Provide dual endpoints for summary: existing `/rotation/summary` and new `/rotation/summary/v2`.
-- Public key embedding is controlled by `GAUTH_ROTATIONS_V2_EMBED_PUBS=1`; when disabled, auditor signature verification requires an external key source (future enhancement) or is limited to digest/continuity.
+- Public key embedding is controlled by `AGENTAUTH_ROTATIONS_V2_EMBED_PUBS=1`; when disabled, auditor signature verification requires an external key source (future enhancement) or is limited to digest/continuity.
 
 ### Configuration
 
@@ -108,20 +108,20 @@ Add `config/multisig_weights.json` or integrate into existing config loader:
 ### Metrics & Observability
 
 Expose:
-- `gauth_rotation_v2_threshold_weight` gauge
-- `gauth_rotation_v2_effective_weight` gauge (configured total)
-- `gauth_rotation_v2_signer_weight{signer}` gauge
-- `gauth_rotation_v2_verified_weight` gauge (verified weight for latest artifact)
-- `gauth_rotation_v2_verified_weight_alg{alg}` gauge (algorithm breakdown)
-- `gauth_rotation_v2_signature_failures_total{reason}` & `gauth_rotation_v2_signature_failures_by_alg_total{alg,reason}` counters
-- `gauth_rotation_v2_threshold_violations_total` counter
+- `agentauth_rotation_v2_threshold_weight` gauge
+- `agentauth_rotation_v2_effective_weight` gauge (configured total)
+- `agentauth_rotation_v2_signer_weight{signer}` gauge
+- `agentauth_rotation_v2_verified_weight` gauge (verified weight for latest artifact)
+- `agentauth_rotation_v2_verified_weight_alg{alg}` gauge (algorithm breakdown)
+- `agentauth_rotation_v2_signature_failures_total{reason}` & `agentauth_rotation_v2_signature_failures_by_alg_total{alg,reason}` counters
+- `agentauth_rotation_v2_threshold_violations_total` counter
 - Planned: continuity break counter, embedding success metric
 * Added continuity metrics:
-  - `gauth_rotation_v2_chain_starts_total` (chain initialization events)
-  - `gauth_rotation_v2_continuity_updates_total` (successful advancement of previous hash)
+  - `agentauth_rotation_v2_chain_starts_total` (chain initialization events)
+  - `agentauth_rotation_v2_continuity_updates_total` (successful advancement of previous hash)
 * Added embedding metrics:
-  - `gauth_rotation_v2_public_keys_embedded_total` (artifacts built with embedding flag enabled)
-  - `gauth_rotation_v2_embedded_public_key_count` (gauge of embedded keys in latest artifact)
+  - `agentauth_rotation_v2_public_keys_embedded_total` (artifacts built with embedding flag enabled)
+  - `agentauth_rotation_v2_embedded_public_key_count` (gauge of embedded keys in latest artifact)
 
 ### Security Considerations
 
@@ -173,7 +173,7 @@ Implemented:
 * Weighted verification metrics (threshold, effective, per-signer, verified, failures, per-alg breakdown).
 * Auditor CLI modes for V2 remote/file digest + continuity + signature verification (Ed25519 via embedded public keys).
 * Continuity chaining using `previous_artifact_hash` with server state tracking.
-* Optional public key embedding via `GAUTH_ROTATIONS_V2_EMBED_PUBS`.
+* Optional public key embedding via `AGENTAUTH_ROTATIONS_V2_EMBED_PUBS`.
 * Tests: config loading, mixed algorithm verification success/failure, continuity, embedded public key verification.
 
 Pending / Planned:

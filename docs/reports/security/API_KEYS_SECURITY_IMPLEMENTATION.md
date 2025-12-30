@@ -89,7 +89,7 @@ Endpoints:
 Features:
 - Cryptographically secure key generation (32 bytes, base64)
 - SHA-256 hashing for secure storage
-- Display-safe key prefixes (e.g., `gauth_sk_...`)
+- Display-safe key prefixes (e.g., `agentauth_sk_...`)
 - Automatic usage tracking
 - Rate limiting configuration
 
@@ -297,11 +297,11 @@ To test the implementation:
 
 1. **Start backend:**
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 GAUTH_USE_JWT_LIB=1 \
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_USE_JWT_LIB=1 \
 DB_HOST=localhost DB_PORT=5432 DB_USER=postgres \
-DB_PASSWORD=gauth_dev_password DB_NAME=gauth DB_SSLMODE=disable \
-GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
+DB_PASSWORD=agentauth_dev_password DB_NAME=agentauth DB_SSLMODE=disable \
+AGENTAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
 ./bin/web-server
 ```
 
@@ -344,7 +344,7 @@ curl -X POST 'http://localhost:8080/api/admin/api-keys' \
 ## Migration Applied
 ```bash
 cat database/migrations/006_api_keys_security.sql | \
-  docker exec -i gauth-postgres psql -U postgres -d gauth
+  docker exec -i agentauth-postgres psql -U postgres -d agentauth
 ```
 
 Tables created successfully with some syntax warnings for PostgreSQL version differences (IF NOT EXISTS for policies/triggers).

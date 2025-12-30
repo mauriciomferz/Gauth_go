@@ -9,10 +9,10 @@ echo "=================================="
 echo ""
 
 # Set minimal required environment variables
-export GAUTH_JWT_SIGNING_KEY="test-integration-key-$(date +%s)"
-export GAUTH_DEV_INDEX="1"
-export GAUTH_AAP-001_ENABLED="1"
-export GAUTH_USE_JWT_LIB="1"
+export AGENTAUTH_JWT_SIGNING_KEY="test-integration-key-$(date +%s)"
+export AGENTAUTH_DEV_INDEX="1"
+export AGENTAUTH_AAP-001_ENABLED="1"
+export AGENTAUTH_USE_JWT_LIB="1"
 
 echo "✅ Environment configured"
 echo ""
@@ -20,7 +20,7 @@ echo ""
 # Test 1: Server starts without database (graceful degradation)
 echo "Test 1: Server startup without database"
 echo "---------------------------------------"
-/tmp/test-gauth > /tmp/gauth-test.log 2>&1 &
+/tmp/test-agentauth > /tmp/agentauth-test.log 2>&1 &
 SERVER_PID=$!
 echo "Started server (PID: $SERVER_PID)"
 
@@ -32,11 +32,11 @@ if ps -p $SERVER_PID > /dev/null; then
     echo "✅ Server is running"
     
     # Check logs for database message
-    if grep -q "\[database\] DB_HOST not configured" /tmp/gauth-test.log; then
+    if grep -q "\[database\] DB_HOST not configured" /tmp/agentauth-test.log; then
         echo "✅ Graceful degradation working (DB_HOST not configured message found)"
     else
         echo "📝 Log excerpt:"
-        grep -i "database\|admin" /tmp/gauth-test.log | head -5 || echo "No database/admin logs found"
+        grep -i "database\|admin" /tmp/agentauth-test.log | head -5 || echo "No database/admin logs found"
     fi
     
     # Check if server is listening
@@ -54,7 +54,7 @@ if ps -p $SERVER_PID > /dev/null; then
 else
     echo "❌ Server failed to start"
     echo "Error logs:"
-    cat /tmp/gauth-test.log
+    cat /tmp/agentauth-test.log
     exit 1
 fi
 
@@ -67,10 +67,10 @@ export DB_HOST="localhost"
 export DB_PORT="5432"
 export DB_USER="test"
 export DB_PASSWORD="test"
-export DB_NAME="gauth_test"
+export DB_NAME="agentauth_test"
 export DB_SSLMODE="disable"
 
-/tmp/test-gauth > /tmp/gauth-test-db.log 2>&1 &
+/tmp/test-agentauth > /tmp/agentauth-test-db.log 2>&1 &
 SERVER_PID=$!
 echo "Started server with DB_HOST configured (PID: $SERVER_PID)"
 
@@ -83,20 +83,20 @@ if ps -p $SERVER_PID > /dev/null 2>&1; then
     wait $SERVER_PID 2>/dev/null || true
 fi
 
-if grep -q "\[database\] connection failed" /tmp/gauth-test-db.log; then
+if grep -q "\[database\] connection failed" /tmp/agentauth-test-db.log; then
     echo "✅ Database connection attempt detected"
     echo "📝 Database log:"
-    grep -i "database" /tmp/gauth-test-db.log | head -3
-elif grep -q "\[database\] PostgreSQL connection established" /tmp/gauth-test-db.log; then
+    grep -i "database" /tmp/agentauth-test-db.log | head -3
+elif grep -q "\[database\] PostgreSQL connection established" /tmp/agentauth-test-db.log; then
     echo "✅ Database connection successful!"
-    if grep -q "\[admin\] handlers registered" /tmp/gauth-test-db.log; then
+    if grep -q "\[admin\] handlers registered" /tmp/agentauth-test-db.log; then
         echo "✅ Admin handlers registered successfully!"
         echo "📝 Admin log:"
-        grep -i "admin" /tmp/gauth-test-db.log
+        grep -i "admin" /tmp/agentauth-test-db.log
     fi
 else
     echo "📝 Full startup log:"
-    cat /tmp/gauth-test-db.log | head -30
+    cat /tmp/agentauth-test-db.log | head -30
 fi
 
 echo ""
@@ -156,6 +156,6 @@ echo "  4. Test endpoints with: curl http://localhost:8080/api/admin/poa"
 echo ""
 
 # Cleanup
-rm -f /tmp/gauth-test.log /tmp/gauth-test-db.log
+rm -f /tmp/agentauth-test.log /tmp/agentauth-test-db.log
 
 exit 0

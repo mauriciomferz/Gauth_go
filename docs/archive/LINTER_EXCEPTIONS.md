@@ -109,8 +109,8 @@ _, _, _, _ = sigIssued, sigIssueFail, sigVerifications, sigVerificationFail
 - Explicitly marks variables as intentionally unused
 - Standard Go pattern to satisfy compiler
 
-3. **pkg/rfc0111/rfc0111_anchor_test.go:45** (21 blank identifiers)
-4. **pkg/rfc0111/rfc0111_anchor_test.go:72** (21 blank identifiers)
+3. **pkg/aap001/aap001_anchor_test.go:45** (21 blank identifiers)
+4. **pkg/aap001/aap001_anchor_test.go:72** (21 blank identifiers)
 ```go
 _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ = fields...
 ```
@@ -130,7 +130,7 @@ _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ = fields...
 
 #### Warnings:
 
-1. **pkg/rfc0111/taxonomy.go:15** - Taxonomy map initialization
+1. **pkg/aap001/taxonomy.go:15** - Taxonomy map initialization
 ```go
 func init() {
     agentTypeSet = make(map[string]struct{}, len(AllowedAgentTypes))

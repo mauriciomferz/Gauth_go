@@ -122,7 +122,7 @@ AgentAuth’s Go implementation provides layered enforcement combining jurisdict
 
 ## Enhancements Implemented (Oct 2025)
 ### External Jurisdiction Rules Loader
-- Environment variable `GAUTH_JURISDICTION_RULES_PATH` allows supplying a JSON file (`config/jurisdiction_rules.json` sample included) to override built-in jurisdiction enforcement configuration.
+- Environment variable `AGENTAUTH_JURISDICTION_RULES_PATH` allows supplying a JSON file (`config/jurisdiction_rules.json` sample included) to override built-in jurisdiction enforcement configuration.
 - Schema: `{ "jurisdictions": [{ "jurisdiction": "UNITED_STATES", "strict_mode": true, "allowed_actions": [...], "blocked_actions": [...], "cross_border_rules": {"transfer": ["CANADA"]}, "data_residency_rules": {"personal_data": true} }] }`
 - Loader replaces in-memory maps atomically; falls back to defaults on read/parse failure.
 
@@ -137,19 +137,19 @@ AgentAuth’s Go implementation provides layered enforcement combining jurisdict
   - JSON: `/api/v1/jurisdiction/validator/metrics`
   - Prometheus: `/api/v1/jurisdiction/validator/metrics/prometheus`
 - Prometheus metric names (subset):
-  - `gauth_validator_validation_attempts_total`
-  - `gauth_validator_validation_successes_total`
-  - `gauth_validator_validation_failures_total`
-  - `gauth_validator_entity_validation_attempts_total`
-  - `gauth_validator_entity_validation_failures_total`
-  - `gauth_validator_value_limit_checks_total`
-  - `gauth_validator_value_limit_violations_total`
-  - `gauth_validator_approval_checks_total`
-  - `gauth_validator_approval_failures_total`
-  - `gauth_validator_board_approval_checks_total`
-  - `gauth_validator_board_approval_failures_total`
-  - `gauth_validator_total_validation_latency_ms`
-  - `gauth_validator_last_validation_latency_ms`
+  - `agentauth_validator_validation_attempts_total`
+  - `agentauth_validator_validation_successes_total`
+  - `agentauth_validator_validation_failures_total`
+  - `agentauth_validator_entity_validation_attempts_total`
+  - `agentauth_validator_entity_validation_failures_total`
+  - `agentauth_validator_value_limit_checks_total`
+  - `agentauth_validator_value_limit_violations_total`
+  - `agentauth_validator_approval_checks_total`
+  - `agentauth_validator_approval_failures_total`
+  - `agentauth_validator_board_approval_checks_total`
+  - `agentauth_validator_board_approval_failures_total`
+  - `agentauth_validator_total_validation_latency_ms`
+  - `agentauth_validator_last_validation_latency_ms`
 - Deterministic ordering applied for jurisdiction and violation label sets identical to enforcement metrics approach.
 
 ### Updated Testing

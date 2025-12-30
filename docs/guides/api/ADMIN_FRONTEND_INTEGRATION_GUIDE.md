@@ -525,12 +525,12 @@ const fetchFeatureFlags = async () => {
 ### 1. Start the Backend Server
 
 ```bash
-GAUTH_JWT_SIGNING_KEY="test-key" \
+AGENTAUTH_JWT_SIGNING_KEY="test-key" \
 DB_HOST="localhost" \
 DB_PORT="5432" \
 DB_USER="postgres" \
-DB_PASSWORD="gauth_dev_password" \
-DB_NAME="gauth" \
+DB_PASSWORD="agentauth_dev_password" \
+DB_NAME="agentauth" \
 DB_SSLMODE="disable" \
 go run ./cmd/web-server
 ```
@@ -611,7 +611,7 @@ export const apiFetch = async (
   
   if (response.status === 400) {
     const error = await response.json();
-    if (error.message?.includes('tenant')) {
+    if (error.message?.includes('tenant') {
       throw new TenantError(error.message);
     }
   }

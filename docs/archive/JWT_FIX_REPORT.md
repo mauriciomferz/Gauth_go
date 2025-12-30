@@ -72,7 +72,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
         "token_type": token.TokenType,
         "scope":     token.Scope,
         
-        // RFC-0111 Extended fields
+        // AAP-001 Extended fields
         "client_owner":       token.ClientOwner.OwnerID,
         "owners_authorizer":  token.OwnersAuthorizer.AuthorizerID,
         "resource_owner":     token.ResourceOwner.OwnerID,
@@ -98,7 +98,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 **What This Enables:**
 - Tokens can be transmitted as JWT strings over HTTP
 - Standard JWT format for interoperability
-- All RFC-0111 fields preserved in claims
+- All AAP-001 fields preserved in claims
 - Complex objects (PoA, AuthChain) serialized as JSON
 
 #### 4. Fixed JWT Parsing (REPLACED - 150 lines)
@@ -167,13 +167,13 @@ func getInt64(m map[string]interface{}, key string) int64 { ... }
 **What This Fixes:**
 - "Not implemented" error eliminated
 - Full JWT parsing with signature validation
-- All RFC-0111 fields reconstructed
+- All AAP-001 fields reconstructed
 - Complex objects deserialized from JSON
 - Proper error handling
 
 #### 5. Verification
 ```bash
-$ go build ./pkg/gauth/... 2>&1 | head -50
+$ go build ./pkg/agentauth/... 2>&1 | head -50
 # (clean output - no errors)
 ```
 
@@ -183,7 +183,7 @@ $ go build ./pkg/gauth/... 2>&1 | head -50
 
 ## Compliance Impact
 
-### Token Management (RFC-0111 Section 4.2)
+### Token Management (AAP-001 Section 4.2)
 
 **Before:**
 - ❌ Token serialization: NOT IMPLEMENTED (0%)
@@ -204,7 +204,7 @@ $ go build ./pkg/gauth/... 2>&1 | head -50
 - Token refresh mechanism
 - Token revocation propagation
 
-### Overall RFC-0111 Compliance
+### Overall AAP-001 Compliance
 **Estimate:** 55% → 58% (3% increase from fixing critical blocker)
 
 ---
@@ -256,7 +256,7 @@ type PowerDecisionPoint interface {
 1. Uses mock implementations (tests)
 2. Passes `nil` for PDP parameter (production code)
 
-### RFC-0111 Requirement
+### AAP-001 Requirement
 **Section 3.3 - Policy Decision Point (PDP)**
 > "The PDP evaluates access control policies to determine whether a requested action should be permitted. It considers:
 > - Authorization chain validity
@@ -318,7 +318,7 @@ type Condition struct {
 
 ### Commit 1: JWT Token Serialization Implementation
 ```bash
-git add pkg/gauth/extended_token_service.go
+git add pkg/agentauth/extended_token_service.go
 git commit -m "feat: implement JWT token serialization (fixes critical blocker)
 
 - Added github.com/golang-jwt/jwt/v5 dependency
@@ -328,12 +328,12 @@ git commit -m "feat: implement JWT token serialization (fixes critical blocker)
 - Tokens can now be transmitted as JWT strings
 
 Closes #CRITICAL-001 from brutal honest audit
-RFC-0111 Token Management: 40% → 75% compliance"
+AAP-001 Token Management: 40% → 75% compliance"
 ```
 
 ### Commit 2: E2E Test Interface Fix (Partial)
 ```bash
-git add pkg/gauth/e2e_rfc_flow_test_extended.go
+git add pkg/agentauth/e2e_rfc_flow_test_extended.go
 git commit -m "fix: update PDPClient mock interface in E2E tests
 
 - Fixed mockPDPClient.EvaluatePolicy signature
@@ -350,7 +350,7 @@ git commit -m "fix: update PDPClient mock interface in E2E tests
 1. **JWT Token Serialization** (P0 - BLOCKER)
    - 60 lines of encoding logic
    - 150 lines of parsing logic
-   - Full RFC-0111 field mapping
+   - Full AAP-001 field mapping
    - Compilation verified
 
 ### 🔄 In Progress
@@ -374,7 +374,7 @@ git commit -m "fix: update PDPClient mock interface in E2E tests
 
 ### 📊 Updated Compliance
 - **Token Management:** 40% → 75%
-- **Overall RFC-0111:** 55% → 58%
+- **Overall AAP-001:** 55% → 58%
 - **Blockers Resolved:** 1 of 1 (100%)
 
 ---

@@ -10,7 +10,7 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/mauriciomferz/AgentAuth/pkg/errors"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
@@ -178,7 +178,7 @@ func (a *SimpleAuthenticator) ValidateToken(ctx context.Context, tokenStr string
 	// For demo purposes, create mock claims
 	return &TokenClaims{
 		Subject:   "demo-user",
-		Issuer:    "gauth",
+		Issuer:    "agentauth",
 		Audience:  "api",
 		ExpiresAt: time.Now().Add(time.Hour),
 		IssuedAt:  time.Now(),
@@ -256,7 +256,7 @@ func (a *SimpleAuthenticator) AuthorizePowerOfAttorney(ctx context.Context, req 
 }
 
 func (a *SimpleAuthenticator) CreateAdvancedDelegation(ctx context.Context, req DelegationRequest) (*DelegationResponse, error) {
-	// --- Minimal RFC 115 validation logic ---
+	// --- Minimal AAP-002 validation logic ---
 	if req.PrincipalID == "" || req.DelegateID == "" {
 		return nil, fmt.Errorf("missing required principal or delegate ID")
 	}
@@ -346,13 +346,13 @@ const (
 	ClientTypeAgenticAI       = "AgenticAI"
 	AuthorizationType         = "Authorization"
 
-	DepositTransaction   = gauth.DepositTransaction
-	TransactionPending   = gauth.TransactionPending
-	TransactionCompleted = gauth.TransactionCompleted
-	TransactionFailed    = gauth.TransactionFailed
-	// TransactionCanceled exported for external packages; legacy alias retained in gauth.
-	TransactionCanceled  = gauth.TransactionCanceled
-	TransactionCancelled = gauth.TransactionCancelled // deprecated alias
+	DepositTransaction   = agentauth.DepositTransaction
+	TransactionPending   = agentauth.TransactionPending
+	TransactionCompleted = agentauth.TransactionCompleted
+	TransactionFailed    = agentauth.TransactionFailed
+	// TransactionCanceled exported for external packages; legacy alias retained in agentauth.
+	TransactionCanceled  = agentauth.TransactionCanceled
+	TransactionCancelled = agentauth.TransactionCancelled // deprecated alias
 )
 
 func NewRFCCompliantService() *SimpleAuthenticator {
@@ -361,18 +361,18 @@ func NewRFCCompliantService() *SimpleAuthenticator {
 
 // Re-export variables
 var (
-	ErrInvalidToken  = gauth.ErrInvalidToken
-	ErrUnauthorized  = gauth.ErrUnauthorized
-	ErrTokenExpired  = gauth.ErrTokenExpired
-	ErrInvalidGrant  = gauth.ErrInvalidGrant
-	ErrInvalidClient = gauth.ErrInvalidClient
+	ErrInvalidToken  = agentauth.ErrInvalidToken
+	ErrUnauthorized  = agentauth.ErrUnauthorized
+	ErrTokenExpired  = agentauth.ErrTokenExpired
+	ErrInvalidGrant  = agentauth.ErrInvalidGrant
+	ErrInvalidClient = agentauth.ErrInvalidClient
 )
 
 // Re-export functions
 var (
-	New                         = gauth.New
-	NewResourceServer           = gauth.NewResourceServer
-	NewPowerAdministrationPoint = gauth.NewPowerAdministrationPoint
+	New                         = agentauth.New
+	NewResourceServer           = agentauth.NewResourceServer
+	NewPowerAdministrationPoint = agentauth.NewPowerAdministrationPoint
 )
 
 // ValidateToken validates an authentication token

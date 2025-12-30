@@ -8,7 +8,7 @@
 
 - [Authentication](#authentication)
 - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
-- [AgentAuth+ Advanced Features](#gauth-advanced-features)
+- [AgentAuth+ Advanced Features](#agentauth-advanced-features)
 - [Admin APIs](#admin-apis)
 - [Revocation APIs](#revocation-apis)
 - [Authorization APIs](#authorization-apis)
@@ -23,7 +23,7 @@
 
 #### 1. Initiate Login
 ```http
-POST /api/v1/gauth/auth/login/init
+POST /api/v1/agentauth/auth/login/init
 Content-Type: application/json
 
 {
@@ -53,7 +53,7 @@ Content-Type: application/json
 
 #### 2. Verify MFA
 ```http
-POST /api/v1/gauth/auth/login/mfa
+POST /api/v1/agentauth/auth/login/mfa
 Content-Type: application/json
 
 {
@@ -81,7 +81,7 @@ Content-Type: application/json
 
 #### 3. Refresh Token
 ```http
-POST /api/v1/gauth/auth/token/refresh
+POST /api/v1/agentauth/auth/token/refresh
 Content-Type: application/json
 
 {
@@ -101,7 +101,7 @@ Content-Type: application/json
 
 #### 4. Logout
 ```http
-POST /api/v1/gauth/auth/logout
+POST /api/v1/agentauth/auth/logout
 Content-Type: application/json
 
 {
@@ -123,7 +123,7 @@ Content-Type: application/json
 
 ### Health Check
 ```http
-GET /api/v1/gauth/mcp/health
+GET /api/v1/agentauth/mcp/health
 ```
 
 **Response (200 OK)**:
@@ -142,7 +142,7 @@ GET /api/v1/gauth/mcp/health
 
 ### List All Servers
 ```http
-GET /api/v1/gauth/mcp/servers
+GET /api/v1/agentauth/mcp/servers
 ```
 
 **Response (200 OK)**:
@@ -176,7 +176,7 @@ GET /api/v1/gauth/mcp/servers
 
 ### Register New Server
 ```http
-POST /api/v1/gauth/mcp/servers
+POST /api/v1/agentauth/mcp/servers
 Content-Type: application/json
 
 {
@@ -219,7 +219,7 @@ Content-Type: application/json
 
 ### Get Server Status
 ```http
-GET /api/v1/gauth/mcp/servers/:id/status
+GET /api/v1/agentauth/mcp/servers/:id/status
 ```
 
 **Response (200 OK)**:
@@ -238,7 +238,7 @@ GET /api/v1/gauth/mcp/servers/:id/status
 
 ### Disconnect Server
 ```http
-DELETE /api/v1/gauth/mcp/servers/:id
+DELETE /api/v1/agentauth/mcp/servers/:id
 ```
 
 **Response (200 OK)**:
@@ -261,7 +261,7 @@ DELETE /api/v1/gauth/mcp/servers/:id
 
 ### List Server Resources
 ```http
-GET /api/v1/gauth/mcp/servers/:id/resources
+GET /api/v1/agentauth/mcp/servers/:id/resources
 ```
 
 **Response (200 OK)**:
@@ -287,7 +287,7 @@ GET /api/v1/gauth/mcp/servers/:id/resources
 
 ### Read Resource Content
 ```http
-POST /api/v1/gauth/mcp/servers/:id/resources/read
+POST /api/v1/agentauth/mcp/servers/:id/resources/read
 Content-Type: application/json
 
 {
@@ -303,7 +303,7 @@ Content-Type: application/json
     {
       "uri": "file:///Users/data/config.json",
       "mimeType": "application/json",
-      "text": "{\n  \"app\": \"gauth\",\n  \"version\": \"1.0.0\"\n}"
+      "text": "{\n  \"app\": \"agentauth\",\n  \"version\": \"1.0.0\"\n}"
     }
   ]
 }
@@ -311,7 +311,7 @@ Content-Type: application/json
 
 ### List Server Tools
 ```http
-GET /api/v1/gauth/mcp/servers/:id/tools
+GET /api/v1/agentauth/mcp/servers/:id/tools
 ```
 
 **Response (200 OK)**:
@@ -357,7 +357,7 @@ GET /api/v1/gauth/mcp/servers/:id/tools
 
 ### Call Tool
 ```http
-POST /api/v1/gauth/mcp/servers/:id/tools/call
+POST /api/v1/agentauth/mcp/servers/:id/tools/call
 Content-Type: application/json
 
 {
@@ -375,7 +375,7 @@ Content-Type: application/json
   "content": [
     {
       "type": "text",
-      "text": "{\n  \"app\": \"gauth\",\n  \"version\": \"1.0.0\"\n}"
+      "text": "{\n  \"app\": \"agentauth\",\n  \"version\": \"1.0.0\"\n}"
     }
   ]
 }
@@ -395,7 +395,7 @@ Content-Type: application/json
 ## AgentAuth+ Advanced Features
 
 **Status**: ✅ Operational (December 1, 2025)  
-**Activation**: Set `GAUTH_GAUTHPLUS_ENABLED=1` environment variable  
+**Activation**: Set `AGENTAUTH_AGENTAUTH_PLUS_ENABLED=1` environment variable  
 **Total Endpoints**: 27 across 5 feature domains
 
 ### Successor Management (4 endpoints)
@@ -404,7 +404,7 @@ AI agent takeover scenarios when primary agents fail or are decommissioned.
 
 #### Get Active Successor
 ```http
-GET /api/v1/gauthplus/successors/active/:poaID
+GET /api/v1/agentauthplus/successors/active/:poaID
 ```
 
 **Response (200 OK)**:
@@ -424,7 +424,7 @@ GET /api/v1/gauthplus/successors/active/:poaID
 
 #### Get Successor History
 ```http
-GET /api/v1/gauthplus/successors/history/:poaID
+GET /api/v1/agentauthplus/successors/history/:poaID
 ```
 
 **Response (200 OK)**:
@@ -452,7 +452,7 @@ AI-to-AI delegations with depth limits and policy validation.
 
 #### Get Delegation Chain
 ```http
-GET /api/v1/gauthplus/delegations/chain/:agentID
+GET /api/v1/agentauthplus/delegations/chain/:agentID
 ```
 
 **Response (200 OK)**:
@@ -470,7 +470,7 @@ Multi-approver workflows with threshold logic (all/majority/quorum/weighted).
 
 #### List Pending Approvals
 ```http
-GET /api/v1/gauthplus/dual-control/approvals/pending
+GET /api/v1/agentauthplus/dual-control/approvals/pending
 ```
 
 **Response (200 OK)**:
@@ -492,7 +492,7 @@ GET /api/v1/gauthplus/dual-control/approvals/pending
 
 #### Get Approval Status
 ```http
-GET /api/v1/gauthplus/dual-control/approvals/:id/status
+GET /api/v1/agentauthplus/dual-control/approvals/:id/status
 ```
 
 **Response (200 OK)**:
@@ -513,7 +513,7 @@ Track violations of transparency, loyalty, prudence, and accountability duties.
 
 #### List Violations
 ```http
-GET /api/v1/gauthplus/fiduciary/violations
+GET /api/v1/agentauthplus/fiduciary/violations
 ```
 
 **Response (200 OK)**:
@@ -537,7 +537,7 @@ GET /api/v1/gauthplus/fiduciary/violations
 
 #### Get Violations by Severity
 ```http
-GET /api/v1/gauthplus/fiduciary/violations/by-severity?severity=critical
+GET /api/v1/agentauthplus/fiduciary/violations/by-severity?severity=critical
 ```
 
 ### AI Capability Assessments (6 endpoints)
@@ -546,7 +546,7 @@ Capability level evaluations (L0-L5) with certification management.
 
 #### Get Latest Assessment
 ```http
-GET /api/v1/gauthplus/capabilities/assessments/:agentID
+GET /api/v1/agentauthplus/capabilities/assessments/:agentID
 ```
 
 **Response (200 OK)**:
@@ -567,7 +567,7 @@ GET /api/v1/gauthplus/capabilities/assessments/:agentID
 
 #### List Certifications
 ```http
-GET /api/v1/gauthplus/capabilities/certifications/:agentID
+GET /api/v1/agentauthplus/capabilities/certifications/:agentID
 ```
 
 **Response (200 OK)**:
@@ -592,11 +592,11 @@ GET /api/v1/gauthplus/capabilities/certifications/:agentID
 AgentAuth+ supports multiple enforcement modes controlled by environment variables:
 
 - **ADVISORY** (default): Logs warnings, allows requests
-- **STRICT**: Blocks requests on violations (`GAUTH_GAUTHPLUS_ENFORCE=1`)
+- **STRICT**: Blocks requests on violations (`AGENTAUTH_AGENTAUTH_PLUS_ENFORCE=1`)
 - **CUSTOM**: Selective enforcement
-  - `GAUTH_GAUTHPLUS_ENFORCE_CAPABILITIES=1`
-  - `GAUTH_GAUTHPLUS_ENFORCE_DUAL_CONTROL=1`
-  - `GAUTH_GAUTHPLUS_ENFORCE_FIDUCIARY=1`
+  - `AGENTAUTH_AGENTAUTH_PLUS_ENFORCE_CAPABILITIES=1`
+  - `AGENTAUTH_AGENTAUTH_PLUS_ENFORCE_DUAL_CONTROL=1`
+  - `AGENTAUTH_AGENTAUTH_PLUS_ENFORCE_FIDUCIARY=1`
 
 ### Complete Endpoint List
 
@@ -608,7 +608,7 @@ AgentAuth+ supports multiple enforcement modes controlled by environment variabl
 | **Fiduciary Duty** | 4 | Record violation, resolve, list all, filter by severity |
 | **Capability Assessment** | 6 | Assess, certify, revoke, get latest, list certs, query |
 
-See [GAUTHPLUS_ENDPOINTS_ACTIVATION_REPORT.md](GAUTHPLUS_ENDPOINTS_ACTIVATION_REPORT.md) for detailed documentation.
+See [AGENTAUTH_PLUS_ENDPOINTS_ACTIVATION_REPORT.md](AGENTAUTH_PLUS_ENDPOINTS_ACTIVATION_REPORT.md) for detailed documentation.
 
 ---
 
@@ -949,8 +949,8 @@ Configure webhooks for event notifications:
 ## Support
 
 For issues or questions:
-- GitHub Issues: https://github.com/mauriciomferz/Gauth_go/issues
-- Documentation: https://github.com/mauriciomferz/Gauth_go/wiki
+- GitHub Issues: https://github.com/mauriciomferz/AgentAuth/issues
+- Documentation: https://github.com/mauriciomferz/AgentAuth/wiki
 
 ---
 

@@ -15,13 +15,13 @@ import (
 // SecurityHeadersMiddleware adds comprehensive security headers to all responses
 func SecurityHeadersMiddleware() gin.HandlerFunc {
 	// Load configuration from environment
-	isDevelopment := os.Getenv("GAUTH_ENV") == "development"
+	isDevelopment := os.Getenv("AGENTAUTH_ENV") == "development"
 
 	// Content Security Policy
 	csp := buildContentSecurityPolicy(isDevelopment)
 
 	// Allowed frame ancestors (for X-Frame-Options alternative)
-	frameAncestors := os.Getenv("GAUTH_FRAME_ANCESTORS")
+	frameAncestors := os.Getenv("AGENTAUTH_FRAME_ANCESTORS")
 	if frameAncestors == "" {
 		frameAncestors = "'none'" // Default: no framing
 	}
@@ -32,7 +32,7 @@ func SecurityHeadersMiddleware() gin.HandlerFunc {
 
 		// Strict Transport Security (HSTS) - only in production with HTTPS
 		if !isDevelopment && c.Request.TLS != nil {
-			maxAge := os.Getenv("GAUTH_HSTS_MAX_AGE")
+			maxAge := os.Getenv("AGENTAUTH_HSTS_MAX_AGE")
 			if maxAge == "" {
 				maxAge = "31536000" // 1 year default
 			}
@@ -40,7 +40,7 @@ func SecurityHeadersMiddleware() gin.HandlerFunc {
 		}
 
 		// X-Frame-Options (defense-in-depth with CSP frame-ancestors)
-		frameOptions := os.Getenv("GAUTH_X_FRAME_OPTIONS")
+		frameOptions := os.Getenv("AGENTAUTH_X_FRAME_OPTIONS")
 		if frameOptions == "" {
 			frameOptions = "DENY" // Default: no framing
 		}
@@ -53,7 +53,7 @@ func SecurityHeadersMiddleware() gin.HandlerFunc {
 		c.Header("X-XSS-Protection", "1; mode=block")
 
 		// Referrer Policy
-		referrerPolicy := os.Getenv("GAUTH_REFERRER_POLICY")
+		referrerPolicy := os.Getenv("AGENTAUTH_REFERRER_POLICY")
 		if referrerPolicy == "" {
 			referrerPolicy = "strict-origin-when-cross-origin"
 		}
@@ -114,7 +114,7 @@ func buildContentSecurityPolicy(isDevelopment bool) string {
 	}
 
 	// Allow custom CSP additions via environment
-	customCSP := os.Getenv("GAUTH_CSP_ADDITIONS")
+	customCSP := os.Getenv("AGENTAUTH_CSP_ADDITIONS")
 	if customCSP != "" {
 		directives = append(directives, strings.Split(customCSP, ";")...)
 	}
@@ -138,7 +138,7 @@ func buildPermissionsPolicy() string {
 	}
 
 	// Allow custom permissions via environment
-	customPermissions := os.Getenv("GAUTH_PERMISSIONS_POLICY")
+	customPermissions := os.Getenv("AGENTAUTH_PERMISSIONS_POLICY")
 	if customPermissions != "" {
 		policies = append(policies, strings.Split(customPermissions, ",")...)
 	}
@@ -170,7 +170,7 @@ func isSecureEndpoint(path string) bool {
 func CORSMiddleware() gin.HandlerFunc {
 	// Load allowed origins from environment
 	allowedOrigins := loadAllowedOrigins()
-	isDevelopment := os.Getenv("GAUTH_ENV") == "development"
+	isDevelopment := os.Getenv("AGENTAUTH_ENV") == "development"
 
 	// Allowed methods
 	allowedMethods := []string{
@@ -232,7 +232,7 @@ func CORSMiddleware() gin.HandlerFunc {
 
 // loadAllowedOrigins loads and parses allowed CORS origins from environment
 func loadAllowedOrigins() []string {
-	originsStr := os.Getenv("GAUTH_CORS_ALLOWED_ORIGINS")
+	originsStr := os.Getenv("AGENTAUTH_CORS_ALLOWED_ORIGINS")
 	if originsStr == "" {
 		// Default to localhost for development
 		return []string{
@@ -292,7 +292,7 @@ func SecureResponseMiddleware() gin.HandlerFunc {
 		c.Next()
 
 		// Remove sensitive error details in production
-		if os.Getenv("GAUTH_ENV") != "development" {
+		if os.Getenv("AGENTAUTH_ENV") != "development" {
 			if c.Writer.Status() >= 500 {
 				// Log actual error but don't expose to client
 				c.Set("security_event", "internal_error")

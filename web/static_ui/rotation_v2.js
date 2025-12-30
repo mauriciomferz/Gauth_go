@@ -45,7 +45,7 @@ function renderStatusBadge(verifiedWeight, threshold){
 
 async function verifySignersClient(artifact){
   if(!artifact || !artifact.signers) return {total: artifact ? artifact.signers.length : 0, ok: 0, results: []};
-  const payload = artifact.canonical_digest ? new TextEncoder().encode('GAUTH_ROTATION_V2:'+artifact.canonical_digest) : null;
+  const payload = artifact.canonical_digest ? new TextEncoder().encode('AGENTAUTH_ROTATION_V2:'+artifact.canonical_digest) : null;
   if(!payload) return {total: artifact.signers.length, ok: 0, results: []};
   const subtle = (window.crypto && window.crypto.subtle);
   const results = [];
@@ -171,7 +171,7 @@ export async function initRotationV2Panel(){
       setText('rotv2-latest-hash', data.continuity && data.continuity.latest_hash || art.canonical_digest || '—');
       setText('rotv2-keyset-id', art.active_key_set_id || '—');
       setText('rotv2-generated-at', art.generated_at || '—');
-      setText('rotv2-alg-suite', (art.algorithm_suite && art.algorithm_suite.join(',')) || '—');
+      setText('rotv2-alg-suite', (art.algorithm_suite && art.algorithm_suite.join(',') || '—');
       renderStatusBadge(data.verified_weight || 0, art.threshold_weight || 0);
       renderAlgWeights(data.verified_weight_by_alg || {});
       renderSigners(art.signers || []);

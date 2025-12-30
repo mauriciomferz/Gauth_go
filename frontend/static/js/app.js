@@ -52,7 +52,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                 return;
             }
             
-            this.currentExperiment = { ...experiment, id: experimentId, data: JSON.parse(JSON.stringify(experiment.template)) };
+            this.currentExperiment = { ...experiment, id: experimentId, data: JSON.parse(JSON.stringify(experiment.template) };
             this.showExperimentModal();
         },
         
@@ -632,11 +632,11 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                 progress: this.progress,
                 completedExamples: Array.from(this.completedExamples)
             };
-            localStorage.setItem('gauth-learning-progress', JSON.stringify(data));
+            localStorage.setItem('agentauth-learning-progress', JSON.stringify(data));
         },
         
         loadProgress: function() {
-            const saved = localStorage.getItem('gauth-learning-progress');
+            const saved = localStorage.getItem('agentauth-learning-progress');
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
@@ -775,42 +775,42 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
         setupButtonHandlers: function() {
             // Learning journey button
             document.addEventListener('click', (e) => {
-                if (e.target.closest('[data-action="start-learning-path"]')) {
+                if (e.target.closest('[data-action="start-learning-path"]') {
                     InteractiveElements.showNotification('🎓 Starting guided learning journey...', 'info');
                     LearningSystem.startModule('authorization-fundamentals');
                 }
                 
-                if (e.target.closest('[data-action="quick-compliance-check"]')) {
+                if (e.target.closest('[data-action="quick-compliance-check"]') {
                     ComplianceDashboard.runQuickCheck();
                 }
                 
-                if (e.target.closest('[data-action="test-pattern"]')) {
+                if (e.target.closest('[data-action="test-pattern"]') {
                     InteractiveElements.showNotification('🧪 Starting pattern testing...', 'info');
                     ExperimentalPlayground.startExperiment('policy-builder');
                 }
                 
-                if (e.target.closest('[data-action="create-token"]')) {
+                if (e.target.closest('[data-action="create-token"]') {
                     this.createDemoToken();
                 }
                 
                 // Module start buttons
-                if (e.target.closest('.bg-green-600, .bg-blue-600, .bg-purple-600, .bg-red-600, .bg-yellow-600, .bg-indigo-600')) {
+                if (e.target.closest('.bg-green-600, .bg-blue-600, .bg-purple-600, .bg-red-600, .bg-yellow-600, .bg-indigo-600') {
                     this.startModule(e.target.closest('div'));
                 }
                 
                 // Run example buttons
-                if (e.target.closest('[data-example-id]')) {
+                if (e.target.closest('[data-example-id]') {
                     const exampleId = e.target.closest('[data-example-id]').dataset.exampleId;
                     this.runExample(exampleId);
                 }
                 
                 // Test authorization patterns
-                if (e.target.closest('[data-action="test-pattern"]')) {
+                if (e.target.closest('[data-action="test-pattern"]') {
                     this.testAuthorizationPattern();
                 }
                 
                 // Create demo token
-                if (e.target.closest('[data-action="create-token"]')) {
+                if (e.target.closest('[data-action="create-token"]') {
                     this.createDemoToken();
                 }
             });
@@ -821,7 +821,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
             LearningTracker.examples.forEach(example => {
                 const moduleElements = document.querySelectorAll('.bg-green-600, .bg-blue-600, .bg-purple-600, .bg-red-600, .bg-yellow-600, .bg-indigo-600');
                 moduleElements.forEach(module => {
-                    if (!module.querySelector('.example-button')) {
+                    if (!module.querySelector('.example-button') {
                         const button = document.createElement('button');
                         button.className = 'mt-2 px-3 py-1 bg-white bg-opacity-20 text-white rounded text-sm hover:bg-opacity-30 example-button';
                         button.textContent = `Try Example: ${example.title}`;
@@ -964,7 +964,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
         setupFormHandlers: function() {
             // Pattern selector
             document.addEventListener('change', (e) => {
-                if (e.target.matches('select')) {
+                if (e.target.matches('select') {
                     this.handlePatternSelection(e.target);
                 }
             });
@@ -1015,7 +1015,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                 ex.group === 'basics'
             );
             
-            if (relevantExample && !LearningTracker.completedExamples.has(relevantExample.id)) {
+            if (relevantExample && !LearningTracker.completedExamples.has(relevantExample.id) {
                 await this.runExample(relevantExample.id);
             }
         },
@@ -1143,7 +1143,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
         
         clearActivityFeedLoader() {
             const feedElement = document.getElementById('activity-feed');
-            if (feedElement && feedElement.querySelector('.fa-spinner')) {
+            if (feedElement && feedElement.querySelector('.fa-spinner') {
                 feedElement.innerHTML = '<div class="text-center text-gray-500 py-4"><p class="text-sm">Live activity will appear here</p></div>';
             }
         },
@@ -1317,11 +1317,11 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
         },
         
         saveTheme: function(theme) {
-            localStorage.setItem('gauth-theme', theme);
+            localStorage.setItem('agentauth-theme', theme);
         },
         
         loadTheme: function() {
-            const savedTheme = localStorage.getItem('gauth-theme');
+            const savedTheme = localStorage.getItem('agentauth-theme');
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark');
             }
@@ -1478,7 +1478,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                             action: async () => {
                                 // Run the PoA example
                                 try {
-                                    const result = await APIClient.runExample('gauth_protocol_basics:minimal_poa');
+                                    const result = await APIClient.runExample('agentauth_protocol_basics:minimal_poa');
                                     if (result.success && result.job_id) {
                                         return await LearningSystem.pollExampleResult(result.job_id, 'Power of Attorney example');
                                     }
@@ -1561,7 +1561,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                             type: 'interactive',
                             action: async () => {
                                 try {
-                                    const result = await APIClient.runExample('gauth_protocol_basics:delegation');
+                                    const result = await APIClient.runExample('agentauth_protocol_basics:delegation');
                                     if (result.success && result.job_id) {
                                         return await LearningSystem.pollExampleResult(result.job_id, 'Delegation chain example');
                                     }
@@ -2349,7 +2349,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
             
-            const successRate = Math.round((passed / (passed + failed)) * 100);
+            const successRate = Math.round((passed / (passed + failed) * 100);
             
             overallResults.innerHTML = `
                 <div class="bg-white border border-gray-200 rounded-lg p-4">
@@ -2426,7 +2426,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                             <p class="font-semibold">AgentAuth Learning Lab Ready!</p>
                             <p class="text-sm opacity-90 mt-1">Connected to live APIs. Start with a tutorial?</p>
                             <div class="mt-2 space-x-2">
-                                <button onclick="window.AgentAuthLab.TutorialSystem.startTutorial('gauth-basics')" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-30">
+                                <button onclick="window.AgentAuthLab.TutorialSystem.startTutorial('agentauth-basics')" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-30">
                                     Start Basics Tutorial
                                 </button>
                                 <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded hover:bg-opacity-30">

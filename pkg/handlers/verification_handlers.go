@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
 )
 
 // VerificationHandler handles verification-related HTTP requests
 type VerificationHandler struct {
-	verificationService gauthplus.VerificationService
+	verificationService agentauthplus.VerificationService
 }
 
 // NewVerificationHandler creates a new verification handler
-func NewVerificationHandler(verificationService gauthplus.VerificationService) *VerificationHandler {
+func NewVerificationHandler(verificationService agentauthplus.VerificationService) *VerificationHandler {
 	return &VerificationHandler{
 		verificationService: verificationService,
 	}

@@ -686,8 +686,8 @@ package main
 
 import (
     "context"
-    "github.com/your-org/gauth/internal/policy"
-    pkgpolicy "github.com/your-org/gauth/pkg/policy"
+    "github.com/your-org/agentauth/internal/policy"
+    pkgpolicy "github.com/your-org/agentauth/pkg/policy"
 )
 
 func main() {
@@ -741,7 +741,7 @@ func main() {
 ```go
 import (
     "github.com/gin-gonic/gin"
-    "github.com/your-org/gauth/internal/policy"
+    "github.com/your-org/agentauth/internal/policy"
 )
 
 func setupPolicyVersioningAPI(
@@ -786,19 +786,19 @@ func setupPolicyVersioningAPI(
 **Configuration:**
 ```bash
 # Environment variable (optional)
-export GAUTH_POLICY_VERSION_DB_PATH="/var/lib/gauth/policy_versions.db"
+export AGENTAUTH_POLICY_VERSION_DB_PATH="/var/lib/agentauth/policy_versions.db"
 ```
 
 **Usage Example:**
 ```go
 import (
-    "github.com/your-org/gauth/internal/policy"
-    pkgpolicy "github.com/your-org/gauth/pkg/policy"
+    "github.com/your-org/agentauth/internal/policy"
+    pkgpolicy "github.com/your-org/agentauth/pkg/policy"
 )
 
 func main() {
     // Create persistent store
-    store, err := policy.NewBoltPolicyVersionStore("/var/lib/gauth/policy_versions.db")
+    store, err := policy.NewBoltPolicyVersionStore("/var/lib/agentauth/policy_versions.db")
     if err != nil {
         log.Fatalf("Failed to create store: %v", err)
     }
@@ -826,7 +826,7 @@ versionManager.ActivateVersion(ctx, 2, "admin") // Active version = 2 saved to d
 // Process crashes/restarts
 
 // After restart
-store, _ := policy.NewBoltPolicyVersionStore("/var/lib/gauth/policy_versions.db")
+store, _ := policy.NewBoltPolicyVersionStore("/var/lib/agentauth/policy_versions.db")
 registry := pkgpolicy.NewRegistry()
 versionManager, _ := policy.NewPolicyVersionManagerWithStore(registry, store)
 
@@ -843,7 +843,7 @@ registry := pkgpolicy.NewRegistry()
 versionManager := policy.NewPolicyVersionManager(registry) // No store
 
 // With persistence
-store, _ := policy.NewBoltPolicyVersionStore("/var/lib/gauth/policy_versions.db")
+store, _ := policy.NewBoltPolicyVersionStore("/var/lib/agentauth/policy_versions.db")
 versionManager, _ := policy.NewPolicyVersionManagerWithStore(registry, store)
 
 // Both interfaces are identical - persistence is optional enhancement
@@ -854,13 +854,13 @@ versionManager, _ := policy.NewPolicyVersionManagerWithStore(registry, store)
 1. **Backup Strategy:**
    ```bash
    # BoltDB file contains complete version history
-   cp /var/lib/gauth/policy_versions.db /backup/policy_versions-$(date +%Y%m%d).db
+   cp /var/lib/agentauth/policy_versions.db /backup/policy_versions-$(date +%Y%m%d).db
    ```
 
 2. **Migration from In-Memory:**
    ```go
    // Step 1: Create store
-   store, _ := policy.NewBoltPolicyVersionStore("/var/lib/gauth/policy_versions.db")
+   store, _ := policy.NewBoltPolicyVersionStore("/var/lib/agentauth/policy_versions.db")
    
    // Step 2: Create manager with store (old versions re-created)
    versionManager, _ := policy.NewPolicyVersionManagerWithStore(registry, store)

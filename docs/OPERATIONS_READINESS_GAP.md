@@ -13,7 +13,7 @@ refreshCadence: quarterly
 **Document Version:** 1.0  
 **Date:** 2025-01-01  
 **Status:** Initial Assessment  
-**Project:** AgentAuth 1.0 (AAP-RFC-0111 Implementation)
+**Project:** AgentAuth 1.0 (AAP-001 Implementation)
 
 ---
 
@@ -120,7 +120,7 @@ demoRSAKid = "demo-rsa"
 **Gaps:**
 - Nonce storage in-memory (lost on restart)
 - No distributed replay detection across multiple instances
-- Demo seed: `GAUTH_REVOCATION_DEMO_SEED`
+- Demo seed: `AGENTAUTH_REVOCATION_DEMO_SEED`
 - No TTL-based cleanup of old nonces
 
 **Remediation:**
@@ -135,7 +135,7 @@ demoRSAKid = "demo-rsa"
 **Current State:**
 ```go
 // web/server_clean.go:6017
-jwtEnabled := os.Getenv("GAUTH_USE_JWT_LIB") == "1"
+jwtEnabled := os.Getenv("AGENTAUTH_USE_JWT_LIB") == "1"
 ```
 
 **Gaps:**
@@ -161,11 +161,11 @@ jwtEnabled := os.Getenv("GAUTH_USE_JWT_LIB") == "1"
 
 **Current State:**
 ```go
-// pkg/rfc0111/repository.go
+// pkg/aap001/repository.go
 // memoryRepository is an in-memory implementation (prototype / tests)
 type memoryRepository struct {
     mu    sync.RWMutex
-    store map[string]rfc0111.PoA
+    store map[string]aap001.PoA
     // ...
 }
 
@@ -194,7 +194,7 @@ type MemoryAuthorizer struct {
 
 **Current State:**
 ```go
-// pkg/rfc0111/bolt_repository.go
+// pkg/aap001/bolt_repository.go
 // TODO: add parent_poa_id index for efficient chain queries
 ```
 
@@ -404,7 +404,7 @@ kidPubCache := map[string]ed25519.PublicKey{}  // In-memory, per-request
 **Remediation:**
 1. Implement jurisdiction-based data residency policies
 2. Add geographic routing for multi-region deployments
-3. Enforce data sovereignty compliance per RFC-0111 jurisdiction field
+3. Enforce data sovereignty compliance per AAP-001 jurisdiction field
 4. Document compliance posture (GDPR, CCPA, SOC 2)
 5. **Timeline:** P1 - 4 weeks
 
@@ -589,21 +589,21 @@ Dockerfile.minimal
 
 **Current State:**
 ```go
-// Multiple GAUTH_* environment variables for feature gates
-GAUTH_USE_JWT_LIB=1
-GAUTH_JWT_ALG=RS256
-GAUTH_DEV_INDEX=1
-GAUTH_REVOCATION_DEMO_SEED=1
-GAUTH_POA_ENVELOPE_V2=1
-GAUTH_DETACHED_SIGNATURE=1
-GAUTH_RAW_POA_CHAIN_HASH_ALGO=sha256
-GAUTH_JWT_ROTATION_DAYS=90
+// Multiple AGENTAUTH_* environment variables for feature gates
+AGENTAUTH_USE_JWT_LIB=1
+AGENTAUTH_JWT_ALG=RS256
+AGENTAUTH_DEV_INDEX=1
+AGENTAUTH_REVOCATION_DEMO_SEED=1
+AGENTAUTH_POA_ENVELOPE_V2=1
+AGENTAUTH_DETACHED_SIGNATURE=1
+AGENTAUTH_RAW_POA_CHAIN_HASH_ALGO=sha256
+AGENTAUTH_JWT_ROTATION_DAYS=90
 ```
 
 **Gaps:**
 - Feature gates mixed with operational configuration
 - No configuration validation on startup
-- Development-only environment variables (GAUTH_DEV_*)
+- Development-only environment variables (AGENTAUTH_DEV_*)
 - No configuration documentation or schema
 
 **Remediation:**
@@ -839,7 +839,7 @@ GAUTH_JWT_ROTATION_DAYS=90
 
 ## 13. Conclusion
 
-The current AgentAuth implementation is a well-structured **development prototype** with comprehensive RFC-0111 compliance and excellent test coverage (13/13 PoA visualization tests passing, 18/18 enforcement tests passing). However, significant gaps exist across security, persistence, monitoring, and operational domains that must be addressed before production deployment.
+The current AgentAuth implementation is a well-structured **development prototype** with comprehensive AAP-001 compliance and excellent test coverage (13/13 PoA visualization tests passing, 18/18 enforcement tests passing). However, significant gaps exist across security, persistence, monitoring, and operational domains that must be addressed before production deployment.
 
 The **prioritized remediation roadmap** provides a 24-week path to production readiness, with critical security and persistence gaps addressed in the first 6 weeks. By following this plan, the AgentAuth system will achieve:
 

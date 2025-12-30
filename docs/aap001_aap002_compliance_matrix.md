@@ -10,7 +10,7 @@ owners: [system]
 
 Date: 2025-10-29
 
-This document captures current implementation status for key clauses of AAP-001 (Delegation & Authorization Protocol) and AAP-002 (Power of Attorney Definition) as reflected in the Beta MVP demo (`ai_capability_demo`) and core packages (`pkg/rfc0111`, `internal/multisig`).
+This document captures current implementation status for key clauses of AAP-001 (Delegation & Authorization Protocol) and AAP-002 (Power of Attorney Definition) as reflected in the Beta MVP demo (`ai_capability_demo`) and core packages (`pkg/aap001`, `internal/multisig`).
 
 ## Status Legend
 | Status | Meaning |
@@ -22,10 +22,10 @@ This document captures current implementation status for key clauses of AAP-001 
 ## AAP-001 Core Areas
 | Area | Elements | Status | Evidence |
 |------|----------|--------|----------|
-| Delegation Object | `PowerOfAttorney` base fields (grantor, grantee, scope, validity) | Implemented | `pkg/rfc0111/rfc0111.go` lines ~70-120 |
-| Canonical Digest | Deterministic digest (V1/V2/V3 domain separation) | Implemented | `pkg/rfc0111/canonical.go` |
-| Single Signature Authenticity | `POASignature` struct + digest verification | Implemented | `pkg/rfc0111/rfc0111.go` (signature logic) |
-| Multi-Signature Threshold | Signers, threshold structural validation | Implemented | `ValidateMultiSignature` in `rfc0111.go` |
+| Delegation Object | `PowerOfAttorney` base fields (grantor, grantee, scope, validity) | Implemented | `pkg/aap001/aap001.go` lines ~70-120 |
+| Canonical Digest | Deterministic digest (V1/V2/V3 domain separation) | Implemented | `pkg/aap001/canonical.go` |
+| Single Signature Authenticity | `POASignature` struct + digest verification | Implemented | `pkg/aap001/aap001.go` (signature logic) |
+| Multi-Signature Threshold | Signers, threshold structural validation | Implemented | `ValidateMultiSignature` in `aap001.go` |
 | Weighted Multi-Signature | Weight parsing & verification semantics | Implemented | `verifyMultiSignatures`, tests `multi_signature_weight*_test.go` |
 | Lifecycle States | active, revoked, expired | Implemented | `POAStatus` constants + revocation endpoint |
 | Revocation | Status transition + timestamp reason | Implemented | `/demo/poa/:id/revoke`, fields `RevokedAt`, `RevocationReason` |
@@ -91,8 +91,8 @@ This document captures current implementation status for key clauses of AAP-001 
 5. Evidence hashes – MEDIUM
 
 ## References
-- `pkg/rfc0111/rfc0111.go`
-- `pkg/rfc0111/canonical.go`
+- `pkg/aap001/aap001.go`
+- `pkg/aap001/canonical.go`
 - `examples/ai_capability_demo/main.go`
 - `examples/ai_capability_demo/README.md`
 - `docs/openapi_poa_delegation_implementation.md`

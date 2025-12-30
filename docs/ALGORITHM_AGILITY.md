@@ -66,7 +66,7 @@ algorithms := registry.ListAlgorithms()  // ["EdDSA", "PS256", "ES256"]
 #### Ed25519 (Default - Fastest)
 
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
+import "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 
 // Create provider
 provider := &crypto.Ed25519Provider{}
@@ -172,7 +172,7 @@ Add algorithm identifier to token header:
 ```go
 import (
     "encoding/json"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 )
 
 type TokenHeader struct {
@@ -284,7 +284,7 @@ return newToken
 ```
 
 #### Phase 3: Monitor and Switch (Week 5-6)
-- Monitor metrics: `gauth_algorithm_usage{algorithm="PS256"}` should approach 100%
+- Monitor metrics: `agentauth_algorithm_usage{algorithm="PS256"}` should approach 100%
 - Once all services updated, switch issuer to new algorithm only
 - Stop signing with Ed25519
 
@@ -424,14 +424,14 @@ Test token issuance and verification:
 
 ```bash
 # Generate test tokens with all algorithms
-./bin/gauth-token-generator --algorithm EdDSA --output ed25519.token
-./bin/gauth-token-generator --algorithm PS256 --output rsa.token
-./bin/gauth-token-generator --algorithm ES256 --output ecdsa.token
+./bin/agentauth-token-generator --algorithm EdDSA --output ed25519.token
+./bin/agentauth-token-generator --algorithm PS256 --output rsa.token
+./bin/agentauth-token-generator --algorithm ES256 --output ecdsa.token
 
 # Verify tokens
-./bin/gauth-token-verifier --token ed25519.token --public-key ed25519.pub
-./bin/gauth-token-verifier --token rsa.token --public-key rsa.pub
-./bin/gauth-token-verifier --token ecdsa.token --public-key ecdsa.pub
+./bin/agentauth-token-verifier --token ed25519.token --public-key ed25519.pub
+./bin/agentauth-token-verifier --token rsa.token --public-key rsa.pub
+./bin/agentauth-token-verifier --token ecdsa.token --public-key ecdsa.pub
 ```
 
 ## Monitoring
@@ -444,7 +444,7 @@ Track algorithm usage with Prometheus metrics:
 // In metrics exporter
 var algorithmUsageCounter = prometheus.NewCounterVec(
     prometheus.CounterOpts{
-        Name: "gauth_signature_operations_total",
+        Name: "agentauth_signature_operations_total",
         Help: "Total signature operations by algorithm and operation type",
     },
     []string{"algorithm", "operation"},  // operation: "sign" or "verify"
@@ -463,14 +463,14 @@ algorithmUsageCounter.WithLabelValues(provider.AlgorithmID(), "verify").Inc()
 
 ```promql
 # Algorithm distribution
-sum by (algorithm) (rate(gauth_signature_operations_total[5m]))
+sum by (algorithm) (rate(agentauth_signature_operations_total[5m]))
 
 # Migration progress (RSA-PSS adoption rate)
-sum(rate(gauth_signature_operations_total{algorithm="PS256"}[5m])) /
-sum(rate(gauth_signature_operations_total[5m])) * 100
+sum(rate(agentauth_signature_operations_total{algorithm="PS256"}[5m]) /
+sum(rate(agentauth_signature_operations_total[5m]) * 100
 
 # Verification failures by algorithm
-sum by (algorithm) (rate(gauth_signature_verification_failures_total[5m]))
+sum by (algorithm) (rate(agentauth_signature_verification_failures_total[5m]))
 ```
 
 ## Troubleshooting

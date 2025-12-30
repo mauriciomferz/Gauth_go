@@ -1,4 +1,4 @@
-module github.com/example/gauth-opa-integration
+module github.com/example/agentauth-opa-integration
 
 go 1.23.8
 

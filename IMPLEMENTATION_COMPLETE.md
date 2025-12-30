@@ -26,14 +26,14 @@ This document summarizes the successful implementation of the remaining code rev
 - Maintained 100% backward compatibility - existing code works without changes
 
 **Files Created:**
-- `pkg/gauth/policy_store.go` (368 lines) - Interface and in-memory implementation
-- `pkg/gauth/policy_store_db.go` (606 lines) - Database implementation
-- `pkg/gauth/policy_store_test.go` (325 lines) - Comprehensive test coverage
+- `pkg/agentauth/policy_store.go` (368 lines) - Interface and in-memory implementation
+- `pkg/agentauth/policy_store_db.go` (606 lines) - Database implementation
+- `pkg/agentauth/policy_store_test.go` (325 lines) - Comprehensive test coverage
 - `POLICY_STORE_IMPLEMENTATION.md` - Complete documentation
 
 **Files Modified:**
-- `pkg/gauth/gauth.go` - Refactored PowerAdministrationPoint to use interface
-- `pkg/gauth/pap_test.go` - Updated to use new store field
+- `pkg/agentauth/agentauth.go` - Refactored PowerAdministrationPoint to use interface
+- `pkg/agentauth/pap_test.go` - Updated to use new store field
 
 **Test Results:**
 ```
@@ -48,13 +48,13 @@ This document summarizes the successful implementation of the remaining code rev
 === RUN   TestInMemoryPolicyStore_IsolationCopy
 --- PASS: TestInMemoryPolicyStore_IsolationCopy (0.00s)
 PASS
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauth     0.927s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauth     0.927s
 ```
 
 All PAP tests (policy administration point) also passing:
 ```
 PASS
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauth     0.354s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauth     0.354s
 ```
 
 ### 2. Directory Structure Cleanup
@@ -124,11 +124,11 @@ $ go build ./pkg/...
 ✅ Success (no output = successful build)
 
 # All policy store tests pass
-$ go test -v -run TestInMemoryPolicyStore ./pkg/gauth/
+$ go test -v -run TestInMemoryPolicyStore ./pkg/agentauth/
 ✅ PASS (0.927s)
 
 # All PAP tests pass
-$ go test ./pkg/gauth/ -run TestPAP -v
+$ go test ./pkg/agentauth/ -run TestPAP -v
 ✅ PASS (0.354s)
 ```
 
@@ -145,7 +145,7 @@ Complete documentation available in:
 ```go
 import (
     "database/sql"
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
     _ "github.com/lib/pq"
 )
 
@@ -154,19 +154,19 @@ if err != nil {
     log.Fatal(err)
 }
 
-store := gauth.NewDatabasePolicyStore(db)
-pap := gauth.NewPowerAdministrationPointWithStore("pap-001", "Production PAP", "Main PAP", store)
+store := agentauth.NewDatabasePolicyStore(db)
+pap := agentauth.NewPowerAdministrationPointWithStore("pap-001", "Production PAP", "Main PAP", store)
 defer store.Close()
 
 // Use PAP as normal - all operations now persist to database
-policy, err := pap.CreatePolicy(ctx, &gauth.CreatePolicyRequest{...})
+policy, err := pap.CreatePolicy(ctx, &agentauth.CreatePolicyRequest{...})
 ```
 
 ### Using Default In-Memory Store (Backward Compatible)
 ```go
 // No changes needed - works exactly as before
-pap := gauth.NewPowerAdministrationPoint("pap-001", "Test PAP", "Description")
-policy, err := pap.CreatePolicy(ctx, &gauth.CreatePolicyRequest{...})
+pap := agentauth.NewPowerAdministrationPoint("pap-001", "Test PAP", "Description")
+policy, err := pap.CreatePolicy(ctx, &agentauth.CreatePolicyRequest{...})
 ```
 
 ## Next Steps (Optional Enhancements)

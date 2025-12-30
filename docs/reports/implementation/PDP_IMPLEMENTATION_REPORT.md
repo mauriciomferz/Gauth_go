@@ -12,17 +12,17 @@ refreshCadence: annually
 
 ## Executive Summary
 
-Successfully implemented RFC-0111 Policy Decision Point (PDP) integration by creating a bridge between the existing `pkg/pdp.Engine` and the `PDPClient` interface required by the compliance validator.
+Successfully implemented AAP-001 Policy Decision Point (PDP) integration by creating a bridge between the existing `pkg/pdp.Engine` and the `PDPClient` interface required by the compliance validator.
 
 **Status:** ✅ COMPLETED  
 **Priority:** P1 - RFC REQUIREMENT  
-**Compliance Impact:** PDP Section (0% → 80%), Overall RFC-0111 (58% → 62%)
+**Compliance Impact:** PDP Section (0% → 80%), Overall AAP-001 (58% → 62%)
 
 ---
 
 ## What Was Implemented
 
-### 1. PDP Bridge (`pkg/gauth/pdp_bridge.go`)
+### 1. PDP Bridge (`pkg/agentauth/pdp_bridge.go`)
 
 **Purpose:** Bridges the gap between two interfaces:
 - **Source:** `pdp.Engine` (existing full-featured policy engine)
@@ -37,7 +37,7 @@ Successfully implemented RFC-0111 Policy Decision Point (PDP) integration by cre
   - `map[string]interface{}`
   - Direct `pdp.Request`
 - Intelligent request conversion with attribute extraction
-- Full RFC-0111 field mapping
+- Full AAP-001 field mapping
 
 **Code Statistics:**
 - **Lines:** 230
@@ -115,7 +115,7 @@ pdp.Request {
 
 ### 3. RFC Configuration Integration
 
-**Updated:** `pkg/gauth/rfc0111_config.go`
+**Updated:** `pkg/agentauth/aap001_config.go`
 
 **Changes:**
 1. Added `pkg/pdp` import
@@ -132,7 +132,7 @@ func createDefaultPDPEngine() pdp.Engine {
     // Enable mandatory obligation enforcement
     engine.WithObligationFailureDenies(true)
     
-    // Add RFC-0111 policies...
+    // Add AAP-001 policies...
     return engine
 }
 ```
@@ -142,7 +142,7 @@ func createDefaultPDPEngine() pdp.Engine {
 **Policy 1: Allow Valid Chains**
 ```go
 {
-    ID: "rfc0111-allow-valid-chain"
+    ID: "aap001-allow-valid-chain"
     Subjects: ["*"]
     Rules: [{
         Actions: ["read", "write", "execute", "authorize", "access"]
@@ -151,7 +151,7 @@ func createDefaultPDPEngine() pdp.Engine {
     }]
     Metadata: {
         "description": "Allow requests with valid authorization chains"
-        "rfc": "RFC-0111"
+        "rfc": "AAP-001"
     }
 }
 ```
@@ -159,7 +159,7 @@ func createDefaultPDPEngine() pdp.Engine {
 **Policy 2: Deny Dangerous Actions**
 ```go
 {
-    ID: "rfc0111-default-deny"
+    ID: "aap001-default-deny"
     Subjects: ["*"]
     Rules: [{
         Actions: ["delete", "admin"]
@@ -168,14 +168,14 @@ func createDefaultPDPEngine() pdp.Engine {
     }]
     Metadata: {
         "description": "Deny dangerous actions by default"
-        "rfc": "RFC-0111"
+        "rfc": "AAP-001"
     }
 }
 ```
 
 ### 4. Comprehensive Testing
 
-**Created:** `pkg/gauth/pdp_bridge_test.go` (220 lines)
+**Created:** `pkg/agentauth/pdp_bridge_test.go` (220 lines)
 
 **Test Coverage:**
 1. ✅ `TestPDPBridge_EvaluatePolicy` - 5 scenarios
@@ -208,7 +208,7 @@ func createDefaultPDPEngine() pdp.Engine {
 === RUN   TestPDPBridge_ConvertMapRequest
 --- PASS: TestPDPBridge_ConvertMapRequest (0.00s)
 PASS
-ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth      0.481s
+ok      github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth      0.481s
 ```
 
 ---
@@ -239,7 +239,7 @@ ComplianceValidator
 
 ### Integration Flow
 ```
-1. RFC-0111 config creates PDP engine
+1. AAP-001 config creates PDP engine
    createDefaultPDPEngine()
    
 2. PDP engine wrapped in bridge
@@ -260,9 +260,9 @@ ComplianceValidator
 
 ---
 
-## RFC-0111 Section 3.3 Compliance
+## AAP-001 Section 3.3 Compliance
 
-### PDP Requirements (from RFC-0111)
+### PDP Requirements (from AAP-001)
 
 **Section 3.3 - Policy Decision Point (PDP):**
 > "The PDP evaluates access control policies to determine whether a requested action should be permitted. It considers:
@@ -301,7 +301,7 @@ ComplianceValidator
 - **Before:** 0% (interface only, no implementation)
 - **After:** 80% (full engine integration, missing advanced features)
 
-**Overall RFC-0111:**
+**Overall AAP-001:**
 - **Previous:** 58% (after JWT fix)
 - **New:** 62% (with PDP integration)
 
@@ -324,22 +324,22 @@ ComplianceValidator
 
 ### Commit: 50704bf2
 ```
-feat: implement PDP bridge for RFC-0111 compliance (P1)
+feat: implement PDP bridge for AAP-001 compliance (P1)
 
 - Created PDPBridge that wraps pkg/pdp.Engine for PDPClient interface
 - Converts ExtendedTokenRequest, ExtendedAuthorizationRequest, ExtendedAuthorizationGrant to pdp.Request
 - Added comprehensive unit tests (all passing)
-- Integrated PDP engine into RFC-0111 configuration
-- Added default policies for RFC-0111 compliance (allow read/write, deny dangerous actions)
+- Integrated PDP engine into AAP-001 configuration
+- Added default policies for AAP-001 compliance (allow read/write, deny dangerous actions)
 
 Impact: Compliance validator can now use real policy engine
-RFC-0111 Section 3.3 (PDP): 0% → 80% compliant
-Overall RFC-0111: 58% → 62% estimated
+AAP-001 Section 3.3 (PDP): 0% → 80% compliant
+Overall AAP-001: 58% → 62% estimated
 
 Files:
-- pkg/gauth/pdp_bridge.go (230 lines)
-- pkg/gauth/pdp_bridge_test.go (220 lines, 10 tests)
-- pkg/gauth/rfc0111_config.go (updated with PDP integration)
+- pkg/agentauth/pdp_bridge.go (230 lines)
+- pkg/agentauth/pdp_bridge_test.go (220 lines, 10 tests)
+- pkg/agentauth/aap001_config.go (updated with PDP integration)
 ```
 
 ---
@@ -529,13 +529,13 @@ bridge := NewPDPBridge(engine)
 ✅ **Mission Accomplished:**
 - PDP integration complete and tested
 - Compliance validator now uses real policy engine
-- Default RFC-0111 policies in place
+- Default AAP-001 policies in place
 - Extensible for custom policies
 - 80% PDP compliance achieved
 
 📊 **Impact:**
 - **PDP:** 0% → 80% compliant
-- **Overall RFC-0111:** 58% → 62%
+- **Overall AAP-001:** 58% → 62%
 - **Tests:** 10 new tests, 100% passing
 - **Code:** 450+ lines of production code + tests
 

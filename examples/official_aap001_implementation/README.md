@@ -134,7 +134,7 @@ To successfully execute the full lifecycle (create → validate → revoke) you 
 If either policy is omitted you will receive an authorization error: `delegation not authorized: No matching policy found - default deny` or `revocation not authorized: No matching policy found - default deny`.
     Type: rfc0111.AAP-001ClientTypeDigitalAgent,
     Identity: rfc0111.AAP-001ClientIdentity{
-        AgentID: "gauth-agent-v1.0",
+        AgentID: "agentauth-agent-v1.0",
         TrustLevel: rfc0111.AAP-001TrustLevelStandard,
         CertificationLevel: rfc0111.AAP-001CertificationStandard,
     },
@@ -191,7 +191,7 @@ MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Da
 
 2. Core RFC-0111 Authorization Framework:
 Resource Owner: AgentAuth Open Source Community (organization)
-AI Client: gauth-agent-v1.0 (digital_agent)
+AI Client: agentauth-agent-v1.0 (digital_agent)
 Extended Token: rfc0111-token-1738519234 (valid until 2025-10-03 16:13)
 
 3. Power*Point (P*P) Architecture:

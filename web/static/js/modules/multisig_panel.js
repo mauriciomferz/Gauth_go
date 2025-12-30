@@ -176,7 +176,7 @@ export async function initMultiSigPanel(){
   renderMultiSig(sth, container, verify);
   // Poll occasionally (simple interval) to reflect newly signed heads
   let pollMs = 15000;
-  if(typeof window !== 'undefined'){ pollMs = window.__GAUTH_MULTISIG_POLL || pollMs; }
+  if(typeof window !== 'undefined'){ pollMs = window.__AGENTAUTH_MULTISIG_POLL || pollMs; }
   setInterval(async ()=>{
     const updated = await fetchLatestTreeHead();
     const verify = await verifySignatures(updated);

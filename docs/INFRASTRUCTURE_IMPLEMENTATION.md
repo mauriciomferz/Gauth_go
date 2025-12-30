@@ -63,7 +63,7 @@ func (tb *TokenBucket) Allow(tokens int64) bool {
     elapsed := now.Sub(tb.lastRefill)
     
     // Refill tokens
-    tokensToAdd := int64(elapsed.Seconds()) * tb.refillRate
+    tokensToAdd := int64(elapsed.Seconds() * tb.refillRate
     tb.tokens = min(tb.capacity, tb.tokens+tokensToAdd)
     tb.lastRefill = now
     

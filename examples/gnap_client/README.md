@@ -15,7 +15,7 @@ This example demonstrates how to use the Grant Negotiation and Authorization Pro
 Start the AgentAuth server:
 
 ```bash
-GAUTH_JWT_SIGNING_KEY=your-secret-key go run ./cmd/web-server
+AGENTAUTH_JWT_SIGNING_KEY=your-secret-key go run ./cmd/web-server
 ```
 
 ## Run the Example
@@ -31,11 +31,11 @@ go run ./examples/gnap_client/main.go
 Grant endpoint: http://localhost:8080/gnap/tx
 
 === Step 2: Grant Request ===
-Access Token: gauth_gnap_xxxxx
+Access Token: agentauth_gnap_xxxxx
 Expires In: 3600 seconds
 
 === Step 3: Use Token ===
-Authorization: GNAP gauth_gnap_xxxxx
+Authorization: GNAP agentauth_gnap_xxxxx
 
 === Step 4: Continuation Available ===
 Continue URI: http://localhost:8080/gnap/continue/gnt_xxxxx
@@ -61,7 +61,7 @@ Continue Token: cnt_xxxxx
 Use the access token in API requests:
 
 ```
-Authorization: GNAP gauth_gnap_xxxxx
+Authorization: GNAP agentauth_gnap_xxxxx
 ```
 
 ## References

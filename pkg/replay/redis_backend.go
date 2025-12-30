@@ -19,18 +19,18 @@ type RedisReplayBackend struct {
 
 // NewRedisReplayBackend constructs the adapter. Environment overrides:
 //
-//	GAUTH_REPLAY_BACKEND_TTL    (Go duration string, e.g. 30m, 2h)
-//	GAUTH_REPLAY_BACKEND_PREFIX (string prefix for keys)
+//	AGENTAUTH_REPLAY_BACKEND_TTL    (Go duration string, e.g. 30m, 2h)
+//	AGENTAUTH_REPLAY_BACKEND_PREFIX (string prefix for keys)
 func NewRedisReplayBackend(addr string, ttl time.Duration) (*RedisReplayBackend, error) {
 	if addr == "" {
 		return nil, errors.New("redis addr empty")
 	}
-	if envTTL := os.Getenv("GAUTH_REPLAY_BACKEND_TTL"); envTTL != "" {
+	if envTTL := os.Getenv("AGENTAUTH_REPLAY_BACKEND_TTL"); envTTL != "" {
 		if d, err := time.ParseDuration(envTTL); err == nil {
 			ttl = d
 		}
 	}
-	prefix := os.Getenv("GAUTH_REPLAY_BACKEND_PREFIX")
+	prefix := os.Getenv("AGENTAUTH_REPLAY_BACKEND_PREFIX")
 	if ttl <= 0 {
 		ttl = time.Hour
 	}

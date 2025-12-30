@@ -18,8 +18,8 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 	"github.com/mauriciomferz/AgentAuth/pkg/redis"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/admin"
@@ -42,7 +42,7 @@ import (
 type BetaServer struct {
 	router               *gin.Engine
 	mu                   sync.RWMutex
-	gauthPlusInitialized bool
+	agentAuthPlusInitialized bool
 	start                time.Time
 	keyProvider          crypto.KeyProvider
 	// legacyAliasHits counts invocations of deprecated /api/governance/lifecycle_timeline for deprecation timing.
@@ -65,17 +65,17 @@ type BetaServer struct {
 	stopCh  chan struct{}
 	stopped atomic.Bool // indicates Shutdown() invoked
 	// AAP001 delegation service (prototype) to surface semantic counters and dual-control revocation workflow methods.
-	// These are no-ops when GAUTH_DISABLE_AAP001_SERVICE=1 (service nil) and handlers will fail closed.
+	// These are no-ops when AGENTAUTH_DISABLE_AAP001_SERVICE=1 (service nil) and handlers will fail closed.
 	aap001Service interface {
 		SemanticSnapshot() map[string]uint64
-		InitiateRevocation(ctx context.Context, req gauth_aap_001.RevocationRequest) error
+		InitiateRevocation(ctx context.Context, req agentauth_aap_001.RevocationRequest) error
 		ApproveRevocation(ctx context.Context, poaID, approver string) error
 		CancelRevocation(ctx context.Context, poaID, actor string) error
 	}
 	aapService interface {
-		BuildDelegationGraph(ctx context.Context) ([]gauth_aap_001.DelegationGraphNode, error)
-		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*gauth_aap_001.PowerOfAttorney, error)
-		ListDelegations(userID string) ([]*gauth_aap_001.PowerOfAttorney, error)
+		BuildDelegationGraph(ctx context.Context) ([]agentauth_aap_001.DelegationGraphNode, error)
+		AttachEvidenceHashes(ctx context.Context, poaID string, hashes []string) (*agentauth_aap_001.PowerOfAttorney, error)
+		ListDelegations(userID string) ([]*agentauth_aap_001.PowerOfAttorney, error)
 	}
 	violationHandler *violations.Handler
 	violationAPI     *violations.API
@@ -134,7 +134,7 @@ type BetaServer struct {
 	// Metrics collector (in-memory) for lifecycle & multi-signature instrumentation
 	metrics        metrics.Metrics
 	tracerProvider *tracing.TracerProvider
-	// OTEL metrics objects (initialized if GAUTH_OTEL_METRICS_ENABLE=1)
+	// OTEL metrics objects (initialized if AGENTAUTH_OTEL_METRICS_ENABLE=1)
 	otelMeter             metric.Meter
 	otelViolationCounters map[string]metric.Int64ObservableGauge   // gauge snapshots for counters
 	otelViolationRates    map[string]metric.Float64ObservableGauge // per-minute anomaly rates
@@ -185,7 +185,7 @@ type BetaServer struct {
 	// External notarization (prototype) fields
 	notarizer interface {
 		Notarize(string) (notary.Receipt, error)
-	} // pluggable; memory when GAUTH_CAP_ANCHOR_NOTARIZE=1
+	} // pluggable; memory when AGENTAUTH_CAP_ANCHOR_NOTARIZE=1
 	capLastNotarization        time.Time      // timestamp of last successful notarization
 	capLastNotarizationReceipt notary.Receipt // last receipt (prototype)
 	// Notarization receipt persistence (hash-chain)
@@ -204,7 +204,7 @@ type BetaServer struct {
 	adaptiveIntervalSec   int // current dynamic interval for auto verification
 	adaptiveMismatchCount int // recent mismatch detections (reset after successful verify)
 	adaptiveAppendCount   int // receipts appended since last adjust
-	// Rotation ledger (optional) for dedicated chain separate from receipts when GAUTH_ROTATION_LEDGER_PATH set
+	// Rotation ledger (optional) for dedicated chain separate from receipts when AGENTAUTH_ROTATION_LEDGER_PATH set
 	rotationLedger interface {
 		Load() error
 		AppendDescriptor(*notary.KeyRotationDescriptor) (notary.RotationLedgerRecord, error)
@@ -238,7 +238,7 @@ type BetaServer struct {
 	// Redis client for token blacklist, rate limiting, etc.
 	redisClient *redis.Client
 
-	// Blockchain components (Active if GAUTH_ETH_RPC_URL is set)
+	// Blockchain components (Active if AGENTAUTH_ETH_RPC_URL is set)
 	blockchainRegistry blockchain.BlockchainRegistry
 	syncService        blockchain.SyncService
 
@@ -250,7 +250,7 @@ type BetaServer struct {
 	systemClockMonitor *clock.SystemClockMonitor
 
 	// Extended Token Service for RFC-0111 validation
-	extendedTokenService *gauth.ExtendedTokenService
+	extendedTokenService *agentauth.ExtendedTokenService
 }
 
 // auditChainAnchorAdapter adapts anchor.Provider, anchor.AnchorClient and capabilities.AnchorClient interfaces.

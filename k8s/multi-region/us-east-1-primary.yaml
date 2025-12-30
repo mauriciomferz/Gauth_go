@@ -4,7 +4,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gauth
+  name: agentauth
   labels:
     region: us-east-1
     role: primary
@@ -14,23 +14,23 @@ metadata:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gauth-config
-  namespace: gauth
+  name: agentauth-config
+  namespace: agentauth
 data:
   REGION: "us-east-1"
   REGION_ROLE: "primary"
-  DB_HOST: "postgresql.gauth.svc.cluster.local"
+  DB_HOST: "postgresql.agentauth.svc.cluster.local"
   DB_PORT: "5432"
-  DB_NAME: "gauth"
+  DB_NAME: "agentauth"
   DB_SSLMODE: "require"
-  REDIS_HOST: "redis-cluster.gauth.svc.cluster.local"
+  REDIS_HOST: "redis-cluster.agentauth.svc.cluster.local"
   REDIS_PORT: "6379"
   REDIS_CLUSTER_MODE: "true"
   
   # Replication endpoints
   REPLICA_REGIONS: "eu-west-1,ap-south-1"
-  EU_WEST_1_ENDPOINT: "https://gauth.eu-west-1.example.com"
-  AP_SOUTH_1_ENDPOINT: "https://gauth.ap-south-1.example.com"
+  EU_WEST_1_ENDPOINT: "https://agentauth.eu-west-1.example.com"
+  AP_SOUTH_1_ENDPOINT: "https://agentauth.ap-south-1.example.com"
   
   # Monitoring
   PROMETHEUS_ENDPOINT: "http://prometheus.monitoring.svc:9090"
@@ -41,11 +41,11 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: gauth-secrets
-  namespace: gauth
+  name: agentauth-secrets
+  namespace: agentauth
 type: Opaque
 stringData:
-  DB_USER: "gauth_admin"
+  DB_USER: "agentauth_admin"
   DB_PASSWORD: "CHANGE_IN_PRODUCTION"
   REDIS_PASSWORD: "CHANGE_IN_PRODUCTION"
   JWT_SIGNING_KEY: "CHANGE_IN_PRODUCTION"
@@ -56,10 +56,10 @@ stringData:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth
-  namespace: gauth
+  name: agentauth
+  namespace: agentauth
   labels:
-    app: gauth
+    app: agentauth
     region: us-east-1
 spec:
   replicas: 3
@@ -70,11 +70,11 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         region: us-east-1
       annotations:
         prometheus.io/scrape: "true"
@@ -90,7 +90,7 @@ spec:
                   - key: app
                     operator: In
                     values:
-                      - gauth
+                      - agentauth
               topologyKey: kubernetes.io/hostname
         
         # Prefer different availability zones
@@ -103,12 +103,12 @@ spec:
                     - key: app
                       operator: In
                       values:
-                        - gauth
+                        - agentauth
                 topologyKey: topology.kubernetes.io/zone
       
       containers:
-        - name: gauth
-          image: gauth:latest
+        - name: agentauth
+          image: agentauth:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
@@ -119,61 +119,61 @@ spec:
             - name: REGION
               valueFrom:
                 configMapKeyRef:
-                  name: gauth-config
+                  name: agentauth-config
                   key: REGION
             
             - name: REGION_ROLE
               valueFrom:
                 configMapKeyRef:
-                  name: gauth-config
+                  name: agentauth-config
                   key: REGION_ROLE
             
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: gauth-config
+                  name: agentauth-config
                   key: DB_HOST
             
             - name: DB_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: gauth-config
+                  name: agentauth-config
                   key: DB_PORT
             
             - name: DB_NAME
               valueFrom:
                 configMapKeyRef:
-                  name: gauth-config
+                  name: agentauth-config
                   key: DB_NAME
             
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: gauth-secrets
+                  name: agentauth-secrets
                   key: DB_USER
             
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gauth-secrets
+                  name: agentauth-secrets
                   key: DB_PASSWORD
             
             - name: REDIS_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: gauth-config
+                  name: agentauth-config
                   key: REDIS_HOST
             
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gauth-secrets
+                  name: agentauth-secrets
                   key: REDIS_PASSWORD
             
-            - name: GAUTH_JWT_SIGNING_KEY
+            - name: AGENTAUTH_JWT_SIGNING_KEY
               valueFrom:
                 secretKeyRef:
-                  name: gauth-secrets
+                  name: agentauth-secrets
                   key: JWT_SIGNING_KEY
           
           # Resource limits
@@ -230,7 +230,7 @@ spec:
             - name: tmp
               mountPath: /tmp
             - name: cache
-              mountPath: /var/cache/gauth
+              mountPath: /var/cache/agentauth
       
       volumes:
         - name: tmp
@@ -242,24 +242,24 @@ spec:
       terminationGracePeriodSeconds: 30
       
       # Service account
-      serviceAccountName: gauth
+      serviceAccountName: agentauth
 
 ---
 # Service
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth
-  namespace: gauth
+  name: agentauth
+  namespace: agentauth
   labels:
-    app: gauth
+    app: agentauth
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
     service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
 spec:
   type: LoadBalancer
   selector:
-    app: gauth
+    app: agentauth
   ports:
     - port: 443
       targetPort: 8080
@@ -275,13 +275,13 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gauth-hpa
-  namespace: gauth
+  name: agentauth-hpa
+  namespace: agentauth
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gauth
+    name: agentauth
   minReplicas: 3
   maxReplicas: 20
   metrics:
@@ -331,35 +331,35 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: gauth-pdb
-  namespace: gauth
+  name: agentauth-pdb
+  namespace: agentauth
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
 
 ---
 # ServiceAccount
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gauth
-  namespace: gauth
+  name: agentauth
+  namespace: agentauth
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/gauth-service-role
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/agentauth-service-role
 
 ---
 # Network Policy
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: gauth-network-policy
-  namespace: gauth
+  name: agentauth-network-policy
+  namespace: agentauth
 spec:
   podSelector:
     matchLabels:
-      app: gauth
+      app: agentauth
   policyTypes:
     - Ingress
     - Egress
@@ -423,8 +423,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gauth-ingress
-  namespace: gauth
+  name: agentauth-ingress
+  namespace: agentauth
   annotations:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
@@ -436,16 +436,16 @@ metadata:
 spec:
   tls:
     - hosts:
-        - gauth.us-east-1.example.com
-      secretName: gauth-tls
+        - agentauth.us-east-1.example.com
+      secretName: agentauth-tls
   rules:
-    - host: gauth.us-east-1.example.com
+    - host: agentauth.us-east-1.example.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: gauth
+                name: agentauth
                 port:
                   number: 443

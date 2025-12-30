@@ -192,7 +192,7 @@ modelRateStateExtended["gpt-4"] = {
 
 ## Audit Trail
 
-Rate limit violations are logged to the audit chain (`GAUTH_MODEL_LIMIT_AUDIT_PATH`) with hash chaining:
+Rate limit violations are logged to the audit chain (`AGENTAUTH_MODEL_LIMIT_AUDIT_PATH`) with hash chaining:
 
 ```json
 {
@@ -333,10 +333,10 @@ Choose periods based on business goals:
 **Prometheus Metrics** (existing counter enhanced with period label):
 ```promql
 # Rate limit violations by period
-rate(gauth_model_rate_limit_exceeded_total{period="hour"}[5m])
+rate(agentauth_model_rate_limit_exceeded_total{period="hour"}[5m])
 
 # Usage percentage per period (requires custom exporter)
-(gauth_model_rate_current / gauth_model_rate_limit) * 100
+(agentauth_model_rate_current / agentauth_model_rate_limit) * 100
 ```
 
 **Audit Log Queries**:
@@ -356,13 +356,13 @@ groups:
   - name: rate_limits
     rules:
       - alert: HighRateLimitViolations
-        expr: rate(gauth_model_rate_limit_exceeded_total[5m]) > 10
+        expr: rate(agentauth_model_rate_limit_exceeded_total[5m]) > 10
         for: 5m
         annotations:
           summary: "High rate limit violations for {{ $labels.model_id }}"
       
       - alert: HourlyQuotaNearExhaustion
-        expr: (gauth_model_rate_current{period="hour"} / gauth_model_rate_limit{period="hour"}) > 0.9
+        expr: (agentauth_model_rate_current{period="hour"} / agentauth_model_rate_limit{period="hour"}) > 0.9
         annotations:
           summary: "{{ $labels.model_id }} at 90% hourly quota"
 ```

@@ -594,10 +594,10 @@ The suspension feature includes **11 comprehensive tests** (all passing):
 
 ```bash
 # Run all suspension tests
-go test -v -run "TestSuspend|TestResume|TestUpdateDelegationScope" ./pkg/rfc0111/
+go test -v -run "TestSuspend|TestResume|TestUpdateDelegationScope" ./pkg/aap001/
 
 # Run with coverage
-go test -cover -run "TestSuspend|TestResume|TestUpdateDelegationScope" ./pkg/rfc0111/
+go test -cover -run "TestSuspend|TestResume|TestUpdateDelegationScope" ./pkg/aap001/
 ```
 
 ---
@@ -726,8 +726,8 @@ curl -H "Authorization: Bearer $TOKEN" /api/v1/protected
 
 - **AAP-001**: AgentAuth Delegation Specification
 - **Gap sec12.item1**: Suspension/partial revocation requirement
-- **Implementation**: `pkg/rfc0111/rfc0111.go` (lines 2792-3037)
-- **Tests**: `pkg/rfc0111/suspension_test.go`
+- **Implementation**: `pkg/aap001/aap001.go` (lines 2792-3037)
+- **Tests**: `pkg/aap001/suspension_test.go`
 - **Audit Trail**: `docs/AUDIT_SINK_INTEGRATION.md`
 
 ---

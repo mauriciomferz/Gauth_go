@@ -116,14 +116,14 @@ export CACHE_STATS_TTL=30s
 
 #### Cache Key Structure
 ```
-gauth:verification:{poaID}    # Verification results (5min TTL)
-gauth:poa:{poaID}              # PoA metadata (1min TTL)
-gauth:poa:list:{userID}        # User's PoA list (5min TTL)
-gauth:user:{userID}            # User data (5min TTL)
-gauth:stats:{statType}         # Statistics (30sec TTL)
-gauth:blockchain:sync:{poaID}  # Blockchain sync status
-gauth:blockchain:verify:{poaID}# Blockchain verification
-gauth:session:{sessionID}      # User sessions
+agentauth:verification:{poaID}    # Verification results (5min TTL)
+agentauth:poa:{poaID}              # PoA metadata (1min TTL)
+agentauth:poa:list:{userID}        # User's PoA list (5min TTL)
+agentauth:user:{userID}            # User data (5min TTL)
+agentauth:stats:{statType}         # Statistics (30sec TTL)
+agentauth:blockchain:sync:{poaID}  # Blockchain sync status
+agentauth:blockchain:verify:{poaID}# Blockchain verification
+agentauth:session:{sessionID}      # User sessions
 ```
 
 #### Expected Performance Improvements

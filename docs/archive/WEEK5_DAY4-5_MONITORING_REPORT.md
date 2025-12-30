@@ -53,7 +53,7 @@ Successfully deployed a complete monitoring and observability solution for the A
 │           ▼                                                 │
 │  ┌──────────────────┐                                       │
 │  │  AgentAuth Service   │                                       │
-│  │  (gauth-staging) │                                       │
+│  │  (agentauth-staging) │                                       │
 │  │  /metrics        │                                       │
 │  └──────────────────┘                                       │
 │           │                                                 │
@@ -108,17 +108,17 @@ kubectl port-forward -n monitoring svc/prometheus 9090:9090
 The AgentAuth application exposes **50+ Prometheus metrics** across multiple categories:
 
 #### Rotation Metrics
-- `gauth_rotation_signature_verify_latency_seconds` - Histogram of signature verification latency
-- `gauth_rotation_summary_build_latency_seconds` - Histogram of summary build latency
-- `gauth_rotation_summary_chain_length` - Gauge of current chain length
-- `gauth_rotation_summary_head_age_seconds` - Gauge of summary head age
-- `gauth_rotation_summary_last_anchor_age_seconds` - Gauge of last anchor age
-- `gauth_rotation_v2_chain_starts_total` - Counter of chain start events
-- `gauth_rotation_v2_continuity_updates_total` - Counter of continuity updates
+- `agentauth_rotation_signature_verify_latency_seconds` - Histogram of signature verification latency
+- `agentauth_rotation_summary_build_latency_seconds` - Histogram of summary build latency
+- `agentauth_rotation_summary_chain_length` - Gauge of current chain length
+- `agentauth_rotation_summary_head_age_seconds` - Gauge of summary head age
+- `agentauth_rotation_summary_last_anchor_age_seconds` - Gauge of last anchor age
+- `agentauth_rotation_v2_chain_starts_total` - Counter of chain start events
+- `agentauth_rotation_v2_continuity_updates_total` - Counter of continuity updates
 
 #### AAP-001 Metrics
-- `gauth_rfc0111_detached_issued_total` - Counter of detached PoA issued
-- `gauth_rfc0111_detached_verify_total` - Counter of detached PoA verifications (by result)
+- `agentauth_aap001_detached_issued_total` - Counter of detached PoA issued
+- `agentauth_aap001_detached_verify_total` - Counter of detached PoA verifications (by result)
 
 #### Resource Metrics (via cAdvisor/kubelet)
 - `container_cpu_usage_seconds_total` - CPU usage by container
@@ -139,24 +139,24 @@ The AgentAuth application exposes **50+ Prometheus metrics** across multiple cat
 - Evaluation interval: 15 seconds (alert rules)
 
 **AgentAuth Service Job:**
-- Job name: `gauth-service`
+- Job name: `agentauth-service`
 - Scrape interval: 5 seconds (faster than global)
 - Metrics path: `/metrics`
-- Service discovery: Kubernetes endpoints in `gauth-staging` namespace
-- Target filtering: Only scrapes `gauth-service` endpoints
+- Service discovery: Kubernetes endpoints in `agentauth-staging` namespace
+- Target filtering: Only scrapes `agentauth-service` endpoints
 
 **Configuration:**
 ```yaml
 scrape_configs:
-  - job_name: 'gauth-service'
+  - job_name: 'agentauth-service'
     kubernetes_sd_configs:
       - role: endpoints
         namespaces:
           names:
-            - gauth-staging
+            - agentauth-staging
     relabel_configs:
       - source_labels: [__meta_kubernetes_service_name]
-        regex: gauth-service
+        regex: agentauth-service
         action: keep
     metrics_path: /metrics
     scrape_interval: 5s
@@ -171,7 +171,7 @@ scrape_configs:
 Four comprehensive dashboards have been created as JSON files, ready for import into Grafana:
 
 #### Dashboard 1: AgentAuth Service Health
-**File:** `grafana-dashboards/gauth-service-health.json`  
+**File:** `grafana-dashboards/agentauth-service-health.json`  
 **Purpose:** Monitor infrastructure health and resource usage  
 **Refresh:** 10 seconds
 
@@ -188,17 +188,17 @@ Four comprehensive dashboards have been created as JSON files, ready for import 
 **Key Queries:**
 ```promql
 # Pod health
-sum(up{job="gauth-service"})
+sum(up{job="agentauth-service"})
 
 # Memory percentage
-sum(container_memory_usage_bytes{namespace="gauth-staging",pod=~"gauth-.*"}) 
+sum(container_memory_usage_bytes{namespace="agentauth-staging",pod=~"agentauth-.*"}) 
 / 
-sum(container_spec_memory_limit_bytes{namespace="gauth-staging",pod=~"gauth-.*"}) 
+sum(container_spec_memory_limit_bytes{namespace="agentauth-staging",pod=~"agentauth-.*"}) 
 * 100
 ```
 
 #### Dashboard 2: AgentAuth Performance Metrics
-**File:** `grafana-dashboards/gauth-performance.json`  
+**File:** `grafana-dashboards/agentauth-performance.json`  
 **Purpose:** Monitor application performance and latency  
 **Refresh:** 10 seconds
 
@@ -216,15 +216,15 @@ sum(container_spec_memory_limit_bytes{namespace="gauth-staging",pod=~"gauth-.*"}
 ```promql
 # p95 latency
 histogram_quantile(0.95, 
-  rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])
+  rate(agentauth_rotation_signature_verify_latency_seconds_bucket[5m])
 )
 
 # Request rate
-sum(rate(gauth_rotation_signature_verify_latency_seconds_count[5m]))
+sum(rate(agentauth_rotation_signature_verify_latency_seconds_count[5m]))
 ```
 
 #### Dashboard 3: AgentAuth Business Metrics
-**File:** `grafana-dashboards/gauth-business-metrics.json`  
+**File:** `grafana-dashboards/agentauth-business-metrics.json`  
 **Purpose:** Monitor business operations and PoA lifecycle  
 **Refresh:** 30 seconds
 
@@ -241,14 +241,14 @@ sum(rate(gauth_rotation_signature_verify_latency_seconds_count[5m]))
 **Key Queries:**
 ```promql
 # Chain starts rate
-rate(gauth_rotation_v2_chain_starts_total[5m])
+rate(agentauth_rotation_v2_chain_starts_total[5m])
 
 # AAP-001 operations
-rate(gauth_rfc0111_detached_issued_total[5m])
+rate(agentauth_aap001_detached_issued_total[5m])
 ```
 
 #### Dashboard 4: AgentAuth AAP-001 Compliance
-**File:** `grafana-dashboards/gauth-rfc0111-compliance.json`  
+**File:** `grafana-dashboards/agentauth-aap001-compliance.json`  
 **Purpose:** Monitor AAP-001 rotation chain compliance  
 **Refresh:** 30 seconds
 
@@ -265,10 +265,10 @@ rate(gauth_rfc0111_detached_issued_total[5m])
 **Key Queries:**
 ```promql
 # Chain length
-gauth_rotation_summary_chain_length
+agentauth_rotation_summary_chain_length
 
 # Head age in hours
-gauth_rotation_summary_head_age_seconds / 3600
+agentauth_rotation_summary_head_age_seconds / 3600
 ```
 
 ### 3.2 Dashboard Import Instructions
@@ -293,46 +293,46 @@ All dashboards will be immediately functional with live data from the AgentAuth 
 
 **Alert Groups:** 5 groups with 15 total rules
 
-#### Group 1: gauth_critical (Critical Service Availability)
+#### Group 1: agentauth_critical (Critical Service Availability)
 
 **Interval:** 30 seconds
 
 **Alerts:**
 1. **AgentAuthPodDown** (Critical)
-   - Condition: `up{job="gauth-service"} == 0`
+   - Condition: `up{job="agentauth-service"} == 0`
    - Duration: 2 minutes
    - Description: Individual pod is down
    
 2. **AgentAuthServiceUnavailable** (Critical)
-   - Condition: `sum(up{job="gauth-service"}) == 0`
+   - Condition: `sum(up{job="agentauth-service"}) == 0`
    - Duration: 1 minute
    - Description: All pods are down - complete service outage
 
-#### Group 2: gauth_performance (Performance Degradation)
+#### Group 2: agentauth_performance (Performance Degradation)
 
 **Interval:** 30 seconds
 
 **Alerts:**
 3. **AgentAuthHighErrorRate** (Warning)
    - Condition: Error rate > 5% for 5 minutes
-   - Query: `(sum(rate(gauth_errors_total[5m])) / sum(rate(gauth_requests_total[5m]))) > 0.05`
+   - Query: `(sum(rate(agentauth_errors_total[5m]) / sum(rate(agentauth_requests_total[5m])) > 0.05`
    
 4. **AgentAuthHighLatency** (Warning)
    - Condition: p95 latency > 1 second for 5 minutes
-   - Query: `histogram_quantile(0.95, rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])) > 1.0`
+   - Query: `histogram_quantile(0.95, rate(agentauth_rotation_signature_verify_latency_seconds_bucket[5m]) > 1.0`
    
 5. **AgentAuthVeryHighLatency** (Critical)
    - Condition: p99 latency > 2 seconds for 5 minutes
-   - Query: `histogram_quantile(0.99, rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])) > 2.0`
+   - Query: `histogram_quantile(0.99, rate(agentauth_rotation_signature_verify_latency_seconds_bucket[5m]) > 2.0`
 
-#### Group 3: gauth_resources (Resource Exhaustion)
+#### Group 3: agentauth_resources (Resource Exhaustion)
 
 **Interval:** 30 seconds
 
 **Alerts:**
 6. **AgentAuthHighCPU** (Warning)
    - Condition: CPU usage > 80% for 10 minutes
-   - Query: `sum(rate(container_cpu_usage_seconds_total{namespace="gauth-staging",pod=~"gauth-.*"}[5m])) by (pod) > 0.8`
+   - Query: `sum(rate(container_cpu_usage_seconds_total{namespace="agentauth-staging",pod=~"agentauth-.*"}[5m]) by (pod) > 0.8`
    
 7. **AgentAuthHighMemory** (Warning)
    - Condition: Memory > 85% of limit for 10 minutes
@@ -342,35 +342,35 @@ All dashboards will be immediately functional with live data from the AgentAuth 
    - Condition: Memory > 95% of limit for 5 minutes
    - Description: Pod may be OOMKilled soon
 
-#### Group 4: gauth_business (Business Logic Monitoring)
+#### Group 4: agentauth_business (Business Logic Monitoring)
 
 **Interval:** 60 seconds
 
 **Alerts:**
 9. **AgentAuthRotationChainStale** (Warning)
    - Condition: No continuity updates in 30 minutes (when chain exists)
-   - Query: `increase(gauth_rotation_v2_continuity_updates_total[30m]) == 0 and gauth_rotation_summary_chain_length > 0`
+   - Query: `increase(agentauth_rotation_v2_continuity_updates_total[30m]) == 0 and agentauth_rotation_summary_chain_length > 0`
    
 10. **AgentAuthSummaryHeadOld** (Warning)
     - Condition: Summary head age > 24 hours
-    - Query: `gauth_rotation_summary_head_age_seconds > 86400`
+    - Query: `agentauth_rotation_summary_head_age_seconds > 86400`
     
 11. **AgentAuthLastAnchorOld** (Warning)
     - Condition: Last anchor age > 48 hours
-    - Query: `gauth_rotation_summary_last_anchor_age_seconds > 172800`
+    - Query: `agentauth_rotation_summary_last_anchor_age_seconds > 172800`
 
-#### Group 5: gauth_kubernetes (Kubernetes Issues)
+#### Group 5: agentauth_kubernetes (Kubernetes Issues)
 
 **Interval:** 30 seconds
 
 **Alerts:**
 12. **AgentAuthPodRestartLoop** (Critical)
     - Condition: > 5 restarts in 15 minutes
-    - Query: `increase(kube_pod_container_status_restarts_total{namespace="gauth-staging",pod=~"gauth-.*"}[15m]) > 5`
+    - Query: `increase(kube_pod_container_status_restarts_total{namespace="agentauth-staging",pod=~"agentauth-.*"}[15m]) > 5`
     
 13. **AgentAuthPodNotReady** (Warning)
     - Condition: Pod not ready for 10 minutes
-    - Query: `kube_pod_status_ready{namespace="gauth-staging",pod=~"gauth-.*",condition="false"} == 1`
+    - Query: `kube_pod_status_ready{namespace="agentauth-staging",pod=~"agentauth-.*",condition="false"} == 1`
 
 ### 4.2 Alert Severity Levels
 
@@ -443,8 +443,8 @@ kubectl port-forward -n monitoring svc/grafana 3000:3000
 ```bash
 # Verify AgentAuth metrics exposed
 kubectl run curl-metrics --rm -i --image=curlimages/curl:latest \
-  --restart=Never -n gauth-staging --command -- \
-  sh -c 'curl -s http://gauth-service/metrics | head -50'
+  --restart=Never -n agentauth-staging --command -- \
+  sh -c 'curl -s http://agentauth-service/metrics | head -50'
 # Output: 50+ Prometheus metrics in text format
 ```
 
@@ -455,7 +455,7 @@ kubectl run curl-metrics --rm -i --image=curlimages/curl:latest \
 | Prometheus | ✅ Healthy | 1/1 pods running, scraping every 5s |
 | Grafana | ✅ Healthy | 1/1 pods running, datasource connected |
 | AgentAuth Metrics | ✅ Healthy | 50+ metrics exposed at /metrics |
-| Service Discovery | ✅ Healthy | Auto-detecting gauth-service endpoints |
+| Service Discovery | ✅ Healthy | Auto-detecting agentauth-service endpoints |
 | Alerting Rules | ✅ Loaded | 15 rules across 5 groups |
 | RBAC | ✅ Configured | Cluster-wide read access granted |
 
@@ -521,7 +521,7 @@ open http://localhost:9090
 
 **Query Metrics:**
 1. Access Prometheus: http://localhost:9090/graph
-2. Enter PromQL query (e.g., `gauth_rotation_summary_chain_length`)
+2. Enter PromQL query (e.g., `agentauth_rotation_summary_chain_length`)
 3. Click "Execute" and view graph or table
 
 **Import Dashboards:**
@@ -546,10 +546,10 @@ kubectl wait --for=condition=ready pod -l app=prometheus -n monitoring
 
 Check service discovery:
 ```bash
-kubectl get endpoints gauth-service -n gauth-staging
+kubectl get endpoints agentauth-service -n agentauth-staging
 # Should show 2 endpoints (1 per pod)
 
-kubectl logs -n monitoring -l app=prometheus | grep "gauth-service"
+kubectl logs -n monitoring -l app=prometheus | grep "agentauth-service"
 # Should show successful scrapes
 ```
 
@@ -687,22 +687,22 @@ curl -s http://localhost:9090/api/v1/label/__name__/values | jq length
 
 ### 8.2 Grafana Dashboard JSONs
 
-**grafana-dashboards/gauth-service-health.json** (169 lines)
+**grafana-dashboards/agentauth-service-health.json** (169 lines)
 - 8 panels: pod status, restarts, memory, CPU, availability, network
 - 10-second refresh
 - Thresholds configured
 
-**grafana-dashboards/gauth-performance.json** (166 lines)
+**grafana-dashboards/agentauth-performance.json** (166 lines)
 - 8 panels: request rate, latency percentiles, error rate, heatmap
 - 10-second refresh
 - Performance thresholds
 
-**grafana-dashboards/gauth-business-metrics.json** (148 lines)
+**grafana-dashboards/agentauth-business-metrics.json** (148 lines)
 - 8 panels: chain starts, continuity updates, AAP-001 operations
 - 30-second refresh
 - Business operation tracking
 
-**grafana-dashboards/gauth-rfc0111-compliance.json** (175 lines)
+**grafana-dashboards/agentauth-aap001-compliance.json** (175 lines)
 - 8 panels: chain length, head age, anchor age, rotation events
 - 30-second refresh
 - Compliance thresholds

@@ -153,13 +153,13 @@ useEffect(() => {
 
 **Start Backend**:
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
-GAUTH_JWT_SIGNING_KEY="test-key" \
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+AGENTAUTH_JWT_SIGNING_KEY="test-key" \
 DB_HOST="localhost" \
 DB_PORT="5432" \
 DB_USER="postgres" \
-DB_PASSWORD="gauth_dev_password" \
-DB_NAME="gauth" \
+DB_PASSWORD="agentauth_dev_password" \
+DB_NAME="agentauth" \
 DB_SSLMODE="disable" \
 go run ./cmd/web-server
 ```
@@ -226,13 +226,13 @@ npm run dev
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
-DB_PASSWORD=gauth_dev_password
-DB_NAME=gauth
+DB_PASSWORD=agentauth_dev_password
+DB_NAME=agentauth
 DB_SSLMODE=disable
 
 # Server
 PORT=8080
-GAUTH_JWT_SIGNING_KEY=test-key
+AGENTAUTH_JWT_SIGNING_KEY=test-key
 
 # CORS (add frontend origin)
 ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000

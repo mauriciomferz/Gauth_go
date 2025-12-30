@@ -80,8 +80,8 @@ Event Flow:
 ```go
 import (
     "context"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/audit"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/audit"
 )
 
 // Create simple sink that sends events to SIEM
@@ -100,7 +100,7 @@ func (s *SiemSink) Close() error {
 
 // Configure service with sink
 siemSink := &SiemSink{endpoint: "https://siem.example.com/ingest"}
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(siemSink))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(siemSink))
 ```
 
 ### 2. Use Async Sink for High Throughput
@@ -114,10 +114,10 @@ complianceDB := &ComplianceDatabaseSink{
 }
 
 // Wrap with async buffer (1000 events)
-asyncSink := rfc0111.NewAsyncAuditSink(complianceDB, 1000)
+asyncSink := aap001.NewAsyncAuditSink(complianceDB, 1000)
 defer asyncSink.Close() // Flush on shutdown
 
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(asyncSink))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(asyncSink))
 
 // Token operations won't block waiting for DB writes
 resp, err := svc.CreateDelegationCtx(ctx, req)
@@ -139,9 +139,9 @@ complianceSink := &ComplianceDatabaseSink{dbURL: "postgres://..."}
 queueSink := &MessageQueueSink{topic: "audit-events"}
 
 // Multiplex to all 3 destinations
-multiplex := rfc0111.NewMultiplexAuditSink(siemSink, complianceSink, queueSink)
+multiplex := aap001.NewMultiplexAuditSink(siemSink, complianceSink, queueSink)
 
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(multiplex))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(multiplex))
 
 // Events sent to all 3 destinations in parallel
 resp, err := svc.CreateDelegationCtx(ctx, req)
@@ -160,12 +160,12 @@ Send only revocation events to compliance archive (high-severity filtering):
 complianceSink := &ComplianceDatabaseSink{dbURL: "postgres://..."}
 
 // Filter: only "revoke_delegation" actions
-filtered := rfc0111.NewFilteredAuditSink(
+filtered := aap001.NewFilteredAuditSink(
     complianceSink,
-    rfc0111.FilterByAction("revoke_delegation"),
+    aap001.FilterByAction("revoke_delegation"),
 )
 
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(filtered))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(filtered))
 
 // CreateDelegation events ignored (filtered out)
 resp, _ := svc.CreateDelegationCtx(ctx, req)
@@ -188,12 +188,12 @@ Alert on authorization failures but don't spam with successes:
 alertSink := &AlertingSink{webhook: "https://alerts.example.com/webhook"}
 
 // Filter: only failures
-failuresOnly := rfc0111.NewFilteredAuditSink(
+failuresOnly := aap001.NewFilteredAuditSink(
     alertSink,
-    rfc0111.FilterByResult(audit.ResultFailure),
+    aap001.FilterByResult(audit.ResultFailure),
 )
 
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(failuresOnly))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(failuresOnly))
 
 // Failed delegations trigger alerts
 _, err := svc.CreateDelegationCtx(ctx, unauthorizedReq) // Alert sent!
@@ -205,27 +205,27 @@ Real-world deployment with SIEM (all events), compliance DB (revocations only), 
 
 ```go
 // Sink 1: SIEM (all events, async)
-siemSink := rfc0111.NewAsyncAuditSink(
+siemSink := aap001.NewAsyncAuditSink(
     &SiemSink{endpoint: "https://siem.example.com"},
     1000,
 )
 
 // Sink 2: Compliance DB (revocations only, async)
-complianceSink := rfc0111.NewFilteredAuditSink(
-    rfc0111.NewAsyncAuditSink(&ComplianceDatabaseSink{dbURL: "postgres://..."}, 500),
-    rfc0111.FilterByAction("revoke_delegation"),
+complianceSink := aap001.NewFilteredAuditSink(
+    aap001.NewAsyncAuditSink(&ComplianceDatabaseSink{dbURL: "postgres://..."}, 500),
+    aap001.FilterByAction("revoke_delegation"),
 )
 
 // Sink 3: Alerts (failures only, sync)
-alertSink := rfc0111.NewFilteredAuditSink(
+alertSink := aap001.NewFilteredAuditSink(
     &AlertingSink{webhook: "https://alerts.example.com"},
-    rfc0111.FilterByResult(audit.ResultFailure),
+    aap001.FilterByResult(audit.ResultFailure),
 )
 
 // Multiplex all 3
-multiplex := rfc0111.NewMultiplexAuditSink(siemSink, complianceSink, alertSink)
+multiplex := aap001.NewMultiplexAuditSink(siemSink, complianceSink, alertSink)
 
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(multiplex))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(multiplex))
 ```
 
 ---
@@ -244,7 +244,7 @@ type SplunkSink struct {
 func (s *SplunkSink) Send(ctx context.Context, event *audit.Event) error {
     body, _ := json.Marshal(map[string]interface{}{
         "event":      event,
-        "sourcetype": "gauth:audit",
+        "sourcetype": "agentauth:audit",
         "index":      "security",
     })
 
@@ -328,24 +328,24 @@ func (k *KafkaSink) Close() error {
 
 ```bash
 # Sink timeout (default: 5s)
-GAUTH_AUDIT_SINK_TIMEOUT=10s
+AGENTAUTH_AUDIT_SINK_TIMEOUT=10s
 
 # Async buffer size (default: 1000)
-GAUTH_AUDIT_SINK_BUFFER_SIZE=5000
+AGENTAUTH_AUDIT_SINK_BUFFER_SIZE=5000
 
 # Fail-closed mode (sink errors fail operations)
-GAUTH_AUDIT_SINK_FAIL_CLOSED=true
+AGENTAUTH_AUDIT_SINK_FAIL_CLOSED=true
 ```
 
 ### Service Configuration
 
 ```go
-svc := rfc0111.NewService(
+svc := aap001.NewService(
     logger,
     authorizer,
-    rfc0111.WithAuditSink(sink),           // External sink
-    rfc0111.WithJurisdictionEnforcement(), // P1.3 jurisdiction
-    rfc0111.WithKMS(kms),                  // Key management
+    aap001.WithAuditSink(sink),           // External sink
+    aap001.WithJurisdictionEnforcement(), // P1.3 jurisdiction
+    aap001.WithKMS(kms),                  // Key management
 )
 ```
 
@@ -357,10 +357,10 @@ svc := rfc0111.NewService(
 
 ```bash
 # All audit sink integration tests
-go test -v ./pkg/rfc0111 -run TestAuditSinkIntegration
+go test -v ./pkg/aap001 -run TestAuditSinkIntegration
 
 # Specific test
-go test -v ./pkg/rfc0111 -run TestAuditSinkIntegration_AsyncSink
+go test -v ./pkg/aap001 -run TestAuditSinkIntegration_AsyncSink
 ```
 
 ### Test Results (All 11/11 Passing)
@@ -474,11 +474,11 @@ if async, ok := sink.(*AsyncAuditSink); ok {
 **Fix**: Use `AsyncAuditSink` with larger buffer
 ```go
 // Before (slow, sync sink)
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(slowSink))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(slowSink))
 
 // After (fast, async sink with 5000 buffer)
-asyncSink := rfc0111.NewAsyncAuditSink(slowSink, 5000)
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(asyncSink))
+asyncSink := aap001.NewAsyncAuditSink(slowSink, 5000)
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(asyncSink))
 ```
 
 ### Issue 3: Events Dropped (Buffer Overflow)
@@ -493,7 +493,7 @@ svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(asyncSink))
 **Fix**: Increase buffer size or optimize sink
 ```go
 // Increase buffer from 1000 to 10000
-asyncSink := rfc0111.NewAsyncAuditSink(slowSink, 10000)
+asyncSink := aap001.NewAsyncAuditSink(slowSink, 10000)
 ```
 
 ---
@@ -518,7 +518,7 @@ asyncSink := rfc0111.NewAsyncAuditSink(slowSink, 10000)
 ```go
 // Start with simple sync sink for testing
 testSink := &SimpleSink{endpoint: "https://test-siem.example.com"}
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(testSink))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(testSink))
 ```
 
 2. **Test Event Flow**:
@@ -536,11 +536,11 @@ svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(testSink))
 1. **Deploy Async Sink**:
 ```go
 // Production: async multiplex to SIEM + compliance DB
-siemSink := rfc0111.NewAsyncAuditSink(&SiemSink{...}, 5000)
-complianceSink := rfc0111.NewAsyncAuditSink(&ComplianceSink{...}, 2000)
-multiplex := rfc0111.NewMultiplexAuditSink(siemSink, complianceSink)
+siemSink := aap001.NewAsyncAuditSink(&SiemSink{...}, 5000)
+complianceSink := aap001.NewAsyncAuditSink(&ComplianceSink{...}, 2000)
+multiplex := aap001.NewMultiplexAuditSink(siemSink, complianceSink)
 
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(multiplex))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(multiplex))
 ```
 
 2. **Enable Monitoring**:
@@ -577,7 +577,7 @@ Configures external audit sink for token lifecycle events.
 
 **Example**:
 ```go
-svc := rfc0111.NewService(logger, authorizer, rfc0111.WithAuditSink(mySink))
+svc := aap001.NewService(logger, authorizer, aap001.WithAuditSink(mySink))
 ```
 
 ### NewAsyncAuditSink(sink AuditSink, bufferSize int) *AsyncAuditSink
@@ -592,7 +592,7 @@ Creates async wrapper with buffered background flushing.
 
 **Example**:
 ```go
-asyncSink := rfc0111.NewAsyncAuditSink(slowSink, 5000)
+asyncSink := aap001.NewAsyncAuditSink(slowSink, 5000)
 defer asyncSink.Close() // Flush on shutdown
 ```
 
@@ -607,7 +607,7 @@ Sends events to multiple sinks in parallel.
 
 **Example**:
 ```go
-multiplex := rfc0111.NewMultiplexAuditSink(siem, compliance, queue)
+multiplex := aap001.NewMultiplexAuditSink(siem, compliance, queue)
 ```
 
 ### NewFilteredAuditSink(sink AuditSink, predicate func(*audit.Event) bool) *FilteredAuditSink
@@ -622,9 +622,9 @@ Wraps sink with event filtering.
 
 **Example**:
 ```go
-filtered := rfc0111.NewFilteredAuditSink(
+filtered := aap001.NewFilteredAuditSink(
     sink,
-    rfc0111.FilterByAction("revoke_delegation"),
+    aap001.FilterByAction("revoke_delegation"),
 )
 ```
 

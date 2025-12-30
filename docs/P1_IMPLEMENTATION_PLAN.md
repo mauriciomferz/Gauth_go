@@ -42,7 +42,7 @@ With all P0 critical gaps resolved, this plan outlines the P1 high-priority feat
 1. Implement PoA embedding in token generation
 2. Add extraction and validation logic
 3. Update signature computation to include embedded PoA
-4. Implement size limit controls (env: `GAUTH_MAX_EMBEDDED_POA_SIZE`)
+4. Implement size limit controls (env: `AGENTAUTH_MAX_EMBEDDED_POA_SIZE`)
 
 **Week 5-6: Testing & Documentation**
 1. Property tests for embedding/extraction

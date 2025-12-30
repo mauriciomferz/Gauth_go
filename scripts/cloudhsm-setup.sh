@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Configuration
 AWS_REGION="${AWS_REGION:-us-east-1}"
-CLUSTER_NAME="${CLUSTER_NAME:-gauth-hsm-cluster}"
+CLUSTER_NAME="${CLUSTER_NAME:-agentauth-hsm-cluster}"
 HSM_TYPE="${HSM_TYPE:-hsm1.medium}"
 BACKUP_ID="${BACKUP_ID:-}"  # For DR restoration
 SLACK_WEBHOOK="${SLACK_WEBHOOK:-}"
@@ -78,7 +78,7 @@ get_vpc_subnets() {
     log "Getting VPC subnets..."
     
     # Get subnets from EKS cluster VPC
-    local vpc_id=$(aws eks describe-cluster --name gauth-cluster --region "$AWS_REGION" --query 'cluster.resourcesVpcConfig.vpcId' --output text 2>/dev/null || echo "")
+    local vpc_id=$(aws eks describe-cluster --name agentauth-cluster --region "$AWS_REGION" --query 'cluster.resourcesVpcConfig.vpcId' --output text 2>/dev/null || echo "")
     
     if [ -z "$vpc_id" ]; then
         log_error "Could not find EKS cluster VPC. Please specify manually."
@@ -296,7 +296,7 @@ create_kms_key() {
         --output text)
     
     # Create KMS custom key store
-    local key_store_name="gauth-cloudhsm-keystore"
+    local key_store_name="agentauth-cloudhsm-keystore"
     
     local key_store_id=$(aws kms create-custom-key-store \
         --region "$AWS_REGION" \
@@ -337,10 +337,10 @@ create_kms_key() {
     # Create alias
     aws kms create-alias \
         --region "$AWS_REGION" \
-        --alias-name alias/gauth-vault-unseal \
+        --alias-name alias/agentauth-vault-unseal \
         --target-key-id "$key_id" || true
     
-    log_success "KMS key alias created: alias/gauth-vault-unseal"
+    log_success "KMS key alias created: alias/agentauth-vault-unseal"
     notify_slack "KMS key created with CloudHSM backing: $key_id" "good"
     
     echo "$key_id"

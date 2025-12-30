@@ -130,7 +130,7 @@ AgentAuth 1.0 is a comprehensive authorization framework implementing AAP-001 (C
 - **Delegation** (`pkg/delegation`): Delegation chain management
 
 #### 3. Core Engine Layer
-- **AgentAuth Engine** (`pkg/gauth`): Central orchestration
+- **AgentAuth Engine** (`pkg/agentauth`): Central orchestration
 - **POA Management** (`pkg/poa`): Proof-of-authorization tokens
 - **Policy Decision Point** (`pkg/pdp`): Advanced policy evaluation
 
@@ -700,7 +700,7 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
     token := r.Header.Get("Authorization")
     
     // Call AgentAuth service
-    resp, err := gauthClient.Authorize(&AuthRequest{
+    resp, err := agentauthClient.Authorize(&AuthRequest{
         Token:    token,
         Resource: "/api/documents/123",
         Action:   "read",
@@ -723,11 +723,11 @@ func HandleRequest(w http.ResponseWriter, r *http.Request) {
 
 ```go
 // AgentAuth authorization middleware
-func AuthzMiddleware(gauthClient *gauth.Client) func(next http.Handler) http.Handler {
+func AuthzMiddleware(agentauthClient *agentauth.Client) func(next http.Handler) http.Handler {
     return func(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             // Authorize request
-            if !authorize(r, gauthClient) {
+            if !authorize(r, agentauthClient) {
                 http.Error(w, "Forbidden", 403)
                 return
             }
@@ -744,14 +744,14 @@ func AuthzMiddleware(gauthClient *gauth.Client) func(next http.Handler) http.Han
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: gauth-filter
+  name: agentauth-filter
 spec:
   filters:
   - filterName: envoy.ext_authz
     filterConfig:
       grpc_service:
         envoy_grpc:
-          cluster_name: gauth-service
+          cluster_name: agentauth-service
 ```
 
 ---

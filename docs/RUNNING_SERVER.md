@@ -17,12 +17,12 @@ stat cmd/web-server/main.go: no such file or directory
 or
 
 ```
-stat /.../Gauth_go/web/cmd/web-server: directory not found
+stat /.../AgentAuth/web/cmd/web-server: directory not found
 ```
 
 ## Correct Commands (macOS / zsh)
 
-From the repo root (`Gauth_go/`):
+From the repo root (`AgentAuth/`):
 
 ```zsh
 go run ./cmd/web-server          # preferred (package path)
@@ -45,7 +45,7 @@ go run ./cmd/web-server 2>&1 | tee server.log
 Override port:
 
 ```zsh
-GAUTH_WEB_PORT=9090 go run ./cmd/web-server
+AGENTAUTH_WEB_PORT=9090 go run ./cmd/web-server
 ```
 
 ## Healthcheck
@@ -65,16 +65,16 @@ go run ./cmd/web-server -healthcheck
 ## Common Startup Env Vars
 
 ```zsh
-export GAUTH_TOKEN_SIG_MODE=eddsa           # enable Ed25519 token signatures
-export GAUTH_MULTI_SIG_THRESHOLD=2          # advertise multi-signature support in discovery
-export GAUTH_ATTEST_NONCE_TTL=30m           # attestation nonce TTL
+export AGENTAUTH_TOKEN_SIG_MODE=eddsa           # enable Ed25519 token signatures
+export AGENTAUTH_MULTI_SIG_THRESHOLD=2          # advertise multi-signature support in discovery
+export AGENTAUTH_ATTEST_NONCE_TTL=30m           # attestation nonce TTL
 ```
 
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `stat cmd/web-server/main.go` | Wrong working directory | `cd /path/to/Gauth_go` then rerun |
+| `stat cmd/web-server/main.go` | Wrong working directory | `cd /path/to/AgentAuth` then rerun |
 | `address already in use` | Port 8080 occupied | `lsof -ti:8080 | xargs kill -9` or change port |
 | Missing discovery fields | Env vars not set | Export required env vars before run |
 

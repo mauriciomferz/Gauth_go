@@ -84,23 +84,23 @@ SetPEPAuditBufferSize(enforcement, violation int)
 
 **Example Metric Names:**
 ```
-gauth_rfc0111_pep_enforcements_total{allowed="true",action_type="read"}
-gauth_rfc0111_pep_violations_total{violation_type="policy_violation",severity="critical"}
-gauth_rfc0111_pep_enforcement_latency_seconds_bucket{le="0.1"}
-gauth_rfc0111_pep_audit_buffer_enforcements
+agentauth_aap001_pep_enforcements_total{allowed="true",action_type="read"}
+agentauth_aap001_pep_violations_total{violation_type="policy_violation",severity="critical"}
+agentauth_aap001_pep_enforcement_latency_seconds_bucket{le="0.1"}
+agentauth_aap001_pep_audit_buffer_enforcements
 ```
 
 ---
 
 ### 4. PDP Adapter Integration
 
-**File:** `pkg/gauth/pdp_adapter.go`  
+**File:** `pkg/agentauth/pdp_adapter.go`  
 **Changes:** +17 lines, -13 lines (TODO removal)
 
 **Before (TODOs):**
 ```go
 // TODO: Export to Prometheus/OpenTelemetry when integrated
-// Example: metrics.IncrementCounter("gauth.enforcement.total", ...)
+// Example: metrics.IncrementCounter("agentauth.enforcement.total", ...)
 ```
 
 **After (Implementation):**
@@ -125,7 +125,7 @@ if l.enableMetrics && l.metrics != nil {
 
 ### 5. Comprehensive Testing
 
-**File:** `pkg/gauth/pdp_metrics_test.go`  
+**File:** `pkg/agentauth/pdp_metrics_test.go`  
 **Lines:** 399 (new file)  
 **Test Scenarios:** 5
 
@@ -152,7 +152,7 @@ if l.enableMetrics && l.metrics != nil {
 === RUN   TestPDPMetricsIntegration_MetricsDisabled
 --- PASS: TestPDPMetricsIntegration_MetricsDisabled (0.00s)
 PASS
-ok      github.com/.../pkg/gauth      0.364s
+ok      github.com/.../pkg/agentauth      0.364s
 ```
 
 **Test Highlights:**
@@ -209,7 +209,7 @@ ok      github.com/.../pkg/gauth      0.364s
 
 ### Enforcement Metrics
 
-**Counter:** `gauth_rfc0111_pep_enforcements_total`
+**Counter:** `agentauth_aap001_pep_enforcements_total`
 
 **Label Combinations:**
 ```
@@ -231,21 +231,21 @@ ok      github.com/.../pkg/gauth      0.364s
 **Example Queries:**
 ```promql
 # Total enforcement rate
-sum(rate(gauth_rfc0111_pep_enforcements_total[5m]))
+sum(rate(agentauth_aap001_pep_enforcements_total[5m]))
 
 # Denial rate by action type
-sum(rate(gauth_rfc0111_pep_enforcements_total{allowed="false"}[5m])) by (action_type)
+sum(rate(agentauth_aap001_pep_enforcements_total{allowed="false"}[5m]) by (action_type)
 
 # Enforcement success rate (percentage allowed)
-sum(rate(gauth_rfc0111_pep_enforcements_total{allowed="true"}[5m])) / 
-sum(rate(gauth_rfc0111_pep_enforcements_total[5m])) * 100
+sum(rate(agentauth_aap001_pep_enforcements_total{allowed="true"}[5m]) / 
+sum(rate(agentauth_aap001_pep_enforcements_total[5m]) * 100
 ```
 
 ---
 
 ### Violation Metrics
 
-**Counter:** `gauth_rfc0111_pep_violations_total`
+**Counter:** `agentauth_aap001_pep_violations_total`
 
 **Severity Levels:**
 - **critical:** Immediate action required (e.g., expired token, revoked access)
@@ -266,33 +266,33 @@ unauthorized_action        # Action not authorized
 **Alerting Strategy:**
 ```promql
 # Critical violations (immediate page)
-sum(rate(gauth_rfc0111_pep_violations_total{severity="critical"}[5m])) > 0.1
+sum(rate(agentauth_aap001_pep_violations_total{severity="critical"}[5m]) > 0.1
 
 # High severity violations (ticket creation)
-sum(rate(gauth_rfc0111_pep_violations_total{severity="high"}[5m])) > 0.5
+sum(rate(agentauth_aap001_pep_violations_total{severity="high"}[5m]) > 0.5
 
 # Violation trend analysis
-sum(rate(gauth_rfc0111_pep_violations_total[1h])) by (violation_type, severity)
+sum(rate(agentauth_aap001_pep_violations_total[1h]) by (violation_type, severity)
 ```
 
 ---
 
 ### Latency Metrics
 
-**Histogram:** `gauth_rfc0111_pep_enforcement_latency_seconds`
+**Histogram:** `agentauth_aap001_pep_enforcement_latency_seconds`
 
 **Buckets:** `[0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]`
 
 **Percentile Queries:**
 ```promql
 # P50 (median)
-histogram_quantile(0.50, rate(gauth_rfc0111_pep_enforcement_latency_seconds_bucket[5m]))
+histogram_quantile(0.50, rate(agentauth_aap001_pep_enforcement_latency_seconds_bucket[5m]))
 
 # P95 (SLO target)
-histogram_quantile(0.95, rate(gauth_rfc0111_pep_enforcement_latency_seconds_bucket[5m]))
+histogram_quantile(0.95, rate(agentauth_aap001_pep_enforcement_latency_seconds_bucket[5m]))
 
 # P99 (tail latency)
-histogram_quantile(0.99, rate(gauth_rfc0111_pep_enforcement_latency_seconds_bucket[5m]))
+histogram_quantile(0.99, rate(agentauth_aap001_pep_enforcement_latency_seconds_bucket[5m]))
 ```
 
 **SLO Example:**
@@ -305,8 +305,8 @@ histogram_quantile(0.99, rate(gauth_rfc0111_pep_enforcement_latency_seconds_buck
 ### Buffer Metrics
 
 **Gauges:**
-- `gauth_rfc0111_pep_audit_buffer_enforcements`
-- `gauth_rfc0111_pep_audit_buffer_violations`
+- `agentauth_aap001_pep_audit_buffer_enforcements`
+- `agentauth_aap001_pep_audit_buffer_violations`
 
 **Purpose:**
 - Monitor FIFO buffer utilization
@@ -316,10 +316,10 @@ histogram_quantile(0.99, rate(gauth_rfc0111_pep_enforcement_latency_seconds_buck
 **Example Queries:**
 ```promql
 # Buffer utilization percentage (10k max)
-(gauth_rfc0111_pep_audit_buffer_enforcements / 10000) * 100
+(agentauth_aap001_pep_audit_buffer_enforcements / 10000) * 100
 
 # Alert when buffer approaches capacity
-gauth_rfc0111_pep_audit_buffer_enforcements > 9000
+agentauth_aap001_pep_audit_buffer_enforcements > 9000
 ```
 
 ---
@@ -331,7 +331,7 @@ gauth_rfc0111_pep_audit_buffer_enforcements > 9000
 ```yaml
 # prometheus.yml
 scrape_configs:
-  - job_name: 'gauth-pdp'
+  - job_name: 'agentauth-pdp'
     scrape_interval: 15s
     static_configs:
       - targets: ['localhost:9090']
@@ -352,7 +352,7 @@ groups:
     rules:
       - alert: CriticalViolationRateHigh
         expr: |
-          sum(rate(gauth_rfc0111_pep_violations_total{severity="critical"}[5m])) > 0.1
+          sum(rate(agentauth_aap001_pep_violations_total{severity="critical"}[5m]) > 0.1
         for: 2m
         labels:
           severity: critical
@@ -365,7 +365,7 @@ groups:
       - alert: EnforcementLatencyHigh
         expr: |
           histogram_quantile(0.95, 
-            rate(gauth_rfc0111_pep_enforcement_latency_seconds_bucket[5m])
+            rate(agentauth_aap001_pep_enforcement_latency_seconds_bucket[5m])
           ) > 0.1
         for: 5m
         labels:
@@ -474,7 +474,7 @@ package main
 import (
     "context"
     "github.com/.../internal/metrics"
-    "github.com/.../pkg/gauth"
+    "github.com/.../pkg/agentauth"
     "github.com/prometheus/client_golang/prometheus"
     "github.com/prometheus/client_golang/prometheus/promhttp"
     "net/http"
@@ -484,19 +484,19 @@ func main() {
     // Prometheus setup
     registry := prometheus.NewRegistry()
     promMetrics := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{
-        Namespace: "gauth",
-        Subsystem: "rfc0111",
+        Namespace: "agentauth",
+        Subsystem: "aap001",
         Registry:  registry,
     })
 
     // Audit logger with metrics
-    auditLogger := gauth.NewProductionPEPAuditLogger(10000, true, true)
+    auditLogger := agentauth.NewProductionPEPAuditLogger(10000, true, true)
     auditLogger.SetMetrics(promMetrics)
 
     // SimplePDP integration
-    pdp := gauth.NewSimplePDP(
+    pdp := agentauth.NewSimplePDP(
         policyStore,
-        gauth.WithPDPAuditLogger(auditLogger),
+        agentauth.WithPDPAuditLogger(auditLogger),
     )
 
     // Expose /metrics endpoint
@@ -564,8 +564,8 @@ watch -n 1 'curl -s http://localhost:9090/metrics | grep pep_enforcements_total'
 **Files Changed:** 5 files
 - `internal/metrics/metrics.go` (+59 lines)
 - `internal/metrics/prometheus_adapter.go` (+67 lines)
-- `pkg/gauth/pdp_adapter.go` (+17, -13 lines)
-- `pkg/gauth/pdp_metrics_test.go` (+399 lines, new file)
+- `pkg/agentauth/pdp_adapter.go` (+17, -13 lines)
+- `pkg/agentauth/pdp_metrics_test.go` (+399 lines, new file)
 - `docs/PDP_METRICS_GUIDE.md` (+430 lines, new file)
 
 **Total:** +972 insertions, -13 deletions
@@ -597,7 +597,7 @@ watch -n 1 'curl -s http://localhost:9090/metrics | grep pep_enforcements_total'
 
 ---
 
-## RFC-0111 Compliance Update
+## AAP-001 Compliance Update
 
 ### Before Today
 - **Overall Compliance:** 95%

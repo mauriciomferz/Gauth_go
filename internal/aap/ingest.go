@@ -60,7 +60,7 @@ func ParseRFCFile(path string, rfcID string) ([]Clause, error) {
 			return
 		}
 		raw := strings.Join(currentLines, "\n")
-		h := sha256.Sum256([]byte("GAUTH-RFC-BLOCK:" + raw))
+		h := sha256.Sum256([]byte("AGENTAUTH-RFC-BLOCK:" + raw))
 		clause := Clause{
 			RFC:        rfcID,
 			SectionID:  intToSection(sectionCounter),

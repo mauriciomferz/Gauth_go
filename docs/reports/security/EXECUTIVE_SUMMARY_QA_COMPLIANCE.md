@@ -1,6 +1,6 @@
 # Executive Summary: AgentAuth 1.0 Compliance Audit
 
-**Project**: Gauth_go - AAP-RFC-0150 Go Implementation  
+**Project**: AgentAuth - AAP-RFC-0150 Go Implementation  
 **Audit Date**: 2025-01-XX  
 **QA Manager Certification**: Conditional Approval - Beta Ready
 
@@ -10,7 +10,7 @@
 
 ### **CONDITIONALLY APPROVED FOR BETA RELEASE**
 
-The AgentAuth_go implementation achieves **76% overall compliance** with RFC-0111/RFC-0115 specifications and is approved for Beta release contingent upon completion of P0 security remediation items within 1-2 weeks.
+The AgentAuth_go implementation achieves **76% overall compliance** with AAP-001/AAP-002 specifications and is approved for Beta release contingent upon completion of P0 security remediation items within 1-2 weeks.
 
 ---
 
@@ -18,8 +18,8 @@ The AgentAuth_go implementation achieves **76% overall compliance** with RFC-011
 
 ```
 ┌─────────────────────────────────────────────┐
-│  RFC-0111 (AgentAuth Framework):      85% ✅    │
-│  RFC-0115 (PoA Definition):       65% 🟡    │
+│  AAP-001 (AgentAuth Framework):      85% ✅    │
+│  AAP-002 (PoA Definition):       65% 🟡    │
 │  ──────────────────────────────────────────  │
 │  OVERALL IMPLEMENTATION:          76% 🟡    │
 └─────────────────────────────────────────────┘
@@ -83,10 +83,10 @@ The AgentAuth_go implementation achieves **76% overall compliance** with RFC-011
 
 | ID | Gap | RFC Section | Impact |
 |----|-----|-------------|--------|
-| **G6** | Sector Taxonomy (ISIC/NACE) | RFC-0115 B.2 | Industry scope not validated |
-| **G7** | Regional Scope Hierarchy | RFC-0115 B.3 | Geographic constraints missing |
-| **G8** | Transaction/Decision Types | RFC-0115 B.4 | Action classification incomplete |
-| **G9** | Rights & Obligations | RFC-0115 C.4 | Compliance tracking absent |
+| **G6** | Sector Taxonomy (ISIC/NACE) | AAP-002 B.2 | Industry scope not validated |
+| **G7** | Regional Scope Hierarchy | AAP-002 B.3 | Geographic constraints missing |
+| **G8** | Transaction/Decision Types | AAP-002 B.4 | Action classification incomplete |
+| **G9** | Rights & Obligations | AAP-002 C.4 | Compliance tracking absent |
 
 ---
 
@@ -108,7 +108,7 @@ Deliverable: Production-ready security baseline
 Effort: 15-23 engineer days
 ```
 
-### Phase 2: RFC-0115 Taxonomy (Weeks 4-6) - **REQUIRED FOR FULL COMPLIANCE**
+### Phase 2: AAP-002 Taxonomy (Weeks 4-6) - **REQUIRED FOR FULL COMPLIANCE**
 
 ```
 Week 4: Scope Classification
@@ -125,7 +125,7 @@ Effort: 16-24 engineer days
 
 ### Phase 3: Enhancements (Weeks 7-9) - **POST-BETA**
 
-- Discovery endpoint (`/.well-known/gauth/config`)
+- Discovery endpoint (`/.well-known/agentauth/config`)
 - MCP protocol integration
 - Commercial register API connectors
 - Special conditions evaluation engine
@@ -189,17 +189,17 @@ Effort: 16-24 engineer days
 
 ```
 Current Status: v0.9.0-beta
-├─ [✅ COMPLETE] Core Protocol (RFC-0111)
-├─ [🟡 IN PROGRESS] PoA Definition (RFC-0115)
+├─ [✅ COMPLETE] Core Protocol (AAP-001)
+├─ [🟡 IN PROGRESS] PoA Definition (AAP-002)
 └─ [⏳ PLANNED] Full Production Readiness
 
 Milestone 1: Beta Release (Week 0) ✅ APPROVED
 └─ Condition: Complete G1, G2, document gaps
 
-Milestone 2: RFC-0115 Basic (Week 6)
+Milestone 2: AAP-002 Basic (Week 6)
 └─ Target: 70% PoA compliance (G3-G5 complete)
 
-Milestone 3: RFC-0115 Full (Week 12)
+Milestone 3: AAP-002 Full (Week 12)
 └─ Target: 85% PoA compliance (G6-G9 complete)
 
 Milestone 4: Production v1.0 (Week 15) 🎯
@@ -220,14 +220,14 @@ Milestone 4: Production v1.0 (Week 15) 🎯
 ### For Development Team
 
 1. **Prioritize** G1 (replay store) and G2 (algorithm agility) this sprint
-2. **Document** all RFC-0115 gaps in discovery endpoint
+2. **Document** all AAP-002 gaps in discovery endpoint
 3. **Expand** test coverage on PoA validation (target: 80%+)
 4. **Prepare** migration guide for new taxonomy fields
 
 ### For Product Team
 
 1. **Communicate** Beta status and known limitations transparently
-2. **Position** as "RFC-0111 compliant, RFC-0115 in progress"
+2. **Position** as "AAP-001 compliant, AAP-002 in progress"
 3. **Plan** feature releases aligned with compliance milestones
 4. **Track** customer feedback on missing taxonomy features
 
@@ -271,9 +271,9 @@ Milestone 4: Production v1.0 (Week 15) 🎯
 
 **I hereby certify that:**
 
-1. ✅ The AgentAuth_go implementation has been thoroughly audited against AAP-RFC-0111 and AAP-RFC-0115
-2. ✅ Core protocol implementation (RFC-0111) achieves 85% compliance and is suitable for Beta release
-3. 🟡 PoA Definition implementation (RFC-0115) achieves 65% compliance and requires P0/P1 remediation
+1. ✅ The AgentAuth_go implementation has been thoroughly audited against AAP-001 and AAP-002
+2. ✅ Core protocol implementation (AAP-001) achieves 85% compliance and is suitable for Beta release
+3. 🟡 PoA Definition implementation (AAP-002) achieves 65% compliance and requires P0/P1 remediation
 4. ✅ All mandatory exclusions are properly respected
 5. ✅ Security foundation is strong with identified remediation path
 6. 🟡 Production deployment is CONDITIONAL upon completion of P0 items (G1-G5)

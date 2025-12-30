@@ -104,7 +104,7 @@ type ModelLimitsNotarizeSignResult struct {
 		Success        bool    `json:"success"`
 	} `json:"notarization,omitempty"`
 	// DomainSignature and DomainPrefix added for migration phase 2 (optional dual signature to enable
-	// domain separation without breaking legacy consumers). Present only if env GAUTH_ATTEST_DOMAIN_PREFIX is set
+	// domain separation without breaking legacy consumers). Present only if env AGENTAUTH_ATTEST_DOMAIN_PREFIX is set
 	// at signing time and raw signing enabled.
 	DomainSignature string `json:"domain_signature,omitempty"`
 	DomainPrefix    string `json:"domain_prefix,omitempty"`
@@ -159,7 +159,7 @@ func (s *AttestationService) NotarizeAndSignModelLimits(unsignedJSON []byte, sna
 	}
 
 	// Optional dual domain signature.
-	if dp := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX"); dp != "" && len(sigBytes) > 0 {
+	if dp := os.Getenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX"); dp != "" && len(sigBytes) > 0 {
 		dmsg := append([]byte(dp), unsignedJSON...)
 		if dsig, derr := signer.Sign(dmsg); derr == nil && len(dsig) > 0 {
 			res.DomainSignature = base64.RawStdEncoding.EncodeToString(dsig)

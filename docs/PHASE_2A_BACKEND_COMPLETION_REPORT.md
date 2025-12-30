@@ -15,7 +15,7 @@ Phase 2A Backend Integration is **fully complete**. All three endpoint groups (P
 
 ### What Was Completed
 
-✅ **Backend API Endpoints** - 11 new HTTP endpoints exposing RFC-0111 mock services  
+✅ **Backend API Endpoints** - 11 new HTTP endpoints exposing AAP-001 mock services  
 ✅ **Frontend Integration** - UI updated to call real backend instead of client-side mocks  
 ✅ **Frontend Quality** - Production-grade error handling, testing, accessibility, performance  
 ✅ **Documentation** - Comprehensive implementation guides and API documentation
@@ -77,7 +77,7 @@ Phase 2A Backend Integration is **fully complete**. All three endpoint groups (P
 ```
 
 **Features**:
-- Wraps RFC-0111 `PowerVerificationPoint` mock client
+- Wraps AAP-001 `PowerVerificationPoint` mock client
 - Converts HTTP requests to `IdentityProofRequest` format
 - Returns structured person details and verification metadata
 - Handles verification failures gracefully
@@ -150,7 +150,7 @@ Phase 2A Backend Integration is **fully complete**. All three endpoint groups (P
 ```
 
 **Features**:
-- Wraps RFC-0111 `CommercialRegisterClient` mock
+- Wraps AAP-001 `CommercialRegisterClient` mock
 - Verifies entity status (active/inactive)
 - Checks signatory authorization
 - Returns structured entity and director details
@@ -436,8 +436,8 @@ All endpoints can be tested with curl:
 
 ```bash
 # 1. Start the server
-cd /path/to/Gauth_go
-GAUTH_DEV_INDEX=1 go run ./cmd/web-server
+cd /path/to/AgentAuth
+AGENTAUTH_DEV_INDEX=1 go run ./cmd/web-server
 
 # 2. Test PVP endpoint
 curl -X POST http://localhost:8080/api/v1/beta/pvp/verify \
@@ -459,7 +459,7 @@ curl -X POST http://localhost:8080/api/v1/beta/poa \
 
 The UI integration can be tested by:
 
-1. Starting the backend: `GAUTH_DEV_INDEX=1 go run ./cmd/web-server`
+1. Starting the backend: `AGENTAUTH_DEV_INDEX=1 go run ./cmd/web-server`
 2. Starting the frontend: `cd web/ui-react && npm run dev`
 3. Opening http://localhost:3000
 4. Testing each page:
@@ -484,8 +484,8 @@ npm run test:coverage  # With coverage
 
 | UI Feature | Endpoint | Status | Type | Lines |
 |------------|----------|--------|------|-------|
-| Token Create | `/rfc0111/subscriptions` (8 steps) | ✅ Existing | Real | - |
-| Token Validate | `/rfc0111/token/validate` | ✅ Existing | Real | - |
+| Token Create | `/aap001/subscriptions` (8 steps) | ✅ Existing | Real | - |
+| Token Validate | `/aap001/token/validate` | ✅ Existing | Real | - |
 | Authorization | `/beta/authz/evaluate` | ✅ Existing | Real | - |
 | Metrics | `/beta/metrics/prometheus` | ✅ Existing | Real | - |
 | **PVP Verify** | `/beta/pvp/verify` | ✨ **NEW** | Real | 195 |
@@ -519,7 +519,7 @@ npm run test:coverage  # With coverage
 - ✅ Modern testing infrastructure
 
 ### For Production
-- ✅ RFC-0111 compliant mock services exposed as HTTP APIs
+- ✅ AAP-001 compliant mock services exposed as HTTP APIs
 - ✅ Scalable architecture (in-memory → database transition ready)
 - ✅ WCAG 2.1 AA accessibility compliance
 - ✅ Performance optimized (60% bundle reduction)
@@ -535,7 +535,7 @@ npm run test:coverage  # With coverage
 3. Run E2E tests with Playwright (fix existing Playwright config issues)
 
 ### Future Enhancements
-1. **Phase 2B**: Full RFC-0111 subscription flow UI (8-step wizard)
+1. **Phase 2B**: Full AAP-001 subscription flow UI (8-step wizard)
 2. **Phase 2C**: Replace in-memory PoA storage with database persistence
 3. **Phase 3**: MCP Integration for AI agent authorization
 

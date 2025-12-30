@@ -2,7 +2,7 @@
 // Provides: dark mode toggle persisted in localStorage, focus ring management, mobile nav menu.
 // Dependencies: none (vanilla JS). Safe to import early.
 
-const THEME_KEY = 'gauth-theme';
+const THEME_KEY = 'agentauth-theme';
 let currentTheme = 'light';
 
 function applyTheme(theme) {
@@ -67,14 +67,14 @@ function initMobileNav() {
 	});
 	// Close on Escape
 	document.addEventListener('keydown', e => {
-		if (e.key === 'Escape' && !menu.classList.contains('hidden')) {
+		if (e.key === 'Escape' && !menu.classList.contains('hidden') {
 			setState(false);
 			btn.focus();
 		}
 	});
 	// Outside click close
 	document.addEventListener('click', e => {
-		if (!menu.classList.contains('hidden')) {
+		if (!menu.classList.contains('hidden') {
 			if (!menu.contains(e.target) && e.target !== btn) {
 				setState(false);
 			}
@@ -83,7 +83,7 @@ function initMobileNav() {
 }
 
 // Persist last active demo tab (beta). Stores data-tab value.
-const LAST_TAB_KEY = 'gauth-last-tab';
+const LAST_TAB_KEY = 'agentauth-last-tab';
 function initTabPersistence() {
 	const nav = document.querySelector('nav[aria-label="Interactive demo tabs"]');
 	if (!nav) return;

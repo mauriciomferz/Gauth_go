@@ -13,7 +13,7 @@ import (
 )
 
 // Domain separation prefix identical to signing path for model limits attestation.
-const AttestationDomainPrefix = "GAUTH_MODEL_LIMIT_ATTEST:"
+const AttestationDomainPrefix = "AGENTAUTH_MODEL_LIMIT_ATTEST:"
 
 // Attestation mirrors the JSON structure necessary for verification (subset of full endpoint).
 type Attestation struct {

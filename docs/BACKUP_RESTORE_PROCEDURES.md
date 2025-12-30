@@ -34,7 +34,7 @@ This document describes backup and restore procedures for all AgentAuth system c
 
 **Backup Location:**
 - Primary: `/backups/postgresql/`
-- Remote: S3 bucket `s3://gauth-backups/postgresql/`
+- Remote: S3 bucket `s3://agentauth-backups/postgresql/`
 
 ### Manual Backup
 
@@ -45,19 +45,19 @@ This document describes backup and restore procedures for all AgentAuth system c
 mkdir -p /backups/postgresql/$(date +%Y%m%d)
 
 # Perform pg_dump
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  pg_dump -U gauth -d gauth -F c -f /tmp/gauth_backup.dump
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  pg_dump -U agentauth -d agentauth -F c -f /tmp/agentauth_backup.dump
 
 # Copy from pod
-kubectl cp gauth-staging/<postgres-pod>:/tmp/gauth_backup.dump \
-  /backups/postgresql/$(date +%Y%m%d)/gauth_backup.dump
+kubectl cp agentauth-staging/<postgres-pod>:/tmp/agentauth_backup.dump \
+  /backups/postgresql/$(date +%Y%m%d)/agentauth_backup.dump
 
 # Compress backup
-gzip /backups/postgresql/$(date +%Y%m%d)/gauth_backup.dump
+gzip /backups/postgresql/$(date +%Y%m%d)/agentauth_backup.dump
 
 # Upload to S3
-aws s3 cp /backups/postgresql/$(date +%Y%m%d)/gauth_backup.dump.gz \
-  s3://gauth-backups/postgresql/$(date +%Y%m%d)/
+aws s3 cp /backups/postgresql/$(date +%Y%m%d)/agentauth_backup.dump.gz \
+  s3://agentauth-backups/postgresql/$(date +%Y%m%d)/
 ```
 
 #### Backup Script
@@ -70,8 +70,8 @@ set -e
 
 DATE=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="/backups/postgresql/${DATE}"
-S3_BUCKET="s3://gauth-backups/postgresql/"
-NAMESPACE="gauth-staging"
+S3_BUCKET="s3://agentauth-backups/postgresql/"
+NAMESPACE="agentauth-staging"
 
 echo "Starting PostgreSQL backup at $(date)"
 
@@ -84,30 +84,30 @@ POSTGRES_POD=$(kubectl get pod -n ${NAMESPACE} -l app=postgresql -o jsonpath='{.
 # Perform backup
 echo "Backing up database from pod ${POSTGRES_POD}"
 kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- \
-  pg_dump -U gauth -d gauth -F c -f /tmp/gauth_${DATE}.dump
+  pg_dump -U agentauth -d agentauth -F c -f /tmp/agentauth_${DATE}.dump
 
 # Copy backup from pod
 echo "Copying backup from pod"
-kubectl cp ${NAMESPACE}/${POSTGRES_POD}:/tmp/gauth_${DATE}.dump \
-  ${BACKUP_DIR}/gauth_${DATE}.dump
+kubectl cp ${NAMESPACE}/${POSTGRES_POD}:/tmp/agentauth_${DATE}.dump \
+  ${BACKUP_DIR}/agentauth_${DATE}.dump
 
 # Compress backup
 echo "Compressing backup"
-gzip ${BACKUP_DIR}/gauth_${DATE}.dump
+gzip ${BACKUP_DIR}/agentauth_${DATE}.dump
 
 # Upload to S3
 echo "Uploading to S3"
-aws s3 cp ${BACKUP_DIR}/gauth_${DATE}.dump.gz ${S3_BUCKET}${DATE}/
+aws s3 cp ${BACKUP_DIR}/agentauth_${DATE}.dump.gz ${S3_BUCKET}${DATE}/
 
 # Cleanup old pod backup
-kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- rm /tmp/gauth_${DATE}.dump
+kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- rm /tmp/agentauth_${DATE}.dump
 
 # Cleanup local backups older than 7 days
 find /backups/postgresql -type d -mtime +7 -exec rm -rf {} \;
 
 echo "Backup completed at $(date)"
-echo "Backup file: ${BACKUP_DIR}/gauth_${DATE}.dump.gz"
-echo "S3 location: ${S3_BUCKET}${DATE}/gauth_${DATE}.dump.gz"
+echo "Backup file: ${BACKUP_DIR}/agentauth_${DATE}.dump.gz"
+echo "S3 location: ${S3_BUCKET}${DATE}/agentauth_${DATE}.dump.gz"
 ```
 
 ### Restore from Backup
@@ -116,47 +116,47 @@ echo "S3 location: ${S3_BUCKET}${DATE}/gauth_${DATE}.dump.gz"
 
 ```bash
 # Stop application pods to prevent connections
-kubectl scale deployment gauth-blue -n gauth-staging --replicas=0
+kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=0
 
 # Verify no active connections
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  psql -U postgres -c "SELECT count(*) FROM pg_stat_activity WHERE datname='gauth'"
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  psql -U postgres -c "SELECT count(*) FROM pg_stat_activity WHERE datname='agentauth'"
 ```
 
 #### Restore Steps
 
 ```bash
 # Download backup from S3
-aws s3 cp s3://gauth-backups/postgresql/20251110/gauth_20251110_020000.dump.gz /tmp/
+aws s3 cp s3://agentauth-backups/postgresql/20251110/agentauth_20251110_020000.dump.gz /tmp/
 
 # Decompress backup
-gunzip /tmp/gauth_20251110_020000.dump.gz
+gunzip /tmp/agentauth_20251110_020000.dump.gz
 
 # Copy to PostgreSQL pod
-kubectl cp /tmp/gauth_20251110_020000.dump \
-  gauth-staging/<postgres-pod>:/tmp/restore.dump
+kubectl cp /tmp/agentauth_20251110_020000.dump \
+  agentauth-staging/<postgres-pod>:/tmp/restore.dump
 
 # Drop existing database (CAUTION!)
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  psql -U postgres -c "DROP DATABASE gauth"
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  psql -U postgres -c "DROP DATABASE agentauth"
 
 # Create fresh database
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  psql -U postgres -c "CREATE DATABASE gauth OWNER gauth"
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  psql -U postgres -c "CREATE DATABASE agentauth OWNER agentauth"
 
 # Restore from backup
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  pg_restore -U gauth -d gauth -F c /tmp/restore.dump
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  pg_restore -U agentauth -d agentauth -F c /tmp/restore.dump
 
 # Verify restore
-kubectl exec <postgres-pod> -n gauth-staging -- \
-  psql -U gauth -d gauth -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname='public'"
+kubectl exec <postgres-pod> -n agentauth-staging -- \
+  psql -U agentauth -d agentauth -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname='public'"
 
 # Cleanup
-kubectl exec <postgres-pod> -n gauth-staging -- rm /tmp/restore.dump
+kubectl exec <postgres-pod> -n agentauth-staging -- rm /tmp/restore.dump
 
 # Restart application
-kubectl scale deployment gauth-blue -n gauth-staging --replicas=3
+kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=3
 ```
 
 #### Restore Script
@@ -174,8 +174,8 @@ if [ $# -ne 1 ]; then
 fi
 
 BACKUP_DATE=$1
-S3_BUCKET="s3://gauth-backups/postgresql/"
-NAMESPACE="gauth-staging"
+S3_BUCKET="s3://agentauth-backups/postgresql/"
+NAMESPACE="agentauth-staging"
 TEMP_DIR="/tmp/restore_${BACKUP_DATE}"
 
 echo "Starting PostgreSQL restore from backup ${BACKUP_DATE}"
@@ -185,44 +185,44 @@ mkdir -p ${TEMP_DIR}
 
 # Download backup
 echo "Downloading backup from S3"
-aws s3 cp ${S3_BUCKET}${BACKUP_DATE}/gauth_${BACKUP_DATE}.dump.gz ${TEMP_DIR}/
+aws s3 cp ${S3_BUCKET}${BACKUP_DATE}/agentauth_${BACKUP_DATE}.dump.gz ${TEMP_DIR}/
 
 # Decompress
 echo "Decompressing backup"
-gunzip ${TEMP_DIR}/gauth_${BACKUP_DATE}.dump.gz
+gunzip ${TEMP_DIR}/agentauth_${BACKUP_DATE}.dump.gz
 
 # Get pod name
 POSTGRES_POD=$(kubectl get pod -n ${NAMESPACE} -l app=postgresql -o jsonpath='{.items[0].metadata.name}')
 
 # Scale down application
 echo "Scaling down application"
-kubectl scale deployment gauth-blue -n ${NAMESPACE} --replicas=0
-kubectl wait --for=delete pod -l app=gauth -n ${NAMESPACE} --timeout=60s
+kubectl scale deployment agentauth-blue -n ${NAMESPACE} --replicas=0
+kubectl wait --for=delete pod -l app=agentauth -n ${NAMESPACE} --timeout=60s
 
 # Copy backup to pod
 echo "Copying backup to pod ${POSTGRES_POD}"
-kubectl cp ${TEMP_DIR}/gauth_${BACKUP_DATE}.dump \
+kubectl cp ${TEMP_DIR}/agentauth_${BACKUP_DATE}.dump \
   ${NAMESPACE}/${POSTGRES_POD}:/tmp/restore.dump
 
 # Terminate active connections
 echo "Terminating active connections"
 kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- \
-  psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='gauth' AND pid <> pg_backend_pid()"
+  psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='agentauth' AND pid <> pg_backend_pid()"
 
 # Drop and recreate database
 echo "Dropping and recreating database"
-kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- psql -U postgres -c "DROP DATABASE IF EXISTS gauth"
-kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- psql -U postgres -c "CREATE DATABASE gauth OWNER gauth"
+kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- psql -U postgres -c "DROP DATABASE IF EXISTS agentauth"
+kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- psql -U postgres -c "CREATE DATABASE agentauth OWNER agentauth"
 
 # Restore
 echo "Restoring database"
 kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- \
-  pg_restore -U gauth -d gauth -F c /tmp/restore.dump
+  pg_restore -U agentauth -d agentauth -F c /tmp/restore.dump
 
 # Verify
 echo "Verifying restore"
 TABLE_COUNT=$(kubectl exec ${POSTGRES_POD} -n ${NAMESPACE} -- \
-  psql -U gauth -d gauth -t -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname='public'")
+  psql -U agentauth -d agentauth -t -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname='public'")
 echo "Table count: ${TABLE_COUNT}"
 
 # Cleanup pod
@@ -233,8 +233,8 @@ rm -rf ${TEMP_DIR}
 
 # Scale up application
 echo "Scaling up application"
-kubectl scale deployment gauth-blue -n ${NAMESPACE} --replicas=3
-kubectl wait --for=condition=ready pod -l app=gauth -n ${NAMESPACE} --timeout=120s
+kubectl scale deployment agentauth-blue -n ${NAMESPACE} --replicas=3
+kubectl wait --for=condition=ready pod -l app=agentauth -n ${NAMESPACE} --timeout=120s
 
 echo "Restore completed successfully at $(date)"
 ```
@@ -252,24 +252,24 @@ echo "Restore completed successfully at $(date)"
 
 **Backup Location:**
 - Primary: `/backups/redis/`
-- Remote: S3 bucket `s3://gauth-backups/redis/`
+- Remote: S3 bucket `s3://agentauth-backups/redis/`
 
 ### Manual Backup
 
 ```bash
 # Trigger RDB save
-kubectl exec <redis-pod> -n gauth-staging -- redis-cli BGSAVE
+kubectl exec <redis-pod> -n agentauth-staging -- redis-cli BGSAVE
 
 # Wait for completion
-kubectl exec <redis-pod> -n gauth-staging -- \
+kubectl exec <redis-pod> -n agentauth-staging -- \
   redis-cli LASTSAVE
 
 # Copy RDB file
-kubectl cp gauth-staging/<redis-pod>:/data/dump.rdb \
+kubectl cp agentauth-staging/<redis-pod>:/data/dump.rdb \
   /backups/redis/$(date +%Y%m%d)/dump.rdb
 
 # Copy AOF file
-kubectl cp gauth-staging/<redis-pod>:/data/appendonly.aof \
+kubectl cp agentauth-staging/<redis-pod>:/data/appendonly.aof \
   /backups/redis/$(date +%Y%m%d)/appendonly.aof
 
 # Compress and upload
@@ -277,52 +277,52 @@ tar -czf /backups/redis/$(date +%Y%m%d)/redis_backup.tar.gz \
   -C /backups/redis/$(date +%Y%m%d) dump.rdb appendonly.aof
 
 aws s3 cp /backups/redis/$(date +%Y%m%d)/redis_backup.tar.gz \
-  s3://gauth-backups/redis/$(date +%Y%m%d)/
+  s3://agentauth-backups/redis/$(date +%Y%m%d)/
 ```
 
 ### Restore from Backup
 
 ```bash
 # Scale down application
-kubectl scale deployment gauth-blue -n gauth-staging --replicas=0
+kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=0
 
 # Scale down Redis
-kubectl scale statefulset redis -n gauth-staging --replicas=0
+kubectl scale statefulset redis -n agentauth-staging --replicas=0
 
 # Download backup
-aws s3 cp s3://gauth-backups/redis/20251110/redis_backup.tar.gz /tmp/
+aws s3 cp s3://agentauth-backups/redis/20251110/redis_backup.tar.gz /tmp/
 
 # Extract backup
 tar -xzf /tmp/redis_backup.tar.gz -C /tmp/
 
 # Scale up Redis with one replica
-kubectl scale statefulset redis -n gauth-staging --replicas=1
-kubectl wait --for=condition=ready pod -l app=redis -n gauth-staging --timeout=60s
+kubectl scale statefulset redis -n agentauth-staging --replicas=1
+kubectl wait --for=condition=ready pod -l app=redis -n agentauth-staging --timeout=60s
 
 # Get Redis pod
-REDIS_POD=$(kubectl get pod -n gauth-staging -l app=redis -o jsonpath='{.items[0].metadata.name}')
+REDIS_POD=$(kubectl get pod -n agentauth-staging -l app=redis -o jsonpath='{.items[0].metadata.name}')
 
 # Stop Redis temporarily
-kubectl exec ${REDIS_POD} -n gauth-staging -- redis-cli SHUTDOWN NOSAVE
+kubectl exec ${REDIS_POD} -n agentauth-staging -- redis-cli SHUTDOWN NOSAVE
 
 # Wait for shutdown
 sleep 5
 
 # Copy backup files
-kubectl cp /tmp/dump.rdb gauth-staging/${REDIS_POD}:/data/dump.rdb
-kubectl cp /tmp/appendonly.aof gauth-staging/${REDIS_POD}:/data/appendonly.aof
+kubectl cp /tmp/dump.rdb agentauth-staging/${REDIS_POD}:/data/dump.rdb
+kubectl cp /tmp/appendonly.aof agentauth-staging/${REDIS_POD}:/data/appendonly.aof
 
 # Delete pod to restart
-kubectl delete pod ${REDIS_POD} -n gauth-staging
+kubectl delete pod ${REDIS_POD} -n agentauth-staging
 
 # Wait for pod to be ready
-kubectl wait --for=condition=ready pod -l app=redis -n gauth-staging --timeout=60s
+kubectl wait --for=condition=ready pod -l app=redis -n agentauth-staging --timeout=60s
 
 # Verify data
-kubectl exec ${REDIS_POD} -n gauth-staging -- redis-cli DBSIZE
+kubectl exec ${REDIS_POD} -n agentauth-staging -- redis-cli DBSIZE
 
 # Scale up application
-kubectl scale deployment gauth-blue -n gauth-staging --replicas=3
+kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=3
 ```
 
 ---
@@ -338,14 +338,14 @@ kubectl scale deployment gauth-blue -n gauth-staging --replicas=3
 
 ```bash
 # Create Prometheus snapshot
-kubectl exec <prometheus-pod> -n gauth-staging -- \
+kubectl exec <prometheus-pod> -n agentauth-staging -- \
   curl -XPOST http://localhost:9090/api/v1/admin/tsdb/snapshot
 
 # Get snapshot name from response
 SNAPSHOT_NAME="<snapshot-id>"
 
 # Copy snapshot
-kubectl cp gauth-staging/<prometheus-pod>:/prometheus/snapshots/${SNAPSHOT_NAME} \
+kubectl cp agentauth-staging/<prometheus-pod>:/prometheus/snapshots/${SNAPSHOT_NAME} \
   /backups/prometheus/$(date +%Y%m%d)
 
 # Compress and upload
@@ -353,7 +353,7 @@ tar -czf /backups/prometheus/$(date +%Y%m%d)/prometheus_snapshot.tar.gz \
   -C /backups/prometheus/$(date +%Y%m%d) .
 
 aws s3 cp /backups/prometheus/$(date +%Y%m%d)/prometheus_snapshot.tar.gz \
-  s3://gauth-backups/prometheus/$(date +%Y%m%d)/
+  s3://agentauth-backups/prometheus/$(date +%Y%m%d)/
 ```
 
 ### Grafana Dashboards
@@ -362,11 +362,11 @@ Grafana dashboards are stored in Git and provisioned automatically.
 
 ```bash
 # Export all dashboards
-kubectl exec <grafana-pod> -n gauth-staging -- \
+kubectl exec <grafana-pod> -n agentauth-staging -- \
   grafana-cli admin export-dashboard
 
 # Or backup Grafana database
-kubectl exec <grafana-pod> -n gauth-staging -- \
+kubectl exec <grafana-pod> -n agentauth-staging -- \
   sqlite3 /var/lib/grafana/grafana.db .dump > grafana_backup.sql
 ```
 
@@ -381,7 +381,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: postgresql-backup
-  namespace: gauth-staging
+  namespace: agentauth-staging
 spec:
   schedule: "0 2 * * *"  # Daily at 2 AM
   jobTemplate:
@@ -395,8 +395,8 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  pg_dump -h postgresql -U gauth -d gauth -F c > /backup/gauth_$(date +%Y%m%d_%H%M%S).dump
-                  gzip /backup/gauth_*.dump
+                  pg_dump -h postgresql -U agentauth -d agentauth -F c > /backup/agentauth_$(date +%Y%m%d_%H%M%S).dump
+                  gzip /backup/agentauth_*.dump
               volumeMounts:
                 - name: backup
                   mountPath: /backup

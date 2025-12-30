@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PID_FILE="$ROOT_DIR/gauth-web.pid"
+PID_FILE="$ROOT_DIR/agentauth-web.pid"
 
 if [[ ! -f "$PID_FILE" ]]; then
   echo "[stop-web-demo] No PID file found ($PID_FILE). Is the server running?" >&2

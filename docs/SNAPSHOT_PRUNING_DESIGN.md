@@ -124,7 +124,7 @@ Enhanced Rotation Descriptor Fields (planned):
 ```
 
 Verification Workflow (future):
-1. Canonicalize descriptor (excluding signatures) and domain-separate context (e.g., `gauth:rotation:v1`).
+1. Canonicalize descriptor (excluding signatures) and domain-separate context (e.g., `agentauth:rotation:v1`).
 2. Verify both signatures using known public keys at time of rotation.
 3. Enforce monotonic `effective_time` and continuity via `prev_rotation_hash`.
 4. Fail issuance/verification if rotation descriptor signature checks fail when descriptor present.

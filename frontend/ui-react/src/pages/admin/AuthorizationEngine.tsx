@@ -410,7 +410,7 @@ export default function AuthorizationEngine() {
   };
 
   const handleDeleteAttribute = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this attribute?')) return;
+    if (!confirm('Are you sure you want to delete this attribute?') return;
 
     try {
       const response = await fetch(addTenantParam(`/api/admin/authz/attributes/${id}`), {

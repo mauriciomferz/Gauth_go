@@ -25,21 +25,21 @@ Successfully closed **7 critical and high-priority gaps** across the AgentAuth i
 - Configurable limits for production deployments
 
 **Evidence**:
-- `pkg/gauth/secure_json_test.go` - Security tests with depth/size limits
-- `pkg/gauth/gauth_parsing_prop_test.go` - Property tests
-- `pkg/gauth/parser_fuzz_test.go` - Fuzz harness
+- `pkg/agentauth/secure_json_test.go` - Security tests with depth/size limits
+- `pkg/agentauth/agentauth_parsing_prop_test.go` - Property tests
+- `pkg/agentauth/parser_fuzz_test.go` - Fuzz harness
 
 #### 2. sec1.item5: Public Verifiable Token Integrity
 **Status**: Partial → **Implemented**  
 **Implementation**:
 - Detached signature support for envelope-level verification
-- Fail-closed mode via `GAUTH_REQUIRE_DETACHED_SIGNATURE=1`
+- Fail-closed mode via `AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1`
 - Multi-algorithm support (Ed25519, ECDSA-P256)
 - Comprehensive metrics tracking
 
 **Evidence**:
-- `pkg/rfc0111/rfc0111.go` lines 1260-1320
-- `pkg/rfc0111/detached_signature_fuzz_test.go`
+- `pkg/aap001/aap001.go` lines 1260-1320
+- `pkg/aap001/detached_signature_fuzz_test.go`
 
 #### 3. sec6.item1: Durable Replay Persistence
 **Status**: Partial → **Implemented**  
@@ -50,8 +50,8 @@ Successfully closed **7 critical and high-priority gaps** across the AgentAuth i
 - Fail-closed mode rejects duplicate JTIs with clear errors
 
 **Evidence**:
-- `pkg/gauth/replay_store_bolt.go` - BoltReplayStore implementation
-- `pkg/gauth/replay_store_bolt_test.go` - Comprehensive test coverage
+- `pkg/agentauth/replay_store_bolt.go` - BoltReplayStore implementation
+- `pkg/agentauth/replay_store_bolt_test.go` - Comprehensive test coverage
 
 **Key Features**:
 ```go
@@ -97,14 +97,14 @@ keyID, _ := backend.GenerateAndStoreKey()
 - Service discovery endpoint included
 
 **Evidence**:
-- `api/openapi/gauth-api.yaml` - Full OpenAPI spec
+- `api/openapi/agentauth-api.yaml` - Full OpenAPI spec
 
 **Endpoints Documented**:
 - `POST /poa/issue` - Issue new PoA
 - `POST /poa/verify` - Verify PoA token
 - `POST /poa/revoke` - Revoke PoA
 - `GET /poa/{id}` - Get PoA details
-- `GET /.well-known/gauth-config` - Service discovery
+- `GET /.well-known/agentauth-config` - Service discovery
 
 #### 6. sec11.item1: AI Capability Enforcement
 **Status**: Missing → **Implemented**  
@@ -151,7 +151,7 @@ result, _ := enforcer.Enforce(&UsageContext{
 - `pkg/crypto/signature.go` - Algorithm registry
 - `pkg/crypto/ecdsa_provider.go` - ECDSA implementation
 - `internal/crypto/signalgo/registry.go` - Pluggable algorithm framework
-- `pkg/rfc0111/rfc0111_algorithm_agility_test.go` - Multi-algo tests
+- `pkg/aap001/aap001_algorithm_agility_test.go` - Multi-algo tests
 
 ## Impact Summary
 
@@ -212,33 +212,33 @@ All new implementations include comprehensive test coverage:
 #### Replay Detection
 ```bash
 # Enable BoltDB replay store
-export GAUTH_REPLAY_STORE_PATH=/var/lib/gauth/replay.db
-export GAUTH_REPLAY_TTL=24h
+export AGENTAUTH_REPLAY_STORE_PATH=/var/lib/agentauth/replay.db
+export AGENTAUTH_REPLAY_TTL=24h
 ```
 
 #### Detached Signatures
 ```bash
 # Require detached signatures (fail-closed)
-export GAUTH_REQUIRE_DETACHED_SIGNATURE=1
+export AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1
 ```
 
 #### Vault Integration
 ```bash
 export VAULT_ADDR=https://vault.example.com:8200
 export VAULT_TOKEN=s.xxxxxxxxxxx
-export VAULT_NAMESPACE=gauth  # Optional for Enterprise
+export VAULT_NAMESPACE=agentauth  # Optional for Enterprise
 ```
 
 ### Migration Path
 
 1. **Enable replay persistence**:
-   - Set `GAUTH_REPLAY_STORE_PATH`
+   - Set `AGENTAUTH_REPLAY_STORE_PATH`
    - Existing in-memory JTIs migrate automatically
 
 2. **Enable detached signatures**:
-   - Start with `GAUTH_DETACHED_SIGNATURE=1` (permissive)
+   - Start with `AGENTAUTH_DETACHED_SIGNATURE=1` (permissive)
    - Monitor adoption via metrics
-   - Switch to `GAUTH_REQUIRE_DETACHED_SIGNATURE=1` (mandatory)
+   - Switch to `AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1` (mandatory)
 
 3. **Migrate to Vault**:
    - Deploy Vault with KV v2 enabled

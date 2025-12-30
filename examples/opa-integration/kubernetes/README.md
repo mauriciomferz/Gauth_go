@@ -49,21 +49,21 @@ This directory contains production-ready Kubernetes manifests for deploying Agen
 
 2. **Namespace**
    ```bash
-   kubectl create namespace gauth-system
+   kubectl create namespace agentauth-system
    ```
 
 3. **Secrets** (create before deploying)
    ```bash
    # JWT signing key
-   kubectl create secret generic gauth-secrets \
+   kubectl create secret generic agentauth-secrets \
      --from-literal=jwt-signing-key="$(openssl rand -base64 32)" \
-     -n gauth-system
+     -n agentauth-system
 
    # Database credentials
-   kubectl create secret generic gauth-db-secrets \
-     --from-literal=username=gauth_admin \
+   kubectl create secret generic agentauth-db-secrets \
+     --from-literal=username=agentauth_admin \
      --from-literal=password="YOUR_DB_PASSWORD" \
-     -n gauth-system
+     -n agentauth-system
    ```
 
 ## Deployment Steps
@@ -75,8 +75,8 @@ kubectl apply -f opa-configmap.yaml
 
 **Verify:**
 ```bash
-kubectl get configmap opa-policies -n gauth-system
-kubectl describe configmap opa-policies -n gauth-system
+kubectl get configmap opa-policies -n agentauth-system
+kubectl describe configmap opa-policies -n agentauth-system
 ```
 
 ### 2. Deploy AgentAuth with OPA Sidecar
@@ -87,13 +87,13 @@ kubectl apply -f deployment.yaml
 **Verify:**
 ```bash
 # Check deployment status
-kubectl get deployment gauth-with-opa -n gauth-system
+kubectl get deployment agentauth-with-opa -n agentauth-system
 
 # Check pods
-kubectl get pods -n gauth-system -l app=gauth
+kubectl get pods -n agentauth-system -l app=agentauth
 
 # Check both containers are running
-kubectl get pods -n gauth-system -o jsonpath='{.items[*].status.containerStatuses[*].name}'
+kubectl get pods -n agentauth-system -o jsonpath='{.items[*].status.containerStatuses[*].name}'
 ```
 
 ### 3. Setup Monitoring (Optional)
@@ -111,18 +111,18 @@ kubectl apply -f hpa.yaml
 ### 1. Check Pod Health
 ```bash
 # All containers running
-kubectl get pods -n gauth-system -l app=gauth
+kubectl get pods -n agentauth-system -l app=agentauth
 
 # Expected output:
 # NAME                              READY   STATUS    RESTARTS
-# gauth-with-opa-xxxxx-yyyyy        2/2     Running   0
+# agentauth-with-opa-xxxxx-yyyyy        2/2     Running   0
 ```
 
 ### 2. Check OPA Health
 ```bash
 # Port-forward to OPA
-kubectl port-forward -n gauth-system \
-  svc/gauth 8181:8181
+kubectl port-forward -n agentauth-system \
+  svc/agentauth 8181:8181
 
 # Health check
 curl http://localhost:8181/health
@@ -133,10 +133,10 @@ curl http://localhost:8181/health
 ### 3. Test Policy Evaluation
 ```bash
 # Port-forward if not already done
-kubectl port-forward -n gauth-system svc/gauth 8181:8181
+kubectl port-forward -n agentauth-system svc/agentauth 8181:8181
 
 # Test scope validation
-curl -X POST http://localhost:8181/v1/data/gauth/authz/allow \
+curl -X POST http://localhost:8181/v1/data/agentauth/authz/allow \
   -H "Content-Type: application/json" \
   -d '{
     "input": {
@@ -152,7 +152,7 @@ curl -X POST http://localhost:8181/v1/data/gauth/authz/allow \
 ### 4. Check AgentAuth Application
 ```bash
 # Port-forward to AgentAuth
-kubectl port-forward -n gauth-system svc/gauth 8080:80
+kubectl port-forward -n agentauth-system svc/agentauth 8080:80
 
 # Health check
 curl http://localhost:8080/health
@@ -165,24 +165,24 @@ curl http://localhost:8080/health
 ### Hot-Reload (No Downtime)
 ```bash
 # Edit ConfigMap
-kubectl edit configmap opa-policies -n gauth-system
+kubectl edit configmap opa-policies -n agentauth-system
 
 # Trigger rolling update
-kubectl rollout restart deployment gauth-with-opa -n gauth-system
+kubectl rollout restart deployment agentauth-with-opa -n agentauth-system
 
 # Watch rollout
-kubectl rollout status deployment gauth-with-opa -n gauth-system
+kubectl rollout status deployment agentauth-with-opa -n agentauth-system
 ```
 
 ### Verify New Policy
 ```bash
 # Check ConfigMap version
-kubectl get configmap opa-policies -n gauth-system \
+kubectl get configmap opa-policies -n agentauth-system \
   -o jsonpath='{.metadata.resourceVersion}'
 
 # Check if pods picked up new policy
-kubectl logs -n gauth-system \
-  -l app=gauth -c opa --tail=50 | grep "Bundle loaded"
+kubectl logs -n agentauth-system \
+  -l app=agentauth -c opa --tail=50 | grep "Bundle loaded"
 ```
 
 ## Scaling
@@ -190,11 +190,11 @@ kubectl logs -n gauth-system \
 ### Manual Scaling
 ```bash
 # Scale to 5 replicas
-kubectl scale deployment gauth-with-opa \
-  -n gauth-system --replicas=5
+kubectl scale deployment agentauth-with-opa \
+  -n agentauth-system --replicas=5
 
 # Verify
-kubectl get pods -n gauth-system -l app=gauth
+kubectl get pods -n agentauth-system -l app=agentauth
 ```
 
 ### Auto-Scaling
@@ -203,10 +203,10 @@ kubectl get pods -n gauth-system -l app=gauth
 kubectl apply -f hpa.yaml
 
 # Check HPA status
-kubectl get hpa gauth-hpa -n gauth-system
+kubectl get hpa agentauth-hpa -n agentauth-system
 
 # Watch scaling events
-kubectl get hpa gauth-hpa -n gauth-system -w
+kubectl get hpa agentauth-hpa -n agentauth-system -w
 ```
 
 ## Monitoring
@@ -215,17 +215,17 @@ kubectl get hpa gauth-hpa -n gauth-system -w
 
 **AgentAuth container:**
 ```bash
-kubectl logs -n gauth-system -l app=gauth -c gauth --tail=100 -f
+kubectl logs -n agentauth-system -l app=agentauth -c agentauth --tail=100 -f
 ```
 
 **OPA container:**
 ```bash
-kubectl logs -n gauth-system -l app=gauth -c opa --tail=100 -f
+kubectl logs -n agentauth-system -l app=agentauth -c opa --tail=100 -f
 ```
 
 **Both containers:**
 ```bash
-kubectl logs -n gauth-system -l app=gauth --all-containers=true -f
+kubectl logs -n agentauth-system -l app=agentauth --all-containers=true -f
 ```
 
 ### Metrics
@@ -245,7 +245,7 @@ open http://localhost:9090
 
 ### Events
 ```bash
-kubectl get events -n gauth-system --sort-by='.lastTimestamp'
+kubectl get events -n agentauth-system --sort-by='.lastTimestamp'
 ```
 
 ## Troubleshooting
@@ -254,7 +254,7 @@ kubectl get events -n gauth-system --sort-by='.lastTimestamp'
 
 **Check pod status:**
 ```bash
-kubectl describe pod -n gauth-system -l app=gauth
+kubectl describe pod -n agentauth-system -l app=agentauth
 ```
 
 **Common issues:**
@@ -266,7 +266,7 @@ kubectl describe pod -n gauth-system -l app=gauth
 
 **Check OPA logs:**
 ```bash
-kubectl logs -n gauth-system -l app=gauth -c opa
+kubectl logs -n agentauth-system -l app=agentauth -c opa
 ```
 
 **Common issues:**
@@ -278,9 +278,9 @@ kubectl logs -n gauth-system -l app=gauth -c opa
 
 **Test from AgentAuth container:**
 ```bash
-kubectl exec -n gauth-system -it \
-  $(kubectl get pod -n gauth-system -l app=gauth -o name | head -n1) \
-  -c gauth -- sh
+kubectl exec -n agentauth-system -it \
+  $(kubectl get pod -n agentauth-system -l app=agentauth -o name | head -n1) \
+  -c agentauth -- sh
 
 # Inside container:
 wget -qO- http://localhost:8181/health
@@ -295,7 +295,7 @@ wget -qO- http://localhost:8181/health
 
 **Check resource usage:**
 ```bash
-kubectl top pods -n gauth-system -l app=gauth
+kubectl top pods -n agentauth-system -l app=agentauth
 ```
 
 **Common issues:**
@@ -308,17 +308,17 @@ kubectl top pods -n gauth-system -l app=gauth
 **Verify ConfigMap version:**
 ```bash
 # Get ConfigMap revision
-kubectl get configmap opa-policies -n gauth-system \
+kubectl get configmap opa-policies -n agentauth-system \
   -o jsonpath='{.metadata.resourceVersion}'
 
 # Get pod's ConfigMap revision
-kubectl get pod -n gauth-system -l app=gauth \
+kubectl get pod -n agentauth-system -l app=agentauth \
   -o jsonpath='{.items[0].spec.volumes[?(@.name=="opa-policies")].configMap.name}'
 ```
 
 **Force restart:**
 ```bash
-kubectl rollout restart deployment gauth-with-opa -n gauth-system
+kubectl rollout restart deployment agentauth-with-opa -n agentauth-system
 ```
 
 ## Security Best Practices
@@ -328,12 +328,12 @@ kubectl rollout restart deployment gauth-with-opa -n gauth-system
    apiVersion: networking.k8s.io/v1
    kind: NetworkPolicy
    metadata:
-     name: gauth-netpol
-     namespace: gauth-system
+     name: agentauth-netpol
+     namespace: agentauth-system
    spec:
      podSelector:
        matchLabels:
-         app: gauth
+         app: agentauth
      policyTypes:
      - Ingress
      - Egress
@@ -360,16 +360,16 @@ kubectl rollout restart deployment gauth-with-opa -n gauth-system
 
 2. **Rotate secrets regularly**:
    ```bash
-   kubectl create secret generic gauth-secrets \
+   kubectl create secret generic agentauth-secrets \
      --from-literal=jwt-signing-key="$(openssl rand -base64 32)" \
      --dry-run=client -o yaml | kubectl apply -f -
    
-   kubectl rollout restart deployment gauth-with-opa -n gauth-system
+   kubectl rollout restart deployment agentauth-with-opa -n agentauth-system
    ```
 
 3. **Use PodSecurityPolicy** or **Pod Security Standards**:
    ```bash
-   kubectl label namespace gauth-system \
+   kubectl label namespace agentauth-system \
      pod-security.kubernetes.io/enforce=restricted
    ```
 
@@ -389,7 +389,7 @@ kubectl delete -f opa-configmap.yaml
 
 ### Remove namespace (CAUTION: deletes all resources)
 ```bash
-kubectl delete namespace gauth-system
+kubectl delete namespace agentauth-system
 ```
 
 ## Production Checklist

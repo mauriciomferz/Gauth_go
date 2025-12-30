@@ -1,5 +1,5 @@
 # Model Context Protocol (MCP) Integration Architecture Design
-## RFC-0111 Building Block Implementation
+## AAP-001 Building Block Implementation
 
 **Document Version**: 1.0  
 **Date**: November 12, 2025  
@@ -11,7 +11,7 @@
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [RFC-0111 Requirements](#rfc-0111-requirements)
+2. [AAP-001 Requirements](#rfc-0111-requirements)
 3. [MCP Protocol Overview](#mcp-protocol-overview)
 4. [Current State Analysis](#current-state-analysis)
 5. [Design Goals](#design-goals)
@@ -30,7 +30,7 @@
 
 ### Purpose
 
-This document defines the architecture for integrating the **Model Context Protocol (MCP)** as a required building block into the AgentAuth 1.0 implementation, ensuring full compliance with RFC-0111 Section 1 (Scope) requirements.
+This document defines the architecture for integrating the **Model Context Protocol (MCP)** as a required building block into the AgentAuth 1.0 implementation, ensuring full compliance with AAP-001 Section 1 (Scope) requirements.
 
 ### What is MCP?
 
@@ -44,20 +44,20 @@ This document defines the architecture for integrating the **Model Context Proto
 
 **Evidence from Audit**:
 ```bash
-$ grep -r "MCP\|ModelContext\|model.*context.*protocol" pkg/gauth/*.go
+$ grep -r "MCP\|ModelContext\|model.*context.*protocol" pkg/agentauth/*.go
 # No matches found
 
 MCP Compliance: 0%
 ```
 
-**RFC-0111 Context**:
+**AAP-001 Context**:
 > "In this context, the Model Context Protocol (MCP) was developed by the company Anthropic together with a developer community and represents an open standard that enables developers to establish bidirectional connections between data sources and AI-supported tools... MCP applications typically use OAuth together with OpenID Connect or comparable standards."
 
 **Impact**: 
 - Cannot connect AI clients to external data sources
 - No standardized tool invocation for AI agents
 - Missing crucial AI governance integration point
-- Violates RFC-0111 building block requirement
+- Violates AAP-001 building block requirement
 
 ### Solution Approach
 
@@ -71,7 +71,7 @@ MCP Compliance: 0%
 
 ### Expected Outcomes
 
-- ✅ RFC-0111 MCP requirement satisfied (0% → 85%)
+- ✅ AAP-001 MCP requirement satisfied (0% → 85%)
 - ✅ Overall compliance increase (+7%): 68% → 75% (with OIDC)
 - ✅ AI agents can access external data sources securely
 - ✅ Standardized tool invocation with authorization
@@ -79,11 +79,11 @@ MCP Compliance: 0%
 
 ---
 
-## RFC-0111 Requirements
+## AAP-001 Requirements
 
 ### Section 1: Scope - Building Blocks
 
-**Direct Quote from RFC-0111**:
+**Direct Quote from AAP-001**:
 > "AgentAuth builds on the following standards as building blocks:
 > 
 > **MCP or its alternatives, including but not limited to:**
@@ -91,7 +91,7 @@ MCP Compliance: 0%
 
 ### Section 3: Why AgentAuth (Context)
 
-**RFC-0111 on MCP's Role**:
+**AAP-001 on MCP's Role**:
 > "In this context, the Model Context Protocol (MCP) was developed by the company Anthropic together with a developer community and represents an open standard that enables developers to establish bidirectional connections between data sources and AI-supported tools. Although it represents a step forward in the integration of AI, it does not comprehensively address governance aspects, in particular the question of authorizing and legitimizing AI for its decisions or actions. MCP applications typically use OAuth together with OpenID Connect or comparable standards.
 > 
 > Due to inadequate AI governance, both the combination of MCP, OAuth and OpenID Connect or comparable alternative standards are reaching their limits. It is not sufficient to limit AI authorization to access rights."
@@ -222,9 +222,9 @@ func (a *Agent) EvaluateEnforcement(ctx context.Context,
 
 ---
 
-**2. Authorization Chain** (`pkg/gauth/`):
+**2. Authorization Chain** (`pkg/agentauth/`):
 ```go
-// ExtendedToken represents RFC-0111 authorization credential
+// ExtendedToken represents AAP-001 authorization credential
 type ExtendedToken struct {
     AccessToken          string
     TokenType            string
@@ -252,7 +252,7 @@ type ExtendedToken struct {
 
 ---
 
-**3. Policy Decision Point (PDP)** (`pkg/gauth/pdp_bridge.go`):
+**3. Policy Decision Point (PDP)** (`pkg/agentauth/pdp_bridge.go`):
 ```go
 // PDPBridge validates policy compliance
 type PDPBridge struct {
@@ -290,7 +290,7 @@ func (b *PDPBridge) EvaluatePolicy(ctx context.Context,
 
 ### Primary Goals
 
-1. **RFC-0111 Compliance**: Satisfy MCP building block requirement
+1. **AAP-001 Compliance**: Satisfy MCP building block requirement
 2. **AI Governance**: Apply AgentAuth authorization to MCP resource access
 3. **Standardization**: Use official MCP protocol specification
 4. **Auditability**: Full audit trail of AI-resource interactions
@@ -846,16 +846,16 @@ import (
     "fmt"
     "strings"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 
 // AuthorizationBridge maps AgentAuth tokens to MCP permissions
 type AuthorizationBridge struct {
-    pdpClient gauth.PDPClient
+    pdpClient agentauth.PDPClient
 }
 
 // NewAuthorizationBridge creates authorization bridge
-func NewAuthorizationBridge(pdpClient gauth.PDPClient) *AuthorizationBridge {
+func NewAuthorizationBridge(pdpClient agentauth.PDPClient) *AuthorizationBridge {
     return &AuthorizationBridge{
         pdpClient: pdpClient,
     }
@@ -864,7 +864,7 @@ func NewAuthorizationBridge(pdpClient gauth.PDPClient) *AuthorizationBridge {
 // AuthorizeResourceRead checks if token authorizes reading MCP resource
 func (b *AuthorizationBridge) AuthorizeResourceRead(
     ctx context.Context,
-    token *gauth.ExtendedToken,
+    token *agentauth.ExtendedToken,
     resourceURI string,
 ) (bool, error) {
     // Check token scope
@@ -892,7 +892,7 @@ func (b *AuthorizationBridge) AuthorizeResourceRead(
 // AuthorizeToolCall checks if token authorizes calling MCP tool
 func (b *AuthorizationBridge) AuthorizeToolCall(
     ctx context.Context,
-    token *gauth.ExtendedToken,
+    token *agentauth.ExtendedToken,
     toolName string,
     arguments map[string]interface{},
 ) (bool, error) {
@@ -926,7 +926,7 @@ func (b *AuthorizationBridge) AuthorizeToolCall(
 }
 
 // hasScope checks if token contains required scope
-func (b *AuthorizationBridge) hasScope(token *gauth.ExtendedToken, 
+func (b *AuthorizationBridge) hasScope(token *agentauth.ExtendedToken, 
     requiredScope string) bool {
     
     for _, scope := range token.Scope {
@@ -945,7 +945,7 @@ func (b *AuthorizationBridge) hasScope(token *gauth.ExtendedToken,
 }
 
 // ExtractMCPScopes extracts MCP-related scopes from token
-func (b *AuthorizationBridge) ExtractMCPScopes(token *gauth.ExtendedToken) []string {
+func (b *AuthorizationBridge) ExtractMCPScopes(token *agentauth.ExtendedToken) []string {
     mcpScopes := make([]string, 0)
     for _, scope := range token.Scope {
         if strings.HasPrefix(scope, "mcp:") {
@@ -972,10 +972,10 @@ mcp:sampling:request           - Request AI model sampling
 
 **Purpose**: Add MCP-specific policy evaluation.
 
-**File**: `pkg/gauth/pdp_bridge_mcp.go`
+**File**: `pkg/agentauth/pdp_bridge_mcp.go`
 
 ```go
-package gauth
+package agentauth
 
 import (
     "context"
@@ -1188,14 +1188,14 @@ import (
     "context"
     "fmt"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/mcp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/mcp"
 )
 
 // MCPAgent wraps Agent with MCP capabilities
 type MCPAgent struct {
     *Agent
-    token              *gauth.ExtendedToken
+    token              *agentauth.ExtendedToken
     connectionManager  *mcp.ConnectionManager
     authBridge         *mcp.AuthorizationBridge
     auditLogger        *mcp.AuditLogger
@@ -1204,7 +1204,7 @@ type MCPAgent struct {
 // NewMCPAgent creates MCP-enabled agent
 func NewMCPAgent(
     agent *Agent,
-    token *gauth.ExtendedToken,
+    token *agentauth.ExtendedToken,
     connectionManager *mcp.ConnectionManager,
     authBridge *mcp.AuthorizationBridge,
     auditLogger *mcp.AuditLogger,
@@ -1314,13 +1314,13 @@ func (a *MCPAgent) CallMCPTool(ctx context.Context,
 
 ### MCP Scopes in Extended Token
 
-**Modified ExtendedTokenRequest** (`pkg/gauth/extended_token.go`):
+**Modified ExtendedTokenRequest** (`pkg/agentauth/extended_token.go`):
 
 ```go
 // Example: Requesting token with MCP scopes
 tokenRequest := &ExtendedTokenRequest{
     Scope: []string{
-        "gauth:authorization",
+        "agentauth:authorization",
         "mcp:resource:read",
         "mcp:resource:read:db/customers",  // Specific resource
         "mcp:tool:call",
@@ -1687,12 +1687,12 @@ mcp:
 2. **gorilla/websocket** (WebSocket transport)  
    https://github.com/gorilla/websocket
 
-### RFC-0111 Context
+### AAP-001 Context
 
-1. **RFC-0111 (AgentAuth 1.0)** - Section 3: Why AgentAuth  
+1. **AAP-001 (AgentAuth 1.0)** - Section 3: Why AgentAuth  
    Discusses MCP's role and limitations
 
-2. **RFC-0111 (AgentAuth 1.0)** - Section 1: Scope  
+2. **AAP-001 (AgentAuth 1.0)** - Section 1: Scope  
    Lists MCP as required building block
 
 ---
@@ -1713,7 +1713,7 @@ mcp:
 - ✅ AI agents can call tools on MCP servers
 - ✅ Authorization enforced on all MCP operations
 - ✅ All MCP operations logged in audit trail
-- ✅ RFC-0111 compliance increased: 68% → 75% (+7%)
+- ✅ AAP-001 compliance increased: 68% → 75% (+7%)
 - ✅ All tests passing (unit, integration, E2E)
 - ✅ Documentation complete
 - ✅ Security audit passed
@@ -1723,4 +1723,4 @@ mcp:
 **Document Status**: Ready for Implementation  
 **Next Review**: After Phase 1 completion (Week 1)  
 **Owner**: AgentAuth Development Team  
-**Stakeholders**: RFC-0111 Compliance Team, Security Team, AI Governance Team
+**Stakeholders**: AAP-001 Compliance Team, Security Team, AI Governance Team

@@ -766,7 +766,7 @@ export default function Subscribers() {
     );
   }
 
-  const progressWidth = ((currentStep - 1) / (steps.length - 1)) * 90;
+  const progressWidth = ((currentStep - 1) / (steps.length - 1) * 90;
 
   return (
     <div className={classes.container}>

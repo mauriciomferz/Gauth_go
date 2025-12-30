@@ -25,5 +25,5 @@
     "Endpoint currently returns single-sign summary; this illustrates threshold >=2 support.",
     "Signatures are placeholders (not cryptographically valid)."
   ],
-  "rfc_refs": ["gauth_rfc_001:rotation_invariants", "gauth_rfc_001:rotation_summary", "gauth_rfc_001:multisig_future"]
+  "rfc_refs": ["agentauth_rfc_001:rotation_invariants", "agentauth_rfc_001:rotation_summary", "agentauth_rfc_001:multisig_future"]
 }

@@ -8,10 +8,10 @@ The following metrics are tracked in-memory and exported via Prometheus/OpenTele
 
 | Metric Name | Category | Description |
 | ----------- | -------- | ----------- |
-| `gauth_violation_scope_utf8_invalid_total` | Hygiene | Incremented when a `scope` entry contains invalid UTF-8 sequences. |
-| `gauth_violation_scope_control_char_total` | Hygiene | Incremented when a `scope` entry contains ASCII control characters (0x00-0x1F, 0x7F). |
-| `gauth_violation_restriction_utf8_invalid_total` | Hygiene | Incremented when a `restriction` key or value contains invalid UTF-8. |
-| `gauth_violation_restriction_control_char_total` | Hygiene | Incremented when a `restriction` key or value contains ASCII control characters. |
+| `agentauth_violation_scope_utf8_invalid_total` | Hygiene | Incremented when a `scope` entry contains invalid UTF-8 sequences. |
+| `agentauth_violation_scope_control_char_total` | Hygiene | Incremented when a `scope` entry contains ASCII control characters (0x00-0x1F, 0x7F). |
+| `agentauth_violation_restriction_utf8_invalid_total` | Hygiene | Incremented when a `restriction` key or value contains invalid UTF-8. |
+| `agentauth_violation_restriction_control_char_total` | Hygiene | Incremented when a `restriction` key or value contains ASCII control characters. |
 
 ## Enforcement
 

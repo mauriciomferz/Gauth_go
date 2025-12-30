@@ -82,7 +82,7 @@ class WebSocketManager {
   }
 
   on(eventType: string, callback: EventCallback) {
-    if (!this.listeners.has(eventType)) {
+    if (!this.listeners.has(eventType) {
       this.listeners.set(eventType, new Set())
     }
     this.listeners.get(eventType)!.add(callback)
@@ -140,7 +140,7 @@ export function useWebSocketEvent(eventType: string, callback: EventCallback) {
 
   useEffect(() => {
     // Connect if not already connected
-    if (!wsManager.isConnected()) {
+    if (!wsManager.isConnected() {
       wsManager.connect()
     }
 

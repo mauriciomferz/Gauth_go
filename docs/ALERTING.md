@@ -16,7 +16,7 @@ This guide provides sample Prometheus alerting rules and operational recommendat
 
 Primary gauges now exported directly (no recording rule required for age):
 
-Metric: `gauth_rfc0111_capability_anchor_last_write_seconds`
+Metric: `agentauth_aap001_capability_anchor_last_write_seconds`
 Type: Gauge
 Semantics: Unix epoch seconds of the last successful capability anchor artifact emission (unsigned or signed wrapper).
 
@@ -29,9 +29,9 @@ Type: Gauge (0|1)
 Semantics: 1 when the anchor age exceeds internal stale threshold (`stale_threshold_seconds`), else 0. Threshold value exposed via status endpoint (`/api/v1/beta/capabilities/anchor/status`).
 
 Counters (exposed via Prometheus exposition endpoint `/api/v1/beta/capabilities/anchor/metrics/prometheus`):
-- `gauth_rfc0111_capability_anchor_emitted_total` – successful emission events.
-- `gauth_rfc0111_capability_anchor_skipped_total` – skipped because registry unchanged.
-- `gauth_rfc0111_capability_anchor_hash_changed_total` – hash changed events (indicates registry evolution or potential tamper if unexpected).
+- `agentauth_aap001_capability_anchor_emitted_total` – successful emission events.
+- `agentauth_aap001_capability_anchor_skipped_total` – skipped because registry unchanged.
+- `agentauth_aap001_capability_anchor_hash_changed_total` – hash changed events (indicates registry evolution or potential tamper if unexpected).
 Histogram:
 - `capability_anchor_emission_interval_seconds` – distribution of intervals between successful emissions (excluding skips) for jitter / stall analysis.
 Gauge:
@@ -42,7 +42,7 @@ Stale anchoring may indicate:
 - Background emission loop failure.
 - File system permissions or disk full conditions preventing writes.
 - Logic regressions impacting canonical hash computation.
-- Cryptographic signing failures (when `GAUTH_CAP_ANCHOR_SIGN=1`).
+- Cryptographic signing failures (when `AGENTAUTH_CAP_ANCHOR_SIGN=1`).
 
 Timely detection ensures capability registry integrity and auditability.
 
@@ -50,12 +50,12 @@ Timely detection ensures capability registry integrity and auditability.
 Use these only if the native gauges are temporarily unavailable or for derived aggregations.
 ```
 # Fallback age derivation (not needed if capability_anchor_age_seconds exists)
-- record: gauth_capability_anchor_age_seconds
-  expr: time() - gauth_rfc0111_capability_anchor_last_write_seconds
+- record: agentauth_capability_anchor_age_seconds
+  expr: time() - agentauth_aap001_capability_anchor_last_write_seconds
 
 # Hourly emission rate (requires emitted counter)
-- record: gauth_capability_anchor_emissions_per_hour
-  expr: rate(gauth_rfc0111_capability_anchor_emitted_total[1h]) * 3600
+- record: agentauth_capability_anchor_emissions_per_hour
+  expr: rate(agentauth_aap001_capability_anchor_emitted_total[1h]) * 3600
 ```
 
 ## Core Alerts (Using Native Gauges)
@@ -84,7 +84,7 @@ Use these only if the native gauges are temporarily unavailable or for derived a
 
 # 3. Emission Gap (no new anchors)
 - alert: CapabilityAnchorEmissionGap
-  expr: increase(gauth_rfc0111_capability_anchor_emitted_total[30m]) == 0
+  expr: increase(agentauth_aap001_capability_anchor_emitted_total[30m]) == 0
   for: 10m
   labels:
     severity: warning
@@ -95,7 +95,7 @@ Use these only if the native gauges are temporarily unavailable or for derived a
 
 # 4. Unexpected High Hash Change Rate (possible churn or tamper)
 - alert: CapabilityAnchorHashChurnHigh
-  expr: rate(gauth_rfc0111_capability_anchor_hash_changed_total[15m]) > 5
+  expr: rate(agentauth_aap001_capability_anchor_hash_changed_total[15m]) > 5
   for: 10m
   labels:
     severity: warning
@@ -130,31 +130,31 @@ Use these only if the native gauges are temporarily unavailable or for derived a
 ## Runbook: CapabilityAnchorStaleCritical
 1. Check process health: is the service running? (`/healthz`).
 2. Inspect logs for anchor emission errors (search for `[cap-anchor]`).
-3. Validate file path configuration: `GAUTH_CAP_ANCHOR_FILE_PATH` exists and writable.
-4. Confirm interval: `GAUTH_CAP_ANCHOR_WRITE_INTERVAL` set as expected.
-5. If signing enabled (`GAUTH_CAP_ANCHOR_SIGN=1`), verify EdDSA key availability via `/api/v1/beta/keys/eddsa`.
+3. Validate file path configuration: `AGENTAUTH_CAP_ANCHOR_FILE_PATH` exists and writable.
+4. Confirm interval: `AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL` set as expected.
+5. If signing enabled (`AGENTAUTH_CAP_ANCHOR_SIGN=1`), verify EdDSA key availability via `/api/v1/beta/keys/eddsa`.
 6. Manually trigger reload: `POST /api/v1/beta/capabilities/reload`; observe if `last_write` updates.
 7. If hash changed unexpectedly, compare canonical registry JSON ordering and recently merged capability changes.
 
 ## External Notarization (Prototype Metrics)
-When `GAUTH_CAP_ANCHOR_NOTARIZE=1` and a notarizer is configured, additional metrics appear:
+When `AGENTAUTH_CAP_ANCHOR_NOTARIZE=1` and a notarizer is configured, additional metrics appear:
 
-Metric: `gauth_capability_anchor_notarization_latency_seconds`
+Metric: `agentauth_capability_anchor_notarization_latency_seconds`
 Type: Histogram
 Semantics: Round-trip latency of external notarization submissions. Used for SLOs (e.g., p95 < 2s). Near-zero in memory prototype.
 
-Metric: `gauth_capability_anchor_notarized_age_seconds`
+Metric: `agentauth_capability_anchor_notarized_age_seconds`
 Type: Gauge
 Semantics: Seconds since last successful notarization receipt. Age resets to 0 if never successful; suppress alerts until first success.
 
-Metric: `gauth_capability_anchor_notarization_failures_total`
+Metric: `agentauth_capability_anchor_notarization_failures_total`
 Type: Counter
 Semantics: Cumulative failures submitting hash to external notary. Combine with lack of latency histogram updates to detect total outage.
 
 Example Alerts:
 ```
 - alert: CapabilityAnchorHighNotarizationLatency
-  expr: histogram_quantile(0.95, sum(rate(gauth_capability_anchor_notarization_latency_seconds_bucket[5m])) by (le)) > 2
+  expr: histogram_quantile(0.95, sum(rate(agentauth_capability_anchor_notarization_latency_seconds_bucket[5m]) by (le) > 2
   for: 10m
   labels: { severity: warning }
   annotations:
@@ -162,7 +162,7 @@ Example Alerts:
     description: "p95 notarization latency >2s for 10m. Check external service health."
 
 - alert: CapabilityAnchorStaleExternalNotarization
-  expr: gauth_capability_anchor_notarized_age_seconds > 1200
+  expr: agentauth_capability_anchor_notarized_age_seconds > 1200
   for: 5m
   labels: { severity: critical }
   annotations:
@@ -170,7 +170,7 @@ Example Alerts:
     description: "No successful notarization in >20m. Investigate emission loop and notary availability."
 
 - alert: CapabilityAnchorNotarizationFailuresSurge
-  expr: increase(gauth_capability_anchor_notarization_failures_total[10m]) > 5
+  expr: increase(agentauth_capability_anchor_notarization_failures_total[10m]) > 5
   labels: { severity: warning }
   annotations:
     summary: Notarization failures surge

@@ -5,23 +5,23 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // CustomResourceServer extends the basic ResourceServer with additional functionality
 type CustomResourceServer struct {
-	*gauth.ResourceServer
+	*agentauth.ResourceServer
 	customMetrics map[string]int64
 }
 
-func NewCustomResourceServer(id string, auth *gauth.Service) *CustomResourceServer {
+func NewCustomResourceServer(id string, auth *agentauth.Service) *CustomResourceServer {
 	return &CustomResourceServer{
-		ResourceServer: gauth.NewResourceServer(id, auth),
+		ResourceServer: agentauth.NewResourceServer(id, auth),
 		customMetrics:  make(map[string]int64),
 	}
 }
 
-func (c *CustomResourceServer) ProcessCustomTransaction(tx gauth.TransactionDetails, token string) error {
+func (c *CustomResourceServer) ProcessCustomTransaction(tx agentauth.TransactionDetails, token string) error {
 	// Custom validation
 	if tx.Amount <= 0 {
 		return fmt.Errorf("invalid amount: %f", tx.Amount)
@@ -43,7 +43,7 @@ func (c *CustomResourceServer) ProcessCustomTransaction(tx gauth.TransactionDeta
 
 func main() {
 	// Initialize AgentAuth
-	config := gauth.Config{
+	config := agentauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "custom-client",
 		ClientSecret:      "custom-secret",
@@ -51,7 +51,7 @@ func main() {
 		AccessTokenExpiry: time.Hour,
 	}
 
-	auth, err := gauth.New(config)
+	auth, err := agentauth.New(config)
 	if err != nil {
 		log.Fatalf("Failed to initialize AgentAuth: %v", err)
 	}
@@ -60,7 +60,7 @@ func main() {
 	server := NewCustomResourceServer("custom-resource", auth)
 
 	// Get authorization
-	authReq := gauth.AuthorizationRequest{
+	authReq := agentauth.AuthorizationRequest{
 		ClientID: "custom-client",
 		Scopes:   []string{"custom:write"},
 	}
@@ -71,7 +71,7 @@ func main() {
 	}
 
 	// Get token
-	tokenResp, err := auth.RequestToken(gauth.TokenRequest{
+	tokenResp, err := auth.RequestToken(agentauth.TokenRequest{
 		GrantID: grant.GrantID,
 		Scope:   grant.Scope,
 	})
@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// Process custom transactions
-	transactions := []gauth.TransactionDetails{
+	transactions := []agentauth.TransactionDetails{
 		{
 			Type:   "special_payment",
 			Amount: 150.0,

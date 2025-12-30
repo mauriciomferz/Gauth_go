@@ -11,7 +11,7 @@ echo "1. Core Package Build Tests:"
 echo "   Testing that all core packages build successfully..."
 
 # Test core package builds
-go build ./pkg/gauth/... && echo "   ✅ pkg/gauth builds successfully"
+go build ./pkg/agentauth/... && echo "   ✅ pkg/agentauth builds successfully"
 go build ./pkg/token/... && echo "   ✅ pkg/token builds successfully" 
 go build ./pkg/events/... && echo "   ✅ pkg/events builds successfully"
 go build ./pkg/resilience/... && echo "   ✅ pkg/resilience builds successfully"
@@ -28,7 +28,7 @@ echo "   ✅ Advanced revocation flow test passes"
 
 echo ""
 echo "3. Main Application Build Test:"
-go build -o /tmp/gauth-test ./cmd/gauth-server && echo "   ✅ Main gauth-server builds successfully"
+go build -o /tmp/agentauth-test ./cmd/agentauth-server && echo "   ✅ Main agentauth-server builds successfully"
 
 echo ""  
 echo "4. Key Example Build Tests:"

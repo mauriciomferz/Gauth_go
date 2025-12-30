@@ -12,9 +12,9 @@ Phase 2A backend endpoints are **ready to use**! All 11 API endpoints have been 
 ### Quick Start
 
 ```bash
-# 1. Start the server (IMPORTANT: Must set GAUTH_AAP-001_ENABLED=1)
-cd /path/to/Gauth_go
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+# 1. Start the server (IMPORTANT: Must set AGENTAUTH_AAP-001_ENABLED=1)
+cd /path/to/AgentAuth
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 # 2. Test an endpoint
 curl -X POST http://localhost:8080/api/v1/beta/pvp/verify \
@@ -44,8 +44,8 @@ curl -X POST http://localhost:8080/api/v1/beta/pvp/verify \
 - `POST /api/v1/beta/poa/:id/validate` - Validate PoA for specific action
 
 **Additional Existing Endpoints** (2 endpoints):
-- `POST /api/v1/rfc0111/authorize` - Request authorization token
-- `POST /api/v1/rfc0111/token/validate` - Validate token
+- `POST /api/v1/aap001/authorize` - Request authorization token
+- `POST /api/v1/aap001/token/validate` - Validate token
 
 ### ✅ Frontend Integration Complete
 
@@ -53,7 +53,7 @@ All React UI pages now call real backend endpoints:
 - **PVP Page**: Uses `/beta/pvp/verify`
 - **Registry Page**: Uses `/beta/registry/*` endpoints
 - **PoA Page**: Uses `/beta/poa/*` endpoints
-- **Tokens Page**: Uses existing RFC-0111 endpoints
+- **Tokens Page**: Uses existing AAP-001 endpoints
 
 **Result**: 0 UI mocks remaining ✅
 
@@ -61,27 +61,27 @@ All React UI pages now call real backend endpoints:
 
 ## Important: Server Configuration
 
-### ⚠️ CRITICAL: RFC-0111 Flag Required
+### ⚠️ CRITICAL: AAP-001 Flag Required
 
-Phase 2A endpoints **only work** when `GAUTH_AAP-001_ENABLED=1` is set.
+Phase 2A endpoints **only work** when `AGENTAUTH_AAP-001_ENABLED=1` is set.
 
 **Correct** (endpoints available):
 ```bash
-GAUTH_AAP-001_ENABLED=1 GAUTH_DEV_INDEX=1 go run ./cmd/web-server
+AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_DEV_INDEX=1 go run ./cmd/web-server
 ```
 
 **Incorrect** (endpoints return 404):
 ```bash
-go run ./cmd/web-server  # Missing GAUTH_AAP-001_ENABLED=1
+go run ./cmd/web-server  # Missing AGENTAUTH_AAP-001_ENABLED=1
 ```
 
 ### Environment Variables
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `GAUTH_AAP-001_ENABLED` | ✅ Yes | Enables RFC-0111 and Phase 2A endpoints |
-| `GAUTH_DEV_INDEX` | ⚠️ Recommended | Serves UI from disk (dev mode) |
-| `GAUTH_WEB_PORT` | ❌ Optional | Custom port (default: 8080) |
+| `AGENTAUTH_AAP-001_ENABLED` | ✅ Yes | Enables AAP-001 and Phase 2A endpoints |
+| `AGENTAUTH_DEV_INDEX` | ⚠️ Recommended | Serves UI from disk (dev mode) |
+| `AGENTAUTH_WEB_PORT` | ❌ Optional | Custom port (default: 8080) |
 
 ---
 
@@ -90,8 +90,8 @@ go run ./cmd/web-server  # Missing GAUTH_AAP-001_ENABLED=1
 ### 1. Start the Server
 
 ```bash
-cd /path/to/Gauth_go
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+cd /path/to/AgentAuth
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 Wait for this log message:
@@ -200,8 +200,8 @@ curl -X POST http://localhost:8080/api/v1/beta/poa/$POA_ID/validate \
 ### 1. Start Backend
 
 ```bash
-cd /path/to/Gauth_go
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+cd /path/to/AgentAuth
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 ### 2. Start Frontend (Optional - for React dev server)
@@ -252,16 +252,16 @@ npm run dev
 
 **Problem**: All `/api/v1/beta/*` endpoints return 404
 
-**Solution**: Set `GAUTH_AAP-001_ENABLED=1`:
+**Solution**: Set `AGENTAUTH_AAP-001_ENABLED=1`:
 ```bash
-GAUTH_AAP-001_ENABLED=1 GAUTH_DEV_INDEX=1 go run ./cmd/web-server
+AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_DEV_INDEX=1 go run ./cmd/web-server
 ```
 
 **Verify**: Check server logs for this message:
 ```
-[RFC-0111] Endpoints registered:
-[RFC-0111]   Beta External Service APIs:
-[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)
+[AAP-001] Endpoints registered:
+[AAP-001]   Beta External Service APIs:
+[AAP-001]     POST /api/v1/beta/pvp/verify (PVP identity verification)
 ...
 ```
 
@@ -359,7 +359,7 @@ See `docs/PHASE_2A_TESTING_RESULTS.md` for complete curl examples for all endpoi
 
 ### Common Issues
 
-1. **404 errors**: Check `GAUTH_AAP-001_ENABLED=1` is set
+1. **404 errors**: Check `AGENTAUTH_AAP-001_ENABLED=1` is set
 2. **Port in use**: Kill existing server with `pkill -9 web-serve`
 3. **Old UI**: Hard refresh browser (Cmd+Shift+R)
 

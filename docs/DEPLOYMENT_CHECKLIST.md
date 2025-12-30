@@ -9,8 +9,8 @@
 - [x] **Linting**: `golangci-lint run` (if available)
 
 ## 2. Build Verification
-- [x] **Binary Build**: `go build -ldflags="-s -w" -o build/bin/gauth-server ./cmd/gauth-server`
-- [x] **Docker Build**: `docker build -f Dockerfile.production -t gauth:staging .` (Dry run check)
+- [x] **Binary Build**: `go build -ldflags="-s -w" -o build/bin/agentauth-server ./cmd/agentauth-server`
+- [x] **Docker Build**: `docker build -f Dockerfile.production -t agentauth:staging .` (Dry run check)
 
 ## 3. Staging Configuration Check
 - [x] Verify `deployments/k8s/staging` manifests exist.

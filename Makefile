@@ -4,14 +4,14 @@ rfc_clause_index: ## Generate RFC clause index JSON from placeholder spec files
 	CLAUSES=$$(jq '.clauses | length' docs/rfc/rfc_clause_index.json); \
 	echo "✅ RFC clause index generated (clauses=$$CLAUSES)";
 
-crypto-rotate: ## Manually rotate Ed25519 key (requires GAUTH_TOKEN_SIG_MODE=eddsa); prints new kid
+crypto-rotate: ## Manually rotate Ed25519 key (requires AGENTAUTH_TOKEN_SIG_MODE=eddsa); prints new kid
 	@echo "🔄 Rotating Ed25519 key..."; \
-	GAUTH_TOKEN_SIG_MODE=eddsa go test -run TestEdDSA -count=1 ./pkg/gauth >/dev/null || true; \
+	AGENTAUTH_TOKEN_SIG_MODE=eddsa go test -run TestEdDSA -count=1 ./pkg/agentauth >/dev/null || true; \
 	go run ./scripts/rotate_key.go || echo "(rotate script missing - future implementation)";
 
 crypto-test: ## Run EdDSA-focused tests only
 	@echo "🧪 Running EdDSA test subset..."; \
-	GAUTH_TOKEN_SIG_MODE=eddsa $(GOTEST) -run TestEdDSA ./pkg/gauth -count=1; \
+	AGENTAUTH_TOKEN_SIG_MODE=eddsa $(GOTEST) -run TestEdDSA ./pkg/agentauth -count=1; \
 	echo "✅ EdDSA tests passed";
 
 ## Revocation System Targets
@@ -54,7 +54,7 @@ GOMOD=$(GOCMD) mod
 GOFMT=$(GOCMD) fmt
 
 # Build configuration
-BINARY_NAME=gauth
+BINARY_NAME=agentauth
 BINARY_DIR=build/bin
 LDFLAGS=-ldflags="-s -w"
 
@@ -77,8 +77,8 @@ verify-build-env: ## Verify build environment and directory structure
 	@echo "📍 Current working directory: $$(pwd)"
 	@echo "📂 Repository structure verification:"
 	@test -d "./cmd" || (echo "❌ ./cmd directory missing" && exit 1)
-	@test -d "./cmd/gauth-server" || (echo "❌ ./cmd/gauth-server directory missing" && exit 1)
-	@test -f "./cmd/gauth-server/main.go" || (echo "❌ ./cmd/gauth-server/main.go missing" && exit 1)
+	@test -d "./cmd/agentauth-server" || (echo "❌ ./cmd/agentauth-server directory missing" && exit 1)
+	@test -f "./cmd/agentauth-server/main.go" || (echo "❌ ./cmd/agentauth-server/main.go missing" && exit 1)
 	@test -f "./go.mod" || (echo "❌ ./go.mod missing" && exit 1)
 	@echo "✅ Build environment verified successfully"
 
@@ -110,21 +110,21 @@ build-ci-adaptive: ## CI-adaptive build that handles nested directory structures
 	@echo "📍 Working Directory: $$(pwd)"
 	@echo ""
 	@echo "🔍 Searching for source files..."
-	@if [ -f "./cmd/gauth-server/main.go" ]; then \
-		echo "✅ Method 1: Found ./cmd/gauth-server/main.go"; \
-		SOURCE_PATH="./cmd/gauth-server"; \
-	elif [ -f "cmd/gauth-server/main.go" ]; then \
-		echo "✅ Method 2: Found cmd/gauth-server/main.go"; \
-		SOURCE_PATH="cmd/gauth-server"; \
+	@if [ -f "./cmd/agentauth-server/main.go" ]; then \
+		echo "✅ Method 1: Found ./cmd/agentauth-server/main.go"; \
+		SOURCE_PATH="./cmd/agentauth-server"; \
+	elif [ -f "cmd/agentauth-server/main.go" ]; then \
+		echo "✅ Method 2: Found cmd/agentauth-server/main.go"; \
+		SOURCE_PATH="cmd/agentauth-server"; \
 	else \
 		echo "🔍 Method 3: Searching filesystem..."; \
-		MAIN_GO_PATH=$$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1); \
+		MAIN_GO_PATH=$$(find . -name "main.go" -path "*/cmd/agentauth-server/*" 2>/dev/null | head -1); \
 		if [ -n "$$MAIN_GO_PATH" ]; then \
 			SOURCE_PATH=$$(dirname "$$MAIN_GO_PATH"); \
 			echo "✅ Method 3: Found $$MAIN_GO_PATH"; \
 			echo "✅ Using source path: $$SOURCE_PATH"; \
 		else \
-			echo "❌ FAILED: Cannot find gauth-server/main.go anywhere"; \
+			echo "❌ FAILED: Cannot find agentauth-server/main.go anywhere"; \
 			echo "📋 Available main.go files:"; \
 			find . -name "main.go" 2>/dev/null | head -10 || echo "No main.go files found"; \
 			exit 1; \
@@ -155,19 +155,19 @@ ci-build: ## Recommended build target for CI/CD environments
 	@echo "🏗️ Building with adaptive method:"
 	@$(MAKE) build-ci-adaptive
 
-build-server-adaptive: ## Build gauth-server with adaptive path detection (recommended)
+build-server-adaptive: ## Build agentauth-server with adaptive path detection (recommended)
 	@echo "🔧 Building AgentAuth demo server (adaptive method)..."
 	@echo "📍 Current working directory: $$(pwd)"
-	@echo "� Searching for gauth-server source..."
+	@echo "� Searching for agentauth-server source..."
 	@SOURCE_PATH=""; \
-	if [ -f "./cmd/gauth-server/main.go" ]; then \
-		SOURCE_PATH="./cmd/gauth-server"; \
-		echo "✅ Method 1: Found ./cmd/gauth-server/main.go"; \
-	elif [ -f "cmd/gauth-server/main.go" ]; then \
-		SOURCE_PATH="cmd/gauth-server"; \
-		echo "✅ Method 2: Found cmd/gauth-server/main.go"; \
+	if [ -f "./cmd/agentauth-server/main.go" ]; then \
+		SOURCE_PATH="./cmd/agentauth-server"; \
+		echo "✅ Method 1: Found ./cmd/agentauth-server/main.go"; \
+	elif [ -f "cmd/agentauth-server/main.go" ]; then \
+		SOURCE_PATH="cmd/agentauth-server"; \
+		echo "✅ Method 2: Found cmd/agentauth-server/main.go"; \
 	else \
-		FOUND_PATH=$$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1); \
+		FOUND_PATH=$$(find . -name "main.go" -path "*/cmd/agentauth-server/*" 2>/dev/null | head -1); \
 		if [ -n "$$FOUND_PATH" ]; then \
 			SOURCE_PATH=$$(dirname "$$FOUND_PATH"); \
 			echo "✅ Method 3: Found $$FOUND_PATH"; \
@@ -179,13 +179,13 @@ build-server-adaptive: ## Build gauth-server with adaptive path detection (recom
 		$(GOBUILD) $(LDFLAGS) -o $(BINARY_DIR)/$(BINARY_NAME)-server "$$SOURCE_PATH"; \
 		echo "✅ Build completed successfully"; \
 	else \
-		echo "❌ ERROR: Cannot find gauth-server source code"; \
+		echo "❌ ERROR: Cannot find agentauth-server source code"; \
 		echo "📋 Current directory contents:"; \
 		ls -la . | head -10; \
 		echo "📋 cmd directory contents:"; \
 		ls -la cmd/ 2>/dev/null || echo "No cmd directory found"; \
-		echo "📋 Search results for gauth-server directories:"; \
-		find . -name "gauth-server" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"; \
+		echo "📋 Search results for agentauth-server directories:"; \
+		find . -name "agentauth-server" -type d 2>/dev/null | head -5 || echo "No agentauth-server directories found"; \
 		exit 1; \
 	fi
 
@@ -394,11 +394,11 @@ clean: ## Clean build artifacts
 ## Docker targets
 docker-build: ## Build Docker image
 	@echo "🐳 Building Docker image..."
-	docker build -t gauth:latest .
+	docker build -t agentauth:latest .
 
 docker-build-minimal: ## Build minimal beta web image (Dockerfile.minimal)
 	@echo "🐳 Building minimal beta web image..."
-	docker build -f Dockerfile.minimal -t gauth:minimal .
+	docker build -f Dockerfile.minimal -t agentauth:minimal .
 
 docker-smoke-minimal: ## Build & run smoke test against minimal image
 	@echo "🧪 Running minimal image smoke test..."; \
@@ -407,7 +407,7 @@ docker-smoke-minimal: ## Build & run smoke test against minimal image
 
 docker-run: ## Run Docker container
 	@echo "🚀 Running Docker container..."
-	docker run -p 8080:8080 gauth:latest
+	docker run -p 8080:8080 agentauth:latest
 
 docker-dev-build: ## Build developer hot-reload image (Dockerfile.dev) (set GO_VERSION / AIR_VERSION / INSTALL_AIR)
 	@echo "🐳 Building dev image (Dockerfile.dev)..."; \
@@ -415,11 +415,11 @@ docker-dev-build: ## Build developer hot-reload image (Dockerfile.dev) (set GO_V
 	[ -n "$$GO_VERSION" ] && BUILD_ARGS="$$BUILD_ARGS --build-arg GO_VERSION=$$GO_VERSION"; \
 	[ -n "$$AIR_VERSION" ] && BUILD_ARGS="$$BUILD_ARGS --build-arg AIR_VERSION=$$AIR_VERSION"; \
 	[ -n "$$INSTALL_AIR" ] && BUILD_ARGS="$$BUILD_ARGS --build-arg INSTALL_AIR=$$INSTALL_AIR"; \
-	docker build $$BUILD_ARGS -f Dockerfile.dev -t gauth-dev .
+	docker build $$BUILD_ARGS -f Dockerfile.dev -t agentauth-dev .
 
 docker-dev-run: ## Run dev hot-reload container (mount source, exposes :8080)
 	@echo "🌀 Starting dev hot-reload container (Ctrl+C to stop)..."; \
-	docker run --rm -it -p $${GAUTH_DEV_PORT:-8080}:8080 -v "$(PWD)":/app -e GAUTH_BETA=1 gauth-dev
+	docker run --rm -it -p $${AGENTAUTH_DEV_PORT:-8080}:8080 -v "$(PWD)":/app -e AGENTAUTH_BETA=1 agentauth-dev
 
 ## Utility targets
 run-server: build-server ## Build and run CLI demo server
@@ -472,7 +472,7 @@ help: ## Show this help message
 	@echo "  make web-start           # Start web demo (scripts/start-web-demo.sh)"
 	@echo "  make web-stop            # Stop web demo (scripts/stop-web-demo.sh)"
 	@echo "  make web-restart         # Restart web demo (stop+start)"
-	@echo "  make web-logs            # Tail web demo logs (gauth-web.log)"
+	@echo "  make web-logs            # Tail web demo logs (agentauth-web.log)"
 	@echo "  make web-health           # Health check for web demo (scripts/health.sh)"
 	@echo "  make web-tail-logs        # Tail web demo logs (scripts/tail-logs.sh)"
 	@echo "  make web-integration-test  # Run integration tests for web demo (test/integration, integration tag)"
@@ -609,37 +609,37 @@ web-restart: ## Restart the web demo (stop then start)
 
 web-logs: ## Tail the web demo logs
 	@echo "📜 Tailing web demo logs (Ctrl+C to stop)..."
-	tail -f gauth-web.log
+	tail -f agentauth-web.log
 
-web-beta: ## Run embedded beta UI server (optionally set GAUTH_WEB_PORT)
+web-beta: ## Run embedded beta UI server (optionally set AGENTAUTH_WEB_PORT)
 	@echo "🧪 Starting beta web UI (Ctrl+C to stop)..."
-	@if [ -z "$$GAUTH_WEB_PORT" ]; then \\
-	  echo "(Tip) export GAUTH_WEB_PORT=9090 to change port"; \\
+	@if [ -z "$$AGENTAUTH_WEB_PORT" ]; then \\
+	  echo "(Tip) export AGENTAUTH_WEB_PORT=9090 to change port"; \\
 	fi; \\
-	GAUTH_BETA=1 go run ./cmd/web-server
+	AGENTAUTH_BETA=1 go run ./cmd/web-server
 
 web-educational: web-beta ## (Deprecated) Alias for legacy educational UI target
 	@echo "⚠️  'web-educational' is deprecated. Use 'make web-beta' instead." >&2
 
-dev-web: ## Run web server directly (no build) with log redirection (GAUTH_WEB_PORT optional)
+dev-web: ## Run web server directly (no build) with log redirection (AGENTAUTH_WEB_PORT optional)
 	@echo "🧪 Starting dev web server (Ctrl+C to stop)..."; \
-	PORT=$${GAUTH_WEB_PORT:-8080}; \
+	PORT=$${AGENTAUTH_WEB_PORT:-8080}; \
 	# Normalize to digits only then rely on main.go adding colon
 	PORT=$$(echo $$PORT | sed 's/^://'); \
-	LOG=$${GAUTH_DEV_LOG:-/tmp/gauth_web.log}; \
-	[ -z "$$LOG" ] && LOG=/tmp/gauth_web.log; \
+	LOG=$${AGENTAUTH_DEV_LOG:-/tmp/agentauth_web.log}; \
+	[ -z "$$LOG" ] && LOG=/tmp/agentauth_web.log; \
 	echo "→ Port: $$PORT"; \
 	echo "→ Log: $$LOG"; \
-	GAUTH_WEB_PORT=$$PORT go run ./cmd/web-server > "$$LOG" 2>&1 & echo $$! > /tmp/gauth_web.pid; \
-	echo "✅ Server PID $$(cat /tmp/gauth_web.pid) (logs: $$LOG)"; \
+	AGENTAUTH_WEB_PORT=$$PORT go run ./cmd/web-server > "$$LOG" 2>&1 & echo $$! > /tmp/agentauth_web.pid; \
+	echo "✅ Server PID $$(cat /tmp/agentauth_web.pid) (logs: $$LOG)"; \
 	echo "Tip: tail -f $$LOG";
 
 dev-web-stop: ## Stop dev web server started via dev-web target
-	@if [ -f /tmp/gauth_web.pid ]; then \
-		PID=$$(cat /tmp/gauth_web.pid); \
+	@if [ -f /tmp/agentauth_web.pid ]; then \
+		PID=$$(cat /tmp/agentauth_web.pid); \
 		echo "🛑 Stopping dev web server PID $$PID"; \
 		kill $$PID 2>/dev/null || echo "(process already gone)"; \
-		rm -f /tmp/gauth_web.pid; \
+		rm -f /tmp/agentauth_web.pid; \
 	else \
 		echo "No dev web PID file found"; \
 	fi

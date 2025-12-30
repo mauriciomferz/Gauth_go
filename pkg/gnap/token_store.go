@@ -119,7 +119,7 @@ func (s *MemoryTokenStore) Rotate(value string) (*IssuedToken, error) {
 
 	// Create new token
 	newToken := &IssuedToken{
-		Value:       GenerateID("gauth_gnap_"),
+		Value:       GenerateID("agentauth_gnap_"),
 		GrantID:     oldToken.GrantID,
 		Access:      oldToken.Access,
 		IssuedAt:    time.Now().UTC(),

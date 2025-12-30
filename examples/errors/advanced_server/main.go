@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	gauthErrors "github.com/mauriciomferz/AgentAuth/pkg/errors"
+	agentauthErrors "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 // Define custom context keys
@@ -56,8 +56,8 @@ func main() {
 
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate token validation error
-	err := gauthErrors.New(gauthErrors.ErrInvalidToken, "The token provided is malformed or invalid")
-	err = err.WithSource(gauthErrors.SourceToken)
+	err := agentauthErrors.New(agentauthErrors.ErrInvalidToken, "The token provided is malformed or invalid")
+	err = err.WithSource(agentauthErrors.SourceToken)
 	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789")
 	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusUnauthorized, r.RemoteAddr)
 	err = err.AddInfo("token_hint", "Check token format and signature")
@@ -68,8 +68,8 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 
 func resourceHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate insufficient scope error
-	err := gauthErrors.New(gauthErrors.ErrInsufficientScope, "The token does not have the required scope")
-	err = err.WithSource(gauthErrors.SourceAuthorization)
+	err := agentauthErrors.New(agentauthErrors.ErrInsufficientScope, "The token does not have the required scope")
+	err = err.WithSource(agentauthErrors.SourceAuthorization)
 	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789")
 	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusForbidden, r.RemoteAddr)
 
@@ -88,8 +88,8 @@ func resourceHandler(w http.ResponseWriter, r *http.Request) {
 func rateLimitedHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate rate limit error
 	baseErr := fmt.Errorf("rate limit of 100 requests per minute exceeded")
-	err := gauthErrors.New(gauthErrors.ErrRateLimited, "API rate limit exceeded")
-	err = err.WithSource(gauthErrors.SourceRateLimiting)
+	err := agentauthErrors.New(agentauthErrors.ErrRateLimited, "API rate limit exceeded")
+	err = err.WithSource(agentauthErrors.SourceRateLimiting)
 	err = err.WithCause(baseErr)
 	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-123", "")
 	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusTooManyRequests, r.RemoteAddr)
@@ -99,8 +99,8 @@ func rateLimitedHandler(w http.ResponseWriter, r *http.Request) {
 	err = err.AddInfo("reset", "2023-07-01T15:30:45Z")
 
 	// Demonstrate checking for rate limit errors
-	if gauthErrors.IsRateLimitError(err) {
-		retryAfter := gauthErrors.GetRetryAfter(err)
+	if agentauthErrors.IsRateLimitError(err) {
+		retryAfter := agentauthErrors.GetRetryAfter(err)
 		log.Printf("Rate limit exceeded. Retry after %v", retryAfter)
 		w.Header().Set("Retry-After", fmt.Sprintf("%v", retryAfter))
 	}
@@ -114,8 +114,8 @@ func serverErrorHandler(w http.ResponseWriter, r *http.Request) {
 	baseErr := stderrors.New("database connection failed: timeout")
 
 	// Convert to structured error for more context
-	err := gauthErrors.New(gauthErrors.ErrServerError, "Database operation failed")
-	err = err.WithSource(gauthErrors.SourceStorage)
+	err := agentauthErrors.New(agentauthErrors.ErrServerError, "Database operation failed")
+	err = err.WithSource(agentauthErrors.SourceStorage)
 	err = err.WithCause(baseErr)
 	log.Println(err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusInternalServerError, r.RemoteAddr))
 	// middleware.ErrorResponse(w, r, err) // Not available: middleware package missing
@@ -133,8 +133,8 @@ func contextErrorHandler(w http.ResponseWriter, r *http.Request) {
 
 func simulateErrorWithContext(ctx context.Context) error {
 	// Create error and extract info from context
-	err := gauthErrors.New(gauthErrors.ErrServerError, "Error occurred while processing context")
-	// err = err.WithSource(gauthErrors.SourceProtocol) // SourceProtocol not defined
+	err := agentauthErrors.New(agentauthErrors.ErrServerError, "Error occurred while processing context")
+	// err = err.WithSource(agentauthErrors.SourceProtocol) // SourceProtocol not defined
 
 	// Extract context values
 	// err = err.WithContext(ctx) // Method not implemented
@@ -163,8 +163,8 @@ func deeperFunction() error {
 
 func evenDeeperFunction() error {
 	// Create error with stack trace
-	err := gauthErrors.New(gauthErrors.ErrServerError, "Error with stack trace")
-	// err = err.WithSource(gauthErrors.SourceValidation) // SourceValidation not defined
+	err := agentauthErrors.New(agentauthErrors.ErrServerError, "Error with stack trace")
+	// err = err.WithSource(agentauthErrors.SourceValidation) // SourceValidation not defined
 	// err = err.WithStack() // Method not implemented
 	err = err.WithHTTPInfo("/api/stack-trace", "GET", http.StatusInternalServerError, "")
 	return err

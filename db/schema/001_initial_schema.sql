@@ -1073,12 +1073,12 @@ ORDER BY last_state_change DESC;
 -- ============================================================================
 
 -- Create application user role
-CREATE ROLE gauth_app_user WITH LOGIN PASSWORD 'change_me_in_production';
+CREATE ROLE agentauth_app_user WITH LOGIN PASSWORD 'change_me_in_production';
 
 -- Grant necessary permissions
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO gauth_app_user;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO gauth_app_user;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO gauth_app_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO agentauth_app_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO agentauth_app_user;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO agentauth_app_user;
 
 -- ============================================================================
 -- COMMENTS

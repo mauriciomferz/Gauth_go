@@ -6,7 +6,7 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Implementation Progress Report - RFC-0111 Recommended Next Steps
+# Implementation Progress Report - AAP-001 Recommended Next Steps
 
 **Date**: November 11, 2025  
 **Status**: In Progress - Priority Items Implemented
@@ -20,7 +20,7 @@ Implemented the first 2 priority items from the QA Manager's recommendations, ad
 ### 1. Public Disclosure API Endpoints (COMPLETED)
 **Status**: ✅ Fully Implemented  
 **Files Created**:
-- `pkg/gauth/disclosure_service.go` (391 lines)
+- `pkg/agentauth/disclosure_service.go` (391 lines)
 - `web/handlers/disclosure/disclosure_handlers.go` (120 lines)  
 - `web/disclosure_routes.go` (32 lines)
 
@@ -41,14 +41,14 @@ GET  /api/v1/disclosure/authorizations/:id/audit
 - ✅ Compliance violation tracking
 - ✅ Comprehensive authorization summaries and details
 
-**RFC-0111 Compliance**: Implements transparency and accountability requirements
+**AAP-001 Compliance**: Implements transparency and accountability requirements
 
 ---
 
 ### 2. External PVP/PIP Service Integration (COMPLETED)
 **Status**: ✅ Fully Implemented  
 **File Created**:
-- `pkg/gauth/external/pvp_pip_clients.go` (400 lines)
+- `pkg/agentauth/external/pvp_pip_clients.go` (400 lines)
 
 **Components Implemented**:
 
@@ -215,7 +215,7 @@ PVPClient/PIPClient
    - Test concurrent requests
 
 3. **Medium-term** (Priorities 5-8):
-   - Complete remaining RFC-0111 requirements
+   - Complete remaining AAP-001 requirements
    - Add monitoring infrastructure  
    - Performance testing and optimization
 
@@ -225,7 +225,7 @@ PVPClient/PIPClient
 
 1. **Transparency API**: Resource owners can now view, manage, and revoke their authorizations
 2. **Production-Ready Clients**: External services integration with resilience patterns
-3. **RFC-0111 Compliance**: Significant progress toward full transparency requirements
+3. **AAP-001 Compliance**: Significant progress toward full transparency requirements
 4. **Best Practices**: Circuit breakers, retries, fallbacks, caching, audit logging
 
 ---

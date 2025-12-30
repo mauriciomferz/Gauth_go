@@ -12,7 +12,7 @@ import (
 // This prevents privilege escalation attacks where a PoA requests scopes beyond what
 // the grantor (principal) actually possesses.
 //
-// Security Context: Addresses Critical Vulnerability - Weak Delegation Constraints (CVE-2025-GAUTH-005)
+// Security Context: Addresses Critical Vulnerability - Weak Delegation Constraints (CVE-2025-AGENTAUTH-005)
 //
 // Attack Scenario Prevented:
 //  1. User "bob" has role="Editor" with permissions=["read", "write", "update"]

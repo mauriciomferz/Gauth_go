@@ -6,7 +6,7 @@ The MCP (Model Context Protocol) integration in AgentAuth allows you to register
 
 **Protocol:** JSON-RPC 2.0  
 **Transports:** stdio (implemented), WebSocket (planned), HTTP-SSE (planned)  
-**Feature Gate:** `GAUTH_MCP_ENABLED=1`
+**Feature Gate:** `AGENTAUTH_MCP_ENABLED=1`
 
 ---
 
@@ -31,11 +31,11 @@ npm install -g @modelcontextprotocol/server-calculator
 ### 1. Start the Backend Server
 
 ```bash
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 
-# Enable MCP and RFC-0111 features
-export GAUTH_MCP_ENABLED=1
-export GAUTH_AAP-001_ENABLED=1
+# Enable MCP and AAP-001 features
+export AGENTAUTH_MCP_ENABLED=1
+export AGENTAUTH_AAP-001_ENABLED=1
 
 # Start the server
 go run ./cmd/web-server
@@ -43,7 +43,7 @@ go run ./cmd/web-server
 
 **Expected output:**
 ```
-[MCP] Connection manager initialized (GAUTH_MCP_ENABLED=1)
+[MCP] Connection manager initialized (AGENTAUTH_MCP_ENABLED=1)
 [MCP] Endpoints registered:
 [MCP]   POST   /api/v1/beta/mcp/servers (Register MCP server)
 [MCP]   GET    /api/v1/beta/mcp/servers (List MCP servers)
@@ -58,7 +58,7 @@ go run ./cmd/web-server
 ### 2. Start the Frontend Server
 
 ```bash
-cd /path/to/Gauth_go/web/ui-react
+cd /path/to/AgentAuth/web/ui-react
 
 # Start Vite development server
 npm run dev
@@ -597,7 +597,7 @@ async function readUserDocument(userId, filename) {
 
 - **MCP Protocol Specification:** https://spec.modelcontextprotocol.io/
 - **Official MCP SDK:** https://github.com/modelcontextprotocol/typescript-sdk
-- **AgentAuth RFC-0111 Documentation:** `/docs/RFC_0111_IMPLEMENTATION.md`
+- **AgentAuth AAP-001 Documentation:** `/docs/RFC_0111_IMPLEMENTATION.md`
 - **Phase 2B Completion Report:** `/PHASE_2B_MCP_COMPLETION_REPORT.md`
 
 ---

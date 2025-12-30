@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	base := envOr("GAUTH_BASE_URL", "http://localhost:8080")
+	base := envOr("AGENTAUTH_BASE_URL", "http://localhost:8080")
 	interval := 10 * time.Second
 	client := &http.Client{Timeout: 5 * time.Second}
 

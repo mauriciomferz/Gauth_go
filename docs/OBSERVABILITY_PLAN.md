@@ -28,19 +28,19 @@ Spans:
 Exporter: OTLP (stdout fallback). Sampling: ParentBased(TraceIDRatio=0.25) initial.
 
 ## Prometheus Metrics (Additions)
-- Counter: `gauth_replay_wal_writes_total` labels: result(success|fail).
-- Histogram: `gauth_replay_wal_flush_latency_ms` (buckets: 1,2,4,8,16,32,64).
-- Gauge: `gauth_replay_wal_pending_entries`.
-- Histogram: `gauth_attestation_verify_latency_ms` (1,2,4,8,16,32,64,128,256).
-- Counter: `gauth_rotation_signature_failures_total`.
-- Gauge: `gauth_revocation_tree_size`.
- - Counter: `gauth_attestation_verify_total` labels: outcome(success|failure), soft_invalid(true|false).
+- Counter: `agentauth_replay_wal_writes_total` labels: result(success|fail).
+- Histogram: `agentauth_replay_wal_flush_latency_ms` (buckets: 1,2,4,8,16,32,64).
+- Gauge: `agentauth_replay_wal_pending_entries`.
+- Histogram: `agentauth_attestation_verify_latency_ms` (1,2,4,8,16,32,64,128,256).
+- Counter: `agentauth_rotation_signature_failures_total`.
+- Gauge: `agentauth_revocation_tree_size`.
+ - Counter: `agentauth_attestation_verify_total` labels: outcome(success|failure), soft_invalid(true|false).
 
 ## Alert Rules (monitoring/)
 1. Replay Spike:
 ```
 ALERT ReplaySpike
-  IF increase(gauth_replay_detected_total[5m]) > 50
+  IF increase(agentauth_replay_detected_total[5m]) > 50
   FOR 2m
   LABELS { severity = "warning" }
   ANNOTATIONS { summary = "High replay detection volume" }
@@ -48,7 +48,7 @@ ALERT ReplaySpike
 2. WAL Flush Latency:
 ```
 ALERT WALFlushHigh
-  IF histogram_quantile(0.95, sum(rate(gauth_replay_wal_flush_latency_ms_bucket[5m])) by (le)) > 32
+  IF histogram_quantile(0.95, sum(rate(agentauth_replay_wal_flush_latency_ms_bucket[5m]) by (le) > 32
   FOR 2m
   LABELS { severity = "critical" }
   ANNOTATIONS { summary = "WAL flush p95 latency high" }
@@ -56,7 +56,7 @@ ALERT WALFlushHigh
 3. Rotation Failure:
 ```
 ALERT RotationSignatureFailures
-  IF increase(gauth_rotation_signature_failures_total[15m]) > 0
+  IF increase(agentauth_rotation_signature_failures_total[15m]) > 0
   FOR 1m
   LABELS { severity = "critical" }
   ANNOTATIONS { summary = "Rotation signature failures detected" }

@@ -396,7 +396,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
               <input
                 type="text"
                 value={formData.scope.join(', ')}
-                onChange={(e) => setFormData(prev => ({ ...prev, scope: e.target.value.split(',').map(s => s.trim()) }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, scope: e.target.value.split(',').map(s => s.trim() }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 placeholder="read, write, delete"
               />

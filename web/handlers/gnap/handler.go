@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
 	"github.com/mauriciomferz/AgentAuth/pkg/gnap"
 )
 
@@ -24,13 +24,13 @@ type Handler struct {
 	TokenStore  gnap.TokenStore          // Token lifecycle management
 	RSStore     gnap.ResourceServerStore // RS lifecycle Management (RFC 9767)
 	AuditLogger AuditLogger              // Optional audit logging
-	Verif       gauthplus.VerificationService
+	Verif       agentauthplus.VerificationService
 	BaseURL     string // Base URL for continuation URIs
 	DefaultWait int    // Default wait seconds for polling
 }
 
 // NewHandler creates a GNAP handler.
-func NewHandler(store gnap.GrantStore, verif gauthplus.VerificationService, baseURL string) *Handler {
+func NewHandler(store gnap.GrantStore, verif agentauthplus.VerificationService, baseURL string) *Handler {
 	return &Handler{
 		Store:       store,
 		Verif:       verif,
@@ -383,7 +383,7 @@ func (h *Handler) buildContinueResponse(grant *gnap.Grant) *gnap.GrantResponse {
 // issueToken creates an access token for an approved grant.
 func (h *Handler) issueToken(grant *gnap.Grant, req *gnap.GrantRequest) *gnap.AccessToken {
 	token := &gnap.AccessToken{
-		Value:     gnap.GenerateID("gauth_gnap_"),
+		Value:     gnap.GenerateID("agentauth_gnap_"),
 		ExpiresIn: 3600, // 1 hour default
 		IssuedAt:  time.Now().UTC(),
 	}
@@ -426,7 +426,7 @@ func (h *Handler) linkAgentAuthContext(ctx context.Context, resp *gnap.GrantResp
 	}
 
 	// Determine representative action for verification report
-	var action gauthplus.Action
+	var action agentauthplus.Action
 	if req.AccessToken != nil && len(req.AccessToken.Access) > 0 {
 		ar := req.AccessToken.Access[0]
 		action.Type = "transaction" // Default

@@ -3,7 +3,7 @@ import { demoState, addAuditEntry } from "./state.js";
 import { addConsoleOutput } from "./console.js";
 
 // Internal buffer for audit stream log export
-window._gauthAuditLogBuffer = window._gauthAuditLogBuffer || [];
+window._agentauthAuditLogBuffer = window._agentauthAuditLogBuffer || [];
 
 function updateAuditStatus(status, pulse=false) {
 	const badge = document.getElementById('audit-stream-status');
@@ -47,14 +47,14 @@ function startAuditSSEWithBackoff(startBtn, stopBtn){
 		es.onmessage = (ev) => {
 			try {
 				const data = JSON.parse(ev.data);
-				window._gauthAuditLogBuffer.push({ ts: Date.now(), raw: ev.data, parsed: data });
+				window._agentauthAuditLogBuffer.push({ ts: Date.now(), raw: ev.data, parsed: data });
 				if (data.entries) {
 					addConsoleOutput('audit-output', `[batch ${data.entries.length} entries]`, 'info');
 				} else {
 					addConsoleOutput('audit-output', `[audit] ${ev.data}`, 'info');
 				}
 			} catch {
-				window._gauthAuditLogBuffer.push({ ts: Date.now(), raw: ev.data });
+				window._agentauthAuditLogBuffer.push({ ts: Date.now(), raw: ev.data });
 				addConsoleOutput('audit-output', `[audit] ${ev.data}`, 'info');
 			}
 		};
@@ -81,7 +81,7 @@ function startAuditSSEWithBackoff(startBtn, stopBtn){
 }
 
 export function downloadAuditLog(){
-	const data = (window._gauthAuditLogBuffer||[]).map(e=>e);
+	const data = (window._agentauthAuditLogBuffer||[]).map(e=>e);
 	const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), count: data.length, entries: data }, null, 2)], { type: 'application/json' });
 	const a = document.createElement('a');
 	a.href = URL.createObjectURL(blob);
@@ -163,8 +163,8 @@ export function auditInit() {
 	// SSE audit stream buttons
 	const startBtn = document.getElementById('startAuditStream');
 	const stopBtn = document.getElementById('stopAuditStream');
-	if (startBtn && !startBtn.__gauthBound) {
-		startBtn.__gauthBound = true;
+	if (startBtn && !startBtn.__agentauthBound) {
+		startBtn.__agentauthBound = true;
 		startBtn.addEventListener('click', () => {
 			if (window._auditSSE) {
 				addConsoleOutput('audit-output', 'Audit stream already running', 'warning');
@@ -174,8 +174,8 @@ export function auditInit() {
 			startAuditSSEWithBackoff(startBtn, stopBtn);
 		});
 	}
-	if (stopBtn && !stopBtn.__gauthBound) {
-		stopBtn.__gauthBound = true;
+	if (stopBtn && !stopBtn.__agentauthBound) {
+		stopBtn.__agentauthBound = true;
 		stopBtn.addEventListener('click', () => {
 			if (!window._auditSSE) {
 				addConsoleOutput('audit-output', 'No active audit stream', 'warning');
@@ -186,8 +186,8 @@ export function auditInit() {
 		stopBtn.disabled = true;
 	}
     const dlBtn = document.getElementById('download-audit-log');
-    if (dlBtn && !dlBtn.__gauthBound) {
-        dlBtn.__gauthBound = true;
+    if (dlBtn && !dlBtn.__agentauthBound) {
+        dlBtn.__agentauthBound = true;
         dlBtn.addEventListener('click', downloadAuditLog);
     }
 }

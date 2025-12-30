@@ -13,7 +13,7 @@ owners: [system]
 ## What Was Done
 
 ### 1. Comprehensive RFC Compliance Assessment
-- Created detailed RFC-0111 and RFC-0115 compliance audit
+- Created detailed AAP-001 and AAP-002 compliance audit
 - Identified 9 critical gaps in implementation
 - Document: `QA_MANAGER_FINAL_RFC_COMPLIANCE_REPORT_BRUTAL_HONEST.md`
 
@@ -44,7 +44,7 @@ owners: [system]
 
 ### What Needs Work:
 1. **PEP (pep.go)** - Compilation errors, needs type alignment
-2. **PAP** - Only stub exists in gauth.go, needs full implementation
+2. **PAP** - Only stub exists in agentauth.go, needs full implementation
 3. **Request orchestration** - Steps (c), (g) need explicit orchestration layer
 4. **E2E tests** - Disabled, needs API signature updates
 5. **OpenID Connect** - Not implemented
@@ -92,7 +92,7 @@ The project is in **BETTER SHAPE THAN INITIALLY ASSESSED**. Many critical compon
 ## Files Created This Session:
 1. `QA_MANAGER_FINAL_RFC_COMPLIANCE_REPORT_BRUTAL_HONEST.md` - Comprehensive assessment
 2. `GAP_CLOSURE_NOVEMBER_12_2025.md` - Gap closure report
-3. `pkg/gauth/pep.go` - PEP implementation (needs fixes)
+3. `pkg/agentauth/pep.go` - PEP implementation (needs fixes)
 4. `GAP_FIX_SUMMARY.md` - This file
 
 ## Next Steps:

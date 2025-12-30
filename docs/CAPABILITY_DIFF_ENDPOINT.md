@@ -14,7 +14,7 @@ Purpose: Allow clients to fetch only changes in capability registry since a know
 
 ## Status
 Phase 2 implementation:
-- In-memory snapshot ring (configurable via `GAUTH_CAPABILITY_DIFF_HISTORY`, default 32) retains recent registry states keyed by hash.
+- In-memory snapshot ring (configurable via `AGENTAUTH_CAPABILITY_DIFF_HISTORY`, default 32) retains recent registry states keyed by hash.
 - Real diff computation for added / removed / modified capability entries.
 - 404 returned for unknown baseline hashes (not in retention window) or when retention disabled.
 Pending: signed diff artifact, pagination, hash domain expansion.
@@ -68,7 +68,7 @@ Future: Expand domain to include `DeprecatedAfter|SunsetAfter|Versions[]` for st
 
 ## Snapshot Retention
 Implemented:
-- In-memory ring buffer (capacity `GAUTH_CAPABILITY_DIFF_HISTORY`, default 32).
+- In-memory ring buffer (capacity `AGENTAUTH_CAPABILITY_DIFF_HISTORY`, default 32).
 - Each diff request stores the current snapshot if new hash not already present.
 - Eviction: oldest snapshot removed when capacity exceeded; index rebuilt (small cost, low cardinality).
 
@@ -97,7 +97,7 @@ Future: emit extended lifecycle fields or a `fields_changed` array for granular 
 ## Alert Examples (PromQL)
 ```yaml
 ALERT CapabilityDiffLatencyHigh
-  IF histogram_quantile(0.95, sum(rate(gauth_rfc0111_capability_diff_latency_seconds_bucket[5m])) by (le)) > 0.050
+  IF histogram_quantile(0.95, sum(rate(agentauth_aap001_capability_diff_latency_seconds_bucket[5m]) by (le) > 0.050
   FOR 10m
   LABELS { severity="warning" }
   ANNOTATIONS { summary="Capability diff p95 latency high", description="p95 >50ms over 10m" }

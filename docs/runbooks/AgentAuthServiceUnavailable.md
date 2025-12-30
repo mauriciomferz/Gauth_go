@@ -25,7 +25,7 @@ All AgentAuth pods are down, making the entire service unavailable. This is a **
 
 **Trigger Condition:**
 ```promql
-sum(up{job="gauth-service"}) == 0
+sum(up{job="agentauth-service"}) == 0
 ```
 
 **Duration:** 1 minute  
@@ -45,15 +45,15 @@ sum(up{job="gauth-service"}) == 0
 
 2. **Quick Status Check**
    ```bash
-   kubectl get pods -n gauth-staging -l app=gauth
-   kubectl get deployment gauth-blue -n gauth-staging
+   kubectl get pods -n agentauth-staging -l app=agentauth
+   kubectl get deployment agentauth-blue -n agentauth-staging
    kubectl get nodes
    ```
 
 3. **Check Service Status**
    ```bash
-   kubectl get svc gauth-service -n gauth-staging
-   kubectl get endpoints gauth-service -n gauth-staging
+   kubectl get svc agentauth-service -n agentauth-staging
+   kubectl get endpoints agentauth-service -n agentauth-staging
    ```
 
 ---
@@ -86,19 +86,19 @@ sum(up{job="gauth-service"}) == 0
 
 ```bash
 # Check all resources
-kubectl get all -n gauth-staging
+kubectl get all -n agentauth-staging
 
 # Check recent events
-kubectl get events -n gauth-staging --sort-by='.lastTimestamp' | head -20
+kubectl get events -n agentauth-staging --sort-by='.lastTimestamp' | head -20
 
 # Check deployment rollout status
-kubectl rollout status deployment/gauth-blue -n gauth-staging
+kubectl rollout status deployment/agentauth-blue -n agentauth-staging
 
 # Check replica set
-kubectl get rs -n gauth-staging
+kubectl get rs -n agentauth-staging
 
 # Check pod details
-kubectl describe pods -n gauth-staging -l app=gauth
+kubectl describe pods -n agentauth-staging -l app=agentauth
 
 # Check node status
 kubectl get nodes -o wide
@@ -114,21 +114,21 @@ kubectl top nodes
 **Option A: Rollback Deployment**
 ```bash
 # Rollback to last known good version
-kubectl rollout undo deployment/gauth-blue -n gauth-staging
-kubectl rollout status deployment/gauth-blue -n gauth-staging
+kubectl rollout undo deployment/agentauth-blue -n agentauth-staging
+kubectl rollout status deployment/agentauth-blue -n agentauth-staging
 ```
 
 **Option B: Scale Up from Zero**
 ```bash
 # Force scale up
-kubectl scale deployment gauth-blue -n gauth-staging --replicas=3
-kubectl get pods -n gauth-staging -w
+kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=3
+kubectl get pods -n agentauth-staging -w
 ```
 
 **Option C: Restart Deployment**
 ```bash
-kubectl rollout restart deployment/gauth-blue -n gauth-staging
-kubectl rollout status deployment/gauth-blue -n gauth-staging
+kubectl rollout restart deployment/agentauth-blue -n agentauth-staging
+kubectl rollout status deployment/agentauth-blue -n agentauth-staging
 ```
 
 ### Priority 2: Emergency Fallback (5-10 minutes)
@@ -140,9 +140,9 @@ If quick recovery fails, deploy emergency fallback:
 kubectl apply -f k8s-emergency-fallback.yaml
 
 # Or use previous known-good image
-kubectl set image deployment/gauth-blue \
-  gauth=ghcr.io/mauriciomferz/gauth-staging:<previous-tag> \
-  -n gauth-staging
+kubectl set image deployment/agentauth-blue \
+  agentauth=ghcr.io/mauriciomferz/agentauth-staging:<previous-tag> \
+  -n agentauth-staging
 ```
 
 ### Priority 3: Root Cause Analysis (10+ minutes)
@@ -154,7 +154,7 @@ Once service is restored, investigate root cause:
 git log --oneline -10
 
 # Check application logs from failed pods
-kubectl logs -l app=gauth -n gauth-staging --previous --tail=200
+kubectl logs -l app=agentauth -n agentauth-staging --previous --tail=200
 
 # Review Prometheus metrics before outage
 # Open Grafana and check metrics 15 minutes before alert
@@ -169,27 +169,27 @@ kubectl get events --all-namespaces --sort-by='.lastTimestamp' | head -50
 
 1. **Pods Running**
    ```bash
-   kubectl get pods -n gauth-staging -l app=gauth
+   kubectl get pods -n agentauth-staging -l app=agentauth
    # Should show 3/3 running pods
    ```
 
 2. **Service Endpoints**
    ```bash
-   kubectl get endpoints gauth-service -n gauth-staging
+   kubectl get endpoints agentauth-service -n agentauth-staging
    # Should show multiple IP addresses
    ```
 
 3. **Health Check**
    ```bash
    kubectl run test-curl --rm -i --image=curlimages/curl --restart=Never \
-     -n gauth-staging -- curl -f http://gauth-service/api/v1/beta/health
+     -n agentauth-staging -- curl -f http://agentauth-service/api/v1/beta/health
    ```
 
 4. **Load Test**
    ```bash
    # Run quick load test to verify capacity
    kubectl run load-test --rm -i --image=williamyeh/wrk --restart=Never \
-     -n gauth-staging -- wrk -t2 -c10 -d30s http://gauth-service/api/v1/beta/health
+     -n agentauth-staging -- wrk -t2 -c10 -d30s http://agentauth-service/api/v1/beta/health
    ```
 
 ---
@@ -291,7 +291,7 @@ This is a P0 incident - escalate immediately to:
 
 **Contact Methods:**
 - PagerDuty: High urgency page
-- Slack: #gauth-incidents (mention @oncall)
+- Slack: #agentauth-incidents (mention @oncall)
 - Phone: Use emergency contact list
 
 ---

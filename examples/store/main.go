@@ -52,7 +52,7 @@ func basicTokenOperations(ctx context.Context, tokenStore *token.MemoryStore) {
 	tok := &token.Token{
 		ID:        "token123",
 		Subject:   "user123",
-		Issuer:    "gauth",
+		Issuer:    "agentauth",
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 		Type:      token.Access,
@@ -79,7 +79,7 @@ func multipleTokensExample(ctx context.Context, tokenStore *token.MemoryStore) {
 		tok := &token.Token{
 			ID:        fmt.Sprintf("multi_%d", i),
 			Subject:   subject,
-			Issuer:    "gauth",
+			Issuer:    "agentauth",
 			IssuedAt:  time.Now(),
 			ExpiresAt: time.Now().Add(1 * time.Hour),
 			Type:      tokenTypes[i],
@@ -108,7 +108,7 @@ func revocationExample(ctx context.Context, tokenStore *token.MemoryStore) {
 	tok := &token.Token{
 		ID:        "revocable_token",
 		Subject:   "revoke_test_user",
-		Issuer:    "gauth",
+		Issuer:    "agentauth",
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(24 * time.Hour),
 		Type:      token.Access,

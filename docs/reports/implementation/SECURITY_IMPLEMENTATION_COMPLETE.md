@@ -96,7 +96,7 @@ Successfully implemented a comprehensive security and compliance framework for t
 
 **Helper Functions**
 - `LogSecurityEvent()` - Generic security events
-- `LogAuthenticationAttempt()` - Authentication tracking
+- `LoagentAuthenticationAttempt()` - Authentication tracking
 - `LogTokenOperation()` - Token lifecycle events
 - `LogAdministrativeAction()` - Admin operations
 - `GetAuditSummary()` - Event statistics
@@ -154,34 +154,34 @@ Successfully implemented a comprehensive security and compliance framework for t
 
 **Prometheus Metrics** (`internal/security/metrics.go`)
 - Rate limiting metrics:
-  * `gauth_rate_limit_violations_total` (by endpoint, client_ip)
-  * `gauth_ddos_blocked_total`
-  * `gauth_rate_limited_clients` (gauge)
+  * `agentauth_rate_limit_violations_total` (by endpoint, client_ip)
+  * `agentauth_ddos_blocked_total`
+  * `agentauth_rate_limited_clients` (gauge)
 
 - Authentication metrics:
-  * `gauth_authentication_attempts_total` (by result)
-  * `gauth_authentication_failures_total`
+  * `agentauth_authentication_attempts_total` (by result)
+  * `agentauth_authentication_failures_total`
 
 - Input validation metrics:
-  * `gauth_sql_injection_attempts_total`
-  * `gauth_xss_attempts_total`
-  * `gauth_path_traversal_attempts_total`
+  * `agentauth_sql_injection_attempts_total`
+  * `agentauth_xss_attempts_total`
+  * `agentauth_path_traversal_attempts_total`
 
 - CORS metrics:
-  * `gauth_cors_rejected_total`
+  * `agentauth_cors_rejected_total`
 
 - Token operation metrics:
-  * `gauth_token_created_total`
-  * `gauth_token_validation_failures_total`
+  * `agentauth_token_created_total`
+  * `agentauth_token_validation_failures_total`
 
 - Security event metrics:
-  * `gauth_security_events_total` (by event_type, severity)
-  * `gauth_critical_security_events_total`
+  * `agentauth_security_events_total` (by event_type, severity)
+  * `agentauth_critical_security_events_total`
 
 - Request metrics:
-  * `gauth_secure_requests_total`
-  * `gauth_insecure_requests_total`
-  * `gauth_active_sessions` (gauge)
+  * `agentauth_secure_requests_total`
+  * `agentauth_insecure_requests_total`
+  * `agentauth_active_sessions` (gauge)
 
 **Alert Rules** (`monitoring/alerts/security-alerts.yml`)
 - **Critical Alerts**:
@@ -325,7 +325,7 @@ Successfully implemented a comprehensive security and compliance framework for t
 package main
 
 import (
-	"github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/security"
+	"github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -362,24 +362,24 @@ func main() {
 
 ```bash
 # Security Headers
-export GAUTH_ENV=production
-export GAUTH_HSTS_MAX_AGE=31536000
-export GAUTH_X_FRAME_OPTIONS=DENY
+export AGENTAUTH_ENV=production
+export AGENTAUTH_HSTS_MAX_AGE=31536000
+export AGENTAUTH_X_FRAME_OPTIONS=DENY
 
 # CORS
-export GAUTH_CORS_ALLOWED_ORIGINS=https://app.example.com
+export AGENTAUTH_CORS_ALLOWED_ORIGINS=https://app.example.com
 
 # Rate Limiting
-export GAUTH_RATE_LIMIT_RPS=100
-export GAUTH_RATE_LIMIT_BURST=200
-export GAUTH_STRICT_RATE_LIMIT_RPS=10
+export AGENTAUTH_RATE_LIMIT_RPS=100
+export AGENTAUTH_RATE_LIMIT_BURST=200
+export AGENTAUTH_STRICT_RATE_LIMIT_RPS=10
 
 # Input Validation
-export GAUTH_MAX_BODY_SIZE=1048576
+export AGENTAUTH_MAX_BODY_SIZE=1048576
 
 # Audit Logging
-export GAUTH_AUDIT_LOG_FILE=/var/log/gauth/audit.log
-export GAUTH_AUDIT_LOG_STDOUT=1
+export AGENTAUTH_AUDIT_LOG_FILE=/var/log/agentauth/audit.log
+export AGENTAUTH_AUDIT_LOG_STDOUT=1
 ```
 
 ## Security Testing
@@ -534,7 +534,7 @@ security.ApplyAllMiddleware(router, security.DefaultSecurityConfig())
 ### Check Security Status
 ```bash
 # Metrics endpoint
-curl http://localhost:8080/metrics | grep gauth_security
+curl http://localhost:8080/metrics | grep agentauth_security
 
 # Audit summary
 curl http://localhost:8080/api/v1/beta/audit/summary
@@ -547,10 +547,10 @@ curl http://localhost:8080/api/v1/beta/security/status
 ```bash
 # Block specific IP (add to rate limiter)
 # Increase rate limits temporarily
-export GAUTH_RATE_LIMIT_RPS=200
+export AGENTAUTH_RATE_LIMIT_RPS=200
 
 # Enable verbose audit logging
-export GAUTH_AUDIT_LOG_STDOUT=1
+export AGENTAUTH_AUDIT_LOG_STDOUT=1
 
 # Review recent security events
 curl http://localhost:8080/api/v1/beta/audit/events?severity=critical

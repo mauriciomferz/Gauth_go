@@ -104,7 +104,7 @@ Stress test results:
 **Implementation**: Already existed in `pkg/delegation/delegation.go` but enhanced with comprehensive testing.
 
 **Features**:
-- Environment-driven depth limit: `GAUTH_MAX_DELEGATION_DEPTH`
+- Environment-driven depth limit: `AGENTAUTH_MAX_DELEGATION_DEPTH`
 - Enforced at chain append time
 - Depth exceeded error: `rfc.ErrDelegationDepthExceeded`
 - Metrics integration: `m.IncDelegationDepthExceeded()`
@@ -113,7 +113,7 @@ Stress test results:
 **Test Coverage**:
 ```go
 func TestChain_DepthEnforcement(t *testing.T) {
-	t.Setenv("GAUTH_MAX_DELEGATION_DEPTH", "3")
+	t.Setenv("AGENTAUTH_MAX_DELEGATION_DEPTH", "3")
 	// Adds 3 delegations successfully
 	// 4th delegation fails with depth_exceeded error
 }

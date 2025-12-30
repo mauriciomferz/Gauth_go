@@ -3,7 +3,7 @@ import { demoState, addAuditEntry } from "./state.js";
 import { addConsoleOutput } from "./console.js";
 
 // Internal buffers for downloadable logs
-window._gauthEventLogBuffer = window._gauthEventLogBuffer || [];
+window._agentauthEventLogBuffer = window._agentauthEventLogBuffer || [];
 
 function updateEventStatus(status, pulse=false) {
     const badge = document.getElementById('event-stream-status');
@@ -48,10 +48,10 @@ function startEventSSEWithBackoff(startBtn, stopBtn) {
         es.onmessage = (ev) => {
             try {
                 const data = JSON.parse(ev.data);
-                window._gauthEventLogBuffer.push({ ts: Date.now(), raw: ev.data, parsed: data });
+                window._agentauthEventLogBuffer.push({ ts: Date.now(), raw: ev.data, parsed: data });
                 addConsoleOutput('event-output', `[event:${data.type||'msg'}] ${ev.data}`, 'info');
             } catch {
-                window._gauthEventLogBuffer.push({ ts: Date.now(), raw: ev.data });
+                window._agentauthEventLogBuffer.push({ ts: Date.now(), raw: ev.data });
                 addConsoleOutput('event-output', `[event] ${ev.data}`, 'info');
             }
         };
@@ -78,7 +78,7 @@ function startEventSSEWithBackoff(startBtn, stopBtn) {
 }
 
 export function downloadEventLog() {
-    const data = (window._gauthEventLogBuffer||[]).map(e=>e);
+    const data = (window._agentauthEventLogBuffer||[]).map(e=>e);
     const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), count: data.length, events: data }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -222,8 +222,8 @@ export function authzInit() {
     // New explicit start/stop stream buttons (separate from legacy subscribe logic)
     const startBtn = document.getElementById('startEventStream');
     const stopBtn = document.getElementById('stopEventStream');
-    if (startBtn && !startBtn.__gauthBound) {
-        startBtn.__gauthBound = true;
+    if (startBtn && !startBtn.__agentauthBound) {
+        startBtn.__agentauthBound = true;
         startBtn.addEventListener('click', () => {
             if (window._eventSSE) {
                 addConsoleOutput('event-output', 'Event stream already running', 'warning');
@@ -233,8 +233,8 @@ export function authzInit() {
             startEventSSEWithBackoff(startBtn, stopBtn);
         });
     }
-    if (stopBtn && !stopBtn.__gauthBound) {
-        stopBtn.__gauthBound = true;
+    if (stopBtn && !stopBtn.__agentauthBound) {
+        stopBtn.__agentauthBound = true;
         stopBtn.addEventListener('click', () => {
             if (!window._eventSSE) {
                 addConsoleOutput('event-output', 'No active event stream', 'warning');
@@ -246,8 +246,8 @@ export function authzInit() {
     }
     // Download event log button (optional presence)
     const dlBtn = document.getElementById('download-event-log');
-    if (dlBtn && !dlBtn.__gauthBound) {
-        dlBtn.__gauthBound = true;
+    if (dlBtn && !dlBtn.__agentauthBound) {
+        dlBtn.__agentauthBound = true;
         dlBtn.addEventListener('click', downloadEventLog);
     }
 }

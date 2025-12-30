@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-The **ABAC Function Registry** provides an extensible, thread-safe system for registering and invoking custom functions in attribute-based access control (ABAC) policy expressions. This addresses RFC-0111 § 3.5 requirements for expression evaluation extensibility.
+The **ABAC Function Registry** provides an extensible, thread-safe system for registering and invoking custom functions in attribute-based access control (ABAC) policy expressions. This addresses AAP-001 § 3.5 requirements for expression evaluation extensibility.
 
 ## Architecture
 
@@ -113,7 +113,7 @@ package main
 import (
     "fmt"
     "time"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp/expr"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp/expr"
 )
 
 func main() {
@@ -514,7 +514,7 @@ None required - function registry is always enabled.
 
 ## References
 
-- RFC-0111 § 3.5: ABAC Expression Evaluation
+- AAP-001 § 3.5: ABAC Expression Evaluation
 - `pkg/pdp/expr/registry.go`: Core registry implementation
 - `pkg/pdp/expr/builtins.go`: Built-in function library
 - `pkg/pdp/expr/registry_test.go`: Test suite

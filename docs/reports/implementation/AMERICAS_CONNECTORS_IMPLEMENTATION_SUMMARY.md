@@ -47,12 +47,12 @@ The Brazilian identity connector integrates with **Gov.br** (the unified Brazili
 **Validation Algorithm:** Dual check digit calculation
 ```
 Step 1 - First Check Digit:
-  sum = Σ(digit[i] × (10-i)) for i = 0 to 8
+  sum = Σ(digit[i] × (10-i) for i = 0 to 8
   remainder = sum mod 11
   check1 = (remainder < 2) ? 0 : (11 - remainder)
 
 Step 2 - Second Check Digit:
-  sum = Σ(digit[i] × (11-i)) for i = 0 to 9
+  sum = Σ(digit[i] × (11-i) for i = 0 to 9
   remainder = sum mod 11
   check2 = (remainder < 2) ? 0 : (11 - remainder)
 
@@ -284,8 +284,8 @@ Example: GOTJ901015HDFRRL09
 **Check Digit Calculation:**
 ```
 Character mapping: "0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
-sum = Σ(value[i] × (18-i)) for i = 0 to 16
-check_digit = (10 - (sum mod 10)) mod 10
+sum = Σ(value[i] × (18-i) for i = 0 to 16
+check_digit = (10 - (sum mod 10) mod 10
 ```
 
 **State Codes (32 states):**
@@ -316,7 +316,7 @@ check_digit = (10 - (sum mod 10)) mod 10
 **Check Digit Calculation:**
 ```
 Character mapping: "0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ"
-sum = Σ(value[i] × (n+1-i)) for i = 0 to n-1
+sum = Σ(value[i] × (n+1-i) for i = 0 to n-1
 remainder = sum mod 11
 check_digit = (remainder == 0) ? "0" : 
               (11 - remainder == 10) ? "A" : 
@@ -648,19 +648,19 @@ type ValidationError struct {
 **Environment Variables:**
 ```bash
 # Brazil
-GAUTH_BR_GOVBR_URL=https://sso.staging.acesso.gov.br
-GAUTH_BR_GOVBR_CLIENT_ID=your_client_id
-GAUTH_BR_GOVBR_SECRET=your_client_secret
+AGENTAUTH_BR_GOVBR_URL=https://sso.staging.acesso.gov.br
+AGENTAUTH_BR_GOVBR_CLIENT_ID=your_client_id
+AGENTAUTH_BR_GOVBR_SECRET=your_client_secret
 
 # Canada
-GAUTH_CA_SERVICE_CANADA_URL=https://api.servicecanada.gc.ca
-GAUTH_CA_API_KEY=your_api_key
+AGENTAUTH_CA_SERVICE_CANADA_URL=https://api.servicecanada.gc.ca
+AGENTAUTH_CA_API_KEY=your_api_key
 
 # Mexico
-GAUTH_MX_RENAPO_URL=https://renapo.gob.mx/api
-GAUTH_MX_RENAPO_API_KEY=your_api_key
-GAUTH_MX_SAT_URL=https://sat.gob.mx/api
-GAUTH_MX_INE_URL=https://ine.mx/api
+AGENTAUTH_MX_RENAPO_URL=https://renapo.gob.mx/api
+AGENTAUTH_MX_RENAPO_API_KEY=your_api_key
+AGENTAUTH_MX_SAT_URL=https://sat.gob.mx/api
+AGENTAUTH_MX_INE_URL=https://ine.mx/api
 ```
 
 ### Security

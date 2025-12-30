@@ -190,10 +190,10 @@ if kubectl cluster-info &> /dev/null; then
     check_status "pass" "Kubernetes cluster accessible" "Server: $CLUSTER_SERVER"
     
     # Check namespace
-    if kubectl get namespace gauth-staging &> /dev/null; then
-        check_status "pass" "Namespace gauth-staging exists"
+    if kubectl get namespace agentauth-staging &> /dev/null; then
+        check_status "pass" "Namespace agentauth-staging exists"
     else
-        check_status "warn" "Namespace gauth-staging not found" "Create: kubectl apply -f deployments/k8s/staging/namespace.yaml"
+        check_status "warn" "Namespace agentauth-staging not found" "Create: kubectl apply -f deployments/k8s/staging/namespace.yaml"
     fi
     
     # Check NGINX Ingress

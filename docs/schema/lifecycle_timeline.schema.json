@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gimelfoundation.com/schema/lifecycle_timeline.json",
+  "$id": "https://agentauth.io/schema/lifecycle_timeline.json",
   "title": "LifecycleTimelineSnapshot",
   "type": "object",
   "required": ["success", "events"],

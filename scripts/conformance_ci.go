@@ -251,7 +251,7 @@ func RunConformance(args []string) (int, error) {
 					for rel, lines := range fileContentCache {
 						if filepath.Base(rel) == base {
 							for _, ln := range lines {
-								if testFuncRe.MatchString(strings.TrimSpace(ln)) {
+								if testFuncRe.MatchString(strings.TrimSpace(ln) {
 									hasTestFunc = true
 									break
 								}

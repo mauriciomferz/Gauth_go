@@ -20,15 +20,15 @@ Deploy GNAP (RFC 9635) in production with this guide.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_GNAP_BASE_URL` | `http://localhost:8080` | Base URL for continuation URIs |
-| `GAUTH_JWT_SIGNING_KEY` | - | JWT signing key (required) |
+| `AGENTAUTH_GNAP_BASE_URL` | `http://localhost:8080` | Base URL for continuation URIs |
+| `AGENTAUTH_JWT_SIGNING_KEY` | - | JWT signing key (required) |
 
 ## Configuration
 
 ### 1. Set Base URL
 
 ```bash
-export GAUTH_GNAP_BASE_URL=https://your-domain.com
+export AGENTAUTH_GNAP_BASE_URL=https://your-domain.com
 ```
 
 ### 2. Enable GNAP Endpoints
@@ -51,7 +51,7 @@ Default: 1 hour. Customize via handler initialization in `server_factory.go`.
 ## Security Checklist
 
 - [ ] Use HTTPS for all GNAP endpoints
-- [ ] Configure `GAUTH_GNAP_BASE_URL` with HTTPS
+- [ ] Configure `AGENTAUTH_GNAP_BASE_URL` with HTTPS
 - [ ] Enable HTTP Message Signatures for client authentication
 - [ ] Set up audit logging for compliance
 - [ ] Configure rate limiting
@@ -114,4 +114,4 @@ For HA deployments:
 |-------|----------|
 | Token rejected | Check expiration, verify signature |
 | Continuation fails | Verify continue token matches grant |
-| Discovery returns wrong URL | Check `GAUTH_GNAP_BASE_URL` |
+| Discovery returns wrong URL | Check `AGENTAUTH_GNAP_BASE_URL` |

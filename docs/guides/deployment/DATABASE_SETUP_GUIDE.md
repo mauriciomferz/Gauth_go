@@ -35,28 +35,28 @@ If the script doesn't work, run manually:
 docker-compose -f docker-compose.database.yml up -d postgres
 
 # 2. Wait for PostgreSQL to be ready
-docker exec gauth-postgres pg_isready -U postgres -d gauth
+docker exec agentauth-postgres pg_isready -U postgres -d agentauth
 
 # 3. Run migrations
-docker exec -i gauth-postgres psql -U postgres -d gauth < database/migrations/001_admin_handlers_schema.sql
+docker exec -i agentauth-postgres psql -U postgres -d agentauth < database/migrations/001_admin_handlers_schema.sql
 
 # 4. Verify tables
-docker exec gauth-postgres psql -U postgres -d gauth -c "\dt"
+docker exec agentauth-postgres psql -U postgres -d agentauth -c "\dt"
 ```
 
 ### Connection Details
 ```
 Host:     localhost
 Port:     5432
-Database: gauth
+Database: agentauth
 User:     postgres
-Password: gauth_dev_password
+Password: agentauth_dev_password
 ```
 
 ### Useful Commands
 ```bash
 # Connect to database
-docker exec -it gauth-postgres psql -U postgres -d gauth
+docker exec -it agentauth-postgres psql -U postgres -d agentauth
 
 # View logs
 docker-compose -f docker-compose.database.yml logs -f postgres
@@ -69,7 +69,7 @@ docker-compose -f docker-compose.database.yml down -v
 
 # Start with pgAdmin UI
 docker-compose -f docker-compose.database.yml --profile with-ui up -d
-# Access at: http://localhost:5050 (admin@gauth.local / admin)
+# Access at: http://localhost:5050 (admin@agentauth.local / admin)
 ```
 
 ## Option 2: Local PostgreSQL Installation
@@ -82,17 +82,17 @@ docker-compose -f docker-compose.database.yml --profile with-ui up -d
 
 1. **Create database:**
 ```bash
-createdb gauth
+createdb agentauth
 ```
 
 2. **Run migrations:**
 ```bash
-psql -U your_username -d gauth -f database/migrations/001_admin_handlers_schema.sql
+psql -U your_username -d agentauth -f database/migrations/001_admin_handlers_schema.sql
 ```
 
 3. **Verify tables:**
 ```bash
-psql -U your_username -d gauth -c "\dt"
+psql -U your_username -d agentauth -c "\dt"
 ```
 
 Expected: 17 tables created.
@@ -104,7 +104,7 @@ export DB_HOST=localhost
 export DB_PORT=5432
 export DB_USER=your_username
 export DB_PASSWORD=your_password
-export DB_NAME=gauth
+export DB_NAME=agentauth
 export DB_SSLMODE=disable
 ```
 
@@ -115,7 +115,7 @@ export DB_SSLMODE=disable
 3. **Get connection details** from cloud console
 4. **Run migrations:**
 ```bash
-psql -h your-host.region.rds.amazonaws.com -U admin -d gauth -f database/migrations/001_admin_handlers_schema.sql
+psql -h your-host.region.rds.amazonaws.com -U admin -d agentauth -f database/migrations/001_admin_handlers_schema.sql
 ```
 
 5. **Update environment variables:**
@@ -124,7 +124,7 @@ export DB_HOST=your-host.region.rds.amazonaws.com
 export DB_PORT=5432
 export DB_USER=admin
 export DB_PASSWORD=your_secure_password
-export DB_NAME=gauth
+export DB_NAME=agentauth
 export DB_SSLMODE=require  # Required for cloud databases
 ```
 
@@ -210,7 +210,7 @@ lsof -i:5432
 kill -9 <PID>
 
 # Remove old container and try again
-docker rm -f gauth-postgres
+docker rm -f agentauth-postgres
 docker-compose -f docker-compose.database.yml up -d postgres
 ```
 
@@ -220,7 +220,7 @@ docker-compose -f docker-compose.database.yml up -d postgres
 docker-compose -f docker-compose.database.yml logs postgres
 
 # Try running migration manually
-docker exec -it gauth-postgres psql -U postgres -d gauth
+docker exec -it agentauth-postgres psql -U postgres -d agentauth
 
 # Then in psql:
 \i /docker-entrypoint-initdb.d/001_admin_handlers_schema.sql
@@ -228,14 +228,14 @@ docker exec -it gauth-postgres psql -U postgres -d gauth
 
 ### Connection Refused
 - Ensure PostgreSQL is running: `docker ps | grep postgres`
-- Check port mapping: `docker port gauth-postgres`
+- Check port mapping: `docker port agentauth-postgres`
 - Verify network: `docker network ls`
 
 ### Permission Denied
 ```bash
 # If using local PostgreSQL, grant permissions:
-psql -U postgres -c "CREATE ROLE gauth_app WITH LOGIN PASSWORD 'change_me';"
-psql -U postgres -d gauth -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO gauth_app;"
+psql -U postgres -c "CREATE ROLE agentauth_app WITH LOGIN PASSWORD 'change_me';"
+psql -U postgres -d agentauth -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO agentauth_app;"
 ```
 
 ## Next Steps
@@ -244,12 +244,12 @@ After database setup:
 
 1. **Start AgentAuth server:**
 ```bash
-export GAUTH_JWT_SIGNING_KEY="your-secret-key"
+export AGENTAUTH_JWT_SIGNING_KEY="your-secret-key"
 export DB_HOST=localhost
 export DB_PORT=5432
 export DB_USER=postgres
-export DB_PASSWORD=gauth_dev_password
-export DB_NAME=gauth
+export DB_PASSWORD=agentauth_dev_password
+export DB_NAME=agentauth
 export DB_SSLMODE=disable
 
 go run ./cmd/web-server

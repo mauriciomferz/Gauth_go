@@ -121,10 +121,10 @@ chmod 644 public.pem
 For key rotation support, use sortable naming:
 
 ```
-gauth-prod-2025-11.priv.pem
-gauth-prod-2025-11.pub.pem
-gauth-prod-2025-12.priv.pem
-gauth-prod-2025-12.pub.pem
+agentauth-prod-2025-11.priv.pem
+agentauth-prod-2025-11.pub.pem
+agentauth-prod-2025-12.priv.pem
+agentauth-prod-2025-12.pub.pem
 ```
 
 ---
@@ -135,25 +135,25 @@ gauth-prod-2025-12.pub.pem
 
 ```bash
 # Enable/disable JWE encryption
-export GAUTH_JWE_ENABLED=true
+export AGENTAUTH_JWE_ENABLED=true
 
 # Key encryption algorithm (RSA-OAEP-256 recommended)
-export GAUTH_JWE_ALGORITHM=RSA-OAEP-256
+export AGENTAUTH_JWE_ALGORITHM=RSA-OAEP-256
 
 # Content encryption algorithm (A256GCM recommended)
-export GAUTH_JWE_ENCRYPTION=A256GCM
+export AGENTAUTH_JWE_ENCRYPTION=A256GCM
 
 # Path to RSA public key
-export GAUTH_JWE_PUBLIC_KEY=/etc/gauth/keys/public.pem
+export AGENTAUTH_JWE_PUBLIC_KEY=/etc/agentauth/keys/public.pem
 
 # Path to RSA private key
-export GAUTH_JWE_PRIVATE_KEY=/etc/gauth/keys/private.pem
+export AGENTAUTH_JWE_PRIVATE_KEY=/etc/agentauth/keys/private.pem
 
 # Key identifier (for rotation)
-export GAUTH_JWE_KEY_ID=gauth-prod-2025-11
+export AGENTAUTH_JWE_KEY_ID=agentauth-prod-2025-11
 
 # Key rotation interval (days)
-export GAUTH_JWE_ROTATION_DAYS=365
+export AGENTAUTH_JWE_ROTATION_DAYS=365
 ```
 
 ### Multi-Key Registry (Optional)
@@ -162,13 +162,13 @@ For zero-downtime key rotation, use key directory:
 
 ```bash
 # Directory containing multiple key pairs
-export GAUTH_JWE_KEY_DIR=/etc/gauth/keys
+export AGENTAUTH_JWE_KEY_DIR=/etc/agentauth/keys
 
 # Key files in directory:
-# - gauth-prod-2025-11.priv.pem
-# - gauth-prod-2025-11.pub.pem
-# - gauth-prod-2025-12.priv.pem (new key)
-# - gauth-prod-2025-12.pub.pem (new key)
+# - agentauth-prod-2025-11.priv.pem
+# - agentauth-prod-2025-11.pub.pem
+# - agentauth-prod-2025-12.priv.pem (new key)
+# - agentauth-prod-2025-12.pub.pem (new key)
 ```
 
 ### Configuration Validation
@@ -178,12 +178,12 @@ export GAUTH_JWE_KEY_DIR=/etc/gauth/keys
 go run ./cmd/web-server --validate-env
 
 # Expected output:
-# ✓ GAUTH_JWE_ENABLED: true
-# ✓ GAUTH_JWE_ALGORITHM: RSA-OAEP-256
-# ✓ GAUTH_JWE_ENCRYPTION: A256GCM
-# ✓ GAUTH_JWE_PUBLIC_KEY: /etc/gauth/keys/public.pem (file exists)
-# ✓ GAUTH_JWE_PRIVATE_KEY: /etc/gauth/keys/private.pem (file exists)
-# ✓ GAUTH_JWE_KEY_ID: gauth-prod-2025-11
+# ✓ AGENTAUTH_JWE_ENABLED: true
+# ✓ AGENTAUTH_JWE_ALGORITHM: RSA-OAEP-256
+# ✓ AGENTAUTH_JWE_ENCRYPTION: A256GCM
+# ✓ AGENTAUTH_JWE_PUBLIC_KEY: /etc/agentauth/keys/public.pem (file exists)
+# ✓ AGENTAUTH_JWE_PRIVATE_KEY: /etc/agentauth/keys/private.pem (file exists)
+# ✓ AGENTAUTH_JWE_KEY_ID: agentauth-prod-2025-11
 # Configuration valid ✓
 ```
 
@@ -197,7 +197,7 @@ go run ./cmd/web-server --validate-env
 # Build production image with JWE support
 docker build \
   -f deployments/docker/Dockerfile.jwe \
-  -t gauth:jwe-latest \
+  -t agentauth:jwe-latest \
   .
 ```
 
@@ -211,14 +211,14 @@ cp private.pem ./keys/
 
 # Run container with volume mount
 docker run -d \
-  --name gauth-server \
+  --name agentauth-server \
   -p 8080:8080 \
-  -v $(pwd)/keys:/etc/gauth/keys:ro \
-  -e GAUTH_JWE_ENABLED=true \
-  -e GAUTH_JWE_PUBLIC_KEY=/etc/gauth/keys/public.pem \
-  -e GAUTH_JWE_PRIVATE_KEY=/etc/gauth/keys/private.pem \
-  -e GAUTH_JWE_KEY_ID=gauth-prod-2025-11 \
-  gauth:jwe-latest
+  -v $(pwd)/keys:/etc/agentauth/keys:ro \
+  -e AGENTAUTH_JWE_ENABLED=true \
+  -e AGENTAUTH_JWE_PUBLIC_KEY=/etc/agentauth/keys/public.pem \
+  -e AGENTAUTH_JWE_PRIVATE_KEY=/etc/agentauth/keys/private.pem \
+  -e AGENTAUTH_JWE_KEY_ID=agentauth-prod-2025-11 \
+  agentauth:jwe-latest
 ```
 
 ### Docker Compose Deployment
@@ -235,7 +235,7 @@ cp ../../private.pem ./keys/
 docker-compose -f docker-compose.jwe.yml up -d
 
 # Check logs
-docker-compose -f docker-compose.jwe.yml logs -f gauth-server
+docker-compose -f docker-compose.jwe.yml logs -f agentauth-server
 
 # Stop services
 docker-compose -f docker-compose.jwe.yml down
@@ -245,17 +245,17 @@ docker-compose -f docker-compose.jwe.yml down
 
 ```bash
 # Create Docker secrets
-echo "$(cat private.pem)" | docker secret create gauth_private_key -
-echo "$(cat public.pem)" | docker secret create gauth_public_key -
+echo "$(cat private.pem)" | docker secret create agentauth_private_key -
+echo "$(cat public.pem)" | docker secret create agentauth_public_key -
 
 # Deploy with secrets
 docker service create \
-  --name gauth-server \
-  --secret source=gauth_private_key,target=/run/secrets/private.pem,mode=0400 \
-  --secret source=gauth_public_key,target=/run/secrets/public.pem,mode=0444 \
-  -e GAUTH_JWE_PRIVATE_KEY=/run/secrets/private.pem \
-  -e GAUTH_JWE_PUBLIC_KEY=/run/secrets/public.pem \
-  gauth:jwe-latest
+  --name agentauth-server \
+  --secret source=agentauth_private_key,target=/run/secrets/private.pem,mode=0400 \
+  --secret source=agentauth_public_key,target=/run/secrets/public.pem,mode=0444 \
+  -e AGENTAUTH_JWE_PRIVATE_KEY=/run/secrets/private.pem \
+  -e AGENTAUTH_JWE_PUBLIC_KEY=/run/secrets/public.pem \
+  agentauth:jwe-latest
 ```
 
 ---
@@ -265,20 +265,20 @@ docker service create \
 ### Create Namespace
 
 ```bash
-kubectl create namespace gauth
+kubectl create namespace agentauth
 ```
 
 ### Generate Secrets
 
 ```bash
 # Create secret from key files
-kubectl create secret generic gauth-jwe-keys \
+kubectl create secret generic agentauth-jwe-keys \
   --from-file=public.pem=./public.pem \
   --from-file=private.pem=./private.pem \
-  --namespace=gauth
+  --namespace=agentauth
 
 # Verify secret
-kubectl describe secret gauth-jwe-keys -n gauth
+kubectl describe secret agentauth-jwe-keys -n agentauth
 ```
 
 ### Alternative: Base64 Encoding
@@ -288,31 +288,31 @@ kubectl describe secret gauth-jwe-keys -n gauth
 cat public.pem | base64 -w 0 > public.pem.b64
 cat private.pem | base64 -w 0 > private.pem.b64
 
-# Edit gauth-jwe-deployment.yaml and paste base64 values
+# Edit agentauth-jwe-deployment.yaml and paste base64 values
 ```
 
 ### Deploy Application
 
 ```bash
 # Apply deployment manifest
-kubectl apply -f deployments/kubernetes/gauth-jwe-deployment.yaml
+kubectl apply -f deployments/kubernetes/agentauth-jwe-deployment.yaml
 
 # Check deployment status
-kubectl get deployments -n gauth
-kubectl get pods -n gauth
+kubectl get deployments -n agentauth
+kubectl get pods -n agentauth
 
 # Check logs
-kubectl logs -f deployment/gauth-server -n gauth
+kubectl logs -f deployment/agentauth-server -n agentauth
 
 # Check service
-kubectl get svc -n gauth
+kubectl get svc -n agentauth
 ```
 
 ### Verify Deployment
 
 ```bash
 # Port forward to test locally
-kubectl port-forward svc/gauth-service 8080:8080 -n gauth
+kubectl port-forward svc/agentauth-service 8080:8080 -n agentauth
 
 # Test health endpoint
 curl http://localhost:8080/health
@@ -322,13 +322,13 @@ curl http://localhost:8080/health
 
 ```bash
 # Edit ConfigMap
-kubectl edit configmap gauth-jwe-config -n gauth
+kubectl edit configmap agentauth-jwe-config -n agentauth
 
 # Restart pods to apply changes
-kubectl rollout restart deployment/gauth-server -n gauth
+kubectl rollout restart deployment/agentauth-server -n agentauth
 
 # Monitor rollout
-kubectl rollout status deployment/gauth-server -n gauth
+kubectl rollout status deployment/agentauth-server -n agentauth
 ```
 
 ---
@@ -342,12 +342,12 @@ kubectl rollout status deployment/gauth-server -n gauth
 ```bash
 # Generate new key pair with new key ID
 openssl genpkey -algorithm RSA \
-  -out gauth-prod-2025-12.priv.pem \
+  -out agentauth-prod-2025-12.priv.pem \
   -pkeyopt rsa_keygen_bits:2048
 
 openssl rsa -pubout \
-  -in gauth-prod-2025-12.priv.pem \
-  -out gauth-prod-2025-12.pub.pem
+  -in agentauth-prod-2025-12.priv.pem \
+  -out agentauth-prod-2025-12.pub.pem
 ```
 
 **Step 2: Add New Key to Registry**
@@ -356,33 +356,33 @@ For Kubernetes:
 
 ```bash
 # Create new secret with both old and new keys
-kubectl create secret generic gauth-jwe-keys-v2 \
-  --from-file=gauth-prod-2025-11.priv.pem=./old-private.pem \
-  --from-file=gauth-prod-2025-11.pub.pem=./old-public.pem \
-  --from-file=gauth-prod-2025-12.priv.pem=./new-private.pem \
-  --from-file=gauth-prod-2025-12.pub.pem=./new-public.pem \
-  --namespace=gauth
+kubectl create secret generic agentauth-jwe-keys-v2 \
+  --from-file=agentauth-prod-2025-11.priv.pem=./old-private.pem \
+  --from-file=agentauth-prod-2025-11.pub.pem=./old-public.pem \
+  --from-file=agentauth-prod-2025-12.priv.pem=./new-private.pem \
+  --from-file=agentauth-prod-2025-12.pub.pem=./new-public.pem \
+  --namespace=agentauth
 
 # Update deployment to use key directory
 # Edit deployment YAML:
-#   GAUTH_JWE_KEY_DIR=/etc/gauth/keys
+#   AGENTAUTH_JWE_KEY_DIR=/etc/agentauth/keys
 # (instead of individual key paths)
 
 # Apply updated deployment
-kubectl apply -f deployments/kubernetes/gauth-jwe-deployment.yaml
+kubectl apply -f deployments/kubernetes/agentauth-jwe-deployment.yaml
 ```
 
 **Step 3: Update ConfigMap to Use New Key for Encryption**
 
 ```bash
 # Update key ID in ConfigMap
-kubectl patch configmap gauth-jwe-config \
-  -n gauth \
+kubectl patch configmap agentauth-jwe-config \
+  -n agentauth \
   --type merge \
-  -p '{"data":{"GAUTH_JWE_KEY_ID":"gauth-prod-2025-12"}}'
+  -p '{"data":{"AGENTAUTH_JWE_KEY_ID":"agentauth-prod-2025-12"}}'
 
 # Restart pods
-kubectl rollout restart deployment/gauth-server -n gauth
+kubectl rollout restart deployment/agentauth-server -n agentauth
 ```
 
 **Step 4: Wait for Token Expiry**
@@ -396,13 +396,13 @@ kubectl rollout restart deployment/gauth-server -n gauth
 
 ```bash
 # Create new secret without old key
-kubectl create secret generic gauth-jwe-keys-v3 \
-  --from-file=gauth-prod-2025-12.priv.pem=./new-private.pem \
-  --from-file=gauth-prod-2025-12.pub.pem=./new-public.pem \
-  --namespace=gauth
+kubectl create secret generic agentauth-jwe-keys-v3 \
+  --from-file=agentauth-prod-2025-12.priv.pem=./new-private.pem \
+  --from-file=agentauth-prod-2025-12.pub.pem=./new-public.pem \
+  --namespace=agentauth
 
 # Update deployment
-kubectl apply -f deployments/kubernetes/gauth-jwe-deployment.yaml
+kubectl apply -f deployments/kubernetes/agentauth-jwe-deployment.yaml
 ```
 
 ### Rotation Frequency Recommendations
@@ -485,7 +485,7 @@ For high-security deployments, integrate with HSM:
 **AWS CloudHSM Example:**
 
 ```go
-// pkg/gauth/jwe_hsm_aws.go
+// pkg/agentauth/jwe_hsm_aws.go
 import (
     "github.com/aws/aws-sdk-go/service/cloudhsmv2"
 )
@@ -541,11 +541,11 @@ func NewJWEServiceWithPKCS11(p11Config *PKCS11Config) (*JWEService, error) {
 echo "$JWE_TOKEN" | cut -d. -f1 | base64 -d | jq .kid
 
 # Check loaded keys
-kubectl exec -it deployment/gauth-server -n gauth -- \
-  ls -la /etc/gauth/keys/
+kubectl exec -it deployment/agentauth-server -n agentauth -- \
+  ls -la /etc/agentauth/keys/
 
-# Verify GAUTH_JWE_KEY_ID matches file naming
-kubectl get configmap gauth-jwe-config -n gauth -o yaml
+# Verify AGENTAUTH_JWE_KEY_ID matches file naming
+kubectl get configmap agentauth-jwe-config -n agentauth -o yaml
 ```
 
 ### Issue 2: "Invalid JWE format"
@@ -561,8 +561,8 @@ kubectl get configmap gauth-jwe-config -n gauth -o yaml
 
 echo "$TOKEN" | awk -F. '{print NF}'
 
-# If 3 parts, check GAUTH_JWE_ENABLED
-kubectl get configmap gauth-jwe-config -n gauth -o yaml | grep ENABLED
+# If 3 parts, check AGENTAUTH_JWE_ENABLED
+kubectl get configmap agentauth-jwe-config -n agentauth -o yaml | grep ENABLED
 ```
 
 ### Issue 3: "Performance degradation"
@@ -576,13 +576,13 @@ kubectl get configmap gauth-jwe-config -n gauth -o yaml | grep ENABLED
 echo -n "$JWE_TOKEN" | wc -c
 
 # Check JWE compression enabled
-kubectl get configmap gauth-jwe-config -n gauth -o yaml | grep COMPRESSION
+kubectl get configmap agentauth-jwe-config -n agentauth -o yaml | grep COMPRESSION
 
 # Check CPU usage
-kubectl top pods -n gauth
+kubectl top pods -n agentauth
 
 # Scale horizontally if needed
-kubectl scale deployment/gauth-server --replicas=5 -n gauth
+kubectl scale deployment/agentauth-server --replicas=5 -n agentauth
 ```
 
 ### Issue 4: "Old tokens fail after key rotation"
@@ -593,14 +593,14 @@ kubectl scale deployment/gauth-server --replicas=5 -n gauth
 
 ```bash
 # Re-add old key to registry temporarily
-kubectl create secret generic gauth-jwe-keys \
-  --from-file=gauth-prod-2025-11.priv.pem=./old-private.pem \
-  --from-file=gauth-prod-2025-12.priv.pem=./new-private.pem \
-  --namespace=gauth \
+kubectl create secret generic agentauth-jwe-keys \
+  --from-file=agentauth-prod-2025-11.priv.pem=./old-private.pem \
+  --from-file=agentauth-prod-2025-12.priv.pem=./new-private.pem \
+  --namespace=agentauth \
   --dry-run=client -o yaml | kubectl apply -f -
 
 # Restart pods
-kubectl rollout restart deployment/gauth-server -n gauth
+kubectl rollout restart deployment/agentauth-server -n agentauth
 ```
 
 ### Debug Mode
@@ -609,16 +609,16 @@ Enable debug logging:
 
 ```bash
 # Set log level
-kubectl patch configmap gauth-jwe-config \
-  -n gauth \
+kubectl patch configmap agentauth-jwe-config \
+  -n agentauth \
   --type merge \
-  -p '{"data":{"GAUTH_LOG_LEVEL":"debug"}}'
+  -p '{"data":{"AGENTAUTH_LOG_LEVEL":"debug"}}'
 
 # Restart pods
-kubectl rollout restart deployment/gauth-server -n gauth
+kubectl rollout restart deployment/agentauth-server -n agentauth
 
 # View detailed logs
-kubectl logs -f deployment/gauth-server -n gauth | grep JWE
+kubectl logs -f deployment/agentauth-server -n agentauth | grep JWE
 ```
 
 ---
@@ -629,28 +629,28 @@ kubectl logs -f deployment/gauth-server -n gauth | grep JWE
 
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
-| `GAUTH_JWE_ENABLED` | bool | `true` | Enable/disable JWE encryption |
-| `GAUTH_JWE_ALGORITHM` | string | `RSA-OAEP-256` | Key encryption algorithm |
-| `GAUTH_JWE_ENCRYPTION` | string | `A256GCM` | Content encryption algorithm |
-| `GAUTH_JWE_PUBLIC_KEY` | path | - | RSA public key file path |
-| `GAUTH_JWE_PRIVATE_KEY` | path | - | RSA private key file path |
-| `GAUTH_JWE_KEY_ID` | string | - | Key identifier |
-| `GAUTH_JWE_KEY_DIR` | path | - | Multi-key directory |
-| `GAUTH_JWE_ROTATION_DAYS` | int | `365` | Key rotation interval |
+| `AGENTAUTH_JWE_ENABLED` | bool | `true` | Enable/disable JWE encryption |
+| `AGENTAUTH_JWE_ALGORITHM` | string | `RSA-OAEP-256` | Key encryption algorithm |
+| `AGENTAUTH_JWE_ENCRYPTION` | string | `A256GCM` | Content encryption algorithm |
+| `AGENTAUTH_JWE_PUBLIC_KEY` | path | - | RSA public key file path |
+| `AGENTAUTH_JWE_PRIVATE_KEY` | path | - | RSA private key file path |
+| `AGENTAUTH_JWE_KEY_ID` | string | - | Key identifier |
+| `AGENTAUTH_JWE_KEY_DIR` | path | - | Multi-key directory |
+| `AGENTAUTH_JWE_ROTATION_DAYS` | int | `365` | Key rotation interval |
 
 ### B. File Structure
 
 ```
-/etc/gauth/
+/etc/agentauth/
 ├── keys/
-│   ├── gauth-prod-2025-11.pub.pem    (644)
-│   ├── gauth-prod-2025-11.priv.pem   (400)
-│   ├── gauth-prod-2025-12.pub.pem    (644)
-│   └── gauth-prod-2025-12.priv.pem   (400)
+│   ├── agentauth-prod-2025-11.pub.pem    (644)
+│   ├── agentauth-prod-2025-11.priv.pem   (400)
+│   ├── agentauth-prod-2025-12.pub.pem    (644)
+│   └── agentauth-prod-2025-12.priv.pem   (400)
 ├── config/
-│   └── gauth.yaml
+│   └── agentauth.yaml
 └── logs/
-    └── gauth.log
+    └── agentauth.log
 ```
 
 ### C. Quick Start Checklist

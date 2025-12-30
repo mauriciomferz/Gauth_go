@@ -1,15 +1,15 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: gauth-opa
-  namespace: gauth-system
+  name: agentauth-opa
+  namespace: agentauth-system
   labels:
-    app: gauth
+    app: agentauth
     prometheus: kube-prometheus
 spec:
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       component: web-server
   endpoints:
   # AgentAuth metrics
@@ -27,14 +27,14 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: gauth-opa-alerts
-  namespace: gauth-system
+  name: agentauth-opa-alerts
+  namespace: agentauth-system
   labels:
-    app: gauth
+    app: agentauth
     prometheus: kube-prometheus
 spec:
   groups:
-  - name: gauth.opa.performance
+  - name: agentauth.opa.performance
     interval: 30s
     rules:
     # Alert: High OPA latency
@@ -63,13 +63,13 @@ spec:
       annotations:
         summary: "High OPA error rate"
         description: "OPA error rate is {{ $value }} errors/sec"
-        runbook: "Check OPA logs: kubectl logs -n gauth-system -l app=gauth -c opa"
+        runbook: "Check OPA logs: kubectl logs -n agentauth-system -l app=agentauth -c opa"
 
     # Alert: OPA container restarting
     - alert: OPAContainerRestarting
       expr: |
         rate(kube_pod_container_status_restarts_total{
-          namespace="gauth-system",
+          namespace="agentauth-system",
           container="opa"
         }[15m]) > 0
       for: 5m
@@ -95,13 +95,13 @@ spec:
         description: "OPA cache miss rate is {{ $value | humanizePercentage }}"
         runbook: "Consider increasing cache size or TTL"
 
-  - name: gauth.opa.availability
+  - name: agentauth.opa.availability
     interval: 30s
     rules:
     # Alert: OPA unavailable
     - alert: OPAUnavailable
       expr: |
-        up{job="gauth-opa", container="opa"} == 0
+        up{job="agentauth-opa", container="opa"} == 0
       for: 2m
       labels:
         severity: critical
@@ -109,36 +109,36 @@ spec:
       annotations:
         summary: "OPA sidecar is down"
         description: "OPA sidecar has been unavailable for 2 minutes"
-        runbook: "Check pod status: kubectl describe pod -n gauth-system -l app=gauth"
+        runbook: "Check pod status: kubectl describe pod -n agentauth-system -l app=agentauth"
 
     # Alert: AgentAuth pods not ready
     - alert: AgentAuthPodsNotReady
       expr: |
         kube_deployment_status_replicas_ready{
-          namespace="gauth-system",
-          deployment="gauth-with-opa"
+          namespace="agentauth-system",
+          deployment="agentauth-with-opa"
         } < kube_deployment_spec_replicas{
-          namespace="gauth-system",
-          deployment="gauth-with-opa"
+          namespace="agentauth-system",
+          deployment="agentauth-with-opa"
         }
       for: 5m
       labels:
         severity: warning
-        component: gauth
+        component: agentauth
       annotations:
         summary: "AgentAuth pods not ready"
         description: "{{ $value }} AgentAuth pods are not ready"
         runbook: "Check pod status and logs"
 
-  - name: gauth.opa.capacity
+  - name: agentauth.opa.capacity
     interval: 30s
     rules:
     # Alert: High CPU usage
     - alert: HighOPACPUUsage
       expr: |
         rate(container_cpu_usage_seconds_total{
-          namespace="gauth-system",
-          pod=~"gauth-with-opa-.*",
+          namespace="agentauth-system",
+          pod=~"agentauth-with-opa-.*",
           container="opa"
         }[5m]) > 0.8
       for: 10m
@@ -154,12 +154,12 @@ spec:
     - alert: HighOPAMemoryUsage
       expr: |
         container_memory_usage_bytes{
-          namespace="gauth-system",
-          pod=~"gauth-with-opa-.*",
+          namespace="agentauth-system",
+          pod=~"agentauth-with-opa-.*",
           container="opa"
         } / container_spec_memory_limit_bytes{
-          namespace="gauth-system",
-          pod=~"gauth-with-opa-.*",
+          namespace="agentauth-system",
+          pod=~"agentauth-with-opa-.*",
           container="opa"
         } > 0.85
       for: 5m
@@ -175,13 +175,13 @@ spec:
     - alert: ApproachingMaxReplicas
       expr: |
         kube_deployment_status_replicas{
-          namespace="gauth-system",
-          deployment="gauth-with-opa"
+          namespace="agentauth-system",
+          deployment="agentauth-with-opa"
         } > 8
       for: 10m
       labels:
         severity: info
-        component: gauth
+        component: agentauth
       annotations:
         summary: "AgentAuth approaching max replicas"
         description: "AgentAuth has {{ $value }} replicas (max: 10)"
@@ -191,12 +191,12 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard-gauth-opa
-  namespace: gauth-system
+  name: grafana-dashboard-agentauth-opa
+  namespace: agentauth-system
   labels:
     grafana_dashboard: "1"
 data:
-  gauth-opa-dashboard.json: |
+  agentauth-opa-dashboard.json: |
     {
       "dashboard": {
         "title": "AgentAuth + OPA Performance",
@@ -234,7 +234,7 @@ data:
             "title": "OPA CPU Usage",
             "targets": [
               {
-                "expr": "rate(container_cpu_usage_seconds_total{namespace=\"gauth-system\",container=\"opa\"}[5m])"
+                "expr": "rate(container_cpu_usage_seconds_total{namespace=\"agentauth-system\",container=\"opa\"}[5m])"
               }
             ]
           },
@@ -242,7 +242,7 @@ data:
             "title": "OPA Memory Usage",
             "targets": [
               {
-                "expr": "container_memory_usage_bytes{namespace=\"gauth-system\",container=\"opa\"}"
+                "expr": "container_memory_usage_bytes{namespace=\"agentauth-system\",container=\"opa\"}"
               }
             ]
           },
@@ -250,7 +250,7 @@ data:
             "title": "Active Replicas",
             "targets": [
               {
-                "expr": "kube_deployment_status_replicas_ready{namespace=\"gauth-system\",deployment=\"gauth-with-opa\"}"
+                "expr": "kube_deployment_status_replicas_ready{namespace=\"agentauth-system\",deployment=\"agentauth-with-opa\"}"
               }
             ]
           }

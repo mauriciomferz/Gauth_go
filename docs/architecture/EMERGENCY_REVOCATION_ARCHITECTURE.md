@@ -334,14 +334,14 @@ func (o *EmergencyOracle) submitToBlockchain(event *RevocationEvent) {
 ### Validator Integration
 
 ```go
-// pkg/gauth/validator.go (UPDATED)
-package gauth
+// pkg/agentauth/validator.go (UPDATED)
+package agentauth
 
 import (
     "context"
     "time"
     
-    "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+    "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 )
 
 type Validator struct {
@@ -758,7 +758,7 @@ import (
     "net/http"
     "time"
     
-    "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+    "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 )
 
 type RevocationHandler struct {
@@ -890,13 +890,13 @@ groups:
     interval: 30s
     rules:
       - alert: HighRevocationLatency
-        expr: histogram_quantile(0.95, rate(gauth_emergency_revocation_duration_seconds_bucket[5m])) > 1
+        expr: histogram_quantile(0.95, rate(agentauth_emergency_revocation_duration_seconds_bucket[5m]) > 1
         for: 5m
         annotations:
           summary: "Emergency revocation latency above 1 second"
           
       - alert: FlashbotsSubmissionFailures
-        expr: rate(gauth_flashbots_submission_failures[5m]) > 0.1
+        expr: rate(agentauth_flashbots_submission_failures[5m]) > 0.1
         for: 5m
         annotations:
           summary: "High rate of Flashbots submission failures"
@@ -925,7 +925,7 @@ echo "Test: Front-Running Prevention"
 # The agent will attempt to detect and front-run revocation
 
 # Step 1: Initiate emergency revocation
-curl -X POST https://api.gauth.example.com/v1/poa/test_poa/revoke/emergency \
+curl -X POST https://api.agentauth.example.com/v1/poa/test_poa/revoke/emergency \
   -H "Authorization: Bearer $PRINCIPAL_TOKEN" \
   -d '{"reason": "test_frontrunning"}'
 
@@ -948,13 +948,13 @@ echo "Test: Revocation Latency"
 START=$(date +%s%3N)
 
 # Revoke PoA
-curl -X POST https://api.gauth.example.com/v1/poa/test_poa/revoke/emergency \
+curl -X POST https://api.agentauth.example.com/v1/poa/test_poa/revoke/emergency \
   -H "Authorization: Bearer $PRINCIPAL_TOKEN"
 
 # Immediately attempt to use revoked PoA
 sleep 0.1  # 100ms delay
 
-RESPONSE=$(curl -X POST https://api.gauth.example.com/v1/trade \
+RESPONSE=$(curl -X POST https://api.agentauth.example.com/v1/trade \
   -H "Authorization: Bearer $POA_TOKEN" \
   -d '{"action": "buy", "amount": 1000}')
 

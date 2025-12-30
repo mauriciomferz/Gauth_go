@@ -175,7 +175,7 @@ config := &PDPConfig{
 
 **API**:
 ```go
-store := NewIndexedDelegationStore("/var/lib/gauth/delegations.db")
+store := NewIndexedDelegationStore("/var/lib/agentauth/delegations.db")
 
 // Store delegation with automatic indexing
 store.Store(&DelegationRecord{

@@ -235,9 +235,9 @@
 **Flags:**
 - `--db-host` - Database host (default: localhost)
 - `--db-port` - Database port (default: 5432)
-- `--db-user` - Database user (default: gauth_app_user)
+- `--db-user` - Database user (default: agentauth_app_user)
 - `--db-password` - Database password
-- `--db-name` - Database name (default: gauth_admin)
+- `--db-name` - Database name (default: agentauth_admin)
 - `--db-ssl-mode` - SSL mode (default: disable)
 - `--redis-host` - Redis host (default: localhost)
 - `--redis-port` - Redis port (default: 6379)
@@ -380,10 +380,10 @@
 ```bash
 # Install PostgreSQL 14+
 # Create database
-createdb gauth_admin
+createdb agentauth_admin
 
 # Create application user
-psql -d gauth_admin -c "CREATE ROLE gauth_app_user WITH LOGIN PASSWORD 'change_me';"
+psql -d agentauth_admin -c "CREATE ROLE agentauth_app_user WITH LOGIN PASSWORD 'change_me';"
 
 # Run migrations
 ./db-migrate --cmd migrate-up --db-password change_me
@@ -427,9 +427,9 @@ database:
   postgres:
     host: localhost
     port: 5432
-    user: gauth_app_user
+    user: agentauth_app_user
     password: ${DB_PASSWORD}
-    database: gauth_admin
+    database: agentauth_admin
     sslmode: disable
     max_conns: 25
     min_conns: 5

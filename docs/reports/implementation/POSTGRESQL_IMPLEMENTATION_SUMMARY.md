@@ -15,18 +15,18 @@ refreshCadence: annually
 
 ## Overview
 
-Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Tokens, enabling production-ready token storage with comprehensive JSONB support for complex authorization structures.
+Successfully implemented PostgreSQL persistence layer for AAP-001 Extended Tokens, enabling production-ready token storage with comprehensive JSONB support for complex authorization structures.
 
 ## ✅ Completed Components
 
 ### 1. Token Store Infrastructure (100%)
 
-**ExtendedTokenStore Interface** (`pkg/gauth/extended_token_store.go`)
+**ExtendedTokenStore Interface** (`pkg/agentauth/extended_token_store.go`)
 - 7 methods defined for complete token lifecycle management
-- Supports OAuth 2.0 and RFC-0111 extended fields
+- Supports OAuth 2.0 and AAP-001 extended fields
 - Error definitions: `ErrTokenNotFound`, `ErrTokenAlreadyExists`, `ErrTokenRevoked`
 
-**MemoryExtendedTokenStore** (`pkg/gauth/extended_token_store_memory.go`)
+**MemoryExtendedTokenStore** (`pkg/agentauth/extended_token_store_memory.go`)
 - Thread-safe implementation with `sync.RWMutex`
 - 4 indexes for fast lookups (access token, refresh token, revoked, client)
 - RFC 7009 compliant idempotent revocation
@@ -34,7 +34,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 - Statistics tracking (`GetStats()`)
 - 232 lines, fully tested
 
-**PostgresExtendedTokenStore** (`pkg/gauth/extended_token_store_postgres.go`)
+**PostgresExtendedTokenStore** (`pkg/agentauth/extended_token_store_postgres.go`)
 - All 7 ExtendedTokenStore methods implemented
 - JSONB storage for Power of Attorney, Authorization Chain, Legal Framework, Verification Proof
 - Automatic client_id extraction from authorization chain
@@ -46,7 +46,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 ### 2. Database Schema (100%)
 
 **Extended Tokens Migration** (`schema/migrations/001_create_extended_tokens.sql`)
-- 28 columns covering OAuth 2.0 + RFC-0111 fields
+- 28 columns covering OAuth 2.0 + AAP-001 fields
 - JSONB columns: `power_of_attorney`, `authorization_chain`, `legal_framework`, `verification_proof`, `audit_trail`
 - Metadata: `created_at`, `revoked_at`, `last_used_at`, `use_count`
 - Computed `expires_at` column: `GENERATED ALWAYS AS (issued_at + (expires_in || ' seconds')::INTERVAL) STORED`
@@ -69,7 +69,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 **Docker Compose** (`docker-compose.yml`)
 - PostgreSQL 16 Alpine (port 5432)
 - Redis 7 Alpine (port 6379)
-- Web server with RFC-0111 enabled (port 8080)
+- Web server with AAP-001 enabled (port 8080)
 - Auto-migration on PostgreSQL startup
 - Health checks for all services
 - Persistent data volumes
@@ -106,7 +106,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 
 ### 6. Performance Benchmarks (100%)
 
-**Test Results** (`scripts/test_rfc0111_performance.sh`)
+**Test Results** (`scripts/test_aap001_performance.sh`)
 - **Subscription creation**: 10 in 1s (avg 0s each)
 - **Token issuance**: 10 in 0s (avg 0ms each)
 - **Concurrent requests**: 5/5 success in 0s
@@ -133,7 +133,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 ### Handler Integration (0%)
 
 **Required Changes**:
-1. Add config flag to select token store backend (`GAUTH_TOKEN_STORE=postgres`)
+1. Add config flag to select token store backend (`AGENTAUTH_TOKEN_STORE=postgres`)
 2. Initialize PostgreSQL store in main() with DSN from environment
 3. Update handlers to use `ExtendedTokenStore` interface instead of direct map access
 4. Add graceful shutdown to close database connections
@@ -141,14 +141,14 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 
 **Files to Modify**:
 - `cmd/web-server/main.go` - Initialize stores based on config
-- `web/handlers/rfc0111/authorization_handlers.go` - Use token store interface
-- `pkg/gauth/token_manager.go` - Add store selection logic
+- `web/handlers/aap001/authorization_handlers.go` - Use token store interface
+- `pkg/agentauth/token_manager.go` - Add store selection logic
 
 ### PostgreSQL Backend Testing (0%)
 
 **Test Plan**:
 1. Start docker-compose environment
-2. Run all RFC-0111 tests with `GAUTH_TOKEN_STORE=postgres`
+2. Run all AAP-001 tests with `AGENTAUTH_TOKEN_STORE=postgres`
 3. Verify tokens persist across server restarts
 4. Measure PostgreSQL performance vs in-memory
 5. Test concurrent access patterns
@@ -164,9 +164,9 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 
 ### Code Metrics
 - **New Files Created**: 6
-  - `pkg/gauth/extended_token_store.go` (42 lines)
-  - `pkg/gauth/extended_token_store_memory.go` (232 lines)
-  - `pkg/gauth/extended_token_store_postgres.go` (460 lines)
+  - `pkg/agentauth/extended_token_store.go` (42 lines)
+  - `pkg/agentauth/extended_token_store_memory.go` (232 lines)
+  - `pkg/agentauth/extended_token_store_postgres.go` (460 lines)
   - `schema/migrations/001_create_extended_tokens.sql` (60 lines)
   - `schema/migrations/002_create_subscriptions.sql` (54 lines)
   - `docker-compose.yml` (85 lines)
@@ -254,7 +254,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 
 ### Design Decisions
 
-1. **JSONB Storage**: Chosen for RFC-0111 complex structures to maintain flexibility while enabling efficient queries
+1. **JSONB Storage**: Chosen for AAP-001 complex structures to maintain flexibility while enabling efficient queries
 2. **Computed Columns**: `expires_at` calculated by database for consistent cleanup queries
 3. **Connection Pooling**: Conservative defaults (25/5) - tune based on load testing
 4. **Idempotent Revocation**: RFC 7009 compliance - multiple revocation calls succeed
@@ -278,7 +278,7 @@ Successfully implemented PostgreSQL persistence layer for RFC-0111 Extended Toke
 ## 🔗 Related Documents
 
 - [PostgreSQL Setup Guide](docs/POSTGRESQL_SETUP.md)
-- [RFC-0111 Implementation](AAP-001_README.md)
+- [AAP-001 Implementation](AAP-001_README.md)
 - [Architecture Documentation](ARCHITECTURE.md)
 - [Production Ready Status](PRODUCTION_READY_STATUS_REPORT.md)
 

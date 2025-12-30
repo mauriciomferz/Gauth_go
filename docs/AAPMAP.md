@@ -39,7 +39,7 @@ Legend:
 | RFC115-C6 | Rights & Obligations | `Requirements`, `RightsObligations`, `EnforceReportingCompliance` | pkg/poa/obligations_execution_test.go | Implemented | Verified reporting duty logic and rule structures |
 | RFC115-C7 | Special Conditions | `SpecialConditions` | pkg/poa/special_conditions_test.go | Implemented | Verified persistence and mock interpreter extensibility |
 | RFC115-C8 | Joint / Collective Signatures | `VerifyMultiSig` | pkg/poa/multi_signature_test.go | Implemented | Verified threshold logic and signature counting |
-| RFC115-C9 | Canonical Serialization & Digest | `CanonicalPOADigest` | pkg/gauth_rfc_001/canonical_fuzz_test.go | Implemented | Verified via fuzzing (stability, invariance) |
+| RFC115-C9 | Canonical Serialization & Digest | `CanonicalPOADigest` | pkg/agentauth_rfc_001/canonical_fuzz_test.go | Implemented | Verified via fuzzing (stability, invariance) |
 | RFC115-C10 | Revocation Semantics | `RevocationChain`, `IsDelegationRevoked` | pkg/delegation/revocation_semantics_test.go | Implemented | Verified chain filtering and revocation checks |
 
 ## Cross-Cutting
@@ -47,7 +47,7 @@ Legend:
 |-----------|---------|------------------------|-------|--------|-------|
 | Cross-1 | Error Taxonomy | `pkg/rfc/errs` | pkg/poa/error_taxonomy_test.go | Implemented | Standardized via leaf package |
 | Cross-2 | Metrics Export | `authz.PrometheusMetricsProvider` | pkg/authz/metrics_labels_test.go | Implemented | Verified Prometheus labels support |
-| Cross-3 | Discovery Metadata | `/.well-known/gauth-configuration` | web/discovery_test.go | Implemented | Added jwks_uri & revocation endpoints |
+| Cross-3 | Discovery Metadata | `/.well-known/agentauth-configuration` | web/discovery_test.go | Implemented | Added jwks_uri & revocation endpoints |
 
 ## CI Conformance Script (Planned)
 Script will:
@@ -175,10 +175,10 @@ Implementation lines (approximate):
 ## RFC 9396: Rich Authorization Requests (RAR)
 | Clause ID | Title | Implementation Symbols | Tests | Status | Notes |
 |-----------|-------|------------------------|-------|--------|-------|
-| RFC9396-3 | Authorization Details Data Model | `gauth.AuthorizationDetail` | pkg/gauth/rar_validator_test.go | Implemented | Types and JSON serialization |
+| RFC9396-3 | Authorization Details Data Model | `agentauth.AuthorizationDetail` | pkg/agentauth/rar_validator_test.go | Implemented | Types and JSON serialization |
 | RFC9396-5 | Authorization Request | `RFCCompliantAuthorizationRequest` | web/handlers/token/rfc_integration_test.go | Implemented | 'authorization_details' parameter support |
 | RFC9396-6 | Token Response | `ExtendedToken`, `ExtendedTokenService` | web/handlers/token/rfc_integration_test.go | Implemented | Details persisted in token and JWT |
-| RFC9396-7 | Resource Server Validation | `RARValidator`, `ValidateExtendedTokenWithRAR` | pkg/gauth/resource_server_test.go | Implemented | Enforces PoA scope narrowing |
+| RFC9396-7 | Resource Server Validation | `RARValidator`, `ValidateExtendedTokenWithRAR` | pkg/agentauth/resource_server_test.go | Implemented | Enforces PoA scope narrowing |
 ```
 
 ## OAuth Identity Assertion Authorization Grant (Draft)

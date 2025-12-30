@@ -48,16 +48,16 @@
 
 ```bash
 # Enable revocation system
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 
 # Redis connection (required)
 export REDIS_HOST=localhost  # or production Redis host
 export REDIS_PORT=6379
 
 # Optional configuration (with defaults)
-export GAUTH_REVOCATION_TWOPHASE_TIMEOUT=1h        # Two-phase disable timeout
-export GAUTH_REVOCATION_OPTIMISTIC_WINDOW=24h      # Challenge window
-export GAUTH_REVOCATION_CIRCUIT_RATE=10            # Max tx per minute
+export AGENTAUTH_REVOCATION_TWOPHASE_TIMEOUT=1h        # Two-phase disable timeout
+export AGENTAUTH_REVOCATION_OPTIMISTIC_WINDOW=24h      # Challenge window
+export AGENTAUTH_REVOCATION_CIRCUIT_RATE=10            # Max tx per minute
 ```
 
 ### Infrastructure Requirements
@@ -102,14 +102,14 @@ go mod tidy
 go mod verify
 
 # Build with optimization
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o gauth-server ./cmd/web-server
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o agentauth-server ./cmd/web-server
 
 # Verify binary
-file gauth-server
+file agentauth-server
 # Expected: ELF 64-bit LSB executable
 
 # Test binary locally (dry run)
-./gauth-server --help
+./agentauth-server --help
 ```
 
 ### Step 3: Pre-Deployment Tests
@@ -133,13 +133,13 @@ go test ./pkg/revocation/... -bench=. -benchmem
 #### Development Environment
 ```bash
 # Set dev environment variables
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=dev-redis.internal
 export REDIS_PORT=6379
-export GAUTH_DEV_INDEX=1
+export AGENTAUTH_DEV_INDEX=1
 
 # Start server
-./gauth-server
+./agentauth-server
 
 # Verify health
 curl http://localhost:8080/api/v1/beta/revocation/health
@@ -148,12 +148,12 @@ curl http://localhost:8080/api/v1/beta/revocation/health
 #### Staging Environment
 ```bash
 # Set staging environment variables
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=staging-redis.internal
 export REDIS_PORT=6379
 
 # Deploy with monitoring
-./gauth-server | tee -a /var/log/gauth/server.log
+./agentauth-server | tee -a /var/log/agentauth/server.log
 
 # Smoke test all endpoints
 ./scripts/test-revocation-endpoints.sh
@@ -162,19 +162,19 @@ export REDIS_PORT=6379
 #### Production Environment
 ```bash
 # Set production environment variables
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=prod-redis-cluster.internal
 export REDIS_PORT=6379
-export GAUTH_REVOCATION_TWOPHASE_TIMEOUT=2h
-export GAUTH_REVOCATION_OPTIMISTIC_WINDOW=48h
-export GAUTH_REVOCATION_CIRCUIT_RATE=100
+export AGENTAUTH_REVOCATION_TWOPHASE_TIMEOUT=2h
+export AGENTAUTH_REVOCATION_OPTIMISTIC_WINDOW=48h
+export AGENTAUTH_REVOCATION_CIRCUIT_RATE=100
 
 # Deploy with systemd or container orchestrator
-systemctl start gauth-server
+systemctl start agentauth-server
 
 # Verify deployment
-systemctl status gauth-server
-journalctl -u gauth-server -f
+systemctl status agentauth-server
+journalctl -u agentauth-server -f
 ```
 
 ---
@@ -274,13 +274,13 @@ curl "http://localhost:8080/api/v1/beta/revocation/status?poa_id=test-poa-2"
 ### Log Monitoring
 ```bash
 # Watch for revocation events
-journalctl -u gauth-server -f | grep '\[revocation\]'
+journalctl -u agentauth-server -f | grep '\[revocation\]'
 
 # Check for errors
-journalctl -u gauth-server -f | grep 'ERROR'
+journalctl -u agentauth-server -f | grep 'ERROR'
 
 # Monitor Redis operations
-journalctl -u gauth-server -f | grep 'Redis'
+journalctl -u agentauth-server -f | grep 'Redis'
 ```
 
 ### Alerting Rules
@@ -306,10 +306,10 @@ journalctl -u gauth-server -f | grep 'Redis'
 
 ```bash
 # Disable revocation system
-export GAUTH_REVOCATION_ENABLED=0
+export AGENTAUTH_REVOCATION_ENABLED=0
 
 # Restart server
-systemctl restart gauth-server
+systemctl restart agentauth-server
 
 # Verify disabled
 curl http://localhost:8080/api/v1/beta/revocation/health
@@ -320,10 +320,10 @@ curl http://localhost:8080/api/v1/beta/revocation/health
 
 ```bash
 # Increase circuit breaker rate limit
-export GAUTH_REVOCATION_CIRCUIT_RATE=1000
+export AGENTAUTH_REVOCATION_CIRCUIT_RATE=1000
 
 # Restart server
-systemctl restart gauth-server
+systemctl restart agentauth-server
 
 # Monitor improvement
 watch -n 1 'curl -s http://localhost:8080/api/v1/beta/revocation/circuit/metrics?poa_id=active-poa'
@@ -334,8 +334,8 @@ watch -n 1 'curl -s http://localhost:8080/api/v1/beta/revocation/circuit/metrics
 ```bash
 # Revert to previous version
 git checkout <previous-commit>
-go build -o gauth-server ./cmd/web-server
-systemctl restart gauth-server
+go build -o agentauth-server ./cmd/web-server
+systemctl restart agentauth-server
 
 # Verify old version
 curl http://localhost:8080/version
@@ -355,7 +355,7 @@ curl http://localhost:8080/version
 redis-cli -h $REDIS_HOST -p $REDIS_PORT ping
 
 # Check environment variables
-env | grep GAUTH_REVOCATION
+env | grep AGENTAUTH_REVOCATION
 
 # Check port availability
 netstat -tulpn | grep 8080
@@ -396,7 +396,7 @@ redis-cli -h $REDIS_HOST -p $REDIS_PORT SLOWLOG GET 10
 **Diagnosis:**
 ```bash
 # Monitor memory
-watch -n 5 'ps aux | grep gauth-server'
+watch -n 5 'ps aux | grep agentauth-server'
 
 # Get Go runtime stats
 curl http://localhost:8080/debug/pprof/heap > heap.out
@@ -439,7 +439,7 @@ export GOMAXPROCS=4
 export GOGC=100
 
 # Tune rate limits
-export GAUTH_REVOCATION_CIRCUIT_RATE=100  # transactions per minute
+export AGENTAUTH_REVOCATION_CIRCUIT_RATE=100  # transactions per minute
 ```
 
 ---
@@ -505,10 +505,10 @@ export GAUTH_REVOCATION_CIRCUIT_RATE=100  # transactions per minute
 ### Common Commands
 ```bash
 # Check service status
-systemctl status gauth-server
+systemctl status agentauth-server
 
 # View logs
-journalctl -u gauth-server -f
+journalctl -u agentauth-server -f
 
 # Test health
 curl localhost:8080/api/v1/beta/revocation/health
@@ -517,7 +517,7 @@ curl localhost:8080/api/v1/beta/revocation/health
 curl localhost:8080/metrics
 
 # Emergency disable
-export GAUTH_REVOCATION_ENABLED=0 && systemctl restart gauth-server
+export AGENTAUTH_REVOCATION_ENABLED=0 && systemctl restart agentauth-server
 ```
 
 ### Redis Commands

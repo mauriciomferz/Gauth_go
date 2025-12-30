@@ -57,8 +57,8 @@ Revocation Event Canonical Fields:
 ```
 
 Domain Separation:
-* Rotation ledger signature domain: implicit via JSON shape + inclusion of `hash` (already domain separated during hash computation). Future: add explicit prefix `GAUTH_ROTATION_LEDGER_ENTRY:` before JSON bytes if cross-structure collision surfaces.
-* Revocation event signature domain: same strategy; optional future prefix `GAUTH_REVOCATION_EVENT_V1:`.
+* Rotation ledger signature domain: implicit via JSON shape + inclusion of `hash` (already domain separated during hash computation). Future: add explicit prefix `AGENTAUTH_ROTATION_LEDGER_ENTRY:` before JSON bytes if cross-structure collision surfaces.
+* Revocation event signature domain: same strategy; optional future prefix `AGENTAUTH_REVOCATION_EVENT_V1:`.
 
 Verification Path:
 * Chain verification recomputes per-entry hash, checks prev linkage, then if `Signature` present validates using `SigKid` against key manager public keys.

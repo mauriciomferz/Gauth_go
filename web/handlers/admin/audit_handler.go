@@ -27,7 +27,7 @@ type AuditHandler struct {
 // NewAuditHandler creates a new audit handler instance
 func NewAuditHandler(db *pgxpool.Pool, stopCh <-chan struct{}) *AuditHandler {
 	repo := audit.NewRepository(db)
-	exportService := audit.NewExportService(repo, "/tmp/gauth-audit-exports")
+	exportService := audit.NewExportService(repo, "/tmp/agentauth-audit-exports")
 
 	// Start cleanup routine for expired exports
 	if stopCh != nil {

@@ -16,7 +16,7 @@ title: AgentAuth Complete API Reference
 
 > Note: This reference now includes the Decision Metrics governance endpoint (`/api/v1/beta/metrics/decisions`) documenting structured lifecycle decision aggregation.
 
-Complete API reference for AAP-RFC-0111 (AgentAuth 1.0) and AAP-RFC-0115 (PoA Definition) implementation, including both the Go library API and the web demonstration API.
+Complete API reference for AAP-001 (AgentAuth 1.0) and AAP-002 (PoA Definition) implementation, including both the Go library API and the web demonstration API.
 
 ## 📋 **Table of Contents**
 
@@ -50,7 +50,7 @@ Validator Notes: Uses draft 2020-12. If your validator warns about meta-schema f
 
 ## 🌐 **Web Demo API**
 
-The web demonstration API provides REST endpoints for testing and demonstrating RFC-0111 and RFC-0115 functionality through a web interface.
+The web demonstration API provides REST endpoints for testing and demonstrating AAP-001 and AAP-002 functionality through a web interface.
 
 ### **Base URL**
 ```
@@ -127,9 +127,9 @@ Ordering: Stable lexicographic ordering by action, resource, outcome (and reason
 Unavailable Case: If the in‑memory metrics implementation is not active, returns `{"success":true,"decisions":{"available":false}}`.
 
 Environment Influence:
-* `GAUTH_MAINTENANCE_WINDOW=1` may produce `reason=maintenance`.
-* `GAUTH_RATE_LIMITED=1` may produce `reason=rate_limited`.
-* `GAUTH_POLICY_VIOLATION=1` converts status change reasons to `policy_violation`.
+* `AGENTAUTH_MAINTENANCE_WINDOW=1` may produce `reason=maintenance`.
+* `AGENTAUTH_RATE_LIMITED=1` may produce `reason=rate_limited`.
+* `AGENTAUTH_POLICY_VIOLATION=1` converts status change reasons to `policy_violation`.
 
 Export Formats:
 All governance list endpoints support an optional `?format=csv` parameter for lightweight ingestion:
@@ -329,10 +329,10 @@ Fields:
 Environment Configuration (Notarization Prototype):
 | Env | Purpose | Default |
 |-----|---------|---------|
-| `GAUTH_CAP_ANCHOR_NOTARIZE` | Enable notarization emission path | unset |
-| `GAUTH_CAP_ANCHOR_NOTARY_PROVIDER` | Provider selection (`memory`,`external_stub`) | `memory` |
-| `GAUTH_NOTARY_RECEIPT_PERSIST_PATH` | Receipt chain persistence file | unset |
-| `GAUTH_NOTARY_RECEIPT_VERIFY_INTERVAL` | Background verification interval (seconds, >=30) | 120 |
+| `AGENTAUTH_CAP_ANCHOR_NOTARIZE` | Enable notarization emission path | unset |
+| `AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER` | Provider selection (`memory`,`external_stub`) | `memory` |
+| `AGENTAUTH_NOTARY_RECEIPT_PERSIST_PATH` | Receipt chain persistence file | unset |
+| `AGENTAUTH_NOTARY_RECEIPT_VERIFY_INTERVAL` | Background verification interval (seconds, >=30) | 120 |
 
 Metrics:
 * `capability_anchor_notarization_receipts_integrity` gauge: ok=1 mismatch=0 unconfigured/legacy/empty=-1. This gauge is now also mirrored in the custom endpoint `/api/v1/beta/capabilities/anchor/metrics/prometheus` (HELP/TYPE + current value) for environments scraping only that minimal surface; full labeled metrics remain available via the standard `/metrics` registry scrape.
@@ -340,7 +340,7 @@ Metrics:
 * Failure counters: `capability_anchor_notarization_failures_total` (+ provider labeled).
 * Age gauge: `capability_anchor_notarized_age_seconds` (time since last successful receipt).
  * On-demand verification trigger: append `?verify=1` to `/api/v1/beta/capabilities/anchor/metrics/prometheus` to force a recomputation of receipt chain integrity even if a recent verification occurred. Useful for ad-hoc probes or post-maintenance spot checks.
- * Freshness auto-check: the custom Prometheus endpoint automatically re-verifies if the last verification timestamp is older than `GAUTH_NOTARY_RECEIPT_VERIFY_FRESHNESS_SECONDS` (default 120s). Override by setting that env var to a positive integer seconds value.
+ * Freshness auto-check: the custom Prometheus endpoint automatically re-verifies if the last verification timestamp is older than `AGENTAUTH_NOTARY_RECEIPT_VERIFY_FRESHNESS_SECONDS` (default 120s). Override by setting that env var to a positive integer seconds value.
 
 Alerting Recommendation:
 Alert when integrity gauge == 0 (mismatch) for >=2 consecutive scrapes; suppress alerts for -1 (unconfigured/empty/legacy).
@@ -489,33 +489,33 @@ Host: localhost:8080
 ```json
 [
   {
-    "id": "rfc0111-basic",
-    "name": "RFC-0111 Basic AgentAuth 1.0",
-    "description": "Basic RFC-0111 AgentAuth 1.0 scenario with P*P Architecture",
+    "id": "aap001-basic",
+    "name": "AAP-001 Basic AgentAuth 1.0",
+    "description": "Basic AAP-001 AgentAuth 1.0 scenario with P*P Architecture",
     "config": {
       "p2p_enabled": true,
       "exclusions": ["resource1", "resource2"],
       "extended_tokens": true,
       "ai_client": false
     },
-    "rfc_type": "RFC-0111"
+    "rfc_type": "AAP-001"
   },
   {
-    "id": "rfc0111-ai",
-    "name": "RFC-0111 AI Client",
-    "description": "RFC-0111 with AI client capabilities enabled",
+    "id": "aap001-ai",
+    "name": "AAP-001 AI Client",
+    "description": "AAP-001 with AI client capabilities enabled",
     "config": {
       "p2p_enabled": true,
       "exclusions": [],
       "extended_tokens": true,
       "ai_client": true
     },
-    "rfc_type": "RFC-0111"
+    "rfc_type": "AAP-001"
   },
   {
-    "id": "rfc0115-basic",
-    "name": "RFC-0115 Basic PoA Definition",
-    "description": "Basic RFC-0115 Power of Attorney definition scenario",
+    "id": "aap002-basic",
+    "name": "AAP-002 Basic PoA Definition",
+    "description": "Basic AAP-002 Power of Attorney definition scenario",
     "config": {
       "parties": {
         "grantor": "User A",
@@ -525,12 +525,12 @@ Host: localhost:8080
       "authorization_type": "limited",
       "legal_framework": "standard"
     },
-    "rfc_type": "RFC-0115"
+    "rfc_type": "AAP-002"
   },
   {
-    "id": "rfc0115-advanced",
-    "name": "RFC-0115 Advanced PoA",
-    "description": "Advanced RFC-0115 with complex authorization requirements",
+    "id": "aap002-advanced",
+    "name": "AAP-002 Advanced PoA",
+    "description": "Advanced AAP-002 with complex authorization requirements",
     "config": {
       "parties": {
         "grantor": "Corporation A",
@@ -541,20 +541,20 @@ Host: localhost:8080
       "authorization_type": "full",
       "legal_framework": "enterprise"
     },
-    "rfc_type": "RFC-0115"
+    "rfc_type": "AAP-002"
   },
   {
     "id": "combined-demo",
     "name": "Combined RFC Demo",
-    "description": "Demonstration of combined RFC-0111 and RFC-0115 functionality",
+    "description": "Demonstration of combined AAP-001 and AAP-002 functionality",
     "config": {
-      "rfc0111": {
+      "aap001": {
         "p2p_enabled": true,
         "exclusions": ["restricted"],
         "extended_tokens": true,
         "ai_client": true
       },
-      "rfc0115": {
+      "aap002": {
         "parties": {
           "grantor": "System",
           "grantee": "Client"
@@ -577,7 +577,7 @@ Authenticates using a selected demo scenario and returns a mock authentication t
 **Request:**
 ```json
 {
-  "scenario_id": "rfc0111-basic"
+  "scenario_id": "aap001-basic"
 }
 ```
 
@@ -585,11 +585,11 @@ Authenticates using a selected demo scenario and returns a mock authentication t
 ```json
 {
   "success": true,
-  "token": "gauth_abc123def456...",
-  "message": "Authentication successful for RFC-0111 Basic AgentAuth 1.0",
+  "token": "agentauth_abc123def456...",
+  "message": "Authentication successful for AAP-001 Basic AgentAuth 1.0",
   "metadata": {
-    "scenario": "RFC-0111 Basic AgentAuth 1.0",
-    "rfc_type": "RFC-0111",
+    "scenario": "AAP-001 Basic AgentAuth 1.0",
+    "rfc_type": "AAP-001",
     "timestamp": 1696260000,
     "config": {
       "p2p_enabled": true,
@@ -598,7 +598,7 @@ Authenticates using a selected demo scenario and returns a mock authentication t
       "ai_client": false
     }
   },
-  "rfc_type": "RFC-0111"
+  "rfc_type": "AAP-001"
 }
 ```
 
@@ -622,7 +622,7 @@ Validates an authentication token received from the authenticate endpoint.
 **Request:**
 ```json
 {
-  "token": "gauth_abc123def456..."
+  "token": "agentauth_abc123def456..."
 }
 ```
 
@@ -640,10 +640,10 @@ Validates an authentication token received from the authenticate endpoint.
 
 ---
 
-### **🎯 RFC-0111 Configuration**
+### **🎯 AAP-001 Configuration**
 
-#### **POST /rfc0111/config**
-Creates and validates an RFC-0111 configuration using the combined RFC implementation.
+#### **POST /aap001/config**
+Creates and validates an AAP-001 configuration using the combined RFC implementation.
 
 **Request:**
 ```json
@@ -659,7 +659,7 @@ Creates and validates an RFC-0111 configuration using the combined RFC implement
 ```json
 {
   "success": true,
-  "message": "RFC-0111 configuration created successfully",
+  "message": "AAP-001 configuration created successfully",
   "config": {
     "pp_architecture": {
       "pep": {
@@ -680,7 +680,7 @@ Creates and validates an RFC-0111 configuration using the combined RFC implement
         "decision_rules": ["scope_validation", "exclusions_enforcement"]
       },
       "pip": {
-        "authorization_server": "gauth_server",
+        "authorization_server": "agentauth_server",
         "data_sources": ["user_profile", "resource_metadata"],
         "info_types": ["identity", "permissions", "exclusions"]
       },
@@ -719,7 +719,7 @@ Creates and validates an RFC-0111 configuration using the combined RFC implement
       "enforcement_level": "strict"
     },
     "extended_tokens": {
-      "token_type": "gauth_extended",
+      "token_type": "agentauth_extended",
       "scope": ["authorization", "compliance"],
       "duration": "1h0m0s",
       "authorization": {
@@ -734,7 +734,7 @@ Creates and validates an RFC-0111 configuration using the combined RFC implement
         "revocation_status": "active"
       }
     },
-    "gauth_roles": {
+    "agentauth_roles": {
       "resource_owner": {
         "identity": "user_principal",
         "legal_capacity": true,
@@ -758,7 +758,7 @@ Creates and validates an RFC-0111 configuration using the combined RFC implement
         "compliance_mode": "strict"
       },
       "authorization_server": {
-        "identity": "gauth_server",
+        "identity": "agentauth_server",
         "extended_token_issuing": true,
         "compliance_tracking": true,
         "pp_architecture_support": true,
@@ -782,7 +782,7 @@ Creates and validates an RFC-0111 configuration using the combined RFC implement
     "created_at": "2025-10-02T20:00:00Z",
     "updated_at": "2025-10-02T20:00:00Z"
   },
-  "rfc_version": "RFC-0111",
+  "rfc_version": "AAP-001",
   "timestamp": 1696260000
 }
 ```
@@ -792,10 +792,10 @@ Creates and validates an RFC-0111 configuration using the combined RFC implement
 
 ---
 
-### **📋 RFC-0115 PoA Definition**
+### **📋 AAP-002 PoA Definition**
 
-#### **POST /rfc0115/poa**
-Creates and validates an RFC-0115 Power of Attorney definition.
+#### **POST /aap002/poa**
+Creates and validates an AAP-002 Power of Attorney definition.
 
 **Request:**
 ```json
@@ -814,7 +814,7 @@ Creates and validates an RFC-0115 Power of Attorney definition.
 ```json
 {
   "success": true,
-  "message": "RFC-0115 Power of Attorney definition validated successfully",
+  "message": "AAP-002 Power of Attorney definition validated successfully",
   "poa_definition": {
     "parties": {
       "principal": {
@@ -936,14 +936,14 @@ Creates and validates an RFC-0115 Power of Attorney definition.
         "jurisdiction": "Delaware_Courts"
       }
     },
-    "gauth_context": {
+    "agentauth_context": {
       "pp_architecture_role": "client_authorization",
       "exclusions_compliant": true,
       "extended_token_scope": ["poa_validation", "compliance_tracking"],
       "ai_governance_level": "supervised"
     }
   },
-  "rfc_version": "RFC-0115",
+  "rfc_version": "AAP-002",
   "timestamp": 1696260000
 }
 ```
@@ -956,18 +956,18 @@ Creates and validates an RFC-0115 Power of Attorney definition.
 ### **🔄 Combined RFC Demo**
 
 #### **POST /combined/demo**
-Demonstrates the combined functionality of RFC-0111 and RFC-0115 in a unified configuration.
+Demonstrates the combined functionality of AAP-001 and AAP-002 in a unified configuration.
 
 **Request:**
 ```json
 {
-  "rfc0111": {
+  "aap001": {
     "p2p_enabled": true,
     "extended_tokens": true,
     "ai_client": true,
     "exclusions": ["web3_blockchain"]
   },
-  "rfc0115": {
+  "aap002": {
     "parties": {
       "grantor": "System",
       "grantee": "AI Agent"
@@ -984,10 +984,10 @@ Demonstrates the combined functionality of RFC-0111 and RFC-0115 in a unified co
   "message": "Combined RFC configuration validated successfully",
   "combined_config": {
     "rfc_0111": {
-      "pp_architecture": { /* RFC-0111 configuration */ },
+      "pp_architecture": { /* AAP-001 configuration */ },
       "exclusions": { /* exclusions configuration */ },
       "extended_tokens": { /* token configuration */ },
-      "gauth_roles": { /* role definitions */ },
+      "agentauth_roles": { /* role definitions */ },
       "version": "1.0.0",
       "status": "active",
       "created_at": "2025-10-02T20:00:00Z",
@@ -997,17 +997,17 @@ Demonstrates the combined functionality of RFC-0111 and RFC-0115 in a unified co
       "parties": { /* party definitions */ },
       "authorization": { /* authorization scope */ },
       "requirements": { /* requirements structure */ },
-      "gauth_context": { /* integration context */ }
+      "agentauth_context": { /* integration context */ }
     },
     "integration_level": "combined_rfc",
     "combined_version": "1.0.0",
     "compatibility": {
-      "rfc0111_version": "1.0.0",
-      "rfc0115_version": "1.0.0",
+      "aap001_version": "1.0.0",
+      "aap002_version": "1.0.0",
       "integration_status": "fully_compatible"
     }
   },
-  "rfc_versions": ["RFC-0111", "RFC-0115"],
+  "rfc_versions": ["AAP-001", "AAP-002"],
   "timestamp": 1696260000
 }
 ```
@@ -1034,8 +1034,8 @@ Serves the frontend application files from the `/frontend/` directory.
 
 The existing library API documentation in the original API_REFERENCE.md file covers:
 - RFCCompliantService
-- RFC-0111 Authorization API (AuthorizeAgentAuth)
-- RFC-0115 PoA Definition structures
+- AAP-001 Authorization API (AuthorizeAgentAuth)
+- AAP-002 PoA Definition structures
 - Professional Foundation API (ProperJWTService)
 - Legal Framework Validation
 - Complete data type definitions
@@ -1075,19 +1075,19 @@ curl -X GET http://localhost:8080/scenarios
 ```bash
 curl -X POST http://localhost:8080/authenticate \
   -H "Content-Type: application/json" \
-  -d '{"scenario_id": "rfc0111-basic"}'
+  -d '{"scenario_id": "aap001-basic"}'
 ```
 
 3. **Validate the Token**
 ```bash
 curl -X POST http://localhost:8080/validate \
   -H "Content-Type: application/json" \
-  -d '{"token": "gauth_abc123def456..."}'
+  -d '{"token": "agentauth_abc123def456..."}'
 ```
 
-4. **Configure RFC-0111**
+4. **Configure AAP-001**
 ```bash
-curl -X POST http://localhost:8080/rfc0111/config \
+curl -X POST http://localhost:8080/aap001/config \
   -H "Content-Type: application/json" \
   -d '{
     "p2p_enabled": true,
@@ -1097,9 +1097,9 @@ curl -X POST http://localhost:8080/rfc0111/config \
   }'
 ```
 
-5. **Create RFC-0115 PoA Definition**
+5. **Create AAP-002 PoA Definition**
 ```bash
-curl -X POST http://localhost:8080/rfc0115/poa \
+curl -X POST http://localhost:8080/aap002/poa \
   -H "Content-Type: application/json" \
   -d '{
     "parties": {
@@ -1117,13 +1117,13 @@ curl -X POST http://localhost:8080/rfc0115/poa \
 curl -X POST http://localhost:8080/combined/demo \
   -H "Content-Type: application/json" \
   -d '{
-    "rfc0111": {
+    "aap001": {
       "p2p_enabled": true,
       "extended_tokens": true,
       "ai_client": true,
       "exclusions": ["web3_blockchain"]
     },
-    "rfc0115": {
+    "aap002": {
       "parties": {
         "grantor": "System",
         "grantee": "AI Agent"
@@ -1138,7 +1138,7 @@ curl -X POST http://localhost:8080/combined/demo \
 ## � Capability Anchor & Notarization (Prototype)
 
 ### GET /api/v1/beta/capabilities/anchor/status
-Returns freshness & integrity state of the capability anchor artifact plus optional external notarization receipt when `GAUTH_CAP_ANCHOR_NOTARIZE=1`.
+Returns freshness & integrity state of the capability anchor artifact plus optional external notarization receipt when `AGENTAUTH_CAP_ANCHOR_NOTARIZE=1`.
 
 Fields:
 ```
@@ -1161,26 +1161,26 @@ Receipt (prototype):
 
 ### Custom Prometheus Exposition
 `GET /api/v1/beta/capabilities/anchor/metrics/prometheus` emits anchor & notarization metrics:
-- gauth_rfc0111_capability_anchor_last_write_seconds (gauge)
+- agentauth_aap001_capability_anchor_last_write_seconds (gauge)
 - capability_anchor_age_seconds (gauge)
 - capability_anchor_stale (gauge)
-- gauth_rfc0111_capability_anchor_emitted_total (counter)
-- gauth_rfc0111_capability_anchor_skipped_total (counter)
-- gauth_rfc0111_capability_anchor_hash_changed_total (counter)
+- agentauth_aap001_capability_anchor_emitted_total (counter)
+- agentauth_aap001_capability_anchor_skipped_total (counter)
+- agentauth_aap001_capability_anchor_hash_changed_total (counter)
 - capability_anchor_emission_interval_seconds (histogram)
 - capability_anchor_emission_jitter_seconds (gauge)
-- gauth_capability_anchor_notarization_latency_seconds (histogram, when notarize enabled)
-- gauth_capability_anchor_notarized_age_seconds (gauge, when notarize enabled)
-- gauth_capability_anchor_notarization_failures_total (counter, when notarize enabled)
+- agentauth_capability_anchor_notarization_latency_seconds (histogram, when notarize enabled)
+- agentauth_capability_anchor_notarized_age_seconds (gauge, when notarize enabled)
+- agentauth_capability_anchor_notarization_failures_total (counter, when notarize enabled)
 
 ### Environment Flags
 | Flag | Purpose |
 |------|---------|
-| GAUTH_CAP_ANCHOR_FILE_PATH | Anchor artifact file path |
-| GAUTH_CAP_ANCHOR_WRITE_INTERVAL | Minimum interval (>=1m) between emissions (default 5m) |
-| GAUTH_CAP_ANCHOR_SIGN | Enable Ed25519 signing if key present |
-| GAUTH_CAP_ANCHOR_NOTARIZE | Enable prototype external notarization & metrics |
-| GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS | SLA stale threshold (default 600) |
+| AGENTAUTH_CAP_ANCHOR_FILE_PATH | Anchor artifact file path |
+| AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL | Minimum interval (>=1m) between emissions (default 5m) |
+| AGENTAUTH_CAP_ANCHOR_SIGN | Enable Ed25519 signing if key present |
+| AGENTAUTH_CAP_ANCHOR_NOTARIZE | Enable prototype external notarization & metrics |
+| AGENTAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS | SLA stale threshold (default 600) |
 
 See `docs/ALERTING.md` for alert examples (latency, stale notarized age, failures surge).
 
@@ -1190,9 +1190,9 @@ Prototype Notice: External notarization currently uses an in-memory stub provide
 
 1. **Start the Demo Server**
 ```bash
-cd gauth-demo-app/web/backend
-go build -o gauth-backend main.go
-./gauth-backend
+cd agentauth-demo-app/web/backend
+go build -o agentauth-backend main.go
+./agentauth-backend
 ```
 
 2. **Access the Web Interface**

@@ -1,5 +1,5 @@
 ---
-title: RFC-0111 Compliance Progress Update (Nov 12 2025)
+title: AAP-001 Compliance Progress Update (Nov 12 2025)
 category: compliance-report
 status: active
 lastUpdated: 2025-11-12
@@ -7,7 +7,7 @@ owners: compliance-team
 source: progress-assessment
 refreshCadence: ad-hoc
 ---
-# RFC-0111 Compliance Progress Update
+# AAP-001 Compliance Progress Update
 **Date:** November 12, 2025  
 **Session:** Post-Implementation Review  
 **Previous Audit:** QA_MANAGER_BRUTAL_HONEST_FINAL_AUDIT_NOV_12_2025.md
@@ -44,12 +44,12 @@ Following the brutal honest audit that revealed **55-60% actual compliance** (vs
 - ✅ Implemented `EncodeExtendedToken()` method (60 lines)
 - ✅ Fixed `parseExtendedToken()` method (150 lines)
 - ✅ Added HMAC-SHA256 signing infrastructure
-- ✅ All RFC-0111 fields preserved in JWT claims
+- ✅ All AAP-001 fields preserved in JWT claims
 - ✅ Complex objects (PoA, AuthChain) serialized as JSON
 
 **Verification:**
 ```bash
-$ go build ./pkg/gauth/...
+$ go build ./pkg/agentauth/...
 # Clean build - no errors ✅
 ```
 
@@ -79,18 +79,18 @@ $ go build ./pkg/gauth/...
 - ✅ Created `PDPBridge` wrapping `pkg/pdp.Engine`
 - ✅ Implements `PDPClient` interface
 - ✅ Converts 4 request types to `pdp.Request`
-- ✅ Integrated into RFC-0111 configuration
-- ✅ Added 2 default RFC-0111 policies
+- ✅ Integrated into AAP-001 configuration
+- ✅ Added 2 default AAP-001 policies
 - ✅ 10 comprehensive unit tests (100% passing)
 
 **Verification:**
 ```bash
-$ go test -v -run TestPDPBridge ./pkg/gauth/
+$ go test -v -run TestPDPBridge ./pkg/agentauth/
 PASS
-ok      github.com/.../pkg/gauth      0.481s
+ok      github.com/.../pkg/agentauth      0.481s
 ```
 
-**Commit:** `50704bf2` - feat: implement PDP bridge for RFC-0111 compliance
+**Commit:** `50704bf2` - feat: implement PDP bridge for AAP-001 compliance
 
 **Impact:**
 - PDP Implementation: 0% → 80% (+80%)
@@ -121,7 +121,7 @@ ok      github.com/.../pkg/gauth      0.481s
 | **OpenID Connect** | 0% | 0% | - | ⏳ TODO |
 | **MCP** | 0% | 0% | - | ⏳ TODO |
 | | | | | |
-| **OVERALL RFC-0111** | **55-60%** | **62%** | **+7%** | ✅ IMPROVED |
+| **OVERALL AAP-001** | **55-60%** | **62%** | **+7%** | ✅ IMPROVED |
 
 ---
 
@@ -155,16 +155,16 @@ ok      github.com/.../pkg/gauth      0.481s
 
 ### Production Code Added
 ```
-pkg/gauth/extended_token_service.go  | +220 lines (JWT impl)
-pkg/gauth/pdp_bridge.go              | +230 lines (new)
-pkg/gauth/rfc0111_config.go          | +45 lines (PDP integration)
+pkg/agentauth/extended_token_service.go  | +220 lines (JWT impl)
+pkg/agentauth/pdp_bridge.go              | +230 lines (new)
+pkg/agentauth/aap001_config.go          | +45 lines (PDP integration)
                                      | --------
                                      | +495 lines
 ```
 
 ### Test Code Added
 ```
-pkg/gauth/pdp_bridge_test.go         | +220 lines (new)
+pkg/agentauth/pdp_bridge_test.go         | +220 lines (new)
                                      | --------
                                      | +220 lines
 ```
@@ -186,13 +186,13 @@ SESSION_SUMMARY_NOV_12_2025.md       | +562 lines
 
 ### JWT Implementation
 ```bash
-$ go build ./pkg/gauth/...
+$ go build ./pkg/agentauth/...
 # Clean output ✅
 ```
 
 ### PDP Bridge
 ```bash
-$ go test -v -run TestPDPBridge ./pkg/gauth/
+$ go test -v -run TestPDPBridge ./pkg/agentauth/
 === RUN   TestPDPBridge_EvaluatePolicy
     --- PASS: TestPDPBridge_EvaluatePolicy (0.00s)
 === RUN   TestPDPBridge_ConvertTokenRequest
@@ -204,7 +204,7 @@ $ go test -v -run TestPDPBridge ./pkg/gauth/
 === RUN   TestPDPBridge_ConvertMapRequest
     --- PASS: TestPDPBridge_ConvertMapRequest (0.00s)
 PASS
-ok      github.com/.../pkg/gauth      0.481s
+ok      github.com/.../pkg/agentauth      0.481s
 ```
 
 **Test Statistics:**
@@ -227,22 +227,22 @@ feat: implement JWT token serialization (fixes critical P0 blocker)
 - Added HMAC-SHA256 signing infrastructure
 
 Closes #CRITICAL-001 from brutal honest audit
-RFC-0111 Token Management: 40% → 75% compliance
+AAP-001 Token Management: 40% → 75% compliance
 ```
 
 ### 2. PDP Bridge Implementation
 ```
 commit 50704bf2
-feat: implement PDP bridge for RFC-0111 compliance (P1)
+feat: implement PDP bridge for AAP-001 compliance (P1)
 
 - Created PDPBridge wrapping pkg/pdp.Engine
 - Converts ExtendedTokenRequest, Auth, Grant to pdp.Request
 - Added comprehensive unit tests (all passing)
-- Integrated into RFC-0111 configuration
+- Integrated into AAP-001 configuration
 - Added default policies
 
-RFC-0111 Section 3.3 (PDP): 0% → 80% compliant
-Overall RFC-0111: 58% → 62% estimated
+AAP-001 Section 3.3 (PDP): 0% → 80% compliant
+Overall AAP-001: 58% → 62% estimated
 ```
 
 ### 3. Documentation

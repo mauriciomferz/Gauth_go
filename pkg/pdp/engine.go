@@ -201,8 +201,8 @@ func (e *InMemoryEngine) WithAdviceChannel(ch AdviceChannel) *InMemoryEngine {
 //   - cache: DecisionCache instance (nil disables caching)
 //
 // Configuration via environment:
-//   - GAUTH_PDP_CACHE_SIZE: Max entries (default 1000, 0=disabled)
-//   - GAUTH_PDP_CACHE_TTL: Entry lifetime (default 5m)
+//   - AGENTAUTH_PDP_CACHE_SIZE: Max entries (default 1000, 0=disabled)
+//   - AGENTAUTH_PDP_CACHE_TTL: Entry lifetime (default 5m)
 //
 // Example:
 //

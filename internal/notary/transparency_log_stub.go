@@ -40,9 +40,9 @@ type TransparencyLogger interface {
 // StubTransparencyLogger simulates logging by locally synthesizing metadata and optional latency.
 // Environment variables:
 //
-//	GAUTH_TLOG_STUB_MIN_LATENCY_MS (default 25)
-//	GAUTH_TLOG_STUB_MAX_LATENCY_MS (default 90)
-//	GAUTH_TLOG_STUB_PROVIDER_NAME  (default "tlog_stub")
+//	AGENTAUTH_TLOG_STUB_MIN_LATENCY_MS (default 25)
+//	AGENTAUTH_TLOG_STUB_MAX_LATENCY_MS (default 90)
+//	AGENTAUTH_TLOG_STUB_PROVIDER_NAME  (default "tlog_stub")
 //
 // Latency uniform in range; leaf id & root ref are time-based placeholders.
 type StubTransparencyLogger struct {
@@ -53,9 +53,9 @@ type StubTransparencyLogger struct {
 
 // NewStubTransparencyLogger builds a logger from environment configuration.
 func NewStubTransparencyLogger() *StubTransparencyLogger {
-	minMs := parseIntEnvBounds("GAUTH_TLOG_STUB_MIN_LATENCY_MS", 25, 0, 2000)
-	maxMs := parseIntEnvBounds("GAUTH_TLOG_STUB_MAX_LATENCY_MS", 90, minMs, 5000)
-	name := os.Getenv("GAUTH_TLOG_STUB_PROVIDER_NAME")
+	minMs := parseIntEnvBounds("AGENTAUTH_TLOG_STUB_MIN_LATENCY_MS", 25, 0, 2000)
+	maxMs := parseIntEnvBounds("AGENTAUTH_TLOG_STUB_MAX_LATENCY_MS", 90, minMs, 5000)
+	name := os.Getenv("AGENTAUTH_TLOG_STUB_PROVIDER_NAME")
 	if name == "" {
 		name = "tlog_stub"
 	}

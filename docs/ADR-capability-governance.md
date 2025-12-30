@@ -45,7 +45,7 @@ Implement Option 4: transactional validator & atomic registry reset with enforce
 - Validation Pipeline (all-or-nothing): parse -> validate schema_version -> uniqueness check -> dangling reference check -> canonical sort -> hash compute -> atomic `Reset`.
 - Canonical Hash: SHA256 over JSON serialization of sorted capabilities (by id) and sorted actions (lexicographically) with each capability list sorted; includes schema_version to prevent replay across versions.
 - Discovery Additions: `capability_registry_schema_version`, `capability_registry_hash`, provenance (`capability_registry_source`, `capability_registry_last_loaded_at`).
-- Enforcement Flag: `GAUTH_CAPABILITY_ENFORCE=1` gates action capability checks at token issuance & delegation endpoints.
+- Enforcement Flag: `AGENTAUTH_CAPABILITY_ENFORCE=1` gates action capability checks at token issuance & delegation endpoints.
 - Audit Enhancements: `capability_enforce` events logged; `/api/v1/audit/capabilities` supports `limit`, `cursor`, optional filters `action`, `outcome`; returns `entries`, `count`, `next_cursor`, `has_more`, `total_filtered`.
 
 ### 4.2 Atomicity & Failure Behavior
@@ -85,7 +85,7 @@ Implement Option 4: transactional validator & atomic registry reset with enforce
 ## 10. Migration & Rollout
 - Introduce `schema_version` starting at `v1`. Older files without version now rejected (document upgrade path).
 - Provide sample `capabilities.json` with version & commentary.
-- Rollout Steps: deploy code -> add versioned file -> enable `GAUTH_CAPABILITY_ENFORCE` after readiness checks.
+- Rollout Steps: deploy code -> add versioned file -> enable `AGENTAUTH_CAPABILITY_ENFORCE` after readiness checks.
 
 ## 11. Future Work (Follow-ups)
 - External anchoring of `capability_registry_hash` (timestamp/Merkle service).

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-service
-  namespace: gauth-staging
+  namespace: agentauth-staging
   labels:
     app: postgres
     environment: staging
@@ -22,7 +22,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: gauth-staging
+  namespace: agentauth-staging
   labels:
     app: postgres
     environment: staging
@@ -59,12 +59,12 @@ spec:
         - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_DB
         - name: POSTGRES_USER
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_USER
         - name: POSTGRES_PASSWORD
           valueFrom:
@@ -151,7 +151,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-config
-  namespace: gauth-staging
+  namespace: agentauth-staging
   labels:
     app: postgres
     environment: staging
@@ -215,7 +215,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init-scripts
-  namespace: gauth-staging
+  namespace: agentauth-staging
   labels:
     app: postgres
     environment: staging
@@ -227,16 +227,16 @@ data:
     DO
     $$
     BEGIN
-      IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = 'gauth_app') THEN
-        CREATE USER gauth_app WITH PASSWORD 'REPLACE_WITH_APP_PASSWORD';
+      IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = 'agentauth_app') THEN
+        CREATE USER agentauth_app WITH PASSWORD 'REPLACE_WITH_APP_PASSWORD';
       END IF;
     END
     $$;
     
     -- Grant privileges
-    GRANT ALL PRIVILEGES ON DATABASE gauth TO gauth_app;
-    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO gauth_app;
-    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO gauth_app;
+    GRANT ALL PRIVILEGES ON DATABASE agentauth TO agentauth_app;
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO agentauth_app;
+    GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO agentauth_app;
     
     -- Enable required extensions
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

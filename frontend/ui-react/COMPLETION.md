@@ -94,7 +94,7 @@ That's it! The script installs everything and starts the dev server.
 #### 4. Commercial Registry (**NEW!**)
 - Verify legal entities across 8 jurisdictions
 - Verify authorized signatories
-- Sample entities table (Siemens, British Airways, Airbus, Nestlé)
+- Sample entities table (AgentAuth, British Airways, Airbus, Nestlé)
 - Entity/signatory status displays
 - Full API integration ready
 
@@ -271,7 +271,7 @@ npm run build                 # Build for production (dist/)
 npm run preview               # Preview production build
 
 # **Backend** (separate terminal)
-cd ..                         # Back to Gauth_go root
+cd ..                         # Back to AgentAuth root
 go run ./cmd/web-server       # Start Go backend (port 8080)
 ```
 
@@ -280,7 +280,7 @@ go run ./cmd/web-server       # Start Go backend (port 8080)
 ## 🌟 Highlights
 
 ### **Before** (Legacy UI)
-- 2 separate HTML files (index.html, gauth1.html)
+- 2 separate HTML files (index.html, agentauth1.html)
 - Vanilla JavaScript
 - Inline CSS
 - No dark mode

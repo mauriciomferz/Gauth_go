@@ -6,21 +6,21 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC-0111 REST API Implementation
+# AAP-001 REST API Implementation
 
-This document describes the REST API endpoints for RFC-0111 compliant subscription and authorization flows.
+This document describes the REST API endpoints for AAP-001 compliant subscription and authorization flows.
 
 ## Quick Start
 
 ```bash
-# 1. Enable RFC-0111 and start server
-GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+# 1. Enable AAP-001 and start server
+AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 # 2. Run integration test
-./scripts/test_rfc0111_subscription_flow.sh
+./scripts/test_aap001_subscription_flow.sh
 
 # 3. Create a subscription manually
-curl -X POST http://localhost:8080/api/v1/rfc0111/subscriptions \
+curl -X POST http://localhost:8080/api/v1/aap001/subscriptions \
   -H "Content-Type: application/json" \
   -d '{
     "owners_authorizer_id": "auth-12345",
@@ -41,52 +41,52 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/subscriptions \
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| POST | `/api/v1/rfc0111/subscriptions` | Step I: Create subscription | ✅ |
-| POST | `/api/v1/rfc0111/subscriptions/:id/step-ii` | Step II: Authorization proof | ✅ |
-| POST | `/api/v1/rfc0111/subscriptions/:id/step-iii` | Step III: Client owner identity | ✅ |
-| POST | `/api/v1/rfc0111/subscriptions/:id/step-iv` | Step IV: Client owner auth | ✅ |
-| POST | `/api/v1/rfc0111/subscriptions/:id/step-v` | Step V: Client authorization | ✅ |
-| POST | `/api/v1/rfc0111/subscriptions/:id/step-vi` | Step VI: Resource owner identity | ✅ |
-| POST | `/api/v1/rfc0111/subscriptions/:id/step-vii` | Step VII: Resource owner auth | ✅ |
-| POST | `/api/v1/rfc0111/subscriptions/:id/step-viii` | Step VIII: Resource server | ✅ |
-| GET | `/api/v1/rfc0111/subscriptions/:id` | Get subscription | ✅ |
-| GET | `/api/v1/rfc0111/subscriptions?client_id=X` | List subscriptions | ✅ |
-| POST | `/api/v1/rfc0111/authorize` | Request authorization token | ✅ |
-| POST | `/api/v1/rfc0111/token/validate` | Validate token | ✅ |
-| POST | `/api/v1/rfc0111/token/introspect` | Introspect token (RFC 7662) | ✅ |
-| POST | `/api/v1/rfc0111/token/revoke` | Revoke token (RFC 7009) | ✅ |
+| POST | `/api/v1/aap001/subscriptions` | Step I: Create subscription | ✅ |
+| POST | `/api/v1/aap001/subscriptions/:id/step-ii` | Step II: Authorization proof | ✅ |
+| POST | `/api/v1/aap001/subscriptions/:id/step-iii` | Step III: Client owner identity | ✅ |
+| POST | `/api/v1/aap001/subscriptions/:id/step-iv` | Step IV: Client owner auth | ✅ |
+| POST | `/api/v1/aap001/subscriptions/:id/step-v` | Step V: Client authorization | ✅ |
+| POST | `/api/v1/aap001/subscriptions/:id/step-vi` | Step VI: Resource owner identity | ✅ |
+| POST | `/api/v1/aap001/subscriptions/:id/step-vii` | Step VII: Resource owner auth | ✅ |
+| POST | `/api/v1/aap001/subscriptions/:id/step-viii` | Step VIII: Resource server | ✅ |
+| GET | `/api/v1/aap001/subscriptions/:id` | Get subscription | ✅ |
+| GET | `/api/v1/aap001/subscriptions?client_id=X` | List subscriptions | ✅ |
+| POST | `/api/v1/aap001/authorize` | Request authorization token | ✅ |
+| POST | `/api/v1/aap001/token/validate` | Validate token | ✅ |
+| POST | `/api/v1/aap001/token/introspect` | Introspect token (RFC 7662) | ✅ |
+| POST | `/api/v1/aap001/token/revoke` | Revoke token (RFC 7009) | ✅ |
 
 **Legend:** ✅ Implemented | 🚧 Stub/In Progress | ⏳ Planned
 
 ## Overview
 
 The implementation provides:
-1. **Core RFC-0111 Components** (in `pkg/gauth/`):
+1. **Core AAP-001 Components** (in `pkg/agentauth/`):
    - `subscription_flow.go` - Subscription flow manager (Steps I-VIII)
    - `protocol_orchestrator.go` - Authorization flow orchestrator (Steps a-i)
    - `subscription_store.go` - Subscription persistence interface
    - `subscription_store_memory.go` - In-memory subscription storage
    - `compliance_tracker.go` - Ongoing compliance monitoring (Step i)
 
-2. **REST API Handlers** (in `web/handlers/rfc0111/`):
+2. **REST API Handlers** (in `web/handlers/aap001/`):
    - `subscription_handlers.go` - Subscription lifecycle endpoints
    - `authorization_handlers.go` - Authorization and token endpoints
 
 3. **Route Registration** (in `web/`):
-   - `rfc0111_routes.go` - Endpoint registration helper
+   - `aap001_routes.go` - Endpoint registration helper
 
 ## API Endpoints
 
 ### Subscription Flow (Steps I-VIII)
 
-The RFC-0111 subscription flow consists of 8 sequential steps that must be completed in order. Each step builds upon the previous one, with prerequisite validation enforced by the system.
+The AAP-001 subscription flow consists of 8 sequential steps that must be completed in order. Each step builds upon the previous one, with prerequisite validation enforced by the system.
 
 #### Step I: Owner's Authorizer Identity Proof
 ```
-POST /api/v1/rfc0111/subscriptions
+POST /api/v1/aap001/subscriptions
 ```
 
-Initiates a new RFC-0111 subscription flow. The owner's authorizer (e.g., board member, managing director) proves their identity to the authorization server.
+Initiates a new AAP-001 subscription flow. The owner's authorizer (e.g., board member, managing director) proves their identity to the authorization server.
 
 **Request:**
 ```json
@@ -132,7 +132,7 @@ Initiates a new RFC-0111 subscription flow. The owner's authorizer (e.g., board 
 
 #### Step II: Owner's Authorizer Authorization Proof
 ```
-POST /api/v1/rfc0111/subscriptions/:id/step-ii
+POST /api/v1/aap001/subscriptions/:id/step-ii
 ```
 
 The owner's authorizer proves their authority via commercial register entry. This verifies they have the legal right to act on behalf of the organization.
@@ -168,7 +168,7 @@ The owner's authorizer proves their authority via commercial register entry. Thi
 
 #### Step III: Client Owner Identity Proof
 ```
-POST /api/v1/rfc0111/subscriptions/:id/step-iii
+POST /api/v1/aap001/subscriptions/:id/step-iii
 ```
 
 The client owner (owner of the AI system) proves their identity to the authorization server.
@@ -202,7 +202,7 @@ The client owner (owner of the AI system) proves their identity to the authoriza
 
 #### Step IV: Client Owner Authorization Proof
 ```
-POST /api/v1/rfc0111/subscriptions/:id/step-iv
+POST /api/v1/aap001/subscriptions/:id/step-iv
 ```
 
 Validates the authorization chain from the owner's authorizer to the client owner. This step confirms the client owner has proper authorization to operate the AI system.
@@ -285,7 +285,7 @@ Validates the authorization chain from the owner's authorizer to the client owne
 
 #### Step V: Client Authorization
 ```
-POST /api/v1/rfc0111/subscriptions/:id/step-v
+POST /api/v1/aap001/subscriptions/:id/step-v
 ```
 
 The client owner authorizes a client (AI system) to act with the authorization server, including permissions for identity sharing and prompting.
@@ -321,7 +321,7 @@ The client owner authorizes a client (AI system) to act with the authorization s
 
 #### Step VI: Resource Owner Identity Proof
 ```
-POST /api/v1/rfc0111/subscriptions/:id/step-vi
+POST /api/v1/aap001/subscriptions/:id/step-vi
 ```
 
 The resource owner (owner of the protected resources) proves their identity to the authorization server.
@@ -355,7 +355,7 @@ The resource owner (owner of the protected resources) proves their identity to t
 
 #### Step VII: Resource Owner Authorization Proof
 ```
-POST /api/v1/rfc0111/subscriptions/:id/step-vii
+POST /api/v1/aap001/subscriptions/:id/step-vii
 ```
 
 Validates the authorization chain for the resource owner. This confirms the resource owner has proper authorization to delegate access to their resources.
@@ -469,7 +469,7 @@ Validates the authorization chain for the resource owner. This confirms the reso
 
 #### Step VIII: Resource Server Authorization
 ```
-POST /api/v1/rfc0111/subscriptions/:id/step-viii
+POST /api/v1/aap001/subscriptions/:id/step-viii
 ```
 
 Completes the subscription by authorizing the resource server. This finalizes the entire subscription flow.
@@ -509,7 +509,7 @@ After successful completion of Step VIII, the subscription status changes to `ac
 
 #### Get Subscription
 ```
-GET /api/v1/rfc0111/subscriptions/:id
+GET /api/v1/aap001/subscriptions/:id
 ```
 
 Retrieves subscription details.
@@ -526,7 +526,7 @@ Retrieves subscription details.
 
 #### List Subscriptions
 ```
-GET /api/v1/rfc0111/subscriptions?client_id=client_xyz
+GET /api/v1/aap001/subscriptions?client_id=client_xyz
 ```
 
 Lists all subscriptions for a client.
@@ -547,7 +547,7 @@ Lists all subscriptions for a client.
 
 ### Authorization Flow (Steps a-i)
 
-The authorization flow implements RFC-0111 Steps a-i, which execute after a subscription is completed. This flow validates the subscription, issues extended tokens with compliance metadata, and provides token lifecycle management.
+The authorization flow implements AAP-001 Steps a-i, which execute after a subscription is completed. This flow validates the subscription, issues extended tokens with compliance metadata, and provides token lifecycle management.
 
 **Prerequisites:**
 - Subscription must be in `completed` status (all Steps I-VIII finished)
@@ -556,10 +556,10 @@ The authorization flow implements RFC-0111 Steps a-i, which execute after a subs
 
 #### Step a-i: Request Authorization Token
 ```
-POST /api/v1/rfc0111/authorize
+POST /api/v1/aap001/authorize
 ```
 
-Executes the complete RFC-0111 authorization flow, including:
+Executes the complete AAP-001 authorization flow, including:
 - (a) Request structure validation
 - (b) Request compliance validation against subscription
 - (c) Authorization grant issuance
@@ -641,7 +641,7 @@ Executes the complete RFC-0111 authorization flow, including:
 **cURL Example:**
 ```bash
 # First, complete a subscription (Steps I-VIII)
-SUBSCRIPTION_ID=$(curl -s -X POST http://localhost:8080/api/v1/rfc0111/subscriptions \
+SUBSCRIPTION_ID=$(curl -s -X POST http://localhost:8080/api/v1/aap001/subscriptions \
   -H "Content-Type: application/json" \
   -d '{"owners_authorizer_id": "auth-001", "identity_proof_request": {...}}' \
   | jq -r '.subscription_id')
@@ -650,7 +650,7 @@ SUBSCRIPTION_ID=$(curl -s -X POST http://localhost:8080/api/v1/rfc0111/subscript
 # (See subscription flow section for complete examples)
 
 # Then request authorization token
-curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
+curl -X POST http://localhost:8080/api/v1/aap001/authorize \
   -H "Content-Type: application/json" \
   -d "{
     \"client_id\": \"client-003\",
@@ -663,10 +663,10 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
 
 #### Token Validation
 ```
-POST /api/v1/rfc0111/token/validate
+POST /api/v1/aap001/token/validate
 ```
 
-Validates an RFC-0111 access token and returns client information. This endpoint verifies token signature, expiration, and revocation status.
+Validates an AAP-001 access token and returns client information. This endpoint verifies token signature, expiration, and revocation status.
 
 **Request:**
 ```json
@@ -700,14 +700,14 @@ Validates an RFC-0111 access token and returns client information. This endpoint
 ```bash
 TOKEN="eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0wMDEifQ..."
 
-curl -X POST http://localhost:8080/api/v1/rfc0111/token/validate \
+curl -X POST http://localhost:8080/api/v1/aap001/token/validate \
   -H "Content-Type: application/json" \
   -d "{\"token\": \"$TOKEN\"}"
 ```
 
 #### Token Introspection (RFC 7662)
 ```
-POST /api/v1/rfc0111/token/introspect
+POST /api/v1/aap001/token/introspect
 ```
 
 RFC 7662 compliant token introspection endpoint. Returns detailed information about a token's current state. Per RFC 7662, returns `active: false` for invalid tokens rather than error responses.
@@ -747,14 +747,14 @@ RFC 7662 compliant token introspection endpoint. Returns detailed information ab
 ```bash
 TOKEN="eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0wMDEifQ..."
 
-curl -X POST http://localhost:8080/api/v1/rfc0111/token/introspect \
+curl -X POST http://localhost:8080/api/v1/aap001/token/introspect \
   -H "Content-Type: application/json" \
   -d "{\"token\": \"$TOKEN\", \"token_type_hint\": \"access_token\"}"
 ```
 
 #### Token Revocation (RFC 7009)
 ```
-POST /api/v1/rfc0111/token/revoke
+POST /api/v1/aap001/token/revoke
 ```
 
 RFC 7009 compliant token revocation endpoint. Revokes an access token, making it immediately invalid. Per RFC 7009 §2.2, this endpoint returns 200 OK regardless of whether the token existed or was already revoked (idempotent operation).
@@ -785,12 +785,12 @@ RFC 7009 compliant token revocation endpoint. Revokes an access token, making it
 ```bash
 TOKEN="eyJhbGciOiJFZERTQSIsImtpZCI6ImtleS0wMDEifQ..."
 
-curl -X POST http://localhost:8080/api/v1/rfc0111/token/revoke \
+curl -X POST http://localhost:8080/api/v1/aap001/token/revoke \
   -H "Content-Type: application/json" \
   -d "{\"token\": \"$TOKEN\"}"
 
 # Verify revocation
-curl -X POST http://localhost:8080/api/v1/rfc0111/token/introspect \
+curl -X POST http://localhost:8080/api/v1/aap001/token/introspect \
   -H "Content-Type: application/json" \
   -d "{\"token\": \"$TOKEN\"}"
 # Should return: {"active": false}
@@ -802,7 +802,7 @@ Here's a complete example showing the full flow from subscription to token revoc
 
 ```bash
 #!/bin/bash
-BASE_URL="http://localhost:8080/api/v1/rfc0111"
+BASE_URL="http://localhost:8080/api/v1/aap001"
 
 # 1. Create subscription and complete Steps I-VIII
 # (See subscription flow section for complete step-by-step examples)
@@ -855,17 +855,17 @@ echo "✓ Revocation verified"
 
 ## Integration
 
-To enable RFC-0111 endpoints in your web server:
+To enable AAP-001 endpoints in your web server:
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 
 // In your server initialization:
 
 // 1. Create storage
-subscriptionStore := gauth.NewMemorySubscriptionStore()
+subscriptionStore := agentauth.NewMemorySubscriptionStore()
 
 // 2. Create mock external clients (replace with real implementations)
 pvpClient := &MockPVPClient{}
@@ -873,11 +873,11 @@ pipClient := &MockPIPClient{}
 commercialRegClient := &MockCommercialRegisterClient{}
 
 // 3. Create validators
-authChainValidator := gauth.NewAuthorizationChainValidator()
-formalReqValidator := gauth.NewFormalRequirementsValidator()
+authChainValidator := agentauth.NewAuthorizationChainValidator()
+formalReqValidator := agentauth.NewFormalRequirementsValidator()
 
 // 4. Create subscription manager
-subscriptionManager := gauth.NewSubscriptionFlowManager(
+subscriptionManager := agentauth.NewSubscriptionFlowManager(
     pvpClient,
     pipClient,
     commercialRegClient,
@@ -887,15 +887,15 @@ subscriptionManager := gauth.NewSubscriptionFlowManager(
 )
 
 // 5. Create extended token service and validators
-extendedTokenService := gauth.NewExtendedTokenService(/* params */)
-complianceValidator := gauth.NewComplianceValidator(/* params */)
+extendedTokenService := agentauth.NewExtendedTokenService(/* params */)
+complianceValidator := agentauth.NewComplianceValidator(/* params */)
 
 // 6. Create compliance tracker
-complianceTracker := gauth.NewMemoryComplianceTracker(complianceValidator)
+complianceTracker := agentauth.NewMemoryComplianceTracker(complianceValidator)
 
 // 7. Create AgentAuth service with RFC compliance
-gauthService := gauth.New(
-    gauth.WithRFCCompliance(
+agentauthService := agentauth.New(
+    agentauth.WithRFCCompliance(
         subscriptionStore,
         extendedTokenService,
         complianceValidator,
@@ -908,11 +908,11 @@ gauthService := gauth.New(
     ),
 )
 
-// 8. Register RFC-0111 endpoints
+// 8. Register AAP-001 endpoints
 server.RegisterAAP-001Endpoints(
     subscriptionManager,
     subscriptionStore,
-    gauthService,
+    agentauthService,
 )
 ```
 
@@ -921,26 +921,26 @@ server.RegisterAAP-001Endpoints(
 ### ✅ Completed
 
 **Core Components:**
-- ✅ Subscription flow manager (Steps I-VIII) - `pkg/gauth/subscription_flow.go` (~592 lines)
-- ✅ Protocol orchestrator (Steps a-i) - `pkg/gauth/protocol_orchestrator.go`
-- ✅ Subscription storage interface - `pkg/gauth/subscription_store.go`
-- ✅ In-memory subscription store - `pkg/gauth/subscription_store_memory.go`
-- ✅ Compliance tracker with background monitoring - `pkg/gauth/compliance_tracker.go`
+- ✅ Subscription flow manager (Steps I-VIII) - `pkg/agentauth/subscription_flow.go` (~592 lines)
+- ✅ Protocol orchestrator (Steps a-i) - `pkg/agentauth/protocol_orchestrator.go`
+- ✅ Subscription storage interface - `pkg/agentauth/subscription_store.go`
+- ✅ In-memory subscription store - `pkg/agentauth/subscription_store_memory.go`
+- ✅ Compliance tracker with background monitoring - `pkg/agentauth/compliance_tracker.go`
 
 **REST API Layer:**
-- ✅ Complete subscription handlers (Steps I-VIII) - `web/handlers/rfc0111/subscription_handlers.go` (~500 lines)
-- ✅ Authorization handlers (stubs) - `web/handlers/rfc0111/authorization_handlers.go`
-- ✅ Route registration - `web/rfc0111_routes.go`
-- ✅ Server integration with RFC-0111 toggle - `web/server_clean.go`
+- ✅ Complete subscription handlers (Steps I-VIII) - `web/handlers/aap001/subscription_handlers.go` (~500 lines)
+- ✅ Authorization handlers (stubs) - `web/handlers/aap001/authorization_handlers.go`
+- ✅ Route registration - `web/aap001_routes.go`
+- ✅ Server integration with AAP-001 toggle - `web/server_clean.go`
 
 **Mock Services:**
-- ✅ Mock PVP client - `pkg/gauth/mocks/external_services.go`
-- ✅ Mock PIP client - `pkg/gauth/mocks/external_services.go`
-- ✅ Mock Commercial Register client - `pkg/gauth/mocks/external_services.go`
+- ✅ Mock PVP client - `pkg/agentauth/mocks/external_services.go`
+- ✅ Mock PIP client - `pkg/agentauth/mocks/external_services.go`
+- ✅ Mock Commercial Register client - `pkg/agentauth/mocks/external_services.go`
 
 **Testing:**
-- ✅ Integration test script - `scripts/test_rfc0111_subscription_flow.sh` (342 lines)
-- ✅ Mock service tests - `pkg/gauth/mocks/external_services_test.go`
+- ✅ Integration test script - `scripts/test_aap001_subscription_flow.sh` (342 lines)
+- ✅ Mock service tests - `pkg/agentauth/mocks/external_services_test.go`
 - ✅ Steps I-III validated end-to-end
 
 **Documentation:**
@@ -988,7 +988,7 @@ server.RegisterAAP-001Endpoints(
 | Mock External Services | ~390 | ✅ Complete |
 | Integration Test Script | ~342 | ✅ Complete |
 | Route Registration | ~150 | ✅ Complete |
-| **Total RFC-0111 Code** | **~2,000+** | **85% Complete** |
+| **Total AAP-001 Code** | **~2,000+** | **85% Complete** |
 
 ### 🎯 Current Test Coverage
 
@@ -1012,18 +1012,18 @@ server.RegisterAAP-001Endpoints(
 
 ## Complete End-to-End Example
 
-This example demonstrates the complete RFC-0111 subscription flow from start to finish.
+This example demonstrates the complete AAP-001 subscription flow from start to finish.
 
 ### Prerequisites
 
-1. Start the server with RFC-0111 enabled:
+1. Start the server with AAP-001 enabled:
 ```bash
-GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 2. Set environment variables:
 ```bash
-export API_BASE="http://localhost:8080/api/v1/rfc0111"
+export API_BASE="http://localhost:8080/api/v1/aap001"
 ```
 
 ### Step-by-Step Flow
@@ -1217,10 +1217,10 @@ Use the provided integration test script:
 
 ```bash
 # Run complete subscription flow test
-./scripts/test_rfc0111_subscription_flow.sh
+./scripts/test_aap001_subscription_flow.sh
 
 # Run with custom server URL
-./scripts/test_rfc0111_subscription_flow.sh http://localhost:9090
+./scripts/test_aap001_subscription_flow.sh http://localhost:9090
 ```
 
 The test script will:
@@ -1309,12 +1309,12 @@ All API endpoints follow a consistent error response format:
 
 ### Server Not Starting
 
-**Problem:** Server fails to start or RFC-0111 endpoints not available
+**Problem:** Server fails to start or AAP-001 endpoints not available
 
 **Solution:**
 ```bash
-# Ensure RFC-0111 is enabled
-export GAUTH_AAP-001_ENABLED=1
+# Ensure AAP-001 is enabled
+export AGENTAUTH_AAP-001_ENABLED=1
 
 # Start server
 go run ./cmd/web-server
@@ -1322,17 +1322,17 @@ go run ./cmd/web-server
 
 ### Endpoints Return 404
 
-**Problem:** `POST /api/v1/rfc0111/subscriptions` returns 404
+**Problem:** `POST /api/v1/aap001/subscriptions` returns 404
 
-**Cause:** RFC-0111 endpoints not enabled
+**Cause:** AAP-001 endpoints not enabled
 
 **Solution:**
 ```bash
-# Check if GAUTH_AAP-001_ENABLED is set
-echo $GAUTH_AAP-001_ENABLED
+# Check if AGENTAUTH_AAP-001_ENABLED is set
+echo $AGENTAUTH_AAP-001_ENABLED
 
 # If not set or not "1", set it:
-export GAUTH_AAP-001_ENABLED=1
+export AGENTAUTH_AAP-001_ENABLED=1
 
 # Restart server
 ```
@@ -1420,22 +1420,22 @@ export GAUTH_AAP-001_ENABLED=1
 
 ### Integration Test Failures
 
-**Problem:** `./scripts/test_rfc0111_subscription_flow.sh` exits with errors
+**Problem:** `./scripts/test_aap001_subscription_flow.sh` exits with errors
 
 **Diagnostics:**
 ```bash
 # Check server status
-curl -s http://localhost:8080/api/v1/rfc0111/subscriptions?client_id=test
+curl -s http://localhost:8080/api/v1/aap001/subscriptions?client_id=test
 
 # Check server logs
-tail -f /tmp/gauth-server.log
+tail -f /tmp/agentauth-server.log
 
 # Run test with verbose output
-bash -x ./scripts/test_rfc0111_subscription_flow.sh
+bash -x ./scripts/test_aap001_subscription_flow.sh
 ```
 
 **Common Issues:**
-- Server not running → Start server with `GAUTH_AAP-001_ENABLED=1`
+- Server not running → Start server with `AGENTAUTH_AAP-001_ENABLED=1`
 - Wrong port → Update `BASE_URL` in test script
 - Missing `jq` → Install with `brew install jq` (macOS) or `apt-get install jq` (Linux)
 
@@ -1444,14 +1444,14 @@ bash -x ./scripts/test_rfc0111_subscription_flow.sh
 ```
 ┌─────────────────────────────────────────────────┐
 │           REST API Layer                        │
-│  (web/handlers/rfc0111/)                        │
+│  (web/handlers/aap001/)                        │
 │  - subscription_handlers.go                     │
 │  - authorization_handlers.go                    │
 └────────────────┬────────────────────────────────┘
                  │
 ┌────────────────▼────────────────────────────────┐
 │         Core Business Logic                     │
-│  (pkg/gauth/)                                   │
+│  (pkg/agentauth/)                                   │
 │  - SubscriptionFlowManager (Steps I-VIII)       │
 │  - ProtocolOrchestrator (Steps a-i)             │
 │  - ComplianceTracker (Step i monitoring)        │
@@ -1459,7 +1459,7 @@ bash -x ./scripts/test_rfc0111_subscription_flow.sh
                  │
 ┌────────────────▼────────────────────────────────┐
 │         Persistence Layer                       │
-│  (pkg/gauth/)                                   │
+│  (pkg/agentauth/)                                   │
 │  - SubscriptionStore interface                  │
 │  - MemorySubscriptionStore (dev/test)           │
 │  - PostgreSQLSubscriptionStore (TODO)           │

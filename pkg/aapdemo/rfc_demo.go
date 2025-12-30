@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
-// ValidateAAP001Flow performs a minimal validation sequence on a gauth Service.
+// ValidateAAP001Flow performs a minimal validation sequence on a agentauth Service.
 // NOTE: The caller must have already issued a token to supply here; this helper focuses on
 // validation + revocation semantics only. (Examples perform full grant/token issuance flows.)
-func ValidateAAP001Flow(svc *gauth.Service, issuedToken string) error {
+func ValidateAAP001Flow(svc *agentauth.Service, issuedToken string) error {
 	if svc == nil {
 		return fmt.Errorf("service cannot be nil")
 	}
@@ -73,21 +73,21 @@ func TestAAP002Features() error {
 func DemoAAP001PowerOfAttorney() error {
 	fmt.Println("=== AAP-001 Power-of-Attorney Demonstration ===")
 
-	cfg := gauth.Config{
+	cfg := agentauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "AAP-demo-client",
 		ClientSecret:      "AAP-demo-secret",
 		Scopes:            []string{"transaction:execute", "read", "write"},
 		AccessTokenExpiry: time.Hour,
 	}
-	svc, err := gauth.New(cfg)
+	svc, err := agentauth.New(cfg)
 	if err != nil {
 		return fmt.Errorf("create service: %w", err)
 	}
 	fmt.Println("✅ AgentAuth service initialized")
 
 	fmt.Println("\n📋 Step 1: Authorization Request")
-	grant, err := svc.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: cfg.ClientID, Scopes: []string{"transaction:execute"}})
+	grant, err := svc.InitiateAuthorization(agentauth.AuthorizationRequest{ClientID: cfg.ClientID, Scopes: []string{"transaction:execute"}})
 	if err != nil {
 		return fmt.Errorf("authorization request: %w", err)
 	}
@@ -95,7 +95,7 @@ func DemoAAP001PowerOfAttorney() error {
 	fmt.Printf("   📜 Scopes: %v\n", grant.Scope)
 
 	fmt.Println("\n🎫 Step 2: Token Issuance")
-	tokenResp, err := svc.RequestToken(gauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope, Restrictions: grant.Restrictions})
+	tokenResp, err := svc.RequestToken(agentauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope, Restrictions: grant.Restrictions})
 	if err != nil {
 		return fmt.Errorf("token request: %w", err)
 	}

@@ -133,8 +133,8 @@ Warning: 299 - "Keys deprecated: jzABkhZzkp0, aB3CdEfGhI8"
 
 Enable with:
 ```bash
-export GAUTH_JWKS_SIGNING_KEY="your-secret-key"
-export GAUTH_JWKS_SIGNING_KEY_ENABLED="1"
+export AGENTAUTH_JWKS_SIGNING_KEY="your-secret-key"
+export AGENTAUTH_JWKS_SIGNING_KEY_ENABLED="1"
 ```
 
 Response headers:
@@ -272,14 +272,14 @@ def verify_signature_strict(kid, signature, payload, jwks):
 
 ```bash
 # Key rotation schedule (automatic background rotation)
-export GAUTH_EDDSA_ROTATION_INTERVAL_MINS=10080  # 7 days
+export AGENTAUTH_EDDSA_ROTATION_INTERVAL_MINS=10080  # 7 days
 
 # Key TTL (lifetime per key)
-export GAUTH_EDDSA_TTL_HOURS=168  # 7 days
+export AGENTAUTH_EDDSA_TTL_HOURS=168  # 7 days
 
 # Optional JWKS signing (integrity protection)
-export GAUTH_JWKS_SIGNING_KEY="production-jwks-secret-2025"
-export GAUTH_JWKS_SIGNING_KEY_ENABLED="1"
+export AGENTAUTH_JWKS_SIGNING_KEY="production-jwks-secret-2025"
+export AGENTAUTH_JWKS_SIGNING_KEY_ENABLED="1"
 ```
 
 ### Monitoring Metrics
@@ -433,7 +433,7 @@ else:
    - Too long: Extended exposure if key compromised during deprecation
 
 3. **JWKS Signature Secrets**: 
-   - Rotate `GAUTH_JWKS_SIGNING_KEY` independently from signing keys
+   - Rotate `AGENTAUTH_JWKS_SIGNING_KEY` independently from signing keys
    - Use strong secrets (≥256 bits entropy)
    - Store securely (environment variables, not hardcoded)
 
@@ -502,8 +502,8 @@ go test -v -run "TestJWKS" ./web
 
 ```bash
 # Start server with 10-second TTL (rapid deprecation)
-export GAUTH_TOKEN_SIG_MODE=eddsa
-export GAUTH_EDDSA_TTL_HOURS=0.00277  # 10 seconds
+export AGENTAUTH_TOKEN_SIG_MODE=eddsa
+export AGENTAUTH_EDDSA_TTL_HOURS=0.00277  # 10 seconds
 ./bin/web-server
 
 # T+0s: Fetch JWKS (fresh key, no warning)

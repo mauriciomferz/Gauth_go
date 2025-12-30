@@ -88,7 +88,7 @@ func (v *VaultKeyStore) Generate(ctx context.Context, tenant string) (string, er
 	var encryptedPriv string
 	if v.transitPath != "" {
 		// Use Vault transit encrypt API
-		transitKey := "gauth-key"
+		transitKey := "agentauth-key"
 		transitEncryptPath := fmt.Sprintf("%s/encrypt/%s", v.transitPath, transitKey)
 		req := map[string]interface{}{"plaintext": base64.StdEncoding.EncodeToString(priv)}
 		resp, err := v.client.Write(ctx, transitEncryptPath, req)
@@ -115,7 +115,7 @@ func (v *VaultKeyStore) Generate(ctx context.Context, tenant string) (string, er
 		"active":      false,
 	}
 
-	path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, keyID)
+	path := fmt.Sprintf("%s/data/agentauth/keys/%s/%s", v.kvPath, tenant, keyID)
 	if _, err := v.client.Write(ctx, path, map[string]interface{}{"data": keyData}); err != nil {
 		return "", fmt.Errorf("vault key storage failed: %w", err)
 	}
@@ -131,7 +131,7 @@ func (v *VaultKeyStore) Activate(ctx context.Context, tenant, keyID string) erro
 	}
 
 	// Activate the specified key
-	path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, keyID)
+	path := fmt.Sprintf("%s/data/agentauth/keys/%s/%s", v.kvPath, tenant, keyID)
 	resp, err := v.client.Read(ctx, path)
 	if err != nil {
 		return fmt.Errorf("failed to read key for activation: %w", err)
@@ -154,7 +154,7 @@ func (v *VaultKeyStore) Activate(ctx context.Context, tenant, keyID string) erro
 
 // Archive marks a key as archived (inactive but retained).
 func (v *VaultKeyStore) Archive(ctx context.Context, tenant, keyID string) error {
-	path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, keyID)
+	path := fmt.Sprintf("%s/data/agentauth/keys/%s/%s", v.kvPath, tenant, keyID)
 	resp, err := v.client.Read(ctx, path)
 	if err != nil {
 		return fmt.Errorf("failed to read key for archiving: %w", err)
@@ -184,7 +184,7 @@ func (v *VaultKeyStore) GetActive(ctx context.Context, tenant string) (*Key, err
 
 	for _, key := range keys {
 		if key.ID != "" { // Check if this is the active key by reading from Vault
-			path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, key.ID)
+			path := fmt.Sprintf("%s/data/agentauth/keys/%s/%s", v.kvPath, tenant, key.ID)
 			resp, err := v.client.Read(ctx, path)
 			if err != nil {
 				continue
@@ -206,7 +206,7 @@ func (v *VaultKeyStore) GetActive(ctx context.Context, tenant string) (*Key, err
 
 // GetKey retrieves a specific key by ID.
 func (v *VaultKeyStore) GetKey(ctx context.Context, tenant, keyID string) (*Key, error) {
-	path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, keyID)
+	path := fmt.Sprintf("%s/data/agentauth/keys/%s/%s", v.kvPath, tenant, keyID)
 	resp, err := v.client.Read(ctx, path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read key: %w", err)
@@ -223,7 +223,7 @@ func (v *VaultKeyStore) GetKey(ctx context.Context, tenant, keyID string) (*Key,
 // ListKeys returns all keys for a tenant.
 func (v *VaultKeyStore) ListKeys(ctx context.Context, tenant string) ([]*Key, error) {
 	// List keys in the tenant's path
-	listPath := fmt.Sprintf("%s/metadata/gauth/keys/%s", v.kvPath, tenant)
+	listPath := fmt.Sprintf("%s/metadata/agentauth/keys/%s", v.kvPath, tenant)
 	resp, err := v.client.Read(ctx, listPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list keys: %w", err)
@@ -258,7 +258,7 @@ func (v *VaultKeyStore) ListKeys(ctx context.Context, tenant string) ([]*Key, er
 
 // Delete permanently removes a key.
 func (v *VaultKeyStore) Delete(ctx context.Context, tenant, keyID string) error {
-	path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, keyID)
+	path := fmt.Sprintf("%s/data/agentauth/keys/%s/%s", v.kvPath, tenant, keyID)
 	return v.client.Delete(ctx, path)
 }
 
@@ -277,7 +277,7 @@ func (v *VaultKeyStore) deactivateAllKeys(ctx context.Context, tenant string) er
 	}
 
 	for _, key := range keys {
-		path := fmt.Sprintf("%s/data/gauth/keys/%s/%s", v.kvPath, tenant, key.ID)
+		path := fmt.Sprintf("%s/data/agentauth/keys/%s/%s", v.kvPath, tenant, key.ID)
 		resp, err := v.client.Read(ctx, path)
 		if err != nil {
 			continue
@@ -314,7 +314,7 @@ func (v *VaultKeyStore) parseVaultKey(keyID string, keyData map[string]interface
 	var privateKey []byte
 	if v.transitPath != "" && len(privateKeyEnc) > 7 && privateKeyEnc[:7] == "vault:v" {
 		// Use Vault transit decrypt API
-		transitKey := "gauth-key"
+		transitKey := "agentauth-key"
 		transitDecryptPath := fmt.Sprintf("%s/decrypt/%s", v.transitPath, transitKey)
 		req := map[string]interface{}{"ciphertext": privateKeyEnc}
 		resp, err := v.client.Write(context.Background(), transitDecryptPath, req)

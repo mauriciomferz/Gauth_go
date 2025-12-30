@@ -35,7 +35,7 @@ func NewEncrypted(backend Provider, passphrase string) (*EncryptedProvider, erro
 	// Derive 32-byte key using PBKDF2-SHA256
 	// Salt is fixed for deterministic key derivation from passphrase
 	// In production, consider per-tenant salts stored separately
-	salt := []byte("gauth-secret-storage-v1")
+	salt := []byte("agentauth-secret-storage-v1")
 	key := pbkdf2.Key([]byte(passphrase), salt, 100000, 32, sha256.New)
 
 	return &EncryptedProvider{

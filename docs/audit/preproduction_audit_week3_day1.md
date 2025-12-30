@@ -15,7 +15,7 @@ owners: compliance-team
 **Date:** November 9, 2025  
 **Auditor:** Pre-Production Validation Team  
 **Platform:** Apple M3 Pro, Go 1.25.4  
-**Repository:** Gauth_go (mauriciomferz/main)
+**Repository:** AgentAuth (mauriciomferz/main)
 
 ### Overall Status: ⚠️ CONDITIONAL PASS
 

@@ -208,7 +208,7 @@ While all 45 gap matrix requirements are implemented, `OPERATIONS_READINESS_GAP.
    - SLO/SLI definitions with error budgets
    - Alert rules (Alertmanager) for high error rates, latency degradation
 
-**Note:** These are deployment and operational concerns, not functional requirements. The 100% compliance refers to the **functional and protocol implementation** as specified in RFC-0111/0115.
+**Note:** These are deployment and operational concerns, not functional requirements. The 100% compliance refers to the **functional and protocol implementation** as specified in AAP-001/0115.
 
 ---
 
@@ -217,7 +217,7 @@ While all 45 gap matrix requirements are implemented, `OPERATIONS_READINESS_GAP.
 ### Running the Validation
 
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 go run ./cmd/validate-gaps
 ```
 
@@ -284,7 +284,7 @@ The automated validation tool confirms that AgentAuth implements:
 
 **Readiness Score: 100.0/100.0 - EXCELLENT**
 
-The AgentAuth implementation achieves complete functional compliance with RFC-0111/0115 specifications. Additional production hardening (TLS, secrets management, infrastructure automation) are deployment concerns documented in `OPERATIONS_READINESS_GAP.md` for operational teams.
+The AgentAuth implementation achieves complete functional compliance with AAP-001/0115 specifications. Additional production hardening (TLS, secrets management, infrastructure automation) are deployment concerns documented in `OPERATIONS_READINESS_GAP.md` for operational teams.
 
 ---
 

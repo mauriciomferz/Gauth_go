@@ -54,7 +54,7 @@ func NewFileKeyStore(basePath string, ttl time.Duration) (*FileKeyStore, error) 
 		return nil, fmt.Errorf("failed to create base directory: %w", err)
 	}
 	var masterKey []byte
-	keyStr := os.Getenv("GAUTH_FILEKEYSTORE_MASTER_KEY")
+	keyStr := os.Getenv("AGENTAUTH_FILEKEYSTORE_MASTER_KEY")
 	if keyStr != "" {
 		mk, err := base64.StdEncoding.DecodeString(keyStr)
 		if err == nil && (len(mk) == 32) {

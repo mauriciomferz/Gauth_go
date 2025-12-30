@@ -1,19 +1,19 @@
-# Security Considerations for RFC-0111 Integration
+# Security Considerations for AAP-001 Integration
 
 **Version:** 1.0 (v0.9.1)  
 **Date:** November 21, 2025  
-**Applies To:** `pkg/rfc0111` Power of Attorney Validation Framework
+**Applies To:** `pkg/aap001` Power of Attorney Validation Framework
 
 ---
 
-**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com  
-Official Go implementation of AAP-RFC-0111 and AAP-RFC-0115 specifications
+**AgentAuth Community**, www.agentauth.io  
+Official Go implementation of AAP-001 and AAP-002 specifications
 
 ---
 
 ## ⚠️ CRITICAL: Integration Security Requirements
 
-The RFC-0111 service is a **validation framework**, not a complete authentication system. It **trusts** the authenticated identity provided via `context.Context`. Integrators are **responsible** for secure authentication and context population.
+The AAP-001 service is a **validation framework**, not a complete authentication system. It **trusts** the authenticated identity provided via `context.Context`. Integrators are **responsible** for secure authentication and context population.
 
 ### 🚨 MANDATORY Integration Requirements
 
@@ -35,12 +35,12 @@ The RFC-0111 service is a **validation framework**, not a complete authenticatio
 
 ## 🔒 Secure-By-Default Configuration (v0.9.1+)
 
-As of version **v0.9.1**, the RFC-0111 service defaults to **secure behavior**:
+As of version **v0.9.1**, the AAP-001 service defaults to **secure behavior**:
 
 ### Default Security Settings
 
 ```go
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // Defaults:
 //   failClosedReplay: true    ← Revocation/replay errors REJECT requests
 //   strictConstraints: false  ← Unknown constraints ignored (backward compatible)
@@ -57,7 +57,7 @@ svc := rfc0111.NewService(audit, authz)
 ### **Development Security Issues (v2.0.0+)**
 For security vulnerabilities in the development RFC implementation:
 
-**🔒 CONFIDENTIAL REPORTING**: security@gimelfoundation.org
+**🔒 CONFIDENTIAL REPORTING**: security@agentauth.io
 
 ### **Supported Versions**
 | Version | Status | Security Support |
@@ -87,7 +87,7 @@ This security policy operates under German law and EU regulations, consistent wi
 
 **Jurisdictional Coverage**: DE, EU, International (as applicable)
 **Compliance Standards**: GDPR, ISO 27001 principles, German corporate law
-**Legal Contact**: legal@gimelfoundation.org
+**Legal Contact**: legal@agentauth.io
 
 ---
 

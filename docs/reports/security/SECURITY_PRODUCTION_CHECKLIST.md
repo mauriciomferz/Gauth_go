@@ -14,7 +14,7 @@ owners: [system]
 
 ### 1. JWT Signing Key Forgery Risk 🔴 CRITICAL
 
-**Vulnerability**: The default `GAUTH_JWT_SIGNING_KEY` is set to `dev-please-change` in examples and documentation.
+**Vulnerability**: The default `AGENTAUTH_JWT_SIGNING_KEY` is set to `dev-please-change` in examples and documentation.
 
 **Impact**: If deployed with this default key, attackers can:
 - Forge any "Proof of Authorization" (PoA) token
@@ -25,14 +25,14 @@ owners: [system]
 **Remediation**:
 ```bash
 # Generate a strong random key (minimum 32 bytes)
-export GAUTH_JWT_SIGNING_KEY=$(openssl rand -base64 32)
+export AGENTAUTH_JWT_SIGNING_KEY=$(openssl rand -base64 32)
 
 # Or use a Hardware Security Module (HSM) / Cloud KMS
 # AWS KMS, Azure Key Vault, GCP Cloud KMS, etc.
 ```
 
 **Validation**: Server now validates on startup and **BLOCKS startup** if:
-- `GAUTH_JWT_SIGNING_KEY` is unset
+- `AGENTAUTH_JWT_SIGNING_KEY` is unset
 - Key matches known weak values: `dev-please-change`, `dev-signing-key-change-in-production`, `changeme`, `secret`, `test`
 - Key is shorter than 32 bytes in production mode
 
@@ -88,51 +88,51 @@ if err := validator.ValidateURI(uri); err != nil {
 
 ```bash
 # Option 1: Stripe Identity
-export GAUTH_PVP_PROVIDER=stripe
+export AGENTAUTH_PVP_PROVIDER=stripe
 export STRIPE_API_KEY=sk_live_...
 
 # Option 2: Veriff
-export GAUTH_PVP_PROVIDER=veriff  
+export AGENTAUTH_PVP_PROVIDER=veriff  
 export VERIFF_API_KEY=...
 export VERIFF_API_SECRET=...
 
 # Option 3: Idemia
-export GAUTH_PVP_PROVIDER=idemia
+export AGENTAUTH_PVP_PROVIDER=idemia
 export IDEMIA_API_KEY=...
 
 # Option 4: Onfido
-export GAUTH_PVP_PROVIDER=onfido
+export AGENTAUTH_PVP_PROVIDER=onfido
 export ONFIDO_API_TOKEN=...
 
 # Option 5: Jumio
-export GAUTH_PVP_PROVIDER=jumio
+export AGENTAUTH_PVP_PROVIDER=jumio
 export JUMIO_API_TOKEN=...
 export JUMIO_API_SECRET=...
 ```
 
-**Validation**: Server now warns on startup if `GAUTH_PVP_PROVIDER` is unset or set to `mock` in production mode.
+**Validation**: Server now warns on startup if `AGENTAUTH_PVP_PROVIDER` is unset or set to `mock` in production mode.
 
 **Implementation Status**:
 - ✅ Framework and validation complete
-- ⚠️ Provider integrations require implementation (see `pkg/gauth/pvp_factory.go`)
+- ⚠️ Provider integrations require implementation (see `pkg/agentauth/pvp_factory.go`)
 
 ---
 
 ### 4. Debug UI Exposure 🟢 LOW  
 
-**Vulnerability**: `GAUTH_DEV_INDEX=1` exposes developer UI and debug endpoints.
+**Vulnerability**: `AGENTAUTH_DEV_INDEX=1` exposes developer UI and debug endpoints.
 
 **Impact**: Information disclosure, potential admin interface access.
 
 **Remediation**:
 ```bash
 # Disable debug features
-unset GAUTH_DEV_INDEX
-unset GAUTH_DEV_MODE
+unset AGENTAUTH_DEV_INDEX
+unset AGENTAUTH_DEV_MODE
 
 # Or explicitly set to 0
-export GAUTH_DEV_INDEX=0
-export GAUTH_DEV_MODE=false
+export AGENTAUTH_DEV_INDEX=0
+export AGENTAUTH_DEV_MODE=false
 ```
 
 **Validation**: Server now **BLOCKS startup** if these are enabled in production mode.
@@ -143,40 +143,40 @@ export GAUTH_DEV_MODE=false
 
 ### Required (Server blocks startup if missing/weak)
 
-- [ ] `GAUTH_JWT_SIGNING_KEY` - Strong random key (min 32 bytes) - **CRITICAL**
-- [ ] `GAUTH_ENV=production` or `GAUTH_MODE=production` - Enables production mode
+- [ ] `AGENTAUTH_JWT_SIGNING_KEY` - Strong random key (min 32 bytes) - **CRITICAL**
+- [ ] `AGENTAUTH_ENV=production` or `AGENTAUTH_MODE=production` - Enables production mode
 
 ### Required for Compliance
 
-- [ ] `GAUTH_PVP_PROVIDER` - Real identity verification (stripe, veriff, idemia, onfido, jumio)
+- [ ] `AGENTAUTH_PVP_PROVIDER` - Real identity verification (stripe, veriff, idemia, onfido, jumio)
 - [ ] Provider-specific credentials (see section 3 above)
 
 ### Security Configuration  
 
-- [ ] `GAUTH_CORS_ALLOW` - Restrict to specific domains (NOT `*`)
-- [ ] `GAUTH_RATE_LIMIT_ENABLED=true` - Enable rate limiting
-- [ ] `GAUTH_RATE_LIMIT_REQUESTS=100` - Requests per window
-- [ ] `GAUTH_RATE_LIMIT_WINDOW=60s` - Time window
+- [ ] `AGENTAUTH_CORS_ALLOW` - Restrict to specific domains (NOT `*`)
+- [ ] `AGENTAUTH_RATE_LIMIT_ENABLED=true` - Enable rate limiting
+- [ ] `AGENTAUTH_RATE_LIMIT_REQUESTS=100` - Requests per window
+- [ ] `AGENTAUTH_RATE_LIMIT_WINDOW=60s` - Time window
 
 ### Database Security
 
-- [ ] `GAUTH_DB_PASSWORD` - Strong password (NOT `dev-password-please-change`)
-- [ ] `GAUTH_DB_HOST` - Database hostname
-- [ ] `GAUTH_DB_PORT` - Database port (default 5432)
-- [ ] `GAUTH_DB_USER` - Database user
-- [ ] `GAUTH_DB_NAME` - Database name
+- [ ] `AGENTAUTH_DB_PASSWORD` - Strong password (NOT `dev-password-please-change`)
+- [ ] `AGENTAUTH_DB_HOST` - Database hostname
+- [ ] `AGENTAUTH_DB_PORT` - Database port (default 5432)
+- [ ] `AGENTAUTH_DB_USER` - Database user
+- [ ] `AGENTAUTH_DB_NAME` - Database name
 
 ### Disable Development Features
 
-- [ ] `GAUTH_DEV_INDEX=0` or unset
-- [ ] `GAUTH_DEV_MODE=false` or unset
-- [ ] `GAUTH_ENABLE_PPROF=0` or unset - Disable profiling endpoints
+- [ ] `AGENTAUTH_DEV_INDEX=0` or unset
+- [ ] `AGENTAUTH_DEV_MODE=false` or unset
+- [ ] `AGENTAUTH_ENABLE_PPROF=0` or unset - Disable profiling endpoints
 
 ### Monitoring (Recommended)
 
-- [ ] `GAUTH_METRICS_ENABLED=true`
-- [ ] `GAUTH_TRACING_ENABLED=true`
-- [ ] `GAUTH_LOG_LEVEL=info` (NOT `debug`)
+- [ ] `AGENTAUTH_METRICS_ENABLED=true`
+- [ ] `AGENTAUTH_TRACING_ENABLED=true`
+- [ ] `AGENTAUTH_LOG_LEVEL=info` (NOT `debug`)
 
 ---
 
@@ -195,15 +195,15 @@ if err := validator.ValidateAll(); err != nil {
 ```
 
 **Production Mode Detection**: Triggered by:
-- `GAUTH_ENV=production` or `GAUTH_ENV=prod`
-- `GAUTH_MODE=production` or `GAUTH_MODE=prod`  
+- `AGENTAUTH_ENV=production` or `AGENTAUTH_ENV=prod`
+- `AGENTAUTH_MODE=production` or `AGENTAUTH_MODE=prod`  
 - Port binding to 443 or 8443 without dev flags
 
 **Validation Failures Block Startup**: Server will refuse to start if:
 - JWT signing key is missing or weak
-- `GAUTH_DEV_INDEX=1` in production
-- `GAUTH_DEV_MODE=true` in production
-- `GAUTH_CORS_ALLOW=*` in production
+- `AGENTAUTH_DEV_INDEX=1` in production
+- `AGENTAUTH_DEV_MODE=true` in production
+- `AGENTAUTH_CORS_ALLOW=*` in production
 - Database password matches known weak values
 
 **Warnings Logged**: Non-blocking warnings for:
@@ -256,9 +256,9 @@ PASS
 cat SECURITY_PRODUCTION_CHECKLIST.md
 
 # Set production environment variables
-export GAUTH_ENV=production
-export GAUTH_JWT_SIGNING_KEY=$(openssl rand -base64 32)
-export GAUTH_PVP_PROVIDER=stripe
+export AGENTAUTH_ENV=production
+export AGENTAUTH_JWT_SIGNING_KEY=$(openssl rand -base64 32)
+export AGENTAUTH_PVP_PROVIDER=stripe
 export STRIPE_API_KEY=sk_live_...
 # ... (see checklist above)
 
@@ -266,13 +266,13 @@ export STRIPE_API_KEY=sk_live_...
 go test ./internal/security/... -v
 
 # Build production binary
-go build -o gauth-server ./cmd/web-server
+go build -o agentauth-server ./cmd/web-server
 ```
 
 ### 2. Startup (Automatic Validation)
 
 ```bash
-./gauth-server
+./agentauth-server
 ```
 
 Expected output:
@@ -285,8 +285,8 @@ Expected output:
 If validation fails:
 ```
 [SECURITY] FATAL: security validation failed:
-GAUTH_JWT_SIGNING_KEY is set to known weak value 'dev-please-change'
-GAUTH_DEV_INDEX=1 exposes debug UI - MUST be disabled in production
+AGENTAUTH_JWT_SIGNING_KEY is set to known weak value 'dev-please-change'
+AGENTAUTH_DEV_INDEX=1 exposes debug UI - MUST be disabled in production
 
 SERVER STARTUP BLOCKED. Fix the above security issues and restart.
 exit status 1
@@ -315,7 +315,7 @@ curl http://your-server:8080/api/v1/beta/health
 
 ```bash
 # Check current environment
-env | grep GAUTH
+env | grep AGENTAUTH
 
 # Check for weak defaults
 grep -r "dev-please-change" .env* || echo "No weak defaults in .env files"
@@ -325,10 +325,10 @@ grep -r "dev-please-change" .env* || echo "No weak defaults in .env files"
 
 ```bash
 # JWT signing key
-export GAUTH_JWT_SIGNING_KEY=$(openssl rand -base64 48)
+export AGENTAUTH_JWT_SIGNING_KEY=$(openssl rand -base64 48)
 
 # Database password  
-export GAUTH_DB_PASSWORD=$(openssl rand -base64 24)
+export AGENTAUTH_DB_PASSWORD=$(openssl rand -base64 24)
 
 # Store in secrets management
 # AWS Secrets Manager, HashiCorp Vault, Azure Key Vault, etc.
@@ -343,7 +343,7 @@ export GAUTH_DB_PASSWORD=$(openssl rand -base64 24)
 # 2. Enable Stripe Identity in dashboard
 # 3. Get API key from https://dashboard.stripe.com/apikeys
 
-export GAUTH_PVP_PROVIDER=stripe
+export AGENTAUTH_PVP_PROVIDER=stripe
 export STRIPE_API_KEY=sk_live_...
 ```
 
@@ -352,13 +352,13 @@ export STRIPE_API_KEY=sk_live_...
 ```yaml
 # docker-compose.production.yml
 services:
-  gauth:
+  agentauth:
     environment:
-      - GAUTH_ENV=production
-      - GAUTH_JWT_SIGNING_KEY=${GAUTH_JWT_SIGNING_KEY}
-      - GAUTH_PVP_PROVIDER=stripe
+      - AGENTAUTH_ENV=production
+      - AGENTAUTH_JWT_SIGNING_KEY=${AGENTAUTH_JWT_SIGNING_KEY}
+      - AGENTAUTH_PVP_PROVIDER=stripe
       - STRIPE_API_KEY=${STRIPE_API_KEY}
-      # NO GAUTH_DEV_INDEX or GAUTH_DEV_MODE
+      # NO AGENTAUTH_DEV_INDEX or AGENTAUTH_DEV_MODE
 ```
 
 ### Step 5: Deploy and Validate
@@ -368,7 +368,7 @@ services:
 docker-compose -f docker-compose.production.yml up -d
 
 # Check logs for security validation
-docker-compose logs gauth | grep SECURITY
+docker-compose logs agentauth | grep SECURITY
 
 # Should see:
 # [SECURITY] Production mode detected - enforcing security validations  
@@ -381,7 +381,7 @@ docker-compose logs gauth | grep SECURITY
 
 ### Network Security
 
-- [ ] Use TLS/HTTPS in production (terminate at load balancer or use `GAUTH_TLS_CERT` and `GAUTH_TLS_KEY`)
+- [ ] Use TLS/HTTPS in production (terminate at load balancer or use `AGENTAUTH_TLS_CERT` and `AGENTAUTH_TLS_KEY`)
 - [ ] Implement Web Application Firewall (WAF)
 - [ ] Use private subnets for backend services
 - [ ] Restrict database access to application subnet only
@@ -389,7 +389,7 @@ docker-compose logs gauth | grep SECURITY
 ### Key Rotation
 
 - [ ] Rotate JWT signing keys periodically (suggest 90 days)
-- [ ] Use key versioning (e.g., `GAUTH_JWT_SIGNING_KEY_VERSION=v2`)
+- [ ] Use key versioning (e.g., `AGENTAUTH_JWT_SIGNING_KEY_VERSION=v2`)
 - [ ] Implement zero-downtime key rotation
 
 ### Monitoring

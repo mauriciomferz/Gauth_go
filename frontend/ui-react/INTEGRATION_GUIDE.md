@@ -158,8 +158,8 @@ export default defineConfig({
 The React app expects these endpoints (already defined in `lib/api.ts`):
 
 ### Token Management
-- `POST /api/v1/gauth/token` - Create extended token
-- `POST /api/v1/gauth/token/validate` - Validate token
+- `POST /api/v1/agentauth/token` - Create extended token
+- `POST /api/v1/agentauth/token/validate` - Validate token
 - `GET /api/v1/token/revocation/head` - Get revocation head
 
 ### Rotation
@@ -175,23 +175,23 @@ The React app expects these endpoints (already defined in `lib/api.ts`):
 - `GET /api/v1/beta/discovery` - Get supported algorithms
 
 ### PVP (Identity)
-- `POST /api/v1/gauth/pvp/verify` - Verify identity chain
+- `POST /api/v1/agentauth/pvp/verify` - Verify identity chain
 
 ### Commercial Registry
-- `POST /api/v1/gauth/registry/verify` - Verify entity
-- `POST /api/v1/gauth/registry/signatory` - Verify signatory
+- `POST /api/v1/agentauth/registry/verify` - Verify entity
+- `POST /api/v1/agentauth/registry/signatory` - Verify signatory
 
 ### PIP (Authorization)
-- `POST /api/v1/gauth/pip/authorize` - Validate authorization
-- `GET /api/v1/gauth/pip/cache/stats` - Get cache statistics
+- `POST /api/v1/agentauth/pip/authorize` - Validate authorization
+- `GET /api/v1/agentauth/pip/cache/stats` - Get cache statistics
 
 ### PoA (Power of Attorney)
-- `POST /api/v1/gauth/poa` - Create PoA
-- `POST /api/v1/gauth/poa/validate` - Validate PoA
-- `GET /api/v1/gauth/poa/list` - List all PoAs
+- `POST /api/v1/agentauth/poa` - Create PoA
+- `POST /api/v1/agentauth/poa/validate` - Validate PoA
+- `GET /api/v1/agentauth/poa/list` - List all PoAs
 
 ### Metrics
-- `GET /api/v1/gauth/metrics` - Get system metrics
+- `GET /api/v1/agentauth/metrics` - Get system metrics
 - `GET /api/v1/health` - Health check
 
 ---
@@ -256,7 +256,7 @@ server {
 
     # Proxy API requests to Go backend
     location /api/ {
-        proxy_pass http://gauth-backend:8080;
+        proxy_pass http://agentauth-backend:8080;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -272,7 +272,7 @@ server {
 version: '3.8'
 
 services:
-  gauth-backend:
+  agentauth-backend:
     build:
       context: .
       dockerfile: Dockerfile
@@ -281,21 +281,21 @@ services:
     environment:
       - PORT=8080
     networks:
-      - gauth-network
+      - agentauth-network
 
-  gauth-ui:
+  agentauth-ui:
     build:
       context: ./web/ui-react
       dockerfile: Dockerfile
     ports:
       - "80:80"
     depends_on:
-      - gauth-backend
+      - agentauth-backend
     networks:
-      - gauth-network
+      - agentauth-network
 
 networks:
-  gauth-network:
+  agentauth-network:
     driver: bridge
 ```
 
@@ -307,11 +307,11 @@ networks:
 
 ```bash
 # Terminal 1: Go Backend
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 go run ./cmd/web-server
 
 # Terminal 2: React UI
-cd /path/to/Gauth_go/web/ui-react
+cd /path/to/AgentAuth/web/ui-react
 npm run dev
 ```
 
@@ -351,7 +351,7 @@ curl http://localhost:3000/api/v1/health
 
 ```bash
 # Test token creation
-curl -X POST http://localhost:3000/api/v1/gauth/token \
+curl -X POST http://localhost:3000/api/v1/agentauth/token \
   -H "Content-Type: application/json" \
   -d '{
     "clientId": "test-client",

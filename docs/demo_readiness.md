@@ -20,10 +20,10 @@ This checklist enumerates remaining polish items to ensure a clear, compelling l
 7. Semantic diagnostics: induce semantic counter growth → show anomaly scores and hash chain evolution.
 
 ## Environment Preparation
-- Set `GAUTH_REPLAY_STRICT=1` for replay demo.
-- Export `GAUTH_CAPABILITIES_PATH` to a small curated capability registry file.
+- Set `AGENTAUTH_REPLAY_STRICT=1` for replay demo.
+- Export `AGENTAUTH_CAPABILITIES_PATH` to a small curated capability registry file.
 - Ensure anchor client memory persistence path writable for signed tree heads and capability audit chain tips.
-- (Optional) Enable OTEL metrics: `GAUTH_OTEL_METRICS_ENABLE=1`.
+- (Optional) Enable OTEL metrics: `AGENTAUTH_OTEL_METRICS_ENABLE=1`.
 
 ## Scripts / Automation (Recommended)
 - Add a `scripts/demo_sequence.sh` to orchestrate a timed curl sequence for endpoints (future task).
@@ -47,7 +47,7 @@ This checklist enumerates remaining polish items to ensure a clear, compelling l
 | Risk | Impact | Mitigation |
 |------|--------|-----------|
 | Lack of live semantic variation | Low audience engagement | Pre-generate varying counter snapshots via scripted requests before opening diagnostics page. |
-| Replay strict mode unset | Replay demo fails silently | Assert `GAUTH_REPLAY_STRICT=1` early; script check environment variable. |
+| Replay strict mode unset | Replay demo fails silently | Assert `AGENTAUTH_REPLAY_STRICT=1` early; script check environment variable. |
 | Capability registry hash unchanged | Anchor looks trivial | Introduce a small modification (add capability) mid-demo before re-anchoring. |
 | Revocation chain empty | Anchor emission returns 404 | Pre-seed 2 revocation events early in sequence. |
 | Anomaly scores all zero | Diminished RFC115 showcase | Rapid bursts (≥3 snapshots) with increasing semantic counts to elevate z-score. |

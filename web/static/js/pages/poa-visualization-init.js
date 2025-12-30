@@ -243,8 +243,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'f' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); document.getElementById('fullscreenBtn').click(); }
-    else if (e.key === 'r' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); resetBtn.click(); }
+    if (e.key === 'f' && (e.metaKey || e.ctrlKey) { e.preventDefault(); document.getElementById('fullscreenBtn').click(); }
+    else if (e.key === 'r' && (e.metaKey || e.ctrlKey) { e.preventDefault(); resetBtn.click(); }
     else if (e.key === 'c' && (e.metaKey || e.ctrlKey) && e.shiftKey) { e.preventDefault(); clearBtn.click(); }
   });
 

@@ -124,7 +124,7 @@ The React UI is **100% complete** with all 8 pages fully implemented and functio
   - Document type dropdown (certificate/power_of_attorney/board_resolution/extract)
   - Result display with 5 fields (signatoryName, entity, authorityType, status, appointmentDate, restrictions)
 - 4 stat cards (Entities: 2,347, Jurisdictions: 47, Signatories: 8,912, Success: 99.1%)
-- Sample entities table (4 mock entities: Siemens, British Airways, Airbus, Nestlé)
+- Sample entities table (4 mock entities: AgentAuth, British Airways, Airbus, Nestlé)
 - Color-coded success/failure displays
 
 **API Integration**:

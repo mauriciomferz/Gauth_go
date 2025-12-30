@@ -225,14 +225,14 @@ result, err := rego.New(
 # No configuration needed - wildcards work out of the box!
 
 # For testing without wildcards (regression testing)
-export GAUTH_DISABLE_WILDCARDS=1
+export AGENTAUTH_DISABLE_WILDCARDS=1
 ```
 
 ### Advanced Patterns (Production: Disabled)
 ```bash
 # NOT RECOMMENDED for production
 # Enables regex and range patterns (security risk)
-export GAUTH_ENABLE_ADVANCED_SCOPE=1
+export AGENTAUTH_ENABLE_ADVANCED_SCOPE=1
 ```
 
 ---
@@ -259,7 +259,7 @@ func TestMyScopes(t *testing.T) {
     parent := []string{"api:v1:*"}
     child := []string{"api:v1:users:read"}
     
-    err := gauth_rfc_001.ValidateInheritedScope(parent, child)
+    err := agentauth_rfc_001.ValidateInheritedScope(parent, child)
     if err != nil {
         t.Errorf("scope validation failed: %v", err)
     }
@@ -356,7 +356,7 @@ A: Yes! No configuration needed. Works out of the box in AgentAuth v3.1+
 A: No. All exact-match scopes continue to work. Backward compatible.
 
 **Q: Can I use regex patterns like `resource:.*:action`?**  
-A: Not in production (security risk). Only in development with `GAUTH_ENABLE_ADVANCED_SCOPE=1`
+A: Not in production (security risk). Only in development with `AGENTAUTH_ENABLE_ADVANCED_SCOPE=1`
 
 **Q: How many wildcards can I use per pattern?**  
 A: Maximum 3 wildcards per pattern (security boundary)
@@ -377,7 +377,7 @@ A: Use existing test suite or `/api/v1/scope/validate` endpoint
 
 ## References
 
-- [AgentAuth RFC-0111 Specification](./RFC-0111.md)
+- [AgentAuth AAP-001 Specification](./AAP-001.md)
 - [Security Audit Critical Review](./SECURITY_AUDIT_CRITICAL_REVIEW.md) (P1.1)
 - [Open Policy Agent](https://www.openpolicyagent.org/) (OPA integration guide coming in P1.2)
 - [OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) (migration study in P1.3)

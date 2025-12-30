@@ -98,8 +98,8 @@
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a href="#gauth-api-examples-tutorials"
-id="toc-gauth-api-examples-tutorials">AgentAuth API Examples &amp;
+<li><a href="#agentauth-api-examples-tutorials"
+id="toc-agentauth-api-examples-tutorials">AgentAuth API Examples &amp;
 Tutorials</a>
 <ul>
 <li><a href="#table-of-contents" id="toc-table-of-contents">Table of
@@ -171,7 +171,7 @@ Practices</a></li>
 </ul></li>
 </ul>
 </nav>
-<h1 id="gauth-api-examples-tutorials">AgentAuth API Examples &amp;
+<h1 id="agentauth-api-examples-tutorials">AgentAuth API Examples &amp;
 Tutorials</h1>
 <p>Complete guide with examples in <strong>curl</strong>,
 <strong>JavaScript</strong>, <strong>Python</strong>, and
@@ -237,7 +237,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Access Token: </span><span class="va">$TOKEN</span><span class="st">&quot;</span></span></code></pre></div>
 <h4 id="javascripttypescript">JavaScript/TypeScript</h4>
 <div class="sourceCode" id="cb2"><pre
-class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { AgentAuthClient } <span class="im">from</span> <span class="st">&#39;./gauth-client&#39;</span><span class="op">;</span></span>
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { AgentAuthClient } <span class="im">from</span> <span class="st">&#39;./agentauth-client&#39;</span><span class="op">;</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">subscriptionFlow</span>() {</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> client <span class="op">=</span> <span class="kw">new</span> <span class="fu">AgentAuthClient</span>({</span>
@@ -261,7 +261,7 @@ class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb2-
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">subscriptionFlow</span>()<span class="op">.</span><span class="fu">catch</span>(<span class="bu">console</span><span class="op">.</span><span class="fu">error</span>)<span class="op">;</span></span></code></pre></div>
 <h4 id="python">Python</h4>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gauth_client <span class="im">import</span> AgentAuthClient</span>
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> agentauth_client <span class="im">import</span> AgentAuthClient</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> subscription_flow():</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> AgentAuthClient(base_url<span class="op">=</span><span class="st">&#39;http://localhost:8080&#39;</span>)</span>
@@ -286,14 +286,14 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a hr
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="op">(</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fmt&quot;</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/yourorg/gauth-go-sdk&quot;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;github.com/yourorg/agentauth-go-sdk&quot;</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    client <span class="op">:=</span> gauth<span class="op">.</span>NewClient<span class="op">(</span><span class="st">&quot;http://localhost:8080&quot;</span><span class="op">)</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    client <span class="op">:=</span> agentauth<span class="op">.</span>NewClient<span class="op">(</span><span class="st">&quot;http://localhost:8080&quot;</span><span class="op">)</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Create subscription</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    sub<span class="op">,</span> err <span class="op">:=</span> client<span class="op">.</span>CreateSubscription<span class="op">(&amp;</span>gauth<span class="op">.</span>SubscriptionCreate<span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    sub<span class="op">,</span> err <span class="op">:=</span> client<span class="op">.</span>CreateSubscription<span class="op">(&amp;</span>agentauth<span class="op">.</span>SubscriptionCreate<span class="op">{</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        ClientID<span class="op">:</span> <span class="st">&quot;my-app&quot;</span><span class="op">,</span></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        Scope<span class="op">:</span>    <span class="st">&quot;read write&quot;</span><span class="op">,</span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">})</span></span>
@@ -810,7 +810,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href=
 <h2 id="error-handling-examples">Error Handling Examples</h2>
 <h3 id="javascripttypescript-6">JavaScript/TypeScript</h3>
 <div class="sourceCode" id="cb22"><pre
-class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { AgentAuthClient<span class="op">,</span> AgentAuthError } <span class="im">from</span> <span class="st">&#39;./gauth-client&#39;</span><span class="op">;</span></span>
+class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { AgentAuthClient<span class="op">,</span> AgentAuthError } <span class="im">from</span> <span class="st">&#39;./agentauth-client&#39;</span><span class="op">;</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">handleErrors</span>() {</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> client <span class="op">=</span> <span class="kw">new</span> <span class="fu">AgentAuthClient</span>({ baseURL<span class="op">:</span> <span class="st">&#39;http://localhost:8080&#39;</span> })<span class="op">;</span></span>
@@ -841,7 +841,7 @@ class="sourceCode typescript"><code class="sourceCode typescript"><span id="cb22
 <span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
 <h3 id="python-6">Python</h3>
 <div class="sourceCode" id="cb23"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> gauth_client <span class="im">import</span> AgentAuthClient, AgentAuthError, AgentAuthHTTPError</span>
+class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> agentauth_client <span class="im">import</span> AgentAuthClient, AgentAuthError, AgentAuthHTTPError</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> handle_errors():</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> AgentAuthClient(base_url<span class="op">=</span><span class="st">&#39;http://localhost:8080&#39;</span>)</span>

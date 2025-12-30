@@ -1,4 +1,4 @@
-# RFC-0111 Compliance Implementation Guide
+# AAP-001 Compliance Implementation Guide
 ## Solutions for the 5 Critical Gaps
 
 **Document Purpose**: Provides concrete, implementable solutions to fix the 5 critical gaps identified in the brutal honest assessment.
@@ -12,11 +12,11 @@
 ## Gap #1: No Subscription Flow (Steps I-VIII)
 
 ### Problem
-The one-off enrollment process (RFC-0111 Steps I-VIII) is completely missing. There's no way for participants to establish their identities and authorizations before requesting tokens.
+The one-off enrollment process (AAP-001 Steps I-VIII) is completely missing. There's no way for participants to establish their identities and authorizations before requesting tokens.
 
 ### Solution
 
-**File to Create**: `pkg/gauth/subscription_flow.go`
+**File to Create**: `pkg/agentauth/subscription_flow.go`
 
 **What It Does**:
 - Implements Steps I-VIII as a sequential state machine
@@ -80,9 +80,9 @@ type SubscriptionFlowManager struct {
    ```
 
 **Files Changed**:
-- NEW: `pkg/gauth/subscription_flow.go` (~600 lines)
-- NEW: `pkg/gauth/subscription_store.go` (~200 lines) 
-- NEW: `pkg/gauth/subscription_store_memory.go` (~150 lines) - In-memory implementation
+- NEW: `pkg/agentauth/subscription_flow.go` (~600 lines)
+- NEW: `pkg/agentauth/subscription_store.go` (~200 lines) 
+- NEW: `pkg/agentauth/subscription_store_memory.go` (~150 lines) - In-memory implementation
 - UPDATE: `cmd/web-server/main.go` - Add subscription endpoints
 
 ---
@@ -94,7 +94,7 @@ Individual validation functions exist but aren't connected. `RequestToken()` dir
 
 ### Solution
 
-**File to Create**: `pkg/gauth/protocol_orchestrator.go`
+**File to Create**: `pkg/agentauth/protocol_orchestrator.go`
 
 **What It Does**:
 - Orchestrates Steps (a)-(i) in correct sequence
@@ -168,7 +168,7 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 
 4. **Update Main Service** (Week 4):
    ```go
-   // In pkg/gauth/gauth.go:
+   // In pkg/agentauth/agentauth.go:
    
    // Add new RFC-compliant method:
    func (g *Service) RequestTokenRFC(
@@ -181,9 +181,9 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
    ```
 
 **Files Changed**:
-- NEW: `pkg/gauth/protocol_orchestrator.go` (~500 lines)
-- NEW: `pkg/gauth/compliance_tracker.go` (~300 lines)
-- UPDATE: `pkg/gauth/gauth.go` - Add RequestTokenRFC() method
+- NEW: `pkg/agentauth/protocol_orchestrator.go` (~500 lines)
+- NEW: `pkg/agentauth/compliance_tracker.go` (~300 lines)
+- UPDATE: `pkg/agentauth/agentauth.go` - Add RequestTokenRFC() method
 - UPDATE: `cmd/web-server/main.go` - Add RFC endpoint
 
 ---
@@ -191,13 +191,13 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 ## Gap #3: Wrong Token Type
 
 ### Problem
-`RequestToken()` returns standard JWTs instead of RFC-0111 extended tokens with PoA metadata.
+`RequestToken()` returns standard JWTs instead of AAP-001 extended tokens with PoA metadata.
 
 ### Solution
 
 **What to Fix**: Make `RequestToken()` use `ExtendedTokenService.CreateExtendedToken()`
 
-**Current Code** (pkg/gauth/gauth.go:298):
+**Current Code** (pkg/agentauth/agentauth.go:298):
 ```go
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
     // WRONG: Directly generates JWT
@@ -234,7 +234,7 @@ func (g *Service) RequestToken(req TokenRequest) (*ExtendedToken, error) {
        GrantID      string
        Scope        []string
        
-       // NEW: RFC-0111 required fields
+       // NEW: AAP-001 required fields
        PowerOfAttorney      *poa.PoADefinition
        AuthorizationChain   *AuthorizationChain
        ClientOwnerInfo      *ClientOwnerInfo
@@ -282,8 +282,8 @@ func (g *Service) RequestToken(req TokenRequest) (*ExtendedToken, error) {
    ```
 
 **Files Changed**:
-- UPDATE: `pkg/gauth/gauth.go` - Modify RequestToken(), add RequestTokenLegacy()
-- UPDATE: `pkg/gauth/types.go` - Expand TokenRequest structure
+- UPDATE: `pkg/agentauth/agentauth.go` - Modify RequestToken(), add RequestTokenLegacy()
+- UPDATE: `pkg/agentauth/types.go` - Expand TokenRequest structure
 - UPDATE: `cmd/web-server/main.go` - Add /v1/token/rfc and /v1/token/legacy endpoints
 
 ---
@@ -433,8 +433,8 @@ Client → RequestTokenRFC() → ProtocolOrchestrator.ExecuteRFCCompliantFlow()
    ```
 
 **Files Changed**:
-- UPDATE: `pkg/gauth/protocol_orchestrator.go` - Add all validation calls
-- UPDATE: `pkg/gauth/subscription_flow.go` - Add validation calls to steps
+- UPDATE: `pkg/agentauth/protocol_orchestrator.go` - Add all validation calls
+- UPDATE: `pkg/agentauth/subscription_flow.go` - Add validation calls to steps
 
 ---
 
@@ -494,7 +494,7 @@ func TestRequestToken_CallsValidation(t *testing.T) {
 
 ### Integration Tests
 ```go
-// Test complete RFC-0111 flow end-to-end:
+// Test complete AAP-001 flow end-to-end:
 func TestCompleteAAP-001Flow(t *testing.T) {
     // 1. Execute subscription flow (Steps I-VIII)
     // 2. Request authorization with RFC-compliant request
@@ -506,7 +506,7 @@ func TestCompleteAAP-001Flow(t *testing.T) {
 
 ### Compliance Tests
 ```go
-// RFC-0111 conformance test suite:
+// AAP-001 conformance test suite:
 func TestAAP-001Conformance(t *testing.T) {
     // Verify Steps I-VIII are sequential
     // Verify Steps (a)-(i) are executed
@@ -578,7 +578,7 @@ Response:
     "access_token": "ext_eyJhbGc...",
     "token_type": "AgentAuth-Extended-Token",
     "expires_in": 3600,
-    // RFC-0111 Extended Fields:
+    // AAP-001 Extended Fields:
     "power_of_attorney": { ... },
     "authorization_chain": { ... },
     "client_owner": { ... },
@@ -628,7 +628,7 @@ if config.RFCCompliantMode {
 
 ### Option 3: Version-Based Routing
 - `/v1/token` - Legacy OAuth
-- `/v2/token` - RFC-0111 compliant
+- `/v2/token` - AAP-001 compliant
 - Both supported indefinitely
 
 ---
@@ -644,8 +644,8 @@ if config.RFCCompliantMode {
 - ✅ Compliance tracking operational
 
 ### Compliance Criteria
-- ✅ RFC-0111 conformance tests pass
-- ✅ RFC-0115 conformance tests pass
+- ✅ AAP-001 conformance tests pass
+- ✅ AAP-002 conformance tests pass
 - ✅ Independent audit confirms compliance
 - ✅ Protocol flow matches RFC specification exactly
 

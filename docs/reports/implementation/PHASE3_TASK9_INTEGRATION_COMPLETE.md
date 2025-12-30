@@ -20,8 +20,8 @@ Successfully integrated all 5 migrated admin handlers into the main AgentAuth se
 ### Server Integration (web/server_clean.go)
 
 **1. Added Imports:**
-- `github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/database`
-- `adminHandlers "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/web/handlers/admin"`
+- `github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/database`
+- `adminHandlers "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/web/handlers/admin"`
 
 **2. Database Initialization:**
 Added PostgreSQL connection pool initialization in `NewBetaServerWithMetrics` function:
@@ -91,9 +91,9 @@ Added to go.mod:
 |----------|-------------|---------|---------|
 | `DB_HOST` | PostgreSQL host | none | `localhost` |
 | `DB_PORT` | PostgreSQL port | 5432 | `5432` |
-| `DB_USER` | Database user | none | `gauth_admin` |
+| `DB_USER` | Database user | none | `agentauth_admin` |
 | `DB_PASSWORD` | Database password | none | `secure_password` |
-| `DB_NAME` | Database name | none | `gauth` |
+| `DB_NAME` | Database name | none | `agentauth` |
 | `DB_SSLMODE` | SSL mode | `prefer` | `disable`, `require` |
 | `DB_MAX_CONNS` | Max connections | 25 | `50` |
 | `DB_MIN_CONNS` | Min connections | 5 | `10` |
@@ -106,9 +106,9 @@ Added to go.mod:
 ```bash
 export DB_HOST=localhost
 export DB_PORT=5432
-export DB_USER=gauth_admin
+export DB_USER=agentauth_admin
 export DB_PASSWORD=your_password
-export DB_NAME=gauth
+export DB_NAME=agentauth
 export DB_SSLMODE=disable  # For development
 ```
 
@@ -215,10 +215,10 @@ Before starting the server, ensure PostgreSQL database has the required tables. 
 ### 1. Start PostgreSQL
 ```bash
 # Using Docker
-docker run --name gauth-postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=gauth -p 5432:5432 -d postgres:15
+docker run --name agentauth-postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=agentauth -p 5432:5432 -d postgres:15
 
 # Run migrations
-psql -h localhost -U postgres -d gauth -f database/migrations/001_initial_schema.sql
+psql -h localhost -U postgres -d agentauth -f database/migrations/001_initial_schema.sql
 ```
 
 ### 2. Set Environment Variables
@@ -227,7 +227,7 @@ export DB_HOST=localhost
 export DB_PORT=5432
 export DB_USER=postgres
 export DB_PASSWORD=password
-export DB_NAME=gauth
+export DB_NAME=agentauth
 export DB_SSLMODE=disable
 ```
 

@@ -26,14 +26,14 @@ func main() {
 	log.Println("==============================")
 
 	// 1. Load Configuration
-	rpcURL := os.Getenv("GAUTH_ETH_RPC_URL")
+	rpcURL := os.Getenv("AGENTAUTH_ETH_RPC_URL")
 	if rpcURL == "" {
-		log.Fatalf("Error: GAUTH_ETH_RPC_URL environment variable is not set")
+		log.Fatalf("Error: AGENTAUTH_ETH_RPC_URL environment variable is not set")
 	}
 
-	privKeyHex := os.Getenv("GAUTH_ETH_PRIVATE_KEY")
+	privKeyHex := os.Getenv("AGENTAUTH_ETH_PRIVATE_KEY")
 	if privKeyHex == "" {
-		log.Fatalf("Error: GAUTH_ETH_PRIVATE_KEY environment variable is not set")
+		log.Fatalf("Error: AGENTAUTH_ETH_PRIVATE_KEY environment variable is not set")
 	}
 
 	bytecodeFile := "contracts/build/PoARegistry.bin"

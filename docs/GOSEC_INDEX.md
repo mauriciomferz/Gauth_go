@@ -110,7 +110,7 @@ cp .gosec.json /path/to/new/project/
 
 ### `.gosec.json` (Project Root)
 
-**Location:** `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/.gosec.json`
+**Location:** `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/.gosec.json`
 
 **Purpose:** Centralized gosec configuration for all workflows
 

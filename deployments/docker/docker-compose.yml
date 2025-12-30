@@ -1,20 +1,20 @@
 
 services:
   # Main AgentAuth service
-  gauth:
+  agentauth:
     build:
       context: ../..
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - POSTGRES_URL=postgres://gauth:gauth_password@postgres:5432/gauth?sslmode=disable
+      - POSTGRES_URL=postgres://agentauth:agentauth_password@postgres:5432/agentauth?sslmode=disable
       - REDIS_URL=redis://redis:6379
       - VAULT_ADDR=http://vault:8200
       # VAULT_TOKEN is for Vault development mode ONLY. Override via environment when running locally:
-      #   export GAUTH_VAULT_DEV_TOKEN=$(openssl rand -hex 8)
+      #   export AGENTAUTH_VAULT_DEV_TOKEN=$(openssl rand -hex 8)
       # Then run: docker compose up
-      - VAULT_TOKEN=${GAUTH_VAULT_DEV_TOKEN:-dev-root-token}
+      - VAULT_TOKEN=${AGENTAUTH_VAULT_DEV_TOKEN:-dev-root-token}
     depends_on:
       postgres:
         condition: service_healthy
@@ -23,7 +23,7 @@ services:
       vault:
         condition: service_started
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
@@ -36,19 +36,19 @@ services:
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: gauth
-      POSTGRES_USER: gauth
-      POSTGRES_PASSWORD: gauth_password
+      POSTGRES_DB: agentauth
+      POSTGRES_USER: agentauth
+      POSTGRES_PASSWORD: agentauth_password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gauth -d gauth"]
+      test: ["CMD-SHELL", "pg_isready -U agentauth -d agentauth"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -62,7 +62,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -76,13 +76,13 @@ services:
     cap_add:
       - IPC_LOCK
     environment:
-      # Development root token (NOT for production). Override by setting GAUTH_VAULT_DEV_TOKEN before compose up.
-      VAULT_DEV_ROOT_TOKEN_ID: ${GAUTH_VAULT_DEV_TOKEN:-dev-root-token}
+      # Development root token (NOT for production). Override by setting AGENTAUTH_VAULT_DEV_TOKEN before compose up.
+      VAULT_DEV_ROOT_TOKEN_ID: ${AGENTAUTH_VAULT_DEV_TOKEN:-dev-root-token}
       VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
     ports:
       - "8200:8200"
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # Prometheus for metrics collection
@@ -102,7 +102,7 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
     depends_on:
       - alertmanager
@@ -121,7 +121,7 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # Jaeger for distributed tracing
@@ -133,7 +133,7 @@ services:
     environment:
       COLLECTOR_OTLP_ENABLED: true
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # Node Exporter for system metrics
@@ -151,7 +151,7 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # AlertManager for alerting
@@ -167,7 +167,7 @@ services:
       - '--storage.path=/alertmanager'
       - '--web.external-url=http://localhost:9093'
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
 volumes:
@@ -178,5 +178,5 @@ volumes:
   alertmanager_data:
 
 networks:
-  gauth-network:
+  agentauth-network:
     driver: bridge

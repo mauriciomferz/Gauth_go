@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BASE_URL="${1:-http://localhost:8080}"
-EXAMPLE_ID="${EXAMPLE_ID:-gauth_protocol_basics:minimal_poa}"
+EXAMPLE_ID="${EXAMPLE_ID:-agentauth_protocol_basics:minimal_poa}"
 
 echo "[SSE TEST] Starting job for example: $EXAMPLE_ID"
 JOB_JSON=$(curl -s -X POST "$BASE_URL/api/v1/beta/examples/run" \

@@ -25,7 +25,7 @@
       "status": "Implemented",
       "priority": "P0",
       "gap": "Need configurable algorithms (Ed25519 only)",
-      "evidence": "docs/GAP_MATRIX.md:12|pkg/rfc0111/signature_negative_test.go"
+      "evidence": "docs/GAP_MATRIX.md:12|pkg/aap001/signature_negative_test.go"
     },
     {
       "section": "Cryptographic \u0026 Authenticity",
@@ -34,7 +34,7 @@
       "status": "Partial",
       "priority": "P0",
       "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)",
-      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go"
+      "evidence": "pkg/agentauth/agentauth.go|pkg/agentauth/agentauth_claims_test.go"
     },
     {
       "section": "Cryptographic \u0026 Authenticity",
@@ -43,7 +43,7 @@
       "status": "Partial",
       "priority": "P0",
       "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety",
-      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_prop_test.go|pkg/gauth/gauth_fuzz_test.go"
+      "evidence": "pkg/agentauth/agentauth.go|pkg/agentauth/agentauth_prop_test.go|pkg/agentauth/agentauth_fuzz_test.go"
     },
     {
       "section": "Cryptographic \u0026 Authenticity",
@@ -70,7 +70,7 @@
       "status": "Implemented",
       "priority": "P2",
       "gap": "Property + fuzz tests validate determinism \u0026 mutable field exclusion",
-      "evidence": "docs/GAP_MATRIX.md:15|pkg/rfc0111/canonical.go|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go"
+      "evidence": "docs/GAP_MATRIX.md:15|pkg/aap001/canonical.go|pkg/aap001/canonical_prop_test.go|pkg/aap001/canonical_fuzz_test.go"
     },
     {
       "section": "Authorization Engine",
@@ -124,7 +124,7 @@
       "status": "Partial",
       "priority": "P0",
       "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel \u0026 persistence of daily limits",
-      "evidence": "docs/GAP_MATRIX.md:32|pkg/rfc0111/validator.go|pkg/rfc0111/rfc0111.go"
+      "evidence": "docs/GAP_MATRIX.md:32|pkg/aap001/validator.go|pkg/aap001/aap001.go"
     },
     {
       "section": "PoA Definition (AAP-002)",
@@ -132,8 +132,8 @@
       "requirement": "Embed full PoA in token",
       "status": "Partial",
       "priority": "P1",
-      "gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel \u0026 audit persistence",
-      "evidence": "docs/GAP_MATRIX.md:33|pkg/rfc0111/rfc0111.go|internal/metrics/metrics.go"
+      "gap": "RawPOA + PoAVersion embedding implemented behind AGENTAUTH_EMBED_FULL_POA with size cap AGENTAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel \u0026 audit persistence",
+      "evidence": "docs/GAP_MATRIX.md:33|pkg/aap001/aap001.go|internal/metrics/metrics.go"
     },
     {
       "section": "PoA Definition (AAP-002)",
@@ -214,7 +214,7 @@
       "status": "Partial",
       "priority": "P1",
       "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence \u0026 eviction controls",
-      "evidence": "pkg/gauth/gauth.go|pkg/gauth/gauth_claims_test.go"
+      "evidence": "pkg/agentauth/agentauth.go|pkg/agentauth/agentauth_claims_test.go"
     },
     {
       "section": "Replay \u0026 Token Security",
@@ -259,7 +259,7 @@
       "status": "Implemented",
       "priority": "P2",
       "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted \u0026 restored with hash chain verification. Remaining gaps: external anchoring \u0026 archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.",
-      "evidence": "internal/observability/violations.go|pkg/gauth/gauth.go|pkg/rfc0111/rfc0111.go|web/server_clean.go|docs/OBSERVABILITY.md|web/persistence_verify_test.go|web/server_anomaly_test.go|web/server_semantic_persistence_test.go"
+      "evidence": "internal/observability/violations.go|pkg/agentauth/agentauth.go|pkg/aap001/aap001.go|web/server_clean.go|docs/OBSERVABILITY.md|web/persistence_verify_test.go|web/server_anomaly_test.go|web/server_semantic_persistence_test.go"
     },
     {
       "section": "Observability \u0026 Metrics",
@@ -304,7 +304,7 @@
       "status": "Partial",
       "priority": "P1",
       "gap": "Canonical digest covered; parsing \u0026 semantic validators still lack property tests",
-      "evidence": "docs/GAP_MATRIX.md:77|pkg/rfc0111/canonical_prop_test.go|pkg/rfc0111/canonical_fuzz_test.go"
+      "evidence": "docs/GAP_MATRIX.md:77|pkg/aap001/canonical_prop_test.go|pkg/aap001/canonical_fuzz_test.go"
     },
     {
       "section": "Testing \u0026 Conformance",

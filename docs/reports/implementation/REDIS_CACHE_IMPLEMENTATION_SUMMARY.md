@@ -42,7 +42,7 @@
   - No compilation errors
 
 - **keys.go**: Key builder utilities
-  - Standardized key prefixes: gauth:verification:, gauth:poa:, gauth:user:, gauth:stats:, gauth:blockchain:, gauth:session:
+  - Standardized key prefixes: agentauth:verification:, agentauth:poa:, agentauth:user:, agentauth:stats:, agentauth:blockchain:, agentauth:session:
   - KeyBuilder struct with generation methods
   - Invalidation pattern generators (InvalidatePoAPattern, InvalidateUserPattern)
 
@@ -223,14 +223,14 @@ Example: POST /api/v1/admin/cache/invalidate/user/456
 
 ### Cache Key Structure
 ```
-gauth:verification:{poaID}    # Verification results (5min TTL)
-gauth:poa:{poaID}              # PoA metadata (1min TTL)
-gauth:poa:list:{userID}        # User's PoA list (5min TTL)
-gauth:user:{userID}            # User data (5min TTL)
-gauth:stats:{statType}         # Statistics (30sec TTL)
-gauth:blockchain:sync:{poaID}  # Blockchain sync status
-gauth:blockchain:verify:{poaID}# Blockchain verification
-gauth:session:{sessionID}      # User sessions
+agentauth:verification:{poaID}    # Verification results (5min TTL)
+agentauth:poa:{poaID}              # PoA metadata (1min TTL)
+agentauth:poa:list:{userID}        # User's PoA list (5min TTL)
+agentauth:user:{userID}            # User data (5min TTL)
+agentauth:stats:{statType}         # Statistics (30sec TTL)
+agentauth:blockchain:sync:{poaID}  # Blockchain sync status
+agentauth:blockchain:verify:{poaID}# Blockchain verification
+agentauth:session:{sessionID}      # User sessions
 ```
 
 ### Cache Flow
@@ -286,8 +286,8 @@ NewMemoryCache() ← Automatic fallback
 ## 🐛 Known Issues
 
 ### 1. pkg/handlers Import Path Conflicts (FIXED)
-- Files were using wrong mauriciomferz/Gauth_go imports
-- Fixed to use AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
+- Files were using wrong mauriciomferz/AgentAuth imports
+- Fixed to use agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
 - Some webhook types may still be undefined
 
 ### 2. Missing Gorilla Mux Dependency

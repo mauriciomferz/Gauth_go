@@ -18,9 +18,9 @@ This release focuses on strengthening multi-signature integrity, canonical seria
 | Multi-Signature | Embedded `Weights` map + structural validation (positive, subset, cumulative >= threshold) | Eliminates env-driven ambiguity; ensures deterministic binding |
 | Canonical JSON | Added `version` and serialized `weights` (when provided) | Future evolution support; integrity across signer sets |
 | Authenticity | Strict authenticity now default (missing public key -> integrity failure) | Reduces silent authenticity downgrade risk |
-| Replay Protection | JTI claim mandatory unless `GAUTH_ALLOW_MISSING_JTI=1` | Closes trivial replay channel for tokens without store |
+| Replay Protection | JTI claim mandatory unless `AGENTAUTH_ALLOW_MISSING_JTI=1` | Closes trivial replay channel for tokens without store |
 | Tests | Updated property & domain tests; added version/weights presence test | Ensures determinism & correctness under new model |
-| Docs | New `rfc0111_compliance_matrix.md`, API README compliance summary, CHANGELOG entry | Transparent compliance and roadmap communication |
+| Docs | New `aap001_compliance_matrix.md`, API README compliance summary, CHANGELOG entry | Transparent compliance and roadmap communication |
 | Algorithm Agility | Added ECDSA P-256, BLS12-381 single, and BLS12-381 aggregated (multi-sig compression) support via registry | Enables phased adoption and scalability of multi-signer cryptography |
 | Crypto Introspection | Added `/api/v1/crypto/algorithms` listing algorithms + aggregated capability flag | Operational visibility & easy integration testing |
 
@@ -31,7 +31,7 @@ This release focuses on strengthening multi-signature integrity, canonical seria
 
 ## Migration Guidance
 1. Legacy multi-sig PoAs (pre-embedded weights) should be re-issued to gain domain V2 differentiation.
-2. If existing deployments depend on soft authenticity skip, set `GAUTH_STRICT_AUTHENTICITY=0` temporarily during transition.
+2. If existing deployments depend on soft authenticity skip, set `AGENTAUTH_STRICT_AUTHENTICITY=0` temporarily during transition.
 3. Audit storage systems should verify digest divergence for threshold PoAs after upgrade.
 
 ## Backward Compatibility
@@ -43,7 +43,7 @@ This release focuses on strengthening multi-signature integrity, canonical seria
 - Property assertions confirm weight order invariance and digest variation on threshold/weight changes.
 
 ## Compliance Snapshot
-See `docs/rfc0111_compliance_matrix.md` for full matrix. Highlights:
+See `docs/aap001_compliance_matrix.md` for full matrix. Highlights:
 - Implemented: Multi-signature threshold, canonical serialization, validity period.
 - Partial: Audit logging, replay protection, cryptographic requirements (algorithm agility pending).
 - Missing (before this patch): OpenAPI export, external anchoring.
@@ -76,8 +76,8 @@ Backward Compatibility:
 
 ## References
 - CHANGELOG: `docs/CHANGELOG.md`
-- Compliance Matrix: `docs/rfc0111_compliance_matrix.md`
-- Canonical Implementation: `pkg/rfc0111/canonical.go`
+- Compliance Matrix: `docs/aap001_compliance_matrix.md`
+- Canonical Implementation: `pkg/aap001/canonical.go`
 - Crypto Abstraction: `pkg/crypto/signature.go`, `pkg/crypto/ecdsa_provider.go`
 
 ## Algorithm Agility Usage
@@ -95,8 +95,8 @@ Planned: algorithm introspection endpoint, heterogeneous threshold aggregation, 
 
 ## Checksums (Informational)
 The canonical digest domain prefix variants:
-- V1: `GAUTH_AAP-001_POA_V1` (single-sig)
-- V2: `GAUTH_AAP-001_POA_V2|thr=<T>|w=<sorted weights>` (multi-sig)
+- V1: `AGENTAUTH_AAP-001_POA_V1` (single-sig)
+- V2: `AGENTAUTH_AAP-001_POA_V2|thr=<T>|w=<sorted weights>` (multi-sig)
 
 ## Acknowledgments
 Thanks to contributors refining threshold signatures, authenticity defaults, and compliance mapping.
@@ -108,15 +108,15 @@ End of release notes.
 This release adds a metrics-instrumented, corruption-tolerant Write-Ahead Log (WAL) for replay (nonce/JTI) protection:
 
 Features:
-- WAL append on each `Record` / `RecordWithEvict` when `GAUTH_REPLAY_WAL` is set.
+- WAL append on each `Record` / `RecordWithEvict` when `AGENTAUTH_REPLAY_WAL` is set.
 - Recovery on startup via line-by-line scan (`RecoverWithStats`) tolerating malformed JSON lines (skipped without aborting).
 - Metrics instrumentation:
 	- Latency observation for append and recovery phases (`ObserveReplayStoreLatency`).
 	- Error counter increments (`IncReplayStoreErrors`) for each skipped corrupt line and initialization failures.
 - Backward-compatible constructor: existing `NewReplayNonceStore(ttl)` preserved; new `NewReplayNonceStoreWithMetrics(ttl, metrics)` enables instrumentation.
 - Environment variables:
-	- `GAUTH_REPLAY_WAL`: path to WAL file (enables durability).
-	- `GAUTH_REPLAY_CAP`: optional in-memory capacity bound with oldest eviction.
+	- `AGENTAUTH_REPLAY_WAL`: path to WAL file (enables durability).
+	- `AGENTAUTH_REPLAY_CAP`: optional in-memory capacity bound with oldest eviction.
 
 Operational Notes:
 - Recovery clamps any future timestamps to `now` to prevent negative TTL windows.
@@ -127,7 +127,7 @@ Future Enhancements (Planned):
 - Snapshot + compaction to control WAL growth.
 - Explicit recovery latency vs append latency metric separation.
 - Rolling hash / integrity chain for tamper detection.
-- Size-based rotation (`GAUTH_REPLAY_WAL_MAX_MB`) and fsync toggle.
+- Size-based rotation (`AGENTAUTH_REPLAY_WAL_MAX_MB`) and fsync toggle.
 
 Testing Added:
 - `TestReplayNonceStore_CorruptionRecovery` validates recovery of valid records and error counting for malformed line.
@@ -145,7 +145,7 @@ New Endpoints:
 - `GET /api/v1/anchor/verifyChain` – Performs incremental hash-chain verification of external receipts (`status`: ok|mismatch|empty, optional `mismatch_index`).
 
 Receipt Persistence:
-- Configure via `GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=memory|tsa_stub` (prototype providers) and `GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH` (JSONL chain file).
+- Configure via `AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=memory|tsa_stub` (prototype providers) and `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH` (JSONL chain file).
 - Chain semantics: Each appended receipt records `PrevHash` and cumulative `ChainHash` (rolling hash binding sequence order) enabling simple tamper-evidence.
 
 Metrics Added:
@@ -158,7 +158,7 @@ Failure Modes & HTTP Codes:
 - 503: Receipt store not configured (provider or path missing).
 - 400: Neither capability nor rotation hash available (no material to combine).
 - 500: Append failure to receipt store.
-- 401: Unauthorized combined emission when `GAUTH_COMBINED_ANCHOR_TOKEN` set and header `X-Combined-Anchor-Token` missing or mismatched.
+- 401: Unauthorized combined emission when `AGENTAUTH_COMBINED_ANCHOR_TOKEN` set and header `X-Combined-Anchor-Token` missing or mismatched.
 
 Security / Integrity Notes:
 - Duplicate combined hashes (idempotent emissions) are accepted for prototype; future versions may enforce deduplication or temporal spacing.
@@ -177,22 +177,22 @@ Testing:
 - `TestCombinedAnchorEmission` validates happy path emission, chain listing, metric increments, and idempotent second emission.
 
 ### Periodic Emission (New Optional Background Loop)
-Set `GAUTH_COMBINED_ANCHOR_INTERVAL_SEC` (>=30) to enable an automatic background loop that emits a combined anchor receipt at the specified interval. Behavior:
+Set `AGENTAUTH_COMBINED_ANCHOR_INTERVAL_SEC` (>=30) to enable an automatic background loop that emits a combined anchor receipt at the specified interval. Behavior:
 - Skips emission silently when neither capability nor rotation hash is available (avoids inflating failure metrics pre-initialization).
 - Increments `combined_anchor_failures_total` if the receipt store is configured incorrectly or append fails.
 - Uses current rotation ledger head (when initialized) concatenated with the capability registry hash (`cap_hash:rotation_head`).
-- Disabled when `GAUTH_DISABLE_BG_POLLS=1`.
+- Disabled when `AGENTAUTH_DISABLE_BG_POLLS=1`.
 
 Operational Guidance:
-1. Export `GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER` and `GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH`.
-2. Export `GAUTH_COMBINED_ANCHOR_INTERVAL_SEC=300` (example for 5m cadence).
+1. Export `AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER` and `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH`.
+2. Export `AGENTAUTH_COMBINED_ANCHOR_INTERVAL_SEC=300` (example for 5m cadence).
 3. Observe periodic emission logs `[combined-anchor] emitted hash=...` and metric growth.
 
 ### Rotation Ledger Integration
-When `GAUTH_CAP_ANCHOR_NOTARIZE=1` and `GAUTH_ROTATION_LEDGER_PATH` are set, the combined emission now incorporates the current rotation ledger head hash. Response payload of `POST /api/v1/anchor/emitCombined` includes `rotation_head` (empty when ledger absent) enabling downstream audit differentiation between pure capability anchors and capability+rotation continuity anchors. Test coverage: `TestCombinedAnchorEmissionWithRotation` asserts hash derivation `sha256(cap_hash+":"+rotation_head)` and chain persistence.
+When `AGENTAUTH_CAP_ANCHOR_NOTARIZE=1` and `AGENTAUTH_ROTATION_LEDGER_PATH` are set, the combined emission now incorporates the current rotation ledger head hash. Response payload of `POST /api/v1/anchor/emitCombined` includes `rotation_head` (empty when ledger absent) enabling downstream audit differentiation between pure capability anchors and capability+rotation continuity anchors. Test coverage: `TestCombinedAnchorEmissionWithRotation` asserts hash derivation `sha256(cap_hash+":"+rotation_head)` and chain persistence.
 
 Operational Guidance:
-1. Set `GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=memory` and `GAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH=/path/to/receipts.jsonl`.
+1. Set `AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=memory` and `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RECEIPT_PATH=/path/to/receipts.jsonl`.
 2. Issue `POST /api/v1/anchor/emitCombined` once capability registry hash computed (or after a change reload).
 3. Inspect chain via `GET /api/v1/anchor/chain` (expect appended receipts with evolving `ChainHash`).
 4. Monitor metrics for emission and failure counters to baseline reliability.
@@ -281,9 +281,9 @@ Added a PoP challenge issuance path to the aggregated BLS endpoint and a dedicat
 Issuance:
 - Request: `POST /api/v1/crypto/bls/aggregate` with `{ "mode":"issue", "message_b64":..., "participants":N, "require_pop":true }`.
 - Response: `{ mode:"issue_pop", participant_count, public_keys_b64[], key_ids[], challenges_b64[], latency_ms }`.
-- Challenge derivation: `challenge = SHA256("gauth-pop:" || public_key_bytes || nonce16)`.
+- Challenge derivation: `challenge = SHA256("agentauth-pop:" || public_key_bytes || nonce16)`.
 - Metrics: increments `bls_pop_challenges_issued` per generated challenge.
-- Optional (test-only) private key export when `GAUTH_ALLOW_POP_PRIV_EXPORT=1` adds `private_keys_b64[]` (DO NOT enable in production).
+- Optional (test-only) private key export when `AGENTAUTH_ALLOW_POP_PRIV_EXPORT=1` adds `private_keys_b64[]` (DO NOT enable in production).
 
 Verification:
 - Request: `POST /api/v1/crypto/bls/pop/verify` with `{ "pairs":[{"public_key_b64","signature_b64","challenge_b64"}, ...] }` where each `signature_b64` is a BLS signature over the raw challenge bytes.
@@ -296,7 +296,7 @@ Design Notes:
 - Verification processes each tuple independently, permitting partial failure introspection (`failure_indices`).
 
 Security Guidance:
-- Never expose `GAUTH_ALLOW_POP_PRIV_EXPORT` outside controlled test environments.
+- Never expose `AGENTAUTH_ALLOW_POP_PRIV_EXPORT` outside controlled test environments.
 - Rotate keys regularly; PoP issuance can be integrated before rotation cut-over to ensure new keys are live.
 - Future hardening: signed challenge bundles, expiration timestamp, and optional aggregated PoP attestation artifact.
 

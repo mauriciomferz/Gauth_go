@@ -322,8 +322,8 @@ func (c *{Country}IdentityConnector) Close() error
 ```go
 // 1. Configure connector
 config := &{Country}ConnectorConfig{
-    APIEndpoint:    os.Getenv("GAUTH_{COUNTRY}_API_URL"),
-    APIKey:         os.Getenv("GAUTH_{COUNTRY}_API_KEY"),
+    APIEndpoint:    os.Getenv("AGENTAUTH_{COUNTRY}_API_URL"),
+    APIKey:         os.Getenv("AGENTAUTH_{COUNTRY}_API_KEY"),
     RequestTimeout: 30 * time.Second,
 }
 

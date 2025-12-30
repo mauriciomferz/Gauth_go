@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // OIDCPowerVerificationPoint implements the PowerVerificationPoint interface for OIDC ID tokens
@@ -58,9 +58,9 @@ func NewOIDCPowerVerificationPoint(config OIDCPVPConfig) (*OIDCPowerVerification
 //   - request: Identity proof request containing ID token in proof_data
 //
 // Returns:
-//   - *gauth.IdentityProofResult: Verification result with trust level
+//   - *agentauth.IdentityProofResult: Verification result with trust level
 //   - error: Error if verification fails
-func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, request *gauth.IdentityProofRequest) (*gauth.IdentityProofResult, error) {
+func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, request *agentauth.IdentityProofRequest) (*agentauth.IdentityProofResult, error) {
 	// Validate proof method
 	if request.ProofMethod != ProofMethodOIDCIDToken && request.ProofMethod != ProofMethodOIDCExternal {
 		return nil, fmt.Errorf("unsupported proof method: %s (expected %s or %s)",
@@ -70,7 +70,7 @@ func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, re
 	// Extract ID token from proof data
 	idToken, ok := request.ProofData["id_token"].(string)
 	if !ok || idToken == "" {
-		return &gauth.IdentityProofResult{
+		return &agentauth.IdentityProofResult{
 			Valid:         false,
 			SubjectID:     request.SubjectID,
 			FailureReason: "id_token not found or invalid in proof_data",
@@ -80,7 +80,7 @@ func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, re
 	// Extract expected audience from proof data
 	audience, ok := request.ProofData["audience"].(string)
 	if !ok || audience == "" {
-		return &gauth.IdentityProofResult{
+		return &agentauth.IdentityProofResult{
 			Valid:         false,
 			SubjectID:     request.SubjectID,
 			FailureReason: "audience not found or invalid in proof_data",
@@ -90,7 +90,7 @@ func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, re
 	// Convert ID token to identity proof using the bridge
 	result, err := p.bridge.ConvertIDTokenToIdentityProof(ctx, idToken, audience)
 	if err != nil {
-		return &gauth.IdentityProofResult{
+		return &agentauth.IdentityProofResult{
 			Valid:         false,
 			SubjectID:     request.SubjectID,
 			FailureReason: fmt.Sprintf("ID token validation failed: %v", err),
@@ -113,7 +113,7 @@ func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, re
 
 	// Validate minimum trust level
 	if !p.bridge.trustMapper.ValidateMinimumTrustLevel(actualACR, requiredACR) {
-		return &gauth.IdentityProofResult{
+		return &agentauth.IdentityProofResult{
 			Valid:      false,
 			SubjectID:  request.SubjectID,
 			TrustLevel: result.TrustLevel,
@@ -124,7 +124,7 @@ func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, re
 
 	// Verify subject ID matches if provided
 	if request.SubjectID != "" && result.SubjectID != request.SubjectID {
-		return &gauth.IdentityProofResult{
+		return &agentauth.IdentityProofResult{
 			Valid:     false,
 			SubjectID: request.SubjectID,
 			FailureReason: fmt.Sprintf("subject ID mismatch: expected %s, got %s",

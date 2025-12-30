@@ -65,7 +65,7 @@ RUN apk add ca-certificates tzdata libstdc++ libgcc
 **Features**:
 - Multi-stage build for smaller final image
 - CGO enabled for BLS library support
-- Non-root user (gauth:1000)
+- Non-root user (agentauth:1000)
 - Health check integration
 - Security-hardened runtime
 
@@ -139,9 +139,9 @@ error unpacking image: no match for platform in manifest
 
 **Evidence**:
 ```bash
-$ docker exec kind-node ctr images ls | grep gauth
+$ docker exec kind-node ctr images ls | grep agentauth
 # Shows: "no match for platform in manifest: not found"
-$ docker exec kind-node crictl images | grep gauth
+$ docker exec kind-node crictl images | grep agentauth
 # Image not listed (unusable)
 ```
 
@@ -225,17 +225,17 @@ $ docker exec kind-node crictl images | grep gauth
 ### Working Deployment ✅
 
 ```bash
-$ kubectl get pods -n gauth-staging
+$ kubectl get pods -n agentauth-staging
 NAME                          READY   STATUS    RESTARTS   AGE
-gauth-blue-59b9464b78-6vvkt   1/1     Running   0          5m
-gauth-blue-59b9464b78-mm8h6   1/1     Running   0          5m
+agentauth-blue-59b9464b78-6vvkt   1/1     Running   0          5m
+agentauth-blue-59b9464b78-mm8h6   1/1     Running   0          5m
 
 $ kubectl run test --rm -i --image=curlimages/curl -- \
-    curl -s http://gauth-service/api/v1/beta/health
+    curl -s http://agentauth-service/api/v1/beta/health
 {"status":"healthy","version":"blue"}
 ```
 
-**Image**: `gauth-mock:blue` (7.65MB)  
+**Image**: `agentauth-mock:blue` (7.65MB)  
 **Type**: Demonstration server  
 **Functionality**: Health endpoints, version routing
 
@@ -261,7 +261,7 @@ $ kubectl run test --rm -i --image=curlimages/curl -- \
 **Why**: Solves all containerization issues + provides automation
 
 **Tasks**:
-1. Update `.github/workflows/gauth-ci.yml`:
+1. Update `.github/workflows/agentauth-ci.yml`:
    ```yaml
    - name: Build Docker Image
      run: |
@@ -279,7 +279,7 @@ $ kubectl run test --rm -i --image=curlimages/curl -- \
 
 3. Update Kubernetes manifests:
    ```yaml
-   image: ghcr.io/mauriciomferz/gauth_go:latest
+   image: ghcr.io/mauriciomferz/agentauth_go:latest
    imagePullPolicy: Always
    ```
 
@@ -336,7 +336,7 @@ $ kubectl run test --rm -i --image=curlimages/curl -- \
 - `k8s-test-green.yaml` - Matching green environment
 
 ### Scripts
-- `/tmp/gauth-build-in-kind.sh` - Attempted in-cluster build (not viable)
+- `/tmp/agentauth-build-in-kind.sh` - Attempted in-cluster build (not viable)
 
 ---
 

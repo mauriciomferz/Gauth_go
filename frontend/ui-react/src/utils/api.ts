@@ -70,7 +70,7 @@ export const apiFetch = async (
 
     if (response.status === 400) {
       const error = await response.json().catch(() => ({}));
-      if (error.message?.includes('tenant')) {
+      if (error.message?.includes('tenant') {
         throw new TenantError(error.message);
       }
       throw new ApiError(error.message || 'Bad request', 400, error);

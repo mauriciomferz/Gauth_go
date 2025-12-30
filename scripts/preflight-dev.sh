@@ -34,7 +34,7 @@ Resolve by either:
   * Removing unintended placeholder files, OR
   * Adding at least a 'package <name>' line and (optionally) a placeholder test.
 
-To skip this check (NOT recommended) set: GAUTH_SKIP_PREFLIGHT=1
+To skip this check (NOT recommended) set: AGENTAUTH_SKIP_PREFLIGHT=1
 EOF
   exit 1
 fi

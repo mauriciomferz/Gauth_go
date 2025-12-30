@@ -21,8 +21,8 @@ on:
 env:
   GO_VERSION: '1.25.5'
   DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-  IMAGE_NAME: gauth
-  KUBERNETES_NAMESPACE: gauth-staging
+  IMAGE_NAME: agentauth
+  KUBERNETES_NAMESPACE: agentauth-staging
 
 jobs:
   # Job 1: Run comprehensive tests before deployment
@@ -55,12 +55,12 @@ jobs:
 
       - name: Run RFC compliance tests
         run: |
-          go test ./pkg/gauth/... -v -short -run "(RFC|Envelope|Rotation)" -timeout=5m
+          go test ./pkg/agentauth/... -v -short -run "(RFC|Envelope|Rotation)" -timeout=5m
           echo "✅ AAP-001/0115 compliance validated"
 
       - name: Run security regression tests
         run: |
-          go test ./pkg/gauth/... ./pkg/audit/... -v -short -run "(Replay|Tamper|Scope)" -timeout=5m
+          go test ./pkg/agentauth/... ./pkg/audit/... -v -short -run "(Replay|Tamper|Scope)" -timeout=5m
           echo "✅ Security regression tests passed"
 
       - name: Upload coverage to Codecov
@@ -70,7 +70,7 @@ jobs:
           files: ./coverage.out
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
-          name: gauth-coverage
+          name: agentauth-coverage
           fail_ci_if_error: false
 
   # Job 2: Security scanning (SAST, dependency vulnerabilities)
@@ -201,7 +201,7 @@ jobs:
     if: ${{ success() || failure() }}
     environment:
       name: staging
-      url: https://gauth-staging.yourdomain.com
+      url: https://agentauth-staging.yourdomain.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -224,7 +224,7 @@ jobs:
         run: |
           # Update image in deployment manifest
           IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
-          sed -i "s|image: gauth:staging|image: ${IMAGE_TAG}|g" deployments/k8s/staging/deployment.yaml
+          sed -i "s|image: agentauth:staging|image: ${IMAGE_TAG}|g" deployments/k8s/staging/deployment.yaml
           
           echo "Updated deployment image to: ${IMAGE_TAG}"
 
@@ -243,26 +243,26 @@ jobs:
       - name: Wait for deployment rollout
         continue-on-error: true
         run: |
-          kubectl rollout status deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=5m
+          kubectl rollout status deployment/agentauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=5m
           echo "✅ Deployment rolled out successfully"
 
       - name: Verify deployment health
         continue-on-error: true
         run: |
           # Wait for pods to be ready
-          kubectl wait --for=condition=ready pod -l app=gauth -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=2m
+          kubectl wait --for=condition=ready pod -l app=agentauth -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=2m
           
           # Check pod status
-          kubectl get pods -n ${{ env.KUBERNETES_NAMESPACE }} -l app=gauth
+          kubectl get pods -n ${{ env.KUBERNETES_NAMESPACE }} -l app=agentauth
           
           # Check deployment status
-          kubectl describe deployment gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
+          kubectl describe deployment agentauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
 
       - name: Run smoke tests
         continue-on-error: true
         run: |
           # Get ingress URL
-          INGRESS_IP=$(kubectl get ingress gauth-ingress -n ${{ env.KUBERNETES_NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          INGRESS_IP=$(kubectl get ingress agentauth-ingress -n ${{ env.KUBERNETES_NAMESPACE }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
           
           # Test health endpoint
           curl -f -k https://${INGRESS_IP}/healthz || exit 1
@@ -273,7 +273,7 @@ jobs:
           echo "✅ Beta health check passed"
           
           # Test metrics endpoint
-          curl -f -k https://${INGRESS_IP}/metrics | grep -q "gauth_" || exit 1
+          curl -f -k https://${INGRESS_IP}/metrics | grep -q "agentauth_" || exit 1
           echo "✅ Metrics endpoint validated"
 
       - name: Notify deployment success
@@ -387,8 +387,8 @@ jobs:
         continue-on-error: true
         run: |
           echo "🔄 Rolling back deployment to previous revision..."
-          kubectl rollout undo deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
-          kubectl rollout status deployment/gauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=3m
+          kubectl rollout undo deployment/agentauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }}
+          kubectl rollout status deployment/agentauth-deployment -n ${{ env.KUBERNETES_NAMESPACE }} --timeout=3m
           echo "✅ Rollback completed"
 
       - name: Notify rollback

@@ -28,7 +28,7 @@ This document maps conceptual AAP-001 actors & functional planes (traditional OA
 ## Role → Implementation Mapping
 | RFC Role / Plane | Current Implementation | File / Package References | Status |
 |------------------|------------------------|----------------------------|--------|
-| Resource Owner | Represented implicitly by `grantor` in PoA | `pkg/rfc0111/rfc0111.go` (PowerOfAttorney.Grantor) | Implemented |
+| Resource Owner | Represented implicitly by `grantor` in PoA | `pkg/aap001/aap001.go` (PowerOfAttorney.Grantor) | Implemented |
 | Client | External caller using `/demo/enforce` or requesting token | `examples/ai_capability_demo/main.go` endpoints | Implemented |
 | Authorization Server | Token issuance & PoA management endpoints | `/demo/poa/issue`, `/demo/poa/:id/token`, `/demo/poa/:id/revoke` in `main.go` | Partial (minimal issuance logic) |
 | Resource Server | Enforcement of action with PoA validation | `authMiddleware` + `/demo/enforce` | Implemented |
@@ -36,12 +36,12 @@ This document maps conceptual AAP-001 actors & functional planes (traditional OA
 | PEP | HTTP handlers wrapping enforcement | `/demo/enforce` handler; Gin middleware | Implemented |
 | PAP | Policy definitions loading (governance policies set) | `internal/ai` policy loader (GetGovernancePolicies) | Partial (no admin API) |
 | PIP | Claims source (request JSON + JWT claims) | `main.go` request parsing + JWT claim extraction | Implemented |
-| PVP | Signature/multi-sign enforcement & canonical digest | `pkg/rfc0111/canonical.go`, `verifyMultiSignatures`, multisig tests | Implemented |
+| PVP | Signature/multi-sign enforcement & canonical digest | `pkg/aap001/canonical.go`, `verifyMultiSignatures`, multisig tests | Implemented |
 | Delegation Repository | In-memory PoA map | `main.go` (poaRepo) | Partial (no persistent backend) |
 | Audit Trail | Decision persistence + stdout audit callback | `persistDecision`, audit callback in `main.go` | Partial (no structured ledger) |
 | Revocation Controller | Endpoint updates status + metrics | `/demo/poa/:id/revoke` | Implemented |
 | Extended Token Processor | Issues JWT referencing PoA | `/demo/poa/:id/token` | Implemented (no digest embedding) |
-| Multi-Signature Orchestrator | Threshold verification logic & tests | `pkg/rfc0111/*multi_signature*` | Implemented (no live collection API in demo) |
+| Multi-Signature Orchestrator | Threshold verification logic & tests | `pkg/aap001/*multi_signature*` | Implemented (no live collection API in demo) |
 
 ## Gaps & Remediation (Role Perspective)
 | Gap | Role(s) Affected | Remediation |

@@ -34,6 +34,9 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 	"github.com/mauriciomferz/AgentAuth/internal/tracing"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
 	"github.com/mauriciomferz/AgentAuth/pkg/anchor"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/auth"
@@ -48,9 +51,6 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 	devicePkg "github.com/mauriciomferz/AgentAuth/pkg/device"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
 	gnapPkg "github.com/mauriciomferz/AgentAuth/pkg/gnap"
 	"github.com/mauriciomferz/AgentAuth/pkg/ledger"
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
@@ -113,7 +113,7 @@ func getExtProviderLabel(s *BetaServer) string {
 		return rec.Provider
 	}
 	// Fallback to environment selection; normalize known variants for metrics label stability.
-	raw := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER")
+	raw := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER")
 	if raw == "" {
 		return "_"
 	}
@@ -145,7 +145,7 @@ func NewBetaServer(port string, opts ...BetaServerOption) *BetaServer {
 func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServerOption) *BetaServer {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	// Enable CORS with allow-list support (GAUTH_CORS_ALLOW env).
+	// Enable CORS with allow-list support (AGENTAUTH_CORS_ALLOW env).
 	r.Use(corsMiddleware())
 	// Normalize port: allow ":8080" or "8080"
 	if port == "" {
@@ -159,8 +159,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	} else {
 		memoryMetrics = m
 	}
-	// Enable persistence if GAUTH_METRICS_PERSIST_PATH is set (only for in-memory implementation)
-	if pp := os.Getenv("GAUTH_METRICS_PERSIST_PATH"); pp != "" {
+	// Enable persistence if AGENTAUTH_METRICS_PERSIST_PATH is set (only for in-memory implementation)
+	if pp := os.Getenv("AGENTAUTH_METRICS_PERSIST_PATH"); pp != "" {
 		if memImpl, ok := memoryMetrics.(*metrics.Memory); ok {
 			// Expand tilde and relative paths for convenience
 			if strings.HasPrefix(pp, "~") {
@@ -195,13 +195,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		keyProvider:         nil, // default to nil; expected to be injected or initialized via options
 	}
 
-	// Tracing initialization: primary enable flag GAUTH_TRACING_ENABLED or legacy GAUTH_OTEL_ENABLE.
-	if os.Getenv("GAUTH_TRACING_ENABLED") == "1" || os.Getenv("GAUTH_OTEL_ENABLE") == "1" {
-		if tp, err := tracing.NewTracerProvider(tracing.Config{ServiceName: "gauth-beta"}); err == nil {
+	// Tracing initialization: primary enable flag AGENTAUTH_TRACING_ENABLED or legacy AGENTAUTH_OTEL_ENABLE.
+	if os.Getenv("AGENTAUTH_TRACING_ENABLED") == "1" || os.Getenv("AGENTAUTH_OTEL_ENABLE") == "1" {
+		if tp, err := tracing.NewTracerProvider(tracing.Config{ServiceName: "agentauth-beta"}); err == nil {
 			s.tracerProvider = tp
 			fmt.Fprintln(os.Stderr, "[tracing] enabled spans")
 			// Sampling ratio (0..1). Ratio <=0 interpreted as ALWAYS SAMPLE per ADR.
-			if raw := os.Getenv("GAUTH_TRACING_SAMPLE_RATIO"); raw != "" {
+			if raw := os.Getenv("AGENTAUTH_TRACING_SAMPLE_RATIO"); raw != "" {
 				if v, err := strconv.ParseFloat(raw, 64); err == nil && v >= 0 && v <= 1 {
 					s.tracerSampleRatio = v
 				}
@@ -212,15 +212,15 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// Initialize System Clock Monitor (RR-015)
-	ntpServer := envFallback("GAUTH_NTP_SERVER", "pool.ntp.org")
+	ntpServer := envFallback("AGENTAUTH_NTP_SERVER", "pool.ntp.org")
 	maxSkew := 5 * time.Minute
-	if v := os.Getenv("GAUTH_MAX_CLOCK_SKEW"); v != "" {
+	if v := os.Getenv("AGENTAUTH_MAX_CLOCK_SKEW"); v != "" {
 		if d, err := time.ParseDuration(v); err == nil {
 			maxSkew = d
 		}
 	}
 	ntpInterval := 1 * time.Hour
-	if v := os.Getenv("GAUTH_NTP_INTERVAL"); v != "" {
+	if v := os.Getenv("AGENTAUTH_NTP_INTERVAL"); v != "" {
 		if d, err := time.ParseDuration(v); err == nil {
 			ntpInterval = d
 		}
@@ -229,8 +229,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.systemClockMonitor.Start()
 
 	// Redis Initialization
-	if os.Getenv("GAUTH_SKIP_REDIS") == "1" {
-		fmt.Fprintln(os.Stderr, "[redis] initialization skipped via GAUTH_SKIP_REDIS")
+	if os.Getenv("AGENTAUTH_SKIP_REDIS") == "1" {
+		fmt.Fprintln(os.Stderr, "[redis] initialization skipped via AGENTAUTH_SKIP_REDIS")
 	} else {
 		redisHost := os.Getenv("REDIS_HOST")
 		if redisHost == "" {
@@ -297,7 +297,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				data, err := json.Marshal(artifact)
 				if err == nil {
 					// Check if signing is enabled and KeyManager available
-					signEnabled := os.Getenv("GAUTH_CAP_ANCHOR_SIGN") == "1"
+					signEnabled := os.Getenv("AGENTAUTH_CAP_ANCHOR_SIGN") == "1"
 					if signEnabled && s.keyProvider != nil {
 						// Attempt EdDSA signing via KeyProvider.ActiveSigner()
 						if signer, err := s.keyProvider.ActiveSigner(); err == nil && signer != nil {
@@ -347,7 +347,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			_, _ = s.capabilityAnchorHandler.Anchor(context.Background())
 		}
 
-		// Internal Notarization (if enabled via GAUTH_CAP_ANCHOR_NOTARIZE)
+		// Internal Notarization (if enabled via AGENTAUTH_CAP_ANCHOR_NOTARIZE)
 		if s.notarizer != nil {
 			if rec, err := s.notarizer.Notarize(newHash); err != nil {
 				fmt.Fprintf(os.Stderr, "[anchor] notarization failed hash=%s err=%v\n", newHash, err)
@@ -419,8 +419,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 
-	// Seed demo capabilities if no GAUTH_CAPABILITIES_PATH and registry is empty (test compatibility)
-	if os.Getenv("GAUTH_CAPABILITIES_PATH") == "" {
+	// Seed demo capabilities if no AGENTAUTH_CAPABILITIES_PATH and registry is empty (test compatibility)
+	if os.Getenv("AGENTAUTH_CAPABILITIES_PATH") == "" {
 		currentCaps := capability.DefaultRegistry().List()
 		if len(currentCaps) == 0 {
 			capability.Register(capability.Capability{ID: "cap.transfer", Version: "1.0", Stable: true})
@@ -444,7 +444,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Initialize Key Manager
 	// RR-013 Phase 2: Support External/Cloud KMS
-	// Uses unified factory which checks GAUTH_KMS_PROVIDER
+	// Uses unified factory which checks AGENTAUTH_KMS_PROVIDER
 	km, kmErr := keys.NewKeyManager(context.Background())
 
 	if kmErr != nil {
@@ -473,13 +473,13 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// Initialize PDP Distributed Cache (RR-001)
-	if os.Getenv("GAUTH_PDP_CACHE_ENABLED") == "1" {
-		l1Size := atoiDefault(os.Getenv("GAUTH_PDP_CACHE_L1_SIZE"), 1000)
+	if os.Getenv("AGENTAUTH_PDP_CACHE_ENABLED") == "1" {
+		l1Size := atoiDefault(os.Getenv("AGENTAUTH_PDP_CACHE_L1_SIZE"), 1000)
 		l1 := authz.NewLRUDecisionCache(l1Size)
 
 		var cacheImpl authz.DecisionCache = l1
 
-		if os.Getenv("GAUTH_PDP_CACHE_TYPE") == "redis" && s.redisClient != nil {
+		if os.Getenv("AGENTAUTH_PDP_CACHE_TYPE") == "redis" && s.redisClient != nil {
 			// Initialize L2 Redis cache using server's redis connection info
 			redisHost := os.Getenv("REDIS_HOST")
 			if redisHost == "" {
@@ -495,7 +495,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				Type:     "redis",
 			})
 			if err == nil {
-				nodeID := os.Getenv("GAUTH_NODE_ID")
+				nodeID := os.Getenv("AGENTAUTH_NODE_ID")
 				if nodeID == "" {
 					nodeID = "node-" + strconv.FormatInt(time.Now().UnixNano()%1000, 10)
 				}
@@ -527,11 +527,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Initialize Model Limits Handler
 	s.modelLimitsHandler = modellimits.NewHandler(
-		os.Getenv("GAUTH_MODEL_LIMITS_CONFIG_PATH"),
-		os.Getenv("GAUTH_MODEL_LIMIT_AUDIT_PATH"),
-		os.Getenv("GAUTH_MODEL_LIMIT_ANCHOR_PATH"),
+		os.Getenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH"),
+		os.Getenv("AGENTAUTH_MODEL_LIMIT_AUDIT_PATH"),
+		os.Getenv("AGENTAUTH_MODEL_LIMIT_ANCHOR_PATH"),
 	)
-	s.modelLimitsHandler.StrictUnknown = os.Getenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1"
+	s.modelLimitsHandler.StrictUnknown = os.Getenv("AGENTAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1"
 	// Wire dependencies if available
 	if km := s.getKeyManager(); km != nil {
 		s.modelLimitsHandler.KeyManager = km
@@ -543,29 +543,29 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.modelLimitsAPI = modellimits.NewAPI(s.modelLimitsHandler)
 
 	// Initialize Database
-	if host := os.Getenv("GAUTH_DB_HOST"); host != "" {
-		port := atoiDefault(os.Getenv("GAUTH_DB_PORT"), 5432)
+	if host := os.Getenv("AGENTAUTH_DB_HOST"); host != "" {
+		port := atoiDefault(os.Getenv("AGENTAUTH_DB_PORT"), 5432)
 		dbCfg := &database.Config{
 			Host:     host,
 			Port:     port,
-			User:     os.Getenv("GAUTH_DB_USER"),
-			Password: os.Getenv("GAUTH_DB_PASSWORD"),
-			Database: os.Getenv("GAUTH_DB_NAME"),
-			SSLMode:  os.Getenv("GAUTH_DB_SSL_MODE"),
+			User:     os.Getenv("AGENTAUTH_DB_USER"),
+			Password: os.Getenv("AGENTAUTH_DB_PASSWORD"),
+			Database: os.Getenv("AGENTAUTH_DB_NAME"),
+			SSLMode:  os.Getenv("AGENTAUTH_DB_SSL_MODE"),
 		}
 		if db, err := database.NewDB(dbCfg); err == nil {
 			s.db = db
 			fmt.Printf("Database connected: %s\n", host)
 
 			// Initialize Blockchain Components if configured
-			if ethRPC := os.Getenv("GAUTH_ETH_RPC_URL"); ethRPC != "" {
-				ethKey := os.Getenv("GAUTH_ETH_PRIVATE_KEY")
+			if ethRPC := os.Getenv("AGENTAUTH_ETH_RPC_URL"); ethRPC != "" {
+				ethKey := os.Getenv("AGENTAUTH_ETH_PRIVATE_KEY")
 				// We allow empty private key for read-only mode if needed, but warnings usually apply
 
 				ethConfig := &blockchain.EthereumConfig{
 					RPCURL:          ethRPC,
 					PrivateKey:      ethKey,
-					ContractAddress: os.Getenv("GAUTH_ETH_CONTRACT_ADDRESS"),
+					ContractAddress: os.Getenv("AGENTAUTH_ETH_CONTRACT_ADDRESS"),
 					NetworkName:     "sepolia", // defaulting to sepolia for this phase
 					ChainID:         11155111,  // Sepolia ChainID
 					GasLimit:        3000000,
@@ -585,7 +585,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 					syncConfig := blockchain.DefaultSyncConfig()
 					// Override sync config from env if needed
-					if mode := os.Getenv("GAUTH_SYNC_MODE"); mode != "" {
+					if mode := os.Getenv("AGENTAUTH_SYNC_MODE"); mode != "" {
 						syncConfig.SyncMode = mode
 					}
 
@@ -672,7 +672,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		s.capabilitiesHandler.KeyManager = km
 	}
 	// Capability registry external anchor artifact configuration (prototype)
-	if v := os.Getenv("GAUTH_CAP_ANCHOR_FILE_PATH"); v != "" {
+	if v := os.Getenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH"); v != "" {
 		// Expand ~ for convenience
 		if strings.HasPrefix(v, "~") {
 			if home, err := os.UserHomeDir(); err == nil {
@@ -690,7 +690,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			fmt.Fprintf(os.Stderr, "[cap-anchor] file path configured path=%s\n", abs)
 		}
 	}
-	if v := os.Getenv("GAUTH_CAP_ANCHOR_WRITE_INTERVAL"); v != "" {
+	if v := os.Getenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL"); v != "" {
 		if dur, err := time.ParseDuration(v); err == nil && dur >= time.Minute {
 			s.capAnchorWriteInterval = dur
 		}
@@ -699,9 +699,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// default conservative interval (5m) to limit filesystem churn
 		s.capAnchorWriteInterval = 5 * time.Minute
 	}
-	// SLA stale threshold (seconds) optional: GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS (default 600s)
+	// SLA stale threshold (seconds) optional: AGENTAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS (default 600s)
 	staleSec := 600
-	if raw := os.Getenv("GAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS"); raw != "" {
+	if raw := os.Getenv("AGENTAUTH_CAP_ANCHOR_STALE_THRESHOLD_SECONDS"); raw != "" {
 		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
 			staleSec = v
 		}
@@ -747,36 +747,36 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	gnapStore := gnapPkg.NewMemoryGrantStore()
 	gnapTokenStore := gnapPkg.NewMemoryTokenStore()
 	gnapRSStore := gnapPkg.NewMemoryResourceServerStore() // RFC 9767 Support
-	gnapBaseURL := envFallback("GAUTH_GNAP_BASE_URL", "http://localhost:8080")
+	gnapBaseURL := envFallback("AGENTAUTH_GNAP_BASE_URL", "http://localhost:8080")
 
 	// Create VerificationService for GNAP-AgentAuth integration (nil for now - wire later with DB services)
 	// Create VerificationService for GNAP-AgentAuth integration
-	var gnapVerificationService gauthplus.VerificationService
+	var gnapVerificationService agentauthplus.VerificationService
 
 	if s.db != nil {
-		poaStore := gauthplus.NewPostgreSQLPoAStore(s.db)
+		poaStore := agentauthplus.NewPostgreSQLPoAStore(s.db)
 		// Enable caching for delegation and capability services (RR-014)
-		rawDelSvc := gauthplus.NewPostgreSQLDelegationService(s.db)
-		delSvc := gauthplus.NewCachedDelegationService(rawDelSvc, 5*time.Minute)
+		rawDelSvc := agentauthplus.NewPostgreSQLDelegationService(s.db)
+		delSvc := agentauthplus.NewCachedDelegationService(rawDelSvc, 5*time.Minute)
 
-		rawCapSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(s.db)
-		capSvc := gauthplus.NewCachedCapabilityService(rawCapSvc, 10*time.Minute)
+		rawCapSvc := agentauthplus.NewPostgreSQLCapabilityAssessmentService(s.db)
+		capSvc := agentauthplus.NewCachedCapabilityService(rawCapSvc, 10*time.Minute)
 
-		fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(s.db)
-		principalVerifier := gauthplus.NewDefaultPrincipalVerifier()
-		attestationVerifier := gauthplus.NewDefaultAttestationVerifier()
+		fidSvc := agentauthplus.NewPostgreSQLFiduciaryDutyService(s.db)
+		principalVerifier := agentauthplus.NewDefaultPrincipalVerifier()
+		attestationVerifier := agentauthplus.NewDefaultAttestationVerifier()
 
 		// Generate a temporary key for the Verification Service Authority (Phase 11)
 		// In production, this would be retrieved from a secure KeyStore/KMS
 		_, verifPrivKey, _ := ed25519.GenerateKey(crand.Reader)
-		attestationSigner := gauthplus.NewDefaultAttestationSigner("gauthplus-local-authority", verifPrivKey)
+		attestationSigner := agentauthplus.NewDefaultAttestationSigner("agentauthplus-local-authority", verifPrivKey)
 
 		// Register the public key in the verifier for local bridge support
-		attestationVerifier.RegisterKey("gauthplus-local-authority", verifPrivKey.Public().(ed25519.PublicKey))
+		attestationVerifier.RegisterKey("agentauthplus-local-authority", verifPrivKey.Public().(ed25519.PublicKey))
 
 		registerService := registry.NewMockCommercialRegisterService()
 
-		gnapVerificationService = gauthplus.NewVerificationService(
+		gnapVerificationService = agentauthplus.NewVerificationService(
 			poaStore, delSvc, capSvc, fidSvc, principalVerifier, attestationVerifier, attestationSigner, registerService,
 		)
 		fmt.Println("AgentAuth+ VerificationService wired with PostgreSQL storage (cached) and Hardened Verifiers")
@@ -791,7 +791,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	clientKeyStore := auth.NewMemoryKeyStore()
 	clientAuthenticator := &auth.PrivateKeyJWTValidator{
 		KeyProvider:    clientKeyStore,
-		ValidAudiences: []string{envFallback("GAUTH_TOKEN_ENDPOINT", "http://localhost:8080/device/token")},
+		ValidAudiences: []string{envFallback("AGENTAUTH_TOKEN_ENDPOINT", "http://localhost:8080/device/token")},
 		Replay:         s.replayStore,
 	}
 
@@ -815,7 +815,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	if s.db != nil {
 		oauth2DBPool = s.db.Pool
 	}
-	oauth2Handler := authHandlers.NewOAuth2Handler(oauth2DBPool, os.Getenv("GAUTH_JWT_SIGNING_KEY"))
+	oauth2Handler := authHandlers.NewOAuth2Handler(oauth2DBPool, os.Getenv("AGENTAUTH_JWT_SIGNING_KEY"))
 	oauth2Group := s.router.Group("/api/v1/oauth2")
 	oauth2Handler.RegisterRoutes(oauth2Group)
 	log.Println("[oauth2] registered CIBA and Token Exchange endpoints at /api/v1/oauth2/*")
@@ -906,8 +906,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}()
 
-	// Violation persistence path (optional) GAUTH_VIOLATION_PERSIST_PATH
-	s.violationPersistPath = os.Getenv("GAUTH_VIOLATION_PERSIST_PATH")
+	// Violation persistence path (optional) AGENTAUTH_VIOLATION_PERSIST_PATH
+	s.violationPersistPath = os.Getenv("AGENTAUTH_VIOLATION_PERSIST_PATH")
 	if s.violationPersistPath != "" {
 		// Expand tilde
 		if strings.HasPrefix(s.violationPersistPath, "~") {
@@ -932,8 +932,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.violationAPI = violations.NewAPI(s.violationHandler)
 	s.violationAPI.RegisterRoutes(s.router)
 
-	// Semantic persistence path (optional) GAUTH_SEMANTIC_PERSIST_PATH
-	s.semanticPersistPath = os.Getenv("GAUTH_SEMANTIC_PERSIST_PATH")
+	// Semantic persistence path (optional) AGENTAUTH_SEMANTIC_PERSIST_PATH
+	s.semanticPersistPath = os.Getenv("AGENTAUTH_SEMANTIC_PERSIST_PATH")
 	if s.semanticPersistPath != "" {
 		if strings.HasPrefix(s.semanticPersistPath, "~") {
 			if home, err := os.UserHomeDir(); err == nil {
@@ -951,8 +951,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		s.semanticHandler = semantic.NewHandler(nil, nil, "")
 	}
 
-	// Semantic ledger path (optional) GAUTH_SEMANTIC_LEDGER_PATH (Item 8)
-	if slp := os.Getenv("GAUTH_SEMANTIC_LEDGER_PATH"); slp != "" {
+	// Semantic ledger path (optional) AGENTAUTH_SEMANTIC_LEDGER_PATH (Item 8)
+	if slp := os.Getenv("AGENTAUTH_SEMANTIC_LEDGER_PATH"); slp != "" {
 		if strings.HasPrefix(slp, "~") {
 			if home, err := os.UserHomeDir(); err == nil {
 				slp = filepath.Join(home, strings.TrimPrefix(slp, "~"))
@@ -966,8 +966,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 
-	// Receipt store persistence path (optional) GAUTH_NOTARY_RECEIPT_PERSIST_PATH
-	if rp := os.Getenv("GAUTH_NOTARY_RECEIPT_PERSIST_PATH"); rp != "" {
+	// Receipt store persistence path (optional) AGENTAUTH_NOTARY_RECEIPT_PERSIST_PATH
+	if rp := os.Getenv("AGENTAUTH_NOTARY_RECEIPT_PERSIST_PATH"); rp != "" {
 		if strings.HasPrefix(rp, "~") {
 			if home, err := os.UserHomeDir(); err == nil {
 				rp = filepath.Join(home, strings.TrimPrefix(rp, "~"))
@@ -983,7 +983,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// Persist audit log path (optional)
-	if pp := os.Getenv("GAUTH_AUDIT_PERSIST_PATH"); pp != "" {
+	if pp := os.Getenv("AGENTAUTH_AUDIT_PERSIST_PATH"); pp != "" {
 		if strings.HasPrefix(pp, "~") {
 			if home, err := os.UserHomeDir(); err == nil {
 				pp = filepath.Join(home, strings.TrimPrefix(pp, "~"))
@@ -996,33 +996,33 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// Initialize Primary Auth Service (Standard JWT)
 	// Supports HS256 (default) or RS256 with key pair.
 	// Initialize primary token service (for violation counters) unless explicitly disabled.
-	if os.Getenv("GAUTH_DISABLE_VIOLATION_SERVICE") != "1" {
-		cfg := gauth.Config{
-			AuthServerURL:     os.Getenv("GAUTH_ISSUER"),
+	if os.Getenv("AGENTAUTH_DISABLE_VIOLATION_SERVICE") != "1" {
+		cfg := agentauth.Config{
+			AuthServerURL:     os.Getenv("AGENTAUTH_ISSUER"),
 			ClientID:          "beta-demo-client",
 			ClientSecret:      "demo-client-secret-00000000000000000000000000000000",
-			SigningKey:        os.Getenv("GAUTH_SIGNING_KEY"), // optional distinct HMAC key
+			SigningKey:        os.Getenv("AGENTAUTH_SIGNING_KEY"), // optional distinct HMAC key
 			Scopes:            []string{"demo"},
 			AccessTokenExpiry: 30 * time.Minute,
 			Audience:          []string{"beta-audience"},
 		}
-		if signingKeyStr := os.Getenv("GAUTH_SIGNING_KEY"); signingKeyStr != "" {
+		if signingKeyStr := os.Getenv("AGENTAUTH_SIGNING_KEY"); signingKeyStr != "" {
 			cfg.SigningKey = signingKeyStr
 		}
 
-		primary, err := gauth.New(cfg)
+		primary, err := agentauth.New(cfg)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[violation-metrics] primary service init failed: %v\n", err)
 		} else {
 			s.primaryAuthService = primary
-			fmt.Fprintln(os.Stderr, "[violation-metrics] primary gauth.Service initialized (violation counters active)")
+			fmt.Fprintln(os.Stderr, "[violation-metrics] primary agentauth.Service initialized (violation counters active)")
 			// Initialize handler with service and load persistence
 			// Note: s.violationHandler.Service field needs to be set.
 			// server_clean.go line 1963: s.violationHandler.Service = primary
 			if s.tokenHandler != nil {
 				s.tokenHandler.SetAgentAuthService(primary)
 			}
-			// Wait, check type compatibility: primary(*gauth.Service) vs ViolationProvider interface.
+			// Wait, check type compatibility: primary(*agentauth.Service) vs ViolationProvider interface.
 			// Assuming it satisfies it.
 			// I need to set the Service field directly since NewHandler usage above passed nil service.
 			s.violationHandler.Service = primary
@@ -1033,20 +1033,20 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// Initialize AAP001 Semantic Interoperability Service
-	// Initialize AAP001 service (semantic counters) unless disabled (GAUTH_DISABLE_AAP001_SERVICE=1)
-	if os.Getenv("GAUTH_DISABLE_AAP001_SERVICE") != "1" {
+	// Initialize AAP001 service (semantic counters) unless disabled (AGENTAUTH_DISABLE_AAP001_SERVICE=1)
+	if os.Getenv("AGENTAUTH_DISABLE_AAP001_SERVICE") != "1" {
 		// Create an AAP001 service using in-memory audit logger and existing authorizer policies.
 		memAudit := audit.NewMemoryLogger(nil)
 		if s.authorizer == nil {
 			s.authorizer = authz.NewMemoryAuthorizer()
 		}
-		// Functional options: enable mandatory signatures when GAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
-		aapOpts := []gauth_aap_001.Option{}
+		// Functional options: enable mandatory signatures when AGENTAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
+		aapOpts := []agentauth_aap_001.Option{}
 		if s.redisClient != nil {
-			// Enable distributed replay protection (GAUTH-VULN-004)
-			aapOpts = append(aapOpts, gauth_aap_001.WithReplayStoreRedis(s.redisClient.GetClient(), "gauth", 5*time.Minute))
+			// Enable distributed replay protection (AGENTAUTH-VULN-004)
+			aapOpts = append(aapOpts, agentauth_aap_001.WithReplayStoreRedis(s.redisClient.GetClient(), "agentauth", 5*time.Minute))
 		}
-		svc := gauth_aap_001.NewService(memAudit, s.authorizer, aapOpts...)
+		svc := agentauth_aap_001.NewService(memAudit, s.authorizer, aapOpts...)
 		s.aap001Service = svc
 		fmt.Fprintln(os.Stderr, "[aap001] service initialized (semantic counters active)")
 		// Mount dual-control revocation workflow HTTP endpoints.
@@ -1089,7 +1089,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			})
 
 			// Auth handler
-			jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
+			jwtSecret := os.Getenv("AGENTAUTH_JWT_SIGNING_KEY")
 			if jwtSecret == "" {
 				jwtSecret = "dev-secret-change-in-production"
 			}
@@ -1180,19 +1180,19 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			adminGroup.DELETE("/policy-templates/:id", policyTemplatesHandler.DeletePolicyTemplate)
 
 			// AgentAuth+ enhanced authorization handler (Admin API)
-			gauthPlusHandler := adminHandlers.NewAgentAuthPlusHandler(dbPool)
-			gauthPlusHandler.RegisterRoutes(adminGroup)
+			agentAuthPlusHandler := adminHandlers.NewAgentAuthPlusHandler(dbPool)
+			agentAuthPlusHandler.RegisterRoutes(adminGroup)
 
 			// AgentAuth+ Public API (v1) - Create services sharing the pool
 			gplusDB := &database.DB{Pool: dbPool}
-			succSvc := gauthplus.NewPostgreSQLSuccessorService(gplusDB)
-			delSvc := gauthplus.NewPostgreSQLDelegationService(gplusDB)
-			dualSvc := gauthplus.NewPostgreSQLDualControlService(gplusDB)
-			capSvc := gauthplus.NewPostgreSQLCapabilityAssessmentService(gplusDB)
-			fidSvc := gauthplus.NewPostgreSQLFiduciaryDutyService(gplusDB)
+			succSvc := agentauthplus.NewPostgreSQLSuccessorService(gplusDB)
+			delSvc := agentauthplus.NewPostgreSQLDelegationService(gplusDB)
+			dualSvc := agentauthplus.NewPostgreSQLDualControlService(gplusDB)
+			capSvc := agentauthplus.NewPostgreSQLCapabilityAssessmentService(gplusDB)
+			fidSvc := agentauthplus.NewPostgreSQLFiduciaryDutyService(gplusDB)
 			s.RegisterAgentAuthPlusEndpoints(succSvc, delSvc, dualSvc, capSvc, fidSvc)
 
-			fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, gauthplus (17 total)") // OIDC authentication flow handler
+			fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, agentauthplus (17 total)") // OIDC authentication flow handler
 			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
 			authGroup := r.Group("/auth")
 			oidcAuthHandler.RegisterRoutes(authGroup)
@@ -1216,7 +1216,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			c.Next()
 		})
 
-		jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
+		jwtSecret := os.Getenv("AGENTAUTH_JWT_SIGNING_KEY")
 		if jwtSecret == "" {
 			jwtSecret = "dev-secret-change-in-production"
 		}
@@ -1280,24 +1280,24 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	mcpAuthBridge := mcp.NewAuthorizationBridge(pdpAdapter)
 	mcpAuditLogger := mcp.NewInMemoryAuditLogger(1000)
 	mcpHandler := mcpHandlers.NewMCPHandler(mcpAuthBridge, mcpAuditLogger, s.extendedTokenService)
-	gauthAPIGroup := r.Group("/api/v1/gauth")
-	mcpHandler.RegisterRoutes(gauthAPIGroup)
-	fmt.Fprintln(os.Stderr, "[mcp] Model Context Protocol handler registered at /api/v1/gauth/mcp/*")
+	agentauthAPIGroup := r.Group("/api/v1/agentauth")
+	mcpHandler.RegisterRoutes(agentauthAPIGroup)
+	fmt.Fprintln(os.Stderr, "[mcp] Model Context Protocol handler registered at /api/v1/agentauth/mcp/*")
 
 	// Beta Auth handler - frontend authentication endpoints
-	jwtSecret := os.Getenv("GAUTH_JWT_SIGNING_KEY")
+	jwtSecret := os.Getenv("AGENTAUTH_JWT_SIGNING_KEY")
 	if jwtSecret == "" {
 		jwtSecret = "dev-secret-change-in-production"
 	}
 	betaAuthHandler := authHandlers.NewBetaAuthHandler(jwtSecret)
-	authGroup := gauthAPIGroup.Group("/auth")
+	authGroup := agentauthAPIGroup.Group("/auth")
 	betaAuthHandler.RegisterRoutes(authGroup)
-	fmt.Fprintln(os.Stderr, "[auth] Frontend authentication endpoints registered at /api/v1/gauth/auth/*")
-	fmt.Fprintln(os.Stderr, "[auth]   POST /api/v1/gauth/auth/login/init (Initiate login)")
-	fmt.Fprintln(os.Stderr, "[auth]   POST /api/v1/gauth/auth/login/mfa (Verify MFA and get JWT)")
+	fmt.Fprintln(os.Stderr, "[auth] Frontend authentication endpoints registered at /api/v1/agentauth/auth/*")
+	fmt.Fprintln(os.Stderr, "[auth]   POST /api/v1/agentauth/auth/login/init (Initiate login)")
+	fmt.Fprintln(os.Stderr, "[auth]   POST /api/v1/agentauth/auth/login/mfa (Verify MFA and get JWT)")
 
 	// Initialize production-grade revocation system (Emergency Oracle + Two-Phase + Optimistic + Circuit Breaker)
-	// Enabled via GAUTH_REVOCATION_ENABLED=1; requires Redis connection
+	// Enabled via AGENTAUTH_REVOCATION_ENABLED=1; requires Redis connection
 	ctx := context.Background()
 	s.revocationService = NewRevocationService(ctx)
 	if s.revocationService != nil && s.revocationService.enabled {
@@ -1306,15 +1306,15 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		fmt.Fprintln(os.Stderr, "[revocation] Production revocation system initialized (77 tests validated)")
 		fmt.Fprintln(os.Stderr, "[revocation] Emergency Oracle + Two-Phase + Optimistic + Circuit Breaker")
 		fmt.Fprintln(os.Stderr, "[revocation] Performance: 67k ops/sec, P99 <30ms latency")
-	} else if os.Getenv("GAUTH_REVOCATION_ENABLED") != "0" && os.Getenv("GAUTH_TEST_SILENT") != "1" {
+	} else if os.Getenv("AGENTAUTH_REVOCATION_ENABLED") != "0" && os.Getenv("AGENTAUTH_TEST_SILENT") != "1" {
 		fmt.Fprintln(os.Stderr, "[revocation] Production revocation system disabled")
-		fmt.Fprintln(os.Stderr, "[revocation] Set GAUTH_REVOCATION_ENABLED=1 and configure Redis to enable")
+		fmt.Fprintln(os.Stderr, "[revocation] Set AGENTAUTH_REVOCATION_ENABLED=1 and configure Redis to enable")
 	}
 
-	// Violation persistence autosave loop (optional) (disabled if GAUTH_DISABLE_BG_POLLS=1)
-	if s.violationPersistPath != "" && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
+	// Violation persistence autosave loop (optional) (disabled if AGENTAUTH_DISABLE_BG_POLLS=1)
+	if s.violationPersistPath != "" && os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
 		intervalSec := 0
-		if raw := os.Getenv("GAUTH_VIOLATION_AUTOSAVE_SEC"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_VIOLATION_AUTOSAVE_SEC"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil {
 				intervalSec = v
 			}
@@ -1338,10 +1338,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}()
 		}
 	}
-	// Semantic counters autosave loop GAUTH_SEMANTIC_AUTOSAVE_SEC (min 10s)
-	if s.semanticPersistPath != "" && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
+	// Semantic counters autosave loop AGENTAUTH_SEMANTIC_AUTOSAVE_SEC (min 10s)
+	if s.semanticPersistPath != "" && os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
 		intervalSec := 0
-		if raw := os.Getenv("GAUTH_SEMANTIC_AUTOSAVE_SEC"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_SEMANTIC_AUTOSAVE_SEC"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil {
 				intervalSec = v
 			}
@@ -1363,10 +1363,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}()
 		}
 	}
-	// Background semantic anomaly sampler (optional): GAUTH_SEMANTIC_ANOMALY_BG_SEC (min 5s)
-	if s.aap001Service != nil && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
+	// Background semantic anomaly sampler (optional): AGENTAUTH_SEMANTIC_ANOMALY_BG_SEC (min 5s)
+	if s.aap001Service != nil && os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
 		bgInterval := 0
-		if raw := os.Getenv("GAUTH_SEMANTIC_ANOMALY_BG_SEC"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_SEMANTIC_ANOMALY_BG_SEC"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil {
 				bgInterval = v
 			}
@@ -1384,7 +1384,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 						s.semanticHandler.Update()
 						// Check for high anomaly scores to activate reactive throttle
 						active := false
-						if tStr := os.Getenv("GAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD"); tStr != "" {
+						if tStr := os.Getenv("AGENTAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD"); tStr != "" {
 							if threshold, err := strconv.ParseFloat(tStr, 64); err == nil {
 								scores := s.semanticHandler.Scores()
 								for _, v := range scores {
@@ -1403,10 +1403,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			}()
 		}
 	}
-	// Metrics autosave loop (optional): GAUTH_METRICS_AUTOSAVE_SEC (default disabled when unset or <5).
-	if mm, ok := s.metrics.(*metrics.Memory); ok && os.Getenv("GAUTH_DISABLE_BG_POLLS") != "1" {
+	// Metrics autosave loop (optional): AGENTAUTH_METRICS_AUTOSAVE_SEC (default disabled when unset or <5).
+	if mm, ok := s.metrics.(*metrics.Memory); ok && os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
 		intervalSec := 0
-		if v := os.Getenv("GAUTH_METRICS_AUTOSAVE_SEC"); v != "" {
+		if v := os.Getenv("AGENTAUTH_METRICS_AUTOSAVE_SEC"); v != "" {
 			if iv, err := strconv.Atoi(v); err == nil {
 				intervalSec = iv
 			}
@@ -1436,14 +1436,14 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		s.tokenHandler.TracerRatio = s.tracerSampleRatio
 	}
 	// Initialize OpenTelemetry metrics exporter if enabled (stdout metric for demo) guarded by sync.Once
-	if os.Getenv("GAUTH_OTEL_METRICS_ENABLE") == "1" {
+	if os.Getenv("AGENTAUTH_OTEL_METRICS_ENABLE") == "1" {
 		otelInitOnce.Do(func() {
 			exp, err := stdoutmetric.New(stdoutmetric.WithWriter(os.Stderr))
 			if err == nil {
 				provider := metricsdk.NewMeterProvider(metricsdk.WithReader(metricsdk.NewPeriodicReader(exp, metricsdk.WithInterval(5*time.Second))))
 				otel.SetMeterProvider(provider)
 				s.otelMetricsProvider = provider
-				s.otelMeter = provider.Meter("gauth-beta")
+				s.otelMeter = provider.Meter("agentauth-beta")
 				fmt.Fprintln(os.Stderr, "[otel-metrics] stdout exporter initialized")
 				// Register observable gauges for violation counters and anomaly rates.
 				s.otelViolationCounters = make(map[string]metric.Int64ObservableGauge)
@@ -1452,17 +1452,17 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				semanticRateGauges60 := make(map[string]metric.Float64ObservableGauge)
 				semanticRateGauges300 := make(map[string]metric.Float64ObservableGauge)
 				semanticAnomalyGauges := make(map[string]metric.Float64ObservableGauge)
-				violationIntegrityGauge, gErr1 := s.otelMeter.Int64ObservableGauge("gauth_persistence_integrity_violation")
+				violationIntegrityGauge, gErr1 := s.otelMeter.Int64ObservableGauge("agentauth_persistence_integrity_violation")
 				if gErr1 != nil {
 					log.Printf("otel gauge create failed (violation): %v", gErr1)
 				}
-				semanticIntegrityGauge, gErr2 := s.otelMeter.Int64ObservableGauge("gauth_persistence_integrity_semantic")
+				semanticIntegrityGauge, gErr2 := s.otelMeter.Int64ObservableGauge("agentauth_persistence_integrity_semantic")
 				if gErr2 != nil {
 					log.Printf("otel gauge create failed (semantic): %v", gErr2)
 				}
 				counterKeys := []string{"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch", "replay_detected", "audience_mismatch", "missing_claim", "unknown"}
 				for _, k := range counterKeys {
-					name := "gauth_violation_counter_" + k
+					name := "agentauth_violation_counter_" + k
 					gauge, err2 := s.otelMeter.Int64ObservableGauge(name)
 					if err2 == nil {
 						s.otelViolationCounters[k] = gauge
@@ -1470,7 +1470,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				}
 				rateKeys := []string{"rate_60s", "rate_300s"}
 				for _, rk := range rateKeys {
-					name := "gauth_violation_" + rk
+					name := "agentauth_violation_" + rk
 					g, err2 := s.otelMeter.Float64ObservableGauge(name)
 					if err2 == nil {
 						s.otelViolationRates[rk] = g
@@ -1478,33 +1478,33 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				}
 				semanticKeys := []string{"amount_limit_exceeded", "daily_amount_limit_exceeded", "currency_mismatch", "scope_violation", "restriction_mismatch"}
 				for _, sk := range semanticKeys {
-					name := "gauth_poa_semantic_counter_" + sk
+					name := "agentauth_poa_semantic_counter_" + sk
 					gauge, err2 := s.otelMeter.Int64ObservableGauge(name)
 					if err2 == nil {
 						semanticGauges[sk] = gauge
 					}
-					g60, e60 := s.otelMeter.Float64ObservableGauge("gauth_poa_semantic_rate_60s_" + sk)
+					g60, e60 := s.otelMeter.Float64ObservableGauge("agentauth_poa_semantic_rate_60s_" + sk)
 					if e60 == nil {
 						semanticRateGauges60[sk] = g60
 					}
-					g300, e300 := s.otelMeter.Float64ObservableGauge("gauth_poa_semantic_rate_300s_" + sk)
+					g300, e300 := s.otelMeter.Float64ObservableGauge("agentauth_poa_semantic_rate_300s_" + sk)
 					if e300 == nil {
 						semanticRateGauges300[sk] = g300
 					}
-					sg, se := s.otelMeter.Float64ObservableGauge("gauth_poa_semantic_anomaly_score_" + sk)
+					sg, se := s.otelMeter.Float64ObservableGauge("agentauth_poa_semantic_anomaly_score_" + sk)
 					if se == nil {
 						semanticAnomalyGauges[sk] = sg
 					}
 				}
-				revEmit, revEmitErr := s.otelMeter.Int64ObservableGauge("gauth_revocation_auto_sign_emitted")
+				revEmit, revEmitErr := s.otelMeter.Int64ObservableGauge("agentauth_revocation_auto_sign_emitted")
 				if revEmitErr != nil {
 					log.Printf("otel gauge create failed (revocation emitted): %v", revEmitErr)
 				}
-				revSkipEmpty, revSkipEmptyErr := s.otelMeter.Int64ObservableGauge("gauth_revocation_auto_sign_skipped_empty")
+				revSkipEmpty, revSkipEmptyErr := s.otelMeter.Int64ObservableGauge("agentauth_revocation_auto_sign_skipped_empty")
 				if revSkipEmptyErr != nil {
 					log.Printf("otel gauge create failed (revocation skipped empty): %v", revSkipEmptyErr)
 				}
-				revSkipDup, revSkipDupErr := s.otelMeter.Int64ObservableGauge("gauth_revocation_auto_sign_skipped_duplicate")
+				revSkipDup, revSkipDupErr := s.otelMeter.Int64ObservableGauge("agentauth_revocation_auto_sign_skipped_duplicate")
 				if revSkipDupErr != nil {
 					log.Printf("otel gauge create failed (revocation skipped duplicate): %v", revSkipDupErr)
 				}
@@ -1612,8 +1612,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 	// Initialize empty revocation chain
 	s.revocationChain = delegation.NewRevocationChain()
-	// Optional demo auto-seeding: GAUTH_REVOCATION_DEMO_SEED=<n>, GAUTH_REVOCATION_DEMO_SIGN=1 to sign a tree head
-	if rawSeed := os.Getenv("GAUTH_REVOCATION_DEMO_SEED"); rawSeed != "" {
+	// Optional demo auto-seeding: AGENTAUTH_REVOCATION_DEMO_SEED=<n>, AGENTAUTH_REVOCATION_DEMO_SIGN=1 to sign a tree head
+	if rawSeed := os.Getenv("AGENTAUTH_REVOCATION_DEMO_SEED"); rawSeed != "" {
 		if n, err := strconv.Atoi(rawSeed); err == nil && n > 0 {
 			reasons := []delegation.RevocationReason{
 				delegation.RevocationReasonCompromise,
@@ -1634,7 +1634,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				}
 			}
 			fmt.Fprintf(os.Stderr, "[revocation-seed] auto seeded events count=%d\n", added)
-			if os.Getenv("GAUTH_REVOCATION_DEMO_SIGN") == "1" {
+			if os.Getenv("AGENTAUTH_REVOCATION_DEMO_SIGN") == "1" {
 				if sth, serr := s.revocationChain.SignTreeHead(); serr == nil {
 					fmt.Fprintf(os.Stderr, "[revocation-seed] signed tree head len=%d root=%s sigs=%d\n", sth.ChainLength, sth.MerkleRoot, len(sth.Signatures))
 				} else {
@@ -1644,7 +1644,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 	// Load persisted signed tree heads if configured
-	if p := os.Getenv("GAUTH_STH_PERSIST_PATH"); p != "" {
+	if p := os.Getenv("AGENTAUTH_STH_PERSIST_PATH"); p != "" {
 		if err := s.revocationChain.LoadSignedTreeHeads(p); err == nil {
 			fmt.Fprintf(os.Stderr, "[revocation] loaded signed tree heads path=%s count=%d\n", p, len(s.revocationChain.TreeHeads()))
 		} else {
@@ -1652,9 +1652,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 	// Initialize EdDSA key manager (with optional persistence)
-	if os.Getenv("GAUTH_TOKEN_SIG_MODE") == "eddsa" {
+	if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == "eddsa" {
 		ttlHours := 24
-		if v := os.Getenv("GAUTH_KEY_ROTATION_HOURS"); v != "" {
+		if v := os.Getenv("AGENTAUTH_KEY_ROTATION_HOURS"); v != "" {
 			if n, err := strconv.Atoi(v); err == nil && n > 0 {
 				ttlHours = n
 			}
@@ -1693,10 +1693,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			if s.keyProvider == nil {
 				s.keyProvider = km
 			}
-			fmt.Fprintf(os.Stderr, "[crypto] eddsa manager initialized ttl=%dh persist=%v\n", ttlHours, os.Getenv("GAUTH_EDDSA_PERSIST_PATH") != "")
+			fmt.Fprintf(os.Stderr, "[crypto] eddsa manager initialized ttl=%dh persist=%v\n", ttlHours, os.Getenv("AGENTAUTH_EDDSA_PERSIST_PATH") != "")
 		}
 		// Optional automatic rotation loop
-		if rv := os.Getenv("GAUTH_EDDSA_AUTO_ROTATE_MIN"); rv != "" {
+		if rv := os.Getenv("AGENTAUTH_EDDSA_AUTO_ROTATE_MIN"); rv != "" {
 			if mins, err := strconv.Atoi(rv); err == nil && mins >= 5 {
 				if km := s.getKeyManager(); km != nil {
 					go func() {
@@ -1716,7 +1716,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// Initialize Anchor Client (Memory default)
 	s.anchorClient = anchor.NewMemoryAnchor()
 	// Enable persistence if configured (Roadmap Item 2)
-	if pp := os.Getenv("GAUTH_ANCHOR_PERSIST_PATH"); pp != "" {
+	if pp := os.Getenv("AGENTAUTH_ANCHOR_PERSIST_PATH"); pp != "" {
 		if err := s.anchorClient.EnablePersistence(pp); err != nil {
 			fmt.Fprintf(os.Stderr, "[anchor] persistence load failed path=%s err=%v\n", pp, err)
 		} else {
@@ -1730,8 +1730,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// External anchoring for capability registry (RFC-3161 TSA)
-	// Enable via GAUTH_CAPABILITY_TSA_URL environment variable
-	if tsaURL := os.Getenv("GAUTH_CAPABILITY_TSA_URL"); tsaURL != "" && s.capabilitiesHandler != nil {
+	// Enable via AGENTAUTH_CAPABILITY_TSA_URL environment variable
+	if tsaURL := os.Getenv("AGENTAUTH_CAPABILITY_TSA_URL"); tsaURL != "" && s.capabilitiesHandler != nil {
 		// Create RFC-3161 provider
 		rfc3161Provider := ledger.NewRFC3161Provider(tsaURL)
 
@@ -1749,8 +1749,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 
-	// External anchoring for semantics (optional) GAUTH_SEMANTIC_ANCHOR_ENABLE (Item 8)
-	if os.Getenv("GAUTH_SEMANTIC_ANCHOR_ENABLE") == "1" && s.anchorClient != nil && s.semanticHandler != nil {
+	// External anchoring for semantics (optional) AGENTAUTH_SEMANTIC_ANCHOR_ENABLE (Item 8)
+	if os.Getenv("AGENTAUTH_SEMANTIC_ANCHOR_ENABLE") == "1" && s.anchorClient != nil && s.semanticHandler != nil {
 		s.semanticHandler.AnchorProvider = &capAnchorProviderAdapter{client: s.anchorClient}
 		fmt.Fprintf(os.Stderr, "[semantics] external anchoring enabled\n")
 	}
@@ -1796,22 +1796,22 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Resolve External Anchor Provider
 	var extProvider anchorint.Provider
-	extProviderName := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER")
+	extProviderName := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER")
 	if extProviderName == "tsa_stub" || extProviderName == "tsa-stub" {
 		// Use TSA Stub Provider (useful for reliability testing)
 		minMs, maxMs := 10, 50
 		failProb := 0.0
-		if v := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS"); v != "" {
+		if v := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS"); v != "" {
 			if n, err := strconv.Atoi(v); err == nil {
 				minMs = n
 			}
 		}
-		if v := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS"); v != "" {
+		if v := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS"); v != "" {
 			if n, err := strconv.Atoi(v); err == nil {
 				maxMs = n
 			}
 		}
-		if v := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB"); v != "" {
+		if v := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB"); v != "" {
 			if f, err := strconv.ParseFloat(v, 64); err == nil {
 				failProb = f
 			}
@@ -1845,12 +1845,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	retries := 0
 	retryDelay := time.Duration(0)
-	if v := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES"); v != "" {
+	if v := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil && n > 0 {
 			retries = n
 		}
 	}
-	if v := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS"); v != "" {
+	if v := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil && n > 0 {
 			retryDelay = time.Duration(n) * time.Millisecond
 		}
@@ -1861,7 +1861,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.capabilityAnchorAPI.RegisterRoutes(s.router)
 
 	// Persistence for capability anchor (audit hash history)
-	if pp := os.Getenv("GAUTH_CAP_ANCHOR_PERSIST_PATH"); pp != "" {
+	if pp := os.Getenv("AGENTAUTH_CAP_ANCHOR_PERSIST_PATH"); pp != "" {
 		if err := s.capabilityAnchorHandler.Load(pp); err != nil {
 			fmt.Fprintf(os.Stderr, "[cap-anchor] load error: %v\n", err)
 		} else {
@@ -1878,8 +1878,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	// Prototype Notarizer (Memory) - extracted from commented block above
-	// If GAUTH_CAP_ANCHOR_NOTARIZE=1, we enable a prototype notarizer using the anchor client.
-	if os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" {
+	// If AGENTAUTH_CAP_ANCHOR_NOTARIZE=1, we enable a prototype notarizer using the anchor client.
+	if os.Getenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE") == "1" {
 		// The anchor client (memory) acts as the notarizer backend for this prototype.
 		// In a real system, this would be a remote service or smart contract.
 		if s.anchorClient != nil {
@@ -1894,12 +1894,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// We'll skip complex receipt store logic here as it's not fully extracted to a package yet.
 	// Instead, we verify the receipt verification loop logic in server_clean.go and port it if critical.
 	// server_clean.go had a `verifyReceiptChain` loop. Use s.startReceiptVerificationLoop() equivalent.
-	if os.Getenv("GAUTH_RECEIPT_VERIFY_BG_SEC") != "" {
+	if os.Getenv("AGENTAUTH_RECEIPT_VERIFY_BG_SEC") != "" {
 		// ... background loop logic would go here
 	}
 
 	// Initialize Rotation Ledger (Prototype)
-	if rlPath := os.Getenv("GAUTH_ROTATION_LEDGER_PATH"); rlPath != "" {
+	if rlPath := os.Getenv("AGENTAUTH_ROTATION_LEDGER_PATH"); rlPath != "" {
 		s.rotationLedger = notary.NewRotationLedger(rlPath)
 		// Try to load; on failure (new file) just log warning as append will create/overwrite
 		if err := s.rotationLedger.Load(); err != nil {
@@ -1915,7 +1915,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// NOTE: Temporarily disabled - policyHandler.CreatePolicy method doesn't exist.
 	// TODO: Add CreatePolicy method to policy.Handler or remove this seeding code.
 	/*
-		if seedPolicies := os.Getenv("GAUTH_POLICY_DEMO_SEED"); seedPolicies == "1" {
+		if seedPolicies := os.Getenv("AGENTAUTH_POLICY_DEMO_SEED"); seedPolicies == "1" {
 			if s.policyHandler != nil {
 				// Seed some demo policies
 				s.policyHandler.CreatePolicy("demo-policy-1", "allow", "any", "any")
@@ -1946,7 +1946,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	})
 
 	// Initial Load of Capabilities (Delayed to ensure all dependencies are wired)
-	if pp := os.Getenv("GAUTH_CAPABILITIES_PATH"); pp != "" {
+	if pp := os.Getenv("AGENTAUTH_CAPABILITIES_PATH"); pp != "" {
 		if err := s.capabilitiesHandler.LoadFromFile(pp); err != nil {
 			fmt.Fprintf(os.Stderr, "[capabilities] initial load failed path=%s err=%v\n", pp, err)
 		} else {

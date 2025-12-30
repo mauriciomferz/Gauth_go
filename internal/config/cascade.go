@@ -44,13 +44,13 @@ func DefaultCascadeConfig() CascadeConfig {
 func LoadCascadeConfigFromEnv() CascadeConfig {
 	config := DefaultCascadeConfig()
 
-	// GAUTH_CASCADE_PARENT_REVOCATION enables cascade processing
-	if enabled := parseBoolEnv("GAUTH_CASCADE_PARENT_REVOCATION"); enabled {
+	// AGENTAUTH_CASCADE_PARENT_REVOCATION enables cascade processing
+	if enabled := parseBoolEnv("AGENTAUTH_CASCADE_PARENT_REVOCATION"); enabled {
 		config.Enabled = enabled
 	}
 
-	// GAUTH_CASCADE_MODE sets processing mode (revoke|suspend|notify)
-	if mode := strings.ToLower(strings.TrimSpace(os.Getenv("GAUTH_CASCADE_MODE"))); mode != "" {
+	// AGENTAUTH_CASCADE_MODE sets processing mode (revoke|suspend|notify)
+	if mode := strings.ToLower(strings.TrimSpace(os.Getenv("AGENTAUTH_CASCADE_MODE"))); mode != "" {
 		switch mode {
 		case "revoke":
 			config.Mode = CascadeModeRevoke
@@ -61,13 +61,13 @@ func LoadCascadeConfigFromEnv() CascadeConfig {
 		}
 	}
 
-	// GAUTH_CASCADE_MAX_DEPTH limits cascade depth
-	if depth := getIntEnv("GAUTH_CASCADE_MAX_DEPTH", int64(config.MaxDepth)); depth >= 0 {
+	// AGENTAUTH_CASCADE_MAX_DEPTH limits cascade depth
+	if depth := getIntEnv("AGENTAUTH_CASCADE_MAX_DEPTH", int64(config.MaxDepth)); depth >= 0 {
 		config.MaxDepth = int(depth)
 	}
 
-	// GAUTH_CASCADE_BATCH_SIZE controls batch processing size
-	if batchSize := getIntEnv("GAUTH_CASCADE_BATCH_SIZE", int64(config.BatchSize)); batchSize > 0 {
+	// AGENTAUTH_CASCADE_BATCH_SIZE controls batch processing size
+	if batchSize := getIntEnv("AGENTAUTH_CASCADE_BATCH_SIZE", int64(config.BatchSize)); batchSize > 0 {
 		config.BatchSize = int(batchSize)
 	}
 

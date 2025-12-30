@@ -13,7 +13,7 @@
     "tests",
     "vendor",
     "cmd/examples",
-    "Gauth_go/examples"
+    "AgentAuth_go/examples"
   ],
   "exclude": [
     "G104",

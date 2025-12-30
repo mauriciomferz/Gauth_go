@@ -83,7 +83,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "pg_stat_activity_count{datname=\"gauth\"}",
+          "expr": "pg_stat_activity_count{datname=\"agentauth\"}",
           "legendFormat": "Active Connections",
           "range": true,
           "refId": "A"
@@ -173,7 +173,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_xact_commit{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_commit{datname=\"agentauth\"}[5m])",
           "legendFormat": "Commits/sec",
           "range": true,
           "refId": "A"
@@ -184,7 +184,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_xact_rollback{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_rollback{datname=\"agentauth\"}[5m])",
           "legendFormat": "Rollbacks/sec",
           "range": true,
           "refId": "B"
@@ -254,7 +254,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_blks_hit{datname=\"gauth\"}[5m]) / (rate(pg_stat_database_blks_hit{datname=\"gauth\"}[5m]) + rate(pg_stat_database_blks_read{datname=\"gauth\"}[5m])) * 100",
+          "expr": "rate(pg_stat_database_blks_hit{datname=\"agentauth\"}[5m]) / (rate(pg_stat_database_blks_hit{datname=\"agentauth\"}[5m]) + rate(pg_stat_database_blks_read{datname=\"agentauth\"}[5m]) * 100",
           "legendFormat": "Cache Hit Ratio",
           "range": true,
           "refId": "A"
@@ -344,7 +344,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_tup_fetched{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_tup_fetched{datname=\"agentauth\"}[5m])",
           "legendFormat": "Rows Fetched/sec",
           "range": true,
           "refId": "A"
@@ -355,7 +355,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_tup_returned{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_tup_returned{datname=\"agentauth\"}[5m])",
           "legendFormat": "Rows Returned/sec",
           "range": true,
           "refId": "B"
@@ -366,7 +366,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_tup_inserted{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_tup_inserted{datname=\"agentauth\"}[5m])",
           "legendFormat": "Rows Inserted/sec",
           "range": true,
           "refId": "C"
@@ -377,7 +377,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_tup_updated{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_tup_updated{datname=\"agentauth\"}[5m])",
           "legendFormat": "Rows Updated/sec",
           "range": true,
           "refId": "D"
@@ -388,7 +388,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_tup_deleted{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_tup_deleted{datname=\"agentauth\"}[5m])",
           "legendFormat": "Rows Deleted/sec",
           "range": true,
           "refId": "E"
@@ -450,7 +450,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "pg_database_size_bytes{datname=\"gauth\"}",
+          "expr": "pg_database_size_bytes{datname=\"agentauth\"}",
           "legendFormat": "Database Size",
           "range": true,
           "refId": "A"
@@ -540,7 +540,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "pg_stat_activity_count{datname=\"gauth\", state=\"active\"}",
+          "expr": "pg_stat_activity_count{datname=\"agentauth\", state=\"active\"}",
           "legendFormat": "Active",
           "range": true,
           "refId": "A"
@@ -551,7 +551,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "pg_stat_activity_count{datname=\"gauth\", state=\"idle\"}",
+          "expr": "pg_stat_activity_count{datname=\"agentauth\", state=\"idle\"}",
           "legendFormat": "Idle",
           "range": true,
           "refId": "B"
@@ -562,7 +562,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "pg_stat_activity_count{datname=\"gauth\", state=\"idle in transaction\"}",
+          "expr": "pg_stat_activity_count{datname=\"agentauth\", state=\"idle in transaction\"}",
           "legendFormat": "Idle in Transaction",
           "range": true,
           "refId": "C"
@@ -652,7 +652,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_conflicts{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_conflicts{datname=\"agentauth\"}[5m])",
           "legendFormat": "Conflicts/sec",
           "range": true,
           "refId": "A"
@@ -663,7 +663,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(pg_stat_database_deadlocks{datname=\"gauth\"}[5m])",
+          "expr": "rate(pg_stat_database_deadlocks{datname=\"agentauth\"}[5m])",
           "legendFormat": "Deadlocks/sec",
           "range": true,
           "refId": "B"
@@ -749,7 +749,7 @@
   "tags": [
     "postgresql",
     "database",
-    "gauth"
+    "agentauth"
   ],
   "templating": {
     "list": []
@@ -761,7 +761,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "PostgreSQL Database Metrics",
-  "uid": "postgresql-gauth",
+  "uid": "postgresql-agentauth",
   "version": 0,
   "weekStart": ""
 }

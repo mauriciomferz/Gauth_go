@@ -157,7 +157,7 @@ export default function Layout({ children }: LayoutProps) {
                 </li>
                 <li>
                   <a
-                    href="https://github.com/mauriciomferz/Gauth_go"
+                    href="https://github.com/mauriciomferz/AgentAuth"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-primary-500"

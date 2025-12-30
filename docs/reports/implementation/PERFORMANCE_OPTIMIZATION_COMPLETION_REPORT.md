@@ -471,10 +471,10 @@ Improvement: 81% reduction
 
 ```bash
 # 1. Monitor performance metrics
-kubectl logs -n gauth -l app=gauth-api --tail=1000 | grep "slow_query"
+kubectl logs -n agentauth -l app=agentauth-api --tail=1000 | grep "slow_query"
 
 # 2. Check pgBouncer health
-kubectl exec -n gauth pgbouncer-0 -- psql -p 6432 -U pgbouncer_admin pgbouncer -c "SHOW POOLS;"
+kubectl exec -n agentauth pgbouncer-0 -- psql -p 6432 -U pgbouncer_admin pgbouncer -c "SHOW POOLS;"
 
 # 3. Review cache hit rate
 redis-cli INFO stats | grep keyspace_hits
@@ -487,7 +487,7 @@ aws cloudfront get-distribution-config --id DISTRIBUTION_ID
 
 ```bash
 # 1. Analyze slow queries
-psql -h pgbouncer.gauth.svc.cluster.local -p 6432 -U gauth -d gauth \
+psql -h pgbouncer.agentauth.svc.cluster.local -p 6432 -U agentauth -d agentauth \
     -c "SELECT query, mean_exec_time FROM pg_stat_statements WHERE mean_exec_time > 100 ORDER BY mean_exec_time DESC LIMIT 20;"
 
 # 2. Review index usage

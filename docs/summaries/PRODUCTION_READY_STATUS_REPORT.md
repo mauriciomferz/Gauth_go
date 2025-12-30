@@ -39,7 +39,7 @@ The AgentAuth 1.0 authorization framework has completed **all production-critica
 **HIGH Severity Resolution**:
 1. **Integer Overflow** (46 findings):
    - web/server_clean.go: Fixed with MaxInt64 boundary validation
-   - pkg/gauth/replay_store_bolt.go: Fixed with timestamp validation
+   - pkg/agentauth/replay_store_bolt.go: Fixed with timestamp validation
    - Remaining: Marked safe with nolint (metrics, durations, enums)
 
 2. **Weak RNG** (15 findings):
@@ -170,7 +170,7 @@ The AgentAuth 1.0 authorization framework has completed **all production-critica
 
 #### Phase 5A: Core Package Documentation (806 lines)
 
-1. **pkg/gauth/doc.go** (124 lines)
+1. **pkg/agentauth/doc.go** (124 lines)
    - Core authorization framework
    - Delegation chain patterns
    - Multi-signature validation
@@ -494,6 +494,6 @@ The system demonstrates:
 
 **Report Generated**: November 9, 2025  
 **Project**: AgentAuth 1.0 (AAP-001/0115)  
-**Repository**: github.com/mauriciomferz/Gauth_go  
+**Repository**: github.com/mauriciomferz/AgentAuth  
 **Branch**: main  
 **Status**: ✅ **PRODUCTION READY**

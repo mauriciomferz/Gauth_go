@@ -454,8 +454,8 @@ web/
 ### Server Commands
 ```bash
 # Start server
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
-GAUTH_DEV_INDEX=1 ./bin/web-server &
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+AGENTAUTH_DEV_INDEX=1 ./bin/web-server &
 
 # Check server status
 ps aux | grep "[w]eb-server"

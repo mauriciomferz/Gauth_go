@@ -26,7 +26,7 @@ AgentAuth has successfully implemented comprehensive advanced monitoring capabil
 
 ### Files Created (7 files, ~1,100 lines)
 
-#### 1. **monitoring/grafana/dashboards/gauth-overview.json** (577 lines)
+#### 1. **monitoring/grafana/dashboards/agentauth-overview.json** (577 lines)
 - **Purpose**: Comprehensive Grafana dashboard for system monitoring
 - **Panels**: 10 visualization panels covering all key metrics
 - **Features**:
@@ -41,7 +41,7 @@ AgentAuth has successfully implemented comprehensive advanced monitoring capabil
   - Application-specific metrics
   - Component health checks table
 
-#### 2. **monitoring/prometheus/alerts/gauth-alerts.yml** (175 lines)
+#### 2. **monitoring/prometheus/alerts/agentauth-alerts.yml** (175 lines)
 - **Purpose**: Prometheus alert rule definitions
 - **Alert Count**: 15 comprehensive rules
 - **Categories**:
@@ -58,18 +58,18 @@ AgentAuth has successfully implemented comprehensive advanced monitoring capabil
   - Node Exporter (port 9100) - Host/system metrics
   - Postgres Exporter (port 9187) - Database metrics
   - Redis Exporter (port 9121) - Cache metrics
-- **Networking**: Dedicated bridge network (`gauth-monitoring`)
+- **Networking**: Dedicated bridge network (`agentauth-monitoring`)
 - **Volumes**: 3 persistent volumes for data retention
 
 #### 4. **monitoring/prometheus/prometheus.yml** (75 lines)
 - **Purpose**: Prometheus scrape configuration
 - **Scrape Jobs**: 11 configured endpoints
-  - `gauth` - Main application metrics
-  - `gauth-authz` - Authorization metrics
-  - `gauth-policy` - Policy evaluation metrics
-  - `gauth-violations` - Security violation metrics
-  - `gauth-capabilities` - Capability anchor metrics
-  - `gauth-revocation` - Revocation metrics
+  - `agentauth` - Main application metrics
+  - `agentauth-authz` - Authorization metrics
+  - `agentauth-policy` - Policy evaluation metrics
+  - `agentauth-violations` - Security violation metrics
+  - `agentauth-capabilities` - Capability anchor metrics
+  - `agentauth-revocation` - Revocation metrics
   - `prometheus` - Self-monitoring
   - `node` - Host metrics
   - `postgres` - Database metrics
@@ -80,10 +80,10 @@ AgentAuth has successfully implemented comprehensive advanced monitoring capabil
 #### 5. **monitoring/alertmanager/config.yml** (88 lines)
 - **Purpose**: Alert routing and notification configuration
 - **Receivers**: 4 notification channels
-  - `critical` - PagerDuty + Slack (#gauth-critical)
-  - `warning` - Slack (#gauth-warnings)
+  - `critical` - PagerDuty + Slack (#agentauth-critical)
+  - `warning` - Slack (#agentauth-warnings)
   - `info` - Email (ops-team@example.com)
-  - `default` - Slack (#gauth-alerts)
+  - `default` - Slack (#agentauth-alerts)
 - **Routing**: Severity-based routing tree
 - **Inhibition Rules**: 3 rules to prevent alert storms
   - Suppress non-critical when service is down
@@ -163,8 +163,8 @@ Alert Triggered
     ▼
 AlertManager Routing Tree
     │
-    ├─ severity=critical → PagerDuty + Slack (#gauth-critical)
-    ├─ severity=warning  → Slack (#gauth-warnings)
+    ├─ severity=critical → PagerDuty + Slack (#agentauth-critical)
+    ├─ severity=warning  → Slack (#agentauth-warnings)
     └─ severity=info     → Email (ops-team@example.com)
     │
     ▼
@@ -219,7 +219,7 @@ Inhibition Rules Applied
 | **P95 Latency** | Gauge | `histogram_quantile(0.95, ...)` | Track response time performance |
 | **Error Rate** | Stat | `rate(http_requests_total{status=~"5.."}[5m])` | Monitor system errors |
 | **Cache Hit Rate** | Gauge | `cache_hits / (cache_hits + cache_misses)` | Track cache efficiency |
-| **Service Health** | Stat | `up{job="gauth"}` | Monitor service availability |
+| **Service Health** | Stat | `up{job="agentauth"}` | Monitor service availability |
 | **Memory Usage** | Stat | `process_resident_memory_bytes` | Track memory consumption |
 | **HTTP Status Codes** | Time Series | `rate(http_requests_total[5m])` by status | Visualize response distribution |
 | **Go Runtime** | Time Series | `go_goroutines`, `go_gc_duration_seconds` | Monitor Go runtime health |
@@ -317,15 +317,15 @@ open http://localhost:9090/alerts
 
 ```bash
 # Prometheus configuration check
-$ docker exec gauth-prometheus promtool check config /etc/prometheus/prometheus.yml
+$ docker exec agentauth-prometheus promtool check config /etc/prometheus/prometheus.yml
 ✅ SUCCESS
 
 # Alert rules check
-$ docker exec gauth-prometheus promtool check rules /etc/prometheus/alerts/*.yml
+$ docker exec agentauth-prometheus promtool check rules /etc/prometheus/alerts/*.yml
 ✅ 15 rules validated
 
 # AlertManager configuration check
-$ docker exec gauth-alertmanager amtool check-config /etc/alertmanager/config.yml
+$ docker exec agentauth-alertmanager amtool check-config /etc/alertmanager/config.yml
 ✅ SUCCESS
 ```
 
@@ -334,7 +334,7 @@ $ docker exec gauth-alertmanager amtool check-config /etc/alertmanager/config.ym
 ## Known Issues and Resolutions
 
 ### Issue 1: JSON Syntax Warning in Dashboard
-- **File**: `monitoring/grafana/dashboards/gauth-overview.json`
+- **File**: `monitoring/grafana/dashboards/agentauth-overview.json`
 - **Line**: 551
 - **Error**: "Expected comma or closing brace"
 - **Impact**: Minor - Dashboard may still load correctly

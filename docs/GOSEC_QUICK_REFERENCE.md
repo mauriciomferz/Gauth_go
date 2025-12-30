@@ -290,7 +290,7 @@ gosec -quiet ./...
 
 - **Full Documentation:** `docs/CI_GOSEC_COMPREHENSIVE_FIX.md`
 - **Gosec Rules:** https://github.com/securego/gosec#rules
-- **GitHub Security:** https://github.com/{org}/gauth/security/code-scanning
+- **GitHub Security:** https://github.com/{org}/agentauth/security/code-scanning
 
 ---
 

@@ -14,10 +14,10 @@ import (
 // rotate-key is a minimal utility to rotate the Ed25519 signing key when running in eddsa mode.
 // Usage:
 //
-//	GAUTH_TOKEN_SIG_MODE=eddsa go run ./cmd/rotate-key
+//	AGENTAUTH_TOKEN_SIG_MODE=eddsa go run ./cmd/rotate-key
 func main() {
-	if os.Getenv("GAUTH_TOKEN_SIG_MODE") != "eddsa" {
-		fmt.Println("GAUTH_TOKEN_SIG_MODE != eddsa (no rotation performed)")
+	if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") != "eddsa" {
+		fmt.Println("AGENTAUTH_TOKEN_SIG_MODE != eddsa (no rotation performed)")
 		return
 	}
 	// In a standalone tool, the global registry is always nil initially.

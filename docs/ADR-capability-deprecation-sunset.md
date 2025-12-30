@@ -28,8 +28,8 @@ Define a two-phase lifecycle for each capability version:
 2. Sunset Phase (`sunset_after`): Capability is scheduled for removal. After this timestamp passes, enforcement treats the capability as invalid unless an override flag is set for emergency extension.
 
 ### Enforcement Modes
-- `GAUTH_CAP_LIFECYCLE_STRICT=1`: API negotiation omits versions past `deprecated_after` (proactive migration) and rejects requests listing only deprecated versions.
-- `GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE=1`: Capability usage past `sunset_after` yields `capability_enforce` denial with outcome `sunset`.
+- `AGENTAUTH_CAP_LIFECYCLE_STRICT=1`: API negotiation omits versions past `deprecated_after` (proactive migration) and rejects requests listing only deprecated versions.
+- `AGENTAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE=1`: Capability usage past `sunset_after` yields `capability_enforce` denial with outcome `sunset`.
 
 ### Discovery & Info Exposure
 `/api/v1/beta/info` and the well-known configuration will expose:

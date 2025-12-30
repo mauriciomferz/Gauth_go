@@ -103,7 +103,7 @@ for i, char := range number {
     }
     sum += digit
 }
-checkDigit := (10 - (sum % 10)) % 10
+checkDigit := (10 - (sum % 10) % 10
 ```
 
 **Special Features:**
@@ -478,7 +478,7 @@ controlChar := controlChars[sum % 26]
 ## 📚 Related Documents
 - `SESSION_COMPLETION_REPORT_NOV_16_2025.md` - Previous session summary (US, DE, UK, NL connectors)
 - `EXTERNAL_CONNECTORS_AUDIT_REPORT.md` - External connectors audit
-- `pkg/gauth/external/` - All connector implementations
+- `pkg/agentauth/external/` - All connector implementations
 
 ---
 

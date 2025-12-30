@@ -79,7 +79,7 @@ func NewDB(cfg *Config) (*DB, error) {
 	// Configure connection behavior
 	poolConfig.ConnConfig.ConnectTimeout = 10 * time.Second
 	poolConfig.ConnConfig.RuntimeParams = map[string]string{
-		"application_name": "gauth_admin_portal",
+		"application_name": "agentauth_admin_portal",
 	}
 
 	// Create connection pool

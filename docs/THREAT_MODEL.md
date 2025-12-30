@@ -90,7 +90,7 @@ The AgentAuth prototype implements AAP-001 delegation (PowerOfAttorney) with opt
 
 ## 7. Gaps & Weaknesses
 - (Completed) Token replay protection: JTI issuance & distributed (Redis) replay store with fail-closed mode.
-- (Completed) Discovery hardening: JWKS signatures and deprecation schedules now exposed via `/.well-known/gauth-configuration`.
+- (Completed) Discovery hardening: JWKS signatures and deprecation schedules now exposed via `/.well-known/agentauth-configuration`.
 - (Completed) RFC-3161 verification: Cryptographic verification of TimeStampToken CMS structures implemented.
 - (Completed) Capability registry anchoring: External TSA anchoring integrated for capability governance audit trail.
 - (Completed) MCP Security: AgentAuth-secured MCP REST integration with mandatory authorization and auditing.
@@ -150,7 +150,7 @@ Even after recommended actions, residual risks include key compromise via host i
 |-------|-------------|---------------------|
 | Capability Anchor Artifact | Periodic hash of registry state (sha256 + optional signature) | Integrity, Freshness |
 | Notarization Receipts | Append-only chain of receipt objects (hash, timestamp, provider) | Integrity, Ordering |
-| Receipt Chain Hash | Head chain hash (sha256(prev_hash || entry_bytes)) | Tamper-evidence |
+| Receipt Chain Hash | Head chain hash (sha256(prev_hash || entry_bytes) | Tamper-evidence |
 | Merkle Root (optional) | Tree root summarizing all entries up to point | Efficient verification |
 | Rotation Descriptor | Metadata linking old/new signing keys | Continuity, Non-repudiation |
 | Snapshot Object (planned) | Authenticated summary enabling pruning | Integrity, Scalability |

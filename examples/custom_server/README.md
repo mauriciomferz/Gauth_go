@@ -31,4 +31,4 @@ go run main.go
 
 ---
 
-For more, see the [AgentAuth Package Documentation](../../pkg/gauth/doc.go).
+For more, see the [AgentAuth Package Documentation](../../pkg/agentauth/doc.go).

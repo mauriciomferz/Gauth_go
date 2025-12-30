@@ -1,18 +1,18 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gauth-staging
+  name: agentauth-staging
   labels:
-    name: gauth-staging
+    name: agentauth-staging
     environment: staging
-    app: gauth
+    app: agentauth
     managed-by: kubectl
 ---
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: gauth-staging-quota
-  namespace: gauth-staging
+  name: agentauth-staging-quota
+  namespace: agentauth-staging
 spec:
   hard:
     requests.cpu: "4"
@@ -25,8 +25,8 @@ spec:
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: gauth-staging-limits
-  namespace: gauth-staging
+  name: agentauth-staging-limits
+  namespace: agentauth-staging
 spec:
   limits:
   - max:

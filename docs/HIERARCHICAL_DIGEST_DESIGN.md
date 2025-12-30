@@ -16,7 +16,7 @@ Introduce a structured digest domain version that safely incorporates hierarchic
 ## Current State
 - Digest versions: V1 (single-sig base), V2 (multi-sig domain separation), V3 (taxonomy enrichment).
 - Hierarchical fields (`parent_poa_id`, `depth`) are excluded from canonical digest to avoid retroactive invalidation of existing signatures.
-- Advanced scope inheritance (regex/prefix) now supported behind `GAUTH_ENABLE_ADVANCED_SCOPE`.
+- Advanced scope inheritance (regex/prefix) now supported behind `AGENTAUTH_ENABLE_ADVANCED_SCOPE`.
 
 ## Goals
 1. Preserve existing signatures for legacy PoAs (V1–V3 remain valid).
@@ -32,7 +32,7 @@ Introduce a structured digest domain version that safely incorporates hierarchic
 New domain format activates when either:
 - `parent_poa_id` is non-empty, OR
 - Advanced inheritance patterns (regex) are present in `scope` entries, OR
-- Explicit environment `GAUTH_FORCE_HIER_DIGEST=1` set.
+- Explicit environment `AGENTAUTH_FORCE_HIER_DIGEST=1` set.
 
 ### Canonical Fields for V4
 Included (ordered JSON keys to maintain stable hashing):
@@ -67,7 +67,7 @@ Decision: INCLUDE `parent_digest` for V4 to bind subtree integrity.
 
 ### Upgrade Path
 1. Add conditional digest constructor path for hierarchical activation.
-2. Gate activation behind environment until sufficient test coverage (`GAUTH_ENABLE_HIER_DIGEST=1`).
+2. Gate activation behind environment until sufficient test coverage (`AGENTAUTH_ENABLE_HIER_DIGEST=1`).
 3. Introduce metrics: ✅ **COMPLETED**
    - `hier_digest_issued_total` (dedicated Prometheus counter with fqName registration)
    - `hier_digest_parent_digest_missing_total` (dedicated counter for parent retrieval failures)
@@ -80,7 +80,7 @@ Decision: INCLUDE `parent_digest` for V4 to bind subtree integrity.
 
 ### Verification Impacts
 - Validation must check if parent digest referenced matches stored parent canonical digest when verifying child.
-- Revocation cascade optional: If parent revoked, child may either remain valid or be auto-marked `suspended`; configurable via `GAUTH_CASCADE_PARENT_REVOCATION=1`.
+- Revocation cascade optional: If parent revoked, child may either remain valid or be auto-marked `suspended`; configurable via `AGENTAUTH_CASCADE_PARENT_REVOCATION=1`.
 
 ### Security Considerations
 - Binding parent digest prevents stealth widening by swapping parent object.
@@ -89,7 +89,7 @@ Decision: INCLUDE `parent_digest` for V4 to bind subtree integrity.
 
 ### Cascade Revocation Semantics
 
-When `GAUTH_CASCADE_PARENT_REVOCATION=1` is enabled, parent PoA revocation triggers automatic status changes for descendant PoAs to prevent unauthorized privilege retention.
+When `AGENTAUTH_CASCADE_PARENT_REVOCATION=1` is enabled, parent PoA revocation triggers automatic status changes for descendant PoAs to prevent unauthorized privilege retention.
 
 #### Implementation Options
 
@@ -107,7 +107,7 @@ When `GAUTH_CASCADE_PARENT_REVOCATION=1` is enabled, parent PoA revocation trigg
 - Cons: Suspended state requires careful handling in authorization logic
 
 **Option 3: Configurable Cascade Depth**
-- Environment variable `GAUTH_CASCADE_MAX_DEPTH=N` limits cascade scope
+- Environment variable `AGENTAUTH_CASCADE_MAX_DEPTH=N` limits cascade scope
 - Prevents runaway cascades in very deep hierarchies
 - Combined with either immediate or suspension semantics
 - Pros: Performance protection, operational control
@@ -116,10 +116,10 @@ When `GAUTH_CASCADE_PARENT_REVOCATION=1` is enabled, parent PoA revocation trigg
 #### Recommended Implementation (Phase 2)
 
 ```bash
-GAUTH_CASCADE_PARENT_REVOCATION=1          # Enable cascade processing
-GAUTH_CASCADE_MODE=suspend                 # suspend|revoke|notify
-GAUTH_CASCADE_MAX_DEPTH=10                # Max cascade depth (0=unlimited)
-GAUTH_CASCADE_BATCH_SIZE=100              # Process descendants in batches
+AGENTAUTH_CASCADE_PARENT_REVOCATION=1          # Enable cascade processing
+AGENTAUTH_CASCADE_MODE=suspend                 # suspend|revoke|notify
+AGENTAUTH_CASCADE_MAX_DEPTH=10                # Max cascade depth (0=unlimited)
+AGENTAUTH_CASCADE_BATCH_SIZE=100              # Process descendants in batches
 ```
 
 #### Cascade Processing Algorithm
@@ -166,7 +166,7 @@ IncCascadeBatchProcessed(count int)         // Batch processing progress
   - Integration with dual-control revocation workflow (cascade during suspension vs after approval)?
 
 ## Implementation Checklist
-- [x] Add env gate `GAUTH_ENABLE_HIER_DIGEST`.
+- [x] Add env gate `AGENTAUTH_ENABLE_HIER_DIGEST`.
 - [x] Extend canonical digest builder with V4 branch.
 - [x] Include parent digest fetch + error handling metric (missing parent counter wired).
 - [x] Emit hierarchical digest counters (issued, parent_digest_missing, version_mismatch) - **FULLY IMPLEMENTED** with dedicated Prometheus counters.
@@ -174,7 +174,7 @@ IncCascadeBatchProcessed(count int)         // Batch processing progress
 - [x] Tests covering activation, tamper, disabled path, validation mismatch.
 - [ ] Documentation updates (README + OpenAPI + assessment cross-reference cascade semantics).
 - [ ] **Cascade revocation implementation** (Phase 2):
-  - [ ] Environment flags: `GAUTH_CASCADE_PARENT_REVOCATION`, `GAUTH_CASCADE_MODE`, `GAUTH_CASCADE_MAX_DEPTH`
+  - [ ] Environment flags: `AGENTAUTH_CASCADE_PARENT_REVOCATION`, `AGENTAUTH_CASCADE_MODE`, `AGENTAUTH_CASCADE_MAX_DEPTH`
   - [ ] Descendant discovery via `parent_poa_id` repository queries
   - [ ] Batch processing with configurable size limits
   - [ ] Cascade-specific metrics (triggered, processed, latency, depth limits)
@@ -190,9 +190,9 @@ Generated: 2025-10-30
 ## Activation & Rollout Status (Post Partial Implementation)
 
 Implemented (Phase 1):
-* Env flags wired: `GAUTH_ENABLE_HIER_DIGEST`, `GAUTH_FORCE_HIER_DIGEST`.
+* Env flags wired: `AGENTAUTH_ENABLE_HIER_DIGEST`, `AGENTAUTH_FORCE_HIER_DIGEST`.
 * Structural field `parent_digest` added to PoA; canonical JSON emits hierarchy object for Version>=4.
-* V4 domain sentinel: `GAUTH_AAP-001_POA_V4|hier=1`.
+* V4 domain sentinel: `AGENTAUTH_AAP-001_POA_V4|hier=1`.
 * **Metrics fully implemented**: Dedicated Prometheus counters with proper registration (`hierDigestIssued`, `hierDigestParentDigestMissing`, `hierDigestVersionMismatch`) in both in-memory and Prometheus adapter implementations.
 * Unit tests: root & child issuance (Version=4), disabled flag path retains Version<4, parent digest tamper changes canonical digest.
 
@@ -200,11 +200,11 @@ Pending (Phase 2):
 * Validation-time parent digest verification for V4 PoAs.
 * Version mismatch counter surfacing when expectations diverge.
 * README / API reference updates & OpenAPI schema augmentation for hierarchy object.
-* Optional cascade semantics via `GAUTH_CASCADE_PARENT_REVOCATION`.
+* Optional cascade semantics via `AGENTAUTH_CASCADE_PARENT_REVOCATION`.
 
 Operational Guidance:
-* Enable gradually with `GAUTH_ENABLE_HIER_DIGEST=1`; monitor hierarchical issuance vs total.
-* Use `GAUTH_FORCE_HIER_DIGEST=1` after confirming parent retrieval reliability.
+* Enable gradually with `AGENTAUTH_ENABLE_HIER_DIGEST=1`; monitor hierarchical issuance vs total.
+* Use `AGENTAUTH_FORCE_HIER_DIGEST=1` after confirming parent retrieval reliability.
 * Rollback by unsetting flags; existing Version=4 PoAs remain until revoked.
 
 Monitoring & Alerting:
@@ -221,7 +221,7 @@ Security Gains:
 
 ### Phase 2a: Core Infrastructure (Week 4)
 1. **Environment Configuration**
-   - Add flags: `GAUTH_CASCADE_PARENT_REVOCATION`, `GAUTH_CASCADE_MODE`, `GAUTH_CASCADE_MAX_DEPTH`, `GAUTH_CASCADE_BATCH_SIZE`
+   - Add flags: `AGENTAUTH_CASCADE_PARENT_REVOCATION`, `AGENTAUTH_CASCADE_MODE`, `AGENTAUTH_CASCADE_MAX_DEPTH`, `AGENTAUTH_CASCADE_BATCH_SIZE`
    - Configuration validation and defaults
    - Documentation in environment variables reference
 

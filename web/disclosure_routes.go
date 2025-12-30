@@ -2,12 +2,12 @@
 package web
 
 import (
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/disclosure"
 )
 
 // RegisterDisclosureRoutes registers RFC-0111 disclosure/transparency endpoints
-func (s *BetaServer) RegisterDisclosureRoutes(disclosureService *gauth.DisclosureService) {
+func (s *BetaServer) RegisterDisclosureRoutes(disclosureService *agentauth.DisclosureService) {
 	handler := disclosure.NewHandler(disclosureService)
 
 	// Public disclosure endpoints for transparency

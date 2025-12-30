@@ -70,7 +70,7 @@ This document outlines the comprehensive overhaul of the AgentAuth Learning Lab 
 
 #### Sandbox Playground (15 pattern buttons)
 - `[data-action="test-pattern"]` - Basic patterns
-- `[data-example-id="gauth_protocol_basics:delegation"]`
+- `[data-example-id="agentauth_protocol_basics:delegation"]`
 - `[data-action="test-revocation"]`
 - `[data-action="test-multisig"]`
 - `[data-action="test-hierarchy"]`

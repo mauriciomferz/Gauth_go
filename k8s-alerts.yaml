@@ -6,7 +6,7 @@ metadata:
 data:
   alerts.yml: |
     groups:
-      - name: gauth_alerts
+      - name: agentauth_alerts
         rules:
           - alert: InstanceDown
             expr: up == 0

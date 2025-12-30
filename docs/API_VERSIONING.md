@@ -41,12 +41,12 @@ AgentAuth follows a clear and predictable versioning strategy to ensure stabilit
 AgentAuth uses **URL-based versioning** as the primary versioning mechanism:
 
 ```
-https://api.gauth.example.com/api/{version}/{endpoint}
+https://api.agentauth.example.com/api/{version}/{endpoint}
 ```
 
 **Examples:**
 - `/api/v1/beta/health` - Version 1 (beta)
-- `/api/v1/rfc0111/subscriptions` - Version 1 (stable)
+- `/api/v1/aap001/subscriptions` - Version 1 (stable)
 - `/api/v2/subscriptions` - Version 2 (future)
 
 ### Version Header Support
@@ -81,7 +81,7 @@ Client SDKs follow [Semantic Versioning 2.0.0](https://semver.org/):
 
 **Endpoints:**
 - System: `/api/v1/beta/health`, `/api/v1/beta/info`, `/api/v1/beta/ping`
-- RFC-0111: `/api/v1/rfc0111/subscriptions/*`
+- AAP-001: `/api/v1/aap001/subscriptions/*`
 - PoA: `/api/v1/beta/poa/*`
 - Authorization: `/api/v1/beta/authz/*`
 - PVP: `/api/v1/beta/pvp/*`
@@ -134,8 +134,8 @@ HTTP/1.1 200 OK
 X-API-Deprecated: true
 X-API-Deprecated-Date: 2025-11-15T00:00:00Z
 X-API-Sunset-Date: 2026-11-15T00:00:00Z
-X-API-Migration-Guide: https://docs.gauth.example.com/migration/v1-to-v2
-Link: <https://api.gauth.example.com/api/v2/subscriptions>; rel="successor-version"
+X-API-Migration-Guide: https://docs.agentauth.example.com/migration/v1-to-v2
+Link: <https://api.agentauth.example.com/api/v2/subscriptions>; rel="successor-version"
 ```
 
 ### Deprecation Response Body
@@ -149,7 +149,7 @@ Deprecated endpoints include a warning in the response:
     "deprecated_at": "2025-11-15T00:00:00Z",
     "sunset_at": "2026-11-15T00:00:00Z",
     "message": "This endpoint is deprecated and will be removed on 2026-11-15",
-    "migration_guide": "https://docs.gauth.example.com/migration/v1-to-v2",
+    "migration_guide": "https://docs.agentauth.example.com/migration/v1-to-v2",
     "successor": "/api/v2/subscriptions"
   }
 }
@@ -204,14 +204,14 @@ When migrating from one version to another:
 
 ```bash
 # Check the API changelog
-curl https://api.gauth.example.com/api/changelog
+curl https://api.agentauth.example.com/api/changelog
 ```
 
 #### Step 2: Test Against New Version
 
 ```bash
 # Use the new version in a test environment
-curl https://api-staging.gauth.example.com/api/v2/subscriptions
+curl https://api-staging.agentauth.example.com/api/v2/subscriptions
 ```
 
 #### Step 3: Update Your Code
@@ -242,10 +242,10 @@ const response = await fetch('/api/v2/authorizations', {
 
 ```bash
 # JavaScript/TypeScript
-npm install @gauth/client@2.0.0
+npm install @agentauth/client@2.0.0
 
 # Python
-pip install gauth-client==2.0.0
+pip install agentauth-client==2.0.0
 ```
 
 #### Step 5: Deploy and Monitor
@@ -430,23 +430,23 @@ v2 Retired:                                                 Nov 2028  ✗ EOL
 
 ```bash
 # Get changelog for current version
-curl https://api.gauth.example.com/api/changelog
+curl https://api.agentauth.example.com/api/changelog
 
 # Get changelog for specific version
-curl https://api.gauth.example.com/api/changelog?version=v1
+curl https://api.agentauth.example.com/api/changelog?version=v1
 ```
 
 ### GitHub Releases
 
 All versions are tagged and released on GitHub:
 
-https://github.com/mauriciomferz/Gauth_go/releases
+https://github.com/mauriciomferz/AgentAuth/releases
 
 ### RSS Feed
 
 Subscribe to changelog updates:
 
-https://api.gauth.example.com/api/changelog.rss
+https://api.agentauth.example.com/api/changelog.rss
 
 ---
 
@@ -454,14 +454,14 @@ https://api.gauth.example.com/api/changelog.rss
 
 ### Questions About Versioning?
 
-- **Email**: api-support@gauth.example.com
-- **GitHub Discussions**: https://github.com/mauriciomferz/Gauth_go/discussions
-- **Slack**: #gauth-api-versioning
+- **Email**: api-support@agentauth.example.com
+- **GitHub Discussions**: https://github.com/mauriciomferz/AgentAuth/discussions
+- **Slack**: #agentauth-api-versioning
 
 ### Report Issues
 
-- **GitHub Issues**: https://github.com/mauriciomferz/Gauth_go/issues
-- **Security Issues**: security@gauth.example.com
+- **GitHub Issues**: https://github.com/mauriciomferz/AgentAuth/issues
+- **Security Issues**: security@agentauth.example.com
 
 ---
 

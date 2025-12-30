@@ -51,10 +51,10 @@ type Revocation struct {
 // Chain maintains ordered delegations.
 type Chain struct{ items []Delegation }
 
-// currentMaxDelegationDepth parses GAUTH_MAX_DELEGATION_DEPTH each call to allow dynamic test changes.
+// currentMaxDelegationDepth parses AGENTAUTH_MAX_DELEGATION_DEPTH each call to allow dynamic test changes.
 // Invalid or empty values disable enforcement (return 0).
 func currentMaxDelegationDepth() int64 {
-	raw := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH")
+	raw := os.Getenv("AGENTAUTH_MAX_DELEGATION_DEPTH")
 	if raw == "" {
 		return 0
 	}

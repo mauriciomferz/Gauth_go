@@ -141,7 +141,7 @@ type SubscriberFilters struct {
      ```sql
      SELECT 
          COUNT(*) AS total_tokens,
-         COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW()) AS active_tokens,
+         COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW() AS active_tokens,
          COUNT(*) FILTER (WHERE revoked_at IS NOT NULL) AS revoked_tokens,
          MAX(last_used_at) AS last_activity
      FROM tokens
@@ -454,7 +454,7 @@ curl -X POST http://localhost:8080/api/admin/subscribers \
   }'
 
 # Verify in database
-psql -h localhost -U gauth -d gauth_db -c "
+psql -h localhost -U agentauth -d agentauth_db -c "
     SELECT tenant_id, tenant_name, status, tier, 
            oidc_provider, contact_email, created_at 
     FROM subscribers 
@@ -516,7 +516,7 @@ curl http://localhost:8080/api/admin/subscribers/test-corp/metrics
 Subscribers table already exists from Task 1 schema:
 ```bash
 # Verify table exists
-psql -h localhost -U gauth -d gauth_db -c "\d subscribers"
+psql -h localhost -U agentauth -d agentauth_db -c "\d subscribers"
 ```
 
 ### Handler Registration

@@ -2,11 +2,11 @@ services:
   # PostgreSQL database for RFC-0111 implementation
   postgres:
     image: postgres:16-alpine
-    container_name: gauth-postgres
+    container_name: agentauth-postgres
     environment:
-      POSTGRES_DB: gauth
-      POSTGRES_USER: gauth
-      POSTGRES_PASSWORD: gauth_dev_password
+      POSTGRES_DB: agentauth
+      POSTGRES_USER: agentauth
+      POSTGRES_PASSWORD: agentauth_dev_password
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
@@ -14,17 +14,17 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./schema/migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U gauth" ]
+      test: [ "CMD-SHELL", "pg_isready -U agentauth" ]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
-      - gauth-network
+      - agentauth-network
 
   # Redis for caching (optional)
   redis:
     image: redis:7-alpine
-    container_name: gauth-redis
+    container_name: agentauth-redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -33,25 +33,25 @@ services:
       timeout: 3s
       retries: 5
     networks:
-      - gauth-network
+      - agentauth-network
 
   # AgentAuth backend API server
   backend:
     build:
       context: .
       dockerfile: Dockerfile.production
-    container_name: gauth-backend
+    container_name: agentauth-backend
     environment:
       # RFC-0111 Configuration
-      GAUTH_AAP-001_ENABLED: "1"
-      GAUTH_AAP-001_USE_MOCKS: "1"
+      AGENTAUTH_AAP-001_ENABLED: "1"
+      AGENTAUTH_AAP-001_USE_MOCKS: "1"
 
       # Database Configuration
       DB_HOST: postgres
       DB_PORT: "5432"
-      DB_NAME: gauth
-      DB_USER: gauth
-      DB_PASSWORD: gauth_dev_password
+      DB_NAME: agentauth
+      DB_USER: agentauth
+      DB_PASSWORD: agentauth_dev_password
       DB_SSLMODE: disable
 
       # Redis Configuration (optional)
@@ -59,15 +59,15 @@ services:
       REDIS_PORT: "6379"
 
       # Authentication
-      GAUTH_JWT_SIGNING_KEY: ${GAUTH_JWT_SIGNING_KEY}
+      AGENTAUTH_JWT_SIGNING_KEY: ${AGENTAUTH_JWT_SIGNING_KEY}
 
       # Database Connection (Environment overrides)
-      GAUTH_DB_HOST: postgres
-      GAUTH_DB_USER: ${GAUTH_DB_USER}
-      GAUTH_DB_PASSWORD: ${GAUTH_DB_PASSWORD}
-      GAUTH_DB_NAME: ${GAUTH_DB_NAME}
-      GAUTH_DB_PORT: "5432"
-      GAUTH_DB_SSL_MODE: disable
+      AGENTAUTH_DB_HOST: postgres
+      AGENTAUTH_DB_USER: ${AGENTAUTH_DB_USER}
+      AGENTAUTH_DB_PASSWORD: ${AGENTAUTH_DB_PASSWORD}
+      AGENTAUTH_DB_NAME: ${AGENTAUTH_DB_NAME}
+      AGENTAUTH_DB_PORT: "5432"
+      AGENTAUTH_DB_SSL_MODE: disable
 
       # Server Configuration
       PORT: "8080"
@@ -80,7 +80,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - gauth-network
+      - agentauth-network
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/v1/beta/health" ]
       interval: 30s
@@ -93,13 +93,13 @@ services:
     build:
       context: .
       dockerfile: docker/legacy/Dockerfile.ui
-    container_name: gauth-frontend
+    container_name: agentauth-frontend
     ports:
       - "80:80"
     depends_on:
       - backend
     networks:
-      - gauth-network
+      - agentauth-network
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health" ]
       interval: 30s
@@ -110,7 +110,7 @@ services:
   # Prometheus Monitoring
   prometheus:
     image: prom/prometheus:v2.45.0
-    container_name: gauth-prometheus
+    container_name: agentauth-prometheus
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml
@@ -123,12 +123,12 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     networks:
-      - gauth-network
+      - agentauth-network
 
   # Grafana Dashboard
   grafana:
     image: grafana/grafana:10.0.0
-    container_name: gauth-grafana
+    container_name: agentauth-grafana
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
@@ -139,7 +139,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - gauth-network
+      - agentauth-network
     depends_on:
       - prometheus
 volumes:
@@ -151,5 +151,5 @@ volumes:
     driver: local
 
 networks:
-  gauth-network:
+  agentauth-network:
     driver: bridge

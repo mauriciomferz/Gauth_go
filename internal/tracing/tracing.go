@@ -106,7 +106,7 @@ func SpanFromContext(ctx context.Context) *Span {
 
 func Demo() error {
 	fmt.Println("=== Tracing Demo ===")
-	tracer := NewTracer("gauth-service")
+	tracer := NewTracer("agentauth-service")
 	ctx := context.Background()
 
 	root, ctx := tracer.StartSpan(ctx, "root-operation")

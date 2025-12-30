@@ -417,7 +417,7 @@ package main
 import (
     "log"
     "github.com/gin-gonic/gin"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gagent"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gagent"
 )
 
 func main() {
@@ -472,8 +472,8 @@ agent.SetRiskScorer(&CustomRiskScorer{})
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/enforcement"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gagent"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/enforcement"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gagent"
 )
 
 // Create enforcement engine

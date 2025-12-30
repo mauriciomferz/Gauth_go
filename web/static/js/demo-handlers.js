@@ -22,7 +22,7 @@ class AgentAuthDemoHandlers {
 
         // Tab handling
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.tab-button')) {
+            if (e.target.closest('.tab-button') {
                 this.handleTabSwitch(e.target.closest('.tab-button'));
             }
         });
@@ -313,7 +313,7 @@ class AgentAuthDemoHandlers {
             context: {
                 department: data.department,
                 classification: data.classification,
-                roles: data.roles ? data.roles.split(',').map(r => r.trim()) : []
+                roles: data.roles ? data.roles.split(',').map(r => r.trim() : []
             }
         };
 
@@ -400,7 +400,7 @@ class AgentAuthDemoHandlers {
         try {
             const result = await this.api.runExample(exampleId);
             
-            if (result.job_id && (result.success || result.state === 'running')) {
+            if (result.job_id && (result.success || result.state === 'running') {
                 this.appendOutput(outputDiv, `✓ Example queued with job ID: ${result.job_id}`, 'success');
                 this.appendOutput(outputDiv, `Status: ${result.state || 'running'}`, 'info');
                 
@@ -525,7 +525,7 @@ class AgentAuthDemoHandlers {
                     <td class="px-3 py-2">
                         ${job.state === 'running' || job.state === 'queued' ? 
                             `<button class="bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded" 
-                                     onclick="gAuthDemo.cancelJob('${job.id}')">Cancel</button>` :
+                                     onclick="agentAuthDemo.cancelJob('${job.id}')">Cancel</button>` :
                             '-'
                         }
                     </td>
@@ -827,7 +827,7 @@ class AgentAuthDemoHandlers {
 document.addEventListener('DOMContentLoaded', () => {
     // Wait for API client to be available
     if (window.AgentAuthAPI) {
-        window.gAuthDemo = new AgentAuthDemoHandlers(window.AgentAuthAPI);
+        window.agentAuthDemo = new AgentAuthDemoHandlers(window.AgentAuthAPI);
         console.log('AgentAuth Demo Handlers initialized');
     } else {
         console.error('AgentAuth API Client not available');

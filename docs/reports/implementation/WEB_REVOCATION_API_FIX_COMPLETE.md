@@ -202,7 +202,7 @@ $ go build ./web/revocation.go
 ```bash
 $ go test ./pkg/revocation/... -v
 PASS
-ok      github.com/mauriciomferz/Gauth_go/pkg/revocation        23.724s
+ok      github.com/mauriciomferz/AgentAuth/pkg/revocation        23.724s
 ```
 
 **Test Summary:**
@@ -281,16 +281,16 @@ All 13 endpoints registered under `/api/v1/beta`:
 
 ```bash
 # Required for system to be enabled
-GAUTH_REVOCATION_ENABLED=1
+AGENTAUTH_REVOCATION_ENABLED=1
 
 # Redis connection (defaults: localhost:6379)
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
 # Optional configuration
-GAUTH_REVOCATION_TWOPHASE_TIMEOUT=1h        # Default timeout for two-phase disable
-GAUTH_REVOCATION_OPTIMISTIC_WINDOW=24h      # Challenge window for optimistic revocation
-GAUTH_REVOCATION_CIRCUIT_RATE=10            # Max transactions per minute
+AGENTAUTH_REVOCATION_TWOPHASE_TIMEOUT=1h        # Default timeout for two-phase disable
+AGENTAUTH_REVOCATION_OPTIMISTIC_WINDOW=24h      # Challenge window for optimistic revocation
+AGENTAUTH_REVOCATION_CIRCUIT_RATE=10            # Max transactions per minute
 ```
 
 ### Default Values (when not set)

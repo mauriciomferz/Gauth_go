@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/AgentAuth/pkg/gagent"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 )
 
@@ -18,11 +18,11 @@ type MCPHandler struct {
 	connManager  *mcp.ConnectionManager
 	authBridge   gagent.AuthorizationBridge
 	auditLogger  mcp.AuditLogger
-	tokenService *gauth.ExtendedTokenService
+	tokenService *agentauth.ExtendedTokenService
 }
 
 // NewMCPHandler creates a new MCP handler instance with security dependencies
-func NewMCPHandler(authBridge gagent.AuthorizationBridge, auditLogger mcp.AuditLogger, tokenService *gauth.ExtendedTokenService) *MCPHandler {
+func NewMCPHandler(authBridge gagent.AuthorizationBridge, auditLogger mcp.AuditLogger, tokenService *agentauth.ExtendedTokenService) *MCPHandler {
 	return &MCPHandler{
 		connManager:  mcp.NewConnectionManager(),
 		authBridge:   authBridge,
@@ -47,7 +47,7 @@ func (h *MCPHandler) RegisterRoutes(r *gin.RouterGroup) {
 }
 
 // authorize extracts and validates the token from the request
-func (h *MCPHandler) authorize(c *gin.Context) (*gauth.ExtendedToken, error) {
+func (h *MCPHandler) authorize(c *gin.Context) (*agentauth.ExtendedToken, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" || len(authHeader) < 8 || authHeader[:7] != "Bearer " {
 		return nil, errors.New("missing or invalid authorization header")

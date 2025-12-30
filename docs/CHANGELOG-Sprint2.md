@@ -32,8 +32,8 @@ Status: Completed (All core goals implemented)
 
 ## RB9 – Observability Phase 1
 - Introduced tracing spans: `token.issue`, `token.validate`, `attestation.verify`, `rotation.perform`.
-- Environment gating: `GAUTH_TRACING_ENABLED` (primary) + legacy `GAUTH_OTEL_ENABLE`.
-- Sampling ratio semantics: `GAUTH_TRACING_SAMPLE_RATIO` with current implementation (ratio<=0 => always sample). Documented in ADR.
+- Environment gating: `AGENTAUTH_TRACING_ENABLED` (primary) + legacy `AGENTAUTH_OTEL_ENABLE`.
+- Sampling ratio semantics: `AGENTAUTH_TRACING_SAMPLE_RATIO` with current implementation (ratio<=0 => always sample). Documented in ADR.
 - Added latency percentile endpoint `/api/v1/beta/metrics/latency` exposing p50/p95/p99 for key histograms.
 - Fixed early error span closure path in attestation verify (body read failure).
 - Added rotation span tagging (prev_kid, new_kid, ttl_hours, history_size, error).

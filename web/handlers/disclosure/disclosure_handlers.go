@@ -7,16 +7,16 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // Handler provides HTTP handlers for disclosure API
 type Handler struct {
-	disclosureService *gauth.DisclosureService
+	disclosureService *agentauth.DisclosureService
 }
 
 // NewHandler creates a new disclosure handler
-func NewHandler(disclosureService *gauth.DisclosureService) *Handler {
+func NewHandler(disclosureService *agentauth.DisclosureService) *Handler {
 	return &Handler{
 		disclosureService: disclosureService,
 	}
@@ -38,7 +38,7 @@ func (h *Handler) ListActiveAuthorizationsHandler(c *gin.Context) {
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
 	// Build request
-	request := &gauth.ListActiveAuthorizationsRequest{
+	request := &agentauth.ListActiveAuthorizationsRequest{
 		ResourceOwnerID: resourceOwnerID,
 		ClientID:        clientID,
 		Status:          status,
@@ -99,7 +99,7 @@ func (h *Handler) RevokeAuthorizationHandler(c *gin.Context) {
 	}
 
 	// Build request
-	request := &gauth.RevokeAuthorizationRequest{
+	request := &agentauth.RevokeAuthorizationRequest{
 		AuthorizationID: authorizationID,
 		ResourceOwnerID: req.ResourceOwnerID,
 		Reason:          req.Reason,

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth/external"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/external"
 )
 
 // PolicyClientConfig holds configuration for the Policy API client.

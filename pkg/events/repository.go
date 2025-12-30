@@ -414,7 +414,7 @@ func (r *Repository) GetEventMetrics(ctx context.Context, tenantID string) (*Eve
 			SELECT 
 				COUNT(*) as total_events,
 				COUNT(*) FILTER (WHERE timestamp >= CURRENT_DATE) as events_today,
-				COUNT(*) FILTER (WHERE timestamp >= DATE_TRUNC('hour', NOW())) as events_this_hour
+				COUNT(*) FILTER (WHERE timestamp >= DATE_TRUNC('hour', NOW()) as events_this_hour
 			FROM events
 			WHERE tenant_id = $1
 		)

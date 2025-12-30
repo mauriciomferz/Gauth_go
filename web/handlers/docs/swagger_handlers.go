@@ -65,7 +65,7 @@ func ReDocHandler(c *gin.Context) {
 func OpenAPISpecHandler(c *gin.Context) {
 	// In production, this would read from the embedded file
 	// For now, serve from the file system
-	c.File("./docs/openapi/gauth-api.yaml")
+	c.File("./docs/openapi/agentauth-api.yaml")
 }
 
 // DocsLandingHandler serves a landing page with links to both documentation formats

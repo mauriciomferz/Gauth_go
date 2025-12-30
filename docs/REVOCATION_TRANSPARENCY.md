@@ -33,8 +33,8 @@ This document consolidates the integrity and verification surfaces for the revoc
 ```
 
 ### 2.2 Merkle Tree
-- Leaves: `SHA256("GAUTH_MERKLE_LEAF:" + eventHash)`
-- Parent: `SHA256("GAUTH_MERKLE_NODE:" + left + right)` (hex concatenation)
+- Leaves: `SHA256("AGENTAUTH_MERKLE_LEAF:" + eventHash)`
+- Parent: `SHA256("AGENTAUTH_MERKLE_NODE:" + left + right)` (hex concatenation)
 - Odd leaf promotion: last leaf copied upward without hashing partner (deterministic root)
 
 Proof step: `{ sibling: <hex>, position: "L"|"R" }` where position denotes sibling relative to evolving hash.
@@ -63,10 +63,10 @@ Validation reconstructs Merkle trees for `start_length` and `end_length` and ver
 Environment variables:
 | Variable | Description |
 |----------|-------------|
-| `GAUTH_TOKEN_SIG_MODE=eddsa` | Enables Ed25519 signing of events & STHs |
-| `GAUTH_MULTI_SIG_THRESHOLD` | Required cumulative signature weight (or count) for STH validity (>1 activates multi-sig v2) |
-| `GAUTH_MULTI_SIG_WEIGHTS` | Comma list `kid=weight` for non-uniform signer weights |
-| `GAUTH_STH_PERSIST_PATH` | Path to JSON file storing STH history |
+| `AGENTAUTH_TOKEN_SIG_MODE=eddsa` | Enables Ed25519 signing of events & STHs |
+| `AGENTAUTH_MULTI_SIG_THRESHOLD` | Required cumulative signature weight (or count) for STH validity (>1 activates multi-sig v2) |
+| `AGENTAUTH_MULTI_SIG_WEIGHTS` | Comma list `kid=weight` for non-uniform signer weights |
+| `AGENTAUTH_STH_PERSIST_PATH` | Path to JSON file storing STH history |
 
 Weights semantics:
 - If weights list empty: each signature weight = 1.
@@ -76,7 +76,7 @@ Weights semantics:
 Security note: Threshold & total weights are part of version 2 signature payload; altering them requires resigning to remain valid.
 
 ## 4. Persistence
-Setting `GAUTH_STH_PERSIST_PATH` causes every new STH to be appended (overwriting full file with array) and reloaded on startup. Invalid signatures are skipped. If no valid STH remains, in-memory history is retained (defensive fallback).
+Setting `AGENTAUTH_STH_PERSIST_PATH` causes every new STH to be appended (overwriting full file with array) and reloaded on startup. Invalid signatures are skipped. If no valid STH remains, in-memory history is retained (defensive fallback).
 
 File format (example):
 ```jsonc
@@ -102,7 +102,7 @@ File format (example):
 | `/api/v1/token/revocation/root` | Current Merkle root + chain length | Empty root if no events |
 | `/api/v1/token/revocation/proof` | Inclusion proof by `id`, `index`, or `hash` | Query params: one of `id`, `index`, `hash` required |
 | `/api/v1/token/revocation/consistency?start=<i>` | Consistency proof between tree head `i` and latest | Prototype O(n) verification |
-| `/.well-known/gauth-configuration` | Discovery metadata | `revocation_support` object includes STH, threshold, satisfied_weight |
+| `/.well-known/agentauth-configuration` | Discovery metadata | `revocation_support` object includes STH, threshold, satisfied_weight |
 | `/.well-known/jwks.json` | Ed25519 public keys (OKP) | Used for client-side signature verification |
 
 ## 6. Verification Workflow (CLI `cmd/verify`)
@@ -173,7 +173,7 @@ Additional proof fields:
 | `prefix_bridges` | Intermediate merged digests from right-to-left reduction enabling fast reconstruction |
 
 Fast Reconstruction:
-If `GAUTH_CONSISTENCY_V2_FAST=1`, verification attempts to reduce blocks using bridges; mismatch vs canonical rebuild aborts with `fast_reconstruction_mismatch`. Complexity: `O(b)` where `b = len(prefix_roots)` ≤ `log2(start_length)+1`.
+If `AGENTAUTH_CONSISTENCY_V2_FAST=1`, verification attempts to reduce blocks using bridges; mismatch vs canonical rebuild aborts with `fast_reconstruction_mismatch`. Complexity: `O(b)` where `b = len(prefix_roots)` ≤ `log2(start_length)+1`.
 
 Verification Invariants:
 1. All `prefix_sizes[i]` are powers of two.
@@ -274,7 +274,7 @@ curl -s "http://localhost:8080/api/v1/token/revocation/consistency?start=0" | jq
 ```
 ### Discovery STH Metadata
 ```
-curl -s "http://localhost:8080/.well-known/gauth-configuration" | jq '.revocation_support.sth_latest'
+curl -s "http://localhost:8080/.well-known/agentauth-configuration" | jq '.revocation_support.sth_latest'
 ```
 
 ## 13. Verification Pseudocode
@@ -417,7 +417,7 @@ sequenceDiagram
 ### 16.7 Minimal ConsistencyProofV2 Example
 -### 16.8 Interval Path Optimization (Experimental)
 
-When `GAUTH_CONSISTENCY_V2_INTERVAL_PATH=1` the proof generator bypasses building a full temporary Merkle level cache. Instead it:
+When `AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH=1` the proof generator bypasses building a full temporary Merkle level cache. Instead it:
 1. Streams leaf-domain digests into an internal helper for range hashing.
 2. Uses the least-significant set bit (LSB) of `oldSize` to identify the largest aligned block ending at `oldSize`.
 3. Hashes the adjacent sibling block if wholly contained in `EndLength`.
@@ -483,7 +483,7 @@ Instead of duplicating HTTP + cryptographic logic, consumers can import the reus
 ```go
 import (
   "net/http"
-  "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/verification"
+  "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/verification"
 )
 
 func verify(base string, targetHash string) error {

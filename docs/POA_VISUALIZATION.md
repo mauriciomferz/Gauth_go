@@ -152,7 +152,7 @@ Interactive demonstration with:
 ### Basic PoA Graph
 
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/visualization"
+import "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/visualization"
 
 // Create visualizer
 viz := visualization.NewPoAVisualizer()
@@ -242,7 +242,7 @@ Access the interactive demo:
 
 ```bash
 # Start server with dev mode for hot reload
-GAUTH_DEV_INDEX=1 go run ./cmd/web-server
+AGENTAUTH_DEV_INDEX=1 go run ./cmd/web-server
 
 # Open browser
 open http://localhost:8080/poa-visualization
@@ -272,12 +272,12 @@ open http://localhost:8080/poa-visualization
 
 ## RFC Compliance
 
-**AAP-RFC-0111 (AgentAuth 1.0):**
+**AAP-001 (AgentAuth 1.0):**
 - Visualizes Section 3.A parties (Principal, Authorizer, Client, Resource)
 - Represents subscription, matching, request protocol steps
 - Shows delegation chains and authorization relationships
 
-**AAP-RFC-0115 (PoA Definition):**
+**AAP-002 (PoA Definition):**
 - Visualizes PoA Definition structure and sections
 - Renders parties, scope, and requirements graph
 - Shows validation flow (structural, capability, jurisdiction)

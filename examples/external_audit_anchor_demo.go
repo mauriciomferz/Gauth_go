@@ -17,7 +17,7 @@ func main() {
 	fmt.Println("=======================================================")
 
 	// Setup temp files with restricted permissions
-	tmpDir := "/tmp/gauth-external-anchor-demo"
+	tmpDir := "/tmp/agentauth-external-anchor-demo"
 	if err := os.MkdirAll(tmpDir, 0750); err != nil {
 		log.Fatalf("Failed to create temp dir: %v", err)
 	}

@@ -8,7 +8,7 @@ owners: [system]
 
 # Auditor Enhancements (Beta Roadmap)
 
-This document defines planned extensions to the auditor tooling to strengthen assurance for RFC-0111 / RFC-0115 artifacts and forthcoming multi-sig & algorithm agility features.
+This document defines planned extensions to the auditor tooling to strengthen assurance for AAP-001 / AAP-002 artifacts and forthcoming multi-sig & algorithm agility features.
 
 ## Objectives
 

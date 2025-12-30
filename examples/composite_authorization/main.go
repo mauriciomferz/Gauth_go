@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // Composite demo flow:
@@ -46,8 +46,8 @@ func main() {
 	}
 
 	// --- AAP001 service with revocation chain ---
-	svc := gauth_aap_001.NewService(audit.NewMemoryLogger(nil), az)
-	delResp, err := svc.CreateDelegationCtx(ctx, gauth_aap_001.DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, Restrictions: map[string]string{"classification": "public"}, Duration: time.Hour})
+	svc := agentauth_aap_001.NewService(audit.NewMemoryLogger(nil), az)
+	delResp, err := svc.CreateDelegationCtx(ctx, agentauth_aap_001.DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, Restrictions: map[string]string{"classification": "public"}, Duration: time.Hour})
 	if err != nil {
 		fmt.Println("Delegation create failed:", err)
 		return

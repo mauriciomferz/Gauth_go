@@ -101,7 +101,7 @@ func simulateActivity(grantStore *gnap.MemoryGrantStore, tokenStore *gnap.Memory
 
 	// Create valid token
 	token1 := &gnap.IssuedToken{
-		Value:     "gauth_gnap_valid",
+		Value:     "agentauth_gnap_valid",
 		GrantID:   grant1.ID,
 		IssuedAt:  now,
 		ExpiresAt: now.Add(1 * time.Hour),
@@ -111,7 +111,7 @@ func simulateActivity(grantStore *gnap.MemoryGrantStore, tokenStore *gnap.Memory
 
 	// Create expired token (will be cleaned up after grace period)
 	expiredToken := &gnap.IssuedToken{
-		Value:     "gauth_gnap_expired",
+		Value:     "agentauth_gnap_expired",
 		GrantID:   grant1.ID,
 		IssuedAt:  now.Add(-3 * time.Hour),
 		ExpiresAt: now.Add(-2 * time.Hour), // Expired 2 hours ago

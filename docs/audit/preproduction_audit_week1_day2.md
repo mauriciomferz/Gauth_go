@@ -79,7 +79,7 @@ All vulnerabilities are in Go 1.25.1 standard library and affect **production-cr
 **Impact on AgentAuth**:
 - **Call Paths**:
   1. `internal/crypto/vault_keystore.go:456` → `http.Client.Do`
-  2. `cmd/gauth-server/main.go:32` → `http.Client.Get`
+  2. `cmd/agentauth-server/main.go:32` → `http.Client.Get`
   3. `cmd/verify/verify.go:160` → `http.Get`
   4. `pkg/ledger/revocation_anchor.go:56` → `http.Post`
 - **Risk**: Malicious HTTP response with crafted cookies causes OOM
@@ -317,7 +317,7 @@ govulncheck ./...
 
 3. **Conformance Tests** (30 minutes)
    ```bash
-   ./bin/gauth-conformance run
+   ./bin/agentauth-conformance run
    # Expected: 100% compliance maintained
    ```
 
@@ -372,7 +372,7 @@ go list -u -m all 2>&1 | grep '\['
 ```bash
 # Generate Software Bill of Materials
 # Install: go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
-cyclonedx-gomod mod -json > artifacts/sbom_gauth_v1.0.json
+cyclonedx-gomod mod -json > artifacts/sbom_agentauth_v1.0.json
 ```
 
 ---

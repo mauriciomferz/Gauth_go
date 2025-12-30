@@ -1,5 +1,5 @@
 // Package aap001 provides HTTP handlers for RFC-0111 authorization flows.
-package gauth_aap_001
+package agentauth_aap_001
 
 import (
 	"encoding/base64"
@@ -8,21 +8,21 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
 // AuthorizationHandlers encapsulates RFC-0111 authorization API handlers.
 type AuthorizationHandlers struct {
-	gauthService *gauth.Service
-	tokenStore   gauth.ExtendedTokenStore
+	agentauthService *agentauth.Service
+	tokenStore   agentauth.ExtendedTokenStore
 }
 
 // NewAuthorizationHandlers creates a new authorization handlers instance.
-func NewAuthorizationHandlers(service *gauth.Service, tokenStore gauth.ExtendedTokenStore) *AuthorizationHandlers {
+func NewAuthorizationHandlers(service *agentauth.Service, tokenStore agentauth.ExtendedTokenStore) *AuthorizationHandlers {
 	return &AuthorizationHandlers{
-		gauthService: service,
+		agentauthService: service,
 		tokenStore:   tokenStore,
 	}
 }
@@ -55,7 +55,7 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 	// For simple "read write" scopes, create a basic scope with standard actions
 	requestedScope := parseBasicScope(req.Scope)
 
-	response, err := h.gauthService.RequestTokenRFC(c.Request.Context(), &gauth.RFCCompliantAuthorizationRequest{
+	response, err := h.agentauthService.RequestTokenRFC(c.Request.Context(), &agentauth.RFCCompliantAuthorizationRequest{
 		ClientID:         req.ClientID,
 		ResourceOwnerID:  req.ResourceOwnerID,
 		SubscriptionID:   req.SubscriptionID,
@@ -107,7 +107,7 @@ func (h *AuthorizationHandlers) ValidateToken(c *gin.Context) {
 	}
 
 	// Validate token using existing service
-	result, err := h.gauthService.ValidateToken(req.Token)
+	result, err := h.agentauthService.ValidateToken(req.Token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"success": false,
@@ -160,7 +160,7 @@ func (h *AuthorizationHandlers) IntrospectToken(c *gin.Context) {
 	}
 
 	// RFC 7662 compliant token introspection
-	result, err := h.gauthService.ValidateToken(req.Token)
+	result, err := h.agentauthService.ValidateToken(req.Token)
 
 	// Per RFC 7662, return active: false for invalid tokens rather than error
 	if err != nil {

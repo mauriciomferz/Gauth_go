@@ -3,7 +3,7 @@ services:
   # Prometheus - Metrics collection and storage
   prometheus:
     image: prom/prometheus:latest
-    container_name: gauth-prometheus
+    container_name: agentauth-prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -20,12 +20,12 @@ services:
       - monitoring
     restart: unless-stopped
     labels:
-      - "com.gauth.description=Prometheus metrics server"
+      - "com.agentauth.description=Prometheus metrics server"
 
   # Grafana - Metrics visualization
   grafana:
     image: grafana/grafana:latest
-    container_name: gauth-grafana
+    container_name: agentauth-grafana
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -45,12 +45,12 @@ services:
       - prometheus
     restart: unless-stopped
     labels:
-      - "com.gauth.description=Grafana dashboard server"
+      - "com.agentauth.description=Grafana dashboard server"
 
   # AlertManager - Alert routing and management
   alertmanager:
     image: prom/alertmanager:latest
-    container_name: gauth-alertmanager
+    container_name: agentauth-alertmanager
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
@@ -63,12 +63,12 @@ services:
       - monitoring
     restart: unless-stopped
     labels:
-      - "com.gauth.description=Prometheus AlertManager"
+      - "com.agentauth.description=Prometheus AlertManager"
 
   # Node Exporter - Host metrics
   node-exporter:
     image: prom/node-exporter:latest
-    container_name: gauth-node-exporter
+    container_name: agentauth-node-exporter
     command:
       - '--path.rootfs=/host'
     volumes:
@@ -79,26 +79,26 @@ services:
       - monitoring
     restart: unless-stopped
     labels:
-      - "com.gauth.description=Node/host metrics exporter"
+      - "com.agentauth.description=Node/host metrics exporter"
 
   # Postgres Exporter - Database metrics (optional, if using PostgreSQL)
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
-    container_name: gauth-postgres-exporter
+    container_name: agentauth-postgres-exporter
     environment:
-      - DATA_SOURCE_NAME=postgresql://gauth_admin:gauth_dev_password@host.docker.internal:5432/gauth?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://agentauth_admin:agentauth_dev_password@host.docker.internal:5432/agentauth?sslmode=disable
     ports:
       - "9187:9187"
     networks:
       - monitoring
     restart: unless-stopped
     labels:
-      - "com.gauth.description=PostgreSQL metrics exporter"
+      - "com.agentauth.description=PostgreSQL metrics exporter"
 
   # Redis Exporter - Cache metrics (if using Redis)
   redis-exporter:
     image: oliver006/redis_exporter:latest
-    container_name: gauth-redis-exporter
+    container_name: agentauth-redis-exporter
     environment:
       - REDIS_ADDR=redis://host.docker.internal:6379
     ports:
@@ -107,12 +107,12 @@ services:
       - monitoring
     restart: unless-stopped
     labels:
-      - "com.gauth.description=Redis metrics exporter"
+      - "com.agentauth.description=Redis metrics exporter"
 
 networks:
   monitoring:
     driver: bridge
-    name: gauth-monitoring
+    name: agentauth-monitoring
 
 volumes:
   prometheus_data:

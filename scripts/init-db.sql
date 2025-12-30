@@ -5,10 +5,10 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Create database schema
-CREATE SCHEMA IF NOT EXISTS gauth;
+CREATE SCHEMA IF NOT EXISTS agentauth;
 
 -- Set search path
-SET search_path TO gauth, public;
+SET search_path TO agentauth, public;
 
 -- Create tables for token storage
 CREATE TABLE IF NOT EXISTS tokens (
@@ -59,11 +59,11 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_client_id ON audit_logs(client_id);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
 
 -- Create user for application
-CREATE USER gauth_app WITH PASSWORD 'secure_app_password';
-GRANT USAGE ON SCHEMA gauth TO gauth_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gauth TO gauth_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA gauth TO gauth_app;
+CREATE USER agentauth_app WITH PASSWORD 'secure_app_password';
+GRANT USAGE ON SCHEMA agentauth TO agentauth_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA agentauth TO agentauth_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA agentauth TO agentauth_app;
 
 -- Set default privileges for future objects
-ALTER DEFAULT PRIVILEGES IN SCHEMA gauth GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO gauth_app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA gauth GRANT USAGE, SELECT ON SEQUENCES TO gauth_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA agentauth GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO agentauth_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA agentauth GRANT USAGE, SELECT ON SEQUENCES TO agentauth_app;

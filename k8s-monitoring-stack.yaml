@@ -30,15 +30,15 @@ data:
         static_configs:
           - targets: ['localhost:9090']
       
-      - job_name: 'gauth-service'
+      - job_name: 'agentauth-service'
         kubernetes_sd_configs:
           - role: endpoints
             namespaces:
               names:
-                - gauth-staging
+                - agentauth-staging
         relabel_configs:
           - source_labels: [__meta_kubernetes_service_name]
-            regex: gauth-service
+            regex: agentauth-service
             action: keep
           - source_labels: [__meta_kubernetes_endpoint_port_name]
             regex: http

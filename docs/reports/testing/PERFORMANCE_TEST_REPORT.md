@@ -485,22 +485,22 @@ monitoringConfig := MonitoringConfig{
 
 ```bash
 # Run all benchmarks
-go test -bench=. -benchmem -benchtime=5s ./pkg/gauth
+go test -bench=. -benchmem -benchtime=5s ./pkg/agentauth
 
 # Run specific benchmarks
-go test -bench=BenchmarkJurisdiction -benchmem ./pkg/gauth
-go test -bench=BenchmarkMetrics -benchmem ./pkg/gauth
+go test -bench=BenchmarkJurisdiction -benchmem ./pkg/agentauth
+go test -bench=BenchmarkMetrics -benchmem ./pkg/agentauth
 
 # Generate CPU profile
-go test -bench=BenchmarkComprehensiveValidation -cpuprofile=cpu.prof ./pkg/gauth
+go test -bench=BenchmarkComprehensiveValidation -cpuprofile=cpu.prof ./pkg/agentauth
 go tool pprof cpu.prof
 
 # Generate memory profile
-go test -bench=BenchmarkConcurrent -memprofile=mem.prof -benchmem ./pkg/gauth
+go test -bench=BenchmarkConcurrent -memprofile=mem.prof -benchmem ./pkg/agentauth
 go tool pprof mem.prof
 
 # Compare before/after
-go test -bench=. -benchmem ./pkg/gauth > new.txt
+go test -bench=. -benchmem ./pkg/agentauth > new.txt
 benchstat baseline.txt new.txt
 ```
 

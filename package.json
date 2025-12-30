@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "gauth-web-modular",
+  "name": "agentauth-web-modular",
   "version": "1.0.0",
   "description": "Modularized AgentAuth web frontend",
   "main": "web/static/js/modules/main.js",

@@ -5,19 +5,19 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: patroni-config
-  namespace: gauth
+  namespace: agentauth
 data:
   patroni.yml: |
-    scope: gauth-postgres
+    scope: agentauth-postgres
     namespace: /db/
     name: ${HOSTNAME}
     
     restapi:
       listen: 0.0.0.0:8008
-      connect_address: ${HOSTNAME}.postgresql.gauth.svc:8008
+      connect_address: ${HOSTNAME}.postgresql.agentauth.svc:8008
     
     etcd:
-      hosts: etcd-0.etcd.gauth.svc:2379,etcd-1.etcd.gauth.svc:2379,etcd-2.etcd.gauth.svc:2379
+      hosts: etcd-0.etcd.agentauth.svc:2379,etcd-1.etcd.agentauth.svc:2379,etcd-2.etcd.agentauth.svc:2379
     
     bootstrap:
       dcs:
@@ -82,7 +82,7 @@ data:
     
     postgresql:
       listen: 0.0.0.0:5432
-      connect_address: ${HOSTNAME}.postgresql.gauth.svc:5432
+      connect_address: ${HOSTNAME}.postgresql.agentauth.svc:5432
       data_dir: /var/lib/postgresql/data
       pgpass: /tmp/pgpass
       authentication:
@@ -107,7 +107,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgresql
-  namespace: gauth
+  namespace: agentauth
 spec:
   serviceName: postgresql
   replicas: 3
@@ -155,7 +155,7 @@ spec:
                   name: postgresql-secrets
                   key: replication-password
             - name: PATRONI_SCOPE
-              value: gauth-postgres
+              value: agentauth-postgres
             - name: PATRONI_NAME
               valueFrom:
                 fieldRef:
@@ -210,7 +210,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql
-  namespace: gauth
+  namespace: agentauth
   labels:
     app: postgresql
 spec:
@@ -229,7 +229,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql-replica
-  namespace: gauth
+  namespace: agentauth
   labels:
     app: postgresql
 spec:
@@ -248,7 +248,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgresql-headless
-  namespace: gauth
+  namespace: agentauth
 spec:
   clusterIP: None
   ports:
@@ -265,7 +265,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: postgresql
-  namespace: gauth
+  namespace: agentauth
 
 ---
 # Role for Patroni
@@ -273,7 +273,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: postgresql
-  namespace: gauth
+  namespace: agentauth
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -291,7 +291,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: postgresql
-  namespace: gauth
+  namespace: agentauth
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -306,7 +306,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: postgresql-secrets
-  namespace: gauth
+  namespace: agentauth
 type: Opaque
 stringData:
   superuser-password: CHANGE_IN_PRODUCTION
@@ -318,7 +318,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: postgresql-backup
-  namespace: gauth
+  namespace: agentauth
 spec:
   schedule: "0 2 * * *"  # Daily at 2 AM
   jobTemplate:
@@ -332,24 +332,24 @@ spec:
                 - /bin/bash
                 - -c
                 - |
-                  pg_dump -h postgresql.gauth.svc -U postgres -d gauth | \
-                  gzip > /backups/gauth-$(date +%Y%m%d-%H%M%S).sql.gz
+                  pg_dump -h postgresql.agentauth.svc -U postgres -d agentauth | \
+                  gzip > /backups/agentauth-$(date +%Y%m%d-%H%M%S).sql.gz
                   
                   # Upload to S3
-                  aws s3 cp /backups/gauth-$(date +%Y%m%d-%H%M%S).sql.gz \
-                    s3://gauth-backups/postgresql/$(date +%Y%m%d-%H%M%S).sql.gz
+                  aws s3 cp /backups/agentauth-$(date +%Y%m%d-%H%M%S).sql.gz \
+                    s3://agentauth-backups/postgresql/$(date +%Y%m%d-%H%M%S).sql.gz
                   
                   # Clean up local backup
-                  rm /backups/gauth-$(date +%Y%m%d-%H%M%S).sql.gz
+                  rm /backups/agentauth-$(date +%Y%m%d-%H%M%S).sql.gz
                   
                   # Delete backups older than 30 days
-                  aws s3 ls s3://gauth-backups/postgresql/ | \
+                  aws s3 ls s3://agentauth-backups/postgresql/ | \
                     awk '{print $4}' | \
                     while read file; do
                       file_date=$(echo $file | grep -oP '\d{8}')
-                      days_old=$(( ($(date +%s) - $(date -d $file_date +%s)) / 86400 ))
+                      days_old=$(( ($(date +%s) - $(date -d $file_date +%s) / 86400 ))
                       if [ $days_old -gt 30 ]; then
-                        aws s3 rm s3://gauth-backups/postgresql/$file
+                        aws s3 rm s3://agentauth-backups/postgresql/$file
                       fi
                     done
               env:

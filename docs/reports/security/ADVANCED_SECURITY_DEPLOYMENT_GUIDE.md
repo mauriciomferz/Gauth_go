@@ -141,7 +141,7 @@ kubectl exec -n vault vault-0 -- vault secrets tune -max-lease-ttl=87600h pki
 kubectl exec -n vault vault-0 -- vault write -field=certificate pki/root/generate/internal \
     common_name="AgentAuth Root CA" \
     ttl=87600h \
-    key_bits=4096 > /tmp/gauth-root-ca.crt
+    key_bits=4096 > /tmp/agentauth-root-ca.crt
 
 # Configure CA URLs
 kubectl exec -n vault vault-0 -- vault write pki/config/urls \
@@ -168,8 +168,8 @@ kubectl exec -n vault vault-0 -- vault write pki_int/intermediate/set-signed \
     certificate="$(cat /tmp/intermediate.cert.pem)"
 
 # Create roles for server and client certificates
-kubectl exec -n vault vault-0 -- vault write pki_int/roles/gauth-server \
-    allowed_domains="gauth-api.example.com,*.gauth-api.example.com,*.internal,*.gauth.svc.cluster.local" \
+kubectl exec -n vault vault-0 -- vault write pki_int/roles/agentauth-server \
+    allowed_domains="agentauth-api.example.com,*.agentauth-api.example.com,*.internal,*.agentauth.svc.cluster.local" \
     allow_subdomains=true \
     allow_ip_sans=true \
     server_flag=true \
@@ -177,8 +177,8 @@ kubectl exec -n vault vault-0 -- vault write pki_int/roles/gauth-server \
     max_ttl="168h" \
     ttl="168h"
 
-kubectl exec -n vault vault-0 -- vault write pki_int/roles/gauth-client \
-    allowed_domains="*.client.gauth.internal,*.gauth.svc.cluster.local" \
+kubectl exec -n vault vault-0 -- vault write pki_int/roles/agentauth-client \
+    allowed_domains="*.client.agentauth.internal,*.agentauth.svc.cluster.local" \
     allow_subdomains=true \
     client_flag=true \
     server_flag=false \
@@ -200,28 +200,28 @@ kubectl exec -n vault vault-0 -- vault write auth/kubernetes/config \
 
 # 2.3: Create policies
 cat <<EOF | kubectl exec -i -n vault vault-0 -- vault policy write cert-manager -
-path "pki_int/sign/gauth-server" {
+path "pki_int/sign/agentauth-server" {
   capabilities = ["create", "update"]
 }
-path "pki_int/sign/gauth-client" {
+path "pki_int/sign/agentauth-client" {
   capabilities = ["create", "update"]
 }
 EOF
 
-cat <<EOF | kubectl exec -i -n vault vault-0 -- vault policy write gauth-app -
-path "secret/data/gauth/*" {
+cat <<EOF | kubectl exec -i -n vault vault-0 -- vault policy write agentauth-app -
+path "secret/data/agentauth/*" {
   capabilities = ["read"]
 }
-path "database/creds/gauth-app" {
+path "database/creds/agentauth-app" {
   capabilities = ["read"]
 }
-path "pki_int/issue/gauth-client" {
+path "pki_int/issue/agentauth-client" {
   capabilities = ["create", "update"]
 }
-path "transit/encrypt/gauth-*" {
+path "transit/encrypt/agentauth-*" {
   capabilities = ["update"]
 }
-path "transit/decrypt/gauth-*" {
+path "transit/decrypt/agentauth-*" {
   capabilities = ["update"]
 }
 EOF
@@ -233,10 +233,10 @@ kubectl exec -n vault vault-0 -- vault write auth/kubernetes/role/cert-manager \
     policies=cert-manager \
     ttl=1h
 
-kubectl exec -n vault vault-0 -- vault write auth/kubernetes/role/gauth-app \
-    bound_service_account_names=gauth-api \
-    bound_service_account_namespaces=gauth \
-    policies=gauth-app \
+kubectl exec -n vault vault-0 -- vault write auth/kubernetes/role/agentauth-app \
+    bound_service_account_names=agentauth-api \
+    bound_service_account_namespaces=agentauth \
+    policies=agentauth-app \
     ttl=1h
 ```
 
@@ -247,8 +247,8 @@ kubectl exec -n vault vault-0 -- vault write auth/kubernetes/role/gauth-app \
 kubectl create serviceaccount cert-manager-vault -n cert-manager
 
 # 3.2: Update CA bundle in ClusterIssuer
-kubectl create configmap gauth-ca-bundle -n gauth \
-    --from-file=ca-bundle.crt=/tmp/gauth-root-ca.crt
+kubectl create configmap agentauth-ca-bundle -n agentauth \
+    --from-file=ca-bundle.crt=/tmp/agentauth-root-ca.crt
 
 # 3.3: Deploy cert-manager configuration
 kubectl apply -f k8s/security/mtls-config.yaml --selector=cert-manager.io
@@ -257,11 +257,11 @@ kubectl apply -f k8s/security/mtls-config.yaml --selector=cert-manager.io
 kubectl apply -f k8s/security/mtls-config.yaml --selector=cert-manager.io/v1,Certificate
 
 # 3.5: Verify certificates
-kubectl get certificates -n gauth
-kubectl describe certificate gauth-api-server-cert -n gauth
+kubectl get certificates -n agentauth
+kubectl describe certificate agentauth-api-server-cert -n agentauth
 
 # Wait for certificates to be issued
-kubectl wait --for=condition=ready certificate --all -n gauth --timeout=300s
+kubectl wait --for=condition=ready certificate --all -n agentauth --timeout=300s
 ```
 
 ---
@@ -278,11 +278,11 @@ kubectl wait --for=condition=ready certificate --all -n gauth --timeout=300s
 kubectl exec -n vault vault-0 -- vault secrets enable -path=secret kv-v2
 
 # Configure retention
-kubectl exec -n vault vault-0 -- vault kv metadata put -max-versions 10 secret/gauth/
-kubectl exec -n vault vault-0 -- vault kv metadata put -delete-version-after=30d secret/gauth/
+kubectl exec -n vault vault-0 -- vault kv metadata put -max-versions 10 secret/agentauth/
+kubectl exec -n vault vault-0 -- vault kv metadata put -delete-version-after=30d secret/agentauth/
 
 # Store application secrets
-kubectl exec -n vault vault-0 -- vault kv put secret/gauth/config \
+kubectl exec -n vault vault-0 -- vault kv put secret/agentauth/config \
     jwt_signing_key="$(openssl rand -base64 32)" \
     webhook_secret="$(openssl rand -base64 32)" \
     api_encryption_key="$(openssl rand -base64 32)"
@@ -293,25 +293,25 @@ kubectl exec -n vault vault-0 -- vault secrets enable database
 # Configure PostgreSQL
 kubectl exec -n vault vault-0 -- vault write database/config/postgresql \
     plugin_name=postgresql-database-plugin \
-    allowed_roles="gauth-app,gauth-readonly" \
-    connection_url="postgresql://{{username}}:{{password}}@postgresql.gauth.svc.cluster.local:5432/gauth?sslmode=require" \
+    allowed_roles="agentauth-app,agentauth-readonly" \
+    connection_url="postgresql://{{username}}:{{password}}@postgresql.agentauth.svc.cluster.local:5432/agentauth?sslmode=require" \
     username="vault" \
     password="vault-db-password"
 
 # Create database roles
-kubectl exec -n vault vault-0 -- vault write database/roles/gauth-app \
+kubectl exec -n vault vault-0 -- vault write database/roles/agentauth-app \
     db_name=postgresql \
-    creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT gauth_app TO \"{{name}}\";" \
+    creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT agentauth_app TO \"{{name}}\";" \
     default_ttl="30m" \
     max_ttl="1h"
 
 # 1.3: Enable transit engine for encryption-as-a-service
 kubectl exec -n vault vault-0 -- vault secrets enable transit
 
-kubectl exec -n vault vault-0 -- vault write -f transit/keys/gauth-data \
+kubectl exec -n vault vault-0 -- vault write -f transit/keys/agentauth-data \
     type="aes256-gcm96"
 
-kubectl exec -n vault vault-0 -- vault write -f transit/keys/gauth-pii \
+kubectl exec -n vault vault-0 -- vault write -f transit/keys/agentauth-pii \
     type="aes256-gcm96" \
     auto_rotate_period="720h"
 ```
@@ -329,7 +329,7 @@ kubectl wait --for=condition=ready pod -l app=vault-agent-injector -n vault --ti
 kubectl get mutatingwebhookconfigurations vault-agent-injector-cfg
 
 # 2.4: Test injection (deploy sample app)
-kubectl apply -f k8s/security/vault-deployment.yaml --selector=app=gauth-api
+kubectl apply -f k8s/security/vault-deployment.yaml --selector=app=agentauth-api
 ```
 
 ---
@@ -429,18 +429,18 @@ EOF
 ### Step 1: Deploy mTLS Infrastructure (2 hours)
 
 ```bash
-# 1.1: Create gauth namespace with Istio injection
-kubectl create namespace gauth
-kubectl label namespace gauth istio-injection=enabled
+# 1.1: Create agentauth namespace with Istio injection
+kubectl create namespace agentauth
+kubectl label namespace agentauth istio-injection=enabled
 
 # 1.2: Deploy mTLS configuration
 kubectl apply -f k8s/security/mtls-config.yaml
 
 # 1.3: Wait for Nginx pods
-kubectl wait --for=condition=ready pod -l app=nginx-mtls -n gauth --timeout=300s
+kubectl wait --for=condition=ready pod -l app=nginx-mtls -n agentauth --timeout=300s
 
 # 1.4: Get Nginx LoadBalancer IP
-NGINX_IP=$(kubectl get svc nginx-mtls -n gauth -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+NGINX_IP=$(kubectl get svc nginx-mtls -n agentauth -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 echo "Nginx mTLS LoadBalancer IP: $NGINX_IP"
 
 # 1.5: Update DNS (Route53 example)
@@ -448,7 +448,7 @@ aws route53 change-resource-record-sets --hosted-zone-id Z1234567890ABC --change
   "Changes": [{
     "Action": "UPSERT",
     "ResourceRecordSet": {
-      "Name": "gauth-api.example.com",
+      "Name": "agentauth-api.example.com",
       "Type": "A",
       "TTL": 60,
       "ResourceRecords": [{"Value": "'$NGINX_IP'"}]
@@ -464,10 +464,10 @@ aws route53 change-resource-record-sets --hosted-zone-id Z1234567890ABC --change
 kubectl apply -f k8s/security/mtls-config.yaml --selector=security.istio.io
 
 # 2.2: Verify Istio configuration
-istioctl analyze -n gauth
+istioctl analyze -n agentauth
 
 # 2.3: Check mTLS status
-kubectl exec -n gauth $(kubectl get pod -n gauth -l app=gauth-api -o jsonpath='{.items[0].metadata.name}') -c istio-proxy -- \
+kubectl exec -n agentauth $(kubectl get pod -n agentauth -l app=agentauth-api -o jsonpath='{.items[0].metadata.name}') -c istio-proxy -- \
     curl -s localhost:15000/config_dump | grep -A 20 tls_context
 ```
 
@@ -475,8 +475,8 @@ kubectl exec -n gauth $(kubectl get pod -n gauth -l app=gauth-api -o jsonpath='{
 
 ```bash
 # 3.1: Issue client certificate for testing
-kubectl exec -n vault vault-0 -- vault write -format=json pki_int/issue/gauth-client \
-    common_name="test-client.client.gauth.internal" \
+kubectl exec -n vault vault-0 -- vault write -format=json pki_int/issue/agentauth-client \
+    common_name="test-client.client.agentauth.internal" \
     ttl="720h" > /tmp/client-cert.json
 
 # Extract certificate and key
@@ -488,7 +488,7 @@ jq -r '.data.ca_chain[]' /tmp/client-cert.json > /tmp/ca-chain.crt
 curl --cacert /tmp/ca-chain.crt \
      --cert /tmp/client.crt \
      --key /tmp/client.key \
-     https://gauth-api.example.com/health
+     https://agentauth-api.example.com/health
 
 # Should return 200 OK
 ```
@@ -522,7 +522,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: security-automation
-  namespace: gauth
+  namespace: agentauth
 spec:
   schedule: "0 1 * * *"  # Daily at 1 AM
   jobTemplate:
@@ -532,7 +532,7 @@ spec:
           serviceAccountName: security-automation
           containers:
           - name: security-checks
-            image: gauth/security-automation:latest
+            image: agentauth/security-automation:latest
             command: ["/scripts/security-automation.sh", "all"]
             env:
             - name: SLACK_WEBHOOK
@@ -544,10 +544,10 @@ spec:
 EOF
 
 # 2.2: Create ServiceAccount with permissions
-kubectl create serviceaccount security-automation -n gauth
+kubectl create serviceaccount security-automation -n agentauth
 kubectl create clusterrolebinding security-automation \
     --clusterrole=cluster-admin \
-    --serviceaccount=gauth:security-automation
+    --serviceaccount=agentauth:security-automation
 
 # 2.3: Run initial security check
 ./scripts/security-automation.sh all
@@ -561,10 +561,10 @@ kubectl create clusterrolebinding security-automation \
 
 ```bash
 # Trigger manual rotation
-./scripts/security-automation.sh rotate gauth-api-server-cert
+./scripts/security-automation.sh rotate agentauth-api-server-cert
 
 # Verify new certificate
-kubectl get certificate gauth-api-server-cert -n gauth -o jsonpath='{.status.notAfter}'
+kubectl get certificate agentauth-api-server-cert -n agentauth -o jsonpath='{.status.notAfter}'
 ```
 
 ### Test 2: mTLS Authentication
@@ -574,11 +574,11 @@ kubectl get certificate gauth-api-server-cert -n gauth -o jsonpath='{.status.not
 curl --cacert /tmp/ca-chain.crt \
      --cert /tmp/client.crt \
      --key /tmp/client.key \
-     https://gauth-api.example.com/api/v1/poa
+     https://agentauth-api.example.com/api/v1/poa
 
 # Test failed authentication (no client cert)
 curl --cacert /tmp/ca-chain.crt \
-     https://gauth-api.example.com/api/v1/poa
+     https://agentauth-api.example.com/api/v1/poa
 # Should return 400 Bad Request (no client certificate)
 ```
 
@@ -586,13 +586,13 @@ curl --cacert /tmp/ca-chain.crt \
 
 ```bash
 # Read current database credentials
-kubectl exec -n gauth $(kubectl get pod -n gauth -l app=gauth-api -o jsonpath='{.items[0].metadata.name}') -- \
+kubectl exec -n agentauth $(kubectl get pod -n agentauth -l app=agentauth-api -o jsonpath='{.items[0].metadata.name}') -- \
     cat /vault/secrets/db-creds
 
 # Wait 30 minutes for automatic rotation
 
 # Read new credentials (should be different)
-kubectl exec -n gauth $(kubectl get pod -n gauth -l app=gauth-api -o jsonpath='{.items[0].metadata.name}') -- \
+kubectl exec -n agentauth $(kubectl get pod -n agentauth -l app=agentauth-api -o jsonpath='{.items[0].metadata.name}') -- \
     cat /vault/secrets/db-creds
 ```
 
@@ -618,7 +618,7 @@ kubectl exec -n vault vault-0 -- vault status
 ./scripts/security-automation.sh scan
 
 # Check results
-cat /var/log/gauth/security-scans/scan-*.json | jq '.[] | select(.Severity == "CRITICAL")'
+cat /var/log/agentauth/security-scans/scan-*.json | jq '.[] | select(.Severity == "CRITICAL")'
 ```
 
 ---
@@ -630,11 +630,11 @@ cat /var/log/gauth/security-scans/scan-*.json | jq '.[] | select(.Severity == "C
 **Scenario**: Certificate expired and services are failing
 
 **Steps**:
-1. Check certificate status: `kubectl get certificates -n gauth`
+1. Check certificate status: `kubectl get certificates -n agentauth`
 2. Force renewal: `./scripts/security-automation.sh rotate <cert-name>`
-3. Verify renewal: `kubectl describe certificate <cert-name> -n gauth`
-4. Restart affected pods: `kubectl rollout restart deployment/<name> -n gauth`
-5. Verify services: `curl --cacert /tmp/ca-chain.crt https://gauth-api.example.com/health`
+3. Verify renewal: `kubectl describe certificate <cert-name> -n agentauth`
+4. Restart affected pods: `kubectl rollout restart deployment/<name> -n agentauth`
+5. Verify services: `curl --cacert /tmp/ca-chain.crt https://agentauth-api.example.com/health`
 
 **Prevention**: Ensure cert-manager auto-renewal is working (renewBefore: 24h)
 
@@ -656,9 +656,9 @@ cat /var/log/gauth/security-scans/scan-*.json | jq '.[] | select(.Severity == "C
 **Scenario**: High rate of mTLS authentication failures
 
 **Steps**:
-1. Check Nginx logs: `kubectl logs -n gauth -l app=nginx-mtls | grep FAILED`
-2. Verify CA bundle: `kubectl get configmap gauth-ca-bundle -n gauth -o yaml`
-3. Check CRL: `kubectl exec -n gauth nginx-mtls-0 -- curl http://vault.vault.svc.cluster.local:8200/v1/pki/crl`
+1. Check Nginx logs: `kubectl logs -n agentauth -l app=nginx-mtls | grep FAILED`
+2. Verify CA bundle: `kubectl get configmap agentauth-ca-bundle -n agentauth -o yaml`
+3. Check CRL: `kubectl exec -n agentauth nginx-mtls-0 -- curl http://vault.vault.svc.cluster.local:8200/v1/pki/crl`
 4. Review certificate expiry: `./scripts/security-automation.sh certs`
 5. If CA is rotated, update CA bundle and restart Nginx
 
@@ -674,7 +674,7 @@ cat /var/log/gauth/security-scans/scan-*.json | jq '.[] | select(.Severity == "C
 
 **Diagnosis**:
 ```bash
-kubectl describe certificate <cert-name> -n gauth
+kubectl describe certificate <cert-name> -n agentauth
 kubectl logs -n cert-manager deploy/cert-manager
 ```
 
@@ -706,14 +706,14 @@ aws cloudhsmv2 describe-clusters --cluster-id $HSM_CLUSTER_ID
 
 **Diagnosis**:
 ```bash
-istioctl analyze -n gauth
-kubectl get peerauthentication -n gauth
+istioctl analyze -n agentauth
+kubectl get peerauthentication -n agentauth
 ```
 
 **Solutions**:
-1. Verify Istio injection: `kubectl get pod -n gauth -o jsonpath='{.items[*].spec.containers[*].name}'` (should see istio-proxy)
+1. Verify Istio injection: `kubectl get pod -n agentauth -o jsonpath='{.items[*].spec.containers[*].name}'` (should see istio-proxy)
 2. Check PeerAuthentication mode: Should be STRICT
-3. Restart pods to inject Istio: `kubectl rollout restart deployment/gauth-api -n gauth`
+3. Restart pods to inject Istio: `kubectl rollout restart deployment/agentauth-api -n agentauth`
 
 ---
 
@@ -734,7 +734,7 @@ kubectl get peerauthentication -n gauth
 
 ```bash
 # Check security alerts
-kubectl logs -n gauth -l app=gauth-api --tail=1000 | grep -i "security\|breach\|unauthorized"
+kubectl logs -n agentauth -l app=agentauth-api --tail=1000 | grep -i "security\|breach\|unauthorized"
 
 # Review audit logs
 ./scripts/security-automation.sh audit
@@ -760,11 +760,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: block-suspicious-ip
-  namespace: gauth
+  namespace: agentauth
 spec:
   podSelector:
     matchLabels:
-      app: gauth-api
+      app: agentauth-api
   policyTypes:
   - Ingress
   ingress:
@@ -780,13 +780,13 @@ EOF
 
 ```bash
 # Collect forensics
-kubectl logs -n gauth --all-containers --timestamps > /tmp/incident-logs.txt
+kubectl logs -n agentauth --all-containers --timestamps > /tmp/incident-logs.txt
 
 # Export audit logs
 kubectl exec -n vault vault-0 -- vault audit list -detailed > /tmp/vault-audit.txt
 
 # Network traffic analysis
-kubectl exec -n gauth <pod> -c istio-proxy -- curl localhost:15000/config_dump > /tmp/istio-config.json
+kubectl exec -n agentauth <pod> -c istio-proxy -- curl localhost:15000/config_dump > /tmp/istio-config.json
 ```
 
 #### Step 4: Recover (1 hour)
@@ -796,7 +796,7 @@ kubectl exec -n gauth <pod> -c istio-proxy -- curl localhost:15000/config_dump >
 # Generate new unseal keys following Vault rekey procedure
 
 # 2. Rotate all certificates
-for cert in $(kubectl get certificates -n gauth -o jsonpath='{.items[*].metadata.name}'); do
+for cert in $(kubectl get certificates -n agentauth -o jsonpath='{.items[*].metadata.name}'); do
     ./scripts/security-automation.sh rotate $cert
 done
 
@@ -804,7 +804,7 @@ done
 kubectl exec -n vault vault-0 -- vault write -f database/rotate-root/postgresql
 
 # 4. Restart all services
-kubectl rollout restart deployment -n gauth
+kubectl rollout restart deployment -n agentauth
 ```
 
 #### Step 5: Post-Incident (24 hours)

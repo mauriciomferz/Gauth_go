@@ -22,7 +22,7 @@
 - [Completion Report](docs/PHASE_2A_BACKEND_COMPLETION_REPORT.md) - Implementation details
 - [Testing Results](docs/PHASE_2A_TESTING_RESULTS.md) - Verification and test results
 
-**Server Requirement**: Must set `GAUTH_AAP-001_ENABLED=1` environment variable to enable Phase 2A endpoints.
+**Server Requirement**: Must set `AGENTAUTH_AAP-001_ENABLED=1` environment variable to enable Phase 2A endpoints.
 
 ---
 
@@ -137,7 +137,7 @@ Phase 2A Enhancement completed the backend integration by exposing HTTP endpoint
 **Complexity**: Medium (4-6 hours) → **Completed**
 **Status**: ✅ All 6 endpoints implemented, 4 tested, 2 code-verified
 
-**Current**: PoA logic embedded in RFC-0111 subscription flow  
+**Current**: PoA logic embedded in AAP-001 subscription flow  
 **Change**: Extract and expose as standalone API  
 **UI Impact**: Update `createPoA()`, `validatePoA()`, `listPoAs()` in api.ts
 
@@ -175,7 +175,7 @@ Phase 2A Enhancement completed the backend integration by exposing HTTP endpoint
 }
 ```
 
-### 4. RFC-0111 Subscription Flow UI ⏳ DEFERRED
+### 4. AAP-001 Subscription Flow UI ⏳ DEFERRED
 **Frontend**: Multi-step wizard for token creation
 **Components**: 8-step wizard component
 **Complexity**: High (8-12 hours)
@@ -183,40 +183,40 @@ Phase 2A Enhancement completed the backend integration by exposing HTTP endpoint
 
 **Current**: UI mocks token creation with JWT-like strings  
 **Change**: Full subscription flow implementation  
-**Backend**: Already implemented in `/api/v1/rfc0111/subscriptions`
+**Backend**: Already implemented in `/api/v1/aap001/subscriptions`
 
 **Steps to Implement**:
 
 **Step I: Initiate Subscription**
-- POST `/api/v1/rfc0111/subscriptions`
+- POST `/api/v1/aap001/subscriptions`
 - Returns subscription ID
 
 **Step II: Authorizer Authentication**
-- POST `/api/v1/rfc0111/subscriptions/:id/step-ii`
+- POST `/api/v1/aap001/subscriptions/:id/step-ii`
 - Provide PVP credentials
 
 **Step III: Client Owner Identity**
-- POST `/api/v1/rfc0111/subscriptions/:id/step-iii`
+- POST `/api/v1/aap001/subscriptions/:id/step-iii`
 - Link to PVP verified identity
 
 **Step IV: Client Owner Authorization**
-- POST `/api/v1/rfc0111/subscriptions/:id/step-iv`
+- POST `/api/v1/aap001/subscriptions/:id/step-iv`
 - Commercial Registry entity verification
 
 **Step V: Client Authorization**
-- POST `/api/v1/rfc0111/subscriptions/:id/step-v`
+- POST `/api/v1/aap001/subscriptions/:id/step-v`
 - PoA delegation (if applicable)
 
 **Step VI: Resource Owner Identity**
-- POST `/api/v1/rfc0111/subscriptions/:id/step-vi`
+- POST `/api/v1/aap001/subscriptions/:id/step-vi`
 - PVP verification for resource owner
 
 **Step VII: Resource Owner Authorization**
-- POST `/api/v1/rfc0111/subscriptions/:id/step-vii`
+- POST `/api/v1/aap001/subscriptions/:id/step-vii`
 - Resource owner consent
 
 **Step VIII: Resource Server Authorization**
-- POST `/api/v1/rfc0111/subscriptions/:id/step-viii`
+- POST `/api/v1/aap001/subscriptions/:id/step-viii`
 - Final authorization, returns token
 
 **UI Components Needed**:
@@ -286,7 +286,7 @@ package beta
 
 import (
     "github.com/gin-gonic/gin"
-    "gauth/internal/pvp"
+    "agentauth/internal/pvp"
 )
 
 func HandlePVPVerify(c *gin.Context) {
@@ -313,7 +313,7 @@ package beta
 
 import (
     "github.com/gin-gonic/gin"
-    "gauth/internal/registry"
+    "agentauth/internal/registry"
 )
 
 func HandleEntityVerify(c *gin.Context) {
@@ -331,7 +331,7 @@ package beta
 
 import (
     "github.com/gin-gonic/gin"
-    "gauth/internal/poa"
+    "agentauth/internal/poa"
 )
 
 // Full CRUD handlers
@@ -469,8 +469,8 @@ const token = generateMockToken()
 
 ### Backend
 - Existing mock clients (PVP, Registry)
-- RFC-0111 subscription endpoints (already implemented)
-- PoA logic from RFC-0111 flow
+- AAP-001 subscription endpoints (already implemented)
+- PoA logic from AAP-001 flow
 
 ### Frontend
 - React state management (Zustand)
@@ -500,8 +500,8 @@ If issues arise, we can:
 
 | UI Feature | Endpoint | Status | Type |
 |------------|----------|--------|------|
-| Token Create | `/rfc0111/subscriptions` (8 steps) | ✨ NEW | Real |
-| Token Validate | `/rfc0111/token/validate` | ✅ Existing | Real |
+| Token Create | `/aap001/subscriptions` (8 steps) | ✨ NEW | Real |
+| Token Validate | `/aap001/token/validate` | ✅ Existing | Real |
 | Authorization | `/beta/authz/evaluate` | ✅ Existing | Real |
 | Metrics | `/beta/metrics/prometheus` | ✅ Existing | Real |
 | PVP Verify | `/beta/pvp/verify` | ✨ NEW | Real |
@@ -530,7 +530,7 @@ If issues arise, we can:
 
 ### Benefits
 1. **Complete Integration**: No more UI mocks, all real backend
-2. **RFC-0111 Compliance**: Full subscription flow implemented
+2. **AAP-001 Compliance**: Full subscription flow implemented
 3. **Demo-Ready**: Can demonstrate complete token creation flow
 4. **Production-Ready**: All features backed by real endpoints
 5. **Maintainability**: Clear separation of frontend/backend

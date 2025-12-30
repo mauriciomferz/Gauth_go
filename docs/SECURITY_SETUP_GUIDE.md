@@ -25,7 +25,7 @@ This guide helps you enable and configure security features for the AgentAuth Go
 
 GitHub Advanced Security features are **free for public repositories**. Enable them in repository settings:
 
-1. Navigate to: `https://github.com/mauriciomferz/Gauth_go/settings`
+1. Navigate to: `https://github.com/mauriciomferz/AgentAuth/settings`
 2. Click **Code security and analysis** in the left sidebar
 3. Enable the following:
    - ✅ **Dependency graph** (should be auto-enabled)
@@ -180,7 +180,7 @@ govulncheck ./...
 ### Code Scanning Alerts
 
 **View Current Alerts:**
-- Navigate to: `https://github.com/mauriciomferz/Gauth_go/security/code-scanning`
+- Navigate to: `https://github.com/mauriciomferz/AgentAuth/security/code-scanning`
 - Filter by severity: Critical, High, Medium, Low
 - Review and remediate
 
@@ -232,10 +232,10 @@ Before production deployment:
 ### GitHub Security Dashboard
 
 Monitor security at:
-- **Overview:** `https://github.com/mauriciomferz/Gauth_go/security`
-- **Code Scanning:** `https://github.com/mauriciomferz/Gauth_go/security/code-scanning`
-- **Secret Scanning:** `https://github.com/mauriciomferz/Gauth_go/security/secret-scanning`
-- **Dependabot:** `https://github.com/mauriciomferz/Gauth_go/security/dependabot`
+- **Overview:** `https://github.com/mauriciomferz/AgentAuth/security`
+- **Code Scanning:** `https://github.com/mauriciomferz/AgentAuth/security/code-scanning`
+- **Secret Scanning:** `https://github.com/mauriciomferz/AgentAuth/security/secret-scanning`
+- **Dependabot:** `https://github.com/mauriciomferz/AgentAuth/security/dependabot`
 
 ### Runtime Security (Beta Demo)
 
@@ -263,7 +263,7 @@ curl http://localhost:8080/api/v1/beta/authz/metrics/prometheus
 **For Security Vulnerabilities:**
 - **DO NOT** open public GitHub issues
 - Email: [Add security contact email]
-- Use GitHub Security Advisories: `https://github.com/mauriciomferz/Gauth_go/security/advisories/new`
+- Use GitHub Security Advisories: `https://github.com/mauriciomferz/AgentAuth/security/advisories/new`
 
 **Response SLA (Beta):**
 - Critical: 24 hours
@@ -289,8 +289,8 @@ If a security incident occurs:
 ### Implemented Standards
 
 - ✅ **RFC-0150** - AgentAuth Protocol Compliance
-- ✅ **RFC-0111** - Semantic Validation
-- ✅ **RFC-0115** - Authorization Framework
+- ✅ **AAP-001** - Semantic Validation
+- ✅ **AAP-002** - Authorization Framework
 - ✅ **OWASP** - Security best practices (partial)
 - ⚠️ **SOC 2** - Not certified (beta demonstration)
 - ⚠️ **ISO 27001** - Not certified (beta demonstration)
@@ -398,8 +398,8 @@ staticcheck ./...
 ## Support
 
 For security questions or concerns:
-- GitHub Issues (non-security): `https://github.com/mauriciomferz/Gauth_go/issues`
-- Security Advisories: `https://github.com/mauriciomferz/Gauth_go/security/advisories`
+- GitHub Issues (non-security): `https://github.com/mauriciomferz/AgentAuth/issues`
+- Security Advisories: `https://github.com/mauriciomferz/AgentAuth/security/advisories`
 - Documentation: `http://localhost:8080/docs/SECURITY_SETUP_GUIDE.md`
 
 ---

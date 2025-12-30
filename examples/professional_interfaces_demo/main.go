@@ -16,7 +16,7 @@ func main() {
 
 	// Create professional configuration
 	config := auth.ProfessionalConfig{
-		Issuer:            "gauth-mesh",
+		Issuer:            "agentauth-mesh",
 		Audience:          "service-mesh",
 		TokenExpiry:       30 * time.Minute,
 		ServiceID:         "api-service-1",

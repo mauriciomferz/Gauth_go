@@ -202,7 +202,7 @@ docker run -d -p 6379:6379 redis:7-alpine
 
 2. **Run test suite**:
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 go test ./pkg/revocation -v
 ```
 
@@ -227,7 +227,7 @@ go test ./pkg/revocation -bench=. -benchmem
 
 ```go
 // In main.go or initialization code
-logger := revocation.NewSimpleLogger("gauth")
+logger := revocation.NewSimpleLogger("agentauth")
 
 oracle, err := revocation.NewEmergencyOracle(
     []string{

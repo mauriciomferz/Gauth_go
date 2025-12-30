@@ -1,16 +1,16 @@
 ---
-title: RFC-0111 Implementation Architecture
+title: AAP-001 Implementation Architecture
 category: architecture
 status: active
 lastUpdated: 2025-11-12
 owners: architecture-team
 ---
-# RFC-0111 Implementation Architecture
+# AAP-001 Implementation Architecture
 ## Visual Guide to the Solution
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         RFC-0111 COMPLIANT GAUTH                            │
+│                         AAP-001 COMPLIANT AGENTAUTH                            │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐    │
 │  │                    ONE-OFF SUBSCRIPTION FLOW                        │    │
@@ -71,7 +71,7 @@ owners: architecture-team
 │    │ (e) Extended Token Issuance                                      │     │
 │    │     → ExtendedTokenService.CreateExtendedToken() ✓ CALLED        │     │
 │    │     → NOT jwt.NewWithClaims() ❌                                 │     │
-│    │     → Returns RFC-0111 ExtendedToken ✓                           │     │
+│    │     → Returns AAP-001 ExtendedToken ✓                           │     │
 │    ├──────────────────────────────────────────────────────────────────┤     │
 │    │ (f) Grant Compliance Validation                                  │     │
 │    │     → ComplianceValidator.ValidateGrantCompliance() ✓ CALLED     │     │
@@ -88,7 +88,7 @@ owners: architecture-team
 │    │     → Monitor ongoing behavior vs authorized scope               │     │
 │    └──────────────────────────────────────────────────────────────────┘     │
 │                               ↓                                             │
-│                    Return RFC-0111 ExtendedToken                            │
+│                    Return AAP-001 ExtendedToken                            │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -208,7 +208,7 @@ owners: architecture-team
 └─────────────────────────────────────┘
 ```
 
-**Result**: True RFC-0111 AgentAuth implementation. ✓
+**Result**: True AAP-001 AgentAuth implementation. ✓
 
 ---
 
@@ -384,8 +384,8 @@ owners: architecture-team
 ## File Structure
 
 ```
-pkg/gauth/
-├── gauth.go                          (EXISTING - UPDATE)
+pkg/agentauth/
+├── agentauth.go                          (EXISTING - UPDATE)
 │   ├── RequestToken()                 ← Update to use orchestrator
 │   ├── RequestTokenLegacy()           ← NEW: Keep old JWT mode
 │   └── RequestTokenRFC()              ← NEW: RFC-compliant entry point
@@ -460,7 +460,7 @@ pkg/gauth/
 ✅ Protocol orchestrator (Steps a-i)
 ✅ Extended tokens with PoA metadata
 ✅ All validation functions integrated
-✅ True RFC-0111 AgentAuth implementation
+✅ True AAP-001 AgentAuth implementation
 ✅ RFC compliance: 95+/100
 ```
 
@@ -474,7 +474,7 @@ The code quality is excellent. The validation functions are comprehensive.
 The data structures are perfect. We're not rewriting from scratch.
 
 **We're adding 3 new files (~1,400 lines) to orchestrate the existing ~5,000 
-lines of validation code into an RFC-0111 compliant flow.**
+lines of validation code into an AAP-001 compliant flow.**
 
 ---
 
@@ -515,7 +515,7 @@ lines of validation code into an RFC-0111 compliant flow.**
 │ • refresh_token │    │ • pq.Array() for    │
 │ • scope []text  │    │   PostgreSQL arrays │
 │ • issued_at     │    │ • Nullable issued_by│
-│ • expires_at    │    │ • RFC-0111 metadata │
+│ • expires_at    │    │ • AAP-001 metadata │
 │ • revoked_at    │    │                     │
 │ • client_id     │    │ Performance:        │
 │   (JSONB path)  │    │ • ~10ms/token       │
@@ -535,13 +535,13 @@ lines of validation code into an RFC-0111 compliant flow.**
 
 ```bash
 # Token Store Selection
-export GAUTH_TOKEN_STORE=postgres        # Options: memory, postgres (default: memory)
+export AGENTAUTH_TOKEN_STORE=postgres        # Options: memory, postgres (default: memory)
 
 # PostgreSQL Connection
 export DB_HOST=localhost
 export DB_PORT=5432
-export DB_NAME=gauth
-export DB_USER=gauth_user
+export DB_NAME=agentauth
+export DB_USER=agentauth_user
 export DB_PASSWORD=secure_password
 export DB_SSLMODE=require               # For production
 ```
@@ -570,7 +570,7 @@ err := db.QueryRowContext(ctx, query, accessToken).Scan(
 
 **JSONB Storage for Complex Structures**:
 ```sql
--- Full RFC-0111 authorization chains stored as JSONB
+-- Full AAP-001 authorization chains stored as JSONB
 authorization_chain JSONB,      -- Complete auth chain with all entities
 power_of_attorney JSONB,        -- PoA credential details
 client_owner JSONB,             -- Client owner information
@@ -584,7 +584,7 @@ CREATE INDEX idx_extended_tokens_client_id ON extended_tokens(((authorization_ch
 ```
 
 **Database Schema** (`schema/migrations/001_create_extended_tokens.sql`):
-- 28 columns for complete RFC-0111 token metadata
+- 28 columns for complete AAP-001 token metadata
 - 5 indexes for performance (client_id JSONB path, grant_id, issued_at, revoked_at partial, created_at)
 - Nullable `issued_by` column (matches optional ExtendedToken.IssuedBy field)
 - Auto-applied migrations on first connection
@@ -605,7 +605,7 @@ if h.tokenStore != nil && response.ExtendedToken != nil {
 ```sql
 -- Verification query
 SELECT COUNT(*) as total_tokens,
-       COUNT(DISTINCT ((authorization_chain->'client'->>'entity_id'))) as unique_clients
+       COUNT(DISTINCT ((authorization_chain->'client'->>'entity_id')) as unique_clients
 FROM extended_tokens;
 
 -- Result: ✅
@@ -622,9 +622,9 @@ FROM extended_tokens LIMIT 3;
 -- Result: ✅
 token_prefix              | token_type | expires_in | compliance_level
 --------------------------+------------+------------+------------------
-gauth_at_a6cca05dc8eb2... | Bearer     | 3600       | rfc-0111-compliant
-gauth_at_cba6bea9fea47... | Bearer     | 3600       | rfc-0111-compliant
-gauth_at_8d66456cdf96c... | Bearer     | 3600       | rfc-0111-compliant
+agentauth_at_a6cca05dc8eb2... | Bearer     | 3600       | rfc-0111-compliant
+agentauth_at_cba6bea9fea47... | Bearer     | 3600       | rfc-0111-compliant
+agentauth_at_8d66456cdf96c... | Bearer     | 3600       | rfc-0111-compliant
 ```
 
 **Performance Metrics**:
@@ -644,7 +644,7 @@ docker-compose up -d
 **Production Setup**:
 ```bash
 # 1. Set environment variables
-export GAUTH_TOKEN_STORE=postgres
+export AGENTAUTH_TOKEN_STORE=postgres
 export DB_HOST=prod-postgres.example.com
 export DB_SSLMODE=require
 
@@ -657,7 +657,7 @@ export DB_SSLMODE=require
 
 - **Setup Guide**: `docs/POSTGRESQL_SETUP.md` (850+ lines)
 - **Schema**: `schema/migrations/001_create_extended_tokens.sql`
-- **Implementation**: `pkg/gauth/extended_token_store_postgres.go` (479 lines)
+- **Implementation**: `pkg/agentauth/extended_token_store_postgres.go` (479 lines)
 - **Tests**: Verified with 5 tokens, full JSONB data persistence
 
 ---

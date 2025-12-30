@@ -113,17 +113,17 @@ curl http://localhost:8080/api/admin/audit/correlations | jq .
 **Solutions**:
 1. Check backend logs:
    ```bash
-   docker logs gauth-backend-new --tail=50 | grep -i export
+   docker logs agentauth-backend-new --tail=50 | grep -i export
    ```
 
 2. Verify database connectivity:
    ```bash
-   docker exec gauth-postgres pg_isready
+   docker exec agentauth-postgres pg_isready
    ```
 
 3. Check disk space for export directory:
    ```bash
-   df -h /tmp/gauth-audit-exports
+   df -h /tmp/agentauth-audit-exports
    ```
 
 ### API Key Not Working
@@ -153,7 +153,7 @@ curl http://localhost:8080/api/admin/audit/correlations | jq .
 **Solutions**:
 1. Check for large export jobs:
    ```bash
-   ls -lh /tmp/gauth-audit-exports/
+   ls -lh /tmp/agentauth-audit-exports/
    ```
 
 2. Clean up old export jobs:
@@ -164,7 +164,7 @@ curl http://localhost:8080/api/admin/audit/correlations | jq .
 
 3. Restart backend if needed:
    ```bash
-   docker restart gauth-backend-new
+   docker restart agentauth-backend-new
    ```
 
 ---
@@ -217,9 +217,9 @@ curl http://localhost:8080/api/admin/api-keys | jq .
 
 ### Log Locations
 
-- **Backend logs**: `docker logs gauth-backend-new`
-- **PostgreSQL logs**: `docker logs gauth-postgres`
-- **Export files**: `/tmp/gauth-audit-exports/`
+- **Backend logs**: `docker logs agentauth-backend-new`
+- **PostgreSQL logs**: `docker logs agentauth-postgres`
+- **Export files**: `/tmp/agentauth-audit-exports/`
 
 ### Important URLs
 
@@ -236,16 +236,16 @@ curl http://localhost:8080/api/admin/api-keys | jq .
 
 ```bash
 # 1. Check logs
-docker logs gauth-backend-new --tail=100
+docker logs agentauth-backend-new --tail=100
 
 # 2. Restart backend
-docker restart gauth-backend-new
+docker restart agentauth-backend-new
 
 # 3. Verify health
 curl http://localhost:8080/api/v1/beta/health
 
 # 4. If still failing, redeploy
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 ./deploy-standalone.sh
 ```
 
@@ -253,16 +253,16 @@ cd /path/to/Gauth_go
 
 ```bash
 # 1. Check PostgreSQL
-docker ps | grep gauth-postgres
+docker ps | grep agentauth-postgres
 
 # 2. Restart if needed
-docker restart gauth-postgres
+docker restart agentauth-postgres
 
 # 3. Wait for healthy
-docker exec gauth-postgres pg_isready
+docker exec agentauth-postgres pg_isready
 
 # 4. Restart backend
-docker restart gauth-backend-new
+docker restart agentauth-backend-new
 ```
 
 ---

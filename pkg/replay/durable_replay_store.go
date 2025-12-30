@@ -650,7 +650,7 @@ func (a *DurableReplayStoreAdapter) Record(jti string, at time.Time) error {
 	return a.store.Record(jti, at)
 }
 
-// CheckAndStore implements gauth.ReplayStore interface for fail-closed mode.
+// CheckAndStore implements agentauth.ReplayStore interface for fail-closed mode.
 // Returns error if JTI already seen (replay detected).
 func (a *DurableReplayStoreAdapter) CheckAndStore(jti string) error {
 	seen, err := a.store.Seen(jti)
@@ -689,39 +689,39 @@ func (st *SnapshotTrigger) Trigger(ctx context.Context) error {
 
 // NewDurableReplayStoreFromEnv creates a DurableReplayStore from environment variables.
 // Supported env vars:
-//   - GAUTH_REPLAY_WAL_PATH (default: ./data/replay.wal)
-//   - GAUTH_REPLAY_TTL_SEC (default: 900 = 15 minutes)
-//   - GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC (default: 300 = 5 minutes)
-//   - GAUTH_REPLAY_EVICTION_POLICY (default: ttl, options: ttl|lru|size|ttl+size)
-//   - GAUTH_REPLAY_EVICTION_MAX_SIZE (default: 10000)
+//   - AGENTAUTH_REPLAY_WAL_PATH (default: ./data/replay.wal)
+//   - AGENTAUTH_REPLAY_TTL_SEC (default: 900 = 15 minutes)
+//   - AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC (default: 300 = 5 minutes)
+//   - AGENTAUTH_REPLAY_EVICTION_POLICY (default: ttl, options: ttl|lru|size|ttl+size)
+//   - AGENTAUTH_REPLAY_EVICTION_MAX_SIZE (default: 10000)
 func NewDurableReplayStoreFromEnv(metrics DurableReplayMetrics) (*DurableReplayStore, error) {
-	walPath := os.Getenv("GAUTH_REPLAY_WAL_PATH")
+	walPath := os.Getenv("AGENTAUTH_REPLAY_WAL_PATH")
 	if walPath == "" {
 		walPath = "./data/replay.wal"
 	}
 
 	ttl := 15 * time.Minute
-	if v := os.Getenv("GAUTH_REPLAY_TTL_SEC"); v != "" {
+	if v := os.Getenv("AGENTAUTH_REPLAY_TTL_SEC"); v != "" {
 		if secs, err := strconv.Atoi(v); err == nil && secs > 0 {
 			ttl = time.Duration(secs) * time.Second
 		}
 	}
 
 	snapshotInterval := 5 * time.Minute
-	if v := os.Getenv("GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC"); v != "" {
+	if v := os.Getenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC"); v != "" {
 		if secs, err := strconv.Atoi(v); err == nil && secs > 0 {
 			snapshotInterval = time.Duration(secs) * time.Second
 		}
 	}
 
 	maxSize := 10000
-	if v := os.Getenv("GAUTH_REPLAY_EVICTION_MAX_SIZE"); v != "" {
+	if v := os.Getenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE"); v != "" {
 		if size, err := strconv.Atoi(v); err == nil && size > 0 {
 			maxSize = size
 		}
 	}
 
-	policyStr := os.Getenv("GAUTH_REPLAY_EVICTION_POLICY")
+	policyStr := os.Getenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
 	if policyStr == "" {
 		policyStr = "ttl" // Default
 	}

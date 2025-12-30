@@ -9,7 +9,7 @@ owners: [system]
 # Walkthrough - Deployment Readiness & Admin Handlers
 
 ## Overview
-Transformed the Gauth backend from a "Degraded Mode" state to a fully functional Admin Service by initializing and wiring up critical handlers (`TokenHandler`, `APIKeyHandler`, `ResilienceHandler`) and adding necessary dependencies (Redis). Verified the production build and configuration.
+Transformed the AgentAuth backend from a "Degraded Mode" state to a fully functional Admin Service by initializing and wiring up critical handlers (`TokenHandler`, `APIKeyHandler`, `ResilienceHandler`) and adding necessary dependencies (Redis). Verified the production build and configuration.
 
 ## Changes
 
@@ -20,13 +20,13 @@ Transformed the Gauth backend from a "Degraded Mode" state to a fully functional
 
 ### 2. Deployment Configuration
 - **Redis Configuration**: Updated `docker-compose.production.yml` to pass `REDIS_HOST` and `REDIS_PORT` to the backend service, ensuring proper connection to the Redis container.
-- **Volume Management**: Performed `docker-compose down -v` to forcefully remove stale volumes. This was critical to resolve the `FATAL: role "gauth_prod_user" does not exist` error, which otherwise persisted and blocked the backend from initializing the production database connection.
+- **Volume Management**: Performed `docker-compose down -v` to forcefully remove stale volumes. This was critical to resolve the `FATAL: role "agentauth_prod_user" does not exist` error, which otherwise persisted and blocked the backend from initializing the production database connection.
 - **Frontend Health Check**: Fixed "Unhealthy" status by updating `Dockerfile.production` to use `127.0.0.1`.
 - **API Connectivity**: Configured `VITE_API_BASE_URL` to `/api/v1` in `docker-compose.production.yml` to route requests through the Nginx proxy, resolving CORS issues and 404s.
-- **Production Mode**: Added `DB_HOST` to backend environment variables (mapped to `GAUTH_DB_HOST`), ensuring the application starts in Production Mode.
-- **Service Configuration**: Disabled Postgres SSL requirement (`GAUTH_DB_SSL_MODE=disable`) and removed Redis authentication to align with the provided Docker images, resolving startup failures.
+- **Production Mode**: Added `DB_HOST` to backend environment variables (mapped to `AGENTAUTH_DB_HOST`), ensuring the application starts in Production Mode.
+- **Service Configuration**: Disabled Postgres SSL requirement (`AGENTAUTH_DB_SSL_MODE=disable`) and removed Redis authentication to align with the provided Docker images, resolving startup failures.
 - **Frontend Routing**: Updated `nginx.conf` to correctly proxy `/gnap/` and `/.well-known/` requests, and resolved AgentAuth+ pathing.
-- **Database Schema**: Created `004_create_gauthplus_tables.sql` and corrected volume mount path to `./schema/migrations` to fix "relation does not exist" errors for AgentAuth+ features.
+- **Database Schema**: Created `004_create_agentauthplus_tables.sql` and corrected volume mount path to `./schema/migrations` to fix "relation does not exist" errors for AgentAuth+ features.
 - **Audit Trail**: Created `005_create_audit_and_subscriber_tables.sql` to resolve 500 errors on Audit APIs caused by missing `audit_events` and `subscribers` tables.
 - **Subscribers & Tokens**: Created `006_create_tokens_table.sql` and updated `005` with legacy columns (`subscriber_id`, `subscriber_name`) to resolve 500 errors on `/api/admin/subscribers` and `/api/admin/tokens`.
 - **Power of Attorney**: Created `007_create_poa_tables.sql` to resolve 500 errors on `/api/admin/poa`, defining `power_of_attorney` and `poa_templates` tables.
@@ -35,23 +35,23 @@ Transformed the Gauth backend from a "Degraded Mode" state to a fully functional
 - **Events**: Created `010_create_event_tables.sql` to resolve 500 errors on `/api/admin/events/*`, defining `events`, `event_types`, and `event_handlers` tables.
 - **OIDC**: Created `011_create_oidc_provider_tables.sql` to resolve 500 errors on `/api/admin/oidc-providers`, defining `oidc_providers` table.
 - **Frontend CORS**: Updated frontend admin pages to use relative API paths instead of hardcoded `localhost:8080`, resolving CORS errors.
-- **Healthcheck**: Updated `docker-compose.production.yml` to specify the correct database (`gauth_production`) for `pg_isready` check, resolving "database does not exist" warnings.
+- **Healthcheck**: Updated `docker-compose.production.yml` to specify the correct database (`agentauth_production`) for `pg_isready` check, resolving "database does not exist" warnings.
 
 ## Verification Results
 
 ### Deployment Verification
 - **Container Startup**: PASSED (All services Healthy)
-- **Database Connection**: PASSED (Production Mode active, Role `gauth_prod_user` authn success)
+- **Database Connection**: PASSED (Production Mode active, Role `agentauth_prod_user` authn success)
 - **Admin Handlers**: PASSED (AgentAuth+ endpoints registered)
 - **Frontend Health**: PASSED (Reachable on port 3002)
 - **CORS**: PASSED (Nginx proxy on `/api/v1` handles backend communication correctly)
 - **Logs**: No fatal errors observed after volume reset.
 
 ### Containers
-- `gauth-backend-prod`: Up (Healthy)
-- `gauth-postgres-prod`: Up (Healthy)
-- `gauth-redis-prod`: Up (Healthy)
-- `gauth-frontend-prod`: Up (Healthy) - Verified via updated health check.
+- `agentauth-backend-prod`: Up (Healthy)
+- `agentauth-postgres-prod`: Up (Healthy)
+- `agentauth-redis-prod`: Up (Healthy)
+- `agentauth-frontend-prod`: Up (Healthy) - Verified via updated health check.
 
 ## Next Steps
 - Access the Admin Dashboard at `http://localhost:3002`.
@@ -138,7 +138,7 @@ We verified the end-to-end flow using the Browser Subagent:
 ### 7. Global Stability Verification
 - **Full Test Suite**: Executed `go test -v ./...` verifying all packages.
 - **Results**:
-  - **Unit Tests**: PASSED (All packages including `pkg/scim`, `pkg/saml`, `pkg/compliance`, `pkg/gauth`).
+  - **Unit Tests**: PASSED (All packages including `pkg/scim`, `pkg/saml`, `pkg/compliance`, `pkg/agentauth`).
   - **Integration Tests**: PASSED (`test/integration/pkg/poa`, `test/integration/pkg/replay`).
   - **Load Tests**: PASSED (`test/load` endurance test verified system stability under simulated load).
 - **Conclusion**: The system is stable, performant, and regression-free.

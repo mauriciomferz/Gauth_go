@@ -530,15 +530,15 @@ ON CONFLICT (tenant_id) DO NOTHING;
 -- Note: Adjust role name and password for your environment
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'gauth_app') THEN
-        CREATE ROLE gauth_app WITH LOGIN PASSWORD 'change_me_in_production';
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'agentauth_app') THEN
+        CREATE ROLE agentauth_app WITH LOGIN PASSWORD 'change_me_in_production';
     END IF;
 END
 $$;
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO gauth_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO gauth_app;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO gauth_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO agentauth_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO agentauth_app;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO agentauth_app;
 
 -- ============================================================================
 -- SCHEMA COMPLETE

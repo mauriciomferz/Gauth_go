@@ -32,30 +32,30 @@ echo "📁 Building from directory: $SCRIPT_DIR"
 
 # Clean up any previous test images
 echo "🧹 Cleaning up previous test images..."
-docker rmi gauth-demo:test 2>/dev/null || true
+docker rmi agentauth-demo:test 2>/dev/null || true
 
 echo "🔨 Building Docker image..."
-echo "   Image: gauth-demo:test"
-echo "   Context: . (excluding gauth-demo-app/ via .dockerignore)"
+echo "   Image: agentauth-demo:test"
+echo "   Context: . (excluding agentauth-demo-app/ via .dockerignore)"
 echo "   Strategy: Remove problematic local module dependency during build"
 echo ""
 
 # Build the Docker image
-if docker build -t gauth-demo:test .; then
+if docker build -t agentauth-demo:test .; then
     echo ""
     echo "✅ Docker build completed successfully!"
     
     # Get image information
     echo ""
     echo "📊 Image Information:"
-    docker images gauth-demo:test --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
+    docker images agentauth-demo:test --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
     
     echo ""
     echo "🧪 Testing the built application..."
     
     # Test the application in a container
-    echo "   Running: docker run --rm gauth-demo:test --help"
-    if docker run --rm gauth-demo:test --help; then
+    echo "   Running: docker run --rm agentauth-demo:test --help"
+    if docker run --rm agentauth-demo:test --help; then
         echo ""
         echo "✅ Application runs successfully in container!"
     else
@@ -68,10 +68,10 @@ if docker build -t gauth-demo:test .; then
     echo "🎉 Docker build verification completed successfully!"
     echo ""
     echo "To run the container:"
-    echo "   docker run -p 8080:8080 gauth-demo:test"
+    echo "   docker run -p 8080:8080 agentauth-demo:test"
     echo ""
     echo "To clean up:"
-    echo "   docker rmi gauth-demo:test"
+    echo "   docker rmi agentauth-demo:test"
     
 else
     echo ""

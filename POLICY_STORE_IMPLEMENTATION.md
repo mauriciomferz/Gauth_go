@@ -21,7 +21,7 @@ The authorization engine (PowerAdministrationPoint) previously stored all polici
 ## Solution
 Implemented a pluggable PolicyStore interface with two implementations:
 
-### 1. PolicyStore Interface (`pkg/gauth/policy_store.go`)
+### 1. PolicyStore Interface (`pkg/agentauth/policy_store.go`)
 Defines a contract for policy persistence with the following operations:
 - **Create**: Add new policies
 - **Get**: Retrieve policy by ID
@@ -33,7 +33,7 @@ Defines a contract for policy persistence with the following operations:
 - **Count**: Get policy count with optional filtering
 - **Close**: Cleanup resources
 
-### 2. InMemoryPolicyStore (`pkg/gauth/policy_store.go`)
+### 2. InMemoryPolicyStore (`pkg/agentauth/policy_store.go`)
 Thread-safe in-memory implementation for:
 - Development environments
 - Testing
@@ -47,7 +47,7 @@ Features:
 - Handles date range filtering (CreatedAfter/CreatedBefore)
 - Tag-based filtering with multiple tag support
 
-### 3. DatabasePolicyStore (`pkg/gauth/policy_store_db.go`)
+### 3. DatabasePolicyStore (`pkg/agentauth/policy_store_db.go`)
 PostgreSQL-backed implementation for production environments:
 - Persistent storage of all policy data
 - Uses JSONB columns for flexible schema (PolicyRules, Scope, Restrictions, Tags, Metadata)
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS authorization_policies (
 ```
 
 ## PowerAdministrationPoint Refactoring
-Updated `pkg/gauth/gauth.go`:
+Updated `pkg/agentauth/agentauth.go`:
 
 **Before:**
 ```go
@@ -150,7 +150,7 @@ policies, err := pap.SearchPolicies(context.Background(), criteria)
 ```
 
 ## Testing
-Comprehensive test suite in `pkg/gauth/policy_store_test.go`:
+Comprehensive test suite in `pkg/agentauth/policy_store_test.go`:
 - `TestInMemoryPolicyStore_CRUD`: Basic operations
 - `TestInMemoryPolicyStore_List`: Status filtering
 - `TestInMemoryPolicyStore_Search`: Multi-criteria search
@@ -170,7 +170,7 @@ All tests pass:
 === RUN   TestInMemoryPolicyStore_IsolationCopy
 --- PASS: TestInMemoryPolicyStore_IsolationCopy (0.00s)
 PASS
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauth     0.927s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauth     0.927s
 ```
 
 ## Backward Compatibility
@@ -202,11 +202,11 @@ For production deployments:
 ✅ **Concurrency**: Database transactions ensure data integrity
 
 ## Files Modified
-- ✅ `pkg/gauth/policy_store.go` - New interface and in-memory implementation
-- ✅ `pkg/gauth/policy_store_db.go` - New database implementation
-- ✅ `pkg/gauth/policy_store_test.go` - New comprehensive test suite
-- ✅ `pkg/gauth/gauth.go` - Refactored PowerAdministrationPoint
-- ✅ `pkg/gauth/pap_test.go` - Minor update to test store field
+- ✅ `pkg/agentauth/policy_store.go` - New interface and in-memory implementation
+- ✅ `pkg/agentauth/policy_store_db.go` - New database implementation
+- ✅ `pkg/agentauth/policy_store_test.go` - New comprehensive test suite
+- ✅ `pkg/agentauth/agentauth.go` - Refactored PowerAdministrationPoint
+- ✅ `pkg/agentauth/pap_test.go` - Minor update to test store field
 
 ## Related Documentation
 - See `DIRECTORY_REORGANIZATION.md` for frontend/testing structure changes

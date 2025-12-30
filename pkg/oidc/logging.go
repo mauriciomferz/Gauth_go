@@ -391,8 +391,8 @@ func (l *Logger) LogRateLimitCheck(endpoint, result string, remaining int) {
 		Msg("Rate limit check")
 }
 
-// LogAuthenticationAttempt logs an authentication attempt.
-func (l *Logger) LogAuthenticationAttempt(provider, userID string, success bool) {
+// LoagentAuthenticationAttempt logs an authentication attempt.
+func (l *Logger) LoagentAuthenticationAttempt(provider, userID string, success bool) {
 	event := l.logger.Info()
 	if !success {
 		event = l.logger.Warn()

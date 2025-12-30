@@ -67,7 +67,7 @@ func requestGrant() (map[string]interface{}, error) {
 		"access_token": map[string]interface{}{
 			"access": []map[string]interface{}{
 				{
-					"type":    "gauth-api",
+					"type":    "agentauth-api",
 					"actions": []string{"read", "write"},
 				},
 			},

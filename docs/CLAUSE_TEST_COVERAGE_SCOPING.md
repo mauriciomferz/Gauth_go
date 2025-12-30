@@ -115,7 +115,7 @@ func TestCanonicalDigestStable(t *testing.T) { ... }
   ```
 5. Failing threshold example (bash snippet):
   ```bash
-  pct=$(jq -r '(.rfc["0111"].sections + .rfc["0115"].sections | map(select(.tests|length>0)) | length) / (.rfc["0111"].sections + .rfc["0115"].sections | length) * 100' docs/CLAUSE_TEST_COVERAGE.json)
+  pct=$(jq -r '(.rfc["0111"].sections + .rfc["0115"].sections | map(select(.tests|length>0) | length) / (.rfc["0111"].sections + .rfc["0115"].sections | length) * 100' docs/CLAUSE_TEST_COVERAGE.json)
   echo "Clause coverage: ${pct}%"
   awk "BEGIN {exit (${pct} < 5)}"  # require at least 5%
   ```

@@ -90,12 +90,12 @@ Improve `pkg/poa` test coverage from baseline to 75%+
 ### Deliverables
 - **Test Files Created:** 11 files
   1. memory_service_test.go (782 lines)
-  2. rfc0115_compliance_test.go (1092 lines after expansions)
+  2. aap002_compliance_test.go (1092 lines after expansions)
   3. issue_and_helpers_test.go (803 lines)
   4. raw_poa_stream_test.go (778 lines)
   5. edge_cases_test.go (458 lines)
   6. poa_multisig_test.go (118 lines)
-  7. rfc0115_negative_test.go (95 lines)
+  7. aap002_negative_test.go (95 lines)
   8. poa_digest_test.go (70 lines)
   9. validator_test.go (67 lines)
   10. poa_test.go (58 lines)
@@ -120,7 +120,7 @@ Improve `pkg/poa` test coverage from baseline to 75%+
 | DecodeRawPOAStreamWith | 52.3% | ⚠️ Limited |
 
 #### 2. Comprehensive Test Scenarios
-- ✅ RFC-0115 compliance validation
+- ✅ AAP-002 compliance validation
 - ✅ CBOR streaming encoding/decoding
 - ✅ Memory service CRUD operations
 - ✅ Edge cases and error handling
@@ -272,7 +272,7 @@ This demonstrated the importance of identifying high-impact target areas.
    - Document lessons learned
 
 3. **📋 Plan Phase 3**
-   - Select next target package (e.g., pkg/rfc0111)
+   - Select next target package (e.g., pkg/aap001)
    - Apply lessons from Phase 2
    - Set realistic coverage targets
 
@@ -352,14 +352,14 @@ Phase 2B Commits:
 ### C. Test File Sizes
 
 **pkg/poa test files (sorted by size):**
-1. rfc0115_compliance_test.go - 1,092 lines
+1. aap002_compliance_test.go - 1,092 lines
 2. issue_and_helpers_test.go - 803 lines
 3. memory_service_test.go - 782 lines
 4. raw_poa_stream_test.go - 778 lines
 5. edge_cases_test.go - 458 lines
 6. session36_edge_cases_test.go - 319 lines
 7. poa_multisig_test.go - 118 lines
-8. rfc0115_negative_test.go - 95 lines
+8. aap002_negative_test.go - 95 lines
 9. poa_digest_test.go - 70 lines
 10. validator_test.go - 67 lines
 11. poa_test.go - 58 lines

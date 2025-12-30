@@ -58,10 +58,10 @@ if err := ValidateJSONSecurity(jsonData, 32, 1024*1024); err != nil {
 
 ## Feature Flag
 
-### GAUTH_STRICT_JSON_PARSING
+### AGENTAUTH_STRICT_JSON_PARSING
 
 **Default**: `0` (disabled - backward compatible)  
-**Enable**: Set `GAUTH_STRICT_JSON_PARSING=1`
+**Enable**: Set `AGENTAUTH_STRICT_JSON_PARSING=1`
 
 **Effect**:
 - **Disabled (default)**: Uses standard `json.Unmarshal` for backward compatibility
@@ -69,7 +69,7 @@ if err := ValidateJSONSecurity(jsonData, 32, 1024*1024); err != nil {
 
 **Example**:
 ```bash
-export GAUTH_STRICT_JSON_PARSING=1
+export AGENTAUTH_STRICT_JSON_PARSING=1
 go run ./cmd/web-server
 ```
 
@@ -77,12 +77,12 @@ go run ./cmd/web-server
 
 ### Integration in ValidateToken
 
-The `ValidateToken` function in `pkg/gauth/gauth.go` integrates SecureJSONParser:
+The `ValidateToken` function in `pkg/agentauth/agentauth.go` integrates SecureJSONParser:
 
 ```go
 // Header parsing
 var head map[string]any
-if os.Getenv("GAUTH_STRICT_JSON_PARSING") == "1" {
+if os.Getenv("AGENTAUTH_STRICT_JSON_PARSING") == "1" {
     parser := DefaultSecureParser()
     if uErr := parser.ParseSecure(headBytes, &head); uErr != nil {
         return nil, ErrInvalidToken
@@ -95,7 +95,7 @@ if os.Getenv("GAUTH_STRICT_JSON_PARSING") == "1" {
 
 // Payload parsing (same pattern)
 var claims map[string]any
-if os.Getenv("GAUTH_STRICT_JSON_PARSING") == "1" {
+if os.Getenv("AGENTAUTH_STRICT_JSON_PARSING") == "1" {
     parser := DefaultSecureParser()
     if err := parser.ParseSecure(payloadBytes, &claims); err != nil {
         return nil, ErrInvalidToken
@@ -172,14 +172,14 @@ func computeMaxDepth(data []byte) int {
 - Zero behavior change (backward compatible)
 
 **Validation**:
-- Run existing property tests: `go test -v -run TestParsingProperty ./pkg/gauth/`
+- Run existing property tests: `go test -v -run TestParsingProperty ./pkg/agentauth/`
 - Verify 5/6 tests passing (TestParsingPropertyTimingBoundaries pre-existing failure)
 
 ### Phase 2: Enable in Staging Environment
 
 **Action**: Enable strict JSON parsing in staging
 ```bash
-export GAUTH_STRICT_JSON_PARSING=1
+export AGENTAUTH_STRICT_JSON_PARSING=1
 ```
 
 **Result**:
@@ -188,7 +188,7 @@ export GAUTH_STRICT_JSON_PARSING=1
 - Monitor for unexpected rejections
 
 **Validation**:
-- Run SecureJSONParser tests: `go test -v -run TestSecureJSONParser ./pkg/gauth/`
+- Run SecureJSONParser tests: `go test -v -run TestSecureJSONParser ./pkg/agentauth/`
 - Verify all 9 test suites passing (41 test cases total)
 - Monitor staging logs for "nesting depth exceeds limit" or "exceeds max size" errors
 
@@ -196,7 +196,7 @@ export GAUTH_STRICT_JSON_PARSING=1
 
 **Action**: Enable strict JSON parsing in production after successful staging validation
 ```bash
-export GAUTH_STRICT_JSON_PARSING=1
+export AGENTAUTH_STRICT_JSON_PARSING=1
 ```
 
 **Result**:
@@ -208,9 +208,9 @@ export GAUTH_STRICT_JSON_PARSING=1
 
 If issues arise after enabling:
 ```bash
-unset GAUTH_STRICT_JSON_PARSING
+unset AGENTAUTH_STRICT_JSON_PARSING
 # or
-export GAUTH_STRICT_JSON_PARSING=0
+export AGENTAUTH_STRICT_JSON_PARSING=0
 ```
 
 **Rollback Effect**:
@@ -241,7 +241,7 @@ export GAUTH_STRICT_JSON_PARSING=0
 
 ### Comprehensive Test Suite
 
-**File**: `pkg/gauth/secure_json_test.go`
+**File**: `pkg/agentauth/secure_json_test.go`
 
 **Test Coverage** (9 test suites, 41 test cases):
 
@@ -257,14 +257,14 @@ export GAUTH_STRICT_JSON_PARSING=0
 
 **Run Tests**:
 ```bash
-go test -v -run TestSecureJSONParser ./pkg/gauth/
+go test -v -run TestSecureJSONParser ./pkg/agentauth/
 ```
 
 **Expected Result**: All 9 test suites passing (41 test cases, ~0.9s runtime)
 
 ### Property Tests (Backward Compatibility)
 
-**File**: `pkg/gauth/gauth_parsing_prop_test.go`
+**File**: `pkg/agentauth/agentauth_parsing_prop_test.go`
 
 **Property Tests** (5 passing, 1 pre-existing failure):
 
@@ -277,7 +277,7 @@ go test -v -run TestSecureJSONParser ./pkg/gauth/
 
 **Run Property Tests**:
 ```bash
-go test -v -run TestParsingProperty ./pkg/gauth/
+go test -v -run TestParsingProperty ./pkg/agentauth/
 ```
 
 ## Configuration Examples
@@ -294,7 +294,7 @@ go run ./cmd/web-server
 ### Example 2: Strict Parsing with Default Limits
 
 ```bash
-export GAUTH_STRICT_JSON_PARSING=1
+export AGENTAUTH_STRICT_JSON_PARSING=1
 go run ./cmd/web-server
 ```
 
@@ -307,7 +307,7 @@ go run ./cmd/web-server
 ### Example 3: Custom Limits (Code Modification Required)
 
 ```go
-// In gauth.go ValidateToken function
+// In agentauth.go ValidateToken function
 parser := &SecureJSONParser{
     MaxDepth:            64,  // Allow deeper nesting
     MaxSize:             5 * 1024 * 1024, // 5MB limit
@@ -322,7 +322,7 @@ parser := &SecureJSONParser{
 
 ### Error Patterns to Monitor
 
-When `GAUTH_STRICT_JSON_PARSING=1` is enabled, monitor for:
+When `AGENTAUTH_STRICT_JSON_PARSING=1` is enabled, monitor for:
 
 1. **Depth Limit Errors**:
    ```
@@ -345,10 +345,10 @@ When `GAUTH_STRICT_JSON_PARSING=1` is enabled, monitor for:
 ### Metrics (Future Enhancement)
 
 Proposed metrics for observability:
-- `gauth_json_parsing_depth_limit_exceeded_total`: Count of depth limit rejections
-- `gauth_json_parsing_size_limit_exceeded_total`: Count of size limit rejections
-- `gauth_json_parsing_utf8_validation_failed_total`: Count of UTF-8 validation failures
-- `gauth_json_parsing_duration_seconds`: Histogram of parsing latency
+- `agentauth_json_parsing_depth_limit_exceeded_total`: Count of depth limit rejections
+- `agentauth_json_parsing_size_limit_exceeded_total`: Count of size limit rejections
+- `agentauth_json_parsing_utf8_validation_failed_total`: Count of UTF-8 validation failures
+- `agentauth_json_parsing_duration_seconds`: Histogram of parsing latency
 
 ## Comparison with Standard Parsing
 
@@ -368,15 +368,15 @@ Proposed metrics for observability:
 - **OWASP JSON Security Cheat Sheet**: https://cheatsheetseries.owasp.org/cheatsheets/JSON_Security_Cheat_Sheet.html
 - **Go encoding/json**: https://pkg.go.dev/encoding/json
 - **GAP Matrix**: docs/GAP_MATRIX.auto.md (sec1.item3 status)
-- **Implementation**: pkg/gauth/secure_json.go, pkg/gauth/gauth.go (ValidateToken integration)
-- **Tests**: pkg/gauth/secure_json_test.go
+- **Implementation**: pkg/agentauth/secure_json.go, pkg/agentauth/agentauth.go (ValidateToken integration)
+- **Tests**: pkg/agentauth/secure_json_test.go
 
 ## Future Enhancements
 
 1. **Dynamic Limit Configuration**: Environment variables for MaxDepth/MaxSize
    ```bash
-   export GAUTH_JSON_MAX_DEPTH=64
-   export GAUTH_JSON_MAX_SIZE_MB=5
+   export AGENTAUTH_JSON_MAX_DEPTH=64
+   export AGENTAUTH_JSON_MAX_SIZE_MB=5
    ```
 
 2. **Metrics Integration**: Prometheus counters for security violations
@@ -391,9 +391,9 @@ Proposed metrics for observability:
 
 ### P2.11 (2025-11-06)
 
-- **Added**: SecureJSONParser with depth/size/UTF-8 validation (pkg/gauth/secure_json.go)
-- **Added**: Feature flag GAUTH_STRICT_JSON_PARSING=1 for opt-in enforcement
-- **Added**: Integration in ValidateToken (pkg/gauth/gauth.go lines 411-425, 445-459)
+- **Added**: SecureJSONParser with depth/size/UTF-8 validation (pkg/agentauth/secure_json.go)
+- **Added**: Feature flag AGENTAUTH_STRICT_JSON_PARSING=1 for opt-in enforcement
+- **Added**: Integration in ValidateToken (pkg/agentauth/agentauth.go lines 411-425, 445-459)
 - **Added**: Comprehensive test suite (9 suites, 41 test cases, all passing)
 - **Added**: Documentation (SECURE_JSON_PARSING.md)
 - **Status**: sec1.item3 **Implemented** (Robust JSON parsing with explicit security hardening)

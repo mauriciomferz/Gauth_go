@@ -2,11 +2,11 @@
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: gauth-postgres
+    container_name: agentauth-postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: gauth_dev_password
-      POSTGRES_DB: gauth
+      POSTGRES_PASSWORD: agentauth_dev_password
+      POSTGRES_DB: agentauth
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
@@ -14,20 +14,20 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d gauth"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d agentauth"]
       interval: 10s
       timeout: 5s
       retries: 5
     restart: unless-stopped
     networks:
-      - gauth-network
+      - agentauth-network
 
   # Optional: PostgreSQL Admin UI (pgAdmin)
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: gauth-pgadmin
+    container_name: agentauth-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@gauth.local
+      PGADMIN_DEFAULT_EMAIL: admin@agentauth.local
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
@@ -38,7 +38,7 @@ services:
       - postgres
     restart: unless-stopped
     networks:
-      - gauth-network
+      - agentauth-network
     profiles:
       - with-ui  # Only start with: docker-compose --profile with-ui up
 
@@ -49,5 +49,5 @@ volumes:
     driver: local
 
 networks:
-  gauth-network:
+  agentauth-network:
     driver: bridge

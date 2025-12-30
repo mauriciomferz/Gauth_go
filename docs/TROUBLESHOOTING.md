@@ -25,7 +25,7 @@ This guide helps you diagnose and fix common issues in AgentAuth.
 #### Diagnostic Steps
 1. Check token format:
 ```go
-import "github.com/AgentAuth-Foundation/gauth/pkg/token"
+import "github.com/agentauth/agentauth/pkg/token"
 
 // Inspect token details
 token, err := tokenManager.Inspect(ctx, tokenString)
@@ -89,7 +89,7 @@ if err != nil {
 #### Diagnostic Steps
 1. Check rate limit configuration:
 ```go
-import "github.com/AgentAuth-Foundation/gauth/pkg/rate"
+import "github.com/agentauth/agentauth/pkg/rate"
 
 // Inspect rate limiter
 config := limiter.GetConfig()
@@ -150,7 +150,7 @@ for i := 0; i < 10; i++ {
 #### Diagnostic Steps
 1. Check token store performance:
 ```go
-import "github.com/AgentAuth-Foundation/gauth/pkg/monitoring"
+import "github.com/agentauth/agentauth/pkg/monitoring"
 
 // Monitor store operations
 metrics := monitoring.NewStoreMetrics()
@@ -308,9 +308,9 @@ log.Printf("Diagnostics: %+v", diag)
 
 ## Support Resources
 
-1. [GitHub Issues](https://github.com/AgentAuth-Foundation/gauth/issues)
-2. [Documentation](https://gauth.dev/docs)
-3. [Community Forum](https://gauth.dev/forum)
+1. [GitHub Issues](https://github.com/agentauth/agentauth/issues)
+2. [Documentation](https://agentauth.dev/docs)
+3. [Community Forum](https://agentauth.dev/forum)
 
 ## Contributing
 
@@ -364,7 +364,7 @@ For security issues, please use our [security reporting process](SECURITY.md).
 
 **Fix**:
 1. Find process: `lsof -nP -iTCP:8080 -sTCP:LISTEN`.
-2. Choose alternative: `go run web/server.go 9505` or set `GAUTH_WEB_PORT=9505`.
+2. Choose alternative: `go run web/server.go 9505` or set `AGENTAUTH_WEB_PORT=9505`.
 
 ### 5. CSP Blocking Future Localized Assets
 If you localize Tailwind / Font Awesome under `web/static/vendor/`, you can tighten CSP:

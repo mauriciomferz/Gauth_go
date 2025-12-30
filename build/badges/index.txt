@@ -16,7 +16,7 @@
 ./pkg/delegation=51.2
 ./pkg/errors=0.0
 ./pkg/events=0.0
-./pkg/gauth=63.2
+./pkg/agentauth=63.2
 ./pkg/poa=16.3
 ./pkg/policy=52.8
 ./pkg/rate=22.4

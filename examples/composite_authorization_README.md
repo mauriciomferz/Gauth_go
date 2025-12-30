@@ -8,7 +8,7 @@ owners: [system]
 
 # Composite Authorization Example
 
-This example (`gauth-plus-authorization.json`) models a rich, multi-layer corporate authorization grant that delegates constrained financial and contractual powers from human executives to an enterprise AI agent under strict governance, dual-control, and audit obligations.
+This example (`agentauth-plus-authorization.json`) models a rich, multi-layer corporate authorization grant that delegates constrained financial and contractual powers from human executives to an enterprise AI agent under strict governance, dual-control, and audit obligations.
 
 ## Purpose
 Illustrates how complex authority structures can be encoded as a single machine-consumable artifact:
@@ -22,7 +22,7 @@ Illustrates how complex authority structures can be encoded as a single machine-
 - Accountability & cascade chain for ultimate responsibility tracing
 
 ## File
-`examples/gauth-plus-authorization.json`
+`examples/agentauth-plus-authorization.json`
 
 ## Structural Sections
 | Section | Key Fields | Intent |
@@ -84,7 +84,7 @@ Validity windows (`valid_from`, `valid_until`, `expires_at`) enable automatic su
 
 ### Example (Pseudo-Go)
 ```go
-artifact := LoadCompositeAuthorization("examples/gauth-plus-authorization.json")
+artifact := LoadCompositeAuthorization("examples/agentauth-plus-authorization.json")
 if time.Now().After(artifact.ExpiresAt) { Deny("grant expired") }
 if !WithinScope(artifact, action.Domain) { Deny("outside scope") }
 if RequiresDualControl(artifact, action) { QueueForDualControl(action) }
@@ -94,9 +94,9 @@ RecordAuditEvent(action, artifact.AccountabilityChain)
 
 ### Example curl (distributing artifact)
 ```bash
-curl -X POST https://gauth.example/api/v1/authorization/artifacts \
+curl -X POST https://agentauth.example/api/v1/authorization/artifacts \
   -H 'Content-Type: application/json' \
-  --data-binary @examples/gauth-plus-authorization.json
+  --data-binary @examples/agentauth-plus-authorization.json
 ```
 (Endpoint name illustrative; adapt to actual API path.)
 
@@ -192,23 +192,23 @@ Returns 409 when new artifact `valid_from` precedes current artifact `expires_at
 The `canonical_hash` is computed from selected deterministic fields (scope, basic powers, decision matrix entries, expiration, accountability chain). Changing any of those requires reactivation and produces a new hash.
 
 ## Prometheus Metrics
-Composite authorization lifecycle instrumentation (prefix `gauth_composite_`):
+Composite authorization lifecycle instrumentation (prefix `agentauth_composite_`):
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| `gauth_composite_activation_total` | counter | Successful activations (201). |
-| `gauth_composite_conflicts_total` | counter | Activation conflicts (409). |
-| `gauth_composite_invalid_total` | counter | Invalid/expired activation attempts (400). |
-| `gauth_composite_current_hash_present` | gauge | 1 when artifact active; 0 if none configured. |
-| `gauth_composite_chain_updates_total` | counter | Continuity advances (non-empty previous hash). |
+| `agentauth_composite_activation_total` | counter | Successful activations (201). |
+| `agentauth_composite_conflicts_total` | counter | Activation conflicts (409). |
+| `agentauth_composite_invalid_total` | counter | Invalid/expired activation attempts (400). |
+| `agentauth_composite_current_hash_present` | gauge | 1 when artifact active; 0 if none configured. |
+| `agentauth_composite_chain_updates_total` | counter | Continuity advances (non-empty previous hash). |
 
 Example scrape (after 2 activations, 1 conflict):
 ```
-gauth_composite_activation_total 2
-gauth_composite_conflicts_total 1
-gauth_composite_invalid_total 0
-gauth_composite_current_hash_present 1
-gauth_composite_chain_updates_total 1
+agentauth_composite_activation_total 2
+agentauth_composite_conflicts_total 1
+agentauth_composite_invalid_total 0
+agentauth_composite_current_hash_present 1
+agentauth_composite_chain_updates_total 1
 ```
 
 Use these for dashboards: activation velocity, conflict ratio, continuity health.

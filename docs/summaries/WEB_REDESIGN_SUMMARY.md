@@ -33,7 +33,7 @@ Recent incremental UX improvements were added post-initial redesign to modernize
 
 1. **Dark Mode Theme Toggle** (`#themeToggle` in `web/templates/index.html`)
 	- Implements persistent light/dark theme switching by applying/removing the `dark` class on `document.documentElement`.
-	- User preference stored in `localStorage` under key `gauth-theme` (values: `light` | `dark` | `system`).
+	- User preference stored in `localStorage` under key `agentauth-theme` (values: `light` | `dark` | `system`).
 	- Respects OS preference when set to `system` and reacts to changes.
 	- Provides accessible button labeling and icon state (moon/sun) for clarity.
 

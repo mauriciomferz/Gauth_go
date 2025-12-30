@@ -9,7 +9,7 @@
       "normative_statements": null,
       "raw_block": "## 1. Introduction\nAgentAuth Core Protocol describes mechanisms for delegation, policy evaluation, audit traceability and revocation. (Placeholder text.)\n",
       "block_hash": "sha256-f827cc53bf08e6f625ccef55b2aaeb68f907b61c1d969dbf9d2bb793e8b7493d",
-      "source_file": "rfc0111.md"
+      "source_file": "aap001.md"
     },
     {
       "rfc": "0111",
@@ -30,7 +30,7 @@
       ],
       "raw_block": "## 2. Policy Bundle Integrity\nImplementations MUST link each policy bundle to the previous via a cryptographic hash to ensure chain integrity.\nA client SHOULD be able to query provenance metadata including bundle hash, timestamp, and issuer identity.\n",
       "block_hash": "sha256-ed95e20503548e61bd093e8806cfb4b4fecad7dce3b80677770311d075dcb213",
-      "source_file": "rfc0111.md"
+      "source_file": "aap001.md"
     },
     {
       "rfc": "0111",
@@ -56,7 +56,7 @@
       ],
       "raw_block": "## 3. Delegation \u0026 Revocation\nEach delegation artifact MUST contain a reference to its parent delegation or root authority.\nRevocation entries MUST NOT be alterable once appended.\nImplementations SHOULD provide an externally verifiable anchor for revocation chains.\n",
       "block_hash": "sha256-0917b83a2aa07f5d83bb95aa93f4deb58d4c7fc7898ad05243a86080d8c14979",
-      "source_file": "rfc0111.md"
+      "source_file": "aap001.md"
     },
     {
       "rfc": "0111",
@@ -77,7 +77,7 @@
       ],
       "raw_block": "## 4. Audit Logging\nAudit events MUST capture decision inputs sufficient for deterministic replay.\nAudit chain hashes MAY be anchored to external trusted timestamp services.\n",
       "block_hash": "sha256-fdef235bef566e61dacfbf33c533d53043f2b1e7f1333ec9885d8918bae8cb63",
-      "source_file": "rfc0111.md"
+      "source_file": "aap001.md"
     },
     {
       "rfc": "0111",
@@ -93,7 +93,7 @@
       ],
       "raw_block": "## 5. Replay Protection\nToken creation endpoints MUST reject previously seen nonces or identifiers to prevent replay.\n",
       "block_hash": "sha256-5435399ee68f33310a8d813d87b5c411e8d5d2d9c6a81816438756425387a104",
-      "source_file": "rfc0111.md"
+      "source_file": "aap001.md"
     },
     {
       "rfc": "0111",
@@ -114,7 +114,7 @@
       ],
       "raw_block": "## 6. Cryptographic Requirements\nSignatures MUST employ algorithms with public verifiability.\nHMAC symmetric-only schemes SHOULD NOT be used for cross-tenant verification contexts.\n",
       "block_hash": "sha256-e19c9220b761ddcf8c88cd3ccec5af737f28b355f48d2479b6b53551a3058f58",
-      "source_file": "rfc0111.md"
+      "source_file": "aap001.md"
     },
     {
       "rfc": "0115",
@@ -135,7 +135,7 @@
       ],
       "raw_block": "## 1. Power of Attorney Structure\nA Power of Attorney (POA) document MUST enumerate principal, delegate, scope and validity period.\nIt SHOULD include formal requirements enabling external verification.\n",
       "block_hash": "sha256-a3bc13bced6037fe564b7c553b36f617b1508f5537304a45a0c9d6ac1044c0c2",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -156,7 +156,7 @@
       ],
       "raw_block": "## 2. Scope Semantics\nScope definitions MUST support hierarchical narrowing.\nImplementations SHOULD allow pattern or range expressions for advanced narrowing.\n",
       "block_hash": "sha256-e2cd04fd4ea18a67884f6dca231a9426395253c907cb1bdcbcb2230b14bb70cc",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -177,7 +177,7 @@
       ],
       "raw_block": "## 3. Validity Period\nPOA artifacts MUST define `valid_from` and `valid_until` timestamps.\nVerification logic SHOULD consider reasonable clock skew.\n",
       "block_hash": "sha256-7e428ec6ed3085a5ce09c2276fa4cbea3ba2a53348ce4387a75e887cff915d8f",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -193,7 +193,7 @@
       ],
       "raw_block": "## 4. Formal Requirements\nFormal requirements MAY include notarization references and multi-signature attestations.\n",
       "block_hash": "sha256-0594b974e5b4f839e255092a5bd2edd88605dfc096b4c53d100561f07db494bd",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -209,7 +209,7 @@
       ],
       "raw_block": "## 5. Power Limits\nQuantitative limits MUST be enforceable (e.g., maximum transaction value, daily quota).\n",
       "block_hash": "sha256-a044b01ee454cb7228200a74d2ee01b7ef9449c3fa0107be0bb2dbd95501e4ac",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -225,7 +225,7 @@
       ],
       "raw_block": "## 6. Rights \u0026 Obligations\nRights granted and obligations imposed SHOULD be serialized canonically and hashed.\n",
       "block_hash": "sha256-486d8385feb2b1e1b493a99f9cf8336b0f8732f255f62e0e6d48ea8e0550e739",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -241,7 +241,7 @@
       ],
       "raw_block": "## 7. Special Conditions\nSpecial conditions MAY specify exceptional overrides subject to stricter audit.\n",
       "block_hash": "sha256-0818aff01a3396c5c98ad9a584214247020b34667ebc067571067ab8a3506e6f",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -257,7 +257,7 @@
       ],
       "raw_block": "## 8. Joint Signatures\nMulti-party representation MUST support threshold semantics (M-of-N) with aggregate verification.\n",
       "block_hash": "sha256-cf821dfae37c6e83bae3a581bb4b78228febc8f5bc425ed64664e9e6863230ed",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -273,7 +273,7 @@
       ],
       "raw_block": "## 9. Canonical Serialization\nCanonical POA digest MUST be stable under field reordering and extraneous whitespace removal.\n",
       "block_hash": "sha256-a973017c95b9cc8419ffa76538908d4a94da09e883d4f884702682c4adcfed9e",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     },
     {
       "rfc": "0115",
@@ -294,7 +294,7 @@
       ],
       "raw_block": "## 10. Revocation Semantics\nRevocation entries MUST immediately invalidate derived delegations.\nRevocation chains SHOULD be externally anchored.\n",
       "block_hash": "sha256-5d86fee3ae9b536d3917adbd1bfba6364e4af2198d53c15eaa16e547292edd50",
-      "source_file": "rfc0115.md"
+      "source_file": "aap002.md"
     }
   ]
 }

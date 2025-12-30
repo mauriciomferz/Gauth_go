@@ -9,20 +9,20 @@ echo "=== PostgreSQL Backend Test ==="
 echo
 
 # Configuration
-export GAUTH_AAP-001_ENABLED=1
+export AGENTAUTH_AAP-001_ENABLED=1
 export DB_HOST=localhost
 export DB_PORT=5432
-export DB_NAME=gauth
-export DB_USER=gauth
-export DB_PASSWORD=gauth_password
+export DB_NAME=agentauth
+export DB_USER=agentauth
+export DB_PASSWORD=agentauth_password
 export DB_SSLMODE=disable
 
 echo "1. Testing PostgreSQL connection..."
-docker exec gauth-postgres psql -U gauth -d gauth -c "SELECT version();" | head -1
+docker exec agentauth-postgres psql -U agentauth -d agentauth -c "SELECT version();" | head -1
 
 echo
 echo "2. Checking database tables..."
-docker exec gauth-postgres psql -U gauth -d gauth -c "\dt" | grep -E "(extended_tokens|subscriptions)"
+docker exec agentauth-postgres psql -U agentauth -d agentauth -c "\dt" | grep -E "(extended_tokens|subscriptions)"
 
 echo
 echo "3. Building web-server with PostgreSQL support..."
@@ -30,7 +30,7 @@ go build -o /tmp/web-server-postgres ./cmd/web-server
 
 echo
 echo "4. Starting web-server with PostgreSQL backend..."
-/tmp/web-server-postgres > /tmp/gauth_postgres.log 2>&1 &
+/tmp/web-server-postgres > /tmp/agentauth_postgres.log 2>&1 &
 WEB_PID=$!
 echo "Web server PID: $WEB_PID"
 
@@ -54,7 +54,7 @@ echo "Created token: ${ACCESS_TOKEN:0:20}..."
 
 echo
 echo "6. Verifying token was stored in PostgreSQL..."
-TOKEN_COUNT=$(docker exec gauth-postgres psql -U gauth -d gauth -t -c "SELECT COUNT(*) FROM extended_tokens;")
+TOKEN_COUNT=$(docker exec agentauth-postgres psql -U agentauth -d agentauth -t -c "SELECT COUNT(*) FROM extended_tokens;")
 echo "Tokens in database: $TOKEN_COUNT"
 
 if [ "$TOKEN_COUNT" -eq 1 ]; then
@@ -76,7 +76,7 @@ curl -s -X DELETE http://localhost:8080/api/v1/rfc0111/token/$ACCESS_TOKEN
 
 echo
 echo "9. Verifying revocation in PostgreSQL..."
-REVOKED_COUNT=$(docker exec gauth-postgres psql -U gauth -d gauth -t -c "SELECT COUNT(*) FROM extended_tokens WHERE revoked_at IS NOT NULL;")
+REVOKED_COUNT=$(docker exec agentauth-postgres psql -U agentauth -d agentauth -t -c "SELECT COUNT(*) FROM extended_tokens WHERE revoked_at IS NOT NULL;")
 echo "Revoked tokens in database: $REVOKED_COUNT"
 
 if [ "$REVOKED_COUNT" -eq 1 ]; then
@@ -99,7 +99,7 @@ echo "Created subscription: $SUB_ID"
 
 echo
 echo "11. Verifying subscription in PostgreSQL..."
-SUB_COUNT=$(docker exec gauth-postgres psql -U gauth -d gauth -t -c "SELECT COUNT(*) FROM subscriptions;")
+SUB_COUNT=$(docker exec agentauth-postgres psql -U agentauth -d agentauth -t -c "SELECT COUNT(*) FROM subscriptions;")
 echo "Subscriptions in database: $SUB_COUNT"
 
 echo

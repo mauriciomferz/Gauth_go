@@ -442,7 +442,7 @@ two_phase_test.go:260: ✅ Auto-revoke triggered successfully after 200ms
 ### Summary
 ```
 PASS
-ok  github.com/mauriciomferz/Gauth_go/pkg/revocation  0.591s
+ok  github.com/mauriciomferz/AgentAuth/pkg/revocation  0.591s
 ```
 
 **Test Coverage:**
@@ -638,7 +638,7 @@ T₀+30s:   Auto-revoke triggers RevokePoA()
 ### Validator Integration
 
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+import "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 
 // Initialize two-phase revocation
 twoPhase := &revocation.TwoPhaseRevocation{

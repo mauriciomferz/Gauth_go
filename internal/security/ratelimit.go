@@ -226,8 +226,8 @@ func getClientIP(c *gin.Context) string {
 // DefaultRateLimitConfig returns default rate limiting configuration
 func DefaultRateLimitConfig() RateLimiterConfig {
 	// Load from environment or use defaults
-	rps := getEnvInt("GAUTH_RATE_LIMIT_RPS", 100)
-	burst := getEnvInt("GAUTH_RATE_LIMIT_BURST", 200)
+	rps := getEnvInt("AGENTAUTH_RATE_LIMIT_RPS", 100)
+	burst := getEnvInt("AGENTAUTH_RATE_LIMIT_BURST", 200)
 
 	return RateLimiterConfig{
 		RequestsPerSecond: rps,
@@ -238,8 +238,8 @@ func DefaultRateLimitConfig() RateLimiterConfig {
 
 // StrictRateLimitConfig returns strict rate limiting for sensitive endpoints
 func StrictRateLimitConfig() RateLimiterConfig {
-	rps := getEnvInt("GAUTH_STRICT_RATE_LIMIT_RPS", 10)
-	burst := getEnvInt("GAUTH_STRICT_RATE_LIMIT_BURST", 20)
+	rps := getEnvInt("AGENTAUTH_STRICT_RATE_LIMIT_RPS", 10)
+	burst := getEnvInt("AGENTAUTH_STRICT_RATE_LIMIT_BURST", 20)
 
 	return RateLimiterConfig{
 		RequestsPerSecond: rps,
@@ -275,8 +275,8 @@ func ConfigureEndpointRateLimits() *EndpointRateLimiter {
 
 	// Moderate limits for read operations
 	moderateConfig := RateLimiterConfig{
-		RequestsPerSecond: getEnvInt("GAUTH_MODERATE_RATE_LIMIT_RPS", 50),
-		BurstSize:         getEnvInt("GAUTH_MODERATE_RATE_LIMIT_BURST", 100),
+		RequestsPerSecond: getEnvInt("AGENTAUTH_MODERATE_RATE_LIMIT_RPS", 50),
+		BurstSize:         getEnvInt("AGENTAUTH_MODERATE_RATE_LIMIT_BURST", 100),
 		CleanupInterval:   5 * time.Minute,
 	}
 	limiter.AddEndpoint("/api/v1/beta/subscriptions", moderateConfig)
@@ -310,7 +310,7 @@ func DDoSProtectionMiddleware() gin.HandlerFunc {
 	}()
 
 	// DDoS detection threshold
-	maxRequestsPerSecond := getEnvInt("GAUTH_DDOS_MAX_RPS", 1000)
+	maxRequestsPerSecond := getEnvInt("AGENTAUTH_DDOS_MAX_RPS", 1000)
 
 	return func(c *gin.Context) {
 		ip := getClientIP(c)

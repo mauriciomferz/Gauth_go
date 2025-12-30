@@ -189,7 +189,7 @@ func auditRotation(base string) (interface{}, error) {
 	if err != nil {
 		return nil, fmt.Errorf("canonical_payload_error: %w", err)
 	}
-	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), payload...)
+	msg := append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), payload...)
 	for _, sig := range sum.Signatures {
 		k := reg.FindByID(sig.Kid)
 		if k == nil {
@@ -352,7 +352,7 @@ func verifyAttestation(att *Attestation) map[string]interface{} {
 	}
 	u := unsignedStruct{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Nonce: att.Nonce, Snapshot: att.Snapshot, Audit: att.Audit, Anchor: att.Anchor, StrictUnknown: att.StrictUnknown, Surge: att.Surge, Notarization: att.Notarization}
 	raw, _ := json.Marshal(u)
-	msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+	msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	sigBytes, err := base64.RawStdEncoding.DecodeString(att.Signature)
 	if err != nil {
 		result["valid"] = false
@@ -662,7 +662,7 @@ func auditRotationV2ArtifactJSON(data []byte, expectedPrev string) (interface{},
 	}
 
 	// Signature verification (only algorithms with embedded public keys). Preimage domain separation.
-	preimage := []byte("GAUTH_ROTATION_V2:" + computed)
+	preimage := []byte("AGENTAUTH_ROTATION_V2:" + computed)
 	verifiedWeight := 0
 	failures := []string{}
 	validSigners := []string{}

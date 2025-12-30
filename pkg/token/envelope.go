@@ -3,7 +3,7 @@ package token
 import (
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // Envelope is a draft structured token payload (Milestone 2A scaffold).
@@ -27,7 +27,7 @@ type Envelope struct {
 // EnvelopeV2 introduces explicit canonical POA digest and satisfied multi-signature metadata.
 // It embeds a minimal subset of POA fields required for validation while allowing future
 // expansion (e.g., policy versioning) without breaking legacy consumers. Tokens issued
-// with GAUTH_POA_ENVELOPE_V2=1 will serialize this structure instead of Envelope.
+// with AGENTAUTH_POA_ENVELOPE_V2=1 will serialize this structure instead of Envelope.
 type EnvelopeV2 struct {
 	Version             string            `json:"ver"`
 	KeyID               string            `json:"kid,omitempty"`
@@ -53,11 +53,11 @@ type EnvelopeV2 struct {
 	// RawPOAChain embeds a minimal CBOR-like streaming representation (length-prefixed map sequence or
 	// indefinite-length CBOR array) of the delegation chain snapshot at issuance (prototype: single POA item).
 	// Base64 encoded; omitted if embedding disabled or size exceeds limits. Uses hash algorithm negotiated
-	// via GAUTH_RAW_POA_CHAIN_HASH_ALGO (default sha256) for PrevHash continuity when multiple items present.
+	// via AGENTAUTH_RAW_POA_CHAIN_HASH_ALGO (default sha256) for PrevHash continuity when multiple items present.
 	RawPOAChain string `json:"raw_poa_chain,omitempty"`
 	// RawPOAChainAlgo records hashing algorithm used when computing chain continuity ("sha256", "blake2b256", "sha3_256").
 	RawPOAChainAlgo string `json:"raw_poa_chain_algo,omitempty"`
-	// Detached signature (optional, feature gated by GAUTH_DETACHED_SIGNATURE=1). This is an Ed25519 (or future) signature
+	// Detached signature (optional, feature gated by AGENTAUTH_DETACHED_SIGNATURE=1). This is an Ed25519 (or future) signature
 	// over the canonical POA JSON bytes (the exact same bytes whose SHA-256 hex is CanonicalDigest). The intent is to
 	// provide a publicly verifiable integrity proof decoupled from the embedded (or absent) POA signature object.
 	DetachedSignature    string `json:"detached_sig,omitempty"`
@@ -67,5 +67,5 @@ type EnvelopeV2 struct {
 	// and extensible restrictions. When present, VerifyToken enforces typ-specific validation rules (e.g. delegation
 	// tokens must have valid PoA reference, capability tokens must specify supported operations). Omitted for
 	// backward compatibility with tokens issued before P2.10 (sec1.item2 integration).
-	AdvancedClaims *gauth.AdvancedClaims `json:"advanced_claims,omitempty"`
+	AdvancedClaims *agentauth.AdvancedClaims `json:"advanced_claims,omitempty"`
 }

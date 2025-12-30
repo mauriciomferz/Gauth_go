@@ -7,24 +7,24 @@ set -e
 echo "🚀 AgentAuth CI Build Script"
 echo "========================"
 
-# Function to find gauth-server source
-find_gauth_server() {
+# Function to find agentauth-server source
+find_agentauth_server() {
     # Method 1: Standard relative path
-    if [ -f "./cmd/gauth-server/main.go" ]; then
-        echo "✅ Found ./cmd/gauth-server/main.go" >&2
-        echo "./cmd/gauth-server"
+    if [ -f "./cmd/agentauth-server/main.go" ]; then
+        echo "✅ Found ./cmd/agentauth-server/main.go" >&2
+        echo "./cmd/agentauth-server"
         return 0
     fi
     
     # Method 2: Without leading dot
-    if [ -f "cmd/gauth-server/main.go" ]; then
-        echo "✅ Found cmd/gauth-server/main.go" >&2
-        echo "cmd/gauth-server"
+    if [ -f "cmd/agentauth-server/main.go" ]; then
+        echo "✅ Found cmd/agentauth-server/main.go" >&2
+        echo "cmd/agentauth-server"
         return 0
     fi
     
     # Method 3: Find anywhere
-    local main_go_path=$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1)
+    local main_go_path=$(find . -name "main.go" -path "*/cmd/agentauth-server/*" 2>/dev/null | head -1)
     if [ -n "$main_go_path" ]; then
         local source_path=$(dirname "$main_go_path")
         echo "✅ Found $main_go_path" >&2
@@ -32,11 +32,11 @@ find_gauth_server() {
         return 0
     fi
     
-    # Method 4: Find gauth-server directory
-    local gauth_dir=$(find . -name "gauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
-    if [ -n "$gauth_dir" ] && [ -f "$gauth_dir/main.go" ]; then
-        echo "✅ Found directory $gauth_dir with main.go" >&2
-        echo "$gauth_dir"
+    # Method 4: Find agentauth-server directory
+    local agentauth_dir=$(find . -name "agentauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
+    if [ -n "$agentauth_dir" ] && [ -f "$agentauth_dir/main.go" ]; then
+        echo "✅ Found directory $agentauth_dir with main.go" >&2
+        echo "$agentauth_dir"
         return 0
     fi
     
@@ -58,8 +58,8 @@ show_diagnostics() {
     echo "📂 Looking for cmd directories:"
     find . -name "cmd" -type d 2>/dev/null | head -5 || echo "No cmd directories found"
     echo ""
-    echo "📂 Looking for gauth-server directories:"  
-    find . -name "gauth-server" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"
+    echo "📂 Looking for agentauth-server directories:"  
+    find . -name "agentauth-server" -type d 2>/dev/null | head -5 || echo "No agentauth-server directories found"
     echo ""
     echo "📄 Looking for main.go files:"
     find . -name "main.go" 2>/dev/null | head -10 || echo "No main.go files found"
@@ -79,7 +79,7 @@ if command -v git >/dev/null 2>&1; then
 fi
 
 # Find the source path with enhanced error handling
-echo "🔍 Searching for gauth-server source..."
+echo "🔍 Searching for agentauth-server source..."
 
 # First, let's ensure we can see what's happening
 echo "🔍 Pre-search verification:"
@@ -99,38 +99,38 @@ echo ""
 echo "🔍 Method-by-method search:"
 
 # Method 1
-echo "  🔍 Method 1: Testing ./cmd/gauth-server/main.go"
-if [ -f "./cmd/gauth-server/main.go" ]; then
-    SOURCE_PATH="./cmd/gauth-server"
-    echo "  ✅ Method 1: Found ./cmd/gauth-server/main.go"
+echo "  🔍 Method 1: Testing ./cmd/agentauth-server/main.go"
+if [ -f "./cmd/agentauth-server/main.go" ]; then
+    SOURCE_PATH="./cmd/agentauth-server"
+    echo "  ✅ Method 1: Found ./cmd/agentauth-server/main.go"
 else
-    echo "  ❌ Method 1: ./cmd/gauth-server/main.go not found"
+    echo "  ❌ Method 1: ./cmd/agentauth-server/main.go not found"
     
     # Method 2
-    echo "  🔍 Method 2: Testing cmd/gauth-server/main.go"
-    if [ -f "cmd/gauth-server/main.go" ]; then
-        SOURCE_PATH="cmd/gauth-server"
-        echo "  ✅ Method 2: Found cmd/gauth-server/main.go"
+    echo "  🔍 Method 2: Testing cmd/agentauth-server/main.go"
+    if [ -f "cmd/agentauth-server/main.go" ]; then
+        SOURCE_PATH="cmd/agentauth-server"
+        echo "  ✅ Method 2: Found cmd/agentauth-server/main.go"
     else
-        echo "  ❌ Method 2: cmd/gauth-server/main.go not found"
+        echo "  ❌ Method 2: cmd/agentauth-server/main.go not found"
         
         # Method 3
         echo "  🔍 Method 3: Searching filesystem..."
-        MAIN_GO_PATH=$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1)
+        MAIN_GO_PATH=$(find . -name "main.go" -path "*/cmd/agentauth-server/*" 2>/dev/null | head -1)
         if [ -n "$MAIN_GO_PATH" ]; then
             SOURCE_PATH=$(dirname "$MAIN_GO_PATH")
             echo "  ✅ Method 3: Found $MAIN_GO_PATH"
         else
-            echo "  ❌ Method 3: No main.go found in */cmd/gauth-server/* pattern"
+            echo "  ❌ Method 3: No main.go found in */cmd/agentauth-server/* pattern"
             
             # Method 4
             echo "  🔍 Method 4: Directory search..."
-            GAUTH_DIR=$(find . -name "gauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
-            if [ -n "$GAUTH_DIR" ] && [ -f "$GAUTH_DIR/main.go" ]; then
-                SOURCE_PATH="$GAUTH_DIR"
-                echo "  ✅ Method 4: Found directory $GAUTH_DIR with main.go"
+            AGENTAUTH_DIR=$(find . -name "agentauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
+            if [ -n "$AGENTAUTH_DIR" ] && [ -f "$AGENTAUTH_DIR/main.go" ]; then
+                SOURCE_PATH="$AGENTAUTH_DIR"
+                echo "  ✅ Method 4: Found directory $AGENTAUTH_DIR with main.go"
             else
-                echo "  ❌ Method 4: No gauth-server directory with main.go found"
+                echo "  ❌ Method 4: No agentauth-server directory with main.go found"
                 SOURCE_PATH=""
             fi
         fi
@@ -140,18 +140,18 @@ fi
 # Check if we found anything
 if [ -z "$SOURCE_PATH" ]; then
     echo ""
-    echo "❌ ERROR: Could not find cmd/gauth-server/main.go using any method"
+    echo "❌ ERROR: Could not find cmd/agentauth-server/main.go using any method"
     echo ""
     echo "🔍 Enhanced Search Analysis:"
     echo "============================"
-    echo "📂 All Go files containing 'gauth':"
-    find . -name "*.go" 2>/dev/null | grep -i gauth | head -10 || echo "None found"
+    echo "📂 All Go files containing 'agentauth':"
+    find . -name "*.go" 2>/dev/null | grep -i agentauth | head -10 || echo "None found"
     echo ""
     echo "📂 All main.go files:"
     find . -name "main.go" 2>/dev/null | head -15 || echo "No main.go files found"
     echo ""
-    echo "📂 All directories named gauth-server:"
-    find . -name "*gauth-server*" -type d 2>/dev/null || echo "No gauth-server directories found"
+    echo "📂 All directories named agentauth-server:"
+    find . -name "*agentauth-server*" -type d 2>/dev/null || echo "No agentauth-server directories found"
     echo ""
     echo "📂 Complete cmd directory structure:"
     if [ -d "cmd" ]; then
@@ -180,15 +180,15 @@ echo "📁 Creating build directory..."
 mkdir -p build/bin
 
 # Build the server
-echo "🔧 Building gauth-server..."
-if go build -ldflags="-s -w" -o build/bin/gauth-server "$SOURCE_PATH"; then
+echo "🔧 Building agentauth-server..."
+if go build -ldflags="-s -w" -o build/bin/agentauth-server "$SOURCE_PATH"; then
     echo "✅ Build successful!"
     echo "📊 Binary info:"
-    ls -la build/bin/gauth-server
+    ls -la build/bin/agentauth-server
     
     # Test the binary
     echo "🧪 Testing binary..."
-    if ./build/bin/gauth-server --help >/dev/null 2>&1; then
+    if ./build/bin/agentauth-server --help >/dev/null 2>&1; then
         echo "✅ Binary test successful!"
     else
         echo "⚠️ Binary test failed (may be normal for some flags)"

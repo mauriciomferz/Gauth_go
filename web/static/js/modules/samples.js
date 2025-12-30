@@ -31,7 +31,7 @@ function pollJobs() {
 	fetch('/api/v1/beta/examples/run/jobs')
 		.then(r => r.json())
 		.then(j => {
-			if (!j.success || !Array.isArray(j.jobs)) throw new Error(j.message||'invalid jobs');
+			if (!j.success || !Array.isArray(j.jobs) throw new Error(j.message||'invalid jobs');
 			renderJobTable(j.jobs);
 			document.getElementById('job-panel-msg').textContent = '';
 		})
@@ -77,7 +77,7 @@ function runSample(id) {
 	if (!samplesOutput) return Promise.reject(new Error('missing samples-output'));
 	stopManualJobStream();
 	if (currentSampleStreamJob) currentSampleStreamJob = null;
-	samplesOutput.innerHTML = `<span class='text-gray-400'>[Queued ${id}]</span><br><span class='text-yellow-400'>Submitting job...</span><br><span class='text-blue-400'>gauth-samples></span> <span class='blinking-cursor'>_</span>`;
+	samplesOutput.innerHTML = `<span class='text-gray-400'>[Queued ${id}]</span><br><span class='text-yellow-400'>Submitting job...</span><br><span class='text-blue-400'>agentauth-samples></span> <span class='blinking-cursor'>_</span>`;
 	return fetch("/api/v1/beta/examples/run", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) })
 		.then(res => res.json())
 		.then(data => {
@@ -86,7 +86,7 @@ function runSample(id) {
 				throw new Error(data.message || 'queue failed');
 			}
 			const jobId = data.job_id; currentSampleStreamJob = jobId;
-			samplesOutput.innerHTML = `<span class='text-gray-400'>[Job ${jobId} queued for ${id}]</span><br><span class='text-yellow-400'>State: ${data.state}</span><br><span class='text-blue-400'>gauth-samples></span> <span class='blinking-cursor'>_</span>`;
+			samplesOutput.innerHTML = `<span class='text-gray-400'>[Job ${jobId} queued for ${id}]</span><br><span class='text-yellow-400'>State: ${data.state}</span><br><span class='text-blue-400'>agentauth-samples></span> <span class='blinking-cursor'>_</span>`;
 			attachLogStream(jobId, id);
 			return { jobId, id };
 		})
@@ -101,9 +101,9 @@ function waitForJobCompletion(jobId, timeoutMs = 30000, intervalMs = 600) {
 			fetch('/api/v1/beta/examples/run/jobs')
 				.then(r => r.json())
 				.then(j => {
-					if (!j.success || !Array.isArray(j.jobs)) throw new Error('jobs fetch failed');
+					if (!j.success || !Array.isArray(j.jobs) throw new Error('jobs fetch failed');
 					const job = j.jobs.find(x => x.id === jobId);
-					if (job && ['done','failed','timeout','canceled'].includes(job.state)) {
+					if (job && ['done','failed','timeout','canceled'].includes(job.state) {
 						return resolve(job);
 					}
 					if (Date.now() - start > timeoutMs) return reject(new Error('job timeout'));
@@ -213,7 +213,7 @@ function fetchCatalog() {
   return fetch('/api/v1/beta/examples/catalog')
     .then(r => r.json())
     .then(j => {
-      if (!j.success || !Array.isArray(j.examples)) throw new Error(j.message || 'invalid catalog');
+      if (!j.success || !Array.isArray(j.examples) throw new Error(j.message || 'invalid catalog');
       catalogCache = j.examples;
 			filteredCatalog = [...catalogCache];
 			renderSamplesList(filteredCatalog);
@@ -270,10 +270,10 @@ function applyFilters(){
 	filteredCatalog = catalogCache.filter(ex => {
 		const title = (ex.title||'').toLowerCase();
 		const id = (ex.id||'').toLowerCase();
-		if (q && !(title.includes(q)||id.includes(q))) return false;
+		if (q && !(title.includes(q)||id.includes(q)) return false;
 		const group = ex.Group || ex.group || '';
 		if (!adv && group==='advanced') return false;
-		if (!neg && (group==='negative'||group==='neg'||group==='failure')) return false;
+		if (!neg && (group==='negative'||group==='neg'||group==='failure') return false;
 		if (!basics && group==='basics') return false;
 		return true;
 	});

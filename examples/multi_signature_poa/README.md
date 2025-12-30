@@ -61,7 +61,7 @@ This **beta implementation** provides M-of-N threshold signature collection and 
 │                                                               │
 │  verifyMultiSignatures() - 180+ lines                        │
 │  • Threshold M-of-N enforcement                              │
-│  • Weighted signature support (GAUTH_MULTI_SIG_WEIGHTS)      │
+│  • Weighted signature support (AGENTAUTH_MULTI_SIG_WEIGHTS)      │
 │  • Canonical digest computation & verification               │
 │  • Comprehensive error handling & metrics                    │
 │                                                               │
@@ -259,7 +259,7 @@ func main() {
 Configure weighted voting via environment variable:
 
 ```bash
-export GAUTH_MULTI_SIG_WEIGHTS="CEO=5,CFO=3,CTO=2,COO=1"
+export AGENTAUTH_MULTI_SIG_WEIGHTS="CEO=5,CFO=3,CTO=2,COO=1"
 ```
 
 ```go
@@ -342,19 +342,19 @@ go test ./pkg/rfc0111 -v -run=Granular
 
 ```prometheus
 # Success counter
-gauth_rfc0111_multi_signature_verifications_total
+agentauth_rfc0111_multi_signature_verifications_total
 
 # Failure counters (granular categorization)
-gauth_rfc0111_multi_signature_verification_failures_total
-gauth_rfc0111_multi_signature_structural_failures_total
-gauth_rfc0111_multi_signature_digest_failures_total
-gauth_rfc0111_multi_signature_public_key_missing_failures_total
-gauth_rfc0111_multi_signature_invalid_signature_failures_total
-gauth_rfc0111_multi_signature_threshold_failures_total
-gauth_rfc0111_multi_signature_weight_failures_total
+agentauth_rfc0111_multi_signature_verification_failures_total
+agentauth_rfc0111_multi_signature_structural_failures_total
+agentauth_rfc0111_multi_signature_digest_failures_total
+agentauth_rfc0111_multi_signature_public_key_missing_failures_total
+agentauth_rfc0111_multi_signature_invalid_signature_failures_total
+agentauth_rfc0111_multi_signature_threshold_failures_total
+agentauth_rfc0111_multi_signature_weight_failures_total
 
 # Latency histogram
-gauth_rfc0111_multi_signature_verification_latency_seconds
+agentauth_rfc0111_multi_signature_verification_latency_seconds
 ```
 
 ### Failure Taxonomy
@@ -417,10 +417,10 @@ manager.SubmitSignature(ctx, poaID, signerID, keyID, signature, metadata)
 
 ```bash
 # Weighted voting (optional)
-export GAUTH_MULTI_SIG_WEIGHTS="signer1=weight1,signer2=weight2"
+export AGENTAUTH_MULTI_SIG_WEIGHTS="signer1=weight1,signer2=weight2"
 
 # Domain separation V2 (recommended)
-export GAUTH_MULTI_SIG_DOMAIN_V2=true
+export AGENTAUTH_MULTI_SIG_DOMAIN_V2=true
 ```
 
 ### Integration Example

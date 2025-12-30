@@ -22,8 +22,8 @@ Successfully closed **9 out of 10 RFC compliance gaps**, improving overall compl
 
 | RFC | Before | After | Improvement | Status |
 |-----|--------|-------|-------------|--------|
-| **RFC-0111** (AgentAuth 1.0) | 67.5% | ~94% | +26.5% | ✅ Production Ready |
-| **RFC-0115** (Power-of-Attorney) | 71.4% | ~96% | +24.6% | ✅ Production Ready |
+| **AAP-001** (AgentAuth 1.0) | 67.5% | ~94% | +26.5% | ✅ Production Ready |
+| **AAP-002** (Power-of-Attorney) | 71.4% | ~96% | +24.6% | ✅ Production Ready |
 | **Combined** | 69.0% | ~95% | +26.0% | ✅ Production Ready |
 
 ---
@@ -34,10 +34,10 @@ Successfully closed **9 out of 10 RFC compliance gaps**, improving overall compl
 **Status:** COMPLETE  
 **Impact:** HIGH (Critical)  
 **Lines of Code:** 550+  
-**File:** `pkg/gauth/extended_token.go`
+**File:** `pkg/agentauth/extended_token.go`
 
 **Deliverables:**
-- Complete ExtendedToken structure per RFC-0111 §3
+- Complete ExtendedToken structure per AAP-001 §3
 - Authorization chain with 3-level hierarchy
 - Client owner and owner's authorizer entities
 - Legal framework metadata
@@ -50,7 +50,7 @@ type ExtendedToken struct {
     // OAuth 2.0 compatibility
     AccessToken, TokenType, ExpiresIn, RefreshToken, Scope
     
-    // RFC-0111 extensions
+    // AAP-001 extensions
     PowerOfAttorney          *poa.PoADefinition
     AuthorizationChain       *AuthorizationChain
     ClientOwner              *ClientOwnerInfo
@@ -69,7 +69,7 @@ type ExtendedToken struct {
 **Status:** COMPLETE  
 **Impact:** HIGH (Critical)  
 **Lines of Code:** Integrated in G1  
-**File:** `pkg/gauth/extended_token.go`
+**File:** `pkg/agentauth/extended_token.go`
 
 **Deliverables:**
 - OwnersAuthorizerInfo structure with statutory authority
@@ -150,7 +150,7 @@ type OwnersAuthorizerInfo struct {
 **Status:** COMPLETE (Framework)  
 **Impact:** HIGH (Critical)  
 **Lines of Code:** 50+  
-**File:** `pkg/gauth/extended_token.go`
+**File:** `pkg/agentauth/extended_token.go`
 
 **Deliverables:**
 - ExtendedTokenRequest type for token issuance
@@ -169,14 +169,14 @@ type OwnersAuthorizerInfo struct {
 **File:** `pkg/poa/action_types.go`
 
 **Deliverables:**
-- Added 5 missing RFC-0115 §B.4.4 actions:
+- Added 5 missing AAP-002 §B.4.4 actions:
   - `ActionNonPhysicalDataAggregation`
   - `ActionNonPhysicalVisualization`
   - `ActionNonPhysicalNotification`
   - `ActionNonPhysicalRAG` (Retrieval-Augmented Generation)
   - `ActionNonPhysicalPresenting`
 - Updated validation logic
-- 100% RFC-0115 §B.4.4 compliance (20 actions)
+- 100% AAP-002 §B.4.4 compliance (20 actions)
 
 ---
 
@@ -285,8 +285,8 @@ type OwnersAuthorizerInfo struct {
 **Estimated Effort:** 7-10 days
 
 **Required Tasks:**
-1. Create RFC-0111 compliance test suite
-2. Create RFC-0115 compliance test suite
+1. Create AAP-001 compliance test suite
+2. Create AAP-002 compliance test suite
 3. End-to-end token flow tests
 4. Authorization chain validation tests
 5. PVP verification tests
@@ -311,7 +311,7 @@ type OwnersAuthorizerInfo struct {
 ### File Breakdown
 | File | Lines | Status | Purpose |
 |------|-------|--------|---------|
-| `pkg/gauth/extended_token.go` | 600+ | ✅ Complete | Extended token structure |
+| `pkg/agentauth/extended_token.go` | 600+ | ✅ Complete | Extended token structure |
 | `pkg/verification/pvp.go` | 620+ | ✅ Complete | Power Verification Point |
 | `pkg/registry/commercial_register.go` | 480+ | ✅ Complete | Commercial register |
 | `pkg/poa/action_types.go` | 50+ | ✅ Complete | Non-physical actions |
@@ -337,7 +337,7 @@ Authorization = None
 Identity = None
 ```
 
-### After: RFC-0111 Comprehensive Authorization
+### After: AAP-001 Comprehensive Authorization
 ```
 ExtendedToken =
   OAuth 2.0 Base (backward compatible)
@@ -391,7 +391,7 @@ ExtendedToken =
 
 ## Compliance Matrix
 
-### RFC-0111 (AgentAuth 1.0 Authorization Framework)
+### AAP-001 (AgentAuth 1.0 Authorization Framework)
 
 | Section | Requirement | Before | After | Status |
 |---------|-------------|--------|-------|--------|
@@ -401,9 +401,9 @@ ExtendedToken =
 | §4.3 | Quantum Resistance | 0% | 90% | ✅ Documented |
 | Step II | Commercial Register | 10% | 100% | ✅ Complete |
 | Step VII | Identity Verification | 0% | 95% | ✅ Complete |
-| **Overall** | **RFC-0111** | **67.5%** | **~94%** | ✅ **Production Ready** |
+| **Overall** | **AAP-001** | **67.5%** | **~94%** | ✅ **Production Ready** |
 
-### RFC-0115 (Power-of-Attorney Credential Definition)
+### AAP-002 (Power-of-Attorney Credential Definition)
 
 | Section | Requirement | Before | After | Status |
 |---------|-------------|--------|-------|--------|
@@ -415,7 +415,7 @@ ExtendedToken =
 | §B.4.4 | Non-Physical Actions | 60% | 100% | ✅ Complete |
 | §C.2 | Power Limits | 70% | 95% | ✅ Complete |
 | §C.3 | Rights & Obligations | 65% | 95% | ✅ Complete |
-| **Overall** | **RFC-0115** | **71.4%** | **~96%** | ✅ **Production Ready** |
+| **Overall** | **AAP-002** | **71.4%** | **~96%** | ✅ **Production Ready** |
 
 ---
 
@@ -423,7 +423,7 @@ ExtendedToken =
 
 ### 1. Hybrid Authorization Model
 **Decision:** Three-level hierarchy (Authorizer → Owner → Client)  
-**Rationale:** RFC-0111 explicit requirement for complete traceability  
+**Rationale:** AAP-001 explicit requirement for complete traceability  
 **Impact:** Full authorization chain with legal basis at each level
 
 ### 2. Backward Compatibility
@@ -438,7 +438,7 @@ ExtendedToken =
 
 ### 4. Centralized PIP
 **Decision:** Single consolidated Power Information Point  
-**Rationale:** RFC-0111 architecture requirement  
+**Rationale:** AAP-001 architecture requirement  
 **Impact:** Simplified authorization data access, improved caching
 
 ### 5. Quantum Hybrid Approach
@@ -557,8 +557,8 @@ ExtendedToken =
 - ⏳ **Test coverage:** Pending (Gap G10)
 
 ### Compliance Metrics
-- ✅ **RFC-0111:** 67.5% → ~94% (+26.5%)
-- ✅ **RFC-0115:** 71.4% → ~96% (+24.6%)
+- ✅ **AAP-001:** 67.5% → ~94% (+26.5%)
+- ✅ **AAP-002:** 71.4% → ~96% (+24.6%)
 - ✅ **Combined:** 69% → ~95% (+26%)
 
 ### Quality Metrics
@@ -597,17 +597,17 @@ ExtendedToken =
 ## Conclusion
 
 ### Achievement Summary
-This gap remediation session successfully transformed AgentAuth from **69% RFC compliant with 5 critical blockers** to **~95% RFC compliant with zero critical blockers**, establishing a production-ready foundation for RFC-0111 and RFC-0115 compliance.
+This gap remediation session successfully transformed AgentAuth from **69% RFC compliant with 5 critical blockers** to **~95% RFC compliant with zero critical blockers**, establishing a production-ready foundation for AAP-001 and AAP-002 compliance.
 
 ### Key Accomplishments
-✅ **Extended token structure** - Complete RFC-0111 §3 implementation  
+✅ **Extended token structure** - Complete AAP-001 §3 implementation  
 ✅ **Authorization chain** - 3-level hierarchy with legal basis  
 ✅ **Power Verification Point** - Complete identity verification system  
 ✅ **Commercial register** - Multi-jurisdiction integration framework  
 ✅ **Enhanced representatives** - Type distinction with authorization proofs  
 ✅ **Quantum resistance** - Comprehensive implementation roadmap  
 ✅ **Centralized PIP** - Consolidated authorization data access  
-✅ **Non-physical actions** - 100% RFC-0115 §B.4.4 compliance  
+✅ **Non-physical actions** - 100% AAP-002 §B.4.4 compliance  
 
 ### Production Readiness
 **Verdict:** ✅ **PRODUCTION READY** (with 2-3 weeks integration work)
@@ -641,7 +641,7 @@ The AgentAuth implementation now has a solid, RFC-compliant foundation ready for
 ## Appendix: Quick Reference
 
 ### Key Files
-- `/pkg/gauth/extended_token.go` - Extended token structure (600+ lines)
+- `/pkg/agentauth/extended_token.go` - Extended token structure (600+ lines)
 - `/pkg/verification/pvp.go` - Power Verification Point (620+ lines)
 - `/pkg/registry/commercial_register.go` - Commercial register (480+ lines)
 - `/pkg/poa/action_types.go` - Action types (updated)
@@ -650,7 +650,7 @@ The AgentAuth implementation now has a solid, RFC-compliant foundation ready for
 - `/docs/QUANTUM_RESISTANCE_GUIDE.md` - Quantum resistance guide
 
 ### Key Types
-- `ExtendedToken` - RFC-0111 compliant token
+- `ExtendedToken` - AAP-001 compliant token
 - `AuthorizationChain` - 3-level authorization hierarchy
 - `PowerVerificationPoint` - PVP interface
 - `CommercialRegisterService` - Registry interface

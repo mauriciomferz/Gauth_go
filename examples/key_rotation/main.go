@@ -14,7 +14,7 @@ import (
 // Example integration of the multi-tenant key rotation system
 func main() {
 	// Create a file-based key store for development
-	fileStore, err := crypto.NewFileKeyStore("/tmp/gauth-keys", 24*time.Hour)
+	fileStore, err := crypto.NewFileKeyStore("/tmp/agentauth-keys", 24*time.Hour)
 	if err != nil {
 		log.Fatalf("Failed to create file key store: %v", err)
 	}
@@ -117,7 +117,7 @@ func main() {
 			"backends": gin.H{
 				"file": gin.H{
 					"description": "File-based key storage for development",
-					"location":    "/tmp/gauth-keys",
+					"location":    "/tmp/agentauth-keys",
 					"security":    "File system permissions (600)",
 				},
 				"vault": gin.H{

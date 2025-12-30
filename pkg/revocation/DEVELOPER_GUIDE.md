@@ -58,7 +58,7 @@ Automatically suspends PoAs exhibiting suspicious patterns (rate limits, anomalo
 ### Installation
 
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+import "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 ```
 
 ### Minimal Example
@@ -71,7 +71,7 @@ import (
     "log"
     "time"
 
-    "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+    "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 )
 
 func main() {
@@ -578,7 +578,7 @@ import (
     "context"
     "log"
 
-    "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+    "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 )
 
 type RevocationService struct {
@@ -865,7 +865,7 @@ import "github.com/prometheus/client_golang/prometheus"
 var (
     revocationTotal = prometheus.NewCounterVec(
         prometheus.CounterOpts{
-            Name: "gauth_revocations_total",
+            Name: "agentauth_revocations_total",
             Help: "Total number of revocations by type",
         },
         []string{"type", "status"},
@@ -873,7 +873,7 @@ var (
 
     revocationDuration = prometheus.NewHistogramVec(
         prometheus.HistogramOpts{
-            Name: "gauth_revocation_duration_seconds",
+            Name: "agentauth_revocation_duration_seconds",
             Help: "Revocation operation duration",
             Buckets: []float64{0.001, 0.005, 0.01, 0.025, 0.05, 0.1},
         },
@@ -882,7 +882,7 @@ var (
 
     circuitBreakerState = prometheus.NewGaugeVec(
         prometheus.GaugeOpts{
-            Name: "gauth_circuit_breaker_state",
+            Name: "agentauth_circuit_breaker_state",
             Help: "Circuit breaker state (0=closed, 1=open, 2=half-open)",
         },
         []string{"poa_id"},
@@ -1123,8 +1123,8 @@ func TestRevocationWithRedisFailure(t *testing.T) { /* ... */ }
 ## Support
 
 For issues, questions, or contributions:
-- **GitHub Issues**: [github.com/mauriciomferz/Gauth_go/issues](https://github.com/mauriciomferz/Gauth_go/issues)
-- **Documentation**: [github.com/mauriciomferz/Gauth_go/tree/main/docs](https://github.com/mauriciomferz/Gauth_go/tree/main/docs)
+- **GitHub Issues**: [github.com/mauriciomferz/AgentAuth/issues](https://github.com/mauriciomferz/AgentAuth/issues)
+- **Documentation**: [github.com/mauriciomferz/AgentAuth/tree/main/docs](https://github.com/mauriciomferz/AgentAuth/tree/main/docs)
 
 **License**: See [LICENSE](../../LICENSE)
 

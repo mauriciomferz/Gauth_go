@@ -56,7 +56,7 @@ Decision: Allow/Deny + Reason + Obligations
 
 ### 2. Extended Token Enhancements
 
-**File Modified**: `pkg/gauth/extended_token.go` (+45 lines)
+**File Modified**: `pkg/agentauth/extended_token.go` (+45 lines)
 
 **New Methods**:
 - `HasMCPScope(requiredScope string) bool` - Check for specific scope with wildcard support
@@ -145,7 +145,7 @@ mcp:*                          - Wildcard: all MCP operations
 |----------|--------|-------|--------|
 | MCP Compliance | 30% | 60% | +30% |
 | Building Blocks | 45% | 52% | +7% |
-| Overall RFC-0111 | 75% | 76% | +1% |
+| Overall AAP-001 | 75% | 76% | +1% |
 | Time to Production | 24-31 weeks | 23-30 weeks | -1 week |
 
 ### File Summary
@@ -161,7 +161,7 @@ pkg/mcp/
 ├── transport_stdio.go       (141 lines)
 └── README.md                (300+ lines)
 
-pkg/gauth/
+pkg/agentauth/
 └── extended_token.go        (+45 lines) 📝 UPDATED
 
 MCP_PHASE2_COMPLETION_REPORT.md (400+ lines) ✨ NEW
@@ -318,7 +318,7 @@ $ go build ./...
 | Phase 3 | ⏳ Planned | 85% | Agent Integration, Audit, REST API, E2E Tests |
 | Phase 4 | 📋 Future | 95% | WebSocket/HTTP-SSE, Performance, Production |
 
-### RFC-0111 Impact
+### AAP-001 Impact
 - **MCP Requirement**: ✅ Partially satisfied (60% complete)
 - **Building Blocks**: 45% → 52% (+7%)
 - **Overall Compliance**: 75% → 76% (+1%)
@@ -340,7 +340,7 @@ The Authorization Bridge successfully bridges AgentAuth's comprehensive authoriz
 
 **Production Readiness**: Authorization layer is production-ready. Phase 3 will add operational components (agent integration, audit logging, REST API) to complete the MCP integration.
 
-**Compliance Progress**: On track to reach 85% MCP compliance and 78% overall RFC-0111 compliance after Phase 3.
+**Compliance Progress**: On track to reach 85% MCP compliance and 78% overall AAP-001 compliance after Phase 3.
 
 ---
 

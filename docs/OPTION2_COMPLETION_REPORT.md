@@ -27,7 +27,7 @@ Successfully completed comprehensive API documentation and developer experience 
 
 ### ✅ Task 1: OpenAPI/Swagger Specification
 
-**File**: `docs/openapi/gauth-api.yaml` (1,700 lines)
+**File**: `docs/openapi/agentauth-api.yaml` (1,700 lines)
 
 **Deliverables:**
 - Complete OpenAPI 3.1 specification
@@ -36,11 +36,11 @@ Successfully completed comprehensive API documentation and developer experience 
 - Security schemes: BearerAuth (JWT), ApiKeyAuth
 - Error responses with proper HTTP status codes
 - Server configurations: localhost, staging, production
-- 14 organized tags (System, RFC-0111, PoA, Tokens, etc.)
+- 14 organized tags (System, AAP-001, PoA, Tokens, etc.)
 
 **Coverage:**
 - System endpoints (health, info, ping)
-- RFC-0111 subscription flow (10 endpoints)
+- AAP-001 subscription flow (10 endpoints)
 - Power of Attorney (6 endpoints)
 - Authorization evaluation (2 endpoints)
 - PVP identity verification (1 endpoint)
@@ -90,12 +90,12 @@ Successfully completed comprehensive API documentation and developer experience 
 
 #### TypeScript/JavaScript SDK
 
-**File**: `sdks/typescript/gauth-client.ts` (750 lines)
+**File**: `sdks/typescript/agentauth-client.ts` (750 lines)
 
 **Deliverables:**
 - Complete type definitions (15+ interfaces)
 - AgentAuthClient class with 40+ methods
-- RFC-0111 methods (10):
+- AAP-001 methods (10):
   - `createSubscription`, `getSubscription`, `listSubscriptions`
   - `executeStepII` through `executeStepVIII`
   - `completeSubscriptionFlow` (automatic 8-step execution)
@@ -115,7 +115,7 @@ Successfully completed comprehensive API documentation and developer experience 
 
 #### Python SDK
 
-**File**: `sdks/python/gauth_client.py` (650 lines)
+**File**: `sdks/python/agentauth_client.py` (650 lines)
 
 **Deliverables:**
 - Dataclasses for type safety (Subscription, PoA, Token)
@@ -140,7 +140,7 @@ Successfully completed comprehensive API documentation and developer experience 
 
 **Deliverables:**
 - 7 major workflow tutorials:
-  1. RFC-0111 Subscription Flow
+  1. AAP-001 Subscription Flow
   2. Power of Attorney Management
   3. Token Management
   4. Authorization Evaluation
@@ -259,13 +259,13 @@ Successfully completed comprehensive API documentation and developer experience 
 
 ### New Files Created (10)
 
-1. `docs/openapi/gauth-api.yaml` - OpenAPI 3.1 specification (1,700 lines)
+1. `docs/openapi/agentauth-api.yaml` - OpenAPI 3.1 specification (1,700 lines)
 2. `web/handlers/docs/swagger_handlers.go` - HTTP handlers (130 lines)
 3. `web/handlers/docs/swagger-ui.html` - Swagger UI template (80 lines)
 4. `web/handlers/docs/redoc.html` - ReDoc template (90 lines)
 5. `web/docs_routes.go` - Route registration (25 lines)
-6. `sdks/typescript/gauth-client.ts` - TypeScript SDK (750 lines)
-7. `sdks/python/gauth_client.py` - Python SDK (650 lines)
+6. `sdks/typescript/agentauth-client.ts` - TypeScript SDK (750 lines)
+7. `sdks/python/agentauth_client.py` - Python SDK (650 lines)
 8. `docs/API_EXAMPLES.md` - Multi-language examples (500 lines)
 9. `docs/QUICKSTART.md` - Quick start guide (600 lines)
 10. `docs/API_VERSIONING.md` - Versioning policy (400 lines)
@@ -530,9 +530,9 @@ Successfully completed comprehensive API documentation and developer experience 
 - [API_EXAMPLES.md](./API_EXAMPLES.md) - Multi-language API examples
 - [QUICKSTART.md](./QUICKSTART.md) - Developer onboarding guide
 - [API_VERSIONING.md](./API_VERSIONING.md) - Versioning policy
-- [docs/openapi/gauth-api.yaml](./openapi/gauth-api.yaml) - OpenAPI specification
-- [sdks/typescript/gauth-client.ts](../sdks/typescript/gauth-client.ts) - TypeScript SDK
-- [sdks/python/gauth_client.py](../sdks/python/gauth_client.py) - Python SDK
+- [docs/openapi/agentauth-api.yaml](./openapi/agentauth-api.yaml) - OpenAPI specification
+- [sdks/typescript/agentauth-client.ts](../sdks/typescript/agentauth-client.ts) - TypeScript SDK
+- [sdks/python/agentauth_client.py](../sdks/python/agentauth_client.py) - Python SDK
 
 ---
 

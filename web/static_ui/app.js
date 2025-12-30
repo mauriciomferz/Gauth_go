@@ -64,7 +64,7 @@ async function loadAlgorithms(){
 
 async function loadOpenAPISpec(){
   try {
-    const res = await fetch('/api/openapi/gauth.yaml');
+    const res = await fetch('/api/openapi/agentauth.yaml');
     if(!res.ok) throw new Error('spec missing');
     const text = await res.text();
     const el = document.getElementById('openapi-container');

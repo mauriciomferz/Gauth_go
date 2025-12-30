@@ -1,7 +1,7 @@
 // Command verify-manifest verifies the signed policy manifest emitted by the AgentAuth server.
 // It fetches (or reads from file) the /api/v1/policy/manifest JSON, reconstructs the
 // canonical unsigned portion, recomputes the sha256 hash, and verifies the Ed25519 signature
-// using domain separation prefix "GAUTH_POLICY_MANIFEST:".
+// using domain separation prefix "AGENTAUTH_POLICY_MANIFEST:".
 //
 // Usage examples:
 //
@@ -244,7 +244,7 @@ func main() {
 		emitResult(*jsonOut, false, "signature_decode_error", map[string]any{"error": err.Error()})
 		os.Exit(1)
 	}
-	msg := append([]byte("GAUTH_POLICY_MANIFEST:"), rawCanon...)
+	msg := append([]byte("AGENTAUTH_POLICY_MANIFEST:"), rawCanon...)
 	if !ed25519.Verify(pubKey, msg, sigBytes) {
 		emitResult(*jsonOut, false, "signature_invalid", map[string]any{"kid": kid})
 		os.Exit(1)

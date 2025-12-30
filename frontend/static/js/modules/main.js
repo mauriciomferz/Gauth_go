@@ -113,14 +113,14 @@ window.AgentAuth.initModules = initModules;
 // Auto-init when DOM ready (safe idempotent)
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    if (!window.__gauthInitialized) {
-      window.__gauthInitialized = true;
+    if (!window.__agentauthInitialized) {
+      window.__agentauthInitialized = true;
       initAll();
     }
   });
 } else {
-  if (!window.__gauthInitialized) {
-    window.__gauthInitialized = true;
+  if (!window.__agentauthInitialized) {
+    window.__agentauthInitialized = true;
     initAll();
   }
 }

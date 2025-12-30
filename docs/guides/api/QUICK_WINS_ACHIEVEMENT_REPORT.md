@@ -242,8 +242,8 @@ Day 9:  Production Revocation System      100/100 ← Current
 - `pkg/audit/export.go` - Export service
 - `web/handlers/admin/cache_handler.go` - Cache API
 - `web/handlers/admin/audit_handler.go` - Enhanced audit API
-- `monitoring/grafana/dashboards/gauth-overview.json` - Grafana dashboard
-- `monitoring/prometheus/alerts/gauth-alerts.yml` - Alert rules
+- `monitoring/grafana/dashboards/agentauth-overview.json` - Grafana dashboard
+- `monitoring/prometheus/alerts/agentauth-alerts.yml` - Alert rules
 - `monitoring/docker-compose.yml` - Monitoring stack
 - `monitoring/prometheus/prometheus.yml` - Prometheus config
 - `monitoring/alertmanager/config.yml` - AlertManager config

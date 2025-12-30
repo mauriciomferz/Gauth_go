@@ -10,7 +10,7 @@ echo ""
 echo "📊 Creating capability assessments..."
 for i in {1..10}; do
   level=$((i % 4 + 1))
-  curl -s -X POST "$BASE_URL/api/v1/gauthplus/capabilities" \
+  curl -s -X POST "$BASE_URL/api/v1/agentauthplus/capabilities" \
     -H "Content-Type: application/json" \
     -d "{
       \"agent_id\": \"agent-$(printf '%03d' $i)\",
@@ -27,7 +27,7 @@ echo ""
 echo "🔗 Creating delegation chains..."
 for i in {1..5}; do
   next=$((i + 1))
-  curl -s -X POST "$BASE_URL/api/v1/gauthplus/delegations" \
+  curl -s -X POST "$BASE_URL/api/v1/agentauthplus/delegations" \
     -H "Content-Type: application/json" \
     -d "{
       \"delegator_agent_id\": \"agent-$(printf '%03d' $i)\",
@@ -44,7 +44,7 @@ echo ""
 # 3. Create dual control approvals
 echo "👥 Creating dual control approvals..."
 for i in {1..3}; do
-  curl -s -X POST "$BASE_URL/api/v1/gauthplus/dual-control" \
+  curl -s -X POST "$BASE_URL/api/v1/agentauthplus/dual-control" \
     -H "Content-Type: application/json" \
     -d "{
       \"action_type\": \"high_value_transfer\",
@@ -66,7 +66,7 @@ duties=("transparency" "loyalty" "prudence" "accountability")
 for i in {1..5}; do
   sev=${severities[$((i % 3))]}
   duty=${duties[$((i % 4))]}
-  curl -s -X POST "$BASE_URL/api/v1/gauthplus/fiduciary" \
+  curl -s -X POST "$BASE_URL/api/v1/agentauthplus/fiduciary" \
     -H "Content-Type: application/json" \
     -d "{
       \"poa_id\": \"550e8400-e29b-41d4-a716-44665544000$i\",
@@ -83,7 +83,7 @@ echo ""
 # 5. Activate successors
 echo "🔄 Activating successors..."
 for i in {1..2}; do
-  curl -s -X POST "$BASE_URL/api/v1/gauthplus/successors/activate" \
+  curl -s -X POST "$BASE_URL/api/v1/agentauthplus/successors/activate" \
     -H "Content-Type: application/json" \
     -d "{
       \"poa_id\": \"550e8400-e29b-41d4-a716-44665544000$i\",
@@ -99,15 +99,15 @@ echo ""
 # 6. Test capability API multiple times to trigger cache
 echo "💾 Testing cache performance..."
 for i in {1..20}; do
-  curl -s "$BASE_URL/api/v1/gauthplus/capabilities/agent-001/latest" > /dev/null
-  [ $((i % 5)) -eq 0 ] && echo "  ✓ $i requests completed"
+  curl -s "$BASE_URL/api/v1/agentauthplus/capabilities/agent-001/latest" > /dev/null
+  [ $((i % 5) -eq 0 ] && echo "  ✓ $i requests completed"
 done
 
 echo ""
 echo "=== Test Traffic Generation Complete ==="
 echo ""
 echo "📊 View metrics at:"
-echo "   Grafana:    http://localhost:3000/d/gauthplus-monitoring/gauthplus-monitoring"
+echo "   Grafana:    http://localhost:3000/d/agentauthplus-monitoring/agentauthplus-monitoring"
 echo "   Prometheus: http://localhost:9090/graph"
 echo "   Metrics:    http://localhost:8080/metrics"
 echo ""

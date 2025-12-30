@@ -73,7 +73,7 @@ type TSAStubProvider struct {
 	providerTag string
 	rnd         *rand.Rand
 	// forcedFailuresRemaining decrements before probabilistic model applies, enabling deterministic
-	// initial failure sequences for tests (set via GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS).
+	// initial failure sequences for tests (set via AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS).
 	forcedFailuresRemaining int
 }
 
@@ -109,13 +109,13 @@ func NewTSAStubProviderSeeded(minMs, maxMs int, failProb float64, seed int64) *T
 	return &TSAStubProvider{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: failProb, providerTag: "tsa-stub", rnd: rand.New(src)} // #nosec G404
 }
 
-// NewTSAStubProviderFromEnv builds a stub provider reading GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED if present.
+// NewTSAStubProviderFromEnv builds a stub provider reading AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED if present.
 // The env var enables deterministic test runs for flaky probability-based tests.
 func NewTSAStubProviderFromEnv(minMs, maxMs int, failProb float64) *TSAStubProvider {
-	if v := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED"); v != "" {
+	if v := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED"); v != "" {
 		if parsed, err := strconv.ParseInt(v, 10, 64); err == nil {
 			p := NewTSAStubProviderSeeded(minMs, maxMs, failProb, parsed)
-			if ff := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS"); ff != "" {
+			if ff := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS"); ff != "" {
 				if n, err := strconv.Atoi(ff); err == nil && n > 0 {
 					p.forcedFailuresRemaining = n
 				}
@@ -124,7 +124,7 @@ func NewTSAStubProviderFromEnv(minMs, maxMs int, failProb float64) *TSAStubProvi
 		}
 	}
 	p := NewTSAStubProvider(minMs, maxMs, failProb)
-	if ff := os.Getenv("GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS"); ff != "" {
+	if ff := os.Getenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS"); ff != "" {
 		if n, err := strconv.Atoi(ff); err == nil && n > 0 {
 			p.forcedFailuresRemaining = n
 		}

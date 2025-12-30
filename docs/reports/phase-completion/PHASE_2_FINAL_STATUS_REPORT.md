@@ -77,7 +77,7 @@ Phase 2 has been **successfully completed** with all frontend pages integrated w
 - ✅ Token creation via delegation
 - ✅ Client-side validation
 - ✅ Secure JWT handling
-- ✅ RFC-0111 compliance
+- ✅ AAP-001 compliance
 
 ---
 
@@ -410,7 +410,7 @@ The AgentAuth Enterprise IAM React frontend is now a fully functional, productio
 
 ## 📞 Contact & Resources
 
-**Repository**: https://github.com/mauriciomferz/Gauth_go  
+**Repository**: https://github.com/mauriciomferz/AgentAuth  
 **Branch**: main  
 **Status**: All Phase 2 work merged  
 
@@ -424,7 +424,7 @@ The AgentAuth Enterprise IAM React frontend is now a fully functional, productio
 **Quick Start**:
 ```bash
 # Backend
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 go run ./cmd/web-server
 
 # Frontend

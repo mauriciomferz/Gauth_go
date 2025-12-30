@@ -33,7 +33,7 @@ This guide will walk you through setting up AgentAuth, making your first API cal
 
 ```bash
 # Pull and run AgentAuth
-docker run -p 8080:8080 ghcr.io/mauriciomferz/gauth:latest
+docker run -p 8080:8080 ghcr.io/mauriciomferz/agentauth:latest
 
 # Verify it's running
 curl http://localhost:8080/api/v1/beta/health
@@ -43,8 +43,8 @@ curl http://localhost:8080/api/v1/beta/health
 
 ```bash
 # Clone the repository
-git clone https://github.com/mauriciomferz/Gauth_go.git
-cd Gauth_go
+git clone https://github.com/mauriciomferz/AgentAuth.git
+cd AgentAuth
 
 # Install dependencies
 go mod download
@@ -59,13 +59,13 @@ go run ./cmd/web-server
 
 ```bash
 # Download latest release
-wget https://github.com/mauriciomferz/Gauth_go/releases/latest/download/gauth-linux-amd64
+wget https://github.com/mauriciomferz/AgentAuth/releases/latest/download/agentauth-linux-amd64
 
 # Make executable
-chmod +x gauth-linux-amd64
+chmod +x agentauth-linux-amd64
 
 # Run
-./gauth-linux-amd64
+./agentauth-linux-amd64
 ```
 
 ---
@@ -95,11 +95,11 @@ curl http://localhost:8080/api/v1/beta/health
 
 ### Step 1: Create a Subscription (Get Access Token)
 
-AgentAuth uses the RFC-0111 subscription flow to issue access tokens. Let's complete the flow automatically:
+AgentAuth uses the AAP-001 subscription flow to issue access tokens. Let's complete the flow automatically:
 
 ```bash
 # Create subscription (Step I)
-SUB_RESPONSE=$(curl -s -X POST http://localhost:8080/api/v1/rfc0111/subscriptions \
+SUB_RESPONSE=$(curl -s -X POST http://localhost:8080/api/v1/aap001/subscriptions \
   -H "Content-Type: application/json" \
   -d '{
     "client_id": "quickstart-app",
@@ -112,13 +112,13 @@ echo "Subscription ID: $SUB_ID"
 
 # Execute steps II-VII automatically
 for STEP in ii iii iv v vi vii; do
-  curl -s -X POST "http://localhost:8080/api/v1/rfc0111/subscriptions/$SUB_ID/step-$STEP" \
+  curl -s -X POST "http://localhost:8080/api/v1/aap001/subscriptions/$SUB_ID/step-$STEP" \
     -H "Content-Type: application/json" \
     -d '{"proof_type": "document", "proof_data": "quickstart"}' > /dev/null
 done
 
 # Get access token (Step VIII)
-TOKEN_RESPONSE=$(curl -s -X POST "http://localhost:8080/api/v1/rfc0111/subscriptions/$SUB_ID/step-viii")
+TOKEN_RESPONSE=$(curl -s -X POST "http://localhost:8080/api/v1/aap001/subscriptions/$SUB_ID/step-viii")
 TOKEN=$(echo $TOKEN_RESPONSE | jq -r '.token')
 
 echo "✅ Access Token: $TOKEN"
@@ -247,14 +247,14 @@ curl -s -X POST http://localhost:8080/api/v1/beta/pvp/verify \
 
 ```bash
 # Install the SDK
-npm install @gauth/client
+npm install @agentauth/client
 # or
-yarn add @gauth/client
+yarn add @agentauth/client
 ```
 
 **Usage:**
 ```typescript
-import { AgentAuthClient } from '@gauth/client';
+import { AgentAuthClient } from '@agentauth/client';
 
 const client = new AgentAuthClient({
   baseURL: 'http://localhost:8080'
@@ -284,12 +284,12 @@ console.log('PoA created:', poa.id);
 
 ```bash
 # Install the SDK
-pip install gauth-client
+pip install agentauth-client
 ```
 
 **Usage:**
 ```python
-from gauth_client import AgentAuthClient
+from agentauth_client import AgentAuthClient
 
 client = AgentAuthClient(base_url='http://localhost:8080')
 
@@ -385,18 +385,18 @@ Try out endpoints directly from your browser!
 ```bash
 # Server Configuration
 export PORT=8080
-export GAUTH_ENV=development
+export AGENTAUTH_ENV=development
 
 # Security
-export GAUTH_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
-export GAUTH_RATE_LIMIT_RPS=100
+export AGENTAUTH_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+export AGENTAUTH_RATE_LIMIT_RPS=100
 
 # Features
-export GAUTH_AAP-001_ENABLED=1
+export AGENTAUTH_AAP-001_ENABLED=1
 
 # Logging
-export GAUTH_AUDIT_LOG_FILE=/var/log/gauth/audit.log
-export GAUTH_AUDIT_LOG_STDOUT=1
+export AGENTAUTH_AUDIT_LOG_FILE=/var/log/agentauth/audit.log
+export AGENTAUTH_AUDIT_LOG_STDOUT=1
 ```
 
 ### Configuration File
@@ -416,11 +416,11 @@ security:
   hsts_max_age: 31536000
 
 features:
-  rfc0111_enabled: true
+  aap001_enabled: true
   metrics_enabled: true
 
 logging:
-  audit_log_file: /var/log/gauth/audit.log
+  audit_log_file: /var/log/agentauth/audit.log
   audit_log_stdout: true
 ```
 
@@ -468,9 +468,9 @@ logging:
 
 ### 🤝 Get Help
 
-- **GitHub Issues**: https://github.com/mauriciomferz/Gauth_go/issues
-- **Discussions**: https://github.com/mauriciomferz/Gauth_go/discussions
-- **Email**: support@gauth.example.com
+- **GitHub Issues**: https://github.com/mauriciomferz/AgentAuth/issues
+- **Discussions**: https://github.com/mauriciomferz/AgentAuth/discussions
+- **Email**: support@agentauth.example.com
 
 ---
 
@@ -487,10 +487,10 @@ Check out our sample applications:
 ## FAQ
 
 **Q: How do I get an API key?**  
-A: Use the RFC-0111 subscription flow to obtain an access token. API keys are for service-to-service authentication (contact support).
+A: Use the AAP-001 subscription flow to obtain an access token. API keys are for service-to-service authentication (contact support).
 
 **Q: Can I use AgentAuth without the subscription flow?**  
-A: The subscription flow is recommended for full RFC-0111 compliance, but you can also use direct token creation for simpler scenarios.
+A: The subscription flow is recommended for full AAP-001 compliance, but you can also use direct token creation for simpler scenarios.
 
 **Q: How long do tokens last?**  
 A: Default token lifetime is 1 hour (3600 seconds). This can be configured during subscription.

@@ -18,11 +18,11 @@ async function openPolicyTab(page: Page) {
     const cacheBust = Date.now();
     await page.goto(`/index.html?cb=${cacheBust}`, { waitUntil: 'domcontentloaded' });
     let tab = page.locator('[data-testid="policy-tab"]');
-    if (!(await tab.count())) {
+    if (!(await tab.count()) {
       // Fallback: locate button by visible text
       tab = page.locator('button:has-text("Policy (Experimental)")');
     }
-    if (await tab.count()) {
+    if (await tab.count() {
       try {
         await tab.first().waitFor({ state: 'visible', timeout: 2000 });
         await tab.first().click();

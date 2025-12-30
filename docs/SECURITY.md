@@ -32,14 +32,14 @@ Security best practices, vulnerability status, and incident response guide.
 
 **Current Setup**:
 - JWT signing key: Randomly generated (256-bit)
-- Storage: Environment variable `GAUTH_JWT_SIGNING_KEY`
+- Storage: Environment variable `AGENTAUTH_JWT_SIGNING_KEY`
 - Algorithm: EdDSA (configurable)
 
 **Recommendations**:
 1. Keep JWT key in secure secret manager:
    ```bash
    # Never commit to git
-   echo "GAUTH_JWT_SIGNING_KEY=..." >> .gitignore
+   echo "AGENTAUTH_JWT_SIGNING_KEY=..." >> .gitignore
    
    # Use environment-specific keys
    # Dev: Different from staging/prod
@@ -76,7 +76,7 @@ DB_PASSWORD=$(openssl rand -base64 32)
 # Connection pool: max 20
 
 # Regular backups
-pg_dump -U gauth gauth > backup-$(date +%Y%m%d).sql
+pg_dump -U agentauth agentauth > backup-$(date +%Y%m%d).sql
 ```
 
 ### API Key Security
@@ -127,9 +127,9 @@ ufw allow 443/tcp  # HTTPS only
 ufw allow 8080/tcp from 10.0.0.0/8  # Internal only
 
 # Enable TLS
-GAUTH_TLS_ENABLED=true
-GAUTH_TLS_CERT_PATH=/etc/gauth/tls/cert.pem
-GAUTH_TLS_KEY_PATH=/etc/gauth/tls/key.pem
+AGENTAUTH_TLS_ENABLED=true
+AGENTAUTH_TLS_CERT_PATH=/etc/agentauth/tls/cert.pem
+AGENTAUTH_TLS_KEY_PATH=/etc/agentauth/tls/key.pem
 ```
 
 ---

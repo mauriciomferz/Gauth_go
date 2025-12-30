@@ -16,16 +16,16 @@ class PoAMarketingCredentialSystem {
 
     bindEvents() {
         document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-validate-marketing-request]')) {
+            if (e.target.matches('[data-validate-marketing-request]') {
                 this.validateMarketingRequest();
             }
-            if (e.target.matches('[data-create-marketing-poa]')) {
+            if (e.target.matches('[data-create-marketing-poa]') {
                 this.createMarketingPoA();
             }
-            if (e.target.matches('[data-test-social-campaign]')) {
+            if (e.target.matches('[data-test-social-campaign]') {
                 this.testSocialMediaCampaign();
             }
-            if (e.target.matches('[data-test-content-approval]')) {
+            if (e.target.matches('[data-test-content-approval]') {
                 this.testContentApproval();
             }
         });

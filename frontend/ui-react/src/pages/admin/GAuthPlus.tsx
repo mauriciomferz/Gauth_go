@@ -20,11 +20,11 @@ import {
   Certificate24Regular,
   Shield24Regular,
 } from '@fluentui/react-icons'
-import SuccessorPanel from '../../components/gauthplus/SuccessorPanel'
-import DelegationPanel from '../../components/gauthplus/DelegationPanel'
-import DualControlPanel from '../../components/gauthplus/DualControlPanel'
-import CapabilityPanel from '../../components/gauthplus/CapabilityPanel'
-import FiduciaryPanel from '../../components/gauthplus/FiduciaryPanel'
+import SuccessorPanel from '../../components/agentauthplus/SuccessorPanel'
+import DelegationPanel from '../../components/agentauthplus/DelegationPanel'
+import DualControlPanel from '../../components/agentauthplus/DualControlPanel'
+import CapabilityPanel from '../../components/agentauthplus/CapabilityPanel'
+import FiduciaryPanel from '../../components/agentauthplus/FiduciaryPanel'
 
 const useStyles = makeStyles({
   container: {

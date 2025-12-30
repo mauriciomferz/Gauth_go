@@ -6,14 +6,14 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC-0111 Implementation Status Report
+# AAP-001 Implementation Status Report
 
 **Date**: November 11, 2025  
 **Status**: ✅ FULLY OPERATIONAL
 
 ## Executive Summary
 
-The RFC-0111 Authorization Protocol implementation is now **complete and operational**. Both the Subscription Flow (Steps I-VIII) and Authorization Flow (Steps a-i) are fully functional with all compliance validations passing.
+The AAP-001 Authorization Protocol implementation is now **complete and operational**. Both the Subscription Flow (Steps I-VIII) and Authorization Flow (Steps a-i) are fully functional with all compliance validations passing.
 
 ## Implementation Status
 
@@ -46,7 +46,7 @@ All 9 steps of the authorization flow are implemented and tested:
 - **Step (b)**: Request Compliance Validation - Validates scope, PoA, legal framework
 - **Step (c)**: Authorization Grant Issuance - Issues short-lived authorization grants
 - **Step (d)**: Extended Token Request - Implicit token request via grant
-- **Step (e)**: Extended Token Issuance - Creates RFC-0111 compliant extended tokens
+- **Step (e)**: Extended Token Issuance - Creates AAP-001 compliant extended tokens
 - **Step (f)**: Grant Compliance Validation - Validates grant scope and issuer authority
 - **Step (g)**: Transaction/Decision/Action Request - Prepared for downstream usage
 - **Step (h)**: Token Validation & Request Fulfillment - Token contains validation metadata
@@ -56,7 +56,7 @@ All 9 steps of the authorization flow are implemented and tested:
 
 **Token Features**:
 - OAuth 2.0 compatible (Bearer token)
-- Extended metadata per RFC-0111
+- Extended metadata per AAP-001
 - Power of Attorney embedded in token
 - 3-level authorization chain (owners_authorizer → client_owner → client)
 - Legal framework (EU-GDPR, Germany jurisdiction)
@@ -68,15 +68,15 @@ All 9 steps of the authorization flow are implemented and tested:
 
 ### 1. Scope Parsing and Mapping
 
-Implemented OAuth scope to RFC-0111 action mapping:
+Implemented OAuth scope to AAP-001 action mapping:
 - `read` → `ActionNonPhysicalAnalyzing`
 - `write` → `ActionNonPhysicalDocumenting`
 - `delete` → `ActionNonPhysicalApproving`
 - `admin` → `ActionNonPhysicalApproving`
 
 **Files Modified**:
-- `web/handlers/rfc0111/authorization_handlers.go` - Enhanced `parseBasicScope()`
-- `pkg/gauth/protocol_orchestrator.go` - Scopes array population
+- `web/handlers/aap001/authorization_handlers.go` - Enhanced `parseBasicScope()`
+- `pkg/agentauth/protocol_orchestrator.go` - Scopes array population
 
 ### 2. Power of Attorney Integration
 
@@ -87,7 +87,7 @@ Implemented complete PoA structure with all required fields:
 - Active operational status
 
 **Files Modified**:
-- `web/handlers/rfc0111/subscription_handlers.go` - Step V handler creates mock PoA
+- `web/handlers/aap001/subscription_handlers.go` - Step V handler creates mock PoA
 
 ### 3. Legal Framework Validation
 
@@ -97,7 +97,7 @@ Implemented legal framework extraction and validation:
 - Validates governing law and jurisdiction
 
 **Files Modified**:
-- `pkg/gauth/protocol_orchestrator.go` - Legal framework extraction and propagation
+- `pkg/agentauth/protocol_orchestrator.go` - Legal framework extraction and propagation
 
 ### 4. Grant Compliance
 
@@ -107,19 +107,19 @@ Implemented grant scope validation:
 - Ensures issuer authority
 
 **Files Modified**:
-- `pkg/gauth/protocol_orchestrator.go` - Grant creation and validation
+- `pkg/agentauth/protocol_orchestrator.go` - Grant creation and validation
 
 ## Test Coverage
 
 ### Automated Tests
 
-**Subscription Flow Test**: `./scripts/test_rfc0111_subscription_flow.sh`
+**Subscription Flow Test**: `./scripts/test_aap001_subscription_flow.sh`
 - Tests all 8 subscription steps
 - Verifies subscription state transitions
 - Validates authorization chain creation
 - Result: ✅ 11/11 tests passing
 
-**End-to-End Test**: `./scripts/test_rfc0111_end_to_end.sh`
+**End-to-End Test**: `./scripts/test_aap001_end_to_end.sh`
 - Tests complete subscription + authorization flow
 - Verifies extended token issuance
 - Validates all metadata fields
@@ -132,10 +132,10 @@ Can be tested via curl commands:
 
 ```bash
 # 1. Create subscription
-SUB_ID=$(./scripts/test_rfc0111_subscription_flow.sh 2>&1 | grep -oE 'sub_[0-9]+' | tail -1)
+SUB_ID=$(./scripts/test_aap001_subscription_flow.sh 2>&1 | grep -oE 'sub_[0-9]+' | tail -1)
 
 # 2. Request authorization
-curl -X POST "http://localhost:8080/api/v1/rfc0111/authorize" \
+curl -X POST "http://localhost:8080/api/v1/aap001/authorize" \
   -H "Content-Type: application/json" \
   -d "{
     \"client_id\": \"client-app-123\",
@@ -153,7 +153,7 @@ curl -X POST "http://localhost:8080/api/v1/rfc0111/authorize" \
 
 **Issue**: Token validation/introspection/revocation endpoints exist but don't work with extended tokens
 
-**Root Cause**: Extended tokens created via RFC-0111 are not persisted in the token store. The `ExtendedTokenService` generates tokens but doesn't store them for later validation.
+**Root Cause**: Extended tokens created via AAP-001 are not persisted in the token store. The `ExtendedTokenService` generates tokens but doesn't store them for later validation.
 
 **Impact**: 
 - Token validation returns "invalid token" even for valid tokens
@@ -180,18 +180,18 @@ type ExtendedTokenStore interface {
 
 ### Modified Files
 
-1. **web/handlers/rfc0111/authorization_handlers.go**
+1. **web/handlers/aap001/authorization_handlers.go**
    - Enhanced OAuth scope parsing
-   - Maps OAuth scopes to RFC-0111 action types
+   - Maps OAuth scopes to AAP-001 action types
    - Lines modified: 182-260
 
-2. **web/handlers/rfc0111/subscription_handlers.go**
+2. **web/handlers/aap001/subscription_handlers.go**
    - Added PoA creation in Step V handler
    - Configured active operational status
    - Added legal framework (JurisdictionLaw)
    - Lines modified: 335-365
 
-3. **pkg/gauth/protocol_orchestrator.go**
+3. **pkg/agentauth/protocol_orchestrator.go**
    - Extract scopes from RequestedScope
    - Populate scopes array for compliance validation
    - Extract legal framework from PoA
@@ -201,11 +201,11 @@ type ExtendedTokenStore interface {
 
 ### Code Organization
 
-All RFC-0111 specific code is properly organized:
-- **Handlers**: `web/handlers/rfc0111/`
-- **Core Logic**: `pkg/gauth/`
+All AAP-001 specific code is properly organized:
+- **Handlers**: `web/handlers/aap001/`
+- **Core Logic**: `pkg/agentauth/`
 - **PoA Types**: `pkg/poa/`
-- **Tests**: `scripts/test_rfc0111_*.sh`
+- **Tests**: `scripts/test_aap001_*.sh`
 
 ### Documentation
 
@@ -215,7 +215,7 @@ All RFC-0111 specific code is properly organized:
 
 ## Compliance Validation
 
-The implementation validates the following RFC-0111 requirements:
+The implementation validates the following AAP-001 requirements:
 
 ### Request Compliance (Step b)
 - ✅ Request structure (client ID, scopes)
@@ -267,7 +267,7 @@ The implementation validates the following RFC-0111 requirements:
 
 5. **Enhanced Error Handling** (2-3 hours)
    - Consistent error response format
-   - Detailed error messages per RFC-0111
+   - Detailed error messages per AAP-001
    - Error correlation IDs
 
 6. **Comprehensive Audit Logging** (3-4 hours)
@@ -294,7 +294,7 @@ The implementation validates the following RFC-0111 requirements:
 
 ## Conclusion
 
-The RFC-0111 implementation is **fully operational** with both subscription and authorization flows working end-to-end. All compliance validations pass, and extended tokens are issued with complete metadata.
+The AAP-001 implementation is **fully operational** with both subscription and authorization flows working end-to-end. All compliance validations pass, and extended tokens are issued with complete metadata.
 
 The implementation successfully demonstrates:
 - ✅ Multi-party authorization chains

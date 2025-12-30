@@ -47,7 +47,7 @@ func NewMockKMS() (*MockKMS, error) {
 	signer := &ed25519Signer{keyID: keyID, priv: priv, pub: pub, algo: AlgoEd25519}
 	mk := &MockKMS{active: signer, publics: map[string]ed25519.PublicKey{keyID: pub}, created: map[string]time.Time{keyID: time.Now().UTC()}}
 	// Optional latency via env (ms)
-	if v := os.Getenv("GAUTH_KMS_LATENCY_MS"); v != "" {
+	if v := os.Getenv("AGENTAUTH_KMS_LATENCY_MS"); v != "" {
 		if ms, err := strconv.Atoi(v); err == nil && ms >= 0 && ms < 60000 {
 			mk.latency = time.Duration(ms) * time.Millisecond
 		}

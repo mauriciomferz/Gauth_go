@@ -9,7 +9,7 @@ var (
 	// MCP Metrics
 	MCPRequestsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_mcp_requests_total",
+			Name: "agentauth_mcp_requests_total",
 			Help: "Total number of MCP requests processed",
 		},
 		[]string{"method", "status"},
@@ -17,7 +17,7 @@ var (
 
 	MCPRequestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_mcp_request_duration_seconds",
+			Name:    "agentauth_mcp_request_duration_seconds",
 			Help:    "Duration of MCP requests in seconds",
 			Buckets: prometheus.DefBuckets,
 		},
@@ -26,14 +26,14 @@ var (
 
 	MCPActiveConnections = promauto.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "gauth_mcp_active_connections",
+			Name: "agentauth_mcp_active_connections",
 			Help: "Number of active MCP connections",
 		},
 	)
 
 	MCPMessagesReceived = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_mcp_messages_received_total",
+			Name: "agentauth_mcp_messages_received_total",
 			Help: "Total number of MCP messages received",
 		},
 		[]string{"transport", "type"},
@@ -41,7 +41,7 @@ var (
 
 	MCPMessagesSent = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_mcp_messages_sent_total",
+			Name: "agentauth_mcp_messages_sent_total",
 			Help: "Total number of MCP messages sent",
 		},
 		[]string{"transport", "type"},
@@ -50,7 +50,7 @@ var (
 	// Identity Connector Metrics
 	ConnectorValidationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_connector_validations_total",
+			Name: "agentauth_connector_validations_total",
 			Help: "Total number of identity validations performed",
 		},
 		[]string{"country", "document_type", "result"},
@@ -58,7 +58,7 @@ var (
 
 	ConnectorValidationDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_connector_validation_duration_seconds",
+			Name:    "agentauth_connector_validation_duration_seconds",
 			Help:    "Duration of identity validations in seconds",
 			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5},
 		},
@@ -67,7 +67,7 @@ var (
 
 	ConnectorAPICallsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_connector_api_calls_total",
+			Name: "agentauth_connector_api_calls_total",
 			Help: "Total number of API calls to government systems",
 		},
 		[]string{"country", "api_name", "status"},
@@ -75,7 +75,7 @@ var (
 
 	ConnectorAPICallDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_connector_api_call_duration_seconds",
+			Name:    "agentauth_connector_api_call_duration_seconds",
 			Help:    "Duration of government API calls in seconds",
 			Buckets: []float64{.05, .1, .25, .5, 1, 2, 5, 10, 30},
 		},
@@ -84,7 +84,7 @@ var (
 
 	ConnectorCacheHits = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_connector_cache_hits_total",
+			Name: "agentauth_connector_cache_hits_total",
 			Help: "Total number of cache hits for validation results",
 		},
 		[]string{"country", "document_type"},
@@ -92,7 +92,7 @@ var (
 
 	ConnectorCacheMisses = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_connector_cache_misses_total",
+			Name: "agentauth_connector_cache_misses_total",
 			Help: "Total number of cache misses for validation results",
 		},
 		[]string{"country", "document_type"},
@@ -101,14 +101,14 @@ var (
 	// RFC-0111 PoA Metrics
 	PoACreatedTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
-			Name: "gauth_poa_created_total",
+			Name: "agentauth_poa_created_total",
 			Help: "Total number of Power of Attorney credentials created",
 		},
 	)
 
 	PoAValidationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_poa_validations_total",
+			Name: "agentauth_poa_validations_total",
 			Help: "Total number of PoA validations performed",
 		},
 		[]string{"result"},
@@ -116,14 +116,14 @@ var (
 
 	PoARevokedTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
-			Name: "gauth_poa_revoked_total",
+			Name: "agentauth_poa_revoked_total",
 			Help: "Total number of PoA credentials revoked",
 		},
 	)
 
 	PoAActiveCount = promauto.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "gauth_poa_active_count",
+			Name: "agentauth_poa_active_count",
 			Help: "Number of currently active PoA credentials",
 		},
 	)
@@ -131,7 +131,7 @@ var (
 	// Authorization Metrics
 	AuthorizationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_authorizations_total",
+			Name: "agentauth_authorizations_total",
 			Help: "Total number of authorization requests",
 		},
 		[]string{"client_id", "status"},
@@ -139,7 +139,7 @@ var (
 
 	AuthorizationDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_authorization_duration_seconds",
+			Name:    "agentauth_authorization_duration_seconds",
 			Help:    "Duration of authorization requests in seconds",
 			Buckets: prometheus.DefBuckets,
 		},
@@ -148,7 +148,7 @@ var (
 
 	TokensIssuedTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_tokens_issued_total",
+			Name: "agentauth_tokens_issued_total",
 			Help: "Total number of access tokens issued",
 		},
 		[]string{"grant_type", "client_id"},
@@ -156,7 +156,7 @@ var (
 
 	TokenValidationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_token_validations_total",
+			Name: "agentauth_token_validations_total",
 			Help: "Total number of token validations",
 		},
 		[]string{"result"},
@@ -165,7 +165,7 @@ var (
 	// Policy Metrics
 	PolicyDecisionsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_policy_decisions_total",
+			Name: "agentauth_policy_decisions_total",
 			Help: "Total number of policy decisions made",
 		},
 		[]string{"policy_id", "effect"},
@@ -173,7 +173,7 @@ var (
 
 	PolicyEvaluationDuration = promauto.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "gauth_policy_evaluation_duration_seconds",
+			Name:    "agentauth_policy_evaluation_duration_seconds",
 			Help:    "Duration of policy evaluation in seconds",
 			Buckets: []float64{.0001, .0005, .001, .005, .01, .025, .05},
 		},
@@ -182,7 +182,7 @@ var (
 	// System Health Metrics
 	HTTPRequestsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_http_requests_total",
+			Name: "agentauth_http_requests_total",
 			Help: "Total number of HTTP requests",
 		},
 		[]string{"method", "endpoint", "status"},
@@ -190,7 +190,7 @@ var (
 
 	HTTPRequestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_http_request_duration_seconds",
+			Name:    "agentauth_http_request_duration_seconds",
 			Help:    "Duration of HTTP requests in seconds",
 			Buckets: prometheus.DefBuckets,
 		},
@@ -199,14 +199,14 @@ var (
 
 	DatabaseConnectionsActive = promauto.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "gauth_database_connections_active",
+			Name: "agentauth_database_connections_active",
 			Help: "Number of active database connections",
 		},
 	)
 
 	DatabaseQueriesTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_database_queries_total",
+			Name: "agentauth_database_queries_total",
 			Help: "Total number of database queries",
 		},
 		[]string{"operation", "table", "status"},
@@ -214,7 +214,7 @@ var (
 
 	DatabaseQueryDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_database_query_duration_seconds",
+			Name:    "agentauth_database_query_duration_seconds",
 			Help:    "Duration of database queries in seconds",
 			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1},
 		},
@@ -223,7 +223,7 @@ var (
 
 	RedisOperationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_redis_operations_total",
+			Name: "agentauth_redis_operations_total",
 			Help: "Total number of Redis operations",
 		},
 		[]string{"operation", "status"},
@@ -231,7 +231,7 @@ var (
 
 	RedisOperationDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauth_redis_operation_duration_seconds",
+			Name:    "agentauth_redis_operation_duration_seconds",
 			Help:    "Duration of Redis operations in seconds",
 			Buckets: []float64{.0001, .0005, .001, .005, .01, .025, .05},
 		},
@@ -241,7 +241,7 @@ var (
 	// Error Metrics
 	ErrorsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_errors_total",
+			Name: "agentauth_errors_total",
 			Help: "Total number of errors by type",
 		},
 		[]string{"type", "component"},
@@ -250,7 +250,7 @@ var (
 	// Audit Log Metrics
 	AuditLogsWritten = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauth_audit_logs_written_total",
+			Name: "agentauth_audit_logs_written_total",
 			Help: "Total number of audit log entries written",
 		},
 		[]string{"event_type"},
@@ -258,7 +258,7 @@ var (
 
 	AuditLogWriteDuration = promauto.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "gauth_audit_log_write_duration_seconds",
+			Name:    "agentauth_audit_log_write_duration_seconds",
 			Help:    "Duration of audit log writes in seconds",
 			Buckets: []float64{.001, .005, .01, .025, .05, .1},
 		},
@@ -267,7 +267,7 @@ var (
 	// AgentAuth+ Metrics
 	AgentAuthPlusValidationsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauthplus_validations_total",
+			Name: "agentauthplus_validations_total",
 			Help: "Total number of AgentAuth+ validations performed",
 		},
 		[]string{"feature", "result"},
@@ -275,7 +275,7 @@ var (
 
 	AgentAuthPlusValidationDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "gauthplus_validation_duration_seconds",
+			Name:    "agentauthplus_validation_duration_seconds",
 			Help:    "Duration of AgentAuth+ feature validations in seconds",
 			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5},
 		},
@@ -284,7 +284,7 @@ var (
 
 	AgentAuthPlusCacheHits = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauthplus_cache_hits_total",
+			Name: "agentauthplus_cache_hits_total",
 			Help: "Total number of AgentAuth+ cache hits",
 		},
 		[]string{"cache_type"},
@@ -292,7 +292,7 @@ var (
 
 	AgentAuthPlusCacheMisses = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauthplus_cache_misses_total",
+			Name: "agentauthplus_cache_misses_total",
 			Help: "Total number of AgentAuth+ cache misses",
 		},
 		[]string{"cache_type"},
@@ -300,7 +300,7 @@ var (
 
 	AgentAuthPlusCacheSize = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "gauthplus_cache_size",
+			Name: "agentauthplus_cache_size",
 			Help: "Current number of entries in AgentAuth+ caches",
 		},
 		[]string{"cache_type"},
@@ -308,7 +308,7 @@ var (
 
 	AgentAuthPlusPolicyViolations = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauthplus_policy_violations_total",
+			Name: "agentauthplus_policy_violations_total",
 			Help: "Total number of AgentAuth+ policy violations detected",
 		},
 		[]string{"policy_type", "severity"},
@@ -316,14 +316,14 @@ var (
 
 	AgentAuthPlusSuccessorActivations = promauto.NewCounter(
 		prometheus.CounterOpts{
-			Name: "gauthplus_successor_activations_total",
+			Name: "agentauthplus_successor_activations_total",
 			Help: "Total number of successor AI activations",
 		},
 	)
 
 	AgentAuthPlusDelegationDepth = promauto.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "gauthplus_delegation_depth",
+			Name:    "agentauthplus_delegation_depth",
 			Help:    "Distribution of delegation chain depths",
 			Buckets: []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
 		},
@@ -331,7 +331,7 @@ var (
 
 	AgentAuthPlusDualControlApprovals = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauthplus_dual_control_approvals_total",
+			Name: "agentauthplus_dual_control_approvals_total",
 			Help: "Total number of dual control approvals",
 		},
 		[]string{"action_type", "status"},
@@ -339,7 +339,7 @@ var (
 
 	AgentAuthPlusCapabilityLevel = promauto.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "gauthplus_capability_level",
+			Name: "agentauthplus_capability_level",
 			Help: "Current capability level of AI agents (L0-L5 mapped to 0-5)",
 		},
 		[]string{"agent_id"},
@@ -347,7 +347,7 @@ var (
 
 	AgentAuthPlusFiduciaryViolations = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "gauthplus_fiduciary_violations_total",
+			Name: "agentauthplus_fiduciary_violations_total",
 			Help: "Total number of fiduciary duty violations",
 		},
 		[]string{"duty_type", "severity"},
@@ -356,7 +356,7 @@ var (
 	// Rotation Business Metrics
 	RotationSignatureVerifyLatency = promauto.NewHistogram(
 		prometheus.HistogramOpts{
-			Name:    "gauth_rotation_signature_verify_latency_seconds",
+			Name:    "agentauth_rotation_signature_verify_latency_seconds",
 			Help:    "Latency of rotation signature verification",
 			Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5},
 		},
@@ -364,28 +364,28 @@ var (
 
 	RotationContinuityUpdatesTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
-			Name: "gauth_rotation_v2_continuity_updates_total",
+			Name: "agentauth_rotation_v2_continuity_updates_total",
 			Help: "Total number of rotation continuity updates",
 		},
 	)
 
 	RotationChainLength = promauto.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "gauth_rotation_summary_chain_length",
+			Name: "agentauth_rotation_summary_chain_length",
 			Help: "Length of the rotation chain",
 		},
 	)
 
 	RotationHeadAge = promauto.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "gauth_rotation_summary_head_age_seconds",
+			Name: "agentauth_rotation_summary_head_age_seconds",
 			Help: "Age of the rotation chain head in seconds",
 		},
 	)
 
 	RotationLastAnchorAge = promauto.NewGauge(
 		prometheus.GaugeOpts{
-			Name: "gauth_rotation_summary_last_anchor_age_seconds",
+			Name: "agentauth_rotation_summary_last_anchor_age_seconds",
 			Help: "Age of the last rotation anchor in seconds",
 		},
 	)

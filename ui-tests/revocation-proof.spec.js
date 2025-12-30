@@ -4,8 +4,8 @@
 
 import { test, expect } from '@playwright/test';
 
-// Assumption: server running locally on GAUTH_WEB_PORT (default 8080 or overridden to 9090). Use 9090 if set.
-const BASE = process.env.GAUTH_WEB_PORT ? `http://localhost:${process.env.GAUTH_WEB_PORT}` : 'http://localhost:9090';
+// Assumption: server running locally on AGENTAUTH_WEB_PORT (default 8080 or overridden to 9090). Use 9090 if set.
+const BASE = process.env.AGENTAUTH_WEB_PORT ? `http://localhost:${process.env.AGENTAUTH_WEB_PORT}` : 'http://localhost:9090';
 
 test.describe('Revocation Transparency Panel', () => {
   test('renders panel and handles empty proof input', async ({ page }) => {

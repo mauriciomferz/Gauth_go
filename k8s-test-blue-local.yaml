@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-blue
-  namespace: gauth-staging
+  name: agentauth-blue
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     version: blue
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       version: blue
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         version: blue
     spec:
       containers:
-      - name: gauth
-        image: gauth-mock:latest
+      - name: agentauth
+        image: agentauth-mock:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -28,17 +28,17 @@ spec:
         - containerPort: 6060
           name: pprof
         env:
-        - name: GAUTH_WEB_PORT
+        - name: AGENTAUTH_WEB_PORT
           value: "8080"
-        - name: GAUTH_ENV
+        - name: AGENTAUTH_ENV
           value: "staging"
-        - name: GAUTH_LOG_LEVEL
+        - name: AGENTAUTH_LOG_LEVEL
           value: "info"
         - name: VERSION
           value: "blue"
-        - name: GAUTH_ENABLE_PPROF
+        - name: AGENTAUTH_ENABLE_PPROF
           value: "1"
-        - name: GAUTH_PPROF_PORT
+        - name: AGENTAUTH_PPROF_PORT
           value: "6060"
         resources:
           requests:
@@ -63,11 +63,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth-service
-  namespace: gauth-staging
+  name: agentauth-service
+  namespace: agentauth-staging
 spec:
   selector:
-    app: gauth
+    app: agentauth
     version: blue
   ports:
   - protocol: TCP

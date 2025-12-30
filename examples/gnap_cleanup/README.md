@@ -49,7 +49,7 @@ The example will:
 To integrate this into your application:
 
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/gnap"
+import "github.com/mauriciomferz/AgentAuth/pkg/gnap"
 
 // In your main function or server setup
 cleanup := gnap.NewCleanupManager(grantStore, tokenStore, 10*time.Minute)

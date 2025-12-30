@@ -9,7 +9,7 @@ owners: [system]
 # PoA Visualization Enhancement - AgentAuth Protocol Flow Integration
 
 ## Overview
-Successfully enhanced the PoA visualization to include complete AgentAuth Protocol Flow patterns based on RFC-0111 and RFC-0115. The visualization now supports **15 different pattern types** including 6 new protocol flow visualizations.
+Successfully enhanced the PoA visualization to include complete AgentAuth Protocol Flow patterns based on AAP-001 and AAP-002. The visualization now supports **15 different pattern types** including 6 new protocol flow visualizations.
 
 ## New Protocol Flow Patterns
 
@@ -28,7 +28,7 @@ Successfully enhanced the PoA visualization to include complete AgentAuth Protoc
 **Demonstrates**: PoA Definition validation and capability matching
 - **Nodes**: 7 (PoA Definition, 4 validation steps, PDP, Result)
 - **Key Components**:
-  - PoA Definition (RFC-0115) validation
+  - PoA Definition (AAP-002) validation
   - AI Capability checking
   - Jurisdiction verification (GDPR, HIPAA)
   - Policy matching (RBAC)
@@ -79,7 +79,7 @@ Successfully enhanced the PoA visualization to include complete AgentAuth Protoc
 - **Use Case**: Comprehensive token validation including cryptographic verification and identity proofing
 
 ### 6. **Complete Protocol Flow** (`protocol-full`)
-**Demonstrates**: End-to-end RFC-0111 + RFC-0115 flow
+**Demonstrates**: End-to-end AAP-001 + AAP-002 flow
 - **Nodes**: 15 (All phases integrated)
 - **Phases**:
   1. **Subscription**: Client registration
@@ -180,7 +180,7 @@ Each protocol flow node includes rich metadata:
 ### Starting the Server
 ```bash
 # Set dev mode to serve templates from disk
-export GAUTH_DEV_INDEX=1
+export AGENTAUTH_DEV_INDEX=1
 
 # Start the server
 go run ./cmd/web-server
@@ -240,7 +240,7 @@ Example: Complete Protocol Flow positions nodes from:
 
 ## Protocol Flow Mapping to RFCs
 
-### RFC-0111 Authorization Flow
+### AAP-001 Authorization Flow
 | Pattern | RFC Section | Components |
 |---------|-------------|------------|
 | Subscription | §3.1 Client Registration | Client ID, Client Secret, Registration endpoint |
@@ -249,7 +249,7 @@ Example: Complete Protocol Flow positions nodes from:
 | Enforcement | §4.1 Token Usage | PEP, Resource Server, Access Token |
 | Verification | §4.2 Token Validation | Signature, Expiration, Revocation |
 
-### RFC-0115 PoA Definition
+### AAP-002 PoA Definition
 | Pattern | RFC Section | Components |
 |---------|-------------|------------|
 | Matching | §2.1 PoA Structure | Grantor, Grantee, Scope, Constraints |
@@ -352,7 +352,7 @@ AI Agent → Register Client → Configure Scopes → Obtain Credentials
 
 ## Testing Checklist
 
-- [x] Server starts with `GAUTH_DEV_INDEX=1`
+- [x] Server starts with `AGENTAUTH_DEV_INDEX=1`
 - [x] Page loads at `/poa-visualization`
 - [x] Dropdown includes "AgentAuth Protocol Flow" optgroup
 - [x] 6 new protocol patterns added

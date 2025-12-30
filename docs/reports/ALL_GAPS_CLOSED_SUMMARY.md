@@ -47,7 +47,7 @@ Successfully closed **8 critical, high-priority, and medium-priority gaps** acro
 ## New Files Created
 
 ### Core Implementations
-1. **`pkg/gauth/replay_store_bolt.go`** (175 lines)
+1. **`pkg/agentauth/replay_store_bolt.go`** (175 lines)
    - BoltDB-backed durable replay detection
    - TTL-based expiration with background cleanup
    - Thread-safe with proper error handling
@@ -65,14 +65,14 @@ Successfully closed **8 critical, high-priority, and medium-priority gaps** acro
    - Per-model metadata evaluation (NEW: cost, context, deprecation)
    - Approval workflow integration
 
-4. **`api/openapi/gauth-api.yaml`** (357 lines)
+4. **`api/openapi/agentauth-api.yaml`** (357 lines)
    - Complete OpenAPI 3.0.3 specification
    - All PoA endpoints documented
    - Request/response schemas defined
    - Security schemes configured
 
 ### Test Files
-5. **`pkg/gauth/replay_store_bolt_test.go`** (88 lines)
+5. **`pkg/agentauth/replay_store_bolt_test.go`** (88 lines)
    - 5 comprehensive test cases
    - Tests persistence, expiration, count, directory creation
 
@@ -114,7 +114,7 @@ Successfully closed **8 critical, high-priority, and medium-priority gaps** acro
 
 # Build Verification
 ✅ go build ./internal/crypto/vault_backend.go
-✅ go build ./pkg/rfc0111
+✅ go build ./pkg/aap001
 ```
 
 ## Key Features Delivered
@@ -127,7 +127,7 @@ Successfully closed **8 critical, high-priority, and medium-priority gaps** acro
 
 **Usage**:
 ```go
-store, _ := NewBoltReplayStore("/var/lib/gauth/replay.db", 24*time.Hour)
+store, _ := NewBoltReplayStore("/var/lib/agentauth/replay.db", 24*time.Hour)
 err := store.CheckAndRecord("jti-12345") // Returns error on replay
 ```
 
@@ -158,7 +158,7 @@ keyID, _ := backend.GenerateAndStoreKey()
 - `POST /poa/verify` - Verify PoA token  
 - `POST /poa/revoke` - Revoke PoA
 - `GET /poa/{id}` - Get PoA details
-- `GET /.well-known/gauth-config` - Service discovery
+- `GET /.well-known/agentauth-config` - Service discovery
 
 ### 4. AI Capability Enforcement (P1 + P2) ✅
 - **CapabilityEnforcer**: Runtime limit checking
@@ -222,16 +222,16 @@ result, _ := enforcer.Enforce(&UsageContext{
 
 ```bash
 # Replay Detection (P0)
-export GAUTH_REPLAY_STORE_PATH=/var/lib/gauth/replay.db
-export GAUTH_REPLAY_TTL=24h
+export AGENTAUTH_REPLAY_STORE_PATH=/var/lib/agentauth/replay.db
+export AGENTAUTH_REPLAY_TTL=24h
 
 # Detached Signatures (P0)
-export GAUTH_REQUIRE_DETACHED_SIGNATURE=1  # Fail-closed mode
+export AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1  # Fail-closed mode
 
 # Vault Integration (P0)
 export VAULT_ADDR=https://vault.example.com:8200
 export VAULT_TOKEN=s.xxxxxxxxxxx
-export VAULT_NAMESPACE=gauth  # Optional for Enterprise
+export VAULT_NAMESPACE=agentauth  # Optional for Enterprise
 ```
 
 ## Remaining Work (Future Sprints)

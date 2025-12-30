@@ -16,7 +16,7 @@ echo "[run_benchmarks] Writing results to $OUT_DIR"
 
 # List of benchmark packages (extend as needed)
 PKGS=(
-  "./pkg/gauth"
+  "./pkg/agentauth"
 )
 
 # Number of repetitions for stability

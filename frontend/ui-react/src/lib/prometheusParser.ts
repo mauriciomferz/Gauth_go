@@ -33,12 +33,12 @@ export function parsePrometheusMetrics(text: string): PrometheusMetric[] {
   const typeMap = new Map<string, string>();
   
   text.split('\n').forEach(line => {
-    if (line.startsWith('# HELP ')) {
+    if (line.startsWith('# HELP ') {
       const parts = line.substring(7).split(' ');
       const name = parts[0];
       const help = parts.slice(1).join(' ');
       helpMap.set(name, help);
-    } else if (line.startsWith('# TYPE ')) {
+    } else if (line.startsWith('# TYPE ') {
       const parts = line.substring(7).split(' ');
       const name = parts[0];
       const type = parts[1];
@@ -54,7 +54,7 @@ export function parsePrometheusMetrics(text: string): PrometheusMetric[] {
     const { name, labels, value, timestamp } = parsed;
     const baseName = getBaseName(name);
     
-    if (!metricMap.has(baseName)) {
+    if (!metricMap.has(baseName) {
       metricMap.set(baseName, {
         name: baseName,
         type: (typeMap.get(baseName) as any) || 'untyped',

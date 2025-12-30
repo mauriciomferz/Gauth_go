@@ -19,7 +19,7 @@ export function clearConsoleOutput(containerId) {
   if (!container) return;
   container.innerHTML = `
     <span class="text-gray-500"># ${containerId.replace("-output", "").toUpperCase()} Console</span><br>
-    <span class="text-blue-400">gauth-${containerId.replace("-output", "")}></span> <span class="blinking-cursor">_</span>
+    <span class="text-blue-400">agentauth-${containerId.replace("-output", "")}></span> <span class="blinking-cursor">_</span>
   `;
 }
 

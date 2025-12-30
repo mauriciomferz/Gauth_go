@@ -25,15 +25,15 @@
   - PID: 97514
   - All 27 AgentAuth+ endpoints active
   - Metrics exposed at /metrics
-  - Admin UI at /admin/gauthplus
+  - Admin UI at /admin/agentauthplus
 ```
 
 ### 2. ✅ Prometheus Configuration
 
-**Fixed Issue**: Updated scrape target from `gauth:8080` to `host.docker.internal:8080`
+**Fixed Issue**: Updated scrape target from `agentauth:8080` to `host.docker.internal:8080`
 
 **Scraping Status**:
-- **gauth-service**: ✅ UP (scraping http://host.docker.internal:8080/metrics)
+- **agentauth-service**: ✅ UP (scraping http://host.docker.internal:8080/metrics)
 - **prometheus**: ✅ UP  
 - **grafana**: ✅ UP
 - **alertmanager**: ✅ UP
@@ -83,24 +83,24 @@
 **Available Metrics** (verified at http://localhost:8080/metrics):
 
 ```
-gauthplus_successor_activations_total
-gauthplus_delegation_depth (histogram)
-gauthplus_cache_hits_total
-gauthplus_cache_misses_total  
-gauthplus_cache_size
-gauthplus_validations_total
-gauthplus_validation_duration_seconds
-gauthplus_policy_violations_total
-gauthplus_dual_control_approvals_total
-gauthplus_fiduciary_violations_total
-gauthplus_capability_level
+agentauthplus_successor_activations_total
+agentauthplus_delegation_depth (histogram)
+agentauthplus_cache_hits_total
+agentauthplus_cache_misses_total  
+agentauthplus_cache_size
+agentauthplus_validations_total
+agentauthplus_validation_duration_seconds
+agentauthplus_policy_violations_total
+agentauthplus_dual_control_approvals_total
+agentauthplus_fiduciary_violations_total
+agentauthplus_capability_level
 ```
 
 **Prometheus Collection**: ✅ Active (15s scrape interval)
 
 ### 5. ✅ Grafana Dashboard
 
-**Access**: http://localhost:3000/d/gauthplus-monitoring/gauthplus-monitoring
+**Access**: http://localhost:3000/d/agentauthplus-monitoring/agentauthplus-monitoring
 
 **Status**: Dashboard provisioned and displaying data
 
@@ -127,7 +127,7 @@ gauthplus_capability_level
 ### Database Connectivity ✅
 ```
 User: postgres
-Database: gauth
+Database: agentauth
 Tables: All AgentAuth+ tables created via migrations
 Status: Connected and operational
 ```
@@ -148,7 +148,7 @@ Status: Connected and operational
 ```
 27 AgentAuth+ management endpoints registered
 16 admin handlers registered
-All RFC-0111 endpoints operational
+All AAP-001 endpoints operational
 ```
 
 ---
@@ -158,7 +158,7 @@ All RFC-0111 endpoints operational
 | Service | URL | Status |
 |---------|-----|--------|
 | **AgentAuth Service** | http://localhost:8080 | ✅ UP |
-| **Admin UI** | http://localhost:8080/admin/gauthplus | ✅ UP |
+| **Admin UI** | http://localhost:8080/admin/agentauthplus | ✅ UP |
 | **Metrics** | http://localhost:8080/metrics | ✅ UP |
 | **Grafana** | http://localhost:3000 | ✅ UP |
 | **Prometheus** | http://localhost:9090 | ✅ UP |
@@ -170,7 +170,7 @@ All RFC-0111 endpoints operational
 
 ## Test Traffic Script
 
-Created: `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test-traffic.sh`
+Created: `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/test-traffic.sh`
 
 **Usage**:
 ```bash
@@ -225,7 +225,7 @@ Created: `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test-traffic.sh
 
 **Issue**: While metrics are exposed and Prometheus is scraping, some panels show "No data" because:
 
-1. **Validation metrics** require authorization requests through the full RFC-0111 flow
+1. **Validation metrics** require authorization requests through the full AAP-001 flow
 2. **Cache metrics** need to be explicitly recorded (implementation gap)
 3. **Policy violation metrics** require policy enforcement to be triggered
 4. **Duration metrics** need actual validation operations
@@ -236,7 +236,7 @@ Created: `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/test-traffic.sh
 
 ```bash
 # Example: Trigger validation flow
-curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
+curl -X POST http://localhost:8080/api/v1/aap001/authorize \
   -H "Content-Type: application/json" \
   -d '{
     "client_id": "agent-001",
@@ -256,7 +256,7 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
 **Tasks**:
 1. Add metric recording to management API handlers
 2. Create authorization test flow script  
-3. Trigger validations through RFC-0111 endpoints
+3. Trigger validations through AAP-001 endpoints
 4. Verify all panels display data
 
 **Impact**: Full end-to-end demonstration
@@ -290,7 +290,7 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
 **Goal**: Finalize session documentation
 
 **Tasks**:
-1. Update GAUTHPLUS_NEXT_STEPS.md with demo status
+1. Update AGENTAUTH_PLUS_NEXT_STEPS.md with demo status
 2. Commit test-traffic.sh and configuration changes
 3. Create demo video/screenshots
 4. Document known issues and solutions
@@ -307,7 +307,7 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
    - Tests cache performance
    - Ready for repeated use
 
-2. **GAUTHPLUS_VALIDATION_GUIDE.md** (603 lines)
+2. **AGENTAUTH_PLUS_VALIDATION_GUIDE.md** (603 lines)
    - 17 comprehensive test procedures
    - Complete API testing guide
    - Troubleshooting section
@@ -331,7 +331,7 @@ cd deployments/docker
 docker compose -f docker-compose.monitoring.yml down
 
 # Stop database (optional)
-docker stop gauth-postgres
+docker stop agentauth-postgres
 ```
 
 ### Start Services (Quick)
@@ -342,13 +342,13 @@ docker compose -f docker-compose.monitoring.yml up -d
 
 # Start AgentAuth server
 cd ../..
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 \
-GAUTH_USE_JWT_LIB=1 GAUTH_GAUTHPLUS_ENABLED=1 \
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 \
+AGENTAUTH_USE_JWT_LIB=1 AGENTAUTH_AGENTAUTH_PLUS_ENABLED=1 \
 DB_HOST=localhost DB_PORT=5432 DB_USER=postgres \
-DB_PASSWORD=gauth_dev_password DB_NAME=gauth \
+DB_PASSWORD=agentauth_dev_password DB_NAME=agentauth \
 DB_SSLMODE=disable \
-GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
-go run ./cmd/web-server > /tmp/gauth.log 2>&1 &
+AGENTAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
+go run ./cmd/web-server > /tmp/agentauth.log 2>&1 &
 ```
 
 ---

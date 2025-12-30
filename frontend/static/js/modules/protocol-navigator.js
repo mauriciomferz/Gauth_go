@@ -15,7 +15,7 @@
 //   - Mock tokens are correctly rejected with 401 (security working)
 //   - Valid tokens require completed subscription + PoA credential
 //
-// Environment: Requires GAUTH_AAP-001_ENABLED=1
+// Environment: Requires AGENTAUTH_AAP-001_ENABLED=1
 
 /**
  * AgentAuth Protocol Flow Steps
@@ -207,7 +207,7 @@ class ProtocolNavigator {
     completeSubstep(stepId, substepId) {
         if (!this.stepStates[stepId]) return;
 
-        if (!this.stepStates[stepId].completedSubsteps.includes(substepId)) {
+        if (!this.stepStates[stepId].completedSubsteps.includes(substepId) {
             this.stepStates[stepId].completedSubsteps.push(substepId);
         }
 
@@ -616,7 +616,7 @@ class ProtocolNavigatorUI {
         this.container.querySelectorAll('.protocol-step').forEach(stepEl => {
             stepEl.addEventListener('click', (e) => {
                 // Don't toggle if clicking on a substep
-                if (e.target.closest('.substep')) return;
+                if (e.target.closest('.substep') return;
                 
                 const stepId = stepEl.getAttribute('data-step');
                 this.toggleStep(stepId);
@@ -650,7 +650,7 @@ class ProtocolNavigatorUI {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `gauth-flow-${Date.now()}.json`;
+        a.download = `agentauth-flow-${Date.now()}.json`;
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -687,7 +687,7 @@ function initProtocolNavigator(containerId = 'protocol-navigator') {
 
 // Auto-initialize if container exists
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('protocol-navigator')) {
+    if (document.getElementById('protocol-navigator') {
         initProtocolNavigator();
     }
 });

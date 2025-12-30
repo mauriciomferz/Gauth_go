@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-**Phase 2A Enhancement successfully replaced all UI mocks with real backend endpoints.** This phase implemented a complete Beta API layer for PVP, Commercial Registry, Power of Attorney (PoA), and RFC-0111 subscription flow. All 9 planned backend endpoints were created, tested, and integrated with the React UI.
+**Phase 2A Enhancement successfully replaced all UI mocks with real backend endpoints.** This phase implemented a complete Beta API layer for PVP, Commercial Registry, Power of Attorney (PoA), and AAP-001 subscription flow. All 9 planned backend endpoints were created, tested, and integrated with the React UI.
 
 ### Final Status: 100% Complete ✅
 
@@ -57,7 +57,7 @@
 - File: `web/ui-react/src/components/subscription/SubscriptionWizard.tsx`
 - Lines: 310
 - Features:
-  - 8-step RFC-0111 subscription flow
+  - 8-step AAP-001 subscription flow
   - Visual progress indicator
   - Automatic step progression
   - Error handling and display
@@ -68,7 +68,7 @@
 - Added 15 new methods:
   - 3 methods for PVP/Registry
   - 3 methods for PoA operations
-  - 9 methods for RFC-0111 subscription flow
+  - 9 methods for AAP-001 subscription flow
 - Removed all sessionStorage mocks
 
 **Tokens Page Integration**:
@@ -130,7 +130,7 @@
 **Key Methods**:
 ```typescript
 // Real backend integration
-validateToken() → POST /rfc0111/token/validate
+validateToken() → POST /aap001/token/validate
 checkAuthorization() → POST /beta/authz/evaluate (FIXED: subject field)
 getMetrics() → GET /beta/metrics/prometheus (custom parser)
 
@@ -201,7 +201,7 @@ $ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 - **Jurisdiction lookup**: 6.7ns (sub-microsecond)
 - **Metrics recording**: 81.9ns (sub-microsecond)
 - **Policy evaluation**: <100µs typical
-- **RFC-0111 compliance**: 98%
+- **AAP-001 compliance**: 98%
 - **Test pass rate**: 100%
 
 ### Frontend Performance
@@ -220,10 +220,10 @@ $ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 1. **Authorization** (`/beta/authz/evaluate`):
    - Core PDP/PEP functionality
    - Already implemented and tested
-   - Critical for demonstrating RFC-0111 compliance
+   - Critical for demonstrating AAP-001 compliance
 
-2. **Token Validation** (`/rfc0111/token/validate`):
-   - RFC-0111 specification requirement
+2. **Token Validation** (`/aap001/token/validate`):
+   - AAP-001 specification requirement
    - Works with any JWT-compatible token
    - Demonstrates interoperability
 
@@ -237,7 +237,7 @@ $ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 **Why mocks for these 5 features?**
 
 1. **Token Creation**:
-   - RFC-0111 requires 8-step subscription flow (Steps I-VIII)
+   - AAP-001 requires 8-step subscription flow (Steps I-VIII)
    - Each step requires: PVP auth, PoA credentials, entity verification
    - Multi-day project to implement full subscription UI
    - Mock allows demo of validation flow
@@ -255,7 +255,7 @@ $ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
    - Mock sufficient for entity verification demo
 
 4. **PoA Management**:
-   - Backend has PoA logic in RFC-0111 flow
+   - Backend has PoA logic in AAP-001 flow
    - Integrated into subscription Steps V-VII
    - No standalone CRUD endpoints
    - Mock allows PoA UI demonstration
@@ -273,7 +273,7 @@ $ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 | # | Criterion | Status | Evidence |
 |---|-----------|--------|----------|
 | 1 | Servers running and healthy | ✅ Complete | Backend: PID 24918, Frontend: Vite on 3000 |
-| 2 | RFC-0111 endpoints discovered | ✅ Complete | All endpoints logged and documented |
+| 2 | AAP-001 endpoints discovered | ✅ Complete | All endpoints logged and documented |
 | 3 | API client updated | ✅ Complete | api.ts updated with 3 real endpoints |
 | 4 | Integration guide created | ✅ Complete | API_INTEGRATION_GUIDE.md (280+ lines) |
 | 5 | Token page tested | ✅ Complete | Mock creation + real validation working |
@@ -330,11 +330,11 @@ $ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 ### Challenges Overcome 💪
 1. **Backend Field Names**: Discovered `subject` vs `client_id` mismatch through testing
 2. **Prometheus Parsing**: Implemented custom parser for text format metrics
-3. **Endpoint Discovery**: Found RFC-0111 requires environment variables
+3. **Endpoint Discovery**: Found AAP-001 requires environment variables
 4. **Integration Complexity**: Decided on pragmatic mock strategy for complex flows
 
 ### Future Improvements 🚀
-1. **Subscription Flow UI**: Implement 8-step RFC-0111 subscription wizard
+1. **Subscription Flow UI**: Implement 8-step AAP-001 subscription wizard
 2. **Direct PVP Endpoint**: Expose PVP client as HTTP endpoint
 3. **Direct Registry Endpoint**: Expose Commercial Registry as HTTP endpoint
 4. **PoA CRUD API**: Create standalone PoA management endpoints

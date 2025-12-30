@@ -15,7 +15,7 @@ export function attachLogStream(jobId, exampleId) {
   let reconnectAttempts = 0;
   const maxReconnectAttempts = 5;
   let es;
-  samplesOutput.innerHTML = `<span class='text-gray-400'>[Job ${jobId} for ${exampleId}]</span><br><span class='text-yellow-400'>Waiting for logs...</span><br><span class='text-blue-400'>gauth-samples></span> <span class='blinking-cursor'>_</span>`;
+  samplesOutput.innerHTML = `<span class='text-gray-400'>[Job ${jobId} for ${exampleId}]</span><br><span class='text-yellow-400'>Waiting for logs...</span><br><span class='text-blue-400'>agentauth-samples></span> <span class='blinking-cursor'>_</span>`;
   let logLines = [];
   let state = 'unknown';
   let output = '';
@@ -38,7 +38,7 @@ export function attachLogStream(jobId, exampleId) {
       html += `<span class='text-orange-400'>⌛ Timeout ${exampleId} (job ${jobId})</span><br>`;
       if (output) html += `<pre class='text-yellow-200 whitespace-pre-wrap mt-2'>${escapeHtml(output)}</pre>`;
     }
-    html += `<br><span class='text-blue-400'>gauth-samples></span> <span class='blinking-cursor'>_</span>`;
+    html += `<br><span class='text-blue-400'>agentauth-samples></span> <span class='blinking-cursor'>_</span>`;
     samplesOutput.innerHTML = html;
   }
 
@@ -78,7 +78,7 @@ export function attachLogStream(jobId, exampleId) {
     JOB_LOG_CACHE.set(jobId, { lines: [...logLines], state, output, error });
   }
   // Restore cached lines if we had prior data (e.g., re-attaching)
-  if (JOB_LOG_CACHE.has(jobId)) {
+  if (JOB_LOG_CACHE.has(jobId) {
     const cached = JOB_LOG_CACHE.get(jobId);
     logLines = [...cached.lines]; state = cached.state; output = cached.output; error = cached.error; updateSamplesOutput();
   }
@@ -94,7 +94,7 @@ export function cancelSampleStream(){
 export function restoreCachedJob(jobId){
   const samplesOutput = document.getElementById('samples-output');
   if (!samplesOutput) return;
-  if (JOB_LOG_CACHE.has(jobId)) {
+  if (JOB_LOG_CACHE.has(jobId) {
     const c = JOB_LOG_CACHE.get(jobId);
     const lines = c.lines || [];
     const state = c.state || 'unknown';
@@ -103,7 +103,7 @@ export function restoreCachedJob(jobId){
     if (lines.length) html += `<pre class='text-blue-300 whitespace-pre-wrap mt-2'>${escapeHtml(lines.join('\n'))}</pre>`;
     if (c.output) html += `<pre class='text-green-300 whitespace-pre-wrap mt-2'>${escapeHtml(c.output)}</pre>`;
     if (c.error) html += `<span class='text-red-300'>Error: ${escapeHtml(c.error)}</span>`;
-    html += `<br><span class='text-blue-400'>gauth-samples></span> <span class='blinking-cursor'>_</span>`;
+    html += `<br><span class='text-blue-400'>agentauth-samples></span> <span class='blinking-cursor'>_</span>`;
     samplesOutput.innerHTML = html;
   }
 }
@@ -137,7 +137,7 @@ export function startManualJobStream(jobId) {
   function appendLine(line){ outputEl.textContent += line + '\n'; outputEl.scrollTop = outputEl.scrollHeight; let entry = JOB_LOG_CACHE.get(jobId) || { lines:[], state:'', output:'', error:'' }; entry.lines.push(line); if (entry.lines.length>MAX_CACHE_LINES) entry.lines.shift(); JOB_LOG_CACHE.set(jobId, entry); }
   function cacheManual(s){ let entry = JOB_LOG_CACHE.get(jobId) || { lines:[], state:'', output:'', error:'' }; entry.state = s.state; entry.output = s.output || entry.output; entry.error = s.error || entry.error; JOB_LOG_CACHE.set(jobId, entry); }
   // Restore cached lines if exist
-  if (JOB_LOG_CACHE.has(jobId)) { const c = JOB_LOG_CACHE.get(jobId); outputEl.textContent = c.lines.join('\n') + (c.lines.length?'\n':''); }
+  if (JOB_LOG_CACHE.has(jobId) { const c = JOB_LOG_CACHE.get(jobId); outputEl.textContent = c.lines.join('\n') + (c.lines.length?'\n':''); }
       es2.onerror = () => { statusEl.textContent = 'Stream error (fallback).'; es2.close(); };
     } else {
       statusEl.textContent = 'Stream error.';

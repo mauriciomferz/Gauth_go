@@ -1,6 +1,6 @@
 # Phase 8 Completion Report: Production Readiness & Advanced Features
 
-**Project**: AgentAuth OIDC Implementation (RFC-0111)  
+**Project**: AgentAuth OIDC Implementation (AAP-001)  
 **Phase**: 8 - Production Readiness & Advanced Features  
 **Date**: November 12, 2025  
 **Compliance Progress**: 85% → 95% (+10%)
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Phase 8 successfully implements advanced OAuth 2.0/OIDC flows for production deployment, increasing RFC-0111 compliance from 85% to 95%. This phase delivers production-ready implementations of:
+Phase 8 successfully implements advanced OAuth 2.0/OIDC flows for production deployment, increasing AAP-001 compliance from 85% to 95%. This phase delivers production-ready implementations of:
 
 - **Device Authorization Grant** (RFC 8628)
 - **Pushed Authorization Requests** (RFC 9126)

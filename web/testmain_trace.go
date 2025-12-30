@@ -2,7 +2,7 @@ package web
 
 // testmain_trace.go provides a custom TestMain that can emit early diagnostic output to help
 // debug truncated / piped test runs (e.g., when using `| head` which can trigger SIGPIPE).
-// Enable tracing by setting GAUTH_TEST_TRACE_SIGPIPE=1.
+// Enable tracing by setting AGENTAUTH_TEST_TRACE_SIGPIPE=1.
 // The tracing prints:
 //   [trace] test harness starting (pid=...)
 //   [trace] heartbeat t=<unix_ms>
@@ -31,15 +31,15 @@ func runTests(m *testing.M) int {
 		}
 	}()
 
-	if os.Getenv("GAUTH_TEST_TRACE_SIGPIPE") == "1" {
+	if os.Getenv("AGENTAUTH_TEST_TRACE_SIGPIPE") == "1" {
 		fmt.Fprintf(os.Stderr, "[trace] test harness starting pid=%d at=%s\n", os.Getpid(), time.Now().Format(time.RFC3339Nano))
 		// Determine heartbeat phase duration (default 120ms)
 		durMs := 120
-		if v := os.Getenv("GAUTH_TEST_TRACE_HEARTBEAT_MS"); v != "" {
+		if v := os.Getenv("AGENTAUTH_TEST_TRACE_HEARTBEAT_MS"); v != "" {
 			if parsed, err := strconv.Atoi(v); err == nil && parsed > 0 && parsed < 10_000 {
 				durMs = parsed
 			} else {
-				fmt.Fprintf(os.Stderr, "[trace] invalid GAUTH_TEST_TRACE_HEARTBEAT_MS=%q (must be 1..9999) using default=%d\n", v, durMs)
+				fmt.Fprintf(os.Stderr, "[trace] invalid AGENTAUTH_TEST_TRACE_HEARTBEAT_MS=%q (must be 1..9999) using default=%d\n", v, durMs)
 			}
 		}
 		stop := make(chan struct{})
@@ -73,7 +73,7 @@ func runTests(m *testing.M) int {
 
 	// Sentinel diagnostic line to aid log parsing during flake triage.
 	fmt.Fprintf(os.Stderr, "[diag] m.Run returned=%d duration_ms=%d goroutines_before=%d goroutines_after=%d at=%s\n", code, duration.Milliseconds(), goroutinesBefore, goroutinesAfter, time.Now().Format(time.RFC3339Nano))
-	if os.Getenv("GAUTH_TEST_TRACE_SIGPIPE") == "1" {
+	if os.Getenv("AGENTAUTH_TEST_TRACE_SIGPIPE") == "1" {
 		fmt.Fprintf(os.Stderr, "[trace] test harness finished code=%d at=%s\n", code, time.Now().Format(time.RFC3339Nano))
 	}
 	// Return code to allow defers to complete before exit.

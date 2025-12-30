@@ -6,22 +6,22 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/internal/tracing"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/resilience"
 )
 
 // HighlyResilientService combines tracing and multiple resilience patterns
 type HighlyResilientService struct {
-	auth      *gauth.AgentAuth
-	server    *gauth.ResourceServer
+	auth      *agentauth.AgentAuth
+	server    *agentauth.ResourceServer
 	composite *resilience.Composite
 	tracer    *tracing.TracerProvider
 }
 
-func NewHighlyResilientService(auth *gauth.AgentAuth) (*HighlyResilientService, error) {
+func NewHighlyResilientService(auth *agentauth.AgentAuth) (*HighlyResilientService, error) {
 	// Initialize tracer
 	tracerProvider, _ := tracing.NewTracerProvider(tracing.Config{
-		ServiceName:    "resilient-gauth",
+		ServiceName:    "resilient-agentauth",
 		ServiceVersion: "1.0",
 		Environment:    "production",
 		OTLPEndpoint:   "localhost:4317",
@@ -41,16 +41,16 @@ func NewHighlyResilientService(auth *gauth.AgentAuth) (*HighlyResilientService, 
 		BurstSize: 20,
 	})
 
-	// gauth.NewResourceServer expects (name string, service *Service)
+	// agentauth.NewResourceServer expects (name string, service *Service)
 	return &HighlyResilientService{
 		auth:      auth,
-		server:    gauth.NewResourceServer("resilient-service", nil),
+		server:    agentauth.NewResourceServer("resilient-service", nil),
 		composite: composite,
 		tracer:    tracerProvider,
 	}, nil
 }
 
-func (s *HighlyResilientService) ProcessRequest(ctx context.Context, tx gauth.TransactionDetails, token string) error {
+func (s *HighlyResilientService) ProcessRequest(ctx context.Context, tx agentauth.TransactionDetails, token string) error {
 	// Start tracing span
 	ctx, span := s.tracer.StartSpan(ctx, tracing.SpanTransaction,
 		tracing.AttributeTransactionType.String(string(tx.Type)),

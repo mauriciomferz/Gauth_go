@@ -19,7 +19,7 @@ All Week 4 Day 4 preparation complete. System is ready to push 24 commits to Git
 Branch: main
 Status: 24 commits ahead of origin/main
 Working Tree: Clean
-Remote: https://github.com/mauriciomferz/Gauth_go
+Remote: https://github.com/mauriciomferz/AgentAuth
 ```
 
 ### Recent Commits (Last 5)
@@ -97,7 +97,7 @@ Remote: https://github.com/mauriciomferz/Gauth_go
 
 **IMPORTANT**: These 6 secrets must be configured before pushing.
 
-**Configuration URL**: https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions
+**Configuration URL**: https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions
 
 ### Required Secrets (5 mandatory + 1 optional)
 
@@ -180,7 +180,7 @@ Compressing objects: 100% (80/80), done.
 Writing objects: 100% (100/100), 25.50 KiB | 5.10 MiB/s, done.
 Total 100 (delta 45), reused 80 (delta 30), pack-reused 0
 remote: Resolving deltas: 100% (45/45), completed with 20 local objects.
-To https://github.com/mauriciomferz/Gauth_go.git
+To https://github.com/mauriciomferz/AgentAuth.git
    791fb792..81c8df9f  main -> main
 ```
 
@@ -189,7 +189,7 @@ To https://github.com/mauriciomferz/Gauth_go.git
 Open GitHub Actions immediately:
 ```bash
 # Via browser
-open https://github.com/mauriciomferz/Gauth_go/actions
+open https://github.com/mauriciomferz/AgentAuth/actions
 
 # Via GitHub CLI
 gh run watch
@@ -219,13 +219,13 @@ Expected timeline (~15 minutes):
 Monitor with kubectl:
 ```bash
 # Watch pods
-kubectl get pods -n gauth-staging --watch
+kubectl get pods -n agentauth-staging --watch
 
 # Check rollout
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 
 # Tail logs
-kubectl logs -f deployment/gauth-deployment -n gauth-staging
+kubectl logs -f deployment/agentauth-deployment -n agentauth-staging
 ```
 
 ### Step 5: Verify Deployment
@@ -233,25 +233,25 @@ kubectl logs -f deployment/gauth-deployment -n gauth-staging
 After pipeline succeeds:
 ```bash
 # 1. Check pods
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 
 # 2. Test health endpoint
-curl https://gauth-staging.yourdomain.com/healthz
+curl https://agentauth-staging.yourdomain.com/healthz
 
 # 3. Test beta API
-curl https://gauth-staging.yourdomain.com/api/v1/beta/health
+curl https://agentauth-staging.yourdomain.com/api/v1/beta/health
 
 # 4. Check metrics
-curl https://gauth-staging.yourdomain.com/metrics | grep gauth_
+curl https://agentauth-staging.yourdomain.com/metrics | grep agentauth_
 
 # 5. Check logs
-kubectl logs deployment/gauth-deployment -n gauth-staging
+kubectl logs deployment/agentauth-deployment -n agentauth-staging
 
 # 6. Check HPA
-kubectl get hpa -n gauth-staging
+kubectl get hpa -n agentauth-staging
 
 # 7. Check resource usage
-kubectl top pods -n gauth-staging
+kubectl top pods -n agentauth-staging
 ```
 
 ### Step 6: Capture Results
@@ -262,13 +262,13 @@ Document pipeline execution:
 gh run view <RUN_ID> --log > workflow-logs-week4-day4.txt
 
 # Screenshot workflow success (via browser)
-# https://github.com/mauriciomferz/Gauth_go/actions
+# https://github.com/mauriciomferz/AgentAuth/actions
 
 # Save pod status
-kubectl get pods -n gauth-staging -o wide > pods-status-week4-day4.txt
+kubectl get pods -n agentauth-staging -o wide > pods-status-week4-day4.txt
 
 # Save deployment details
-kubectl describe deployment gauth-deployment -n gauth-staging > deployment-details-week4-day4.txt
+kubectl describe deployment agentauth-deployment -n agentauth-staging > deployment-details-week4-day4.txt
 ```
 
 ---
@@ -279,19 +279,19 @@ kubectl describe deployment gauth-deployment -n gauth-staging > deployment-detai
 - ✅ Workflow status: Success (green checkmark)
 - ✅ All 5 jobs passed
 - ✅ Duration: ~15-20 minutes
-- ✅ Image pushed: `ghcr.io/mauriciomferz/gauth:staging`
+- ✅ Image pushed: `ghcr.io/mauriciomferz/agentauth:staging`
 
 ### Kubernetes
-- ✅ Namespace: `gauth-staging` created
+- ✅ Namespace: `agentauth-staging` created
 - ✅ Pods: 5 running (3 AgentAuth + 1 PostgreSQL + 1 Redis)
-- ✅ Services: 3 created (gauth-service, gauth-postgres, gauth-redis)
-- ✅ Ingress: 1 configured (gauth-ingress)
+- ✅ Services: 3 created (agentauth-service, agentauth-postgres, agentauth-redis)
+- ✅ Ingress: 1 configured (agentauth-ingress)
 - ✅ HPA: 1 configured (min=3, max=10)
 
 ### Endpoints
-- ✅ Health: `https://gauth-staging.yourdomain.com/healthz` → HTTP 200
-- ✅ Beta API: `https://gauth-staging.yourdomain.com/api/v1/beta/health` → HTTP 200
-- ✅ Metrics: `https://gauth-staging.yourdomain.com/metrics` → HTTP 200
+- ✅ Health: `https://agentauth-staging.yourdomain.com/healthz` → HTTP 200
+- ✅ Beta API: `https://agentauth-staging.yourdomain.com/api/v1/beta/health` → HTTP 200
+- ✅ Metrics: `https://agentauth-staging.yourdomain.com/metrics` → HTTP 200
 
 ### Slack
 - ✅ Notification received: "✅ AgentAuth Deployment Successful"
@@ -326,15 +326,15 @@ cat ~/.kube/config | base64 # Update KUBE_CONFIG_STAGING secret
 ```bash
 # Error: timed out waiting for the condition
 # Fix: Check pod status and events
-kubectl get pods -n gauth-staging
-kubectl describe pod <POD_NAME> -n gauth-staging
-kubectl get events -n gauth-staging --sort-by='.lastTimestamp'
+kubectl get pods -n agentauth-staging
+kubectl describe pod <POD_NAME> -n agentauth-staging
+kubectl get events -n agentauth-staging --sort-by='.lastTimestamp'
 ```
 
 **Emergency Rollback**:
 ```bash
-kubectl rollout undo deployment/gauth-deployment -n gauth-staging
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout undo deployment/agentauth-deployment -n agentauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 ```
 
 ---
@@ -412,8 +412,8 @@ git push origin main
 ```
 
 Then immediately open:
-- **GitHub Actions**: https://github.com/mauriciomferz/Gauth_go/actions
-- **Terminal**: `gh run watch` or `kubectl get pods -n gauth-staging --watch`
+- **GitHub Actions**: https://github.com/mauriciomferz/AgentAuth/actions
+- **Terminal**: `gh run watch` or `kubectl get pods -n agentauth-staging --watch`
 
 Good luck! 🎉
 

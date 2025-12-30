@@ -67,10 +67,10 @@ Phase 19 & 20 deployment complete. Now enhancing with testing, documentation, an
     - [x] Implement DB query logic for Collect()
     - [x] Register with Prometheus registry
 - [x] Verify Custom Metrics
-    - [x] Check `gauth_audit_events_total`
-    - [x] Check `gauth_api_keys_total`
+    - [x] Check `agentauth_audit_events_total`
+    - [x] Check `agentauth_api_keys_total`
 
-    - [x] Check `gauth_api_keys_total`
+    - [x] Check `agentauth_api_keys_total`
 
 ## Phase 23: Alerting Configuration [x]
 - [x] Define Alert Rules (`monitoring/alerts.yml`)
@@ -78,11 +78,11 @@ Phase 19 & 20 deployment complete. Now enhancing with testing, documentation, an
 - [x] Verify Alerts Triggering
 
 ## Phase 25: Post-Handoff Fixes [x]
-- [x] Fix Container CrashLoopBackOff (`gauth-server` demo vs `web-server` entrypoint)
+- [x] Fix Container CrashLoopBackOff (`agentauth-server` demo vs `web-server` entrypoint)
 - [x] Restore missing database tables for metrics
   - [x] `audit_events` (Fix schema mismatch with app)
-  - [x] `api_keys` (Enable `gauth_api_keys_total` metric)
-  - [x] `authorization_policies` (Enable `gauth_active_policies_total` metric)
+  - [x] `api_keys` (Enable `agentauth_api_keys_total` metric)
+  - [x] `authorization_policies` (Enable `agentauth_active_policies_total` metric)
 - [x] Verify Full Metrics Suite on `/metrics` endpoint
 
 ## Final Status: ALL COMPLETE ✅

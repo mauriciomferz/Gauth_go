@@ -768,21 +768,21 @@ type ValidationError struct {
 **Environment Variables:**
 ```bash
 # South Africa
-GAUTH_ZA_DHA_URL=https://api.dha.gov.za
-GAUTH_ZA_DHA_API_KEY=your_api_key
-GAUTH_ZA_NATIS_URL=https://api.natis.gov.za
+AGENTAUTH_ZA_DHA_URL=https://api.dha.gov.za
+AGENTAUTH_ZA_DHA_API_KEY=your_api_key
+AGENTAUTH_ZA_NATIS_URL=https://api.natis.gov.za
 
 # Nigeria
-GAUTH_NG_NIMC_URL=https://api.nimc.gov.ng
-GAUTH_NG_NIMC_API_KEY=your_api_key
-GAUTH_NG_BVN_URL=https://api.nibss-plc.com.ng
-GAUTH_NG_FRSC_URL=https://api.frsc.gov.ng
+AGENTAUTH_NG_NIMC_URL=https://api.nimc.gov.ng
+AGENTAUTH_NG_NIMC_API_KEY=your_api_key
+AGENTAUTH_NG_BVN_URL=https://api.nibss-plc.com.ng
+AGENTAUTH_NG_FRSC_URL=https://api.frsc.gov.ng
 
 # Kenya
-GAUTH_KE_IPRS_URL=https://api.iprs.go.ke
-GAUTH_KE_IPRS_API_KEY=your_api_key
-GAUTH_KE_HUDUMA_URL=https://api.huduma.go.ke
-GAUTH_KE_NTSA_URL=https://api.ntsa.go.ke
+AGENTAUTH_KE_IPRS_URL=https://api.iprs.go.ke
+AGENTAUTH_KE_IPRS_API_KEY=your_api_key
+AGENTAUTH_KE_HUDUMA_URL=https://api.huduma.go.ke
+AGENTAUTH_KE_NTSA_URL=https://api.ntsa.go.ke
 ```
 
 ### Security

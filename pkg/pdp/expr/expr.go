@@ -15,7 +15,7 @@ import (
 // regexCacheOps tracks cache operations for observability
 var regexCacheOps = promauto.NewCounterVec(
 	prometheus.CounterOpts{
-		Namespace: "gauth",
+		Namespace: "agentauth",
 		Subsystem: "expr",
 		Name:      "regex_cache_ops_total",
 		Help:      "Regex cache operations (hit, miss, evict)",

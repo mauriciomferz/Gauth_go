@@ -108,7 +108,7 @@ Each pattern generator returns a standardized data structure:
 
 1. **Start the server** (if not running):
    ```bash
-   GAUTH_DEV_INDEX=1 go run ./cmd/web-server
+   AGENTAUTH_DEV_INDEX=1 go run ./cmd/web-server
    ```
 
 2. **Open the visualization**:
@@ -198,7 +198,7 @@ Each pattern generator returns a standardized data structure:
 - `WEBAPP_VISUAL_GUIDE.md` - Overall webapp architecture
 
 ## Testing Checklist
-- [x] Server starts with GAUTH_DEV_INDEX=1
+- [x] Server starts with AGENTAUTH_DEV_INDEX=1
 - [x] Page loads at /poa-visualization.html
 - [x] Three.js imports resolve correctly
 - [x] Dropdown shows all 9 pattern options

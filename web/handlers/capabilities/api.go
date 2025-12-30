@@ -59,11 +59,11 @@ func (a *API) List(c *gin.Context) {
 	c.JSON(200, resp)
 }
 
-// Reload reloads capability file (if GAUTH_CAPABILITIES_PATH set) and returns summary.
+// Reload reloads capability file (if AGENTAUTH_CAPABILITIES_PATH set) and returns summary.
 func (a *API) Reload(c *gin.Context) {
-	path := os.Getenv("GAUTH_CAPABILITIES_PATH")
+	path := os.Getenv("AGENTAUTH_CAPABILITIES_PATH")
 	if path == "" {
-		c.JSON(400, gin.H{"success": false, "error": "no_capabilities_path", "detail": "GAUTH_CAPABILITIES_PATH not set"})
+		c.JSON(400, gin.H{"success": false, "error": "no_capabilities_path", "detail": "AGENTAUTH_CAPABILITIES_PATH not set"})
 		return
 	}
 	before := capability.DefaultRegistry().List()
@@ -190,7 +190,7 @@ func (a *API) AuditVerify(c *gin.Context) {
 
 // AuditAnchor anchors the current capability audit chain tip (prev hash state after latest event) if anchoring enabled.
 func (a *API) AuditAnchor(c *gin.Context) {
-	if os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") != "1" {
+	if os.Getenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE") != "1" {
 		c.JSON(403, gin.H{"success": false, "error": "anchoring_disabled"})
 		return
 	}
@@ -232,7 +232,7 @@ func (a *API) EdDSAPublicKey(c *gin.Context) {
 	a.Handler.mu.RUnlock()
 
 	// Hardcoded check for signature mode to match server_clean.go
-	if os.Getenv("GAUTH_TOKEN_SIG_MODE") != "eddsa" || km == nil {
+	if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") != "eddsa" || km == nil {
 		c.JSON(200, gin.H{"success": true, "configured": false})
 		return
 	}

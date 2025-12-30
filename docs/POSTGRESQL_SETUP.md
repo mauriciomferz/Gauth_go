@@ -8,11 +8,11 @@ owners: [system]
 
 # PostgreSQL Setup Guide
 
-This guide covers setting up and using PostgreSQL persistence for RFC-0111 Extended Tokens in AgentAuth.
+This guide covers setting up and using PostgreSQL persistence for AAP-001 Extended Tokens in AgentAuth.
 
 ## Overview
 
-AgentAuth now supports persistent storage for RFC-0111 extended tokens using PostgreSQL with JSONB storage for complex authorization structures. This enables:
+AgentAuth now supports persistent storage for AAP-001 extended tokens using PostgreSQL with JSONB storage for complex authorization structures. This enables:
 
 - **Token Persistence**: Tokens survive server restarts
 - **Distributed Deployments**: Multiple server instances share token state
@@ -37,13 +37,13 @@ docker-compose logs -f web-server
 The services include:
 - **PostgreSQL 16**: Port 5432, auto-migrations on startup
 - **Redis 7**: Port 6379 for caching
-- **Web Server**: Port 8080 with RFC-0111 enabled
+- **Web Server**: Port 8080 with AAP-001 enabled
 
 ### 2. Verify Database Setup
 
 ```bash
 # Connect to PostgreSQL
-docker-compose exec postgres psql -U gauth -d gauth
+docker-compose exec postgres psql -U agentauth -d agentauth
 
 # Check tables
 \dt
@@ -72,7 +72,7 @@ docker-compose down -v
 
 ### Extended Tokens Table
 
-The `extended_tokens` table stores RFC-0111 tokens with:
+The `extended_tokens` table stores AAP-001 tokens with:
 
 **OAuth 2.0 Fields:**
 - `access_token` (VARCHAR 512, PRIMARY KEY)
@@ -82,7 +82,7 @@ The `extended_tokens` table stores RFC-0111 tokens with:
 - `scope` (TEXT[], nullable)
 - `issued_at` (TIMESTAMP WITH TIME ZONE)
 
-**RFC-0111 Extended Fields (JSONB):**
+**AAP-001 Extended Fields (JSONB):**
 - `power_of_attorney` - Power of Attorney definition
 - `authorization_chain` - Complete authorization hierarchy
 - `legal_framework` - Legal compliance context
@@ -109,7 +109,7 @@ The `extended_tokens` table stores RFC-0111 tokens with:
 
 ### Subscriptions Table
 
-The `subscriptions` table stores RFC-0111 subscription flow state:
+The `subscriptions` table stores AAP-001 subscription flow state:
 
 **Core Fields:**
 - `id` (VARCHAR 255, PRIMARY KEY)
@@ -145,9 +145,9 @@ The `subscriptions` table stores RFC-0111 subscription flow state:
 # PostgreSQL Connection
 DB_HOST=localhost           # Database host (default: localhost)
 DB_PORT=5432               # Database port (default: 5432)
-DB_NAME=gauth              # Database name (default: gauth)
-DB_USER=gauth              # Database user (default: gauth)
-DB_PASSWORD=gauth_password # Database password (required)
+DB_NAME=agentauth              # Database name (default: agentauth)
+DB_USER=agentauth              # Database user (default: agentauth)
+DB_PASSWORD=agentauth_password # Database password (required)
 
 # Connection Pool Settings (optional)
 DB_MAX_OPEN_CONNS=25      # Maximum open connections (default: 25)
@@ -156,18 +156,18 @@ DB_CONN_MAX_LIFETIME=5m   # Connection max lifetime (default: 5m)
 DB_CONN_MAX_IDLE_TIME=1m  # Connection max idle time (default: 1m)
 ```
 
-### RFC-0111 Configuration
+### AAP-001 Configuration
 
 ```bash
-# Enable RFC-0111 Features
-GAUTH_AAP-001_ENABLED=1              # Enable RFC-0111 endpoints
-GAUTH_AAP-001_USE_MOCKS=0            # Use real services (1 for mocks)
+# Enable AAP-001 Features
+AGENTAUTH_AAP-001_ENABLED=1              # Enable AAP-001 endpoints
+AGENTAUTH_AAP-001_USE_MOCKS=0            # Use real services (1 for mocks)
 
 # Token Store Selection
-GAUTH_TOKEN_STORE=postgres           # Options: memory, postgres (default: memory)
+AGENTAUTH_TOKEN_STORE=postgres           # Options: memory, postgres (default: memory)
 
 # Subscription Store Selection
-GAUTH_SUBSCRIPTION_STORE=postgres    # Options: memory, postgres (default: memory)
+AGENTAUTH_SUBSCRIPTION_STORE=postgres    # Options: memory, postgres (default: memory)
 ```
 
 ### Redis Configuration (Optional)
@@ -204,11 +204,11 @@ sudo systemctl start postgresql
 psql postgres
 
 # Create user and database
-CREATE USER gauth WITH PASSWORD 'gauth_password';
-CREATE DATABASE gauth OWNER gauth;
+CREATE USER agentauth WITH PASSWORD 'agentauth_password';
+CREATE DATABASE agentauth OWNER agentauth;
 
 # Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE gauth TO gauth;
+GRANT ALL PRIVILEGES ON DATABASE agentauth TO agentauth;
 
 \q
 ```
@@ -217,14 +217,14 @@ GRANT ALL PRIVILEGES ON DATABASE gauth TO gauth;
 
 ```bash
 # Apply migrations in order
-psql -h localhost -U gauth -d gauth -f schema/migrations/001_create_extended_tokens.sql
-psql -h localhost -U gauth -d gauth -f schema/migrations/002_create_subscriptions.sql
+psql -h localhost -U agentauth -d agentauth -f schema/migrations/001_create_extended_tokens.sql
+psql -h localhost -U agentauth -d agentauth -f schema/migrations/002_create_subscriptions.sql
 ```
 
 ### 4. Verify Setup
 
 ```bash
-psql -h localhost -U gauth -d gauth
+psql -h localhost -U agentauth -d agentauth
 
 # Check tables
 SELECT table_name FROM information_schema.tables 
@@ -242,19 +242,19 @@ WHERE schemaname = 'public';
 ```go
 import (
     "context"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 
 // Create PostgreSQL token store from DSN
-dsn := "postgres://gauth:gauth_password@localhost:5432/gauth?sslmode=disable"
-tokenStore, err := gauth.NewPostgresExtendedTokenStoreFromDSN(dsn)
+dsn := "postgres://agentauth:agentauth_password@localhost:5432/agentauth?sslmode=disable"
+tokenStore, err := agentauth.NewPostgresExtendedTokenStoreFromDSN(dsn)
 if err != nil {
     log.Fatalf("Failed to create token store: %v", err)
 }
 defer tokenStore.Close()
 
 // Or create from existing *sql.DB
-// tokenStore := gauth.NewPostgresExtendedTokenStore(db)
+// tokenStore := agentauth.NewPostgresExtendedTokenStore(db)
 
 // Save a token
 ctx := context.Background()
@@ -265,9 +265,9 @@ if err != nil {
 
 // Retrieve a token
 token, metadata, err := tokenStore.GetToken(ctx, "access_token_xyz")
-if err == gauth.ErrTokenNotFound {
+if err == agentauth.ErrTokenNotFound {
     log.Println("Token not found")
-} else if err == gauth.ErrTokenExpired {
+} else if err == agentauth.ErrTokenExpired {
     log.Println("Token has expired")
 } else if err != nil {
     log.Printf("Error: %v", err)
@@ -379,20 +379,20 @@ sleep 5
 # Run tests with PostgreSQL
 export DB_HOST=localhost
 export DB_PORT=5432
-export DB_NAME=gauth
-export DB_USER=gauth
-export DB_PASSWORD=gauth_password
-export GAUTH_AAP-001_ENABLED=1
-export GAUTH_TOKEN_STORE=postgres
+export DB_NAME=agentauth
+export DB_USER=agentauth
+export DB_PASSWORD=agentauth_password
+export AGENTAUTH_AAP-001_ENABLED=1
+export AGENTAUTH_TOKEN_STORE=postgres
 
-go test -v ./pkg/gauth/... -run TestPostgres
+go test -v ./pkg/agentauth/... -run TestPostgres
 ```
 
 ### Performance Benchmarks
 
 ```bash
 # Run performance tests
-./scripts/test_rfc0111_performance.sh
+./scripts/test_aap001_performance.sh
 
 # Expected results with PostgreSQL:
 # - Token issuance: ~5-10ms per token
@@ -407,8 +407,8 @@ go test -v ./pkg/gauth/... -run TestPostgres
 docker-compose up -d
 
 # Run integration tests
-./scripts/test_rfc0111_subscription_flow.sh
-./scripts/test_rfc0111_end_to_end.sh
+./scripts/test_aap001_subscription_flow.sh
+./scripts/test_aap001_end_to_end.sh
 ```
 
 ## Monitoring
@@ -417,12 +417,12 @@ docker-compose up -d
 
 ```sql
 -- Connection stats
-SELECT * FROM pg_stat_database WHERE datname = 'gauth';
+SELECT * FROM pg_stat_database WHERE datname = 'agentauth';
 
 -- Table sizes
 SELECT 
-    pg_size_pretty(pg_total_relation_size('extended_tokens')) as tokens_size,
-    pg_size_pretty(pg_total_relation_size('subscriptions')) as subscriptions_size;
+    pg_size_pretty(pg_total_relation_size('extended_tokens') as tokens_size,
+    pg_size_pretty(pg_total_relation_size('subscriptions') as subscriptions_size;
 
 -- Index usage
 SELECT 
@@ -434,7 +434,7 @@ WHERE schemaname = 'public';
 SELECT 
     COUNT(*) as total_tokens,
     COUNT(*) FILTER (WHERE revoked_at IS NULL) as active_tokens,
-    COUNT(*) FILTER (WHERE expires_at < NOW()) as expired_tokens
+    COUNT(*) FILTER (WHERE expires_at < NOW() as expired_tokens
 FROM extended_tokens;
 ```
 
@@ -460,7 +460,7 @@ WHERE client_id = 'client_123' AND revoked_at IS NULL;
 
 ```bash
 # Test connection
-psql postgres://gauth:gauth_password@localhost:5432/gauth -c "SELECT 1"
+psql postgres://agentauth:agentauth_password@localhost:5432/agentauth -c "SELECT 1"
 
 # Check PostgreSQL is running
 pg_isready -h localhost -p 5432
@@ -473,20 +473,20 @@ docker-compose logs postgres | grep ERROR
 
 ```bash
 # Check migration status
-psql -h localhost -U gauth -d gauth -c "\dt"
+psql -h localhost -U agentauth -d agentauth -c "\dt"
 
 # Manually run migrations
-psql -h localhost -U gauth -d gauth -f schema/migrations/001_create_extended_tokens.sql
+psql -h localhost -U agentauth -d agentauth -f schema/migrations/001_create_extended_tokens.sql
 
 # Rollback (drop tables)
-psql -h localhost -U gauth -d gauth -c "DROP TABLE IF EXISTS extended_tokens CASCADE;"
+psql -h localhost -U agentauth -d agentauth -c "DROP TABLE IF EXISTS extended_tokens CASCADE;"
 ```
 
 ### Performance Issues
 
 ```bash
 # Check slow queries
-docker-compose exec postgres psql -U gauth -d gauth -c "
+docker-compose exec postgres psql -U agentauth -d agentauth -c "
 SELECT pid, now() - query_start as duration, query 
 FROM pg_stat_activity 
 WHERE state = 'active' AND query NOT LIKE '%pg_stat_activity%'
@@ -494,12 +494,12 @@ ORDER BY duration DESC;
 "
 
 # Check locks
-docker-compose exec postgres psql -U gauth -d gauth -c "
+docker-compose exec postgres psql -U agentauth -d agentauth -c "
 SELECT * FROM pg_locks WHERE NOT granted;
 "
 
 # Vacuum tables
-docker-compose exec postgres psql -U gauth -d gauth -c "
+docker-compose exec postgres psql -U agentauth -d agentauth -c "
 VACUUM ANALYZE extended_tokens;
 VACUUM ANALYZE subscriptions;
 "
@@ -513,7 +513,7 @@ To migrate from in-memory storage to PostgreSQL:
 2. **Export existing tokens** (if persistence needed)
 3. **Update environment variables**:
    ```bash
-   GAUTH_TOKEN_STORE=postgres
+   AGENTAUTH_TOKEN_STORE=postgres
    DB_HOST=localhost
    DB_PASSWORD=your_password
    ```
@@ -553,17 +553,17 @@ services:
 
 ```bash
 # Automated backup
-docker-compose exec postgres pg_dump -U gauth gauth > backup_$(date +%Y%m%d).sql
+docker-compose exec postgres pg_dump -U agentauth agentauth > backup_$(date +%Y%m%d).sql
 
 # Restore from backup
-docker-compose exec -T postgres psql -U gauth -d gauth < backup_20231115.sql
+docker-compose exec -T postgres psql -U agentauth -d agentauth < backup_20231115.sql
 ```
 
 ## Additional Resources
 
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/16/)
 - [JSONB Performance Tips](https://www.postgresql.org/docs/16/datatype-json.html)
-- [RFC-0111 Specification](../AAP-001_README.md)
+- [AAP-001 Specification](../AAP-001_README.md)
 - [AgentAuth Architecture](../ARCHITECTURE.md)
 
 ## Support

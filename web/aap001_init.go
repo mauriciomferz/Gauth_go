@@ -8,38 +8,38 @@ import (
 
 	_ "github.com/lib/pq" // PostgreSQL driver
 	"github.com/mauriciomferz/AgentAuth/pkg/database"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth/external"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth/mocks"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/external"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/mocks"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
 )
 
 // InitAAP001FromEnv initializes RFC-0111 components based on environment variables.
 // This is a web-server specific helper that can create mock services and configure persistence.
 //
 // Environment variables:
-//   - GAUTH_AAP001_ENABLED: Set to "1" to enable RFC-0111 functionality
-//   - GAUTH_AAP001_USE_MOCKS: Set to "1" to use mock external services (default: 1)
-//   - GAUTH_TOKEN_STORE: "postgres" or "memory" (default: memory)
+//   - AGENTAUTH_AAP001_ENABLED: Set to "1" to enable RFC-0111 functionality
+//   - AGENTAUTH_AAP001_USE_MOCKS: Set to "1" to use mock external services (default: 1)
+//   - AGENTAUTH_TOKEN_STORE: "postgres" or "memory" (default: memory)
 //   - DB_HOST: PostgreSQL host (default: localhost)
 //   - DB_PORT: PostgreSQL port (default: 5432)
-//   - DB_NAME: PostgreSQL database name (default: gauth)
-//   - DB_USER: PostgreSQL user (default: gauth)
-//   - DB_PASSWORD: PostgreSQL password (default: gauth_password)
+//   - DB_NAME: PostgreSQL database name (default: agentauth)
+//   - DB_USER: PostgreSQL user (default: agentauth)
+//   - DB_PASSWORD: PostgreSQL password (default: agentauth_password)
 //   - DB_SSLMODE: PostgreSQL SSL mode (default: disable)
 //
 // Returns nil if RFC-0111 is not enabled.
-// Returns an ExtendedTokenStore configured based on GAUTH_TOKEN_STORE.
-func InitAAP001FromEnv() (*gauth.AAP001Components, gauth.ExtendedTokenStore, error) {
+// Returns an ExtendedTokenStore configured based on AGENTAUTH_TOKEN_STORE.
+func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenStore, error) {
 	// Check if RFC-0111 is enabled
-	if os.Getenv("GAUTH_AAP001_ENABLED") != "1" {
+	if os.Getenv("AGENTAUTH_AAP001_ENABLED") != "1" {
 		return nil, nil, nil
 	}
 
 	// Determine whether to use mocks (default: yes)
-	useMocks := os.Getenv("GAUTH_AAP001_USE_MOCKS") != "0"
+	useMocks := os.Getenv("AGENTAUTH_AAP001_USE_MOCKS") != "0"
 
-	var components *gauth.AAP001Components
+	var components *agentauth.AAP001Components
 	var err error
 
 	if !useMocks {
@@ -56,7 +56,7 @@ func InitAAP001FromEnv() (*gauth.AAP001Components, gauth.ExtendedTokenStore, err
 		commercialRegClient := mocks.NewMockCommercialRegisterClient()
 
 		// Initialize RFC-0111 with mocks
-		components, err = gauth.InitAAP001WithComponents(
+		components, err = agentauth.InitAAP001WithComponents(
 			pvpClient,
 			pipClient,
 			commercialRegClient,
@@ -67,13 +67,13 @@ func InitAAP001FromEnv() (*gauth.AAP001Components, gauth.ExtendedTokenStore, err
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Using MOCK external services\n")
 	}
 
-	// Initialize token store based on GAUTH_TOKEN_STORE environment variable
-	tokenStoreType := os.Getenv("GAUTH_TOKEN_STORE")
+	// Initialize token store based on AGENTAUTH_TOKEN_STORE environment variable
+	tokenStoreType := os.Getenv("AGENTAUTH_TOKEN_STORE")
 	if tokenStoreType == "" {
 		tokenStoreType = "memory" // default
 	}
 
-	var tokenStore gauth.ExtendedTokenStore
+	var tokenStore agentauth.ExtendedTokenStore
 	switch tokenStoreType {
 	case "postgres":
 		// Build PostgreSQL DSN from environment variables
@@ -87,15 +87,15 @@ func InitAAP001FromEnv() (*gauth.AAP001Components, gauth.ExtendedTokenStore, err
 		}
 		dbname := os.Getenv("DB_NAME")
 		if dbname == "" {
-			dbname = "gauth"
+			dbname = "agentauth"
 		}
 		user := os.Getenv("DB_USER")
 		if user == "" {
-			user = "gauth"
+			user = "agentauth"
 		}
 		password := os.Getenv("DB_PASSWORD")
 		if password == "" {
-			password = "gauth_password"
+			password = "agentauth_password"
 		}
 		sslmode := os.Getenv("DB_SSLMODE")
 		if sslmode == "" {
@@ -106,7 +106,7 @@ func InitAAP001FromEnv() (*gauth.AAP001Components, gauth.ExtendedTokenStore, err
 			host, port, user, password, dbname, sslmode)
 
 		// Create PostgreSQL token store
-		pgStore, err := gauth.NewPostgresExtendedTokenStoreFromDSN(dsn)
+		pgStore, err := agentauth.NewPostgresExtendedTokenStoreFromDSN(dsn)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to initialize PostgreSQL token store: %w", err)
 		}
@@ -114,16 +114,16 @@ func InitAAP001FromEnv() (*gauth.AAP001Components, gauth.ExtendedTokenStore, err
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Using PostgreSQL token store (host=%s, db=%s)\n", host, dbname)
 
 	case "memory":
-		tokenStore = gauth.NewMemoryExtendedTokenStore()
+		tokenStore = agentauth.NewMemoryExtendedTokenStore()
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Using in-memory token store\n")
 
 	default:
 		return nil, nil, fmt.Errorf("unknown token store type: %s (supported: memory, postgres)", tokenStoreType)
 	}
 
-	// PHASE 3: AgentAuth+ Authorization Integration (optional, controlled by GAUTH_GAUTHPLUS_ENABLED)
+	// PHASE 3: AgentAuth+ Authorization Integration (optional, controlled by AGENTAUTH_AGENTAUTHPLUS_ENABLED)
 	// Initialize AgentAuth+ services if database connection is available and feature is enabled
-	if os.Getenv("GAUTH_GAUTHPLUS_ENABLED") == "1" {
+	if os.Getenv("AGENTAUTH_AGENTAUTHPLUS_ENABLED") == "1" {
 		_, err := initializeAgentAuthPlus(components)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[AgentAuth+] WARNING: Failed to initialize AgentAuth+ integration: %v\n", err)
@@ -140,7 +140,7 @@ func InitAAP001FromEnv() (*gauth.AAP001Components, gauth.ExtendedTokenStore, err
 
 // InitAAP001WithRealServices initializes RFC-0111 components with real service connectors.
 // This sets up the GlobalIdentityVerifier with supported country connectors.
-func InitAAP001WithRealServices() (*gauth.AAP001Components, error) {
+func InitAAP001WithRealServices() (*agentauth.AAP001Components, error) {
 	// 1. Initialize Country-Specific Connectors
 
 	// US
@@ -156,12 +156,12 @@ func InitAAP001WithRealServices() (*gauth.AAP001Components, error) {
 
 	// France (FranceConnect)
 	frConfig := &external.FranceConnectorConfig{
-		FranceConnectURL: os.Getenv("GAUTH_FR_FC_URL"),
-		ClientID:         os.Getenv("GAUTH_FR_CLIENT_ID"),
-		ClientSecret:     os.Getenv("GAUTH_FR_CLIENT_SECRET"),
-		RedirectURI:      os.Getenv("GAUTH_FR_REDIRECT_URI"),
+		FranceConnectURL: os.Getenv("AGENTAUTH_FR_FC_URL"),
+		ClientID:         os.Getenv("AGENTAUTH_FR_CLIENT_ID"),
+		ClientSecret:     os.Getenv("AGENTAUTH_FR_CLIENT_SECRET"),
+		RedirectURI:      os.Getenv("AGENTAUTH_FR_REDIRECT_URI"),
 		// Optional APIs
-		ANTSAPIKey: os.Getenv("GAUTH_FR_ANTS_KEY"),
+		ANTSAPIKey: os.Getenv("AGENTAUTH_FR_ANTS_KEY"),
 	}
 	// Use defaults if empty for basic initialization
 	if frConfig.FranceConnectURL == "" {
@@ -176,8 +176,8 @@ func InitAAP001WithRealServices() (*gauth.AAP001Components, error) {
 
 	// Italy (SPID)
 	itConfig := &external.ItalyConnectorConfig{
-		SPIDMetadataURL:   os.Getenv("GAUTH_IT_SPID_URL"),
-		ServiceProviderID: os.Getenv("GAUTH_IT_SP_ID"),
+		SPIDMetadataURL:   os.Getenv("AGENTAUTH_IT_SPID_URL"),
+		ServiceProviderID: os.Getenv("AGENTAUTH_IT_SP_ID"),
 	}
 	if itConfig.SPIDMetadataURL == "" {
 		itConfig.SPIDMetadataURL = "https://registry.spid.gov.it/metadata"
@@ -190,9 +190,9 @@ func InitAAP001WithRealServices() (*gauth.AAP001Components, error) {
 
 	// Spain (Cl@ve)
 	esConfig := &external.SpainConnectorConfig{
-		ClaveURL:          os.Getenv("GAUTH_ES_CLAVE_URL"),
-		ClaveClientID:     os.Getenv("GAUTH_ES_CLIENT_ID"),
-		ClaveClientSecret: os.Getenv("GAUTH_ES_CLIENT_SECRET"),
+		ClaveURL:          os.Getenv("AGENTAUTH_ES_CLAVE_URL"),
+		ClaveClientID:     os.Getenv("AGENTAUTH_ES_CLIENT_ID"),
+		ClaveClientSecret: os.Getenv("AGENTAUTH_ES_CLIENT_SECRET"),
 	}
 	if esConfig.ClaveURL == "" {
 		esConfig.ClaveURL = "https://clave.gob.es/api/v1"
@@ -204,28 +204,28 @@ func InitAAP001WithRealServices() (*gauth.AAP001Components, error) {
 	}
 
 	// 2. Initialize Global Identity Verifier
-	globalVerifier := gauth.NewGlobalIdentityVerifier(
+	globalVerifier := agentauth.NewGlobalIdentityVerifier(
 		usVerifier,
 		frConnector,
 		itConnector,
 		esConnector,
-		os.Getenv("GAUTH_STRICT_IDENTITY") == "1", // Strict mode
+		os.Getenv("AGENTAUTH_STRICT_IDENTITY") == "1", // Strict mode
 	)
 
 	// 3. Initialize other clients (Mocks for now unless real implementation available)
 	// Using default PIP client which connects to external services
-	pipConfig := &gauth.PIPClientConfig{
-		BaseURL: os.Getenv("GAUTH_PIP_URL"),
+	pipConfig := &agentauth.PIPClientConfig{
+		BaseURL: os.Getenv("AGENTAUTH_PIP_URL"),
 		Timeout: 10 * time.Second,
 	}
-	pipClient := gauth.NewPIPClient(pipConfig)
+	pipClient := agentauth.NewPIPClient(pipConfig)
 
 	// Using Mock Commercial Register (since we focused on Identity Connectors in Phase 6)
 	commercialRegClient := mocks.NewMockCommercialRegisterClient()
 
 	// 4. Create base components
 	// We pass 'globalVerifier' as the PVP Client because it implements VerifyIdentityProof now
-	components, err := gauth.InitAAP001WithComponents(
+	components, err := agentauth.InitAAP001WithComponents(
 		globalVerifier,
 		pipClient,
 		commercialRegClient,
@@ -237,11 +237,11 @@ func InitAAP001WithRealServices() (*gauth.AAP001Components, error) {
 	// 5. Override FormalRequirementsValidator to use GlobalIdentityVerifier
 	// The default one created by InitAAP001WithComponents has no verifiers.
 	// We replace it with one that uses our Global Identity Verifier.
-	components.FormalReqValidator = gauth.NewFormalRequirementsValidator(
+	components.FormalReqValidator = agentauth.NewFormalRequirementsValidator(
 		nil,            // NotarialCertificateVerifier
 		globalVerifier, // IdentityDocumentVerifier (Global)
 		nil,            // DigitalSignatureVerifier
-		os.Getenv("GAUTH_STRICT_FORMAL") == "1",
+		os.Getenv("AGENTAUTH_STRICT_FORMAL") == "1",
 	)
 
 	fmt.Fprintf(os.Stderr, "[RFC-0111] Initialized GlobalIdentityVerifier with US, FR, IT, ES connectors\n")
@@ -253,15 +253,15 @@ func InitAAP001WithRealServices() (*gauth.AAP001Components, error) {
 // This function requires a PostgreSQL database connection to be available.
 //
 // Environment variables:
-//   - GAUTH_GAUTHPLUS_ENABLED: Set to "1" to enable AgentAuth+ features
-//   - GAUTH_GAUTHPLUS_ENFORCE: Set to "1" to enable strict enforcement (default: advisory mode)
-//   - GAUTH_GAUTHPLUS_ENFORCE_CAPABILITIES: Set to "1" to enforce capability requirements
-//   - GAUTH_GAUTHPLUS_ENFORCE_DUAL_CONTROL: Set to "1" to enforce dual control approvals
-//   - GAUTH_GAUTHPLUS_ENFORCE_FIDUCIARY: Set to "1" to enforce fiduciary duty checks
+//   - AGENTAUTH_AGENTAUTHPLUS_ENABLED: Set to "1" to enable AgentAuth+ features
+//   - AGENTAUTH_AGENTAUTHPLUS_ENFORCE: Set to "1" to enable strict enforcement (default: advisory mode)
+//   - AGENTAUTH_AGENTAUTHPLUS_ENFORCE_CAPABILITIES: Set to "1" to enforce capability requirements
+//   - AGENTAUTH_AGENTAUTHPLUS_ENFORCE_DUAL_CONTROL: Set to "1" to enforce dual control approvals
+//   - AGENTAUTH_AGENTAUTHPLUS_ENFORCE_FIDUCIARY: Set to "1" to enforce fiduciary duty checks
 //   - DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSLMODE: Database connection params
 //
 // Returns a map of services for endpoint registration, or error if initialization fails.
-func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]interface{}, error) {
+func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string]interface{}, error) {
 	// Build PostgreSQL DSN from environment variables
 	host := os.Getenv("DB_HOST")
 	if host == "" {
@@ -273,15 +273,15 @@ func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]int
 	}
 	dbname := os.Getenv("DB_NAME")
 	if dbname == "" {
-		dbname = "gauth"
+		dbname = "agentauth"
 	}
 	user := os.Getenv("DB_USER")
 	if user == "" {
-		user = "gauth"
+		user = "agentauth"
 	}
 	password := os.Getenv("DB_PASSWORD")
 	if password == "" {
-		password = "gauth_password"
+		password = "agentauth_password"
 	}
 	sslmode := os.Getenv("DB_SSLMODE")
 	if sslmode == "" {
@@ -312,18 +312,18 @@ func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]int
 	// Test connection is handled by NewDB (Ping)
 
 	// Initialize AgentAuth+ services
-	successorService := gauthplus.NewPostgreSQLSuccessorService(db)
-	delegationService := gauthplus.NewPostgreSQLDelegationService(db)
-	dualControlService := gauthplus.NewPostgreSQLDualControlService(db)
-	fiduciaryService := gauthplus.NewPostgreSQLFiduciaryDutyService(db)
-	capabilityService := gauthplus.NewPostgreSQLCapabilityAssessmentService(db)
+	successorService := agentauthplus.NewPostgreSQLSuccessorService(db)
+	delegationService := agentauthplus.NewPostgreSQLDelegationService(db)
+	dualControlService := agentauthplus.NewPostgreSQLDualControlService(db)
+	fiduciaryService := agentauthplus.NewPostgreSQLFiduciaryDutyService(db)
+	capabilityService := agentauthplus.NewPostgreSQLCapabilityAssessmentService(db)
 
 	// Wrap services with caching for performance optimization
 	// Capability assessments change infrequently (monthly reviews) - 5 minute TTL
-	cachedCapabilityService := gauthplus.NewCachedCapabilityService(capabilityService, 5*time.Minute)
+	cachedCapabilityService := agentauthplus.NewCachedCapabilityService(capabilityService, 5*time.Minute)
 
 	// Delegation chains more volatile - 1 minute TTL
-	cachedDelegationService := gauthplus.NewCachedDelegationService(delegationService, 1*time.Minute)
+	cachedDelegationService := agentauthplus.NewCachedDelegationService(delegationService, 1*time.Minute)
 
 	// Start background cache cleanup (every 5 minutes)
 	// DEPRECATED: Caches now have internal cleanup loops managed by their own goroutines.
@@ -332,7 +332,7 @@ func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]int
 	fmt.Fprintf(os.Stderr, "[AgentAuth+] Performance optimization: Caching enabled (capability TTL: 5m, delegation TTL: 1m)\n")
 
 	// Create AgentAuth+ validator with cached services
-	gauthPlusValidator := gauth.NewAgentAuthPlusValidator(
+	agentAuthPlusValidator := agentauth.NewAgentAuthPlusValidator(
 		successorService,
 		cachedDelegationService, // Use cached version
 		dualControlService,
@@ -341,22 +341,22 @@ func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]int
 	)
 
 	// Configure enforcement modes based on environment variables
-	enforceStrict := os.Getenv("GAUTH_GAUTHPLUS_ENFORCE") == "1"
-	enforceCapabilities := os.Getenv("GAUTH_GAUTHPLUS_ENFORCE_CAPABILITIES") == "1"
-	enforceDualControl := os.Getenv("GAUTH_GAUTHPLUS_ENFORCE_DUAL_CONTROL") == "1"
-	enforceFiduciary := os.Getenv("GAUTH_GAUTHPLUS_ENFORCE_FIDUCIARY") == "1"
+	enforceStrict := os.Getenv("AGENTAUTH_AGENTAUTHPLUS_ENFORCE") == "1"
+	enforceCapabilities := os.Getenv("AGENTAUTH_AGENTAUTHPLUS_ENFORCE_CAPABILITIES") == "1"
+	enforceDualControl := os.Getenv("AGENTAUTH_AGENTAUTHPLUS_ENFORCE_DUAL_CONTROL") == "1"
+	enforceFiduciary := os.Getenv("AGENTAUTH_AGENTAUTHPLUS_ENFORCE_FIDUCIARY") == "1"
 
 	// If strict mode is enabled, enforce all features
 	if enforceStrict {
-		gauthPlusValidator.SetEnforceCapabilities(true)
-		gauthPlusValidator.SetEnforceDualControl(true)
-		gauthPlusValidator.SetEnforceFiduciary(true)
+		agentAuthPlusValidator.SetEnforceCapabilities(true)
+		agentAuthPlusValidator.SetEnforceDualControl(true)
+		agentAuthPlusValidator.SetEnforceFiduciary(true)
 		fmt.Fprintf(os.Stderr, "[AgentAuth+] Enforcement mode: STRICT (blocking on policy violations)\n")
 	} else {
 		// Otherwise, use selective enforcement
-		gauthPlusValidator.SetEnforceCapabilities(enforceCapabilities)
-		gauthPlusValidator.SetEnforceDualControl(enforceDualControl)
-		gauthPlusValidator.SetEnforceFiduciary(enforceFiduciary)
+		agentAuthPlusValidator.SetEnforceCapabilities(enforceCapabilities)
+		agentAuthPlusValidator.SetEnforceDualControl(enforceDualControl)
+		agentAuthPlusValidator.SetEnforceFiduciary(enforceFiduciary)
 
 		if enforceCapabilities || enforceDualControl || enforceFiduciary {
 			fmt.Fprintf(os.Stderr, "[AgentAuth+] Enforcement mode: CUSTOM (capabilities=%v, dualControl=%v, fiduciary=%v)\n",
@@ -368,7 +368,7 @@ func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]int
 
 	// Integrate AgentAuth+ validator into RFC-0111 components
 	if components.ComplianceValidator != nil {
-		components.ComplianceValidator.SetAgentAuthPlusValidator(gauthPlusValidator)
+		components.ComplianceValidator.SetAgentAuthPlusValidator(agentAuthPlusValidator)
 		components.ComplianceValidator.SetEnforceAgentAuthPlus(true)
 		fmt.Fprintf(os.Stderr, "[AgentAuth+] Integrated with ComplianceValidator\n")
 	}
@@ -384,7 +384,7 @@ func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]int
 
 	// Store services globally for endpoint registration
 	// Services will be registered via server.RegisterAgentAuthPlusEndpoints() during server startup
-	gauthPlusServicesGlobal = map[string]interface{}{
+	agentAuthPlusServicesGlobal = map[string]interface{}{
 		"successor_service":     successorService,
 		"delegation_service":    cachedDelegationService, // Store the wrapper for shutdown
 		"dual_control_service":  dualControlService,
@@ -396,30 +396,30 @@ func initializeAgentAuthPlus(components *gauth.AAP001Components) (map[string]int
 
 	fmt.Fprintf(os.Stderr, "[AgentAuth+] Services available for API endpoint registration\n")
 
-	return gauthPlusServicesGlobal, nil
+	return agentAuthPlusServicesGlobal, nil
 }
 
 // Global storage for AgentAuth+ services (initialized by initializeAgentAuthPlus)
-var gauthPlusServicesGlobal map[string]interface{}
+var agentAuthPlusServicesGlobal map[string]interface{}
 
 // InitializeAgentAuthPlusEndpoints registers AgentAuth+ management endpoints if services are available.
 // This should be called after the server router is initialized and AgentAuth+ services are created.
 func (s *BetaServer) InitializeAgentAuthPlusEndpoints() {
-	if s.gauthPlusInitialized {
+	if s.agentAuthPlusInitialized {
 		return // Already initialized
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.gauthPlusInitialized {
+	if s.agentAuthPlusInitialized {
 		return // Double-check locking
 	}
 
-	if gauthPlusServicesGlobal == nil {
+	if agentAuthPlusServicesGlobal == nil {
 		return // AgentAuth+ not initialized
 	}
 
 	// Extract services from global map
-	successorService, _ := gauthPlusServicesGlobal["successor_service"].(gauthplus.SuccessorManagementService)
+	successorService, _ := agentAuthPlusServicesGlobal["successor_service"].(agentauthplus.SuccessorManagementService)
 	// We need to extract the interface expected by RegisterAgentAuthPlusEndpoints, which is DelegationService.
 	// cachedDelegationService implements DelegationService via struct embedding?
 	// Wait, CachedDelegationService wraps DelegationService but does NOT embed it (it uses composition).
@@ -428,10 +428,10 @@ func (s *BetaServer) InitializeAgentAuthPlusEndpoints() {
 	// func (s *CachedDelegationService) CreateDelegation...
 	// It mirrors the methods. Yes, it should implement it.
 
-	delegationService, _ := gauthPlusServicesGlobal["delegation_service"].(gauthplus.DelegationService)
-	dualControlService, _ := gauthPlusServicesGlobal["dual_control_service"].(gauthplus.DualControlService)
-	capabilityService, _ := gauthPlusServicesGlobal["capability_service"].(gauthplus.CapabilityAssessmentService)
-	fiduciaryService, _ := gauthPlusServicesGlobal["fiduciary_service"].(gauthplus.FiduciaryDutyService)
+	delegationService, _ := agentAuthPlusServicesGlobal["delegation_service"].(agentauthplus.DelegationService)
+	dualControlService, _ := agentAuthPlusServicesGlobal["dual_control_service"].(agentauthplus.DualControlService)
+	capabilityService, _ := agentAuthPlusServicesGlobal["capability_service"].(agentauthplus.CapabilityAssessmentService)
+	fiduciaryService, _ := agentAuthPlusServicesGlobal["fiduciary_service"].(agentauthplus.FiduciaryDutyService)
 
 	if successorService == nil || delegationService == nil || dualControlService == nil ||
 		capabilityService == nil || fiduciaryService == nil {
@@ -454,23 +454,23 @@ func (s *BetaServer) InitializeAgentAuthPlusEndpoints() {
 	fmt.Fprintf(os.Stderr, "[AgentAuth+]   Dual Control: 6 endpoints\n")
 	fmt.Fprintf(os.Stderr, "[AgentAuth+]   Capability Assessment: 6 endpoints\n")
 	fmt.Fprintf(os.Stderr, "[AgentAuth+]   Fiduciary Duty: 4 endpoints\n")
-	s.gauthPlusInitialized = true
+	s.agentAuthPlusInitialized = true
 }
 
 // ShutdownAgentAuthPlus closes background resources (caches) used by AgentAuth+ services
 func ShutdownAgentAuthPlus() {
-	if gauthPlusServicesGlobal == nil {
+	if agentAuthPlusServicesGlobal == nil {
 		return
 	}
 
 	// Close capability cache
-	if svc, ok := gauthPlusServicesGlobal["cached_capability_svc"].(interface{ Close() }); ok {
+	if svc, ok := agentAuthPlusServicesGlobal["cached_capability_svc"].(interface{ Close() }); ok {
 		svc.Close()
 		fmt.Println("[shutdown] Closed AgentAuth+ capability cache")
 	}
 
 	// Close delegation cache
-	if svc, ok := gauthPlusServicesGlobal["cached_delegation_svc"].(interface{ Close() }); ok {
+	if svc, ok := agentAuthPlusServicesGlobal["cached_delegation_svc"].(interface{ Close() }); ok {
 		svc.Close()
 		fmt.Println("[shutdown] Closed AgentAuth+ delegation cache")
 	}

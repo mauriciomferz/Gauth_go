@@ -234,7 +234,7 @@ make bench-revocation
 ### 3. Start Web Server
 ```bash
 # Enable revocation system
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
 
@@ -290,18 +290,18 @@ All endpoints under `/api/v1/beta/revocation/*`:
 ## ⚙️ Configuration
 
 ### Required Environment Variables
-- `GAUTH_REVOCATION_ENABLED=1` - Enable revocation system
+- `AGENTAUTH_REVOCATION_ENABLED=1` - Enable revocation system
 - `REDIS_HOST` - Redis server hostname (default: localhost)
 - `REDIS_PORT` - Redis server port (default: 6379)
 
 ### Optional Configuration
 - `REDIS_PASSWORD` - Redis authentication
 - `REDIS_DB` - Redis database number (default: 0)
-- `GAUTH_REVOCATION_ORACLE_CHANNEL` - Oracle channel (default: revocation_emergency)
-- `GAUTH_REVOCATION_TWOPHASE_TIMEOUT` - Disable timeout (default: 60s)
-- `GAUTH_REVOCATION_OPTIMISTIC_WINDOW` - Challenge window (default: 15m)
-- `GAUTH_REVOCATION_CIRCUIT_RATE` - Rate limit (default: 10/min)
-- `GAUTH_REVOCATION_DEBUG=1` - Enable debug logging
+- `AGENTAUTH_REVOCATION_ORACLE_CHANNEL` - Oracle channel (default: revocation_emergency)
+- `AGENTAUTH_REVOCATION_TWOPHASE_TIMEOUT` - Disable timeout (default: 60s)
+- `AGENTAUTH_REVOCATION_OPTIMISTIC_WINDOW` - Challenge window (default: 15m)
+- `AGENTAUTH_REVOCATION_CIRCUIT_RATE` - Rate limit (default: 10/min)
+- `AGENTAUTH_REVOCATION_DEBUG=1` - Enable debug logging
 
 ---
 
@@ -520,7 +520,7 @@ curl -X POST http://localhost:8080/api/v1/beta/revocation/validate \
 **Symptoms**: All endpoints return 503 with "revocation_disabled"
 
 **Solutions**:
-- Set `GAUTH_REVOCATION_ENABLED=1`
+- Set `AGENTAUTH_REVOCATION_ENABLED=1`
 - Verify Redis is running: `redis-cli ping`
 - Check Redis connection parameters
 - Restart web server
@@ -539,7 +539,7 @@ curl -X POST http://localhost:8080/api/v1/beta/revocation/validate \
 
 **Solutions**:
 - Check metrics: `GET /api/v1/beta/revocation/circuit/metrics`
-- Increase rate limit: `export GAUTH_REVOCATION_CIRCUIT_RATE=100`
+- Increase rate limit: `export AGENTAUTH_REVOCATION_CIRCUIT_RATE=100`
 - Temporarily suspend: `POST /api/v1/beta/revocation/circuit/suspend`
 - Reset metrics: `POST /api/v1/beta/revocation/circuit/reset`
 
@@ -642,7 +642,7 @@ curl -X POST http://localhost:8080/api/v1/beta/revocation/validate \
 - [ ] Throughput metrics
 
 #### Rollback Plan
-- [ ] Disable via `GAUTH_REVOCATION_ENABLED=0`
+- [ ] Disable via `AGENTAUTH_REVOCATION_ENABLED=0`
 - [ ] Server continues without revocation
 - [ ] No data loss (Redis state preserved)
 - [ ] Re-enable when ready

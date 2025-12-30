@@ -307,11 +307,11 @@ $$ LANGUAGE plpgsql;
 -- GRANTS
 -- ============================================================================
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON oidc_providers TO gauth_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON oidc_auth_sessions TO gauth_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON oidc_user_mappings TO gauth_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON oidc_providers TO agentauth_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON oidc_auth_sessions TO agentauth_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON oidc_user_mappings TO agentauth_app;
 
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO gauth_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO agentauth_app;
 
 -- ============================================================================
 -- SCHEMA COMPLETE

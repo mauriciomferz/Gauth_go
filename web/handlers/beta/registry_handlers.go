@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // EntityVerifyRequest represents the request for entity verification
@@ -64,11 +64,11 @@ type SignatoryDetails struct {
 
 // RegistryHandler wraps a CommercialRegisterClient for HTTP exposure
 type RegistryHandler struct {
-	registryClient gauth.CommercialRegisterClient
+	registryClient agentauth.CommercialRegisterClient
 }
 
 // NewRegistryHandler creates a new Commercial Registry HTTP handler
-func NewRegistryHandler(registryClient gauth.CommercialRegisterClient) *RegistryHandler {
+func NewRegistryHandler(registryClient agentauth.CommercialRegisterClient) *RegistryHandler {
 	return &RegistryHandler{
 		registryClient: registryClient,
 	}

@@ -9,7 +9,7 @@ refreshCadence: on-change
 ---
 
 # OpenID Connect Integration Architecture Design
-## RFC-0111 Building Block Implementation
+## AAP-001 Building Block Implementation
 
 **Document Version**: 1.0  
 **Date**: November 12, 2025  
@@ -21,7 +21,7 @@ refreshCadence: on-change
 ## Table of Contents
 
 1. [Executive Summary](#executive-summary)
-2. [RFC-0111 Requirements](#rfc-0111-requirements)
+2. [AAP-001 Requirements](#rfc-0111-requirements)
 3. [Current State Analysis](#current-state-analysis)
 4. [Design Goals](#design-goals)
 5. [Architecture Overview](#architecture-overview)
@@ -39,7 +39,7 @@ refreshCadence: on-change
 
 ### Purpose
 
-This document defines the architecture for integrating **OpenID Connect (OIDC)** as a required building block into the AgentAuth 1.0 implementation, ensuring full compliance with RFC-0111 Section 1 (Scope) requirements.
+This document defines the architecture for integrating **OpenID Connect (OIDC)** as a required building block into the AgentAuth 1.0 implementation, ensuring full compliance with AAP-001 Section 1 (Scope) requirements.
 
 ### Current Gap
 
@@ -58,12 +58,12 @@ This document defines the architecture for integrating **OpenID Connect (OIDC)**
 
 **Impact**: 
 - Cannot interoperate with OIDC-compliant identity providers
-- Violates RFC-0111 building block requirement
+- Violates AAP-001 building block requirement
 - Limits adoption by enterprises using standard OIDC infrastructure
 
 ### Solution Approach
 
-**Hybrid Integration Model**: Extend existing AgentAuth structures with OIDC compatibility while maintaining backward compatibility with current RFC-0111 implementation.
+**Hybrid Integration Model**: Extend existing AgentAuth structures with OIDC compatibility while maintaining backward compatibility with current AAP-001 implementation.
 
 **Key Strategy**:
 1. Implement OIDC as identity verification layer
@@ -73,7 +73,7 @@ This document defines the architecture for integrating **OpenID Connect (OIDC)**
 
 ### Expected Outcomes
 
-- ✅ RFC-0111 OIDC requirement satisfied (0% → 90%)
+- ✅ AAP-001 OIDC requirement satisfied (0% → 90%)
 - ✅ Overall compliance increase (+6%): 62% → 68%
 - ✅ Enterprise-grade identity verification
 - ✅ Interoperability with standard OIDC ecosystem
@@ -81,11 +81,11 @@ This document defines the architecture for integrating **OpenID Connect (OIDC)**
 
 ---
 
-## RFC-0111 Requirements
+## AAP-001 Requirements
 
 ### Section 1: Scope - Building Blocks
 
-**Direct Quote from RFC-0111**:
+**Direct Quote from AAP-001**:
 > "AgentAuth builds on the following standards as building blocks:
 > 
 > **OpenID Connect or its alternatives, including but not limited to:**
@@ -103,9 +103,9 @@ This document defines the architecture for integrating **OpenID Connect (OIDC)**
 5. **Session Management** (Optional but recommended)
 
 **Integration Points**:
-- RFC-0111 Step I: Owner's Authorizer Identity Proof → **Use OIDC ID Token**
-- RFC-0111 Step III: Client Owner Identity Proof → **Use OIDC ID Token**
-- RFC-0111 Step VI: Resource Owner Identity Proof → **Use OIDC ID Token**
+- AAP-001 Step I: Owner's Authorizer Identity Proof → **Use OIDC ID Token**
+- AAP-001 Step III: Client Owner Identity Proof → **Use OIDC ID Token**
+- AAP-001 Step VI: Resource Owner Identity Proof → **Use OIDC ID Token**
 
 ---
 
@@ -159,7 +159,7 @@ type IdentityProofResult struct {
 
 ### Primary Goals
 
-1. **RFC-0111 Compliance**: Satisfy OIDC building block requirement
+1. **AAP-001 Compliance**: Satisfy OIDC building block requirement
 2. **Interoperability**: Work with major OIDC providers (Google, Microsoft Azure AD, Okta, Auth0, Keycloak)
 3. **Backward Compatibility**: Don't break existing AgentAuth subscription flow
 4. **Enterprise-Grade**: Support enterprise identity requirements (SSO, MFA, ACR levels)
@@ -289,7 +289,7 @@ func NewDiscoveryService(issuerURL string) *DiscoveryService {
             // AgentAuth-specific scopes
             ScopesSupported: []string{
                 "openid", "profile", "email",
-                "gauth:owner", "gauth:client", "gauth:resource",
+                "agentauth:owner", "agentauth:client", "agentauth:resource",
             },
             
             // Standard OIDC claims + AgentAuth extensions
@@ -466,7 +466,7 @@ import (
     "fmt"
     "time"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 
 // IdentityBridge converts OIDC identity to AgentAuth identity structures
@@ -488,11 +488,11 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
     ctx context.Context,
     idToken string,
     expectedAudience string,
-) (*gauth.IdentityProofResult, error) {
+) (*agentauth.IdentityProofResult, error) {
     // Validate ID token
     claims, err := b.idTokenService.ValidateIDToken(ctx, idToken, expectedAudience)
     if err != nil {
-        return &gauth.IdentityProofResult{
+        return &agentauth.IdentityProofResult{
             Valid:         false,
             FailureReason: fmt.Sprintf("ID token validation failed: %v", err),
         }, nil
@@ -510,7 +510,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
     // Map ACR to AgentAuth trust level
     trustLevel := b.trustMapper.MapACRToTrustLevel(claims.ACR)
     
-    return &gauth.IdentityProofResult{
+    return &agentauth.IdentityProofResult{
         Valid:      true,
         SubjectID:  claims.Subject,
         Identity:   identity,
@@ -689,16 +689,16 @@ func (c *OIDCProviderClient) VerifyIDToken(
 
 **Purpose**: Extend existing PowerVerificationPoint to support OIDC.
 
-**File**: `pkg/gauth/pvp_oidc.go`
+**File**: `pkg/agentauth/pvp_oidc.go`
 
 ```go
-package gauth
+package agentauth
 
 import (
     "context"
     "fmt"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/oidc"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/oidc"
 )
 
 // OIDCPowerVerificationPoint implements PowerVerificationPoint with OIDC support
@@ -821,7 +821,7 @@ func (pvp *OIDCPowerVerificationPoint) verifyExternalOIDC(
 
 ## Integration Strategy
 
-### Integration with RFC-0111 Subscription Flow
+### Integration with AAP-001 Subscription Flow
 
 **Modified Subscription Flow** (Steps I-VIII):
 
@@ -867,14 +867,14 @@ func (m *SubscriptionFlowManager) ExecuteStepI(
 
 ```yaml
 oidc:
-  issuer_url: "https://gauth.example.com"
+  issuer_url: "https://agentauth.example.com"
   
   external_providers:
     - name: "google"
       issuer_url: "https://accounts.google.com"
       client_id: "your-google-client-id"
       client_secret: "your-google-client-secret"
-      redirect_uri: "https://gauth.example.com/callback/google"
+      redirect_uri: "https://agentauth.example.com/callback/google"
       scopes:
         - "openid"
         - "profile"
@@ -884,7 +884,7 @@ oidc:
       issuer_url: "https://your-domain.okta.com"
       client_id: "your-okta-client-id"
       client_secret: "your-okta-client-secret"
-      redirect_uri: "https://gauth.example.com/callback/okta"
+      redirect_uri: "https://agentauth.example.com/callback/okta"
       scopes:
         - "openid"
         - "profile"
@@ -894,7 +894,7 @@ oidc:
       issuer_url: "https://login.microsoftonline.com/{tenant-id}/v2.0"
       client_id: "your-azure-client-id"
       client_secret: "your-azure-client-secret"
-      redirect_uri: "https://gauth.example.com/callback/azure"
+      redirect_uri: "https://agentauth.example.com/callback/azure"
       scopes:
         - "openid"
         - "profile"
@@ -925,7 +925,7 @@ oidc:
 ### Phase 2: PowerVerificationPoint Integration (Week 2)
 
 **Deliverables**:
-- ✅ OIDC-enabled PVP (`pkg/gauth/pvp_oidc.go`)
+- ✅ OIDC-enabled PVP (`pkg/agentauth/pvp_oidc.go`)
 - ✅ Integration into subscription flow Steps I, III, VI
 - ✅ Configuration loader for OIDC providers
 - ✅ Integration tests
@@ -1274,7 +1274,7 @@ oidc:
 - ✅ OIDC Discovery endpoint operational
 - ✅ ID tokens issued and validated
 - ✅ External provider federation working (Google/Okta/Azure)
-- ✅ RFC-0111 compliance increased: 62% → 68% (+6%)
+- ✅ AAP-001 compliance increased: 62% → 68% (+6%)
 - ✅ All tests passing (unit, integration, E2E)
 - ✅ Documentation complete
 - ✅ Security audit passed
@@ -1284,4 +1284,4 @@ oidc:
 **Document Status**: Ready for Implementation  
 **Next Review**: After Phase 1 completion (Week 1)  
 **Owner**: AgentAuth Development Team  
-**Stakeholders**: RFC-0111 Compliance Team, Security Team, Architecture Team
+**Stakeholders**: AAP-001 Compliance Team, Security Team, Architecture Team

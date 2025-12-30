@@ -254,9 +254,9 @@ logger.LogRateLimitCheck("/token", "allowed", 95)
 // Output: {"level":"debug","endpoint":"/token","result":"allowed","remaining":95,"msg":"Rate limit check"}
 ```
 
-**LogAuthenticationAttempt**: Authentication
+**LoagentAuthenticationAttempt**: Authentication
 ```go
-logger.LogAuthenticationAttempt("google", "user123", true)
+logger.LoagentAuthenticationAttempt("google", "user123", true)
 // Output: {"level":"info","provider":"google","user_id":"user123","success":true,"msg":"Authentication attempt"}
 ```
 
@@ -341,7 +341,7 @@ func main() {
     
     // Register health checkers
     healthService.RegisterChecker(oidc.NewStorageHealthChecker(storage, "storage"))
-    healthService.RegisterChecker(oidc.NewMemoryHealthChecker(900)) // Alert at 900MB
+    healthService.RegisterChecker(oidc.NewMemoryHealthChecker(900) // Alert at 900MB
     healthService.RegisterChecker(oidc.NewGoroutineHealthChecker(1000))
     
     // 5. Set up HTTP endpoints
@@ -385,13 +385,13 @@ func main() {
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-oidc
+  name: agentauth-oidc
 spec:
   template:
     spec:
       containers:
-      - name: gauth
-        image: gauth-oidc:latest
+      - name: agentauth
+        image: agentauth-oidc:latest
         ports:
         - containerPort: 8080
           name: http
@@ -430,11 +430,11 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: gauth-oidc
+  name: agentauth-oidc
 spec:
   selector:
     matchLabels:
-      app: gauth-oidc
+      app: agentauth-oidc
   endpoints:
   - port: metrics
     path: /metrics

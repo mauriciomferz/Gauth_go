@@ -26,7 +26,7 @@ docker-compose -f docker-compose.database.yml up -d postgres
 echo ""
 echo -e "${BLUE}Step 2: Waiting for PostgreSQL to be ready...${NC}"
 for i in {1..30}; do
-    if docker exec gauth-postgres pg_isready -U postgres -d gauth > /dev/null 2>&1; then
+    if docker exec agentauth-postgres pg_isready -U postgres -d agentauth > /dev/null 2>&1; then
         echo -e "${GREEN}✅ PostgreSQL is ready!${NC}"
         break
     fi
@@ -42,7 +42,7 @@ done
 
 echo ""
 echo -e "${BLUE}Step 3: Running database migrations...${NC}"
-docker exec -i gauth-postgres psql -U postgres -d gauth < database/migrations/001_admin_handlers_schema.sql
+docker exec -i agentauth-postgres psql -U postgres -d agentauth < database/migrations/001_admin_handlers_schema.sql
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Migrations completed successfully!${NC}"
@@ -53,7 +53,7 @@ fi
 
 echo ""
 echo -e "${BLUE}Step 4: Verifying tables...${NC}"
-TABLE_COUNT=$(docker exec gauth-postgres psql -U postgres -d gauth -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
+TABLE_COUNT=$(docker exec agentauth-postgres psql -U postgres -d agentauth -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
 echo -e "   Tables created: ${GREEN}${TABLE_COUNT}${NC}"
 
 if [ "$TABLE_COUNT" -ge "17" ]; then
@@ -68,12 +68,12 @@ echo ""
 echo "Database connection details:"
 echo "  Host:     localhost"
 echo "  Port:     5432"
-echo "  Database: gauth"
+echo "  Database: agentauth"
 echo "  User:     postgres"
-echo "  Password: gauth_dev_password"
+echo "  Password: agentauth_dev_password"
 echo ""
 echo "To connect with psql:"
-echo "  docker exec -it gauth-postgres psql -U postgres -d gauth"
+echo "  docker exec -it agentauth-postgres psql -U postgres -d agentauth"
 echo ""
 echo "To view logs:"
 echo "  docker-compose -f docker-compose.database.yml logs -f postgres"
@@ -83,5 +83,5 @@ echo "  docker-compose -f docker-compose.database.yml down"
 echo ""
 echo "To start with pgAdmin UI:"
 echo "  docker-compose -f docker-compose.database.yml --profile with-ui up -d"
-echo "  Then open: http://localhost:5050 (admin@gauth.local / admin)"
+echo "  Then open: http://localhost:5050 (admin@agentauth.local / admin)"
 echo ""

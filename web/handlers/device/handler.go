@@ -21,7 +21,7 @@ type Handler struct {
 
 // NewHandler creates a new device authorization handler.
 func NewHandler(store device.DeviceCodeStore) *Handler {
-	baseURL := os.Getenv("GAUTH_DEVICE_BASE_URL")
+	baseURL := os.Getenv("AGENTAUTH_DEVICE_BASE_URL")
 	if baseURL == "" {
 		baseURL = "http://localhost:8080"
 	}

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // IdentityBridge converts between OIDC and AgentAuth identity structures
@@ -31,11 +31,11 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 	ctx context.Context,
 	idToken string,
 	expectedAudience string,
-) (*gauth.IdentityProofResult, error) {
+) (*agentauth.IdentityProofResult, error) {
 	// Validate ID token
 	claims, err := b.idTokenService.ValidateIDToken(ctx, idToken, expectedAudience)
 	if err != nil {
-		return &gauth.IdentityProofResult{
+		return &agentauth.IdentityProofResult{
 			Valid:         false,
 			FailureReason: fmt.Sprintf("ID token validation failed: %v", err),
 		}, nil
@@ -54,7 +54,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 	trustLevel := b.trustMapper.MapACRToTrustLevel(claims.ACR)
 
 	// Build successful identity proof result
-	return &gauth.IdentityProofResult{
+	return &agentauth.IdentityProofResult{
 		Valid:         true,
 		SubjectID:     claims.Subject,
 		Identity:      identity,
@@ -68,7 +68,7 @@ func (b *IdentityBridge) ConvertIDTokenToIdentityProof(
 // This enables AgentAuth to issue OIDC-compliant ID tokens
 func (b *IdentityBridge) ConvertIdentityProofToIDToken(
 	ctx context.Context,
-	proof *gauth.IdentityProofResult,
+	proof *agentauth.IdentityProofResult,
 	audience []string,
 	identityType string,
 ) (string, error) {
@@ -229,7 +229,7 @@ func BuildIdentityProofRequestFromIDToken(
 	idToken string,
 	idTokenService *IDTokenService,
 	audience string,
-) (*gauth.IdentityProofRequest, error) {
+) (*agentauth.IdentityProofRequest, error) {
 	// Parse ID token without full validation
 	claims, err := idTokenService.ValidateIDToken(context.Background(), idToken, audience)
 	if err != nil {
@@ -246,7 +246,7 @@ func BuildIdentityProofRequestFromIDToken(
 	mapper := NewTrustLevelMapper()
 	trustLevel := mapper.MapACRToTrustLevel(claims.ACR)
 
-	return &gauth.IdentityProofRequest{
+	return &agentauth.IdentityProofRequest{
 		SubjectID:     claims.Subject,
 		IdentityType:  entityType,
 		ProofMethod:   ProofMethodOIDCIDToken,

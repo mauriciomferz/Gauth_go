@@ -25,7 +25,7 @@ One or more AgentAuth pods have been down for more than 2 minutes, indicating a 
 
 **Trigger Condition:**
 ```promql
-up{job="gauth-service"} == 0
+up{job="agentauth-service"} == 0
 ```
 
 **Duration:** 2 minutes  
@@ -37,22 +37,22 @@ up{job="gauth-service"} == 0
 
 1. **Check Pod Status**
    ```bash
-   kubectl get pods -n gauth-staging -l app=gauth
-   kubectl describe pod <pod-name> -n gauth-staging
+   kubectl get pods -n agentauth-staging -l app=agentauth
+   kubectl describe pod <pod-name> -n agentauth-staging
    ```
 
 2. **Check Pod Logs**
    ```bash
    # Current logs
-   kubectl logs <pod-name> -n gauth-staging --tail=100
+   kubectl logs <pod-name> -n agentauth-staging --tail=100
    
    # Previous container logs (if pod restarted)
-   kubectl logs <pod-name> -n gauth-staging --previous
+   kubectl logs <pod-name> -n agentauth-staging --previous
    ```
 
 3. **Check Events**
    ```bash
-   kubectl get events -n gauth-staging --sort-by='.lastTimestamp' | grep <pod-name>
+   kubectl get events -n agentauth-staging --sort-by='.lastTimestamp' | grep <pod-name>
    ```
 
 ---
@@ -85,21 +85,21 @@ up{job="gauth-service"} == 0
 
 ```bash
 # Check pod status and restarts
-kubectl get pods -n gauth-staging -l app=gauth -o wide
+kubectl get pods -n agentauth-staging -l app=agentauth -o wide
 
 # Describe pod for detailed state
-kubectl describe pod <pod-name> -n gauth-staging
+kubectl describe pod <pod-name> -n agentauth-staging
 
 # Check resource usage
-kubectl top pods -n gauth-staging
+kubectl top pods -n agentauth-staging
 
 # Check node status
 kubectl get nodes
 kubectl describe node <node-name>
 
 # Check deployment status
-kubectl get deployment gauth-blue -n gauth-staging
-kubectl describe deployment gauth-blue -n gauth-staging
+kubectl get deployment agentauth-blue -n agentauth-staging
+kubectl describe deployment agentauth-blue -n agentauth-staging
 ```
 
 ---
@@ -115,40 +115,40 @@ kubectl describe deployment gauth-blue -n gauth-staging
 
 ```bash
 # Rollback deployment
-kubectl rollout undo deployment/gauth-blue -n gauth-staging
-kubectl rollout status deployment/gauth-blue -n gauth-staging
+kubectl rollout undo deployment/agentauth-blue -n agentauth-staging
+kubectl rollout status deployment/agentauth-blue -n agentauth-staging
 ```
 
 ### Scenario 2: Resource Exhaustion
 
 1. Check if pod was OOMKilled
    ```bash
-   kubectl get pod <pod-name> -n gauth-staging -o jsonpath='{.status.containerStatuses[0].lastState.terminated.reason}'
+   kubectl get pod <pod-name> -n agentauth-staging -o jsonpath='{.status.containerStatuses[0].lastState.terminated.reason}'
    ```
 
 2. Increase resource limits if needed
    ```bash
-   kubectl edit deployment gauth-blue -n gauth-staging
+   kubectl edit deployment agentauth-blue -n agentauth-staging
    # Increase memory/CPU limits
    ```
 
 3. Scale up if resource constraints are cluster-wide
    ```bash
    # Add more nodes or scale existing pods
-   kubectl scale deployment gauth-blue -n gauth-staging --replicas=5
+   kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=5
    ```
 
 ### Scenario 3: Failed Health Checks
 
 1. Check health endpoint directly
    ```bash
-   kubectl port-forward <pod-name> -n gauth-staging 8080:8080
+   kubectl port-forward <pod-name> -n agentauth-staging 8080:8080
    curl http://localhost:8080/api/v1/beta/health
    ```
 
 2. Review health check configuration
    ```bash
-   kubectl get deployment gauth-blue -n gauth-staging -o yaml | grep -A 10 livenessProbe
+   kubectl get deployment agentauth-blue -n agentauth-staging -o yaml | grep -A 10 livenessProbe
    ```
 
 3. Adjust probe timing if startup is slow
@@ -160,17 +160,17 @@ kubectl rollout status deployment/gauth-blue -n gauth-staging
 
 1. Check image pull status
    ```bash
-   kubectl describe pod <pod-name> -n gauth-staging | grep -A 5 "Events:"
+   kubectl describe pod <pod-name> -n agentauth-staging | grep -A 5 "Events:"
    ```
 
 2. Verify image exists and is accessible
    ```bash
-   docker pull ghcr.io/mauriciomferz/gauth-staging:latest
+   docker pull ghcr.io/mauriciomferz/agentauth-staging:latest
    ```
 
 3. Check image pull secrets
    ```bash
-   kubectl get secrets -n gauth-staging
+   kubectl get secrets -n agentauth-staging
    ```
 
 ---
@@ -181,17 +181,17 @@ After resolution, verify:
 
 1. **Pod is running**
    ```bash
-   kubectl get pods -n gauth-staging -l app=gauth
+   kubectl get pods -n agentauth-staging -l app=agentauth
    ```
 
 2. **Health checks passing**
    ```bash
-   kubectl exec <pod-name> -n gauth-staging -- curl -f http://localhost:8080/api/v1/beta/health
+   kubectl exec <pod-name> -n agentauth-staging -- curl -f http://localhost:8080/api/v1/beta/health
    ```
 
 3. **Service endpoints updated**
    ```bash
-   kubectl get endpoints gauth-service -n gauth-staging
+   kubectl get endpoints agentauth-service -n agentauth-staging
    ```
 
 4. **Metrics being collected**
@@ -238,7 +238,7 @@ After resolution, verify:
 
 **Contact Information:**
 - On-call engineer: Check PagerDuty rotation
-- Slack channel: #gauth-incidents
+- Slack channel: #agentauth-incidents
 - Email: oncall@example.com
 
 ---

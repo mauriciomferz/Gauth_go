@@ -22,7 +22,7 @@ source: integration-test-suite
 ## Phase 6 Objectives
 
 Create comprehensive End-to-End (E2E) integration tests demonstrating complete authorization flows across all Gap G10 components:
-- Extended Token (gauth)
+- Extended Token (agentauth)
 - Power of Attorney (PoA)
 - Commercial Register Service
 - Power Verification Point (PVP)
@@ -152,7 +152,7 @@ Create comprehensive End-to-End (E2E) integration tests demonstrating complete a
 - Integrates all components for authorization decisions
 - Cache management with TTL
 
-**5. Extended Token (gauth)**
+**5. Extended Token (agentauth)**
 - Complete structure: AccessToken, TokenType, ExpiresIn, Scope, IssuedAt
 - Integration fields: PowerOfAttorney, AuthorizationChain, ClientOwner, OwnersAuthorizer, VerificationProof
 - Authorization Chain: 3 levels with AuthorizationLink for each
@@ -169,15 +169,15 @@ Create comprehensive End-to-End (E2E) integration tests demonstrating complete a
 - Sets Authorization with NonPhysicalActions and Geographic/Sector scopes
 - Defines ValidityPeriod with StartTime/EndTime
 
-**createCompleteExtendedToken(t *testing.T) *gauth.ExtendedToken**
+**createCompleteExtendedToken(t *testing.T) *agentauth.ExtendedToken**
 - Generates complete Extended Token for validation tests
 - Includes PoA from createPoADefinition
 - Builds full Authorization Chain (3 levels)
 - Adds ClientOwner and OwnersAuthorizer info
 - Includes VerificationProof with verification levels
 
-**convertToVerificationLevels(result) []gauth.VerificationLevel**
-- Converts PVP VerificationDetails to gauth.VerificationLevel
+**convertToVerificationLevels(result) []agentauth.VerificationLevel**
+- Converts PVP VerificationDetails to agentauth.VerificationLevel
 - Maps Entity, Step, Method, Timestamp, TrustLevel
 
 ### API Structure Corrections (During Development)
@@ -242,7 +242,7 @@ During test development, the following API mismatches were discovered and correc
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/InvalidCommercialRegisterEntry (0.10s)
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/BrokenAuthorizationChain (0.00s)
 PASS
-ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/test/integration       0.635s
+ok      github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/test/integration       0.635s
 ```
 
 ## Integration Test Statistics Summary

@@ -19,21 +19,21 @@ This implementation delivers comprehensive JWT/PASETO advanced claims support, c
 
 ### **✅ Delivered Components**
 
-#### 1. **Advanced Claims Structure** (`pkg/gauth/advanced_claims.go`)
+#### 1. **Advanced Claims Structure** (`pkg/agentauth/advanced_claims.go`)
 - **AdvancedClaims**: Extended JWT claims with metadata support
 - **ClaimsMetadata**: Structured metadata including version, capabilities, restrictions
 - **ClaimsRestrictions**: Time windows, usage limits, IP whitelist, geofencing
 - **PASETOFooter**: Structured footer for PASETO tokens with key management
 - **Semantic Validation**: Comprehensive claims validation with temporal checks
 
-#### 2. **Enhanced Token Validation** (`pkg/gauth/advanced_validation.go`)
+#### 2. **Enhanced Token Validation** (`pkg/agentauth/advanced_validation.go`)
 - **ValidateAdvancedToken()**: Extended validation with semantic checks
 - **CreateAdvancedToken()**: Token creation with advanced claims
 - **ValidationMetadata**: Confidence scoring and validation context
 - **PASETO Footer Support**: Structured footer validation for PASETO tokens
 - **Time Window Enforcement**: Temporal access controls
 
-#### 3. **Comprehensive Test Coverage** (`pkg/gauth/*_test.go`)
+#### 3. **Comprehensive Test Coverage** (`pkg/agentauth/*_test.go`)
 - **Unit Tests**: 13 test functions covering all claim types
 - **Integration Tests**: End-to-end token creation and validation
 - **Complex Scenarios**: Multi-tenant, delegation, high-risk user scenarios
@@ -67,9 +67,9 @@ ClaimsMetadata{
 ### **Structured PASETO Footer**
 ```go
 PASETOFooter{
-    KeyID:     "gauth-ed25519-key-v2-2025",
+    KeyID:     "agentauth-ed25519-key-v2-2025",
     Algorithm: "Ed25519", 
-    Issuer:    "https://auth.gauth.example.com",
+    Issuer:    "https://auth.agentauth.example.com",
     Metadata: map[string]interface{}{
         "compliance":   []string{"SOC2", "GDPR", "HIPAA"},
         "jurisdiction": "US-CA",
@@ -92,7 +92,7 @@ PASETOFooter{
 
 ```bash
 # All tests passing (14 test functions)
-$ go test ./pkg/gauth -run "Test.*Advanced.*" -v
+$ go test ./pkg/agentauth -run "Test.*Advanced.*" -v
 === RUN   TestAdvancedClaims_ValidateSemantics
 === RUN   TestAdvancedClaims_ToMapFromMap  
 === RUN   TestExampleAdvancedClaims

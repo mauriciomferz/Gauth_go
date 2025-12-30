@@ -85,11 +85,11 @@ type VaultClient interface {
 
 **Key Features:**
 - **Ed25519 Key Generation:** Cryptographically secure key pair generation with `crypto/ed25519`
-- **KV v2 Storage:** Keys stored in Vault KV engine at `{kvPath}/data/gauth/keys/{tenant}/{keyID}`
+- **KV v2 Storage:** Keys stored in Vault KV engine at `{kvPath}/data/agentauth/keys/{tenant}/{keyID}`
 - **Transit Engine Support:** Optional Transit mount path for advanced cryptographic operations
 - **Token-Based Authentication:** Configurable Vault token with TTL
 - **Health Checks:** `/sys/health` endpoint integration for Vault connectivity verification
-- **Tenant Isolation:** Keys stored under tenant-specific paths (`gauth/keys/{tenant}/`)
+- **Tenant Isolation:** Keys stored under tenant-specific paths (`agentauth/keys/{tenant}/`)
 - **Key Lifecycle Management:** Generate, Activate, Archive, GetActive, GetKey, ListKeys, Delete operations
 - **Atomic Activation:** `deactivateAllKeys` ensures only one active key per tenant
 - **Key Metadata:** Algorithm, creation/expiration timestamps, active status, tenant ownership
@@ -315,7 +315,7 @@ ok  	internal/crypto	0.123s
 ```go
 func main() {
 	// Create file-based key store for development
-	fileStore, err := crypto.NewFileKeyStore("/tmp/gauth-keys", 24*time.Hour)
+	fileStore, err := crypto.NewFileKeyStore("/tmp/agentauth-keys", 24*time.Hour)
 	
 	// Create default rotation policy
 	defaultPolicy := &crypto.RotationPolicy{
@@ -445,15 +445,15 @@ type KeyRotationDescriptor struct {
 The `internal/notary/rotation_metrics.go` provides comprehensive Prometheus metrics export:
 
 **Metrics Counters:**
-- `gauth_rotation_verification_latency_seconds`: Histogram of rotation verification latency
-- `gauth_rotation_verification_total`: Counter labeled by outcome (success/failure/error)
-- `gauth_rotation_verification_failure_reason_total`: Counter labeled by failure reason
-- `gauth_rotation_summary_latency_seconds`: Histogram of rotation summary build latency
-- `gauth_rotation_summary_total`: Counter labeled by outcome (success/error)
-- `gauth_rotation_summary_anchor_total`: Counter labeled by result (anchored/skipped/error)
-- `gauth_rotation_summary_chain_length`: Gauge of latest rotation ledger chain length
-- `gauth_rotation_summary_head_age_seconds`: Gauge of rotation summary head age
-- `gauth_rotation_summary_last_anchor_age_seconds`: Gauge of time since last anchor
+- `agentauth_rotation_verification_latency_seconds`: Histogram of rotation verification latency
+- `agentauth_rotation_verification_total`: Counter labeled by outcome (success/failure/error)
+- `agentauth_rotation_verification_failure_reason_total`: Counter labeled by failure reason
+- `agentauth_rotation_summary_latency_seconds`: Histogram of rotation summary build latency
+- `agentauth_rotation_summary_total`: Counter labeled by outcome (success/error)
+- `agentauth_rotation_summary_anchor_total`: Counter labeled by result (anchored/skipped/error)
+- `agentauth_rotation_summary_chain_length`: Gauge of latest rotation ledger chain length
+- `agentauth_rotation_summary_head_age_seconds`: Gauge of rotation summary head age
+- `agentauth_rotation_summary_last_anchor_age_seconds`: Gauge of time since last anchor
 
 **Metric Functions:**
 ```go
@@ -730,27 +730,27 @@ The remaining gaps are P2-P3 priority enhancements (AWS/GCP KMS providers, audit
 **Endpoint:** `/metrics`
 
 **Rotation Metrics:**
-- `gauth_rotation_verification_latency_seconds{quantile="0.5|0.9|0.99"}` - Rotation verification latency percentiles
-- `gauth_rotation_verification_total{outcome="success|failure|error"}` - Total rotation verifications by outcome
-- `gauth_rotation_verification_failure_reason_total{reason="..."}` - Failure categorization
-- `gauth_rotation_summary_latency_seconds{quantile="0.5|0.9|0.99"}` - Summary build latency percentiles
-- `gauth_rotation_summary_total{outcome="success|error"}` - Total summary requests
-- `gauth_rotation_summary_anchor_total{result="anchored|skipped|error"}` - Anchor attempts
-- `gauth_rotation_summary_chain_length` - Current rotation ledger chain length
-- `gauth_rotation_summary_head_age_seconds` - Age of rotation summary head
-- `gauth_rotation_summary_last_anchor_age_seconds` - Time since last anchor
+- `agentauth_rotation_verification_latency_seconds{quantile="0.5|0.9|0.99"}` - Rotation verification latency percentiles
+- `agentauth_rotation_verification_total{outcome="success|failure|error"}` - Total rotation verifications by outcome
+- `agentauth_rotation_verification_failure_reason_total{reason="..."}` - Failure categorization
+- `agentauth_rotation_summary_latency_seconds{quantile="0.5|0.9|0.99"}` - Summary build latency percentiles
+- `agentauth_rotation_summary_total{outcome="success|error"}` - Total summary requests
+- `agentauth_rotation_summary_anchor_total{result="anchored|skipped|error"}` - Anchor attempts
+- `agentauth_rotation_summary_chain_length` - Current rotation ledger chain length
+- `agentauth_rotation_summary_head_age_seconds` - Age of rotation summary head
+- `agentauth_rotation_summary_last_anchor_age_seconds` - Time since last anchor
 
 **Example Query:**
 ```promql
 # Average rotation verification latency (last 5 minutes)
-rate(gauth_rotation_verification_latency_seconds_sum[5m]) / 
-rate(gauth_rotation_verification_latency_seconds_count[5m])
+rate(agentauth_rotation_verification_latency_seconds_sum[5m]) / 
+rate(agentauth_rotation_verification_latency_seconds_count[5m])
 
 # Rotation failure rate
-rate(gauth_rotation_verification_total{outcome="failure"}[5m])
+rate(agentauth_rotation_verification_total{outcome="failure"}[5m])
 
 # Current rotation chain length
-gauth_rotation_summary_chain_length
+agentauth_rotation_summary_chain_length
 ```
 
 ---

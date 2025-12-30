@@ -108,7 +108,7 @@ Four pluggable eviction strategies are supported:
 - **Implementation**: `TTLEvictionPolicy{TTL: duration}`
 - **Complexity**: O(n) scan during eviction trigger
 - **Memory**: Unbounded without size limit
-- **Configuration**: `GAUTH_REPLAY_EVICTION_POLICY=ttl GAUTH_REPLAY_TTL_SEC=900`
+- **Configuration**: `AGENTAUTH_REPLAY_EVICTION_POLICY=ttl AGENTAUTH_REPLAY_TTL_SEC=900`
 
 #### 2. **Size-Based Eviction**
 - **Strategy**: Evict oldest entries when count exceeds max size
@@ -116,7 +116,7 @@ Four pluggable eviction strategies are supported:
 - **Implementation**: `SizeBasedEvictionPolicy{MaxSize: count}`
 - **Complexity**: O(n log n) sort by timestamp when evicting
 - **Memory**: Bounded by MaxSize
-- **Configuration**: `GAUTH_REPLAY_EVICTION_POLICY=size GAUTH_REPLAY_EVICTION_MAX_SIZE=10000`
+- **Configuration**: `AGENTAUTH_REPLAY_EVICTION_POLICY=size AGENTAUTH_REPLAY_EVICTION_MAX_SIZE=10000`
 
 #### 3. **LRU Eviction** (Least Recently Used)
 - **Strategy**: Evict least recently accessed entries when count exceeds max size
@@ -124,7 +124,7 @@ Four pluggable eviction strategies are supported:
 - **Implementation**: `LRUEvictionPolicy{MaxSize: count}` with accessTimes tracking
 - **Complexity**: O(n log n) sort by access time when evicting
 - **Memory**: Bounded by MaxSize + accessTimes overhead
-- **Configuration**: `GAUTH_REPLAY_EVICTION_POLICY=lru GAUTH_REPLAY_EVICTION_MAX_SIZE=10000`
+- **Configuration**: `AGENTAUTH_REPLAY_EVICTION_POLICY=lru AGENTAUTH_REPLAY_EVICTION_MAX_SIZE=10000`
 
 #### 4. **Composite Eviction**
 - **Strategy**: Combine multiple policies (ANY match triggers eviction)
@@ -132,7 +132,7 @@ Four pluggable eviction strategies are supported:
 - **Implementation**: `CompositeEvictionPolicy{Policies: []EvictionPolicy}`
 - **Complexity**: Sum of constituent policy complexities
 - **Memory**: Constrained by strictest policy
-- **Configuration**: `GAUTH_REPLAY_EVICTION_POLICY=ttl+size`
+- **Configuration**: `AGENTAUTH_REPLAY_EVICTION_POLICY=ttl+size`
 
 ### Eviction Trigger Points
 
@@ -147,11 +147,11 @@ Eviction is triggered lazily during:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_REPLAY_WAL_PATH` | `./data/replay.wal` | Path to Write-Ahead Log file |
-| `GAUTH_REPLAY_TTL_SEC` | `900` (15 min) | TTL for replay entries (seconds) |
-| `GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC` | `300` (5 min) | Automatic snapshot interval (seconds) |
-| `GAUTH_REPLAY_EVICTION_POLICY` | `ttl` | Eviction policy: `ttl`, `lru`, `size`, `ttl+size` |
-| `GAUTH_REPLAY_EVICTION_MAX_SIZE` | `10000` | Max entries for size/LRU policies |
+| `AGENTAUTH_REPLAY_WAL_PATH` | `./data/replay.wal` | Path to Write-Ahead Log file |
+| `AGENTAUTH_REPLAY_TTL_SEC` | `900` (15 min) | TTL for replay entries (seconds) |
+| `AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC` | `300` (5 min) | Automatic snapshot interval (seconds) |
+| `AGENTAUTH_REPLAY_EVICTION_POLICY` | `ttl` | Eviction policy: `ttl`, `lru`, `size`, `ttl+size` |
+| `AGENTAUTH_REPLAY_EVICTION_MAX_SIZE` | `10000` | Max entries for size/LRU policies |
 
 ### Eviction Policy Selection Guide
 
@@ -169,13 +169,13 @@ Eviction is triggered lazily during:
 
 ```go
 import (
-    "github.com/.../pkg/gauth"
+    "github.com/.../pkg/agentauth"
     "github.com/.../pkg/replay"
 )
 
 // Create DurableReplayStore with TTL eviction
 config := replay.DurableReplayStoreConfig{
-    WALPath:        "/var/lib/gauth/replay.wal",
+    WALPath:        "/var/lib/agentauth/replay.wal",
     TTL:            15 * time.Minute,
     SnapshotInterval: 5 * time.Minute,
     EvictionPolicy: &replay.TTLEvictionPolicy{TTL: 15 * time.Minute},
@@ -188,28 +188,28 @@ if err != nil {
 }
 defer store.Close()
 
-// Wrap for gauth ReplayStore interface
+// Wrap for agentauth ReplayStore interface
 adapter := replay.NewDurableReplayStoreAdapter(store)
 
-// Inject into gauth
-gauthSvc, err := gauth.New(gauthConfig, gauth.WithReplayStore(adapter))
+// Inject into agentauth
+agentauthSvc, err := agentauth.New(agentauthConfig, agentauth.WithReplayStore(adapter))
 ```
 
 #### Environment Variable Configuration
 
 ```bash
 # Set environment variables
-export GAUTH_REPLAY_WAL_PATH="/var/lib/gauth/replay.wal"
-export GAUTH_REPLAY_TTL_SEC=900
-export GAUTH_REPLAY_EVICTION_POLICY="ttl+size"
-export GAUTH_REPLAY_EVICTION_MAX_SIZE=50000
+export AGENTAUTH_REPLAY_WAL_PATH="/var/lib/agentauth/replay.wal"
+export AGENTAUTH_REPLAY_TTL_SEC=900
+export AGENTAUTH_REPLAY_EVICTION_POLICY="ttl+size"
+export AGENTAUTH_REPLAY_EVICTION_MAX_SIZE=50000
 
 # Application code
 ```
 
 ```go
 import (
-    "github.com/.../pkg/gauth"
+    "github.com/.../pkg/agentauth"
     "github.com/.../pkg/replay"
 )
 
@@ -221,14 +221,14 @@ if err != nil {
 defer store.Close()
 
 adapter := replay.NewDurableReplayStoreAdapter(store)
-gauthSvc, err := gauth.New(gauthConfig, gauth.WithReplayStore(adapter))
+agentauthSvc, err := agentauth.New(agentauthConfig, agentauth.WithReplayStore(adapter))
 ```
 
 #### Size-Based Eviction (Fixed Capacity)
 
 ```go
 config := replay.DurableReplayStoreConfig{
-    WALPath:        "/var/lib/gauth/replay.wal",
+    WALPath:        "/var/lib/agentauth/replay.wal",
     TTL:            1 * time.Hour, // Long TTL (eviction by size, not time)
     EvictionPolicy: &replay.SizeBasedEvictionPolicy{MaxSize: 10000},
     MaxSize:        10000,
@@ -239,7 +239,7 @@ config := replay.DurableReplayStoreConfig{
 
 ```go
 config := replay.DurableReplayStoreConfig{
-    WALPath:        "/var/lib/gauth/replay.wal",
+    WALPath:        "/var/lib/agentauth/replay.wal",
     TTL:            30 * time.Minute,
     EvictionPolicy: &replay.LRUEvictionPolicy{MaxSize: 50000},
     MaxSize:        50000,
@@ -250,7 +250,7 @@ config := replay.DurableReplayStoreConfig{
 
 ```go
 config := replay.DurableReplayStoreConfig{
-    WALPath:        "/var/lib/gauth/replay.wal",
+    WALPath:        "/var/lib/agentauth/replay.wal",
     TTL:            15 * time.Minute,
     EvictionPolicy: &replay.CompositeEvictionPolicy{
         Policies: []replay.EvictionPolicy{
@@ -267,36 +267,36 @@ config := replay.DurableReplayStoreConfig{
 
 #### Development Environment
 ```bash
-GAUTH_REPLAY_WAL_PATH="./tmp/replay.wal"
-GAUTH_REPLAY_TTL_SEC=600              # 10 minutes (short for dev)
-GAUTH_REPLAY_EVICTION_POLICY=ttl
-GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=60 # 1 minute (frequent snapshots)
+AGENTAUTH_REPLAY_WAL_PATH="./tmp/replay.wal"
+AGENTAUTH_REPLAY_TTL_SEC=600              # 10 minutes (short for dev)
+AGENTAUTH_REPLAY_EVICTION_POLICY=ttl
+AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=60 # 1 minute (frequent snapshots)
 ```
 
 #### Production (High Traffic)
 ```bash
-GAUTH_REPLAY_WAL_PATH="/var/lib/gauth/replay.wal"
-GAUTH_REPLAY_TTL_SEC=900                # 15 minutes
-GAUTH_REPLAY_EVICTION_POLICY=lru
-GAUTH_REPLAY_EVICTION_MAX_SIZE=100000   # 100K hot tokens
-GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=300  # 5 minutes
+AGENTAUTH_REPLAY_WAL_PATH="/var/lib/agentauth/replay.wal"
+AGENTAUTH_REPLAY_TTL_SEC=900                # 15 minutes
+AGENTAUTH_REPLAY_EVICTION_POLICY=lru
+AGENTAUTH_REPLAY_EVICTION_MAX_SIZE=100000   # 100K hot tokens
+AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=300  # 5 minutes
 ```
 
 #### Production (Memory-Constrained)
 ```bash
-GAUTH_REPLAY_WAL_PATH="/var/lib/gauth/replay.wal"
-GAUTH_REPLAY_TTL_SEC=900
-GAUTH_REPLAY_EVICTION_POLICY=ttl+size
-GAUTH_REPLAY_EVICTION_MAX_SIZE=10000    # Strict limit
-GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=300
+AGENTAUTH_REPLAY_WAL_PATH="/var/lib/agentauth/replay.wal"
+AGENTAUTH_REPLAY_TTL_SEC=900
+AGENTAUTH_REPLAY_EVICTION_POLICY=ttl+size
+AGENTAUTH_REPLAY_EVICTION_MAX_SIZE=10000    # Strict limit
+AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=300
 ```
 
 #### Compliance (Long Retention)
 ```bash
-GAUTH_REPLAY_WAL_PATH="/mnt/audit/replay.wal"
-GAUTH_REPLAY_TTL_SEC=7776000            # 90 days
-GAUTH_REPLAY_EVICTION_POLICY=ttl
-GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=3600 # Hourly snapshots
+AGENTAUTH_REPLAY_WAL_PATH="/mnt/audit/replay.wal"
+AGENTAUTH_REPLAY_TTL_SEC=7776000            # 90 days
+AGENTAUTH_REPLAY_EVICTION_POLICY=ttl
+AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC=3600 # Hourly snapshots
 ```
 
 ### Monitoring
@@ -364,7 +364,7 @@ histogram_quantile(0.99, rate(replay_store_latency_seconds_bucket[5m]))
 **High Latency:**
 ```yaml
 - alert: HighReplayStoreLatency
-  expr: histogram_quantile(0.99, rate(replay_store_latency_seconds_bucket[5m])) > 0.001
+  expr: histogram_quantile(0.99, rate(replay_store_latency_seconds_bucket[5m]) > 0.001
   for: 5m
   annotations:
     summary: "p99 replay store latency >1ms (performance degradation)"
@@ -402,10 +402,10 @@ Snapshots automatically trigger WAL rotation:
 
 ```bash
 # Snapshot file contains full state
-cp /var/lib/gauth/replay.wal.snapshot /backup/replay-$(date +%Y%m%d).snapshot
+cp /var/lib/agentauth/replay.wal.snapshot /backup/replay-$(date +%Y%m%d).snapshot
 
 # WAL contains recent changes
-cp /var/lib/gauth/replay.wal /backup/replay-$(date +%Y%m%d).wal
+cp /var/lib/agentauth/replay.wal /backup/replay-$(date +%Y%m%d).wal
 ```
 
 ## Migration Guide
@@ -430,7 +430,7 @@ cp /var/lib/gauth/replay.wal /backup/replay-$(date +%Y%m%d).wal
 **Steps:**
 1. Analyze cache hit rate and store size trends
 2. If store size unbounded: Switch to `size` or `lru` policy
-3. If frequent evictions: Increase `GAUTH_REPLAY_EVICTION_MAX_SIZE`
+3. If frequent evictions: Increase `AGENTAUTH_REPLAY_EVICTION_MAX_SIZE`
 4. If memory pressure: Switch to `ttl+size` composite policy
 5. Adjust snapshot interval based on WAL size growth
 
@@ -447,7 +447,7 @@ cp /var/lib/gauth/replay.wal /backup/replay-$(date +%Y%m%d).wal
 **Steps:**
 1. Verify 99.99% uptime with DurableReplayStore for 2+ weeks
 2. Confirm crash recovery tested in staging
-3. Remove legacy `seenJTI` map from gauth.Service (code cleanup)
+3. Remove legacy `seenJTI` map from agentauth.Service (code cleanup)
 4. Document final configuration in runbooks
 
 ## Security Considerations
@@ -549,7 +549,7 @@ func (a *DurableReplayStoreAdapter) CheckAndStore(jti string) error {
 - TestEvictionMetrics: Metrics instrumentation ✅
 - TestEvictionConcurrency: Thread safety ✅
 
-**Integration Tests (pkg/replay/gauth_integration_test.go):**
+**Integration Tests (pkg/replay/agentauth_integration_test.go):**
 - TestDurableReplayStoreAgentAuthIntegration: CheckAndStore interface ✅
 - TestDurableReplayStoreFromEnv: Environment configuration ✅
 - TestDurableReplayStoreWithSizeEviction: Size policy with env vars ✅
@@ -569,7 +569,7 @@ func (a *DurableReplayStoreAdapter) CheckAndStore(jti string) error {
 5. Verify: Previous JTIs detected as replays, new JTIs accepted
 
 **Eviction Verification:**
-1. Configure `GAUTH_REPLAY_EVICTION_POLICY=size GAUTH_REPLAY_EVICTION_MAX_SIZE=100`
+1. Configure `AGENTAUTH_REPLAY_EVICTION_POLICY=size AGENTAUTH_REPLAY_EVICTION_MAX_SIZE=100`
 2. Issue 200 tokens
 3. Verify: Store size stays ≤ 100, oldest evicted
 

@@ -12,27 +12,27 @@ Enhanced the existing RFC 7523 implementation to align with the latest RFC 7523b
 ### Implementation Details
 
 #### JTI Replay Protection
-- **Modified**: [`pkg/auth/client_auth.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/client_auth.go#L59-L90)
+- **Modified**: [`pkg/auth/client_auth.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/auth/client_auth.go#L59-L90)
 - **Integration**: Connected `PrivateKeyJWTValidator` with the existing `ReplayNonceStore` via `CheckAndStore` adapter
 - **Behavior**: Each JWT assertion is uniquely identified by its JTI claim, preventing token reuse attacks
 
 #### Algorithm Agility
-- **Modified**: [`pkg/auth/client_auth.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/client_auth.go#L70-L79)
+- **Modified**: [`pkg/auth/client_auth.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/auth/client_auth.go#L70-L79)
 - **Support Added**:
   - RSA (RS256) - existing
   - EdDSA (Ed25519) - new
   - ECDSA (ES256) - new
-- **Key Storage**: Updated [`pkg/auth/store.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/store.go#L10-L12) to store `any` type for public keys
+- **Key Storage**: Updated [`pkg/auth/store.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/auth/store.go#L10-L12) to store `any` type for public keys
 
 #### Flexible Audience Validation
-- **Modified**: [`pkg/auth/client_auth.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/client_auth.go#L81-L90)
+- **Modified**: [`pkg/auth/client_auth.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/auth/client_auth.go#L81-L90)
 - **Feature**: `ValidAudiences []string` field in `PrivateKeyJWTValidator`
 - **Use Case**: Supports tokens used across multiple services (e.g., token endpoint, device authorization endpoint)
 
 ### Testing & Verification
 
 #### Unit Tests
-- **File**: [`pkg/auth/client_auth_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/auth/client_auth_test.go)
+- **File**: [`pkg/auth/client_auth_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/auth/client_auth_test.go)
 - **Coverage**:
   - ✅ RSA key authentication
   - ✅ EdDSA key authentication
@@ -42,13 +42,13 @@ Enhanced the existing RFC 7523 implementation to align with the latest RFC 7523b
   - ✅ Invalid signature detection
 
 #### Integration Tests
-- **Device Flow**: [`web/handlers/device/rfc7523_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/device/rfc7523_test.go)
+- **Device Flow**: [`web/handlers/device/rfc7523_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/device/rfc7523_test.go)
   - Verified device authorization flow with new validator
-- **JWT Bearer Grant**: [`web/handlers/grant_jwt/handler_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/grant_jwt/handler_test.go)
+- **JWT Bearer Grant**: [`web/handlers/grant_jwt/handler_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/grant_jwt/handler_test.go)
   - Confirmed JWT bearer grant functionality preserved
 
 ### Production Integration
-- **Modified**: [`web/server_factory.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go#L400-L410)
+- **Modified**: [`web/server_factory.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/server_factory.go#L400-L410)
 - **Changes**: Updated initialization to pass `ValidAudiences` and `ReplayStore` to validator instances
 
 ---
@@ -61,7 +61,7 @@ Deepened the integration between AgentAuth's authorization system and AI agent p
 ### MCP Authorization Enhancements
 
 #### AI Agent Identity Propagation
-Enhanced [`pkg/mcp/auth_bridge.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/auth_bridge.go) to propagate granular AI agent identity information to the Policy Decision Point (PDP):
+Enhanced [`pkg/mcp/auth_bridge.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/mcp/auth_bridge.go) to propagate granular AI agent identity information to the Policy Decision Point (PDP):
 - Added `client_name` and `client_type` attributes from the `AuthorizationChain` to all PDP requests
 - Updated `AuthorizeResourceRead`, `AuthorizeToolCall`, and `AuthorizePromptGet` methods
 - Enables policy engines to make decisions based on specific AI agent characteristics
@@ -74,7 +74,7 @@ Implemented monetary value extraction and validation in tool calls:
 - Enables enforcement of financial constraints defined in Power of Attorney tokens
 
 #### Integration Testing
-Created [`pkg/mcp/mcp_integration_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/mcp/mcp_integration_test.go) with comprehensive test coverage:
+Created [`pkg/mcp/mcp_integration_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/mcp/mcp_integration_test.go) with comprehensive test coverage:
 - ✅ Tool call authorization with high compliance level
 - ✅ Monetary limit enforcement (denies calls exceeding `value_limit`)
 - ✅ Wildcard MCP scope verification (`mcp:*` grants)
@@ -82,10 +82,10 @@ Created [`pkg/mcp/mcp_integration_test.go`](file:///Users/mauricio.fernandez_fer
 ### GNAP-AgentAuth Integration
 
 #### VerificationService Integration
-Established the critical link between GNAP grant requests and AgentAuth's Power of Attorney system by integrating [`pkg/gauthplus/VerificationService`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauthplus/verification.go) into the GNAP handler:
+Established the critical link between GNAP grant requests and AgentAuth's Power of Attorney system by integrating [`pkg/agentauthplus/VerificationService`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/verification.go) into the GNAP handler:
 
 **Modified Files:**
-- [`web/handlers/gnap/handler.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/gnap/handler.go#L25): Added `VerificationService` to `Handler` struct
+- [`web/handlers/gnap/handler.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/gnap/handler.go#L25): Added `VerificationService` to `Handler` struct
 - Updated `NewHandler` signature to accept `VerificationService`
 - Implemented `linkAgentAuthContext` helper function
 
@@ -106,13 +106,13 @@ This enables GNAP clients to:
 
 Fixed high-priority unhandled error findings (G104) in CLI tools:
 
-#### [`cmd/gauth-server/main.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/gauth-server/main.go)
+#### [`cmd/agentauth-server/main.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/cmd/agentauth-server/main.go)
 - Explicitly ignored errors from `resp.Body.Close()` in health check endpoints (lines 38, 42)
 
-#### [`cmd/gen-crypto-vectors/main.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/gen-crypto-vectors/main.go)
+#### [`cmd/gen-crypto-vectors/main.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/cmd/gen-crypto-vectors/main.go)
 - Explicitly ignored errors from `os.Stdout.Write(enc)` (line 183)
 
-#### [`cmd/snapshot/main.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/cmd/snapshot/main.go)
+#### [`cmd/snapshot/main.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/cmd/snapshot/main.go)
 - Explicitly ignored errors from multiple `f.Close()` calls in error handling paths (lines 59, 65, 71, 74)
 
 **Impact:** Reduced gosec findings from 251 to 247 issues, addressing critical unhandled errors in production code paths.
@@ -178,7 +178,7 @@ GNAP Response
 
 Completed integration of `VerificationService` into production server initialization:
 
-**Modified**: [`web/server_factory.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go#L664-L678)
+**Modified**: [`web/server_factory.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/server_factory.go#L664-L678)
 - Updated GNAP handler initialization to accept `VerificationService` parameter
 - Added placeholder for future DB service wiring (TODO comment)
 - All GNAP tests passing ✅
@@ -222,19 +222,19 @@ Addressed remaining specific security/correctness findings:
 ### Key Accomplishments
 
 #### RFC-3161 Verification Hardening
-- **CMS Structure Parsing**: Implemented comprehensive ASN.1 structures for `ContentInfo`, `SignedData`, and `TSTInfo` in [`pkg/ledger/rfc3161/client.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/rfc3161/client.go#L63-L124)
+- **CMS Structure Parsing**: Implemented comprehensive ASN.1 structures for `ContentInfo`, `SignedData`, and `TSTInfo` in [`pkg/ledger/rfc3161/client.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/rfc3161/client.go#L63-L124)
 - **Cryptographic Verification**: New `Verify()` method validates TimeStampToken signatures, ensuring cryptographic integrity of TSA responses
-- **Provider Integration**: Updated [`RFC3161Provider.Verify`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/external_anchor.go#L280-L290) to use the hardened verification logic
+- **Provider Integration**: Updated [`RFC3161Provider.Verify`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/external_anchor.go#L280-L290) to use the hardened verification logic
 
 #### Capability Registry Anchoring
-- **NotaryAdapter**: Created [`web/handlers/capabilities/notary_adapter.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/capabilities/notary_adapter.go) to bridge ledger's `ExternalAnchorClient` to capability handler's `AnchorClient` interface
-- **Server Integration**: Wired external TSA anchoring in [`server_factory.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/server_factory.go#L1684-L1702) with `GAUTH_CAPABILITY_TSA_URL` configuration
+- **NotaryAdapter**: Created [`web/handlers/capabilities/notary_adapter.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/capabilities/notary_adapter.go) to bridge ledger's `ExternalAnchorClient` to capability handler's `AnchorClient` interface
+- **Server Integration**: Wired external TSA anchoring in [`server_factory.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/server_factory.go#L1684-L1702) with `AGENTAUTH_CAPABILITY_TSA_URL` configuration
 - **Capability Audit Trail**: Capability registry changes can now be anchored to external TSA providers for immutable audit trails
 
 #### Risk Management Documentation
-- **Operational Guidance**: Created [`FAIL_CLOSED_ADVISORY.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/FAIL_CLOSED_ADVISORY.md) documenting security vs availability trade-offs for replay store fail-closed mode
-- **Threat Model Sync**: Updated [`THREAT_MODEL.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/THREAT_MODEL.md#L86-L109) to reflect completed mitigations (discovery hardening, RFC-3161 verification, capability anchoring)
-- **Risk Register**: Updated [`RESIDUAL_RISKS.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/RESIDUAL_RISKS.md#L68-L77) with archived mitigations MR-009 and MR-010
+- **Operational Guidance**: Created [`FAIL_CLOSED_ADVISORY.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/FAIL_CLOSED_ADVISORY.md) documenting security vs availability trade-offs for replay store fail-closed mode
+- **Threat Model Sync**: Updated [`THREAT_MODEL.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/THREAT_MODEL.md#L86-L109) to reflect completed mitigations (discovery hardening, RFC-3161 verification, capability anchoring)
+- **Risk Register**: Updated [`RESIDUAL_RISKS.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md#L68-L77) with archived mitigations MR-009 and MR-010
 
 ### Verification Results
 
@@ -276,21 +276,21 @@ Phase 14 closes critical governance gaps:
 ### Key Accomplishments
 
 #### POA Signature Fuzzing (P0 - Security Critical)
-- **Comprehensive Fuzz Suite**: Created [`canonical_signature_fuzz_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/canonical_signature_fuzz_test.go) with 4 fuzz functions covering Ed25519, RSA-PSS, and ECDSA signature verification
+- **Comprehensive Fuzz Suite**: Created [`canonical_signature_fuzz_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/canonical_signature_fuzz_test.go) with 4 fuzz functions covering Ed25519, RSA-PSS, and ECDSA signature verification
 - **Property-Based Testing**: Validated signature invariants (valid signatures verify, mutated signatures/digests fail verification, deterministic digest computation)
 - **Test Coverage**: 26,752 executions, 28 interesting test cases discovered, 0 failures
 
 #### Capability Registry Fuzzing (P1 - Integrity)
-- **Registry Resilience**: Created [`registry_fuzz_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/internal/capability/registry_fuzz_test.go) with 5 fuzz functions testing loader, canonical hash, and registry operations
+- **Registry Resilience**: Created [`registry_fuzz_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/capability/registry_fuzz_test.go) with 5 fuzz functions testing loader, canonical hash, and registry operations
 - **Malformed JSON Handling**: Tested deep nesting, duplicates, missing fields, zero/negative values
 - **Hash Stability**: Verified canonical hash order-independence and collision resistance
 - **Test Coverage**: 3.1 million executions, 284 interesting test cases discovered, 0 failures
 
 #### JTI Validation Enhancement (P2 - Security)
-- **Enhanced Validation**: Implemented [`validateJTIEnhanced`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go#L83-L108) with UUID length validation (exact 36 chars) and format validation
+- **Enhanced Validation**: Implemented [`validateJTIEnhanced`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/aap001.go#L83-L108) with UUID length validation (exact 36 chars) and format validation
 - **Structured Errors**: Added `JTIValidationError` type with specific failure reasons (length_invalid, format_invalid, timestamp_skew)
 - **Metrics Integration**: Added `IncMalformedJTI(reason string)` metric across all collectors (Memory, Prometheus, CollectorRegistry) for granular tracking
-- **Comprehensive Tests**: Created [`rfc0111_jti_enhanced_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111_jti_enhanced_test.go) with 10 test cases covering edge cases
+- **Comprehensive Tests**: Created [`aap001_jti_enhanced_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/aap001_jti_enhanced_test.go) with 10 test cases covering edge cases
 - **Test Results**: All 10 test cases pass (valid UUIDs, length violations, format violations, variant/version checks)
 
 ### Verification Results
@@ -346,7 +346,7 @@ Phase 15 closes critical testing gaps:
 ### Completed Components
 
 #### ABAC Function Registry ✅
-- **Registry Implementation**: Created [`pkg/authz/expr/registry.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr/registry.go) with extensible `FunctionRegistry` interface
+- **Registry Implementation**: Created [`pkg/authz/expr/registry.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/expr/registry.go) with extensible `FunctionRegistry` interface
 - **Built-in Functions** (7 total):
   - `len(str)` - String length (byte count)
   - `upper(str)` - Uppercase conversion
@@ -356,13 +356,13 @@ Phase 15 closes critical testing gaps:
   - `contains(str, substr)` - Substring search
   - `regex_match(str, pattern)` - Regex matching (with 256-char limit)
 - **Thread Safety**: Registry uses `sync.RWMutex` for concurrent access
-- **Comprehensive Tests**: [`registry_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr/registry_test.go) with 77 test cases, **all passing**
+- **Comprehensive Tests**: [`registry_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/expr/registry_test.go) with 77 test cases, **all passing**
 - **Error Handling**: All functions validate argument counts and types, fail gracefully
 
 ### Remaining Work
 
 **Integration with Expression Evaluator**:
-- Add `callNode` AST type to [`pkg/authz/expr.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/expr.go)
+- Add `callNode` AST type to [`pkg/authz/expr.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/expr.go)
 - Update lexer to recognize function call syntax `func(args...)`
 - Update parser to parse function calls
 - Add `MaxFunctionCalls` budget tracking
@@ -394,7 +394,7 @@ Phase 15 closes critical testing gaps:
 - `len(subject) > 3` ✓
 - `upper(subject) == "ADMIN"` ✓
 - `startsWith(subject, "prefix")` ✓
-- `len(upper(subject)) == 5` (nested) ✓
+- `len(upper(subject) == 5` (nested) ✓
 - All string manipulation functions ✓
 - All comparison contexts ✓
 - Error handling for unknown functions ✓
@@ -413,7 +413,7 @@ Phase 15 closes critical testing gaps:
 - **Fallback Chain**: Automatic failover - Primary TSA → Secondary TSA → Local (optional)
 - **Certificate Validation**: Integrated with `rfc3161.Client.Verify()` for cryptographic verification
 - **Timeout Handling**: Configurable per-TSA timeout (default 30s) with context cancellation
-- **Modified**: [`external_anchor.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/external_anchor.go) - Enhanced `RFC3161Provider`
+- **Modified**: [`external_anchor.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/external_anchor.go) - Enhanced `RFC3161Provider`
 
 ### Configuration Example
 ```go
@@ -439,7 +439,7 @@ config := TSAConfig{
 **Completed**: 2025-12-27
 
 ### Decision Reason Taxonomy (C3) ✅
-- **Implementation**: [`decision_reasons.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/authz/pdp/decision_reasons.go)
+- **Implementation**: [`decision_reasons.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/pdp/decision_reasons.go)
 - **45+ Standardized Reason Codes**:
   - Approval: 6 codes (direct, delegated, conditional, ABAC, capability, emergency)
   - Authentication: 6 codes (no auth, expired, invalid signature, malformed, unknown subject, revoked)
@@ -468,7 +468,7 @@ config := TSAConfig{
 **Completed**: 2025-12-27
 
 ### Threat Mitigation Matrix (A3) ✅
-- **Document**: [`THREAT_MITIGATION_MATRIX.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/THREAT_MITIGATION_MATRIX.md)
+- **Document**: [`THREAT_MITIGATION_MATRIX.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/THREAT_MITIGATION_MATRIX.md)
 - **12 Threats Mapped**: All critical/high/medium threats linked to specific mitigations
 - **Key Mappings**:
   - T1 (Token Forgery) → Ed25519/RSA/ECDSA signatures
@@ -481,7 +481,7 @@ config := TSAConfig{
 - **Sync Process**: Manual (quarterly reviews); automated sync script planned
 
 ### Capability Deprecation ADR (D2) ✅
-- **Document**: [`ADR-006-capability-deprecation.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/ADR-006-capability-deprecation.md)
+- **Document**: [`ADR-006-capability-deprecation.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/ADR-006-capability-deprecation.md)
 - **Lifecycle States**: Active → Deprecated → Sunset → Retired
 - **Normal Deprecation**: 90-day announcement, 60-day deprecation, 30-day sunset
 - **Emergency Deprecation**: 0-7 day grace period for critical vulnerabilities
@@ -549,13 +549,13 @@ config := TSAConfig{
 - `pkg/authz/expr/registry.go` - Function registry infrastructure
 - `pkg/authz/expr/registry_test.go` - Comprehensive registry tests
 - `pkg/authz/function_call_test.go` - End-to-end integration tests
-- `pkg/gauth_rfc_001/canonical_signature_fuzz_test.go` - Signature fuzzing
-- `pkg/gauth_rfc_001/rfc0111_jti_enhanced_test.go` - JTI validation tests  
+- `pkg/agentauth_rfc_001/canonical_signature_fuzz_test.go` - Signature fuzzing
+- `pkg/agentauth_rfc_001/aap001_jti_enhanced_test.go` - JTI validation tests  
 - `internal/capability/registry_fuzz_test.go` - Registry fuzzing
 
 **Modified Files** (4):
 - `pkg/authz/expr.go` - Added callNode AST and function call parsing
-- `pkg/gauth_rfc_001/rfc0111.go` - Enhanced JTI validation
+- `pkg/agentauth_rfc_001/aap001.go` - Enhanced JTI validation
 - `internal/metrics/metrics.go` - Added IncMalformedJTI metric
 - Multiple metric collector implementations
 
@@ -570,9 +570,9 @@ config := TSAConfig{
 ### Manual Verification
 - **Docker Deployment**: Skipped (Daemon unavailable).
 - **Local Deployment**:
-    - Started server with `GAUTH_DEV_INDEX=1`.
-    - Verified `ui/gauth1.html` -> **200 OK**.
-    - Verified `api/openapi/gauth.yaml` -> **200 OK**.
+    - Started server with `AGENTAUTH_DEV_INDEX=1`.
+    - Verified `ui/agentauth1.html` -> **200 OK**.
+    - Verified `api/openapi/agentauth.yaml` -> **200 OK**.
 
 ## Summary
 
@@ -609,8 +609,8 @@ This walkthrough documents the completed implementation of RFC 7523bis hardening
 - **Fix**:
     - Used `docker compose up -d --force-recreate` to refresh containers and properly expose ports.
     - Verified port mapping with `docker port`.
-    - Executed all 14 schema migrations manually via `docker exec -i gauth-postgres psql ...` to initialize the database.
-    - Restarted `web-server` with corrected environment variables (`GAUTH_DB_HOST`, `DB_HOST`, `REDIS_HOST`, etc.).
+    - Executed all 14 schema migrations manually via `docker exec -i agentauth-postgres psql ...` to initialize the database.
+    - Restarted `web-server` with corrected environment variables (`AGENTAUTH_DB_HOST`, `DB_HOST`, `REDIS_HOST`, etc.).
 - **Verification**:
     - `GET /api/admin/events/stream` -> **200 OK** (Empty list, non-404).
     - `GET /api/admin/audit/events` -> **200 OK** (Empty list, non-404).
@@ -669,7 +669,7 @@ FAIL passed (13 tests total).
 - **Implementation**:
     - **Handler**: Extended `web/handlers/grant_jwt` to accept the new grant type string.
     - **Logic**: Reused the hardened `RFC 7523` private key validator to verify assertions (signature, checks, JTI replay protection).
-    - **Integration Test Fix**: Resolved type mismatch in `gauthplus_integration_test.go` by correctly passing `*database.DB` (pgx) instead of `*sql.DB`.
+    - **Integration Test Fix**: Resolved type mismatch in `agentauthplus_integration_test.go` by correctly passing `*database.DB` (pgx) instead of `*sql.DB`.
 - **Metrics Mock Fix**: Updated `mockCollector` in `registry_test.go` to fully implement the evolved `Metrics` interface, satisfying `go vet` and static analysis checks.
 - **Final Verification**: `go build ./...`, `go vet ./...`, and `go test -short ./...` all passed.
 
@@ -679,9 +679,9 @@ The system is now stable, consistent, and ready for deployment.
     - `go test ./test/integration/identity_assertion_test.go` -> **PASSED**.
 
 ### Gosec Remediation
-- **Target**: Fix unhandled errors (G104) in `cmd/gauth-server/main.go` and other high-priority issues.
+- **Target**: Fix unhandled errors (G104) in `cmd/agentauth-server/main.go` and other high-priority issues.
 - **Action**:
-    - Ran `gosec -include=G104 ./cmd/gauth-server/...` to identify unhandled errors.
+    - Ran `gosec -include=G104 ./cmd/agentauth-server/...` to identify unhandled errors.
     - **Result**: `gosec` reported 0 findings in `main.go`, indicating previous/clean state or effective configuration.
     - Performed full codebase scan `gosec ./...` to ensure no critical regressions.
 
@@ -721,9 +721,9 @@ The system is now stable, consistent, and ready for deployment.
 
 ## System Wiring & Refactoring (Phase 7)
 
-### Verification-   **Phase 7 (System Wiring & Refactoring)**: Fully wired `VerificationService` with PostgreSQL-backed services (`PoAStore`, `DelegationService`, `FiduciaryDutyService`, `CapabilityAssessmentService`). Refactored all `pkg/gauthplus` Persistence layers to use `pgx`.
+### Verification-   **Phase 7 (System Wiring & Refactoring)**: Fully wired `VerificationService` with PostgreSQL-backed services (`PoAStore`, `DelegationService`, `FiduciaryDutyService`, `CapabilityAssessmentService`). Refactored all `pkg/agentauthplus` Persistence layers to use `pgx`.
 -   **Phase 8 (Verification Service Hardening)**: Hardened the `VerificationService` by integrating `CommercialRegisterService` for authoritative representative verification. Implemented a robust `DefaultPrincipalVerifier` to distinguish between humans and AI agents. Refactored `VerificationServiceImpl` to use these authoritative sources.
--   **Phase 9 (Attestation Verification Integration)**: Implemented `DefaultAttestationVerifier` in `pkg/gauthplus` to bridge with `pkg/compliance` for cryptographic verification. Enhanced `VerificationServiceImpl.VerifyAttestations` to propagate verification status correctly in the authorization chain.
+-   **Phase 9 (Attestation Verification Integration)**: Implemented `DefaultAttestationVerifier` in `pkg/agentauthplus` to bridge with `pkg/compliance` for cryptographic verification. Enhanced `VerificationServiceImpl.VerifyAttestations` to propagate verification status correctly in the authorization chain.
 -   **Phase 10 (GNAP Authorization Context Enrichment)**: Refactored GNAP handlers to leverage comprehensive verification reports. Implemented dynamic mapping of fiduciary and capability assessment results to GNAP compliance levels and enriched authorization chains with entity metadata.
 
 ## Phase 10: GNAP Authorization Context Enrichment
@@ -734,9 +734,9 @@ The system is now stable, consistent, and ready for deployment.
 Concluded the hardening effort with final verification and comprehensive documentation.
 
 **Key changes:**
-- Created [ARCHITECTURE.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauthplus/ARCHITECTURE.md) to document the service design.
-- Updated [GAP_MATRIX.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/GAP_MATRIX.md) to reflect the implementation of persistent PostgreSQL storage.
-- Verified system stability with a full test suite run across `pkg/gauthplus`, `pkg/compliance`, `pkg/gnap`, and `web/handlers/gnap`.
+- Created [ARCHITECTURE.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/ARCHITECTURE.md) to document the service design.
+- Updated [GAP_MATRIX.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/GAP_MATRIX.md) to reflect the implementation of persistent PostgreSQL storage.
+- Verified system stability with a full test suite run across `pkg/agentauthplus`, `pkg/compliance`, `pkg/gnap`, and `web/handlers/gnap`.
 
 GNAP authorization responses now include rich compliance and entity metadata derived from official verification reports.
 
@@ -750,7 +750,7 @@ GNAP authorization responses now include rich compliance and entity metadata der
 - **Action-Aware Reporting**: The GNAP handler now translates requested access rights into AgentAuth `Action` objects for accurate verification reporting.
 
 ### Verification Results
-Integration tests in `web/handlers/gnap/gauth_enrichment_test.go` verify the end-to-end mapping from verification results to GNAP response fields.
+Integration tests in `web/handlers/gnap/agentauth_enrichment_test.go` verify the end-to-end mapping from verification results to GNAP response fields.
 
 ```bash
 $ go test -v ./web/handlers/gnap/... -run TestHandler_LinkAgentAuthContext_Enrichment
@@ -767,15 +767,15 @@ PASS
 The `VerificationService` now supports cryptographic attestation verification by bridging the AgentAuth+ model with the compliance framework.
 
 ### Key Enhancements
-- **Attestation Bridge**: A new `DefaultAttestationVerifier` was implemented in `pkg/gauthplus` that adapts AgentAuth+ attestations to the `compliance.Attestation` model.
+- **Attestation Bridge**: A new `DefaultAttestationVerifier` was implemented in `pkg/agentauthplus` that adapts AgentAuth+ attestations to the `compliance.Attestation` model.
 - **Cryptographic Verification**: The bridge leverages `pkg/compliance.DefaultAttestationVerifier` (Ed25519) to verify cryptographic proofs attached to attestations.
 - **Enhanced Status Propagation**: The `VerifyAttestations` method now correctly handles verification status transitions (e.g., `pending` -> `verified` or `verification_failed`).
 
 ### Verification Results
-Tests were added in `pkg/gauthplus/verification_hardening_test.go` to verify the attestation bridge and status propagation.
+Tests were added in `pkg/agentauthplus/verification_hardening_test.go` to verify the attestation bridge and status propagation.
 
 ```bash
-$ go test -v ./pkg/gauthplus/...
+$ go test -v ./pkg/agentauthplus/...
 === RUN   TestVerificationService_Hardened
 === RUN   TestVerificationService_Hardened/VerifyRepresentativePosition_Success
 === RUN   TestVerificationService_Hardened/VerifyRepresentativePosition_NotFound
@@ -833,10 +833,10 @@ Following the CI/CD verification, a specific UI navigation issue was identified 
 - **Improved Heuristics**: Simplistic name-based heuristics were replaced with authoritative registry checks.
 
 ### Verification Results
-Tests were added in `pkg/gauthplus/verification_hardening_test.go` to verify the new logic.
+Tests were added in `pkg/agentauthplus/verification_hardening_test.go` to verify the new logic.
 
 ```bash
-$ go test -v ./pkg/gauthplus/...
+$ go test -v ./pkg/agentauthplus/...
 === RUN   TestVerificationService_Hardened
 === RUN   TestVerificationService_Hardened/VerifyRepresentativePosition_Success
 === RUN   TestVerificationService_Hardened/VerifyRepresentativePosition_NotFound
@@ -846,7 +846,7 @@ $ go test -v ./pkg/gauthplus/...
     --- PASS: TestVerificationService_Hardened/VerifyRepresentativePosition_NotFound (0.10s)
     --- PASS: TestVerificationService_Hardened/VerifyPrincipalStatus_TypeCheck (0.00s)
 PASS
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauthplus 1.404s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauthplus 1.404s
 ```
 
 ## Final Project Verification (Post-Closure)
@@ -859,10 +859,10 @@ Following the completion of Phase 19, a final regression check identified and re
     - **Fix**: Normalized `MockCommercialRegisterService` keys to "HRB12345-DE" format.
     - **Verification**: `pkg/registry` and `pkg/pip` tests passed.
 
-- **`pkg/gauthplus`**:
+- **`pkg/agentauthplus`**:
     - **Issue**: Integration test `verification_hardening_test.go` failed due to the same key format mismatch.
     - **Fix**: Updated test vectors to matching no-space format.
-    - **Verification**: `go test -v ./pkg/gauthplus/...` passed.
+    - **Verification**: `go test -v ./pkg/agentauthplus/...` passed.
 
 - **`pkg/ledger`**:
     - **Issue**: `TestRFC3161Provider_Integration` failed with `asn1: syntax error: sequence truncated` due to complex nested ASN.1 structural requirements in the mock TSA response.

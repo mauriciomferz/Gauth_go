@@ -24,7 +24,7 @@ refreshCadence: quarterly
 git push origin main
 
 # 3. Open GitHub Actions
-open https://github.com/mauriciomferz/Gauth_go/actions
+open https://github.com/mauriciomferz/AgentAuth/actions
 # Or: gh run watch
 ```
 
@@ -50,7 +50,7 @@ open https://github.com/mauriciomferz/Gauth_go/actions
 
 ### Via GitHub Web UI
 ```
-https://github.com/mauriciomferz/Gauth_go/actions
+https://github.com/mauriciomferz/AgentAuth/actions
 ```
 
 ### Via GitHub CLI
@@ -74,13 +74,13 @@ gh run view <RUN_ID> --log --job deploy
 ### Via kubectl
 ```bash
 # Watch pods
-kubectl get pods -n gauth-staging --watch
+kubectl get pods -n agentauth-staging --watch
 
 # Check rollout status
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 
 # Tail logs
-kubectl logs -f deployment/gauth-deployment -n gauth-staging
+kubectl logs -f deployment/agentauth-deployment -n agentauth-staging
 ```
 
 ---
@@ -95,15 +95,15 @@ kubectl logs -f deployment/gauth-deployment -n gauth-staging
 ### Kubernetes
 ```bash
 # All pods running
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 # Expected: 5 pods, all 1/1 Ready
 
 # Deployment rolled out
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 # Expected: "successfully rolled out"
 
 # Endpoints responding
-curl https://gauth-staging.yourdomain.com/healthz
+curl https://agentauth-staging.yourdomain.com/healthz
 # Expected: HTTP 200 {"status":"ok"}
 ```
 
@@ -124,7 +124,7 @@ curl https://gauth-staging.yourdomain.com/healthz
 # Scopes: write:packages, read:packages
 
 # Update secret
-# https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions
+# https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions
 # Secret: DOCKER_PASSWORD
 ```
 
@@ -140,7 +140,7 @@ kubectl cluster-info
 cat ~/.kube/config | base64 | pbcopy
 
 # Update secret
-# https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions
+# https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions
 # Secret: KUBE_CONFIG_STAGING
 ```
 
@@ -150,11 +150,11 @@ cat ~/.kube/config | base64 | pbcopy
 **Fix**:
 ```bash
 # Check pod status
-kubectl get pods -n gauth-staging
-kubectl describe pod <POD_NAME> -n gauth-staging
+kubectl get pods -n agentauth-staging
+kubectl describe pod <POD_NAME> -n agentauth-staging
 
 # Check events
-kubectl get events -n gauth-staging --sort-by='.lastTimestamp'
+kubectl get events -n agentauth-staging --sort-by='.lastTimestamp'
 
 # Common causes:
 # - ImagePullBackOff: Create ImagePullSecret
@@ -168,31 +168,31 @@ kubectl get events -n gauth-staging --sort-by='.lastTimestamp'
 
 ```bash
 # 1. Check all pods running
-kubectl get pods -n gauth-staging
-# Expected: 5 pods (3 gauth + 1 postgres + 1 redis)
+kubectl get pods -n agentauth-staging
+# Expected: 5 pods (3 agentauth + 1 postgres + 1 redis)
 
 # 2. Test health endpoint
-curl https://gauth-staging.yourdomain.com/healthz
+curl https://agentauth-staging.yourdomain.com/healthz
 # Expected: HTTP 200 {"status":"ok"}
 
 # 3. Test beta API
-curl https://gauth-staging.yourdomain.com/api/v1/beta/health
+curl https://agentauth-staging.yourdomain.com/api/v1/beta/health
 # Expected: HTTP 200 {"status":"healthy","version":"beta"}
 
 # 4. Check metrics
-curl https://gauth-staging.yourdomain.com/metrics | grep gauth_
+curl https://agentauth-staging.yourdomain.com/metrics | grep agentauth_
 # Expected: Prometheus metrics
 
 # 5. Verify logs
-kubectl logs -f deployment/gauth-deployment -n gauth-staging
+kubectl logs -f deployment/agentauth-deployment -n agentauth-staging
 # Expected: No errors, "Server listening on :8080"
 
 # 6. Check HPA
-kubectl get hpa -n gauth-staging
+kubectl get hpa -n agentauth-staging
 # Expected: min=3, max=10, current=3
 
 # 7. Check resource usage
-kubectl top pods -n gauth-staging
+kubectl top pods -n agentauth-staging
 # Expected: CPU <2000m, Memory <4Gi per pod
 ```
 
@@ -209,7 +209,7 @@ kubectl top pods -n gauth-staging
 | `SLACK_WEBHOOK_URL` | `https://hooks.slack.com/...` | Create at https://api.slack.com/apps |
 | `CODECOV_TOKEN` | (optional) | Get from https://codecov.io |
 
-**Configure at**: https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions
+**Configure at**: https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions
 
 ---
 
@@ -220,7 +220,7 @@ After successful pipeline execution:
 1. **Blue-Green Deployment Testing**
    ```bash
    # Deploy to green environment
-   kubectl apply -f deployments/k8s/staging/bluegreen/gauth-deployment-green.yaml
+   kubectl apply -f deployments/k8s/staging/bluegreen/agentauth-deployment-green.yaml
    
    # Switch traffic
    ./deployments/k8s/staging/bluegreen/switch-traffic.sh green
@@ -248,7 +248,7 @@ After successful pipeline execution:
 - **Validation Script**: `scripts/validate-cicd.sh`
 - **Pre-flight Check**: `scripts/preflight-check.sh`
 - **Blue-Green Guide**: `deployments/k8s/staging/bluegreen/README.md`
-- **GitHub Actions**: https://github.com/mauriciomferz/Gauth_go/actions
+- **GitHub Actions**: https://github.com/mauriciomferz/AgentAuth/actions
 - **Kubernetes Dashboard**: (if installed)
 
 ---
@@ -259,13 +259,13 @@ If deployment fails and automatic rollback doesn't trigger:
 
 ```bash
 # Manual rollback
-kubectl rollout undo deployment/gauth-deployment -n gauth-staging
+kubectl rollout undo deployment/agentauth-deployment -n agentauth-staging
 
 # Check status
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 
 # Verify previous version running
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 ```
 
 ---

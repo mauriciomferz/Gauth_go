@@ -106,7 +106,7 @@ func RunClauseCoverage() error {
 	}
 	pct := 0.0
 	if total > 0 {
-		pct = (float64(covered) / float64(total)) * 100
+		pct = (float64(covered) / float64(total) * 100
 	}
 
 	tpl.Generated = time.Now().UTC().Format(time.RFC3339)

@@ -170,9 +170,9 @@ func (p *OktaProvider) hasMFA(claims *oidc.IDTokenClaims) bool {
 func (p *OktaProvider) MapClaims(claims map[string]interface{}) map[string]interface{} {
 	mapped := make(map[string]interface{})
 
-	for oktaClaim, gauthClaim := range OktaClaimMappings {
+	for oktaClaim, agentauthClaim := range OktaClaimMappings {
 		if value, exists := claims[oktaClaim]; exists {
-			mapped[gauthClaim] = value
+			mapped[agentauthClaim] = value
 		}
 	}
 

@@ -11,21 +11,21 @@ import (
 // Labels/outcomes: success | failure (verification invalid) | error (internal computation error)
 var (
 	snapshotGenerationLatency = promauto.NewHistogram(prom.HistogramOpts{
-		Name:    "gauth_snapshot_generation_latency_seconds",
+		Name:    "agentauth_snapshot_generation_latency_seconds",
 		Help:    "Latency of snapshot generation operations",
 		Buckets: prom.DefBuckets,
 	})
 	snapshotGenerationCounter = promauto.NewCounterVec(prom.CounterOpts{
-		Name: "gauth_snapshot_generation_total",
+		Name: "agentauth_snapshot_generation_total",
 		Help: "Total snapshot generation attempts labeled by outcome (success|error)",
 	}, []string{"outcome"})
 	snapshotVerificationLatency = promauto.NewHistogram(prom.HistogramOpts{
-		Name:    "gauth_snapshot_verification_latency_seconds",
+		Name:    "agentauth_snapshot_verification_latency_seconds",
 		Help:    "Latency of snapshot verification operations",
 		Buckets: prom.DefBuckets,
 	})
 	snapshotVerificationCounter = promauto.NewCounterVec(prom.CounterOpts{
-		Name: "gauth_snapshot_verification_total",
+		Name: "agentauth_snapshot_verification_total",
 		Help: "Total snapshot verification attempts labeled by outcome (success|failure|error)",
 	}, []string{"outcome"})
 )

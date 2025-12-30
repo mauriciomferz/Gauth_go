@@ -306,7 +306,7 @@ for: 5m
 
 #### 2. **ServiceDown**
 ```yaml
-expr: up{job="gauth"} == 0
+expr: up{job="agentauth"} == 0
 for: 1m
 ```
 - **Threshold**: Service unreachable for 1 minute
@@ -335,7 +335,7 @@ for: 5m
 
 #### 5. **HighLatency**
 ```yaml
-expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.2
+expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]) > 0.2
 for: 5m
 ```
 - **Threshold**: P95 latency >200ms
@@ -344,7 +344,7 @@ for: 5m
 
 #### 6. **LowCacheHitRate**
 ```yaml
-expr: (cache_hits / (cache_hits + cache_misses)) < 0.7
+expr: (cache_hits / (cache_hits + cache_misses) < 0.7
 for: 10m
 ```
 - **Threshold**: <70% hit rate
@@ -394,7 +394,7 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'gauth'
+  - job_name: 'agentauth'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/api/v1/admin/metrics/prometheus'
@@ -416,7 +416,7 @@ receivers:
     pagerduty_configs:
       - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
     slack_configs:
-      - channel: '#gauth-critical'
+      - channel: '#agentauth-critical'
 ```
 
 **Configuration Steps**:
@@ -444,7 +444,7 @@ receivers:
 
 **Change Admin Password**:
 ```bash
-docker exec -it gauth-grafana grafana-cli admin reset-admin-password newpassword
+docker exec -it agentauth-grafana grafana-cli admin reset-admin-password newpassword
 ```
 
 **Add Data Source** (if not auto-provisioned):
@@ -455,7 +455,7 @@ docker exec -it gauth-grafana grafana-cli admin reset-admin-password newpassword
 
 **Import Dashboard**:
 1. Go to Dashboards → Import
-2. Upload `monitoring/grafana/dashboards/gauth-overview.json`
+2. Upload `monitoring/grafana/dashboards/agentauth-overview.json`
 3. Select Prometheus data source
 4. Import
 
@@ -595,10 +595,10 @@ curl http://localhost:8080/api/v1/admin/metrics/prometheus
 open http://localhost:9090/targets
 
 # Check network connectivity
-docker exec gauth-prometheus ping host.docker.internal
+docker exec agentauth-prometheus ping host.docker.internal
 
 # Review Prometheus logs
-docker logs gauth-prometheus
+docker logs agentauth-prometheus
 ```
 
 #### 2. **Grafana Dashboard Shows No Data**
@@ -611,7 +611,7 @@ docker logs gauth-prometheus
 3. Verify Prometheus is collecting data:
    ```
    http://localhost:9090/graph
-   Query: up{job="gauth"}
+   Query: up{job="agentauth"}
    ```
 
 #### 3. **Alerts Not Firing**
@@ -627,10 +627,10 @@ open http://localhost:9093
 curl http://localhost:9090/api/v1/rules
 
 # Check AlertManager logs
-docker logs gauth-alertmanager
+docker logs agentauth-alertmanager
 
 # Verify webhook URLs are correct
-docker exec gauth-alertmanager cat /etc/alertmanager/config.yml
+docker exec agentauth-alertmanager cat /etc/alertmanager/config.yml
 ```
 
 #### 4. **High Memory Usage by Prometheus**
@@ -656,26 +656,26 @@ prometheus:
 3. Check for metric registration errors:
    ```bash
    # AgentAuth application logs
-   grep "metric" logs/gauth.log
+   grep "metric" logs/agentauth.log
    ```
 
 ### Debugging Commands
 
 ```bash
 # View Prometheus configuration
-docker exec gauth-prometheus cat /etc/prometheus/prometheus.yml
+docker exec agentauth-prometheus cat /etc/prometheus/prometheus.yml
 
 # Check alert rules
-docker exec gauth-prometheus promtool check rules /etc/prometheus/alerts/*.yml
+docker exec agentauth-prometheus promtool check rules /etc/prometheus/alerts/*.yml
 
 # Test PromQL queries
 curl 'http://localhost:9090/api/v1/query?query=up'
 
 # View AlertManager configuration
-docker exec gauth-alertmanager amtool config show
+docker exec agentauth-alertmanager amtool config show
 
 # Check Grafana data sources
-docker exec gauth-grafana grafana-cli admin data-sources list
+docker exec agentauth-grafana grafana-cli admin data-sources list
 
 # Export metrics for analysis
 curl http://localhost:9090/api/v1/export > metrics-export.json
@@ -685,16 +685,16 @@ curl http://localhost:9090/api/v1/export > metrics-export.json
 
 ```bash
 # Prometheus logs
-docker logs gauth-prometheus
+docker logs agentauth-prometheus
 
 # Grafana logs
-docker logs gauth-grafana
+docker logs agentauth-grafana
 
 # AlertManager logs
-docker logs gauth-alertmanager
+docker logs agentauth-alertmanager
 
 # Node Exporter logs
-docker logs gauth-node-exporter
+docker logs agentauth-node-exporter
 ```
 
 ---
@@ -741,12 +741,12 @@ requestCounter.WithLabelValues(endpoint).Inc()
 
 ```bash
 # Backup
-docker run --rm -v gauth_prometheus_data:/data \
+docker run --rm -v agentauth_prometheus_data:/data \
   -v $(pwd):/backup \
   busybox tar czf /backup/prometheus-backup.tar.gz /data
 
 # Restore
-docker run --rm -v gauth_prometheus_data:/data \
+docker run --rm -v agentauth_prometheus_data:/data \
   -v $(pwd):/backup \
   busybox tar xzf /backup/prometheus-backup.tar.gz -C /
 ```
@@ -756,7 +756,7 @@ docker run --rm -v gauth_prometheus_data:/data \
 ```bash
 # Export dashboard
 curl -H "Authorization: Bearer YOUR_API_KEY" \
-  http://localhost:3001/api/dashboards/uid/gauth-overview > dashboard-backup.json
+  http://localhost:3001/api/dashboards/uid/agentauth-overview > dashboard-backup.json
 
 # Import dashboard
 curl -X POST -H "Authorization: Bearer YOUR_API_KEY" \

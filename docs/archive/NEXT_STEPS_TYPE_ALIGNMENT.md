@@ -16,7 +16,7 @@
 - Circuit breaker pattern, retry logic, caching - all complete
 
 ### ⚠️ What Needs Fixing
-- `pkg/gauth/disclosure_service.go` - Type mismatches preventing compilation
+- `pkg/agentauth/disclosure_service.go` - Type mismatches preventing compilation
 - Build fails due to interface/struct field incompatibilities
 - ~4-7 critical type alignment issues
 
@@ -114,9 +114,9 @@ Need to derive status from:
 #### Step 1: Analyze Existing Types (30 min)
 ```bash
 # Read complete type definitions
-grep -A 20 "type ClientOwnerInfo" pkg/gauth/*.go
-grep -A 20 "type OwnersAuthorizerInfo" pkg/gauth/*.go
-grep -A 30 "type ExtendedToken struct" pkg/gauth/*.go
+grep -A 20 "type ClientOwnerInfo" pkg/agentauth/*.go
+grep -A 20 "type OwnersAuthorizerInfo" pkg/agentauth/*.go
+grep -A 30 "type ExtendedToken struct" pkg/agentauth/*.go
 ```
 
 **Actions**:
@@ -126,7 +126,7 @@ grep -A 30 "type ExtendedToken struct" pkg/gauth/*.go
 4. Create type mapping document
 
 #### Step 2: Extend ExtendedTokenStore Interface (1 hour)
-**File**: `pkg/gauth/extended_token_store.go`
+**File**: `pkg/agentauth/extended_token_store.go`
 
 Add methods:
 ```go
@@ -145,8 +145,8 @@ type ExtendedTokenStore interface {
 
 #### Step 3: Implement New Methods (1-2 hours)
 **Files**: All implementations of `ExtendedTokenStore`
-- `pkg/gauth/postgres_extended_token_store.go`
-- `pkg/gauth/memory_extended_token_store.go`
+- `pkg/agentauth/postgres_extended_token_store.go`
+- `pkg/agentauth/memory_extended_token_store.go`
 - Any other implementations
 
 **Example**:
@@ -165,7 +165,7 @@ func (s *PostgresExtendedTokenStore) RevokeTokenWithReason(ctx context.Context, 
 ```
 
 #### Step 4: Fix disclosure_service.go (2 hours)
-**File**: `pkg/gauth/disclosure_service.go`
+**File**: `pkg/agentauth/disclosure_service.go`
 
 **Fixes**:
 1. Change `GetExtendedToken()` → `GetToken()`
@@ -221,7 +221,7 @@ func getClientName(token *ExtendedToken) string {
 go build -o bin/web-server ./cmd/web-server
 
 # Run existing tests
-go test ./pkg/gauth
+go test ./pkg/agentauth
 
 # Manual API test
 ./bin/web-server &
@@ -229,7 +229,7 @@ curl http://localhost:8080/api/v1/disclosure/authorizations?owner_id=test_owner
 ```
 
 #### Step 6: Add Integration Tests (1 hour)
-**File**: `pkg/gauth/disclosure_service_test.go`
+**File**: `pkg/agentauth/disclosure_service_test.go`
 
 ```go
 func TestDisclosureService_ListActiveAuthorizations(t *testing.T) {
@@ -251,12 +251,12 @@ func TestDisclosureService_RevokeAuthorization(t *testing.T) {
 
 Keep the stub implementation active and document TODOs:
 
-**File**: `pkg/gauth/disclosure_service_stub.go` (already exists)
+**File**: `pkg/agentauth/disclosure_service_stub.go` (already exists)
 
 **Update handlers** to use stub:
 ```go
 // In web/handlers/disclosure/disclosure_handlers.go
-service := gauth.NewDisclosureServiceStub()  // Use stub instead
+service := agentauth.NewDisclosureServiceStub()  // Use stub instead
 ```
 
 **Pros**:
@@ -275,7 +275,7 @@ service := gauth.NewDisclosureServiceStub()  // Use stub instead
 
 Create adapter layer between disclosure service and existing types:
 
-**New File**: `pkg/gauth/disclosure_adapter.go`
+**New File**: `pkg/agentauth/disclosure_adapter.go`
 
 ```go
 type DisclosureAdapter struct {
@@ -320,7 +320,7 @@ func (a *DisclosureAdapter) CreateAuditEntry(action, actor string, details map[s
 1. Adds only 4-6 hours vs. technical debt
 2. Results in production-quality code
 3. Enables full transparency functionality
-4. Completes RFC-0111 compliance improvements
+4. Completes AAP-001 compliance improvements
 5. Provides foundation for Tasks 4-8
 
 **Timeline**:
@@ -339,8 +339,8 @@ func (a *DisclosureAdapter) CreateAuditEntry(action, actor string, details map[s
 $ go build -o bin/web-server ./cmd/web-server
 # No errors
 
-$ go test ./pkg/gauth
-ok  github.com/.../pkg/gauth  X.XXXs
+$ go test ./pkg/agentauth
+ok  github.com/.../pkg/agentauth  X.XXXs
 ```
 
 ### API Functional
@@ -362,8 +362,8 @@ $ curl -X POST "http://localhost:8080/api/v1/disclosure/authorizations/token_123
 
 ### Tests Pass
 ```bash
-$ go test ./pkg/gauth -run TestDisclosure
-ok  github.com/.../pkg/gauth  X.XXXs
+$ go test ./pkg/agentauth -run TestDisclosure
+ok  github.com/.../pkg/agentauth  X.XXXs
 ```
 
 ---
@@ -388,16 +388,16 @@ ok  github.com/.../pkg/gauth  X.XXXs
 ## Resources Needed
 
 ### Files to Read
-1. `pkg/gauth/extended_token_store.go` - Interface definition
-2. `pkg/gauth/extended_token.go` - Type definitions
-3. `pkg/gauth/postgres_extended_token_store.go` - Implementation example
-4. `pkg/gauth/memory_extended_token_store.go` - Implementation example
+1. `pkg/agentauth/extended_token_store.go` - Interface definition
+2. `pkg/agentauth/extended_token.go` - Type definitions
+3. `pkg/agentauth/postgres_extended_token_store.go` - Implementation example
+4. `pkg/agentauth/memory_extended_token_store.go` - Implementation example
 
 ### Files to Modify
-1. `pkg/gauth/extended_token_store.go` - Add methods
-2. `pkg/gauth/*_extended_token_store.go` - Implement methods
-3. `pkg/gauth/disclosure_service.go` - Fix type usage
-4. `pkg/gauth/disclosure_service_test.go` - New file for tests
+1. `pkg/agentauth/extended_token_store.go` - Add methods
+2. `pkg/agentauth/*_extended_token_store.go` - Implement methods
+3. `pkg/agentauth/disclosure_service.go` - Fix type usage
+4. `pkg/agentauth/disclosure_service_test.go` - New file for tests
 
 ### Documentation to Update
 1. `IMPLEMENTATION_STATUS.md` - Update after completion

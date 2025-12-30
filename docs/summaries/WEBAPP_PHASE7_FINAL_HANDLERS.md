@@ -271,7 +271,7 @@ case 'cancel-all-samples':
 - **Process ID:** 51543 (Phase 7 deployment)
 - **Previous PID:** 47968 (Phase 6 - terminated)
 - **Port:** 8080
-- **Environment:** `GAUTH_DEV_INDEX=1`
+- **Environment:** `AGENTAUTH_DEV_INDEX=1`
 - **Memory Usage:** 17.5 MB (17,568 KB)
 - **CPU Usage:** 0.0% (idle state)
 - **Status:** ✅ Running smoothly

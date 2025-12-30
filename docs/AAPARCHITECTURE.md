@@ -12,23 +12,23 @@ title: AgentAuth RFC Implementation Architecture
 > Last Updated: 2025-10-17
 > Status: Active
 
-**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
+**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 AAP-002 COMPLETE** | **🏢 AGENTAUTH COMMUNITY**
 
 **Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
 This document describes the architecture of the AgentAuth RFC implementation demonstrating compliance with:
-- **AAP-RFC-0111**: AgentAuth 1.0 Authorization Framework
-- **AAP-RFC-0115**: Power-of-Attorney Credential Definition (PoA-Definition) ✅ **COMPLETE**
+- **AAP-001**: AgentAuth 1.0 Authorization Framework
+- **AAP-002**: Power-of-Attorney Credential Definition (PoA-Definition) ✅ **COMPLETE**
 
 **AgentAuth Community gGmbH i.G.**
-**Website**: www.AgentAuthFoundation.com
+**Website**: www.agentauth.io
 **Operated by**: AgentAuth Technologies GmbH
 **Managing Directors**: AgentAuth Contributor, the AgentAuth Community
 **Chairman of the Board**: Daniel Hartert
 **Address**: Hardtweg 31, D-53639 Königswinter, Germany
 **Registration**: Siegburg HRB 18660
-**Additional Info**: www.AgentAuthID.com
+**Additional Info**: www.agentauth.io
 
 ## 🎯 **RFC Compliance Architecture Overview**
 
@@ -50,7 +50,7 @@ This document describes the architecture of the AgentAuth RFC implementation dem
 ## 🏗️ **AAP-001: P*P Architecture Implementation**
 
 ### **Power*Point (P*P) Components**
-The AgentAuth implementation follows the P*P architecture as specified in AAP-RFC-0111, emphasizing "Power" rather than "Policy":
+The AgentAuth implementation follows the P*P architecture as specified in AAP-001, emphasizing "Power" rather than "Policy":
 
 ```go
 type RFCCompliantService struct {
@@ -347,7 +347,7 @@ func (m *AICapabilityMatrix) validateCapabilities(client ClientAI, actions Autho
     
     // Validate each requested action against client capabilities
     for _, transaction := range actions.Transactions {
-        if !m.hasCapability(baseCapabilities, string(transaction)) {
+        if !m.hasCapability(baseCapabilities, string(transaction) {
             return fmt.Errorf("AI client %s lacks capability for transaction: %s", client.Identity, transaction)
         }
     }

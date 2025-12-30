@@ -61,7 +61,7 @@ Closed **11 gaps** across all priority levels (P0-P2), bringing the AgentAuth AA
 ## New Implementations
 
 ### 1. BoltDB Replay Store (P0) ✅
-**Files**: `pkg/gauth/replay_store_bolt.go` (175 lines)
+**Files**: `pkg/agentauth/replay_store_bolt.go` (175 lines)
 
 **Features**:
 - Persistent JTI tracking across restarts
@@ -72,7 +72,7 @@ Closed **11 gaps** across all priority levels (P0-P2), bringing the AgentAuth AA
 
 **Usage**:
 ```go
-store, _ := NewBoltReplayStore("/var/lib/gauth/replay.db", 24*time.Hour)
+store, _ := NewBoltReplayStore("/var/lib/agentauth/replay.db", 24*time.Hour)
 err := store.CheckAndRecord("jti-12345")
 // Returns error if JTI already seen within TTL
 ```
@@ -122,7 +122,7 @@ priv, pub, _ := backend.RetrieveKey(keyID)
 **Usage**:
 ```go
 // Single file sink
-fileSink, _ := NewFileAuditSink("/var/log/gauth/rotations.log")
+fileSink, _ := NewFileAuditSink("/var/log/agentauth/rotations.log")
 
 // Multi-tenant with multiple destinations
 httpSink := NewHTTPAuditSink("https://audit.example.com/events")
@@ -141,14 +141,14 @@ multiSink.Write(event)
 **Test Coverage**: 6/6 tests passing
 
 ### 4. OpenAPI Documentation (P1) ✅
-**Files**: `api/openapi/gauth-api.yaml` (357 lines)
+**Files**: `api/openapi/agentauth-api.yaml` (357 lines)
 
 **Documented Endpoints**:
 - `POST /poa/issue` - Issue new Power of Attorney
 - `POST /poa/verify` - Verify PoA token
 - `POST /poa/revoke` - Revoke PoA delegation
 - `GET /poa/{id}` - Retrieve PoA details
-- `GET /.well-known/gauth-config` - Service discovery
+- `GET /.well-known/agentauth-config` - Service discovery
 
 **Schemas Defined**:
 - ServiceConfig, IssueRequest/Response
@@ -207,12 +207,12 @@ if !result.Allowed {
 ## Files Summary
 
 ### Created (9 new files)
-1. `pkg/gauth/replay_store_bolt.go` - Durable replay detection
-2. `pkg/gauth/replay_store_bolt_test.go` - Replay store tests  
+1. `pkg/agentauth/replay_store_bolt.go` - Durable replay detection
+2. `pkg/agentauth/replay_store_bolt_test.go` - Replay store tests  
 3. `internal/crypto/vault_backend.go` - Vault integration
 4. `internal/crypto/rotation_audit_sink.go` - Audit sink implementations
 5. `internal/crypto/rotation_audit_sink_test.go` - Audit sink tests
-6. `api/openapi/gauth-api.yaml` - Complete API specification
+6. `api/openapi/agentauth-api.yaml` - Complete API specification
 7. `internal/ai/capability_enforcer.go` - Enhanced with model metadata
 8. `artifacts/GAP_CLOSURE_NOVEMBER_2025.md` - Detailed documentation
 9. `ALL_GAPS_CLOSED_SUMMARY.md` - Executive summary
@@ -252,7 +252,7 @@ if !result.Allowed {
 
 # Build Verification
 ✅ go build ./...
-✅ go build ./pkg/rfc0111
+✅ go build ./pkg/aap001
 ✅ go build ./internal/crypto/vault_backend.go
 ```
 
@@ -264,29 +264,29 @@ if !result.Allowed {
 
 ```bash
 # === Replay Detection (P0 - Critical) ===
-export GAUTH_REPLAY_STORE_PATH=/var/lib/gauth/replay.db
-export GAUTH_REPLAY_TTL=24h
+export AGENTAUTH_REPLAY_STORE_PATH=/var/lib/agentauth/replay.db
+export AGENTAUTH_REPLAY_TTL=24h
 
 # === Detached Signatures (P0 - Critical) ===
 # Permissive mode (logs but allows)
-export GAUTH_DETACHED_SIGNATURE=1
+export AGENTAUTH_DETACHED_SIGNATURE=1
 # Fail-closed mode (rejects tokens without detached signature)
-export GAUTH_REQUIRE_DETACHED_SIGNATURE=1
+export AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1
 
 # === Vault Integration (P0 - Critical) ===
 export VAULT_ADDR=https://vault.example.com:8200
 export VAULT_TOKEN=s.xxxxxxxxxxxxxxxxxxxxxx
-export VAULT_NAMESPACE=gauth  # Optional: Enterprise only
+export VAULT_NAMESPACE=agentauth  # Optional: Enterprise only
 export VAULT_MOUNT_PATH=secret  # Default: secret
 
 # === Rotation Audit (P1 - High Priority) ===
-export GAUTH_ROTATION_AUDIT_FILE=/var/log/gauth/rotations.log
-export GAUTH_ROTATION_AUDIT_HTTP=https://audit.example.com/events
-export GAUTH_TENANT_ID=default  # Multi-tenant deployments
+export AGENTAUTH_ROTATION_AUDIT_FILE=/var/log/agentauth/rotations.log
+export AGENTAUTH_ROTATION_AUDIT_HTTP=https://audit.example.com/events
+export AGENTAUTH_TENANT_ID=default  # Multi-tenant deployments
 
 # === AI Capability Enforcement (P1 - High Priority) ===
-export GAUTH_AI_CAPABILITY_MATRIX=/etc/gauth/capabilities.json
-export GAUTH_AI_ENFORCEMENT_ENABLED=true
+export AGENTAUTH_AI_CAPABILITY_MATRIX=/etc/agentauth/capabilities.json
+export AGENTAUTH_AI_ENFORCEMENT_ENABLED=true
 ```
 
 ### Deployment Checklist
@@ -324,8 +324,8 @@ export GAUTH_AI_ENFORCEMENT_ENABLED=true
 #### Step 1: Enable Replay Persistence (Day 1)
 ```bash
 # Start with file-based replay store
-export GAUTH_REPLAY_STORE_PATH=/var/lib/gauth/replay.db
-systemctl restart gauth
+export AGENTAUTH_REPLAY_STORE_PATH=/var/lib/agentauth/replay.db
+systemctl restart agentauth
 ```
 
 #### Step 2: Deploy Vault (Day 2-3)
@@ -334,26 +334,26 @@ systemctl restart gauth
 export VAULT_ADDR=https://vault.internal:8200
 export VAULT_TOKEN=$(vault login -token-only)
 # Rotate keys and store in Vault
-gauth-admin rotate-to-vault
+agentauth-admin rotate-to-vault
 ```
 
 #### Step 3: Enable Detached Signatures (Day 4-5)
 ```bash
 # Phase 1: Permissive mode (monitor adoption)
-export GAUTH_DETACHED_SIGNATURE=1
+export AGENTAUTH_DETACHED_SIGNATURE=1
 # Monitor metrics for 24-48 hours
 
 # Phase 2: Fail-closed mode (enforce)
-export GAUTH_REQUIRE_DETACHED_SIGNATURE=1
-systemctl restart gauth
+export AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1
+systemctl restart agentauth
 ```
 
 #### Step 4: Audit Trail (Day 6-7)
 ```bash
 # Enable multi-sink audit
-export GAUTH_ROTATION_AUDIT_FILE=/var/log/gauth/rotations.log
-export GAUTH_ROTATION_AUDIT_HTTP=https://audit.internal/events
-systemctl restart gauth
+export AGENTAUTH_ROTATION_AUDIT_FILE=/var/log/agentauth/rotations.log
+export AGENTAUTH_ROTATION_AUDIT_HTTP=https://audit.internal/events
+systemctl restart agentauth
 ```
 
 ## Remaining Work (Future Iterations)
@@ -428,28 +428,28 @@ systemctl restart gauth
 ## Production Metrics to Monitor
 
 ### Critical (P0)
-- `gauth_replay_store_size_bytes` - Replay DB size
-- `gauth_vault_api_latency_ms` - Vault response time
-- `gauth_vault_cache_hit_rate` - Cache effectiveness
-- `gauth_detached_signature_failures` - Verification failures
+- `agentauth_replay_store_size_bytes` - Replay DB size
+- `agentauth_vault_api_latency_ms` - Vault response time
+- `agentauth_vault_cache_hit_rate` - Cache effectiveness
+- `agentauth_detached_signature_failures` - Verification failures
 
 ### Important (P1)
-- `gauth_rotation_audit_write_errors` - Sink failures
-- `gauth_ai_capability_violations` - Policy violations
-- `gauth_rotation_events_total` - Key rotation frequency
+- `agentauth_rotation_audit_write_errors` - Sink failures
+- `agentauth_ai_capability_violations` - Policy violations
+- `agentauth_rotation_events_total` - Key rotation frequency
 
 ### Alerts
 ```yaml
 - alert: ReplayStoreGrowth
-  expr: gauth_replay_store_size_bytes > 1GB
+  expr: agentauth_replay_store_size_bytes > 1GB
   for: 1h
   
 - alert: VaultHighLatency
-  expr: gauth_vault_api_latency_ms > 200
+  expr: agentauth_vault_api_latency_ms > 200
   for: 5m
   
 - alert: AuditSinkFailures
-  expr: rate(gauth_rotation_audit_write_errors[5m]) > 0.1
+  expr: rate(agentauth_rotation_audit_write_errors[5m]) > 0.1
   for: 5m
 ```
 

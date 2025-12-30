@@ -17,15 +17,15 @@ class InteractivePatternExplorer {
 
     bindEvents() {
         document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-explore-pattern]')) {
+            if (e.target.matches('[data-explore-pattern]') {
                 const patternId = e.target.dataset.explorePattern;
                 this.explorePattern(patternId);
             }
-            if (e.target.matches('[data-run-simulation]')) {
+            if (e.target.matches('[data-run-simulation]') {
                 const simulationId = e.target.dataset.runSimulation;
                 this.runSimulation(simulationId);
             }
-            if (e.target.matches('[data-modify-parameters]')) {
+            if (e.target.matches('[data-modify-parameters]') {
                 this.showParameterEditor();
             }
         });

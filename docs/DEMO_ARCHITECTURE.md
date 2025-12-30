@@ -67,10 +67,10 @@ graph LR
 ## Metrics to Highlight
 | Metric | Story | Why It Matters |
 |--------|-------|----------------|
-| gauth_rotation_signature_verify_latency_seconds | Efficiency of multi-sig verification | Scales with number of keys |
-| gauth_attestation_verify_latency_seconds | Attestation validation performance | Replay + signature overhead demonstration |
-| gauth_attestation_verify_failures_total | Integrity failure surface | Shows protection against tampering/replay |
-| gauth_attestation_nonce_cache_size | Replay defense footprint | Transparent memory usage / TTL pruning |
+| agentauth_rotation_signature_verify_latency_seconds | Efficiency of multi-sig verification | Scales with number of keys |
+| agentauth_attestation_verify_latency_seconds | Attestation validation performance | Replay + signature overhead demonstration |
+| agentauth_attestation_verify_failures_total | Integrity failure surface | Shows protection against tampering/replay |
+| agentauth_attestation_nonce_cache_size | Replay defense footprint | Transparent memory usage / TTL pruning |
 
 ## Demo Script (Condensed)
 1. Fetch rotation summary; show threshold & signatures.
@@ -86,12 +86,12 @@ graph LR
 - Auditor CLI fetches JSON artifacts, reconstructs canonical unsigned payloads, verifies signatures, recomputes Merkle proof, outputs machine-readable JSON.
 
 ## OpenAPI & Discovery (Planned)
-Expose `/api/openapi.json` and `/.well-known/gauth/config` containing:
+Expose `/api/openapi.json` and `/.well-known/agentauth/config` containing:
 ```jsonc
 {
   "supported_algorithms": ["EdDSA"],
-  "attestation_prefix": "GAUTH_MODEL_LIMIT_ATTEST:",
-  "poa_digest_prefix": "GAUTH_POA_DEF:",
+  "attestation_prefix": "AGENTAUTH_MODEL_LIMIT_ATTEST:",
+  "poa_digest_prefix": "AGENTAUTH_POA_DEF:",
   "replay_nonce_ttl_seconds": 3600,
   "rotation_multisig": true
 }

@@ -24,7 +24,7 @@ done
 echo ""
 echo "🧪 Verifying builds work correctly..."
 echo "Main demo build:"
-if go build -v ./cmd/gauth-server >/dev/null 2>&1; then
+if go build -v ./cmd/agentauth-server >/dev/null 2>&1; then
     echo "✅ Main demo builds successfully"
 else
     echo "❌ Main demo build failed"
@@ -32,7 +32,7 @@ fi
 
 echo ""
 echo "Web backend build:"
-cd gauth-demo-app/web/backend
+cd agentauth-demo-app/web/backend
 if go build -v . >/dev/null 2>&1; then
     echo "✅ Web backend builds successfully"
 else

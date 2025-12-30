@@ -26,7 +26,7 @@ Successfully completed Week 4 Day 4 objectives:
 From previous session, discovered **9 failing tests** across 4 packages:
 - `pkg/authz`: 1 test (fsnotify handling)
 - `examples/ai_capability_demo`: 2 tests (JWKS refresh, negative kid eviction)
-- `pkg/rfc0111`: 1 test (date comparison boundary)
+- `pkg/aap001`: 1 test (date comparison boundary)
 - `web`: 2 tests (model limits race conditions)
 - `internal/crypto`: 2 tests (TenantScheduler races)
 - `test/load`: 1 test (timeout under load)
@@ -105,9 +105,9 @@ if fetches.Load() < 1 { /* ... */ }
 
 ---
 
-#### Fix 3: pkg/rfc0111 - Date Comparison Boundary Bug ✅
+#### Fix 3: pkg/aap001 - Date Comparison Boundary Bug ✅
 
-**File**: `pkg/rfc0111/bolt_repository.go`
+**File**: `pkg/aap001/bolt_repository.go`
 
 **Issue**: `TestBoltRepository_PruneExpired` expected 2 POAs pruned but got 1 (boundary condition failure).
 
@@ -242,7 +242,7 @@ $ go test ./... -race -timeout 5m
 **Results**:
 - ✅ **pkg/authz**: All tests pass
 - ✅ **examples/ai_capability_demo**: All tests pass (individually)
-- ✅ **pkg/rfc0111**: All tests pass
+- ✅ **pkg/aap001**: All tests pass
 - ✅ **web**: Tests pass individually, linker warning when running full suite
 - ⏸️ **internal/crypto**: 2 TenantScheduler tests fail (deferred - requires architectural refactoring)
 - ⏳ **test/load**: Timeout after 60s (performance issue, not race condition)
@@ -427,7 +427,7 @@ Failed Tests: 0
    - Fixed examples/ai_capability_demo JWKS background refresh race
 
 2. **e16b1081** - `fix: Correct date comparison in BoltRepository FindExpired`
-   - Fixed pkg/rfc0111 date comparison boundary bug
+   - Fixed pkg/aap001 date comparison boundary bug
    - Ensures POAs expiring on cutoff date are included
 
 3. **a755ce3d** - `fix: Add mutex protection for modelLimits map race conditions`
@@ -448,7 +448,7 @@ Failed Tests: 0
 |---------|-------|----------------|--------|
 | pkg/authz | Policy removal not detected | **HIGH** - Stale policies enforced | ✅ Fixed |
 | examples/ai_capability_demo | JWKS counter race | **MEDIUM** - Test flakiness | ✅ Fixed |
-| pkg/rfc0111 | POA expiration boundary | **HIGH** - Expired POAs not pruned | ✅ Fixed |
+| pkg/aap001 | POA expiration boundary | **HIGH** - Expired POAs not pruned | ✅ Fixed |
 | web | Model limits map race | **CRITICAL** - Data corruption risk | ✅ Fixed (2 tests) |
 
 ### Code Quality Improvements
@@ -655,7 +655,7 @@ The project uses a multi-workflow GitHub Actions setup:
 2. **Deploy to Staging** (.github/workflows/deploy-staging.yml):
    - Triggers: Push to main
    - Jobs: Security Scanning, Test Suite (with race detector), Build Docker, Deploy, Rollback
-   - Environment: gauth-staging namespace
+   - Environment: agentauth-staging namespace
    - Strategy: Blue-green deployment with automated rollback on failure
 
 3. **CodeQL Advanced** (Security scanning):

@@ -89,12 +89,12 @@ curl -X POST http://localhost:8080/api/admin/api-keys \
 {
   "apiKey": {
     "id": "key-123",
-    "keyId": "gauth_sk_...",
+    "keyId": "agentauth_sk_...",
     "name": "Production Service",
     "scopes": ["poa:read", "poa:write"],
     "createdAt": "2025-12-29T00:00:00Z"
   },
-  "secretKey": "gauth_sk_live_abc123...",
+  "secretKey": "agentauth_sk_live_abc123...",
   "message": "Save this key securely - it won't be shown again"
 }
 ```

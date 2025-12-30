@@ -257,7 +257,7 @@ func (p *PrometheusMetrics) SetEvidenceHashesPerPOA(poaID string, n int) {
 
 // PrometheusAdapterOptions allows optional customization when constructing.
 type PrometheusAdapterOptions struct {
-	Namespace string          // e.g. "gauth"
+	Namespace string          // e.g. "agentauth"
 	Subsystem string          // e.g. "delegation" (used as prefix component)
 	Registry  prom.Registerer // optional; defaults to global if nil
 	Buckets   []float64       // optional custom latency buckets
@@ -280,7 +280,7 @@ var DefaultBuckets = []float64{
 //nolint:gocyclo // Metrics initialization with 100+ metric registrations
 func NewPrometheusMetrics(opts PrometheusAdapterOptions) *PrometheusMetrics {
 	if opts.Namespace == "" {
-		opts.Namespace = "gauth"
+		opts.Namespace = "agentauth"
 	}
 	if opts.Subsystem == "" {
 		opts.Subsystem = "aap001"

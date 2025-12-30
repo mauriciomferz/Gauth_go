@@ -63,9 +63,9 @@ Healthcheck behavior (now probes the long‑running beta web server):
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
    CMD ["/web-server", "-healthcheck"]
 ```
-The `web-server` binary performs an HTTP GET to `GAUTH_HEALTH_URL` (default `http://localhost:8080/api/v1/beta/health`) and exits 0 on 2xx.
+The `web-server` binary performs an HTTP GET to `AGENTAUTH_HEALTH_URL` (default `http://localhost:8080/api/v1/beta/health`) and exits 0 on 2xx.
 
-Why switch from the demo `gauth-server`? The `gauth-server` binary executes a finite protocol walk‑through then exits, which made the container appear unhealthy despite a successful demonstration. Using the persistent `web-server` aligns the healthcheck with an actual served endpoint and avoids false negatives.
+Why switch from the demo `agentauth-server`? The `agentauth-server` binary executes a finite protocol walk‑through then exits, which made the container appear unhealthy despite a successful demonstration. Using the persistent `web-server` aligns the healthcheck with an actual served endpoint and avoids false negatives.
 
 Add them back incrementally only after confirming the core binary builds and starts.
 
@@ -75,7 +75,7 @@ Convenience targets / scripts:
 
 | Command | Purpose |
 |---------|---------|
-| `make docker-build-minimal` | Build the minimal image (`gauth:minimal`) |
+| `make docker-build-minimal` | Build the minimal image (`agentauth:minimal`) |
 | `make docker-smoke-minimal` | Build & run a smoke test (health probe) |
 | `scripts/smoke-minimal.sh` | Underlying script (used by target) |
 
@@ -105,11 +105,11 @@ A GitHub Actions workflow (`.github/workflows/minimal-smoke.yml`) runs the same 
 3. If error persists, capture full plain-progress log and attach it to an issue.
 4. Run the built image (if successful):
    ```bash
-   docker run --rm -p 8080:8080 gauth-demo:robust-build --help
+   docker run --rm -p 8080:8080 agentauth-demo:robust-build --help
    ```
 
 ## Housekeeping
-- `.dockerignore` excludes large / irrelevant directories. Avoid re-adding the `gauth-demo-app` folder that previously caused cache key instability.
+- `.dockerignore` excludes large / irrelevant directories. Avoid re-adding the `agentauth-demo-app` folder that previously caused cache key instability.
 - If you add new top-level directories required for build, ensure they are copied explicitly in Dockerfiles.
 
 ## Next Steps

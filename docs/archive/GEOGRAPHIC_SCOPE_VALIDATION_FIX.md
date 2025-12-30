@@ -11,12 +11,12 @@ owners: [system]
 ## Issue Description
 **Problem**: Power of Attorney (PoA) validation always passed regardless of geographic scope restrictions. The system was not checking if requested operations were authorized in the specified jurisdiction, allowing operations in any country even when the PoA explicitly restricted authorization to specific regions.
 
-**Impact**: Critical security vulnerability - clients could perform unauthorized operations outside their permitted geographic boundaries, violating RFC-0111 compliance requirements.
+**Impact**: Critical security vulnerability - clients could perform unauthorized operations outside their permitted geographic boundaries, violating AAP-001 compliance requirements.
 
 ## Root Cause Analysis
 
 ### 1. Missing Validation Logic
-The `ComplianceValidator.ValidateRequestCompliance()` method in `pkg/gauth/compliance_validation.go` validated PoA structure, temporal requirements, and authorized actions, but **completely skipped geographic scope validation**.
+The `ComplianceValidator.ValidateRequestCompliance()` method in `pkg/agentauth/compliance_validation.go` validated PoA structure, temporal requirements, and authorized actions, but **completely skipped geographic scope validation**.
 
 ### 2. No Jurisdiction Context
 The authorization request flow did not capture or pass the jurisdiction (country/region) information needed to perform geographic validation.
@@ -31,7 +31,7 @@ The `poa.IsAuthorizedInRegion()` helper function existed but was never called du
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Authorization Handler                                       │
-│ (web/handlers/rfc0111/authorization_handlers.go)           │
+│ (web/handlers/aap001/authorization_handlers.go)           │
 │                                                             │
 │  Captures: jurisdiction (ISO 3166-1/3166-2)                │
 └──────────────────────┬──────────────────────────────────────┘
@@ -39,7 +39,7 @@ The `poa.IsAuthorizedInRegion()` helper function existed but was never called du
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ Protocol Orchestrator                                       │
-│ (pkg/gauth/protocol_orchestrator.go)                       │
+│ (pkg/agentauth/protocol_orchestrator.go)                       │
 │                                                             │
 │  Passes jurisdiction to ExtendedAuthorizationRequest       │
 └──────────────────────┬──────────────────────────────────────┘
@@ -47,7 +47,7 @@ The `poa.IsAuthorizedInRegion()` helper function existed but was never called du
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ Compliance Validator                                        │
-│ (pkg/gauth/compliance_validation.go)                       │
+│ (pkg/agentauth/compliance_validation.go)                       │
 │                                                             │
 │  1. ValidateRequestCompliance()                            │
 │     ├─ validatePoA()                                       │
@@ -59,7 +59,7 @@ The `poa.IsAuthorizedInRegion()` helper function existed but was never called du
 ### Code Changes
 
 #### 1. ExtendedAuthorizationRequest Enhancement
-**File**: `pkg/gauth/compliance_validation.go`
+**File**: `pkg/agentauth/compliance_validation.go`
 
 Added `Jurisdiction` field to capture geographic context:
 ```go
@@ -77,7 +77,7 @@ type ExtendedAuthorizationRequest struct {
 ```
 
 #### 2. New Validation Method
-**File**: `pkg/gauth/compliance_validation.go`
+**File**: `pkg/agentauth/compliance_validation.go`
 
 Implemented `validateGeographicScope()` method:
 ```go
@@ -120,7 +120,7 @@ func (v *ComplianceValidator) validateGeographicScope(
 ```
 
 #### 3. Integration into Validation Flow
-**File**: `pkg/gauth/compliance_validation.go`
+**File**: `pkg/agentauth/compliance_validation.go`
 
 Modified `ValidateRequestCompliance()` to call geographic validation:
 ```go
@@ -147,7 +147,7 @@ if request.PowerOfAttorney != nil {
 ```
 
 #### 4. API Request Structure Update
-**File**: `web/handlers/rfc0111/authorization_handlers.go`
+**File**: `web/handlers/aap001/authorization_handlers.go`
 
 Added jurisdiction field to request:
 ```go
@@ -165,7 +165,7 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
     }
     
     // Pass to service
-    response, err := h.gauthService.RequestTokenRFC(c.Request.Context(), &gauth.RFCCompliantAuthorizationRequest{
+    response, err := h.agentauthService.RequestTokenRFC(c.Request.Context(), &agentauth.RFCCompliantAuthorizationRequest{
         // ... existing fields
         Jurisdiction:     req.Jurisdiction,  // NEW
         // ...
@@ -174,7 +174,7 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 ```
 
 #### 5. Service Layer Update
-**File**: `pkg/gauth/protocol_orchestrator.go`
+**File**: `pkg/agentauth/protocol_orchestrator.go`
 
 Added Jurisdiction to RFCCompliantAuthorizationRequest:
 ```go
@@ -254,7 +254,7 @@ REJECT with "geographic_scope_violation"
 ## Test Coverage
 
 ### Test Suite
-**File**: `pkg/gauth/geographic_scope_validation_test.go`
+**File**: `pkg/agentauth/geographic_scope_validation_test.go`
 
 **6 comprehensive test cases** covering all scenarios:
 
@@ -284,7 +284,7 @@ REJECT with "geographic_scope_violation"
 
 ### Test Results
 ```bash
-$ go test -v ./pkg/gauth -run TestGeographicScope
+$ go test -v ./pkg/agentauth -run TestGeographicScope
 
 === RUN   TestGeographicScopeValidation_Success
 --- PASS: TestGeographicScopeValidation_Success (0.00s)
@@ -299,7 +299,7 @@ $ go test -v ./pkg/gauth -run TestGeographicScope
 === RUN   TestGeographicScopeValidation_SubdivisionSupport
 --- PASS: TestGeographicScopeValidation_SubdivisionSupport (0.00s)
 PASS
-ok      pkg/gauth      0.242s
+ok      pkg/agentauth      0.242s
 ```
 
 ## API Changes
@@ -308,7 +308,7 @@ ok      pkg/gauth      0.242s
 
 **Before** (jurisdiction not captured):
 ```json
-POST /api/v1/rfc0111/authorize
+POST /api/v1/aap001/authorize
 {
   "client_id": "client-123",
   "subscription_id": "sub_xyz",
@@ -320,7 +320,7 @@ POST /api/v1/rfc0111/authorize
 
 **After** (jurisdiction required for validation):
 ```json
-POST /api/v1/rfc0111/authorize
+POST /api/v1/aap001/authorize
 {
   "client_id": "client-123",
   "subscription_id": "sub_xyz",
@@ -349,16 +349,16 @@ POST /api/v1/rfc0111/authorize
 }
 ```
 
-## RFC-0111 Compliance
+## AAP-001 Compliance
 
 ### Before Fix
-- ❌ **RFC-0111 Section 6.b**: Request compliance validation incomplete
-- ❌ **RFC-0115 Section B.3**: Geographic scope restrictions not enforced
+- ❌ **AAP-001 Section 6.b**: Request compliance validation incomplete
+- ❌ **AAP-002 Section B.3**: Geographic scope restrictions not enforced
 - ❌ **Gap G8**: Geographic scope implementation missing enforcement
 
 ### After Fix
-- ✅ **RFC-0111 Section 6.b**: Complete request compliance validation including geographic scope
-- ✅ **RFC-0115 Section B.3**: Full geographic scope validation with ISO 3166 support
+- ✅ **AAP-001 Section 6.b**: Complete request compliance validation including geographic scope
+- ✅ **AAP-002 Section B.3**: Full geographic scope validation with ISO 3166 support
 - ✅ **Gap G8**: Geographic scope implementation now 100% complete with enforcement
 
 ## Security Impact
@@ -396,12 +396,12 @@ POST /api/v1/rfc0111/authorize
 ## Files Modified
 
 ### Core Implementation
-1. `pkg/gauth/compliance_validation.go` - Added geographic scope validation
-2. `pkg/gauth/protocol_orchestrator.go` - Added jurisdiction field and pass-through
-3. `web/handlers/rfc0111/authorization_handlers.go` - Added jurisdiction capture
+1. `pkg/agentauth/compliance_validation.go` - Added geographic scope validation
+2. `pkg/agentauth/protocol_orchestrator.go` - Added jurisdiction field and pass-through
+3. `web/handlers/aap001/authorization_handlers.go` - Added jurisdiction capture
 
 ### Testing
-4. `pkg/gauth/geographic_scope_validation_test.go` - New comprehensive test suite (6 tests)
+4. `pkg/agentauth/geographic_scope_validation_test.go` - New comprehensive test suite (6 tests)
 
 ## Deployment Considerations
 
@@ -528,15 +528,15 @@ BenchmarkGeographicScopeValidate-10    100000000    12.12 ns/op
 ### Metrics to Track
 
 1. **Geographic Scope Violations**
-   - Counter: `gauth_geographic_scope_violations_total`
+   - Counter: `agentauth_geographic_scope_violations_total`
    - Labels: jurisdiction_requested, poa_regions
 
 2. **Validation Successes**
-   - Counter: `gauth_geographic_scope_validations_success_total`
+   - Counter: `agentauth_geographic_scope_validations_success_total`
    - Labels: jurisdiction
 
 3. **Missing Jurisdiction Warnings**
-   - Counter: `gauth_geographic_scope_no_jurisdiction_total`
+   - Counter: `agentauth_geographic_scope_no_jurisdiction_total`
 
 ### Audit Logging
 
@@ -580,13 +580,13 @@ level=warn msg="Geographic scope violation"
 
 ## Conclusion
 
-The geographic scope validation fix closes a critical security gap in the AgentAuth 1.0 implementation, ensuring full RFC-0111 compliance and preventing unauthorized cross-border operations. The solution is:
+The geographic scope validation fix closes a critical security gap in the AgentAuth 1.0 implementation, ensuring full AAP-001 compliance and preventing unauthorized cross-border operations. The solution is:
 
 - ✅ **Secure**: Prevents unauthorized operations outside PoA scope
 - ✅ **Complete**: 100% test coverage with all scenarios validated
 - ✅ **Compatible**: Backward compatible with existing deployments
 - ✅ **Performant**: Sub-microsecond validation overhead
-- ✅ **RFC Compliant**: Full RFC-0111 Section 6.b and RFC-0115 Section B.3 compliance
+- ✅ **RFC Compliant**: Full AAP-001 Section 6.b and AAP-002 Section B.3 compliance
 
 **Status**: ✅ PRODUCTION READY
 

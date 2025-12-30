@@ -18,29 +18,29 @@ const (
 
 var (
 	rotationVerificationLatency = promauto.NewHistogram(prom.HistogramOpts{
-		Name:    "gauth_rotation_verification_latency_seconds",
+		Name:    "agentauth_rotation_verification_latency_seconds",
 		Help:    "Latency of key rotation chain verification operations",
 		Buckets: prom.DefBuckets,
 	})
 	rotationVerificationCounter = promauto.NewCounterVec(prom.CounterOpts{
-		Name: "gauth_rotation_verification_total",
+		Name: "agentauth_rotation_verification_total",
 		Help: "Total rotation verification attempts labeled by outcome (success|failure|error)",
 	}, []string{"outcome"})
 	rotationVerificationFailureReason = promauto.NewCounterVec(prom.CounterOpts{
-		Name: "gauth_rotation_verification_failure_reason_total",
+		Name: "agentauth_rotation_verification_failure_reason_total",
 		Help: "Total rotation verification failures labeled by reason",
 	}, []string{"reason"})
 	rotationSummaryLatency = promauto.NewHistogram(prom.HistogramOpts{
-		Name:    "gauth_rotation_summary_latency_seconds",
+		Name:    "agentauth_rotation_summary_latency_seconds",
 		Help:    "Latency of rotation summary build (including optional signing)",
 		Buckets: prom.DefBuckets,
 	})
 	rotationSummaryCounter = promauto.NewCounterVec(prom.CounterOpts{
-		Name: "gauth_rotation_summary_total",
+		Name: "agentauth_rotation_summary_total",
 		Help: "Total rotation summary requests labeled by outcome (success|error)",
 	}, []string{"outcome"})
 	rotationSummaryAnchors = promauto.NewCounterVec(prom.CounterOpts{
-		Name: "gauth_rotation_summary_anchor_total",
+		Name: "agentauth_rotation_summary_anchor_total",
 		Help: "Rotation summary anchoring attempts labeled by result (anchored|skipped|error)",
 	}, []string{"result"})
 
@@ -50,7 +50,7 @@ var (
 	// rotationSignatureVerifyLatency -> metrics.RotationSignatureVerifyLatency
 
 	rotationSignatureVerifyFailures = promauto.NewCounterVec(prom.CounterOpts{
-		Name: "gauth_rotation_signature_verify_failures_total",
+		Name: "agentauth_rotation_signature_verify_failures_total",
 		Help: "Total failed rotation signature verifications labeled by reason",
 	}, []string{"reason"})
 	lastAnchorUnixNano atomic.Int64

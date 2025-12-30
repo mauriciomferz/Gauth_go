@@ -1,0 +1,397 @@
+# OpenAPI Documentation for AgentAuth Power of Attorney & Delegation APIs
+# Addresses gap sec10.item1 (P1): OpenAPI for PoA & delegation
+
+openapi: 3.0.3
+info:
+  title: AgentAuth Power of Attorney API
+  description: |
+    RESTful API for issuing, verifying, and managing Power of Attorney (PoA) delegations
+    compliant with AAP-001 and AAP-002.
+  version: 1.0.0
+  contact:
+    name: AgentAuth Community
+    url: https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: http://localhost:8080/v1
+    description: Development server
+
+tags:
+  - name: PoA Issuance
+    description: Operations for issuing Power of Attorney tokens
+  - name: PoA Verification
+    description: Operations for verifying PoA tokens
+  - name: PoA Revocation
+    description: Operations for revoking PoA delegations
+  - name: Discovery
+    description: Well-known endpoints for service discovery
+
+paths:
+  /.well-known/agentauth-config:
+    get:
+      summary: Service discovery endpoint
+      description: Returns AgentAuth service configuration and capabilities
+      tags:
+        - Discovery
+      responses:
+        '200':
+          description: Service configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceConfig'
+
+  /poa/issue:
+    post:
+      summary: Issue a new Power of Attorney
+      description: Creates and signs a new PoA delegation token
+      tags:
+        - PoA Issuance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueRequest'
+      responses:
+        '200':
+          description: PoA issued successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /poa/verify:
+    post:
+      summary: Verify a Power of Attorney token
+      description: Validates the signature and checks the validity of a PoA token
+      tags:
+        - PoA Verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /poa/revoke:
+    post:
+      summary: Revoke a Power of Attorney
+      description: Revokes an active PoA delegation
+      tags:
+        - PoA Revocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
+      responses:
+        '200':
+          description: PoA revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevokeResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: PoA not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /poa/{id}:
+    get:
+      summary: Get PoA details
+      description: Retrieves information about a specific PoA
+      tags:
+        - PoA Verification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: PoA identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PoA details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PoADetails'
+        '404':
+          description: PoA not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    ServiceConfig:
+      type: object
+      properties:
+        issuer:
+          type: string
+          description: Service issuer identifier
+        version:
+          type: string
+          description: API version
+        algorithms:
+          type: array
+          items:
+            type: string
+          description: Supported signature algorithms
+        jwks_uri:
+          type: string
+          description: JWKS endpoint URL
+        revocation_endpoint:
+          type: string
+          description: Revocation endpoint URL
+
+    IssueRequest:
+      type: object
+      required:
+        - grantor
+        - grantee
+        - scope
+      properties:
+        grantor:
+          type: string
+          description: Entity granting the power of attorney
+        grantee:
+          type: string
+          description: Entity receiving the power of attorney
+        scope:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeItem'
+          description: List of delegated permissions
+        expires_at:
+          type: string
+          format: date-time
+          description: Expiration timestamp (ISO 8601)
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Additional metadata
+
+    ScopeItem:
+      type: object
+      required:
+        - action
+        - resource
+      properties:
+        action:
+          type: string
+          description: Action permitted (e.g., "read", "write")
+        resource:
+          type: string
+          description: Resource identifier
+        constraints:
+          type: object
+          additionalProperties: true
+          description: Additional constraints
+
+    IssueResponse:
+      type: object
+      properties:
+        poa_id:
+          type: string
+          description: Unique PoA identifier
+        token:
+          type: string
+          description: JWT or PASETO token
+        expires_at:
+          type: string
+          format: date-time
+          description: Expiration timestamp
+        signature:
+          $ref: '#/components/schemas/Signature'
+
+    Signature:
+      type: object
+      properties:
+        algorithm:
+          type: string
+          description: Signature algorithm used
+        key_id:
+          type: string
+          description: Key identifier
+        signature:
+          type: string
+          description: Base64-encoded signature
+
+    VerifyRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: JWT or PASETO token to verify
+        context:
+          type: object
+          additionalProperties: true
+          description: Additional verification context
+
+    VerifyResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          description: Whether the token is valid
+        poa_id:
+          type: string
+          description: PoA identifier
+        grantor:
+          type: string
+          description: Grantor identity
+        grantee:
+          type: string
+          description: Grantee identity
+        scope:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeItem'
+        expires_at:
+          type: string
+          format: date-time
+        signature_valid:
+          type: boolean
+          description: Whether signature verification passed
+        errors:
+          type: array
+          items:
+            type: string
+          description: Validation errors if any
+
+    RevokeRequest:
+      type: object
+      required:
+        - poa_id
+        - reason
+      properties:
+        poa_id:
+          type: string
+          description: PoA identifier to revoke
+        reason:
+          type: string
+          description: Revocation reason
+        revoked_by:
+          type: string
+          description: Entity performing revocation
+
+    RevokeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        poa_id:
+          type: string
+        revoked_at:
+          type: string
+          format: date-time
+
+    PoADetails:
+      type: object
+      properties:
+        poa_id:
+          type: string
+        grantor:
+          type: string
+        grantee:
+          type: string
+        scope:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeItem'
+        issued_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, expired, revoked]
+        revocation_info:
+          $ref: '#/components/schemas/RevocationInfo'
+
+    RevocationInfo:
+      type: object
+      properties:
+        revoked:
+          type: boolean
+        revoked_at:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        revoked_by:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error details
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - bearerAuth: []
+  - apiKey: []

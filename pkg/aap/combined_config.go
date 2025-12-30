@@ -112,7 +112,7 @@ type AAP002PoADefinition struct {
 	Verification     map[string]interface{} `json:"verification"`
 	Parties          PoAParties             `json:"parties"`
 	Authorization    Authorization          `json:"authorization"`
-	AgentAuthContext AgentAuthContext       `json:"gauth_context"`
+	AgentAuthContext AgentAuthContext       `json:"agentauth_context"`
 }
 
 // AAP001Config represents AAP-001 specific configuration

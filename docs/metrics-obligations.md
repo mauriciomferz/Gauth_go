@@ -19,10 +19,10 @@ Obligations (and advice) are post-decision actions executed by the PDP engine. T
 ### Prometheus (Adapter)
 | Metric | Type | Description |
 |--------|------|-------------|
-| `gauth_rfc0111_obligation_latency_seconds` | Histogram | Per-obligation execution latency. Buckets inherit adapter latency buckets (default fast path: 100µs..100ms). |
-| `gauth_rfc0111_mandatory_obligation_failures_total` | Counter | Count of mandatory obligation failures that reversed an allow decision into a deny outcome. |
-| `gauth_rfc0111_obligations_executed_total` | Counter | (Existing) Successful obligation/advice executions. |
-| `gauth_rfc0111_obligations_failed_total` | Counter | (Existing) Failed obligation/advice executions (non-mandatory or mandatory). |
+| `agentauth_aap001_obligation_latency_seconds` | Histogram | Per-obligation execution latency. Buckets inherit adapter latency buckets (default fast path: 100µs..100ms). |
+| `agentauth_aap001_mandatory_obligation_failures_total` | Counter | Count of mandatory obligation failures that reversed an allow decision into a deny outcome. |
+| `agentauth_aap001_obligations_executed_total` | Counter | (Existing) Successful obligation/advice executions. |
+| `agentauth_aap001_obligations_failed_total` | Counter | (Existing) Failed obligation/advice executions (non-mandatory or mandatory). |
 
 > Note: `obligations_failed_total` counts all failures; `mandatory_obligation_failures_total` is a subset representing failures of obligations marked `Mandatory` that also changed the final decision.
 
@@ -44,21 +44,21 @@ Obligations (and advice) are post-decision actions executed by the PDP engine. T
 ## Example PromQL Queries
 ```promql
 # 95th percentile obligation latency (5m window)
-histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[5m])))
+histogram_quantile(0.95, sum by (le) (rate(agentauth_aap001_obligation_latency_seconds_bucket[5m])))
 
 # Mandatory failure rate per 10 minutes
-rate(gauth_rfc0111_mandatory_obligation_failures_total[10m])
+rate(agentauth_aap001_mandatory_obligation_failures_total[10m])
 
 # Failure ratio (all failures vs executes) last hour
-sum(rate(gauth_rfc0111_obligations_failed_total[1h])) / sum(rate(gauth_rfc0111_obligations_executed_total[1h]))
+sum(rate(agentauth_aap001_obligations_failed_total[1h]) / sum(rate(agentauth_aap001_obligations_executed_total[1h]))
 ```
 
 ## Suggested Alerting (Initial Baselines)
 | Alert | Expression | Rationale |
 |-------|------------|-----------|
-| High obligation latency p95 | `histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[15m]))) > 0.025` | >25ms sustained may indicate downstream degradation. |
-| Mandatory failure surge | `increase(gauth_rfc0111_mandatory_obligation_failures_total[30m]) > 0` | Any occurrence may warrant investigation (start as warning). |
-| Failure ratio elevated | `sum(rate(gauth_rfc0111_obligations_failed_total[30m])) / sum(rate(gauth_rfc0111_obligations_executed_total[30m])) > 0.05` | >5% failure ratio suggests instability in obligation handlers. |
+| High obligation latency p95 | `histogram_quantile(0.95, sum by (le) (rate(agentauth_aap001_obligation_latency_seconds_bucket[15m])) > 0.025` | >25ms sustained may indicate downstream degradation. |
+| Mandatory failure surge | `increase(agentauth_aap001_mandatory_obligation_failures_total[30m]) > 0` | Any occurrence may warrant investigation (start as warning). |
+| Failure ratio elevated | `sum(rate(agentauth_aap001_obligations_failed_total[30m]) / sum(rate(agentauth_aap001_obligations_executed_total[30m]) > 0.05` | >5% failure ratio suggests instability in obligation handlers. |
 
 Tune thresholds after baseline collection (first week in production). Use multi-window (short + long) to reduce flapping.
 

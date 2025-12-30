@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgentAuth - The Open-Source Platform for AI Control and Secure IDs</title>
-    <meta name="description" content="Security beyond High Assurance. The premier platform for AI agent governance and DNA-based identity verification. 95% RFC-0111 & RFC-0115 compliant.">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
+    <meta name="description"
+        content="Security beyond High Assurance. The premier platform for AI agent governance and DNA-based identity verification. 95% RFC-0111 & RFC-0115 compliant.">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔐</text></svg>">
     <style>
         :root {
             --primary: #667eea;
@@ -23,9 +26,13 @@
             --border: rgba(102, 126, 234, 0.2);
             --glow: rgba(102, 126, 234, 0.4);
         }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg-dark);
@@ -44,26 +51,31 @@
             height: 100%;
             z-index: 0;
             background: radial-gradient(ellipse at top, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-                        radial-gradient(ellipse at bottom, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+                radial-gradient(ellipse at bottom, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
         }
-        
+
         .bg-grid {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(102, 126, 234, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(102, 126, 234, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
             z-index: 0;
             animation: gridMove 30s linear infinite;
         }
-        
+
         @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
         }
 
         /* Navigation */
@@ -78,7 +90,7 @@
             border-bottom: 1px solid var(--border);
             padding: 20px 0;
         }
-        
+
         .nav-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -87,7 +99,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .logo-section {
             display: flex;
             align-items: center;
@@ -95,41 +107,48 @@
             font-size: 24px;
             font-weight: 700;
         }
-        
+
         .logo-icon {
             font-size: 32px;
             animation: float 3s ease-in-out infinite;
         }
-        
+
         @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
         }
-        
+
         .logo-text {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .nav-links {
             display: flex;
             gap: 30px;
             align-items: center;
         }
-        
+
         .nav-link {
             color: var(--text-secondary);
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s ease;
         }
-        
+
         .nav-link:hover {
             color: var(--text-primary);
         }
-        
+
         .cta-button {
             padding: 12px 24px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -142,7 +161,7 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .cta-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px var(--glow);
@@ -162,7 +181,7 @@
             padding: 100px 40px;
             text-align: center;
         }
-        
+
         .hero-badge {
             display: inline-flex;
             align-items: center;
@@ -175,12 +194,19 @@
             margin-bottom: 30px;
             animation: pulse 2s ease-in-out infinite;
         }
-        
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
         }
-        
+
         .hero-badge-dot {
             width: 8px;
             height: 8px;
@@ -188,12 +214,19 @@
             border-radius: 50%;
             animation: blink 1.5s ease-in-out infinite;
         }
-        
+
         @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
         }
-        
+
         .hero h1 {
             font-size: 72px;
             font-weight: 800;
@@ -204,7 +237,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .hero-subtitle {
             font-size: 24px;
             color: var(--text-secondary);
@@ -212,7 +245,7 @@
             margin: 0 auto 40px;
             line-height: 1.6;
         }
-        
+
         .hero-cta-group {
             display: flex;
             gap: 20px;
@@ -220,7 +253,7 @@
             flex-wrap: wrap;
             margin-bottom: 60px;
         }
-        
+
         .cta-primary {
             padding: 18px 40px;
             font-size: 18px;
@@ -234,12 +267,12 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .cta-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 15px 40px var(--glow);
         }
-        
+
         .cta-secondary {
             padding: 18px 40px;
             font-size: 18px;
@@ -253,23 +286,23 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .cta-secondary:hover {
             background: rgba(102, 126, 234, 0.1);
             transform: translateY(-3px);
         }
-        
+
         .hero-stats {
             display: flex;
             justify-content: center;
             gap: 60px;
             flex-wrap: wrap;
         }
-        
+
         .stat-item {
             text-align: center;
         }
-        
+
         .stat-number {
             font-size: 48px;
             font-weight: 800;
@@ -278,7 +311,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .stat-label {
             font-size: 14px;
             color: var(--text-secondary);
@@ -291,12 +324,12 @@
             margin: 0 auto;
             padding: 100px 40px;
         }
-        
+
         .section-header {
             text-align: center;
             margin-bottom: 80px;
         }
-        
+
         .section-tag {
             display: inline-block;
             padding: 6px 16px;
@@ -308,7 +341,7 @@
             margin-bottom: 20px;
             font-weight: 600;
         }
-        
+
         .section-title {
             font-size: 56px;
             font-weight: 800;
@@ -318,20 +351,20 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .section-subtitle {
             font-size: 20px;
             color: var(--text-secondary);
             max-width: 700px;
             margin: 0 auto;
         }
-        
+
         .problem-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 30px;
         }
-        
+
         .problem-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -339,30 +372,30 @@
             padding: 40px;
             transition: all 0.3s ease;
         }
-        
+
         .problem-card:hover {
             transform: translateY(-5px);
             border-color: #ef4444;
             box-shadow: 0 20px 40px rgba(239, 68, 68, 0.2);
         }
-        
+
         .problem-icon {
             font-size: 48px;
             margin-bottom: 20px;
         }
-        
+
         .problem-title {
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 15px;
             color: #f87171;
         }
-        
+
         .problem-list {
             list-style: none;
             padding: 0;
         }
-        
+
         .problem-list li {
             padding: 10px 0;
             padding-left: 30px;
@@ -370,7 +403,7 @@
             color: var(--text-secondary);
             line-height: 1.6;
         }
-        
+
         .problem-list li::before {
             content: '⚠️';
             position: absolute;
@@ -383,7 +416,7 @@
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 30px;
         }
-        
+
         .solution-card {
             background: linear-gradient(135deg, var(--bg-card) 0%, rgba(102, 126, 234, 0.05) 100%);
             border: 1px solid var(--border);
@@ -393,7 +426,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .solution-card::before {
             content: '';
             position: absolute;
@@ -403,41 +436,41 @@
             height: 4px;
             background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
         }
-        
+
         .solution-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px var(--glow);
         }
-        
+
         .solution-icon {
             font-size: 56px;
             margin-bottom: 20px;
         }
-        
+
         .solution-title {
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 15px;
         }
-        
+
         .solution-description {
             color: var(--text-secondary);
             line-height: 1.7;
             margin-bottom: 20px;
         }
-        
+
         .solution-features {
             list-style: none;
             padding: 0;
         }
-        
+
         .solution-features li {
             padding: 8px 0;
             padding-left: 30px;
             position: relative;
             color: var(--text-secondary);
         }
-        
+
         .solution-features li::before {
             content: '✅';
             position: absolute;
@@ -450,7 +483,7 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
         }
-        
+
         .feature-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -459,24 +492,24 @@
             transition: all 0.3s ease;
             text-align: center;
         }
-        
+
         .feature-card:hover {
             transform: translateY(-5px);
             border-color: var(--primary);
             background: var(--bg-card-hover);
         }
-        
+
         .feature-icon {
             font-size: 48px;
             margin-bottom: 15px;
         }
-        
+
         .feature-title {
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 10px;
         }
-        
+
         .feature-description {
             font-size: 14px;
             color: var(--text-secondary);
@@ -489,7 +522,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 30px;
         }
-        
+
         .tech-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -497,12 +530,12 @@
             padding: 40px;
             transition: all 0.3s ease;
         }
-        
+
         .tech-card:hover {
             border-color: var(--primary);
             box-shadow: 0 10px 30px var(--glow);
         }
-        
+
         .tech-title {
             font-size: 24px;
             font-weight: 700;
@@ -511,29 +544,29 @@
             align-items: center;
             gap: 12px;
         }
-        
+
         .tech-content {
             color: var(--text-secondary);
             line-height: 1.8;
         }
-        
+
         .tech-list {
             list-style: none;
             padding: 0;
             margin-top: 20px;
         }
-        
+
         .tech-list li {
             padding: 12px 0;
             padding-left: 35px;
             position: relative;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .tech-list li:last-child {
             border-bottom: none;
         }
-        
+
         .tech-list li::before {
             content: '▸';
             position: absolute;
@@ -551,13 +584,13 @@
             text-align: center;
             margin: 100px 40px;
         }
-        
+
         .cta-section h2 {
             font-size: 48px;
             font-weight: 800;
             margin-bottom: 20px;
         }
-        
+
         .cta-section p {
             font-size: 20px;
             color: var(--text-secondary);
@@ -576,20 +609,20 @@
             padding: 60px 40px;
             border-top: 1px solid var(--border);
         }
-        
+
         .footer-grid {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr 1fr;
             gap: 60px;
             margin-bottom: 40px;
         }
-        
+
         .footer-brand {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        
+
         .footer-logo {
             display: flex;
             align-items: center;
@@ -597,27 +630,27 @@
             font-size: 24px;
             font-weight: 700;
         }
-        
+
         .footer-description {
             color: var(--text-secondary);
             line-height: 1.6;
         }
-        
+
         .footer-column h4 {
             font-size: 16px;
             font-weight: 700;
             margin-bottom: 20px;
         }
-        
+
         .footer-links {
             list-style: none;
             padding: 0;
         }
-        
+
         .footer-links li {
             margin-bottom: 12px;
         }
-        
+
         .footer-links a {
             color: var(--text-secondary);
             text-decoration: none;
@@ -625,13 +658,13 @@
             cursor: pointer;
             display: inline-block;
         }
-        
+
         .footer-links a:hover {
             color: var(--primary);
             text-decoration: underline;
             transform: translateX(3px);
         }
-        
+
         .footer-bottom {
             text-align: center;
             padding-top: 40px;
@@ -645,40 +678,41 @@
                 grid-template-columns: 1fr;
             }
         }
-        
+
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 48px;
             }
-            
+
             .hero-subtitle {
                 font-size: 18px;
             }
-            
+
             .section-title {
                 font-size: 36px;
             }
-            
+
             .problem-grid,
             .solution-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .nav-links {
                 display: none;
             }
-            
+
             .footer-grid {
                 grid-template-columns: 1fr;
                 gap: 40px;
             }
-            
+
             .cta-section {
                 padding: 60px 30px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="bg-animated"></div>
     <div class="bg-grid"></div>
@@ -695,7 +729,7 @@
                 <a href="#solution" class="nav-link">Solution</a>
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#technical" class="nav-link">Technical</a>
-                <a href="/gauth1.html" class="cta-button">Launch Dashboard →</a>
+                <a href="/agentauth1.html" class="cta-button">Launch Dashboard →</a>
             </div>
         </div>
     </nav>
@@ -707,18 +741,19 @@
                 <span class="hero-badge-dot"></span>
                 <span>✨ 95% RFC-0111 & RFC-0115 Compliant • Security Beyond High Assurance</span>
             </div>
-            
+
             <h1>The Open-Source Platform<br>for AI Control and Secure IDs</h1>
-            
+
             <p class="hero-subtitle">
-                Next-level biometrics and practical AI governance. The premier platform enabling security beyond LoA4 through DNA-based identity verification and comprehensive agent control.
+                Next-level biometrics and practical AI governance. The premier platform enabling security beyond LoA4
+                through DNA-based identity verification and comprehensive agent control.
             </p>
-            
+
             <div class="hero-cta-group">
                 <a href="/protocol-flow" class="cta-primary">🚀 Explore Protocol Flow</a>
                 <a href="/poa-visualization" class="cta-secondary">🗺️ View 3D Visualization</a>
             </div>
-            
+
             <div class="hero-stats">
                 <div class="stat-item">
                     <div class="stat-number">95%</div>
@@ -745,10 +780,11 @@
                 <span class="section-tag">🚨 THE CHALLENGE</span>
                 <h2 class="section-title">USD 10 Trillion Problem</h2>
                 <p class="section-subtitle">
-                    Cybercrime costs approach $10 trillion, doubling since 2015, driven by AI challenges and identity vulnerabilities
+                    Cybercrime costs approach $10 trillion, doubling since 2015, driven by AI challenges and identity
+                    vulnerabilities
                 </p>
             </div>
-            
+
             <div class="problem-grid">
                 <div class="problem-card">
                     <div class="problem-icon">🔓</div>
@@ -760,7 +796,7 @@
                         <li>60% of cyber-threats are identity-based, doubling in 2024</li>
                     </ul>
                 </div>
-                
+
                 <div class="problem-card">
                     <div class="problem-icon">🤖</div>
                     <h3 class="problem-title">The Agent Control Challenge</h3>
@@ -777,13 +813,16 @@
         <!-- Solution Section -->
         <section id="solution" class="section">
             <div class="section-header">
-                <span class="section-tag" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">✅ THE SOLUTION</span>
+                <span class="section-tag"
+                    style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">✅
+                    THE SOLUTION</span>
                 <h2 class="section-title">Three-Layer Security Architecture</h2>
                 <p class="section-subtitle">
-                    AgentAuth provides the premier operating system for secure identities and agent control along the user lifecycle
+                    AgentAuth provides the premier operating system for secure identities and agent control along the
+                    user lifecycle
                 </p>
             </div>
-            
+
             <div class="solution-grid">
                 <div class="solution-card">
                     <div class="solution-icon">🧬</div>
@@ -798,12 +837,13 @@
                         <li>1 in 100 trillion accuracy</li>
                     </ul>
                 </div>
-                
+
                 <div class="solution-card">
                     <div class="solution-icon">🌍</div>
                     <h3 class="solution-title">Global Identity Network</h3>
                     <p class="solution-description">
-                        First and only AI-based identity proof among up to 8 billion individuals with continuous risk monitoring.
+                        First and only AI-based identity proof among up to 8 billion individuals with continuous risk
+                        monitoring.
                     </p>
                     <ul class="solution-features">
                         <li>DefconG continuous monitoring</li>
@@ -812,12 +852,13 @@
                         <li>Trust services leverage</li>
                     </ul>
                 </div>
-                
+
                 <div class="solution-card">
                     <div class="solution-icon">🤖</div>
                     <h3 class="solution-title">G-Agent - AI Control</h3>
                     <p class="solution-description">
-                        First and only practical AI governance solution based on open-source protocol (AgentAuth). Patent pending.
+                        First and only practical AI governance solution based on open-source protocol (AgentAuth).
+                        Patent pending.
                     </p>
                     <ul class="solution-features">
                         <li>Authorize agent/robot</li>
@@ -832,60 +873,69 @@
         <!-- Features Section -->
         <section id="features" class="section">
             <div class="section-header">
-                <span class="section-tag" style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3); color: #667eea;">⚡ KEY FEATURES</span>
+                <span class="section-tag"
+                    style="background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3); color: #667eea;">⚡
+                    KEY FEATURES</span>
                 <h2 class="section-title">Enterprise-Grade Capabilities</h2>
                 <p class="section-subtitle">
                     Built on proven security practices with comprehensive compliance and enforcement
                 </p>
             </div>
-            
+
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">🔒</div>
                     <h3 class="feature-title">Rule-Based Enforcement</h3>
-                    <p class="feature-description">Deterministic, signature-like verification ensuring requests are PoA subsets</p>
+                    <p class="feature-description">Deterministic, signature-like verification ensuring requests are PoA
+                        subsets</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">🧠</div>
                     <h3 class="feature-title">AI-Based Enforcement</h3>
-                    <p class="feature-description">Anomaly-focused compliance covering implied authority and trained behaviors</p>
+                    <p class="feature-description">Anomaly-focused compliance covering implied authority and trained
+                        behaviors</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">📋</div>
                     <h3 class="feature-title">PoA Disclosure</h3>
-                    <p class="feature-description">Legal mechanism mitigating residual risks through relying party verification</p>
+                    <p class="feature-description">Legal mechanism mitigating residual risks through relying party
+                        verification</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">🌐</div>
                     <h3 class="feature-title">Self-Sovereign Identity</h3>
-                    <p class="feature-description">Decentralized ID with no Agent Naming Service, ensuring true autonomy</p>
+                    <p class="feature-description">Decentralized ID with no Agent Naming Service, ensuring true autonomy
+                    </p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">⚖️</div>
                     <h3 class="feature-title">Law of Agency</h3>
-                    <p class="feature-description">Comprehensive PoA definitions with business ownership and accountability</p>
+                    <p class="feature-description">Comprehensive PoA definitions with business ownership and
+                        accountability</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">🔐</div>
                     <h3 class="feature-title">Least Privilege</h3>
-                    <p class="feature-description">Zero-trust architecture with minimal permissions and continuous validation</p>
+                    <p class="feature-description">Zero-trust architecture with minimal permissions and continuous
+                        validation</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
                     <h3 class="feature-title">Compliance Tracking</h3>
                     <p class="feature-description">Real-time monitoring with audit trails and quality assurance</p>
                 </div>
-                
+
                 <div class="feature-card">
                     <div class="feature-icon">🚀</div>
                     <h3 class="feature-title">Global Scalability</h3>
-                    <p class="feature-description">AI control beyond Human-in-the-Loop, leveraging full autonomous potential</p>
+                    <p class="feature-description">AI control beyond Human-in-the-Loop, leveraging full autonomous
+                        potential</p>
                 </div>
             </div>
         </section>
@@ -893,13 +943,15 @@
         <!-- Technical Section -->
         <section id="technical" class="section">
             <div class="section-header">
-                <span class="section-tag" style="background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.3); color: #fb923c;">🔬 TECHNICAL</span>
+                <span class="section-tag"
+                    style="background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.3); color: #fb923c;">🔬
+                    TECHNICAL</span>
                 <h2 class="section-title">Protocol Implementation</h2>
                 <p class="section-subtitle">
                     95% RFC-0111 & RFC-0115 compliant with enhanced 30-substep protocol flow
                 </p>
             </div>
-            
+
             <div class="tech-grid">
                 <div class="tech-card">
                     <h3 class="tech-title">
@@ -908,16 +960,23 @@
                     </h3>
                     <div class="tech-content">
                         <ul class="tech-list">
-                            <li><strong>Subscription (3 substeps):</strong> Registration, configuration, credentials</li>
-                            <li><strong>Matching (7 substeps):</strong> PoA validation, AI capabilities, jurisdiction, policies, authorization chain, commercial register, formal requirements</li>
-                            <li><strong>Subset/Request (7 substeps):</strong> Auth request, scope selection, request compliance, PIP query, PDP decision, extended token generation, grant compliance</li>
-                            <li><strong>Enforcement (4 substeps):</strong> Supply PEP, demand PEP, disclosure, audit logging</li>
-                            <li><strong>Verification (6 substeps):</strong> Extended token validation, signature verification, revocation check, PVP identity, authorization chain verify, formal requirements verify</li>
-                            <li><strong>Audit (3 substeps):</strong> Event logging, compliance check, report generation</li>
+                            <li><strong>Subscription (3 substeps):</strong> Registration, configuration, credentials
+                            </li>
+                            <li><strong>Matching (7 substeps):</strong> PoA validation, AI capabilities, jurisdiction,
+                                policies, authorization chain, commercial register, formal requirements</li>
+                            <li><strong>Subset/Request (7 substeps):</strong> Auth request, scope selection, request
+                                compliance, PIP query, PDP decision, extended token generation, grant compliance</li>
+                            <li><strong>Enforcement (4 substeps):</strong> Supply PEP, demand PEP, disclosure, audit
+                                logging</li>
+                            <li><strong>Verification (6 substeps):</strong> Extended token validation, signature
+                                verification, revocation check, PVP identity, authorization chain verify, formal
+                                requirements verify</li>
+                            <li><strong>Audit (3 substeps):</strong> Event logging, compliance check, report generation
+                            </li>
                         </ul>
                     </div>
                 </div>
-                
+
                 <div class="tech-card">
                     <h3 class="tech-title">
                         <span>🛡️</span>
@@ -925,9 +984,12 @@
                     </h3>
                     <div class="tech-content">
                         <ul class="tech-list">
-                            <li><strong>P*P Architecture:</strong> PEP (Policy Enforcement Point), PDP (Policy Decision Point), PIP (Policy Information Point), PVP (Policy Verification Point)</li>
-                            <li><strong>Extended JWT Tokens:</strong> Enhanced claims with authorization chain metadata</li>
-                            <li><strong>Authorization Chain:</strong> Comprehensive validation of delegation hierarchies</li>
+                            <li><strong>P*P Architecture:</strong> PEP (Policy Enforcement Point), PDP (Policy Decision
+                                Point), PIP (Policy Information Point), PVP (Policy Verification Point)</li>
+                            <li><strong>Extended JWT Tokens:</strong> Enhanced claims with authorization chain metadata
+                            </li>
+                            <li><strong>Authorization Chain:</strong> Comprehensive validation of delegation hierarchies
+                            </li>
                             <li><strong>Commercial Register:</strong> Verified entity authentication and validation</li>
                             <li><strong>Formal Requirements:</strong> Legal and regulatory compliance validation</li>
                             <li><strong>Zero Known CVEs:</strong> All dependencies current and secure</li>
@@ -944,7 +1006,7 @@
             <div class="hero-cta-group">
                 <a href="/protocol-flow" class="cta-primary">🚀 Protocol Flow Navigator</a>
                 <a href="/poa-visualization" class="cta-secondary">🗺️ 3D PoA Visualization</a>
-                <a href="/gauth1.html" class="cta-secondary">📊 Dashboard & Metrics</a>
+                <a href="/agentauth1.html" class="cta-secondary">📊 Dashboard & Metrics</a>
             </div>
         </div>
     </div>
@@ -958,44 +1020,48 @@
                     <span class="logo-text">AgentAuth</span>
                 </div>
                 <p class="footer-description">
-                    The open-source platform for AI control and secure IDs. Security beyond high assurance through DNA-based biometrics and practical AI governance.
+                    The open-source platform for AI control and secure IDs. Security beyond high assurance through
+                    DNA-based biometrics and practical AI governance.
                 </p>
             </div>
-            
+
             <div class="footer-column">
                 <h4>Product</h4>
                 <ul class="footer-links">
                     <li><a href="/protocol-flow">Protocol Flow</a></li>
                     <li><a href="/poa-visualization">PoA Visualization</a></li>
-                    <li><a href="/gauth1.html">Dashboard</a></li>
+                    <li><a href="/agentauth1.html">Dashboard</a></li>
                     <li><a href="/openapi.yaml">API Documentation</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-column">
                 <h4>Resources</h4>
                 <ul class="footer-links">
-                    <li><a href="https://github.com/mauriciomferz/Gauth_go" target="_blank" rel="noopener">GitHub Repository</a></li>
+                    <li><a href="https://github.com/mauriciomferz/AgentAuth" target="_blank" rel="noopener">GitHub
+                            Repository</a></li>
                     <li><a href="/api/v1/audit/logs">Audit Logs</a></li>
                     <li><a href="/api/v1/discovery">API Discovery</a></li>
-                    <li><a href="https://gimel.foundation" target="_blank" rel="noopener">AgentAuth Community</a></li>
+                    <li><a href="https://agentauth.io" target="_blank" rel="noopener">AgentAuth Community</a></li>
                 </ul>
             </div>
-            
+
             <div class="footer-column">
                 <h4>Compliance</h4>
                 <ul class="footer-links">
-                    <li><a href="https://gimelfoundation.com/gifo-rfcs/#rfc-0111" target="_blank" rel="noopener">RFC-0111 Compliant</a></li>
-                    <li><a href="https://gimelfoundation.com/gifo-rfcs/#rfc-0115" target="_blank" rel="noopener">RFC-0115 Ready</a></li>
+                    <li><a href="https://agentauth.io/aap-001" target="_blank" rel="noopener">AAP-001 Compliant</a></li>
+                    <li><a href="https://agentauth.io/aap-001" target="_blank" rel="noopener">AAP-002 Ready</a></li>
                     <li><a href="https://gdpr.eu/" target="_blank" rel="noopener">GDPR Compatible</a></li>
-                    <li><a href="https://digital-strategy.ec.europa.eu/en/policies/eidas-regulation" target="_blank" rel="noopener">eIDAS 2.0 Aligned</a></li>
+                    <li><a href="https://digital-strategy.ec.europa.eu/en/policies/eidas-regulation" target="_blank"
+                            rel="noopener">eIDAS 2.0 Aligned</a></li>
                 </ul>
             </div>
         </div>
-        
+
         <div class="footer-bottom">
             <p>&copy; 2025 AgentAuth • AgentAuth Technologies • Open-Source Platform for AI Control and Secure IDs</p>
-            <p style="margin-top: 10px; font-size: 12px;">95% RFC-0111 & RFC-0115 Compliant • Security Beyond LoA4 • Patent Pending Technologies</p>
+            <p style="margin-top: 10px; font-size: 12px;">95% RFC-0111 & RFC-0115 Compliant • Security Beyond LoA4 •
+                Patent Pending Technologies</p>
         </div>
     </footer>
 
@@ -1015,7 +1081,8 @@
         console.log('%c🔐 AgentAuth Platform', 'font-size: 24px; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
         console.log('%c95% RFC-0111 & RFC-0115 Compliant', 'font-size: 14px; color: #10b981; font-weight: bold;');
         console.log('%cSecurity Beyond High Assurance (LoA4+)', 'font-size: 12px; color: #667eea;');
-        console.log('%c\nExplore:\n• /protocol-flow - Interactive protocol visualization\n• /poa-visualization - 3D PoA relationships\n• /gauth1.html - Full dashboard', 'font-size: 11px; color: #a0aec0;');
+        console.log('%c\nExplore:\n• /protocol-flow - Interactive protocol visualization\n• /poa-visualization - 3D PoA relationships\n• /agentauth1.html - Full dashboard', 'font-size: 11px; color: #a0aec0;');
     </script>
 </body>
+
 </html>

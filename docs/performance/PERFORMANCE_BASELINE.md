@@ -55,7 +55,7 @@ Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
 Date: 2025-10-17
 Host: macOS (Apple M3 Pro, arm64)
 Go Version: (same session as above)
-Command: `go test -bench . -benchmem ./pkg/rfc0111 -run ^$ -count=1`
+Command: `go test -bench . -benchmem ./pkg/aap001 -run ^$ -count=1`
 
 ```
 BenchmarkCreateDelegation-11             10045 ns/op   10955 B/op    82 allocs/op
@@ -79,8 +79,8 @@ Go Version: same session
 
 Commands:
 ```
-go test -run=NONE -bench=BenchmarkSignCanonicalPOA -benchmem ./pkg/rfc0111 -count=1
-go test -run=NONE -bench=BenchmarkVerifyCanonicalPOA -benchmem ./pkg/rfc0111 -count=1
+go test -run=NONE -bench=BenchmarkSignCanonicalPOA -benchmem ./pkg/aap001 -count=1
+go test -run=NONE -bench=BenchmarkVerifyCanonicalPOA -benchmem ./pkg/aap001 -count=1
 ```
 
 Results:

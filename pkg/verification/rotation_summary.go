@@ -83,7 +83,7 @@ func VerifyRotationSummarySignature(sum *RotationSummary, kp interface {
 			if err != nil {
 				return fmt.Errorf("serialization_error:%w", err)
 			}
-			msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+			msg := append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), enc...)
 			sigBytes, err := base64.RawURLEncoding.DecodeString(sigEntry.Signature)
 			if err != nil {
 				return errors.New("signature_decode_error")
@@ -110,7 +110,7 @@ func VerifyRotationSummarySignature(sum *RotationSummary, kp interface {
 	if err != nil {
 		return fmt.Errorf("serialization_error:%w", err)
 	}
-	msg := append([]byte("GAUTH_ROTATION_SUMMARY:"), enc...)
+	msg := append([]byte("AGENTAUTH_ROTATION_SUMMARY:"), enc...)
 	sig, err := base64.RawURLEncoding.DecodeString(sum.Signature)
 	if err != nil {
 		return errors.New("signature_decode_error")

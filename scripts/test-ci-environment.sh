@@ -9,16 +9,16 @@ echo "============================"
 
 # Create a temporary directory with the nested structure that causes issues
 TEMP_DIR="/tmp/ci-test-$(date +%s)"
-mkdir -p "$TEMP_DIR/Gauth_go/Gauth_go"
+mkdir -p "$TEMP_DIR/AgentAuth/AgentAuth"
 
 echo "📁 Created test directory: $TEMP_DIR"
 
 # Copy the project to the nested structure (like GitHub Actions does)
 echo "📋 Copying project to nested structure..."
-cp -r . "$TEMP_DIR/Gauth_go/Gauth_go/" 2>/dev/null || echo "Copy completed (some files skipped)"
+cp -r . "$TEMP_DIR/AgentAuth/AgentAuth/" 2>/dev/null || echo "Copy completed (some files skipped)"
 
 # Change to the nested directory
-cd "$TEMP_DIR/Gauth_go/Gauth_go"
+cd "$TEMP_DIR/AgentAuth/AgentAuth"
 
 echo "📍 Test working directory: $(pwd)"
 echo ""
@@ -41,43 +41,43 @@ else
   echo "❌ cmd directory not found"
 fi
 echo ""
-echo "🔍 Searching for gauth-server source..."
+echo "🔍 Searching for agentauth-server source..."
 
 # Method 1: Standard relative path  
-if [ -f "./cmd/gauth-server/main.go" ]; then
-  SOURCE_PATH="./cmd/gauth-server"
-  echo "✅ Method 1: Found ./cmd/gauth-server/main.go"
+if [ -f "./cmd/agentauth-server/main.go" ]; then
+  SOURCE_PATH="./cmd/agentauth-server"
+  echo "✅ Method 1: Found ./cmd/agentauth-server/main.go"
 # Method 2: No leading dot
-elif [ -f "cmd/gauth-server/main.go" ]; then
-  SOURCE_PATH="cmd/gauth-server"  
-  echo "✅ Method 2: Found cmd/gauth-server/main.go"
+elif [ -f "cmd/agentauth-server/main.go" ]; then
+  SOURCE_PATH="cmd/agentauth-server"  
+  echo "✅ Method 2: Found cmd/agentauth-server/main.go"
 # Method 3: Search filesystem
 else
   echo "🔍 Method 3: Searching filesystem..."
-  MAIN_GO_PATH=$(find . -name "main.go" -path "*/gauth-server/*" 2>/dev/null | head -1)
+  MAIN_GO_PATH=$(find . -name "main.go" -path "*/agentauth-server/*" 2>/dev/null | head -1)
   if [ -n "$MAIN_GO_PATH" ]; then
     SOURCE_PATH=$(dirname "$MAIN_GO_PATH")
     echo "✅ Method 3: Found $MAIN_GO_PATH"
   else
-    echo "❌ ERROR: Cannot find gauth-server/main.go anywhere"
+    echo "❌ ERROR: Cannot find agentauth-server/main.go anywhere"
     echo "📋 Available main.go files:"
     find . -name "main.go" 2>/dev/null | head -10 || echo "No main.go files found"
-    echo "📋 Available gauth-server directories:"  
-    find . -name "*gauth-server*" -type d 2>/dev/null | head -5 || echo "No gauth-server directories found"
+    echo "📋 Available agentauth-server directories:"  
+    find . -name "*agentauth-server*" -type d 2>/dev/null | head -5 || echo "No agentauth-server directories found"
     exit 1
   fi
 fi
 
-echo "🏗️ Building gauth-server..."
+echo "🏗️ Building agentauth-server..."
 echo "📁 Source path: $SOURCE_PATH"
 mkdir -p build/bin
 
-if go build -ldflags="-s -w" -o build/bin/gauth-server "$SOURCE_PATH"; then
+if go build -ldflags="-s -w" -o build/bin/agentauth-server "$SOURCE_PATH"; then
   echo "✅ Build successful!"
   echo "📊 Binary info:"
-  ls -la build/bin/gauth-server
+  ls -la build/bin/agentauth-server
   echo "🧪 Testing binary..."
-  if ./build/bin/gauth-server --help >/dev/null 2>&1 || ./build/bin/gauth-server -h >/dev/null 2>&1; then
+  if ./build/bin/agentauth-server --help >/dev/null 2>&1 || ./build/bin/agentauth-server -h >/dev/null 2>&1; then
     echo "✅ Binary test passed"
   else
     echo "⚠️ Binary test failed (may be normal for some binaries)"

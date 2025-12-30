@@ -8,7 +8,7 @@
 
 ## Overview
 
-An external security researcher conducted a comprehensive audit of the Gauth_go authentication framework, focusing on AAP-RFC-0115 (Power of Attorney) implementation and potential architectural vulnerabilities. This document provides an executive summary of findings and remediation status.
+An external security researcher conducted a comprehensive audit of the AgentAuth authentication framework, focusing on AAP-002 (Power of Attorney) implementation and potential architectural vulnerabilities. This document provides an executive summary of findings and remediation status.
 
 ---
 
@@ -61,7 +61,7 @@ if child.Scope ⊄ parent.Scope {
 **Existing Protections:**
 - ✅ **Hard Depth Limit:** `maxDepth = 10` (iterative, not recursive)
 - ✅ **Cycle Detection:** `visitedIDs` map tracks seen PoA IDs
-- ✅ **Environment Variable:** `GAUTH_MAX_DELEGATION_DEPTH`
+- ✅ **Environment Variable:** `AGENTAUTH_MAX_DELEGATION_DEPTH`
 
 **Performance Validation:**
 - Load tested: 100 VUs × 10s with 8-hop chains
@@ -91,7 +91,7 @@ if child.Scope ⊄ parent.Scope {
 Security-Hardened: Comprehensive security controls with continuous testing
 - SAST/DAST tools in CI/CD pipeline
 - External security audits (2025-11-30)
-- RFC-0111 compliant implementation
+- AAP-001 compliant implementation
 ```
 
 ---
@@ -152,9 +152,9 @@ T=10s: Attacker replays again → Store.Seen() == TRUE → REJECTED
 
 ### Test Coverage
 ```
-pkg/gauth_rfc_001/: 91.2%
+pkg/agentauth_rfc_001/: 91.2%
 pkg/poa/: 89.7%
-pkg/gauth/: 88.3%
+pkg/agentauth/: 88.3%
 
 Overall: 91.7% coverage
 Security-specific tests: 18 cases
@@ -188,25 +188,25 @@ $ trivy fs --security-checks vuln .
 # Redis is MANDATORY for Kubernetes/Docker production use
 
 # Replay protection - REDIS REQUIRED
-export GAUTH_REPLAY_STORE_TYPE=redis
+export AGENTAUTH_REPLAY_STORE_TYPE=redis
 export REDIS_HOST=redis-cluster.default.svc.cluster.local
 export REDIS_PORT=6379
 export REDIS_PASSWORD=your-secure-password
-export GAUTH_REPLAY_FAIL_CLOSED=1
-export GAUTH_ALLOW_MISSING_JTI=0
+export AGENTAUTH_REPLAY_FAIL_CLOSED=1
+export AGENTAUTH_ALLOW_MISSING_JTI=0
 
 # ❌ DO NOT USE BoltDB in containers
 # If you must use BoltDB (development/testing ONLY):
 #   1. Use persistent volume (not /tmp or emptyDir)
-#   2. Set GAUTH_ALLOW_UNSAFE_BOLTDB=1 (UNSAFE for production)
+#   2. Set AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1 (UNSAFE for production)
 #   3. Single instance only (no horizontal scaling)
 
 # Delegation limits
-export GAUTH_MAX_DELEGATION_DEPTH=5
-export GAUTH_POA_VALIDATOR=advanced
+export AGENTAUTH_MAX_DELEGATION_DEPTH=5
+export AGENTAUTH_POA_VALIDATOR=advanced
 
 # Monitoring
-export GAUTH_METRICS_ENABLED=1
+export AGENTAUTH_METRICS_ENABLED=1
 ```
 
 **RECOMMENDED (Should Have):**
@@ -226,11 +226,11 @@ export GAUTH_METRICS_ENABLED=1
 
 ```yaml
 groups:
-  - name: gauth_security
+  - name: agentauth_security
     rules:
       # Replay attack detection
       - alert: ReplayAttackDetected
-        expr: rate(gauth_replay_hits_total[5m]) > 0.1
+        expr: rate(agentauth_replay_hits_total[5m]) > 0.1
         for: 1m
         labels:
           severity: critical
@@ -239,7 +239,7 @@ groups:
       
       # Delegation depth abuse
       - alert: DelegationDepthExceededSpike
-        expr: rate(gauth_delegation_depth_exceeded_total[5m]) > 0.1
+        expr: rate(agentauth_delegation_depth_exceeded_total[5m]) > 0.1
         for: 5m
         labels:
           severity: warning
@@ -248,7 +248,7 @@ groups:
       
       # Scope violations
       - alert: ScopeViolationDetected
-        expr: rate(gauth_scope_violations_total[5m]) > 0.05
+        expr: rate(agentauth_scope_violations_total[5m]) > 0.05
         for: 5m
         labels:
           severity: high
@@ -263,7 +263,7 @@ groups:
 ### Playbook: Replay Attack Detected
 
 **Phase 1: Detection (< 1 min)**
-- Alert triggers: `rate(gauth_replay_hits_total[5m]) > 0.1`
+- Alert triggers: `rate(agentauth_replay_hits_total[5m]) > 0.1`
 - Auto-notification to security team
 
 **Phase 2: Investigation (< 5 min)**
@@ -357,7 +357,7 @@ This security audit response confirms that:
 
 ---
 
-**Prepared By:** Gauth_go Security Team  
+**Prepared By:** AgentAuth Security Team  
 **Date:** November 30, 2025  
 **Next Review:** Q4 2026 (Annual External Audit)
 

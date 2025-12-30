@@ -48,11 +48,11 @@ Blue-green deployment maintains two identical production environments (blue and 
 
 ## Files
 
-1. **gauth-deployment-blue.yaml**: Blue environment deployment
-2. **gauth-deployment-green.yaml**: Green environment deployment
-3. **gauth-service-blue.yaml**: Service for blue environment
-4. **gauth-service-green.yaml**: Service for green environment
-5. **gauth-ingress-bluegreen.yaml**: Ingress with traffic switching capability
+1. **agentauth-deployment-blue.yaml**: Blue environment deployment
+2. **agentauth-deployment-green.yaml**: Green environment deployment
+3. **agentauth-service-blue.yaml**: Service for blue environment
+4. **agentauth-service-green.yaml**: Service for green environment
+5. **agentauth-ingress-bluegreen.yaml**: Ingress with traffic switching capability
 6. **switch-traffic.sh**: Script to switch traffic between blue/green
 
 ## Deployment Procedure
@@ -60,27 +60,27 @@ Blue-green deployment maintains two identical production environments (blue and 
 ### Initial Setup (First Time)
 ```bash
 # 1. Deploy blue environment
-kubectl apply -f gauth-deployment-blue.yaml
-kubectl apply -f gauth-service-blue.yaml
+kubectl apply -f agentauth-deployment-blue.yaml
+kubectl apply -f agentauth-service-blue.yaml
 
 # 2. Wait for blue to be ready
-kubectl rollout status deployment/gauth-deployment-blue -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment-blue -n agentauth-staging
 
 # 3. Deploy ingress pointing to blue
-kubectl apply -f gauth-ingress-bluegreen.yaml
+kubectl apply -f agentauth-ingress-bluegreen.yaml
 
 # 4. Verify blue is serving traffic
-curl https://gauth-staging.yourdomain.com/healthz
+curl https://agentauth-staging.yourdomain.com/healthz
 ```
 
 ### Deploying New Version
 ```bash
 # 1. Deploy to green environment (inactive)
-kubectl apply -f gauth-deployment-green.yaml
-kubectl apply -f gauth-service-green.yaml
+kubectl apply -f agentauth-deployment-green.yaml
+kubectl apply -f agentauth-service-green.yaml
 
 # 2. Wait for green to be ready
-kubectl rollout status deployment/gauth-deployment-green -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment-green -n agentauth-staging
 
 # 3. Run smoke tests against green
 ./smoke-tests.sh green
@@ -89,7 +89,7 @@ kubectl rollout status deployment/gauth-deployment-green -n gauth-staging
 ./switch-traffic.sh green
 
 # 5. Monitor green environment
-kubectl logs -n gauth-staging -l app=gauth,version=green --tail=100 -f
+kubectl logs -n agentauth-staging -l app=agentauth,version=green --tail=100 -f
 
 # 6. If successful, keep blue as rollback target
 # If issues arise, run: ./switch-traffic.sh blue
@@ -101,14 +101,14 @@ kubectl logs -n gauth-staging -l app=gauth,version=green --tail=100 -f
 ./switch-traffic.sh blue
 
 # Verify blue is serving traffic
-curl https://gauth-staging.yourdomain.com/healthz
+curl https://agentauth-staging.yourdomain.com/healthz
 ```
 
 ### Cleanup Old Environment
 ```bash
 # After green has been stable for 24+ hours, clean up blue
-kubectl delete -f gauth-deployment-blue.yaml
-kubectl delete -f gauth-service-blue.yaml
+kubectl delete -f agentauth-deployment-blue.yaml
+kubectl delete -f agentauth-service-blue.yaml
 
 # Rename green to blue for next cycle
 # (This makes green the new "stable" environment)
@@ -119,14 +119,14 @@ kubectl delete -f gauth-service-blue.yaml
 ### Method 1: Ingress Annotation (Recommended)
 Update ingress annotation to switch backend service:
 ```yaml
-nginx.ingress.kubernetes.io/service-upstream: "gauth-service-green"
+nginx.ingress.kubernetes.io/service-upstream: "agentauth-service-green"
 ```
 
 ### Method 2: Service Selector Update
 Update main service selector to point to desired version:
 ```yaml
 selector:
-  app: gauth
+  app: agentauth
   version: green  # Change from 'blue' to 'green'
 ```
 
@@ -137,13 +137,13 @@ Update DNS record or load balancer to point to green service endpoint.
 
 ```bash
 # Watch pod status
-watch kubectl get pods -n gauth-staging -l app=gauth
+watch kubectl get pods -n agentauth-staging -l app=agentauth
 
 # Monitor error rate
-kubectl logs -n gauth-staging -l app=gauth,version=green --tail=100 | grep ERROR
+kubectl logs -n agentauth-staging -l app=agentauth,version=green --tail=100 | grep ERROR
 
 # Check metrics
-curl https://gauth-staging.yourdomain.com/metrics | grep gauth_http_requests_total
+curl https://agentauth-staging.yourdomain.com/metrics | grep agentauth_http_requests_total
 ```
 
 ## Advantages

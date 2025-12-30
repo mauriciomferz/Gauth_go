@@ -29,15 +29,15 @@ Following the brutally honest RFC compliance assessment that identified 9 critic
 
 | Gap ID | Title | Priority | RFC | Status | Lines | File |
 |--------|-------|----------|-----|--------|-------|------|
-| G1 | Extended Token Structure | P0-Critical | RFC-0111 §3 | ✅ CLOSED | 550+ | extended_token.go |
-| G2 | Owner's Authorizer Entity | P0-Critical | RFC-0111 Chain | ✅ CLOSED | (G1) | extended_token.go |
-| G3 | PVP Identity Verification | P0-Critical | RFC-0111 Step VII | ✅ CLOSED | 620+ | pvp.go |
-| G4 | Commercial Register Integration | P0-Critical | RFC-0111 Step II | ✅ CLOSED | 480+ | commercial_register.go |
-| G5 | Token PoA Embedding | P0-Critical | RFC-0111 §3 | 🔄 IN PROGRESS | - | (integration pending) |
-| G6 | Non-Physical Actions | P2-Medium | RFC-0115 §B.4.4 | ✅ CLOSED | 50+ | action_types.go |
-| G7 | Representative Enhancement | P1-High | RFC-0115 §A.2 | ⏳ PENDING | - | poa.go (pending) |
-| G8 | Quantum Resistance | P2-Medium | RFC-0111 §4.3 | ⏳ PENDING | - | (documentation) |
-| G9 | PIP Consolidation | P1-Medium | RFC-0111 | ⏳ PENDING | - | (architecture) |
+| G1 | Extended Token Structure | P0-Critical | AAP-001 §3 | ✅ CLOSED | 550+ | extended_token.go |
+| G2 | Owner's Authorizer Entity | P0-Critical | AAP-001 Chain | ✅ CLOSED | (G1) | extended_token.go |
+| G3 | PVP Identity Verification | P0-Critical | AAP-001 Step VII | ✅ CLOSED | 620+ | pvp.go |
+| G4 | Commercial Register Integration | P0-Critical | AAP-001 Step II | ✅ CLOSED | 480+ | commercial_register.go |
+| G5 | Token PoA Embedding | P0-Critical | AAP-001 §3 | 🔄 IN PROGRESS | - | (integration pending) |
+| G6 | Non-Physical Actions | P2-Medium | AAP-002 §B.4.4 | ✅ CLOSED | 50+ | action_types.go |
+| G7 | Representative Enhancement | P1-High | AAP-002 §A.2 | ⏳ PENDING | - | poa.go (pending) |
+| G8 | Quantum Resistance | P2-Medium | AAP-001 §4.3 | ⏳ PENDING | - | (documentation) |
+| G9 | PIP Consolidation | P1-Medium | AAP-001 | ⏳ PENDING | - | (architecture) |
 
 **Legend:**  
 ✅ CLOSED = Fully implemented and compiling  
@@ -50,13 +50,13 @@ Following the brutally honest RFC compliance assessment that identified 9 critic
 
 ### G1: Extended Token Structure ✅ CLOSED
 
-**File:** `pkg/gauth/extended_token.go` (550+ lines)
+**File:** `pkg/agentauth/extended_token.go` (550+ lines)
 
-**RFC Requirement:** RFC-0111 §3 mandates extended token as comprehensive authorization credential, not just OAuth access token.
+**RFC Requirement:** AAP-001 §3 mandates extended token as comprehensive authorization credential, not just OAuth access token.
 
 **What Was Broken:**
 ```go
-// BEFORE - Simple OAuth token (INCORRECT per RFC-0111)
+// BEFORE - Simple OAuth token (INCORRECT per AAP-001)
 type TokenResponse struct {
     AccessToken  string `json:"access_token"`
     TokenType    string `json:"token_type"`
@@ -67,7 +67,7 @@ type TokenResponse struct {
 
 **What Was Fixed:**
 ```go
-// AFTER - RFC-0111 compliant extended token
+// AFTER - AAP-001 compliant extended token
 type ExtendedToken struct {
     // OAuth 2.0 compatibility
     AccessToken      string     `json:"access_token"`
@@ -75,7 +75,7 @@ type ExtendedToken struct {
     ExpiresIn        int        `json:"expires_in"`
     RefreshToken     string     `json:"refresh_token,omitempty"`
     
-    // RFC-0111 Extensions
+    // AAP-001 Extensions
     PowerOfAttorney         *poa.PoADefinition           `json:"power_of_attorney"`
     AuthorizationChain      *AuthorizationChain          `json:"authorization_chain"`
     ClientOwner             *ClientOwnerInfo             `json:"client_owner"`
@@ -106,13 +106,13 @@ type ExtendedToken struct {
 - `ValidateAuthorizationChain()` - Chain integrity checks
 - `ValidateLegalFramework()` - Legal compliance verification
 
-**RFC Compliance:** 100% for RFC-0111 §3
+**RFC Compliance:** 100% for AAP-001 §3
 
 ---
 
 ### G2: Owner's Authorizer Entity ✅ CLOSED
 
-**File:** `pkg/gauth/extended_token.go` (integrated with G1)
+**File:** `pkg/agentauth/extended_token.go` (integrated with G1)
 
 **RFC Requirement:** Distinct Owner's Authorizer entity representing statutory authority (managing director, board member) separate from Client Owner.
 
@@ -163,7 +163,7 @@ type AuthorizationChain struct {
 
 **File:** `pkg/verification/pvp.go` (620+ lines)
 
-**RFC Requirement:** RFC-0111 Step VII - Power Verification Point (PVP) for identity verification chain validation.
+**RFC Requirement:** AAP-001 Step VII - Power Verification Point (PVP) for identity verification chain validation.
 
 **What Was Broken:**
 - PVP completely missing
@@ -179,13 +179,13 @@ type PowerVerificationPoint interface {
         req *IdentityChainVerificationRequest) (*IdentityChainVerificationResult, error)
     
     VerifyIdentityProof(ctx context.Context, 
-        proof *gauth.IdentityVerificationChain) (*IdentityProofResult, error)
+        proof *agentauth.IdentityVerificationChain) (*IdentityProofResult, error)
     
     VerifyTrustServiceProvider(ctx context.Context, 
         tspID string) (*TSPVerificationResult, error)
     
     TraceAuthorizationChain(ctx context.Context, 
-        chain *gauth.AuthorizationChain) (*ChainTraceResult, error)
+        chain *agentauth.AuthorizationChain) (*ChainTraceResult, error)
     
     BindIdentityToCryptographicKey(ctx context.Context, 
         req *IdentityKeyBindingRequest) (*IdentityKeyBindingResult, error)
@@ -194,7 +194,7 @@ type PowerVerificationPoint interface {
 // DefaultPVP - Production-ready implementation
 type DefaultPVP struct {
     trustListURL      string
-    trustProviders    map[string]*gauth.TrustServiceProviderInfo
+    trustProviders    map[string]*agentauth.TrustServiceProviderInfo
     verificationCache map[string]*IdentityProofResult
     cacheExpiry       time.Duration
 }
@@ -247,7 +247,7 @@ type IdentityChainVerificationResult struct {
 }
 ```
 
-**RFC Compliance:** 90% for RFC-0111 Step VII (pending full TSP endpoint integration)
+**RFC Compliance:** 90% for AAP-001 Step VII (pending full TSP endpoint integration)
 
 ---
 
@@ -255,7 +255,7 @@ type IdentityChainVerificationResult struct {
 
 **File:** `pkg/registry/commercial_register.go` (480+ lines)
 
-**RFC Requirement:** RFC-0111 Steps II & VII mandate verification through commercial register or equivalent authoritative source.
+**RFC Requirement:** AAP-001 Steps II & VII mandate verification through commercial register or equivalent authoritative source.
 
 **What Was Broken:**
 ```go
@@ -414,7 +414,7 @@ func (s *Service) ValidateToken(ctx context.Context, token string) (*ExtendedTok
 
 **File:** `pkg/poa/action_types.go` (updated)
 
-**RFC Requirement:** RFC-0115 §B.4.4 requires complete non-physical action classification.
+**RFC Requirement:** AAP-002 §B.4.4 requires complete non-physical action classification.
 
 **What Was Missing:**
 - Data aggregation
@@ -425,31 +425,31 @@ func (s *Service) ValidateToken(ctx context.Context, token string) (*ExtendedTok
 
 **What Was Added:**
 ```go
-// NEW: RFC-0115 B.4.4 Required Actions
+// NEW: AAP-002 B.4.4 Required Actions
 const (
     // ActionNonPhysicalDataAggregation - Data aggregation and consolidation
-    // RFC-0115 B.4.4: Required for AI data processing operations
+    // AAP-002 B.4.4: Required for AI data processing operations
     ActionNonPhysicalDataAggregation ActionTypeNonPhysical = "DataAggregation"
 
     // ActionNonPhysicalVisualization - Data visualization and reporting
-    // RFC-0115 B.4.4: Required for AI reporting and presentation
+    // AAP-002 B.4.4: Required for AI reporting and presentation
     ActionNonPhysicalVisualization ActionTypeNonPhysical = "Visualization"
 
     // ActionNonPhysicalNotification - Notification and alerting
-    // RFC-0115 B.4.4: Required for AI event-driven communications
+    // AAP-002 B.4.4: Required for AI event-driven communications
     ActionNonPhysicalNotification ActionTypeNonPhysical = "Notification"
 
     // ActionNonPhysicalRAG - Retrieval-Augmented Generation (RAG) operations
-    // RFC-0115 B.4.4: Explicit RAG support as specified in "Researching (e.g., RAG)"
+    // AAP-002 B.4.4: Explicit RAG support as specified in "Researching (e.g., RAG)"
     ActionNonPhysicalRAG ActionTypeNonPhysical = "RAG"
 
     // ActionNonPhysicalPresenting - Sharing and presenting information
-    // RFC-0115 B.4.4: "Sharing / presenting" from specification
+    // AAP-002 B.4.4: "Sharing / presenting" from specification
     ActionNonPhysicalPresenting ActionTypeNonPhysical = "Presenting"
 )
 ```
 
-**Complete RFC-0115 B.4.4 Coverage:**
+**Complete AAP-002 B.4.4 Coverage:**
 - ✅ Sharing/presenting → `ActionNonPhysicalPresenting` (NEW)
 - ✅ Brainstorming/discussing → `ActionNonPhysicalBrainstorming` (existing)
 - ✅ Researching (e.g., RAG) → `ActionNonPhysicalResearching` + `ActionNonPhysicalRAG` (NEW explicit)
@@ -479,7 +479,7 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 }
 ```
 
-**RFC Compliance:** 100% for RFC-0115 §B.4.4
+**RFC Compliance:** 100% for AAP-002 §B.4.4
 
 ---
 
@@ -522,7 +522,7 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 
 ## RFC Compliance Score Evolution
 
-### RFC-0111 (AgentAuth 1.0 Authorization Framework)
+### AAP-001 (AgentAuth 1.0 Authorization Framework)
 
 | Section/Requirement | Initial | After Remediation | Change |
 |---------------------|---------|-------------------|--------|
@@ -539,9 +539,9 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 | Step VII - Identity Verification | 0% | 90% | +90% |
 | Step VIII - Resource Access | 90% | 90% | 0% |
 | Step IX - Token Validation | 70% | 70% | 0% |
-| **Overall RFC-0111** | **67.5%** | **~88%** | **+20.5%** |
+| **Overall AAP-001** | **67.5%** | **~88%** | **+20.5%** |
 
-### RFC-0115 (Power-of-Attorney Credential Definition)
+### AAP-002 (Power-of-Attorney Credential Definition)
 
 | Section | Initial | After Remediation | Change |
 |---------|---------|-------------------|--------|
@@ -558,7 +558,7 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 | §C.2 Power Limits | 90% | 90% | 0% |
 | §C.3 Rights/Obligations | 85% | 85% | 0% |
 | §C.4 Requirements | 80% | 80% | 0% |
-| **Overall RFC-0115** | **71.4%** | **~92%** | **+20.6%** |
+| **Overall AAP-002** | **71.4%** | **~92%** | **+20.6%** |
 
 ### Combined Overall Compliance
 
@@ -595,8 +595,8 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 **Goal:** Comprehensive testing and RFC compliance validation
 
 **Tasks:**
-1. ✅ Create RFC-0111 compliance test suite
-2. ✅ Create RFC-0115 compliance test suite
+1. ✅ Create AAP-001 compliance test suite
+2. ✅ Create AAP-002 compliance test suite
 3. ✅ Authorization chain validation tests
 4. ✅ PVP verification tests
 5. ✅ Commercial register integration tests
@@ -656,7 +656,7 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 │  OAuth 2.0 Base                                             │
 │  ├─ access_token, token_type, expires_in, refresh_token    │
 │                                                             │
-│  RFC-0111 Extensions                                        │
+│  AAP-001 Extensions                                        │
 │  ├─ PowerOfAttorney (complete PoA definition)              │
 │  ├─ AuthorizationChain                                      │
 │  │   ├─ Owner's Authorizer (Level 1: Statutory)            │
@@ -795,7 +795,7 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 
 ### Successful Compilation
 ```bash
-✅ go build ./pkg/gauth/...
+✅ go build ./pkg/agentauth/...
 ✅ go build ./pkg/verification/...
 ✅ go build ./pkg/registry/...
 ✅ go build ./pkg/poa/...
@@ -805,13 +805,13 @@ func ValidateActionTypeNonPhysical(at ActionTypeNonPhysical) error {
 
 ### Package Dependencies
 ```
-pkg/gauth/extended_token.go
+pkg/agentauth/extended_token.go
 ├─ depends on: pkg/poa (PowerOfAttorney)
 ├─ depends on: time
 └─ exports: ExtendedToken, AuthorizationChain, etc.
 
 pkg/verification/pvp.go
-├─ depends on: pkg/gauth (ExtendedToken types)
+├─ depends on: pkg/agentauth (ExtendedToken types)
 ├─ depends on: context, crypto/sha256, encoding/hex
 └─ exports: PowerVerificationPoint, DefaultPVP
 
@@ -829,7 +829,7 @@ pkg/poa/action_types.go (updated)
 ## Testing Recommendations
 
 ### Unit Tests Priority
-1. **ExtendedToken Validation** (pkg/gauth/extended_token_test.go)
+1. **ExtendedToken Validation** (pkg/agentauth/extended_token_test.go)
    - Test all validation methods
    - Test authorization chain integrity
    - Test legal framework validation
@@ -938,8 +938,8 @@ pkg/poa/action_types.go (updated)
 
 ### RFC Compliance Documentation
 1. ✅ Gap closure report (this document)
-2. ⏳ RFC-0111 compliance certification
-3. ⏳ RFC-0115 compliance certification
+2. ⏳ AAP-001 compliance certification
+3. ⏳ AAP-002 compliance certification
 4. ⏳ Security audit report
 5. ⏳ Performance benchmarks
 
@@ -959,11 +959,11 @@ This comprehensive gap remediation session has successfully transformed the Agen
 - ✅ **Zero production blockers** remaining
 
 **Qualitative Improvements:**
-- ✅ **Extended Token** now RFC-0111 compliant comprehensive authorization credential
+- ✅ **Extended Token** now AAP-001 compliant comprehensive authorization credential
 - ✅ **Authorization Chain** properly models three-level hierarchy with statutory authority
 - ✅ **PVP** implements complete identity verification chain with TSP integration
 - ✅ **Commercial Register** integration interface ready for production APIs
-- ✅ **Non-Physical Actions** complete per RFC-0115 §B.4.4
+- ✅ **Non-Physical Actions** complete per AAP-002 §B.4.4
 
 ### Production Readiness Verdict
 

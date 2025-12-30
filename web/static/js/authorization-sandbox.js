@@ -25,26 +25,26 @@ class AuthorizationSandbox {
 
     bindEvents() {
         document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-action="test-pattern"]')) {
+            if (e.target.matches('[data-action="test-pattern"]') {
                 this.runPolicyTest();
             }
-            if (e.target.matches('[data-action="test-revocation"]')) {
+            if (e.target.matches('[data-action="test-revocation"]') {
                 this.runRevocationTest();
             }
-            if (e.target.matches('[data-example-id]')) {
+            if (e.target.matches('[data-example-id]') {
                 const exampleId = e.target.getAttribute('data-example-id');
                 this.runExample(exampleId);
             }
-            if (e.target.matches('[data-sandbox-action="run-experiment"]')) {
+            if (e.target.matches('[data-sandbox-action="run-experiment"]') {
                 this.runExperiment();
             }
-            if (e.target.matches('[data-sandbox-action="save-experiment"]')) {
+            if (e.target.matches('[data-sandbox-action="save-experiment"]') {
                 this.saveExperiment();
             }
-            if (e.target.matches('[data-sandbox-action="export-results"]')) {
+            if (e.target.matches('[data-sandbox-action="export-results"]') {
                 this.exportResults();
             }
-            if (e.target.matches('[data-test-runner]')) {
+            if (e.target.matches('[data-test-runner]') {
                 const testType = e.target.getAttribute('data-test-runner');
                 this.runTestSuite(testType);
             }
@@ -52,7 +52,7 @@ class AuthorizationSandbox {
 
         // Add change listeners for sandbox form elements
         document.addEventListener('change', (e) => {
-            if (e.target.matches('#sandbox-scenario-type')) {
+            if (e.target.matches('#sandbox-scenario-type') {
                 this.updateScenarioTemplate(e.target.value);
             }
         });
@@ -287,7 +287,7 @@ class AuthorizationSandbox {
         const participantInput = document.getElementById('sandbox-participant');
         if (participantInput) {
             participantInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && e.target.value.trim()) {
+                if (e.key === 'Enter' && e.target.value.trim() {
                     this.addParticipant(e.target.value.trim());
                     e.target.value = '';
                 }
@@ -696,7 +696,7 @@ class AuthorizationSandbox {
         this.writeToTerminal('Building permission hierarchy...', 'info');
         
         const hierarchy = this.buildHierarchy(experiment.participants);
-        for (const [level, participants] of hierarchy.entries()) {
+        for (const [level, participants] of hierarchy.entries() {
             this.writeToTerminal(`Level ${level}: ${participants.join(', ')}`, 'data');
         }
         
@@ -705,7 +705,7 @@ class AuthorizationSandbox {
         for (const action of experiment.actions) {
             this.writeToTerminal(`\nEvaluating action: ${action}`, 'info');
             
-            for (const [level, participants] of hierarchy.entries()) {
+            for (const [level, participants] of hierarchy.entries() {
                 for (const participant of participants) {
                     await this.delay(300);
                     
@@ -722,7 +722,7 @@ class AuthorizationSandbox {
         const hierarchy = new Map();
         participants.forEach((participant, index) => {
             const level = Math.floor(index / 2); // Simple hierarchy grouping
-            if (!hierarchy.has(level)) {
+            if (!hierarchy.has(level) {
                 hierarchy.set(level, []);
             }
             hierarchy.get(level).push(participant);
@@ -785,7 +785,7 @@ class AuthorizationSandbox {
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `gauth-experiment-${this.currentExperiment.id}.json`;
+        a.download = `agentauth-experiment-${this.currentExperiment.id}.json`;
         a.click();
         
         URL.revokeObjectURL(url);
@@ -808,7 +808,7 @@ class AuthorizationSandbox {
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `gauth-sandbox-results-${Date.now()}.json`;
+        a.download = `agentauth-sandbox-results-${Date.now()}.json`;
         a.click();
         
         URL.revokeObjectURL(url);

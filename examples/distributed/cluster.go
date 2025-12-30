@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // ResourceNode represents a distributed resource node
@@ -23,7 +23,7 @@ type ResourceNode struct {
 
 // DistributedResourceManager manages a cluster of resource nodes
 type DistributedResourceManager struct {
-	auth         gauth.AgentAuth
+	auth         agentauth.AgentAuth
 	nodes        map[string]*ResourceNode
 	nodesMutex   sync.RWMutex
 	tokenCache   map[string]time.Time
@@ -31,7 +31,7 @@ type DistributedResourceManager struct {
 	healthChecks chan string
 }
 
-func NewDistributedResourceManager(auth gauth.AgentAuth) *DistributedResourceManager {
+func NewDistributedResourceManager(auth agentauth.AgentAuth) *DistributedResourceManager {
 	drm := &DistributedResourceManager{
 		auth:         auth,
 		nodes:        make(map[string]*ResourceNode),
@@ -52,7 +52,7 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 	defer drm.nodesMutex.Unlock()
 
 	// Validate node registration with AgentAuth
-	tx := gauth.TransactionDetails{
+	tx := agentauth.TransactionDetails{
 		Type:       "node_registration",
 		ResourceID: node.ID,
 		CustomMetadata: map[string]interface{}{
@@ -62,7 +62,7 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 	}
 
 	// Request temporary token for node
-	authReq := gauth.AuthorizationRequest{
+	authReq := agentauth.AuthorizationRequest{
 		ClientID: "cluster-manager",
 		Scopes:   []string{"node:register", "transaction:execute"},
 	}
@@ -72,7 +72,7 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 		return err
 	}
 
-	tokenResp, err := drm.auth.RequestToken(gauth.TokenRequest{
+	tokenResp, err := drm.auth.RequestToken(agentauth.TokenRequest{
 		GrantID: grant.GrantID,
 		Scope:   append(grant.Scope, "transaction:execute"),
 	})
@@ -82,7 +82,7 @@ func (drm *DistributedResourceManager) RegisterNode(node *ResourceNode) error {
 	log.Printf("Granted token scopes: %v", tokenResp.Scope)
 
 	// Process registration
-	server := gauth.NewResourceServer("cluster-manager", drm.auth.(*gauth.Service))
+	server := agentauth.NewResourceServer("cluster-manager", drm.auth.(*agentauth.Service))
 	_, err = server.ProcessTransaction(tx, tokenResp.Token)
 	if err != nil {
 		return err
@@ -169,7 +169,7 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 		resourceID := fmt.Sprintf("resource-%d", i+1)
 		userID := fmt.Sprintf("user-%d", userIndex) // user-1, user-2, user-3
 
-		tx := gauth.TransactionDetails{
+		tx := agentauth.TransactionDetails{
 			Type:       "resource_access",
 			ResourceID: resourceID,
 			CustomMetadata: map[string]interface{}{
@@ -178,7 +178,7 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 			},
 		}
 
-		authReq := gauth.AuthorizationRequest{
+		authReq := agentauth.AuthorizationRequest{
 			ClientID: userID,
 			Scopes:   []string{"resource:access"},
 		}
@@ -189,7 +189,7 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 			continue
 		}
 
-		tokenResp, err := manager.auth.RequestToken(gauth.TokenRequest{
+		tokenResp, err := manager.auth.RequestToken(agentauth.TokenRequest{
 			GrantID: grant.GrantID,
 			Scope:   grant.Scope,
 		})
@@ -198,7 +198,7 @@ func SimulateDistributedAuthorization(manager *DistributedResourceManager, numRe
 			continue
 		}
 
-		server := gauth.NewResourceServer(nodeID, manager.auth.(*gauth.Service))
+		server := agentauth.NewResourceServer(nodeID, manager.auth.(*agentauth.Service))
 		result, err := server.ProcessTransaction(tx, tokenResp.Token)
 		if err != nil {
 			log.Printf("[Sim] Node %s denied access to %s for %s: %v", nodeID, userID, resourceID, err)
@@ -267,7 +267,7 @@ func main() {
 		clientSecret = "cluster-secret" // Default for development only
 	}
 
-	config := gauth.Config{
+	config := agentauth.Config{
 		AuthServerURL:     "https://auth.example.com",
 		ClientID:          "cluster-manager",
 		ClientSecret:      clientSecret,
@@ -275,7 +275,7 @@ func main() {
 		AccessTokenExpiry: 24 * time.Hour,
 	}
 
-	auth, err := gauth.New(config)
+	auth, err := agentauth.New(config)
 	if err != nil {
 		log.Fatalf("Failed to initialize AgentAuth: %v", err)
 	}

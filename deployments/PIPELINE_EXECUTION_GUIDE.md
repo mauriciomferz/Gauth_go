@@ -32,7 +32,7 @@ This guide documents the process for pushing code to GitHub, triggering the CI/C
 - [x] All 23 commits ready to push
 - [x] Working tree clean (no uncommitted changes)
 - [x] Branch: main
-- [x] Remote: https://github.com/mauriciomferz/Gauth_go
+- [x] Remote: https://github.com/mauriciomferz/AgentAuth
 - [x] Workflow YAML syntax validated
 - [x] All 15 required Kubernetes manifests present
 - [x] Scripts executable (preflight-check.sh, validate-cicd.sh, switch-traffic.sh)
@@ -40,7 +40,7 @@ This guide documents the process for pushing code to GitHub, triggering the CI/C
 ### ⚠️ Required GitHub Secrets
 
 Before pushing, verify these 6 secrets are configured at:  
-**https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions**
+**https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions**
 
 | Secret Name | Required | Description | Example Value |
 |-------------|----------|-------------|---------------|
@@ -71,7 +71,7 @@ kubectl get nodes
 # Expected: All nodes in "Ready" state
 
 # Check namespace exists
-kubectl get namespace gauth-staging
+kubectl get namespace agentauth-staging
 
 # If missing, create it:
 kubectl apply -f deployments/k8s/staging/namespace.yaml
@@ -147,7 +147,7 @@ git push origin main
 # Writing objects: 100% (XX/XX), XX.XX KiB | XX.XX MiB/s, done.
 # Total XX (delta XX), reused XX (delta XX), pack-reused 0
 # remote: Resolving deltas: 100% (XX/XX), completed with XX local objects.
-# To https://github.com/mauriciomferz/Gauth_go.git
+# To https://github.com/mauriciomferz/AgentAuth.git
 #    791fb792..05721f73  main -> main
 ```
 
@@ -155,7 +155,7 @@ git push origin main
 
 Immediately after pushing, navigate to GitHub Actions:
 
-**URL**: https://github.com/mauriciomferz/Gauth_go/actions
+**URL**: https://github.com/mauriciomferz/AgentAuth/actions
 
 **Look for**:
 - Workflow run name: "Deploy to Staging"
@@ -206,8 +206,8 @@ Immediately after pushing, navigate to GitHub Actions:
 │  ├─ Build Docker image (multi-stage)                       │
 │  ├─ Run Trivy vulnerability scan                           │
 │  └─ Push image to registry                                 │
-│      Image: ghcr.io/mauriciomferz/gauth:staging            │
-│             ghcr.io/mauriciomferz/gauth:main-05721f73       │
+│      Image: ghcr.io/mauriciomferz/agentauth:staging            │
+│             ghcr.io/mauriciomferz/agentauth:main-05721f73       │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -227,7 +227,7 @@ Immediately after pushing, navigate to GitHub Actions:
 │  │   └─ hpa.yaml                                           │
 │  ├─ Wait for rollout (timeout: 5m)                         │
 │  ├─ Run smoke tests                                        │
-│  │   ├─ curl https://gauth-staging.yourdomain.com/healthz  │
+│  │   ├─ curl https://agentauth-staging.yourdomain.com/healthz  │
 │  │   ├─ curl .../api/v1/beta/health                        │
 │  │   └─ curl .../metrics                                   │
 │  └─ Send Slack notification (success)                      │
@@ -237,7 +237,7 @@ Immediately after pushing, navigate to GitHub Actions:
 │  Job 5: rollback (only if deploy fails)                    │
 │  ├─ Set up kubectl                                          │
 │  ├─ Configure kubeconfig                                    │
-│  ├─ kubectl rollout undo deployment/gauth-deployment       │
+│  ├─ kubectl rollout undo deployment/agentauth-deployment       │
 │  └─ Send Slack notification (rollback)                     │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -294,33 +294,33 @@ Monitor deployment from terminal:
 
 ```bash
 # Watch pods in staging namespace
-kubectl get pods -n gauth-staging --watch
+kubectl get pods -n agentauth-staging --watch
 
 # Expected progression:
 # NAME                                READY   STATUS              RESTARTS   AGE
-# gauth-postgres-0                    0/1     ContainerCreating   0          10s
-# gauth-postgres-0                    1/1     Running             0          30s
-# gauth-redis-0                       0/1     ContainerCreating   0          10s
-# gauth-redis-0                       1/1     Running             0          25s
-# gauth-deployment-7d5f4c8b9d-abc12   0/1     ContainerCreating   0          5s
-# gauth-deployment-7d5f4c8b9d-abc12   0/1     Running             0          15s
-# gauth-deployment-7d5f4c8b9d-abc12   1/1     Running             0          30s
+# agentauth-postgres-0                    0/1     ContainerCreating   0          10s
+# agentauth-postgres-0                    1/1     Running             0          30s
+# agentauth-redis-0                       0/1     ContainerCreating   0          10s
+# agentauth-redis-0                       1/1     Running             0          25s
+# agentauth-deployment-7d5f4c8b9d-abc12   0/1     ContainerCreating   0          5s
+# agentauth-deployment-7d5f4c8b9d-abc12   0/1     Running             0          15s
+# agentauth-deployment-7d5f4c8b9d-abc12   1/1     Running             0          30s
 # (repeat for 3 replicas)
 
 # Check rollout status
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 
 # Expected output:
-# Waiting for deployment "gauth-deployment" rollout to finish: 0 of 3 updated replicas are available...
-# Waiting for deployment "gauth-deployment" rollout to finish: 1 of 3 updated replicas are available...
-# Waiting for deployment "gauth-deployment" rollout to finish: 2 of 3 updated replicas are available...
-# deployment "gauth-deployment" successfully rolled out
+# Waiting for deployment "agentauth-deployment" rollout to finish: 0 of 3 updated replicas are available...
+# Waiting for deployment "agentauth-deployment" rollout to finish: 1 of 3 updated replicas are available...
+# Waiting for deployment "agentauth-deployment" rollout to finish: 2 of 3 updated replicas are available...
+# deployment "agentauth-deployment" successfully rolled out
 
 # Check logs from new pods
-kubectl logs -f deployment/gauth-deployment -n gauth-staging
+kubectl logs -f deployment/agentauth-deployment -n agentauth-staging
 
 # Monitor HPA
-kubectl get hpa -n gauth-staging --watch
+kubectl get hpa -n agentauth-staging --watch
 ```
 
 ---
@@ -340,7 +340,7 @@ kubectl get hpa -n gauth-staging --watch
    - Expected: 2500+ tests pass
    - Expected: >80% coverage
 6. **Run RFC compliance tests**: `go test -tags=compliance ./test/conformance/...`
-   - Expected: All RFC 2104, RFC 5869, RFC 6238, RFC 6979, RFC 8032, RFC 8235, AgentAuth-RFC-001 (formerly RFC 111), RFC 7519 tests pass
+   - Expected: All RFC 2104, RFC 5869, RFC 6238, RFC 6979, RFC 8032, RFC 8235, AAP-001 (formerly AAP-001), RFC 7519 tests pass
 7. **Run security regression tests**: `go test -tags=security ./test/security/...`
    - Expected: All SSRF, timing attack, injection tests pass
 8. **Upload coverage**: Upload coverage.out to Codecov (optional)
@@ -366,7 +366,7 @@ gh run view RUN_ID --log --job test | grep -E "(PASS|FAIL|coverage:)"
 ...
 PASS
 coverage: 87.3% of statements
-ok      github.com/mauriciomferz/Gauth_go/pkg/poa       5.123s  coverage: 87.3% of statements
+ok      github.com/mauriciomferz/AgentAuth/pkg/poa       5.123s  coverage: 87.3% of statements
 ```
 
 ---
@@ -427,10 +427,10 @@ No vulnerabilities found.
    - Password: `${{ secrets.DOCKER_PASSWORD }}`
 4. **Extract metadata**: Generate tags and labels
    - Tags:
-     * `ghcr.io/mauriciomferz/gauth:staging` (latest staging)
-     * `ghcr.io/mauriciomferz/gauth:main-05721f73` (commit-specific)
+     * `ghcr.io/mauriciomferz/agentauth:staging` (latest staging)
+     * `ghcr.io/mauriciomferz/agentauth:main-05721f73` (commit-specific)
    - Labels:
-     * `org.opencontainers.image.source=https://github.com/mauriciomferz/Gauth_go`
+     * `org.opencontainers.image.source=https://github.com/mauriciomferz/AgentAuth`
      * `org.opencontainers.image.revision=05721f73`
      * `org.opencontainers.image.created=2025-11-09T12:00:00Z`
 5. **Build Docker image**: Multi-stage build using `Dockerfile`
@@ -438,7 +438,7 @@ No vulnerabilities found.
    - Stage 2: Runtime (alpine:3.20)
    - Output: ~50MB image
 6. **Run Trivy vulnerability scan**: Scan Docker image for OS and library vulnerabilities
-   - Command: `trivy image --severity HIGH,CRITICAL ghcr.io/mauriciomferz/gauth:staging`
+   - Command: `trivy image --severity HIGH,CRITICAL ghcr.io/mauriciomferz/agentauth:staging`
    - Checks: Alpine base image, Go runtime, application dependencies
 7. **Push image to registry**: Upload to GHCR
 
@@ -460,13 +460,13 @@ gh run view RUN_ID --log --job build | grep -E "(Step [0-9]+|pushed|vulnerabilit
 #2 [internal] load build definition from Dockerfile
 #2 transferring dockerfile: 1.2kB done
 ...
-#15 [stage-1 5/5] RUN addgroup -g 1000 gauth && adduser -D -u 1000 -G gauth gauth
+#15 [stage-1 5/5] RUN addgroup -g 1000 agentauth && adduser -D -u 1000 -G agentauth agentauth
 #15 DONE 0.3s
 ...
 #17 exporting to image
 #17 exporting layers done
 #17 writing image sha256:abc123def456... done
-#17 naming to ghcr.io/mauriciomferz/gauth:staging done
+#17 naming to ghcr.io/mauriciomferz/agentauth:staging done
 #17 DONE 0.5s
 
 Running Trivy vulnerability scanner...
@@ -481,7 +481,7 @@ main-05721f73: digest: sha256:abc123def456... size: 1234
 ```
 
 **Image Details**:
-- **Registry**: `ghcr.io/mauriciomferz/gauth`
+- **Registry**: `ghcr.io/mauriciomferz/agentauth`
 - **Tags**: `staging`, `main-05721f73`
 - **Size**: ~50MB (compressed)
 - **Layers**: 5 (base alpine + binary + user + config + entrypoint)
@@ -512,13 +512,13 @@ main-05721f73: digest: sha256:abc123def456... size: 1234
    kubectl apply -f deployments/k8s/staging/hpa.yaml
    ```
 5. **Wait for rollout**: Monitor deployment progress (timeout: 5m)
-   - Command: `kubectl rollout status deployment/gauth-deployment -n gauth-staging --timeout=5m`
+   - Command: `kubectl rollout status deployment/agentauth-deployment -n agentauth-staging --timeout=5m`
    - Expected: 3 replicas running and healthy
 6. **Run smoke tests**: Verify endpoints
    ```bash
-   curl -f https://gauth-staging.yourdomain.com/healthz
-   curl -f https://gauth-staging.yourdomain.com/api/v1/beta/health
-   curl -f https://gauth-staging.yourdomain.com/metrics | grep gauth_
+   curl -f https://agentauth-staging.yourdomain.com/healthz
+   curl -f https://agentauth-staging.yourdomain.com/api/v1/beta/health
+   curl -f https://agentauth-staging.yourdomain.com/metrics | grep agentauth_
    ```
 7. **Send Slack notification**: Post success message to Slack
 
@@ -538,25 +538,25 @@ gh run view RUN_ID --log --job deploy | grep -E "(configured|created|deployed|ro
 
 **Expected Output**:
 ```
-namespace/gauth-staging configured
-configmap/gauth-config configured
-secret/gauth-secrets configured
-statefulset.apps/gauth-postgres configured
-statefulset.apps/gauth-redis configured
-deployment.apps/gauth-deployment configured
-service/gauth-service configured
-ingress.networking.k8s.io/gauth-ingress configured
-horizontalpodautoscaler.autoscaling/gauth-hpa configured
+namespace/agentauth-staging configured
+configmap/agentauth-config configured
+secret/agentauth-secrets configured
+statefulset.apps/agentauth-postgres configured
+statefulset.apps/agentauth-redis configured
+deployment.apps/agentauth-deployment configured
+service/agentauth-service configured
+ingress.networking.k8s.io/agentauth-ingress configured
+horizontalpodautoscaler.autoscaling/agentauth-hpa configured
 
-Waiting for deployment "gauth-deployment" rollout to finish: 0 of 3 updated replicas are available...
-Waiting for deployment "gauth-deployment" rollout to finish: 1 of 3 updated replicas are available...
-Waiting for deployment "gauth-deployment" rollout to finish: 2 of 3 updated replicas are available...
-deployment "gauth-deployment" successfully rolled out
+Waiting for deployment "agentauth-deployment" rollout to finish: 0 of 3 updated replicas are available...
+Waiting for deployment "agentauth-deployment" rollout to finish: 1 of 3 updated replicas are available...
+Waiting for deployment "agentauth-deployment" rollout to finish: 2 of 3 updated replicas are available...
+deployment "agentauth-deployment" successfully rolled out
 
 Running smoke tests...
 ✅ /healthz: HTTP 200
 ✅ /api/v1/beta/health: HTTP 200
-✅ /metrics: HTTP 200 (gauth_requests_total found)
+✅ /metrics: HTTP 200 (agentauth_requests_total found)
 
 🎉 Deployment successful! Sending Slack notification...
 ```
@@ -565,15 +565,15 @@ Running smoke tests...
 
 | Resource Type | Name | Replicas/Ready | CPU Limit | Memory Limit |
 |---------------|------|----------------|-----------|--------------|
-| Namespace | gauth-staging | - | - | - |
-| ConfigMap | gauth-config | - | - | - |
-| Secret | gauth-secrets | - | - | - |
-| StatefulSet | gauth-postgres | 1/1 | 2000m | 4Gi |
-| StatefulSet | gauth-redis | 1/1 | 1000m | 2Gi |
-| Deployment | gauth-deployment | 3/3 | 2000m | 4Gi |
-| Service | gauth-service | - | - | - |
-| Ingress | gauth-ingress | - | - | - |
-| HPA | gauth-hpa | min=3, max=10 | - | - |
+| Namespace | agentauth-staging | - | - | - |
+| ConfigMap | agentauth-config | - | - | - |
+| Secret | agentauth-secrets | - | - | - |
+| StatefulSet | agentauth-postgres | 1/1 | 2000m | 4Gi |
+| StatefulSet | agentauth-redis | 1/1 | 1000m | 2Gi |
+| Deployment | agentauth-deployment | 3/3 | 2000m | 4Gi |
+| Service | agentauth-service | - | - | - |
+| Ingress | agentauth-ingress | - | - | - |
+| HPA | agentauth-hpa | min=3, max=10 | - | - |
 
 **Total Resources**:
 - **Pods**: 5 (3 AgentAuth + 1 PostgreSQL + 1 Redis)
@@ -597,11 +597,11 @@ Running smoke tests...
 2. **Configure kubeconfig**: Decode secret
 3. **Rollback deployment**: Undo to previous revision
    ```bash
-   kubectl rollout undo deployment/gauth-deployment -n gauth-staging
+   kubectl rollout undo deployment/agentauth-deployment -n agentauth-staging
    ```
 4. **Wait for rollback**: Monitor rollout status
    ```bash
-   kubectl rollout status deployment/gauth-deployment -n gauth-staging --timeout=3m
+   kubectl rollout status deployment/agentauth-deployment -n agentauth-staging --timeout=3m
    ```
 5. **Send Slack notification**: Alert team of rollback
 
@@ -615,10 +615,10 @@ Running smoke tests...
 ⚠️  Deployment failed, initiating rollback...
 
 Rollback to previous revision...
-deployment.apps/gauth-deployment rolled back
+deployment.apps/agentauth-deployment rolled back
 
 Waiting for rollback to complete...
-deployment "gauth-deployment" successfully rolled out
+deployment "agentauth-deployment" successfully rolled out
 
 🔄 Rollback successful! Previous version restored.
 Sending Slack notification...
@@ -632,7 +632,7 @@ Commit: 05721f73
 Reason: Deployment timeout after 5 minutes
 Action: Automatically rolled back to previous version
 Status: ✅ Rollback successful
-View logs: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
+View logs: https://github.com/mauriciomferz/AgentAuth/actions/runs/XXX
 ```
 
 ---
@@ -648,7 +648,7 @@ Environment: staging
 Branch: main
 Commit: 05721f73 - docs: Add Week 4 Day 3 CI/CD setup
 Triggered by: mauriciomferz
-View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
+View: https://github.com/mauriciomferz/AgentAuth/actions/runs/XXX
 ```
 
 #### 2. Deployment Success
@@ -657,13 +657,13 @@ View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
 Environment: staging
 Commit: 05721f73
 Duration: 15m 32s
-Image: ghcr.io/mauriciomferz/gauth:staging
+Image: ghcr.io/mauriciomferz/agentauth:staging
 Endpoints:
-  • Health: https://gauth-staging.yourdomain.com/healthz
-  • Beta API: https://gauth-staging.yourdomain.com/api/v1/beta/health
-  • Metrics: https://gauth-staging.yourdomain.com/metrics
+  • Health: https://agentauth-staging.yourdomain.com/healthz
+  • Beta API: https://agentauth-staging.yourdomain.com/api/v1/beta/health
+  • Metrics: https://agentauth-staging.yourdomain.com/metrics
 Resources: 5 pods, 3 replicas
-View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
+View: https://github.com/mauriciomferz/AgentAuth/actions/runs/XXX
 ```
 
 #### 3. Deployment Failure
@@ -675,7 +675,7 @@ Duration: 8m 14s
 Failed Job: deploy
 Reason: Deployment rollout timeout after 5 minutes
 Action: Automatically rolled back to previous version
-View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
+View: https://github.com/mauriciomferz/AgentAuth/actions/runs/XXX
 ```
 
 #### 4. Security Scan Failure
@@ -688,7 +688,7 @@ Issues Found:
   • HIGH: SQL injection vulnerability in pkg/auth/handler.go:45
   • CRITICAL: CVE-2024-1234 in golang.org/x/crypto v0.1.0
 Action: Deployment blocked, manual fix required
-View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
+View: https://github.com/mauriciomferz/AgentAuth/actions/runs/XXX
 ```
 
 ---
@@ -698,7 +698,7 @@ View: https://github.com/mauriciomferz/Gauth_go/actions/runs/XXX
 ### Issue 1: Workflow Not Triggered
 
 **Symptoms**:
-- No workflow appears at https://github.com/mauriciomferz/Gauth_go/actions after push
+- No workflow appears at https://github.com/mauriciomferz/AgentAuth/actions after push
 - Workflow shows "This workflow has a workflow_dispatch event trigger"
 
 **Causes**:
@@ -715,7 +715,7 @@ git ls-tree -r main --name-only | grep workflow
 python3 -c "import yaml; yaml.safe_load(open('.github/workflows/deploy-staging.yml'))"
 
 # Check GitHub Actions settings
-# Navigate to: https://github.com/mauriciomferz/Gauth_go/settings/actions
+# Navigate to: https://github.com/mauriciomferz/AgentAuth/settings/actions
 # Ensure "Allow all actions and reusable workflows" is enabled
 ```
 
@@ -742,7 +742,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u mauriciomferz --password-stdin
 # Required scopes: write:packages, delete:packages, read:packages
 
 # Regenerate GitHub PAT if needed
-# Update secret at: https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions
+# Update secret at: https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions
 ```
 
 ---
@@ -766,7 +766,7 @@ kubectl get nodes
 
 # Regenerate kubeconfig secret
 cat ~/.kube/config | base64 | pbcopy
-# Update secret at: https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions
+# Update secret at: https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions
 # Paste base64-encoded kubeconfig
 
 # Verify kubeconfig has correct cluster endpoint
@@ -790,14 +790,14 @@ kubectl config view --minify
 **Solutions**:
 ```bash
 # Check pod status
-kubectl get pods -n gauth-staging
-kubectl describe pod <POD_NAME> -n gauth-staging
+kubectl get pods -n agentauth-staging
+kubectl describe pod <POD_NAME> -n agentauth-staging
 
 # Check events
-kubectl get events -n gauth-staging --sort-by='.lastTimestamp'
+kubectl get events -n agentauth-staging --sort-by='.lastTimestamp'
 
 # Check logs
-kubectl logs <POD_NAME> -n gauth-staging
+kubectl logs <POD_NAME> -n agentauth-staging
 
 # Common fixes:
 
@@ -806,10 +806,10 @@ kubectl create secret docker-registry ghcr-secret \
   --docker-server=ghcr.io \
   --docker-username=mauriciomferz \
   --docker-password=$GITHUB_TOKEN \
-  --namespace=gauth-staging
+  --namespace=agentauth-staging
 
 # Update deployment to use imagePullSecrets
-kubectl patch deployment gauth-deployment -n gauth-staging -p '
+kubectl patch deployment agentauth-deployment -n agentauth-staging -p '
 {
   "spec": {
     "template": {
@@ -821,7 +821,7 @@ kubectl patch deployment gauth-deployment -n gauth-staging -p '
 }'
 
 # 2. CrashLoopBackOff - Check application logs
-kubectl logs <POD_NAME> -n gauth-staging --previous
+kubectl logs <POD_NAME> -n agentauth-staging --previous
 
 # 3. Insufficient resources - Scale down or increase cluster capacity
 kubectl top nodes
@@ -846,26 +846,26 @@ kubectl describe node <NODE_NAME>
 **Solutions**:
 ```bash
 # Check ingress
-kubectl get ingress -n gauth-staging
-kubectl describe ingress gauth-ingress -n gauth-staging
+kubectl get ingress -n agentauth-staging
+kubectl describe ingress agentauth-ingress -n agentauth-staging
 
 # Check service
-kubectl get svc -n gauth-staging
-kubectl describe svc gauth-service -n gauth-staging
+kubectl get svc -n agentauth-staging
+kubectl describe svc agentauth-service -n agentauth-staging
 
 # Check endpoints
-kubectl get endpoints gauth-service -n gauth-staging
+kubectl get endpoints agentauth-service -n agentauth-staging
 
 # Test pod directly (bypassing ingress)
-kubectl port-forward -n gauth-staging deployment/gauth-deployment 8080:8080
+kubectl port-forward -n agentauth-staging deployment/agentauth-deployment 8080:8080
 curl http://localhost:8080/healthz
 
 # Check ingress controller logs
 kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller
 
 # Check TLS certificate
-kubectl get certificate -n gauth-staging
-kubectl describe certificate gauth-staging-tls -n gauth-staging
+kubectl get certificate -n agentauth-staging
+kubectl describe certificate agentauth-staging-tls -n agentauth-staging
 ```
 
 ---
@@ -891,8 +891,8 @@ go get -u all
 go mod tidy
 
 # Test Trivy scan locally
-docker build -t gauth:test .
-trivy image --severity HIGH,CRITICAL gauth:test
+docker build -t agentauth:test .
+trivy image --severity HIGH,CRITICAL agentauth:test
 
 # If vulnerability is false positive, add to .trivyignore
 echo "CVE-2024-XXXX" >> .trivyignore
@@ -924,7 +924,7 @@ curl -X POST -H 'Content-type: application/json' \
 # Regenerate Slack webhook if needed
 # Navigate to: https://api.slack.com/apps
 # Select app → Incoming Webhooks → Add New Webhook to Workspace
-# Update secret at: https://github.com/mauriciomferz/Gauth_go/settings/secrets/actions
+# Update secret at: https://github.com/mauriciomferz/AgentAuth/settings/secrets/actions
 ```
 
 ---
@@ -934,90 +934,90 @@ curl -X POST -H 'Content-type: application/json' \
 ### Step 1: Verify All Pods Running
 
 ```bash
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 
 # Expected output:
 # NAME                                READY   STATUS    RESTARTS   AGE
-# gauth-deployment-7d5f4c8b9d-abc12   1/1     Running   0          5m
-# gauth-deployment-7d5f4c8b9d-def34   1/1     Running   0          5m
-# gauth-deployment-7d5f4c8b9d-ghi56   1/1     Running   0          5m
-# gauth-postgres-0                    1/1     Running   0          6m
-# gauth-redis-0                       1/1     Running   0          6m
+# agentauth-deployment-7d5f4c8b9d-abc12   1/1     Running   0          5m
+# agentauth-deployment-7d5f4c8b9d-def34   1/1     Running   0          5m
+# agentauth-deployment-7d5f4c8b9d-ghi56   1/1     Running   0          5m
+# agentauth-postgres-0                    1/1     Running   0          6m
+# agentauth-redis-0                       1/1     Running   0          6m
 ```
 
 ### Step 2: Check Service Endpoints
 
 ```bash
-kubectl get svc -n gauth-staging
+kubectl get svc -n agentauth-staging
 
 # Expected output:
 # NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-# gauth-service     ClusterIP   10.96.123.45    <none>        80/TCP     5m
-# gauth-postgres    ClusterIP   10.96.123.46    <none>        5432/TCP   6m
-# gauth-redis       ClusterIP   10.96.123.47    <none>        6379/TCP   6m
+# agentauth-service     ClusterIP   10.96.123.45    <none>        80/TCP     5m
+# agentauth-postgres    ClusterIP   10.96.123.46    <none>        5432/TCP   6m
+# agentauth-redis       ClusterIP   10.96.123.47    <none>        6379/TCP   6m
 ```
 
 ### Step 3: Verify Ingress
 
 ```bash
-kubectl get ingress -n gauth-staging
+kubectl get ingress -n agentauth-staging
 
 # Expected output:
 # NAME            CLASS   HOSTS                           ADDRESS         PORTS     AGE
-# gauth-ingress   nginx   gauth-staging.yourdomain.com    34.123.45.67    80, 443   5m
+# agentauth-ingress   nginx   agentauth-staging.yourdomain.com    34.123.45.67    80, 443   5m
 ```
 
 ### Step 4: Test Endpoints
 
 ```bash
 # Health check
-curl -v https://gauth-staging.yourdomain.com/healthz
+curl -v https://agentauth-staging.yourdomain.com/healthz
 # Expected: HTTP 200, {"status":"ok"}
 
 # Beta health
-curl -v https://gauth-staging.yourdomain.com/api/v1/beta/health
+curl -v https://agentauth-staging.yourdomain.com/api/v1/beta/health
 # Expected: HTTP 200, {"status":"healthy","version":"beta"}
 
 # Metrics
-curl -v https://gauth-staging.yourdomain.com/metrics | head -20
-# Expected: HTTP 200, Prometheus metrics (gauth_requests_total, etc.)
+curl -v https://agentauth-staging.yourdomain.com/metrics | head -20
+# Expected: HTTP 200, Prometheus metrics (agentauth_requests_total, etc.)
 ```
 
 ### Step 5: Check Application Logs
 
 ```bash
 # Tail logs from all replicas
-kubectl logs -f -n gauth-staging -l app=gauth --tail=100
+kubectl logs -f -n agentauth-staging -l app=agentauth --tail=100
 
 # Expected output:
 # 2025-11-09T12:15:00Z INFO Starting AgentAuth server version=beta port=8080
-# 2025-11-09T12:15:00Z INFO Database connection established host=gauth-postgres
-# 2025-11-09T12:15:00Z INFO Redis connection established host=gauth-redis
+# 2025-11-09T12:15:00Z INFO Database connection established host=agentauth-postgres
+# 2025-11-09T12:15:00Z INFO Redis connection established host=agentauth-redis
 # 2025-11-09T12:15:00Z INFO Server listening on :8080
 ```
 
 ### Step 6: Verify HPA
 
 ```bash
-kubectl get hpa -n gauth-staging
+kubectl get hpa -n agentauth-staging
 
 # Expected output:
 # NAME        REFERENCE                    TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
-# gauth-hpa   Deployment/gauth-deployment  25%/80%   3         10        3          5m
+# agentauth-hpa   Deployment/agentauth-deployment  25%/80%   3         10        3          5m
 ```
 
 ### Step 7: Check Resource Usage
 
 ```bash
-kubectl top pods -n gauth-staging
+kubectl top pods -n agentauth-staging
 
 # Expected output:
 # NAME                                CPU(cores)   MEMORY(bytes)
-# gauth-deployment-7d5f4c8b9d-abc12   150m         512Mi
-# gauth-deployment-7d5f4c8b9d-def34   145m         508Mi
-# gauth-deployment-7d5f4c8b9d-ghi56   148m         515Mi
-# gauth-postgres-0                    80m          1Gi
-# gauth-redis-0                       30m          256Mi
+# agentauth-deployment-7d5f4c8b9d-abc12   150m         512Mi
+# agentauth-deployment-7d5f4c8b9d-def34   145m         508Mi
+# agentauth-deployment-7d5f4c8b9d-ghi56   148m         515Mi
+# agentauth-postgres-0                    80m          1Gi
+# agentauth-redis-0                       30m          256Mi
 ```
 
 ---
@@ -1055,7 +1055,7 @@ After successful pipeline execution and verification:
 
 ### Push and Monitor
 - [ ] Code pushed to GitHub (`git push origin main`)
-- [ ] Workflow triggered at https://github.com/mauriciomferz/Gauth_go/actions
+- [ ] Workflow triggered at https://github.com/mauriciomferz/AgentAuth/actions
 - [ ] Test job passed (~4 min)
 - [ ] Security job passed (~2 min)
 - [ ] Build job passed (~3 min)
@@ -1102,7 +1102,7 @@ After successful pipeline execution and verification:
 
 ## Appendix B: Kubernetes Resources Summary
 
-**Namespace**: `gauth-staging`
+**Namespace**: `agentauth-staging`
 
 | Resource | Count | Total CPU | Total Memory | Total Storage |
 |----------|-------|-----------|--------------|---------------|

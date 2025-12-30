@@ -39,7 +39,7 @@ The QA Manager's audit identified several "CRITICAL" and "HIGH" priority gaps. U
 
 ### Revised Compliance Assessment
 
-**Updated RFC-0111 Compliance: 75-80%** (not 55-60%)
+**Updated AAP-001 Compliance: 75-80%** (not 55-60%)
 
 **Rationale for Revision**:
 1. ✅ JWT/JWE serialization is fully functional
@@ -65,7 +65,7 @@ The QA Manager's audit identified several "CRITICAL" and "HIGH" priority gaps. U
 
 **Implementation Details**:
 
-**File**: `pkg/gauth/extended_token_service.go`
+**File**: `pkg/agentauth/extended_token_service.go`
 
 **Function**: `EncodeExtendedToken()` (Lines 125-189)
 
@@ -85,7 +85,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 		"token_type": token.TokenType,
 		"scope":      token.Scope,
 		
-		// RFC-0111 extended claims
+		// AAP-001 extended claims
 		"client_owner":      token.ClientOwner,
 		"owners_authorizer": token.OwnersAuthorizer,
 		"resource_owner":    token.ResourceOwner,
@@ -117,7 +117,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 
 **Capabilities**:
 - ✅ JWT encoding with standard claims (iss, sub, aud, exp, iat, jti)
-- ✅ RFC-0111 extended claims (PoA, AuthChain, restrictions)
+- ✅ AAP-001 extended claims (PoA, AuthChain, restrictions)
 - ✅ HMAC-SHA256 signing
 - ✅ Token string generation
 - ✅ Can be transmitted over HTTP
@@ -139,7 +139,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 
 **Implementation Details**:
 
-**File**: `pkg/gauth/extended_token_service.go`
+**File**: `pkg/agentauth/extended_token_service.go`
 
 **Function**: `parseExtendedToken()` (Lines 415-547)
 
@@ -217,7 +217,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 **Capabilities**:
 - ✅ JWT string parsing with signature verification
 - ✅ HMAC signature validation
-- ✅ Claims extraction (standard + RFC-0111 extended)
+- ✅ Claims extraction (standard + AAP-001 extended)
 - ✅ JSON deserialization of complex objects (PoA, AuthChain)
 - ✅ Comprehensive error handling
 - ✅ Security: Validates signing method to prevent algorithm confusion attacks
@@ -231,9 +231,9 @@ func (s *ExtendedTokenService) parseExtendedToken(
 ## GAP #3: OpenID Connect Integration ✅ FIXED
 
 ### QA Audit Claim
-> **CRITICAL**: "NO OPENID CONNECT IMPLEMENTATION. RFC-0111 Section 1 explicitly requires OIDC. No ID tokens, no UserInfo endpoint, no OIDC Discovery, no Dynamic Client Registration."
+> **CRITICAL**: "NO OPENID CONNECT IMPLEMENTATION. AAP-001 Section 1 explicitly requires OIDC. No ID tokens, no UserInfo endpoint, no OIDC Discovery, no Dynamic Client Registration."
 >
-> **Evidence Cited**: `grep -r "OpenID\|OIDC\|openid" pkg/gauth/*.go` - No matches found
+> **Evidence Cited**: `grep -r "OpenID\|OIDC\|openid" pkg/agentauth/*.go` - No matches found
 >
 > **OpenID Connect Compliance: 0%** (Not implemented)
 
@@ -280,7 +280,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 - `pushed_authorization.go` - Pushed Authorization Requests (PAR)
 - `device_authorization.go` - Device Authorization Grant (RFC 8628)
 
-#### 3. RFC-0111 Integration
+#### 3. AAP-001 Integration
 
 **PowerVerificationPoint Integration**:
 - `pvp.go` - OIDC PowerVerificationPoint implementation (165 lines)
@@ -325,8 +325,8 @@ func (s *ExtendedTokenService) parseExtendedToken(
 | PAR | RFC 9126 | `pushed_authorization.go` | ✅ Complete |
 | Device Flow | RFC 8628 | `device_authorization.go` | ✅ Complete |
 | **Integration** |
-| PVP Integration | RFC-0111 | `pvp.go` | ✅ Complete |
-| Identity Bridge | RFC-0111 | `identity_bridge.go` | ✅ Complete |
+| PVP Integration | AAP-001 | `pvp.go` | ✅ Complete |
+| Identity Bridge | AAP-001 | `identity_bridge.go` | ✅ Complete |
 
 ### Code Statistics
 
@@ -342,7 +342,7 @@ $ find pkg/oidc -name "*_test.go" | xargs wc -l | tail -1
 **Test Code**: ~6,543 lines  
 **Test Coverage**: Comprehensive (>80% estimated)
 
-### Integration with RFC-0111
+### Integration with AAP-001
 
 **Subscription Flow Integration** (Steps I, III, VI):
 ```go
@@ -356,8 +356,8 @@ result, err := s.pvpRouter.VerifyIdentityProof(ctx, request.IdentityProof)
 ```
 
 **Why QA Audit Missed This**: 
-1. Audit only searched `pkg/gauth/*.go` - OIDC is in `pkg/oidc/`
-2. Search pattern was too narrow: `grep -r "OpenID\|OIDC\|openid" pkg/gauth/*.go`
+1. Audit only searched `pkg/agentauth/*.go` - OIDC is in `pkg/oidc/`
+2. Search pattern was too narrow: `grep -r "OpenID\|OIDC\|openid" pkg/agentauth/*.go`
 3. Correct search would be: `find pkg -name "*.go" -type f` or `ls -la pkg/oidc/`
 
 **Status**: ✅ **GAP CLOSED - COMPREHENSIVE IMPLEMENTATION**
@@ -491,7 +491,7 @@ type PolicyConflict struct {
 
 ### Integration with AgentAuth
 
-**File**: `pkg/gauth/pdp_bridge.go` (216 lines)
+**File**: `pkg/agentauth/pdp_bridge.go` (216 lines)
 
 **Purpose**: Bridges `pkg/pdp.Engine` to `PDPClient` interface used by `ComplianceValidator`
 
@@ -546,10 +546,10 @@ policies := []pdp.Policy{
 engine := pdp.NewInMemoryEngine(policies, pdp.NewDenyOverrides(), nil)
 
 // Create bridge for AgentAuth integration
-pdpBridge := gauth.NewPDPBridge(engine)
+pdpBridge := agentauth.NewPDPBridge(engine)
 
 // Use in ComplianceValidator
-complianceValidator := gauth.NewComplianceValidator(
+complianceValidator := agentauth.NewComplianceValidator(
 	chainValidator,
 	pip,
 	pdpBridge, // PDPClient interface
@@ -570,7 +570,7 @@ $ find pkg/pdp -name "*.go" ! -name "*_test.go" | xargs wc -l
 **Production Code**: ~1,500+ lines  
 **Test Code**: ~1,200+ lines
 
-**Why QA Audit Missed This**: Audit only checked for interface in `pkg/gauth/pep.go`, didn't search for `pkg/pdp/` package.
+**Why QA Audit Missed This**: Audit only checked for interface in `pkg/agentauth/pep.go`, didn't search for `pkg/pdp/` package.
 
 **Status**: ✅ **GAP CLOSED - FULL IMPLEMENTATION**
 
@@ -592,7 +592,7 @@ $ find pkg/pdp -name "*.go" ! -name "*_test.go" | xargs wc -l
 
 ### 1. Extended Token Store - PostgreSQL
 
-**File**: `pkg/gauth/extended_token_store_postgres.go`
+**File**: `pkg/agentauth/extended_token_store_postgres.go`
 
 ```go
 type PostgreSQLExtendedTokenStore struct {
@@ -657,7 +657,7 @@ type RedisStorage struct {
 
 ### 3. Replay Protection - BoltDB
 
-**File**: `pkg/gauth/replay_store_bolt.go`
+**File**: `pkg/agentauth/replay_store_bolt.go`
 
 ```go
 type BoltReplayStore struct {
@@ -673,7 +673,7 @@ type BoltReplayStore struct {
 ### 4. Database Schema Support
 
 **PostgreSQL Tables** (inferred from code):
-- `extended_tokens` - Extended OAuth tokens with RFC-0111 data
+- `extended_tokens` - Extended OAuth tokens with AAP-001 data
 - `authorization_codes` - OIDC authorization codes
 - `access_tokens` - Access token metadata
 - `refresh_tokens` - Refresh token data
@@ -744,7 +744,7 @@ tx.Commit()
 ## GAP #6: MCP (Model Context Protocol) Integration ❌ CONFIRMED GAP
 
 ### QA Audit Claim
-> **CRITICAL**: "NO MCP IMPLEMENTATION. RFC-0111 Section 1 explicitly requires MCP."
+> **CRITICAL**: "NO MCP IMPLEMENTATION. AAP-001 Section 1 explicitly requires MCP."
 >
 > **MCP Compliance: 0%** (Not implemented)
 
@@ -758,11 +758,11 @@ $ find pkg -name "*.go" -type f -exec grep -l "MCP\|ModelContext\|model.*context
 
 **Status**: ❌ **CONFIRMED GAP - MCP NOT IMPLEMENTED**
 
-**RFC Requirement**: RFC-0111 Section 1 states:
+**RFC Requirement**: AAP-001 Section 1 states:
 > "MCP or its alternatives, including but not limited to MCP Implementation on Github"
 
 **Impact**: Medium-High
-- MCP is required by RFC-0111 for AI model context management
+- MCP is required by AAP-001 for AI model context management
 - AgentAuth targets AI agent authorization
 - MCP integration needed for full RFC compliance
 
@@ -833,7 +833,7 @@ $ find pkg -name "*pap*" -o -name "*policy*admin*"
 
 **Need to Investigate**:
 1. Check `pkg/external/` directory
-2. Check `pkg/gauth/external/` subdirectory
+2. Check `pkg/agentauth/external/` subdirectory
 3. Search for real API client implementations
 4. Check for eIDAS integration code
 5. Review OCSP/CRL implementations
@@ -880,7 +880,7 @@ $ find pkg -name "*pap*" -o -name "*policy*admin*"
 
 **Analysis**:
 - Tests are comprehensive (552 lines)
-- Test all RFC-0111 steps (I-VIII, a-i)
+- Test all AAP-001 steps (I-VIII, a-i)
 - Disabled due to interface evolution
 - Most interface issues likely resolved by now
 
@@ -1084,7 +1084,7 @@ $ find pkg -name "*pap*" -o -name "*policy*admin*"
 
 ### Why the Discrepancies?
 
-1. **Search Too Narrow**: Only searched `pkg/gauth/*.go`, missed `pkg/oidc/` and `pkg/pdp/`
+1. **Search Too Narrow**: Only searched `pkg/agentauth/*.go`, missed `pkg/oidc/` and `pkg/pdp/`
 2. **Incomplete Package Discovery**: Didn't list all directories
 3. **Timing**: May have been conducted before recent implementations
 4. **Old Code References**: Cited old stub implementations that were replaced
@@ -1101,7 +1101,7 @@ $ find pkg -name "*pap*" -o -name "*policy*admin*"
 
 ### Honest Revised Assessment
 
-**Actual RFC-0111 Compliance: 75-80%** ✅
+**Actual AAP-001 Compliance: 75-80%** ✅
 
 **Strengths**:
 - Comprehensive OIDC implementation

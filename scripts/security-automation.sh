@@ -5,11 +5,11 @@
 set -euo pipefail
 
 # Configuration
-NAMESPACE="${NAMESPACE:-gauth}"
+NAMESPACE="${NAMESPACE:-agentauth}"
 VAULT_ADDR="${VAULT_ADDR:-https://vault.vault.svc.cluster.local:8200}"
 SLACK_WEBHOOK="${SLACK_WEBHOOK:-}"
-LOG_FILE="${LOG_FILE:-/var/log/gauth/security-automation.log}"
-SCAN_RESULTS_DIR="/var/log/gauth/security-scans"
+LOG_FILE="${LOG_FILE:-/var/log/agentauth/security-automation.log}"
+SCAN_RESULTS_DIR="/var/log/agentauth/security-scans"
 
 # Colors for output
 RED='\033[0;31m'
@@ -214,7 +214,7 @@ analyze_audit_logs() {
     log "Analyzing security audit logs..."
     
     # Failed authentication attempts
-    local failed_auth=$(kubectl logs -n "$NAMESPACE" -l app=gauth-api --tail=10000 | grep -c "authentication failed" || echo 0)
+    local failed_auth=$(kubectl logs -n "$NAMESPACE" -l app=agentauth-api --tail=10000 | grep -c "authentication failed" || echo 0)
     
     if [ "$failed_auth" -gt 100 ]; then
         log_error "High number of failed authentication attempts: $failed_auth"
@@ -230,7 +230,7 @@ analyze_audit_logs() {
     fi
     
     # Suspicious API activity (high 4xx rates)
-    local high_4xx=$(kubectl logs -n "$NAMESPACE" -l app=gauth-api --tail=10000 | grep -c "\"status\":4" || echo 0)
+    local high_4xx=$(kubectl logs -n "$NAMESPACE" -l app=agentauth-api --tail=10000 | grep -c "\"status\":4" || echo 0)
     
     if [ "$high_4xx" -gt 500 ]; then
         log_warning "High rate of 4xx responses: $high_4xx"
@@ -256,7 +256,7 @@ validate_network_policies() {
     log "Found $policy_count network policies"
     
     # Validate critical policies
-    for policy in "gauth-api-network-policy" "postgresql-network-policy" "redis-network-policy"; do
+    for policy in "agentauth-api-network-policy" "postgresql-network-policy" "redis-network-policy"; do
         if kubectl get networkpolicy "$policy" -n "$NAMESPACE" &>/dev/null; then
             log_success "Network policy $policy is configured"
         else
@@ -329,7 +329,7 @@ compliance_check() {
 generate_security_report() {
     log "Generating security report..."
     
-    local report_file="/var/log/gauth/security-report-$(date +%Y%m%d).md"
+    local report_file="/var/log/agentauth/security-report-$(date +%Y%m%d).md"
     
     cat > "$report_file" <<EOF
 # AgentAuth Security Report

@@ -7,15 +7,15 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gauth-hpa
-  namespace: gauth-staging
+  name: agentauth-hpa
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gauth-blue
+    name: agentauth-blue
   minReplicas: 3
   maxReplicas: 10
   metrics:
@@ -59,14 +59,14 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: gauth-pdb
-  namespace: gauth-staging
+  name: agentauth-pdb
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
 spec:
   minAvailable: 2
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       version: blue
   unhealthyPodEvictionPolicy: IfHealthyBudget

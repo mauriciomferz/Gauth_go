@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Phase 6 successfully implements **Dynamic Provider Registration**, enabling runtime management of OIDC providers with multi-tenant support and automatic discovery integration. The implementation adds 398 lines of production code, 633 lines of comprehensive tests, and increases RFC-0111 compliance from 70% to 75%.
+Phase 6 successfully implements **Dynamic Provider Registration**, enabling runtime management of OIDC providers with multi-tenant support and automatic discovery integration. The implementation adds 398 lines of production code, 633 lines of comprehensive tests, and increases AAP-001 compliance from 70% to 75%.
 
 ### Key Achievements
 
@@ -437,7 +437,7 @@ func (s *TokenExchangeService) ExchangeToken(ctx, tenantID, providerID, token) {
 
 ---
 
-## RFC-0111 Compliance Impact
+## AAP-001 Compliance Impact
 
 ### Compliance Increase: 70% → 75% (+5%)
 

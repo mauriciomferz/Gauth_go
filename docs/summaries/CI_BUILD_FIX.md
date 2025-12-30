@@ -11,13 +11,13 @@ owners: [system]
 ## Problem
 CI build was failing with:
 ```
-stat /home/runner/work/Gauth_go/Gauth_go/cmd/gauth-server: directory not found
+stat /home/runner/work/AgentAuth/AgentAuth/cmd/agentauth-server: directory not found
 make: *** [Makefile:55: build-server] Error 1
 ```
 
 ## Root Cause
 GitHub Actions creates a nested directory structure where the repository is checked out to:
-`/home/runner/work/Gauth_go/Gauth_go/` instead of expected `/home/runner/work/Gauth_go/`
+`/home/runner/work/AgentAuth/AgentAuth/` instead of expected `/home/runner/work/AgentAuth/`
 
 ## Solution
 Enhanced the Makefile with multiple build strategies and comprehensive diagnostics.
@@ -59,7 +59,7 @@ Or for maximum compatibility:
 
 ## How It Works
 
-1. **Adaptive Path Detection**: Searches for `cmd/gauth-server/main.go` using multiple methods
+1. **Adaptive Path Detection**: Searches for `cmd/agentauth-server/main.go` using multiple methods
 2. **Comprehensive Diagnostics**: Provides detailed error information if build fails
 3. **Fallback Mechanisms**: Automatically tries alternative build methods
 4. **Environment Verification**: Checks directory structure before building
@@ -67,8 +67,8 @@ Or for maximum compatibility:
 ## Build Methods
 
 The adaptive build tries these methods in order:
-1. `./cmd/gauth-server/main.go` (standard relative path)
-2. `cmd/gauth-server/main.go` (no leading dot)
+1. `./cmd/agentauth-server/main.go` (standard relative path)
+2. `cmd/agentauth-server/main.go` (no leading dot)
 3. `find` command to locate the file anywhere in the project
 
 ## Testing
@@ -76,7 +76,7 @@ The adaptive build tries these methods in order:
 All targets have been tested in both standard and nested directory structures:
 - ✅ Standard: `/path/to/project/`
 - ✅ Nested: `/path/to/nested/project/project/`
-- ✅ CI-like: `/home/runner/work/Gauth_go/Gauth_go/`
+- ✅ CI-like: `/home/runner/work/AgentAuth/AgentAuth/`
 
 ## Verification
 

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS api_keys (
     
     -- Key identification
     key_name VARCHAR(255) NOT NULL,
-    key_prefix VARCHAR(20) NOT NULL, -- First 8 chars for display (e.g., "gauth_pk_...")
+    key_prefix VARCHAR(20) NOT NULL, -- First 8 chars for display (e.g., "agentauth_pk_...")
     key_hash VARCHAR(255) NOT NULL UNIQUE, -- SHA-256 hash of the full key
     
     -- Key metadata
@@ -335,12 +335,12 @@ ON CONFLICT (tenant_id) DO NOTHING;
 -- GRANTS
 -- ============================================================================
 
-GRANT SELECT, INSERT, UPDATE, DELETE ON api_keys TO gauth_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON security_settings TO gauth_app;
-GRANT SELECT, INSERT ON api_key_usage_logs TO gauth_app;
-GRANT SELECT, INSERT ON security_audit_logs TO gauth_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON api_keys TO agentauth_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON security_settings TO agentauth_app;
+GRANT SELECT, INSERT ON api_key_usage_logs TO agentauth_app;
+GRANT SELECT, INSERT ON security_audit_logs TO agentauth_app;
 
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO gauth_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO agentauth_app;
 
 -- ============================================================================
 -- SCHEMA COMPLETE

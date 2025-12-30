@@ -2,7 +2,7 @@
 
 **Status:** ✅ ALL 5 HANDLERS OPERATIONAL  
 **Server:** http://localhost:8080  
-**Database:** PostgreSQL 15 (gauth-postgres)  
+**Database:** PostgreSQL 15 (agentauth-postgres)  
 **Test Tenant:** test-tenant-1
 
 ---
@@ -45,7 +45,7 @@ curl "http://localhost:8080/api/admin/config/variables?tenant_id=test-tenant-1" 
 
 ```bash
 # Access database
-docker exec -it gauth-postgres psql -U postgres -d gauth
+docker exec -it agentauth-postgres psql -U postgres -d agentauth
 
 # Check tables
 \dt
@@ -65,12 +65,12 @@ SELECT * FROM authorization_policies WHERE tenant_id = 'test-tenant-1';
 lsof -ti:8080
 
 # Start server
-GAUTH_JWT_SIGNING_KEY="test-key" \
+AGENTAUTH_JWT_SIGNING_KEY="test-key" \
 DB_HOST="localhost" \
 DB_PORT="5432" \
 DB_USER="postgres" \
-DB_PASSWORD="gauth_dev_password" \
-DB_NAME="gauth" \
+DB_PASSWORD="agentauth_dev_password" \
+DB_NAME="agentauth" \
 DB_SSLMODE="disable" \
 go run ./cmd/web-server
 

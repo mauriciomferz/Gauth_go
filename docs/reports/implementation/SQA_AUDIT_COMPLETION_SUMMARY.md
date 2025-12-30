@@ -196,7 +196,7 @@ Tertiary:  Public mempool (15-30s, risk of front-running)
 **Objective**: Replace boolean allow-lists with semantic constraint engine.
 
 **Deliverables**:
-- **pkg/gauth/constraints/** package (2,000+ lines)
+- **pkg/agentauth/constraints/** package (2,000+ lines)
 - Semantic constraint parser and validator
 - 96.6% test coverage
 - 6 million operations/second throughput
@@ -262,7 +262,7 @@ Validation Latency:    ~1ms for complex policies (100+ constraints)
 
 **Test Coverage**:
 ```bash
-$ go test ./pkg/gauth/constraints -v -cover
+$ go test ./pkg/agentauth/constraints -v -cover
 === RUN   TestConstraintParser
 --- PASS: TestConstraintParser (0.00s)
 === RUN   TestConstraintValidator
@@ -270,7 +270,7 @@ $ go test ./pkg/gauth/constraints -v -cover
 ...
 PASS
 coverage: 96.6% of statements
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/constraints    0.157s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauth/constraints    0.157s
 ```
 
 **Real-World Impact**:
@@ -279,7 +279,7 @@ ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/constraints    0.157s
 - Prevents **$600M Ronin Bridge hack** (no transaction limits)
 
 **Status**: ✅ Complete  
-**Package**: `pkg/gauth/constraints/`  
+**Package**: `pkg/agentauth/constraints/`  
 **Addresses**: CRITICAL-3 (Boolean Allow-Lists → Fiduciary Duty Fallacy)
 
 ---
@@ -291,7 +291,7 @@ ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/constraints    0.157s
 **Problem Statement**:
 ```
 Before: AAP-001 (both AgentAuth and Ethereum use same identifier)
-After:  gauth_rfc_001 (unique namespace, no collision)
+After:  agentauth_rfc_001 (unique namespace, no collision)
 
 Conflict: Ethereum AAP-001 defines "Account Abstraction"
           AgentAuth AAP-001 defines "Power of Attorney Lifecycle"
@@ -300,28 +300,28 @@ Impact: Tooling confusion, governance conflicts, implementation ambiguity
 ```
 
 **Deliverables**:
-- Renamed `rfc0111` → `gauth_rfc_001` (629 files modified)
-- Renamed `rfc0002` → `gauth_rfc_002` (114 files modified)
+- Renamed `aap001` → `agentauth_rfc_001` (629 files modified)
+- Renamed `rfc0002` → `agentauth_rfc_002` (114 files modified)
 - Created **RFC_GOVERNANCE.md** (governance structure)
 - Updated all documentation, tests, and code references
 
 **Renaming Strategy**:
 ```bash
 # Phase 1: Namespace prefix
-rfc0111 → gauth_rfc_001
-rfc0002 → gauth_rfc_002
+aap001 → agentauth_rfc_001
+rfc0002 → agentauth_rfc_002
 
 # Phase 2: File structure
-docs/rfc0111/         → docs/gauth_rfc_001/
-pkg/rfc0111/          → pkg/gauth_rfc_001/
-test/integration/rfc0111/ → test/integration/gauth_rfc_001/
+docs/aap001/         → docs/agentauth_rfc_001/
+pkg/aap001/          → pkg/agentauth_rfc_001/
+test/integration/aap001/ → test/integration/agentauth_rfc_001/
 
 # Phase 3: Code references
-import "github.com/mauriciomferz/Gauth_go/pkg/rfc0111"
-→ import "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+import "github.com/mauriciomferz/AgentAuth/pkg/aap001"
+→ import "github.com/mauriciomferz/AgentAuth/pkg/agentauth_rfc_001"
 
 const AAP-001_VERSION = "1.0.0"
-→ const GAUTH_RFC_001_VERSION = "1.0.0"
+→ const AGENTAUTH_RFC_001_VERSION = "1.0.0"
 ```
 
 **Governance Structure**:
@@ -334,9 +334,9 @@ RFC Lifecycle:
 5. DEPLOYED → (live in production)
 
 RFC Numbering:
-- gauth_rfc_001 to gauth_rfc_999: Core protocol
-- gauth_rfc_1000 to gauth_rfc_1999: Extensions
-- gauth_rfc_2000+: Experimental
+- agentauth_rfc_001 to agentauth_rfc_999: Core protocol
+- agentauth_rfc_1000 to agentauth_rfc_1999: Extensions
+- agentauth_rfc_2000+: Experimental
 ```
 
 **Commit Statistics**:
@@ -378,7 +378,7 @@ Historical Precedent:
 ```
 
 **Deliverables**:
-- **pkg/gauth/verification/** package (927 lines, 4 files)
+- **pkg/agentauth/verification/** package (927 lines, 4 files)
 - Dual-channel verification (SMS + Email)
 - Time-delayed activation (24-hour cancellation window)
 - Mock implementations for testing
@@ -445,7 +445,7 @@ func (d *DualChannelVerifier) ConfirmVerification(challengeID, userCode string) 
     normalizedUser := normalizeCode(userCode)
     
     // Constant-time comparison (prevents timing attacks)
-    if subtle.ConstantTimeCompare([]byte(normalizedStored), []byte(normalizedUser)) != 1 {
+    if subtle.ConstantTimeCompare([]byte(normalizedStored), []byte(normalizedUser) != 1 {
         return fmt.Errorf("invalid verification code")
     }
     
@@ -486,7 +486,7 @@ func (t *TimelockPoA) CreateWithDelay(ctx context.Context, poa *PoAData) (string
     t.pendingPoAs.Store(poa.ID, poa)
     
     // Generate cancel URL
-    cancelURL := fmt.Sprintf("https://gauth.example.com/cancel/%s", poa.ID)
+    cancelURL := fmt.Sprintf("https://agentauth.example.com/cancel/%s", poa.ID)
     
     // Send multi-channel notification
     notification := fmt.Sprintf(`
@@ -541,7 +541,7 @@ AgentAuth: Power of Attorney Cancelled
 
 Your PoA (ID: %s) has been successfully cancelled.
 
-If you did not request this cancellation, contact security@gauth.example.com immediately.
+If you did not request this cancellation, contact security@agentauth.example.com immediately.
     `, poaID)
     
     t.notifier.SendNotification(ctx, poa.Principal, "PoA Cancelled", notification)
@@ -567,7 +567,7 @@ Details:
 - Created: 2025-11-26T16:00:00Z
 
 🚨 IF YOU DID NOT AUTHORIZE THIS:
-Cancel immediately: https://gauth.example.com/cancel/poa_abc123
+Cancel immediately: https://agentauth.example.com/cancel/poa_abc123
 
 This is a security feature. If your private key was stolen, this 24-hour
 delay gives you time to cancel the fraudulent PoA before it becomes active.
@@ -583,7 +583,7 @@ PoA ID: poa_abc123
 Grantee: 0xAIAgent
 Activation Time: 2025-11-27T16:00:00Z
 
-To cancel: https://gauth.example.com/cancel/poa_abc123
+To cancel: https://agentauth.example.com/cancel/poa_abc123
 ```
 
 **Activation Confirmation**:
@@ -596,12 +596,12 @@ PoA ID: poa_abc123
 Grantee: 0xAIAgent
 Activated: 2025-11-27T16:00:00Z
 
-Monitor activity: https://gauth.example.com/poa/poa_abc123
+Monitor activity: https://agentauth.example.com/poa/poa_abc123
 ```
 
 **Test Results**:
 ```bash
-$ go test ./pkg/gauth/verification -v -cover
+$ go test ./pkg/agentauth/verification -v -cover
 
 === RUN   TestDualChannelVerifier_RequestVerification
 [MOCK SMS] To: +1234567890
@@ -626,7 +626,7 @@ Subject: AgentAuth: Confirm Power of Attorney Creation
 
 PASS
 coverage: 62.6% of statements
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/verification    0.213s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauth/verification    0.213s
 ```
 
 **Security Impact**:
@@ -635,7 +635,7 @@ ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/verification    0.213s
 - **Attack Prevention**: Ronin Bridge pattern ($600M scale)
 
 **Status**: ✅ Complete  
-**Package**: `pkg/gauth/verification/`  
+**Package**: `pkg/agentauth/verification/`  
 **Commit**: `a414f203`  
 **Addresses**: CRITICAL-5 (Identity vs Authorization Coupling)
 
@@ -758,12 +758,12 @@ After Remediation:
 ### Phase 2: Code Integration
 
 - [ ] **Replace Mock Services**:
-  - [ ] `MockSMSGateway` → `TwilioSMSGateway` (pkg/gauth/verification/twilio.go)
-  - [ ] `MockEmailService` → `SendGridEmailService` (pkg/gauth/verification/sendgrid.go)
-  - [ ] `MockPoARegistry` → `PostgreSQLPoARegistry` (pkg/gauth/storage/postgresql.go)
+  - [ ] `MockSMSGateway` → `TwilioSMSGateway` (pkg/agentauth/verification/twilio.go)
+  - [ ] `MockEmailService` → `SendGridEmailService` (pkg/agentauth/verification/sendgrid.go)
+  - [ ] `MockPoARegistry` → `PostgreSQLPoARegistry` (pkg/agentauth/storage/postgresql.go)
 
 - [ ] **Update PoA Creation Flow**:
-  - [ ] Integrate `DualChannelVerifier` into `pkg/gauth/issuer.go`
+  - [ ] Integrate `DualChannelVerifier` into `pkg/agentauth/issuer.go`
   - [ ] Integrate `TimelockPoA` into PoA lifecycle
   - [ ] Add configuration options (delay duration, notification channels)
 
@@ -834,7 +834,7 @@ After Remediation:
 
 **1. Biometric Verification**:
 ```go
-// pkg/gauth/verification/biometric.go
+// pkg/agentauth/verification/biometric.go
 type BiometricVerifier struct {
     yubikey *yubikey.Manager
 }
@@ -876,7 +876,7 @@ if poa.Constraints.MaxValue < 10_000 {
 
 **1. Anomaly Detection**:
 ```go
-// pkg/gauth/security/anomaly.go
+// pkg/agentauth/security/anomaly.go
 type AnomalyDetector struct {
     model *tensorflow.Model
 }

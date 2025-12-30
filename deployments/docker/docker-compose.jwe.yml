@@ -1,46 +1,46 @@
 
 services:
   # AgentAuth Authorization Server with JWE Encryption
-  gauth-server:
+  agentauth-server:
     build:
       context: ../..
       dockerfile: deployments/docker/Dockerfile.jwe
-    image: gauth:jwe-latest
-    container_name: gauth-server
+    image: agentauth:jwe-latest
+    container_name: agentauth-server
     ports:
       - "8080:8080"
     environment:
       # JWE Configuration
-      GAUTH_JWE_ENABLED: "true"
-      GAUTH_JWE_ALGORITHM: "RSA-OAEP-256"
-      GAUTH_JWE_ENCRYPTION: "A256GCM"
-      GAUTH_JWE_PUBLIC_KEY: "/etc/gauth/keys/public.pem"
-      GAUTH_JWE_PRIVATE_KEY: "/etc/gauth/keys/private.pem"
-      GAUTH_JWE_KEY_ID: "gauth-prod-2025-11"
-      GAUTH_JWE_ROTATION_DAYS: "365"
+      AGENTAUTH_JWE_ENABLED: "true"
+      AGENTAUTH_JWE_ALGORITHM: "RSA-OAEP-256"
+      AGENTAUTH_JWE_ENCRYPTION: "A256GCM"
+      AGENTAUTH_JWE_PUBLIC_KEY: "/etc/agentauth/keys/public.pem"
+      AGENTAUTH_JWE_PRIVATE_KEY: "/etc/agentauth/keys/private.pem"
+      AGENTAUTH_JWE_KEY_ID: "agentauth-prod-2025-11"
+      AGENTAUTH_JWE_ROTATION_DAYS: "365"
       
       # Application Configuration
-      GAUTH_PORT: "8080"
-      GAUTH_LOG_LEVEL: "info"
+      AGENTAUTH_PORT: "8080"
+      AGENTAUTH_LOG_LEVEL: "info"
       
       # Database (example)
-      DATABASE_URL: "postgresql://gauth:secret@postgres:5432/gauth?sslmode=disable"
+      DATABASE_URL: "postgresql://agentauth:secret@postgres:5432/agentauth?sslmode=disable"
     
     volumes:
       # Mount JWE keys from host (SECURE: use secrets in production)
-      - ./keys:/etc/gauth/keys:ro
+      - ./keys:/etc/agentauth/keys:ro
       
       # Alternative: Mount keys from Docker volume
-      # - gauth-keys:/etc/gauth/keys:ro
+      # - agentauth-keys:/etc/agentauth/keys:ro
     
     secrets:
       # Production: Use Docker secrets for sensitive keys
-      - source: gauth_private_key
+      - source: agentauth_private_key
         target: /run/secrets/private.pem
         mode: 0400
     
     networks:
-      - gauth-network
+      - agentauth-network
     
     depends_on:
       - postgres
@@ -58,32 +58,32 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: gauth-postgres
+    container_name: agentauth-postgres
     environment:
-      POSTGRES_USER: gauth
+      POSTGRES_USER: agentauth
       POSTGRES_PASSWORD: secret
-      POSTGRES_DB: gauth
+      POSTGRES_DB: agentauth
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: gauth-redis
+    container_name: agentauth-redis
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # Prometheus (Monitoring)
   prometheus:
     image: prom/prometheus:latest
-    container_name: gauth-prometheus
+    container_name: agentauth-prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -93,13 +93,13 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
   # Grafana (Visualization)
   grafana:
     image: grafana/grafana:latest
-    container_name: gauth-grafana
+    container_name: agentauth-grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     volumes:
@@ -108,7 +108,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - gauth-network
+      - agentauth-network
     depends_on:
       - prometheus
     restart: unless-stopped
@@ -119,12 +119,12 @@ volumes:
   prometheus-data:
   grafana-data:
   # Uncomment if using Docker volumes for keys
-  # gauth-keys:
+  # agentauth-keys:
 
 networks:
-  gauth-network:
+  agentauth-network:
     driver: bridge
 
 secrets:
-  gauth_private_key:
+  agentauth_private_key:
     file: ./keys/private.pem

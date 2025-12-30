@@ -136,7 +136,7 @@ This example demonstrates a *beta demonstration* combination of both specificati
 go version
 
 # Navigate to project root
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 ```
 
 ### **Execute Combined Demo**
@@ -168,7 +168,7 @@ go run main.go
     - Supply Side: client (active)
     - Demand Side: resource_server (active)
   🎯 PDP (Power Decision Point): client_owner
-  📊 PIP (Power Information Point): gauth_server
+  📊 PIP (Power Information Point): agentauth_server
   🔧 PAP (Power Administration Point): owner_authorizer
   ✅ PVP (Power Verification Point): trust_service
 

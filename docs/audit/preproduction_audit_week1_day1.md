@@ -93,7 +93,7 @@ Most issues (59%) are **line length violations** in:
 - **Locations**: Load testing, demo code, benchmarking, stub providers
 - **Context**: Non-cryptographic random selection (test data generation, simulations)
 - **Assessment**: ✅ **Appropriate usage** - Not used for security-sensitive operations
-- **Evidence**: All cryptographic operations use `crypto/rand` (verified in pkg/crypto/, pkg/gauth/)
+- **Evidence**: All cryptographic operations use `crypto/rand` (verified in pkg/crypto/, pkg/agentauth/)
 
 **G407: Hardcoded IV/Nonce** - 2 occurrences
 - **Locations**: internal/secrets/provider.go:92, 193
@@ -219,7 +219,7 @@ Most issues (59%) are **line length violations** in:
 3. **Test Mode Hardened IV Check** (2 hours)
    - Add runtime check in internal/secrets/provider.go
    - Prevent hardcoded IV usage in production environment
-   - Exit with error if GAUTH_ENV=production and test keys detected
+   - Exit with error if AGENTAUTH_ENV=production and test keys detected
 
 ### Priority 2: Code Quality (Q1 2026)
 

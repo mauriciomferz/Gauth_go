@@ -69,7 +69,7 @@ func CreatePoA(ctx context.Context, poa *PoA) error {
 ### Core Components
 
 ```
-pkg/gauth/verification/
+pkg/agentauth/verification/
 ├── dual_channel.go     # SMS + Email verification (189 lines)
 ├── timelock.go         # Time-delayed activation (280 lines)
 ├── mock.go             # Mock implementations for testing (177 lines)
@@ -176,7 +176,7 @@ PoA ID: poa_abc123
 If you did not request this, please:
 1. Do NOT share this code
 2. Change your account password immediately
-3. Contact security@gauth.example.com
+3. Contact security@agentauth.example.com
 ```
 
 **Step 2: User Confirmation**
@@ -209,7 +209,7 @@ poa := &PoAData{
 
 poaID, cancelURL, err := timelock.CreateWithDelay(ctx, poa)
 // poaID:     "poa_abc123"
-// cancelURL: "https://gauth.example.com/cancel/poa_abc123"
+// cancelURL: "https://agentauth.example.com/cancel/poa_abc123"
 ```
 
 **Notification Sent**:
@@ -227,7 +227,7 @@ Details:
 - Created: 2025-11-26T16:00:00Z
 
 🚨 IF YOU DID NOT AUTHORIZE THIS:
-Cancel immediately: https://gauth.example.com/cancel/poa_abc123
+Cancel immediately: https://agentauth.example.com/cancel/poa_abc123
 
 This 24-hour delay gives you time to cancel fraudulent PoAs.
 ```
@@ -243,7 +243,7 @@ PoA ID: poa_abc123
 Grantee: 0xAIAgent
 Activation Time: 2025-11-27T16:00:00Z
 
-To cancel: https://gauth.example.com/cancel/poa_abc123
+To cancel: https://agentauth.example.com/cancel/poa_abc123
 ```
 
 **Step 3: Activation or Cancellation**
@@ -266,7 +266,7 @@ AgentAuth: Power of Attorney Cancelled
 Your Power of Attorney (ID: poa_abc123) has been successfully cancelled.
 
 If you did not request this cancellation, your account may be compromised.
-Please contact security@gauth.example.com immediately.
+Please contact security@agentauth.example.com immediately.
 ```
 
 ---
@@ -288,7 +288,7 @@ Please contact security@gauth.example.com immediately.
 ### Test Execution
 
 ```bash
-$ go test ./pkg/gauth/verification -v -cover
+$ go test ./pkg/agentauth/verification -v -cover
 
 === RUN   TestDualChannelVerifier_RequestVerification
 [MOCK SMS] To: +1234567890
@@ -322,7 +322,7 @@ Subject: AgentAuth: Confirm Power of Attorney Creation
 
 PASS
 coverage: 62.6% of statements
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/verification    0.213s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauth/verification    0.213s
 ```
 
 ---
@@ -412,7 +412,7 @@ type SendGridEmailService struct {
 
 func (s *SendGridEmailService) SendEmail(ctx context.Context, to, subject, body string) error {
     message := mail.NewSingleEmail(
-        mail.NewEmail("AgentAuth Security", "security@gauth.example.com"),
+        mail.NewEmail("AgentAuth Security", "security@agentauth.example.com"),
         subject,
         mail.NewEmail("", to),
         body,
@@ -427,7 +427,7 @@ func (s *SendGridEmailService) SendEmail(ctx context.Context, to, subject, body 
 ### Step 2: Update PoA Creation Flow
 
 ```go
-// pkg/gauth/issuer.go (UPDATED)
+// pkg/agentauth/issuer.go (UPDATED)
 func (i *Issuer) CreatePoA(ctx context.Context, poa *PoA) error {
     // Step 1: Cryptographic signature
     signature := i.signer.Sign(poa.Hash())
@@ -530,7 +530,7 @@ func (m *SecurityMonitor) CheckSuspiciousActivity(principal string) error {
 
 ### Phase 2: Biometric Verification (Not Implemented Yet)
 ```go
-// pkg/gauth/verification/biometric.go (FUTURE)
+// pkg/agentauth/verification/biometric.go (FUTURE)
 type BiometricVerifier struct {
     yubikey *yubikey.Manager
 }
@@ -601,7 +601,7 @@ Task 7 successfully **eliminates CRITICAL-5 vulnerability** by:
 ---
 
 **Report Generated**: November 26, 2025  
-**Package**: `github.com/mauriciomferz/Gauth_go/pkg/gauth/verification`  
+**Package**: `github.com/mauriciomferz/AgentAuth/pkg/agentauth/verification`  
 **Files**: 4 (dual_channel.go, timelock.go, mock.go, verification_test.go)  
 **Lines Added**: 927  
 **Test Coverage**: 62.6%  

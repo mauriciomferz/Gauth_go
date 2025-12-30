@@ -1,5 +1,5 @@
                                                                                                                                                 # AgentAuth Subscription Flow Architecture
-## RFC-0111 Implementation vs. Industry Standards
+## AAP-001 Implementation vs. Industry Standards
 
 **Comparing AgentAuth with Azure AD, Okta, and AWS IAM**
 
@@ -11,7 +11,7 @@ November 19, 2025
 ## Table of Contents
 
 1. Executive Summary
-2. AgentAuth RFC-0111 Subscription Flow
+2. AgentAuth AAP-001 Subscription Flow
 3. Azure AD/Entra Comparison
 4. Okta Comparison
 5. AWS IAM/Cognito Comparison
@@ -27,7 +27,7 @@ November 19, 2025
 
 ### What is AgentAuth?
 
-**AgentAuth** is a specialized OAuth 2.0 authorization server implementing **RFC-0111**, designed specifically for **AI agent authorization** with **Power of Attorney (PoA)** delegation scenarios.
+**AgentAuth** is a specialized OAuth 2.0 authorization server implementing **AAP-001**, designed specifically for **AI agent authorization** with **Power of Attorney (PoA)** delegation scenarios.
 
 ### Key Value Proposition
 
@@ -35,7 +35,7 @@ November 19, 2025
 - **Multi-party authorization chains** (3+ levels)
 - **EU regulatory compliance** (eIDAS, GDPR)
 - **Delegation-first architecture**
-- **100% RFC-0111 compliant** (45/45 requirements implemented)
+- **100% AAP-001 compliant** (45/45 requirements implemented)
 
 ### Not a Replacement For
 
@@ -46,7 +46,7 @@ November 19, 2025
 
 ---
 
-## 2. AgentAuth RFC-0111 Subscription Flow
+## 2. AgentAuth AAP-001 Subscription Flow
 
 ### Overview: 8-Step One-Time Subscription Process
 
@@ -216,7 +216,7 @@ type ResourceServerAuthorization struct {
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              RFC-0111 SUBSCRIPTION FLOW                     │
+│              AAP-001 SUBSCRIPTION FLOW                     │
 │                (ONE-TIME SETUP)                             │
 └─────────────────────────────────────────────────────────────┘
 
@@ -279,13 +279,13 @@ type ResourceServerAuthorization struct {
 
 ### Key Differences: AgentAuth vs. Azure AD
 
-| Feature | AgentAuth RFC-0111 | Azure AD/Entra |
+| Feature | AgentAuth AAP-001 | Azure AD/Entra |
 |---------|----------------|----------------|
 | **Primary Use** | AI agent authorization | Human user SSO |
 | **Identity Focus** | Legal entity validation | Employee/user authentication |
 | **Authorization Model** | Multi-party chains (3+ levels) | Role-based (RBAC) |
 | **Setup Complexity** | 8-step subscription (one-time) | App registration (minutes) |
-| **PoA Support** | ✅ Native (RFC-0111) | ❌ Not supported |
+| **PoA Support** | ✅ Native (AAP-001) | ❌ Not supported |
 | **Commercial Register** | ✅ Built-in verification | ❌ External integration needed |
 | **Delegation Depth** | 3+ levels with validation | 1 level (user → app) |
 | **Compliance Focus** | EU eIDAS, GDPR, PoA laws | GDPR, SOC 2, ISO 27001 |
@@ -302,7 +302,7 @@ type ResourceServerAuthorization struct {
 - ✅ Standard RBAC is sufficient
 - ✅ No legal delegation required
 
-**Use AgentAuth RFC-0111 When:**
+**Use AgentAuth AAP-001 When:**
 - ✅ AI agents need legal authorization
 - ✅ Power of Attorney validation required
 - ✅ Multi-party authorization chains (3+ levels)
@@ -348,14 +348,14 @@ type ResourceServerAuthorization struct {
 
 ### Key Differences: AgentAuth vs. Okta
 
-| Feature | AgentAuth RFC-0111 | Okta |
+| Feature | AgentAuth AAP-001 | Okta |
 |---------|----------------|------|
 | **Primary Use** | AI agent authorization | User SSO & identity management |
 | **Identity Source** | National ID systems (18 countries) | LDAP, AD, HR systems |
 | **Authorization Model** | Multi-party chains | User groups + policies |
 | **Setup Process** | 8-step legal validation | Admin portal configuration |
 | **PoA Support** | ✅ Native | ❌ Custom development needed |
-| **App Integrations** | Custom via RFC-0111 | 7,000+ pre-built |
+| **App Integrations** | Custom via AAP-001 | 7,000+ pre-built |
 | **Delegation Model** | Legal chain validation | Simple user → app delegation |
 | **Lifecycle Management** | Subscription-based | User lifecycle hooks |
 | **Compliance** | EU eIDAS, PoA laws | SOC 2, HIPAA, FedRAMP |
@@ -371,7 +371,7 @@ type ResourceServerAuthorization struct {
 - ✅ Standard SSO requirements
 - ✅ Adaptive MFA for workforce
 
-**Use AgentAuth RFC-0111 When:**
+**Use AgentAuth AAP-001 When:**
 - ✅ AI agents acting with legal authority
 - ✅ Statutory representative validation required
 - ✅ Complex delegation scenarios (corporate hierarchies)
@@ -429,7 +429,7 @@ type ResourceServerAuthorization struct {
 
 ### Key Differences: AgentAuth vs. AWS
 
-| Feature | AgentAuth RFC-0111 | AWS IAM/Cognito |
+| Feature | AgentAuth AAP-001 | AWS IAM/Cognito |
 |---------|----------------|-----------------|
 | **Primary Use** | AI agent authorization | AWS resource access control |
 | **Identity Model** | Legal entity with PoA | AWS users/roles |
@@ -438,7 +438,7 @@ type ResourceServerAuthorization struct {
 | **Setup Complexity** | 8-step subscription | Policy JSON documents |
 | **PoA Support** | ✅ Native | ❌ Not applicable |
 | **Commercial Register** | ✅ Built-in | ❌ Not supported |
-| **Token Format** | RFC-0111 extended tokens | Standard JWT |
+| **Token Format** | AAP-001 extended tokens | Standard JWT |
 | **Compliance** | EU eIDAS, PoA laws | AWS compliance programs |
 | **Cross-Cloud** | ✅ Platform-agnostic | ❌ AWS-only |
 
@@ -453,7 +453,7 @@ type ResourceServerAuthorization struct {
 - ✅ AWS service-to-service authorization
 - ✅ Temporary credentials (STS) required
 
-**Use AgentAuth RFC-0111 When:**
+**Use AgentAuth AAP-001 When:**
 - ✅ AI agents need legal authorization
 - ✅ Resources span multiple cloud platforms
 - ✅ Power of Attorney validation required
@@ -509,7 +509,7 @@ Resource
 
 #### 3. Per-Request Compliance Validation
 
-**AgentAuth RFC-0111 (Steps a-i):**
+**AgentAuth AAP-001 (Steps a-i):**
 
 Every authorization request validates:
 - Authorization chain integrity
@@ -623,7 +623,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│              GAUTH ARCHITECTURE                        │
+│              AGENTAUTH ARCHITECTURE                        │
 └────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────────┐
@@ -644,7 +644,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 ┌──────────────────────────────────────────────────────┐
 │  TOKEN LAYER                                         │
 │  - ExtendedTokenStore                                │
-│  - RFC-0111 Compliant Token Structure                │
+│  - AAP-001 Compliant Token Structure                │
 │  - PoA Credential Embedding                          │
 └──────────────────────────────────────────────────────┘
                       ↓
@@ -661,7 +661,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ### Token Structure Comparison
 
-#### AgentAuth RFC-0111 Token
+#### AgentAuth AAP-001 Token
 
 ```json
 {
@@ -738,7 +738,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ### Key Token Differences
 
-| Feature | AgentAuth RFC-0111 | Azure/Okta/AWS |
+| Feature | AgentAuth AAP-001 | Azure/Okta/AWS |
 |---------|----------------|----------------|
 | **PoA Credential** | ✅ Embedded | ❌ Not included |
 | **Authorization Chain** | ✅ 3+ levels | ❌ Not included |
@@ -800,10 +800,10 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ### Compliance Scorecard
 
-| Compliance Area | AgentAuth RFC-0111 | Status |
+| Compliance Area | AgentAuth AAP-001 | Status |
 |----------------|----------------|--------|
-| **RFC-0111** | Authorization Protocol | 100% ✅ |
-| **RFC-0115** | Token Structure | 100% ✅ |
+| **AAP-001** | Authorization Protocol | 100% ✅ |
+| **AAP-002** | Token Structure | 100% ✅ |
 | **eIDAS** | EU Digital Identity | 90% ✅ |
 | **GDPR** | Data Protection | 100% ✅ |
 | **Geographic Scope** | Jurisdiction Validation | 100% ✅ |
@@ -819,7 +819,7 @@ A fintech AI operates across 10 EU countries, requiring different statutory auth
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│              GAUTH SECURITY LAYERS                     │
+│              AGENTAUTH SECURITY LAYERS                     │
 └────────────────────────────────────────────────────────┘
 
 LAYER 1: Identity Verification
@@ -854,7 +854,7 @@ LAYER 5: Audit & Monitoring
 
 ### AgentAuth vs. Industry Standards: Summary
 
-| Aspect | AgentAuth RFC-0111 | Azure AD | Okta | AWS IAM/Cognito |
+| Aspect | AgentAuth AAP-001 | Azure AD | Okta | AWS IAM/Cognito |
 |--------|----------------|----------|------|-----------------|
 | **Purpose** | AI agent authorization | Enterprise SSO | User identity management | AWS resource control |
 | **PoA Support** | ✅ Native | ❌ No | ❌ No | ❌ No |
@@ -868,7 +868,7 @@ LAYER 5: Audit & Monitoring
 
 ### When to Choose AgentAuth
 
-**✅ Choose AgentAuth RFC-0111 When:**
+**✅ Choose AgentAuth AAP-001 When:**
 
 1. **AI agents need legal authorization**
    - Autonomous AI systems acting on behalf of legal entities
@@ -937,7 +937,7 @@ LAYER 5: Audit & Monitoring
 ### Next Steps
 
 **For Stakeholders:**
-1. Review RFC-0111 specification alignment
+1. Review AAP-001 specification alignment
 2. Evaluate use cases requiring PoA validation
 3. Assess EU regulatory compliance needs
 4. Determine deployment environment (staging/production)
@@ -958,11 +958,11 @@ LAYER 5: Audit & Monitoring
 
 ## Contact & Resources
 
-**Repository:** [github.com/mauriciomferz/Gauth_go](https://github.com/mauriciomferz/Gauth_go)
+**Repository:** [github.com/mauriciomferz/AgentAuth](https://github.com/mauriciomferz/AgentAuth)
 
 **Documentation:**
 - `IMPLEMENTATION_STATUS.md` - Current implementation state
-- `docs/AAP-001_README.md` - RFC-0111 guide
+- `docs/AAP-001_README.md` - AAP-001 guide
 - `DEPLOYMENT_GUIDE.md` - Production deployment
 - `API_KEYS_GUIDE.md` - Provider setup
 

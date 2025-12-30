@@ -11,7 +11,7 @@ Enhance load testing capabilities to include coverage for Revocation and Admin A
     *   Updated the execution mix to include these new scenarios (10% and 5% probability respectively).
     *   Added dynamic configuration: `DURATION`, `RAMP_DURATION`, and `STAGE_DURATION` can now be injected via environment variables for flexible testing (e.g., short verification runs vs. full stress tests).
     *   **Fix**: Updated `BASE_URL` logic to support IPv6 (`[::1]:8080`) correctly to resolve connectivity issues.
-    *   **Fix**: Updated MCP endpoint path to `/api/v1/gauth/mcp/servers`.
+    *   **Fix**: Updated MCP endpoint path to `/api/v1/agentauth/mcp/servers`.
 
 2.  **Soak Test Creation (`tests/load/soak-test.js`)**:
     *   Created a new dedicated script for stability testing.
@@ -29,7 +29,7 @@ Tests were verified in **Degraded Mode** (Backend running without Database):
 
 *   **Load Test**: `k6 run -e DURATION=10s tests/load/k6-load-test.js`
     *   **Result**: 0% Failure Rate.
-    *   **Validated**: `/healthz` and `/api/v1/gauth/mcp/servers` endpoints.
+    *   **Validated**: `/healthz` and `/api/v1/agentauth/mcp/servers` endpoints.
 
 *   **Soak Test**: `k6 run -e DURATION=10s -e DEGRADED_MODE=true tests/load/soak-test.js`
     *   **Result**: 0% Failure Rate.

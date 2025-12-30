@@ -79,7 +79,7 @@ Characteristics:
 - Demonstrates append-only growth from `start_length` to `end_length`.
 - Provides optional prefix subtree decomposition (`prefix_roots`, `prefix_sizes`) representing maximal power-of-two aligned blocks covering the first `start_length` leaves (binary decomposition). Sum(prefix_sizes) == start_length.
 - If the revocation chain is currently empty (no events appended), `latest_tree_head` MAY be `null` (or omitted) because `SignTreeHead()` now returns `nil` for empty chains (see "Empty Chain Behavior" in `REVOCATION_TRANSPARENCY.md`). Clients must handle this case gracefully.
-- Current verification (`VerifyConsistencyProofV2`) still rebuilds the start tree for canonical root validation, but additionally validates each prefix root matches the corresponding subtree. Experimental fast reconstruction (feature flag `GAUTH_CONSISTENCY_V2_FAST=1`) currently succeeds only when `start_length` is a power of two (single prefix block); multi-block reconstruction is deferred.
+- Current verification (`VerifyConsistencyProofV2`) still rebuilds the start tree for canonical root validation, but additionally validates each prefix root matches the corresponding subtree. Experimental fast reconstruction (feature flag `AGENTAUTH_CONSISTENCY_V2_FAST=1`) currently succeeds only when `start_length` is a power of two (single prefix block); multi-block reconstruction is deferred.
 
 Additional Fields (Optimization Phase):
 | Field | Description |
@@ -93,7 +93,7 @@ Generation Algorithm (Optimized):
 4. Consistency Path: (Current phase) A temporary Merkle tree is still built to derive the logarithmic path between historical and latest tree heads. Future phase will replace this with pure streaming interval math eliminating remaining `O(n)` generation overhead.
 
 Fast Reconstruction:
-`ReconstructStartRootFromPrefixBlocks(prefix_roots, prefix_sizes, start_length, prefix_bridges)` validates invariants and performs a reduction using bridges to obtain `start_root` in `O(k)` where `k = len(prefix_roots) + len(prefix_bridges)` (typically `< 2*log2(start_length)`). If the feature flag `GAUTH_CONSISTENCY_V2_FAST=1` is set, verification attempts this reconstruction and compares the result against the canonical rebuilt root; any mismatch causes verification failure.
+`ReconstructStartRootFromPrefixBlocks(prefix_roots, prefix_sizes, start_length, prefix_bridges)` validates invariants and performs a reduction using bridges to obtain `start_root` in `O(k)` where `k = len(prefix_roots) + len(prefix_bridges)` (typically `< 2*log2(start_length)`). If the feature flag `AGENTAUTH_CONSISTENCY_V2_FAST=1` is set, verification attempts this reconstruction and compares the result against the canonical rebuilt root; any mismatch causes verification failure.
 
 Auditor Endpoint Enhancement:
 `GET /api/v1/token/revocation/audit_consistency?start=<tree_head_index>` returns both legacy (full rebuild) and fast reconstruction timings:
@@ -142,22 +142,22 @@ Limitations (Prototype):
 - Merkle tree uses copy-up promotion for odd nodes; path algorithm adapted accordingly.
 ### 🪪 Power of Attorney Semantic Validation Modes
 
-The service supports selectable semantic validation tiers for delegation issuance controlled by `GAUTH_POA_VALIDATOR`:
+The service supports selectable semantic validation tiers for delegation issuance controlled by `AGENTAUTH_POA_VALIDATOR`:
 
 | Mode | Env Value | Characteristics |
 |------|-----------|-----------------|
 | Basic (default) | `basic` or unset | Backwards-compatible minimal invariants: prevent non-wildcard self-delegation, enforce `valid_from < valid_until`, require `jurisdiction` for `regulatory:` scopes, placeholder joint delegation rule (`joint:` requires `signatures` ≥2), numeric format sanity (`max_amount`, `max_daily_amount`, `currency` if present). Wildcard allowed for self-delegation only. |
-| Advanced | `advanced` | Superset governance rules: mandatory `currency` restriction and 30‑day duration cap for any `transaction:` scope, wildcard scope disabled unless `GAUTH_ALLOW_WILDCARD=1`, syntax validation for `valid_hours` (`HH-HH`, wrap-around allowed) and `valid_weekdays` (comma-separated 0–6 unique), optional inline multi-signature restriction unless `GAUTH_ALLOW_INLINE_MULTISIG=1`, aggregate scope length limiting via `GAUTH_MAX_SCOPE_AGG_LEN`, runtime enforcement of `valid_hours` + `valid_weekdays` during token verification. |
+| Advanced | `advanced` | Superset governance rules: mandatory `currency` restriction and 30‑day duration cap for any `transaction:` scope, wildcard scope disabled unless `AGENTAUTH_ALLOW_WILDCARD=1`, syntax validation for `valid_hours` (`HH-HH`, wrap-around allowed) and `valid_weekdays` (comma-separated 0–6 unique), optional inline multi-signature restriction unless `AGENTAUTH_ALLOW_INLINE_MULTISIG=1`, aggregate scope length limiting via `AGENTAUTH_MAX_SCOPE_AGG_LEN`, runtime enforcement of `valid_hours` + `valid_weekdays` during token verification. |
 | None | `none` | Disables semantic validation (not recommended for production). Only basic structural field checks apply. |
 
 Additional related environment variables:
 
 | Env | Purpose |
 |-----|---------|
-| `GAUTH_ALLOW_WILDCARD` | Set to `1` to permit `*` scope under Advanced mode. |
-| `GAUTH_ALLOW_INLINE_MULTISIG` | Set to `1` to allow providing `MultiSignatures` inline at issuance when `threshold > 1`. |
-| `GAUTH_MAX_SCOPE_AGG_LEN` | Integer limit for aggregate length of all scope entries (Advanced). |
-| `GAUTH_POA_VALIDATOR` | Selects validator mode (`advanced`, `basic`, `none`). |
+| `AGENTAUTH_ALLOW_WILDCARD` | Set to `1` to permit `*` scope under Advanced mode. |
+| `AGENTAUTH_ALLOW_INLINE_MULTISIG` | Set to `1` to allow providing `MultiSignatures` inline at issuance when `threshold > 1`. |
+| `AGENTAUTH_MAX_SCOPE_AGG_LEN` | Integer limit for aggregate length of all scope entries (Advanced). |
+| `AGENTAUTH_POA_VALIDATOR` | Selects validator mode (`advanced`, `basic`, `none`). |
 
 Restriction Keys (current set): `currency`, `jurisdiction`, `signatures`, `max_amount`, `max_daily_amount`, `valid_hours`, `valid_weekdays`. Future enhancements will add a warning channel and persistent counters for daily limit usage.
 
@@ -171,9 +171,9 @@ EnvelopeV2 supports optional embedding of the full canonical PoA JSON for determ
 Environment Variables:
 | Env | Purpose | Default |
 |-----|---------|---------|
-| `GAUTH_POA_ENVELOPE_V2` | Enables EnvelopeV2 issuance (adds canonical digest & multi-sig metadata). | unset (V1) |
-| `GAUTH_EMBED_FULL_POA` | When `1`, embeds canonical PoA JSON into `RawPOA` and sets `PoAVersion` (`poa/v1`). | unset (disabled) |
-| `GAUTH_MAX_RAW_POA_BYTES` | Max allowed canonical JSON length for embedding; skip & count if exceeded. | 8192 |
+| `AGENTAUTH_POA_ENVELOPE_V2` | Enables EnvelopeV2 issuance (adds canonical digest & multi-sig metadata). | unset (V1) |
+| `AGENTAUTH_EMBED_FULL_POA` | When `1`, embeds canonical PoA JSON into `RawPOA` and sets `PoAVersion` (`poa/v1`). | unset (disabled) |
+| `AGENTAUTH_MAX_RAW_POA_BYTES` | Max allowed canonical JSON length for embedding; skip & count if exceeded. | 8192 |
 
 Behavior:
 1. Canonical JSON produced once via `CanonicalPOADigest` and reused for `RawPOA` (ordering preserved: sorted scope & restriction keys; RFC3339 UTC timestamps).
@@ -196,7 +196,7 @@ Security Notes:
 * Embedding increases token size; keep cap conservative and benchmark before raising.
 
 Future Roadmap:
-* CBOR compact encoding (`GAUTH_EMBED_FULL_POA_FORMAT=cbor`).
+* CBOR compact encoding (`AGENTAUTH_EMBED_FULL_POA_FORMAT=cbor`).
 * Verification helper exposing RawPOA directly (avoid manual envelope parsing).
 * Streaming / chunking strategy for very large PoAs.
 * Warning channel & audit persistence of embedded PoA snapshots.
@@ -248,7 +248,7 @@ Fields:
 
 #### Canonical Signing Payload
 ```
-GAUTH_TREE_HEAD:{"version":<int>,"merkle_root":"<hex>","chain_length":<int>,"aggregate_hash":"<hex>","threshold":<int>,"weights_total":<int>,"satisfied_weight":<int>}
+AGENTAUTH_TREE_HEAD:{"version":<int>,"merkle_root":"<hex>","chain_length":<int>,"aggregate_hash":"<hex>","threshold":<int>,"weights_total":<int>,"satisfied_weight":<int>}
 ```
 (Order fixed; no whitespace; numeric values unquoted.)
 
@@ -290,11 +290,11 @@ Each successful rotation (development endpoint) triggers automatic signing of th
 #### Environment Variables (Multi-Sig)
 | Env | Purpose |
 |-----|---------|
-| `GAUTH_MSIG_THRESHOLD` | Numeric threshold required for multi-sig validity. |
-| `GAUTH_MSIG_WEIGHTS` | Comma-separated weights for keys in rotation order (e.g. `3,2,1`). |
-| `GAUTH_MSIG_AUTO_SIGN=1` | Auto-sign tree head after any rotation. |
-| `GAUTH_EDDSA_ROTATION_INTERVAL_SEC` | Background rotation interval (if scheduler enabled). |
-| `GAUTH_EDDSA_MAX_HISTORY` | Max historical keys retained/exposed via keys endpoint. |
+| `AGENTAUTH_MSIG_THRESHOLD` | Numeric threshold required for multi-sig validity. |
+| `AGENTAUTH_MSIG_WEIGHTS` | Comma-separated weights for keys in rotation order (e.g. `3,2,1`). |
+| `AGENTAUTH_MSIG_AUTO_SIGN=1` | Auto-sign tree head after any rotation. |
+| `AGENTAUTH_EDDSA_ROTATION_INTERVAL_SEC` | Background rotation interval (if scheduler enabled). |
+| `AGENTAUTH_EDDSA_MAX_HISTORY` | Max historical keys retained/exposed via keys endpoint. |
 
 #### Security & UX Notes
 * Fallback verification is only used when native Ed25519 unavailable; it relies on audited tweetnacl implementation (public domain). Avoid downgrading silently—panel exposes `webcrypto_unsupported` reason.
@@ -309,7 +309,7 @@ Roadmap (Multi-Sig):
 * Optional signature aggregation (MLS-style) to compress multiple Ed25519 signatures.
 
 ### Discovery STH Excerpt
-`GET /.well-known/gauth-configuration`
+`GET /.well-known/agentauth-configuration`
 ```json
 {
     "revocation_support": {
@@ -337,9 +337,9 @@ Clients must fetch JWKS (`/.well-known/jwks.json`) to obtain Ed25519 public keys
 `GET /.well-known/jwks.json`
 
 Returns a JSON Web Key Set containing:
-- RSA key (RS256) when `GAUTH_USE_JWT_LIB=1` and `GAUTH_JWT_ALG=RS256`
+- RSA key (RS256) when `AGENTAUTH_USE_JWT_LIB=1` and `AGENTAUTH_JWT_ALG=RS256`
 - Symmetric placeholder (oct) when only HMAC mode active
-- Ed25519 public keys as OKP JWK objects when `GAUTH_TOKEN_SIG_MODE=eddsa`
+- Ed25519 public keys as OKP JWK objects when `AGENTAUTH_TOKEN_SIG_MODE=eddsa`
 
 Example response (EdDSA + RS256 hybrid):
 ```json
@@ -352,10 +352,10 @@ Example response (EdDSA + RS256 hybrid):
 ```
 Headers:
 - `ETag`: Weak hash of canonical JWKS JSON for client caching (supports `If-None-Match` → `304`).
-- `X-JWKS-Signature` + `X-JWKS-Signature-Alg`: Present only when `GAUTH_JWKS_SIGNING_KEY_ENABLED=1` (HMAC-SHA256 integrity hint).
+- `X-JWKS-Signature` + `X-JWKS-Signature-Alg`: Present only when `AGENTAUTH_JWKS_SIGNING_KEY_ENABLED=1` (HMAC-SHA256 integrity hint).
 - `X-Key-Rotation-Interval-Days`: Optional rotation interval metadata if provided via env.
 
-Rotation Metadata surfaced in discovery (`/.well-known/gauth-configuration`):
+Rotation Metadata surfaced in discovery (`/.well-known/agentauth-configuration`):
 - `jwks_etag`: Mirrors current JWKS ETag once fetched at least once.
 - `jwks_last_rotated`: Timestamp updated whenever ETag changes (new key material).
 
@@ -425,23 +425,23 @@ Metrics Integration:
 Environment Variables:
 | Env | Purpose |
 |-----|---------|
-| `GAUTH_CAP_ANCHOR_NOTARIZE=1` | Enables notarization+receipt path |
-| `GAUTH_NOTARY_RECEIPT_PERSIST_PATH` | Receipt chain persistence file |
-| `GAUTH_NOTARY_RECEIPT_VERIFY_INTERVAL` | Background verify loop interval seconds (>=30) |
-| `GAUTH_CAP_ANCHOR_NOTARY_PROVIDER` | Provider selector (`memory`,`external_stub`) |
- | `GAUTH_NOTARY_RECEIPT_VERIFY_FRESHNESS_SECONDS` | Max age (seconds) before auto re-verification in custom Prometheus endpoint (default 120) |
+| `AGENTAUTH_CAP_ANCHOR_NOTARIZE=1` | Enables notarization+receipt path |
+| `AGENTAUTH_NOTARY_RECEIPT_PERSIST_PATH` | Receipt chain persistence file |
+| `AGENTAUTH_NOTARY_RECEIPT_VERIFY_INTERVAL` | Background verify loop interval seconds (>=30) |
+| `AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER` | Provider selector (`memory`,`external_stub`) |
+ | `AGENTAUTH_NOTARY_RECEIPT_VERIFY_FRESHNESS_SECONDS` | Max age (seconds) before auto re-verification in custom Prometheus endpoint (default 120) |
 
 Additional Environment Variables (Recent Additions):
 | Env | Purpose |
 |-----|---------|
-| `GAUTH_NOTARY_VERIFY_MIN_INTERVAL_SECONDS` | Adaptive verification lower bound (seconds) controlling minimum recomputation cadence |
-| `GAUTH_NOTARY_VERIFY_MAX_INTERVAL_SECONDS` | Adaptive verification upper bound; interval expands toward this under low append/mismatch rates |
-| `GAUTH_NOTARY_MERKLE_ENABLED=1` | Enable Merkle root computation per receipt (field `merkle_root` appears) |
-| `GAUTH_TSA_STUB_MIN_LATENCY_MS` / `GAUTH_TSA_STUB_MAX_LATENCY_MS` | Configure stub TSA latency simulation window |
-| `GAUTH_TSA_STUB_PROVIDER_NAME` | Override provider name for stub TSA receipts |
-| `GAUTH_TSA_STUB_POLICY_OID` | Policy OID placeholder for RFC3161 scaffold |
-| `GAUTH_TLOG_STUB_MIN_LATENCY_MS` / `GAUTH_TLOG_STUB_MAX_LATENCY_MS` | Configure stub transparency log latency simulation window |
-| `GAUTH_TLOG_STUB_PROVIDER_NAME` | Override provider name for transparency log stub |
+| `AGENTAUTH_NOTARY_VERIFY_MIN_INTERVAL_SECONDS` | Adaptive verification lower bound (seconds) controlling minimum recomputation cadence |
+| `AGENTAUTH_NOTARY_VERIFY_MAX_INTERVAL_SECONDS` | Adaptive verification upper bound; interval expands toward this under low append/mismatch rates |
+| `AGENTAUTH_NOTARY_MERKLE_ENABLED=1` | Enable Merkle root computation per receipt (field `merkle_root` appears) |
+| `AGENTAUTH_TSA_STUB_MIN_LATENCY_MS` / `AGENTAUTH_TSA_STUB_MAX_LATENCY_MS` | Configure stub TSA latency simulation window |
+| `AGENTAUTH_TSA_STUB_PROVIDER_NAME` | Override provider name for stub TSA receipts |
+| `AGENTAUTH_TSA_STUB_POLICY_OID` | Policy OID placeholder for RFC3161 scaffold |
+| `AGENTAUTH_TLOG_STUB_MIN_LATENCY_MS` / `AGENTAUTH_TLOG_STUB_MAX_LATENCY_MS` | Configure stub transparency log latency simulation window |
+| `AGENTAUTH_TLOG_STUB_PROVIDER_NAME` | Override provider name for transparency log stub |
 
 ### 🌐 External Capability Anchoring (Prototype)
 
@@ -450,12 +450,12 @@ External anchoring publishes the canonical capability registry hash to an extern
 Environment Variables:
 | Env | Purpose |
 |-----|---------|
-| `GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER` | Select external provider (`memory` in-process demo or `tsa_stub` latency/failure simulation). |
-| `GAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS` | Minimum simulated latency (ms) for `tsa_stub` provider (default 25). |
-| `GAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS` | Maximum simulated latency (ms) for `tsa_stub` provider (default 120). |
-| `GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB` | Failure probability (0.0–1.0) for `tsa_stub` to exercise retry/error paths (default 0). |
-| `GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES` | Number of retry attempts after the initial attempt (exponential backoff). Default 0 (no retries). |
-| `GAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS` | Base backoff (ms) before first retry (default 50). Each retry doubles this base (2^n) and applies ±20% jitter. |
+| `AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER` | Select external provider (`memory` in-process demo or `tsa_stub` latency/failure simulation). |
+| `AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS` | Minimum simulated latency (ms) for `tsa_stub` provider (default 25). |
+| `AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS` | Maximum simulated latency (ms) for `tsa_stub` provider (default 120). |
+| `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB` | Failure probability (0.0–1.0) for `tsa_stub` to exercise retry/error paths (default 0). |
+| `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES` | Number of retry attempts after the initial attempt (exponential backoff). Default 0 (no retries). |
+| `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS` | Base backoff (ms) before first retry (default 50). Each retry doubles this base (2^n) and applies ±20% jitter. |
 
 Receipt Object (provider-specific, memory & stub share shape):
 ```json
@@ -469,7 +469,7 @@ Receipt Object (provider-specific, memory & stub share shape):
 ```
 
 Provider Label Normalization:
-The metrics label for the TSA stub provider uses a dash (`tsa-stub`) while the environment selector uses an underscore (`GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub`). Internally the provider implementation emits `provider:"tsa-stub"` in receipts; the metrics helper normalizes the env value `tsa_stub` → `tsa-stub` to ensure consistent labeled counters/histograms. Memory provider passes through unchanged (`memory`). Custom providers should prefer dash-separated labels for Prometheus cardinality hygiene.
+The metrics label for the TSA stub provider uses a dash (`tsa-stub`) while the environment selector uses an underscore (`AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub`). Internally the provider implementation emits `provider:"tsa-stub"` in receipts; the metrics helper normalizes the env value `tsa_stub` → `tsa-stub` to ensure consistent labeled counters/histograms. Memory provider passes through unchanged (`memory`). Custom providers should prefer dash-separated labels for Prometheus cardinality hygiene.
 
 Endpoints:
 | Endpoint | Method | Purpose |
@@ -485,7 +485,7 @@ To ensure the initial external anchoring attempt (performed during server startu
 
 ```go
 reg := prometheus.NewRegistry()
-pm  := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "gauth", Subsystem: "rfc0111", Registry: reg})
+pm  := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem: "aap001", Registry: reg})
 srv := web.NewBetaServerWithMetrics(":0", pm)
 ```
 
@@ -510,8 +510,8 @@ An initial anchoring attempt is performed immediately during server initializati
 
 Failure Simulation:
 Retry Behavior:
-If `GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES` > 0, the server performs additional attempts upon failure using exponential backoff: `delay = base_ms * 2^attempt` with a ±20% jitter adjustment. Each attempt (initial + retries) records its own metrics (attempt counter increment; failures or latency histogram sample). Successful attempts short-circuit remaining retries. The hash length gauge is updated only on success. Provider-labeled counters reflect total attempts and failures across all retries.
-Set `GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub` with `GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=1` to force failures; status payload will omit `external_anchor_receipt` and failure counter increments.
+If `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES` > 0, the server performs additional attempts upon failure using exponential backoff: `delay = base_ms * 2^attempt` with a ±20% jitter adjustment. Each attempt (initial + retries) records its own metrics (attempt counter increment; failures or latency histogram sample). Successful attempts short-circuit remaining retries. The hash length gauge is updated only on success. Provider-labeled counters reflect total attempts and failures across all retries.
+Set `AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub` with `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=1` to force failures; status payload will omit `external_anchor_receipt` and failure counter increments.
 
 Verification Semantics:
 `/external/verify` invokes provider `Verify`; memory provider always succeeds when hash matches, while stub may return errors if simulated state diverges.
@@ -623,9 +623,9 @@ Failure Reasons:
 Metrics:
 | Metric | Description |
 |--------|-------------|
-| `gauth_rotation_verification_latency_seconds` | Histogram of verification latency |
-| `gauth_rotation_verification_total{outcome="success|failure"}` | Counter labeled by outcome (any failure => failure) |
-| `gauth_rotation_verification_failure_reason_total{reason="<code>"}` | Counter per failing descriptor categorized by first failure reason |
+| `agentauth_rotation_verification_latency_seconds` | Histogram of verification latency |
+| `agentauth_rotation_verification_total{outcome="success|failure"}` | Counter labeled by outcome (any failure => failure) |
+| `agentauth_rotation_verification_failure_reason_total{reason="<code>"}` | Counter per failing descriptor categorized by first failure reason |
 
 Current Limitations:
 * Public key resolution not yet wired—missing keys produce `kid_not_found_old/new`.
@@ -677,17 +677,17 @@ Verification Failure Codes:
 
 Canonical Signing Payload:
 ```
-GAUTH_ROTATION_DESCRIPTOR:{"old_key_id":"...","new_key_id":"...","effective_time":"...","reason":"...","prev_rotation_hash":"..."}
+AGENTAUTH_ROTATION_DESCRIPTOR:{"old_key_id":"...","new_key_id":"...","effective_time":"...","reason":"...","prev_rotation_hash":"..."}
 ```
 
 ### 📊 Snapshot Metrics & Integrity
 Metrics exposed during snapshot operations (Prometheus):
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `gauth_snapshot_generation_latency_seconds` | Histogram | - | Generation latency |
-| `gauth_snapshot_generation_total` | Counter | outcome | Attempts (success|error) |
-| `gauth_snapshot_verification_latency_seconds` | Histogram | - | Verification latency |
-| `gauth_snapshot_verification_total` | Counter | outcome | Attempts (success|failure|error) |
+| `agentauth_snapshot_generation_latency_seconds` | Histogram | - | Generation latency |
+| `agentauth_snapshot_generation_total` | Counter | outcome | Attempts (success|error) |
+| `agentauth_snapshot_verification_latency_seconds` | Histogram | - | Verification latency |
+| `agentauth_snapshot_verification_total` | Counter | outcome | Attempts (success|failure|error) |
 
 Snapshot Verification Result Fields:
 | Field | Meaning |
@@ -708,7 +708,7 @@ Trigger alert when integrity gauge == 0 (mismatch) for 2 consecutive scrapes. Su
 ### 🕒 JTI TTL & Replay Protection
 
 The token service enforces fail-closed replay detection on the `jti` claim. In-memory JTIs expire after a TTL window:
-- Configure with `GAUTH_JTI_TTL_SEC` (default 600 seconds).
+- Configure with `AGENTAUTH_JTI_TTL_SEC` (default 600 seconds).
 - On validation, a duplicate JTI within the TTL window ⇒ token rejected.
 - Opportunistic eviction runs when the in-memory map exceeds 500 entries.
 - Pluggable persistence layer can be injected via `WithReplayStore` to enforce durable uniqueness.
@@ -731,7 +731,7 @@ Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
 
 **Beta Demonstration API Documentation (NOT Production Ready)**
 
-Complete Go library API reference for AAP-RFC-0111 (AgentAuth 1.0) and AAP-RFC-0115 (PoA Definition) implementation.
+Complete Go library API reference for AAP-001 (AgentAuth 1.0) and AAP-002 (PoA Definition) implementation.
 
 > **📝 Note**: This document covers the Go library API. For the web demonstration API documentation, see [COMPLETE_API_REFERENCE.md](./COMPLETE_API_REFERENCE.md) which includes both library and web API documentation.
 
@@ -788,29 +788,29 @@ func NewRFCCompliantService(issuer, audience string) (*RFCCompliantService, erro
 service, err := auth.NewRFCCompliantService("my-company", "ai-authorization")
 ### Signature & Semantic Validation Options (AAP-001 Service)
 
-The lower-level `rfc0111.Service` (delegation issuance / token verification) now supports additional functional options:
+The lower-level `aap001.Service` (delegation issuance / token verification) now supports additional functional options:
 
 ```go
 // Enforce signature presence (abort issuance if signing fails)
-func WithMandatorySignatures() rfc0111.Option
+func WithMandatorySignatures() aap001.Option
 // Provide a signing key (returned Signer must implement ed25519 or supported algorithm)
-func WithSignerProvider(fn func() (cr.Signer, error)) rfc0111.Option
+func WithSignerProvider(fn func() (cr.Signer, error) aap001.Option
 // Install semantic validator executing cross-field invariants before signing/persistence
-func WithSemanticValidator(v rfc0111.PoAValidator) rfc0111.Option
+func WithSemanticValidator(v aap001.PoAValidator) aap001.Option
 // Enforce strict authenticity (missing public key at verification becomes integrity failure)
-func WithStrictAuthenticity() rfc0111.Option
+func WithStrictAuthenticity() aap001.Option
 ```
 
 Canonical Digest & Signature:
 ```go
-digestHex, canonicalJSON, err := rfc0111.CanonicalPOADigest(&poa)
+digestHex, canonicalJSON, err := aap001.CanonicalPOADigest(&poa)
 // Signature covers domain-separated canonical JSON; exclusion of mutable fields preserves validity through lifecycle.
 ```
 
 Validator Interface:
 ```go
 type PoAValidator interface {
-    Validate(*rfc0111.PowerOfAttorney) error // return rfc.ErrInvalidRequest on semantic violation
+    Validate(*aap001.PowerOfAttorney) error // return rfc.ErrInvalidRequest on semantic violation
 }
 
 // Provided prototype implementation:
@@ -826,10 +826,10 @@ Prototype Semantic Rules (BasicPoAValidator):
 
 Activation Example:
 ```go
-svc := rfc0111.NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer(),
-    rfc0111.WithSignerProvider(func() (cr.Signer, error) { kp, _ := cr.NewInMemoryEd25519Provider(); return kp.ActiveSigner() }),
-    rfc0111.WithMandatorySignatures(),
-    rfc0111.WithSemanticValidator(rfc0111.BasicPoAValidator{}),
+svc := aap001.NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer(),
+    aap001.WithSignerProvider(func() (cr.Signer, error) { kp, _ := cr.NewInMemoryEd25519Provider(); return kp.ActiveSigner() }),
+    aap001.WithMandatorySignatures(),
+    aap001.WithSemanticValidator(aap001.BasicPoAValidator{}),
 )
 ```
 
@@ -1314,7 +1314,7 @@ import (
     "context"
     "fmt"
     "time"
-    "github.com/AgentAuth-Foundation/gauth/pkg/auth"
+    "github.com/agentauth/agentauth/pkg/auth"
 )
 
 func main() {

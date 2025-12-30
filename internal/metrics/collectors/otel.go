@@ -71,7 +71,7 @@ func (o *OpenTelemetryCollector) Close() error {
 // Health checks OpenTelemetry meter availability.
 func (o *OpenTelemetryCollector) Health() error {
 	// Simple health check: try to get/create a test counter
-	if _, err := o.getOrCreateCounter("gauth.health.check"); err != nil {
+	if _, err := o.getOrCreateCounter("agentauth.health.check"); err != nil {
 		return fmt.Errorf("otel health check failed: %w", err)
 	}
 	return nil
@@ -133,294 +133,294 @@ func (o *OpenTelemetryCollector) recordDuration(name string, d time.Duration, at
 // Metrics interface implementation (119 methods)
 
 func (o *OpenTelemetryCollector) IncDelegationsCreated() {
-	o.incCounter("gauth.delegations.created")
+	o.incCounter("agentauth.delegations.created")
 }
 
 func (o *OpenTelemetryCollector) IncDelegationsPartiallyRevoked() {
-	o.incCounter("gauth.delegations.partially_revoked")
+	o.incCounter("agentauth.delegations.partially_revoked")
 }
 
 func (o *OpenTelemetryCollector) IncDelegationDepthExceeded() {
-	o.incCounter("gauth.delegation.depth_exceeded")
+	o.incCounter("agentauth.delegation.depth_exceeded")
 }
 
 func (o *OpenTelemetryCollector) SetMaxObservedDelegationDepth(depth int) {
 	// For gauges in OTel, use ObservableGauge with callbacks
 	// Simplified: store in counter for now (production would use proper gauge)
-	counter, _ := o.getOrCreateCounter("gauth.delegation.max_depth")
+	counter, _ := o.getOrCreateCounter("agentauth.delegation.max_depth")
 	if counter != nil {
 		counter.Add(o.ctx, int64(depth))
 	}
 }
 
 func (o *OpenTelemetryCollector) ObserveValidationLatency(d time.Duration) {
-	o.recordDuration("gauth.validation.latency", d)
+	o.recordDuration("agentauth.validation.latency", d)
 }
 
 func (o *OpenTelemetryCollector) IncSignaturesIssued() {
-	o.incCounter("gauth.signatures.issued")
+	o.incCounter("agentauth.signatures.issued")
 }
 
 func (o *OpenTelemetryCollector) IncSignatureIssueFailures() {
-	o.incCounter("gauth.signatures.issue_failures")
+	o.incCounter("agentauth.signatures.issue_failures")
 }
 
 func (o *OpenTelemetryCollector) IncSignatureVerifications() {
-	o.incCounter("gauth.signatures.verifications")
+	o.incCounter("agentauth.signatures.verifications")
 }
 
 func (o *OpenTelemetryCollector) IncSignatureVerificationFailures() {
-	o.incCounter("gauth.signatures.verification_failures")
+	o.incCounter("agentauth.signatures.verification_failures")
 }
 
 func (o *OpenTelemetryCollector) IncAttestationProofIssued() {
-	o.incCounter("gauth.attestation.issued")
+	o.incCounter("agentauth.attestation.issued")
 }
 
 func (o *OpenTelemetryCollector) IncAttestationProofIssueFailures() {
-	o.incCounter("gauth.attestation.issue_failures")
+	o.incCounter("agentauth.attestation.issue_failures")
 }
 
 func (o *OpenTelemetryCollector) IncAttestationProofVerifications() {
-	o.incCounter("gauth.attestation.verifications")
+	o.incCounter("agentauth.attestation.verifications")
 }
 
 func (o *OpenTelemetryCollector) IncAttestationProofVerificationFailures() {
-	o.incCounter("gauth.attestation.verification_failures")
+	o.incCounter("agentauth.attestation.verification_failures")
 }
 
 func (o *OpenTelemetryCollector) IncAttestationProofDigestMismatch() {
-	o.incCounter("gauth.attestation.digest_mismatch")
+	o.incCounter("agentauth.attestation.digest_mismatch")
 }
 
 func (o *OpenTelemetryCollector) ObserveAttestationProofVerificationLatency(d time.Duration) {
-	o.recordDuration("gauth.attestation.verification_latency", d)
+	o.recordDuration("agentauth.attestation.verification_latency", d)
 }
 
 func (o *OpenTelemetryCollector) ObserveAttestationProofIssueLatency(d time.Duration) {
-	o.recordDuration("gauth.attestation.issue_latency", d)
+	o.recordDuration("agentauth.attestation.issue_latency", d)
 }
 
 func (o *OpenTelemetryCollector) IncAttestationProofVerificationFailureReason(reason string) {
-	o.incCounter("gauth.attestation.verification_failure_reason",
+	o.incCounter("agentauth.attestation.verification_failure_reason",
 		attribute.String("reason", reason))
 }
 
 // Revocation metrics
 func (o *OpenTelemetryCollector) IncRevocationsIssued() {
-	o.incCounter("gauth.revocations.issued")
+	o.incCounter("agentauth.revocations.issued")
 }
 
 func (o *OpenTelemetryCollector) IncRevocationIssueFailures() {
-	o.incCounter("gauth.revocations.issue_failures")
+	o.incCounter("agentauth.revocations.issue_failures")
 }
 
 func (o *OpenTelemetryCollector) IncRevocationVerifications() {
-	o.incCounter("gauth.revocations.verifications")
+	o.incCounter("agentauth.revocations.verifications")
 }
 
 func (o *OpenTelemetryCollector) IncRevocationVerificationFailures() {
-	o.incCounter("gauth.revocations.verification_failures")
+	o.incCounter("agentauth.revocations.verification_failures")
 }
 
 func (o *OpenTelemetryCollector) IncRevocationProofsIssued() {
-	o.incCounter("gauth.revocation_proofs.issued")
+	o.incCounter("agentauth.revocation_proofs.issued")
 }
 
 func (o *OpenTelemetryCollector) IncRevocationProofIssueFailures() {
-	o.incCounter("gauth.revocation_proofs.issue_failures")
+	o.incCounter("agentauth.revocation_proofs.issue_failures")
 }
 
 func (o *OpenTelemetryCollector) IncRevocationProofVerifications() {
-	o.incCounter("gauth.revocation_proofs.verifications")
+	o.incCounter("agentauth.revocation_proofs.verifications")
 }
 
 func (o *OpenTelemetryCollector) IncRevocationProofVerificationFailures() {
-	o.incCounter("gauth.revocation_proofs.verification_failures")
+	o.incCounter("agentauth.revocation_proofs.verification_failures")
 }
 
 func (o *OpenTelemetryCollector) ObserveRevocationProofVerificationLatency(d time.Duration) {
-	o.recordDuration("gauth.revocation_proofs.verification_latency", d)
+	o.recordDuration("agentauth.revocation_proofs.verification_latency", d)
 }
 
 func (o *OpenTelemetryCollector) ObserveRevocationProofIssueLatency(d time.Duration) {
-	o.recordDuration("gauth.revocation_proofs.issue_latency", d)
+	o.recordDuration("agentauth.revocation_proofs.issue_latency", d)
 }
 
 // Anchor metrics
 func (o *OpenTelemetryCollector) IncAnchorsCreated() {
-	o.incCounter("gauth.anchors.created")
+	o.incCounter("agentauth.anchors.created")
 }
 
 func (o *OpenTelemetryCollector) IncAnchorVerifications() {
-	o.incCounter("gauth.anchors.verifications")
+	o.incCounter("agentauth.anchors.verifications")
 }
 
 func (o *OpenTelemetryCollector) IncAnchorVerificationFailures() {
-	o.incCounter("gauth.anchors.verification_failures")
+	o.incCounter("agentauth.anchors.verification_failures")
 }
 
 func (o *OpenTelemetryCollector) ObserveAnchorVerificationLatency(d time.Duration) {
-	o.recordDuration("gauth.anchors.verification_latency", d)
+	o.recordDuration("agentauth.anchors.verification_latency", d)
 }
 
 func (o *OpenTelemetryCollector) IncExternalAnchorsCreated() {
-	o.incCounter("gauth.external_anchors.created")
+	o.incCounter("agentauth.external_anchors.created")
 }
 
 func (o *OpenTelemetryCollector) IncExternalAnchorRetries() {
-	o.incCounter("gauth.external_anchors.retries")
+	o.incCounter("agentauth.external_anchors.retries")
 }
 
 func (o *OpenTelemetryCollector) IncAnchorAttempts() {
-	o.incCounter("gauth.anchors.attempts")
+	o.incCounter("agentauth.anchors.attempts")
 }
 
 func (o *OpenTelemetryCollector) IncAnchorFailures() {
-	o.incCounter("gauth.anchors.failures")
+	o.incCounter("agentauth.anchors.failures")
 }
 
 func (o *OpenTelemetryCollector) IncExternalAnchorForcedFailures() {
-	o.incCounter("gauth.external_anchors.forced_failures")
+	o.incCounter("agentauth.external_anchors.forced_failures")
 }
 
 func (o *OpenTelemetryCollector) IncCombinedAnchorEmitted() {
-	o.incCounter("gauth.combined_anchors.emitted")
+	o.incCounter("agentauth.combined_anchors.emitted")
 }
 
 // Obligation metrics
 func (o *OpenTelemetryCollector) IncObligationsExecuted() {
-	o.incCounter("gauth.obligations.executed")
+	o.incCounter("agentauth.obligations.executed")
 }
 
 func (o *OpenTelemetryCollector) IncCapabilityRegistryHashChanged() {
-	o.incCounter("gauth.capability.registry_hash_changed")
+	o.incCounter("agentauth.capability.registry_hash_changed")
 }
 
 func (o *OpenTelemetryCollector) ObserveCapabilityAnchorInterval(d time.Duration) {
-	o.recordDuration("gauth.capability.anchor_interval", d)
+	o.recordDuration("agentauth.capability.anchor_interval", d)
 }
 
 func (o *OpenTelemetryCollector) IncObligationsFailed() {
-	o.incCounter("gauth.obligations.failed")
+	o.incCounter("agentauth.obligations.failed")
 }
 
 func (o *OpenTelemetryCollector) ObserveObligationLatency(d time.Duration) {
-	o.recordDuration("gauth.obligations.latency", d)
+	o.recordDuration("agentauth.obligations.latency", d)
 }
 
 func (o *OpenTelemetryCollector) IncMandatoryObligationFailures() {
-	o.incCounter("gauth.obligations.mandatory_failures")
+	o.incCounter("agentauth.obligations.mandatory_failures")
 }
 
 // Replay/cache metrics
 func (o *OpenTelemetryCollector) IncReplayCacheHits() {
-	o.incCounter("gauth.replay_cache.hits")
+	o.incCounter("agentauth.replay_cache.hits")
 }
 
 func (o *OpenTelemetryCollector) IncReplayCacheMisses() {
-	o.incCounter("gauth.replay_cache.misses")
+	o.incCounter("agentauth.replay_cache.misses")
 }
 
 func (o *OpenTelemetryCollector) IncReplayDetected() {
-	o.incCounter("gauth.replay.detected")
+	o.incCounter("agentauth.replay.detected")
 }
 
 func (o *OpenTelemetryCollector) SetReplayCacheSize(size int) {
-	counter, _ := o.getOrCreateCounter("gauth.replay_cache.size")
+	counter, _ := o.getOrCreateCounter("agentauth.replay_cache.size")
 	if counter != nil {
 		counter.Add(o.ctx, int64(size))
 	}
 }
 
 func (o *OpenTelemetryCollector) IncReplayStoreWrites() {
-	o.incCounter("gauth.replay_store.writes")
+	o.incCounter("agentauth.replay_store.writes")
 }
 
 func (o *OpenTelemetryCollector) IncReplayStoreWriteFailures() {
-	o.incCounter("gauth.replay_store.write_failures")
+	o.incCounter("agentauth.replay_store.write_failures")
 }
 
 func (o *OpenTelemetryCollector) ObserveReplayStoreWriteLatency(d time.Duration) {
-	o.recordDuration("gauth.replay_store.write_latency", d)
+	o.recordDuration("agentauth.replay_store.write_latency", d)
 }
 
 func (o *OpenTelemetryCollector) IncReplayStoreAvailabilityImpact() {
-	o.incCounter("gauth.replay_store.availability_impact")
+	o.incCounter("agentauth.replay_store.availability_impact")
 }
 
 // Multi-signature metrics
 func (o *OpenTelemetryCollector) IncMultiSignatureVerifications() {
-	o.incCounter("gauth.multisig.verifications")
+	o.incCounter("agentauth.multisig.verifications")
 }
 
 func (o *OpenTelemetryCollector) IncMultiSignatureVerificationFailures() {
-	o.incCounter("gauth.multisig.verification_failures")
+	o.incCounter("agentauth.multisig.verification_failures")
 }
 
 func (o *OpenTelemetryCollector) IncMultiSignatureStructuralFailures() {
-	o.incCounter("gauth.multisig.structural_failures")
+	o.incCounter("agentauth.multisig.structural_failures")
 }
 
 func (o *OpenTelemetryCollector) IncMultiSignatureDigestFailures() {
-	o.incCounter("gauth.multisig.digest_failures")
+	o.incCounter("agentauth.multisig.digest_failures")
 }
 
 func (o *OpenTelemetryCollector) IncMultiSignaturePublicKeyMissing() {
-	o.incCounter("gauth.multisig.pubkey_missing")
+	o.incCounter("agentauth.multisig.pubkey_missing")
 }
 
 func (o *OpenTelemetryCollector) IncMultiSignatureInvalidSignatureFailures() {
-	o.incCounter("gauth.multisig.invalid_signature")
+	o.incCounter("agentauth.multisig.invalid_signature")
 }
 
 func (o *OpenTelemetryCollector) IncMultiSignatureThresholdFailures() {
-	o.incCounter("gauth.multisig.threshold_failures")
+	o.incCounter("agentauth.multisig.threshold_failures")
 }
 
 func (o *OpenTelemetryCollector) IncMultiSignatureWeightFailures() {
-	o.incCounter("gauth.multisig.weight_failures")
+	o.incCounter("agentauth.multisig.weight_failures")
 }
 
 func (o *OpenTelemetryCollector) ObserveMultiSignatureVerificationLatency(d time.Duration) {
-	o.recordDuration("gauth.multisig.verification_latency", d)
+	o.recordDuration("agentauth.multisig.verification_latency", d)
 }
 
 func (o *OpenTelemetryCollector) ObserveMultiSignatureBatchSize(size int) {
-	histo, _ := o.getOrCreateHistogram("gauth.multisig.batch_size")
+	histo, _ := o.getOrCreateHistogram("agentauth.multisig.batch_size")
 	if histo != nil {
 		histo.Record(o.ctx, float64(size))
 	}
 }
 
 func (o *OpenTelemetryCollector) ObserveMultiSignatureAggregateLatency(d time.Duration) {
-	o.recordDuration("gauth.multisig.aggregate_latency", d)
+	o.recordDuration("agentauth.multisig.aggregate_latency", d)
 }
 
 // Violation metrics
 func (o *OpenTelemetryCollector) IncViolation(cat interface{}) {
-	o.incCounter("gauth.violations",
+	o.incCounter("agentauth.violations",
 		attribute.String("category", fmt.Sprintf("%v", cat)))
 }
 
 func (o *OpenTelemetryCollector) IncScopeViolations() {
-	o.incCounter("gauth.violations.scope")
+	o.incCounter("agentauth.violations.scope")
 }
 
 func (o *OpenTelemetryCollector) IncRestrictionViolations() {
-	o.incCounter("gauth.violations.restriction")
+	o.incCounter("agentauth.violations.restriction")
 }
 
 func (o *OpenTelemetryCollector) IncUnauthorized() {
-	o.incCounter("gauth.violations.unauthorized")
+	o.incCounter("agentauth.violations.unauthorized")
 }
 
 func (o *OpenTelemetryCollector) IncExpired() {
-	o.incCounter("gauth.violations.expired")
+	o.incCounter("agentauth.violations.expired")
 }
 
 func (o *OpenTelemetryCollector) IncRevoked() {
-	o.incCounter("gauth.violations.revoked")
+	o.incCounter("agentauth.violations.revoked")
 }
 
 // Stub implementations for remaining methods
@@ -519,7 +519,7 @@ func (o *OpenTelemetryCollector) ObserveDistributedTraceLatency(d time.Duration)
 func (o *OpenTelemetryCollector) SetDistributedTraceActiveSpans(count int)                   {}
 
 func (o *OpenTelemetryCollector) ObserveExternalAnchorInterval(seconds float64) {
-	histo, err := o.getOrCreateHistogram("gauth.external_anchor.interval")
+	histo, err := o.getOrCreateHistogram("agentauth.external_anchor.interval")
 	if err != nil {
 		return
 	}

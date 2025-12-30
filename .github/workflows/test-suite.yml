@@ -31,9 +31,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: gauth_admin
-          POSTGRES_PASSWORD: gauth_dev_password
-          POSTGRES_DB: gauth
+          POSTGRES_USER: agentauth_admin
+          POSTGRES_PASSWORD: agentauth_dev_password
+          POSTGRES_DB: agentauth
         ports:
           - 5432:5432
         options: >-
@@ -76,9 +76,9 @@ jobs:
           REDIS_PORT: 6379
           DB_HOST: localhost
           DB_PORT: 5432
-          DB_USER: gauth_admin
-          DB_PASSWORD: gauth_dev_password
-          DB_NAME: gauth
+          DB_USER: agentauth_admin
+          DB_PASSWORD: agentauth_dev_password
+          DB_NAME: agentauth
           DB_SSLMODE: disable
         run: |
           # Skip flaky tests, integration tests, and packages without tests
@@ -207,10 +207,10 @@ jobs:
       
       - name: Start backend server
         env:
-          GAUTH_DEV_INDEX: "1"
-          GAUTH_RFC0111_ENABLED: "1"
-          GAUTH_USE_JWT_LIB: "1"
-          GAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
+          AGENTAUTH_DEV_INDEX: "1"
+          AGENTAUTH_RFC0111_ENABLED: "1"
+          AGENTAUTH_USE_JWT_LIB: "1"
+          AGENTAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
         run: |
           go run ./cmd/web-server &
           echo $! > backend.pid
@@ -290,10 +290,10 @@ jobs:
       
       - name: Start backend server
         env:
-          GAUTH_DEV_INDEX: "1"
-          GAUTH_RFC0111_ENABLED: "1"
-          GAUTH_USE_JWT_LIB: "1"
-          GAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
+          AGENTAUTH_DEV_INDEX: "1"
+          AGENTAUTH_RFC0111_ENABLED: "1"
+          AGENTAUTH_USE_JWT_LIB: "1"
+          AGENTAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
         run: |
           go run ./cmd/web-server &
           echo $! > backend.pid
@@ -348,10 +348,10 @@ jobs:
       
       - name: Start backend server
         env:
-          GAUTH_DEV_INDEX: "1"
-          GAUTH_RFC0111_ENABLED: "1"
-          GAUTH_USE_JWT_LIB: "1"
-          GAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
+          AGENTAUTH_DEV_INDEX: "1"
+          AGENTAUTH_RFC0111_ENABLED: "1"
+          AGENTAUTH_USE_JWT_LIB: "1"
+          AGENTAUTH_JWT_SIGNING_KEY: "test-secret-key-for-ci"
         run: |
           go run ./cmd/web-server &
           echo $! > backend.pid

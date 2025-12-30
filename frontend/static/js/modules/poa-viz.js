@@ -220,7 +220,7 @@ export class PoAGraphVisualizer {
             } else {
                 // Golden spiral distribution for even spacing
                 const phi = Math.acos(1 - 2 * (index + 0.5) / nodeCount);
-                const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+                const theta = Math.PI * (1 + Math.sqrt(5) * index;
                 
                 // Add some randomness for natural star field look
                 const r = radius * (0.8 + Math.random() * 0.4);

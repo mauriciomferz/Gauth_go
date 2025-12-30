@@ -37,12 +37,12 @@
 
 | RFC Section | Requirement | Implementation | Evidence | Compliance |
 |-------------|-------------|----------------|----------|------------|
-| **Section 1 (Scope)** | AI governance protocol | ✅ Implemented | `pkg/gauth/`, `pkg/auth/` | **95%** |
-| **Section 3 (Nomenclature)** | Resource Owner | ✅ Defined | `pkg/gauth/extended_token.go:166` | **90%** |
-| **Section 3** | Resource Server | ✅ Defined | `pkg/gauth/gauth.go:970` | **85%** |
+| **Section 1 (Scope)** | AI governance protocol | ✅ Implemented | `pkg/agentauth/`, `pkg/auth/` | **95%** |
+| **Section 3 (Nomenclature)** | Resource Owner | ✅ Defined | `pkg/agentauth/extended_token.go:166` | **90%** |
+| **Section 3** | Resource Server | ✅ Defined | `pkg/agentauth/agentauth.go:970` | **85%** |
 | **Section 3** | Client (AI) | ✅ Defined | `pkg/poa/poa.go:44-93` | **90%** |
-| **Section 3** | Authorization Server | ✅ Implemented | `pkg/gauth/gauth.go` | **85%** |
-| **Section 3** | Extended Token | ✅ Implemented | `pkg/gauth/extended_token.go:18-46` | **88%** |
+| **Section 3** | Authorization Server | ✅ Implemented | `pkg/agentauth/agentauth.go` | **85%** |
+| **Section 3** | Extended Token | ✅ Implemented | `pkg/agentauth/extended_token.go:18-46` | **88%** |
 
 #### 🔴 **CRITICAL FAILURES**
 
@@ -60,7 +60,7 @@
 **What's Actually Implemented**:
 
 ```go
-// pkg/gauth/extended_token.go:145-176
+// pkg/agentauth/extended_token.go:145-176
 type OwnersAuthorizerInfo struct {
     AuthorizerID             string    `json:"authorizer_id"`
     AuthorizerName           string    `json:"authorizer_name"`
@@ -133,7 +133,7 @@ $ grep -r "RequestComplianceValidation\|GrantComplianceValidation" pkg/ --includ
 
 **Evidence**:
 ```go
-// pkg/gauth/gauth.go:144-180
+// pkg/agentauth/agentauth.go:144-180
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
     // MISSING: Step (b) - request compliance validation
     // MISSING: Step (c) - explicit grant issuance
@@ -174,7 +174,7 @@ Five distinct Power*Point roles with specific responsibilities.
 | **PEP** | Supply & demand-side enforcement | ✅ **GOOD** | `pkg/enforcement/pep.go` | **90%** |
 | **PDP** | Authorization decision engine | ✅ **GOOD** | `pkg/pdp/`, `internal/pdp/` | **85%** |
 | **PIP** | Data provider for decisions | 🟡 **FRAGMENTED** | Multiple packages | **60%** |
-| **PAP** | Policy administration | ✅ **ADEQUATE** | `pkg/gauth/gauth.go:931` | **80%** |
+| **PAP** | Policy administration | ✅ **ADEQUATE** | `pkg/agentauth/agentauth.go:931` | **80%** |
 | **PVP** | Identity verification | 🔴 **CRITICAL GAP** | `pkg/verification/pvp.go` | **45%** |
 
 #### **PEP (Power Enforcement Point) - 90% ✅**
@@ -225,7 +225,7 @@ type Engine struct {
 > "Power Information Point (PIP) – provider of data that contributes to the approval decision. Typically, the authorization server."
 
 **What's Implemented**:
-- Token data in `pkg/gauth/`
+- Token data in `pkg/agentauth/`
 - Policy attributes in `pkg/pdp/`
 - Legal framework data in `pkg/auth/legal_framework_integration.go`
 
@@ -254,7 +254,7 @@ type PIP interface {
 
 **What's Implemented**:
 ```go
-// pkg/gauth/gauth.go:911-943
+// pkg/agentauth/agentauth.go:911-943
 type PowerAdministrationPoint struct {
     AgentAuth       AgentAuth
     ID          string    `json:"id"`
@@ -317,7 +317,7 @@ $ grep -r "VerifyAuthorizationChain\|VerifyStatutoryAuthority\|VerifyCommercialR
 #### **What's Implemented - THE GOOD**
 
 ```go
-// pkg/gauth/extended_token.go:18-46
+// pkg/agentauth/extended_token.go:18-46
 type ExtendedToken struct {
     // OAuth 2.0 Compatibility ✅
     AccessToken  string
@@ -327,7 +327,7 @@ type ExtendedToken struct {
     Scope        []string
     IssuedAt     time.Time
     
-    // RFC-0111 Extended Fields ✅
+    // AAP-001 Extended Fields ✅
     PowerOfAttorney      *poa.PoADefinition
     AuthorizationChain   *AuthorizationChain
     ClientOwner          *ClientOwnerInfo
@@ -347,13 +347,13 @@ type ExtendedToken struct {
 
 **Evidence - Extended Token Creation**:
 ```bash
-$ grep -A 20 "func.*CreateExtendedToken" pkg/gauth/*.go
+$ grep -A 20 "func.*CreateExtendedToken" pkg/agentauth/*.go
 # RESULT: NO SUCH FUNCTION
 ```
 
 **What Actually Happens**:
 ```go
-// pkg/gauth/gauth.go:144-180
+// pkg/agentauth/agentauth.go:144-180
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
     // Returns basic TokenResponse, NOT ExtendedToken
     token := &TokenResponse{
@@ -485,23 +485,23 @@ Comprehensive Power of Attorney credential definition with parties, authorizatio
 | RFC Component | Implementation | Evidence | Compliance |
 |---------------|----------------|----------|------------|
 | **Principal** | ✅ Implemented | `pkg/rfc/combined_config.go:69-73` | **90%** |
-| **Representative/Authorizer** | ✅ Implemented | `pkg/gauth/extended_token.go:145` | **85%** |
+| **Representative/Authorizer** | ✅ Implemented | `pkg/agentauth/extended_token.go:145` | **85%** |
 | **Authorized Client** | ✅ Implemented | `pkg/poa/poa.go:76-105` | **90%** |
 
 **What's Implemented**:
 ```go
 // pkg/poa/poa.go:76-105
 type AuthorizedClient struct {
-    TypeEnum          ClientType              // ✅ RFC-0115 A.3
+    TypeEnum          ClientType              // ✅ AAP-002 A.3
     Identity          string
     Version           string
     OperationalStatus string
-    StatusEnum        OperationalStatus       // ✅ RFC-0115 A.3
-    CapabilityLevel   CapabilityLevel         // ✅ RFC-0115 A.3
+    StatusEnum        OperationalStatus       // ✅ AAP-002 A.3
+    CapabilityLevel   CapabilityLevel         // ✅ AAP-002 A.3
     TeamComposition   []string                // ✅ For AgenticAI
     PhysicalAttributes *PhysicalAttributes    // ✅ For robots
     ModelAttributes    *ModelAttributes       // ✅ For LLMs
-    Certifications    []Certification         // ✅ RFC-0115 C.6
+    Certifications    []Certification         // ✅ AAP-002 C.6
 }
 ```
 
@@ -552,9 +552,9 @@ $ grep -A 10 "type AuthorizedActions" pkg/poa/*.go
 ```
 
 **What's Missing**:
-- Complete RFC-0115 B.4 transaction types (loan, purchase, sale, leasing)
-- Complete RFC-0115 B.4 decision types (personnel, financial, strategic, legal)
-- Complete RFC-0115 B.4 action types (physical and non-physical)
+- Complete AAP-002 B.4 transaction types (loan, purchase, sale, leasing)
+- Complete AAP-002 B.4 decision types (personnel, financial, strategic, legal)
+- Complete AAP-002 B.4 action types (physical and non-physical)
 
 **RFC Compliance**: **65%** for actions, **85%** for sectors/regions
 
@@ -996,7 +996,7 @@ I would say: *"Nice architecture! The data models are excellent. But we're missi
 
 ## APPENDIX A: Compliance Checklist
 
-### RFC-0111 Checklist (48 items)
+### AAP-001 Checklist (48 items)
 
 - [x] Section 1: Scope - AI governance protocol
 - [x] Section 2: Exclusions documented
@@ -1016,7 +1016,7 @@ I would say: *"Nice architecture! The data models are excellent. But we're missi
 - [x] Section 6: Token validation (basic)
 - [ ] Section 6: Compliance tracking (incomplete)
 
-### RFC-0115 Checklist (35 items)
+### AAP-002 Checklist (35 items)
 
 - [x] Section A: Principal defined
 - [x] Section A: Authorizer structure

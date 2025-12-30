@@ -32,7 +32,7 @@ type StoredReceipt struct {
 	Receipt
 	PrevHash  string `json:"prev_hash"`
 	ChainHash string `json:"chain_hash"`
-	// MerkleRoot is optional; populated only when GAUTH_NOTARY_MERKLE_ENABLED=1.
+	// MerkleRoot is optional; populated only when AGENTAUTH_NOTARY_MERKLE_ENABLED=1.
 	// Represents the Merkle root of all receipt leaf hashes up to and including this entry.
 	// Leaf hash definition: sha256(json_base_without_chain_hash). For consistency we reuse the
 	// same 'enc' bytes used during ChainHash computation (excluding PrevHash/ChainHash itself).
@@ -113,7 +113,7 @@ func (rs *ReceiptStore) Append(r Receipt) (StoredReceipt, error) {
 	}
 	h := sha256.Sum256(append([]byte(sr.PrevHash), enc...))
 	sr.ChainHash = fmt.Sprintf("%x", h[:])
-	merkleEnabled := os.Getenv("GAUTH_NOTARY_MERKLE_ENABLED") == "1"
+	merkleEnabled := os.Getenv("AGENTAUTH_NOTARY_MERKLE_ENABLED") == "1"
 	if merkleEnabled {
 		// Initialize leaf hash cache if first time enabling after prior disabled appends.
 		if !rs.merkleInitialized {

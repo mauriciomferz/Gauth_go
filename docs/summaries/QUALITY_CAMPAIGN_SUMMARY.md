@@ -73,13 +73,13 @@ All serious bug categories have been completely eliminated:
 **Impact**: Ensures metrics integrity at extreme values
 
 #### 3. Integer Overflow in Timestamp Cleanup
-**File**: `pkg/gauth/replay_store_bolt.go:120`  
+**File**: `pkg/agentauth/replay_store_bolt.go:120`  
 **Issue**: Timestamp conversion could overflow  
 **Fix**: Added boundary validation, handle far-future timestamps gracefully  
 **Impact**: Prevents replay protection corruption for timestamps beyond year 2262
 
 #### 4. Integer Overflow in Replay Counter
-**File**: `pkg/gauth/replay_store_bolt.go:161`  
+**File**: `pkg/agentauth/replay_store_bolt.go:161`  
 **Issue**: Timestamp conversion in counting logic  
 **Fix**: Added boundary validation, treat overflow as not-expired  
 **Impact**: Maintains replay protection integrity
@@ -372,7 +372,7 @@ if counter > math.MaxInt64 {
 **Branch**: `main`  
 **Latest Commit**: `40743793`  
 **Total Commits**: 15 (this campaign)  
-**Remotes**: Synced to both `origin/main` and `gimel-platform`
+**Remotes**: Synced to `origin/main`
 
 **Modified Files**:
 - 87 source files (improvements)

@@ -15,17 +15,17 @@ Purpose: Provide a concise, cacheable snapshot of cryptographic + governance con
 ## Required Fields (Backlog Spec)
 | Field | Type | Description |
 |-------|------|-------------|
-| `digest_domains` | `[]string` | Active canonical digest domain identifiers (`GAUTH_AAP-001_POA_V1`, `GAUTH_AAP-001_POA_V2`, `GAUTH_AAP-001_POA_V3|tax=1`). |
+| `digest_domains` | `[]string` | Active canonical digest domain identifiers (`AGENTAUTH_AAP-001_POA_V1`, `AGENTAUTH_AAP-001_POA_V2`, `AGENTAUTH_AAP-001_POA_V3|tax=1`). |
 | `active_digest_domain` | `string` | Domain primarily used for newly issued single‑sig PoAs (V3 if taxonomy enabled, else V1). |
 | `token_algorithms` | `[]string` | Supported token signature / JWT algorithms (e.g., `HS256`, `RS256`, `EdDSA`). |
-| `replay_strict_mode` | `bool` | Whether durable replay protection (WAL + snapshot) is active (`GAUTH_REPLAY_WAL_PATH` set). |
+| `replay_strict_mode` | `bool` | Whether durable replay protection (WAL + snapshot) is active (`AGENTAUTH_REPLAY_WAL_PATH` set). |
 | `poa_version_current` | `int` | Current issuance version for newly created PoAs (auto bumps to 3 when taxonomy fields present). |
 | `capabilities_hash` | `string` | SHA256 hash of canonical capability registry if file‑backed (empty if static). |
 | `rotation_tip_hash` | `string` | Head hash of rotation ledger (if configured). |
 | `schema_version` | `int` | Discovery JSON schema version (starts at 1). |
 | `generated_at` | `string` | RFC3339 timestamp of response generation. |
 | `etag` | `string` | Weak ETag header (W/"<hex>") generated from stable canonical JSON (excludes `generated_at`). |
-| `max_delegation_depth` | `int` (optional) | Present only when `GAUTH_MAX_DELEGATION_DEPTH` > 0; maximum allowed delegation chain length (root = depth 1). |
+| `max_delegation_depth` | `int` (optional) | Present only when `AGENTAUTH_MAX_DELEGATION_DEPTH` > 0; maximum allowed delegation chain length (root = depth 1). |
 
 ### Optional / Future Fields
 | Field | Description |
@@ -44,8 +44,8 @@ Client MAY send `If-None-Match` with prior ETag to receive `304 Not Modified` wh
 {
   "schema_version": 1,
   "generated_at": "2025-10-27T00:15:10Z",
-  "digest_domains": ["GAUTH_AAP-001_POA_V1","GAUTH_AAP-001_POA_V2","GAUTH_AAP-001_POA_V3|tax=1"],
-  "active_digest_domain": "GAUTH_AAP-001_POA_V3|tax=1",
+  "digest_domains": ["AGENTAUTH_AAP-001_POA_V1","AGENTAUTH_AAP-001_POA_V2","AGENTAUTH_AAP-001_POA_V3|tax=1"],
+  "active_digest_domain": "AGENTAUTH_AAP-001_POA_V3|tax=1",
   "token_algorithms": ["HS256","RS256","EdDSA"],
   "replay_strict_mode": true,
   "poa_version_current": 3,

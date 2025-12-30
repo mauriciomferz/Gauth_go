@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 )
 
@@ -24,9 +24,9 @@ type MCPClient interface {
 
 // AuthorizationBridge defines the interface for MCP authorization
 type AuthorizationBridge interface {
-	AuthorizeResourceRead(ctx context.Context, token *gauth.ExtendedToken, uri string) (bool, error)
-	AuthorizeToolCall(ctx context.Context, token *gauth.ExtendedToken, name string, args map[string]interface{}) (bool, error)
-	AuthorizePromptGet(ctx context.Context, token *gauth.ExtendedToken, name string) (bool, error)
+	AuthorizeResourceRead(ctx context.Context, token *agentauth.ExtendedToken, uri string) (bool, error)
+	AuthorizeToolCall(ctx context.Context, token *agentauth.ExtendedToken, name string, args map[string]interface{}) (bool, error)
+	AuthorizePromptGet(ctx context.Context, token *agentauth.ExtendedToken, name string) (bool, error)
 }
 
 // MCPAgent is a high-level wrapper for AI agents to access MCP resources
@@ -36,13 +36,13 @@ type MCPAgent struct {
 	authBridge  AuthorizationBridge
 	auditLogger mcp.AuditLogger
 	agentID     string
-	token       *gauth.ExtendedToken
+	token       *agentauth.ExtendedToken
 }
 
 // MCPAgentConfig configures an MCP agent instance
 type MCPAgentConfig struct {
 	AgentID     string               // Unique agent identifier
-	Token       *gauth.ExtendedToken // AgentAuth authorization token
+	Token       *agentauth.ExtendedToken // AgentAuth authorization token
 	MCPClient   MCPClient            // MCP client for server communication
 	AuthBridge  AuthorizationBridge  // Authorization bridge
 	AuditLogger mcp.AuditLogger      // Audit logger (optional)
@@ -205,7 +205,7 @@ func (a *MCPAgent) ListPrompts(ctx context.Context) (*mcp.PromptsListResponse, e
 }
 
 // GetToken returns the agent's current authorization token
-func (a *MCPAgent) GetToken() *gauth.ExtendedToken {
+func (a *MCPAgent) GetToken() *agentauth.ExtendedToken {
 	return a.token
 }
 

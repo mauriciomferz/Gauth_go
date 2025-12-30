@@ -6,7 +6,7 @@ echo "🚀 Starting unified dev environment (backend + frontend)"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-BACKEND_PORT="${GAUTH_PORT:-8080}"
+BACKEND_PORT="${AGENTAUTH_PORT:-8080}"
 UI_DIR="frontend/ui-react"
 UI_PORT="${VITE_PORT:-3000}"
 
@@ -25,9 +25,9 @@ echo "🧪 Quick backend health build"
 go build -o bin/web-server ./cmd/web-server || { echo "❌ Backend build failed"; exit 1; }
 
 echo "🏁 Launching backend in background"
-./bin/web-server > /tmp/gauth_backend.log 2>&1 &
+./bin/web-server > /tmp/agentauth_backend.log 2>&1 &
 BACKEND_PID=$!
-echo "✅ Backend PID: $BACKEND_PID (logs: /tmp/gauth_backend.log)"
+echo "✅ Backend PID: $BACKEND_PID (logs: /tmp/agentauth_backend.log)"
 
 echo "📦 Installing UI dependencies (if needed)"
 if [ -d "$UI_DIR" ]; then
@@ -36,9 +36,9 @@ if [ -d "$UI_DIR" ]; then
     npm install --no-audit --no-fund
   fi
   echo "🌐 Starting Vite dev server"
-  npm run dev -- --port "$UI_PORT" > /tmp/gauth_ui.log 2>&1 &
+  npm run dev -- --port "$UI_PORT" > /tmp/agentauth_ui.log 2>&1 &
   UI_PID=$!
-  echo "✅ UI PID: $UI_PID (logs: /tmp/gauth_ui.log)"
+  echo "✅ UI PID: $UI_PID (logs: /tmp/agentauth_ui.log)"
   cd "$ROOT_DIR"
 else
   echo "⚠️  UI directory missing: $UI_DIR"
@@ -52,6 +52,6 @@ AgentAuth Dev Environment Started
 Backend:   http://localhost:$BACKEND_PORT
 UI:        http://localhost:$UI_PORT
 Kill:      kill $BACKEND_PID $UI_PID
-Logs:      tail -f /tmp/gauth_backend.log /tmp/gauth_ui.log
+Logs:      tail -f /tmp/agentauth_backend.log /tmp/agentauth_ui.log
 ====================================================
 EOF

@@ -21,7 +21,7 @@ Phase 3 successfully connects the frontend button handlers to real Go backend AP
 ```javascript
 'create-token': async function(btn) {
     await delay(1500);
-    const token = 'gauth_' + Math.random().toString(36).substr(2, 32);
+    const token = 'agentauth_' + Math.random().toString(36).substr(2, 32);
     showNotification(`✅ Token created: ${token}`, 'success');
 }
 ```
@@ -514,20 +514,20 @@ fetch('/api/v1/beta/examples/catalog')
 - **Binary**: `/Users/.../bin/web-server`
 - **PID**: 35740
 - **Port**: 8080
-- **Mode**: Dev (GAUTH_DEV_INDEX=1)
+- **Mode**: Dev (AGENTAUTH_DEV_INDEX=1)
 - **Template**: 13,313 lines (up from 13,215)
 - **JavaScript**: ~900 lines total
 
 ### Build Command
 ```bash
-cd /Users/.../Gauth_go
+cd /Users/.../AgentAuth
 go build -o bin/web-server ./cmd/web-server
 ```
 
 ### Run Command
 ```bash
 pkill -f web-server && sleep 1
-GAUTH_DEV_INDEX=1 ./bin/web-server > /dev/null 2>&1 &
+AGENTAUTH_DEV_INDEX=1 ./bin/web-server > /dev/null 2>&1 &
 ```
 
 ### Access

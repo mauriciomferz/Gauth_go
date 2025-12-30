@@ -57,6 +57,6 @@ func respondError(c *gin.Context, status int, code, errStr, msg, rfcRef string, 
 	if detail != nil {
 		det["additional_info"] = detail
 	}
-	envelope := ErrorEnvelope{Code: code, Message: msg, Details: det, Retryable: retryable, Source: "gauth", Error: errStr, Success: false}
+	envelope := ErrorEnvelope{Code: code, Message: msg, Details: det, Retryable: retryable, Source: "agentauth", Error: errStr, Success: false}
 	c.JSON(status, envelope)
 }

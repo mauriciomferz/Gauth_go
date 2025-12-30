@@ -86,7 +86,7 @@ jobs:
       - name: Build production bundle
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://api.gauth.example.com/api/v1
+          VITE_API_BASE_URL: https://api.agentauth.example.com/api/v1
           VITE_ENV: production
 
       - name: Upload build artifacts
@@ -157,7 +157,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            VITE_API_BASE_URL=https://api.gauth.example.com/api/v1
+            VITE_API_BASE_URL=https://api.agentauth.example.com/api/v1
             VITE_ENV=production
 
   # Security scanning
@@ -189,7 +189,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
     environment:
       name: staging
-      url: https://staging.gauth.example.com
+      url: https://staging.agentauth.example.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -200,7 +200,7 @@ jobs:
           # Add your staging deployment commands here
           # Examples:
           # - kubectl apply -f k8s-staging/
-          # - helm upgrade --install gauth ./charts/gauth -f values-staging.yaml
+          # - helm upgrade --install agentauth ./charts/agentauth -f values-staging.yaml
           # - docker-compose -f docker-compose.staging.yml up -d
 
       - name: Run smoke tests
@@ -216,7 +216,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
     environment:
       name: production
-      url: https://gauth.example.com
+      url: https://agentauth.example.com
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -227,7 +227,7 @@ jobs:
           # Add your production deployment commands here
           # Examples:
           # - kubectl apply -f k8s-production/
-          # - helm upgrade --install gauth ./charts/gauth -f values-production.yaml
+          # - helm upgrade --install agentauth ./charts/agentauth -f values-production.yaml
           # - AWS/GCP/Azure deployment commands
 
       - name: Run smoke tests

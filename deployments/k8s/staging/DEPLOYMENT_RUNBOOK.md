@@ -145,29 +145,29 @@ openssl genpkey -algorithm ED25519 -out ed25519-key1.pem
 # Extract private key bytes (hex format)
 PRIVATE_HEX=$(openssl pkey -in ed25519-key1.pem -text -noout | grep 'priv:' -A 3 | tail -n 3 | tr -d ' \n:')
 
-# Format for GAUTH_ROTATIONS_V2_ED25519_KEYS: kid:hex_private_key
+# Format for AGENTAUTH_ROTATIONS_V2_ED25519_KEYS: kid:hex_private_key
 echo "demo-key-1:${PRIVATE_HEX}"
 ```
 
 ### Create Kubernetes Secrets
 ```bash
 # Create namespace first
-kubectl create namespace gauth-staging
+kubectl create namespace agentauth-staging
 
 # Create PostgreSQL secrets
 kubectl create secret generic postgres-secrets \
-  --namespace=gauth-staging \
+  --namespace=agentauth-staging \
   --from-literal=postgres-password='REPLACE_WITH_STRONG_PASSWORD' \
   --from-literal=app-password='REPLACE_WITH_APP_PASSWORD'
 
 # Create Redis secrets
 kubectl create secret generic redis-secrets \
-  --namespace=gauth-staging \
+  --namespace=agentauth-staging \
   --from-literal=redis-password='REPLACE_WITH_REDIS_PASSWORD'
 
 # Create AgentAuth secrets
-kubectl create secret generic gauth-secrets \
-  --namespace=gauth-staging \
+kubectl create secret generic agentauth-secrets \
+  --namespace=agentauth-staging \
   --from-literal=postgres-password='REPLACE_WITH_APP_PASSWORD' \
   --from-file=jwt-private-key=jwt-private-key.pem \
   --from-file=jwt-public-key=jwt-public-key.pem \
@@ -178,13 +178,13 @@ kubectl create secret generic gauth-secrets \
 # Create basic auth for Grafana ingress
 htpasswd -c auth admin
 kubectl create secret generic grafana-basic-auth \
-  --namespace=gauth-staging \
+  --namespace=agentauth-staging \
   --from-file=auth
 
 # Create basic auth for Prometheus ingress
 htpasswd -c auth admin
 kubectl create secret generic prometheus-basic-auth \
-  --namespace=gauth-staging \
+  --namespace=agentauth-staging \
   --from-file=auth
 
 # Clean up local files
@@ -198,28 +198,28 @@ rm -f jwt-private-key.pem jwt-public-key.pem ed25519-key1.pem auth
 ### Step 1: Build and Push Docker Image
 ```bash
 # Navigate to project root
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 
 # Build Docker image (multi-stage, production-ready)
-docker build -t gauth:staging -f Dockerfile .
+docker build -t agentauth:staging -f Dockerfile .
 
 # Tag for registry (adjust for your registry)
-docker tag gauth:staging YOUR_REGISTRY/gauth:staging
-docker tag gauth:staging YOUR_REGISTRY/gauth:$(git rev-parse --short HEAD)
+docker tag agentauth:staging YOUR_REGISTRY/agentauth:staging
+docker tag agentauth:staging YOUR_REGISTRY/agentauth:$(git rev-parse --short HEAD)
 
 # Push to registry
-docker push YOUR_REGISTRY/gauth:staging
-docker push YOUR_REGISTRY/gauth:$(git rev-parse --short HEAD)
+docker push YOUR_REGISTRY/agentauth:staging
+docker push YOUR_REGISTRY/agentauth:$(git rev-parse --short HEAD)
 ```
 
 ### Step 2: Update Deployment Manifest
 ```bash
 # Update image reference in deployment.yaml
-sed -i '' "s|image: gauth:staging|image: YOUR_REGISTRY/gauth:staging|g" \
+sed -i '' "s|image: agentauth:staging|image: YOUR_REGISTRY/agentauth:staging|g" \
   deployments/k8s/staging/deployment.yaml
 
 # Update domain names in ingress.yaml
-sed -i '' "s|gauth-staging.yourdomain.com|gauth-staging.ACTUAL_DOMAIN.com|g" \
+sed -i '' "s|agentauth-staging.yourdomain.com|agentauth-staging.ACTUAL_DOMAIN.com|g" \
   deployments/k8s/staging/ingress.yaml
 ```
 
@@ -247,30 +247,30 @@ kubectl apply -f deployments/k8s/staging/prometheus-deployment.yaml
 kubectl apply -f deployments/k8s/staging/ingress.yaml
 
 # Wait for rollout completion
-kubectl rollout status deployment/gauth-deployment -n gauth-staging --timeout=5m
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging --timeout=5m
 ```
 
 ### Step 4: Verify Deployment
 ```bash
 # Check pod status
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 
 # Expected output:
 # NAME                                READY   STATUS    RESTARTS   AGE
-# gauth-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
-# gauth-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
-# gauth-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
+# agentauth-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
+# agentauth-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
+# agentauth-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
 # postgres-deployment-xxxxxxxx-xxxxx  1/1     Running   0          2m
 # redis-deployment-xxxxxxxxxx-xxxxx   1/1     Running   0          2m
 
 # Check logs
-kubectl logs -n gauth-staging deployment/gauth-deployment --tail=50
+kubectl logs -n agentauth-staging deployment/agentauth-deployment --tail=50
 
 # Check services
-kubectl get svc -n gauth-staging
+kubectl get svc -n agentauth-staging
 
 # Check ingress
-kubectl get ingress -n gauth-staging
+kubectl get ingress -n agentauth-staging
 ```
 
 ---
@@ -280,7 +280,7 @@ kubectl get ingress -n gauth-staging
 ### Health Check Endpoint
 ```bash
 # Get ingress URL
-INGRESS_URL=$(kubectl get ingress gauth-ingress -n gauth-staging -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+INGRESS_URL=$(kubectl get ingress agentauth-ingress -n agentauth-staging -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
 # Test health endpoint
 curl -k https://${INGRESS_URL}/healthz
@@ -296,7 +296,7 @@ curl -k https://${INGRESS_URL}/api/v1/beta/health
 ### Metrics Endpoint
 ```bash
 # Test Prometheus metrics
-curl -k https://${INGRESS_URL}/metrics | grep gauth_
+curl -k https://${INGRESS_URL}/metrics | grep agentauth_
 
 # Expected: Prometheus metrics in text format
 ```
@@ -318,10 +318,10 @@ curl -k -X POST https://${INGRESS_URL}/api/v1/tokens \
 ### Database Connectivity
 ```bash
 # Port-forward to PostgreSQL
-kubectl port-forward -n gauth-staging svc/postgres-service 5432:5432 &
+kubectl port-forward -n agentauth-staging svc/postgres-service 5432:5432 &
 
 # Test connection
-PGPASSWORD='YOUR_APP_PASSWORD' psql -h localhost -U gauth_app -d gauth -c "SELECT 1;"
+PGPASSWORD='YOUR_APP_PASSWORD' psql -h localhost -U agentauth_app -d agentauth -c "SELECT 1;"
 
 # Expected: (1 row)
 ```
@@ -329,7 +329,7 @@ PGPASSWORD='YOUR_APP_PASSWORD' psql -h localhost -U gauth_app -d gauth -c "SELEC
 ### Redis Connectivity
 ```bash
 # Port-forward to Redis
-kubectl port-forward -n gauth-staging svc/redis-service 6379:6379 &
+kubectl port-forward -n agentauth-staging svc/redis-service 6379:6379 &
 
 # Test connection
 redis-cli -h localhost -p 6379 -a 'YOUR_REDIS_PASSWORD' PING
@@ -344,28 +344,28 @@ redis-cli -h localhost -p 6379 -a 'YOUR_REDIS_PASSWORD' PING
 ### Quick Rollback (Previous Revision)
 ```bash
 # Rollback deployment to previous revision
-kubectl rollout undo deployment/gauth-deployment -n gauth-staging
+kubectl rollout undo deployment/agentauth-deployment -n agentauth-staging
 
 # Check rollback status
-kubectl rollout status deployment/gauth-deployment -n gauth-staging
+kubectl rollout status deployment/agentauth-deployment -n agentauth-staging
 ```
 
 ### Rollback to Specific Revision
 ```bash
 # List deployment history
-kubectl rollout history deployment/gauth-deployment -n gauth-staging
+kubectl rollout history deployment/agentauth-deployment -n agentauth-staging
 
 # Rollback to specific revision
-kubectl rollout undo deployment/gauth-deployment -n gauth-staging --to-revision=3
+kubectl rollout undo deployment/agentauth-deployment -n agentauth-staging --to-revision=3
 
 # Verify rollback
-kubectl describe deployment gauth-deployment -n gauth-staging
+kubectl describe deployment agentauth-deployment -n agentauth-staging
 ```
 
 ### Complete Environment Teardown
 ```bash
 # Delete all resources in staging namespace
-kubectl delete namespace gauth-staging
+kubectl delete namespace agentauth-staging
 
 # WARNING: This deletes all data, secrets, and configurations!
 ```
@@ -377,22 +377,22 @@ kubectl delete namespace gauth-staging
 ### Pod Not Starting
 ```bash
 # Describe pod
-kubectl describe pod -n gauth-staging -l app=gauth
+kubectl describe pod -n agentauth-staging -l app=agentauth
 
 # Check events
-kubectl get events -n gauth-staging --sort-by='.lastTimestamp'
+kubectl get events -n agentauth-staging --sort-by='.lastTimestamp'
 
 # Check logs
-kubectl logs -n gauth-staging -l app=gauth --tail=100 --follow
+kubectl logs -n agentauth-staging -l app=agentauth --tail=100 --follow
 ```
 
 ### Database Connection Issues
 ```bash
 # Check PostgreSQL logs
-kubectl logs -n gauth-staging -l app=postgres --tail=50
+kubectl logs -n agentauth-staging -l app=postgres --tail=50
 
 # Test connectivity from AgentAuth pod
-kubectl exec -it -n gauth-staging deployment/gauth-deployment -- sh
+kubectl exec -it -n agentauth-staging deployment/agentauth-deployment -- sh
 # Inside pod:
 nc -zv postgres-service 5432
 ```
@@ -403,22 +403,22 @@ nc -zv postgres-service 5432
 kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
 
 # Check certificate status
-kubectl describe certificate -n gauth-staging gauth-tls
+kubectl describe certificate -n agentauth-staging agentauth-tls
 
 # Check ingress configuration
-kubectl get ingress gauth-ingress -n gauth-staging -o yaml
+kubectl get ingress agentauth-ingress -n agentauth-staging -o yaml
 ```
 
 ### High Memory/CPU Usage
 ```bash
 # Check resource usage
-kubectl top pods -n gauth-staging
+kubectl top pods -n agentauth-staging
 
 # Check HPA status
-kubectl get hpa -n gauth-staging gauth-hpa
+kubectl get hpa -n agentauth-staging agentauth-hpa
 
 # Manually scale if needed
-kubectl scale deployment gauth-deployment -n gauth-staging --replicas=5
+kubectl scale deployment agentauth-deployment -n agentauth-staging --replicas=5
 ```
 
 ---
@@ -428,7 +428,7 @@ kubectl scale deployment gauth-deployment -n gauth-staging --replicas=5
 ### Access Grafana Dashboard
 ```bash
 # Get Grafana URL
-kubectl get ingress grafana-ingress -n gauth-staging
+kubectl get ingress grafana-ingress -n agentauth-staging
 
 # Open in browser: https://grafana-staging.yourdomain.com
 # Default credentials: admin / admin (change immediately)
@@ -437,29 +437,29 @@ kubectl get ingress grafana-ingress -n gauth-staging
 ### Access Prometheus
 ```bash
 # Get Prometheus URL
-kubectl get ingress prometheus-ingress -n gauth-staging
+kubectl get ingress prometheus-ingress -n agentauth-staging
 
 # Open in browser: https://prometheus-staging.yourdomain.com
 ```
 
 ### Key Metrics to Monitor
 1. **Pod Health**:
-   - `kube_pod_status_phase{namespace="gauth-staging"}`
+   - `kube_pod_status_phase{namespace="agentauth-staging"}`
    
 2. **Request Rate**:
-   - `rate(http_requests_total{namespace="gauth-staging"}[5m])`
+   - `rate(http_requests_total{namespace="agentauth-staging"}[5m])`
    
 3. **Error Rate**:
-   - `rate(http_requests_total{namespace="gauth-staging",status=~"5.."}[5m])`
+   - `rate(http_requests_total{namespace="agentauth-staging",status=~"5.."}[5m])`
    
 4. **Latency (p95)**:
    - `histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))`
    
 5. **Memory Usage**:
-   - `container_memory_usage_bytes{namespace="gauth-staging",pod=~"gauth-.*"}`
+   - `container_memory_usage_bytes{namespace="agentauth-staging",pod=~"agentauth-.*"}`
    
 6. **CPU Usage**:
-   - `rate(container_cpu_usage_seconds_total{namespace="gauth-staging",pod=~"gauth-.*"}[5m])`
+   - `rate(container_cpu_usage_seconds_total{namespace="agentauth-staging",pod=~"agentauth-.*"}[5m])`
 
 ### Alert Triggers
 1. **Pod Down**: Any AgentAuth pod unavailable > 2 minutes
@@ -503,9 +503,9 @@ kubectl get ingress prometheus-ingress -n gauth-staging
 - **On-Call Schedule**: PagerDuty rotation (configure)
 - **Documentation**: Confluence page (link)
 - **Slack Channels**: 
-  - `#gauth-staging-alerts` (automated alerts)
-  - `#gauth-support` (team communication)
-  - `#gauth-critical` (critical incidents)
+  - `#agentauth-staging-alerts` (automated alerts)
+  - `#agentauth-support` (team communication)
+  - `#agentauth-critical` (critical incidents)
 
 ---
 

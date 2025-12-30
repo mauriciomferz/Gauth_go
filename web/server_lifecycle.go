@@ -17,8 +17,8 @@ import (
 // Run starts the BetaServer HTTP listener and blocks until a signal is received or error occurs.
 // It handles graceful shutdown on SIGINT/SIGTERM.
 func (s *BetaServer) Run() error {
-	// Precedence: explicit env GAUTH_WEB_PORT overrides constructor, else constructor value.
-	addr := os.Getenv("GAUTH_WEB_PORT")
+	// Precedence: explicit env AGENTAUTH_WEB_PORT overrides constructor, else constructor value.
+	addr := os.Getenv("AGENTAUTH_WEB_PORT")
 	if addr == "" {
 		addr = s.port
 	}

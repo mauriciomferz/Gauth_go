@@ -1,44 +1,44 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-green
-  namespace: gauth-staging
+  name: agentauth-green
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     version: green
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       version: green
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         version: green
     spec:
       containers:
-      - name: gauth
-        image: ghcr.io/mauriciomferz/gauth:green
+      - name: agentauth
+        image: ghcr.io/mauriciomferz/agentauth:green
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
         env:
-        - name: GAUTH_WEB_PORT
+        - name: AGENTAUTH_WEB_PORT
           value: "8080"
-        - name: GAUTH_ENV
+        - name: AGENTAUTH_ENV
           value: "staging"
-        - name: GAUTH_LOG_LEVEL
+        - name: AGENTAUTH_LOG_LEVEL
           value: "info"
         - name: VERSION
           value: "green"
         - name: VERSION
           value: "green"
-        - name: GAUTH_REVOCATION_ENABLED
+        - name: AGENTAUTH_REVOCATION_ENABLED
           value: "1"
-        - name: GAUTH_JWT_SIGNING_KEY
+        - name: AGENTAUTH_JWT_SIGNING_KEY
           value: "staging-secret-key-change-in-prod"
         resources:
           requests:

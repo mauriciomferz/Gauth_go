@@ -8,9 +8,9 @@ package limits
 // shutdown.
 //
 // Environment variables:
-//   GAUTH_LIMITS_PERSIST_PATH           override on-disk JSON path (default tmp/limits_counters.json)
-//   GAUTH_LIMITS_PERSIST_INTERVAL_SEC   persistence interval in seconds (default 60)
-//   GAUTH_LIMITS_DISABLE_PERSIST        when set to "1" disables background persistence entirely
+//   AGENTAUTH_LIMITS_PERSIST_PATH           override on-disk JSON path (default tmp/limits_counters.json)
+//   AGENTAUTH_LIMITS_PERSIST_INTERVAL_SEC   persistence interval in seconds (default 60)
+//   AGENTAUTH_LIMITS_DISABLE_PERSIST        when set to "1" disables background persistence entirely
 //
 // Typical usage:
 //   lm, err := limits.InitFromEnv(); if err != nil { ... }
@@ -53,9 +53,9 @@ func InitFromEnv() (*Manager, error) {
 		return globalMgr, nil
 	}
 
-	path := config.Get("GAUTH_LIMITS_PERSIST_PATH", DefaultPath())
-	intervalSec := config.Get("GAUTH_LIMITS_PERSIST_INTERVAL_SEC", "60")
-	disable := config.Get("GAUTH_LIMITS_DISABLE_PERSIST", "") == "1"
+	path := config.Get("AGENTAUTH_LIMITS_PERSIST_PATH", DefaultPath())
+	intervalSec := config.Get("AGENTAUTH_LIMITS_PERSIST_INTERVAL_SEC", "60")
+	disable := config.Get("AGENTAUTH_LIMITS_DISABLE_PERSIST", "") == "1"
 
 	// Ensure directory exists when persistence enabled.
 	if !disable {

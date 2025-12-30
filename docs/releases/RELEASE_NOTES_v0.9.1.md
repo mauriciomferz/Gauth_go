@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-Version 0.9.1 implements **secure-by-default** behavior for the RFC-0111 Power of Attorney validation framework, addressing all critical security gaps identified in the November 21, 2025 security audit. This release transitions the framework from **PARTIALLY COMPLIANT** to certification-ready **COMPLIANT** status.
+Version 0.9.1 implements **secure-by-default** behavior for the AAP-001 Power of Attorney validation framework, addressing all critical security gaps identified in the November 21, 2025 security audit. This release transitions the framework from **PARTIALLY COMPLIANT** to certification-ready **COMPLIANT** status.
 
 ---
 
@@ -26,16 +26,16 @@ Version 0.9.1 implements **secure-by-default** behavior for the RFC-0111 Power o
 
 ```go
 // BEFORE v0.9.1 (UNSAFE)
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // Redis error → continue with degraded security ❌
 
 // AFTER v0.9.1 (SECURE)
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // Redis error → REJECT with ErrRevoked ✅
 
 // Explicit opt-out for high-availability (not recommended)
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithReplayFailOpen(), // ⚠️ Documented as unsafe
+svc := aap001.NewService(audit, authz,
+    aap001.WithReplayFailOpen(), // ⚠️ Documented as unsafe
 )
 ```
 
@@ -55,12 +55,12 @@ svc := rfc0111.NewService(audit, authz,
 
 ```go
 // Permissive Mode (default, backward compatible)
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // Unknown constraints ignored
 
 // Strict Mode (recommended for security-critical systems)
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithStrictConstraintValidation(), // ✅
+svc := aap001.NewService(audit, authz,
+    aap001.WithStrictConstraintValidation(), // ✅
 )
 // Unknown constraints → ErrRestrictionExceeded
 ```
@@ -128,15 +128,15 @@ result, err := svc.VerifyToken(ctx, token)
 
 ```go
 // Financial, Healthcare, Legal systems
-svc := rfc0111.NewService(audit, authz,
+svc := aap001.NewService(audit, authz,
     // Revocation/Replay Protection (fail-closed)
-    rfc0111.WithRevocationBlacklistStore(redisStore),
-    rfc0111.WithAtomicCounterStore(atomicStore),
-    rfc0111.WithReplayStore(replayStore),
-    rfc0111.WithReplayFailClosed(), // ← Already default in v0.9.1
+    aap001.WithRevocationBlacklistStore(redisStore),
+    aap001.WithAtomicCounterStore(atomicStore),
+    aap001.WithReplayStore(replayStore),
+    aap001.WithReplayFailClosed(), // ← Already default in v0.9.1
     
     // Constraint Enforcement (strict mode)
-    rfc0111.WithStrictConstraintValidation(), // ← RECOMMENDED
+    aap001.WithStrictConstraintValidation(), // ← RECOMMENDED
 )
 ```
 
@@ -144,9 +144,9 @@ svc := rfc0111.NewService(audit, authz,
 
 ```go
 // Non-critical services prioritizing uptime
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithRevocationBlacklistStore(redisStore),
-    rfc0111.WithReplayFailOpen(), // ⚠️ Explicit unsafe opt-in
+svc := aap001.NewService(audit, authz,
+    aap001.WithRevocationBlacklistStore(redisStore),
+    aap001.WithReplayFailOpen(), // ⚠️ Explicit unsafe opt-in
     
     // MUST monitor: replay_store_errors metric
     // MUST alert: rate(replay_store_errors[5m]) > 10
@@ -162,8 +162,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
         // Verify mTLS, DPoP, or OAuth2 Bearer token
         subject := extractAuthenticatedSubject(r)
         
-        // Populate context for RFC-0111
-        ctx := rfc0111.WithSubject(r.Context(), subject)
+        // Populate context for AAP-001
+        ctx := aap001.WithSubject(r.Context(), subject)
         
         next.ServeHTTP(w, r.WithContext(ctx))
     })
@@ -185,7 +185,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 ## Files Changed
 
 **Core Implementation (3 files):**
-- `pkg/rfc0111/rfc0111.go` - Secure defaults, strict mode, defensive validation
+- `pkg/aap001/aap001.go` - Secure defaults, strict mode, defensive validation
 - `pkg/rfc/errors.go` - Added ErrConfiguration
 - `SECURITY.md` - Comprehensive integration guide
 

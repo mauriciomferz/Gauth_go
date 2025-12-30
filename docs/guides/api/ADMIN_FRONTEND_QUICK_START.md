@@ -12,15 +12,15 @@ owners: [system]
 
 ### 1. Start Backend Server
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 
 # Option A: Using environment variables
-GAUTH_JWT_SIGNING_KEY="test-key" \
+AGENTAUTH_JWT_SIGNING_KEY="test-key" \
 DB_HOST="localhost" \
 DB_PORT="5432" \
 DB_USER="postgres" \
-DB_PASSWORD="gauth_dev_password" \
-DB_NAME="gauth" \
+DB_PASSWORD="agentauth_dev_password" \
+DB_NAME="agentauth" \
 DB_SSLMODE="disable" \
 go run ./cmd/web-server
 
@@ -129,11 +129,11 @@ const response = await apiFetch('/api/admin/poa'); // auto-adds tenant_id
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
-DB_PASSWORD=gauth_dev_password
-DB_NAME=gauth
+DB_PASSWORD=agentauth_dev_password
+DB_NAME=agentauth
 DB_SSLMODE=disable
 PORT=8080
-GAUTH_JWT_SIGNING_KEY=test-key
+AGENTAUTH_JWT_SIGNING_KEY=test-key
 ```
 
 ### Frontend (.env.local)
@@ -149,10 +149,10 @@ VITE_DEFAULT_TENANT_ID=test-tenant-1
 ### Issue: "Cannot connect to database"
 ```bash
 # Check PostgreSQL is running
-docker ps | grep gauth-postgres
+docker ps | grep agentauth-postgres
 
 # Start if not running
-docker start gauth-postgres
+docker start agentauth-postgres
 ```
 
 ### Issue: "Port 8080 already in use"

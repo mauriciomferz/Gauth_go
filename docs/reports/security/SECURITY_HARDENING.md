@@ -21,13 +21,13 @@ This checklist enumerates additional controls and operational practices required
 - Use seccomp + AppArmor profiles; supply PodSecurityContext for Kubernetes.
 
 ## 2. Configuration & Secrets
-- Replace `GAUTH_JWT_SIGNING_KEY` with rotated HSM or cloud KMS managed key material.
+- Replace `AGENTAUTH_JWT_SIGNING_KEY` with rotated HSM or cloud KMS managed key material.
 - Store environment secrets in Vault or sealed secrets; avoid plaintext `.env` in images.
-- Restrict `GAUTH_CORS_ALLOW` to explicit domains; never use `*` outside development.
-- Set `GAUTH_ENABLE_REPLAY_PROTECTION=true` with persistent store (Redis/PostgreSQL) for multi-instance deployments.
+- Restrict `AGENTAUTH_CORS_ALLOW` to explicit domains; never use `*` outside development.
+- Set `AGENTAUTH_ENABLE_REPLAY_PROTECTION=true` with persistent store (Redis/PostgreSQL) for multi-instance deployments.
 
 ## 3. Cryptography & Key Management
-- Turn on automated key rotation (`GAUTH_KEY_ROTATION_AUTO=true`) with external anchoring (`GAUTH_ANCHOR_ROTATIONS=true`).
+- Turn on automated key rotation (`AGENTAUTH_KEY_ROTATION_AUTO=true`) with external anchoring (`AGENTAUTH_ANCHOR_ROTATIONS=true`).
 - Enable multi-tenant key isolation if hosting multiple clients (separate key namespaces / prefix).
 - Periodically export key rotation ledger for offline audit.
 - Validate BLS or threshold signature aggregations against side-channel safe implementations.
@@ -38,12 +38,12 @@ This checklist enumerates additional controls and operational practices required
 - Employ mTLS if service-to-service PoA introspection occurs across trust zones.
 
 ## 5. Persistence & Storage
-- Migrate in-memory token/metrics stores to Postgres + durable metrics path (`GAUTH_METRICS_PERSIST_PATH`).
+- Migrate in-memory token/metrics stores to Postgres + durable metrics path (`AGENTAUTH_METRICS_PERSIST_PATH`).
 - Enable backup strategy for persistence volumes (daily snapshot + PIT recovery plan).
 - Apply encryption-at-rest for database volumes (cloud provider or LUKS).
 
 ## 6. Observability & Audit
-- Enable Prometheus metrics (`GAUTH_METRICS_ENABLED=true`), tracing (`GAUTH_TRACING_ENABLED=true`) with sampling guard.
+- Enable Prometheus metrics (`AGENTAUTH_METRICS_ENABLED=true`), tracing (`AGENTAUTH_TRACING_ENABLED=true`) with sampling guard.
 - Ship audit logs to immutable store (S3 object lock or append-only ledger service).
 - Configure alerting: revocation failures, key rotation errors, anomaly in authorization denials spike.
 
@@ -105,7 +105,7 @@ Maintain `TECH_DEBT.md` for P0/P1 items; cross-link completed controls here with
 govulncheck ./...            # Vulnerability scan
 gosec ./...                  # Static security checks
 syft . -o json > sbom.json   # SBOM generation
-trivy image gauth:prod       # Image CVE scan
+trivy image agentauth:prod       # Image CVE scan
 go test -fuzz=FuzzCBOR -run=^$ -fuzztime=10s ./pkg/poa
 ```
 

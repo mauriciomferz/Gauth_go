@@ -29,7 +29,7 @@ fi
 echo "✅ Docker is available and running"
 
 # Define the problematic directory
-PROBLEM_DIR="gauth-demo-app"
+PROBLEM_DIR="agentauth-demo-app"
 BACKUP_DIR="${PROBLEM_DIR}.docker-backup"
 
 # Function to restore directory if script exits
@@ -62,16 +62,16 @@ fi
 
 # Clean up any previous test images
 echo "🧹 Cleaning up previous test images..."
-docker rmi gauth-demo:robust-build 2>/dev/null || true
+docker rmi agentauth-demo:robust-build 2>/dev/null || true
 
 echo "🔨 Building Docker image with robust approach..."
-echo "   Image: gauth-demo:robust-build"
+echo "   Image: agentauth-demo:robust-build"
 echo "   Strategy: Copy only required directories (cmd, pkg, internal, examples)"
 echo ""
 
 # Try building with standard Dockerfile first
 echo "🔄 Attempting build with standard Dockerfile..."
-if docker build -t gauth-demo:robust-build -f Dockerfile .; then
+if docker build -t agentauth-demo:robust-build -f Dockerfile .; then
     BUILD_SUCCESS=true
 else
     echo "⚠️  Standard build failed, trying minimal Dockerfile..."
@@ -92,17 +92,17 @@ RUN go mod download
 COPY cmd/ ./cmd/
 COPY pkg/ ./pkg/
 COPY internal/ ./internal/
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o gauth-server ./cmd/gauth-server
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o agentauth-server ./cmd/agentauth-server
 FROM scratch
-COPY --from=build /app/gauth-server /gauth-server
+COPY --from=build /app/agentauth-server /agentauth-server
 EXPOSE 8080
-ENTRYPOINT ["/gauth-server"]
+ENTRYPOINT ["/agentauth-server"]
 EOF_MIN_DF
         echo "✅ Temporary Dockerfile.minimal created"
     fi
 
     # Try with minimal Dockerfile
-    if docker build -t gauth-demo:robust-build -f Dockerfile.minimal .; then
+    if docker build -t agentauth-demo:robust-build -f Dockerfile.minimal .; then
         BUILD_SUCCESS=true
         echo "✅ Minimal build successful!"
     else
@@ -117,21 +117,21 @@ if [ "$BUILD_SUCCESS" = true ]; then
     # Get image information
     echo ""
     echo "📊 Image Information:"
-    docker images gauth-demo:robust-build --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
+    docker images agentauth-demo:robust-build --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}"
     
     echo ""
     echo "🧪 Testing the built application..."
     
     # Test the application in a container
-    echo "   Running: docker run --rm gauth-demo:robust-build --help"
-    if timeout 30 docker run --rm gauth-demo:robust-build --help >/dev/null 2>&1; then
+    echo "   Running: docker run --rm agentauth-demo:robust-build --help"
+    if timeout 30 docker run --rm agentauth-demo:robust-build --help >/dev/null 2>&1; then
         echo ""
         echo "✅ Application runs successfully in container!"
         
         # Show a brief demo output
         echo ""
         echo "📋 Demo Output:"
-        docker run --rm gauth-demo:robust-build --help | head -15
+        docker run --rm agentauth-demo:robust-build --help | head -15
         
     else
         echo ""
@@ -149,13 +149,13 @@ if [ "$BUILD_SUCCESS" = true ]; then
     echo "   ✅ 8.7MB optimized binary created"
     echo ""
     echo "To run the container:"
-    echo "   docker run -p 8080:8080 gauth-demo:robust-build"
+    echo "   docker run -p 8080:8080 agentauth-demo:robust-build"
     echo ""
     echo "To tag for deployment:"
-    echo "   docker tag gauth-demo:robust-build gauth-demo:latest"
+    echo "   docker tag agentauth-demo:robust-build agentauth-demo:latest"
     echo ""
     echo "To clean up:"
-    echo "   docker rmi gauth-demo:robust-build"
+    echo "   docker rmi agentauth-demo:robust-build"
     
 else
     echo ""

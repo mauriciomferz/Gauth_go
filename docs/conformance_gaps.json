@@ -6,12 +6,12 @@
       "id": "sec1",
       "name": "Cryptographic & Authenticity",
       "items": [
-  {"id": "sec1.item1", "requirement": "Mandatory POA signature at issuance", "status": "Implemented", "gap": "Need configurable algorithms (Ed25519 only)", "evidence": ["docs/GAP_MATRIX.md:12", "pkg/rfc0111/signature_negative_test.go"], "priority": "P0"},
-  {"id": "sec1.item2", "requirement": "Full JWT/PASETO claims", "status": "Partial", "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)", "evidence": ["pkg/gauth/gauth.go", "pkg/gauth/gauth_claims_test.go"], "priority": "P0"},
-  {"id": "sec1.item3", "requirement": "Robust JSON parsing", "status": "Partial", "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety", "evidence": ["pkg/gauth/gauth.go", "pkg/gauth/gauth_prop_test.go", "pkg/gauth/gauth_fuzz_test.go"], "priority": "P0"},
+  {"id": "sec1.item1", "requirement": "Mandatory POA signature at issuance", "status": "Implemented", "gap": "Need configurable algorithms (Ed25519 only)", "evidence": ["docs/GAP_MATRIX.md:12", "pkg/aap001/signature_negative_test.go"], "priority": "P0"},
+  {"id": "sec1.item2", "requirement": "Full JWT/PASETO claims", "status": "Partial", "gap": "sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement)", "evidence": ["pkg/agentauth/agentauth.go", "pkg/agentauth/agentauth_claims_test.go"], "priority": "P0"},
+  {"id": "sec1.item3", "requirement": "Robust JSON parsing", "status": "Partial", "gap": "Manual string scanning; property + fuzz tests cover legacy parser for safety", "evidence": ["pkg/agentauth/agentauth.go", "pkg/agentauth/agentauth_prop_test.go", "pkg/agentauth/agentauth_fuzz_test.go"], "priority": "P0"},
   {"id": "sec1.item4", "requirement": "Key rotation & lifecycle", "status": "Partial", "gap": "Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation & external HSM integration", "evidence": ["internal/crypto/keys.go", "internal/crypto/keys_persist_test.go"], "priority": "P1"},
         {"id": "sec1.item5", "requirement": "Public verifiable token integrity", "status": "Partial", "gap": "Local symmetric only; no detached signature", "evidence": ["docs/GAP_MATRIX.md:14"], "priority": "P0"},
-  {"id": "sec1.item6", "requirement": "Canonical digest stability fuzzing", "status": "Implemented", "gap": "Property + fuzz tests validate determinism & mutable field exclusion", "evidence": ["docs/GAP_MATRIX.md:15", "pkg/rfc0111/canonical.go", "pkg/rfc0111/canonical_prop_test.go", "pkg/rfc0111/canonical_fuzz_test.go"], "priority": "P2"}
+  {"id": "sec1.item6", "requirement": "Canonical digest stability fuzzing", "status": "Implemented", "gap": "Property + fuzz tests validate determinism & mutable field exclusion", "evidence": ["docs/GAP_MATRIX.md:15", "pkg/aap001/canonical.go", "pkg/aap001/canonical_prop_test.go", "pkg/aap001/canonical_fuzz_test.go"], "priority": "P2"}
       ]
     },
     {
@@ -29,8 +29,8 @@
       "id": "sec3",
       "name": "PoA Definition (AAP-002)",
       "items": [
-  {"id": "sec3.item1", "requirement": "Full semantic validation", "status": "Partial", "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits", "evidence": ["docs/GAP_MATRIX.md:32", "pkg/rfc0111/validator.go", "pkg/rfc0111/rfc0111.go"], "priority": "P0"},
-  {"id": "sec3.item2", "requirement": "Embed full PoA in token", "status": "Partial", "gap": "RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence", "evidence": ["docs/GAP_MATRIX.md:33", "pkg/rfc0111/rfc0111.go", "internal/metrics/metrics.go"], "priority": "P1"},
+  {"id": "sec3.item1", "requirement": "Full semantic validation", "status": "Partial", "gap": "AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits", "evidence": ["docs/GAP_MATRIX.md:32", "pkg/aap001/validator.go", "pkg/aap001/aap001.go"], "priority": "P0"},
+  {"id": "sec3.item2", "requirement": "Embed full PoA in token", "status": "Partial", "gap": "RawPOA + PoAVersion embedding implemented behind AGENTAUTH_EMBED_FULL_POA with size cap AGENTAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence", "evidence": ["docs/GAP_MATRIX.md:33", "pkg/aap001/aap001.go", "internal/metrics/metrics.go"], "priority": "P1"},
         {"id": "sec3.item3", "requirement": "Joint/collective signature enforcement", "status": "Missing", "gap": "No multi-signer aggregation", "evidence": ["docs/GAP_MATRIX.md:33"], "priority": "P1"},
         {"id": "sec3.item4", "requirement": "Conditional/special conditions evaluation", "status": "Missing", "gap": "No runtime interpreter", "evidence": ["docs/GAP_MATRIX.md:34"], "priority": "P2"}
       ]
@@ -57,7 +57,7 @@
       "id": "sec6",
       "name": "Replay & Token Security",
       "items": [
-  {"id": "sec6.item1", "requirement": "Fail-closed replay mode", "status": "Partial", "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls", "evidence": ["pkg/gauth/gauth.go", "pkg/gauth/gauth_claims_test.go"], "priority": "P1"},
+  {"id": "sec6.item1", "requirement": "Fail-closed replay mode", "status": "Partial", "gap": "In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls", "evidence": ["pkg/agentauth/agentauth.go", "pkg/agentauth/agentauth_claims_test.go"], "priority": "P1"},
         {"id": "sec6.item2", "requirement": "JTI format validation", "status": "Implemented", "gap": "Need skew checks", "evidence": ["docs/GAP_MATRIX.md:56"], "priority": "P2"},
         {"id": "sec6.item3", "requirement": "Replay persistence recovery", "status": "Missing", "gap": "No WAL snapshot", "evidence": ["docs/GAP_MATRIX.md:57"], "priority": "P2"}
       ]
@@ -68,7 +68,7 @@
       "items": [
   {"id": "sec7.item1", "requirement": "Decision metrics (allow/deny + action/resource labels)", "status": "Implemented", "gap": "Reason taxonomy limited; no JSON labeled export yet", "evidence": ["docs/GAP_MATRIX.md:62", "internal/metrics/prometheus_adapter.go", "docs/OBSERVABILITY.md"], "priority": "P2"},
         {"id": "sec7.item2", "requirement": "Metrics export adapter", "status": "Partial", "gap": "No collector registration", "evidence": ["docs/GAP_MATRIX.md:63"], "priority": "P3"},
-  {"id": "sec7.item3", "requirement": "Violation & semantic counters (adaptive anomaly)", "status": "Implemented", "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted & restored with hash chain verification. Remaining gaps: external anchoring & archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.", "evidence": ["internal/observability/violations.go", "pkg/gauth/gauth.go", "pkg/rfc0111/rfc0111.go", "web/server_clean.go", "docs/OBSERVABILITY.md", "web/persistence_verify_test.go", "web/server_anomaly_test.go", "web/server_semantic_persistence_test.go"], "priority": "P2"},
+  {"id": "sec7.item3", "requirement": "Violation & semantic counters (adaptive anomaly)", "status": "Implemented", "gap": "Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted & restored with hash chain verification. Remaining gaps: external anchoring & archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks.", "evidence": ["internal/observability/violations.go", "pkg/agentauth/agentauth.go", "pkg/aap001/aap001.go", "web/server_clean.go", "docs/OBSERVABILITY.md", "web/persistence_verify_test.go", "web/server_anomaly_test.go", "web/server_semantic_persistence_test.go"], "priority": "P2"},
        {"id": "sec7.item4", "requirement": "Distributed tracing", "status": "Missing", "gap": "No span linking", "evidence": ["docs/GAP_MATRIX.md:65"], "priority": "P3"}
       ]
     },
@@ -85,7 +85,7 @@
       "name": "Testing & Conformance",
       "items": [
   {"id": "sec9.item1", "requirement": "Clause-to-test mapping", "status": "Partial", "gap": "Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped", "evidence": ["docs/GAP_MATRIX.md:76", "conformance/clause_map.json", "report.md"], "priority": "P0"},
-  {"id": "sec9.item2", "requirement": "Fuzzing / property tests", "status": "Partial", "gap": "Canonical digest covered; parsing & semantic validators still lack property tests", "evidence": ["docs/GAP_MATRIX.md:77", "pkg/rfc0111/canonical_prop_test.go", "pkg/rfc0111/canonical_fuzz_test.go"], "priority": "P1"},
+  {"id": "sec9.item2", "requirement": "Fuzzing / property tests", "status": "Partial", "gap": "Canonical digest covered; parsing & semantic validators still lack property tests", "evidence": ["docs/GAP_MATRIX.md:77", "pkg/aap001/canonical_prop_test.go", "pkg/aap001/canonical_fuzz_test.go"], "priority": "P1"},
         {"id": "sec9.item3", "requirement": "Load/stress benchmarks", "status": "Missing", "gap": "No high-load harness", "evidence": ["docs/GAP_MATRIX.md:78"], "priority": "P2"}
       ]
     },

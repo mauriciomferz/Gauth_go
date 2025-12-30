@@ -11,10 +11,10 @@ refreshCadence: on-change
 
 Status: Proposed
 Date: 2025-10-28
-RFC References: RFC-0111 (taxonomy), RFC-0115 (authorization semantics)
+RFC References: AAP-001 (taxonomy), AAP-002 (authorization semantics)
 
 ## Context
-Current enumerations in `pkg/rfc0111/taxonomy.go` are static:
+Current enumerations in `pkg/aap001/taxonomy.go` are static:
 - AllowedAgentTypes: human, service, team, automation, robot, llm
 - AllowedSectors: finance, health, legal, it, operations, security, research
 - AllowedActionClasses: read_ops, write_ops, admin, transfer, decision, audit
@@ -58,4 +58,4 @@ Negative:
 If enumeration addition causes issues, mark value deprecated immediately; avoid removal until next major version. Clients relying on new term may need patch instructions.
 
 ## References
-`pkg/rfc0111/taxonomy.go`, `web/discovery_endpoint.go`
+`pkg/aap001/taxonomy.go`, `web/discovery_endpoint.go`

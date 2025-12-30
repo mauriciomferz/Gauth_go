@@ -16,7 +16,7 @@ Successfully demonstrated blue-green deployment strategy on a local Kubernetes c
 
 ### 1. ✅ Kubernetes Cluster Setup
 - **Cluster Type**: kind (Kubernetes in Docker)
-- **Cluster Name**: gauth-staging
+- **Cluster Name**: agentauth-staging
 - **Configuration**: Single-node control plane with port mapping (30080:80)
 - **Status**: Fully operational
 
@@ -29,19 +29,19 @@ Successfully demonstrated blue-green deployment strategy on a local Kubernetes c
 - **Solution**: Created lightweight mock server for demonstration
   - Simple Go HTTP server (~30 lines)
   - Multi-stage Dockerfile for Linux AMD64
-  - Built: `gauth-mock:blue` and `gauth-mock:green`
+  - Built: `agentauth-mock:blue` and `agentauth-mock:green`
   - Loaded into kind cluster successfully
 
 ### 3. ✅ Blue Environment Deployment
-- **Deployment**: `gauth-blue`
+- **Deployment**: `agentauth-blue`
 - **Replicas**: 2 pods
 - **Status**: 2/2 Running
 - **Readiness**: Health checks passing
-- **Service**: `gauth-service` (ClusterIP: 10.96.227.186:80)
+- **Service**: `agentauth-service` (ClusterIP: 10.96.227.186:80)
 - **Initial Routing**: Traffic → Blue
 
 ### 4. ✅ Green Environment Deployment
-- **Deployment**: `gauth-green`
+- **Deployment**: `agentauth-green`
 - **Replicas**: 2 pods
 - **Status**: 2/2 Running
 - **Readiness**: Health checks passing
@@ -49,14 +49,14 @@ Successfully demonstrated blue-green deployment strategy on a local Kubernetes c
 
 ### 5. ✅ Traffic Switching Test
 - **Method**: Kubernetes Service selector patch
-- **Command**: `kubectl patch service gauth-service -p '{"spec":{"selector":{"version":"green"}}}'`
+- **Command**: `kubectl patch service agentauth-service -p '{"spec":{"selector":{"version":"green"}}}'`
 - **Result**: Instant switch from blue to green
-- **Verification**: `curl http://gauth-service/api/v1/beta/health` returned `{"status":"healthy","version":"green"}`
+- **Verification**: `curl http://agentauth-service/api/v1/beta/health` returned `{"status":"healthy","version":"green"}`
 - **Downtime**: **0 seconds** (atomic service selector update)
 
 ### 6. ✅ Rollback Test
 - **Method**: Reverse service selector patch
-- **Command**: `kubectl patch service gauth-service -p '{"spec":{"selector":{"version":"blue"}}}'`
+- **Command**: `kubectl patch service agentauth-service -p '{"spec":{"selector":{"version":"blue"}}}'`
 - **Measured Time**: **~0.2 seconds** (target was <10s)
 - **Result**: Traffic immediately reverted to blue
 - **Success Rate**: 100%
@@ -73,7 +73,7 @@ Successfully demonstrated blue-green deployment strategy on a local Kubernetes c
 - **Conclusion**: Both environments handle load without errors
 
 ### 8. ✅ Monitoring and Observability
-- **Pod Status Monitoring**: `kubectl get pods -n gauth-staging -L version`
+- **Pod Status Monitoring**: `kubectl get pods -n agentauth-staging -L version`
 - **Service Discovery**: ClusterIP service working correctly
 - **Health Checks**: Liveness and readiness probes functional
 - **Limitations**: Metrics server not available (expected in kind)
@@ -86,11 +86,11 @@ Successfully demonstrated blue-green deployment strategy on a local Kubernetes c
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│           Kubernetes Namespace: gauth-staging        │
+│           Kubernetes Namespace: agentauth-staging        │
 │                                                      │
 │  ┌────────────────────┐     ┌─────────────────────┐│
 │  │   Blue Deployment  │     │  Green Deployment   ││
-│  │  (gauth-blue)      │     │  (gauth-green)      ││
+│  │  (agentauth-blue)      │     │  (agentauth-green)      ││
 │  │                    │     │                     ││
 │  │  Pod 1 (blue)      │     │  Pod 1 (green)      ││
 │  │  Pod 2 (blue)      │     │  Pod 2 (green)      ││
@@ -99,7 +99,7 @@ Successfully demonstrated blue-green deployment strategy on a local Kubernetes c
 │            └──────────┬────────────────┘           │
 │                       │                            │
 │               ┌───────▼────────┐                   │
-│               │  gauth-service │                   │
+│               │  agentauth-service │                   │
 │               │  (ClusterIP)   │                   │
 │               │  selector:     │                   │
 │               │    version: X  │ ◄── Switch here  │
@@ -112,14 +112,14 @@ Successfully demonstrated blue-green deployment strategy on a local Kubernetes c
 **Before Switch**:
 ```yaml
 selector:
-  app: gauth
+  app: agentauth
   version: blue  # Routes to blue pods
 ```
 
 **After Switch** (instant, atomic update):
 ```yaml
 selector:
-  app: gauth
+  app: agentauth
   version: green  # Routes to green pods
 ```
 

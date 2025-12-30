@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-with-opa
-  namespace: gauth-system
+  name: agentauth-with-opa
+  namespace: agentauth-system
   labels:
-    app: gauth
+    app: agentauth
     component: web-server
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       component: web-server
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         component: web-server
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8181"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: gauth
+      serviceAccountName: agentauth
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -30,47 +30,47 @@ spec:
       
       containers:
       # Main AgentAuth application
-      - name: gauth
-        image: gauth:latest
+      - name: agentauth
+        image: agentauth:latest
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
           containerPort: 8080
           protocol: TCP
         env:
-        - name: GAUTH_OPA_ENABLED
+        - name: AGENTAUTH_OPA_ENABLED
           value: "true"
-        - name: GAUTH_OPA_URL
+        - name: AGENTAUTH_OPA_URL
           value: "http://localhost:8181"
-        - name: GAUTH_JWT_SIGNING_KEY
+        - name: AGENTAUTH_JWT_SIGNING_KEY
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: jwt-signing-key
         - name: DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: db-host
         - name: DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: db-port
         - name: DB_NAME
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: db-name
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              name: gauth-db-secrets
+              name: agentauth-db-secrets
               key: username
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: gauth-db-secrets
+              name: agentauth-db-secrets
               key: password
         - name: DB_SSLMODE
           value: "require"
@@ -180,24 +180,24 @@ spec:
         whenUnsatisfiable: ScheduleAnyway
         labelSelector:
           matchLabels:
-            app: gauth
+            app: agentauth
             component: web-server
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
         whenUnsatisfiable: DoNotSchedule
         labelSelector:
           matchLabels:
-            app: gauth
+            app: agentauth
             component: web-server
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth
-  namespace: gauth-system
+  name: agentauth
+  namespace: agentauth-system
   labels:
-    app: gauth
+    app: agentauth
     component: web-server
 spec:
   type: ClusterIP
@@ -211,39 +211,39 @@ spec:
     targetPort: 8181
     protocol: TCP
   selector:
-    app: gauth
+    app: agentauth
     component: web-server
 
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: gauth-pdb
-  namespace: gauth-system
+  name: agentauth-pdb
+  namespace: agentauth-system
 spec:
   minAvailable: 1
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       component: web-server
 
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gauth
-  namespace: gauth-system
+  name: agentauth
+  namespace: agentauth-system
   labels:
-    app: gauth
+    app: agentauth
 
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gauth-config
-  namespace: gauth-system
+  name: agentauth-config
+  namespace: agentauth-system
 data:
   db-host: "postgresql.database.svc.cluster.local"
   db-port: "5432"
-  db-name: "gauth"
+  db-name: "agentauth"
   opa-url: "http://localhost:8181"

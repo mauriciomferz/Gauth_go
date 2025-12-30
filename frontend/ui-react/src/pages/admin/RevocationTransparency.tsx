@@ -424,7 +424,7 @@ const RevocationTransparency: React.FC = () => {
   };
 
   const handleGenerateProof = async () => {
-    if (!proofTokenId.trim()) return;
+    if (!proofTokenId.trim() return;
 
     try {
       setLoading(true);
@@ -445,7 +445,7 @@ const RevocationTransparency: React.FC = () => {
   };
 
   const handleVerifyProof = async () => {
-    if (!verificationInput.trim()) return;
+    if (!verificationInput.trim() return;
 
     try {
       setLoading(true);

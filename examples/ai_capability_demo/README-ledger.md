@@ -11,7 +11,7 @@ owners: [system]
 This document augments the main README with audit ledger anchoring details.
 
 ## Overview
-The demo includes an append-only Merkle ledger (in-memory by default; optional BoltDB persistence when `GAUTH_AI_DEMO_LEDGER_DB_PATH` is set) to anchor events (e.g., PoA lifecycle, decisions). Each append produces a new Merkle root that can be fetched and inclusion proofs can be generated per entry.
+The demo includes an append-only Merkle ledger (in-memory by default; optional BoltDB persistence when `AGENTAUTH_AI_DEMO_LEDGER_DB_PATH` is set) to anchor events (e.g., PoA lifecycle, decisions). Each append produces a new Merkle root that can be fetched and inclusion proofs can be generated per entry.
 
 ## Data Model
 Entry fields:
@@ -85,7 +85,7 @@ Issuance of a PoA-bound token now appends a `poa_token_issue` entry, ensuring tr
 ## Persistence
 Enable BoltDB-backed persistence (experimental):
 ```bash
-export GAUTH_AI_DEMO_LEDGER_DB_PATH=/tmp/ledger.db
+export AGENTAUTH_AI_DEMO_LEDGER_DB_PATH=/tmp/ledger.db
 ```
 On startup you'll see a log: `[ledger] bolt persistence enabled at /tmp/ledger.db`. Entries are stored sequentially in a single bucket; roots are recomputed incrementally.
 

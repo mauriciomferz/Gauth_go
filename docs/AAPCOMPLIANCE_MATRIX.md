@@ -11,7 +11,7 @@ owners: [system]
 > Last Updated: 2025-10-17
 > Status: Active
 
-This document maps (placeholder form) intended AgentAuth AgentAuth-RFC-001 (formerly RFC 111) / AgentAuth-RFC-002 (formerly RFC 115) requirement areas to current implementation artifacts. It is **incomplete** and serves as a planning scaffold.
+This document maps (placeholder form) intended AgentAuth AgentAuth-RFC-001 (formerly AAP-001) / AgentAuth-RFC-002 (formerly AAP-002) requirement areas to current implementation artifacts. It is **incomplete** and serves as a planning scaffold.
 
 | Area | RFC Reference (Placeholder) | Current Implementation Component | Status | Gaps / TODO |
 |------|-----------------------------|----------------------------------|--------|-------------|

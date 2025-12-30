@@ -29,7 +29,7 @@ func NewPasetoManager() (*PasetoManager, error) {
 	return &PasetoManager{
 		publicKey:  public,
 		privateKey: private,
-		footer:     "gauth-paseto-v2",
+		footer:     "agentauth-paseto-v2",
 	}, nil
 }
 

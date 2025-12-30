@@ -312,16 +312,16 @@ When a user successfully authenticates via OIDC:
 
 ```bash
 # Already configured
-GAUTH_DEV_INDEX=1
-GAUTH_AAP-001_ENABLED=1
-GAUTH_USE_JWT_LIB=1
+AGENTAUTH_DEV_INDEX=1
+AGENTAUTH_AAP-001_ENABLED=1
+AGENTAUTH_USE_JWT_LIB=1
 DB_HOST=localhost
 DB_PORT=5432
-DB_USER=gauth_admin
-DB_PASSWORD=gauth_dev_password
-DB_NAME=gauth
+DB_USER=agentauth_admin
+DB_PASSWORD=agentauth_dev_password
+DB_NAME=agentauth
 DB_SSLMODE=disable
-GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
+AGENTAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
 ```
 
 ### Frontend Environment

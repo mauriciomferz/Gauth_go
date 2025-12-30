@@ -73,7 +73,7 @@ import (
 
 func main() {
     config := replay.DurableReplayStoreConfig{
-        WALPath:          "/var/lib/gauth/replay.wal",
+        WALPath:          "/var/lib/agentauth/replay.wal",
         TTL:              24 * time.Hour,        // JTI expiration
         SnapshotInterval: 5 * time.Minute,       // Snapshot frequency
     }
@@ -109,13 +109,13 @@ package main
 
 import (
     "github.com/.../pkg/replay"
-    "github.com/.../pkg/rfc0111"
+    "github.com/.../pkg/aap001"
 )
 
 func main() {
     // Create durable replay store
     config := replay.DurableReplayStoreConfig{
-        WALPath:          "/var/lib/gauth/replay.wal",
+        WALPath:          "/var/lib/agentauth/replay.wal",
         TTL:              24 * time.Hour,
         SnapshotInterval: 5 * time.Minute,
     }
@@ -129,8 +129,8 @@ func main() {
     adapter := replay.NewDurableReplayStoreAdapter(durableStore)
 
     // Create AAP-001 service with durable replay protection
-    svc, err := rfc0111.NewService(
-        rfc0111.WithReplayStore(adapter),
+    svc, err := aap001.NewService(
+        aap001.WithReplayStore(adapter),
         // ... other options
     )
     if err != nil {
@@ -193,7 +193,7 @@ func (m *PrometheusReplayMetrics) ObserveReplayStoreLatency(d time.Duration) {
 // ... implement remaining interface methods
 
 config := replay.DurableReplayStoreConfig{
-    WALPath:          "/var/lib/gauth/replay.wal",
+    WALPath:          "/var/lib/agentauth/replay.wal",
     TTL:              24 * time.Hour,
     SnapshotInterval: 5 * time.Minute,
     Metrics:          prometheusMetrics, // Custom metrics
@@ -348,8 +348,8 @@ ERROR: failed to recover from WAL: invalid JSON
 ```
 
 **Solution**:
-1. Check WAL file permissions: `ls -la /var/lib/gauth/replay.wal`
-2. Inspect WAL for corruption: `tail -n 100 /var/lib/gauth/replay.wal`
+1. Check WAL file permissions: `ls -la /var/lib/agentauth/replay.wal`
+2. Inspect WAL for corruption: `tail -n 100 /var/lib/agentauth/replay.wal`
 3. Manually delete corrupted WAL (will replay from last snapshot)
 4. Enable debug logging for recovery details
 
@@ -360,9 +360,9 @@ ERROR: snapshot creation failed: permission denied
 ```
 
 **Solution**:
-1. Check directory permissions: `ls -ld /var/lib/gauth/`
-2. Ensure write access: `touch /var/lib/gauth/test && rm /var/lib/gauth/test`
-3. Check disk space: `df -h /var/lib/gauth/`
+1. Check directory permissions: `ls -ld /var/lib/agentauth/`
+2. Ensure write access: `touch /var/lib/agentauth/test && rm /var/lib/agentauth/test`
+3. Check disk space: `df -h /var/lib/agentauth/`
 
 #### Memory Growth
 
@@ -405,7 +405,7 @@ WARN: replay store size exceeds 1M entries
 ```yaml
 # config.yaml
 replay:
-  wal_path: /var/lib/gauth/replay.wal
+  wal_path: /var/lib/agentauth/replay.wal
   ttl: 24h
   snapshot_interval: 5m
   
@@ -423,13 +423,13 @@ replay:
 
 ```bash
 # Restrict WAL/snapshot access
-chmod 600 /var/lib/gauth/replay.wal
-chmod 600 /var/lib/gauth/replay.wal.snapshot
-chown gauth:gauth /var/lib/gauth/replay.*
+chmod 600 /var/lib/agentauth/replay.wal
+chmod 600 /var/lib/agentauth/replay.wal.snapshot
+chown agentauth:agentauth /var/lib/agentauth/replay.*
 
 # Directory permissions
-chmod 700 /var/lib/gauth
-chown gauth:gauth /var/lib/gauth
+chmod 700 /var/lib/agentauth
+chown agentauth:agentauth /var/lib/agentauth
 ```
 
 ### Data Retention

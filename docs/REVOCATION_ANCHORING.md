@@ -19,9 +19,9 @@ P2.12 implements external revocation anchoring using RFC 3161 Time-Stamp Authori
 ### Component Stack
 
 ```
-rfc0111.Service.RevokeDelegation()
+aap001.Service.RevokeDelegation()
   ↓
-AnchorClient.Anchor(hash)  [interface from pkg/rfc0111]
+AnchorClient.Anchor(hash)  [interface from pkg/aap001]
   ↓
 RevocationAnchoringAdapter.Anchor(hash)  [pkg/notary]
   ↓
@@ -38,7 +38,7 @@ Receipt stored in BoltDB (anchor_receipts bucket)
 
 ### Key Components
 
-1. **AnchorClient** (`pkg/rfc0111/rfc0111.go` line 1746)
+1. **AnchorClient** (`pkg/aap001/aap001.go` line 1746)
    - Minimal interface: `Anchor(hash string) error`
    - Called by `RevokeDelegation` at line 2800 (best-effort)
 
@@ -84,17 +84,17 @@ Receipt stored in BoltDB (anchor_receipts bucket)
 
 ### Environment Variables
 
-**GAUTH_TSA_URL** (optional):
+**AGENTAUTH_TSA_URL** (optional):
 - TSA endpoint URL for RFC 3161 timestamping
 - Example: `https://freetsa.org/tsr`
 - Default: None (no external anchoring)
 
-**GAUTH_TSA_PROVIDER** (optional):
+**AGENTAUTH_TSA_PROVIDER** (optional):
 - Provider name for receipt metadata
 - Example: `FreeTSA`
 - Default: `"default"`
 
-**GAUTH_TSA_TIMEOUT** (optional):
+**AGENTAUTH_TSA_TIMEOUT** (optional):
 - HTTP timeout for TSA requests (seconds)
 - Example: `10`
 - Default: `10` seconds
@@ -103,7 +103,7 @@ Receipt stored in BoltDB (anchor_receipts bucket)
 
 ```go
 // Create RFC 3161 TSA notarizer
-tsaURL := os.Getenv("GAUTH_TSA_URL")
+tsaURL := os.Getenv("AGENTAUTH_TSA_URL")
 if tsaURL == "" {
     tsaURL = "https://freetsa.org/tsr"  // Free public TSA
 }
@@ -117,10 +117,10 @@ receiptStore, _ := notary.NewReceiptStore(db)
 adapter := notary.NewRevocationAnchoringAdapter(notarizer, receiptStore)
 
 // Inject into AAP-001 service
-svc := rfc0111.NewService(
+svc := aap001.NewService(
     audit.NewMemoryLogger(nil),
     authz.NewNoopAuthorizer(),
-    rfc0111.WithAnchorClient(adapter),
+    aap001.WithAnchorClient(adapter),
 )
 
 // Revocations will now be automatically anchored
@@ -259,7 +259,7 @@ Free TSAs for testing:
 
 ```go
 // No anchoring configured
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // RevokeDelegation works without external anchoring
 ```
 
@@ -270,14 +270,14 @@ svc := rfc0111.NewService(audit, authz)
 **Action**: Test anchoring infrastructure without TSA dependency
 
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/notary"
+import "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/notary"
 
 // Use in-memory notarizer (no external dependency)
 memNotarizer := notary.NewMemory()
 receiptStore, _ := notary.NewReceiptStore(db)
 adapter := notary.NewRevocationAnchoringAdapter(memNotarizer, receiptStore)
 
-svc := rfc0111.NewService(audit, authz, rfc0111.WithAnchorClient(adapter))
+svc := aap001.NewService(audit, authz, aap001.WithAnchorClient(adapter))
 ```
 
 **Validation**:
@@ -291,21 +291,21 @@ svc := rfc0111.NewService(audit, authz, rfc0111.WithAnchorClient(adapter))
 **Action**: Configure real TSA endpoint
 
 ```bash
-export GAUTH_TSA_URL=https://freetsa.org/tsr
-export GAUTH_TSA_PROVIDER=FreeTSA
-export GAUTH_TSA_TIMEOUT=10
+export AGENTAUTH_TSA_URL=https://freetsa.org/tsr
+export AGENTAUTH_TSA_PROVIDER=FreeTSA
+export AGENTAUTH_TSA_TIMEOUT=10
 ```
 
 ```go
 // Production configuration
-tsaURL := os.Getenv("GAUTH_TSA_URL")
-tsaProvider := os.Getenv("GAUTH_TSA_PROVIDER")
+tsaURL := os.Getenv("AGENTAUTH_TSA_URL")
+tsaProvider := os.Getenv("AGENTAUTH_TSA_PROVIDER")
 notarizer := notary.NewRFC3161Provider(tsaURL, tsaProvider)
 
 receiptStore, _ := notary.NewReceiptStore(db)
 adapter := notary.NewRevocationAnchoringAdapter(notarizer, receiptStore)
 
-svc := rfc0111.NewService(audit, authz, rfc0111.WithAnchorClient(adapter))
+svc := aap001.NewService(audit, authz, aap001.WithAnchorClient(adapter))
 ```
 
 **Validation**:
@@ -319,12 +319,12 @@ If TSA anchoring causes issues:
 
 ```go
 // Option 1: Revert to NoopAnchorClient
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // No anchoring, revocations still work
 
 // Option 2: Use MemoryNotarizer (no external dependency)
-svc := rfc0111.NewService(audit, authz, 
-    rfc0111.WithAnchorClient(notary.NewRevocationAnchoringAdapter(
+svc := aap001.NewService(audit, authz, 
+    aap001.WithAnchorClient(notary.NewRevocationAnchoringAdapter(
         notary.NewMemory(), receiptStore)))
 ```
 
@@ -334,7 +334,7 @@ svc := rfc0111.NewService(audit, authz,
 
 ### Metrics
 
-**Existing** (from `pkg/rfc0111/rfc0111.go`):
+**Existing** (from `pkg/aap001/aap001.go`):
 - `anchor_attempts_total`: Count of anchor attempts
 - `anchor_failures_total`: Count of anchor failures
 
@@ -453,7 +453,7 @@ bolt get revocations.db anchor_receipts
 ```
 
 **Solutions**:
-- **TSA timeout**: Increase `GAUTH_TSA_TIMEOUT`
+- **TSA timeout**: Increase `AGENTAUTH_TSA_TIMEOUT`
 - **TSA unavailable**: Switch to backup TSA endpoint
 - **Network issue**: Check firewall rules, proxy settings
 - **BoltDB error**: Check disk space, file permissions
@@ -491,7 +491,7 @@ time curl -X POST https://freetsa.org/tsr \
 **Solutions**:
 - **TSA congestion**: Switch to faster TSA provider
 - **Network latency**: Use geographically closer TSA
-- **Timeout too high**: Reduce `GAUTH_TSA_TIMEOUT` (fail-fast)
+- **Timeout too high**: Reduce `AGENTAUTH_TSA_TIMEOUT` (fail-fast)
 
 ## Future Enhancements
 
@@ -523,7 +523,7 @@ time curl -X POST https://freetsa.org/tsr \
 - **Implementation**:
   - `pkg/notary/revocation_anchor.go`: RevocationAnchoringAdapter (350+ lines)
   - `internal/notary/rfc3161.go`: RFC3161Provider (220+ lines)
-  - `pkg/rfc0111/rfc0111.go`: AnchorClient integration (line 2800)
+  - `pkg/aap001/aap001.go`: AnchorClient integration (line 2800)
 
 ## Changelog
 

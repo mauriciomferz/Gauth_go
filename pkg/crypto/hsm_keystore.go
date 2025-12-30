@@ -143,7 +143,7 @@ func (h *HSMKeyStore) Generate(ctx context.Context, tenant string) (string, erro
 		// fallback
 	}
 
-	keyLabel := fmt.Sprintf("gauth-%s-%d", tenant, time.Now().Unix())
+	keyLabel := fmt.Sprintf("agentauth-%s-%d", tenant, time.Now().Unix())
 
 	publicKeyTemplate := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PUBLIC_KEY),

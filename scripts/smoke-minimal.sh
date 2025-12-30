@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE_TAG="gauth:minimal"
+IMAGE_TAG="agentauth:minimal"
 PORT=8080
 HEALTH_URL="http://localhost:${PORT}/api/v1/beta/health"
-CONTAINER_NAME="gauth-smoke-minimal-$$"
+CONTAINER_NAME="agentauth-smoke-minimal-$$"
 
 log() { printf "[smoke] %s\n" "$*"; }
 

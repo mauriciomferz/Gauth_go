@@ -85,11 +85,11 @@ func NewEnforcementEngine() *EnforcementEngine {
 			ViolationsByType:      make(map[string]int64),
 		},
 		jurisdictionRules:        make(map[compliance.Jurisdiction]*JurisdictionEnforcement),
-		requireDetachedSignature: parseBoolEnv("GAUTH_REQUIRE_DETACHED_SIGNATURE"),
+		requireDetachedSignature: parseBoolEnv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE"),
 	}
 
 	// Attempt external rules load first (allows overriding built-ins without code changes).
-	if path := os.Getenv("GAUTH_JURISDICTION_RULES_PATH"); path != "" {
+	if path := os.Getenv("AGENTAUTH_JURISDICTION_RULES_PATH"); path != "" {
 		if err := engine.loadRulesFromFile(path); err == nil {
 			// Successfully loaded external rules; skip defaults.
 			return engine

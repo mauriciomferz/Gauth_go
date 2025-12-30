@@ -117,7 +117,7 @@ T=200s  Attacker replays captured token → BoltDB accepts (no record)
 ```bash
 # Create Redis cluster
 aws elasticache create-replication-group \
-  --replication-group-id gauth-replay-store \
+  --replication-group-id agentauth-replay-store \
   --replication-group-description "AgentAuth replay protection" \
   --engine redis \
   --cache-node-type cache.t3.micro \
@@ -129,8 +129,8 @@ aws elasticache create-replication-group \
 ```bash
 # Create Redis instance
 az redis create \
-  --name gauth-replay-store \
-  --resource-group gauth-production \
+  --name agentauth-replay-store \
+  --resource-group agentauth-production \
   --location eastus \
   --sku Basic \
   --vm-size c0
@@ -139,7 +139,7 @@ az redis create \
 **Google Cloud Memorystore:**
 ```bash
 # Create Redis instance
-gcloud redis instances create gauth-replay-store \
+gcloud redis instances create agentauth-replay-store \
   --size=1 \
   --region=us-central1 \
   --tier=basic
@@ -220,22 +220,22 @@ REDIS_PASSWORD=your-secure-password         # If authentication enabled
 REDIS_DB=0                                   # Database number (0-15)
 
 # Replay store configuration
-GAUTH_REPLAY_STORE=redis                    # Use Redis instead of BoltDB
-GAUTH_REPLAY_TTL=3600                       # TTL in seconds (1 hour default)
+AGENTAUTH_REPLAY_STORE=redis                    # Use Redis instead of BoltDB
+AGENTAUTH_REPLAY_TTL=3600                       # TTL in seconds (1 hour default)
 ```
 
 #### For Managed Redis Services
 
 **AWS ElastiCache:**
 ```bash
-REDIS_HOST=gauth-replay-store.abc123.0001.use1.cache.amazonaws.com
+REDIS_HOST=agentauth-replay-store.abc123.0001.use1.cache.amazonaws.com
 REDIS_PORT=6379
 REDIS_TLS=true  # ElastiCache supports TLS
 ```
 
 **Azure Cache for Redis:**
 ```bash
-REDIS_HOST=gauth-replay-store.redis.cache.windows.net
+REDIS_HOST=agentauth-replay-store.redis.cache.windows.net
 REDIS_PORT=6380
 REDIS_PASSWORD=your-access-key
 REDIS_TLS=true  # Azure Redis requires TLS
@@ -255,10 +255,10 @@ If your application currently instantiates BoltDB directly, update to use Redis:
 
 **Before (BoltDB):**
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+import "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 
 // Old code - UNSAFE in containers
-replayStore, err := gauth.NewBoltReplayStore("/tmp/replay.db", time.Hour)
+replayStore, err := agentauth.NewBoltReplayStore("/tmp/replay.db", time.Hour)
 if err != nil {
     log.Fatal(err)
 }
@@ -268,7 +268,7 @@ if err != nil {
 ```go
 import (
     "github.com/go-redis/redis/v8"
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth_rfc_001"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth_rfc_001"
 )
 
 // New code - Safe for containers
@@ -278,9 +278,9 @@ redisClient := redis.NewClient(&redis.Options{
     DB:       0,
 })
 
-replayStore, err := gauth_rfc_001.NewRedisReplayStore(
+replayStore, err := agentauth_rfc_001.NewRedisReplayStore(
     redisClient,
-    "gauth:replay",  // Key prefix
+    "agentauth:replay",  // Key prefix
     time.Hour,       // TTL
 )
 if err != nil {
@@ -294,12 +294,12 @@ if err != nil {
 
 1. **Deploy updated configuration:**
    ```bash
-   kubectl apply -f k8s/gauth-deployment.yaml
+   kubectl apply -f k8s/agentauth-deployment.yaml
    ```
 
 2. **Verify Redis connectivity:**
    ```bash
-   kubectl exec -it gauth-pod -- /bin/sh
+   kubectl exec -it agentauth-pod -- /bin/sh
    
    # Test Redis connection
    redis-cli -h redis -p 6379 ping
@@ -308,7 +308,7 @@ if err != nil {
 
 3. **Check application logs:**
    ```bash
-   kubectl logs -f deployment/gauth
+   kubectl logs -f deployment/agentauth
    
    # Look for:
    # [SECURITY] Replay store: Redis (distributed)
@@ -318,13 +318,13 @@ if err != nil {
 4. **Test replay protection:**
    ```bash
    # Authenticate and capture token
-   TOKEN=$(curl -X POST http://gauth:8080/api/v1/auth -d '...')
+   TOKEN=$(curl -X POST http://agentauth:8080/api/v1/auth -d '...')
    
    # Use token (should succeed)
-   curl -H "Authorization: Bearer $TOKEN" http://gauth:8080/api/v1/protected
+   curl -H "Authorization: Bearer $TOKEN" http://agentauth:8080/api/v1/protected
    
    # Try to replay token (should fail)
-   curl -H "Authorization: Bearer $TOKEN" http://gauth:8080/api/v1/protected
+   curl -H "Authorization: Bearer $TOKEN" http://agentauth:8080/api/v1/protected
    # Expected: 401 Unauthorized (replay detected)
    ```
 
@@ -337,11 +337,11 @@ if err != nil {
 ### Kubernetes with PersistentVolumeClaim
 
 ```yaml
-# gauth-deployment-boltdb.yaml
+# agentauth-deployment-boltdb.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: gauth-replay-store
+  name: agentauth-replay-store
 spec:
   accessModes:
     - ReadWriteOnce  # Single instance only
@@ -352,26 +352,26 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth
+  name: agentauth
 spec:
   replicas: 1  # MUST be 1 (BoltDB file locking)
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
     spec:
       containers:
-      - name: gauth
-        image: gauth:latest
+      - name: agentauth
+        image: agentauth:latest
         env:
-        - name: GAUTH_REPLAY_STORE
+        - name: AGENTAUTH_REPLAY_STORE
           value: "bolt"
-        - name: GAUTH_REPLAY_STORE_PATH
+        - name: AGENTAUTH_REPLAY_STORE_PATH
           value: "/data/replay.db"  # Persistent path, NOT /tmp
-        - name: GAUTH_ALLOW_UNSAFE_BOLTDB
+        - name: AGENTAUTH_ALLOW_UNSAFE_BOLTDB
           value: "1"  # Required to bypass container safety check
         volumeMounts:
         - name: replay-data
@@ -379,12 +379,12 @@ spec:
       volumes:
       - name: replay-data
         persistentVolumeClaim:
-          claimName: gauth-replay-store
+          claimName: agentauth-replay-store
 ```
 
 Apply:
 ```bash
-kubectl apply -f gauth-deployment-boltdb.yaml
+kubectl apply -f agentauth-deployment-boltdb.yaml
 ```
 
 ### Docker with Named Volume
@@ -393,19 +393,19 @@ kubectl apply -f gauth-deployment-boltdb.yaml
 # docker-compose.yml
 version: '3.8'
 services:
-  gauth:
-    image: gauth:latest
+  agentauth:
+    image: agentauth:latest
     environment:
-      - GAUTH_REPLAY_STORE=bolt
-      - GAUTH_REPLAY_STORE_PATH=/data/replay.db
-      - GAUTH_ALLOW_UNSAFE_BOLTDB=1
+      - AGENTAUTH_REPLAY_STORE=bolt
+      - AGENTAUTH_REPLAY_STORE_PATH=/data/replay.db
+      - AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1
     volumes:
-      - gauth-replay-data:/data  # Named volume (persistent)
+      - agentauth-replay-data:/data  # Named volume (persistent)
     ports:
       - "8080:8080"
 
 volumes:
-  gauth-replay-data:  # Persistent volume
+  agentauth-replay-data:  # Persistent volume
 ```
 
 ---
@@ -419,14 +419,14 @@ volumes:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: gauth-production
+  name: agentauth-production
 ---
 # Redis Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
-  namespace: gauth-production
+  namespace: agentauth-production
 spec:
   replicas: 1
   selector:
@@ -461,7 +461,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis
-  namespace: gauth-production
+  namespace: agentauth-production
 spec:
   selector:
     app: redis
@@ -474,7 +474,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: redis-pvc
-  namespace: gauth-production
+  namespace: agentauth-production
 spec:
   accessModes:
     - ReadWriteOnce
@@ -487,36 +487,36 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth
-  namespace: gauth-production
+  name: agentauth
+  namespace: agentauth-production
 spec:
   replicas: 3  # Horizontal scaling supported with Redis
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
     spec:
       containers:
-      - name: gauth
-        image: gauth:latest
+      - name: agentauth
+        image: agentauth:latest
         ports:
         - containerPort: 8080
         env:
-        - name: GAUTH_ENV
+        - name: AGENTAUTH_ENV
           value: "production"
         - name: REDIS_HOST
-          value: "redis.gauth-production.svc.cluster.local"
+          value: "redis.agentauth-production.svc.cluster.local"
         - name: REDIS_PORT
           value: "6379"
-        - name: GAUTH_REPLAY_STORE
+        - name: AGENTAUTH_REPLAY_STORE
           value: "redis"
-        - name: GAUTH_JWT_SIGNING_KEY
+        - name: AGENTAUTH_JWT_SIGNING_KEY
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: jwt-signing-key
         resources:
           requests:
@@ -541,11 +541,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth
-  namespace: gauth-production
+  name: agentauth
+  namespace: agentauth-production
 spec:
   selector:
-    app: gauth
+    app: agentauth
   ports:
   - port: 80
     targetPort: 8080
@@ -555,8 +555,8 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: gauth-secrets
-  namespace: gauth-production
+  name: agentauth-secrets
+  namespace: agentauth-production
 type: Opaque
 stringData:
   jwt-signing-key: "CHANGE-ME-TO-RANDOM-32-BYTE-KEY"
@@ -586,17 +586,17 @@ services:
       - redis-data:/data
     command: redis-server --appendonly yes
 
-  gauth:
-    image: gauth:latest
+  agentauth:
+    image: agentauth:latest
     ports:
       - "8080:8080"
     environment:
-      - GAUTH_ENV=development
+      - AGENTAUTH_ENV=development
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - GAUTH_REPLAY_STORE=redis
-      - GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
-      - GAUTH_DEV_INDEX=1
+      - AGENTAUTH_REPLAY_STORE=redis
+      - AGENTAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
+      - AGENTAUTH_DEV_INDEX=1
     depends_on:
       - redis
 
@@ -630,9 +630,9 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/protected
 # Expected: 200 OK
 
 # Step 3: Restart container
-kubectl rollout restart deployment/gauth
+kubectl rollout restart deployment/agentauth
 # Wait for pods to be ready
-kubectl wait --for=condition=ready pod -l app=gauth --timeout=60s
+kubectl wait --for=condition=ready pod -l app=agentauth --timeout=60s
 
 # Step 4: Try to replay token (should fail)
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/protected
@@ -648,7 +648,7 @@ Test replay protection across multiple instances:
 
 ```bash
 # Scale to 3 replicas
-kubectl scale deployment/gauth --replicas=3
+kubectl scale deployment/agentauth --replicas=3
 
 # Authenticate via instance 1
 TOKEN=$(curl http://instance-1:8080/api/v1/auth -d '...' | jq -r '.token')
@@ -664,7 +664,7 @@ Verify that old tokens expire correctly:
 
 ```bash
 # Set short TTL for testing
-export GAUTH_REPLAY_TTL=60  # 60 seconds
+export AGENTAUTH_REPLAY_TTL=60  # 60 seconds
 
 # Authenticate
 TOKEN=$(curl http://localhost:8080/api/v1/auth -d '...' | jq -r '.token')
@@ -690,26 +690,26 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/protected
 1. **Immediate Rollback (Kubernetes):**
    ```bash
    # Rollback to previous deployment
-   kubectl rollout undo deployment/gauth
+   kubectl rollout undo deployment/agentauth
    
    # Verify rollback
-   kubectl rollout status deployment/gauth
+   kubectl rollout status deployment/agentauth
    ```
 
 2. **Restore BoltDB (with persistent volume):**
    ```bash
    # Revert environment variables
-   kubectl set env deployment/gauth \
-     GAUTH_REPLAY_STORE=bolt \
-     GAUTH_REPLAY_STORE_PATH=/data/replay.db \
-     GAUTH_ALLOW_UNSAFE_BOLTDB=1
+   kubectl set env deployment/agentauth \
+     AGENTAUTH_REPLAY_STORE=bolt \
+     AGENTAUTH_REPLAY_STORE_PATH=/data/replay.db \
+     AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1
    ```
 
 3. **Emergency Recovery:**
    ```bash
    # If Redis is down, temporarily disable replay protection
-   kubectl set env deployment/gauth \
-     GAUTH_REPLAY_DISABLED=1
+   kubectl set env deployment/agentauth \
+     AGENTAUTH_REPLAY_DISABLED=1
    
    # ⚠️ WARNING: This disables replay protection entirely
    # Only use as last resort for critical outages
@@ -741,7 +741,7 @@ Use Redis for production deployments.
 
 2. **Fallback to In-Memory** (Not Recommended):
    ```bash
-   GAUTH_REPLAY_FALLBACK=memory
+   AGENTAUTH_REPLAY_FALLBACK=memory
    ```
    This allows authentication to continue but loses replay protection.
 
@@ -810,15 +810,15 @@ Note: Tokens issued by blue won't be replay-protected by green (different stores
 
 ```prometheus
 # Replay store operations
-gauth_replay_store_checks_total
-gauth_replay_store_hits_total
-gauth_replay_store_misses_total
+agentauth_replay_store_checks_total
+agentauth_replay_store_hits_total
+agentauth_replay_store_misses_total
 
 # Replay store latency
-gauth_replay_store_latency_seconds
+agentauth_replay_store_latency_seconds
 
 # Redis connection status
-gauth_redis_connection_status
+agentauth_redis_connection_status
 ```
 
 Alert on:
@@ -852,7 +852,7 @@ Alert on:
 
 For security issues related to replay protection:
 
-- **Email:** security@gimel.foundation
+- **Email:** security@agentauth.io
 - **Report:** See SECURITY.md
 - **Reference:** CV-2025-005 (BoltDB Ephemeral Storage Vulnerability)
 

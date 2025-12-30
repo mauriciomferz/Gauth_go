@@ -41,7 +41,7 @@ func (s *BetaServer) AddLearningLabEndpoints() {
 	s.router.POST("/api/v1/validation/*action", s.apiValidationOperation)
 
 	// Generic AgentAuth action endpoint
-	s.router.POST("/api/v1/gauth/action", s.apiGenericAction)
+	s.router.POST("/api/v1/agentauth/action", s.apiGenericAction)
 }
 
 // apiLearningStart handles learning journey initialization
@@ -51,7 +51,7 @@ func (s *BetaServer) apiLearningStart(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success":           true,
 		"session_id":        sessionID,
-		"current_module":    "gauth-fundamentals",
+		"current_module":    "agentauth-fundamentals",
 		"progress":          15,
 		"modules_completed": 2,
 		"total_modules":     12,

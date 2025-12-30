@@ -234,7 +234,7 @@ authURL := BuildAuthorizationURL(authEndpoint, parResp.RequestURI, "web-app", st
 storage := NewInMemoryStorage()
 
 // Production (PostgreSQL)
-storage, err := NewPostgresStorage("postgres://user:pass@host:5432/gauth")
+storage, err := NewPostgresStorage("postgres://user:pass@host:5432/agentauth")
 
 // Production (Redis)
 storage, err := NewRedisStorage("redis:6379", "", 0)
@@ -337,7 +337,7 @@ parService := NewPARService(DefaultPARConfig())
 ### Production (PostgreSQL + Redis)
 ```go
 // PostgreSQL for persistent storage
-storage, _ := NewPostgresStorage("postgres://user:pass@db:5432/gauth?sslmode=require")
+storage, _ := NewPostgresStorage("postgres://user:pass@db:5432/agentauth?sslmode=require")
 
 // Redis for distributed rate limiting
 rateLimiter, _ := NewRedisRateLimitService(

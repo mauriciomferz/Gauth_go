@@ -9,10 +9,10 @@ owners: [system]
 # Obligation Metrics Alerting Guidance
 
 This document proposes initial Prometheus / Alertmanager rules for the obligation execution metrics:
-- `gauth_rfc0111_obligation_latency_seconds` (histogram)
-- `gauth_rfc0111_obligations_executed_total` (counter)
-- `gauth_rfc0111_obligations_failed_total` (counter)
-- `gauth_rfc0111_mandatory_obligation_failures_total` (counter)
+- `agentauth_aap001_obligation_latency_seconds` (histogram)
+- `agentauth_aap001_obligations_executed_total` (counter)
+- `agentauth_aap001_obligations_failed_total` (counter)
+- `agentauth_aap001_mandatory_obligation_failures_total` (counter)
 
 ## Design Principles
 1. Mandatory failures are rare and high impact — alert immediately.
@@ -31,32 +31,32 @@ This document proposes initial Prometheus / Alertmanager rules for the obligatio
 ## PromQL Building Blocks
 ```promql
 # p95 obligation latency (15m)
-histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[15m])))
+histogram_quantile(0.95, sum by (le) (rate(agentauth_aap001_obligation_latency_seconds_bucket[15m])))
 
 # p99 obligation latency (1h)
-histogram_quantile(0.99, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[1h])))
+histogram_quantile(0.99, sum by (le) (rate(agentauth_aap001_obligation_latency_seconds_bucket[1h])))
 
 # Mandatory failures in last 30m
-increase(gauth_rfc0111_mandatory_obligation_failures_total[30m])
+increase(agentauth_aap001_mandatory_obligation_failures_total[30m])
 
 # Failure ratio (30m)
-sum(rate(gauth_rfc0111_obligations_failed_total[30m]))
+sum(rate(agentauth_aap001_obligations_failed_total[30m]))
   /
-  sum(rate(gauth_rfc0111_obligations_executed_total[30m]))
+  sum(rate(agentauth_aap001_obligations_executed_total[30m]))
 ```
 
 ## Suggested Alert Rules (YAML Snippets)
 ```yaml
 # obligations_alerts.yaml
 groups:
-  - name: gauth_obligations
+  - name: agentauth_obligations
     rules:
       - alert: AgentAuthObligationLatencyHighP95Warning
-        expr: histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[15m]))) > 0.025
+        expr: histogram_quantile(0.95, sum by (le) (rate(agentauth_aap001_obligation_latency_seconds_bucket[15m])) > 0.025
         for: 10m
         labels:
           severity: warning
-          component: gauth_pdp
+          component: agentauth_pdp
         annotations:
           summary: "Obligation latency p95 elevated (>25ms)"
           description: |
@@ -64,21 +64,21 @@ groups:
             Investigate slow obligation handlers or downstream services.
 
       - alert: AgentAuthObligationLatencyHighP95Critical
-        expr: histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[15m]))) > 0.040
+        expr: histogram_quantile(0.95, sum by (le) (rate(agentauth_aap001_obligation_latency_seconds_bucket[15m])) > 0.040
         for: 5m
         labels:
           severity: critical
-          component: gauth_pdp
+          component: agentauth_pdp
         annotations:
           summary: "Obligation latency p95 critical (>40ms)"
           description: "Sustained high latency may impact decision times or timeouts."
 
       - alert: AgentAuthObligationMandatoryFailure
-        expr: increase(gauth_rfc0111_mandatory_obligation_failures_total[30m]) > 0
+        expr: increase(agentauth_aap001_mandatory_obligation_failures_total[30m]) > 0
         for: 1m
         labels:
           severity: critical
-          component: gauth_pdp
+          component: agentauth_pdp
         annotations:
           summary: "Mandatory obligation failure detected"
           description: |
@@ -86,32 +86,32 @@ groups:
             Examine obligation audit logs and handler errors immediately.
 
       - alert: AgentAuthObligationFailureRatioWarning
-        expr: (sum(rate(gauth_rfc0111_obligations_failed_total[30m])) / sum(rate(gauth_rfc0111_obligations_executed_total[30m]))) > 0.05
+        expr: (sum(rate(agentauth_aap001_obligations_failed_total[30m]) / sum(rate(agentauth_aap001_obligations_executed_total[30m])) > 0.05
         for: 15m
         labels:
           severity: warning
-          component: gauth_pdp
+          component: agentauth_pdp
         annotations:
           summary: "Obligation failure ratio >5%"
           description: |
             Elevated obligation failures. Check recent deployment changes or dependency health.
 
       - alert: AgentAuthObligationFailureRatioCritical
-        expr: (sum(rate(gauth_rfc0111_obligations_failed_total[30m])) / sum(rate(gauth_rfc0111_obligations_executed_total[30m]))) > 0.10
+        expr: (sum(rate(agentauth_aap001_obligations_failed_total[30m]) / sum(rate(agentauth_aap001_obligations_executed_total[30m])) > 0.10
         for: 10m
         labels:
           severity: critical
-          component: gauth_pdp
+          component: agentauth_pdp
         annotations:
           summary: "Obligation failure ratio >10%"
           description: "High failure rate — obligations may not be completing reliably."
 
       - alert: AgentAuthObligationLatencyHighP99
-        expr: histogram_quantile(0.99, sum by (le) (rate(gauth_rfc0111_obligation_latency_seconds_bucket[1h]))) > 0.050
+        expr: histogram_quantile(0.99, sum by (le) (rate(agentauth_aap001_obligation_latency_seconds_bucket[1h])) > 0.050
         for: 15m
         labels:
           severity: warning
-          component: gauth_pdp
+          component: agentauth_pdp
         annotations:
           summary: "p99 obligation latency >50ms"
           description: "Long-tail latency degradation detected — assess heavy handlers or outliers."

@@ -124,13 +124,13 @@
 **Key Changes**:
 - **Custom Collector**: Implemented `AgentAuthCollector` in `web/handlers/admin/metrics_handler.go` to scrape real-time data from the database.
 - **Metrics Added**:
-    - `gauth_audit_events_total`: Count of audit events by status (success/failure).
-    - `gauth_api_keys_total`: Count of API keys by status (active/revoked).
-    - `gauth_active_policies_total`: Count of active authorization policies.
+    - `agentauth_audit_events_total`: Count of audit events by status (success/failure).
+    - `agentauth_api_keys_total`: Count of API keys by status (active/revoked).
+    - `agentauth_active_policies_total`: Count of active authorization policies.
 - **Dashboard**: Updated `system.json` to include a "Business Metrics" row visualizing these new data points.
 - **Schema Fixes**: Identified and fixed column name mismatches (`status` vs `result`, `enabled` vs `revoked_at`) during verification.
 
-**Status**: Verified. `curl` output confirms `gauth_` metrics are present and correct.
+**Status**: Verified. `curl` output confirms `agentauth_` metrics are present and correct.
 
 ### Phase 23: Alerting Configuration
 **Goal**: Configure Prometheus to trigger alerts for critical system states.
@@ -146,7 +146,7 @@
 ### Latest Commits
 ```
 31197c62c - docs: comprehensive API, admin, security docs
-5df47a965 - fix: add GAUTH_DB_HOST to deployment
+5df47a965 - fix: add AGENTAUTH_DB_HOST to deployment
 650fd4f4b - feat: standalone deployment script
 7ae7a9062 - docs: comprehensive deployment guide
 c7573a264 - docs: project status to 100/100
@@ -194,7 +194,7 @@ c7573a264 - docs: project status to 100/100
 3. `docs/SECURITY.md` - Security & incident response
 
 ### Project Documentation
-1. `GAUTHPLUS_PROJECT_STATUS.md` - 100/100 status
+1. `AGENTAUTH_PLUS_PROJECT_STATUS.md` - 100/100 status
 2. `walkthrough.md` - This file
 3. `task.md` - All phases complete
 
@@ -252,10 +252,10 @@ curl http://localhost:8080/api/admin/audit/export/JOB_ID/download -o export.json
 ### Useful Commands
 ```bash
 # View logs
-docker logs -f gauth-backend-new
+docker logs -f agentauth-backend-new
 
 # Restart backend
-docker restart gauth-backend-new
+docker restart agentauth-backend-new
 
 # Redeploy
 ./deploy-standalone.sh
@@ -284,7 +284,7 @@ cat docs/SECURITY.md
 - ✅ `.env.quickstart`
 
 ### Project Status (Updated)
-- ✅ `GAUTHPLUS_PROJECT_STATUS.md`
+- ✅ `AGENTAUTH_PLUS_PROJECT_STATUS.md`
 - ✅ `task.md`
 - ✅ `walkthrough.md`
 
@@ -313,37 +313,37 @@ cat docs/SECURITY.md
 **Date**: 2025-12-29
 
 ### 1. Deployment
-- **Cluster**: `kind` (gauth-staging)
-- **Image**: `gauth:staging` (local load)
+- **Cluster**: `kind` (agentauth-staging)
+- **Image**: `agentauth:staging` (local load)
 - **Manifests**:
     - `k8s-monitoring-stack.yaml`: Prometheus & Grafana in `monitoring` ns.
     - `k8s-alerts.yaml`: Alert rules ConfigMap.
-    - `deployments/k8s/staging/`: Application stack in `gauth-staging`.
+    - `deployments/k8s/staging/`: Application stack in `agentauth-staging`.
 - **Status**:
     - `postgres-0`: Running (1/1)
     - `redis-0`: Running (1/1)
-    - `gauth-deployment`: Running (3/3)
+    - `agentauth-deployment`: Running (3/3)
 
 ### 2. Verification Steps
 - **Health Check**: `curl /api/v1/beta/health` → `200 OK` (Status: `healthy`).
 - **Metrics**: `curl /metrics` → Scraped successfully.
-    - **Note**: `gauth_audit_events_total` missing (code registration gap). Other metrics present.
+    - **Note**: `agentauth_audit_events_total` missing (code registration gap). Other metrics present.
 - **Prometheus**:
-    - Targets: `gauth-service` (3/3 UP).
+    - Targets: `agentauth-service` (3/3 UP).
     - Alerts: `InstanceDown` inactive (Good).
 
 ### 3. Issues Resolved
 - **Redis Config**: Removed inline comments from `redis.conf` to fix startup crash.
 - **Image Pull**: Changed `imagePullPolicy` to `IfNotPresent` for local Kind image.
 - **App Crash**:
-    - Added `GAUTH_JWT_SIGNING_KEY` from secrets.
+    - Added `AGENTAUTH_JWT_SIGNING_KEY` from secrets.
     - Mounted `/app/tmp` emptyDir for read-only filesystem compatibility.
 - **ServiceAccount**: Applied missing RBAC manifest.
-- **Custom Metrics (gauth_audit_events_total)**:
+- **Custom Metrics (agentauth_audit_events_total)**:
     - **Registry Scope**: Explicitly registered `AgentAuthCollector` with global `DefaultRegisterer` in `server_factory.go`.
-    - **DB Connection**: Added missing `GAUTH_DB_*` env vars to `deployment.yaml` and disabled SSL in `configmap.yaml` to fix "Development Mode" fallback.
+    - **DB Connection**: Added missing `AGENTAUTH_DB_*` env vars to `deployment.yaml` and disabled SSL in `configmap.yaml` to fix "Development Mode" fallback.
     - **Schema Mismatch**: Updated `metrics_handler.go` to query `audit_logs` (actual table) instead of `audit_events` and use `result` column.
-    - **Verification**: `curl /metrics | grep gauth_audit_events_total` → Success.
+    - **Verification**: `curl /metrics | grep agentauth_audit_events_total` → Success.
 
 ---
 
@@ -351,7 +351,7 @@ cat docs/SECURITY.md
 **Date**: 2025-12-29 (Post-Handoff)
 
 ### 1. CrashLoopBackOff Resolution
-- **Issue**: The `gauth:staging` container was entering a crash loop because the `Dockerfile` was building `cmd/gauth-server`, which turned out to be a short-lived **demo application** that exits after completion.
+- **Issue**: The `agentauth:staging` container was entering a crash loop because the `Dockerfile` was building `cmd/agentauth-server`, which turned out to be a short-lived **demo application** that exits after completion.
 - **Fix**: Updated `Dockerfile` to build `cmd/web-server`, which initializes the persistent `web.NewBetaServer`. verified stable runtime.
 
 ### 2. Missing Metrics & Schema Mismatch
@@ -365,18 +365,18 @@ cat docs/SECURITY.md
   3.  Updated `metrics_handler.go` to target `audit_events` (status column) and `api_keys` (status column).
 - **Verification**: `wget` from inside pod confirmed all metrics present:
   ```
-  gauth_active_policies_total 0
-  gauth_api_keys_total{status="active"} 0
-  gauth_audit_events_total{status="success"} 0
+  agentauth_active_policies_total 0
+  agentauth_api_keys_total{status="active"} 0
+  agentauth_audit_events_total{status="success"} 0
   ```
 
 ### 3. Functional Metric Verification (Post-Release)
 Performed end-to-end validation of the observability pipeline on the live `v1.3.0` release:
-1.  **Baseline Check**: Verified `gauth_api_keys_total{status="active"}` was 0.
+1.  **Baseline Check**: Verified `agentauth_api_keys_total{status="active"}` was 0.
 2.  **Action - Create**: Created API Key `b301b9f2...` for `test-tenant`.
-    *   **Observation**: Metric `gauth_api_keys_total{status="active"}` incremented to 1 immediately.
+    *   **Observation**: Metric `agentauth_api_keys_total{status="active"}` incremented to 1 immediately.
 3.  **Action - Revoke**: Revoked API Key `b301b9f2...`.
-    *   **Observation**: Metric `gauth_api_keys_total{status="active"}` dropped to 0, `status="revoked"` rose to 1.
+    *   **Observation**: Metric `agentauth_api_keys_total{status="active"}` dropped to 0, `status="revoked"` rose to 1.
 
 **Result**: Confirmed full functionality of the database-to-Prometheus metric path.
 
@@ -399,7 +399,7 @@ Performed end-to-end validation of the observability pipeline on the live `v1.3.
 - Documentation: `31197c62c`
 - Frontend Maintenance: `e271032a9`
 
-**Repository**: https://github.com/mauriciomferz/Gauth_go  
+**Repository**: https://github.com/mauriciomferz/AgentAuth  
 **Branch**: `main`  
 **Latest Commit**: `e271032a9`
 

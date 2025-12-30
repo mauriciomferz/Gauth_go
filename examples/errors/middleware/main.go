@@ -6,12 +6,12 @@ import (
 	"time"
 
 	mw "github.com/mauriciomferz/AgentAuth/examples/errors/middleware/internal"
-	gautherr "github.com/mauriciomferz/AgentAuth/pkg/errors"
+	agentautherr "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 // demoHandler is a sample handler that always returns an error
 func demoHandler(w http.ResponseWriter, r *http.Request) {
-	err := gautherr.ErrUnauthorized
+	err := agentautherr.ErrUnauthorized
 	mw.ErrorResponse(w, r, err)
 }
 

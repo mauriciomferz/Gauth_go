@@ -1,5 +1,5 @@
 // Package poa provides crypto interface abstractions for module independence.
-// These interfaces decouple pkg/poa from the main Gauth pkg/crypto package,
+// These interfaces decouple pkg/poa from the main AgentAuth pkg/crypto package,
 // enabling standalone module extraction.
 package poa
 

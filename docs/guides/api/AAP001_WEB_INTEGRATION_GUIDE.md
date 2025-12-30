@@ -1,11 +1,11 @@
-# RFC-0111 Web Server Integration Guide
+# AAP-001 Web Server Integration Guide
 
 **Date**: November 11, 2025  
 **Status**: ✅ **COMPLETE & TESTED**
 
 ## Overview
 
-RFC-0111 subscription and authorization flow endpoints have been successfully integrated into the AgentAuth web server with mock external services. This enables complete testing and development of RFC-0111 compliant applications without requiring real external service connections.
+AAP-001 subscription and authorization flow endpoints have been successfully integrated into the AgentAuth web server with mock external services. This enables complete testing and development of AAP-001 compliant applications without requiring real external service connections.
 
 ---
 
@@ -17,31 +17,31 @@ RFC-0111 subscription and authorization flow endpoints have been successfully in
 go build -o bin/web-server ./cmd/web-server
 ```
 
-### 2. Start with RFC-0111 Enabled
+### 2. Start with AAP-001 Enabled
 
 ```bash
-# Enable RFC-0111 with mock services
-GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
+# Enable AAP-001 with mock services
+AGENTAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
 Expected output:
 ```
-[RFC-0111] Enabled with mock external services
-[RFC-0111] Endpoints registered:
-[RFC-0111]   POST /api/v1/rfc0111/subscriptions (Step I: Initiate subscription)
-[RFC-0111]   GET  /api/v1/rfc0111/subscriptions/:id (Get subscription)
-[RFC-0111]   GET  /api/v1/rfc0111/subscriptions (List subscriptions)
-[RFC-0111]   POST /api/v1/rfc0111/authorize (Request token)
-[RFC-0111]   POST /api/v1/rfc0111/token/validate (Validate token)
-[RFC-0111]   POST /api/v1/rfc0111/token/introspect (Introspect token)
-[RFC-0111]   POST /api/v1/rfc0111/token/revoke (Revoke token)
+[AAP-001] Enabled with mock external services
+[AAP-001] Endpoints registered:
+[AAP-001]   POST /api/v1/aap001/subscriptions (Step I: Initiate subscription)
+[AAP-001]   GET  /api/v1/aap001/subscriptions/:id (Get subscription)
+[AAP-001]   GET  /api/v1/aap001/subscriptions (List subscriptions)
+[AAP-001]   POST /api/v1/aap001/authorize (Request token)
+[AAP-001]   POST /api/v1/aap001/token/validate (Validate token)
+[AAP-001]   POST /api/v1/aap001/token/introspect (Introspect token)
+[AAP-001]   POST /api/v1/aap001/token/revoke (Revoke token)
 ```
 
 ### 3. Test the API
 
 ```bash
 # Create a subscription (Step I)
-curl -X POST http://localhost:8090/api/v1/rfc0111/subscriptions \
+curl -X POST http://localhost:8090/api/v1/aap001/subscriptions \
   -H "Content-Type: application/json" \
   -d '{}'
 
@@ -54,31 +54,31 @@ curl -X POST http://localhost:8090/api/v1/rfc0111/subscriptions \
 }
 
 # Get subscription details
-curl http://localhost:8090/api/v1/rfc0111/subscriptions/sub_1762825103211011000
+curl http://localhost:8090/api/v1/aap001/subscriptions/sub_1762825103211011000
 
 # List subscriptions
-curl "http://localhost:8090/api/v1/rfc0111/subscriptions?client_id=test_client"
+curl "http://localhost:8090/api/v1/aap001/subscriptions?client_id=test_client"
 ```
 
 ---
 
 ## Environment Variables
 
-### RFC-0111 Configuration
+### AAP-001 Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_AAP-001_ENABLED` | `0` | Set to `1` to enable RFC-0111 endpoints |
-| `GAUTH_AAP-001_USE_MOCKS` | `1` | Set to `1` to use mock external services (currently required) |
+| `AGENTAUTH_AAP-001_ENABLED` | `0` | Set to `1` to enable AAP-001 endpoints |
+| `AGENTAUTH_AAP-001_USE_MOCKS` | `1` | Set to `1` to use mock external services (currently required) |
 
 ### Example Configurations
 
 **Development with mocks** (recommended):
 ```bash
-GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
+AGENTAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
-**Disable RFC-0111**:
+**Disable AAP-001**:
 ```bash
 ./bin/web-server 8090
 ```
@@ -89,12 +89,12 @@ GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 
 ### Subscription Flow (Steps I-VIII)
 
-#### POST /api/v1/rfc0111/subscriptions
+#### POST /api/v1/aap001/subscriptions
 Create a new subscription (Step I: Initiate Subscription)
 
 **Request:**
 ```bash
-curl -X POST http://localhost:8090/api/v1/rfc0111/subscriptions \
+curl -X POST http://localhost:8090/api/v1/aap001/subscriptions \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
@@ -109,12 +109,12 @@ curl -X POST http://localhost:8090/api/v1/rfc0111/subscriptions \
 }
 ```
 
-#### GET /api/v1/rfc0111/subscriptions/:id
+#### GET /api/v1/aap001/subscriptions/:id
 Get subscription details
 
 **Request:**
 ```bash
-curl http://localhost:8090/api/v1/rfc0111/subscriptions/sub_1762825103211011000
+curl http://localhost:8090/api/v1/aap001/subscriptions/sub_1762825103211011000
 ```
 
 **Response:**
@@ -127,12 +127,12 @@ curl http://localhost:8090/api/v1/rfc0111/subscriptions/sub_1762825103211011000
 }
 ```
 
-#### GET /api/v1/rfc0111/subscriptions
+#### GET /api/v1/aap001/subscriptions
 List subscriptions for a client
 
 **Request:**
 ```bash
-curl "http://localhost:8090/api/v1/rfc0111/subscriptions?client_id=test_client"
+curl "http://localhost:8090/api/v1/aap001/subscriptions?client_id=test_client"
 ```
 
 **Response:**
@@ -145,16 +145,16 @@ curl "http://localhost:8090/api/v1/rfc0111/subscriptions?client_id=test_client"
 
 ### Authorization Flow (Steps a-i)
 
-#### POST /api/v1/rfc0111/authorize
+#### POST /api/v1/aap001/authorize
 Request an access token
 
-#### POST /api/v1/rfc0111/token/validate
+#### POST /api/v1/aap001/token/validate
 Validate a token
 
-#### POST /api/v1/rfc0111/token/introspect
+#### POST /api/v1/aap001/token/introspect
 Introspect token details
 
-#### POST /api/v1/rfc0111/token/revoke
+#### POST /api/v1/aap001/token/revoke
 Revoke a token
 
 ---
@@ -163,19 +163,19 @@ Revoke a token
 
 ### Components Created
 
-1. **pkg/gauth/rfc0111_config.go**
-   - Configuration helpers for RFC-0111 initialization
+1. **pkg/agentauth/aap001_config.go**
+   - Configuration helpers for AAP-001 initialization
    - `InitAAP-001WithComponents()` - Initialize with provided components
    - Component validation and setup
 
-2. **web/rfc0111_init.go**
+2. **web/aap001_init.go**
    - Web server specific initialization
    - `InitAAP-001FromEnv()` - Environment-based configuration
    - Mock service creation and wiring
 
 3. **web/server_clean.go** (modified)
-   - Integrated RFC-0111 initialization into `NewBetaServerWithMetrics()`
-   - Conditional endpoint registration based on `GAUTH_AAP-001_ENABLED`
+   - Integrated AAP-001 initialization into `NewBetaServerWithMetrics()`
+   - Conditional endpoint registration based on `AGENTAUTH_AAP-001_ENABLED`
    - Logging for initialization status
 
 ### Mock Services
@@ -199,26 +199,26 @@ These mocks:
 ### 1. Run Example Standalone
 
 ```bash
-# Build and run the RFC-0111 example
-go build -o bin/rfc0111-example ./examples/rfc0111
-./bin/rfc0111-example
+# Build and run the AAP-001 example
+go build -o bin/aap001-example ./examples/aap001
+./bin/aap001-example
 ```
 
 ### 2. Run Web Server
 
 ```bash
-# Start web server with RFC-0111
-GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
+# Start web server with AAP-001
+AGENTAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
 ### 3. Run Tests
 
 ```bash
 # Test mock services
-go test ./pkg/gauth/mocks/... -v
+go test ./pkg/agentauth/mocks/... -v
 
 # Test entire package
-go test ./pkg/gauth/... -v
+go test ./pkg/agentauth/... -v
 
 # Run web integration tests (if available)
 go test ./web/... -v
@@ -228,10 +228,10 @@ go test ./web/... -v
 
 ```bash
 # Using curl
-curl -X POST http://localhost:8090/api/v1/rfc0111/subscriptions -d '{}'
+curl -X POST http://localhost:8090/api/v1/aap001/subscriptions -d '{}'
 
 # Using httpie (if installed)
-http POST localhost:8090/api/v1/rfc0111/subscriptions
+http POST localhost:8090/api/v1/aap001/subscriptions
 
 # Using Postman, Insomnia, etc.
 ```
@@ -245,7 +245,7 @@ http POST localhost:8090/api/v1/rfc0111/subscriptions
 All mock services have comprehensive unit tests:
 
 ```bash
-go test ./pkg/gauth/mocks/... -v -cover
+go test ./pkg/agentauth/mocks/... -v -cover
 ```
 
 **Coverage:**
@@ -264,36 +264,36 @@ Create test subscriptions:
 BASE_URL="http://localhost:8090"
 
 # Create subscription
-SUB_ID=$(curl -s -X POST ${BASE_URL}/api/v1/rfc0111/subscriptions -d '{}' | jq -r .subscription_id)
+SUB_ID=$(curl -s -X POST ${BASE_URL}/api/v1/aap001/subscriptions -d '{}' | jq -r .subscription_id)
 echo "Created: $SUB_ID"
 
 # Get subscription
-curl -s ${BASE_URL}/api/v1/rfc0111/subscriptions/${SUB_ID} | jq .
+curl -s ${BASE_URL}/api/v1/aap001/subscriptions/${SUB_ID} | jq .
 
 # List subscriptions
-curl -s "${BASE_URL}/api/v1/rfc0111/subscriptions?client_id=test" | jq .
+curl -s "${BASE_URL}/api/v1/aap001/subscriptions?client_id=test" | jq .
 ```
 
 ---
 
 ## Troubleshooting
 
-### RFC-0111 endpoints return 404
+### AAP-001 endpoints return 404
 
 **Problem**: Endpoints not registered
 
 **Solution**: 
-1. Ensure `GAUTH_AAP-001_ENABLED=1` is set
+1. Ensure `AGENTAUTH_AAP-001_ENABLED=1` is set
 2. Check server logs for initialization messages
 3. Verify server rebuilt after code changes
 
 ```bash
 # Check logs
-cat /tmp/gauth_server.log | grep RFC-0111
+cat /tmp/agentauth_server.log | grep AAP-001
 
 # Should see:
-# [RFC-0111] Enabled with mock external services
-# [RFC-0111] Endpoints registered:
+# [AAP-001] Enabled with mock external services
+# [AAP-001] Endpoints registered:
 ```
 
 ### Server fails to start
@@ -310,7 +310,7 @@ lsof -ti:8090
 pkill -f "web-server 8090"
 
 # Start on different port
-GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8091
+AGENTAUTH_AAP-001_ENABLED=1 ./bin/web-server 8091
 ```
 
 ### Mock services not working
@@ -321,7 +321,7 @@ GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8091
 
 ```bash
 # Look for error messages
-cat /tmp/gauth_server.log | grep -i "failed\|error"
+cat /tmp/agentauth_server.log | grep -i "failed\|error"
 ```
 
 ---
@@ -371,33 +371,33 @@ cat /tmp/gauth_server.log | grep -i "failed\|error"
 
 ### Created Files
 
-1. **pkg/gauth/rfc0111_config.go** (~140 lines)
-   - RFC-0111 component initialization helpers
+1. **pkg/agentauth/aap001_config.go** (~140 lines)
+   - AAP-001 component initialization helpers
    - Environment-based configuration
 
-2. **web/rfc0111_init.go** (~45 lines)
+2. **web/aap001_init.go** (~45 lines)
    - Web server specific initialization
    - Mock service creation
 
-3. **pkg/gauth/mocks/external_services_test.go** (~380 lines)
+3. **pkg/agentauth/mocks/external_services_test.go** (~380 lines)
    - Comprehensive unit tests for all mocks
    - Test coverage for default behavior, customization, and reset
 
 ### Modified Files
 
 1. **web/server_clean.go**
-   - Added RFC-0111 initialization in `NewBetaServerWithMetrics()`
+   - Added AAP-001 initialization in `NewBetaServerWithMetrics()`
    - Conditional endpoint registration
    - Logging output
 
-2. **examples/rfc0111/main.go**
+2. **examples/aap001/main.go**
    - Fixed linter warnings (redundant newlines)
 
 ---
 
 ## Summary
 
-✅ **RFC-0111 successfully integrated into web server**
+✅ **AAP-001 successfully integrated into web server**
 
 **Key Achievements:**
 - ✅ Mock external services (PVP, PIP, Commercial Register)
@@ -410,7 +410,7 @@ cat /tmp/gauth_server.log | grep -i "failed\|error"
 **Ready For:**
 - ✅ Development and testing
 - ✅ API integration
-- ✅ Further RFC-0111 step implementations
+- ✅ Further AAP-001 step implementations
 - ✅ Real external service integration (when available)
 
 ---
@@ -419,17 +419,17 @@ cat /tmp/gauth_server.log | grep -i "failed\|error"
 
 **Start Server:**
 ```bash
-GAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
+AGENTAUTH_AAP-001_ENABLED=1 ./bin/web-server 8090
 ```
 
 **Create Subscription:**
 ```bash
-curl -X POST http://localhost:8090/api/v1/rfc0111/subscriptions -d '{}'
+curl -X POST http://localhost:8090/api/v1/aap001/subscriptions -d '{}'
 ```
 
 **Run Tests:**
 ```bash
-go test ./pkg/gauth/mocks/... -v
+go test ./pkg/agentauth/mocks/... -v
 ```
 
 **Check Status:**

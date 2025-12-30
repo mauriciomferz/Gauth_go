@@ -1,8 +1,8 @@
 #!/bin/bash
 # Load test using the Go-based runner (requires kubectl context to be set)
 
-NAMESPACE="gauth-staging"
-SERVICE="gauth-service"
+NAMESPACE="agentauth-staging"
+SERVICE="agentauth-service"
 LOCAL_PORT=8085
 TARGET_URL="http://localhost:$LOCAL_PORT/api/v1/beta/authz/evaluate"
 
@@ -14,9 +14,9 @@ fi
 
 echo "🔌 Establishing port-forward to $SERVICE in $NAMESPACE..."
 # Find first pod for the service to port-forward (more reliable than svc forward sometimes)
-POD=$(kubectl get pod -n $NAMESPACE -l app=gauth -o jsonpath="{.items[0].metadata.name}" 2>/dev/null)
+POD=$(kubectl get pod -n $NAMESPACE -l app=agentauth -o jsonpath="{.items[0].metadata.name}" 2>/dev/null)
 if [ -z "$POD" ]; then
-    echo "⚠️  No pods found for app=gauth. Trying service forward..."
+    echo "⚠️  No pods found for app=agentauth. Trying service forward..."
     kubectl port-forward -n $NAMESPACE svc/$SERVICE $LOCAL_PORT:8080 > /dev/null 2>&1 &
 else
     echo "Forwarding to pod: $POD"

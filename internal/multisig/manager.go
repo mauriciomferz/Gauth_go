@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // SignatureStatus represents the current state of signature collection.
@@ -93,7 +93,7 @@ func NewSignatureManager(verifier VerificationProvider) *SignatureManager {
 // InitiateCollection starts signature collection for a PoA.
 func (sm *SignatureManager) InitiateCollection(
 	ctx context.Context,
-	poa *gauth_aap_001.PowerOfAttorney,
+	poa *agentauth_aap_001.PowerOfAttorney,
 	expiresIn time.Duration,
 ) error {
 	if poa == nil {
@@ -107,7 +107,7 @@ func (sm *SignatureManager) InitiateCollection(
 	}
 
 	// Compute canonical digest
-	digestHex, _, err := gauth_aap_001.CanonicalPOADigest(poa)
+	digestHex, _, err := agentauth_aap_001.CanonicalPOADigest(poa)
 	if err != nil {
 		return fmt.Errorf("canonical digest failed: %w", err)
 	}
@@ -134,7 +134,7 @@ func (sm *SignatureManager) InitiateCollection(
 		state.ExpiresAt = &expiresAt
 	}
 
-	// Weighted voting is configured via GAUTH_MULTI_SIG_WEIGHTS env var in the verifier
+	// Weighted voting is configured via AGENTAUTH_MULTI_SIG_WEIGHTS env var in the verifier
 	// The manager stores weights if provided explicitly during initialization
 	// For now, assume equal weight (weight=1) per signer unless overridden
 
@@ -315,7 +315,7 @@ func (sm *SignatureManager) isThresholdMetLocked(state *PoASignatureState) bool 
 }
 
 // GetSignatures returns all collected signatures for a PoA.
-func (sm *SignatureManager) GetSignatures(ctx context.Context, poaID string) (map[string]*gauth_aap_001.POASignature, error) {
+func (sm *SignatureManager) GetSignatures(ctx context.Context, poaID string) (map[string]*agentauth_aap_001.POASignature, error) {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
 
@@ -325,9 +325,9 @@ func (sm *SignatureManager) GetSignatures(ctx context.Context, poaID string) (ma
 	}
 
 	// Convert to AAP001 format
-	result := make(map[string]*gauth_aap_001.POASignature, len(state.Signatures))
+	result := make(map[string]*agentauth_aap_001.POASignature, len(state.Signatures))
 	for signerID, record := range state.Signatures {
-		result[signerID] = &gauth_aap_001.POASignature{
+		result[signerID] = &agentauth_aap_001.POASignature{
 			Algorithm: "ed25519",
 			KeyID:     record.KeyID,
 			SigBase64: record.Signature,

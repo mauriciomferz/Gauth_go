@@ -10,7 +10,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 func runAdvancedDemo() {
@@ -38,25 +38,25 @@ func runAdvancedDemo() {
 	demonstrateConfidenceScoring()
 }
 
-func createAdvancedClaimsExample() *gauth.AdvancedClaims {
-	return &gauth.AdvancedClaims{
+func createAdvancedClaimsExample() *agentauth.AdvancedClaims {
+	return &agentauth.AdvancedClaims{
 		Subject:   "user@example.com",
-		Issuer:    "https://auth.gauth.example.com",
-		Audience:  []string{"api.gauth.example.com", "mobile.gauth.example.com"},
+		Issuer:    "https://auth.agentauth.example.com",
+		Audience:  []string{"api.agentauth.example.com", "mobile.agentauth.example.com"},
 		ExpiresAt: time.Now().Add(2 * time.Hour).Unix(),
 		IssuedAt:  time.Now().Unix(),
 		NotBefore: time.Now().Unix(),
-		JWTID:     "gauth-advanced-" + fmt.Sprintf("%d", time.Now().UnixNano()),
-		Scope:     []string{"gauth:read", "gauth:write", "gauth:admin"},
+		JWTID:     "agentauth-advanced-" + fmt.Sprintf("%d", time.Now().UnixNano()),
+		Scope:     []string{"agentauth:read", "agentauth:write", "agentauth:admin"},
 		TokenType: "PASETO",
-		ClientID:  "gauth-mobile-app-v2",
-		ClaimsMetadata: &gauth.ClaimsMetadata{
+		ClientID:  "agentauth-mobile-app-v2",
+		ClaimsMetadata: &agentauth.ClaimsMetadata{
 			Version:      "2.0",
 			Capabilities: []string{"delegation", "revocation", "audit", "multi-tenant"},
 			Source:       "internal-identity-provider",
 			Confidence:   0.98,
-			Restrictions: &gauth.ClaimsRestrictions{
-				TimeWindow: &gauth.TimeWindow{
+			Restrictions: &agentauth.ClaimsRestrictions{
+				TimeWindow: &agentauth.TimeWindow{
 					StartHour: 6,                    // 6 AM
 					EndHour:   20,                   // 8 PM
 					Weekdays:  []int{1, 2, 3, 4, 5}, // Monday-Friday
@@ -67,7 +67,7 @@ func createAdvancedClaimsExample() *gauth.AdvancedClaims {
 			},
 		},
 		Custom: map[string]interface{}{
-			"tenant_id":          "gauth-enterprise-001",
+			"tenant_id":          "agentauth-enterprise-001",
 			"session_id":         "sess_" + fmt.Sprintf("%d", time.Now().UnixNano()),
 			"device_fingerprint": "mobile-ios-16.1-iphone14",
 			"risk_score":         0.15,
@@ -81,11 +81,11 @@ func createAdvancedClaimsExample() *gauth.AdvancedClaims {
 	}
 }
 
-func createStructuredFooter() *gauth.PASETOFooter {
-	footer, err := gauth.CreatePASETOFooter(
-		"gauth-ed25519-key-v2-2025",
+func createStructuredFooter() *agentauth.PASETOFooter {
+	footer, err := agentauth.CreatePASETOFooter(
+		"agentauth-ed25519-key-v2-2025",
 		"Ed25519",
-		"https://auth.gauth.example.com",
+		"https://auth.agentauth.example.com",
 		map[string]interface{}{
 			"version":        "4.0",
 			"purpose":        "public",
@@ -96,7 +96,7 @@ func createStructuredFooter() *gauth.PASETOFooter {
 			"chain_of_trust": map[string]interface{}{
 				"root_ca":      "AgentAuth-Root-CA-2025",
 				"intermediate": "AgentAuth-Intermediate-CA-West",
-				"leaf":         "auth.gauth.example.com",
+				"leaf":         "auth.agentauth.example.com",
 			},
 		},
 	)
@@ -106,7 +106,7 @@ func createStructuredFooter() *gauth.PASETOFooter {
 	return footer
 }
 
-func createMockPASETOToken(claims *gauth.AdvancedClaims, footer *gauth.PASETOFooter) string {
+func createMockPASETOToken(claims *agentauth.AdvancedClaims, footer *agentauth.PASETOFooter) string {
 	// This creates a mock PASETO v4.public token format
 	// In a real implementation, this would use a proper PASETO library
 
@@ -122,7 +122,7 @@ func createMockPASETOToken(claims *gauth.AdvancedClaims, footer *gauth.PASETOFoo
 	return fmt.Sprintf("v4.public.%s.%s", payload, footerEncoded)
 }
 
-func demonstrateValidation(claims *gauth.AdvancedClaims) {
+func demonstrateValidation(claims *agentauth.AdvancedClaims) {
 	fmt.Println("=== Advanced Claims Semantic Validation ===")
 
 	// Test valid claims
@@ -165,8 +165,8 @@ func demonstrateTimeWindowValidation() {
 	fmt.Println("=== Time Window Validation Examples ===")
 
 	// Business hours restriction
-	businessHours := &gauth.ClaimsRestrictions{
-		TimeWindow: &gauth.TimeWindow{
+	businessHours := &agentauth.ClaimsRestrictions{
+		TimeWindow: &agentauth.TimeWindow{
 			StartHour: 9,                    // 9 AM
 			EndHour:   17,                   // 5 PM
 			Weekdays:  []int{1, 2, 3, 4, 5}, // Monday-Friday
@@ -176,8 +176,8 @@ func demonstrateTimeWindowValidation() {
 	fmt.Printf("Business hours allowed: %v\n", businessHours.IsInTimeWindow())
 
 	// 24/7 access
-	alwaysAllowed := &gauth.ClaimsRestrictions{
-		TimeWindow: &gauth.TimeWindow{
+	alwaysAllowed := &agentauth.ClaimsRestrictions{
+		TimeWindow: &agentauth.TimeWindow{
 			StartHour: 0,
 			EndHour:   23,
 			Weekdays:  []int{0, 1, 2, 3, 4, 5, 6}, // All days
@@ -187,8 +187,8 @@ func demonstrateTimeWindowValidation() {
 	fmt.Printf("24/7 access allowed: %v\n", alwaysAllowed.IsInTimeWindow())
 
 	// Weekend only
-	weekendOnly := &gauth.ClaimsRestrictions{
-		TimeWindow: &gauth.TimeWindow{
+	weekendOnly := &agentauth.ClaimsRestrictions{
+		TimeWindow: &agentauth.TimeWindow{
 			StartHour: 0,
 			EndHour:   23,
 			Weekdays:  []int{0, 6}, // Saturday and Sunday
@@ -203,23 +203,23 @@ func demonstrateConfidenceScoring() {
 	fmt.Println("=== Claims Confidence Scoring Examples ===")
 
 	// High confidence claims with metadata
-	highConfidenceClaims := &gauth.AdvancedClaims{
+	highConfidenceClaims := &agentauth.AdvancedClaims{
 		Subject:   "admin@example.com",
 		Audience:  []string{"api.example.com"},
 		TokenType: "JWT",
 		ExpiresAt: time.Now().Add(24 * time.Hour).Unix(), // Long-lived
 		IssuedAt:  time.Now().Unix(),
-		ClaimsMetadata: &gauth.ClaimsMetadata{
+		ClaimsMetadata: &agentauth.ClaimsMetadata{
 			Version:    "2.0",
 			Confidence: 0.95,
-			Restrictions: &gauth.ClaimsRestrictions{
+			Restrictions: &agentauth.ClaimsRestrictions{
 				UsageLimit: 1000,
 			},
 		},
 	}
 
 	// Basic claims with minimal metadata
-	basicClaims := &gauth.AdvancedClaims{
+	basicClaims := &agentauth.AdvancedClaims{
 		Subject:   "user@example.com",
 		Audience:  []string{"api.example.com"},
 		ExpiresAt: time.Now().Add(time.Hour).Unix(), // Short-lived
@@ -232,7 +232,7 @@ func demonstrateConfidenceScoring() {
 }
 
 // Mock confidence calculation for demonstration
-func calculateMockConfidence(claims *gauth.AdvancedClaims) float64 {
+func calculateMockConfidence(claims *agentauth.AdvancedClaims) float64 {
 	score := 0.5 // Base score
 
 	if claims.ClaimsMetadata != nil {

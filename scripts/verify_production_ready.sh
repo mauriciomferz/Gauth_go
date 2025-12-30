@@ -24,8 +24,8 @@ run_check() {
 
 # Core functionality checks
 echo "📦 Testing Core Package Builds..."
-run_check "Main AgentAuth server build" "go build -o /tmp/gauth-server ./cmd/gauth-server"
-run_check "AgentAuth package build" "go build ./pkg/gauth/..."
+run_check "Main AgentAuth server build" "go build -o /tmp/agentauth-server ./cmd/agentauth-server"
+run_check "AgentAuth package build" "go build ./pkg/agentauth/..."
 run_check "Token package build" "go build ./pkg/token/..."
 run_check "Events package build" "go build ./pkg/events/..."
 run_check "Resilience package build" "go build ./pkg/resilience/..."

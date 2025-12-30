@@ -26,7 +26,7 @@ func ReconstructStartRootFromPrefixBlocks(prefixRoots []string, prefixSizes []in
 	if sum != expectedStartLength {
 		return ""
 	}
-	if os.Getenv("GAUTH_CONSISTENCY_V2_FAST") != "1" {
+	if os.Getenv("AGENTAUTH_CONSISTENCY_V2_FAST") != "1" {
 		return ""
 	}
 	if len(prefixRoots) == 1 {
@@ -45,7 +45,7 @@ func ReconstructStartRootFromPrefixBlocks(prefixRoots []string, prefixSizes []in
 	for len(blocks) > 1 {
 		last := blocks[len(blocks)-1]
 		prev := blocks[len(blocks)-2]
-		parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(prev.h)...), []byte(last.h)...))
+		parent := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(prev.h)...), []byte(last.h)...))
 		phex := hex.EncodeToString(parent[:])
 		if len(prefixBridges) > 0 {
 			if bridgeIdx >= len(prefixBridges) || prefixBridges[bridgeIdx] != phex {
@@ -63,7 +63,7 @@ func ReconstructStartRootFromPrefixBlocks(prefixRoots []string, prefixSizes []in
 			if a.sz != b.sz {
 				break
 			}
-			parent2 := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
+			parent2 := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
 			phex2 := hex.EncodeToString(parent2[:])
 			if len(prefixBridges) > 0 {
 				if bridgeIdx >= len(prefixBridges) || prefixBridges[bridgeIdx] != phex2 {

@@ -339,7 +339,7 @@ export default function MCP() {
 
   const handleDisconnectServer = async (serverId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('Are you sure you want to disconnect this server?')) return;
+    if (!confirm('Are you sure you want to disconnect this server?') return;
 
     setLoading(true);
     try {

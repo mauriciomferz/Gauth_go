@@ -71,7 +71,7 @@ The example will show:
 ## Code Structure
 
 - `main.go`: Example implementation
-- Uses `github.com/AgentAuth-Foundation/gauth/pkg/token` package
+- Uses `github.com/AgentAuth-Foundation/agentauth/pkg/token` package
 - Demonstrates all major token management features
 
 ## Key Concepts

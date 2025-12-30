@@ -53,17 +53,17 @@ func NewReplayNonceStoreWithMetrics(ttl time.Duration, m metrics.Metrics) *Repla
 // internal shared constructor logic.
 func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore {
 	cap := 0
-	if raw := os.Getenv("GAUTH_REPLAY_CAP"); raw != "" {
+	if raw := os.Getenv("AGENTAUTH_REPLAY_CAP"); raw != "" {
 		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
 			cap = v
 		}
 	}
-	if raw := os.Getenv("GAUTH_REPLAY_TTL"); raw != "" {
+	if raw := os.Getenv("AGENTAUTH_REPLAY_TTL"); raw != "" {
 		if v, err := time.ParseDuration(raw); err == nil && v > 0 {
 			ttl = v
 		}
 	}
-	walPath := os.Getenv("GAUTH_REPLAY_WAL")
+	walPath := os.Getenv("AGENTAUTH_REPLAY_WAL")
 	var wal *replay.WALStore
 	if walPath != "" {
 		w, err := replay.NewWALStore(walPath)

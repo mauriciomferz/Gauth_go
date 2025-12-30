@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-blue
-  namespace: gauth-staging
+  name: agentauth-blue
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     version: blue
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       version: blue
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         version: blue
     spec:
       affinity:
@@ -25,11 +25,11 @@ spec:
             podAffinityTerm:
               labelSelector:
                 matchLabels:
-                  app: gauth
+                  app: agentauth
               topologyKey: kubernetes.io/hostname
       containers:
-      - name: gauth
-        image: gauth-local-arm64:latest
+      - name: agentauth
+        image: agentauth-local-arm64:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -37,23 +37,23 @@ spec:
         - containerPort: 6060
           name: pprof
         env:
-        - name: GAUTH_WEB_PORT
+        - name: AGENTAUTH_WEB_PORT
           value: "8080"
-        - name: GAUTH_ENV
+        - name: AGENTAUTH_ENV
           value: "staging"
-        - name: GAUTH_LOG_LEVEL
+        - name: AGENTAUTH_LOG_LEVEL
           value: "info"
         - name: VERSION
           value: "blue"
-        - name: GAUTH_ENABLE_PPROF
+        - name: AGENTAUTH_ENABLE_PPROF
           value: "1"
-        - name: GAUTH_PPROF_PORT
+        - name: AGENTAUTH_PPROF_PORT
           value: "6060"
-        - name: GAUTH_PPROF_PORT
+        - name: AGENTAUTH_PPROF_PORT
           value: "6060"
-        - name: GAUTH_REVOCATION_ENABLED
+        - name: AGENTAUTH_REVOCATION_ENABLED
           value: "1"
-        - name: GAUTH_JWT_SIGNING_KEY
+        - name: AGENTAUTH_JWT_SIGNING_KEY
           value: "staging-secret-key-change-in-prod"
         - name: DATABASE_URL
           valueFrom:
@@ -61,7 +61,7 @@ spec:
               name: postgres-secret
               key: DATABASE_URL
         - name: REDIS_URL
-          value: redis://:gauth_redis_password_changeme@redis-service.gauth-data.svc.cluster.local:6379/0
+          value: redis://:agentauth_redis_password_changeme@redis-service.agentauth-data.svc.cluster.local:6379/0
         - name: DB_MAX_CONNECTIONS
           value: "10"
         - name: DB_MAX_IDLE_CONNECTIONS
@@ -89,11 +89,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth-service
-  namespace: gauth-staging
+  name: agentauth-service
+  namespace: agentauth-staging
 spec:
   selector:
-    app: gauth
+    app: agentauth
     version: blue
   ports:
   - protocol: TCP

@@ -75,7 +75,7 @@ chmod +x opa
 
 `policies/scope_validation.rego`:
 ```rego
-package gauth.authz
+package agentauth.authz
 
 # Default deny
 default allow = false
@@ -135,7 +135,7 @@ scope_matches(pattern, scope) {
 opa run --server --addr=:8181 policies/
 
 # Test policy
-curl -X POST http://localhost:8181/v1/data/gauth/authz/allow \
+curl -X POST http://localhost:8181/v1/data/agentauth/authz/allow \
   -H "Content-Type: application/json" \
   -d '{
     "input": {
@@ -180,7 +180,7 @@ func NewOPAScopeValidator(policyPath string) (*OPAScopeValidator, error) {
 
     // Prepare query
     query, err := rego.New(
-        rego.Query("data.gauth.authz.allow"),
+        rego.Query("data.agentauth.authz.allow"),
         rego.Module("scope_validation.rego", string(policy)),
     ).PrepareForEval(context.Background())
     
@@ -260,7 +260,7 @@ type OPAHTTPValidator struct {
 // NewOPAHTTPValidator creates HTTP-based validator
 func NewOPAHTTPValidator(opaURL string) *OPAHTTPValidator {
     return &OPAHTTPValidator{
-        endpoint: opaURL + "/v1/data/gauth/authz/allow",
+        endpoint: opaURL + "/v1/data/agentauth/authz/allow",
         client:   &http.Client{Timeout: 5 * time.Second},
     }
 }
@@ -317,7 +317,7 @@ func (v *OPAHTTPValidator) ValidateScope(ctx context.Context, parent, child []st
 ### Policy 1: Attribute-Based Access Control (ABAC)
 
 ```rego
-package gauth.authz
+package agentauth.authz
 
 # Allow if user has required attributes
 allow {
@@ -338,7 +338,7 @@ allow {
 ### Policy 2: Time-Based Access Control
 
 ```rego
-package gauth.authz
+package agentauth.authz
 
 import future.keywords.if
 
@@ -361,7 +361,7 @@ allow if {
 ### Policy 3: Multi-Tenant Isolation
 
 ```rego
-package gauth.authz
+package agentauth.authz
 
 # Ensure tenant isolation
 allow {
@@ -387,16 +387,16 @@ has_permission(user_perms, required) {
 
 ### OPA Sidecar Pattern
 
-`k8s/gauth-with-opa.yaml`:
+`k8s/agentauth-with-opa.yaml`:
 ```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: opa-policy
-  namespace: gauth
+  namespace: agentauth
 data:
   scope_validation.rego: |
-    package gauth.authz
+    package agentauth.authz
     
     default allow = false
     
@@ -430,28 +430,28 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth
-  namespace: gauth
+  name: agentauth
+  namespace: agentauth
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
     spec:
       containers:
       # AgentAuth application
-      - name: gauth
-        image: ghcr.io/mauriciomferz/gauth:latest
+      - name: agentauth
+        image: ghcr.io/mauriciomferz/agentauth:latest
         ports:
         - containerPort: 8080
         env:
         - name: OPA_URL
           value: "http://localhost:8181"
-        - name: GAUTH_USE_OPA
+        - name: AGENTAUTH_USE_OPA
           value: "true"
         resources:
           requests:
@@ -503,11 +503,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth
-  namespace: gauth
+  name: agentauth
+  namespace: agentauth
 spec:
   selector:
-    app: gauth
+    app: agentauth
   ports:
   - port: 80
     targetPort: 8080
@@ -518,15 +518,15 @@ spec:
 
 ```bash
 # Create namespace
-kubectl create namespace gauth
+kubectl create namespace agentauth
 
 # Deploy AgentAuth with OPA sidecar
-kubectl apply -f k8s/gauth-with-opa.yaml
+kubectl apply -f k8s/agentauth-with-opa.yaml
 
 # Verify deployment
-kubectl get pods -n gauth
-kubectl logs -n gauth <pod-name> -c opa
-kubectl logs -n gauth <pod-name> -c gauth
+kubectl get pods -n agentauth
+kubectl logs -n agentauth <pod-name> -c opa
+kubectl logs -n agentauth <pod-name> -c agentauth
 ```
 
 ---
@@ -593,13 +593,13 @@ func TestOPAScopeValidator(t *testing.T) {
 opa run --server --addr=:8181 policies/ &
 
 # Test policy directly
-curl -X POST http://localhost:8181/v1/data/gauth/authz/allow \
+curl -X POST http://localhost:8181/v1/data/agentauth/authz/allow \
   -d '{"input": {"action": "validate_scope", "parent_scopes": ["users:*"], "child_scopes": ["users:read"]}}'
 
 # Expected: {"result": true}
 
 # Test escalation
-curl -X POST http://localhost:8181/v1/data/gauth/authz/allow \
+curl -X POST http://localhost:8181/v1/data/agentauth/authz/allow \
   -d '{"input": {"action": "validate_scope", "parent_scopes": ["users:read"], "child_scopes": ["users:write"]}}'
 
 # Expected: {"result": false}
@@ -673,16 +673,16 @@ return opaValidator.ValidateScope(ctx, parent, child)
 
 ```prometheus
 # OPA decision count
-gauth_opa_decisions_total{decision="allow|deny",policy="scope_validation"}
+agentauth_opa_decisions_total{decision="allow|deny",policy="scope_validation"}
 
 # OPA latency
-gauth_opa_latency_seconds{quantile="0.5|0.9|0.99"}
+agentauth_opa_latency_seconds{quantile="0.5|0.9|0.99"}
 
 # OPA errors
-gauth_opa_errors_total{type="timeout|network|policy_error"}
+agentauth_opa_errors_total{type="timeout|network|policy_error"}
 
 # OPA availability
-gauth_opa_available{status="up|down"}
+agentauth_opa_available{status="up|down"}
 ```
 
 ### Alerts
@@ -692,13 +692,13 @@ groups:
 - name: opa_alerts
   rules:
   - alert: OPAHighLatency
-    expr: histogram_quantile(0.99, gauth_opa_latency_seconds) > 0.1
+    expr: histogram_quantile(0.99, agentauth_opa_latency_seconds) > 0.1
     for: 5m
     annotations:
       summary: "OPA P99 latency > 100ms"
   
   - alert: OPAUnavailable
-    expr: gauth_opa_available{status="down"} == 1
+    expr: agentauth_opa_available{status="down"} == 1
     for: 1m
     annotations:
       summary: "OPA sidecar unavailable"
@@ -729,8 +729,8 @@ groups:
 Error: OPA returned no results
 
 Solution: Check policy package matches query
-- Query: data.gauth.authz.allow
-- Policy must have: package gauth.authz
+- Query: data.agentauth.authz.allow
+- Policy must have: package agentauth.authz
 ```
 
 ### Problem: OPA sidecar won't start

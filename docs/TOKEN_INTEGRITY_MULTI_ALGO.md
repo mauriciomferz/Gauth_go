@@ -40,18 +40,18 @@ AgentAuth now supports multiple signature algorithms for token integrity verific
 
 ## Environment Variables
 
-### GAUTH_DETACHED_SIGNATURE
+### AGENTAUTH_DETACHED_SIGNATURE
 - **Default**: Not set (disabled)
 - **Values**: `1` (enabled), empty (disabled)
 - **Description**: Enables detached signature generation and verification for EnvelopeV2 tokens
 
-### GAUTH_REQUIRE_DETACHED_SIGNATURE
+### AGENTAUTH_REQUIRE_DETACHED_SIGNATURE
 - **Default**: Not set (optional)
 - **Values**: `1` (required), empty (optional)
 - **Description**: **Fail-closed mode** - Rejects tokens without detached signatures when enabled
 - **Security Note**: Use this in production environments to enforce mandatory signature verification
 
-### GAUTH_POA_ENVELOPE_V2
+### AGENTAUTH_POA_ENVELOPE_V2
 - **Default**: Not set (uses V1)
 - **Values**: `1` (enabled), empty (disabled)
 - **Description**: Enables EnvelopeV2 format which supports detached signatures
@@ -62,8 +62,8 @@ AgentAuth now supports multiple signature algorithms for token integrity verific
 
 ```go
 import (
-	cr "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
-	"github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
+	cr "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
+	"github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
 )
 
 // Create Ed25519 key provider
@@ -73,18 +73,18 @@ if err != nil {
 }
 
 // Create service with Ed25519 signer
-svc := rfc0111.NewService(
+svc := aap001.NewService(
 	auditLogger,
 	authorizer,
-	rfc0111.WithSignerProvider(kp.ActiveSigner),
-	rfc0111.WithKeyProvider(kp),
+	aap001.WithSignerProvider(kp.ActiveSigner),
+	aap001.WithKeyProvider(kp),
 )
 ```
 
 ### ECDSA P-256 Signing
 
 ```go
-import cr "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
+import cr "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 
 // Create ECDSA P-256 key provider
 kp, err := cr.NewInMemoryECDSAProvider()
@@ -93,18 +93,18 @@ if err != nil {
 }
 
 // Create service with ECDSA signer
-svc := rfc0111.NewService(
+svc := aap001.NewService(
 	auditLogger,
 	authorizer,
-	rfc0111.WithSignerProvider(kp.ActiveSigner),
-	rfc0111.WithKeyProvider(kp),
+	aap001.WithSignerProvider(kp.ActiveSigner),
+	aap001.WithKeyProvider(kp),
 )
 ```
 
 ### BLS12-381 Signing
 
 ```go
-import cr "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
+import cr "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/crypto"
 
 // Create BLS12-381 key provider
 kp, err := cr.NewInMemoryBLSProvider()
@@ -113,11 +113,11 @@ if err != nil {
 }
 
 // Create service with BLS signer
-svc := rfc0111.NewService(
+svc := aap001.NewService(
 	auditLogger,
 	authorizer,
-	rfc0111.WithSignerProvider(kp.ActiveSigner),
-	rfc0111.WithKeyProvider(kp),
+	aap001.WithSignerProvider(kp.ActiveSigner),
+	aap001.WithKeyProvider(kp),
 )
 ```
 
@@ -125,12 +125,12 @@ svc := rfc0111.NewService(
 
 ```bash
 # Enable detached signatures and make them mandatory
-export GAUTH_POA_ENVELOPE_V2=1
-export GAUTH_DETACHED_SIGNATURE=1
-export GAUTH_REQUIRE_DETACHED_SIGNATURE=1
+export AGENTAUTH_POA_ENVELOPE_V2=1
+export AGENTAUTH_DETACHED_SIGNATURE=1
+export AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1
 ```
 
-When `GAUTH_REQUIRE_DETACHED_SIGNATURE=1`:
+When `AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1`:
 - ✅ Tokens WITH detached signatures are accepted
 - ❌ Tokens WITHOUT detached signatures are **rejected** with `ErrUnauthorized`
 - ✅ Failure metrics are incremented
@@ -140,9 +140,9 @@ When `GAUTH_REQUIRE_DETACHED_SIGNATURE=1`:
 
 ### Phase 1: Enable Optional Signatures (Current State)
 ```bash
-export GAUTH_POA_ENVELOPE_V2=1
-export GAUTH_DETACHED_SIGNATURE=1
-# GAUTH_REQUIRE_DETACHED_SIGNATURE not set (backward compatible)
+export AGENTAUTH_POA_ENVELOPE_V2=1
+export AGENTAUTH_DETACHED_SIGNATURE=1
+# AGENTAUTH_REQUIRE_DETACHED_SIGNATURE not set (backward compatible)
 ```
 - New tokens will have detached signatures
 - Old tokens without signatures still verify
@@ -155,7 +155,7 @@ export GAUTH_DETACHED_SIGNATURE=1
 
 ### Phase 3: Enforce Mandatory Signatures
 ```bash
-export GAUTH_REQUIRE_DETACHED_SIGNATURE=1
+export AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1
 ```
 - **Breaking change**: All tokens must have signatures
 - Tokens without signatures are rejected
@@ -211,7 +211,7 @@ Located in `pkg/crypto/signature_multi_algo_fuzz_test.go`:
 - Algorithm registry robustness
 
 ### Integration Tests
-Located in `pkg/rfc0111/mandatory_detached_signature_test.go`:
+Located in `pkg/aap001/mandatory_detached_signature_test.go`:
 - Mandatory enforcement scenarios
 - Backward compatibility
 - V1 vs V2 envelope behavior
@@ -236,10 +236,10 @@ BenchmarkVerifyCanonicalPOA/bls12-381 250000 ns/op
 ## Metrics
 
 ### Counters
-- `gauth_token_detached_signature_issued_total{alg="<algorithm>"}`
-- `gauth_token_detached_signature_verify_total{result="<success|failure>",reason="<...>"}`
-- `gauth_signature_verifications_total`
-- `gauth_signature_verification_failures_total`
+- `agentauth_token_detached_signature_issued_total{alg="<algorithm>"}`
+- `agentauth_token_detached_signature_verify_total{result="<success|failure>",reason="<...>"}`
+- `agentauth_signature_verifications_total`
+- `agentauth_signature_verification_failures_total`
 
 ### Failure Reasons
 - `missing_required_signature`: Mandatory enforcement rejected token

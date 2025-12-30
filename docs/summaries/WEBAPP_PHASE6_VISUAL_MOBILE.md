@@ -320,7 +320,7 @@ mobileMenuButton.addEventListener('click', function() {
     mobileNav.classList.toggle('active');
     const icon = this.querySelector('i');
     
-    if (mobileNav.classList.contains('active')) {
+    if (mobileNav.classList.contains('active') {
         icon.classList.remove('fa-bars');
         icon.classList.add('fa-times');  // Change to X icon
     } else {
@@ -347,7 +347,7 @@ mobileNavLinks.forEach(link => {
 ```javascript
 document.addEventListener('click', function(e) {
     if (!mobileMenuButton.contains(e.target) && 
-        !mobileNav.contains(e.target)) {
+        !mobileNav.contains(e.target) {
         mobileNav.classList.remove('active');
         // Reset icon to hamburger
     }
@@ -626,7 +626,7 @@ button, a.nav-link {
 - **PID:** 47968
 - **Port:** 8080
 - **URL:** http://localhost:8080/index.html
-- **Environment:** `GAUTH_DEV_INDEX=1`
+- **Environment:** `AGENTAUTH_DEV_INDEX=1`
 - **Status:** ✅ Running
 - **Memory:** ~15MB
 - **CPU:** <1%

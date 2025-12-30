@@ -275,7 +275,7 @@ go tool pprof mem.prof
 
 #### GitHub Actions UI
 ```
-https://github.com/mauriciomferz/Gauth_go/actions
+https://github.com/mauriciomferz/AgentAuth/actions
 ```
 
 #### Workflow Status

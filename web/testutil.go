@@ -20,7 +20,7 @@ func NewTestServer(t *testing.T, port string) *BetaServer {
 func NewTestServerNoSeed(t *testing.T) *BetaServer {
 	// Ensure we don't auto-seed demo bundle; tests should add precisely what they need.
 	// Use Setenv to keep setting local to this test.
-	t.Setenv("GAUTH_SEED_POLICY", "0")
+	t.Setenv("AGENTAUTH_SEED_POLICY", "0")
 	srv := NewBetaServer("")
 	t.Cleanup(func() {
 		srv.Shutdown()

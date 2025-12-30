@@ -84,7 +84,7 @@
 
 ## 💡 KEY INSIGHT
 
-**The QA audit only searched `pkg/gauth/*.go` and missed entire packages:**
+**The QA audit only searched `pkg/agentauth/*.go` and missed entire packages:**
 - Missed `pkg/oidc/` → 8,000+ lines of OIDC implementation
 - Missed `pkg/pdp/` → 1,500+ lines of PDP implementation
 - Confused test mocks with lack of production code

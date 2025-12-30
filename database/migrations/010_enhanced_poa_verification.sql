@@ -238,7 +238,7 @@ BEGIN
     -- Check allowed countries
     allowed_countries := geographic_restrictions -> 'allowed_countries';
     IF allowed_countries IS NOT NULL AND jsonb_array_length(allowed_countries) > 0 THEN
-        IF NOT (allowed_countries @> to_jsonb(country_code)) THEN
+        IF NOT (allowed_countries @> to_jsonb(country_code) THEN
             RETURN FALSE;
         END IF;
     END IF;
@@ -297,8 +297,8 @@ SELECT
         WHEN p.valid_from > CURRENT_TIMESTAMP THEN 'Pending'
         ELSE 'Active'
     END AS computed_status,
-    jsonb_array_length(COALESCE(p.attestations, '[]'::jsonb)) AS attestation_count,
-    jsonb_array_length(COALESCE(p.version_history, '[]'::jsonb)) AS version_count
+    jsonb_array_length(COALESCE(p.attestations, '[]'::jsonb) AS attestation_count,
+    jsonb_array_length(COALESCE(p.version_history, '[]'::jsonb) AS version_count
 FROM power_of_attorney p;
 
 -- Create view for PoAs requiring review
@@ -307,7 +307,7 @@ SELECT
     p.*,
     CASE
         WHEN p.valid_until - CURRENT_TIMESTAMP < INTERVAL '30 days' THEN 'Expiring Soon'
-        WHEN jsonb_array_length(COALESCE(p.attestations, '[]'::jsonb)) = 0 THEN 'Missing Attestations'
+        WHEN jsonb_array_length(COALESCE(p.attestations, '[]'::jsonb) = 0 THEN 'Missing Attestations'
         WHEN p.version_number > 5 THEN 'Multiple Amendments'
         ELSE 'Review Recommended'
     END AS review_reason
@@ -315,7 +315,7 @@ FROM power_of_attorney p
 WHERE p.status = 'active'
 AND (
     p.valid_until - CURRENT_TIMESTAMP < INTERVAL '30 days'
-    OR jsonb_array_length(COALESCE(p.attestations, '[]'::jsonb)) = 0
+    OR jsonb_array_length(COALESCE(p.attestations, '[]'::jsonb) = 0
     OR p.version_number > 5
 );
 

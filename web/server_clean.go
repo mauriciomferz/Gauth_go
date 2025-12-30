@@ -44,12 +44,12 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/internal/notary"
 	"github.com/mauriciomferz/AgentAuth/internal/tracing"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	anchor "github.com/mauriciomferz/AgentAuth/pkg/anchor"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 	auditHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/audit"
 	betaHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/beta"
 	eventsHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/events"
@@ -63,7 +63,7 @@ import (
 
 // atoiDefault is now defined in server_factory.go
 
-// GAUTH_OTEL_METRICS_ENABLE=1 engages OpenTelemetry metrics. A sync.Once guard ensures gauges
+// AGENTAUTH_OTEL_METRICS_ENABLE=1 engages OpenTelemetry metrics. A sync.Once guard ensures gauges
 // are registered only once globally even if multiple BetaServer instances are constructed in tests.
 var otelInitOnce sync.Once
 
@@ -106,7 +106,7 @@ type combinedAnchorEntry struct {
 // modelLimitsAttestation models the attestation response for model limits governance.
 // Structured as a deterministic JSON serialization target to enable stable Ed25519 signing.
 // Optional signature fields (signature, sig_kid, sig_mode) are added only when
-// GAUTH_MODEL_LIMIT_ATTEST_SIGN=1 and a GlobalEdDSARegistry active key exists.
+// AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN=1 and a GlobalEdDSARegistry active key exists.
 type modelLimitsAttestation struct {
 	Success    bool   `json:"success"`
 	Configured bool   `json:"configured"`
@@ -278,7 +278,7 @@ func (s *BetaServer) Engine() *gin.Engine { return s.router }
 // ===== Modular Anchor Handlers Deps Interface Implementations =====
 // CapabilityAnchorEnabled returns true when anchoring enable flag is set.
 func (s *BetaServer) CapabilityAnchorEnabled() bool {
-	return os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") == "1"
+	return os.Getenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE") == "1"
 }
 func (s *BetaServer) CapabilityRegistryHash() string { return s.capabilitiesHandler.GetRegistryHash() }
 func (s *BetaServer) CapabilityPrevRegistryHash() string {
@@ -371,34 +371,34 @@ func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
 	}
 
 	var b strings.Builder
-	b.WriteString("# HELP gauth_capability_anchor_emitted_total Total capability anchor emissions\n")
-	b.WriteString("# TYPE gauth_capability_anchor_emitted_total counter\n")
-	b.WriteString("# HELP gauth_capability_anchor_skipped_total Throttled capability anchor emissions\n")
-	b.WriteString("# TYPE gauth_capability_anchor_skipped_total counter\n")
-	b.WriteString("# HELP gauth_capability_registry_hash_changed_total Registry hash change events\n")
-	b.WriteString("# TYPE gauth_capability_registry_hash_changed_total counter\n")
-	b.WriteString("# HELP gauth_capability_anchor_emission_jitter_seconds Emission interval jitter\n")
-	b.WriteString("# TYPE gauth_capability_anchor_emission_jitter_seconds gauge\n")
-	b.WriteString("# HELP gauth_capability_anchor_age_seconds Time since last anchor write\n")
-	b.WriteString("# TYPE gauth_capability_anchor_age_seconds gauge\n")
-	b.WriteString("# HELP gauth_capability_anchor_stale Capability anchor stale state\n")
-	b.WriteString("# TYPE gauth_capability_anchor_stale gauge\n")
+	b.WriteString("# HELP agentauth_capability_anchor_emitted_total Total capability anchor emissions\n")
+	b.WriteString("# TYPE agentauth_capability_anchor_emitted_total counter\n")
+	b.WriteString("# HELP agentauth_capability_anchor_skipped_total Throttled capability anchor emissions\n")
+	b.WriteString("# TYPE agentauth_capability_anchor_skipped_total counter\n")
+	b.WriteString("# HELP agentauth_capability_registry_hash_changed_total Registry hash change events\n")
+	b.WriteString("# TYPE agentauth_capability_registry_hash_changed_total counter\n")
+	b.WriteString("# HELP agentauth_capability_anchor_emission_jitter_seconds Emission interval jitter\n")
+	b.WriteString("# TYPE agentauth_capability_anchor_emission_jitter_seconds gauge\n")
+	b.WriteString("# HELP agentauth_capability_anchor_age_seconds Time since last anchor write\n")
+	b.WriteString("# TYPE agentauth_capability_anchor_age_seconds gauge\n")
+	b.WriteString("# HELP agentauth_capability_anchor_stale Capability anchor stale state\n")
+	b.WriteString("# TYPE agentauth_capability_anchor_stale gauge\n")
 
 	// Get values from Memory metrics if available
 	if mem, ok := s.metrics.(*metrics.Memory); ok {
-		b.WriteString(fmt.Sprintf("gauth_capability_anchor_emitted_total %d\n", mem.CapabilityAnchorEmitted()))
-		b.WriteString(fmt.Sprintf("gauth_capability_anchor_skipped_total %d\n", mem.CapabilityAnchorSkipped()))
-		b.WriteString(fmt.Sprintf("gauth_capability_registry_hash_changed_total %d\n", mem.CapabilityRegistryHashChanged()))
+		b.WriteString(fmt.Sprintf("agentauth_capability_anchor_emitted_total %d\n", mem.CapabilityAnchorEmitted()))
+		b.WriteString(fmt.Sprintf("agentauth_capability_anchor_skipped_total %d\n", mem.CapabilityAnchorSkipped()))
+		b.WriteString(fmt.Sprintf("agentauth_capability_registry_hash_changed_total %d\n", mem.CapabilityRegistryHashChanged()))
 		// Algorithm facet counters from SnapshotEx
 		snap := mem.SnapshotEx()
 		for algo, count := range snap.CapabilityAnchorAlgorithmCounts {
-			b.WriteString(fmt.Sprintf("gauth_capability_anchor_algorithm_count{algorithm=\"%s\"} %d\n", algo, count))
+			b.WriteString(fmt.Sprintf("agentauth_capability_anchor_algorithm_count{algorithm=\"%s\"} %d\n", algo, count))
 		}
 	} else {
 		// For PrometheusMetrics or other types, emit zeros (actual Prometheus registry handles real values)
-		b.WriteString("gauth_capability_anchor_emitted_total 0\n")
-		b.WriteString("gauth_capability_anchor_skipped_total 0\n")
-		b.WriteString("gauth_capability_registry_hash_changed_total 0\n")
+		b.WriteString("agentauth_capability_anchor_emitted_total 0\n")
+		b.WriteString("agentauth_capability_anchor_skipped_total 0\n")
+		b.WriteString("agentauth_capability_registry_hash_changed_total 0\n")
 	}
 
 	// Jitter gauge for emission interval stability (use interval mean if available)
@@ -406,23 +406,23 @@ func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
 	if s.capIntervalCount == 0 {
 		jitter = 0
 	}
-	b.WriteString(fmt.Sprintf("gauth_capability_anchor_emission_jitter_seconds %.6f\n", jitter))
+	b.WriteString(fmt.Sprintf("agentauth_capability_anchor_emission_jitter_seconds %.6f\n", jitter))
 	// Age since last anchor write
 	var age float64
 	if !s.capAnchorLastWrite.IsZero() {
 		age = time.Since(s.capAnchorLastWrite).Seconds()
 	}
-	b.WriteString(fmt.Sprintf("gauth_capability_anchor_age_seconds %.3f\n", age))
+	b.WriteString(fmt.Sprintf("agentauth_capability_anchor_age_seconds %.3f\n", age))
 
 	staleVal := 0
 	if s.CapAnchorStale() {
 		staleVal = 1
 	}
-	b.WriteString(fmt.Sprintf("gauth_capability_anchor_stale %d\n", staleVal))
+	b.WriteString(fmt.Sprintf("agentauth_capability_anchor_stale %d\n", staleVal))
 
 	// Integrity status
-	b.WriteString("# HELP gauth_capability_anchor_notarization_receipts_integrity Integrity status of verification chain (1=ok, 0=mismatch, -1=legacy, -2=unconfigured)\n")
-	b.WriteString("# TYPE gauth_capability_anchor_notarization_receipts_integrity gauge\n")
+	b.WriteString("# HELP agentauth_capability_anchor_notarization_receipts_integrity Integrity status of verification chain (1=ok, 0=mismatch, -1=legacy, -2=unconfigured)\n")
+	b.WriteString("# TYPE agentauth_capability_anchor_notarization_receipts_integrity gauge\n")
 	integrityVal := -2
 	switch s.receiptIntegrityStatus {
 	case integrityOK:
@@ -436,12 +436,12 @@ func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
 	case emptyValue:
 		integrityVal = -2
 	}
-	b.WriteString(fmt.Sprintf("gauth_capability_anchor_notarization_receipts_integrity %d\n", integrityVal))
+	b.WriteString(fmt.Sprintf("agentauth_capability_anchor_notarization_receipts_integrity %d\n", integrityVal))
 
 	c.Data(200, "text/plain; charset=utf-8", []byte(b.String()))
 }
 func (s *BetaServer) NotarizationEnabled() bool {
-	return os.Getenv("GAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil
+	return os.Getenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE") == "1" && s.notarizer != nil
 }
 func (s *BetaServer) LastNotarizationTime() time.Time {
 	s.mu.RLock()
@@ -662,12 +662,12 @@ func (cr *compositeResolver) FindByID(id string) *notary.PublicKeyRecord {
 // signatures based on environment-provided private keys, verifies signatures, and returns verification stats.
 // Environment variables:
 //
-//	GAUTH_ROTATIONS_V2_CONFIG   (required) path to weights config JSON
-//	GAUTH_ROTATIONS_V2_SIGN     =1 to enable signing attempts
-//	GAUTH_ROTATIONS_V2_ED25519_KEYS "id:hexOrB64Priv,id2:..." private keys for Ed25519 signers
-//	GAUTH_ROTATIONS_V2_FORCE_SIGN when set attempts signing even if some keys missing (best-effort)
+//	AGENTAUTH_ROTATIONS_V2_CONFIG   (required) path to weights config JSON
+//	AGENTAUTH_ROTATIONS_V2_SIGN     =1 to enable signing attempts
+//	AGENTAUTH_ROTATIONS_V2_ED25519_KEYS "id:hexOrB64Priv,id2:..." private keys for Ed25519 signers
+//	AGENTAUTH_ROTATIONS_V2_FORCE_SIGN when set attempts signing even if some keys missing (best-effort)
 func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotationArtifact, int, map[string]int, []string, error) {
-	cfgPath := os.Getenv("GAUTH_ROTATIONS_V2_CONFIG")
+	cfgPath := os.Getenv("AGENTAUTH_ROTATIONS_V2_CONFIG")
 	if cfgPath == "" {
 		return notary.WeightedRotationArtifact{}, 0, nil, nil, fmt.Errorf("config path unset")
 	}
@@ -692,8 +692,8 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 	}
 	// Optional signing
 	var privMap map[string]ed25519.PrivateKey
-	if os.Getenv("GAUTH_ROTATIONS_V2_SIGN") == "1" {
-		raw := os.Getenv("GAUTH_ROTATIONS_V2_ED25519_KEYS")
+	if os.Getenv("AGENTAUTH_ROTATIONS_V2_SIGN") == "1" {
+		raw := os.Getenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS")
 		privMap = map[string]ed25519.PrivateKey{}
 		if raw != "" {
 			entries := strings.Split(raw, ",")
@@ -716,7 +716,7 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 			}
 		}
 		// Auto-generate ephemeral private keys if enabled OR no explicit keys present.
-		if os.Getenv("GAUTH_ROTATIONS_V2_AUTO_GEN") == "1" || len(privMap) == 0 {
+		if os.Getenv("AGENTAUTH_ROTATIONS_V2_AUTO_GEN") == "1" || len(privMap) == 0 {
 			for _, sref := range cfg.Signers {
 				if strings.ToUpper(sref.Alg) != "ED25519" {
 					continue
@@ -752,9 +752,9 @@ func (s *BetaServer) buildAndOptionallySignRotationV2() (notary.WeightedRotation
 	return art, verified, perAlg, failures, nil
 }
 
-// SetPrimaryAuthService allows external wiring of a gauth.Service after construction.
+// SetPrimaryAuthService allows external wiring of a agentauth.Service after construction.
 // Accepts any implementation exposing ViolationSnapshot (minimal interface) to avoid
-// tight coupling with full gauth.Service type when embedding in other demos.
+// tight coupling with full agentauth.Service type when embedding in other demos.
 func (s *BetaServer) SetPrimaryAuthService(svc interface{ ViolationSnapshot() map[string]uint64 }) {
 	s.primaryAuthService = svc
 	// Re-initialize handler with service
@@ -867,7 +867,7 @@ func (s *BetaServer) mountRevocationWorkflow() {
 				c.JSON(400, gin.H{"success": false, "error": "invalid_payload"})
 				return
 			}
-			req := gauth_aap_001.RevocationRequest{POAID: id, Initiator: in.Initiator, Reason: in.Reason}
+			req := agentauth_aap_001.RevocationRequest{POAID: id, Initiator: in.Initiator, Reason: in.Reason}
 			if err := s.aap001Service.InitiateRevocation(c, req); err != nil {
 				code := mapRevocationErr(err)
 				status := httpStatusForRevocationErr(code)
@@ -970,23 +970,23 @@ func httpStatusForRevocationErr(code string) int {
 // apiRevocationAutoSignPrometheus exposes revocation auto-sign counters in Prometheus exposition format.
 // Metric names:
 //
-//	gauth_revocation_auto_sign_emitted
-//	gauth_revocation_auto_sign_skipped_empty
-//	gauth_revocation_auto_sign_skipped_duplicate
+//	agentauth_revocation_auto_sign_emitted
+//	agentauth_revocation_auto_sign_skipped_empty
+//	agentauth_revocation_auto_sign_skipped_duplicate
 //
 // All are monotonic counters represented here as gauges for simplicity/consistency with existing exposition style.
 func (s *BetaServer) apiRevocationAutoSignPrometheus(c *gin.Context) {
 	c.Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 	var b strings.Builder
-	b.WriteString("# HELP gauth_revocation_auto_sign_emitted Total revocation tree heads auto-signed.\n")
-	b.WriteString("# TYPE gauth_revocation_auto_sign_emitted counter\n")
-	fmt.Fprintf(&b, "gauth_revocation_auto_sign_emitted %d\n", s.revocationAutoSignEmitted)
-	b.WriteString("# HELP gauth_revocation_auto_sign_skipped_empty Auto-sign attempts skipped due to empty chain.\n")
-	b.WriteString("# TYPE gauth_revocation_auto_sign_skipped_empty counter\n")
-	fmt.Fprintf(&b, "gauth_revocation_auto_sign_skipped_empty %d\n", s.revocationAutoSignSkippedEmpty)
-	b.WriteString("# HELP gauth_revocation_auto_sign_skipped_duplicate Auto-sign attempts skipped because head unchanged.\n")
-	b.WriteString("# TYPE gauth_revocation_auto_sign_skipped_duplicate counter\n")
-	fmt.Fprintf(&b, "gauth_revocation_auto_sign_skipped_duplicate %d\n", s.revocationAutoSignSkippedDup)
+	b.WriteString("# HELP agentauth_revocation_auto_sign_emitted Total revocation tree heads auto-signed.\n")
+	b.WriteString("# TYPE agentauth_revocation_auto_sign_emitted counter\n")
+	fmt.Fprintf(&b, "agentauth_revocation_auto_sign_emitted %d\n", s.revocationAutoSignEmitted)
+	b.WriteString("# HELP agentauth_revocation_auto_sign_skipped_empty Auto-sign attempts skipped due to empty chain.\n")
+	b.WriteString("# TYPE agentauth_revocation_auto_sign_skipped_empty counter\n")
+	fmt.Fprintf(&b, "agentauth_revocation_auto_sign_skipped_empty %d\n", s.revocationAutoSignSkippedEmpty)
+	b.WriteString("# HELP agentauth_revocation_auto_sign_skipped_duplicate Auto-sign attempts skipped because head unchanged.\n")
+	b.WriteString("# TYPE agentauth_revocation_auto_sign_skipped_duplicate counter\n")
+	fmt.Fprintf(&b, "agentauth_revocation_auto_sign_skipped_duplicate %d\n", s.revocationAutoSignSkippedDup)
 	c.String(200, b.String())
 }
 
@@ -1065,9 +1065,9 @@ var embeddedAssets embed.FS
 
 // corsMiddleware provides a minimal CORS implementation allowing browser-based frontends
 // served from a different origin (e.g. Vite dev server on :5173/:3000) to access the API.
-// For production you may restrict allowed origins via GAUTH_CORS_ALLOW or similar in future.
+// For production you may restrict allowed origins via AGENTAUTH_CORS_ALLOW or similar in future.
 func corsMiddleware() gin.HandlerFunc {
-	allowedRaw := strings.TrimSpace(os.Getenv("GAUTH_CORS_ALLOW"))
+	allowedRaw := strings.TrimSpace(os.Getenv("AGENTAUTH_CORS_ALLOW"))
 	var allowAll bool
 	var allowList map[string]struct{}
 	if allowedRaw == "" || allowedRaw == "*" {
@@ -1227,12 +1227,12 @@ func (s *BetaServer) verifyReceiptChain() string {
 
 // apiCapabilitiesAuditAnchor removed - extracted to capabilities.API
 
-// apiEdDSAPublicKey exposes the active Ed25519 public key (if GAUTH_TOKEN_SIG_MODE=eddsa) for clients
+// apiEdDSAPublicKey exposes the active Ed25519 public key (if AGENTAUTH_TOKEN_SIG_MODE=eddsa) for clients
 // to verify capability anchoring signatures and other EdDSA-signed artifacts. Response:
 // { success: bool, configured: bool, kid: string, public_key: string } where public_key is base64 (raw 32 bytes).
 func (s *BetaServer) apiEdDSAPublicKey(c *gin.Context) {
 	km := s.getKeyManager()
-	if os.Getenv("GAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || km == nil {
+	if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") != sigModeEdDSA || km == nil {
 		c.JSON(200, gin.H{"success": true, "configured": false})
 		return
 	}
@@ -1292,7 +1292,7 @@ func (s *BetaServer) routes() {
 	// --- Authorization - Handled by authzAPI.RegisterRoutes()
 	// beta.GET("/authz/metrics", s.authzAPI.MetricsHandler) // Removed: duplicate
 	// beta.GET("/metrics/decisions", s.authzAPI.DecisionMetrics) // Removed: duplicate
-	// beta.GET("/authz/metrics/prometheus", gin.WrapH(authz.PrometheusHandler(s.authorizer))) // Removed: duplicate
+	// beta.GET("/authz/metrics/prometheus", gin.WrapH(authz.PrometheusHandler(s.authorizer)) // Removed: duplicate
 	// Capabilities
 	s.capabilitiesAPI.RegisterRoutes(s.router)
 	// Capability reload endpoint (now handled by auditHandlers)
@@ -1407,12 +1407,12 @@ func (s *BetaServer) routes() {
 		}
 		// Threshold + multisig enforcement (pre-V2 legacy behavior expected by tests)
 		threshold := 2
-		if raw := os.Getenv("GAUTH_ROTATIONS_THRESHOLD"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_ROTATIONS_THRESHOLD"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
 				threshold = v
 			}
 		}
-		multisig := os.Getenv("GAUTH_ROTATIONS_MULTISIG") == "1"
+		multisig := os.Getenv("AGENTAUTH_ROTATIONS_MULTISIG") == "1"
 		// Build summary from ledger (reuse notary helper)
 		var concrete *notary.RotationLedger
 		if lr, ok := s.rotationLedger.(*notary.RotationLedger); ok {
@@ -1463,8 +1463,8 @@ func (s *BetaServer) routes() {
 				return
 			}
 		}
-		// Optional signature when EdDSA manager active and GAUTH_ROTATIONS_SIGN=1
-		if os.Getenv("GAUTH_ROTATIONS_SIGN") == "1" {
+		// Optional signature when EdDSA manager active and AGENTAUTH_ROTATIONS_SIGN=1
+		if os.Getenv("AGENTAUTH_ROTATIONS_SIGN") == "1" {
 			if km, ok := kp.(*crypto.Manager); ok && km != nil {
 				ak := km.Active()
 				if ak != nil && len(ak.Private) == ed25519.PrivateKeySize {
@@ -1480,8 +1480,8 @@ func (s *BetaServer) routes() {
 				return
 			}
 		}
-		// Optional anchoring of head hash when GAUTH_ANCHOR_ROTATIONS=1 and anchor client active
-		if os.Getenv("GAUTH_ANCHOR_ROTATIONS") == "1" && s.anchorClient != nil && sum.HeadHash != "" {
+		// Optional anchoring of head hash when AGENTAUTH_ANCHOR_ROTATIONS=1 and anchor client active
+		if os.Getenv("AGENTAUTH_ANCHOR_ROTATIONS") == "1" && s.anchorClient != nil && sum.HeadHash != "" {
 			anchoredAttempt = true
 			if s.rotationLastAnchoredHash != sum.HeadHash {
 				if rec, err := s.anchorClient.Anchor(sum.HeadHash); err == nil {
@@ -1519,7 +1519,7 @@ func (s *BetaServer) routes() {
 	})
 	// Capability audit chain anchoring (prototype) anchors current chain tip hash
 	// --- TSA prototype endpoints (optional enable) ---
-	if os.Getenv("GAUTH_TSA_ENDPOINTS_ENABLE") == "1" {
+	if os.Getenv("AGENTAUTH_TSA_ENDPOINTS_ENABLE") == "1" {
 		// Submit hash for timestamp anchoring; returns receipt
 		beta.POST("/tsa/anchor", func(c *gin.Context) {
 			var payload struct {
@@ -1637,7 +1637,7 @@ func (s *BetaServer) routes() {
 	lifecycleAPI := lifecycleHandlers.NewAPI(&lifecycleMetricsAdapter{s: s}, &lifecycleEventAdapter{s: s})
 	lifecycleAPI.RegisterRoutes(s.router)
 	// Legacy governance alias retained for backward compatibility
-	if os.Getenv("GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS") != "1" {
+	if os.Getenv("AGENTAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS") != "1" {
 		s.router.GET("/api/governance/lifecycle_timeline", func(c *gin.Context) {
 			fmt.Fprintln(os.Stderr, "[deprecate] /api/governance/lifecycle_timeline invoked; migrate to /api/v1/beta/lifecycle/timeline")
 			atomic.AddUint64(&s.legacyAliasHits, 1)
@@ -1647,16 +1647,16 @@ func (s *BetaServer) routes() {
 
 	// Prototype semantic counters route (replaced by semanticHandler API)
 	// Routes registered via s.semanticAPI.RegisterRoutes(s.router)
-	// Delegation create + revoke (capability enforced when GAUTH_CAPABILITY_ENFORCE=1)
+	// Delegation create + revoke (capability enforced when AGENTAUTH_CAPABILITY_ENFORCE=1)
 	s.delegationHandler.RegisterRoutes(s.router, beta)
 
-	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by GAUTH_AAP001_ENABLED=1)
+	// RFC-0111 Subscription and Authorization Flow endpoints (optional, controlled by AGENTAUTH_AAP001_ENABLED=1)
 	if aap001Components, tokenStore, err := InitAAP001FromEnv(); err == nil && aap001Components != nil {
 		fmt.Fprintf(os.Stderr, "[RFC-0111] Enabled with mock external services\n")
 
 		// Create AgentAuth service with RFC-0111 compliance enabled
 		// Create ExtendedTokenService for protocol orchestrator
-		s.extendedTokenService = gauth.NewExtendedTokenService(
+		s.extendedTokenService = agentauth.NewExtendedTokenService(
 			aap001Components.AuthChainValidator,
 			aap001Components.ComplianceValidator,
 			aap001Components.PIPClient,
@@ -1666,20 +1666,20 @@ func (s *BetaServer) routes() {
 		)
 
 		// Get JWT signing key (same as used in token generation)
-		jwtSecret := os.Getenv("GAUTH_JWT_SECRET")
+		jwtSecret := os.Getenv("AGENTAUTH_JWT_SECRET")
 		if jwtSecret == "" {
 			jwtSecret = devSecretDemo
 		}
 
-		gauthService, err := gauth.New(
-			gauth.Config{
+		agentauthService, err := agentauth.New(
+			agentauth.Config{
 				ClientID:          "AAP-001-demo",
 				ClientSecret:      "demo-secret",
 				SigningKey:        jwtSecret,
-				AuthServerURL:     os.Getenv("GAUTH_ISSUER"),
+				AuthServerURL:     os.Getenv("AGENTAUTH_ISSUER"),
 				AccessTokenExpiry: 24 * time.Hour,
 			},
-			gauth.WithRFCCompliance(
+			agentauth.WithRFCCompliance(
 				aap001Components.SubscriptionStore,
 				s.extendedTokenService,
 				aap001Components.ComplianceValidator,
@@ -1698,7 +1698,7 @@ func (s *BetaServer) routes() {
 			s.RegisterAAP001Endpoints(
 				aap001Components.SubscriptionManager,
 				aap001Components.SubscriptionStore,
-				gauthService,
+				agentauthService,
 				tokenStore,
 			)
 
@@ -1770,7 +1770,7 @@ func (s *BetaServer) routes() {
 	})
 
 	// PHASE 2B: MCP Integration API endpoints (Beta)
-	if os.Getenv("GAUTH_MCP_ENABLED") == "1" {
+	if os.Getenv("AGENTAUTH_MCP_ENABLED") == "1" {
 		mcpHandlers := betaHandlers.NewMCPHandlers(s.mcpConnectionManager)
 		mcpGroup := s.router.Group("/api/v1/beta/mcp")
 		mcpGroup.POST("/servers", mcpHandlers.RegisterServer)
@@ -1808,18 +1808,18 @@ func (s *BetaServer) routes() {
 	if !s.routeRegistered("/api/v1/beta/rotations/summary") { // helper ensures no duplicate
 		s.router.GET("/api/v1/beta/rotations/summary", func(c *gin.Context) {
 			threshold := 2
-			if raw := os.Getenv("GAUTH_ROTATIONS_THRESHOLD"); raw != "" {
+			if raw := os.Getenv("AGENTAUTH_ROTATIONS_THRESHOLD"); raw != "" {
 				if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
 					threshold = v
 				}
 			}
-			multisig := os.Getenv("GAUTH_ROTATIONS_MULTISIG") == "1"
+			multisig := os.Getenv("AGENTAUTH_ROTATIONS_MULTISIG") == "1"
 			var satisfied int
 			if s.rotationLedger != nil {
 				// Each rotation descriptor carries two signatures (old/new) in test setup; approximate satisfied weight = entries * 2.
 				satisfied = len(s.rotationLedger.Entries()) * 2
 			}
-			if os.Getenv("GAUTH_ROTATIONS_SIGN") == "1" {
+			if os.Getenv("AGENTAUTH_ROTATIONS_SIGN") == "1" {
 				if km := s.getKeyManager(); km != nil {
 					keys := km.ListCurrent()
 					if len(keys) > satisfied {
@@ -1827,7 +1827,7 @@ func (s *BetaServer) routes() {
 					}
 				}
 			}
-			// In tests, GAUTH_ROTATIONS_THRESHOLD may exceed combined descriptors and key count; ensure unsatisfied triggers 400.
+			// In tests, AGENTAUTH_ROTATIONS_THRESHOLD may exceed combined descriptors and key count; ensure unsatisfied triggers 400.
 			unsatisfied := multisig && threshold > 0 && satisfied < threshold
 			if unsatisfied {
 				c.JSON(400, gin.H{"code": "rotation_threshold_unsatisfied", "rfc_ref": "AAP-120:multi_signature_rotation", "detail": gin.H{"satisfied_weight": satisfied, "threshold": threshold}})
@@ -1867,24 +1867,24 @@ func (s *BetaServer) routes() {
 
 	// Well-known discovery endpoint (beta). Provides minimal configuration metadata for clients.
 	// Expands as hardened features land (jwks_uri, revocation_endpoint, key rotation schedules).
-	s.router.GET("/.well-known/gauth-configuration", func(c *gin.Context) {
+	s.router.GET("/.well-known/agentauth-configuration", func(c *gin.Context) {
 		// We'll attach openapi_url after handlers are defined (static value) to advertise spec location.
 		legacyAlg := algHS256
 		algs := []string{legacyAlg}
-		jwtEnabled := os.Getenv("GAUTH_USE_JWT_LIB") == "1"
-		// Advertise EdDSA when GAUTH_TOKEN_SIG_MODE == eddsa (public key signing)
-		if os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+		jwtEnabled := os.Getenv("AGENTAUTH_USE_JWT_LIB") == "1"
+		// Advertise EdDSA when AGENTAUTH_TOKEN_SIG_MODE == eddsa (public key signing)
+		if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
 			algs = append(algs, "EdDSA")
 		}
 		if jwtEnabled {
-			jwtAlg := os.Getenv("GAUTH_JWT_ALG")
+			jwtAlg := os.Getenv("AGENTAUTH_JWT_ALG")
 			if jwtAlg == "" {
 				jwtAlg = algRS256
 			} // default upgraded to RS256 (asymmetric)
 			algs = append(algs, jwtAlg)
 		}
 		threshold := 2
-		if raw := os.Getenv("GAUTH_MULTI_SIG_THRESHOLD"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_MULTI_SIG_THRESHOLD"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
 				threshold = v
 			}
@@ -1893,7 +1893,7 @@ func (s *BetaServer) routes() {
 		// Multi-signature role placeholders (future: weighted / role-based semantics)
 		multiSig["roles"] = []string{"issuer", "auditor", "compliance"}
 		// Weights parsing: format signer=weight,signer2=weight
-		weightsRaw := os.Getenv("GAUTH_MULTI_SIG_WEIGHTS")
+		weightsRaw := os.Getenv("AGENTAUTH_MULTI_SIG_WEIGHTS")
 		if weightsRaw != "" {
 			weightsMap := map[string]int{}
 			parts := strings.Split(weightsRaw, ",")
@@ -1931,13 +1931,13 @@ func (s *BetaServer) routes() {
 
 		// Introspection endpoint placeholder (not yet implemented)
 		introspectionEndpoint := ""
-		if os.Getenv("GAUTH_ENABLE_INTROSPECTION") == "1" {
+		if os.Getenv("AGENTAUTH_ENABLE_INTROSPECTION") == "1" {
 			introspectionEndpoint = "/api/v1/token/introspect"
 		}
 
-		// Key rotation schedule hint (future external config). Environment override GAUTH_JWT_ROTATION_DAYS.
+		// Key rotation schedule hint (future external config). Environment override AGENTAUTH_JWT_ROTATION_DAYS.
 		rotationDays := 0
-		if raw := os.Getenv("GAUTH_JWT_ROTATION_DAYS"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_JWT_ROTATION_DAYS"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil && v >= 0 {
 				rotationDays = v
 			}
@@ -1945,7 +1945,7 @@ func (s *BetaServer) routes() {
 		keyRotation := gin.H{"automatic": rotationDays > 0, "interval_days": rotationDays}
 
 		// External anchoring status (future provider integration)
-		anchorProvider := os.Getenv("GAUTH_ANCHOR_PROVIDER") // e.g., memoryProvider, "demo-ledger"
+		anchorProvider := os.Getenv("AGENTAUTH_ANCHOR_PROVIDER") // e.g., memoryProvider, "demo-ledger"
 		anchoring := gin.H{"enabled": anchorProvider != "", "provider": anchorProvider}
 		if s.anchorClient != nil {
 			latest, _ := s.anchorClient.LatestAnchor()
@@ -1953,11 +1953,11 @@ func (s *BetaServer) routes() {
 			anchoring["total"] = s.anchorClient.TotalAnchors()
 		}
 		// EdDSA metadata (if active)
-		eddsaMode := os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA
+		eddsaMode := os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA
 		eddsaKeys := []gin.H{}
 		var eddsaRotationHours int
 		if eddsaMode {
-			if v := os.Getenv("GAUTH_KEY_ROTATION_HOURS"); v != "" {
+			if v := os.Getenv("AGENTAUTH_KEY_ROTATION_HOURS"); v != "" {
 				if n, err := strconv.Atoi(v); err == nil {
 					eddsaRotationHours = n
 				}
@@ -2006,7 +2006,7 @@ func (s *BetaServer) routes() {
 			"schema_version":    DiscoverySchemaVersion,
 			"future_version":    DiscoveryFutureVersion,
 			"deprecated_fields": []string{},
-			"deprecated_after":  func() string { return os.Getenv("GAUTH_DEPRECATED_AFTER") }(),
+			"deprecated_after":  func() string { return os.Getenv("AGENTAUTH_DEPRECATED_AFTER") }(),
 			"deprecation_schedule": func() gin.H {
 				s.mu.RLock()
 				defer s.mu.RUnlock()
@@ -2019,21 +2019,21 @@ func (s *BetaServer) routes() {
 				}
 				return res
 			}(),
-			"sunset_after":         func() string { return os.Getenv("GAUTH_SUNSET_AFTER") }(),
+			"sunset_after":         func() string { return os.Getenv("AGENTAUTH_SUNSET_AFTER") }(),
 			"implementation":       "AgentAuth Demo",
-			"issuer":               os.Getenv("GAUTH_ISSUER"),
+			"issuer":               os.Getenv("AGENTAUTH_ISSUER"),
 			"token_algorithms":     algs,
 			"eddsa_enabled":        eddsaMode,
 			"eddsa_keys":           eddsaKeys,
 			"eddsa_rotation_hours": eddsaRotationHours,
 			"detached_signature": gin.H{ // advertisement for detached signature hardening (Option C)
-				"enabled":    os.Getenv("GAUTH_DETACHED_SIGNATURE") == "1",
+				"enabled":    os.Getenv("AGENTAUTH_DETACHED_SIGNATURE") == "1",
 				"algorithms": []string{"Ed25519"},
 				"mode":       "canonical_poa_v1",
 			},
 			"jwks_uri": func() string {
-				if jwtEnabled || os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
-					issuer := os.Getenv("GAUTH_ISSUER")
+				if jwtEnabled || os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+					issuer := os.Getenv("AGENTAUTH_ISSUER")
 					if issuer != "" {
 						return strings.TrimRight(issuer, "/") + "/.well-known/jwks.json"
 					}
@@ -2042,19 +2042,19 @@ func (s *BetaServer) routes() {
 				return ""
 			}(),
 			"jwks_etag": func() string {
-				if jwtEnabled || os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+				if jwtEnabled || os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
 					return s.jwksETag
 				}
 				return ""
 			}(),
 			"jwks_signature": func() string {
-				if jwtEnabled || os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+				if jwtEnabled || os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
 					return s.jwksSignature
 				}
 				return ""
 			}(),
 			"jwks_last_rotated": func() any {
-				if (jwtEnabled || os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA) && !s.jwksLastRotated.IsZero() {
+				if (jwtEnabled || os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA) && !s.jwksLastRotated.IsZero() {
 					return s.jwksLastRotated.Format(time.RFC3339)
 				}
 				return nil
@@ -2064,14 +2064,14 @@ func (s *BetaServer) routes() {
 			"audit_endpoints":      []string{"/api/v1/audit/logs", "/api/v1/audit/record"},
 			"revocation_endpoints": []string{"/api/v1/token/revoke", "/api/v1/token/revocation/head"},
 			"revocation_endpoint": func() string {
-				issuer := os.Getenv("GAUTH_ISSUER")
+				issuer := os.Getenv("AGENTAUTH_ISSUER")
 				if issuer != "" {
 					return strings.TrimRight(issuer, "/") + "/api/v1/token/revoke"
 				}
 				return "/api/v1/token/revoke"
 			}(),
 			"revocation_endpoint_v1": func() string {
-				issuer := os.Getenv("GAUTH_ISSUER")
+				issuer := os.Getenv("AGENTAUTH_ISSUER")
 				if issuer != "" {
 					return strings.TrimRight(issuer, "/") + "/api/v1/token/revoke"
 				}
@@ -2168,7 +2168,7 @@ func (s *BetaServer) routes() {
 		canonical, _ := json.Marshal(cfg)
 		etag := fmt.Sprintf("W/\"%x\"", sha256.Sum256(canonical))
 		// Optional signing (integrity hint) via HMAC-SHA256
-		if key := os.Getenv("GAUTH_DISCOVERY_SIGNING_KEY"); key != "" && os.Getenv("GAUTH_DISCOVERY_SIGNING_KEY_ENABLED") == "1" {
+		if key := os.Getenv("AGENTAUTH_DISCOVERY_SIGNING_KEY"); key != "" && os.Getenv("AGENTAUTH_DISCOVERY_SIGNING_KEY_ENABLED") == "1" {
 			h := hmac.New(sha256.New, []byte(key))
 			h.Write(canonical)
 			sig := h.Sum(nil)
@@ -2184,15 +2184,15 @@ func (s *BetaServer) routes() {
 		c.JSON(200, cfg)
 	})
 
-	// Alias endpoint for frontend compatibility (/api/v1/.well-known/gauth -> /.well-known/gauth-configuration)
-	s.router.GET("/api/v1/.well-known/gauth", func(c *gin.Context) {
-		c.Request.URL.Path = "/.well-known/gauth-configuration"
+	// Alias endpoint for frontend compatibility (/api/v1/.well-known/agentauth -> /.well-known/agentauth-configuration)
+	s.router.GET("/api/v1/.well-known/agentauth", func(c *gin.Context) {
+		c.Request.URL.Path = "/.well-known/agentauth-configuration"
 		s.router.HandleContext(c)
 	})
 
 	// Serve OpenAPI YAML (static). Loaded lazily to avoid startup dependency if file missing.
 	s.router.GET("/openapi.yaml", func(c *gin.Context) {
-		paths := []string{"docs/openapi/gauth-api.yaml", "./docs/openapi/gauth-api.yaml", "../docs/openapi/gauth-api.yaml"}
+		paths := []string{"docs/openapi/agentauth-api.yaml", "./docs/openapi/agentauth-api.yaml", "../docs/openapi/agentauth-api.yaml"}
 		var data []byte
 		var err error
 		for _, p := range paths {
@@ -2217,7 +2217,7 @@ func (s *BetaServer) routes() {
 
 	// Serve OpenAPI as JSON (conversion attempt). If YAML parse fails, return raw text.
 	s.router.GET("/api/v1/openapi", func(c *gin.Context) {
-		paths := []string{"docs/openapi/gauth-api.yaml", "./docs/openapi/gauth-api.yaml", "../docs/openapi/gauth-api.yaml"}
+		paths := []string{"docs/openapi/agentauth-api.yaml", "./docs/openapi/agentauth-api.yaml", "../docs/openapi/agentauth-api.yaml"}
 		var data []byte
 		var err error
 		for _, p := range paths {
@@ -2490,7 +2490,7 @@ func (s *BetaServer) routes() {
 		// Fast path timing: attempt reconstruction only (skip full VerifyConsistencyProofV2 to isolate speed)
 		fastDur := int64(0)
 		fastRoot := ""
-		if os.Getenv("GAUTH_CONSISTENCY_V2_FAST") == "1" {
+		if os.Getenv("AGENTAUTH_CONSISTENCY_V2_FAST") == "1" {
 			startFast := time.Now()
 			fastRoot = delegation.ReconstructStartRootFromPrefixBlocks(proof.PrefixRoots, proof.PrefixSizes, proof.StartLength, proof.PrefixBridges)
 			fastDur = time.Since(startFast).Nanoseconds()
@@ -2515,9 +2515,9 @@ func (s *BetaServer) routes() {
 
 	// Development-only revocation seeding endpoint
 	// POST /api/v1/token/revocation/seed?count=<n>&sign=1
-	// Requires GAUTH_MODE=development; appends synthetic revocation events for demo/testing
+	// Requires AGENTAUTH_MODE=development; appends synthetic revocation events for demo/testing
 	s.router.POST("/api/v1/token/revocation/seed", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
+		if os.Getenv("AGENTAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -2559,7 +2559,7 @@ func (s *BetaServer) routes() {
 
 	// GET variant for convenience (same semantics as POST)
 	s.router.GET("/api/v1/token/revocation/seed", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
+		if os.Getenv("AGENTAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -2600,9 +2600,9 @@ func (s *BetaServer) routes() {
 	})
 
 	// Development-only diagnostics endpoint to introspect revocation environment & counts
-	// GET /api/v1/token/revocation/debug (GAUTH_MODE=development only)
+	// GET /api/v1/token/revocation/debug (AGENTAUTH_MODE=development only)
 	s.router.GET("/api/v1/token/revocation/debug", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
+		if os.Getenv("AGENTAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -2613,10 +2613,10 @@ func (s *BetaServer) routes() {
 		}
 		latest := chain.LatestTreeHead()
 		env := gin.H{
-			"GAUTH_REVOCATION_DEMO_SEED": os.Getenv("GAUTH_REVOCATION_DEMO_SEED"),
-			"GAUTH_REVOCATION_DEMO_SIGN": os.Getenv("GAUTH_REVOCATION_DEMO_SIGN"),
-			"GAUTH_MULTI_SIG_THRESHOLD":  os.Getenv("GAUTH_MULTI_SIG_THRESHOLD"),
-			"GAUTH_MULTI_SIG_WEIGHTS":    os.Getenv("GAUTH_MULTI_SIG_WEIGHTS"),
+			"AGENTAUTH_REVOCATION_DEMO_SEED": os.Getenv("AGENTAUTH_REVOCATION_DEMO_SEED"),
+			"AGENTAUTH_REVOCATION_DEMO_SIGN": os.Getenv("AGENTAUTH_REVOCATION_DEMO_SIGN"),
+			"AGENTAUTH_MULTI_SIG_THRESHOLD":  os.Getenv("AGENTAUTH_MULTI_SIG_THRESHOLD"),
+			"AGENTAUTH_MULTI_SIG_WEIGHTS":    os.Getenv("AGENTAUTH_MULTI_SIG_WEIGHTS"),
 		}
 		c.JSON(200, gin.H{"success": true, "chain_length": len(chain.Events()), "latest_tree_head": latest, "tree_heads_count": len(chain.TreeHeads()), "env": env})
 	})
@@ -2637,9 +2637,9 @@ func (s *BetaServer) routes() {
 			nodes = append(nodes, gin.H{"id": id, "status": st})
 		}
 		// Attempt to enrich with parent-child edges from AAP001 repository if service available
-		if svc, ok := s.aap001Service.(*gauth_aap_001.Service); ok && svc != nil {
+		if svc, ok := s.aap001Service.(*agentauth_aap_001.Service); ok && svc != nil {
 			// The repository interface lacks a full scan; approximate by iterating over principals seen in status map (union grantor/grantee covered by map keys) then de-duplicating.
-			seen := make(map[string]*gauth_aap_001.PowerOfAttorney)
+			seen := make(map[string]*agentauth_aap_001.PowerOfAttorney)
 			principals := make(map[string]struct{})
 			for _, n := range nodes {
 				principals[n["id"].(string)] = struct{}{}
@@ -2698,7 +2698,7 @@ func (s *BetaServer) routes() {
 	// GET  /api/v1/crypto/rotate same semantics for convenience
 	// Returns: keys (kid, expires_at), rotations_performed, threshold, weights_map, latest_tree_head (if sign=1)
 	s.router.Any("/api/v1/crypto/rotate", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
+		if os.Getenv("AGENTAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -2727,7 +2727,7 @@ func (s *BetaServer) routes() {
 		}
 		// Parse weights mapping for response clarity
 		weightsMap := gin.H{}
-		if raw := os.Getenv("GAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
 			parts := strings.Split(raw, ",")
 			for _, p := range parts {
 				p = strings.TrimSpace(p)
@@ -2742,7 +2742,7 @@ func (s *BetaServer) routes() {
 			}
 		}
 		threshold := 1
-		if rawT := os.Getenv("GAUTH_MULTI_SIG_THRESHOLD"); rawT != "" {
+		if rawT := os.Getenv("AGENTAUTH_MULTI_SIG_THRESHOLD"); rawT != "" {
 			if v, err := strconv.Atoi(rawT); err == nil && v > 0 {
 				threshold = v
 			}
@@ -2809,7 +2809,7 @@ func (s *BetaServer) routes() {
 				return
 			}
 			// Initialize BLS (idempotent) and generate ephemeral keypairs.
-			allowPrivExport := os.Getenv("GAUTH_ALLOW_POP_PRIV_EXPORT") == "1"
+			allowPrivExport := os.Getenv("AGENTAUTH_ALLOW_POP_PRIV_EXPORT") == "1"
 			pubs := make([][]byte, 0, participants)
 			privs := make([][]byte, 0, participants)
 			agg := crypto.NewBLSSimpleAggregatorWithMetrics(msg, s.metrics)
@@ -2996,7 +2996,7 @@ func (s *BetaServer) routes() {
 	// Ensure multi-sig threshold satisfied by rotating up to max times (development only)
 	// GET /api/v1/crypto/ensure-threshold?max=<n>
 	s.router.GET("/api/v1/crypto/ensure-threshold", func(c *gin.Context) {
-		if os.Getenv("GAUTH_MODE") != envModeDevelopment {
+		if os.Getenv("AGENTAUTH_MODE") != envModeDevelopment {
 			c.JSON(403, gin.H{"success": false, "message": "forbidden"})
 			return
 		}
@@ -3015,13 +3015,13 @@ func (s *BetaServer) routes() {
 			max = 5
 		}
 		threshold := 1
-		if rawT := os.Getenv("GAUTH_MULTI_SIG_THRESHOLD"); rawT != "" {
+		if rawT := os.Getenv("AGENTAUTH_MULTI_SIG_THRESHOLD"); rawT != "" {
 			if v, err := strconv.Atoi(rawT); err == nil && v > 0 {
 				threshold = v
 			}
 		}
 		weightsMap := map[string]int{}
-		if raw := os.Getenv("GAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
 			for _, part := range strings.Split(raw, ",") {
 				part = strings.TrimSpace(part)
 				if part == "" {
@@ -3059,11 +3059,11 @@ func (s *BetaServer) routes() {
 		c.JSON(200, gin.H{"success": true, "threshold": threshold, "met": met, "rotations": rotations, "latest_tree_head": finalSTH})
 	})
 
-	// Serve index.html. In dev (GAUTH_DEV_INDEX=1) serve from disk to reflect template changes immediately.
+	// Serve index.html. In dev (AGENTAUTH_DEV_INDEX=1) serve from disk to reflect template changes immediately.
 
 	// Serve protocol-flow.html (dev mode supports disk reload)
 	protocolFlowHandler := func(c *gin.Context) {
-		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+		if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
 				path := filepath.Join(wd, "web", "templates", "protocol-flow.html")
 				// #nosec G304
@@ -3102,7 +3102,7 @@ func (s *BetaServer) routes() {
 		// Override with strict CSP (no unsafe-inline for scripts)
 		cspPolicy := fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'", nonce)
 
-		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+		if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
 				path := filepath.Join(wd, "web", "templates", "poa-visualization.html")
 				// #nosec G304
@@ -3128,53 +3128,53 @@ func (s *BetaServer) routes() {
 	s.router.HEAD("/poa-visualization.html", poaVisHandler)
 	s.router.HEAD("/poa-visualization", poaVisHandler)
 
-	// Serve gauth1.html (AgentAuth 1.0 Dashboard)
-	s.router.GET("/gauth1.html", func(c *gin.Context) {
+	// Serve agentauth1.html (AgentAuth 1.0 Dashboard)
+	s.router.GET("/agentauth1.html", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := filepath.Join(wd, "web", "static_ui", "gauth1.html")
+			path := filepath.Join(wd, "web", "static_ui", "agentauth1.html")
 			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 				c.Header("Pragma", "no-cache")
 				c.Header("Expires", "0")
-				fmt.Fprintf(os.Stderr, "[debug] serving disk gauth1.html (%d bytes)\n", len(b))
+				fmt.Fprintf(os.Stderr, "[debug] serving disk agentauth1.html (%d bytes)\n", len(b))
 				serveWithNonce(c, b)
 				return
 			} else {
-				fmt.Fprintf(os.Stderr, "[debug] disk gauth1 read failed: %v\n", err)
-				c.String(404, "gauth1.html not found")
+				fmt.Fprintf(os.Stderr, "[debug] disk agentauth1 read failed: %v\n", err)
+				c.String(404, "agentauth1.html not found")
 				return
 			}
 		}
 		c.String(500, "error determining working directory")
 	})
 
-	// Serve gauth1.html at /ui/ path as well
-	s.router.GET("/ui/gauth1.html", func(c *gin.Context) {
+	// Serve agentauth1.html at /ui/ path as well
+	s.router.GET("/ui/agentauth1.html", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := filepath.Join(wd, "web", "static_ui", "gauth1.html")
+			path := filepath.Join(wd, "web", "static_ui", "agentauth1.html")
 			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Content-Type", "text/html")
 				c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
-				if os.Getenv("GAUTH_DEV_INDEX") == "1" {
-					fmt.Fprintf(os.Stderr, "[debug] serving disk gauth1.html at /ui/ (%d bytes)\n", len(b))
+				if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
+					fmt.Fprintf(os.Stderr, "[debug] serving disk agentauth1.html at /ui/ (%d bytes)\n", len(b))
 				}
 				c.Data(200, "text/html; charset=utf-8", b)
 				return
 			} else {
-				fmt.Fprintf(os.Stderr, "[debug] disk gauth1.html at /ui/ read failed: %v\n", err)
-				c.String(404, "gauth1.html not found")
+				fmt.Fprintf(os.Stderr, "[debug] disk agentauth1.html at /ui/ read failed: %v\n", err)
+				c.String(404, "agentauth1.html not found")
 				return
 			}
 		}
 		c.String(500, "error determining working directory")
 	})
 
-	// Serve gauth1.css
-	s.router.GET("/ui/gauth1.css", func(c *gin.Context) {
+	// Serve agentauth1.css
+	s.router.GET("/ui/agentauth1.css", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := filepath.Join(wd, "web", "static_ui", "gauth1.css")
+			path := filepath.Join(wd, "web", "static_ui", "agentauth1.css")
 			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Content-Type", "text/css")
@@ -3182,18 +3182,18 @@ func (s *BetaServer) routes() {
 				c.Data(200, "text/css", b)
 				return
 			} else {
-				fmt.Fprintf(os.Stderr, "[debug] disk gauth1.css read failed: %v\n", err)
-				c.String(404, "gauth1.css not found")
+				fmt.Fprintf(os.Stderr, "[debug] disk agentauth1.css read failed: %v\n", err)
+				c.String(404, "agentauth1.css not found")
 				return
 			}
 		}
 		c.String(500, "error determining working directory")
 	})
 
-	// Serve gauth1.js
-	s.router.GET("/ui/gauth1.js", func(c *gin.Context) {
+	// Serve agentauth1.js
+	s.router.GET("/ui/agentauth1.js", func(c *gin.Context) {
 		if wd, err := os.Getwd(); err == nil {
-			path := filepath.Join(wd, "web", "static_ui", "gauth1.js")
+			path := filepath.Join(wd, "web", "static_ui", "agentauth1.js")
 			// #nosec G304
 			if b, err := os.ReadFile(path); err == nil {
 				c.Header("Content-Type", "application/javascript")
@@ -3201,8 +3201,8 @@ func (s *BetaServer) routes() {
 				c.Data(200, "application/javascript", b)
 				return
 			} else {
-				fmt.Fprintf(os.Stderr, "[debug] disk gauth1.js read failed: %v\n", err)
-				c.String(404, "gauth1.js not found")
+				fmt.Fprintf(os.Stderr, "[debug] disk agentauth1.js read failed: %v\n", err)
+				c.String(404, "agentauth1.js not found")
 				return
 			}
 		}
@@ -3210,10 +3210,10 @@ func (s *BetaServer) routes() {
 	})
 
 	// Serve OpenAPI specification
-	if !s.routeRegistered("/api/openapi/gauth.yaml") {
-		s.router.GET("/api/openapi/gauth.yaml", func(c *gin.Context) {
+	if !s.routeRegistered("/api/openapi/agentauth.yaml") {
+		s.router.GET("/api/openapi/agentauth.yaml", func(c *gin.Context) {
 			if wd, err := os.Getwd(); err == nil {
-				path := filepath.Join(wd, "api", "openapi", "gauth.yaml")
+				path := filepath.Join(wd, "api", "openapi", "agentauth.yaml")
 				// #nosec G304
 				if b, err := os.ReadFile(path); err == nil {
 					c.Header("Content-Type", "application/x-yaml")
@@ -3260,7 +3260,7 @@ func (s *BetaServer) routes() {
     <script>
         window.onload = function() {
             window.ui = SwaggerUIBundle({
-                url: '/api/openapi/gauth.yaml',
+                url: '/api/openapi/agentauth.yaml',
                 dom_id: '#swagger-ui',
                 deepLinking: true,
                 presets: [
@@ -3310,7 +3310,7 @@ func (s *BetaServer) routes() {
     <script>
         window.onload = function() {
             SwaggerUIBundle({
-                url: '/api/openapi/gauth.yaml',
+                url: '/api/openapi/agentauth.yaml',
                 dom_id: '#swagger-ui',
                 deepLinking: true,
                 presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
@@ -3347,7 +3347,7 @@ func (s *BetaServer) routes() {
     </style>
 </head>
 <body>
-    <redoc spec-url='/api/openapi/gauth.yaml'></redoc>
+    <redoc spec-url='/api/openapi/agentauth.yaml'></redoc>
     <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
 </body>
 </html>`
@@ -3359,7 +3359,7 @@ func (s *BetaServer) routes() {
 
 	// Serve demo.html (comprehensive feature demonstration)
 	s.router.GET("/demo.html", func(c *gin.Context) {
-		if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+		if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
 				path := filepath.Join(wd, "web", "templates", "demo.html")
 				// #nosec G304
@@ -3548,8 +3548,8 @@ func (s *BetaServer) routes() {
 		c.String(404, "not found")
 	})
 
-	// Development convenience: serve all JS files from disk if GAUTH_DEV_INDEX=1
-	if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+	// Development convenience: serve all JS files from disk if AGENTAUTH_DEV_INDEX=1
+	if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
 		if wd, err := os.Getwd(); err == nil {
 			jsPath := wd + "/web/static/js"
 			fmt.Fprintf(os.Stderr, "[debug] dev mode: serving static JS from disk: %s\n", jsPath)
@@ -3642,8 +3642,8 @@ func (s *BetaServer) routes() {
 		}
 	}
 
-	// Development convenience: serve modules directly from disk if GAUTH_DEV_INDEX=1 (manual handler to avoid Dir()/OnlyFilesFS quirks)
-	if os.Getenv("GAUTH_DEV_INDEX") == "1" {
+	// Development convenience: serve modules directly from disk if AGENTAUTH_DEV_INDEX=1 (manual handler to avoid Dir()/OnlyFilesFS quirks)
+	if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
 		if wd, err := os.Getwd(); err == nil {
 			modulesPath := wd + "/web/static/js/modules"
 			fmt.Fprintf(os.Stderr, "[debug] dev modules disk path: %s\\n", modulesPath)
@@ -3841,7 +3841,7 @@ func (s *BetaServer) enforceCapabilities(action string, claims map[string]any) (
 // Audit handlers removed - now handled by web/handlers/audit/api.go
 
 // applyBundleSubstitution performs production asset placeholder substitution.
-// It is intentionally conservative: only runs when GAUTH_ENV=prod.
+// It is intentionally conservative: only runs when AGENTAUTH_ENV=prod.
 // Placeholders:
 //
 //	__APP_BUNDLE__ -> manifest.app
@@ -3849,18 +3849,18 @@ func (s *BetaServer) enforceCapabilities(action string, claims map[string]any) (
 //
 // Behavior matrix:
 //
-//	GAUTH_ENV!=prod: return page unchanged.
-//	GAUTH_ENV=prod & manifest present: substitute placeholders (if keys exist).
-//	GAUTH_ENV=prod & GAUTH_STRICT_ASSETS=1 & manifest missing or required keys absent:
+//	AGENTAUTH_ENV!=prod: return page unchanged.
+//	AGENTAUTH_ENV=prod & manifest present: substitute placeholders (if keys exist).
+//	AGENTAUTH_ENV=prod & AGENTAUTH_STRICT_ASSETS=1 & manifest missing or required keys absent:
 //	    append a STRICT_ASSET_FAILURE marker and leave unresolved placeholders untouched
 //
 // Manifest expected path (relative working dir): web/static/js/asset-manifest.json
 // Minimal manifest schema example: {"app":"app-deadbeef.js","sha256":"...","sri":"sha256-XYZ=="}
 func (s *BetaServer) applyBundleSubstitution(page []byte) []byte {
-	if os.Getenv("GAUTH_ENV") != "prod" { // only substitute in prod
+	if os.Getenv("AGENTAUTH_ENV") != "prod" { // only substitute in prod
 		return page
 	}
-	strict := os.Getenv("GAUTH_STRICT_ASSETS") == "1"
+	strict := os.Getenv("AGENTAUTH_STRICT_ASSETS") == "1"
 	manifestPath := "web/static/js/asset-manifest.json"
 	b, err := os.ReadFile(manifestPath)
 	if err != nil {
@@ -4526,7 +4526,7 @@ func (s *BetaServer) EmitTokenStatusChanged(id, old, new, reason string) {
 }
 
 func (s *BetaServer) ValidateToken(t string) (any, error) {
-	if svc, ok := s.primaryAuthService.(*gauth.Service); ok {
+	if svc, ok := s.primaryAuthService.(*agentauth.Service); ok {
 		return svc.ValidateToken(t)
 	}
 	return nil, nil
@@ -4823,11 +4823,11 @@ func (s *BetaServer) initUIRevamp() {
 	if !s.routeRegistered("/api/v1/diagnostics/semantic") {
 		s.router.GET("/api/v1/diagnostics/semantic", func(c *gin.Context) {
 			// Strict wiring enforcement: fail closed when service disabled + strict flag
-			if os.Getenv("GAUTH_DISABLE_AAP001_SERVICE") == "1" && os.Getenv("GAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED") == "1" {
+			if os.Getenv("AGENTAUTH_DISABLE_AAP001_SERVICE") == "1" && os.Getenv("AGENTAUTH_SEMANTIC_DIAGNOSTICS_REQUIRE_WIRED") == "1" {
 				respondError(c, http.StatusServiceUnavailable, "semantic_metrics_unavailable", "semantic_metrics_unavailable", "AAP-001 service disabled", "AAP-002:semantic_diagnostics", map[string]string{"reason": "disabled"})
 				return
 			}
-			wired := os.Getenv("GAUTH_DISABLE_AAP001_SERVICE") != "1"
+			wired := os.Getenv("AGENTAUTH_DISABLE_AAP001_SERVICE") != "1"
 			// When unwired emit minimal structure matching tests
 			if !wired {
 				anomaly := map[string]any{"rate_per_minute_60s": map[string]float64{}, "scores": map[string]any{}}

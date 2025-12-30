@@ -398,14 +398,14 @@ const ConfigurationManager: React.FC = () => {
   const fetchVariables = async () => {
     try {
       const response = await fetch(addTenantParam('/api/admin/config/variables'));
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json') {
         setVariables([]);
         return;
       }
       const data = await response.json();
       setVariables(data.variables || []);
     } catch (error) {
-      if (!(error instanceof SyntaxError)) {
+      if (!(error instanceof SyntaxError) {
         console.error('Failed to fetch variables:', error);
       }
     }
@@ -414,14 +414,14 @@ const ConfigurationManager: React.FC = () => {
   const fetchConfigContent = async () => {
     try {
       const response = await fetch(addTenantParam(`/api/admin/config/${configFormat}`));
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json') {
         setConfigContent('');
         return;
       }
       const data = await response.json();
       setConfigContent(data.content || '');
     } catch (error) {
-      if (!(error instanceof SyntaxError)) {
+      if (!(error instanceof SyntaxError) {
         console.error('Failed to fetch config content:', error);
       }
     }
@@ -430,14 +430,14 @@ const ConfigurationManager: React.FC = () => {
   const fetchServices = async () => {
     try {
       const response = await fetch(addTenantParam('/api/admin/config/services'));
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json') {
         setServices([]);
         return;
       }
       const data = await response.json();
       setServices(data.services || []);
     } catch (error) {
-      if (!(error instanceof SyntaxError)) {
+      if (!(error instanceof SyntaxError) {
         console.error('Failed to fetch services:', error);
       }
     }
@@ -446,14 +446,14 @@ const ConfigurationManager: React.FC = () => {
   const fetchVersions = async () => {
     try {
       const response = await fetch(addTenantParam('/api/admin/config/versions'));
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json') {
         setVersions([]);
         return;
       }
       const data = await response.json();
       setVersions(data.versions || []);
     } catch (error) {
-      if (!(error instanceof SyntaxError)) {
+      if (!(error instanceof SyntaxError) {
         console.error('Failed to fetch versions:', error);
       }
     }
@@ -462,14 +462,14 @@ const ConfigurationManager: React.FC = () => {
   const fetchOverrides = async () => {
     try {
       const response = await fetch(addTenantParam('/api/admin/config/tenant-overrides'));
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json') {
         setOverrides([]);
         return;
       }
       const data = await response.json();
       setOverrides(data.overrides || []);
     } catch (error) {
-      if (!(error instanceof SyntaxError)) {
+      if (!(error instanceof SyntaxError) {
         console.error('Failed to fetch overrides:', error);
       }
     }
@@ -478,14 +478,14 @@ const ConfigurationManager: React.FC = () => {
   const fetchFlags = async () => {
     try {
       const response = await fetch(addTenantParam('/api/admin/config/feature-flags'));
-      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json') {
         setFlags([]);
         return;
       }
       const data = await response.json();
       setFlags(data.flags || []);
     } catch (error) {
-      if (!(error instanceof SyntaxError)) {
+      if (!(error instanceof SyntaxError) {
         console.error('Failed to fetch flags:', error);
       }
     }
@@ -557,7 +557,7 @@ const ConfigurationManager: React.FC = () => {
   };
 
   const handleDeleteVariable = async (key: string) => {
-    if (!confirm(`Are you sure you want to delete variable "${key}"?`)) return;
+    if (!confirm(`Are you sure you want to delete variable "${key}"?`) return;
     try {
       const response = await fetch(addTenantParam(`/api/admin/config/variables/${key}`), {
         method: 'DELETE',
@@ -619,7 +619,7 @@ const ConfigurationManager: React.FC = () => {
   };
 
   const handleRollback = async (versionId: string) => {
-    if (!confirm('Are you sure you want to rollback to this version?')) return;
+    if (!confirm('Are you sure you want to rollback to this version?') return;
     try {
       setLoading(true);
       const response = await fetch(addTenantParam(`/api/admin/config/versions/${versionId}/rollback`), {
@@ -677,7 +677,7 @@ const ConfigurationManager: React.FC = () => {
   };
 
   const handleDeleteOverride = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this tenant override?')) return;
+    if (!confirm('Are you sure you want to delete this tenant override?') return;
     try {
       const response = await fetch(addTenantParam(`/api/admin/config/tenant-overrides/${id}`), {
         method: 'DELETE',
@@ -733,7 +733,7 @@ const ConfigurationManager: React.FC = () => {
   };
 
   const handleDeleteFlag = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this feature flag?')) return;
+    if (!confirm('Are you sure you want to delete this feature flag?') return;
     try {
       const response = await fetch(addTenantParam(`/api/admin/config/feature-flags/${id}`), {
         method: 'DELETE',
@@ -765,9 +765,9 @@ const ConfigurationManager: React.FC = () => {
   };
 
   const renderDiffLine = (line: string, index: number) => {
-    if (line.startsWith('+')) {
+    if (line.startsWith('+') {
       return <div key={index} className={`${styles.diffLine} ${styles.diffAdded}`}>{line}</div>;
-    } else if (line.startsWith('-')) {
+    } else if (line.startsWith('-') {
       return <div key={index} className={`${styles.diffLine} ${styles.diffRemoved}`}>{line}</div>;
     } else {
       return <div key={index} className={styles.diffLine}>{line}</div>;
@@ -1349,7 +1349,7 @@ const ConfigurationManager: React.FC = () => {
                         <Input
                           placeholder="tenant-1,tenant-2,tenant-3"
                           onChange={(e) =>
-                            setFlagForm({ ...flagForm, targetTenants: e.target.value.split(',').map(t => t.trim()) })
+                            setFlagForm({ ...flagForm, targetTenants: e.target.value.split(',').map(t => t.trim() })
                           }
                         />
                       </div>

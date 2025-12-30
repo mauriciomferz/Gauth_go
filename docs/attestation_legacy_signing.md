@@ -21,7 +21,7 @@ Core functions:
 
 ## Legacy Snippet (Signing + Notarization)
 ```go
-if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && s.notarizer != nil && att.Snapshot.Hash != "" {
+if os.Getenv("AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && s.notarizer != nil && att.Snapshot.Hash != "" {
     auditHead := ""; if att.Audit != nil { auditHead = att.Audit.HeadHash }
     anchorHead := ""; if att.Anchor != nil { anchorHead = att.Anchor.LatestHash }
     seed := fmt.Sprintf("attest|%s|%s|%s", att.Snapshot.Hash, auditHead, anchorHead)
@@ -31,7 +31,7 @@ if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && s.notarizer != nil &
         att.Notarization = &struct { Provider string `json:"provider"`; Timestamp string `json:"timestamp"`; LatencySeconds float64 `json:"latency_seconds"`; Success bool `json:"success"` }{Provider: receipt.Provider, Timestamp: receipt.Timestamp, LatencySeconds: receipt.LatencySeconds, Success: receipt.Success}
     }
 }
-if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
+if os.Getenv("AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" && crypto.GlobalEdDSARegistry != nil {
     if active := crypto.GlobalEdDSARegistry.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
         unsigned := att; unsigned.Signature = ""; unsigned.SigKid = ""; unsigned.SigMode = ""
         if raw, jerr := json.Marshal(unsigned); jerr == nil {
@@ -76,20 +76,20 @@ File: `pkg/attest/service.go`.
 
 ## Migration Plan (Phases)
 1. (Completed) Extract logic – preserve raw signing semantics.
-2. (Completed) Introduce optional domain-separated dual signature via `GAUTH_ATTEST_DOMAIN_PREFIX` (raw + domain in response).
+2. (Completed) Introduce optional domain-separated dual signature via `AGENTAUTH_ATTEST_DOMAIN_PREFIX` (raw + domain in response).
 3. Enforce domain separation once ecosystem upgraded; retain backward compat (serve both for deprecation window, then remove raw).
 4. Add replay protection (nonce registry + TTL + durable store).
 5. Attach tracing + metrics decorators at service boundary.
 6. Remove legacy augmentation code from `web/server_clean.go` after full adoption.
 
 ## Risks & Notes
-- Ensure any future domain prefix is stable and documented (`GAUTH_ATTEST_DOMAIN_PREFIX` proposed).
+- Ensure any future domain prefix is stable and documented (`AGENTAUTH_ATTEST_DOMAIN_PREFIX` proposed).
 - Keep combined hash format unchanged for notarization receipts to maintain historical continuity.
 - When enforcing domain separation, communicate cutover window and provide dual verification path for older signatures.
 
 ## Recommended Removals (Future)
 - Delete `maybeAugmentAndSignAttestation` after handlers call `AttestationService` exclusively.
-- Remove environment variable `GAUTH_MODEL_LIMIT_ATTEST_SIGN` in favor of service-level config object.
+- Remove environment variable `AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN` in favor of service-level config object.
 
 ## Verification
 Unit tests in `pkg/attest/service_test.go` cover:
@@ -97,7 +97,7 @@ Unit tests in `pkg/attest/service_test.go` cover:
 - Domain-separated signing (single and base64 helpers)
 - Raw + notarization path
 - Error modes: missing key, truncated private
-- Dual signature migration (raw + domain) when `GAUTH_ATTEST_DOMAIN_PREFIX` set
+- Dual signature migration (raw + domain) when `AGENTAUTH_ATTEST_DOMAIN_PREFIX` set
 Legacy semantics validated by reproducing raw signature verification with active key.
 
 ---

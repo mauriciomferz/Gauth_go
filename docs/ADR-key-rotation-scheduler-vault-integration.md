@@ -36,14 +36,14 @@ Components:
 ### Configuration
 Env vars:
 ```
-GAUTH_KEY_ROTATION_ENABLED=1
-GAUTH_KEY_ROTATION_INTERVAL=24h
-GAUTH_KEY_ROTATION_JITTER=15m
-GAUTH_KEY_BACKEND=vault|kms|file
-GAUTH_VAULT_ADDR=https://vault.example
-GAUTH_VAULT_TOKEN=... (or injected via file ref)
-GAUTH_KMS_PROVIDER=gcp|azure|aws
-GAUTH_KMS_KEYRING=projects/.../locations/.../keyRings/.../cryptoKeys/...
+AGENTAUTH_KEY_ROTATION_ENABLED=1
+AGENTAUTH_KEY_ROTATION_INTERVAL=24h
+AGENTAUTH_KEY_ROTATION_JITTER=15m
+AGENTAUTH_KEY_BACKEND=vault|kms|file
+AGENTAUTH_VAULT_ADDR=https://vault.example
+AGENTAUTH_VAULT_TOKEN=... (or injected via file ref)
+AGENTAUTH_KMS_PROVIDER=gcp|azure|aws
+AGENTAUTH_KMS_KEYRING=projects/.../locations/.../keyRings/.../cryptoKeys/...
 ```
 
 ### Rotation Flow
@@ -54,13 +54,13 @@ GAUTH_KMS_KEYRING=projects/.../locations/.../keyRings/.../cryptoKeys/...
 5. Persist entry to ledger + optional external notarization.
 
 ### Metrics
-- `gauth_key_rotation_total`
-- `gauth_key_rotation_failures_total`
-- `gauth_key_active_age_seconds` (gauge)
-- `gauth_key_backend_info` (constant labels via build info metric or gauge 1)
+- `agentauth_key_rotation_total`
+- `agentauth_key_rotation_failures_total`
+- `agentauth_key_active_age_seconds` (gauge)
+- `agentauth_key_backend_info` (constant labels via build info metric or gauge 1)
 
 ### Discovery Endpoint Extensions
-Add to `/.well-known/gauth-configuration`:
+Add to `/.well-known/agentauth-configuration`:
 ```
 "key_rotation": {
   "enabled": true,

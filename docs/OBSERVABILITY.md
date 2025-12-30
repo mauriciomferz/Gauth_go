@@ -12,21 +12,21 @@ owners: [system]
 The following metrics are implemented in `web/handlers/admin/metrics_handler.go` and exposed via `/api/admin/metrics/prometheus`:
 
 ### Audit Events
-- **Metric**: `gauth_audit_events_total`
+- **Metric**: `agentauth_audit_events_total`
 - **Type**: Counter
 - **Labels**: `status` (success, failure)
 - **Description**: Tracks total audit log entries created.
 - **Source**: `SELECT COUNT(*) FROM audit_events`
 
 ### API Keys
-- **Metric**: `gauth_api_keys_total`
+- **Metric**: `agentauth_api_keys_total`
 - **Type**: Gauge
 - **Labels**: `status` (active, revoked)
 - **Description**: Current count of API keys in system.
 - **Source**: `SELECT COUNT(*) FROM api_keys`
 
 ### Authorization Policies
-- **Metric**: `gauth_active_policies_total`
+- **Metric**: `agentauth_active_policies_total`
 - **Type**: Gauge
 - **Description**: Number of active authorization policies.
 - **Source**: `SELECT COUNT(*) FROM authorization_policies WHERE status='active'`
@@ -53,8 +53,8 @@ Defined in `monitoring/alerts.yml` and loaded by Prometheus:
 The RB9 observability phase introduces lightweight in-repo tracing plus a consolidated latency percentile endpoint.
 
 Enabling Tracing:
-- Set `GAUTH_TRACING_ENABLED=1` (preferred) OR legacy `GAUTH_OTEL_ENABLE=1`.
-- Optional sampling ratio: `GAUTH_TRACING_SAMPLE_RATIO` in `[0,1]`. A value of `0` or unset defaults to always sample; any value in `(0,1]` applies probabilistic sampling (uniform `rand.Float64()<ratio`).
+- Set `AGENTAUTH_TRACING_ENABLED=1` (preferred) OR legacy `AGENTAUTH_OTEL_ENABLE=1`.
+- Optional sampling ratio: `AGENTAUTH_TRACING_SAMPLE_RATIO` in `[0,1]`. A value of `0` or unset defaults to always sample; any value in `(0,1]` applies probabilistic sampling (uniform `rand.Float64()<ratio`).
 
 Emitted Span Operations:
 | Operation | Description | Key Tags |
@@ -78,7 +78,7 @@ Latency Percentiles Endpoint:
 	"histograms": {
 		"attestation_verify": {"p50": 0.0005, "p95": 0.002, "p99": 0.005, "count": 42},
 		"rotation_summary": {"p50": -1, "p95": -1, "p99": -1, "count": 0},
-		"rfc0111_validation": {"p50": 0.001, "p95": 0.006, "p99": 0.010, "count": 310}
+		"aap001_validation": {"p50": 0.001, "p95": 0.006, "p99": 0.010, "count": 310}
 	}
 }
 ```
@@ -87,13 +87,13 @@ Latency Percentiles Endpoint:
 
 Alerting Example (PromQL):
 ```
-histogram_quantile(0.95, sum by (le)(rate(gauth_attestation_verify_latency_seconds_bucket[5m]))) > 0.050
+histogram_quantile(0.95, sum by (le)(rate(agentauth_attestation_verify_latency_seconds_bucket[5m])) > 0.050
 ```
 Use the JSON endpoint for quick UI snapshots; prefer PromQL for dashboards / SLO tracking.
 
 Future Enhancements:
-- Add token validation latency histogram (`gauth_token_validation_latency_seconds`) once implemented and include it automatically.
-- Add richer attestation outcome counters (`gauth_attestation_verify_total`) sliced by soft_invalid classification for governance dashboards.
+- Add token validation latency histogram (`agentauth_token_validation_latency_seconds`) once implemented and include it automatically.
+- Add richer attestation outcome counters (`agentauth_attestation_verify_total`) sliced by soft_invalid classification for governance dashboards.
 - Emit trace-to-metric correlation IDs for deeper latency root cause drill-down.
 
 Backward Compatibility: The new endpoint is additive and does not alter existing metric names or semantics.
@@ -103,8 +103,8 @@ Backward Compatibility: The new endpoint is additive and does not alter existing
 The replay nonce store (token issuance & attestation replay protection) supports optional write-ahead log (WAL) durability.
 
 Environment Variables:
-* `GAUTH_REPLAY_WAL` – enable WAL for token issuance replay store.
-* `GAUTH_ATTEST_REPLAY_WAL_PATH` – enable WAL for attestation replay store.
+* `AGENTAUTH_REPLAY_WAL` – enable WAL for token issuance replay store.
+* `AGENTAUTH_ATTEST_REPLAY_WAL_PATH` – enable WAL for attestation replay store.
 
 Durable Path Behavior:
 1. On startup, existing WAL file is replayed; malformed lines are skipped (counted via `replay_store_errors_total`).
@@ -116,18 +116,18 @@ Metrics Surface (Memory adapter):
 * `replay_wal_flush_latency` – recorded as part of replay store latency histogram until a dedicated histogram is added.
 
 Prometheus (current state):
-* Flush latency samples appear under `gauth_rfc0111_replay_store_latency_seconds` (multiplexed). Future version will add `gauth_rfc0111_replay_wal_flush_latency_seconds` and `gauth_rfc0111_replay_wal_pending` gauge.
+* Flush latency samples appear under `agentauth_aap001_replay_store_latency_seconds` (multiplexed). Future version will add `agentauth_aap001_replay_wal_flush_latency_seconds` and `agentauth_aap001_replay_wal_pending` gauge.
 
 Alert Rule Examples:
 ```
 ALERT ReplayStoreHighFlushLatency
-	IF histogram_quantile(0.95, sum(rate(gauth_rfc0111_replay_store_latency_seconds_bucket[5m])) by (le)) > 0.25
+	IF histogram_quantile(0.95, sum(rate(agentauth_aap001_replay_store_latency_seconds_bucket[5m]) by (le) > 0.25
 	FOR 5m
 	LABELS { severity = "warning" }
 	ANNOTATIONS { summary = "High WAL flush latency", description = "95th percentile flush latency >250ms" }
 
 ALERT ReplayStoreErrorSurge
-	IF increase(gauth_rfc0111_replay_store_errors_total[5m]) > 25
+	IF increase(agentauth_aap001_replay_store_errors_total[5m]) > 25
 	FOR 2m
 	LABELS { severity = "critical" }
 	ANNOTATIONS { summary = "Replay store error surge", description = "Errors exceed 25 in 5m window" }
@@ -148,7 +148,7 @@ Roadmap:
 RB12 introduces an optional maximum delegation chain length enforced at append time.
 
 Environment Variable:
-* `GAUTH_MAX_DELEGATION_DEPTH` – positive integer; if set and >0, attempts to append a delegation that would increase chain length beyond this value are rejected with error code `delegation_depth_exceeded`.
+* `AGENTAUTH_MAX_DELEGATION_DEPTH` – positive integer; if set and >0, attempts to append a delegation that would increase chain length beyond this value are rejected with error code `delegation_depth_exceeded`.
 
 Metrics:
 * `delegation_depth_exceeded_total` (counter) – increments for each rejected append due to depth.
@@ -160,7 +160,7 @@ Discovery Surface:
 Alert Examples (PromQL):
 ```
 ALERT DelegationDepthExceededSpike
-	IF increase(gauth_delegation_depth_exceeded_total[30m]) > 5
+	IF increase(agentauth_delegation_depth_exceeded_total[30m]) > 5
 	FOR 10m
 	LABELS {severity="warning"}
 	ANNOTATIONS {summary="Delegation depth limit exceed spike", description="More than 5 exceed events in 30m"}
@@ -174,7 +174,7 @@ Operational Notes:
 Roadmap:
 * Add max observed depth gauge.
 * Include depth statistics in a governance diagnostics endpoint.
-* Soft warning mode (`GAUTH_DELEGATION_DEPTH_ENFORCE_STRICT=0`) prior to hard enforcement.
+* Soft warning mode (`AGENTAUTH_DELEGATION_DEPTH_ENFORCE_STRICT=0`) prior to hard enforcement.
 
 
 ### Decision Counters
@@ -183,26 +183,26 @@ Existing decision counters track total decisions, allows, denies, and expression
 Prometheus:
 
 ```text
-# HELP gauth_decisions_total Total authorization decisions by action/resource/outcome.
-# TYPE gauth_decisions_total counter
-gauth_decisions_total{action="read",resource="report:finance",outcome="allow"} 42
-gauth_decisions_total{action="write",resource="report:finance",outcome="deny"} 5
+# HELP agentauth_decisions_total Total authorization decisions by action/resource/outcome.
+# TYPE agentauth_decisions_total counter
+agentauth_decisions_total{action="read",resource="report:finance",outcome="allow"} 42
+agentauth_decisions_total{action="write",resource="report:finance",outcome="deny"} 5
 
-# HELP gauth_decision_reasons_total Authorization decisions labeled with reason taxonomy.
-# TYPE gauth_decision_reasons_total counter
-gauth_decision_reasons_total{action="write",resource="report:finance",outcome="deny",reason="default_deny"} 5
+# HELP agentauth_decision_reasons_total Authorization decisions labeled with reason taxonomy.
+# TYPE agentauth_decision_reasons_total counter
+agentauth_decision_reasons_total{action="write",resource="report:finance",outcome="deny",reason="default_deny"} 5
 ```
 
 JSON snapshot (excerpt) may expose aggregated decision sets (future expansion) but labeled counts are primarily for Prometheus & OTEL. Empty strings normalized to `_` sentinel.
 
-OpenTelemetry: if enabled (GAUTH_OTEL_METRICS_ENABLE=1) the adapter emits `gauth.decisions` and `gauth.decision.reasons` counters with identical label dimensions.
+OpenTelemetry: if enabled (AGENTAUTH_OTEL_METRICS_ENABLE=1) the adapter emits `agentauth.decisions` and `agentauth.decision.reasons` counters with identical label dimensions.
 ## Violation Counters (Beta)
 
 The token validation path now categorizes rejection reasons and increments in-memory counters:
 
 Categories: `sig_invalid`, `expired`, `not_yet_valid`, `issuer_mismatch`, `replay_detected`, `audience_mismatch`, `missing_claim`, `unknown`.
 
-Implementation: `internal/observability/violations.go` provides atomic counters. They are wired into `pkg/gauth/gauth.go` via `failMetric` helper. Tests: `pkg/gauth/gauth_violation_metrics_test.go` exercises several failure categories.
+Implementation: `internal/observability/violations.go` provides atomic counters. They are wired into `pkg/agentauth/agentauth.go` via `failMetric` helper. Tests: `pkg/agentauth/agentauth_violation_metrics_test.go` exercises several failure categories.
 
 Implemented Endpoint:
 `GET /api/v1/beta/metrics/violations` returns a JSON payload:
@@ -232,21 +232,21 @@ All category keys are always present (zero when unused). `total` is the sum of a
 	Deterministic external anchoring tests and controlled chaos experiments sometimes need to guarantee a fixed number of initial failures before allowing the normal probabilistic model to apply. The environment variable:
 
 	```
-	GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=<N>
+	AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=<N>
 	```
 
-	forces the first `N` external anchoring attempts to fail ("stub failure (forced)") regardless of `GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB`. After the forced failures are consumed, the configured probability model resumes.
+	forces the first `N` external anchoring attempts to fail ("stub failure (forced)") regardless of `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB`. After the forced failures are consumed, the configured probability model resumes.
 
 	To distinguish these deterministic injected failures from organic (probability-driven) failures, two new Prometheus counters are exposed:
 
 	```
-	# HELP gauth_rfc0111_external_anchor_forced_failures_total Forced external capability anchoring failures (deterministic override before probabilistic model)
-	# TYPE gauth_rfc0111_external_anchor_forced_failures_total counter
-	gauth_rfc0111_external_anchor_forced_failures_total 1
+	# HELP agentauth_aap001_external_anchor_forced_failures_total Forced external capability anchoring failures (deterministic override before probabilistic model)
+	# TYPE agentauth_aap001_external_anchor_forced_failures_total counter
+	agentauth_aap001_external_anchor_forced_failures_total 1
 
-	# HELP gauth_rfc0111_external_anchor_forced_failures_provider_total Forced external capability anchoring failures labeled by provider
-	# TYPE gauth_rfc0111_external_anchor_forced_failures_provider_total counter
-	gauth_rfc0111_external_anchor_forced_failures_provider_total{provider="tsa-stub"} 1
+	# HELP agentauth_aap001_external_anchor_forced_failures_provider_total Forced external capability anchoring failures labeled by provider
+	# TYPE agentauth_aap001_external_anchor_forced_failures_provider_total counter
+	agentauth_aap001_external_anchor_forced_failures_provider_total{provider="tsa-stub"} 1
 	```
 
 	Behavioral Relationships:
@@ -256,31 +256,31 @@ All category keys are always present (zero when unused). `total` is the sum of a
 	Suggested PromQL to isolate only organic failures (excluding deterministic injects):
 
 	```
-	organic_failures = gauth_rfc0111_external_anchor_failures_total - gauth_rfc0111_external_anchor_forced_failures_total
-	rate_organic_failures_5m = increase(gauth_rfc0111_external_anchor_failures_total[5m]) - increase(gauth_rfc0111_external_anchor_forced_failures_total[5m])
+	organic_failures = agentauth_aap001_external_anchor_failures_total - agentauth_aap001_external_anchor_forced_failures_total
+	rate_organic_failures_5m = increase(agentauth_aap001_external_anchor_failures_total[5m]) - increase(agentauth_aap001_external_anchor_forced_failures_total[5m])
 	```
 
 	Provider Breakdown (organic only):
 	```
-	sum by (provider) (increase(gauth_rfc0111_external_anchor_failures_provider_total[5m])) -
-	sum by (provider) (increase(gauth_rfc0111_external_anchor_forced_failures_provider_total[5m]))
+	sum by (provider) (increase(agentauth_aap001_external_anchor_failures_provider_total[5m]) -
+	sum by (provider) (increase(agentauth_aap001_external_anchor_forced_failures_provider_total[5m]))
 	```
 
 	Alert Example (ignore forced failures spikes used in test pipelines):
 	```
 	ALERT ExternalAnchorOrganicFailureSpike
-	  IF (increase(gauth_rfc0111_external_anchor_failures_total[10m]) - increase(gauth_rfc0111_external_anchor_forced_failures_total[10m])) > 25
+	  IF (increase(agentauth_aap001_external_anchor_failures_total[10m]) - increase(agentauth_aap001_external_anchor_forced_failures_total[10m]) > 25
 	  FOR 5m
 	  LABELS {severity="high"}
 	  ANNOTATIONS {summary="External anchoring organic failure spike", description="Organic external anchor failures >25 in 10m (forced failures excluded)."}
 	```
 
 	Testing Guidance:
-	- Set `GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=1` with `GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=0` to validate success path latency + forced failure counters deterministically.
-	- Combine with `GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED` to stabilize latency histogram sample counts.
+	- Set `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=1` with `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=0` to validate success path latency + forced failure counters deterministically.
+	- Combine with `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED` to stabilize latency histogram sample counts.
 
 	Backward Compatibility:
-	- Existing consumers of `gauth_rfc0111_external_anchor_failures_total` require no changes; forced failures seamlessly appear in aggregate totals.
+	- Existing consumers of `agentauth_aap001_external_anchor_failures_total` require no changes; forced failures seamlessly appear in aggregate totals.
 	- The Memory metrics adapter exposes only aggregate counts; forced failure separation is Prometheus‑only at this stage (future memory separation can be added if needed for JSON endpoints).
 
 	Roadmap:
@@ -290,21 +290,21 @@ All category keys are always present (zero when unused). `total` is the sum of a
 Prometheus Exposition (NEW):
 `GET /api/v1/beta/metrics/violations/prometheus` returns text format metrics:
 ```
-# HELP gauth_validation_total Total token validation failure events across all categories
-# TYPE gauth_validation_total counter
-gauth_validation_total 29
-# HELP gauth_validation_category_token_failures Token validation failures by category
-# TYPE gauth_validation_category_token_failures counter
-gauth_validation_sig_invalid_total 12
-gauth_validation_expired_total 3
-gauth_validation_not_yet_valid_total 0
-gauth_validation_issuer_mismatch_total 1
-gauth_validation_replay_detected_total 4
-gauth_validation_audience_mismatch_total 2
-gauth_validation_missing_claim_total 7
-gauth_validation_unknown_total 0
+# HELP agentauth_validation_total Total token validation failure events across all categories
+# TYPE agentauth_validation_total counter
+agentauth_validation_total 29
+# HELP agentauth_validation_category_token_failures Token validation failures by category
+# TYPE agentauth_validation_category_token_failures counter
+agentauth_validation_sig_invalid_total 12
+agentauth_validation_expired_total 3
+agentauth_validation_not_yet_valid_total 0
+agentauth_validation_issuer_mismatch_total 1
+agentauth_validation_replay_detected_total 4
+agentauth_validation_audience_mismatch_total 2
+agentauth_validation_missing_claim_total 7
+agentauth_validation_unknown_total 0
 ```
-Metric Naming Pattern: `gauth_validation_<category>_total`. A rolled-up aggregate `gauth_validation_total` is also provided for quick ratio calculations.
+Metric Naming Pattern: `agentauth_validation_<category>_total`. A rolled-up aggregate `agentauth_validation_total` is also provided for quick ratio calculations.
 
 ### Anomaly Detection (Rolling Window)
 
@@ -330,10 +330,10 @@ Fields:
 - `surge_threshold_per_minute`: Threshold value (default 100 unless overridden).
 
 Configuration:
-- `GAUTH_VIOLATION_SURGE_THRESHOLD` sets custom per-minute surge threshold.
-- `GAUTH_VIOLATION_PERSIST_PATH` enables persistence (JSON file). On restart, counters + recent history (<5m) are restored.
-- `GAUTH_VIOLATION_AUTOSAVE_SEC` enables periodic autosave (>=10 seconds). Manual saves occur on validation attempts (throttled 5s).
-- `GAUTH_VIOLATION_PERSIST_NO_THROTTLE=1` disables the 5s write throttle (use only for tests / debugging).
+- `AGENTAUTH_VIOLATION_SURGE_THRESHOLD` sets custom per-minute surge threshold.
+- `AGENTAUTH_VIOLATION_PERSIST_PATH` enables persistence (JSON file). On restart, counters + recent history (<5m) are restored.
+- `AGENTAUTH_VIOLATION_AUTOSAVE_SEC` enables periodic autosave (>=10 seconds). Manual saves occur on validation attempts (throttled 5s).
+- `AGENTAUTH_VIOLATION_PERSIST_NO_THROTTLE=1` disables the 5s write throttle (use only for tests / debugging).
 
 Persistence File Schema (Hash Chain Wrapped – NEW):
 ```
@@ -344,13 +344,13 @@ Two new counters expose governance operations and inspection activity. These com
 Prometheus Names:
 
 ```text
-# HELP gauth_policy_rollback_total Total successful policy rollback operations
-# TYPE gauth_policy_rollback_total counter
-gauth_policy_rollback_total 5
+# HELP agentauth_policy_rollback_total Total successful policy rollback operations
+# TYPE agentauth_policy_rollback_total counter
+agentauth_policy_rollback_total 5
 
-# HELP gauth_policy_diff_requests_total Total successful diff requests
-# TYPE gauth_policy_diff_requests_total counter
-gauth_policy_diff_requests_total 42
+# HELP agentauth_policy_diff_requests_total Total successful diff requests
+# TYPE agentauth_policy_diff_requests_total counter
+agentauth_policy_diff_requests_total 42
 ```
 
 JSON Endpoint: `GET /api/v1/beta/policy/metrics`
@@ -368,22 +368,22 @@ Fields added:
 
 | Objective | PromQL Example | Notes |
 |-----------|----------------|-------|
-| Excessive rollbacks | increase(gauth_policy_rollback_total[1h]) > 3 | Indicates instability or high correction rate |
-| Diff usage rate | rate(gauth_policy_diff_requests_total[5m]) | Correlate with change windows |
-| Rollbacks per revision | gauth_policy_rollback_total / gauth_policy_revisions_total | Ratio > 0.2 may warrant review |
-| Pre‑change inspection efficacy | rate(gauth_policy_diff_requests_total[30m]) / increase(gauth_policy_revisions_total[30m]) | Low ratio suggests insufficient diff review |
+| Excessive rollbacks | increase(agentauth_policy_rollback_total[1h]) > 3 | Indicates instability or high correction rate |
+| Diff usage rate | rate(agentauth_policy_diff_requests_total[5m]) | Correlate with change windows |
+| Rollbacks per revision | agentauth_policy_rollback_total / agentauth_policy_revisions_total | Ratio > 0.2 may warrant review |
+| Pre‑change inspection efficacy | rate(agentauth_policy_diff_requests_total[30m]) / increase(agentauth_policy_revisions_total[30m]) | Low ratio suggests insufficient diff review |
 
 ### Alert Suggestions
 
 ```text
 ALERT PolicyRollbackSpike
-	IF increase(gauth_policy_rollback_total[30m]) > 2
+	IF increase(agentauth_policy_rollback_total[30m]) > 2
 	FOR 10m
 	LABELS {severity="warning"}
 	ANNOTATIONS {summary="Policy rollback spike", description="More than 2 rollbacks in 30m"}
 
 ALERT MissingDiffReview
-	IF (increase(gauth_policy_revisions_total[2h]) > 5) AND (increase(gauth_policy_diff_requests_total[2h]) < 3)
+	IF (increase(agentauth_policy_revisions_total[2h]) > 5) AND (increase(agentauth_policy_diff_requests_total[2h]) < 3)
 	FOR 15m
 	LABELS {severity="info"}
 	ANNOTATIONS {summary="Low diff review activity", description="Fewer than 3 diff inspections for >5 revisions in 2h"}
@@ -391,13 +391,13 @@ ALERT MissingDiffReview
 
 ### Forensic Correlation
 Sequence a suspected incident by combining:
-1. `gauth_policy_revisions_total` increments (policy changes)
-2. `gauth_policy_diff_requests_total` bursts (inspection)
-3. `gauth_policy_rollback_total` increments (remediation)
+1. `agentauth_policy_revisions_total` increments (policy changes)
+2. `agentauth_policy_diff_requests_total` bursts (inspection)
+3. `agentauth_policy_rollback_total` increments (remediation)
 4. Audit entries (`/api/v1/beta/audit`) for authoritative timeline.
 
 ### OTEL Roadmap
-Future instrumentation will add Int64 counters `gauth.policy.rollback` and `gauth.policy.diff.requests` when `GAUTH_OTEL_METRICS_ENABLE=1`. This enables unified tracing + metrics correlation (e.g., rollback spans annotated with diff inspection count preceding the action).
+Future instrumentation will add Int64 counters `agentauth.policy.rollback` and `agentauth.policy.diff.requests` when `AGENTAUTH_OTEL_METRICS_ENABLE=1`. This enables unified tracing + metrics correlation (e.g., rollback spans annotated with diff inspection count preceding the action).
 
 Cross‑Reference: See `artifacts/report.md` Governance Feature Report for broader context and implementation details.
 {
@@ -456,61 +456,61 @@ Legacy files (without wrapper) return `integrity:"legacy"` and SHOULD be rotated
 
 Prometheus (Anomaly Metrics Additions):
 ```
-# HELP gauth_validation_rate_per_minute_60s Approximate failure events per minute over last 60s
-gauth_validation_rate_per_minute_60s 42.70
-# HELP gauth_validation_rate_per_minute_300s Approximate failure events per minute over last 300s
-gauth_validation_rate_per_minute_300s 18.40
-# HELP gauth_validation_surge_60s Surge indicator (1 if 60s rate exceeds threshold)
-gauth_validation_surge_60s 1
-# HELP gauth_validation_surge_threshold_per_minute Configured surge threshold per minute
-gauth_validation_surge_threshold_per_minute 40
-# HELP gauth_poa_semantic_anomaly_score EWMA-based standardized anomaly score for 60s semantic rejection rate (z-score)
-gauth_poa_semantic_anomaly_score{category="amount_limit_exceeded"} 2.4
-gauth_poa_semantic_anomaly_score{category="daily_amount_limit_exceeded"} 0
-gauth_poa_semantic_anomaly_score{category="currency_mismatch"} -0.1
-gauth_poa_semantic_anomaly_score{category="scope_violation"} 0.3
-gauth_poa_semantic_anomaly_score{category="restriction_mismatch"} 0
+# HELP agentauth_validation_rate_per_minute_60s Approximate failure events per minute over last 60s
+agentauth_validation_rate_per_minute_60s 42.70
+# HELP agentauth_validation_rate_per_minute_300s Approximate failure events per minute over last 300s
+agentauth_validation_rate_per_minute_300s 18.40
+# HELP agentauth_validation_surge_60s Surge indicator (1 if 60s rate exceeds threshold)
+agentauth_validation_surge_60s 1
+# HELP agentauth_validation_surge_threshold_per_minute Configured surge threshold per minute
+agentauth_validation_surge_threshold_per_minute 40
+# HELP agentauth_poa_semantic_anomaly_score EWMA-based standardized anomaly score for 60s semantic rejection rate (z-score)
+agentauth_poa_semantic_anomaly_score{category="amount_limit_exceeded"} 2.4
+agentauth_poa_semantic_anomaly_score{category="daily_amount_limit_exceeded"} 0
+agentauth_poa_semantic_anomaly_score{category="currency_mismatch"} -0.1
+agentauth_poa_semantic_anomaly_score{category="scope_violation"} 0.3
+agentauth_poa_semantic_anomaly_score{category="restriction_mismatch"} 0
 ```
 
 Alert Hint (Prototype):
 ```
-ALERT ViolationSurge60s IF gauth_validation_surge_60s == 1 FOR 2m LABELS {severity="high"}
+ALERT ViolationSurge60s IF agentauth_validation_surge_60s == 1 FOR 2m LABELS {severity="high"}
 ```
 
 ### OpenTelemetry Metrics Exporter (NEW)
-An optional OpenTelemetry metrics exporter now emits violation counters and rolling rates as Observable Gauges when `GAUTH_OTEL_METRICS_ENABLE=1` is set. A stdout exporter is used for the demo; production deployments should swap in OTLP exporters.
+An optional OpenTelemetry metrics exporter now emits violation counters and rolling rates as Observable Gauges when `AGENTAUTH_OTEL_METRICS_ENABLE=1` is set. A stdout exporter is used for the demo; production deployments should swap in OTLP exporters.
 
 Environment Toggle:
 ```
-GAUTH_OTEL_METRICS_ENABLE=1 ./gauth-server
+AGENTAUTH_OTEL_METRICS_ENABLE=1 ./agentauth-server
 ```
 
 Instrumented Gauge Names:
-- `gauth_violation_counter_sig_invalid`
-- `gauth_violation_counter_expired`
-- `gauth_violation_counter_not_yet_valid`
-- `gauth_violation_counter_issuer_mismatch`
-- `gauth_violation_counter_replay_detected`
-- `gauth_violation_counter_audience_mismatch`
-- `gauth_violation_counter_missing_claim`
-- `gauth_violation_counter_unknown`
-- `gauth_violation_rate_60s` (per-minute normalized rate over ~60s window)
-- `gauth_violation_rate_300s` (per-minute normalized rate over ~300s window)
-- `gauth_poa_semantic_counter_<category>` (semantic validation rejection counters)
-- `gauth_poa_semantic_rate_60s_<category>` / `gauth_poa_semantic_rate_300s_<category>` (per-category per-minute rejection rates)
-- `gauth_poa_semantic_anomaly_score{category="<category>"}` (EWMA-based z-score of 60s rate; baseline adapts online)
+- `agentauth_violation_counter_sig_invalid`
+- `agentauth_violation_counter_expired`
+- `agentauth_violation_counter_not_yet_valid`
+- `agentauth_violation_counter_issuer_mismatch`
+- `agentauth_violation_counter_replay_detected`
+- `agentauth_violation_counter_audience_mismatch`
+- `agentauth_violation_counter_missing_claim`
+- `agentauth_violation_counter_unknown`
+- `agentauth_violation_rate_60s` (per-minute normalized rate over ~60s window)
+- `agentauth_violation_rate_300s` (per-minute normalized rate over ~300s window)
+- `agentauth_poa_semantic_counter_<category>` (semantic validation rejection counters)
+- `agentauth_poa_semantic_rate_60s_<category>` / `agentauth_poa_semantic_rate_300s_<category>` (per-category per-minute rejection rates)
+- `agentauth_poa_semantic_anomaly_score{category="<category>"}` (EWMA-based z-score of 60s rate; baseline adapts online)
 
 All gauges are observed during the exporter callback without additional locking (atomic snapshot reads). Rate computation reuses in-memory rolling history (`violationHistory`).
 
 Sample Stdout Exporter Emission (truncated):
 ```
-gauth_violation_counter_sig_invalid 12
-gauth_violation_counter_missing_claim 7
-gauth_violation_rate_60s 42.7
-gauth_violation_rate_300s 18.4
-gauth_poa_semantic_counter_amount_limit_exceeded 5
-gauth_poa_semantic_rate_60s_amount_limit_exceeded 12.0
-gauth_poa_semantic_anomaly_score{category="amount_limit_exceeded"} 2.1
+agentauth_violation_counter_sig_invalid 12
+agentauth_violation_counter_missing_claim 7
+agentauth_violation_rate_60s 42.7
+agentauth_violation_rate_300s 18.4
+agentauth_poa_semantic_counter_amount_limit_exceeded 5
+agentauth_poa_semantic_rate_60s_amount_limit_exceeded 12.0
+agentauth_poa_semantic_anomaly_score{category="amount_limit_exceeded"} 2.1
 ```
 
 ### Semantic Anomaly Score (NEW)
@@ -538,30 +538,30 @@ Interpretation Guidelines:
 Two Prometheus metrics expose policy version lifecycle state:
 
 ```
-# HELP gauth_policy_revisions_total Total appended policy bundle revisions
-# TYPE gauth_policy_revisions_total counter
-gauth_policy_revisions_total 7
+# HELP agentauth_policy_revisions_total Total appended policy bundle revisions
+# TYPE agentauth_policy_revisions_total counter
+agentauth_policy_revisions_total 7
 
-# HELP gauth_policy_active_version Current effective policy bundle version (rollback aware)
-# TYPE gauth_policy_active_version gauge
-gauth_policy_active_version 5
+# HELP agentauth_policy_active_version Current effective policy bundle version (rollback aware)
+# TYPE agentauth_policy_active_version gauge
+agentauth_policy_active_version 5
 ```
 
 Interpretation:
-- `gauth_policy_revisions_total` increments only when a new bundle is appended (immutable history length).
-- `gauth_policy_active_version` reflects the version of the bundle currently governing decisions. During rollback it may be lower than the highest revision.
-- A rollback does NOT decrement `gauth_policy_revisions_total`; instead the difference `(max_over_time(gauth_policy_revisions_total[5m]) - gauth_policy_active_version)` becomes >0.
+- `agentauth_policy_revisions_total` increments only when a new bundle is appended (immutable history length).
+- `agentauth_policy_active_version` reflects the version of the bundle currently governing decisions. During rollback it may be lower than the highest revision.
+- A rollback does NOT decrement `agentauth_policy_revisions_total`; instead the difference `(max_over_time(agentauth_policy_revisions_total[5m]) - agentauth_policy_active_version)` becomes >0.
 
 Alert Examples:
 ```
 ALERT PolicyRollbackActive
-	IF (max_over_time(gauth_policy_revisions_total[10m]) - gauth_policy_active_version) > 0
+	IF (max_over_time(agentauth_policy_revisions_total[10m]) - agentauth_policy_active_version) > 0
 	FOR 3m
 	LABELS {severity="warning"}
 	ANNOTATIONS {summary="Policy rollback active", description="Active version behind latest appended revision"}
 
 ALERT PolicyFrequentRollbacks
-	IF increase(gauth_policy_active_version[1h]) < increase(gauth_policy_revisions_total[1h]) AND (max_over_time(gauth_policy_revisions_total[1h]) - gauth_policy_active_version) > 0
+	IF increase(agentauth_policy_active_version[1h]) < increase(agentauth_policy_revisions_total[1h]) AND (max_over_time(agentauth_policy_revisions_total[1h]) - agentauth_policy_active_version) > 0
 	FOR 5m
 	LABELS {severity="medium"}
 	ANNOTATIONS {summary="Frequent rollback activity", description="Multiple new revisions with persistent rollback state"}
@@ -569,16 +569,16 @@ ALERT PolicyFrequentRollbacks
 
 Dashboard Tips:
 - Plot both metrics; annotate rollback windows when gauge dips below counter.
-- Derive rollback ratio: `rollback_ratio = (gauth_policy_revisions_total - gauth_policy_active_version) / gauth_policy_revisions_total` (0 when no rollback).
+- Derive rollback ratio: `rollback_ratio = (agentauth_policy_revisions_total - agentauth_policy_active_version) / agentauth_policy_revisions_total` (0 when no rollback).
 
 Roadmap:
-- Add audit event metric `gauth_policy_rollbacks_total` to distinguish intentional governance actions vs temporary exploration.
+- Add audit event metric `agentauth_policy_rollbacks_total` to distinguish intentional governance actions vs temporary exploration.
 - Tag evaluation latency histogram buckets with version labels for longitudinal performance drift analysis across revisions.
 
 Suggested PromQL Alert (prototype):
 ```
 ALERT SemanticAnomalyHigh
-	IF max_over_time(gauth_poa_semantic_anomaly_score[2m]) > 3
+	IF max_over_time(agentauth_poa_semantic_anomaly_score[2m]) > 3
 	FOR 2m
 	LABELS {severity="high"}
 	ANNOTATIONS {
@@ -589,11 +589,11 @@ ALERT SemanticAnomalyHigh
 Follow-up (Roadmap): incorporate seasonality and time-of-day baselines and add persistence for EWMA state.
 
 Background Sampling:
-An optional background anomaly sampler runs when `GAUTH_SEMANTIC_ANOMALY_BG_SEC` is set (minimum 5). It periodically (every N seconds) appends semantic counter snapshots (if changed or >30s elapsed) and recomputes 60s rates feeding the EWMA anomaly model.
+An optional background anomaly sampler runs when `AGENTAUTH_SEMANTIC_ANOMALY_BG_SEC` is set (minimum 5). It periodically (every N seconds) appends semantic counter snapshots (if changed or >30s elapsed) and recomputes 60s rates feeding the EWMA anomaly model.
 
 Example:
 ```
-GAUTH_SEMANTIC_ANOMALY_BG_SEC=15 ./gauth-server
+AGENTAUTH_SEMANTIC_ANOMALY_BG_SEC=15 ./agentauth-server
 
 Hash‑chain wrapped payload example:
 ```jsonc
@@ -651,22 +651,22 @@ This document describes the available metrics, recommended PromQL queries, alert
 
 ## 1. Metrics Surface
 
-All counters and latency histogram are exposed under the Prometheus namespace `gauth` and subsystem `rfc0111` when using the `PrometheusMetrics` adapter.
+All counters and latency histogram are exposed under the Prometheus namespace `agentauth` and subsystem `aap001` when using the `PrometheusMetrics` adapter.
 
 | Metric Name | Type | Description | Increment Source |
 |-------------|------|-------------|------------------|
-| gauth_rfc0111_delegations_created_total | counter | Successfully created delegations (POAs). | `CreateDelegationCtx` after persistence & audit success |
-| gauth_rfc0111_signatures_issued_total | counter | Canonical POA signatures successfully issued. | Sign path (`signerProvider.Sign`) success |
-| gauth_rfc0111_signature_issue_failures_total | counter | Failed attempts to issue a POA signature (digest or sign error). | Any signature attempt error |
-| gauth_rfc0111_signature_verifications_total | counter | Successful signature verifications during validation. | `ValidateDelegationCtx` authenticity path |
-| gauth_rfc0111_signature_public_key_missing_total | counter | Signature present but public key not found (soft skip path). | `ValidateDelegationCtx` when key id absent and NOT strict mode |
-| gauth_rfc0111_envelope_v1_issued_total | counter | Tokens issued using legacy envelope version 1 format. | `generateAuthToken` when GAUTH_POA_ENVELOPE_V2 != 1 |
-| gauth_rfc0111_envelope_v2_issued_total | counter | Tokens issued using envelope version 2 (canonical digest + multi-sig metadata). | `generateAuthToken` when GAUTH_POA_ENVELOPE_V2 = 1 |
-| gauth_rfc0111_envelope_issuance_cadence_seconds | histogram | Distribution of inter-issuance intervals (seconds between consecutive token issuances). Buckets: 0.1,0.25,0.5,1,2,5,10,30,60,120,300. | Recorded after each issuance when a previous issuance timestamp exists |
-| gauth_rfc0111_envelope_v2_adoption_ratio | gauge | Ratio of V2 issuance count to total issuance count (V1+V2). | Updated on every issuance |
-| gauth_rfc0111_envelope_v1_sunset_phase | gauge | Current integer sunset lifecycle phase for Envelope V1 (Pilot=1,Broad=2,Stabilization=3,SoftDeprecation=4,Sunset=5,PostVerification=6). | Manually/automatically set via migration controller |
-| gauth_rfc0111_anchor_attempt_total | counter | Attempts to externally anchor issuance or revocation chain tip. | After chain append (issuance & revocation) when `anchorClient` not nil |
-| gauth_rfc0111_anchor_failure_total | counter | External anchoring failures. | When `anchorClient.Anchor` returns error |
+| agentauth_aap001_delegations_created_total | counter | Successfully created delegations (POAs). | `CreateDelegationCtx` after persistence & audit success |
+| agentauth_aap001_signatures_issued_total | counter | Canonical POA signatures successfully issued. | Sign path (`signerProvider.Sign`) success |
+| agentauth_aap001_signature_issue_failures_total | counter | Failed attempts to issue a POA signature (digest or sign error). | Any signature attempt error |
+| agentauth_aap001_signature_verifications_total | counter | Successful signature verifications during validation. | `ValidateDelegationCtx` authenticity path |
+| agentauth_aap001_signature_public_key_missing_total | counter | Signature present but public key not found (soft skip path). | `ValidateDelegationCtx` when key id absent and NOT strict mode |
+| agentauth_aap001_envelope_v1_issued_total | counter | Tokens issued using legacy envelope version 1 format. | `generateAuthToken` when AGENTAUTH_POA_ENVELOPE_V2 != 1 |
+| agentauth_aap001_envelope_v2_issued_total | counter | Tokens issued using envelope version 2 (canonical digest + multi-sig metadata). | `generateAuthToken` when AGENTAUTH_POA_ENVELOPE_V2 = 1 |
+| agentauth_aap001_envelope_issuance_cadence_seconds | histogram | Distribution of inter-issuance intervals (seconds between consecutive token issuances). Buckets: 0.1,0.25,0.5,1,2,5,10,30,60,120,300. | Recorded after each issuance when a previous issuance timestamp exists |
+| agentauth_aap001_envelope_v2_adoption_ratio | gauge | Ratio of V2 issuance count to total issuance count (V1+V2). | Updated on every issuance |
+| agentauth_aap001_envelope_v1_sunset_phase | gauge | Current integer sunset lifecycle phase for Envelope V1 (Pilot=1,Broad=2,Stabilization=3,SoftDeprecation=4,Sunset=5,PostVerification=6). | Manually/automatically set via migration controller |
+| agentauth_aap001_anchor_attempt_total | counter | Attempts to externally anchor issuance or revocation chain tip. | After chain append (issuance & revocation) when `anchorClient` not nil |
+| agentauth_aap001_anchor_failure_total | counter | External anchoring failures. | When `anchorClient.Anchor` returns error |
 
 ### External Anchor Deterministic Seeding (NEW)
 ### Envelope Versioning (NEW)
@@ -674,10 +674,10 @@ All counters and latency histogram are exposed under the Prometheus namespace `g
 Delegation auth tokens now support a versioned envelope structure controlled by the environment flag:
 
 ```
-GAUTH_POA_ENVELOPE_V2=1
+AGENTAUTH_POA_ENVELOPE_V2=1
 ```
 
-When unset (default), issuance uses Envelope V1 (`ver="gauth-rfc0111-env1"`), containing the core delegation fields. When set to `1`, issuance switches to Envelope V2 (`ver="gauth-rfc0111-env2"`), adding:
+When unset (default), issuance uses Envelope V1 (`ver="agentauth-aap001-env1"`), containing the core delegation fields. When set to `1`, issuance switches to Envelope V2 (`ver="agentauth-aap001-env2"`), adding:
 
 Fields Added in V2:
 - `canonical_digest`: Hex digest of canonical POA representation (best-effort; empty if digest computation failed during issuance fallback).
@@ -692,12 +692,12 @@ Tracks pacing of envelope issuance to identify abnormally rapid spikes (possible
 
 Metric:
 ```
-# HELP gauth_rfc0111_envelope_issuance_cadence_seconds Seconds between consecutive token issuances (inter-arrival interval)
-# TYPE gauth_rfc0111_envelope_issuance_cadence_seconds histogram
-gauth_rfc0111_envelope_issuance_cadence_seconds_bucket{le="0.1"} 12
+# HELP agentauth_aap001_envelope_issuance_cadence_seconds Seconds between consecutive token issuances (inter-arrival interval)
+# TYPE agentauth_aap001_envelope_issuance_cadence_seconds histogram
+agentauth_aap001_envelope_issuance_cadence_seconds_bucket{le="0.1"} 12
 ...
-gauth_rfc0111_envelope_issuance_cadence_seconds_sum 542.3
-gauth_rfc0111_envelope_issuance_cadence_seconds_count 275
+agentauth_aap001_envelope_issuance_cadence_seconds_sum 542.3
+agentauth_aap001_envelope_issuance_cadence_seconds_count 275
 ```
 
 Buckets:
@@ -709,21 +709,21 @@ On each issuance the service loads the previous issuance UNIX timestamp; if pres
 Example PromQL:
 - P95 issuance cadence (fast issuance implies small value):
 ```
-histogram_quantile(0.95, sum by (le)(rate(gauth_rfc0111_envelope_issuance_cadence_seconds_bucket[5m])))
+histogram_quantile(0.95, sum by (le)(rate(agentauth_aap001_envelope_issuance_cadence_seconds_bucket[5m])))
 ```
 - Detect sustained rapid issuance (<500ms inter-arrival) over 10 minutes:
 ```
-histogram_quantile(0.50, sum by (le)(rate(gauth_rfc0111_envelope_issuance_cadence_seconds_bucket[10m]))) < 0.5
+histogram_quantile(0.50, sum by (le)(rate(agentauth_aap001_envelope_issuance_cadence_seconds_bucket[10m])) < 0.5
 ```
 - Average issuance rate derived from cadence (approx tokens/sec):
 ```
-1 / ( (gauth_rfc0111_envelope_issuance_cadence_seconds_sum / gauth_rfc0111_envelope_issuance_cadence_seconds_count) )
+1 / ( (agentauth_aap001_envelope_issuance_cadence_seconds_sum / agentauth_aap001_envelope_issuance_cadence_seconds_count) )
 ```
 
 Alert Examples:
 ```
 ALERT EnvelopeIssuanceBurst
-	IF histogram_quantile(0.90, sum by (le)(rate(gauth_rfc0111_envelope_issuance_cadence_seconds_bucket[5m]))) < 0.25
+	IF histogram_quantile(0.90, sum by (le)(rate(agentauth_aap001_envelope_issuance_cadence_seconds_bucket[5m])) < 0.25
 	FOR 2m
 	LABELS {severity="high"}
 	ANNOTATIONS {summary="High-speed token issuance burst", description="P90 issuance cadence <250ms for >2m; investigate potential runaway issuer."}
@@ -743,9 +743,9 @@ Represents governance lifecycle for Envelope V1 deprecation. Instrumentation ena
 
 Metric:
 ```
-# HELP gauth_rfc0111_envelope_v1_sunset_phase Envelope V1 sunset lifecycle phase
-# TYPE gauth_rfc0111_envelope_v1_sunset_phase gauge
-gauth_rfc0111_envelope_v1_sunset_phase 3
+# HELP agentauth_aap001_envelope_v1_sunset_phase Envelope V1 sunset lifecycle phase
+# TYPE agentauth_aap001_envelope_v1_sunset_phase gauge
+agentauth_aap001_envelope_v1_sunset_phase 3
 ```
 
 Phase Mapping:
@@ -760,8 +760,8 @@ Phase Mapping:
 
 Example PromQL Readiness Check (Adoption + Digest Health):
 ```
-sunset_ready = (gauth_rfc0111_envelope_v2_adoption_ratio > 0.95) and \
-							 ((increase(gauth_rfc0111_envelope_digest_mismatch_total[1h]) / increase(gauth_rfc0111_envelope_v2_issued_total[1h])) < 0.002)
+sunset_ready = (agentauth_aap001_envelope_v2_adoption_ratio > 0.95) and \
+							 ((increase(agentauth_aap001_envelope_digest_mismatch_total[1h]) / increase(agentauth_aap001_envelope_v2_issued_total[1h]) < 0.002)
 ```
 
 Automated Controller (Roadmap):
@@ -771,7 +771,7 @@ Automated Controller (Roadmap):
 Alert Example (Unexpected Legacy Issuance Post Sunset):
 ```
 ALERT UnexpectedEnvelopeV1IssuancePostSunset
-	IF gauth_rfc0111_envelope_v1_sunset_phase == 5 AND increase(gauth_rfc0111_envelope_v1_issued_total[5m]) > 0
+	IF agentauth_aap001_envelope_v1_sunset_phase == 5 AND increase(agentauth_aap001_envelope_v1_issued_total[5m]) > 0
 	FOR 1m
 	LABELS {severity="critical"}
 	ANNOTATIONS {summary="Legacy envelope issuance detected after Sunset", description="Envelope V1 issuance occurred while in Sunset phase (5)."}
@@ -793,14 +793,14 @@ Adds attribution to envelope digest mismatches enabling root cause triage and bl
 
 Metrics:
 ```
-# HELP gauth_rfc0111_envelope_digest_mismatch_total Canonical digest mismatches during verification
-# TYPE gauth_rfc0111_envelope_digest_mismatch_total counter
+# HELP agentauth_aap001_envelope_digest_mismatch_total Canonical digest mismatches during verification
+# TYPE agentauth_aap001_envelope_digest_mismatch_total counter
 
-# HELP gauth_rfc0111_envelope_digest_mismatch_reason_total Envelope digest mismatches labeled by reason
-# TYPE gauth_rfc0111_envelope_digest_mismatch_reason_total counter
-gauth_rfc0111_envelope_digest_mismatch_reason_total{reason="tamper_suspected"} 3
-gauth_rfc0111_envelope_digest_mismatch_reason_total{reason="domain_conflict"} 1
-gauth_rfc0111_envelope_digest_mismatch_reason_total{reason="other"} 2
+# HELP agentauth_aap001_envelope_digest_mismatch_reason_total Envelope digest mismatches labeled by reason
+# TYPE agentauth_aap001_envelope_digest_mismatch_reason_total counter
+agentauth_aap001_envelope_digest_mismatch_reason_total{reason="tamper_suspected"} 3
+agentauth_aap001_envelope_digest_mismatch_reason_total{reason="domain_conflict"} 1
+agentauth_aap001_envelope_digest_mismatch_reason_total{reason="other"} 2
 ```
 
 Reason Semantics:
@@ -815,7 +815,7 @@ Roadmap: Introduce explicit `canonicalization_error` label when digest computati
 Alert Examples:
 ```
 ALERT DigestTamperSuspectedSpike
-	IF increase(gauth_rfc0111_envelope_digest_mismatch_reason_total{reason="tamper_suspected"}[15m]) > 10
+	IF increase(agentauth_aap001_envelope_digest_mismatch_reason_total{reason="tamper_suspected"}[15m]) > 10
 	FOR 5m
 	LABELS {severity="high"}
 	ANNOTATIONS {summary="Spike in tamper-suspected digest mismatches", description=">10 tamper_suspected mismatches in 15m window."}
@@ -857,8 +857,8 @@ ControllerConfig{
 
 Readiness Composite (reused from recording rules concept):
 ```
-sunset_ready = (gauth_rfc0111_envelope_v2_adoption_ratio > 0.95) and \
-							 ((increase(gauth_rfc0111_envelope_digest_mismatch_total[1h]) / increase(gauth_rfc0111_envelope_v2_issued_total[1h])) < 0.002)
+sunset_ready = (agentauth_aap001_envelope_v2_adoption_ratio > 0.95) and \
+							 ((increase(agentauth_aap001_envelope_digest_mismatch_total[1h]) / increase(agentauth_aap001_envelope_v2_issued_total[1h]) < 0.002)
 ```
 
 Dashboard Widgets:
@@ -867,12 +867,12 @@ Dashboard Widgets:
 - Controller satisfaction progress (elapsed / required window) as burn-down indicator.
 
 Rollback Guidance:
-If urgent issues discovered post promotion, set `GAUTH_ENVELOPE_SUNSET_FORCE_PHASE=<prev>` (future implementation) and record audit event; avoid toggling repeatedly.
+If urgent issues discovered post promotion, set `AGENTAUTH_ENVELOPE_SUNSET_FORCE_PHASE=<prev>` (future implementation) and record audit event; avoid toggling repeatedly.
 
 
 ```
-# HELP gauth_rfc0111_envelope_v1_issued_total Delegation tokens issued using envelope version 1
-# HELP gauth_rfc0111_envelope_v2_issued_total Delegation tokens issued using envelope version 2
+# HELP agentauth_aap001_envelope_v1_issued_total Delegation tokens issued using envelope version 1
+# HELP agentauth_aap001_envelope_v2_issued_total Delegation tokens issued using envelope version 2
 ```
 These allow tracking migration rollout and alerting on unexpected reversion (e.g. V2 drop to zero).
 
@@ -882,26 +882,26 @@ Backward Compatibility:
 
 Suggested PromQL Migration Dashboard:
 ```
-sum(rate(gauth_rfc0111_envelope_v1_issued_total[5m])) as v1_rate
-sum(rate(gauth_rfc0111_envelope_v2_issued_total[5m])) as v2_rate
+sum(rate(agentauth_aap001_envelope_v1_issued_total[5m]) as v1_rate
+sum(rate(agentauth_aap001_envelope_v2_issued_total[5m]) as v2_rate
 v2_adoption_pct = v2_rate / (v1_rate + v2_rate)
 ```
 
 Alert Example (Detect Envelope V2 Regression for >15m):
 ```
 ALERT EnvelopeV2Regression
-	IF sum(increase(gauth_rfc0111_envelope_v2_issued_total[15m])) == 0
+	IF sum(increase(agentauth_aap001_envelope_v2_issued_total[15m]) == 0
 	FOR 5m
 	LABELS {severity="medium"}
 	ANNOTATIONS {summary="Envelope V2 issuance stalled", description="No V2 tokens issued in the last 15m (possible misconfiguration or rollback)."}
 ```
 
 Domain Separation Note:
-- Envelope versioning does not modify canonical POA digest domain separation logic (controlled independently by `GAUTH_MULTI_SIG_DOMAIN_V2`).
+- Envelope versioning does not modify canonical POA digest domain separation logic (controlled independently by `AGENTAUTH_MULTI_SIG_DOMAIN_V2`).
 - Envelope V2 embedding of `canonical_digest` is a mirror value; digest computation rules remain unchanged and unaffected by the envelope toggle.
 
 Rollout Strategy:
-1. Deploy with `GAUTH_POA_ENVELOPE_V2=0` and observe baseline V1 issuance rate.
+1. Deploy with `AGENTAUTH_POA_ENVELOPE_V2=0` and observe baseline V1 issuance rate.
 2. Enable flag in staging; monitor `envelope_v2_issued_total` growth and downstream consumer compatibility.
 3. Gradually enable in production (canary subset) using deployment slice environment overrides.
 4. Set global flag once V2 adoption >90% over a sustained window.
@@ -913,8 +913,8 @@ To simplify migration dashboards we expose a direct gauge:
 
 Metric:
 ```
-# HELP gauth_rfc0111_envelope_v2_adoption_ratio Ratio (0-1) of envelope V2 issuance vs total issuance
-# TYPE gauth_rfc0111_envelope_v2_adoption_ratio gauge
+# HELP agentauth_aap001_envelope_v2_adoption_ratio Ratio (0-1) of envelope V2 issuance vs total issuance
+# TYPE agentauth_aap001_envelope_v2_adoption_ratio gauge
 ```
 Computation (performed after each issuance):
 ```
@@ -927,8 +927,8 @@ Edge Cases:
 
 Suggested PromQL (raw ratio + smoothing):
 ```promql
-gauth_rfc0111_envelope_v2_adoption_ratio
-avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[15m])
+agentauth_aap001_envelope_v2_adoption_ratio
+avg_over_time(agentauth_aap001_envelope_v2_adoption_ratio[15m])
 ```
 Threshold Mapping (recommended policy):
 | Phase | Ratio (15m avg) | Action |
@@ -942,7 +942,7 @@ Threshold Mapping (recommended policy):
 Regression Alert Example (ratio drop below 0.80 for 10m):
 ```yaml
 ALERT EnvelopeV2AdoptionRegression
-	IF avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[10m]) < 0.80
+	IF avg_over_time(agentauth_aap001_envelope_v2_adoption_ratio[10m]) < 0.80
 	FOR 5m
 	LABELS {severity="high"}
 	ANNOTATIONS {summary="Envelope V2 adoption ratio regression", description="Ratio <80% for 10m (possible rollback or misconfiguration)."}
@@ -951,17 +951,17 @@ ALERT EnvelopeV2AdoptionRegression
 Canary Completion Alert (reach stabilization threshold):
 ```yaml
 ALERT EnvelopeV2StabilizationReached
-	IF avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[30m]) > 0.70
+	IF avg_over_time(agentauth_aap001_envelope_v2_adoption_ratio[30m]) > 0.70
 	FOR 15m
 	LABELS {severity="info"}
 	ANNOTATIONS {summary="Envelope V2 stabilization threshold crossed", description="Adoption >70% sustained for 30m; begin soft deprecation planning."}
 ```
 
 Dashboard Widgets:
-- Single stat: current `gauth_rfc0111_envelope_v2_adoption_ratio`.
+- Single stat: current `agentauth_aap001_envelope_v2_adoption_ratio`.
 - Sparkline: 6h window of ratio.
 - Phase annotation lines at 0.2, 0.7, 0.9, 0.95.
-- Overlay lines for `rate(gauth_rfc0111_envelope_v1_issued_total[5m])` vs `rate(gauth_rfc0111_envelope_v2_issued_total[5m])`.
+- Overlay lines for `rate(agentauth_aap001_envelope_v1_issued_total[5m])` vs `rate(agentauth_aap001_envelope_v2_issued_total[5m])`.
 
 Operational Runbook Notes:
 - Sudden ratio plunge: check environment variable drift or a subset of pods deployed without the flag.
@@ -972,8 +972,8 @@ Operational Runbook Notes:
 
 Metric:
 ```
-# HELP gauth_rfc0111_envelope_digest_mismatch_total Canonical digest mismatch detected during envelope verification
-# TYPE gauth_rfc0111_envelope_digest_mismatch_total counter
+# HELP agentauth_aap001_envelope_digest_mismatch_total Canonical digest mismatch detected during envelope verification
+# TYPE agentauth_aap001_envelope_digest_mismatch_total counter
 ```
 Definition: Incremented when verification recomputes the canonical delegation digest and it differs from the envelope's embedded digest (V2) or expected reconstruction (V1 path). This signals potential integrity issues: mutation, canonicalization drift, or code regression.
 
@@ -984,21 +984,21 @@ Expected Behavior:
 Alerting:
 ```yaml
 ALERT EnvelopeDigestMismatchSpike
-	IF increase(gauth_rfc0111_envelope_digest_mismatch_total[10m]) > 3
+	IF increase(agentauth_aap001_envelope_digest_mismatch_total[10m]) > 3
 	FOR 5m
 	LABELS {severity="critical"}
 	ANNOTATIONS {summary="Envelope digest mismatch spike", description=">3 mismatches in 10m; possible integrity regression or tampering."}
 ```
 Ratio (mismatch per issuance) for context:
 ```promql
-increase(gauth_rfc0111_envelope_digest_mismatch_total[5m]) / (increase(gauth_rfc0111_envelope_v1_issued_total[5m]) + increase(gauth_rfc0111_envelope_v2_issued_total[5m]))
+increase(agentauth_aap001_envelope_digest_mismatch_total[5m]) / (increase(agentauth_aap001_envelope_v1_issued_total[5m]) + increase(agentauth_aap001_envelope_v2_issued_total[5m]))
 ```
 If ratio >0.01 (1%) sustained => investigate canonicalization path or potential malicious token modifications.
 
 Troubleshooting Steps:
 1. Capture sample mismatched token envelope (ensure redaction of sensitive fields) and recompute digest manually using the canonicalization helper.
 2. Diff canonical JSON representation vs stored envelope fields.
-3. Verify multi-signature domain separation flag consistency (`GAUTH_MULTI_SIG_DOMAIN_V2`).
+3. Verify multi-signature domain separation flag consistency (`AGENTAUTH_MULTI_SIG_DOMAIN_V2`).
 4. Check recent deployment diff for changes in ordering, omitted fields, or added optional metadata.
 5. Inspect logs for fallback digest computation warnings during issuance.
 6. If tampering suspected, enable heightened audit event sampling and consider revoking affected delegations.
@@ -1013,7 +1013,7 @@ Hardening Roadmap:
 - Integrate with anomaly detection subsystem for automatic surge classification.
 
 Sunset Governance Tie-In:
-During deprecation planning for Envelope V1, mismatch anomaly rate must remain below 0.5% for 7 consecutive days before disabling V1 issuance. Include `increase(gauth_rfc0111_envelope_digest_mismatch_total[1h])` in ADR metrics acceptance criteria.
+During deprecation planning for Envelope V1, mismatch anomaly rate must remain below 0.5% for 7 consecutive days before disabling V1 issuance. Include `increase(agentauth_aap001_envelope_digest_mismatch_total[1h])` in ADR metrics acceptance criteria.
 
 Security Considerations:
 - Elevated mismatch counts can signal canonicalization drift enabling signature replay across versions.
@@ -1023,8 +1023,8 @@ Data Retention:
 - Raw counter only; long-term trend derived through remote write or recording rules.
 - Consider recording rule:
 ```promql
-record: gauth_rfc0111_envelope_digest_mismatch_rate_5m
-expr: rate(gauth_rfc0111_envelope_digest_mismatch_total[5m])
+record: agentauth_aap001_envelope_digest_mismatch_rate_5m
+expr: rate(agentauth_aap001_envelope_digest_mismatch_total[5m])
 ```
 
 
@@ -1037,11 +1037,11 @@ Flaky probability-driven tests for the external anchoring stub (`tsa_stub`) are 
 
 Environment Variable:
 ```
-GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED=<int64 seed>
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED=<int64 seed>
 ```
 
 Behavior:
-- When set and `GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub`, the stub provider uses a fixed `math/rand` source seeded with the provided value.
+- When set and `AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub`, the stub provider uses a fixed `math/rand` source seeded with the provided value.
 - This makes latency and success/failure sequences reproducible across test runs and CI.
 - Omitted or empty value falls back to non-deterministic time-based seeding.
 
@@ -1051,16 +1051,16 @@ Use Cases:
 
 Example:
 ```
-GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub \
-GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=0.6 \
-GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES=4 \
-GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED=1700001 \
-./gauth-server
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub \
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=0.6 \
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES=4 \
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED=1700001 \
+./agentauth-server
 ```
 
 Test Guidance:
 - Prefer asserting on presence of attempts + latency sample rather than insisting on a failure occurrence for moderate probabilities.
-- Use `GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=1` in separate tests to exercise failure metrics deterministically.
+- Use `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=1` in separate tests to exercise failure metrics deterministically.
 
 ### Forced Initial Failures (NEW)
 
@@ -1070,40 +1070,40 @@ Multi-signature delegation (POA) validation now emits granular counters and a de
 
 Prometheus Counters:
 ```
-# HELP gauth_rfc0111_multi_signature_verifications_total Successful multi-signature threshold verifications
-# TYPE gauth_rfc0111_multi_signature_verifications_total counter
-gauth_rfc0111_multi_signature_verifications_total 7
+# HELP agentauth_aap001_multi_signature_verifications_total Successful multi-signature threshold verifications
+# TYPE agentauth_aap001_multi_signature_verifications_total counter
+agentauth_aap001_multi_signature_verifications_total 7
 
-# HELP gauth_rfc0111_multi_signature_verification_failures_total Failed multi-signature threshold verifications (generic)
-gauth_rfc0111_multi_signature_verification_failures_total 3
+# HELP agentauth_aap001_multi_signature_verification_failures_total Failed multi-signature threshold verifications (generic)
+agentauth_aap001_multi_signature_verification_failures_total 3
 
-# HELP gauth_rfc0111_multi_signature_structural_failures_total Multi-signature structural precondition failures
-gauth_rfc0111_multi_signature_structural_failures_total 1
+# HELP agentauth_aap001_multi_signature_structural_failures_total Multi-signature structural precondition failures
+agentauth_aap001_multi_signature_structural_failures_total 1
 
-# HELP gauth_rfc0111_multi_signature_digest_failures_total Multi-signature canonical digest failures
-gauth_rfc0111_multi_signature_digest_failures_total 0
+# HELP agentauth_aap001_multi_signature_digest_failures_total Multi-signature canonical digest failures
+agentauth_aap001_multi_signature_digest_failures_total 0
 
-# HELP gauth_rfc0111_multi_signature_public_key_missing_failures_total Multi-signature public key missing events
-gauth_rfc0111_multi_signature_public_key_missing_failures_total 0
+# HELP agentauth_aap001_multi_signature_public_key_missing_failures_total Multi-signature public key missing events
+agentauth_aap001_multi_signature_public_key_missing_failures_total 0
 
-# HELP gauth_rfc0111_multi_signature_invalid_signature_failures_total Multi-signature invalid signature cryptographic failures
-gauth_rfc0111_multi_signature_invalid_signature_failures_total 1
+# HELP agentauth_aap001_multi_signature_invalid_signature_failures_total Multi-signature invalid signature cryptographic failures
+agentauth_aap001_multi_signature_invalid_signature_failures_total 1
 
-# HELP gauth_rfc0111_multi_signature_threshold_failures_total Multi-signature count-based threshold failures
-gauth_rfc0111_multi_signature_threshold_failures_total 1
+# HELP agentauth_aap001_multi_signature_threshold_failures_total Multi-signature count-based threshold failures
+agentauth_aap001_multi_signature_threshold_failures_total 1
 
-# HELP gauth_rfc0111_multi_signature_weight_failures_total Multi-signature weight threshold failures
-gauth_rfc0111_multi_signature_weight_failures_total 0
+# HELP agentauth_aap001_multi_signature_weight_failures_total Multi-signature weight threshold failures
+agentauth_aap001_multi_signature_weight_failures_total 0
 ```
 
 Latency Histogram:
 ```
-# HELP gauth_rfc0111_multi_signature_verification_latency_seconds Latency of multi-signature verification operations
-# TYPE gauth_rfc0111_multi_signature_verification_latency_seconds histogram
+# HELP agentauth_aap001_multi_signature_verification_latency_seconds Latency of multi-signature verification operations
+# TYPE agentauth_aap001_multi_signature_verification_latency_seconds histogram
 ```
 Buckets inherit the adapter's generic bucket configuration unless overridden (default sub‑millisecond through 100ms). Use P95/P99 via PromQL:
 ```
-histogram_quantile(0.95, sum by (le) (rate(gauth_rfc0111_multi_signature_verification_latency_seconds_bucket[5m])))
+histogram_quantile(0.95, sum by (le) (rate(agentauth_aap001_multi_signature_verification_latency_seconds_bucket[5m])))
 ```
 
 Failure Taxonomy:
@@ -1121,11 +1121,11 @@ Gauge-Like Fields (in responses / internal POA struct):
 Suggested Alerts:
 ```
 ALERT MultiSignatureStructuralAnomaly
-	IF increase(gauth_rfc0111_multi_signature_structural_failures_total[10m]) > 5
+	IF increase(agentauth_aap001_multi_signature_structural_failures_total[10m]) > 5
 	FOR 5m
 
 ALERT MultiSignatureCryptoErrorSpike
-	IF (increase(gauth_rfc0111_multi_signature_invalid_signature_failures_total[5m]) + increase(gauth_rfc0111_multi_signature_public_key_missing_failures_total[5m])) > 10
+	IF (increase(agentauth_aap001_multi_signature_invalid_signature_failures_total[5m]) + increase(agentauth_aap001_multi_signature_public_key_missing_failures_total[5m]) > 10
 	FOR 3m
 ```
 
@@ -1133,16 +1133,16 @@ ALERT MultiSignatureCryptoErrorSpike
 
 To prevent digest collisions between single-signature and threshold / weighted multi-signature modes, an optional domain prefix variant can be enabled:
 ```
-GAUTH_MULTI_SIG_DOMAIN_V2=1
+AGENTAUTH_MULTI_SIG_DOMAIN_V2=1
 ```
 When active and `Threshold>1`, the canonical digest preimage domain changes from:
 ```
-GAUTH_AAP-001_POA_V1\n
+AGENTAUTH_AAP-001_POA_V1\n
 ```
 to:
 ```
-GAUTH_AAP-001_POA_V2|thr=<threshold>|w=<sorted-weight-map>\n
-GAUTH_AAP-001_POA_V3|tax=1\n  (Introduced with taxonomy expansion RB2; used for single-signer / non multi-sig PoAs when Version >=3. Multi-sig PoAs continue to use V2 domain to minimize downstream changes. Canonical JSON gains optional taxonomy object: {"taxonomy":{"agent_type":...,"sector":...,"action_class":...}} only when non-empty values are provided.)
+AGENTAUTH_AAP-001_POA_V2|thr=<threshold>|w=<sorted-weight-map>\n
+AGENTAUTH_AAP-001_POA_V3|tax=1\n  (Introduced with taxonomy expansion RB2; used for single-signer / non multi-sig PoAs when Version >=3. Multi-sig PoAs continue to use V2 domain to minimize downstream changes. Canonical JSON gains optional taxonomy object: {"taxonomy":{"agent_type":...,"sector":...,"action_class":...}} only when non-empty values are provided.)
 ```
 `<sorted-weight-map>` is a comma-separated `signer=weight` list sorted lexicographically. If no valid weight map is configured, only `thr=<threshold>` is embedded (weights segment empty).
 
@@ -1159,7 +1159,7 @@ Migration Guidance:
 PromQL Digest Change Detection (optional):
 If previous digest set cardinality known:
 ```
-sum(increase(gauth_rfc0111_multi_signature_verifications_total[30m])) BY ()
+sum(increase(agentauth_aap001_multi_signature_verifications_total[30m]) BY ()
 ```
 Should reflect re-verification volume after re-issuance; structural failures should be near zero.
 
@@ -1171,7 +1171,7 @@ Roadmap:
 
 To guarantee a failure-before-success sequence without relying on probability draws, configure:
 ```
-GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=<n>
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=<n>
 ```
 When `n>0` and the provider is `tsa_stub`, the first `n` anchoring attempts return a forced failure (`stub failure (forced)`), after which normal probabilistic behavior resumes.
 
@@ -1181,23 +1181,23 @@ Interaction Order:
 3. On success, latency and receipt metrics record normally.
 
 Recommended Usage:
-- Set `GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=1` in tests asserting presence of at least one failure and subsequent success metrics.
-- Combine with `GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED` for fully reproducible multi-attempt sequences when `retries > 0`.
+- Set `AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=1` in tests asserting presence of at least one failure and subsequent success metrics.
+- Combine with `AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED` for fully reproducible multi-attempt sequences when `retries > 0`.
 
 Example (failure then success deterministic):
 ```
-GAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub \
-GAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=0.6 \
-GAUTH_CAP_EXTERNAL_ANCHOR_RETRIES=4 \
-GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=1 \
-GAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED=1700001 \
-./gauth-server
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER=tsa_stub \
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB=0.6 \
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES=4 \
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS=1 \
+AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED=1700001 \
+./agentauth-server
 ```
 
 Metrics Impact:
 - Failure counters increment for forced failures like probabilistic ones; no separate label is added (intent: keep surface stable).
 - Latency histogram excludes failed attempts (observed latency recorded only on success path); forced failures do not contribute latency samples.
-| gauth_rfc0111_validation_latency_seconds | histogram | End-to-end delegation validation latency. | Observation in `ValidateDelegationCtx` |
+| agentauth_aap001_validation_latency_seconds | histogram | End-to-end delegation validation latency. | Observation in `ValidateDelegationCtx` |
 
 ### Cardinality
 All current metrics are global (no labels). Add labels conservatively (e.g. `result`, `algorithm`) only when required for dashboards. A label explosion will degrade performance and increase scrape size.
@@ -1208,26 +1208,26 @@ Common queries:
 
 ```promql
 # Delegations per 5m
-sum(increase(gauth_rfc0111_delegations_created_total[5m]))
+sum(increase(agentauth_aap001_delegations_created_total[5m]))
 
 # Validation latency p95
-(sum(increase(gauth_rfc0111_anchor_failure_total[15m])) / clamp_min(sum(increase(gauth_rfc0111_anchor_attempt_total[15m])), 1))
+(sum(increase(agentauth_aap001_anchor_failure_total[15m]) / clamp_min(sum(increase(agentauth_aap001_anchor_attempt_total[15m])), 1))
 
 # Revocation integrity failures (bursts)
-increase(gauth_rfc0111_revocation_integrity_failures_total[1h])
+increase(agentauth_aap001_revocation_integrity_failures_total[1h])
 ```
 
 |-------|------------|-----------------------|-----------|
-| High Validation Latency | `histogram_quantile(0.95, sum by (le)(rate(gauth_rfc0111_validation_latency_seconds_bucket[10m]))) > 0.050` | 50ms p95 sustained 10m | Indicates unexpected slow path (I/O, locking) |
-| Anchor Failure Spike | `sum(increase(gauth_rfc0111_anchor_failure_total[15m])) > 0 and (sum(increase(gauth_rfc0111_anchor_failure_total[15m])) / sum(increase(gauth_rfc0111_anchor_attempt_total[15m]))) > 0.25` | >25% failures | External anchoring dependency degradation |
-| Signature Verification Failures | `increase(gauth_rfc0111_signature_verification_failures_total[10m]) > 10` | >10 failures / 10m | Possible tampering or key mismatch event |
-| Revocation Integrity Failure | `increase(gauth_rfc0111_revocation_integrity_failures_total[5m]) > 0` | Any occurrence | Chain integrity compromise should page immediately |
+| High Validation Latency | `histogram_quantile(0.95, sum by (le)(rate(agentauth_aap001_validation_latency_seconds_bucket[10m])) > 0.050` | 50ms p95 sustained 10m | Indicates unexpected slow path (I/O, locking) |
+| Anchor Failure Spike | `sum(increase(agentauth_aap001_anchor_failure_total[15m]) > 0 and (sum(increase(agentauth_aap001_anchor_failure_total[15m]) / sum(increase(agentauth_aap001_anchor_attempt_total[15m])) > 0.25` | >25% failures | External anchoring dependency degradation |
+| Signature Verification Failures | `increase(agentauth_aap001_signature_verification_failures_total[10m]) > 10` | >10 failures / 10m | Possible tampering or key mismatch event |
+| Revocation Integrity Failure | `increase(agentauth_aap001_revocation_integrity_failures_total[5m]) > 0` | Any occurrence | Chain integrity compromise should page immediately |
 
 ## 4. SLO & SLIs
 
 | SLI | Measurement | Target | Notes |
 |-----|------------|--------|------|
-| Validation Latency p95 | histogram_quantile(0.95, rate(validation_latency_seconds_bucket[5m])) | < 40ms | In-memory baseline ~47.5µs for crypto verification; includes audit overhead |
+| Validation Latency p95 | histogram_quantile(0.95, rate(validation_latency_seconds_bucket[5m]) | < 40ms | In-memory baseline ~47.5µs for crypto verification; includes audit overhead |
 | Signature Issue Success Rate | 1 - failure ratio | > 99.5% | Failures should be rare (digest/sign errors) |
 | Revocation Integrity Fail | Count per 30d | 0 | Any failure triggers immediate investigation |
 | Anchor Success Rate | Attempts - failures | > 90% | Until external service matures; adjust after production data |
@@ -1333,31 +1333,31 @@ Sample:
 
 Format:
 ```
-# HELP gauth_poa_semantic_counter Semantic PoA validation rejection counters.
-# TYPE gauth_poa_semantic_counter counter
-gauth_poa_semantic_counter_scope_violation 7
-gauth_poa_semantic_counter_amount_limit_exceeded 2
-gauth_poa_semantic_counter_daily_amount_limit_exceeded 1
-gauth_poa_semantic_counter_currency_mismatch 1
-gauth_poa_semantic_counter_restriction_mismatch 0
+# HELP agentauth_poa_semantic_counter Semantic PoA validation rejection counters.
+# TYPE agentauth_poa_semantic_counter counter
+agentauth_poa_semantic_counter_scope_violation 7
+agentauth_poa_semantic_counter_amount_limit_exceeded 2
+agentauth_poa_semantic_counter_daily_amount_limit_exceeded 1
+agentauth_poa_semantic_counter_currency_mismatch 1
+agentauth_poa_semantic_counter_restriction_mismatch 0
 ```
 
-Metric Naming Pattern: `gauth_poa_semantic_counter_<key>`.
+Metric Naming Pattern: `agentauth_poa_semantic_counter_<key>`.
 
 ### OpenTelemetry Gauges
-Enabled when `GAUTH_OTEL_METRICS_ENABLE=1`.
+Enabled when `AGENTAUTH_OTEL_METRICS_ENABLE=1`.
 
 Gauge Names:
-- `gauth_poa_semantic_counter_scope_violation`
-- `gauth_poa_semantic_counter_amount_limit_exceeded`
-- `gauth_poa_semantic_counter_daily_amount_limit_exceeded` (cumulative daily limit violations)
-- `gauth_poa_semantic_counter_currency_mismatch`
-- `gauth_poa_semantic_counter_restriction_mismatch`
+- `agentauth_poa_semantic_counter_scope_violation`
+- `agentauth_poa_semantic_counter_amount_limit_exceeded`
+- `agentauth_poa_semantic_counter_daily_amount_limit_exceeded` (cumulative daily limit violations)
+- `agentauth_poa_semantic_counter_currency_mismatch`
+- `agentauth_poa_semantic_counter_restriction_mismatch`
 
 All gauges are Int64 observable and collected alongside violation counters.
 
 ### Persistence
-Set `GAUTH_SEMANTIC_PERSIST_PATH` to enable snapshot persistence (JSON file with schema):
+Set `AGENTAUTH_SEMANTIC_PERSIST_PATH` to enable snapshot persistence (JSON file with schema):
 ```json
 {
 	"counters": {
@@ -1369,28 +1369,28 @@ Set `GAUTH_SEMANTIC_PERSIST_PATH` to enable snapshot persistence (JSON file with
 	"timestamp": "2025-10-19T01:45:12.345678Z"
 }
 ```
-Autosave interval via `GAUTH_SEMANTIC_AUTOSAVE_SEC` (>=10). Throttle override: `GAUTH_SEMANTIC_PERSIST_NO_THROTTLE=1`.
+Autosave interval via `AGENTAUTH_SEMANTIC_AUTOSAVE_SEC` (>=10). Throttle override: `AGENTAUTH_SEMANTIC_PERSIST_NO_THROTTLE=1`.
 
-Restore Behavior: On startup if `GAUTH_SEMANTIC_PERSIST_PATH` is set, the server calls `SetSemanticSnapshot` on the AAP-001 service to fully restore counters (missing keys default to zero). This replaces earlier advisory-only logging.
+Restore Behavior: On startup if `AGENTAUTH_SEMANTIC_PERSIST_PATH` is set, the server calls `SetSemanticSnapshot` on the AAP-001 service to fully restore counters (missing keys default to zero). This replaces earlier advisory-only logging.
 
 ### Example PromQL
 ```promql
 # 5m rate of amount limit exceeded events
-sum(increase(gauth_poa_semantic_counter_amount_limit_exceeded[5m]))
+sum(increase(agentauth_poa_semantic_counter_amount_limit_exceeded[5m]))
 
 # Scope violation ratio vs all semantic events
-sum(increase(gauth_poa_semantic_counter_scope_violation[5m])) /
-clamp_min(sum(increase(gauth_poa_semantic_counter_scope_violation[5m]) + increase(gauth_poa_semantic_counter_amount_limit_exceeded[5m]) + increase(gauth_poa_semantic_counter_daily_amount_limit_exceeded[5m]) + increase(gauth_poa_semantic_counter_currency_mismatch[5m]) + increase(gauth_poa_semantic_counter_restriction_mismatch[5m])), 1)
+sum(increase(agentauth_poa_semantic_counter_scope_violation[5m]) /
+clamp_min(sum(increase(agentauth_poa_semantic_counter_scope_violation[5m]) + increase(agentauth_poa_semantic_counter_amount_limit_exceeded[5m]) + increase(agentauth_poa_semantic_counter_daily_amount_limit_exceeded[5m]) + increase(agentauth_poa_semantic_counter_currency_mismatch[5m]) + increase(agentauth_poa_semantic_counter_restriction_mismatch[5m])), 1)
 ```
 
 ### Alert Suggestions
 | Alert | Expression | Threshold | Rationale |
 |-------|------------|-----------|-----------|
-| Excessive Scope Violations | `sum(increase(gauth_poa_semantic_counter_scope_violation[10m])) > 50` | >50 / 10m | Indicates potential misuse or missing client-side caching of allowed actions |
-| Amount Limit Abuse | `sum(increase(gauth_poa_semantic_counter_amount_limit_exceeded[5m])) > 10` | >10 / 5m | Detects repeated attempts above allowed financial thresholds |
-| Daily Limit Abuse | `sum(increase(gauth_poa_semantic_counter_daily_amount_limit_exceeded[15m])) > 5` | >5 / 15m | Detects cumulative attempts to exceed daily authorized monetary ceilings |
-| Currency Drift | `sum(increase(gauth_poa_semantic_counter_currency_mismatch[15m])) > 5` | >5 / 15m | Possible incorrect client region/currency configuration |
-| Restriction Mismatch Spike | `sum(increase(gauth_poa_semantic_counter_restriction_mismatch[10m])) > 20` | >20 / 10m | Suggests outdated delegation metadata in consumers |
+| Excessive Scope Violations | `sum(increase(agentauth_poa_semantic_counter_scope_violation[10m]) > 50` | >50 / 10m | Indicates potential misuse or missing client-side caching of allowed actions |
+| Amount Limit Abuse | `sum(increase(agentauth_poa_semantic_counter_amount_limit_exceeded[5m]) > 10` | >10 / 5m | Detects repeated attempts above allowed financial thresholds |
+| Daily Limit Abuse | `sum(increase(agentauth_poa_semantic_counter_daily_amount_limit_exceeded[15m]) > 5` | >5 / 15m | Detects cumulative attempts to exceed daily authorized monetary ceilings |
+| Currency Drift | `sum(increase(agentauth_poa_semantic_counter_currency_mismatch[15m]) > 5` | >5 / 15m | Possible incorrect client region/currency configuration |
+| Restriction Mismatch Spike | `sum(increase(agentauth_poa_semantic_counter_restriction_mismatch[10m]) > 20` | >20 / 10m | Suggests outdated delegation metadata in consumers |
 
 ### Roadmap for Semantic Metrics
 1. Add per-restriction labeled counters (guard cardinality via allowlist) for top 3 financial restriction keys.
@@ -1423,23 +1423,23 @@ JSON Extension Example (`GET /api/v1/beta/metrics/poa/semantics`):
 
 Prometheus Metrics:
 ```
-# HELP gauth_poa_semantic_rate_60s Per-minute semantic rejection rate over trailing ~60s window.
-# TYPE gauth_poa_semantic_rate_60s gauge
-gauth_poa_semantic_rate_60s{category="scope_violation"} 3.2
-gauth_poa_semantic_rate_60s{category="amount_limit_exceeded"} 0.4
+# HELP agentauth_poa_semantic_rate_60s Per-minute semantic rejection rate over trailing ~60s window.
+# TYPE agentauth_poa_semantic_rate_60s gauge
+agentauth_poa_semantic_rate_60s{category="scope_violation"} 3.2
+agentauth_poa_semantic_rate_60s{category="amount_limit_exceeded"} 0.4
 ...
-# HELP gauth_poa_semantic_rate_300s Per-minute semantic rejection rate over trailing ~300s window.
-# TYPE gauth_poa_semantic_rate_300s gauge
-gauth_poa_semantic_rate_300s{category="scope_violation"} 1.1
+# HELP agentauth_poa_semantic_rate_300s Per-minute semantic rejection rate over trailing ~300s window.
+# TYPE agentauth_poa_semantic_rate_300s gauge
+agentauth_poa_semantic_rate_300s{category="scope_violation"} 1.1
 ...
 ```
 
 OpenTelemetry Gauges:
 ```
-gauth_poa_semantic_rate_60s_scope_violation
-gauth_poa_semantic_rate_300s_scope_violation
-gauth_poa_semantic_rate_60s_amount_limit_exceeded
-gauth_poa_semantic_rate_300s_amount_limit_exceeded
+agentauth_poa_semantic_rate_60s_scope_violation
+agentauth_poa_semantic_rate_300s_scope_violation
+agentauth_poa_semantic_rate_60s_amount_limit_exceeded
+agentauth_poa_semantic_rate_300s_amount_limit_exceeded
 ... (one pair per semantic category)
 ```
 
@@ -1465,12 +1465,12 @@ Stability: alpha (subject to naming and payload changes pre-1.0).
 
 ### Detached Signature Missing Metric (NEW)
 
-When strict detached signature enforcement is enabled (`GAUTH_REQUIRE_DETACHED_SIGNATURE=1`), requests missing the required detached signature artifact increment a dedicated counter:
+When strict detached signature enforcement is enabled (`AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1`), requests missing the required detached signature artifact increment a dedicated counter:
 
 ```
-# HELP gauth_rfc0111_crypto_signature_missing_total Missing detached signature artifact events when strict enforcement is enabled
-# TYPE gauth_rfc0111_crypto_signature_missing_total counter
-gauth_rfc0111_crypto_signature_missing_total 0
+# HELP agentauth_aap001_crypto_signature_missing_total Missing detached signature artifact events when strict enforcement is enabled
+# TYPE agentauth_aap001_crypto_signature_missing_total counter
+agentauth_aap001_crypto_signature_missing_total 0
 ```
 
 Purpose:
@@ -1481,17 +1481,17 @@ Purpose:
 Suggested PromQL:
 ```promql
 # 10m rate of missing detached signatures
-sum(increase(gauth_rfc0111_crypto_signature_missing_total[10m]))
+sum(increase(agentauth_aap001_crypto_signature_missing_total[10m]))
 
 # Ratio of missing events vs total attestation verifications
-sum(increase(gauth_rfc0111_crypto_signature_missing_total[5m])) /
-clamp_min(sum(increase(gauth_rfc0111_attestation_proof_verifications_total[5m])), 1)
+sum(increase(agentauth_aap001_crypto_signature_missing_total[5m]) /
+clamp_min(sum(increase(agentauth_aap001_attestation_proof_verifications_total[5m])), 1)
 ```
 
 Alert Example:
 ```yaml
 ALERT DetachedSignatureMissingSpike
-	IF increase(gauth_rfc0111_crypto_signature_missing_total[15m]) > 25
+	IF increase(agentauth_aap001_crypto_signature_missing_total[15m]) > 25
 	FOR 5m
 	LABELS {severity="medium"}
 	ANNOTATIONS {summary="Detached signature missing spike", description=">25 missing detached signature events in 15m window (strict mode)."}
@@ -1519,17 +1519,17 @@ Granular counters now distinguish specific trust anchor enforcement failure mode
 
 Prometheus Counters:
 ```
-# HELP gauth_rfc0111_attestation_proof_trust_anchor_missing_total Attestation proof verification failures due to missing trust anchor
-# TYPE gauth_rfc0111_attestation_proof_trust_anchor_missing_total counter
-gauth_rfc0111_attestation_proof_trust_anchor_missing_total 0
+# HELP agentauth_aap001_attestation_proof_trust_anchor_missing_total Attestation proof verification failures due to missing trust anchor
+# TYPE agentauth_aap001_attestation_proof_trust_anchor_missing_total counter
+agentauth_aap001_attestation_proof_trust_anchor_missing_total 0
 
-# HELP gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total Attestation proof verification failures due to algorithm mismatch with trust anchor
-# TYPE gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total counter
-gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total 0
+# HELP agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total Attestation proof verification failures due to algorithm mismatch with trust anchor
+# TYPE agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total counter
+agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total 0
 
-# HELP gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total Attestation proof verification failures due to key mismatch with trust anchor
-# TYPE gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total counter
-gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total 0
+# HELP agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total Attestation proof verification failures due to key mismatch with trust anchor
+# TYPE agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total counter
+agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total 0
 ```
 
 Failure Taxonomy:
@@ -1540,44 +1540,44 @@ Failure Taxonomy:
 | key_mismatch | Key ID found but public key bytes differ | Stale key material, partial rotation, possible tampering | Reconcile key rotation logs; rotate & re-issue proofs |
 
 Environment Toggle:
-`GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1` enables strict enforcement. When unset, proofs still verify cryptographically but trust anchor counters remain zero (soft mode) unless failures occur in branches guarded by strict mode.
+`AGENTAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1` enables strict enforcement. When unset, proofs still verify cryptographically but trust anchor counters remain zero (soft mode) unless failures occur in branches guarded by strict mode.
 
 Suggested PromQL:
 ```promql
 # 5m rate of total trust anchor failures
-sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_missing_total[5m])) +
-sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[5m])) +
-sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[5m]))
+sum(increase(agentauth_aap001_attestation_proof_trust_anchor_missing_total[5m]) +
+sum(increase(agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total[5m]) +
+sum(increase(agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total[5m]))
 
 # Failure ratio vs all verifications (guard divide-by-zero)
-(sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_missing_total[5m])) +
- sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[5m])) +
- sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[5m]))) /
- clamp_min(sum(increase(gauth_rfc0111_attestation_proof_verifications_total[5m])), 1)
+(sum(increase(agentauth_aap001_attestation_proof_trust_anchor_missing_total[5m]) +
+ sum(increase(agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total[5m]) +
+ sum(increase(agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total[5m])) /
+ clamp_min(sum(increase(agentauth_aap001_attestation_proof_verifications_total[5m])), 1)
 
 # Algorithm mismatch spike detection (configuration drift)
-increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[15m]) > 3
+increase(agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total[15m]) > 3
 ```
 
 Alert Examples:
 ```
 ALERT AttestationTrustAnchorFailureSpike
-	IF (sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_missing_total[10m])) +
-			sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[10m])) +
-			sum(increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[10m]))) > 10
+	IF (sum(increase(agentauth_aap001_attestation_proof_trust_anchor_missing_total[10m]) +
+			sum(increase(agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total[10m]) +
+			sum(increase(agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total[10m])) > 10
 	FOR 5m
 	LABELS {severity="high"}
 	ANNOTATIONS {summary="Attestation trust anchor failure spike", description=">10 trust anchor verification failures in 10m window."}
 
 ALERT AttestationAlgorithmDrift
-	IF increase(gauth_rfc0111_attestation_proof_trust_anchor_algorithm_mismatch_total[30m]) > 5
+	IF increase(agentauth_aap001_attestation_proof_trust_anchor_algorithm_mismatch_total[30m]) > 5
 	FOR 10m
 	LABELS {severity="medium"}
 	ANNOTATIONS {summary="Attestation algorithm mismatch surge", description=">5 algorithm mismatches in 30m; verify anchor algorithm metadata."}
 
 ALERT AttestationKeyMismatchPersistent
-	IF increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[1h]) > 0
-		AND increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[1h]) == increase(gauth_rfc0111_attestation_proof_trust_anchor_key_mismatch_total[2h])
+	IF increase(agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total[1h]) > 0
+		AND increase(agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total[1h]) == increase(agentauth_aap001_attestation_proof_trust_anchor_key_mismatch_total[2h])
 	FOR 15m
 	LABELS {severity="warning"}
 	ANNOTATIONS {summary="Persistent attestation key mismatch", description="Key mismatch failures sustained across consecutive hours."}
@@ -1593,11 +1593,11 @@ Hardening Roadmap:
 - Add labeled counter for `trust_anchor_expired` (future) when anchor timestamps supported.
 - Emit gauge `attestation_trust_anchor_last_refresh_age_seconds` to alert on stale registry refresh.
 - Integrate anomaly detection (EWMA) for mismatch ratio vs baseline.
-- Provide CLI `gauth attestation anchors verify` to offline validate registry consistency.
+- Provide CLI `agentauth attestation anchors verify` to offline validate registry consistency.
 
 Testing Guidance:
 - Unit tests inject memory metrics and simulate each failure path asserting only the relevant counter increments.
-- Integration tests set `GAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1` and rotate algorithms/keys to ensure mismatch counters fire.
+- Integration tests set `AGENTAUTH_ATTEST_REQUIRE_TRUST_ANCHOR=1` and rotate algorithms/keys to ensure mismatch counters fire.
 - Use ephemeral anchor with deliberate wrong algorithm to validate algorithm mismatch counter before production rotations.
 
 SLO Considerations (initial draft):

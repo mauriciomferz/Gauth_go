@@ -10,8 +10,8 @@ package delegation
 // - Verification given leaf hash, proof, and expected root
 //
 // Hash function: SHA-256 over prefix + concatenation of child digests:
-//   leaf:   SHA256("GAUTH_MERKLE_LEAF:" + hexHash)
-//   parent: SHA256("GAUTH_MERKLE_NODE:" + left + right)  (left/right are raw hex strings of child nodes)
+//   leaf:   SHA256("AGENTAUTH_MERKLE_LEAF:" + hexHash)
+//   parent: SHA256("AGENTAUTH_MERKLE_NODE:" + left + right)  (left/right are raw hex strings of child nodes)
 // We retain hex strings throughout for consistency with existing event Hash.
 
 import (
@@ -36,7 +36,7 @@ func NewMerkleTree() *MerkleTree { return &MerkleTree{leaves: make([]merkleNode,
 
 // AppendLeaf adds a new leaf from raw event hash (hex string) and marks tree dirty.
 func (t *MerkleTree) AppendLeaf(eventHash string) {
-	h := sha256.Sum256(append([]byte("GAUTH_MERKLE_LEAF:"), []byte(eventHash)...))
+	h := sha256.Sum256(append([]byte("AGENTAUTH_MERKLE_LEAF:"), []byte(eventHash)...))
 	t.leaves = append(t.leaves, merkleNode{digest: hex.EncodeToString(h[:])})
 	t.dirty = true
 }
@@ -80,7 +80,7 @@ func (t *MerkleTree) rebuildIfNeeded() {
 			}
 			left := cur[i].digest
 			right := cur[i+1].digest
-			parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(left)...), []byte(right)...))
+			parent := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(left)...), []byte(right)...))
 			next = append(next, merkleNode{digest: hex.EncodeToString(parent[:])})
 		}
 		levels = append(levels, next)
@@ -141,10 +141,10 @@ func VerifyProof(leafDigest string, proof []MerkleProofStep, expectedRoot string
 	for _, step := range proof {
 		switch step.Position {
 		case "R": // sibling is right of cur: parent = HASH(cur + sibling)
-			parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(cur)...), []byte(step.Sibling)...))
+			parent := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(cur)...), []byte(step.Sibling)...))
 			cur = hex.EncodeToString(parent[:])
 		case "L": // sibling is left: parent = HASH(sibling + cur)
-			parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(step.Sibling)...), []byte(cur)...))
+			parent := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(step.Sibling)...), []byte(cur)...))
 			cur = hex.EncodeToString(parent[:])
 		default:
 			return false
@@ -155,6 +155,6 @@ func VerifyProof(leafDigest string, proof []MerkleProofStep, expectedRoot string
 
 // LeafDigestForEventHash returns leaf-domain digest for given event hash (helper for external verification)
 func LeafDigestForEventHash(eventHash string) string {
-	h := sha256.Sum256(append([]byte("GAUTH_MERKLE_LEAF:"), []byte(eventHash)...))
+	h := sha256.Sum256(append([]byte("AGENTAUTH_MERKLE_LEAF:"), []byte(eventHash)...))
 	return hex.EncodeToString(h[:])
 }

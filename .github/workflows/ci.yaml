@@ -43,9 +43,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: gauth
+          POSTGRES_USER: agentauth
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: gauth
+          POSTGRES_DB: agentauth
         ports:
           - 5432:5432
         # Set health check to wait until postgres has started
@@ -73,13 +73,13 @@ jobs:
       - name: Start Background Server (Full Persistence)
         run: |
           # Export necessary secrets for dev mode
-          export GAUTH_JWT_SIGNING_KEY=ci-secret-key-123
-          export GAUTH_REVOCATION_ENABLED=1
+          export AGENTAUTH_JWT_SIGNING_KEY=ci-secret-key-123
+          export AGENTAUTH_REVOCATION_ENABLED=1
           export DB_HOST=localhost
           export DB_PORT=5432
-          export DB_USER=gauth
+          export DB_USER=agentauth
           export DB_PASSWORD=password
-          export DB_NAME=gauth
+          export DB_NAME=agentauth
           export REDIS_HOST=localhost
           export REDIS_PORT=6379
           

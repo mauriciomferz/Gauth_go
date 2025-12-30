@@ -10,7 +10,7 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'gauth-backend'
+  - job_name: 'agentauth-backend'
     scrape_interval: 5s
     metrics_path: /api/admin/metrics/prometheus
     static_configs:

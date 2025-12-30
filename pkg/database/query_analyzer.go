@@ -410,7 +410,7 @@ func (qa *QueryAnalyzer) GetIndexUsageStats(ctx context.Context) ([]IndexUsageSt
 			indexname,
 			idx_scan,
 			idx_tup_read,
-			pg_size_pretty(pg_relation_size(indexrelid)) as index_size
+			pg_size_pretty(pg_relation_size(indexrelid) as index_size
 		FROM pg_stat_user_indexes
 		ORDER BY idx_scan ASC
 		LIMIT 50

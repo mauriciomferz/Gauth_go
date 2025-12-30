@@ -84,7 +84,7 @@ func (h *Handler) HandleTokenRequest(c *gin.Context) {
 	// In a real system, we'd generate a real access token bound to 'iss' (Subject)
 	// For this MVP, we return a mocked success response
 	resp := TokenResponse{
-		AccessToken: "gauth_access_" + iss + "_" + strings.Split(assertion, ".")[2][:10],
+		AccessToken: "agentauth_access_" + iss + "_" + strings.Split(assertion, ".")[2][:10],
 		TokenType:   "Bearer",
 		ExpiresIn:   3600,
 	}

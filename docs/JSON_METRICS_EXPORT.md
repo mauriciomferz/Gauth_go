@@ -54,11 +54,11 @@ internal/metrics/json_exporter_test.go     - Comprehensive tests (450+ lines)
 
 #### JSONMetricsExporter
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/metrics"
+import "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/metrics"
 
 // Create exporter
 exporter := metrics.NewJSONMetricsExporter(
-    "gauth-service",  // service name
+    "agentauth-service",  // service name
     "1.0.0",          // version
     "prod-host-01",   // hostname
 )
@@ -87,7 +87,7 @@ compactData, err := exporter.ExportJSONCompact() // Compact
 ```json
 {
   "metadata": {
-    "service_name": "gauth",
+    "service_name": "agentauth",
     "service_version": "1.0.0",
     "hostname": "prod-host-01",
     "timestamp": "2025-11-09T15:30:45Z",
@@ -162,13 +162,13 @@ package main
 import (
     "net/http"
     "github.com/gin-gonic/gin"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/metrics"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/metrics"
 )
 
 var jsonExporter *metrics.JSONMetricsExporter
 
 func setupMetricsEndpoints(router *gin.Engine) {
-    jsonExporter = metrics.NewJSONMetricsExporter("gauth", "1.0.0", "localhost")
+    jsonExporter = metrics.NewJSONMetricsExporter("agentauth", "1.0.0", "localhost")
     
     // JSON metrics endpoint
     router.GET("/metrics/json", func(c *gin.Context) {
@@ -242,7 +242,7 @@ curl -s http://localhost:8080/metrics/json | jq '.metadata'
 ### Exporter Options
 
 ```go
-exporter := metrics.NewJSONMetricsExporter("gauth", "1.0.0", "host")
+exporter := metrics.NewJSONMetricsExporter("agentauth", "1.0.0", "host")
 
 // Control reason taxonomy inclusion
 exporter.SetIncludeReasons(false)
@@ -476,7 +476,7 @@ curl -s http://localhost:8080/metrics/json | wc -c
 var globalExporter *metrics.JSONMetricsExporter
 
 func init() {
-    globalExporter = metrics.NewJSONMetricsExporter("gauth", "1.0.0", hostname)
+    globalExporter = metrics.NewJSONMetricsExporter("agentauth", "1.0.0", hostname)
 }
 ```
 

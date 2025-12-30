@@ -82,7 +82,7 @@ Persona provides test identities for various countries:
 
 ### Integration Example
 ```go
-// pkg/gauth/external/persona_connector.go
+// pkg/agentauth/external/persona_connector.go
 package external
 
 import (
@@ -225,7 +225,7 @@ Trulioo provides test mode data:
 
 ### Integration Example
 ```go
-// pkg/gauth/external/trulioo_connector.go
+// pkg/agentauth/external/trulioo_connector.go
 package external
 
 import (
@@ -315,13 +315,13 @@ external_connectors:
 ### Run Integration Tests
 ```bash
 # Test Persona connector
-go test -v ./pkg/gauth/external -run TestPersonaConnector
+go test -v ./pkg/agentauth/external -run TestPersonaConnector
 
 # Test Trulioo connector
-go test -v ./pkg/gauth/external -run TestTruliooConnector
+go test -v ./pkg/agentauth/external -run TestTruliooConnector
 
 # Run all external connector tests
-go test -v ./pkg/gauth/external/...
+go test -v ./pkg/agentauth/external/...
 ```
 
 ### Manual Testing
@@ -353,7 +353,7 @@ curl -X POST http://localhost:8080/api/v1/external/trulioo/verify \
 
 1. **✅ Obtain API Keys**: Follow the steps above
 2. **✅ Update Configuration**: Add keys to `.env`
-3. **✅ Implement Connectors**: Create connector files in `pkg/gauth/external/`
+3. **✅ Implement Connectors**: Create connector files in `pkg/agentauth/external/`
 4. **✅ Add Tests**: Create integration tests
 5. **✅ Run Load Tests**: Use k6 script to test performance
 6. **✅ Monitor Metrics**: Check Prometheus for API call metrics

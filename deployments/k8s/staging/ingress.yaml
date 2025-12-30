@@ -1,10 +1,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gauth-ingress
-  namespace: gauth-staging
+  name: agentauth-ingress
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
   annotations:
     # NGINX Ingress Controller annotations
@@ -40,16 +40,16 @@ metadata:
     
     # Load balancing
     nginx.ingress.kubernetes.io/affinity: cookie
-    nginx.ingress.kubernetes.io/session-cookie-name: gauth-session
+    nginx.ingress.kubernetes.io/session-cookie-name: agentauth-session
     nginx.ingress.kubernetes.io/session-cookie-max-age: "3600"
 spec:
   tls:
   - hosts:
-    - gauth-staging.yourdomain.com  # REPLACE with actual domain
-    secretName: gauth-tls
+    - agentauth-staging.yourdomain.com  # REPLACE with actual domain
+    secretName: agentauth-tls
   
   rules:
-  - host: gauth-staging.yourdomain.com  # REPLACE with actual domain
+  - host: agentauth-staging.yourdomain.com  # REPLACE with actual domain
     http:
       paths:
       # API endpoints
@@ -57,7 +57,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: gauth-service
+            name: agentauth-service
             port:
               number: 80
       
@@ -66,7 +66,7 @@ spec:
         pathType: Exact
         backend:
           service:
-            name: gauth-service
+            name: agentauth-service
             port:
               number: 80
       
@@ -75,7 +75,7 @@ spec:
         pathType: Exact
         backend:
           service:
-            name: gauth-service
+            name: agentauth-service
             port:
               number: 9090
       
@@ -84,7 +84,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: gauth-service
+            name: agentauth-service
             port:
               number: 80
 ---
@@ -93,7 +93,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: grafana-ingress
-  namespace: gauth-staging
+  namespace: agentauth-staging
   labels:
     app: grafana
     environment: staging
@@ -128,7 +128,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: prometheus-ingress
-  namespace: gauth-staging
+  namespace: agentauth-staging
   labels:
     app: prometheus
     environment: staging

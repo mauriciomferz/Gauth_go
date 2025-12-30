@@ -110,7 +110,7 @@ func createExamplePoADefinition() *poa.PoADefinition {
 			AuthorizedClient: poa.AuthorizedClient{
 				Type:              string(poa.ClientTypeLLM),
 				TypeEnum:          poa.ClientTypeLLM,
-				Identity:          "gauth-ai-client-v1",
+				Identity:          "agentauth-ai-client-v1",
 				Version:           "1.0.0",
 				OperationalStatus: "active",
 				StatusEnum:        poa.OperationalStatusActive,

@@ -1,6 +1,6 @@
 # JWE Encryption Security Assessment
 
-**Project**: AgentAuth RFC-0111 Implementation  
+**Project**: AgentAuth AAP-001 Implementation  
 **Date**: November 12, 2025  
 **Assessment Type**: Security Architecture Review  
 **Subject**: JSON Web Encryption (JWE) Implementation Necessity  
@@ -27,10 +27,10 @@ The AgentAuth implementation currently uses **JWT (JSON Web Token) with HMAC-SHA
 
 ### Recommendation: ⚠️ **JWE ENCRYPTION OPTIONAL BUT RECOMMENDED**
 
-**Verdict**: JWE encryption is **NOT strictly required** by RFC-0111 for basic functionality, but is **HIGHLY RECOMMENDED** for production deployment, especially if tokens contain sensitive data.
+**Verdict**: JWE encryption is **NOT strictly required** by AAP-001 for basic functionality, but is **HIGHLY RECOMMENDED** for production deployment, especially if tokens contain sensitive data.
 
 **Reasoning**:
-1. RFC-0111 does NOT explicitly mandate JWE encryption
+1. AAP-001 does NOT explicitly mandate JWE encryption
 2. JWT signing provides integrity and authenticity (sufficient for many use cases)
 3. However, Extended Tokens contain **highly sensitive authorization data**
 4. Without encryption, tokens are vulnerable to **inspection attacks**
@@ -46,7 +46,7 @@ The AgentAuth implementation currently uses **JWT (JSON Web Token) with HMAC-SHA
 
 ### 1.1 What's Implemented ✅
 
-**File**: `pkg/gauth/extended_token_service.go`
+**File**: `pkg/agentauth/extended_token_service.go`
 
 ```go
 // Lines 257-262: JWT Token Creation
@@ -57,7 +57,7 @@ tokenString, err := jwtToken.SignedString(s.signingKey)
 **Features**:
 - ✅ JWT creation with HMAC-SHA256 signing
 - ✅ Standard JWT claims (iss, sub, aud, exp, iat, jti)
-- ✅ Extended RFC-0111 claims (client_owner, owners_authorizer, resource_owner, etc.)
+- ✅ Extended AAP-001 claims (client_owner, owners_authorizer, resource_owner, etc.)
 - ✅ Token encoding (`EncodeExtendedToken()`)
 - ✅ Token parsing and validation (`parseExtendedToken()`)
 - ✅ Signature verification prevents tampering
@@ -213,11 +213,11 @@ tokenString, err := jwtToken.SignedString(s.signingKey)
 
 ---
 
-## 3. RFC-0111 Requirements Analysis
+## 3. AAP-001 Requirements Analysis
 
 ### 3.1 Explicit Requirements
 
-**RFC-0111 Section 6: Cryptographic Requirements**:
+**AAP-001 Section 6: Cryptographic Requirements**:
 > "Signatures MUST employ algorithms with public verifiability.  
 > HMAC symmetric-only schemes SHOULD NOT be used for cross-tenant verification contexts."
 
@@ -226,11 +226,11 @@ tokenString, err := jwtToken.SignedString(s.signingKey)
 - ⚠️ HMAC is symmetric (not public verifiable) - **RFC violation for cross-tenant**
 - ❌ **NO explicit JWE encryption requirement**
 
-**Conclusion**: RFC-0111 does **NOT explicitly require JWE encryption**, but does flag HMAC as problematic for cross-tenant scenarios.
+**Conclusion**: AAP-001 does **NOT explicitly require JWE encryption**, but does flag HMAC as problematic for cross-tenant scenarios.
 
 ### 3.2 Implicit Requirements
 
-**RFC-0111 Implicit Security Assumptions**:
+**AAP-001 Implicit Security Assumptions**:
 1. "Extended tokens contain sensitive authorization data"
 2. "Tokens may traverse untrusted networks"
 3. "Tokens should protect PII and business-sensitive information"
@@ -238,9 +238,9 @@ tokenString, err := jwtToken.SignedString(s.signingKey)
 **Analysis**:
 - JWT signing alone does NOT provide confidentiality
 - Sensitive data is readable by anyone
-- This creates a security gap vs. RFC-0111 design intent
+- This creates a security gap vs. AAP-001 design intent
 
-**Conclusion**: While not *explicitly* mandated, JWE encryption aligns with RFC-0111's security principles.
+**Conclusion**: While not *explicitly* mandated, JWE encryption aligns with AAP-001's security principles.
 
 ### 3.3 Industry Best Practices
 
@@ -261,7 +261,7 @@ tokenString, err := jwtToken.SignedString(s.signingKey)
 
 ### 4.1 What's in an Extended Token?
 
-**From** `pkg/gauth/extended_token_service.go` **claims**:
+**From** `pkg/agentauth/extended_token_service.go` **claims**:
 
 ```go
 claims := jwt.MapClaims{
@@ -274,7 +274,7 @@ claims := jwt.MapClaims{
     "token_type": token.TokenType,               // PUBLIC
     "scope":      token.Scope,                   // SENSITIVE (permissions)
     
-    // RFC-0111 extended claims
+    // AAP-001 extended claims
     "client_owner":      token.ClientOwner,      // HIGHLY SENSITIVE (PII, company info)
     "owners_authorizer": token.OwnersAuthorizer, // HIGHLY SENSITIVE (statutory authority, names)
     "resource_owner":    token.ResourceOwner,    // HIGHLY SENSITIVE (PII)
@@ -454,7 +454,7 @@ claims := jwt.MapClaims{
   "alg": "RSA-OAEP-256",
   "enc": "A256GCM",
   "typ": "JWT",
-  "kid": "gauth-server-2025-11"
+  "kid": "agentauth-server-2025-11"
 }
 ```
 
@@ -462,7 +462,7 @@ claims := jwt.MapClaims{
 
 #### Development/Testing: **Symmetric Keys (A256KW)**
 - Use single 256-bit AES key
-- Store in environment variable: `GAUTH_JWE_KEY`
+- Store in environment variable: `AGENTAUTH_JWE_KEY`
 - Rotate monthly
 
 #### Production: **Asymmetric Keys (RSA-OAEP-256)**
@@ -529,18 +529,18 @@ claims := jwt.MapClaims{
 
 4. Set up environment variables
    ```bash
-   export GAUTH_JWE_ENABLED=true
-   export GAUTH_JWE_ALGORITHM=RSA-OAEP-256
-   export GAUTH_JWE_PUBLIC_KEY=/etc/gauth/jwe-public.pem
-   export GAUTH_JWE_PRIVATE_KEY=/etc/gauth/jwe-private.pem
-   export GAUTH_JWE_KEY_ID=gauth-2025-11
+   export AGENTAUTH_JWE_ENABLED=true
+   export AGENTAUTH_JWE_ALGORITHM=RSA-OAEP-256
+   export AGENTAUTH_JWE_PUBLIC_KEY=/etc/agentauth/jwe-public.pem
+   export AGENTAUTH_JWE_PRIVATE_KEY=/etc/agentauth/jwe-private.pem
+   export AGENTAUTH_JWE_KEY_ID=agentauth-2025-11
    ```
 
 **Deliverable**: JWE configuration and key management setup
 
 ### 6.2 Phase 2: JWE Encryption Implementation (Week 2)
 
-**File**: `pkg/gauth/jwe_service.go` (NEW)
+**File**: `pkg/agentauth/jwe_service.go` (NEW)
 
 **Interface**:
 ```go
@@ -695,8 +695,8 @@ func (s *ExtendedTokenService) isJWE(tokenString string) bool {
 ### 6.3 Phase 3: Testing and Validation (Week 3)
 
 **Test Files**:
-1. `pkg/gauth/jwe_service_test.go` - Unit tests for JWE service
-2. `pkg/gauth/extended_token_jwe_test.go` - Integration tests
+1. `pkg/agentauth/jwe_service_test.go` - Unit tests for JWE service
+2. `pkg/agentauth/extended_token_jwe_test.go` - Integration tests
 
 **Test Cases**:
 ```go
@@ -745,7 +745,7 @@ func BenchmarkJWEDecryption(b *testing.B) {
 ### 6.4 Phase 4: Documentation and Deployment (Ongoing)
 
 **Documentation**:
-1. Update `pkg/gauth/README.md` with JWE encryption guide
+1. Update `pkg/agentauth/README.md` with JWE encryption guide
 2. Create `JWE_CONFIGURATION_GUIDE.md` for operators
 3. Add security section to main README
 4. Update API documentation
@@ -753,14 +753,14 @@ func BenchmarkJWEDecryption(b *testing.B) {
 **Configuration Examples**:
 ```yaml
 # config/production.yaml
-gauth:
+agentauth:
   jwe:
     enabled: true
     algorithm: RSA-OAEP-256
     encryption: A256GCM
-    public_key_path: /etc/gauth/jwe-public.pem
-    private_key_path: /etc/gauth/jwe-private.pem
-    key_id: gauth-prod-2025-11
+    public_key_path: /etc/agentauth/jwe-public.pem
+    private_key_path: /etc/agentauth/jwe-private.pem
+    key_id: agentauth-prod-2025-11
     key_rotation_days: 365
 ```
 
@@ -796,15 +796,15 @@ gauth:
 - Security Hardening: **70% → 90%** (+20%)
 - Fully implemented: JWE ✅, key rotation ✅, HSM ✅
 
-### 7.2 Overall RFC-0111 Compliance
+### 7.2 Overall AAP-001 Compliance
 
 **Current**:
-- Overall RFC-0111: **80%** (after MCP Phase 3 + external connector audit)
+- Overall AAP-001: **80%** (after MCP Phase 3 + external connector audit)
 
 **After JWE Implementation**:
 - Security Hardening: 30% → 70% (Building Block)
 - Building Blocks: 67% → 72% (+5%)
-- Overall RFC-0111: 80% → **82%** (+2%)
+- Overall AAP-001: 80% → **82%** (+2%)
 
 ### 7.3 Regulatory Compliance Enablement
 
@@ -903,7 +903,7 @@ gauth:
 
 **Compliance**:
 - ✅ Security hardening score: 30% → 70%
-- ✅ Overall RFC-0111 compliance: 80% → 82%
+- ✅ Overall AAP-001 compliance: 80% → 82%
 - ✅ Audit finding resolved ("no JWE encryption")
 
 **Operational**:
@@ -938,7 +938,7 @@ gauth:
 **Approach**: Use RS256 (RSA signature) instead of HS256 (HMAC)
 
 **Benefits**:
-- ✅ Public verifiability (addresses RFC-0111 HMAC concern)
+- ✅ Public verifiability (addresses AAP-001 HMAC concern)
 - ✅ Non-repudiation (asymmetric signature)
 
 **Limitations**:
@@ -969,7 +969,7 @@ gauth:
 - ✅ Confidentiality protection (end-to-end encryption)
 - ✅ Regulatory compliance (GDPR, PCI-DSS)
 - ✅ Security hardening: 30% → 70% (+40%)
-- ✅ Overall RFC-0111: 80% → 82% (+2%)
+- ✅ Overall AAP-001: 80% → 82% (+2%)
 
 **Effort**: 2-3 weeks development + testing  
 **Risk**: LOW-MEDIUM (manageable)  

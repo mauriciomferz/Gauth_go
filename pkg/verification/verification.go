@@ -98,7 +98,7 @@ type HTTPClient interface {
 
 // FetchDiscovery retrieves discovery metadata.
 func FetchDiscovery(client HTTPClient, base string) (*DiscoveryResponse, error) {
-	url := fmt.Sprintf("%s/.well-known/gauth-configuration", base)
+	url := fmt.Sprintf("%s/.well-known/agentauth-configuration", base)
 	b, err := httpRead(client, url)
 	if err != nil {
 		return nil, err

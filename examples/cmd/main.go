@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
@@ -62,25 +62,25 @@ func showHelp() {
 	fmt.Println("  --duration=DURATION  Token duration (default: 1h)")
 
 	fmt.Println("\n📝 Examples:")
-	fmt.Println("  gauth-cli --cmd=create-token --user=alice --scopes=read,write,admin")
-	fmt.Println("  gauth-cli --cmd=validate-token --token=your-token-here")
-	fmt.Println("  gauth-cli --cmd=demo")
+	fmt.Println("  agentauth-cli --cmd=create-token --user=alice --scopes=read,write,admin")
+	fmt.Println("  agentauth-cli --cmd=validate-token --token=your-token-here")
+	fmt.Println("  agentauth-cli --cmd=demo")
 }
 
 func createToken(userID, scopesStr string, duration time.Duration) {
 	fmt.Printf("\n🔨 Creating token for user: %s\n", userID)
 
 	// Create AgentAuth service
-	service, err := gauth.New(gauth.Config{
+	service, err := agentauth.New(agentauth.Config{
 		AccessTokenExpiry: duration,
-		ClientID:          "gauth-cli",
+		ClientID:          "agentauth-cli",
 	})
 	if err != nil {
 		log.Fatalf("❌ Failed to create AgentAuth service: %v", err)
 	}
 
 	// Create token request
-	req := gauth.TokenRequest{
+	req := agentauth.TokenRequest{
 		GrantID: userID,
 		Scope:   parseScopes(scopesStr),
 	}
@@ -102,7 +102,7 @@ func validateToken(tokenValue string) {
 	fmt.Printf("\n🔍 Validating token: %s...\n", tokenValue[:min(len(tokenValue), 20)]+"...")
 
 	// Create AgentAuth service
-	service, err := gauth.New(gauth.Config{ClientID: "gauth-cli"})
+	service, err := agentauth.New(agentauth.Config{ClientID: "agentauth-cli"})
 	if err != nil {
 		log.Fatalf("❌ Failed to create AgentAuth service: %v", err)
 	}
@@ -147,7 +147,7 @@ func listTokens() {
 			Value:     fmt.Sprintf("demo-token-value-%d", i),
 			Type:      tok.tokenType,
 			Subject:   tok.userID,
-			Issuer:    "gauth-cli",
+			Issuer:    "agentauth-cli",
 			Scopes:    tok.scopes,
 			IssuedAt:  time.Now(),
 			ExpiresAt: time.Now().Add(time.Hour),
@@ -173,9 +173,9 @@ func runDemo() {
 
 	// Step 1: Create a service
 	fmt.Println("\n1️⃣  Creating AgentAuth service...")
-	service, err := gauth.New(gauth.Config{
+	service, err := agentauth.New(agentauth.Config{
 		AccessTokenExpiry: 30 * time.Minute,
-		ClientID:          "gauth-cli-demo",
+		ClientID:          "agentauth-cli-demo",
 	})
 	if err != nil {
 		log.Fatalf("❌ Failed to create service: %v", err)
@@ -184,7 +184,7 @@ func runDemo() {
 
 	// Step 2: Create a token
 	fmt.Println("\n2️⃣  Creating access token...")
-	req := gauth.TokenRequest{
+	req := agentauth.TokenRequest{
 		GrantID: "demo-user-cli",
 		Scope:   []string{"read:profile", "write:data", "admin:users"},
 	}
@@ -219,7 +219,7 @@ func runDemo() {
 		Value:     "cli-demo-value",
 		Type:      token.Access,
 		Subject:   "demo-user-cli",
-		Issuer:    "gauth-cli-demo",
+		Issuer:    "agentauth-cli-demo",
 		Scopes:    req.Scope,
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(30 * time.Minute),
@@ -242,8 +242,8 @@ func runDemo() {
 
 	fmt.Println("\n🎉 Demo completed successfully!")
 	fmt.Println("\n💡 Try running with different commands:")
-	fmt.Println("   gauth-cli --cmd=create-token --user=your-name")
-	fmt.Println("   gauth-cli --cmd=help")
+	fmt.Println("   agentauth-cli --cmd=create-token --user=your-name")
+	fmt.Println("   agentauth-cli --cmd=help")
 }
 
 // Helper functions

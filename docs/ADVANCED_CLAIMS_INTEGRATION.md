@@ -13,7 +13,7 @@ owners: [system]
 P2.10 integrates advanced JWT/PASETO claims into AAP-001 token generation and verification, completing the **sec1.item2** requirement. This feature adds:
 
 1. **Claims Set Metadata** (`ClaimsMetadata`): Structured metadata (version, capabilities, source, confidence, restrictions)
-2. **typ Semantic Enforcement**: Token type field (`gauth.delegation`, `gauth.token`, `gauth.capability`) with validation rules
+2. **typ Semantic Enforcement**: Token type field (`agentauth.delegation`, `agentauth.token`, `agentauth.capability`) with validation rules
 3. **Delegation Chain Depth Tracking**: Custom field tracking chain traversal depth (useful for depth limit policies)
 4. **Structured Restrictions**: Time window, IP whitelist, usage limits, geofence enforcement
 
@@ -25,11 +25,11 @@ P2.10 integrates advanced JWT/PASETO claims into AAP-001 token generation and ve
 ```go
 type EnvelopeV2 struct {
     // ... existing fields ...
-    AdvancedClaims *gauth.AdvancedClaims `json:"advanced_claims,omitempty"`
+    AdvancedClaims *agentauth.AdvancedClaims `json:"advanced_claims,omitempty"`
 }
 ```
 
-**AdvancedClaims** (pkg/gauth/advanced_claims.go):
+**AdvancedClaims** (pkg/agentauth/advanced_claims.go):
 ```go
 type AdvancedClaims struct {
     // Standard JWT claims (RFC 7519)
@@ -77,18 +77,18 @@ type TimeWindow struct {
 
 | typ Value            | Description                         | Validation Rules                                           |
 |----------------------|-------------------------------------|------------------------------------------------------------|
-| `gauth.delegation`   | AAP-001 delegation tokens           | Must have non-empty `delegation_id` and `scope`            |
-| `gauth.token`        | Generic AgentAuth tokens                | Standard validation only (no special rules)                |
-| `gauth.capability`   | Capability-based access tokens      | Must have at least one scope prefixed with `cap:`          |
+| `agentauth.delegation`   | AAP-001 delegation tokens           | Must have non-empty `delegation_id` and `scope`            |
+| `agentauth.token`        | Generic AgentAuth tokens                | Standard validation only (no special rules)                |
+| `agentauth.capability`   | Capability-based access tokens      | Must have at least one scope prefixed with `cap:`          |
 
 Unknown `typ` values are **rejected (fail-closed)** for security.
 
 ## Feature Flags
 
-### GAUTH_ADVANCED_CLAIMS
+### AGENTAUTH_ADVANCED_CLAIMS
 
 **Default**: `0` (disabled)  
-**Enable**: Set `GAUTH_ADVANCED_CLAIMS=1`
+**Enable**: Set `AGENTAUTH_ADVANCED_CLAIMS=1`
 
 **Effect**:
 - **Generation**: Populates `AdvancedClaims` in EnvelopeV2 with typ, ClaimsMetadata, delegation chain depth
@@ -99,18 +99,18 @@ Unknown `typ` values are **rejected (fail-closed)** for security.
 - When enabled for generation but disabled for verification: AdvancedClaims present but not validated (rollback safe)
 - `omitempty` on `AdvancedClaims` field ensures old tokens don't break
 
-### GAUTH_POA_ENVELOPE_V2
+### AGENTAUTH_POA_ENVELOPE_V2
 
 **Default**: `0` (EnvelopeV1)  
-**Enable**: Set `GAUTH_POA_ENVELOPE_V2=1`
+**Enable**: Set `AGENTAUTH_POA_ENVELOPE_V2=1`
 
 **Required for AdvancedClaims**: Must be enabled to use EnvelopeV2 (which carries AdvancedClaims field).
 
 ## Implementation Details
 
-### Generation (pkg/rfc0111/rfc0111.go)
+### Generation (pkg/aap001/aap001.go)
 
-**generateAuthToken()** populates AdvancedClaims when `GAUTH_ADVANCED_CLAIMS=1`:
+**generateAuthToken()** populates AdvancedClaims when `AGENTAUTH_ADVANCED_CLAIMS=1`:
 
 1. **Delegation Chain Depth Calculation**:
    - Traverses `ParentPOAID` links up to 100 levels
@@ -120,17 +120,17 @@ Unknown `typ` values are **rejected (fail-closed)** for security.
 
 2. **ClaimsMetadata Population**:
    ```go
-   ClaimsMetadata: &gauth.ClaimsMetadata{
+   ClaimsMetadata: &agentauth.ClaimsMetadata{
        Version:      "v1",
        Capabilities: poa.Scope,  // Authorized permissions
-       Source:       "rfc0111_delegation",
+       Source:       "aap001_delegation",
        Confidence:   1.0,  // Fully verified delegation
    }
    ```
 
 3. **AdvancedClaims Population**:
    ```go
-   AdvancedClaims: &gauth.AdvancedClaims{
+   AdvancedClaims: &agentauth.AdvancedClaims{
        Subject:   poa.Grantee,
        Issuer:    poa.Grantor,
        Audience:  []string{poa.Grantee},
@@ -139,7 +139,7 @@ Unknown `typ` values are **rejected (fail-closed)** for security.
        NotBefore: now.Unix(),
        JWTID:     env2.JTI,  // Reuse envelope JTI
        Scope:     poa.Scope,
-       TokenType: "gauth.delegation",  // typ semantic value
+       TokenType: "agentauth.delegation",  // typ semantic value
        ClientID:  poa.ID,
        ClaimsMetadata: claimsMeta,
        Custom: map[string]interface{}{
@@ -150,12 +150,12 @@ Unknown `typ` values are **rejected (fail-closed)** for security.
    }
    ```
 
-### Verification (pkg/rfc0111/rfc0111.go)
+### Verification (pkg/aap001/aap001.go)
 
-**VerifyToken()** enforces typ-specific validation when `GAUTH_ADVANCED_CLAIMS=1`:
+**VerifyToken()** enforces typ-specific validation when `AGENTAUTH_ADVANCED_CLAIMS=1`:
 
 ```go
-if useV2 && env2.AdvancedClaims != nil && os.Getenv("GAUTH_ADVANCED_CLAIMS") == "1" {
+if useV2 && env2.AdvancedClaims != nil && os.Getenv("AGENTAUTH_ADVANCED_CLAIMS") == "1" {
     // Validate semantic rules (expiration, typ, audience, subject)
     if err := env2.AdvancedClaims.ValidateSemantics(); err != nil {
         return nil, rfc.New(rfc.ErrUnauthorized, fmt.Sprintf("advanced claims validation failed: %v", err))
@@ -163,15 +163,15 @@ if useV2 && env2.AdvancedClaims != nil && os.Getenv("GAUTH_ADVANCED_CLAIMS") == 
     
     // Enforce typ-specific rules
     switch env2.AdvancedClaims.TokenType {
-    case "gauth.delegation":
+    case "agentauth.delegation":
         // Must have non-empty delegation_id and scope
         if env2.DelegationID == "" {
-            return nil, rfc.New(rfc.ErrUnauthorized, "typ=gauth.delegation requires valid delegation_id")
+            return nil, rfc.New(rfc.ErrUnauthorized, "typ=agentauth.delegation requires valid delegation_id")
         }
         if len(env2.AdvancedClaims.Scope) == 0 {
-            return nil, rfc.New(rfc.ErrUnauthorized, "typ=gauth.delegation requires non-empty scope")
+            return nil, rfc.New(rfc.ErrUnauthorized, "typ=agentauth.delegation requires non-empty scope")
         }
-    case "gauth.capability":
+    case "agentauth.capability":
         // Must have at least one "cap:" prefixed scope
         hasCapScope := false
         for _, scope := range env2.AdvancedClaims.Scope {
@@ -181,9 +181,9 @@ if useV2 && env2.AdvancedClaims != nil && os.Getenv("GAUTH_ADVANCED_CLAIMS") == 
             }
         }
         if !hasCapScope {
-            return nil, rfc.New(rfc.ErrUnauthorized, "typ=gauth.capability requires at least one 'cap:' prefixed scope")
+            return nil, rfc.New(rfc.ErrUnauthorized, "typ=agentauth.capability requires at least one 'cap:' prefixed scope")
         }
-    case "gauth.token":
+    case "agentauth.token":
         // Generic tokens have no special requirements
     default:
         // Unknown typ values rejected (fail-closed)
@@ -200,8 +200,8 @@ if useV2 && env2.AdvancedClaims != nil && os.Getenv("GAUTH_ADVANCED_CLAIMS") == 
 
 **Action**:
 ```bash
-export GAUTH_ADVANCED_CLAIMS=1
-export GAUTH_POA_ENVELOPE_V2=1
+export AGENTAUTH_ADVANCED_CLAIMS=1
+export AGENTAUTH_POA_ENVELOPE_V2=1
 ```
 
 **Result**:
@@ -223,8 +223,8 @@ export GAUTH_POA_ENVELOPE_V2=1
 
 **Rollback Strategy**:
 ```bash
-unset GAUTH_ADVANCED_CLAIMS
-# Keep GAUTH_POA_ENVELOPE_V2=1 if already using EnvelopeV2
+unset AGENTAUTH_ADVANCED_CLAIMS
+# Keep AGENTAUTH_POA_ENVELOPE_V2=1 if already using EnvelopeV2
 ```
 
 **Effect**:
@@ -237,8 +237,8 @@ unset GAUTH_ADVANCED_CLAIMS
 
 ```go
 // Enable feature flags
-os.Setenv("GAUTH_ADVANCED_CLAIMS", "1")
-os.Setenv("GAUTH_POA_ENVELOPE_V2", "1")
+os.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "1")
+os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 // Create delegation
 resp, err := svc.CreateDelegation(DelegationRequest{
@@ -249,9 +249,9 @@ resp, err := svc.CreateDelegation(DelegationRequest{
 })
 
 // Token now includes AdvancedClaims with:
-// - typ: "gauth.delegation"
+// - typ: "agentauth.delegation"
 // - ClaimsMetadata.Capabilities: ["read", "write"]
-// - ClaimsMetadata.Source: "rfc0111_delegation"
+// - ClaimsMetadata.Source: "aap001_delegation"
 // - ClaimsMetadata.Confidence: 1.0
 // - Custom.delegation_chain_length: 0 (root delegation)
 ```
@@ -282,7 +282,7 @@ savedChild, _ := svc.repo.Save(child)
 ### Example 3: Capability Token
 
 ```go
-// Create capability token (typ=gauth.capability)
+// Create capability token (typ=agentauth.capability)
 // Scope must include at least one "cap:" prefixed permission
 resp, err := svc.CreateDelegation(DelegationRequest{
     Grantor: "alice",
@@ -292,7 +292,7 @@ resp, err := svc.CreateDelegation(DelegationRequest{
 })
 
 // Token validation enforces:
-// - typ="gauth.capability" requires at least one "cap:" scope
+// - typ="agentauth.capability" requires at least one "cap:" scope
 ```
 
 ### Example 4: Time Window Restriction
@@ -308,8 +308,8 @@ resp, err := svc.CreateDelegation(DelegationRequest{
 
 // Manually add ClaimsRestrictions (future: API support)
 // This would restrict token usage to business hours (9 AM - 5 PM, Mon-Fri)
-claimsRestrictions := &gauth.ClaimsRestrictions{
-    TimeWindow: &gauth.TimeWindow{
+claimsRestrictions := &agentauth.ClaimsRestrictions{
+    TimeWindow: &agentauth.TimeWindow{
         StartHour: 9,   // 9 AM
         EndHour:   17,  // 5 PM
         Weekdays:  []int{1, 2, 3, 4, 5},  // Monday-Friday
@@ -322,10 +322,10 @@ claimsRestrictions := &gauth.ClaimsRestrictions{
 
 ## Testing
 
-Comprehensive test coverage in `pkg/rfc0111/advanced_claims_test.go`:
+Comprehensive test coverage in `pkg/aap001/advanced_claims_test.go`:
 
 1. **TestAdvancedClaims_GenerationFeatureGated**:
-   - Verifies AdvancedClaims only populated when `GAUTH_ADVANCED_CLAIMS=1`
+   - Verifies AdvancedClaims only populated when `AGENTAUTH_ADVANCED_CLAIMS=1`
    - Tests backward compatibility (feature disabled by default)
 
 2. **TestAdvancedClaims_BackwardCompatibility**:
@@ -334,7 +334,7 @@ Comprehensive test coverage in `pkg/rfc0111/advanced_claims_test.go`:
 
 Run tests:
 ```bash
-go test -v -run TestAdvancedClaims ./pkg/rfc0111/
+go test -v -run TestAdvancedClaims ./pkg/aap001/
 ```
 
 ## Security Considerations
@@ -374,8 +374,8 @@ go test -v -run TestAdvancedClaims ./pkg/rfc0111/
 - **RFC 7519**: JSON Web Token (JWT) - https://datatracker.ietf.org/doc/html/rfc7519
 - **PASETO**: Platform-Agnostic Security Tokens - https://paseto.io/
 - **GAP Matrix**: docs/GAP_MATRIX.auto.md (sec1.item2 status)
-- **Implementation**: pkg/rfc0111/rfc0111.go (generateAuthToken, VerifyToken)
-- **Tests**: pkg/rfc0111/advanced_claims_test.go
+- **Implementation**: pkg/aap001/aap001.go (generateAuthToken, VerifyToken)
+- **Tests**: pkg/aap001/advanced_claims_test.go
 
 ## Changelog
 
@@ -385,6 +385,6 @@ go test -v -run TestAdvancedClaims ./pkg/rfc0111/
 - **Added**: AdvancedClaims population in generateAuthToken() (~75 lines, feature-gated)
 - **Added**: typ semantic validation in VerifyToken() (~40 lines, feature-gated)
 - **Added**: Delegation chain depth calculation (traverse ParentPOAID up to 100 levels)
-- **Added**: AgentAuth typ values (gauth.delegation, gauth.token, gauth.capability) to isValidTokenType()
+- **Added**: AgentAuth typ values (agentauth.delegation, agentauth.token, agentauth.capability) to isValidTokenType()
 - **Added**: Comprehensive test suite (4 tests, all passing)
 - **Status**: sec1.item2 **Implemented** (claims set metadata, typ semantic enforcement, delegation chain depth tracking)

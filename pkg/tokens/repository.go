@@ -345,8 +345,8 @@ func (r *Repository) GetTokenMetrics(ctx context.Context, tenantID string) (map[
 	query := `
 		SELECT
 			COUNT(*) as total_tokens,
-			COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW()) as active_tokens,
-			COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at <= NOW()) as expired_tokens,
+			COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW() as active_tokens,
+			COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at <= NOW() as expired_tokens,
 			COUNT(*) FILTER (WHERE revoked_at IS NOT NULL) as revoked_tokens,
 			COUNT(*) FILTER (WHERE token_type = 'access') as access_tokens,
 			COUNT(*) FILTER (WHERE token_type = 'refresh') as refresh_tokens,

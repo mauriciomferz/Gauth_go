@@ -8,7 +8,7 @@
 // 4. Authentication and authorization middleware
 //
 // The subscription flow follows RFC-0111 Steps I-VIII, and authorization follows Steps a-i.
-package gauth_aap_001
+package agentauth_aap_001
 
 import (
 	"net/http"
@@ -17,19 +17,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
 // SubscriptionHandlers encapsulates RFC-0111 subscription API handlers.
 type SubscriptionHandlers struct {
-	subscriptionManager *gauth.SubscriptionFlowManager
-	subscriptionStore   gauth.SubscriptionStore
+	subscriptionManager *agentauth.SubscriptionFlowManager
+	subscriptionStore   agentauth.SubscriptionStore
 }
 
 // NewSubscriptionHandlers creates a new subscription handlers instance.
-func NewSubscriptionHandlers(manager *gauth.SubscriptionFlowManager, store gauth.SubscriptionStore) *SubscriptionHandlers {
+func NewSubscriptionHandlers(manager *agentauth.SubscriptionFlowManager, store agentauth.SubscriptionStore) *SubscriptionHandlers {
 	return &SubscriptionHandlers{
 		subscriptionManager: manager,
 		subscriptionStore:   store,
@@ -69,7 +69,7 @@ func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 	}
 
 	// Step I.b: Execute identity proof
-	identityProofRequest := &gauth.IdentityProofRequest{
+	identityProofRequest := &agentauth.IdentityProofRequest{
 		SubjectID:     req.IdentityProofRequest.SubjectID,
 		IdentityType:  req.IdentityProofRequest.IdentityType,
 		ProofMethod:   req.IdentityProofRequest.ProofMethod,
@@ -83,10 +83,10 @@ func (h *SubscriptionHandlers) CreateSubscription(c *gin.Context) {
 		identityProofRequest,
 	)
 	if err != nil {
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error":   gauthErr.Code,
-				"message": gauthErr.Message,
+				"error":   agentauthErr.Code,
+				"message": agentauthErr.Message,
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{
@@ -111,7 +111,7 @@ func (h *SubscriptionHandlers) GetSubscription(c *gin.Context) {
 
 	subscription, err := h.subscriptionStore.GetSubscription(c.Request.Context(), subscriptionID)
 	if err != nil {
-		if err == gauth.ErrSubscriptionNotFound {
+		if err == agentauth.ErrSubscriptionNotFound {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error":   "not_found",
 				"message": "Subscription not found",
@@ -194,8 +194,8 @@ func (h *SubscriptionHandlers) ExecuteStepII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
-			if gauthErr.Code == "step_ii_prerequisite_failed" {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
+			if agentauthErr.Code == "step_ii_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
 		}
@@ -235,7 +235,7 @@ func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 		return
 	}
 
-	identityProofRequest := &gauth.IdentityProofRequest{
+	identityProofRequest := &agentauth.IdentityProofRequest{
 		SubjectID:     req.SubjectID,
 		IdentityType:  req.IdentityType,
 		ProofMethod:   req.ProofMethod,
@@ -250,11 +250,11 @@ func (h *SubscriptionHandlers) ExecuteStepIII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
 			code = http.StatusBadRequest
 			c.JSON(code, gin.H{
-				"error":   gauthErr.Code,
-				"message": gauthErr.Message,
+				"error":   agentauthErr.Code,
+				"message": agentauthErr.Message,
 			})
 		} else {
 			c.JSON(code, gin.H{
@@ -277,7 +277,7 @@ func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
 	var req struct {
-		AuthorizationChain *gauth.AuthorizationChain `json:"authorization_chain" binding:"required"`
+		AuthorizationChain *agentauth.AuthorizationChain `json:"authorization_chain" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -295,8 +295,8 @@ func (h *SubscriptionHandlers) ExecuteStepIV(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
-			if gauthErr.Code == "step_iv_prerequisite_failed" {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
+			if agentauthErr.Code == "step_iv_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
 		}
@@ -380,8 +380,8 @@ func (h *SubscriptionHandlers) ExecuteStepV(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
-			if gauthErr.Code == "step_v_prerequisite_failed" {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
+			if agentauthErr.Code == "step_v_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
 		}
@@ -421,7 +421,7 @@ func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 		return
 	}
 
-	identityProofRequest := &gauth.IdentityProofRequest{
+	identityProofRequest := &agentauth.IdentityProofRequest{
 		SubjectID:     req.SubjectID,
 		IdentityType:  req.IdentityType,
 		ProofMethod:   req.ProofMethod,
@@ -436,11 +436,11 @@ func (h *SubscriptionHandlers) ExecuteStepVI(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
 			code = http.StatusBadRequest
 			c.JSON(code, gin.H{
-				"error":   gauthErr.Code,
-				"message": gauthErr.Message,
+				"error":   agentauthErr.Code,
+				"message": agentauthErr.Message,
 			})
 		} else {
 			c.JSON(code, gin.H{
@@ -463,7 +463,7 @@ func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	subscriptionID := c.Param("id")
 
 	var req struct {
-		AuthorizationChain *gauth.AuthorizationChain `json:"authorization_chain" binding:"required"`
+		AuthorizationChain *agentauth.AuthorizationChain `json:"authorization_chain" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -481,8 +481,8 @@ func (h *SubscriptionHandlers) ExecuteStepVII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
-			if gauthErr.Code == "step_vii_prerequisite_failed" {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
+			if agentauthErr.Code == "step_vii_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
 		}
@@ -531,8 +531,8 @@ func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 	)
 	if err != nil {
 		code := http.StatusInternalServerError
-		if gauthErr, ok := err.(*gauth.AgentAuthError); ok {
-			if gauthErr.Code == "step_viii_prerequisite_failed" {
+		if agentauthErr, ok := err.(*agentauth.AgentAuthError); ok {
+			if agentauthErr.Code == "step_viii_prerequisite_failed" {
 				code = http.StatusBadRequest
 			}
 		}
@@ -574,7 +574,7 @@ func (h *SubscriptionHandlers) ExecuteStepVIII(c *gin.Context) {
 }
 
 // Helper function to generate extended token from completed subscription
-func generateExtendedTokenFromSubscription(sub *gauth.Subscription) (string, error) {
+func generateExtendedTokenFromSubscription(sub *agentauth.Subscription) (string, error) {
 	now := time.Now()
 	exp := now.Add(24 * time.Hour) // Token valid for 24 hours
 
@@ -591,8 +591,8 @@ func generateExtendedTokenFromSubscription(sub *gauth.Subscription) (string, err
 		resourceServerID = sub.ResourceServerAuth.ServerID
 	}
 
-	// Get issuer from environment (matches gauth service configuration)
-	issuer := os.Getenv("GAUTH_ISSUER")
+	// Get issuer from environment (matches agentauth service configuration)
+	issuer := os.Getenv("AGENTAUTH_ISSUER")
 	if issuer == "" {
 		issuer = "http://localhost:8080" // Default for dev
 	}
@@ -631,7 +631,7 @@ func generateExtendedTokenFromSubscription(sub *gauth.Subscription) (string, err
 
 // getJWTSigningKey returns the JWT signing key from environment or default
 func getJWTSigningKey() []byte {
-	secret := os.Getenv("GAUTH_JWT_SECRET")
+	secret := os.Getenv("AGENTAUTH_JWT_SECRET")
 	if secret == "" {
 		// #nosec G101: demo secret placeholder for dev use
 		secret = "dev-secret-demo-00000000000000000000000000000000"

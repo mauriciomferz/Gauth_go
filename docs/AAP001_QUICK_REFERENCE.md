@@ -6,24 +6,24 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC-0111 Quick Reference Guide
+# AAP-001 Quick Reference Guide
 
 ## Quick Commands
 
 ```bash
-# Start server with RFC-0111 enabled
-GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+# Start server with AAP-001 enabled
+AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 # Run all tests
-./scripts/test_rfc0111_end_to_end.sh
+./scripts/test_aap001_end_to_end.sh
 
 # Create subscription
-curl -X POST http://localhost:8080/api/v1/rfc0111/subscriptions \
+curl -X POST http://localhost:8080/api/v1/aap001/subscriptions \
   -H "Content-Type: application/json" \
   -d '{"client_id":"client-app-123","client_owner_identity":{"subject_id":"owner-123"},"owners_authorizer_identity":{"subject_id":"auth-123"},"pip_token":"pip-token","pvp_token":"pvp-token"}'
 
 # Get authorization token
-curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
+curl -X POST http://localhost:8080/api/v1/aap001/authorize \
   -H "Content-Type: application/json" \
   -d '{"client_id":"client-app-123","subscription_id":"sub_XXX","resource_owner_id":"ro-123","scope":"read write"}'
 ```
@@ -40,7 +40,7 @@ Authorization:
   → (e) Token Issue → (f) Grant Check → (g-i) Use/Track
 ```
 
-## Common OAuth Scopes → RFC-0111 Actions
+## Common OAuth Scopes → AAP-001 Actions
 
 | Scope    | Action                         |
 |----------|--------------------------------|
@@ -107,7 +107,7 @@ audit_trail          - Complete audit log
 
 ## Testing Checklist
 
-- [ ] Server running with `GAUTH_AAP-001_ENABLED=1`
+- [ ] Server running with `AGENTAUTH_AAP-001_ENABLED=1`
 - [ ] Can create subscription (8 steps)
 - [ ] Subscription reaches "completed" status
 - [ ] Can request authorization token
@@ -134,9 +134,9 @@ audit_trail          - Complete audit log
 
 ## File Locations
 
-- **Handlers**: `web/handlers/rfc0111/`
-- **Core Logic**: `pkg/gauth/`
+- **Handlers**: `web/handlers/aap001/`
+- **Core Logic**: `pkg/agentauth/`
 - **PoA Types**: `pkg/poa/`
-- **Tests**: `scripts/test_rfc0111_*.sh`
+- **Tests**: `scripts/test_aap001_*.sh`
 - **Docs**: `docs/AAP-001_README.md`
 - **Status**: `AAP-001_IMPLEMENTATION_STATUS.md`

@@ -278,9 +278,9 @@ repo.PruneExpired(cutoff)
 
 ## References
 
-- **BoltRepository**: `pkg/rfc0111/bolt_repository.go` (enhanced with indexes)
-- **Tests**: `pkg/rfc0111/bolt_repository_indexing_test.go` (9 tests)
-- **POARepository Interface**: `pkg/rfc0111/repository.go`
+- **BoltRepository**: `pkg/aap001/bolt_repository.go` (enhanced with indexes)
+- **Tests**: `pkg/aap001/bolt_repository_indexing_test.go` (9 tests)
+- **POARepository Interface**: `pkg/aap001/repository.go`
 - **GAP Matrix**: `docs/GAP_MATRIX.auto.md` (sec5.item2)
 
 ---

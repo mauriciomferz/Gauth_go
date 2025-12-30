@@ -27,12 +27,12 @@ func (s *BetaServer) registerRB3Discovery() {
 		// --- Build token_algorithms slice mirroring well-known logic ---
 		legacyAlg := algHS256
 		algs := []string{legacyAlg}
-		jwtEnabled := os.Getenv("GAUTH_USE_JWT_LIB") == "1"
-		if os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA { // advertise EdDSA when enabled
+		jwtEnabled := os.Getenv("AGENTAUTH_USE_JWT_LIB") == "1"
+		if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA { // advertise EdDSA when enabled
 			algs = append(algs, "EdDSA")
 		}
 		if jwtEnabled {
-			jwtAlg := os.Getenv("GAUTH_JWT_ALG")
+			jwtAlg := os.Getenv("AGENTAUTH_JWT_ALG")
 			if jwtAlg == "" {
 				jwtAlg = algRS256
 			}
@@ -45,12 +45,12 @@ func (s *BetaServer) registerRB3Discovery() {
 			algs = append([]string{legacyAlg}, tail...)
 		}
 		// Digest domains static list (exposed previously in well-known)
-		digestDomains := []string{"GAUTH_AAP001_POA_V1", "GAUTH_AAP001_POA_V2", "GAUTH_AAP001_POA_V3|tax=1"}
+		digestDomains := []string{"AGENTAUTH_AAP001_POA_V1", "AGENTAUTH_AAP001_POA_V2", "AGENTAUTH_AAP001_POA_V3|tax=1"}
 		taxonomySupported := true // RB2 added unconditional taxonomy support; future toggle could gate this.
-		activeDigestDomain := "GAUTH_AAP001_POA_V1"
+		activeDigestDomain := "AGENTAUTH_AAP001_POA_V1"
 		poaVersionCurrent := 1
 		if taxonomySupported { // prefer taxonomy domain for single-sig issuance baseline
-			activeDigestDomain = "GAUTH_AAP001_POA_V3|tax=1"
+			activeDigestDomain = "AGENTAUTH_AAP001_POA_V3|tax=1"
 			poaVersionCurrent = 3
 		}
 		// Replay strict mode if durable WAL configured for token issuance replay store.
@@ -68,7 +68,7 @@ func (s *BetaServer) registerRB3Discovery() {
 		// Core payload excluding generated_at for ETag computation.
 		// Max delegation depth (RB12) dynamic env inspection each request; empty or invalid => omitted / 0.
 		var maxDepthVal any
-		if raw := os.Getenv("GAUTH_MAX_DELEGATION_DEPTH"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_MAX_DELEGATION_DEPTH"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil && v > 0 {
 				maxDepthVal = v
 			}
@@ -85,7 +85,7 @@ func (s *BetaServer) registerRB3Discovery() {
 			"taxonomy_supported":   taxonomySupported,
 			"max_delegation_depth": maxDepthVal,
 			"revocation_signing_alg_values_supported": func() []string {
-				if os.Getenv("GAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
+				if os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
 					return []string{"EdDSA"}
 				}
 				return []string{}

@@ -9,15 +9,15 @@ This specific engagement focused on implementing a production-ready Observabilit
 ## Delivered Components
 
 ### 1. Prometheus & Grafana Infrastructure (Phase 21)
-- **Prometheus**: Configured to scrape `gauth-backend` (interval: 5s), PostgreSQL, and Redis.
+- **Prometheus**: Configured to scrape `agentauth-backend` (interval: 5s), PostgreSQL, and Redis.
 - **Grafana**: Deployed with automatic datasource provisioning and a pre-built "System Metrics" dashboard.
 - **Docker Integration**: All services integrated into `docker-compose.yml` with health checks.
 
 ### 2. Custom Business Metrics (Phase 22)
 - **Collector**: A custom Go collector (`web/handlers/admin/metrics_handler.go`) now exposes real-time business data:
-    - `gauth_audit_events_total`: Compliance audit trail volume (success/failure).
-    - `gauth_api_keys_total`: API ecosystem growth (active/revoked keys).
-    - `gauth_active_policies_total`: Policy governance state.
+    - `agentauth_audit_events_total`: Compliance audit trail volume (success/failure).
+    - `agentauth_api_keys_total`: API ecosystem growth (active/revoked keys).
+    - `agentauth_active_policies_total`: Policy governance state.
 - **Visualization**: These metrics are visualized in a dedicated "Business Metrics" row on the Grafana dashboard.
 
 ### 3. Alerting Pipeline (Phase 23)
@@ -28,10 +28,10 @@ This specific engagement focused on implementing a production-ready Observabilit
 - **Verification**: Verified via outage simulation (manual stop of backend service).
 
 ### 4. Staging Deployment (Phase 24)
-- **Environment**: Kubernetes (Kind) `gauth-staging` namespace.
+- **Environment**: Kubernetes (Kind) `agentauth-staging` namespace.
 - **Observability**: Full stack deployed (Prometheus, Grafana, Alertmanager) alongside application.
-- **Custom Metrics Fix**: Resolved critical issue where `gauth_audit_events_total` was missing.
-    - **Fix**: Globally registered custom collector, injected missing `GAUTH_DB_*` env vars, and aligned schema query to `audit_logs` table.
+- **Custom Metrics Fix**: Resolved critical issue where `agentauth_audit_events_total` was missing.
+    - **Fix**: Globally registered custom collector, injected missing `AGENTAUTH_DB_*` env vars, and aligned schema query to `audit_logs` table.
 - **Phase 25 Fixes**:
     - **CrashLoop**: Fixed incorrect entrypoint in Dockerfile (switched to `web-server`).
     - **Schema Repair**: Restored missing `audit_events` and `api_keys` tables to enable full metrics.
@@ -54,11 +54,11 @@ This specific engagement focused on implementing a production-ready Observabilit
     - Dashboard: Navigate to **Dashboards > AgentAuth+ System Metrics**
 3. **Verify Metrics Endpoint**:
     ```bash
-    curl -s http://localhost:8080/api/admin/metrics/prometheus | grep gauth_
+    curl -s http://localhost:8080/api/admin/metrics/prometheus | grep agentauth_
     ```
 4. **Verify Alerts** (Simulate Outage):
     ```bash
-    docker stop gauth-backend
+    docker stop agentauth-backend
     sleep 75
     # Check Prometheus Alerts
     open http://localhost:9090/alerts

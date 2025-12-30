@@ -33,7 +33,7 @@ Rotations (minimal) | `web/server_clean.go:5293` | Ledger type mismatch.
 Revocation Root Anchor | `web/server_clean.go:5330-5346` | Client, empty chain, empty root, anchor failure paths.
 Revocation Tree Heads | `pkg/delegation/revocation_chain.go:300-380` | SignedTreeHead generation, multi-sig threshold, signature accumulation.
 Tree Head Verification | `pkg/delegation/revocation_chain.go:400-470` | Single & multi-sig signature verification logic.
-Replay Cache Implementation | `pkg/rfc0111/rfc0111.go:1000-1110` | In-memory TTL cache & store abstraction.
+Replay Cache Implementation | `pkg/aap001/aap001.go:1000-1110` | In-memory TTL cache & store abstraction.
 
 ## 3. RFC115 Coverage Evidence
 Feature | File:Line(s) | Notes
@@ -104,7 +104,7 @@ Lack of integrity mismatch test | Low | Low | Add forced divergence scenario.
 1. `web/server_clean.go`: Add attestation signature verification (Ed25519) and trust anchor registry lookup; errors `attestation_signature_invalid`, `attestation_anchor_unknown` (`rfc111:attestation_integrity`).
 2. `web/server_clean.go`: Enhance rotation summary endpoint with sequence monotonicity & signature threshold validation (new error codes).
 3. `web/server_clean.go` + test: Store last emitted hash externally (in-memory) and deliberately mutate snapshot in test to exercise `integrity_status=mismatch`.
-4. Add environment flag `GAUTH_SEMANTIC_THROTTLE_ENABLE`; if anomaly score > threshold, include field `throttle_active=true` and optional deny simulation endpoint.
+4. Add environment flag `AGENTAUTH_SEMANTIC_THROTTLE_ENABLE`; if anomaly score > threshold, include field `throttle_active=true` and optional deny simulation endpoint.
 5. Create `examples/revocation_inclusion_proof.json` with Merkle proof from existing chain test utility.
 6. Create `docs/diagrams.md` with Mermaid flow diagrams for issuance → anchoring → diagnostics feedback.
 

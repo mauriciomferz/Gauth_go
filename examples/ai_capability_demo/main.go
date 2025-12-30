@@ -24,7 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/AgentAuth/examples/ai_capability_demo/ledger"
 	"github.com/mauriciomferz/AgentAuth/internal/ai"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -42,7 +42,7 @@ import (
 
 // Global instrumentation & auth variables
 var (
-	// Metrics (initialized when GAUTH_AI_DEMO_METRICS=1)
+	// Metrics (initialized when AGENTAUTH_AI_DEMO_METRICS=1)
 	pruneCounter                    prometheus.Counter
 	decisionRowsGauge               prometheus.Gauge
 	jwksFetchCounter                *prometheus.CounterVec
@@ -75,8 +75,8 @@ var (
 	jwksNegative map[string]time.Time
 	// PoA repository (in-memory for demo) & mutex
 	poaRepoMu   sync.RWMutex
-	poaRepo     = make(map[string]*gauth_aap_001.PowerOfAttorney)
-	boltPOARepo *gauth_aap_001.BoltRepository
+	poaRepo     = make(map[string]*agentauth_aap_001.PowerOfAttorney)
+	boltPOARepo *agentauth_aap_001.BoltRepository
 	// Simple ledger instance (Week2 anchoring; may be replaced by BoltDB if persistence configured)
 	ledgerInstance      = ledger.New()
 	boltLedgerInstance  *ledger.BoltLedger
@@ -155,12 +155,12 @@ func fetchJWKS(url string, cacheSeconds int) error {
 }
 
 func getJWKSKey(kid string) (*rsa.PublicKey, error) {
-	url := os.Getenv("GAUTH_AI_DEMO_JWKS_URL")
+	url := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_URL")
 	if url == "" {
 		return nil, errors.New("jwks_disabled")
 	}
 	cacheSecs := 300
-	if v := os.Getenv("GAUTH_AI_DEMO_JWKS_CACHE_SECONDS"); v != "" {
+	if v := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS"); v != "" {
 		if parsed, err := strconv.Atoi(v); err == nil && parsed > 0 {
 			cacheSecs = parsed
 		}
@@ -192,13 +192,13 @@ func getJWKSKey(kid string) (*rsa.PublicKey, error) {
 	pub, ok := jwksCache[kid]
 	if !ok {
 		// add to negative cache with TTL if configured
-		if ttlStr := os.Getenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS"); ttlStr != "" {
+		if ttlStr := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS"); ttlStr != "" {
 			if ttl, err := strconv.Atoi(ttlStr); err == nil && ttl > 0 {
 				if jwksNegative == nil {
 					jwksNegative = make(map[string]time.Time)
 				}
 				// Enforce max entries if configured
-				if maxStr := os.Getenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES"); maxStr != "" {
+				if maxStr := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES"); maxStr != "" {
 					if max, errM := strconv.Atoi(maxStr); errM == nil && max > 0 {
 						if len(jwksNegative) >= max {
 							// Evict oldest expiry
@@ -230,26 +230,26 @@ func getJWKSKey(kid string) (*rsa.PublicKey, error) {
 
 // startJWKSBackgroundRefresh launches the JWKS background refresh loop (used by server and tests)
 func startJWKSBackgroundRefresh() {
-	jwksURL := os.Getenv("GAUTH_AI_DEMO_JWKS_URL")
+	jwksURL := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_URL")
 	if jwksURL == "" {
 		return
 	}
 	go func() {
 		for {
 			cacheSecs := 300
-			if v := os.Getenv("GAUTH_AI_DEMO_JWKS_CACHE_SECONDS"); v != "" {
+			if v := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS"); v != "" {
 				if parsed, err := strconv.Atoi(v); err == nil && parsed > 0 {
 					cacheSecs = parsed
 				}
 			}
 			bgFactor := 0.5
-			if fStr := os.Getenv("GAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR"); fStr != "" {
+			if fStr := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR"); fStr != "" {
 				if f, err := strconv.ParseFloat(fStr, 64); err == nil && f > 0 && f < 1 {
 					bgFactor = f
 				}
 			}
 			jitterSeconds := 0
-			if jStr := os.Getenv("GAUTH_AI_DEMO_JWKS_BG_REFRESH_JITTER_SECONDS"); jStr != "" {
+			if jStr := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_JITTER_SECONDS"); jStr != "" {
 				if j, err := strconv.Atoi(jStr); err == nil && j >= 0 {
 					jitterSeconds = j
 				}
@@ -338,7 +338,7 @@ func main() {
 		defer poaRepoMu.Unlock()
 		if boltPOARepo == nil {
 			if len(poaRepo) == 0 {
-				poaRepo = make(map[string]*gauth_aap_001.PowerOfAttorney)
+				poaRepo = make(map[string]*agentauth_aap_001.PowerOfAttorney)
 			}
 		}
 	})
@@ -380,14 +380,14 @@ func main() {
 	}
 
 	// Environment controlled server behavior
-	noServer := os.Getenv("GAUTH_AI_DEMO_NO_SERVER") == "1"
-	port := os.Getenv("GAUTH_AI_DEMO_PORT")
+	noServer := os.Getenv("AGENTAUTH_AI_DEMO_NO_SERVER") == "1"
+	port := os.Getenv("AGENTAUTH_AI_DEMO_PORT")
 	if port == "" {
 		port = "8080"
 	}
 
 	// Initialize optional SQLite persistence
-	dbPath := os.Getenv("GAUTH_AI_DEMO_DB_PATH")
+	dbPath := os.Getenv("AGENTAUTH_AI_DEMO_DB_PATH")
 	var db *sql.DB
 	if dbPath != "" {
 		var err error
@@ -402,14 +402,14 @@ func main() {
 	}
 
 	if noServer {
-		fmt.Println("\n🚫 GAUTH_AI_DEMO_NO_SERVER=1 set; skipping HTTP server start. Scenarios complete.")
+		fmt.Println("\n🚫 AGENTAUTH_AI_DEMO_NO_SERVER=1 set; skipping HTTP server start. Scenarios complete.")
 		return
 	}
 
 	// Initialize OpenTelemetry tracer if enabled
 	var tracer trace.Tracer
 	var tp *sdktrace.TracerProvider
-	if os.Getenv("GAUTH_AI_DEMO_OTEL") == "1" {
+	if os.Getenv("AGENTAUTH_AI_DEMO_OTEL") == "1" {
 		tracer, tp = initTracer()
 		fmt.Println("[otel] tracing enabled")
 		defer func() {
@@ -424,7 +424,7 @@ func main() {
 	fmt.Println("\n🌐 Starting AI Capability API Server on :" + port + "...")
 	fmt.Println("======================================")
 	// Optional BoltDB ledger persistence initialization
-	if lp := os.Getenv("GAUTH_AI_DEMO_LEDGER_DB_PATH"); lp != "" {
+	if lp := os.Getenv("AGENTAUTH_AI_DEMO_LEDGER_DB_PATH"); lp != "" {
 		if bl, err := ledger.NewBoltLedger(lp); err == nil {
 			boltLedgerInstance = bl
 			fmt.Println("[ledger] bolt persistence enabled at", lp)
@@ -433,7 +433,7 @@ func main() {
 		}
 	}
 	// Week2: Optional audit hash-chain ledger persistence (single global instance)
-	if ap := os.Getenv("GAUTH_AI_DEMO_AUDIT_DB_PATH"); ap != "" {
+	if ap := os.Getenv("AGENTAUTH_AI_DEMO_AUDIT_DB_PATH"); ap != "" {
 		if al, err := ledger.NewAuditLedger(ap); err == nil {
 			auditLedgerInstance = al
 			fmt.Println("[audit-ledger] persistence enabled at", ap, "head=", al.HeadHash(), "size=", al.Size())
@@ -638,7 +638,7 @@ func persistDecision(db *sql.DB, action string, allowed bool, meta map[string]an
 		log.Printf("persist error: %v", err)
 	}
 	// Optional retention pruning (max rows)
-	if maxStr := os.Getenv("GAUTH_AI_DEMO_DB_MAX_ROWS"); maxStr != "" {
+	if maxStr := os.Getenv("AGENTAUTH_AI_DEMO_DB_MAX_ROWS"); maxStr != "" {
 		if max, errP := strconv.Atoi(maxStr); errP == nil && max > 0 {
 			var count int
 			if errC := db.QueryRow(`SELECT COUNT(*) FROM decisions`).Scan(&count); errC == nil && count > max {
@@ -654,7 +654,7 @@ func persistDecision(db *sql.DB, action string, allowed bool, meta map[string]an
 		}
 	}
 	// Optional age-based pruning (max age days)
-	if ageStr := os.Getenv("GAUTH_AI_DEMO_DB_MAX_AGE_DAYS"); ageStr != "" {
+	if ageStr := os.Getenv("AGENTAUTH_AI_DEMO_DB_MAX_AGE_DAYS"); ageStr != "" {
 		if days, errA := strconv.Atoi(ageStr); errA == nil && days > 0 {
 			cutoff := time.Now().Add(-time.Duration(days) * 24 * time.Hour).Format(time.RFC3339Nano)
 			res, errDel := db.Exec(`DELETE FROM decisions WHERE created_at < ?`, cutoff)
@@ -685,14 +685,14 @@ func boolToInt(b bool) int {
 
 // authMiddleware validates API key or JWT (HS256) based on env configuration.
 func authMiddleware() gin.HandlerFunc {
-	// Test bypass: if GAUTH_AI_DEMO_TEST_BYPASS_AUTH=1, skip all auth checks (facilitates unit tests for new endpoints)
-	if os.Getenv("GAUTH_AI_DEMO_TEST_BYPASS_AUTH") == "1" {
+	// Test bypass: if AGENTAUTH_AI_DEMO_TEST_BYPASS_AUTH=1, skip all auth checks (facilitates unit tests for new endpoints)
+	if os.Getenv("AGENTAUTH_AI_DEMO_TEST_BYPASS_AUTH") == "1" {
 		return func(c *gin.Context) { c.Next() }
 	}
-	apiKey := os.Getenv("GAUTH_AI_DEMO_API_KEY")
-	jwtSecret := os.Getenv("GAUTH_AI_DEMO_JWT_SECRET")
-	jwksURL := os.Getenv("GAUTH_AI_DEMO_JWKS_URL")
-	expectAlg := os.Getenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG")
+	apiKey := os.Getenv("AGENTAUTH_AI_DEMO_API_KEY")
+	jwtSecret := os.Getenv("AGENTAUTH_AI_DEMO_JWT_SECRET")
+	jwksURL := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_URL")
+	expectAlg := os.Getenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG")
 	if apiKey == "" && jwtSecret == "" && jwksURL == "" { // no auth configured
 		return func(c *gin.Context) { c.Next() }
 	}
@@ -756,7 +756,7 @@ func authMiddleware() gin.HandlerFunc {
 							_ = json.Unmarshal(payloadRaw, &claims)
 							if poaID, ok := claims["poa_id"].(string); ok && poaID != "" {
 								poaRepoMu.RLock()
-								var poa *gauth_aap_001.PowerOfAttorney
+								var poa *agentauth_aap_001.PowerOfAttorney
 								var exists bool
 								if boltPOARepo != nil {
 									poa, exists = boltPOARepo.Get(poaID)
@@ -769,7 +769,7 @@ func authMiddleware() gin.HandlerFunc {
 									return
 								}
 								now := time.Now().UTC()
-								if poa.Status == gauth_aap_001.POAStatusRevoked {
+								if poa.Status == agentauth_aap_001.POAStatusRevoked {
 									unauth("poa_revoked")
 									return
 								}
@@ -779,7 +779,7 @@ func authMiddleware() gin.HandlerFunc {
 								}
 								// Digest/version integrity checks
 								if digClaim, okD := claims["poa_digest"].(string); okD && digClaim != "" {
-									if calcDig, _, errDig := gauth_aap_001.CanonicalPOADigest(poa); errDig == nil {
+									if calcDig, _, errDig := agentauth_aap_001.CanonicalPOADigest(poa); errDig == nil {
 										if calcDig != digClaim {
 											if poaIntegrityFailuresCounter != nil {
 												poaIntegrityFailuresCounter.WithLabelValues("digest_mismatch").Inc()
@@ -844,7 +844,7 @@ func authMiddleware() gin.HandlerFunc {
 							_ = json.Unmarshal(payloadRaw, &claims)
 							if poaID, ok := claims["poa_id"].(string); ok && poaID != "" {
 								poaRepoMu.RLock()
-								var poa *gauth_aap_001.PowerOfAttorney
+								var poa *agentauth_aap_001.PowerOfAttorney
 								var exists bool
 								if boltPOARepo != nil {
 									poa, exists = boltPOARepo.Get(poaID)
@@ -857,7 +857,7 @@ func authMiddleware() gin.HandlerFunc {
 									return
 								}
 								now := time.Now().UTC()
-								if poa.Status == gauth_aap_001.POAStatusRevoked {
+								if poa.Status == agentauth_aap_001.POAStatusRevoked {
 									unauth("poa_revoked")
 									return
 								}
@@ -866,7 +866,7 @@ func authMiddleware() gin.HandlerFunc {
 									return
 								}
 								if digClaim, okD := claims["poa_digest"].(string); okD && digClaim != "" {
-									if calcDig, _, errDig := gauth_aap_001.CanonicalPOADigest(poa); errDig == nil {
+									if calcDig, _, errDig := agentauth_aap_001.CanonicalPOADigest(poa); errDig == nil {
 										if calcDig != digClaim {
 											if poaIntegrityFailuresCounter != nil {
 												poaIntegrityFailuresCounter.WithLabelValues("digest_mismatch").Inc()
@@ -934,15 +934,15 @@ func subtleConstantTimeEq(a, b string) bool {
 
 // validateJWTClaims parses JSON and validates standard claims if present.
 // Enforced: exp (future), nbf (past), iat (reasonable skew), iss/aud match expected env values, alg header=HS256.
-// Clock skew allowed via GAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS (default 60).
-// Expected issuer/audience via GAUTH_AI_DEMO_JWT_EXPECT_ISS / GAUTH_AI_DEMO_JWT_EXPECT_AUD.
+// Clock skew allowed via AGENTAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS (default 60).
+// Expected issuer/audience via AGENTAUTH_AI_DEMO_JWT_EXPECT_ISS / AGENTAUTH_AI_DEMO_JWT_EXPECT_AUD.
 func validateJWTClaims(payload []byte) bool {
 	var claims map[string]any
 	if err := json.Unmarshal(payload, &claims); err != nil {
 		return false
 	}
 	skew := int64(60)
-	if v := os.Getenv("GAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS"); v != "" {
+	if v := os.Getenv("AGENTAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS"); v != "" {
 		if parsed, err := strconv.ParseInt(v, 10, 64); err == nil && parsed >= 0 {
 			skew = parsed
 		}
@@ -967,13 +967,13 @@ func validateJWTClaims(payload []byte) bool {
 		}
 	}
 	// iss
-	if expectedIss := os.Getenv("GAUTH_AI_DEMO_JWT_EXPECT_ISS"); expectedIss != "" {
+	if expectedIss := os.Getenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ISS"); expectedIss != "" {
 		if v, ok := claims["iss"].(string); !ok || v != expectedIss {
 			return false
 		}
 	}
 	// aud (string or array)
-	if expectedAud := os.Getenv("GAUTH_AI_DEMO_JWT_EXPECT_AUD"); expectedAud != "" {
+	if expectedAud := os.Getenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_AUD"); expectedAud != "" {
 		audValid := false
 		switch v := claims["aud"].(type) {
 		case string:
@@ -1000,7 +1000,7 @@ func validateJWTClaimsDetailed(payload []byte) (bool, string) {
 		return false, "malformed_token"
 	}
 	skew := int64(60)
-	if v := os.Getenv("GAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS"); v != "" {
+	if v := os.Getenv("AGENTAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS"); v != "" {
 		if parsed, err := strconv.ParseInt(v, 10, 64); err == nil && parsed >= 0 {
 			skew = parsed
 		}
@@ -1021,12 +1021,12 @@ func validateJWTClaimsDetailed(payload []byte) (bool, string) {
 			return false, "future_iat"
 		}
 	}
-	if expectedIss := os.Getenv("GAUTH_AI_DEMO_JWT_EXPECT_ISS"); expectedIss != "" {
+	if expectedIss := os.Getenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ISS"); expectedIss != "" {
 		if v, ok := claims["iss"].(string); !ok || v != expectedIss {
 			return false, "issuer_mismatch"
 		}
 	}
-	if expectedAud := os.Getenv("GAUTH_AI_DEMO_JWT_EXPECT_AUD"); expectedAud != "" {
+	if expectedAud := os.Getenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_AUD"); expectedAud != "" {
 		audValid := false
 		switch v := claims["aud"].(type) {
 		case string:
@@ -1050,14 +1050,14 @@ func initTracer() (trace.Tracer, *sdktrace.TracerProvider) {
 	exp, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 	if err != nil {
 		fmt.Println("[otel] exporter error:", err)
-		return otel.Tracer("gauth-ai-demo"), nil
+		return otel.Tracer("agentauth-ai-demo"), nil
 	}
 	res, _ := resource.New(context.Background(), resource.WithAttributes(
-		semconv.ServiceName("gauth-ai-capability-demo"),
+		semconv.ServiceName("agentauth-ai-capability-demo"),
 	))
 	tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exp), sdktrace.WithResource(res))
 	otel.SetTracerProvider(tp)
-	return tp.Tracer("gauth-ai-demo"), tp
+	return tp.Tracer("agentauth-ai-demo"), tp
 }
 
 func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, tracer trace.Tracer) {
@@ -1066,12 +1066,12 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 	router.Use(gin.Logger(), gin.Recovery())
 	router.Use(authMiddleware())
 
-	// Optional Prometheus metrics (GAUTH_AI_DEMO_METRICS=1)
+	// Optional Prometheus metrics (AGENTAUTH_AI_DEMO_METRICS=1)
 	var decisionCounter *prometheus.CounterVec
 	var conflictCounter prometheus.Counter
 	var enforceDuration *prometheus.HistogramVec
 	var conflictDuration prometheus.Histogram
-	if os.Getenv("GAUTH_AI_DEMO_METRICS") == "1" {
+	if os.Getenv("AGENTAUTH_AI_DEMO_METRICS") == "1" {
 		decisionCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 			Name: "ai_demo_decisions_total",
 			Help: "Total number of AI capability enforcement decisions (allowed dimension).",
@@ -1263,7 +1263,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		if request.POAID != "" {
 			result := "not_found"
 			poaRepoMu.RLock()
-			var poa *gauth_aap_001.PowerOfAttorney
+			var poa *agentauth_aap_001.PowerOfAttorney
 			var ok bool
 			if boltPOARepo != nil {
 				poa, ok = boltPOARepo.Get(request.POAID)
@@ -1274,7 +1274,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			if ok {
 				// Basic status/time/scope validation
 				now := time.Now().UTC()
-				if poa.Status == gauth_aap_001.POAStatusRevoked {
+				if poa.Status == agentauth_aap_001.POAStatusRevoked {
 					result = "revoked"
 					allowed = false
 				} else if now.After(poa.ValidUntil) || now.Before(poa.ValidFrom) {
@@ -1299,7 +1299,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 					result = "success" // empty scope treated as wildcard for demo
 				}
 				metadata["poa_id"] = poa.ID
-				if dig, canon, err := gauth_aap_001.CanonicalPOADigest(poa); err == nil {
+				if dig, canon, err := agentauth_aap_001.CanonicalPOADigest(poa); err == nil {
 					metadata["poa_digest"] = dig
 					_ = canon
 				}
@@ -1400,7 +1400,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		if req.ID == "" {
 			req.ID = fmt.Sprintf("poa-%d", time.Now().UnixNano())
 		}
-		poa := &gauth_aap_001.PowerOfAttorney{
+		poa := &agentauth_aap_001.PowerOfAttorney{
 			ID:           req.ID,
 			Version:      1,
 			Grantor:      req.Grantor,
@@ -1409,7 +1409,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			Restrictions: map[string]string{},
 			ValidFrom:    time.Now().UTC(),
 			ValidUntil:   time.Now().UTC().Add(time.Duration(req.ValidForSeconds) * time.Second),
-			Status:       gauth_aap_001.POAStatusActive,
+			Status:       agentauth_aap_001.POAStatusActive,
 			CreatedAt:    time.Now().UTC(),
 			UpdatedAt:    time.Now().UTC(),
 			Jurisdiction: req.Jurisdiction,
@@ -1437,7 +1437,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			}
 		}
 		appendAudit("poa_issue", poa.Grantor, poa.ID, map[string]any{"scope": poa.Scope, "jurisdiction": poa.Jurisdiction})
-		digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
+		digest, _, _ := agentauth_aap_001.CanonicalPOADigest(poa)
 		c.JSON(200, gin.H{"poa": poa, "canonical_digest": digest})
 	})
 
@@ -1468,7 +1468,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			return
 		}
 		now := time.Now().UTC()
-		poa := &gauth_aap_001.PowerOfAttorney{ID: req.ID, Version: 1, Grantor: req.Grantor, Grantee: req.Grantee, Scope: req.Scope, Restrictions: map[string]string{}, ValidFrom: now, ValidUntil: now.Add(time.Duration(req.ValidForSeconds) * time.Second), Status: gauth_aap_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Jurisdiction: req.Jurisdiction, Signers: req.Signers, Threshold: req.Threshold, MultiSignatures: map[string]*gauth_aap_001.POASignature{}}
+		poa := &agentauth_aap_001.PowerOfAttorney{ID: req.ID, Version: 1, Grantor: req.Grantor, Grantee: req.Grantee, Scope: req.Scope, Restrictions: map[string]string{}, ValidFrom: now, ValidUntil: now.Add(time.Duration(req.ValidForSeconds) * time.Second), Status: agentauth_aap_001.POAStatusDraft, CreatedAt: now, UpdatedAt: now, Jurisdiction: req.Jurisdiction, Signers: req.Signers, Threshold: req.Threshold, MultiSignatures: map[string]*agentauth_aap_001.POASignature{}}
 		poaRepoMu.Lock()
 		if boltPOARepo != nil {
 			_ = boltPOARepo.Create(poa)
@@ -1504,7 +1504,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			return
 		}
 		poaRepoMu.Lock()
-		var poa *gauth_aap_001.PowerOfAttorney
+		var poa *agentauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1516,7 +1516,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_aap_001.POAStatusDraft {
+		if poa.Status != agentauth_aap_001.POAStatusDraft {
 			poaRepoMu.Unlock()
 			c.JSON(400, gin.H{"error": "poa_not_draft", "status": poa.Status})
 			return
@@ -1534,17 +1534,17 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			return
 		}
 		if poa.MultiSignatures == nil {
-			poa.MultiSignatures = map[string]*gauth_aap_001.POASignature{}
+			poa.MultiSignatures = map[string]*agentauth_aap_001.POASignature{}
 		}
 		if _, exists := poa.MultiSignatures[req.Signer]; exists {
 			poaRepoMu.Unlock()
 			c.JSON(409, gin.H{"error": "duplicate_signature"})
 			return
 		}
-		digest, canon, _ := gauth_aap_001.CanonicalPOADigest(poa)
+		digest, canon, _ := agentauth_aap_001.CanonicalPOADigest(poa)
 		// For demo we generate a dummy Ed25519-like signature placeholder (no crypto key resolution).
 		randomSig := base64.StdEncoding.EncodeToString([]byte("demo-" + req.Signer + "-" + digest))
-		poa.MultiSignatures[req.Signer] = &gauth_aap_001.POASignature{Algorithm: "ed25519", KeyID: req.Signer + "-kid", DigestHex: digest, SigBase64: randomSig, Canonical: canon}
+		poa.MultiSignatures[req.Signer] = &agentauth_aap_001.POASignature{Algorithm: "ed25519", KeyID: req.Signer + "-kid", DigestHex: digest, SigBase64: randomSig, Canonical: canon}
 		poa.UpdatedAt = time.Now().UTC()
 		// Update repo
 		if boltPOARepo != nil {
@@ -1571,7 +1571,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 	router.GET("/demo/poa/:id/status", func(c *gin.Context) {
 		id := c.Param("id")
 		poaRepoMu.RLock()
-		var poa *gauth_aap_001.PowerOfAttorney
+		var poa *agentauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1590,7 +1590,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 	router.POST("/demo/poa/:id/finalize", func(c *gin.Context) {
 		id := c.Param("id")
 		poaRepoMu.Lock()
-		var poa *gauth_aap_001.PowerOfAttorney
+		var poa *agentauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1602,7 +1602,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_aap_001.POAStatusDraft {
+		if poa.Status != agentauth_aap_001.POAStatusDraft {
 			poaRepoMu.Unlock()
 			c.JSON(400, gin.H{"error": "not_draft", "status": poa.Status})
 			return
@@ -1614,7 +1614,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		}
 		// Mark active
 		oldStatus := poa.Status
-		poa.Status = gauth_aap_001.POAStatusActive
+		poa.Status = agentauth_aap_001.POAStatusActive
 		poa.UpdatedAt = time.Now().UTC()
 		if boltPOARepo != nil {
 			_ = boltPOARepo.Update(poa)
@@ -1799,7 +1799,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		id := c.Param("id")
 		reason := c.Query("reason")
 		poaRepoMu.Lock()
-		var poa *gauth_aap_001.PowerOfAttorney
+		var poa *agentauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1807,9 +1807,9 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			poa, ok = poaRepo[id]
 		}
 		if ok {
-			if poa.Status != gauth_aap_001.POAStatusRevoked {
+			if poa.Status != agentauth_aap_001.POAStatusRevoked {
 				oldStatus := poa.Status
-				poa.Status = gauth_aap_001.POAStatusRevoked
+				poa.Status = agentauth_aap_001.POAStatusRevoked
 				now := time.Now().UTC()
 				poa.RevokedAt = &now
 				poa.RevocationReason = reason
@@ -1851,7 +1851,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		id := c.Param("id")
 		reason := c.Query("reason")
 		poaRepoMu.Lock()
-		var poa *gauth_aap_001.PowerOfAttorney
+		var poa *agentauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1859,9 +1859,9 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			poa, ok = poaRepo[id]
 		}
 		if ok {
-			if poa.Status == gauth_aap_001.POAStatusActive { // only allow suspend from active
+			if poa.Status == agentauth_aap_001.POAStatusActive { // only allow suspend from active
 				oldStatus := poa.Status
-				poa.Status = gauth_aap_001.POAStatusSuspended
+				poa.Status = agentauth_aap_001.POAStatusSuspended
 				poa.UpdatedAt = time.Now().UTC()
 				if boltPOARepo != nil {
 					_ = boltPOARepo.Update(poa)
@@ -1886,7 +1886,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		c.JSON(200, gin.H{"suspended": poa.Status == gauth_aap_001.POAStatusSuspended, "poa_id": id, "status": poa.Status, "reason": reason})
+		c.JSON(200, gin.H{"suspended": poa.Status == agentauth_aap_001.POAStatusSuspended, "poa_id": id, "status": poa.Status, "reason": reason})
 	})
 
 	// PoA terminate endpoint (permanent; allow from active or suspended; cannot change revoked/expired/terminated)
@@ -1894,7 +1894,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		id := c.Param("id")
 		reason := c.Query("reason")
 		poaRepoMu.Lock()
-		var poa *gauth_aap_001.PowerOfAttorney
+		var poa *agentauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1902,9 +1902,9 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			poa, ok = poaRepo[id]
 		}
 		if ok {
-			if poa.Status == gauth_aap_001.POAStatusActive || poa.Status == gauth_aap_001.POAStatusSuspended {
+			if poa.Status == agentauth_aap_001.POAStatusActive || poa.Status == agentauth_aap_001.POAStatusSuspended {
 				oldStatus := poa.Status
-				poa.Status = gauth_aap_001.POAStatusTerminated
+				poa.Status = agentauth_aap_001.POAStatusTerminated
 				poa.UpdatedAt = time.Now().UTC()
 				if boltPOARepo != nil {
 					_ = boltPOARepo.Update(poa)
@@ -1928,19 +1928,19 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		c.JSON(200, gin.H{"terminated": poa.Status == gauth_aap_001.POAStatusTerminated, "poa_id": id, "status": poa.Status, "reason": reason})
+		c.JSON(200, gin.H{"terminated": poa.Status == agentauth_aap_001.POAStatusTerminated, "poa_id": id, "status": poa.Status, "reason": reason})
 	})
 
-	// Minimal extended token issuance referencing a PoA (HS256 signed JWT). Requires GAUTH_AI_DEMO_JWT_SECRET.
+	// Minimal extended token issuance referencing a PoA (HS256 signed JWT). Requires AGENTAUTH_AI_DEMO_JWT_SECRET.
 	router.POST("/demo/poa/:id/token", func(c *gin.Context) {
-		secret := os.Getenv("GAUTH_AI_DEMO_JWT_SECRET")
+		secret := os.Getenv("AGENTAUTH_AI_DEMO_JWT_SECRET")
 		if secret == "" {
 			c.JSON(400, gin.H{"error": "jwt_secret_not_configured"})
 			return
 		}
 		id := c.Param("id")
 		poaRepoMu.RLock()
-		var poa *gauth_aap_001.PowerOfAttorney
+		var poa *agentauth_aap_001.PowerOfAttorney
 		var ok bool
 		if boltPOARepo != nil {
 			poa, ok = boltPOARepo.Get(id)
@@ -1952,7 +1952,7 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 			c.JSON(404, gin.H{"error": "poa_not_found"})
 			return
 		}
-		if poa.Status != gauth_aap_001.POAStatusActive {
+		if poa.Status != agentauth_aap_001.POAStatusActive {
 			c.JSON(400, gin.H{"error": "poa_not_active", "status": poa.Status})
 			return
 		}
@@ -1961,11 +1961,11 @@ func startAPIServer(integration *ai.ServerIntegration, port string, db *sql.DB, 
 		if exp.Sub(now) > 2*time.Hour { // cap token lifetime to 2h for demo safety
 			exp = now.Add(2 * time.Hour)
 		}
-		digest, _, _ := gauth_aap_001.CanonicalPOADigest(poa)
+		digest, _, _ := agentauth_aap_001.CanonicalPOADigest(poa)
 		claims := map[string]any{
 			"sub":           poa.Grantee,
-			"iss":           "gauth-demo",
-			"aud":           "gauth-demo-api",
+			"iss":           "agentauth-demo",
+			"aud":           "agentauth-demo-api",
 			"iat":           now.Unix(),
 			"nbf":           now.Unix(),
 			"exp":           exp.Unix(),

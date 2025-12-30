@@ -25,7 +25,7 @@ Week 6 focuses on completing the production readiness journey by adding persiste
 - ✅ Security scanning integrated (Trivy, zero vulnerabilities)
 - ✅ Performance validated (2000 req/sec, 2.4% CPU, 3.85 MB memory)
 - ✅ Monitoring deployed (Prometheus + Grafana, 50+ metrics, 15 alerts)
-- ✅ 2 pods running in kind cluster (gauth-staging namespace)
+- ✅ 2 pods running in kind cluster (agentauth-staging namespace)
 
 **Week 6 Objectives:**
 1. Deploy PostgreSQL and Redis for persistent state

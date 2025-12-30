@@ -233,7 +233,7 @@ const create = async () => {
 4. 🔄 **AuthorizationEngine.tsx** - Update with authz hooks
 5. 🔄 **ConfigurationManager.tsx** - Update with config hooks (most complex)
 6. 🧪 **End-to-End Testing**
-   - Start backend: `cd /path/to/Gauth_go && ./bin/web-server` or use VS Code task
+   - Start backend: `cd /path/to/AgentAuth && ./bin/web-server` or use VS Code task
    - Start frontend: `cd web/ui-react && npm run dev`
    - Test each admin page:
      - Verify tenant_id in browser network tab
@@ -249,9 +249,9 @@ const create = async () => {
 PORT=8080
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=gauth
-DB_USER=gauth
-DB_PASSWORD=gauth_password
+DB_NAME=agentauth
+DB_USER=agentauth
+DB_PASSWORD=agentauth_password
 ```
 
 ### Frontend (.env or .env.local)

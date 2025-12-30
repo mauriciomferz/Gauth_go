@@ -609,7 +609,7 @@ export default function E2ETesting() {
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              a.download = `gauth-e2e-report-${Date.now()}.json`;
+              a.download = `agentauth-e2e-report-${Date.now()}.json`;
               a.click();
               URL.revokeObjectURL(url);
               toast.success('Test report generated and downloaded!');
@@ -636,7 +636,7 @@ export default function E2ETesting() {
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              a.download = `gauth-e2e-results-${Date.now()}.csv`;
+              a.download = `agentauth-e2e-results-${Date.now()}.csv`;
               a.click();
               URL.revokeObjectURL(url);
               toast.success('Test results exported to CSV!');

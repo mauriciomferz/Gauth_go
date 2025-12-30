@@ -44,7 +44,7 @@ The demo server (`cmd/web-server`) provides:
 ## Launching
 ```bash
 go run ./cmd/web-server            # defaults to :8080
-GAUTH_WEB_PORT=9090 go run ./cmd/web-server
+AGENTAUTH_WEB_PORT=9090 go run ./cmd/web-server
 ```
 Visit `http://localhost:8080/index.html`.
 
@@ -117,9 +117,9 @@ After creation the server immediately transitions to `running` and begins append
   "success": true,
   "job": {
     "id": "RNKa...",
-    "example_id": "gauth_protocol_basics:minimal_poa",
+    "example_id": "agentauth_protocol_basics:minimal_poa",
     "state": "done",
-    "output": "Example gauth_protocol_basics:minimal_poa completed",
+    "output": "Example agentauth_protocol_basics:minimal_poa completed",
     "error": "",
     "started_at": "2025-10-11T15:46:49.123Z",
     "finished_at": "2025-10-11T15:46:50.012Z"
@@ -133,7 +133,7 @@ See `docs/LOG_STREAMING.md` for full details. The implemented format currently s
 Quick usage:
 ```bash
 JOB_ID=$(curl -s -X POST -H 'Content-Type: application/json' \
-  -d '{"id":"gauth_protocol_basics:minimal_poa"}' \
+  -d '{"id":"agentauth_protocol_basics:minimal_poa"}' \
   http://localhost:8080/api/v1/educational/examples/run | jq -r .job_id)
 
 curl -N http://localhost:8080/api/v1/educational/examples/run/$JOB_ID/logs

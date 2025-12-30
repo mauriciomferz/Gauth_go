@@ -36,7 +36,7 @@ func main() {
 	fmt.Println()
 
 	// Setup temp directory for filesystem provider with restricted permissions
-	tmpDir := "/tmp/gauth-secrets-demo"
+	tmpDir := "/tmp/agentauth-secrets-demo"
 	if err := os.MkdirAll(tmpDir, 0750); err != nil {
 		log.Fatalf("Failed to create temp dir: %v", err)
 	}

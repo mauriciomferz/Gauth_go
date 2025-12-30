@@ -6,7 +6,7 @@ set -e
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG_FILE="/var/log/gauth/failover.log"
+LOG_FILE="/var/log/agentauth/failover.log"
 SLACK_WEBHOOK="${SLACK_WEBHOOK_URL}"
 PAGERDUTY_KEY="${PAGERDUTY_INTEGRATION_KEY}"
 
@@ -16,10 +16,10 @@ FAILOVER_REGIONS=("eu-west-1" "ap-south-1" "us-west-2")
 
 # Health check endpoints
 declare -A REGION_ENDPOINTS=(
-  ["us-east-1"]="https://gauth.us-east-1.example.com"
-  ["eu-west-1"]="https://gauth.eu-west-1.example.com"
-  ["ap-south-1"]="https://gauth.ap-south-1.example.com"
-  ["us-west-2"]="https://gauth.us-west-2.example.com"
+  ["us-east-1"]="https://agentauth.us-east-1.example.com"
+  ["eu-west-1"]="https://agentauth.eu-west-1.example.com"
+  ["ap-south-1"]="https://agentauth.ap-south-1.example.com"
+  ["us-west-2"]="https://agentauth.us-west-2.example.com"
 )
 
 # Logging function
@@ -56,7 +56,7 @@ trigger_pagerduty() {
         \"payload\": {
           \"summary\": \"$description\",
           \"severity\": \"$severity\",
-          \"source\": \"gauth-failover-automation\",
+          \"source\": \"agentauth-failover-automation\",
           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
         }
       }" 2>/dev/null || log "ERROR" "Failed to trigger PagerDuty alert"
@@ -114,7 +114,7 @@ promote_database() {
   log "INFO" "Promoting database in $region to primary"
   
   # Trigger Patroni failover via API
-  kubectl exec -n gauth postgresql-0 -- \
+  kubectl exec -n agentauth postgresql-0 -- \
     curl -X POST http://localhost:8008/failover \
     -H "Content-Type: application/json" \
     -d "{\"leader\": \"postgresql-0\", \"candidate\": \"postgresql-1\"}"
@@ -143,12 +143,12 @@ update_dns() {
     {
       "Action": "UPSERT",
       "ResourceRecordSet": {
-        "Name": "gauth.example.com",
+        "Name": "agentauth.example.com",
         "Type": "A",
         "TTL": 60,
         "ResourceRecords": [
           {
-            "Value": "$(kubectl get svc gauth -n gauth -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
+            "Value": "$(kubectl get svc agentauth -n agentauth -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"
           }
         ]
       }
@@ -178,11 +178,11 @@ scale_application() {
   
   log "INFO" "Scaling application in $region to $replicas replicas"
   
-  kubectl scale deployment gauth -n gauth --replicas="$replicas"
+  kubectl scale deployment agentauth -n agentauth --replicas="$replicas"
   
   # Wait for pods to be ready
   kubectl wait --for=condition=ready pod \
-    -l app=gauth -n gauth \
+    -l app=agentauth -n agentauth \
     --timeout=300s
   
   if [ $? -eq 0 ]; then
@@ -283,10 +283,10 @@ monitor_health() {
 # Get currently active region
 get_active_region() {
   # Query DNS to determine active region
-  local active_ip=$(dig +short gauth.example.com @8.8.8.8 | head -1)
+  local active_ip=$(dig +short agentauth.example.com @8.8.8.8 | head -1)
   
   for region in "${!REGION_ENDPOINTS[@]}"; do
-    local region_ip=$(kubectl get svc gauth -n gauth \
+    local region_ip=$(kubectl get svc agentauth -n agentauth \
       --context "$region" \
       -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
     

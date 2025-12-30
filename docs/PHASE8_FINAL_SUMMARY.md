@@ -286,7 +286,7 @@ parService := NewPARService(DefaultPARConfig())
 ```go
 // PostgreSQL for persistent storage
 storage, _ := NewPostgresStorage(
-    "postgres://gauth:password@db:5432/gauth?sslmode=require",
+    "postgres://agentauth:password@db:5432/agentauth?sslmode=require",
 )
 
 // Redis for distributed rate limiting

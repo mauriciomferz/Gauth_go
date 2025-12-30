@@ -38,10 +38,10 @@ An environment configuration controls whether backend store errors cause:
 ## Metrics
 
 The following metrics are emitted:
-- `gauth_replay_hits_total`: Count of detected signature replay attempts (blocked).
-- `gauth_replay_misses_total`: Count of first-time valid signatures accepted (new digest+keyID).
-- `gauth_replay_store_errors_total`: Backend errors encountered (whether fail-open or fail-closed).
-- `gauth_replay_store_latency_seconds`: Histogram/summary (depending on backend) measuring Seen/Record operations latency.
+- `agentauth_replay_hits_total`: Count of detected signature replay attempts (blocked).
+- `agentauth_replay_misses_total`: Count of first-time valid signatures accepted (new digest+keyID).
+- `agentauth_replay_store_errors_total`: Backend errors encountered (whether fail-open or fail-closed).
+- `agentauth_replay_store_latency_seconds`: Histogram/summary (depending on backend) measuring Seen/Record operations latency.
 
 Prometheus exposition names may differ (adapter-specific); reference internal metrics implementation for exact naming if scraping.
 

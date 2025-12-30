@@ -52,26 +52,26 @@ You will see:
 ### Environment Variables
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `GAUTH_AI_DEMO_PORT` | Port for HTTP server | `8080` |
-| `GAUTH_AI_DEMO_NO_SERVER` | If set to `1`, skip starting HTTP server (print scenarios only) | unset |
-| `GAUTH_AI_DEMO_DB_PATH` | Path to SQLite database file for decision persistence (creates `decisions` table) | unset |
-| `GAUTH_AI_DEMO_DB_MAX_ROWS` | If set (integer), prune oldest rows to keep at most this many decisions | unset |
-| `GAUTH_AI_DEMO_DB_MAX_AGE_DAYS` | If set (integer), delete decisions older than this many days after each insert | unset |
-| `GAUTH_AI_DEMO_API_KEY` | If set, require matching `X-API-Key` header for protected endpoints | unset |
-| `GAUTH_AI_DEMO_JWT_SECRET` | If set (with or without API key), accept Bearer JWT (HMAC-SHA256 signature + optional `exp` claim validation) | unset |
-| `GAUTH_AI_DEMO_JWT_EXPECT_ISS` | Expected JWT issuer (`iss`) if provided | unset |
-| `GAUTH_AI_DEMO_JWT_EXPECT_AUD` | Expected JWT audience (`aud`) (string or element in array) | unset |
-| `GAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS` | Allowed clock skew for `exp`/`nbf`/`iat` validation (default 60) | unset |
-| `GAUTH_AI_DEMO_JWKS_URL` | JWKS endpoint URL for RS256 JWT public keys (enables RS256 verification) | unset |
-| `GAUTH_AI_DEMO_JWKS_CACHE_SECONDS` | JWKS cache TTL seconds (default 300) | unset |
-| `GAUTH_AI_DEMO_JWT_EXPECT_ALG` | Enforce specific JWT alg (e.g. RS256 or HS256); rejects mismatches if set | unset |
-| `GAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR` | Background refresh fraction of TTL (0<factor<1). Fetches JWKS proactively after `factor * JWKS_CACHE_SECONDS` (default 0.5). | unset |
-| `GAUTH_AI_DEMO_JWKS_BG_REFRESH_JITTER_SECONDS` | Max +/- jitter (seconds) applied to background refresh delay to de-synchronize replicas (default 0 = disabled). | unset |
-| `GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS` | TTL (seconds) to cache missing `kid` lookups and avoid repeated JWKS fetch attempts. | unset |
-| `GAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES` | Maximum number of negative (missing kid) cache entries before oldest eviction. | unset |
-| `GAUTH_AI_DEMO_OTEL` | If `1`, enable OpenTelemetry stdout tracing for enforcement & conflict simulation spans | unset |
-| `GAUTH_AI_DEMO_METRICS` | If `1`, enable Prometheus counters and expose `/metrics` endpoint | unset |
-| `GAUTH_AI_DEMO_POA_DB_PATH` | Path to BoltDB file for persistent PoA storage (falls back to in-memory if unset) | unset |
+| `AGENTAUTH_AI_DEMO_PORT` | Port for HTTP server | `8080` |
+| `AGENTAUTH_AI_DEMO_NO_SERVER` | If set to `1`, skip starting HTTP server (print scenarios only) | unset |
+| `AGENTAUTH_AI_DEMO_DB_PATH` | Path to SQLite database file for decision persistence (creates `decisions` table) | unset |
+| `AGENTAUTH_AI_DEMO_DB_MAX_ROWS` | If set (integer), prune oldest rows to keep at most this many decisions | unset |
+| `AGENTAUTH_AI_DEMO_DB_MAX_AGE_DAYS` | If set (integer), delete decisions older than this many days after each insert | unset |
+| `AGENTAUTH_AI_DEMO_API_KEY` | If set, require matching `X-API-Key` header for protected endpoints | unset |
+| `AGENTAUTH_AI_DEMO_JWT_SECRET` | If set (with or without API key), accept Bearer JWT (HMAC-SHA256 signature + optional `exp` claim validation) | unset |
+| `AGENTAUTH_AI_DEMO_JWT_EXPECT_ISS` | Expected JWT issuer (`iss`) if provided | unset |
+| `AGENTAUTH_AI_DEMO_JWT_EXPECT_AUD` | Expected JWT audience (`aud`) (string or element in array) | unset |
+| `AGENTAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS` | Allowed clock skew for `exp`/`nbf`/`iat` validation (default 60) | unset |
+| `AGENTAUTH_AI_DEMO_JWKS_URL` | JWKS endpoint URL for RS256 JWT public keys (enables RS256 verification) | unset |
+| `AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS` | JWKS cache TTL seconds (default 300) | unset |
+| `AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG` | Enforce specific JWT alg (e.g. RS256 or HS256); rejects mismatches if set | unset |
+| `AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR` | Background refresh fraction of TTL (0<factor<1). Fetches JWKS proactively after `factor * JWKS_CACHE_SECONDS` (default 0.5). | unset |
+| `AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_JITTER_SECONDS` | Max +/- jitter (seconds) applied to background refresh delay to de-synchronize replicas (default 0 = disabled). | unset |
+| `AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS` | TTL (seconds) to cache missing `kid` lookups and avoid repeated JWKS fetch attempts. | unset |
+| `AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES` | Maximum number of negative (missing kid) cache entries before oldest eviction. | unset |
+| `AGENTAUTH_AI_DEMO_OTEL` | If `1`, enable OpenTelemetry stdout tracing for enforcement & conflict simulation spans | unset |
+| `AGENTAUTH_AI_DEMO_METRICS` | If `1`, enable Prometheus counters and expose `/metrics` endpoint | unset |
+| `AGENTAUTH_AI_DEMO_POA_DB_PATH` | Path to BoltDB file for persistent PoA storage (falls back to in-memory if unset) | unset |
 
 ### Start Demo
 From project root (default port):
@@ -80,12 +80,12 @@ go run ./examples/ai_capability_demo
 ```
 Custom port:
 ```bash
-export GAUTH_AI_DEMO_PORT=9090
+export AGENTAUTH_AI_DEMO_PORT=9090
 go run ./examples/ai_capability_demo
 ```
 Run scenarios only (no server):
 ```bash
-export GAUTH_AI_DEMO_NO_SERVER=1
+export AGENTAUTH_AI_DEMO_NO_SERVER=1
 go run ./examples/ai_capability_demo
 ```
 You will see:
@@ -123,18 +123,18 @@ After startup the server provides:
 - `GET /api/v1/ai/health` – Basic health signal
 - `POST /demo/enforce` – Demo wrapper that returns decision + metadata for provided action/claims
 - `POST /api/v1/ai/capabilities/simulate/conflict` – Run the same action across multiple jurisdictions & detect divergence
-- `GET /demo/decisions` – List persisted decisions (requires `GAUTH_AI_DEMO_DB_PATH`); supports `?limit=` (<=500) and `?offset=` for pagination
+- `GET /demo/decisions` – List persisted decisions (requires `AGENTAUTH_AI_DEMO_DB_PATH`); supports `?limit=` (<=500) and `?offset=` for pagination
 - Filters supported: `?action=transaction:read` and/or `?entity_type=assistant` can be combined with pagination.
 - `GET /demo/decisions/export` – Bulk export decisions (requires persistence) with `?format=ndjson|csv` (default ndjson) and optional `?limit=` (up to 100000).
 - `GET /demo/decisions/stats` – Summary statistics (total rows, oldest/newest timestamps, top 5 actions) when persistence enabled.
-- `GET /metrics` – Prometheus metrics (enabled when `GAUTH_AI_DEMO_METRICS=1`) including decision and conflict counters.
+- `GET /metrics` – Prometheus metrics (enabled when `AGENTAUTH_AI_DEMO_METRICS=1`) including decision and conflict counters.
 - `GET /` – Root descriptor listing available endpoints
 - **PoA (Beta MVP)**:
   - `POST /demo/poa/issue` – Issue a minimal PoA (fields: grantor, grantee, scope, valid_for_seconds, jurisdiction, witnesses, attestations)
   - `POST /demo/poa/:id/revoke` – Revoke an existing PoA (optional `?reason=` query)
-  - `POST /demo/poa/:id/token` – Issue a short‑lived HS256 JWT extended token embedding PoA integrity claims (`poa_id`, `poa_digest`, `poa_version`, `token_version=et_v1`) (requires `GAUTH_AI_DEMO_JWT_SECRET`)
+  - `POST /demo/poa/:id/token` – Issue a short‑lived HS256 JWT extended token embedding PoA integrity claims (`poa_id`, `poa_digest`, `poa_version`, `token_version=et_v1`) (requires `AGENTAUTH_AI_DEMO_JWT_SECRET`)
   - `/demo/enforce` – If `poa_id` present, validates status, temporal validity, scope membership; attaches `poa_id` & canonical digest to persisted decision row.
-  - Persistent storage: if `GAUTH_AI_DEMO_POA_DB_PATH` set, PoAs stored durably in BoltDB with primary bucket and secondary principal index (falls back to in-memory map otherwise).
+  - Persistent storage: if `AGENTAUTH_AI_DEMO_POA_DB_PATH` set, PoAs stored durably in BoltDB with primary bucket and secondary principal index (falls back to in-memory map otherwise).
   - **Multi-Signature Draft Workflow (Week 2)**:
     - `POST /demo/poa/prepare` – Create a draft PoA requiring threshold signatures (`signers[]`, `threshold`, optional `valid_for_seconds`). Status starts as `draft`.
     - `POST /demo/poa/:id/sign` – Submit a signer signature (demo uses deterministic placeholder; real flow would supply cryptographic signature). Rejects unknown or duplicate signer.
@@ -315,19 +315,19 @@ Response excerpt:
   "count": 1
 }
 ```
-If `GAUTH_AI_DEMO_DB_PATH` is set (e.g. `export GAUTH_AI_DEMO_DB_PATH=/tmp/gauth_demo.db`), each `/demo/enforce` call records a row:
+If `AGENTAUTH_AI_DEMO_DB_PATH` is set (e.g. `export AGENTAUTH_AI_DEMO_DB_PATH=/tmp/agentauth_demo.db`), each `/demo/enforce` call records a row:
 
 Retention:
-Set `GAUTH_AI_DEMO_DB_MAX_ROWS` to automatically prune oldest rows beyond the limit (keeps most recent by `id`). Example:
+Set `AGENTAUTH_AI_DEMO_DB_MAX_ROWS` to automatically prune oldest rows beyond the limit (keeps most recent by `id`). Example:
 ```bash
-export GAUTH_AI_DEMO_DB_MAX_ROWS=5000
+export AGENTAUTH_AI_DEMO_DB_MAX_ROWS=5000
 ```
 Pruning occurs after each insert; deletion uses a single subquery selecting most recent IDs.
 
 Age-based pruning:
-Set `GAUTH_AI_DEMO_DB_MAX_AGE_DAYS` to remove decisions older than N days automatically:
+Set `AGENTAUTH_AI_DEMO_DB_MAX_AGE_DAYS` to remove decisions older than N days automatically:
 ```bash
-export GAUTH_AI_DEMO_DB_MAX_AGE_DAYS=30
+export AGENTAUTH_AI_DEMO_DB_MAX_AGE_DAYS=30
 ```
 Age pruning runs after row-based pruning; both can be combined.
 
@@ -367,13 +367,13 @@ CREATE TABLE decisions (
 ```
 Quick inspection:
 ```bash
-sqlite3 /tmp/gauth_demo.db 'SELECT id,action,allowed,entity_type,jurisdictions,missing,created_at FROM decisions LIMIT 5';
+sqlite3 /tmp/agentauth_demo.db 'SELECT id,action,allowed,entity_type,jurisdictions,missing,created_at FROM decisions LIMIT 5';
 ```
 
 ## Authentication Middleware
 Set an API key:
 ```bash
-export GAUTH_AI_DEMO_API_KEY=secret123
+export AGENTAUTH_AI_DEMO_API_KEY=secret123
 curl -X POST http://localhost:8080/demo/enforce \
   -H 'X-API-Key: secret123' -H 'Content-Type: application/json' \
   -d '{"action":"transaction:read","claims":{"ai_entity_type":"assistant","ai_entity_verified":true}}'
@@ -382,13 +382,13 @@ Without the header you'll receive `401 {"error":"unauthorized"}`.
 
 Add JWT support (HS256 verified):
 ```bash
-export GAUTH_AI_DEMO_JWT_SECRET=devjwt
+export AGENTAUTH_AI_DEMO_JWT_SECRET=devjwt
 curl -X POST http://localhost:8080/demo/enforce \
   -H 'Authorization: Bearer header.payload.signature' \
   -H 'Content-Type: application/json' \
   -d '{"action":"transaction:read","claims":{"ai_entity_type":"assistant","ai_entity_verified":true}}'
 ```
-The signature is recomputed with HMAC-SHA256 over `header.payload` using `GAUTH_AI_DEMO_JWT_SECRET` and compared constant-time. Claims enforced if present: `exp` (future), `nbf` (not in future beyond skew), `iat` (not excessively future), plus optional `iss` / `aud` matching when corresponding environment variables are set. Adjust skew via `GAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS`.
+The signature is recomputed with HMAC-SHA256 over `header.payload` using `AGENTAUTH_AI_DEMO_JWT_SECRET` and compared constant-time. Claims enforced if present: `exp` (future), `nbf` (not in future beyond skew), `iat` (not excessively future), plus optional `iss` / `aud` matching when corresponding environment variables are set. Adjust skew via `AGENTAUTH_AI_DEMO_JWT_CLOCK_SKEW_SECONDS`.
 
 ### JWT Error Reasons
 When authentication fails a structured JSON error is returned:
@@ -406,7 +406,7 @@ Possible `reason` codes:
 | `future_iat` | `iat` claim too far in the future |
 | `issuer_mismatch` | `iss` claim does not match expected issuer |
 | `audience_mismatch` | `aud` claim missing expected audience |
-| `unsupported_alg` | Algorithm not allowed or does not match `GAUTH_AI_DEMO_JWT_EXPECT_ALG` |
+| `unsupported_alg` | Algorithm not allowed or does not match `AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG` |
 | `jwks_fetch_error` | JWKS retrieval failed or parse error |
 | `kid_not_found` | Token `kid` header not present in JWKS set |
 | `rsa_verification_failed` | RS256 signature verification failed |
@@ -420,16 +420,16 @@ Possible `reason` codes:
 ### RS256 / JWKS Verification
 Enable RS256 tokens signed by an issuer's private key verified against a JWKS URL.
 ```bash
-export GAUTH_AI_DEMO_JWKS_URL=https://issuer.example.com/.well-known/jwks.json
-export GAUTH_AI_DEMO_JWT_EXPECT_ALG=RS256   # optional but recommended
+export AGENTAUTH_AI_DEMO_JWKS_URL=https://issuer.example.com/.well-known/jwks.json
+export AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG=RS256   # optional but recommended
 ```
 Optionally tune cache TTL:
 ```bash
-export GAUTH_AI_DEMO_JWKS_CACHE_SECONDS=600
+export AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS=600
 ```
 Flow:
 - Decode JWT header to extract `alg` and `kid`.
-- Enforce expected `alg` if `GAUTH_AI_DEMO_JWT_EXPECT_ALG` set.
+- Enforce expected `alg` if `AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG` set.
 - Fetch JWKS (cached) if cache expired or not populated.
 - Resolve RSA public key by `kid`.
 - Verify RS256 signature (PKCS#1 v1.5 + SHA-256).
@@ -438,16 +438,16 @@ Flow:
 ### JWKS Background Refresh & Negative KID Caching
 To reduce latency spikes from on-demand JWKS fetch right at expiry and to suppress repeated network calls for unknown key IDs, two optional behaviors can be enabled:
 
-1. Background Refresh (`GAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR`):
+1. Background Refresh (`AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR`):
   - A goroutine wakes early (fraction of original TTL) and refreshes JWKS before expiry.
   - Default factor: `0.5` (refresh halfway through TTL).
-  - Configure a different fraction (e.g. `0.3`) for earlier refresh: `export GAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR=0.3`.
+  - Configure a different fraction (e.g. `0.3`) for earlier refresh: `export AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR=0.3`.
   - Must be between `0` and `1` (exclusive). Values outside range are ignored and default used.
 
-2. Negative KID Cache (`GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS`):
+2. Negative KID Cache (`AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS`):
   - When a `kid` is not found in the current JWKS set, the missing `kid` is cached for the specified TTL.
   - Subsequent requests for the same `kid` during TTL immediately return `kid_not_found` without triggering a JWKS re-fetch, reducing unnecessary fetch attempts.
-  - Example: `export GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS=60` (cache missing KIDs for 60s).
+  - Example: `export AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS=60` (cache missing KIDs for 60s).
 
 These optimizations improve resilience under burst traffic and noisy / misconfigured clients repeatedly sending invalid `kid` values.
 
@@ -457,7 +457,7 @@ Failure reasons map to structured error codes above for observability.
 Tracer provider shuts down gracefully (3s timeout) to flush spans.
 ## Jurisdiction Conflict Metric
 Whenever a divergence is detected in multi-jurisdiction evaluation (`/demo/enforce` with jurisdictions or the conflict simulation endpoint), a metric named `jurisdiction_conflict` is incremented via the metrics callback. Hook this into real telemetry to monitor regulatory friction zones.
-If `GAUTH_AI_DEMO_METRICS=1` is set, an additional Prometheus counter `ai_demo_conflicts_total` tracks conflict occurrences, and decisions are counted in `ai_demo_decisions_total{action,allowed}`.
+If `AGENTAUTH_AI_DEMO_METRICS=1` is set, an additional Prometheus counter `ai_demo_conflicts_total` tracks conflict occurrences, and decisions are counted in `ai_demo_decisions_total{action,allowed}`.
 Latency histograms exposed:
 - `ai_demo_enforcement_duration_seconds{action}` – single enforcement evaluation time.
 - `ai_demo_conflict_batch_duration_seconds` – total batch duration for multi-jurisdiction conflict simulations.
@@ -468,7 +468,7 @@ Additional gauges/counters:
 - `ai_demo_jwks_keys_loaded` – current count of cached JWKS RSA public keys for RS256 verification.
  - `ai_demo_jwks_negative_hits_total` – number of times a previously missing `kid` was served from the negative cache (reducing network fetch attempts).
  - `ai_demo_jwks_negative_entries` – current number of entries in the negative KID cache awaiting expiry.
- - `ai_demo_jwks_negative_evictions_total` – total number of evictions from the negative KID cache due to `GAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES` limit.
+ - `ai_demo_jwks_negative_evictions_total` – total number of evictions from the negative KID cache due to `AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES` limit.
  - `ai_demo_jwks_bg_refresh_total` – number of proactive background JWKS refresh operations before cache expiry.
  - `ai_demo_jwks_cache_ttl_remaining_seconds` – live gauge of seconds until JWKS cache expiry (updates each second).
 - **PoA Metrics**:
@@ -484,13 +484,13 @@ Note: With negative KID caching enabled, repeated invalid `kid` values won't inf
 Monitoring guidance:
  - A rising `ai_demo_jwks_negative_hits_total` with stable `ai_demo_jwks_keys_loaded` may indicate misconfigured or stale clients sending nonexistent `kid` values.
  - Large sustained `ai_demo_jwks_negative_entries` suggests many distinct invalid `kid`s — consider alerting or adding request validation.
- - Frequent increases in `ai_demo_jwks_negative_evictions_total` mean the negative cache max size is being hit; consider raising `GAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES` or investigating malicious random kid spraying.
- - A low `ai_demo_jwks_bg_refresh_total` combined with frequent on-demand fetch errors may indicate refresh factor misconfiguration (increase `GAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR`).
+ - Frequent increases in `ai_demo_jwks_negative_evictions_total` mean the negative cache max size is being hit; consider raising `AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES` or investigating malicious random kid spraying.
+ - A low `ai_demo_jwks_bg_refresh_total` combined with frequent on-demand fetch errors may indicate refresh factor misconfiguration (increase `AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR`).
  - Sudden drops in `ai_demo_jwks_cache_ttl_remaining_seconds` without corresponding `ai_demo_jwks_bg_refresh_total` increments may signal manual interference or clock skew issues.
- - High churn in negative entries hitting eviction threshold (see `GAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES`) could point to malicious spraying of random `kid` values—consider rate limiting.
+ - High churn in negative entries hitting eviction threshold (see `AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES`) could point to malicious spraying of random `kid` values—consider rate limiting.
 Enable tracing:
 ```bash
-export GAUTH_AI_DEMO_OTEL=1
+export AGENTAUTH_AI_DEMO_OTEL=1
 go run ./examples/ai_capability_demo
 ```
 Spans emitted:
@@ -519,11 +519,11 @@ Ideas:
 - Add JWT / API key auth for enforcement endpoints
 - Simulate multi-jurisdiction conflict resolution across policy sets
 - Emit OpenTelemetry spans for capability evaluation
-- Expose Prometheus metrics for decisions & jurisdiction conflicts (`GAUTH_AI_DEMO_METRICS=1`)
+- Expose Prometheus metrics for decisions & jurisdiction conflicts (`AGENTAUTH_AI_DEMO_METRICS=1`)
 - Integrate Power of Attorney (delegation) records and revocation lifecycle
 - Issue extended tokens referencing PoA for delegated actions
 - Bind extended tokens to PoA integrity via canonical digest and version (implemented)
-- Add persistent BoltDB PoA storage (implemented via `GAUTH_AI_DEMO_POA_DB_PATH`)
+- Add persistent BoltDB PoA storage (implemented via `AGENTAUTH_AI_DEMO_POA_DB_PATH`)
 - Expose integrity failure metrics (implemented)
 
 ## Troubleshooting
@@ -536,8 +536,8 @@ Ideas:
 | Extended token rejected | `poa_id` missing or revoked | Re-issue PoA or verify revocation status |
 | Multi-sig finalize rejected | Threshold not met | Add required signatures via `/demo/poa/:id/sign` before finalize |
 | Multi-sig signature rejected | Duplicate or unknown signer | Ensure signer is in original `signers[]` list and not already signed |
-| Server not starting | `GAUTH_AI_DEMO_NO_SERVER=1` set | Unset env var or run without it |
-| /metrics not found | Metrics disabled | Set `GAUTH_AI_DEMO_METRICS=1` and restart |
+| Server not starting | `AGENTAUTH_AI_DEMO_NO_SERVER=1` set | Unset env var or run without it |
+| /metrics not found | Metrics disabled | Set `AGENTAUTH_AI_DEMO_METRICS=1` and restart |
 
 ## License / Usage
 This demo is intended for evaluation and integration guidance. Do not use the hard-coded claims or simplistic compliance markers for production risk decisions. Replace with real attestation / evidence pipeline.

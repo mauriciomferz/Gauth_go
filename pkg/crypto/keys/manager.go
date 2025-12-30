@@ -48,11 +48,11 @@ type LocalKeyManager struct {
 }
 
 // NewLocalKeyManager creates a new local key manager.
-// If path is empty, it defaults to GAUTH_JWT_PRIVKEY_PATH or .keys/jwt_rsa.pem.
+// If path is empty, it defaults to AGENTAUTH_JWT_PRIVKEY_PATH or .keys/jwt_rsa.pem.
 // It loads existing keys or generates a new one if missing.
 func NewLocalKeyManager(path string) (*LocalKeyManager, error) {
 	if path == "" {
-		path = os.Getenv("GAUTH_JWT_PRIVKEY_PATH")
+		path = os.Getenv("AGENTAUTH_JWT_PRIVKEY_PATH")
 	}
 	if path == "" {
 		path = ".keys/jwt_rsa.pem"
@@ -73,7 +73,7 @@ func NewLocalKeyManager(path string) (*LocalKeyManager, error) {
 }
 
 func (km *LocalKeyManager) loadPrevious() {
-	prevPath := os.Getenv("GAUTH_JWT_PREV_PRIVKEY_PATH")
+	prevPath := os.Getenv("AGENTAUTH_JWT_PREV_PRIVKEY_PATH")
 	if prevPath == "" {
 		return
 	}
@@ -93,7 +93,7 @@ func (km *LocalKeyManager) loadPrevious() {
 	km.previousKey = pk
 
 	// Derive previous KID
-	prevKid := os.Getenv("GAUTH_JWT_PREV_KID")
+	prevKid := os.Getenv("AGENTAUTH_JWT_PREV_KID")
 	if prevKid != "" {
 		km.prevKeyID = prevKid
 	} else {
@@ -109,11 +109,11 @@ func (km *LocalKeyManager) loadPrevious() {
 // NewKeyManager creates a KeyManager based on environment configuration.
 // Supports "aws" or "local" (default) keys.
 func NewKeyManager(ctx context.Context) (KeyManager, error) {
-	provider := os.Getenv("GAUTH_KMS_PROVIDER")
+	provider := os.Getenv("AGENTAUTH_KMS_PROVIDER")
 	switch provider {
 	case "aws":
-		keyID := os.Getenv("GAUTH_KMS_KEY_ID")
-		region := os.Getenv("GAUTH_KMS_REGION")
+		keyID := os.Getenv("AGENTAUTH_KMS_KEY_ID")
+		region := os.Getenv("AGENTAUTH_KMS_REGION")
 		client, err := NewAWSKMSClient(ctx, keyID, region)
 		if err != nil {
 			return nil, fmt.Errorf("aws kms init: %w", err)
@@ -165,8 +165,8 @@ func (km *LocalKeyManager) loadOrGenerate() error {
 
 func (km *LocalKeyManager) deriveKeyID() {
 	// Simple fingerprint: base64url of first 8 bytes of modulus
-	// If env GAUTH_JWT_KID is set, use that, otherwise derived.
-	kid := os.Getenv("GAUTH_JWT_KID")
+	// If env AGENTAUTH_JWT_KID is set, use that, otherwise derived.
+	kid := os.Getenv("AGENTAUTH_JWT_KID")
 	if kid != "" {
 		km.keyID = kid
 		return

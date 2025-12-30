@@ -65,7 +65,7 @@ type AnchorClient interface {
 // NewHandler creates a new capabilities handler with defaults.
 func NewHandler() *Handler {
 	st := 12 * time.Hour
-	if v := os.Getenv("GAUTH_CAP_ANCHOR_STALE_THRESHOLD"); v != "" {
+	if v := os.Getenv("AGENTAUTH_CAP_ANCHOR_STALE_THRESHOLD"); v != "" {
 		if d, err := time.ParseDuration(v); err == nil {
 			st = d
 		}
@@ -74,10 +74,10 @@ func NewHandler() *Handler {
 	return &Handler{
 		ActionMappings:         make(map[string][]string),
 		Source:                 "static",
-		Enforce:                os.Getenv("GAUTH_CAPABILITY_ENFORCE") == "1",
-		LifecycleStrict:        os.Getenv("GAUTH_CAP_LIFECYCLE_STRICT") == "1",
-		LifecycleSunsetEnforce: os.Getenv("GAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE") == "1",
-		AuditPersistPath:       os.Getenv("GAUTH_CAP_AUDIT_PATH"),
+		Enforce:                os.Getenv("AGENTAUTH_CAPABILITY_ENFORCE") == "1",
+		LifecycleStrict:        os.Getenv("AGENTAUTH_CAP_LIFECYCLE_STRICT") == "1",
+		LifecycleSunsetEnforce: os.Getenv("AGENTAUTH_CAP_LIFECYCLE_SUNSET_ENFORCE") == "1",
+		AuditPersistPath:       os.Getenv("AGENTAUTH_CAP_AUDIT_PATH"),
 		AnchorStaleThreshold:   st,
 	}
 }

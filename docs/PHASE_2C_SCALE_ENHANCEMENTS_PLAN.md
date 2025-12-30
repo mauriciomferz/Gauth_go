@@ -161,8 +161,8 @@ pap:
     postgres:
       host: "localhost"
       port: 5432
-      database: "gauth_pap"
-      user: "gauth"
+      database: "agentauth_pap"
+      user: "agentauth"
       password: "${PAP_DB_PASSWORD}"
       max_connections: 20
       connection_timeout: 30s
@@ -331,7 +331,7 @@ func (c *RedisCache) CheckRateLimit(key string, limit int, window time.Duration)
 func (c *RedisCache) IncrementRateLimit(key string, window time.Duration) error
 ```
 
-**2. Cache Integration** (`pkg/gauth/cached_validator.go` - 250 lines)
+**2. Cache Integration** (`pkg/agentauth/cached_validator.go` - 250 lines)
 ```go
 type CachedTokenValidator struct {
     validator ExtendedTokenValidator
@@ -527,13 +527,13 @@ var (
 
 #### Implementation Steps
 
-**1. Kubernetes Deployment** (`k8s/gauth-deployment-ha.yaml` - 300 lines)
+**1. Kubernetes Deployment** (`k8s/agentauth-deployment-ha.yaml` - 300 lines)
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth
-  namespace: gauth-system
+  name: agentauth
+  namespace: agentauth-system
 spec:
   replicas: 3
   strategy:
@@ -544,12 +544,12 @@ spec:
   
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
   
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         version: v1.0.0
       annotations:
         prometheus.io/scrape: "true"
@@ -566,12 +566,12 @@ spec:
                   - key: app
                     operator: In
                     values:
-                      - gauth
+                      - agentauth
               topologyKey: topology.kubernetes.io/zone
       
       containers:
-        - name: gauth
-          image: ghcr.io/mauriciomferz/gauth:v1.0.0
+        - name: agentauth
+          image: ghcr.io/mauriciomferz/agentauth:v1.0.0
           imagePullPolicy: IfNotPresent
           
           ports:
@@ -581,22 +581,22 @@ spec:
               containerPort: 9090
           
           env:
-            - name: GAUTH_ENV
+            - name: AGENTAUTH_ENV
               value: "production"
             - name: REDIS_ADDR
               valueFrom:
                 configMapKeyRef:
-                  name: gauth-config
+                  name: agentauth-config
                   key: redis_addr
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
-                  name: gauth-db-secret
+                  name: agentauth-db-secret
                   key: host
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: gauth-db-secret
+                  name: agentauth-db-secret
                   key: password
           
           resources:
@@ -633,13 +633,13 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gauth-hpa
-  namespace: gauth-system
+  name: agentauth-hpa
+  namespace: agentauth-system
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gauth
+    name: agentauth
   minReplicas: 3
   maxReplicas: 20
   metrics:
@@ -682,10 +682,10 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: gauth-vs
+  name: agentauth-vs
 spec:
   hosts:
-    - gauth.example.com
+    - agentauth.example.com
   http:
     - match:
         - headers:
@@ -693,24 +693,24 @@ spec:
               exact: canary
       route:
         - destination:
-            host: gauth
+            host: agentauth
             subset: canary
           weight: 10
         - destination:
-            host: gauth
+            host: agentauth
             subset: stable
           weight: 90
     - route:
         - destination:
-            host: gauth
+            host: agentauth
             subset: stable
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: gauth-dr
+  name: agentauth-dr
 spec:
-  host: gauth
+  host: agentauth
   trafficPolicy:
     connectionPool:
       tcp:
@@ -734,7 +734,7 @@ spec:
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: gauth-postgres
+  name: agentauth-postgres
 spec:
   instances: 3
   primaryUpdateStrategy: unsupervised
@@ -748,8 +748,8 @@ spec:
   
   bootstrap:
     initdb:
-      database: gauth
-      owner: gauth
+      database: agentauth
+      owner: agentauth
   
   storage:
     size: 100Gi
@@ -757,7 +757,7 @@ spec:
   
   backup:
     barmanObjectStore:
-      destinationPath: s3://gauth-backups/postgres
+      destinationPath: s3://agentauth-backups/postgres
       s3Credentials:
         accessKeyId:
           name: aws-creds
@@ -780,9 +780,9 @@ spec:
 
 **AWS Route 53 + CloudFront**:
 ```hcl
-resource "aws_route53_record" "gauth" {
+resource "aws_route53_record" "agentauth" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = "api.gauth.example.com"
+  name    = "api.agentauth.example.com"
   type    = "A"
   
   weighted_routing_policy {
@@ -791,15 +791,15 @@ resource "aws_route53_record" "gauth" {
   
   set_identifier = "us-east-1"
   alias {
-    name                   = aws_lb.gauth_us_east_1.dns_name
-    zone_id                = aws_lb.gauth_us_east_1.zone_id
+    name                   = aws_lb.agentauth_us_east_1.dns_name
+    zone_id                = aws_lb.agentauth_us_east_1.zone_id
     evaluate_target_health = true
   }
 }
 
-resource "aws_route53_record" "gauth_eu" {
+resource "aws_route53_record" "agentauth_eu" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = "api.gauth.example.com"
+  name    = "api.agentauth.example.com"
   type    = "A"
   
   weighted_routing_policy {
@@ -808,8 +808,8 @@ resource "aws_route53_record" "gauth_eu" {
   
   set_identifier = "eu-west-1"
   alias {
-    name                   = aws_lb.gauth_eu_west_1.dns_name
-    zone_id                = aws_lb.gauth_eu_west_1.zone_id
+    name                   = aws_lb.agentauth_eu_west_1.dns_name
+    zone_id                = aws_lb.agentauth_eu_west_1.zone_id
     evaluate_target_health = true
   }
 }
@@ -820,10 +820,10 @@ resource "aws_route53_record" "gauth_eu" {
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: gauth-alerts
+  name: agentauth-alerts
 spec:
   groups:
-    - name: gauth
+    - name: agentauth
       interval: 30s
       rules:
         - alert: AgentAuthHighErrorRate
@@ -852,8 +852,8 @@ spec:
         - alert: AgentAuthPodCrashLooping
           expr: |
             rate(kube_pod_container_status_restarts_total{
-              namespace="gauth-system",
-              pod=~"gauth-.*"
+              namespace="agentauth-system",
+              pod=~"agentauth-.*"
             }[15m]) > 0
           for: 5m
           labels:

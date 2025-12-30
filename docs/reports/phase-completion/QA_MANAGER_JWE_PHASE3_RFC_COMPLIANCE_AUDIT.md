@@ -5,7 +5,7 @@
 
 **Date**: November 12, 2025  
 **Auditor**: Quality Manager (AI)  
-**Scope**: RFC-0111 (AgentAuth 1.0) & RFC-0115 (PoA-Definition) Compliance  
+**Scope**: AAP-001 (AgentAuth 1.0) & AAP-002 (PoA-Definition) Compliance  
 **User Directive**: *"be very precise, honest and thorough on your analisis, don´t hold back and be bruttaly honest"*
 
 ---
@@ -14,7 +14,7 @@
 
 ### Overall RFC Compliance: **78%** 🟡
 
-**Critical Finding**: While JWE Phase 3 (encryption infrastructure) is complete and production-ready, **the core RFC-0111 authorization protocol implementation has significant gaps**. The system has excellent infrastructure components but lacks proper integration and end-to-end RFC compliance.
+**Critical Finding**: While JWE Phase 3 (encryption infrastructure) is complete and production-ready, **the core AAP-001 authorization protocol implementation has significant gaps**. The system has excellent infrastructure components but lacks proper integration and end-to-end RFC compliance.
 
 ### Compliance Breakdown
 
@@ -30,7 +30,7 @@
 
 ---
 
-## PART 1: RFC-0111 COMPLIANCE ANALYSIS
+## PART 1: AAP-001 COMPLIANCE ANALYSIS
 
 ### Section 1: Building Blocks & Exclusions
 
@@ -39,7 +39,7 @@
 **RFC Requirement**: OAuth 2.0 (RFC 6749, RFC 7636), OpenID Connect, MCP
 
 **Evidence**:
-- ✅ OAuth 2.0 token issuance (`gauth.go:342-398`)
+- ✅ OAuth 2.0 token issuance (`agentauth.go:342-398`)
 - ✅ JWT generation with standard claims (iss, sub, aud, exp, iat, jti)
 - ✅ PKCE support (`internal/pkce/`)
 - ✅ OpenID Connect integration (`pkg/oidc/`) - 14 files, OIDC ID token verification
@@ -77,7 +77,7 @@ type AAP-001Exclusions struct {
 
 **RFC Requirement (Section 3, Page 6)**: Extended tokens must represent comprehensive authorization including power of attorney attributes
 
-**Evidence**: `pkg/gauth/extended_token.go` (506 lines)
+**Evidence**: `pkg/agentauth/extended_token.go` (506 lines)
 
 **Structure Analysis**:
 ```go
@@ -90,7 +90,7 @@ type ExtendedToken struct {
     Scope        []string
     IssuedAt     time.Time
     
-    // RFC-0111 EXTENDED FIELDS ✅
+    // AAP-001 EXTENDED FIELDS ✅
     PowerOfAttorney      *poa.PoADefinition           // ✅ PoA credential
     AuthorizationChain   *AuthorizationChain          // ✅ Chain hierarchy
     ClientOwner          *ClientOwnerInfo             // ✅ AI owner
@@ -105,7 +105,7 @@ type ExtendedToken struct {
 }
 ```
 
-**RFC-0111 Required Attributes Coverage**:
+**AAP-001 Required Attributes Coverage**:
 - ✅ Issuer (`IssuedBy`)
 - ✅ Grantee (`ClientOwner`, `Client` in chain)
 - ✅ Successor (`AuthorizationChain` with delegation)
@@ -117,7 +117,7 @@ type ExtendedToken struct {
 - ✅ Version history (`AuditTrail`)
 - ✅ Revocation status (store supports `RevokeToken`, `IsRevoked`)
 
-**Assessment**: ExtendedToken struct is **RFC-0111 perfect** ✅
+**Assessment**: ExtendedToken struct is **AAP-001 perfect** ✅
 
 ---
 
@@ -127,7 +127,7 @@ type ExtendedToken struct {
 
 **RFC Requirement (Section 5, Page 8-10)**: One-off subscription enrollment with 8 steps
 
-**Evidence**: `pkg/gauth/subscription_flow.go` (605 lines)
+**Evidence**: `pkg/agentauth/subscription_flow.go` (605 lines)
 
 **Implementation Analysis**:
 
@@ -149,13 +149,13 @@ type ExtendedToken struct {
 - ✅ PoA credential embedding (Step V)
 - ✅ Subscription state machine (`SubscriptionStatus` enum)
 - ✅ PostgreSQL persistence (`schema/migrations/002_create_subscriptions.sql`)
-- ✅ REST API endpoints (`web/handlers/rfc0111/subscription_handlers.go`)
+- ✅ REST API endpoints (`web/handlers/aap001/subscription_handlers.go`)
 
 **Test Coverage**:
 - ✅ Integration tests (`test/integration/legal_framework_integration_test.go`)
-- ✅ E2E test script (`test_rfc0111_flow.sh`)
+- ✅ E2E test script (`test_aap001_flow.sh`)
 
-**Assessment**: Subscription flow is **fully RFC-0111 compliant** ✅
+**Assessment**: Subscription flow is **fully AAP-001 compliant** ✅
 
 ---
 
@@ -181,14 +181,14 @@ type ExtendedToken struct {
 
 **BRUTAL TRUTH - THE INTEGRATION GAP** 🔴:
 
-**All 9 steps are implemented as separate functions**, but **the main entry point (`gauth.Service.RequestToken()`) does NOT use them**!
+**All 9 steps are implemented as separate functions**, but **the main entry point (`agentauth.Service.RequestToken()`) does NOT use them**!
 
 **What Actually Happens**:
 ```go
-// pkg/gauth/gauth.go:342-398
+// pkg/agentauth/agentauth.go:342-398
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
     // ❌ DIRECTLY generates basic JWT
-    // ❌ NO RFC-0111 validation
+    // ❌ NO AAP-001 validation
     // ❌ NO Extended Token creation
     // ❌ NO authorization chain validation
     // ❌ Returns standard OAuth token, not ExtendedToken
@@ -215,17 +215,17 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 
 **THE FIX EXISTS BUT ISN'T WIRED UP**:
 ```go
-// pkg/gauth/gauth.go:448-453 - SEPARATE METHOD EXISTS
+// pkg/agentauth/agentauth.go:448-453 - SEPARATE METHOD EXISTS
 func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthorizationRequest) (*RFCCompliantTokenResponse, error) {
     if g.protocolOrchestrator == nil {
-        return nil, fmt.Errorf("RFC-0111 protocol orchestrator not initialized")
+        return nil, fmt.Errorf("AAP-001 protocol orchestrator not initialized")
     }
     return g.protocolOrchestrator.ExecuteRFCCompliantFlow(ctx, req)
 }
 ```
 
 **Impact**: 
-- 🔴 **Main API (`RequestToken`) is NOT RFC-0111 compliant**
+- 🔴 **Main API (`RequestToken`) is NOT AAP-001 compliant**
 - 🔴 **Generates basic OAuth JWTs instead of ExtendedTokens**
 - 🟡 **RFC-compliant path exists (`RequestTokenRFC`) but requires separate opt-in**
 - 🟡 **All 9 steps implemented, just not invoked by default**
@@ -233,7 +233,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 **Recommendation**:
 1. **CRITICAL**: Refactor `RequestToken()` to call `RequestTokenRFC()` internally
 2. Add backward compatibility mode for legacy OAuth-only clients
-3. Make RFC-0111 compliance the default, not opt-in
+3. Make AAP-001 compliance the default, not opt-in
 
 **Assessment**: Implementation 100%, Integration 40% → **70% overall** 🟡
 
@@ -249,7 +249,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 
 #### **PEP (Power Enforcement Point) - 85%** ✅
 
-**Implementation**: `pkg/gauth/pep.go` (547 lines)
+**Implementation**: `pkg/agentauth/pep.go` (547 lines)
 
 **Compliant**:
 - ✅ Supply-side enforcement (`EnforceAuthorization()`)
@@ -267,7 +267,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 
 **Code Evidence**:
 ```go
-// pkg/gauth/pep.go:98-126
+// pkg/agentauth/pep.go:98-126
 func (pep *PowerEnforcementPoint) EnforceAuthorization(
     ctx context.Context,
     request *EnforcementRequest,
@@ -371,11 +371,11 @@ func (pdp *DistributedPDP) EvaluateAuthorizationRequest(
 **JWE Phase 3 Implementation** (NEW, completed this session):
 
 **Files Created**:
-1. `pkg/gauth/jwe_env_config.go` (180 lines) - Environment configuration
-2. `pkg/gauth/jwe_key_registry.go` (350 lines) - Multi-key support for zero-downtime rotation
+1. `pkg/agentauth/jwe_env_config.go` (180 lines) - Environment configuration
+2. `pkg/agentauth/jwe_key_registry.go` (350 lines) - Multi-key support for zero-downtime rotation
 3. `deployments/docker/Dockerfile.jwe` (70 lines) - Production Docker image
 4. `deployments/docker/docker-compose.jwe.yml` (150 lines) - Full stack deployment
-5. `deployments/kubernetes/gauth-jwe-deployment.yaml` (250 lines) - K8s manifests
+5. `deployments/kubernetes/agentauth-jwe-deployment.yaml` (250 lines) - K8s manifests
 6. `JWE_DEPLOYMENT_GUIDE.md` (600+ lines) - Comprehensive deployment docs
 7. `JWE_SECURITY_AUDIT.md` (500+ lines) - Security audit (4/5 stars)
 8. `scripts/load-test-jwe.sh` (400+ lines) - Load testing infrastructure
@@ -392,7 +392,7 @@ func (pdp *DistributedPDP) EvaluateAuthorizationRequest(
 
 **JWT Serialization**:
 ```go
-// pkg/gauth/extended_token_service.go:221-279
+// pkg/agentauth/extended_token_service.go:221-279
 func (s *ExtendedTokenService) EncodeExtendedToken(
     ctx context.Context,
     token *ExtendedToken,
@@ -402,7 +402,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
         "iss": s.issuerID,
         "sub": token.AuthorizationChain.Client.EntityID,
         "aud": token.ResourceOwner.OwnerID,
-        // ... RFC-0111 extended fields
+        // ... AAP-001 extended fields
         "power_of_attorney": token.PowerOfAttorney,
         "authorization_chain": token.AuthorizationChain,
         // ... complete serialization
@@ -422,7 +422,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 
 **JWT Parsing**:
 ```go
-// pkg/gauth/extended_token_service.go:415-547
+// pkg/agentauth/extended_token_service.go:415-547
 func (s *ExtendedTokenService) parseExtendedToken(
     ctx context.Context,
     tokenString string,
@@ -438,7 +438,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
         return s.signingKey, nil
     })
     
-    // ✅ Extract all RFC-0111 fields
+    // ✅ Extract all AAP-001 fields
     // ✅ Reconstruct ExtendedToken struct
     return token, nil
 }
@@ -456,7 +456,7 @@ func (s *ExtendedTokenService) parseExtendedToken(
 
 ---
 
-## PART 2: RFC-0115 (PoA-Definition) COMPLIANCE
+## PART 2: AAP-002 (PoA-Definition) COMPLIANCE
 
 ### ✅ **85% COMPLIANT** 🟡
 
@@ -548,7 +548,7 @@ type AuthorizedActions struct {
 ```
 - ✅ Transaction types (loan, purchase, sale, leasing/rental)
 - ✅ Decision types (personnel, financial, buy/sell, conceptual, design, info sharing, strategic, legal, asset mgmt)
-- 🟡 **Action types partially implemented** - missing some RFC-0115 action categories (production, recycling, storage, customization, packaging, cleaning)
+- 🟡 **Action types partially implemented** - missing some AAP-002 action categories (production, recycling, storage, customization, packaging, cleaning)
 
 #### **Section C: Requirements - 75%** 🟡
 
@@ -601,7 +601,7 @@ type JurisdictionContext struct {
 }
 ```
 
-**Assessment**: PoA-Definition structure is **85% RFC-0115 compliant** 🟡
+**Assessment**: PoA-Definition structure is **85% AAP-002 compliant** 🟡
 
 **Missing**:
 - 🟡 10% of action types (physical actions)
@@ -618,10 +618,10 @@ type JurisdictionContext struct {
 
 **Primary API Endpoint**:
 ```go
-// pkg/gauth/gauth.go:342
+// pkg/agentauth/agentauth.go:342
 func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
     // ❌ Returns basic OAuth JWT
-    // ❌ NO RFC-0111 validation
+    // ❌ NO AAP-001 validation
     // ❌ NO Extended Token
     // ❌ Direct JWT generation
 }
@@ -629,16 +629,16 @@ func (g *Service) RequestToken(req TokenRequest) (*TokenResponse, error) {
 
 **RFC-Compliant Endpoint** (exists but not default):
 ```go
-// pkg/gauth/gauth.go:448
+// pkg/agentauth/agentauth.go:448
 func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthorizationRequest) (*RFCCompliantTokenResponse, error) {
-    // ✅ Full RFC-0111 flow
+    // ✅ Full AAP-001 flow
     // ✅ Extended Token creation
     // ✅ Steps (a)-(i) orchestration
 }
 ```
 
 **Impact**:
-- 🔴 **Users calling `RequestToken()` get OAuth tokens, not RFC-0111 Extended Tokens**
+- 🔴 **Users calling `RequestToken()` get OAuth tokens, not AAP-001 Extended Tokens**
 - 🔴 **RFC compliance requires opt-in via `RequestTokenRFC()`**
 - 🔴 **No automatic migration path for existing integrations**
 - 🔴 **Documentation doesn't clearly indicate which method to use**
@@ -650,7 +650,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
        // Convert to RFC request
        rfcReq := convertToRFCRequest(req)
        
-       // Execute RFC-0111 flow
+       // Execute AAP-001 flow
        rfcResp, err := g.RequestTokenRFC(ctx, rfcReq)
        
        // Return as ExtendedTokenResponse (backward compatible interface)
@@ -658,7 +658,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
    }
    ```
 2. Add `RequestTokenLegacy()` for pure OAuth mode
-3. Update documentation to make RFC-0111 the default
+3. Update documentation to make AAP-001 the default
 
 ---
 
@@ -696,7 +696,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 | Metric | Claimed (in reports) | Actual (this audit) | Δ |
 |--------|---------------------|---------------------|---|
 | **Security Hardening** | 70% | 65% | -5% |
-| **Overall RFC-0111** | 81% | 78% | -3% |
+| **Overall AAP-001** | 81% | 78% | -3% |
 | **P*P Architecture** | 73% | 73% | ✅ Accurate |
 | **Extended Token** | 100% | 100% | ✅ Accurate |
 | **Subscription Flow** | 100% | 100% | ✅ Accurate |
@@ -715,17 +715,17 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 
 ### 🔴 **CRITICAL (Must Fix Before Production)**
 
-1. **Refactor `RequestToken()` to Use RFC-0111 Flow**
+1. **Refactor `RequestToken()` to Use AAP-001 Flow**
    - **Priority**: P0 (BLOCKER)
    - **Effort**: 1 week
-   - **Impact**: Makes RFC-0111 the default, fixes integration gap
-   - **Files**: `pkg/gauth/gauth.go`, `pkg/gauth/protocol_orchestrator.go`
+   - **Impact**: Makes AAP-001 the default, fixes integration gap
+   - **Files**: `pkg/agentauth/agentauth.go`, `pkg/agentauth/protocol_orchestrator.go`
 
 2. **Connect PDP to PEP**
    - **Priority**: P0 (BLOCKER)
    - **Effort**: 3 days
    - **Impact**: Enables real authorization decisions
-   - **Files**: `pkg/gauth/pep.go`, `pkg/authz/distributed_pdp.go`
+   - **Files**: `pkg/agentauth/pep.go`, `pkg/authz/distributed_pdp.go`
 
 3. **Implement Real External Integrations**
    - **Priority**: P0 (BLOCKER for production)
@@ -741,7 +741,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
    - **Impact**: Full eIDAS compliance
    - **Files**: `pkg/verification/`, `pkg/oidc/`
 
-5. **Add Missing Action Types (RFC-0115 B.4)**
+5. **Add Missing Action Types (AAP-002 B.4)**
    - **Priority**: P1
    - **Effort**: 3 days
    - **Impact**: 100% PoA-Definition compliance
@@ -751,13 +751,13 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
    - **Priority**: P1 (for regulated industries)
    - **Effort**: 2 weeks
    - **Impact**: FIPS 140-2 Level 2 compliance
-   - **Files**: `pkg/gauth/jwe_service.go`
+   - **Files**: `pkg/agentauth/jwe_service.go`
 
 7. **Production Database Optimization**
    - **Priority**: P1
    - **Effort**: 1 week
    - **Impact**: Connection pooling, query optimization
-   - **Files**: `pkg/gauth/extended_token_store_postgres.go`
+   - **Files**: `pkg/agentauth/extended_token_store_postgres.go`
 
 ### 🟢 **MEDIUM PRIORITY (Nice to Have)**
 
@@ -771,12 +771,12 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
    - **Priority**: P2
    - **Effort**: 1 week
    - **Impact**: Enhanced security (from JWE security audit recommendation)
-   - **Files**: `pkg/gauth/extended_token_service.go`
+   - **Files**: `pkg/agentauth/extended_token_service.go`
 
-10. **Implement Death/Incapacity Rules (RFC-0115 C.7)**
+10. **Implement Death/Incapacity Rules (AAP-002 C.7)**
     - **Priority**: P2
     - **Effort**: 1 week
-    - **Impact**: Complete RFC-0115 compliance
+    - **Impact**: Complete AAP-002 compliance
     - **Files**: `pkg/poa/poa.go`
 
 ---
@@ -794,7 +794,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 **Integration Tests**:
 - ✅ Legal framework integration
 - ✅ Subscription flow (Steps I-VIII)
-- ✅ E2E test script (`test_rfc0111_flow.sh`)
+- ✅ E2E test script (`test_aap001_flow.sh`)
 
 **Load Tests**:
 - ✅ JWE load testing script (1000-5000 req/s)
@@ -850,15 +850,15 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 - ✅ `JWE_PHASE3_COMPLETION_REPORT.md` (800 lines) - Implementation summary
 
 **Existing Documentation**:
-- ✅ RFC-0111 implementation (`docs/Gifo_0111.md`)
-- ✅ RFC-0115 implementation (`docs/Gifo_0115.md`)
+- ✅ AAP-001 implementation (`docs/Gifo_0111.md`)
+- ✅ AAP-002 implementation (`docs/Gifo_0115.md`)
 - ✅ Architecture documentation (`docs/RFC_ARCHITECTURE.md`)
 - ✅ API documentation (`docs/GENERATED_API.md`)
 - ✅ Quick start guide (`QUICK_START_GUIDE.md`)
 
 **Gaps**:
 - 🟡 No clear guidance on which API to use (`RequestToken` vs `RequestTokenRFC`)
-- 🟡 Migration guide missing (OAuth → RFC-0111)
+- 🟡 Migration guide missing (OAuth → AAP-001)
 - 🟡 Production deployment checklist incomplete (external integrations)
 
 ---
@@ -868,7 +868,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 ### **Overall RFC Compliance: 78%** 🟡
 
 **Strengths** ✅:
-1. **Extended Token structure is RFC-0111 perfect** (100%)
+1. **Extended Token structure is AAP-001 perfect** (100%)
 2. **Subscription flow (Steps I-VIII) fully compliant** (100%)
 3. **JWE encryption infrastructure production-ready** (95%)
 4. **PoA-Definition structure comprehensive** (85%)
@@ -876,7 +876,7 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 6. **Request flow steps all implemented** (100% individual functions)
 
 **Critical Weaknesses** 🔴:
-1. **Main API (`RequestToken`) NOT RFC-0111 compliant** - generates basic OAuth tokens instead of Extended Tokens
+1. **Main API (`RequestToken`) NOT AAP-001 compliant** - generates basic OAuth tokens instead of Extended Tokens
 2. **RFC compliance requires opt-in** via separate `RequestTokenRFC()` method
 3. **External integrations use mocks** - commercial register, TSP not connected
 4. **PDP not wired to PEP** - authorization decisions not enforced
@@ -884,12 +884,12 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 
 **The Bottom Line**:
 
-> **This implementation has ALL the RFC-0111/0115 components built, but they're NOT connected to the main API flow. It's like having a Ferrari engine sitting in a garage while the car runs on a lawnmower motor.**
+> **This implementation has ALL the AAP-001/0115 components built, but they're NOT connected to the main API flow. It's like having a Ferrari engine sitting in a garage while the car runs on a lawnmower motor.**
 
 **Production Readiness**: **40%** 🔴
 
 - ✅ **Safe to deploy**: Infrastructure (JWE, JWT, database, caching)
-- 🔴 **NOT safe to deploy as RFC-0111 compliant**: Main API generates OAuth tokens, not Extended Tokens
+- 🔴 **NOT safe to deploy as AAP-001 compliant**: Main API generates OAuth tokens, not Extended Tokens
 - 🟡 **Requires configuration**: External integrations need real endpoints
 
 **Recommended Actions Before Production**:
@@ -909,21 +909,21 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 
 | Component | File | Lines | Status |
 |-----------|------|-------|--------|
-| Extended Token | `pkg/gauth/extended_token.go` | 506 | ✅ 100% |
-| Extended Token Service | `pkg/gauth/extended_token_service.go` | 650 | ✅ 100% |
-| Subscription Flow | `pkg/gauth/subscription_flow.go` | 605 | ✅ 100% |
-| Protocol Orchestrator | `pkg/gauth/protocol_orchestrator.go` | 400 | ✅ 100% |
-| PEP | `pkg/gauth/pep.go` | 547 | ✅ 85% |
+| Extended Token | `pkg/agentauth/extended_token.go` | 506 | ✅ 100% |
+| Extended Token Service | `pkg/agentauth/extended_token_service.go` | 650 | ✅ 100% |
+| Subscription Flow | `pkg/agentauth/subscription_flow.go` | 605 | ✅ 100% |
+| Protocol Orchestrator | `pkg/agentauth/protocol_orchestrator.go` | 400 | ✅ 100% |
+| PEP | `pkg/agentauth/pep.go` | 547 | ✅ 85% |
 | PDP | `pkg/authz/distributed_pdp.go` | 214 | ✅ 100% |
 | PIP | `pkg/pip/pip.go` | 350 | ✅ 80% |
 | PAP | `pkg/authz/policies.go` | 300 | ✅ 77% |
 | PVP | `pkg/verification/pvp.go`, `pkg/oidc/pvp.go` | 400 | 🟡 40% |
 | PoA Definition | `pkg/poa/poa.go` | 1340 | ✅ 85% |
-| JWE Service | `pkg/gauth/jwe_service.go` | 400 | ✅ 95% |
-| JWE Key Registry | `pkg/gauth/jwe_key_registry.go` | 350 | ✅ 100% |
-| JWE Config | `pkg/gauth/jwe_env_config.go` | 180 | ✅ 100% |
-| Main Service (OAuth) | `pkg/gauth/gauth.go` | 1013 | 🔴 40% RFC |
-| RFC Service (Opt-in) | `pkg/gauth/gauth.go` (RequestTokenRFC) | - | ✅ 100% |
+| JWE Service | `pkg/agentauth/jwe_service.go` | 400 | ✅ 95% |
+| JWE Key Registry | `pkg/agentauth/jwe_key_registry.go` | 350 | ✅ 100% |
+| JWE Config | `pkg/agentauth/jwe_env_config.go` | 180 | ✅ 100% |
+| Main Service (OAuth) | `pkg/agentauth/agentauth.go` | 1013 | 🔴 40% RFC |
+| RFC Service (Opt-in) | `pkg/agentauth/agentauth.go` (RequestTokenRFC) | - | ✅ 100% |
 
 ### 🔴 **What's NOT Wired Up**
 
@@ -938,9 +938,9 @@ func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthoriz
 
 ## SIGNATURE
 
-**Quality Manager Assessment**: This audit was conducted with brutal honesty as requested. The implementation is technically excellent with comprehensive RFC-0111/0115 structures, but critical integration gaps prevent production deployment as a fully RFC-compliant authorization system. The main API still generates basic OAuth tokens instead of Extended Tokens, requiring immediate refactoring.
+**Quality Manager Assessment**: This audit was conducted with brutal honesty as requested. The implementation is technically excellent with comprehensive AAP-001/0115 structures, but critical integration gaps prevent production deployment as a fully RFC-compliant authorization system. The main API still generates basic OAuth tokens instead of Extended Tokens, requiring immediate refactoring.
 
-**Recommendation**: **DO NOT DEPLOY AS RFC-0111 COMPLIANT** until `RequestToken()` is refactored to use `RequestTokenRFC()` internally and external integrations are connected.
+**Recommendation**: **DO NOT DEPLOY AS AAP-001 COMPLIANT** until `RequestToken()` is refactored to use `RequestTokenRFC()` internally and external integrations are connected.
 
 **Audit Date**: November 12, 2025  
 **Auditor**: Quality Manager (AI)  

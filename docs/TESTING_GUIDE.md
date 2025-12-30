@@ -30,13 +30,13 @@ cd examples/token/advanced_revocation_flow && go test -v
 ### **Build Verification Tests**
 ```bash
 # Core packages
-go build ./pkg/gauth/...
+go build ./pkg/agentauth/...
 go build ./pkg/token/...
 go build ./pkg/events/...
 go build ./pkg/resilience/...
 
 # Main application
-go build ./cmd/gauth-server/...
+go build ./cmd/agentauth-server/...
 
 # Working examples
 cd examples/typed_structures_demo && go build
@@ -63,7 +63,7 @@ Running `go test ./... -v` fails due to:
 ```
 --- PASS: TestAdvancedRevocationFlowOutput (0.00s)
 PASS
-ok  github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/examples/token/advanced_revocation_flow
+ok  github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/examples/token/advanced_revocation_flow
 ```
 
 ## 🎯 **Best Practices**
@@ -88,7 +88,7 @@ go test ./pkg/... -v
 go build ./pkg/...
 
 # Test specific functionality  
-go run ./cmd/gauth-server/main.go
+go run ./cmd/agentauth-server/main.go
 
 # Run working examples
 cd examples/typed_structures_demo && go run main.go
@@ -109,7 +109,7 @@ cd examples/typed_structures_demo && go run main.go
 
 ### **If you encounter test failures:**
 1. Use the functional test script: `./scripts/run_functional_tests.sh`
-2. Test core packages individually: `go test ./pkg/gauth -v`
+2. Test core packages individually: `go test ./pkg/agentauth -v`
 3. Check specific examples: `cd examples/[working-example] && go test`
 - **Interface mismatches**: Some examples use outdated API signatures
 - **Missing packages**: Some imports reference non-existent packages
@@ -118,7 +118,7 @@ cd examples/typed_structures_demo && go run main.go
 ```bash
 # Verify core functionality works
 go build ./pkg/... && echo "✅ Core packages work"
-go build ./cmd/gauth-server && echo "✅ Main app works"  
+go build ./cmd/agentauth-server && echo "✅ Main app works"  
 cd examples/token/advanced_revocation_flow && go test && echo "✅ Tests pass"
 
 ---

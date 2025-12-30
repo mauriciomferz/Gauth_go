@@ -9,7 +9,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto/keys"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // Helper interfaces to avoid circular dependencies with web package
@@ -70,7 +70,7 @@ type Handler struct {
 	KeyProvider   crypto.KeyProvider
 	JWTKeyManager keys.KeyManager
 	ETagUpdater   JWKSETagUpdater
-	AgentAuthService  gauth.AgentAuth
+	AgentAuthService  agentauth.AgentAuth
 	ClockStatus   ClockStatusProvider
 
 	// Configs
@@ -105,13 +105,13 @@ func NewHandler(store *Store, replay *ReplayNonceStore, auditor Auditor, emitter
 		JWTKeyManager: km,
 		ClockStatus:   clock,
 
-		UseJWTLib:    os.Getenv("GAUTH_USE_JWT_LIB") == "1",
-		JWTAlg:       os.Getenv("GAUTH_JWT_ALG"),
-		JWTKid:       os.Getenv("GAUTH_JWT_KID"),
-		JWTRotation:  os.Getenv("GAUTH_JWT_ROTATION_DAYS"),
-		JWTSecret:    os.Getenv("GAUTH_JWT_SECRET"),
-		Issuer:       os.Getenv("GAUTH_ISSUER"),
-		ReplayStrict: os.Getenv("GAUTH_REPLAY_STRICT") == "1",
+		UseJWTLib:    os.Getenv("AGENTAUTH_USE_JWT_LIB") == "1",
+		JWTAlg:       os.Getenv("AGENTAUTH_JWT_ALG"),
+		JWTKid:       os.Getenv("AGENTAUTH_JWT_KID"),
+		JWTRotation:  os.Getenv("AGENTAUTH_JWT_ROTATION_DAYS"),
+		JWTSecret:    os.Getenv("AGENTAUTH_JWT_SECRET"),
+		Issuer:       os.Getenv("AGENTAUTH_ISSUER"),
+		ReplayStrict: os.Getenv("AGENTAUTH_REPLAY_STRICT") == "1",
 		ClockSkew:    0,
 	}
 
@@ -122,7 +122,7 @@ func NewHandler(store *Store, replay *ReplayNonceStore, auditor Auditor, emitter
 		h.JWTKid = "demo-rsa" // Default fallback
 	}
 	// Clock skew loading
-	if skew := os.Getenv("GAUTH_JWT_CLOCK_SKEW_SECONDS"); skew != "" {
+	if skew := os.Getenv("AGENTAUTH_JWT_CLOCK_SKEW_SECONDS"); skew != "" {
 		if dur, err := time.ParseDuration(skew + "s"); err == nil {
 			h.ClockSkew = dur
 		}

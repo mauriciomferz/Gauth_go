@@ -66,7 +66,7 @@ func SetRotationTracerProvider(tp *tracing.TracerProvider) { RotationTracerProvi
 
 // NewManager constructs a manager with given key lifetime.
 // NewManager constructs a manager with given key lifetime.
-// If GAUTH_EDDSA_PERSIST_PATH is set, keys will be loaded from disk (if file exists)
+// If AGENTAUTH_EDDSA_PERSIST_PATH is set, keys will be loaded from disk (if file exists)
 // and future rotations will be saved. Persistence format (JSON):
 //
 //	{
@@ -78,8 +78,8 @@ func SetRotationTracerProvider(tp *tracing.TracerProvider) { RotationTracerProvi
 // Only non-expired history keys are kept on load. Missing or corrupt file results in fresh key generation.
 func NewManager(ttl time.Duration) (*Manager, error) {
 	m := &Manager{ttl: ttl, stopCh: make(chan struct{})}
-	fmt.Fprintf(os.Stderr, "[crypto] NewManager: ttl=%v persistPath=%s autoRotate=%s\n", ttl, m.persistPath, os.Getenv("GAUTH_EDDSA_AUTO_ROTATE"))
-	if p := os.Getenv("GAUTH_EDDSA_PERSIST_PATH"); p != "" {
+	fmt.Fprintf(os.Stderr, "[crypto] NewManager: ttl=%v persistPath=%s autoRotate=%s\n", ttl, m.persistPath, os.Getenv("AGENTAUTH_EDDSA_AUTO_ROTATE"))
+	if p := os.Getenv("AGENTAUTH_EDDSA_PERSIST_PATH"); p != "" {
 		// Expand ~ and relative path
 		if p[0] == '~' {
 			if home, err := os.UserHomeDir(); err == nil {
@@ -98,11 +98,11 @@ func NewManager(ttl time.Duration) (*Manager, error) {
 		}
 	}
 	// Optional ledger integration for rotation audit events (hash-chained & persistent)
-	if lp := os.Getenv("GAUTH_EDDSA_ROTATION_LEDGER_PATH"); lp != "" {
+	if lp := os.Getenv("AGENTAUTH_EDDSA_ROTATION_LEDGER_PATH"); lp != "" {
 		if abs, err := filepath.Abs(lp); err == nil {
 			// Check for generic External Anchor configuration
-			anchorProvider := os.Getenv("GAUTH_ROTATION_ANCHOR_PROVIDER")
-			anchorURL := os.Getenv("GAUTH_ROTATION_ANCHOR_URL")
+			anchorProvider := os.Getenv("AGENTAUTH_ROTATION_ANCHOR_PROVIDER")
+			anchorURL := os.Getenv("AGENTAUTH_ROTATION_ANCHOR_URL")
 
 			if anchorProvider != "" && anchorURL != "" {
 				// Use ExternalAuditLedger
@@ -116,7 +116,7 @@ func NewManager(ttl time.Duration) (*Manager, error) {
 				if provider != nil {
 					// Use same path for receipt store with .receipts extension if not specified
 					receiptPath := abs + ".receipts"
-					if rp := os.Getenv("GAUTH_ROTATION_ANCHOR_RECEIPT_PATH"); rp != "" {
+					if rp := os.Getenv("AGENTAUTH_ROTATION_ANCHOR_RECEIPT_PATH"); rp != "" {
 						receiptPath = rp
 					}
 
@@ -152,14 +152,14 @@ func NewManager(ttl time.Duration) (*Manager, error) {
 	if err := m.saveLocked(); err != nil {
 		fmt.Fprintf(os.Stderr, "[crypto] initial save failed: %v\n", err)
 	}
-	// Optional auto-rotation scheduler: if GAUTH_EDDSA_AUTO_ROTATE=1 run background ticker
-	if os.Getenv("GAUTH_EDDSA_AUTO_ROTATE") == "1" {
+	// Optional auto-rotation scheduler: if AGENTAUTH_EDDSA_AUTO_ROTATE=1 run background ticker
+	if os.Getenv("AGENTAUTH_EDDSA_AUTO_ROTATE") == "1" {
 		interval := m.ttl / 2
-		if envInterval := os.Getenv("GAUTH_EDDSA_ROTATE_INTERVAL"); envInterval != "" {
+		if envInterval := os.Getenv("AGENTAUTH_EDDSA_ROTATE_INTERVAL"); envInterval != "" {
 			if parsed, err := time.ParseDuration(envInterval); err == nil {
 				interval = parsed
 			} else {
-				fmt.Fprintf(os.Stderr, "[crypto] invalid GAUTH_EDDSA_ROTATE_INTERVAL: %v\n", err)
+				fmt.Fprintf(os.Stderr, "[crypto] invalid AGENTAUTH_EDDSA_ROTATE_INTERVAL: %v\n", err)
 			}
 		} else if interval < time.Minute {
 			interval = time.Minute
@@ -313,10 +313,10 @@ func (m *Manager) Stop() {
 	}
 }
 
-// emitRotationLog writes a JSON line record describing the rotation if GAUTH_EDDSA_ROTATION_LOG is set.
+// emitRotationLog writes a JSON line record describing the rotation if AGENTAUTH_EDDSA_ROTATION_LOG is set.
 // Fields: ts, event, prev_kid, new_kid, ttl_hours, history_size
 func (m *Manager) emitRotationLog(prev, curr *Key) {
-	path := os.Getenv("GAUTH_EDDSA_ROTATION_LOG")
+	path := os.Getenv("AGENTAUTH_EDDSA_ROTATION_LOG")
 	if path == "" || curr == nil {
 		return
 	}

@@ -189,7 +189,7 @@ App will be available at http://localhost:3000
 
 ## 📊 Comparison: Old vs New UI
 
-| Feature | Old UI (index.html) | Old UI (gauth1.html) | **New React UI** |
+| Feature | Old UI (index.html) | Old UI (agentauth1.html) | **New React UI** |
 |---------|---------------------|----------------------|------------------|
 | **Framework** | Vanilla JS | Vanilla JS | **React 18** |
 | **Type Safety** | ❌ None | ❌ None | **✅ TypeScript** |
@@ -354,7 +354,7 @@ npm run format
 ## 📄 Related Files
 
 - `web/static_ui/index.html` - Legacy dashboard (can be deprecated)
-- `web/static_ui/gauth1.html` - Current production UI
+- `web/static_ui/agentauth1.html` - Current production UI
 - `web/ui-react/` - **NEW React SPA** (this project)
 
 ---

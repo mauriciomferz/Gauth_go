@@ -18,9 +18,9 @@ Objective: Demonstrate governance transparency and reactive controls as two auto
 
 ## Pre-Demo Setup
 1. Export environment flags:
-   - `GAUTH_ROTATIONS_SIGN=1` `GAUTH_ROTATIONS_MULTISIG=1` `GAUTH_ROTATIONS_THRESHOLD=2`
-   - `GAUTH_MODEL_LIMIT_ATTEST_SIGN=1` `GAUTH_ATTEST_STREAM_ENABLE=1`
-   - `GAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD=2.5`
+   - `AGENTAUTH_ROTATIONS_SIGN=1` `AGENTAUTH_ROTATIONS_MULTISIG=1` `AGENTAUTH_ROTATIONS_THRESHOLD=2`
+   - `AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN=1` `AGENTAUTH_ATTEST_STREAM_ENABLE=1`
+   - `AGENTAUTH_SEMANTIC_ANOMALY_Z_THRESHOLD=2.5`
 2. Ensure at least 2 active Ed25519 rotation keys (trigger rotation if needed).
 3. Warm revocation/Merkle chain (if endpoint implemented later).
 4. Start server: `go run cmd/web-server/main.go`.
@@ -43,7 +43,7 @@ Outcome: Authorized transaction accepted.
 
 ## Phase 3: Governance Attestation
 1. Agent A requests `GET /api/v1/model/limits/attestation`.
-2. Verifies Ed25519 signature with prefix `GAUTH_MODEL_LIMIT_ATTEST:`.
+2. Verifies Ed25519 signature with prefix `AGENTAUTH_MODEL_LIMIT_ATTEST:`.
 3. Computes expected `combined_hash` locally.
 4. (If notarization enabled) Confirms notarization success field and timestamp.
 
@@ -94,7 +94,7 @@ Attestation Verification (Go pseudocode):
 ```go
 att := fetchModelLimitsAttestation()
 raw := rebuildUnsigned(att)
-msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 ok := ed25519.Verify(pubKey, msg, sigBytes)
 ```
 

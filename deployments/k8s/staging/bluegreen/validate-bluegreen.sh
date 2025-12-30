@@ -52,10 +52,10 @@ warn() {
 print_test_header "1. Validate Manifest Files Exist"
 
 REQUIRED_FILES=(
-    "gauth-deployment-blue.yaml"
-    "gauth-deployment-green.yaml"
-    "gauth-services.yaml"
-    "gauth-ingress-bluegreen.yaml"
+    "agentauth-deployment-blue.yaml"
+    "agentauth-deployment-green.yaml"
+    "agentauth-services.yaml"
+    "agentauth-ingress-bluegreen.yaml"
     "switch-traffic.sh"
     "README.md"
 )
@@ -80,7 +80,7 @@ fi
 print_test_header "2. Validate YAML Syntax"
 
 YAML_ERRORS=0
-for file in gauth-deployment-blue.yaml gauth-deployment-green.yaml gauth-services.yaml gauth-ingress-bluegreen.yaml; do
+for file in agentauth-deployment-blue.yaml agentauth-deployment-green.yaml agentauth-services.yaml agentauth-ingress-bluegreen.yaml; do
     if [[ -f "$file" ]]; then
         # Check basic YAML syntax with Python (supports multi-document YAML)
         if python3 -c "import yaml; list(yaml.safe_load_all(open('$file')))" 2>/dev/null; then
@@ -104,8 +104,8 @@ print_test_header "3. Validate Blue/Green Deployment Consistency"
 echo "Checking for consistent configuration between blue and green..."
 
 # Check that both deployments have same resource limits (except version label)
-BLUE_REPLICAS=$(grep -A 5 "kind: Deployment" gauth-deployment-blue.yaml | grep "replicas:" | awk '{print $2}' || echo "0")
-GREEN_REPLICAS=$(grep -A 5 "kind: Deployment" gauth-deployment-green.yaml | grep "replicas:" | awk '{print $2}' || echo "0")
+BLUE_REPLICAS=$(grep -A 5 "kind: Deployment" agentauth-deployment-blue.yaml | grep "replicas:" | awk '{print $2}' || echo "0")
+GREEN_REPLICAS=$(grep -A 5 "kind: Deployment" agentauth-deployment-green.yaml | grep "replicas:" | awk '{print $2}' || echo "0")
 
 echo -e "  Blue replicas: ${BLUE_REPLICAS}"
 echo -e "  Green replicas: ${GREEN_REPLICAS}"
@@ -123,7 +123,7 @@ print_test_header "4. Validate Service Selectors"
 echo "Checking service selector configuration..."
 
 # Check blue service selector
-if grep -q "version: blue" gauth-services.yaml; then
+if grep -q "version: blue" agentauth-services.yaml; then
     echo -e "${GREEN}  ✓ Blue service has version: blue selector${NC}"
 else
     echo -e "${RED}  ✗ Blue service missing version: blue selector${NC}"
@@ -132,7 +132,7 @@ else
 fi
 
 # Check green service selector
-if grep -q "version: green" gauth-services.yaml; then
+if grep -q "version: green" agentauth-services.yaml; then
     echo -e "${GREEN}  ✓ Green service has version: green selector${NC}"
 else
     echo -e "${RED}  ✗ Green service missing version: green selector${NC}"
@@ -180,21 +180,21 @@ print_test_header "6. Validate Zero-Downtime Strategy Elements"
 echo "Checking deployment strategy configuration..."
 
 # Check for readiness probes
-if grep -q "readinessProbe" gauth-deployment-blue.yaml && grep -q "readinessProbe" gauth-deployment-green.yaml; then
+if grep -q "readinessProbe" agentauth-deployment-blue.yaml && grep -q "readinessProbe" agentauth-deployment-green.yaml; then
     echo -e "${GREEN}  ✓ Deployments have readiness probes${NC}"
 else
     warn "Deployments may be missing readiness probes (required for zero-downtime)"
 fi
 
 # Check for liveness probes
-if grep -q "livenessProbe" gauth-deployment-blue.yaml && grep -q "livenessProbe" gauth-deployment-green.yaml; then
+if grep -q "livenessProbe" agentauth-deployment-blue.yaml && grep -q "livenessProbe" agentauth-deployment-green.yaml; then
     echo -e "${GREEN}  ✓ Deployments have liveness probes${NC}"
 else
     warn "Deployments may be missing liveness probes"
 fi
 
 # Check for rolling update strategy
-if grep -q "RollingUpdate" gauth-deployment-blue.yaml || grep -q "maxSurge" gauth-deployment-blue.yaml; then
+if grep -q "RollingUpdate" agentauth-deployment-blue.yaml || grep -q "maxSurge" agentauth-deployment-blue.yaml; then
     echo -e "${GREEN}  ✓ Deployments use RollingUpdate strategy${NC}"
 else
     warn "Deployment strategy not explicitly set to RollingUpdate"
@@ -205,14 +205,14 @@ pass_test "Zero-downtime strategy elements present"
 # Test 7: Validate Session Affinity
 print_test_header "7. Validate Session Affinity Configuration"
 
-if grep -q "sessionAffinity: ClientIP" gauth-services.yaml; then
+if grep -q "sessionAffinity: ClientIP" agentauth-services.yaml; then
     echo -e "${GREEN}  ✓ Services have ClientIP session affinity${NC}"
 else
     warn "Services missing session affinity (may cause session loss during switch)"
 fi
 
-if grep -q "timeoutSeconds" gauth-services.yaml; then
-    TIMEOUT=$(grep "timeoutSeconds:" gauth-services.yaml | head -1 | awk '{print $2}')
+if grep -q "timeoutSeconds" agentauth-services.yaml; then
+    TIMEOUT=$(grep "timeoutSeconds:" agentauth-services.yaml | head -1 | awk '{print $2}')
     echo -e "${GREEN}  ✓ Session affinity timeout: ${TIMEOUT}s${NC}"
 else
     warn "Session affinity timeout not configured"
@@ -223,9 +223,9 @@ pass_test "Session affinity configuration validated"
 # Test 8: Validate Ingress Configuration
 print_test_header "8. Validate Ingress Configuration for Blue-Green"
 
-if [[ -f "gauth-ingress-bluegreen.yaml" ]]; then
+if [[ -f "agentauth-ingress-bluegreen.yaml" ]]; then
     # Check ingress has backend service reference
-    if grep -q "backend:" gauth-ingress-bluegreen.yaml; then
+    if grep -q "backend:" agentauth-ingress-bluegreen.yaml; then
         echo -e "${GREEN}  ✓ Ingress has backend service configuration${NC}"
     else
         echo -e "${RED}  ✗ Ingress missing backend service configuration${NC}"
@@ -234,8 +234,8 @@ if [[ -f "gauth-ingress-bluegreen.yaml" ]]; then
     fi
     
     # Check for HTTP paths
-    if grep -q "paths:" gauth-ingress-bluegreen.yaml; then
-        PATH_COUNT=$(grep -c "path:" gauth-ingress-bluegreen.yaml || echo "0")
+    if grep -q "paths:" agentauth-ingress-bluegreen.yaml; then
+        PATH_COUNT=$(grep -c "path:" agentauth-ingress-bluegreen.yaml || echo "0")
         echo -e "${GREEN}  ✓ Ingress has ${PATH_COUNT} path(s) configured${NC}"
     else
         warn "Ingress may be missing path configuration"
@@ -281,7 +281,7 @@ echo "Analyzing resource requirements..."
 echo -e "${YELLOW}  ℹ️  Blue-green requires 2x resources during deployment${NC}"
 echo -e "${YELLOW}  ℹ️  Consider resource capacity before deployment${NC}"
 
-if grep -q "resources:" gauth-deployment-blue.yaml; then
+if grep -q "resources:" agentauth-deployment-blue.yaml; then
     echo -e "${GREEN}  ✓ Resource limits defined${NC}"
 else
     warn "Resource limits not defined (may cause resource contention)"
@@ -324,14 +324,14 @@ print_test_header "12. Validate Security Configuration"
 echo "Checking security settings..."
 
 # Check for secret references (not hardcoded values)
-if grep -q "secretKeyRef" gauth-deployment-blue.yaml && grep -q "secretKeyRef" gauth-deployment-green.yaml; then
+if grep -q "secretKeyRef" agentauth-deployment-blue.yaml && grep -q "secretKeyRef" agentauth-deployment-green.yaml; then
     echo -e "${GREEN}  ✓ Deployments use Kubernetes Secrets${NC}"
 else
     warn "Deployments may not be using Kubernetes Secrets properly"
 fi
 
 # Check for security context
-if grep -q "securityContext" gauth-deployment-blue.yaml; then
+if grep -q "securityContext" agentauth-deployment-blue.yaml; then
     echo -e "${GREEN}  ✓ Security context configured${NC}"
 else
     warn "Security context not configured (may run as root)"

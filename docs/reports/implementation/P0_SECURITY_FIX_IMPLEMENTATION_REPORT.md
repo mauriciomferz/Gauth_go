@@ -41,10 +41,10 @@ Successfully implemented P0 critical security fixes to prevent authentication by
 
 ### Files Modified (3)
 
-1. **pkg/gauth/replay_store_bolt.go**
+1. **pkg/agentauth/replay_store_bolt.go**
    - Added container environment validation to `NewBoltReplayStore()`
    - Fails with detailed error if ephemeral path detected in container
-   - Bypass available via `GAUTH_ALLOW_UNSAFE_BOLTDB=1` (dev/test ONLY)
+   - Bypass available via `AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1` (dev/test ONLY)
    - Enhanced documentation with deprecation warnings
 
 2. **internal/security/startup_validation.go**
@@ -129,7 +129,7 @@ func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error
 func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error) {
     // SECURITY CHECK: Validate path is safe for persistent storage
     if security.ShouldEnforceContainerSafety() {
-        if os.Getenv("GAUTH_ALLOW_UNSAFE_BOLTDB") != "1" {
+        if os.Getenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB") != "1" {
             if err := security.ValidatePathForPersistence(path, "replay protection"); err != nil {
                 return nil, fmt.Errorf("BoltDB SECURITY VIOLATION (CV-2025-005): %w", err)
             }
@@ -148,7 +148,7 @@ func (v *StartupValidator) validateReplayStore() {
     
     if inContainer {
         // Warn if BoltDB used with bypass
-        if os.Getenv("GAUTH_ALLOW_UNSAFE_BOLTDB") == "1" {
+        if os.Getenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB") == "1" {
             v.warnings = append(v.warnings, 
                 "BoltDB replay store enabled in %s with safety bypass - UNSAFE", env)
         }
@@ -212,7 +212,7 @@ func (v *StartupValidator) validateReplayStore() {
 
 ```bash
 # ⚠️ UNSAFE FOR PRODUCTION
-export GAUTH_ALLOW_UNSAFE_BOLTDB=1
+export AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1
 
 # This bypasses container safety checks
 # Use ONLY for:
@@ -249,16 +249,16 @@ spec:
 ```bash
 export REDIS_HOST=redis.default.svc.cluster.local
 export REDIS_PORT=6379
-export GAUTH_REPLAY_STORE=redis
+export AGENTAUTH_REPLAY_STORE=redis
 ```
 
 **Step 3: Deploy and Verify**
 ```bash
 kubectl apply -f redis-deployment.yaml
-kubectl apply -f gauth-deployment.yaml
+kubectl apply -f agentauth-deployment.yaml
 
 # Test replay protection
-curl -H "Authorization: Bearer $TOKEN" http://gauth/api/protected
+curl -H "Authorization: Bearer $TOKEN" http://agentauth/api/protected
 # Expected: 401 Unauthorized (replay detected)
 ```
 
@@ -272,10 +272,10 @@ curl -H "Authorization: Bearer $TOKEN" http://gauth/api/protected
 
 ```bash
 # Run in Kubernetes
-kubectl exec -it gauth-pod -- /bin/sh
+kubectl exec -it agentauth-pod -- /bin/sh
 
 # Check logs
-kubectl logs gauth-pod | grep SECURITY
+kubectl logs agentauth-pod | grep SECURITY
 # Expected output:
 # [SECURITY] Running in kubernetes container
 # [SECURITY] BoltDB container safety checks ENABLED
@@ -285,7 +285,7 @@ kubectl logs gauth-pod | grep SECURITY
 
 ```bash
 # Attempt to start with ephemeral path
-export GAUTH_REPLAY_STORE_PATH=/tmp/replay.db
+export AGENTAUTH_REPLAY_STORE_PATH=/tmp/replay.db
 
 ./web-server
 # Expected error:
@@ -299,18 +299,18 @@ export GAUTH_REPLAY_STORE_PATH=/tmp/replay.db
 
 ```bash
 # Authenticate
-TOKEN=$(curl -X POST http://gauth/api/auth -d '...' | jq -r '.token')
+TOKEN=$(curl -X POST http://agentauth/api/auth -d '...' | jq -r '.token')
 
 # Use token (should succeed)
-curl -H "Authorization: Bearer $TOKEN" http://gauth/api/protected
+curl -H "Authorization: Bearer $TOKEN" http://agentauth/api/protected
 # Expected: 200 OK
 
 # Restart container
-kubectl rollout restart deployment/gauth
-kubectl wait --for=condition=ready pod -l app=gauth
+kubectl rollout restart deployment/agentauth
+kubectl wait --for=condition=ready pod -l app=agentauth
 
 # Try to replay token (should fail)
-curl -H "Authorization: Bearer $TOKEN" http://gauth/api/protected
+curl -H "Authorization: Bearer $TOKEN" http://agentauth/api/protected
 # Expected: 401 Unauthorized (replay detected)
 
 # ✅ PASS: Redis maintains replay store across restart
@@ -325,32 +325,32 @@ curl -H "Authorization: Bearer $TOKEN" http://gauth/api/protected
 
 ```prometheus
 # Container safety bypass detection
-gauth_unsafe_boltdb_bypass_total
+agentauth_unsafe_boltdb_bypass_total
 
 # Replay store type
-gauth_replay_store_type{type="redis|bolt|memory"}
+agentauth_replay_store_type{type="redis|bolt|memory"}
 
 # Container environment
-gauth_container_environment{env="kubernetes|docker|podman|none"}
+agentauth_container_environment{env="kubernetes|docker|podman|none"}
 ```
 
 ### Recommended Alerts
 
 ```yaml
 groups:
-  - name: gauth_container_security
+  - name: agentauth_container_security
     rules:
       - alert: UnsafeBoltDBBypass
-        expr: gauth_unsafe_boltdb_bypass_total > 0
+        expr: agentauth_unsafe_boltdb_bypass_total > 0
         for: 1m
         labels:
           severity: critical
         annotations:
           summary: "BoltDB safety bypass detected in production"
-          description: "GAUTH_ALLOW_UNSAFE_BOLTDB=1 is set in production environment"
+          description: "AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1 is set in production environment"
       
       - alert: BoltDBInContainer
-        expr: gauth_replay_store_type{type="bolt"} > 0 and gauth_container_environment{env!="none"} > 0
+        expr: agentauth_replay_store_type{type="bolt"} > 0 and agentauth_container_environment{env!="none"} > 0
         for: 5m
         labels:
           severity: warning
@@ -369,7 +369,7 @@ If P0 fixes cause deployment issues:
 
 ```bash
 # Set bypass flag
-kubectl set env deployment/gauth GAUTH_ALLOW_UNSAFE_BOLTDB=1
+kubectl set env deployment/agentauth AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1
 
 # ⚠️ WARNING: This disables container safety checks
 # Only use for emergency recovery
@@ -380,11 +380,11 @@ kubectl set env deployment/gauth GAUTH_ALLOW_UNSAFE_BOLTDB=1
 
 ```bash
 # Rollback Kubernetes deployment
-kubectl rollout undo deployment/gauth
+kubectl rollout undo deployment/agentauth
 
 # Or redeploy previous Docker image
-docker pull gauth:v1.0.0
-docker run -d gauth:v1.0.0
+docker pull agentauth:v1.0.0
+docker run -d agentauth:v1.0.0
 ```
 
 ### Option 3: Quick Redis Migration
@@ -393,11 +393,11 @@ docker run -d gauth:v1.0.0
 # Deploy Redis sidecar
 kubectl apply -f redis-deployment.yaml
 
-# Update gauth to use Redis
-kubectl set env deployment/gauth \
+# Update agentauth to use Redis
+kubectl set env deployment/agentauth \
   REDIS_HOST=redis \
   REDIS_PORT=6379 \
-  GAUTH_REPLAY_STORE=redis
+  AGENTAUTH_REPLAY_STORE=redis
 ```
 
 ---
@@ -471,7 +471,7 @@ As outlined in SECURITY_AUDIT_CRITICAL_REVIEW.md:
 - Reference: CV-2025-005
 
 **Implementation Questions:**
-- GitHub Issues: https://github.com/mauriciomferz/Gauth_go/issues
+- GitHub Issues: https://github.com/mauriciomferz/AgentAuth/issues
 - Documentation: [docs/](../docs/)
 
 ---

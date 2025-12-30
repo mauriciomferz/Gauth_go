@@ -69,7 +69,7 @@ import (
     "syscall"
     "time"
     
-    "github.com/mauriciomferz/Gauth_go/pkg/gnap"
+    "github.com/mauriciomferz/AgentAuth/pkg/gnap"
 )
 
 func main() {
@@ -146,7 +146,7 @@ spec:
         spec:
           containers:
           - name: cleanup
-            image: gauth:latest
+            image: agentauth:latest
             command: ["/app/gnap-cleanup"]
             env:
             - name: CLEANUP_INTERVAL

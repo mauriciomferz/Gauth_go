@@ -137,15 +137,15 @@ func NewHandler(limitsPath, auditPath, anchorPath string) *Handler {
 		knownModels:       make(map[string]bool),
 	}
 
-	if os.Getenv("GAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1" {
+	if os.Getenv("AGENTAUTH_MODEL_LIMITS_STRICT_UNKNOWN") == "1" {
 		h.StrictUnknown = true
 	}
-	if s := os.Getenv("GAUTH_MODEL_LIMIT_SURGE_FACTOR"); s != "" {
+	if s := os.Getenv("AGENTAUTH_MODEL_LIMIT_SURGE_FACTOR"); s != "" {
 		if v, err := strconv.ParseFloat(s, 64); err == nil {
 			h.SurgeFactor = v
 		}
 	}
-	if s := os.Getenv("GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS"); s != "" {
+	if s := os.Getenv("AGENTAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS"); s != "" {
 		if v, err := strconv.Atoi(s); err == nil {
 			h.SurgeMinEvents = v
 		}
@@ -629,7 +629,7 @@ func (h *Handler) UnsubscribeAttestation(ch chan ModelLimitsAttestation) {
 
 // EmitAttestation broadcasts a fresh attestation to subscribers
 func (h *Handler) EmitAttestation(reason string) {
-	if os.Getenv("GAUTH_ATTEST_STREAM_ENABLE") != "1" {
+	if os.Getenv("AGENTAUTH_ATTEST_STREAM_ENABLE") != "1" {
 		return
 	}
 	att, err := h.BuildUnsignedAttestation()
@@ -712,7 +712,7 @@ func (h *Handler) MaybeAugmentAndSign(att ModelLimitsAttestation) ModelLimitsAtt
 		}
 		h.surgeMu.Unlock()
 
-		if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && h.Notarizer != nil && att.Snapshot.Hash != "" {
+		if os.Getenv("AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE") == "1" && h.Notarizer != nil && att.Snapshot.Hash != "" {
 			auditHead := ""
 			if att.Audit != nil {
 				auditHead = att.Audit.HeadHash
@@ -735,7 +735,7 @@ func (h *Handler) MaybeAugmentAndSign(att ModelLimitsAttestation) ModelLimitsAtt
 		}
 	}
 
-	if os.Getenv("GAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" && h.KeyManager != nil {
+	if os.Getenv("AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN") == "1" && h.KeyManager != nil {
 		if active := h.KeyManager.Active(); active != nil && len(active.Private) == ed25519.PrivateKeySize {
 			if att.Nonce == "" {
 				var nb [16]byte
@@ -745,12 +745,12 @@ func (h *Handler) MaybeAugmentAndSign(att ModelLimitsAttestation) ModelLimitsAtt
 			unsigned := att
 			unsigned.Signature = ""
 			raw, _ := json.Marshal(unsigned)
-			sig := ed25519.Sign(active.Private, append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...))
+			sig := ed25519.Sign(active.Private, append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...))
 			att.Signature = base64.RawStdEncoding.EncodeToString(sig)
 			att.SigKid = active.ID
 			att.SigMode = "eddsa"
 
-			if prefix := os.Getenv("GAUTH_ATTEST_DOMAIN_PREFIX"); prefix != "" {
+			if prefix := os.Getenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX"); prefix != "" {
 				dsig := ed25519.Sign(active.Private, append([]byte(prefix), raw...))
 				att.DomainSignature = base64.RawStdEncoding.EncodeToString(dsig)
 				att.DomainPrefix = prefix
@@ -834,7 +834,7 @@ func (h *Handler) VerifyAttestation(att ModelLimitsAttestation) VerificationResu
 		return VerificationResult{Valid: false, Error: "bad_signature_base64"}
 	}
 
-	prefixed := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), raw...)
+	prefixed := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	valid := ed25519.Verify(key.Public, prefixed, sigBytes)
 	if !valid {
 		return VerificationResult{Valid: false, Error: "signature_invalid", Kid: att.SigKid, SigMode: att.SigMode}

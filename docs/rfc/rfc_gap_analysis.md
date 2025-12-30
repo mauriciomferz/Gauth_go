@@ -6,10 +6,10 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# AgentAuth-RFC-001 (formerly RFC 111) & AgentAuth-RFC-002 (formerly RFC 115) Gap Analysis (Beta Snapshot)
+# AAP-001 & AAP-002 Gap Analysis (Beta Snapshot)
 
 Date: 2025-10-26
-Scope: Implementation state of delegation (RFC111) and multi-signature / serialization (RFC115) features in `main` branch.
+Scope: Implementation state of delegation (AAP-001) and multi-signature / serialization (AAP-002) features in `main` branch.
 
 ## Legend
 - IMPLEMENTED: Feature present with tests & instrumentation.
@@ -17,7 +17,7 @@ Scope: Implementation state of delegation (RFC111) and multi-signature / seriali
 - MISSING: Not yet implemented.
 - DEFERRED: Explicitly postponed (out of beta scope).
 
-## AgentAuth-RFC-001 (formerly RFC 111) (Delegation & Validation)
+## AAP-001 (Delegation & Validation)
 | Requirement | Status | Evidence | Gap / Notes |
 |-------------|--------|----------|-------------|
 | Canonical POA digest deterministic across permutations | IMPLEMENTED | `canonical_permutation_test.go` | Control char escape covered; add fuzzing later (DEFERRED). |
@@ -26,17 +26,17 @@ Scope: Implementation state of delegation (RFC111) and multi-signature / seriali
 | Immediate invalidation on revocation | IMPLEMENTED | Revocation integration tests | N/A |
 | Structured error taxonomy delegation/token endpoints | PARTIAL | `respondError` usage in anchor/token/BLS endpoints | Apply to all legacy endpoints (e.g. status update, audit append). |
 | Scope enforcement (exact membership) | IMPLEMENTED | `ValidateDelegationRich` + semantic counters | Advanced pattern narrowing (regex/prefix/range) MISSING. |
-| Restriction enforcement (max_amount, daily limits) | IMPLEMENTED | `rfc0111_daily_limit_test.go` | Multi-dimensional restrictions (currency/jurisdiction combos) MISSING. |
+| Restriction enforcement (max_amount, daily limits) | IMPLEMENTED | `aap001_daily_limit_test.go` | Multi-dimensional restrictions (currency/jurisdiction combos) MISSING. |
 | Audit chain determinism / replay | IMPLEMENTED | `pkg/audit/replay_test.go` | Add external anchor observer test (PARTIAL). |
 | Canonical serialization versioning | IMPLEMENTED | Canonical digest includes `version` | Formal version negotiation doc MISSING. |
-| Clock skew tolerance (valid_from/valid_until grace) | IMPLEMENTED | `rfc0111_clock_skew_test.go` | Config docs need OpenAPI param (PARTIAL). |
+| Clock skew tolerance (valid_from/valid_until grace) | IMPLEMENTED | `aap001_clock_skew_test.go` | Config docs need OpenAPI param (PARTIAL). |
 | Multi-signature threshold semantics (structural) | IMPLEMENTED | `ValidateMultiSignature`, `verifyMultiSignatures` | Public multi-sig issuance/aggregation endpoint for POA signatures MISSING. |
 | Weighted threshold verification | IMPLEMENTED | `verifyMultiSignatures` weighted path | Need explicit metrics counters for satisfied weight vs threshold (PARTIAL). |
 | Semantic rejection counters (scope/restriction) | IMPLEMENTED (internal) | `semanticCounters` struct increments | Exposed endpoint `/api/v1/diagnostics/semantic` MISSING. |
 | Rights & obligations serialization | MISSING | N/A | Introduce arrays in POA & enforcement hooks. |
 | External anchoring of capability + revocation chain tips | PARTIAL | Combined anchor endpoint for capability; revocation not yet | Add revocation anchor emission + OpenAPI. |
 
-## AgentAuth-RFC-002 (formerly RFC 115) (Multi-Signature & Enhanced Serialization)
+## AAP-002 (Multi-Signature & Enhanced Serialization)
 | Requirement | Status | Evidence | Gap / Notes |
 |-------------|--------|----------|-------------|
 | Domain separation & version switching (single vs multi-sig) | IMPLEMENTED | Canonical digest conditional fields | V2 transition doc MISSING. |

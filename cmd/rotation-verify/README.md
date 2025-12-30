@@ -32,12 +32,12 @@ The test `TestRotationVerifyCLI` treats an exit code 3 (threshold unmet) as a sk
 ## Environment Integration
 The HTTP endpoint `/api/v1/rotation/summary/v2` may emit an unsigned artifact if signing env vars are not configured. To enable local signing:
 ```
-export GAUTH_ROTATIONS_V2_CONFIG=./path/to/weights_config.json
-export GAUTH_ROTATIONS_V2_SIGN=1
+export AGENTAUTH_ROTATIONS_V2_CONFIG=./path/to/weights_config.json
+export AGENTAUTH_ROTATIONS_V2_SIGN=1
 # Optional: supply explicit private keys (32-byte seed or full 64-byte private encoded as hex or base64url):
-export GAUTH_ROTATIONS_V2_ED25519_KEYS="signer1:BASE64URLPRIV,signer2:HEXPRIV"
+export AGENTAUTH_ROTATIONS_V2_ED25519_KEYS="signer1:BASE64URLPRIV,signer2:HEXPRIV"
 # Auto-generate ephemeral keys if none provided:
-export GAUTH_ROTATIONS_V2_AUTO_GEN=1
+export AGENTAUTH_ROTATIONS_V2_AUTO_GEN=1
 ```
 When keys are present the endpoint returns a signed artifact and the CLI should pass threshold verification.
 

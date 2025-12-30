@@ -13,7 +13,7 @@ export function Card({ children, className, title, icon }: CardProps) {
   // Defensive rendering: if icon is a component type (function) create an element
   let renderedIcon: ReactNode | null = null
   if (icon) {
-    if (isValidElement(icon)) {
+    if (isValidElement(icon) {
       renderedIcon = icon
     } else if (typeof icon === 'function') {
       try {
@@ -30,7 +30,7 @@ export function Card({ children, className, title, icon }: CardProps) {
       }
     } else {
       // Last resort: try createElement if it looks like a component (has render or type)
-      if (icon && (icon.render || icon.type)) {
+      if (icon && (icon.render || icon.type) {
         try {
           renderedIcon = createElement(icon.type || icon)
         } catch {
@@ -71,7 +71,7 @@ export function StatCard({ title, value, icon, trend, gradient }: StatCardProps)
   // Normalize icon similar to Card
   let renderedIcon: ReactNode = null
   if (icon) {
-    if (isValidElement(icon)) {
+    if (isValidElement(icon) {
       renderedIcon = icon
     } else if (typeof icon === 'function') {
       try { renderedIcon = icon() } catch { /* ignore */ }

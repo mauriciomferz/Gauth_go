@@ -43,7 +43,7 @@
     - [x] Support `urn:ietf:params:oauth:grant-type:identity-assertion` in `web/handlers/grant_jwt`
     - [x] Create `test/integration/identity_assertion_test.go`
 - [x] Gosec Remediation
-    - [x] Fix unhandled errors in `cmd/gauth-server/main.go`
+    - [x] Fix unhandled errors in `cmd/agentauth-server/main.go`
     - [x] Run `gosec` and fix high-priority issues
 
 ## Phase 6: Aggregated Signatures & Crypto Hardening
@@ -61,7 +61,7 @@
 
 ## Phase 7: System Wiring & Refactoring
 - [x] Wire `VerificationService` for GNAP
-    - [x] Refactor `pkg/gauthplus` services to use `pgx` (consistent with `pkg/database`).
+    - [x] Refactor `pkg/agentauthplus` services to use `pgx` (consistent with `pkg/database`).
     - [x] Implement `PostgreSQLPoAStore`, `FiduciaryDutyService` (PG), `CapabilityAssessmentService` (PG).
     - [x] Wire services in `web/server_factory.go`.
     - [x] Verify compilation and tests.
@@ -75,8 +75,8 @@
     - [x] Add tests for enhanced verification flows
 
 ## Phase 9: Attestation Verification Integration
-- [x] Implement `DefaultAttestationVerifier` in `pkg/gauthplus`
-    - [x] Create `AttestationAdapter` to bridge `gauthplus` and `compliance` types
+- [x] Implement `DefaultAttestationVerifier` in `pkg/agentauthplus`
+    - [x] Create `AttestationAdapter` to bridge `agentauthplus` and `compliance` types
     - [x] Integrate `compliance.DefaultAttestationVerifier`
 - [x] Update `VerifyAttestations` in `VerificationServiceImpl`
 - [x] Add tests for attestation verification
@@ -95,18 +95,18 @@
 
 ## Phase 12: Deployment & Final Validation
 - [x] Final end-to-end verification in production-like environment (Tested via `verification_hardening_test.go`)
-- [x] Documentation update (ARCHITECTURE.md created in `pkg/gauthplus`)
+- [x] Documentation update (ARCHITECTURE.md created in `pkg/agentauthplus`)
 
 ## Phase 13: Protocol Hardening & Observability Extensions [x]
 - [x] Hardened Discovery Protocol
-    - [x] Update `/.well-known/gauth-configuration` with `jwks_signature` and `deprecation_metadata`
+    - [x] Update `/.well-known/agentauth-configuration` with `jwks_signature` and `deprecation_metadata`
     - [x] Implement `UpdateJWKSSignature` in `web/server_clean.go`
 - [x] Extended Metrics & OTEL
     - [x] Add `ObserveCapabilityAnchorInterval` and `IncReplayStoreAvailabilityImpact` to `Metrics` interface
     - [x] Implement new metrics in `Memory` and `PrometheusMetrics`
     - [x] Complete `OpenTelemetryCollector` mapping in `otel.go`
 - [x] Replay Store Hardening
-    - [x] Record availability impact in `rfc0111.go` fail-closed path
+    - [x] Record availability impact in `aap001.go` fail-closed path
 - [x] Verification
     - [x] Verify discovery integrity via integration test
     - [x] Verify OTEL export functionality

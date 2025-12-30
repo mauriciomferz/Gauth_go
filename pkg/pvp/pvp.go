@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // PowerVerificationPoint (PVP) handles identity verification chain validation
@@ -17,13 +17,13 @@ type PowerVerificationPoint interface {
 	VerifyIdentityChain(ctx context.Context, req *IdentityChainVerificationRequest) (*IdentityChainVerificationResult, error)
 
 	// VerifyIdentityProof verifies a single identity proof credential
-	VerifyIdentityProof(ctx context.Context, proof *gauth.IdentityVerificationChain) (*IdentityProofResult, error)
+	VerifyIdentityProof(ctx context.Context, proof *agentauth.IdentityVerificationChain) (*IdentityProofResult, error)
 
 	// VerifyTrustServiceProvider verifies a trust service provider's credentials
 	VerifyTrustServiceProvider(ctx context.Context, tspID string) (*TSPVerificationResult, error)
 
 	// TraceAuthorizationChain traces and validates the authorization chain
-	TraceAuthorizationChain(ctx context.Context, chain *gauth.AuthorizationChain) (*ChainTraceResult, error)
+	TraceAuthorizationChain(ctx context.Context, chain *agentauth.AuthorizationChain) (*ChainTraceResult, error)
 
 	// BindIdentityToCryptographicKey binds an identity to a cryptographic key
 	BindIdentityToCryptographicKey(ctx context.Context, req *IdentityKeyBindingRequest) (*IdentityKeyBindingResult, error)
@@ -41,18 +41,18 @@ type IdentityChainVerificationRequest struct {
 
 // IdentityCredential represents an identity credential
 type IdentityCredential struct {
-	ID                   string                          `json:"id"`
-	Type                 string                          `json:"type"` // "natural_person", "legal_person"
-	Name                 string                          `json:"name"`
-	Identifier           string                          `json:"identifier"` // Tax ID, registration number, etc.
-	IdentifierType       string                          `json:"identifier_type"`
-	Jurisdiction         string                          `json:"jurisdiction"`
-	VerificationMethod   string                          `json:"verification_method"`
-	VerificationLevel    gauth.VerificationLevel         `json:"verification_level"`
-	TrustServiceProvider *gauth.TrustServiceProviderInfo `json:"trust_service_provider,omitempty"`
-	Proof                *IdentityProof                  `json:"proof,omitempty"`
-	IssuedAt             time.Time                       `json:"issued_at"`
-	ExpiresAt            time.Time                       `json:"expires_at,omitempty"`
+	ID                   string                              `json:"id"`
+	Type                 string                              `json:"type"` // "natural_person", "legal_person"
+	Name                 string                              `json:"name"`
+	Identifier           string                              `json:"identifier"` // Tax ID, registration number, etc.
+	IdentifierType       string                              `json:"identifier_type"`
+	Jurisdiction         string                              `json:"jurisdiction"`
+	VerificationMethod   string                              `json:"verification_method"`
+	VerificationLevel    agentauth.VerificationLevel         `json:"verification_level"`
+	TrustServiceProvider *agentauth.TrustServiceProviderInfo `json:"trust_service_provider,omitempty"`
+	Proof                *IdentityProof                      `json:"proof,omitempty"`
+	IssuedAt             time.Time                           `json:"issued_at"`
+	ExpiresAt            time.Time                           `json:"expires_at,omitempty"`
 }
 
 // ClientIdentity represents client identity information
@@ -104,14 +104,14 @@ type VerificationDetail struct {
 
 // IdentityProofResult contains identity proof verification results
 type IdentityProofResult struct {
-	Valid              bool                            `json:"valid"`
-	VerificationLevel  gauth.VerificationLevel         `json:"verification_level"`
-	TrustLevel         string                          `json:"trust_level"`
-	TSPVerified        bool                            `json:"tsp_verified"`
-	TSPDetails         *gauth.TrustServiceProviderInfo `json:"tsp_details,omitempty"`
-	CryptographicProof bool                            `json:"cryptographic_proof"`
-	Timestamp          time.Time                       `json:"timestamp"`
-	Details            string                          `json:"details,omitempty"`
+	Valid              bool                                `json:"valid"`
+	VerificationLevel  agentauth.VerificationLevel         `json:"verification_level"`
+	TrustLevel         string                              `json:"trust_level"`
+	TSPVerified        bool                                `json:"tsp_verified"`
+	TSPDetails         *agentauth.TrustServiceProviderInfo `json:"tsp_details,omitempty"`
+	CryptographicProof bool                                `json:"cryptographic_proof"`
+	Timestamp          time.Time                           `json:"timestamp"`
+	Details            string                              `json:"details,omitempty"`
 }
 
 // TSPVerificationResult contains trust service provider verification results
@@ -171,7 +171,7 @@ type IdentityKeyBindingResult struct {
 // DefaultPVP is the default PVP implementation
 type DefaultPVP struct {
 	trustListURL      string
-	trustProviders    map[string]*gauth.TrustServiceProviderInfo
+	trustProviders    map[string]*agentauth.TrustServiceProviderInfo
 	verificationCache map[string]*IdentityProofResult
 	cacheExpiry       time.Duration
 }
@@ -180,7 +180,7 @@ type DefaultPVP struct {
 func NewDefaultPVP(trustListURL string) *DefaultPVP {
 	pvp := &DefaultPVP{
 		trustListURL:      trustListURL,
-		trustProviders:    make(map[string]*gauth.TrustServiceProviderInfo),
+		trustProviders:    make(map[string]*agentauth.TrustServiceProviderInfo),
 		verificationCache: make(map[string]*IdentityProofResult),
 		cacheExpiry:       15 * time.Minute,
 	}
@@ -194,7 +194,7 @@ func NewDefaultPVP(trustListURL string) *DefaultPVP {
 // seedTrustProviders populates with known TSPs
 func (p *DefaultPVP) seedTrustProviders() {
 	// eIDAS qualified trust service providers
-	p.trustProviders["TSP-DE-001"] = &gauth.TrustServiceProviderInfo{
+	p.trustProviders["TSP-DE-001"] = &agentauth.TrustServiceProviderInfo{
 		ProviderID:       "TSP-DE-001",
 		ProviderName:     "Bundesdruckerei GmbH",
 		ProviderType:     "qualified",
@@ -203,7 +203,7 @@ func (p *DefaultPVP) seedTrustProviders() {
 		ServiceTypes:     []string{"electronic_signature", "identity_verification"},
 	}
 
-	p.trustProviders["TSP-GB-001"] = &gauth.TrustServiceProviderInfo{
+	p.trustProviders["TSP-GB-001"] = &agentauth.TrustServiceProviderInfo{
 		ProviderID:       "TSP-GB-001",
 		ProviderName:     "GOV.UK Verify",
 		ProviderType:     "qualified",
@@ -422,7 +422,7 @@ func (p *DefaultPVP) generateAuthorizationProof(result *IdentityChainVerificatio
 }
 
 // VerifyIdentityProof verifies a single identity proof credential
-func (p *DefaultPVP) VerifyIdentityProof(ctx context.Context, proof *gauth.IdentityVerificationChain) (*IdentityProofResult, error) {
+func (p *DefaultPVP) VerifyIdentityProof(ctx context.Context, proof *agentauth.IdentityVerificationChain) (*IdentityProofResult, error) {
 	result := &IdentityProofResult{
 		Timestamp: time.Now(),
 	}
@@ -476,7 +476,7 @@ func (p *DefaultPVP) VerifyTrustServiceProvider(ctx context.Context, tspID strin
 }
 
 // TraceAuthorizationChain traces and validates authorization chain
-func (p *DefaultPVP) TraceAuthorizationChain(ctx context.Context, chain *gauth.AuthorizationChain) (*ChainTraceResult, error) {
+func (p *DefaultPVP) TraceAuthorizationChain(ctx context.Context, chain *agentauth.AuthorizationChain) (*ChainTraceResult, error) {
 	result := &ChainTraceResult{
 		ChainLinks:       make([]ChainLinkTrace, 0),
 		VerificationDate: time.Now(),

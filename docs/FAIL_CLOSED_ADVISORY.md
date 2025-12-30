@@ -25,7 +25,7 @@ When the replay store (Redis or other distributed backend) becomes unavailable:
 
 ### Current Implementation
 
-Fail-closed behavior is implemented in [`pkg/gauth_rfc_001/rfc0111.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/gauth_rfc_001/rfc0111.go) and triggered when the `CheckJTI` method encounters a replay store availability error.
+Fail-closed behavior is implemented in [`pkg/agentauth_rfc_001/aap001.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/aap001.go) and triggered when the `CheckJTI` method encounters a replay store availability error.
 
 **Key Metric**: `IncReplayStoreAvailabilityImpact()` is emitted each time a validation is denied due to replay store unavailability.
 - **MCP Authorization**: MCP endpoints (Resource, Tool, Prompt) operate in a mandatory fail-closed mode; any authorization bridge failure or missing token identity results in an immediate 403/401 denial.
@@ -95,10 +95,10 @@ Monitor these metrics to detect replay store issues:
 
 ```promql
 # Replay store availability impact (fail-closed rejections)
-rate(gauth_replay_store_availability_impact_total[5m]) > 0
+rate(agentauth_replay_store_availability_impact_total[5m]) > 0
 
 # Replay store error rate
-rate(gauth_replay_store_errors_total[5m]) / rate(gauth_replay_checks_total[5m]) > 0.01
+rate(agentauth_replay_store_errors_total[5m]) / rate(agentauth_replay_checks_total[5m]) > 0.01
 ```
 
 **Alert thresholds**:
@@ -116,7 +116,7 @@ rate(gauth_replay_store_errors_total[5m]) / rate(gauth_replay_checks_total[5m]) 
 4. **Consider temporary fail-open** (requires executive approval):
    ```bash
    # EMERGENCY ONLY - Requires security sign-off
-   export GAUTH_REPLAY_FAILOPEN=1
+   export AGENTAUTH_REPLAY_FAILOPEN=1
    ```
 
 **Post-incident**:
@@ -132,9 +132,9 @@ rate(gauth_replay_store_errors_total[5m]) / rate(gauth_replay_checks_total[5m]) 
 
 | Variable | Values | Default | Description |
 |----------|--------|---------|-------------|
-| `GAUTH_REPLAY_FAILCLOSED` | `1` / `0` | `1` | Enable fail-closed mode |
-| `GAUTH_REPLAY_STORE_TIMEOUT_MS` | Integer | `500` | Replay store operation timeout |
-| `GAUTH_REPLAY_STORE_RETRIES` | Integer | `2` | Number of retry attempts |
+| `AGENTAUTH_REPLAY_FAILCLOSED` | `1` / `0` | `1` | Enable fail-closed mode |
+| `AGENTAUTH_REPLAY_STORE_TIMEOUT_MS` | Integer | `500` | Replay store operation timeout |
+| `AGENTAUTH_REPLAY_STORE_RETRIES` | Integer | `2` | Number of retry attempts |
 
 ### Redis HA Configuration
 
@@ -148,7 +148,7 @@ redis:
     - host: redis-sentinel-1:26379
     - host: redis-sentinel-2:26379
     - host: redis-sentinel-3:26379
-  master_name: gauth-replay-master
+  master_name: agentauth-replay-master
   socket_timeout: 500ms
   command_timeout: 500ms
 ```
@@ -161,7 +161,7 @@ Implementing fail-closed mode addresses:
 - **RR-006**: Replay store exhaustion mitigation
 - **MR-001**: Token replay attack prevention (mitigated)
 
-See [`RESIDUAL_RISKS.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/RESIDUAL_RISKS.md) for complete risk tracking.
+See [`RESIDUAL_RISKS.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md) for complete risk tracking.
 
 ---
 
@@ -176,7 +176,7 @@ Simulate replay store failures to validate behavior:
 iptables -A OUTPUT -p tcp --dport 6379 -j DROP
 
 # Run validation tests
-curl -H "Authorization: Bearer $TOKEN" https://gauth/api/v1/validate
+curl -H "Authorization: Bearer $TOKEN" https://agentauth/api/v1/validate
 
 # Expected: 401 with replay_store_unavailable error
 ```
@@ -192,10 +192,10 @@ Measure fail-closed impact on throughput:
 
 ## References
 
-- [AAP-001 Specification](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/Gifo_0111.md)
-- [THREAT_MODEL.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/THREAT_MODEL.md)
-- [RESIDUAL_RISKS.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/RESIDUAL_RISKS.md)
-- [GAP_MATRIX.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/GAP_MATRIX.md)
+- [AAP-001 Specification](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/Gifo_0111.md)
+- [THREAT_MODEL.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/THREAT_MODEL.md)
+- [RESIDUAL_RISKS.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md)
+- [GAP_MATRIX.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/GAP_MATRIX.md)
 
 ---
 

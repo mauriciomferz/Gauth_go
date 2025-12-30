@@ -147,7 +147,7 @@ SELECT
     idx_scan,
     idx_tup_read,
     idx_tup_fetch,
-    pg_size_pretty(pg_relation_size(indexrelid)) as index_size
+    pg_size_pretty(pg_relation_size(indexrelid) as index_size
 FROM pg_stat_user_indexes
 ORDER BY idx_scan ASC;
 
@@ -163,12 +163,12 @@ FROM (
     SELECT 
         indexrelid::regclass AS idx,
         (indrelid::text ||E'\n'|| indclass::text ||E'\n'|| indkey::text ||E'\n'||
-         COALESCE(indexprs::text,'')||E'\n' || COALESCE(indpred::text,'')) AS key
+         COALESCE(indexprs::text,'')||E'\n' || COALESCE(indpred::text,'') AS key
     FROM pg_index
 ) sub
 GROUP BY key 
 HAVING COUNT(*) > 1
-ORDER BY SUM(pg_relation_size(idx)) DESC;
+ORDER BY SUM(pg_relation_size(idx) DESC;
 
 -- ============================================================================
 -- Analyze Tables (Update Statistics)

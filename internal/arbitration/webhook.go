@@ -115,21 +115,21 @@ func NewWebhookClient(config WebhookConfig) *WebhookClient {
 }
 
 // NewWebhookClientFromEnv creates a webhook client from environment variables:
-// - GAUTH_ARBITRATION_WEBHOOK_URL: Webhook endpoint URL
-// - GAUTH_ARBITRATION_WEBHOOK_SECRET: HMAC secret for signature verification
-// - GAUTH_ARBITRATION_WEBHOOK_TIMEOUT: Request timeout (default: 10s)
-// - GAUTH_ARBITRATION_WEBHOOK_MAX_RETRIES: Max retry attempts (default: 3)
+// - AGENTAUTH_ARBITRATION_WEBHOOK_URL: Webhook endpoint URL
+// - AGENTAUTH_ARBITRATION_WEBHOOK_SECRET: HMAC secret for signature verification
+// - AGENTAUTH_ARBITRATION_WEBHOOK_TIMEOUT: Request timeout (default: 10s)
+// - AGENTAUTH_ARBITRATION_WEBHOOK_MAX_RETRIES: Max retry attempts (default: 3)
 func NewWebhookClientFromEnv() *WebhookClient {
-	url := os.Getenv("GAUTH_ARBITRATION_WEBHOOK_URL")
-	secret := os.Getenv("GAUTH_ARBITRATION_WEBHOOK_SECRET")
+	url := os.Getenv("AGENTAUTH_ARBITRATION_WEBHOOK_URL")
+	secret := os.Getenv("AGENTAUTH_ARBITRATION_WEBHOOK_SECRET")
 	timeout := 10 * time.Second
-	if t := os.Getenv("GAUTH_ARBITRATION_WEBHOOK_TIMEOUT"); t != "" {
+	if t := os.Getenv("AGENTAUTH_ARBITRATION_WEBHOOK_TIMEOUT"); t != "" {
 		if parsed, err := time.ParseDuration(t); err == nil {
 			timeout = parsed
 		}
 	}
 	maxRetries := 3
-	if r := os.Getenv("GAUTH_ARBITRATION_WEBHOOK_MAX_RETRIES"); r != "" {
+	if r := os.Getenv("AGENTAUTH_ARBITRATION_WEBHOOK_MAX_RETRIES"); r != "" {
 		if _, err := fmt.Sscanf(r, "%d", &maxRetries); err == nil && maxRetries > 0 {
 			_ = err // Use parsed value
 		}

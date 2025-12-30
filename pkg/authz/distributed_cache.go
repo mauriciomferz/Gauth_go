@@ -14,7 +14,7 @@ import (
 
 const (
 	// DefaultChannel is the Redis Pub/Sub channel for cache invalidation
-	DefaultChannel = "gauth:pdp:cache:invalidation"
+	DefaultChannel = "agentauth:pdp:cache:invalidation"
 )
 
 // DistributedDecisionCache implements a hybrid L1/L2 cache with distributed invalidation.

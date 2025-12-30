@@ -177,7 +177,7 @@ When clicking "Export Test Report":
 
 ```
 1. Notification: "📄 Generating test report..."
-2. Browser downloads: "gauth-test-report-1730512345678.txt"
+2. Browser downloads: "agentauth-test-report-1730512345678.txt"
 3. Notification: "✅ Test report exported successfully"
 ```
 

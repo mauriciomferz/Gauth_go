@@ -24,7 +24,7 @@ Successfully implemented production-ready API provider integrations for both Per
 
 ### 1. Persona Provider ✅
 
-**File**: `pkg/gauth/external/providers/persona_provider.go`  
+**File**: `pkg/agentauth/external/providers/persona_provider.go`  
 **Lines**: 506  
 **API**: Persona Identity API v2023-01-05
 
@@ -88,7 +88,7 @@ provider := NewPersonaProvider(config)
 
 ### 2. Trulioo Provider ✅
 
-**File**: `pkg/gauth/external/providers/trulioo_provider.go`  
+**File**: `pkg/agentauth/external/providers/trulioo_provider.go`  
 **Lines**: 577  
 **API**: Trulioo GlobalGateway API v2
 

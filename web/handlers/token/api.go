@@ -16,9 +16,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto/keys"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // Legacy Error Constants
@@ -83,15 +83,15 @@ func (h *Handler) Create(c *gin.Context) {
 		Meta  any    `json:"meta"`
 		Nonce string `json:"nonce"`
 		// RFC fields
-		GrantID              string                      `json:"grant_id"`
-		Scope                []string                    `json:"scope"`
-		AuthorizationDetails []gauth.AuthorizationDetail `json:"authorization_details"`
+		GrantID              string                          `json:"grant_id"`
+		Scope                []string                        `json:"scope"`
+		AuthorizationDetails []agentauth.AuthorizationDetail `json:"authorization_details"`
 	}
 	_ = c.ShouldBindJSON(&req)
 
 	// RFC 9396 / RFC-0111 Flow Integration
 	if h.AgentAuthService != nil && (len(req.AuthorizationDetails) > 0 || req.GrantID != "") {
-		tokenReq := gauth.TokenRequest{
+		tokenReq := agentauth.TokenRequest{
 			GrantID:              req.GrantID,
 			Scope:                req.Scope,
 			AuthorizationDetails: req.AuthorizationDetails,
@@ -280,7 +280,7 @@ func (h *Handler) Validate(c *gin.Context) {
 		}
 
 		leeway := time.Duration(0)
-		if raw := os.Getenv("GAUTH_JWT_CLOCK_SKEW_SECONDS"); raw != "" {
+		if raw := os.Getenv("AGENTAUTH_JWT_CLOCK_SKEW_SECONDS"); raw != "" {
 			if v, err := strconv.Atoi(raw); err == nil && v > 0 {
 				leeway = time.Duration(v) * time.Second
 			}
@@ -332,8 +332,8 @@ func (h *Handler) Validate(c *gin.Context) {
 				code = ErrTokenExpired
 			}
 			if strings.Contains(errMsg, ErrInvalidAlgorithm) ||
-				(strings.Contains(errMsg, "signing method") && strings.Contains(errMsg, "invalid")) ||
-				strings.Contains(errMsg, "invalid signing method") {
+				(strings.Contains(errMsg, "signing method") && strings.Contains(errMsg, "invalid") ||
+					strings.Contains(errMsg, "invalid signing method")) {
 				code = ErrInvalidAlgorithm
 				if headerAlg == "" {
 					if declaredAlg != "" {
@@ -479,10 +479,10 @@ func (h *Handler) StatusUpdate(c *gin.Context) {
 
 	if old == req.NewStatus {
 		reason := "noop"
-		if os.Getenv("GAUTH_MAINTENANCE_WINDOW") == "1" {
+		if os.Getenv("AGENTAUTH_MAINTENANCE_WINDOW") == "1" {
 			reason = "maintenance"
 		}
-		if os.Getenv("GAUTH_RATE_LIMITED") == "1" {
+		if os.Getenv("AGENTAUTH_RATE_LIMITED") == "1" {
 			reason = "rate_limited"
 		}
 
@@ -549,7 +549,7 @@ func (h *Handler) Introspect(c *gin.Context) {
 	}
 
 	ms := gin.H{"supported": false}
-	if os.Getenv("GAUTH_MULTI_SIG_THRESHOLD") != "" {
+	if os.Getenv("AGENTAUTH_MULTI_SIG_THRESHOLD") != "" {
 		ms["supported"] = true
 	}
 
@@ -603,11 +603,11 @@ func (h *Handler) Introspect(c *gin.Context) {
 }
 
 func (h *Handler) JWKS(c *gin.Context) {
-	mode := os.Getenv("GAUTH_TOKEN_SIG_MODE")
+	mode := os.Getenv("AGENTAUTH_TOKEN_SIG_MODE")
 	alg := h.JWTAlg
 	useLib := h.UseJWTLib
 	c.Header("Cache-Control", "public, max-age=60")
-	if rot := os.Getenv("GAUTH_JWT_ROTATION_DAYS"); rot != "" {
+	if rot := os.Getenv("AGENTAUTH_JWT_ROTATION_DAYS"); rot != "" {
 		c.Header("X-Key-Rotation-Interval-Days", rot)
 	}
 
@@ -705,8 +705,8 @@ func (h *Handler) JWKS(c *gin.Context) {
 	}
 
 	// Optional signature headers when enabled
-	if os.Getenv("GAUTH_JWKS_SIGNING_KEY_ENABLED") == "1" {
-		sigKey := os.Getenv("GAUTH_JWKS_SIGNING_KEY")
+	if os.Getenv("AGENTAUTH_JWKS_SIGNING_KEY_ENABLED") == "1" {
+		sigKey := os.Getenv("AGENTAUTH_JWKS_SIGNING_KEY")
 		if sigKey != "" {
 			// HMAC-SHA256 signature of keysJSON
 			mac := hmac.New(sha256.New, []byte(sigKey))

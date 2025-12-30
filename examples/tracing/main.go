@@ -39,7 +39,7 @@ func main() {
 	}()
 
 	otel.SetTracerProvider(tp)
-	tracer := otel.Tracer("gauth-demo")
+	tracer := otel.Tracer("agentauth-demo")
 
 	// Initialize RFC Compliant Service
 	fmt.Println("\n2. Initializing RFC Compliant Service...")
@@ -49,7 +49,7 @@ func main() {
 	}
 
 	// Create a traced context
-	ctx, span := tracer.Start(context.Background(), "gauth-authorization-flow")
+	ctx, span := tracer.Start(context.Background(), "agentauth-authorization-flow")
 	defer span.End()
 
 	// Demonstrate traced AgentAuth operations
@@ -72,8 +72,8 @@ func main() {
 	childSpan.End()
 
 	// Execute authorization with tracing
-	_, authSpan := tracer.Start(ctx, "authorize-gauth")
-	gauthResponse, err := authService.AuthorizePowerOfAttorney(ctx, poaRequest)
+	_, authSpan := tracer.Start(ctx, "authorize-agentauth")
+	agentauthResponse, err := authService.AuthorizePowerOfAttorney(ctx, poaRequest)
 	authSpan.End()
 
 	if err != nil {
@@ -82,13 +82,13 @@ func main() {
 	}
 
 	fmt.Printf("✅ Authorization successful with tracing!\n")
-	if len(gauthResponse.AuthorizationCode) > 20 {
-		fmt.Printf("   Authorization Code: %s...\n", gauthResponse.AuthorizationCode[:20])
+	if len(agentauthResponse.AuthorizationCode) > 20 {
+		fmt.Printf("   Authorization Code: %s...\n", agentauthResponse.AuthorizationCode[:20])
 	} else {
-		fmt.Printf("   Authorization Code: %s\n", gauthResponse.AuthorizationCode)
+		fmt.Printf("   Authorization Code: %s\n", agentauthResponse.AuthorizationCode)
 	}
-	fmt.Printf("   Legal Compliance: %t\n", gauthResponse.LegalCompliance)
-	fmt.Printf("   Audit Record ID: %s\n", gauthResponse.AuditRecordID)
+	fmt.Printf("   Legal Compliance: %t\n", agentauthResponse.LegalCompliance)
+	fmt.Printf("   Audit Record ID: %s\n", agentauthResponse.AuditRecordID)
 
 	// Demonstrate traced token operations
 	fmt.Println("\n4. Demonstrating traced token lifecycle...")

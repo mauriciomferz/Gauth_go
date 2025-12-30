@@ -63,7 +63,7 @@ base64url(nonce[12] || ciphertext || tag[16])
 ### Basic Setup
 
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/secret"
+import "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/secret"
 
 // Create encrypted provider
 backend := secret.NewMemory()
@@ -143,11 +143,11 @@ All tests passing (0.845s).
 ### With AAP-001 Service
 
 ```go
-// In pkg/rfc0111/rfc0111.go initialization
+// In pkg/aap001/aap001.go initialization
 backend := secret.NewMemory()
-passphrase := os.Getenv("GAUTH_SECRET_ENCRYPTION_KEY")
+passphrase := os.Getenv("AGENTAUTH_SECRET_ENCRYPTION_KEY")
 if passphrase == "" {
-    return errors.New("GAUTH_SECRET_ENCRYPTION_KEY required")
+    return errors.New("AGENTAUTH_SECRET_ENCRYPTION_KEY required")
 }
 
 secretProvider, err := secret.NewEncrypted(backend, passphrase)
@@ -155,9 +155,9 @@ if err != nil {
     return err
 }
 
-service := rfc0111.NewService(
+service := aap001.NewService(
     // ... other options ...
-    rfc0111.WithSecretProvider(secretProvider),
+    aap001.WithSecretProvider(secretProvider),
 )
 ```
 
@@ -165,10 +165,10 @@ service := rfc0111.NewService(
 
 ```bash
 # Production
-export GAUTH_SECRET_ENCRYPTION_KEY=$(openssl rand -hex 32)
+export AGENTAUTH_SECRET_ENCRYPTION_KEY=$(openssl rand -hex 32)
 
 # Dev/Test
-export GAUTH_SECRET_ENCRYPTION_KEY="dev-passphrase-sufficient-length"
+export AGENTAUTH_SECRET_ENCRYPTION_KEY="dev-passphrase-sufficient-length"
 ```
 
 ## AAP-001 Compliance

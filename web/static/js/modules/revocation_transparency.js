@@ -1,7 +1,7 @@
 // Revocation Transparency Panel Module
 // Polls revocation chain status endpoints and exposes Merkle proof generation.
 // Data sources:
-//  - /api/v1/.well-known/gauth (revocation_support object) for rich metadata (tree head snapshot)
+//  - /api/v1/.well-known/agentauth (revocation_support object) for rich metadata (tree head snapshot)
 //  - /api/v1/token/revocation/head (fast head + length + aggregate + verified)
 //  - /api/v1/token/revocation/root (merkle_root + length)
 //  - /api/v1/token/revocation/proof (on-demand; id | index | hash)
@@ -12,7 +12,7 @@ import { backoffFetchJSON } from './refresh.js';
 
 const HEAD_ENDPOINT = '/api/v1/token/revocation/head';
 const ROOT_ENDPOINT = '/api/v1/token/revocation/root';
-const WELL_KNOWN = '/api/v1/.well-known/gauth';
+const WELL_KNOWN = '/api/v1/.well-known/agentauth';
 const PROOF_ENDPOINT = '/api/v1/token/revocation/proof';
 const CONSISTENCY_ENDPOINT_BASE = '/api/v1/token/revocation/consistency';
 
@@ -79,7 +79,7 @@ async function pollWellKnown() {
     if (!data) {
       // Endpoint doesn't exist (404) - stop polling
       wellKnownAvailable = false;
-      console.log('📭 .well-known/gauth endpoint not available - polling disabled');
+      console.log('📭 .well-known/agentauth endpoint not available - polling disabled');
       return;
     }
     if (!data.revocation_support) return;
@@ -286,10 +286,10 @@ function attachVerifyHandler() {
 function deriveLeafDigest(data) {
   if (!data) return null;
   if (data.leaf_digest) return data.leaf_digest;
-  if (data.event_hash && /^[a-f0-9]{16,}$/i.test(data.event_hash)) {
-    // mirror Go LeafDigestForEventHash: SHA256("GAUTH_MERKLE_LEAF:" + event_hash) hex
+  if (data.event_hash && /^[a-f0-9]{16,}$/i.test(data.event_hash) {
+    // mirror Go LeafDigestForEventHash: SHA256("AGENTAUTH_MERKLE_LEAF:" + event_hash) hex
     const enc = new TextEncoder();
-    const prefix = enc.encode('GAUTH_MERKLE_LEAF:');
+    const prefix = enc.encode('AGENTAUTH_MERKLE_LEAF:');
     const ev = enc.encode(data.event_hash);
     const combined = new Uint8Array(prefix.length + ev.length);
     combined.set(prefix, 0); combined.set(ev, prefix.length);
@@ -301,12 +301,12 @@ function deriveLeafDigest(data) {
 
 // Compute root from leaf digest + ordered proof steps (array of {sibling, position})
 function computeRootFromProof(leafDigest, steps) {
-  if (!leafDigest || !Array.isArray(steps)) return '';
+  if (!leafDigest || !Array.isArray(steps) return '';
   let cur = leafDigest;
   for (const step of steps) {
     const sibling = step.sibling;
     const pos = step.position; // 'R' or 'L'
-    if (!sibling || (pos !== 'R' && pos !== 'L')) return '';
+    if (!sibling || (pos !== 'R' && pos !== 'L') return '';
     if (pos === 'R') {
       cur = merkleParent(cur, sibling);
     } else {
@@ -316,10 +316,10 @@ function computeRootFromProof(leafDigest, steps) {
   return cur;
 }
 
-// Merkle parent digest: SHA256("GAUTH_MERKLE_NODE:" + left + right)
+// Merkle parent digest: SHA256("AGENTAUTH_MERKLE_NODE:" + left + right)
 function merkleParent(leftHex, rightHex) {
   const enc = new TextEncoder();
-  const prefix = enc.encode('GAUTH_MERKLE_NODE:');
+  const prefix = enc.encode('AGENTAUTH_MERKLE_NODE:');
   const left = enc.encode(leftHex);
   const right = enc.encode(rightHex);
   const combined = new Uint8Array(prefix.length + left.length + right.length);
@@ -409,8 +409,8 @@ function initProofFetcher() {
     }
     // Determine query param key heuristically: numeric -> index, hex length >= 16 -> hash, else id
     let qp = 'id';
-    if (/^\d+$/.test(raw)) qp = 'index';
-    else if (/^[a-fA-F0-9]{16,}$/.test(raw)) qp = 'hash';
+    if (/^\d+$/.test(raw) qp = 'index';
+    else if (/^[a-fA-F0-9]{16,}$/.test(raw) qp = 'hash';
     const url = `${PROOF_ENDPOINT}?${qp}=${encodeURIComponent(raw)}`;
     result.textContent = 'Fetching proof…';
     try {

@@ -19,7 +19,7 @@ func buildTestServer(rc *delegation.RevocationChain, enableConsistency bool, kp 
 	Active() *crypto.Key
 }) *httptest.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/.well-known/gauth-configuration", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/.well-known/agentauth-configuration", func(w http.ResponseWriter, r *http.Request) {
 		sth := rc.LatestTreeHead()
 		sigs := []map[string]any{}
 		if sth != nil {

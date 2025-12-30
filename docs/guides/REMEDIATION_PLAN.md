@@ -1,6 +1,6 @@
 # AgentAuth 1.0 Production Remediation Plan
 
-**Project**: Gauth_go - AAP-RFC-0111/RFC-0115 Go Implementation  
+**Project**: AgentAuth - AAP-001/AAP-002 Go Implementation  
 **Prepared**: November 9, 2025  
 **Status**: ✅ **OPERATIONS READY** - 100% Compliance Achieved  
 **Document Version**: 1.0  
@@ -55,7 +55,7 @@ While all requirements are implemented, the following minor enhancements can fur
 
 #### Enhancement E1: Configurable Algorithm Suite
 **Current State**: Ed25519 only implementation  
-**Evidence**: `docs/GAP_MATRIX.md:12 | pkg/rfc0111/signature_negative_test.go`  
+**Evidence**: `docs/GAP_MATRIX.md:12 | pkg/aap001/signature_negative_test.go`  
 **Recommendation**: Add algorithm agility interface
 
 ```
@@ -180,7 +180,7 @@ type SignatureAlgorithm interface {
 │  Tasks:                                                 │
 │  ☐ Add timestamp validation to JTI parser               │
 │  ☐ Implement configurable skew tolerance                │
-│  ☐ Add GAUTH_CLOCK_SKEW_SECONDS env variable            │
+│  ☐ Add AGENTAUTH_CLOCK_SKEW_SECONDS env variable            │
 │  ☐ Log warnings for excessive skew                      │
 │  ☐ Add metrics for skew detection                       │
 └─────────────────────────────────────────────────────────┘
@@ -271,8 +271,8 @@ type SignatureAlgorithm interface {
 │  ✅ Load tests (9 benchmark scenarios)                  │
 │                                                         │
 │  Conformance                                            │
-│  ✅ RFC-0111 compliance (100% symbol coverage)          │
-│  ✅ RFC-0115 compliance (78/78 symbols)                 │
+│  ✅ AAP-001 compliance (100% symbol coverage)          │
+│  ✅ AAP-002 compliance (78/78 symbols)                 │
 │  ✅ Threat model validation (T1-T12)                    │
 │  ✅ Residual risk register (7 risks tracked)            │
 │                                                         │
@@ -381,24 +381,24 @@ type SignatureAlgorithm interface {
 │  DEPLOYMENT PIPELINE                                    │
 ├─────────────────────────────────────────────────────────┤
 │  Stage 1: Development                                   │
-│  Environment: dev.gauth.internal                        │
+│  Environment: dev.agentauth.internal                        │
 │  Purpose:     Feature development & integration testing │
 │  Status:      ✅ Active                                 │
 │                                                         │
 │  Stage 2: Staging                                       │
-│  Environment: staging.gauth.internal                    │
+│  Environment: staging.agentauth.internal                    │
 │  Purpose:     Pre-production validation                 │
 │  Status:      ☐ Ready for deployment                    │
 │  Duration:    2 weeks soak testing                      │
 │                                                         │
 │  Stage 3: Beta Production                               │
-│  Environment: beta.gauth.com                            │
+│  Environment: beta.agentauth.com                            │
 │  Purpose:     Limited customer rollout (10% traffic)    │
 │  Status:      ☐ Pending staging validation              │
 │  Duration:    4 weeks beta program                      │
 │                                                         │
 │  Stage 4: General Availability                          │
-│  Environment: api.gauth.com                             │
+│  Environment: api.agentauth.com                             │
 │  Purpose:     Full production release                   │
 │  Status:      ☐ Pending beta success metrics            │
 │  Target:      Q1 2026                                   │
@@ -643,8 +643,8 @@ The following residual risks have been accepted with documented justification:
 │  • NPS score: >50                                       │
 │                                                         │
 │  Compliance                                             │
-│  • RFC-0111 compliance: 100%                            │
-│  • RFC-0115 compliance: 100%                            │
+│  • AAP-001 compliance: 100%                            │
+│  • AAP-002 compliance: 100%                            │
 │  • External audit pass rate: 100%                       │
 │  • Jurisdiction coverage: 10+ regions                   │
 │                                                         │
@@ -736,8 +736,8 @@ The following residual risks have been accepted with documented justification:
 │  INTERNAL TRAINING CURRICULUM                           │
 ├─────────────────────────────────────────────────────────┤
 │  Week 1: AgentAuth Fundamentals                             │
-│  • RFC-0111 overview (2 hours)                          │
-│  • RFC-0115 Power of Attorney (2 hours)                 │
+│  • AAP-001 overview (2 hours)                          │
+│  • AAP-002 Power of Attorney (2 hours)                 │
 │  • Architecture deep dive (3 hours)                     │
 │  • Hands-on lab exercises (3 hours)                     │
 │                                                         │
@@ -946,15 +946,15 @@ The following residual risks have been accepted with documented justification:
 ### Appendix C: Contact Information
 
 **Project Lead**: Mauricio Fernandez  
-**Email**: mauricio.fernandez@gauth.io  
-**GitHub**: mauriciomferz/Gauth_go
+**Email**: mauricio.fernandez@agentauth.io  
+**GitHub**: mauriciomferz/AgentAuth
 
 **QA Manager**: [To be assigned]  
 **Security Lead**: [To be assigned]  
 **DevOps Lead**: [To be assigned]
 
 **Emergency Hotline**: +1-XXX-XXX-XXXX (24/7 incident response)  
-**Status Page**: https://status.gauth.com
+**Status Page**: https://status.agentauth.com
 
 ---
 

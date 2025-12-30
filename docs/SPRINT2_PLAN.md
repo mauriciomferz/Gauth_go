@@ -71,7 +71,7 @@ func Verify(ctx context.Context, env *Envelope, opts Options) (*VerificationResu
 - Move logic; leave adapter in web layer calling `attest.Verify`.
 - Add unit tests (replay hit, signature bad, digest mismatch, notarization mismatch, success).
 - Update web tests to assert identical JSON error codes.
-- (Progress) Extraction completed: `pkg/attest/verify.go` with `Attestation`, `ReplayStrategy`, `VerificationResult`, and `VerifyModelLimitsAttestation`. Endpoint `apiModelLimitsAttestationVerify` delegates to package logic via adapters (`attestationMemoryReplay`, `attestationDurableReplay`). Extended test suite now covers: valid signature, soft invalid signature, nonce replay (pre-seeded + durable second-call), missing nonce, notarization inconsistent (422), missing signature fields, unknown key id (404), invalid base64 signature, combined hash correctness, and tampered snapshot hash (soft invalid). All tests passing (`go test ./pkg/attest`). Next (optional): add legacy fallback env flag (`GAUTH_LEGACY_ATTEST_VERIFY`), negative audit/anchor hash tamper test, and lightweight latency benchmark.
+- (Progress) Extraction completed: `pkg/attest/verify.go` with `Attestation`, `ReplayStrategy`, `VerificationResult`, and `VerifyModelLimitsAttestation`. Endpoint `apiModelLimitsAttestationVerify` delegates to package logic via adapters (`attestationMemoryReplay`, `attestationDurableReplay`). Extended test suite now covers: valid signature, soft invalid signature, nonce replay (pre-seeded + durable second-call), missing nonce, notarization inconsistent (422), missing signature fields, unknown key id (404), invalid base64 signature, combined hash correctness, and tampered snapshot hash (soft invalid). All tests passing (`go test ./pkg/attest`). Next (optional): add legacy fallback env flag (`AGENTAUTH_LEGACY_ATTEST_VERIFY`), negative audit/anchor hash tamper test, and lightweight latency benchmark.
 
 ### Edge Cases
 - Replay store errors: differentiate `store_error` vs `replay`.
@@ -129,8 +129,8 @@ Rollback readiness:
 
 ## RB9: Observability Phase 1
 ### Tracing Design (Final Implemented)
-- Initialization: in-repo custom tracer provider (not OTLP) activated when `GAUTH_TRACING_ENABLED=1` (or legacy `GAUTH_OTEL_ENABLE=1`).
-- Sampling: `GAUTH_TRACING_SAMPLE_RATIO` (0..1). Implementation treats `ratio <= 0` as ALWAYS SAMPLE (documented quirk; tests assert this). Future change may invert semantics—flag in OBSERVABILITY.md.
+- Initialization: in-repo custom tracer provider (not OTLP) activated when `AGENTAUTH_TRACING_ENABLED=1` (or legacy `AGENTAUTH_OTEL_ENABLE=1`).
+- Sampling: `AGENTAUTH_TRACING_SAMPLE_RATIO` (0..1). Implementation treats `ratio <= 0` as ALWAYS SAMPLE (documented quirk; tests assert this). Future change may invert semantics—flag in OBSERVABILITY.md.
 - Spans & Tags (final RB9 scope):
   - `token.issue`: ttl_req, jwt_mode, outcome, token_id.
   - `token.validate`: status, token_id (minimal to reduce cardinality).
@@ -139,7 +139,7 @@ Rollback readiness:
 - Provider exposes `Spans()` slice for white-box unit tests (no external exporter yet). Propagation limited to request-local context; no cross-process trace propagation in RB9.
 
 ### Latency Percentiles (Implemented)
-- Endpoint: `/api/v1/beta/metrics/latency` returns JSON: `{ success: true, percentiles: { attestation_verify: { p50, p95, p99 }, rotation_summary: {...}, rfc0111_validation: {...} } }`.
+- Endpoint: `/api/v1/beta/metrics/latency` returns JSON: `{ success: true, percentiles: { attestation_verify: { p50, p95, p99 }, rotation_summary: {...}, aap001_validation: {...} } }`.
 - Computation: scans Prometheus histogram buckets, approximates quantiles by cumulative count boundary method (no HDR histogram integration yet). Function `percentileFromBuckets` selects first bucket whose cumulative proportion exceeds target percentile.
 - Added tests (`latency_percentiles_endpoint_test.go`) validating presence of keys and basic monotonic ordering (implicitly by non-zero values where metrics exist).
 
@@ -176,7 +176,7 @@ Rollback readiness:
 
 ## Rollback Plan
 - RB6: Keep original direct calls until Signer integrated; feature flag fallback.
-- RB7: Retain legacy path behind env `GAUTH_LEGACY_ATTEST_VERIFY` for one sprint.
+- RB7: Retain legacy path behind env `AGENTAUTH_LEGACY_ATTEST_VERIFY` for one sprint.
 - RB8: Migrate handlers one group at a time; if failure, revert package import.
 - RB9: Disable tracing via env; no code removal necessary.
 
@@ -228,7 +228,7 @@ Progress after anchor extraction:
 `GET /api/v1/beta/capabilities/audit/verify`, `POST /api/v1/beta/capabilities/audit/anchor`.
 
 **Parity assurances:**
-- Unconfigured verify response unchanged: `{success:true, configured:false}` when `GAUTH_CAP_AUDIT_PERSIST_PATH` unset.
+- Unconfigured verify response unchanged: `{success:true, configured:false}` when `AGENTAUTH_CAP_AUDIT_PERSIST_PATH` unset.
 - Error codes preserved: `capabilities_audit_read_failed`, `capabilities_audit_invalid_json`, `capabilities_audit_chain_tip_empty`, `capabilities_audit_anchor_failure`, `capability_anchor_disabled`, `capability_anchor_client_unavailable`.
 - Anchor success payload fields retained (hash, anchored_at RFC3339, total, chain_tip, type).
 

@@ -295,7 +295,7 @@ func generateAPIKey() (string, error) {
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
-	return "gauth_" + base64.URLEncoding.EncodeToString(b), nil
+	return "agentauth_" + base64.URLEncoding.EncodeToString(b), nil
 }
 
 // generateKeyID generates a unique key ID

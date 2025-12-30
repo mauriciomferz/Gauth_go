@@ -28,7 +28,7 @@ Quick Win #5 has been **successfully completed** with comprehensive audit log ex
 ```go
 type ExportService struct {
     repo      *Repository      // Database access
-    exportDir string           // File storage: /tmp/gauth-audit-exports
+    exportDir string           // File storage: /tmp/agentauth-audit-exports
     jobs      map[string]*ExportJob
     mu        sync.RWMutex     // Thread-safe job access
 }
@@ -67,7 +67,7 @@ type ExportJob struct {
 
 3. **Syslog** - RFC 5424 compliant
    ```
-   <134>1 2025-01-22T10:30:00Z gauth-audit - - - [audit tenant="..." user="..."] Action=poa.create
+   <134>1 2025-01-22T10:30:00Z agentauth-audit - - - [audit tenant="..." user="..."] Action=poa.create
    ```
 
 4. **CEF** - Common Event Format for SIEM
@@ -364,7 +364,7 @@ curl -X POST https://api.example.com/admin/audit/export \
 # Download and send to QRadar
 curl https://api.example.com/admin/audit/export/$(cat /tmp/export-job-id)/download \
   | gunzip \
-  | logger -n qradar-host -P 514 -t gauth
+  | logger -n qradar-host -P 514 -t agentauth
 ```
 
 ---
@@ -550,10 +550,10 @@ $ go build -v ./cmd/web-server
 - ✅ Code reviewed
 
 ### Configuration
-- [ ] Set export directory path (default: /tmp/gauth-audit-exports)
+- [ ] Set export directory path (default: /tmp/agentauth-audit-exports)
   ```go
   // Recommended production path
-  exportDir := "/var/lib/gauth/audit-exports"
+  exportDir := "/var/lib/agentauth/audit-exports"
   ```
 - [ ] Configure file permissions (700 or 750)
 - [ ] Set up disk space monitoring (exports can be large)

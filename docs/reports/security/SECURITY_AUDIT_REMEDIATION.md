@@ -14,10 +14,10 @@ Following the comprehensive security audit and penetration test conducted on Nov
 
 | Vulnerability ID | Severity | Description | Status |
 |-----------------|----------|-------------|---------|
-| CVE-2025-GAUTH-001 | **CRITICAL** | Broken Agent-Session Binding (Impersonation Attack) | ✅ Fixed |
-| CVE-2025-GAUTH-002 | **HIGH** | PoA Replay Protection (Validation Enhanced) | ✅ Validated |
-| CVE-2025-GAUTH-003 | **MEDIUM** | Unenforced Usage Constraints (Scope Bypass) | ✅ Fixed |
-| CVE-2025-GAUTH-004 | **HIGH** | Algorithm Confusion ("None" Attack) | ✅ Fixed |
+| CVE-2025-AGENTAUTH-001 | **CRITICAL** | Broken Agent-Session Binding (Impersonation Attack) | ✅ Fixed |
+| CVE-2025-AGENTAUTH-002 | **HIGH** | PoA Replay Protection (Validation Enhanced) | ✅ Validated |
+| CVE-2025-AGENTAUTH-003 | **MEDIUM** | Unenforced Usage Constraints (Scope Bypass) | ✅ Fixed |
+| CVE-2025-AGENTAUTH-004 | **HIGH** | Algorithm Confusion ("None" Attack) | ✅ Fixed |
 
 **Test Results:** All 30+ attack scenarios successfully blocked, all legitimate use cases pass validation.
 
@@ -25,7 +25,7 @@ Following the comprehensive security audit and penetration test conducted on Nov
 
 ## Vulnerability Details & Remediation
 
-### 1. CVE-2025-GAUTH-001: Broken Agent-Session Binding (CRITICAL)
+### 1. CVE-2025-AGENTAUTH-001: Broken Agent-Session Binding (CRITICAL)
 
 **Original Finding:**
 > "The PoA is treated as a 'bearer token' rather than a 'bound credential.' Any attacker who obtains a PoA (e.g., via network interception, database leak, or insider threat) can use it in their own session without detection."
@@ -46,7 +46,7 @@ Following the comprehensive security audit and penetration test conducted on Nov
 
 **Remediation Implementation:**
 
-**File:** `pkg/rfc0111/security_audit_fixes.go`
+**File:** `pkg/aap001/security_audit_fixes.go`
 ```go
 func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAttorney, sessionUser string) error {
     // Fail-closed: Reject nil PoA
@@ -74,9 +74,9 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 }
 ```
 
-**Integration Point:** `pkg/rfc0111/rfc0111.go` - VerifyToken function (line ~1323)
+**Integration Point:** `pkg/aap001/aap001.go` - VerifyToken function (line ~1323)
 ```go
-// SECURITY FIX 1: Agent-Session Binding Enforcement (CVE-2025-GAUTH-001)
+// SECURITY FIX 1: Agent-Session Binding Enforcement (CVE-2025-AGENTAUTH-001)
 var sessionUser string
 if sub := ctx.Value(ctxKeySubject); sub != nil {
     sessionUser = sub.(string)
@@ -102,7 +102,7 @@ if err := s.EnforceAgentSessionBinding(ctx, poa, sessionUser); err != nil {
 
 ---
 
-### 2. CVE-2025-GAUTH-002: PoA Replay Protection (HIGH)
+### 2. CVE-2025-AGENTAUTH-002: PoA Replay Protection (HIGH)
 
 **Original Finding:**
 > "The system does not check if the jti (JWT ID) has been used before. An attacker can capture a PoA and replay it multiple times before expiration."
@@ -115,7 +115,7 @@ if err := s.EnforceAgentSessionBinding(ctx, poa, sessionUser); err != nil {
 - JTI validation: UUID v4 format enforcement, duplicate detection
 - TTL-based cleanup aligned with PoA expiration windows
 
-**Code Reference:** `pkg/rfc0111/redis_replay_store.go`
+**Code Reference:** `pkg/aap001/redis_replay_store.go`
 ```go
 func (r *RedisReplayStore) Record(jti string, exp time.Time) error {
     ttl := time.Until(exp)
@@ -151,7 +151,7 @@ func (r *RedisReplayStore) Record(jti string, exp time.Time) error {
 
 ---
 
-### 3. CVE-2025-GAUTH-003: Unenforced Usage Constraints (MEDIUM)
+### 3. CVE-2025-AGENTAUTH-003: Unenforced Usage Constraints (MEDIUM)
 
 **Original Finding:**
 > "The constraints (scope, restrictions) in the PoA are stored but not systematically enforced during authorization decisions. An attacker can bypass intended restrictions by crafting requests outside the granted scope."
@@ -175,7 +175,7 @@ Attack:
 
 **Remediation Implementation:**
 
-**File:** `pkg/rfc0111/security_audit_fixes.go`
+**File:** `pkg/aap001/security_audit_fixes.go`
 ```go
 func (s *Service) EnforceScopeConstraints(
     ctx context.Context, 
@@ -252,7 +252,7 @@ func (s *Service) EnforceScopeConstraints(
             actionsList := strings.Split(allowedActions, ",")
             actionAllowed := false
             for _, a := range actionsList {
-                if strings.ToLower(strings.TrimSpace(a)) == strings.ToLower(requestedAction) {
+                if strings.ToLower(strings.TrimSpace(a) == strings.ToLower(requestedAction) {
                     actionAllowed = true
                     break
                 }
@@ -291,7 +291,7 @@ func (s *Service) EnforceScopeConstraints(
 
 ---
 
-### 4. CVE-2025-GAUTH-004: Algorithm Confusion ("None" Attack) (HIGH)
+### 4. CVE-2025-AGENTAUTH-004: Algorithm Confusion ("None" Attack) (HIGH)
 
 **Original Finding:**
 > "No strict algorithm whitelisting is enforced. An attacker can manipulate the signature algorithm field to bypass cryptographic verification (e.g., set alg=none or switch to HMAC with a known key)."
@@ -316,7 +316,7 @@ Attack Vector 2: Algorithm Downgrade (HMAC)
 
 **Remediation Implementation:**
 
-**File:** `pkg/rfc0111/security_audit_fixes.go`
+**File:** `pkg/aap001/security_audit_fixes.go`
 ```go
 // Global algorithm whitelist (configurable via WithAllowedAlgorithms option)
 var AllowedSignatureAlgorithms = []string{
@@ -364,9 +364,9 @@ func (s *Service) ValidateAlgorithmWhitelist(algorithm string) error {
 }
 ```
 
-**Integration Point:** `pkg/rfc0111/rfc0111.go` - VerifyToken function (line ~1258)
+**Integration Point:** `pkg/aap001/aap001.go` - VerifyToken function (line ~1258)
 ```go
-// SECURITY FIX 4: Algorithm Whitelist Validation (CVE-2025-GAUTH-004)
+// SECURITY FIX 4: Algorithm Whitelist Validation (CVE-2025-AGENTAUTH-004)
 // This check MUST occur BEFORE signature verification to prevent algorithm confusion
 if poa.Signature != nil {
     if err := s.ValidateAlgorithmWhitelist(poa.Signature.Algorithm); err != nil {
@@ -417,17 +417,17 @@ svc := NewService(
 **Scenario:** Multi-stage attack combining all 4 vulnerabilities
 
 ```go
-// Attack 1: Bob tries to impersonate Alice (CVE-2025-GAUTH-001)
+// Attack 1: Bob tries to impersonate Alice (CVE-2025-AGENTAUTH-001)
 ctx := WithSubject(context.Background(), "did:agent:bob")
 err := svc.EnforceAgentSessionBinding(ctx, alicePoA, "did:agent:bob")
 // Result: ✅ BLOCKED - Impersonation prevented
 
-// Attack 2: Alice tries scope escalation (CVE-2025-GAUTH-003)
+// Attack 2: Alice tries scope escalation (CVE-2025-AGENTAUTH-003)
 ctx = WithSubject(context.Background(), "did:agent:alice")
 err = svc.EnforceScopeConstraints(ctx, alicePoA, "delete", nil)
 // Result: ✅ BLOCKED - Scope violation detected
 
-// Attack 3: Algorithm confusion with "none" (CVE-2025-GAUTH-004)
+// Attack 3: Algorithm confusion with "none" (CVE-2025-AGENTAUTH-004)
 err = svc.ValidateAlgorithmWhitelist("none")
 // Result: ✅ BLOCKED - Algorithm confusion prevented
 
@@ -757,18 +757,18 @@ Date: November 21, 2025
 
 ### Files Modified
 
-1. **pkg/rfc0111/security_audit_fixes.go** (NEW - 475 lines)
+1. **pkg/aap001/security_audit_fixes.go** (NEW - 475 lines)
    - EnforceAgentSessionBinding function
    - EnforceScopeConstraints function
    - ValidateAlgorithmWhitelist function
    - AllowedSignatureAlgorithms global variable
    - WithAllowedAlgorithms configuration option
 
-2. **pkg/rfc0111/rfc0111.go** (MODIFIED - 2 changes)
+2. **pkg/aap001/aap001.go** (MODIFIED - 2 changes)
    - Line ~1258: Algorithm whitelist validation before signature verification
    - Line ~1323: Agent-session binding enforcement with context extraction
 
-3. **pkg/rfc0111/security_audit_fixes_test.go** (NEW - 549 lines)
+3. **pkg/aap001/security_audit_fixes_test.go** (NEW - 549 lines)
    - 6 comprehensive test suites
    - 33 test scenarios (attack + legitimate use)
    - Helper functions for error type checking
@@ -822,7 +822,7 @@ Date: November 21, 2025
 
 ### OWASP Top 10 (2021)
 
-- **A02:2021 – Cryptographic Failures** → Algorithm confusion mitigated (CVE-2025-GAUTH-004)
+- **A02:2021 – Cryptographic Failures** → Algorithm confusion mitigated (CVE-2025-AGENTAUTH-004)
 - **A03:2021 – Injection** → Scope constraint injection prevented (input validation)
 - **A05:2021 – Security Misconfiguration** → Explicit dangerous algorithm rejection (fail-closed)
 - **A07:2021 – Identification and Authentication Failures** → Agent-session binding (holder-of-key)

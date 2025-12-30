@@ -2,7 +2,7 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'gauth-production'
+    cluster: 'agentauth-production'
     environment: 'production'
 
 # Alertmanager configuration
@@ -19,7 +19,7 @@ rule_files:
 # Scrape configurations
 scrape_configs:
   # AgentAuth application metrics
-  - job_name: 'gauth'
+  - job_name: 'agentauth'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/api/v1/admin/metrics/prometheus'
@@ -52,31 +52,31 @@ scrape_configs:
       - targets: ['alertmanager:9093']
 
   # Additional AgentAuth endpoints
-  - job_name: 'gauth-authz'
+  - job_name: 'agentauth-authz'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/api/v1/beta/authz/metrics/prometheus'
     scrape_interval: 15s
 
-  - job_name: 'gauth-policy'
+  - job_name: 'agentauth-policy'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/api/v1/beta/policy/metrics/prometheus'
     scrape_interval: 15s
 
-  - job_name: 'gauth-violations'
+  - job_name: 'agentauth-violations'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/api/v1/beta/metrics/violations/prometheus'
     scrape_interval: 15s
 
-  - job_name: 'gauth-capabilities'
+  - job_name: 'agentauth-capabilities'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/api/v1/beta/capabilities/anchor/metrics/prometheus'
     scrape_interval: 15s
 
-  - job_name: 'gauth-revocation'
+  - job_name: 'agentauth-revocation'
     static_configs:
       - targets: ['host.docker.internal:8080']
     metrics_path: '/api/v1/beta/metrics/revocation/auto-sign/prometheus'

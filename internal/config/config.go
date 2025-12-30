@@ -42,14 +42,14 @@ type AAP001Config struct {
 // Load reads configuration from environment variables
 func Load() (*Config, error) {
 	cfg := &Config{
-		TokenSigMode:      Get("GAUTH_TOKEN_SIG_MODE", "hmac"),
-		JTITTLSeconds:     int(GetInt("GAUTH_JTI_TTL_SEC", 600)), // 10 minutes default
-		KeyRotationHours:  int(GetInt("GAUTH_KEY_ROTATION_HOURS", 24)),
-		LegacyOAuthMode:   parseBoolEnv("GAUTH_LEGACY_OAUTH_MODE"),
-		UseJWTLib:         parseBoolEnv("GAUTH_USE_JWT_LIB"),
-		JWTKeyID:          Get("GAUTH_JWT_KID", "demo-key"),
-		JWTAlg:            Get("GAUTH_JWT_ALG", "HS256"),
-		StrictJSONParsing: parseBoolEnv("GAUTH_STRICT_JSON_PARSING"),
+		TokenSigMode:      Get("AGENTAUTH_TOKEN_SIG_MODE", "hmac"),
+		JTITTLSeconds:     int(GetInt("AGENTAUTH_JTI_TTL_SEC", 600)), // 10 minutes default
+		KeyRotationHours:  int(GetInt("AGENTAUTH_KEY_ROTATION_HOURS", 24)),
+		LegacyOAuthMode:   parseBoolEnv("AGENTAUTH_LEGACY_OAUTH_MODE"),
+		UseJWTLib:         parseBoolEnv("AGENTAUTH_USE_JWT_LIB"),
+		JWTKeyID:          Get("AGENTAUTH_JWT_KID", "demo-key"),
+		JWTAlg:            Get("AGENTAUTH_JWT_ALG", "HS256"),
+		StrictJSONParsing: parseBoolEnv("AGENTAUTH_STRICT_JSON_PARSING"),
 		Cascade:           LoadCascadeConfigFromEnv(),
 		JWE:               loadJWEConfig(),
 		AAP001:           loadAAP001Config(),
@@ -60,20 +60,20 @@ func Load() (*Config, error) {
 
 func loadJWEConfig() *JWEConfig {
 	cfg := &JWEConfig{
-		Enabled:         parseBoolEnv("GAUTH_JWE_ENABLED"),
-		Algorithm:       Get("GAUTH_JWE_ALGORITHM", "RSA-OAEP-256"),
-		Encryption:      Get("GAUTH_JWE_ENCRYPTION", "A256GCM"),
-		PublicKeyPath:   os.Getenv("GAUTH_JWE_PUBLIC_KEY"),
-		PrivateKeyPath:  os.Getenv("GAUTH_JWE_PRIVATE_KEY"),
-		KeyID:           os.Getenv("GAUTH_JWE_KEY_ID"),
-		KeyRotationDays: int(GetInt("GAUTH_JWE_ROTATION_DAYS", 365)),
+		Enabled:         parseBoolEnv("AGENTAUTH_JWE_ENABLED"),
+		Algorithm:       Get("AGENTAUTH_JWE_ALGORITHM", "RSA-OAEP-256"),
+		Encryption:      Get("AGENTAUTH_JWE_ENCRYPTION", "A256GCM"),
+		PublicKeyPath:   os.Getenv("AGENTAUTH_JWE_PUBLIC_KEY"),
+		PrivateKeyPath:  os.Getenv("AGENTAUTH_JWE_PRIVATE_KEY"),
+		KeyID:           os.Getenv("AGENTAUTH_JWE_KEY_ID"),
+		KeyRotationDays: int(GetInt("AGENTAUTH_JWE_ROTATION_DAYS", 365)),
 	}
 	// Default enabled to true if not set, based on previous logic?
 	// Actually previous logic in jwe_env_config.go said "default: true" but code checked if env != "".
 	// Let's stick to explicit env vars for now to be safe, or check the original file.
 	// Original: if envEnabled != "" { ... } else { config.Enabled = true } (via DefaultJWEConfig)
 	// We should probably replicate defaults.
-	if os.Getenv("GAUTH_JWE_ENABLED") == "" {
+	if os.Getenv("AGENTAUTH_JWE_ENABLED") == "" {
 		cfg.Enabled = true
 	}
 	return cfg
@@ -81,10 +81,10 @@ func loadJWEConfig() *JWEConfig {
 
 func loadAAP001Config() *AAP001Config {
 	cfg := &AAP001Config{
-		Enabled:  os.Getenv("GAUTH_AAP001_ENABLED") == "1",
+		Enabled:  os.Getenv("AGENTAUTH_AAP001_ENABLED") == "1",
 		UseMocks: true,
 	}
-	if val := os.Getenv("GAUTH_AAP001_USE_MOCKS"); val == "0" {
+	if val := os.Getenv("AGENTAUTH_AAP001_USE_MOCKS"); val == "0" {
 		cfg.UseMocks = false
 	}
 	return cfg

@@ -78,7 +78,7 @@ The External Connectors system provides comprehensive identity verification capa
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              External Connectors Layer (pkg/gauth/external)  │
+│              External Connectors Layer (pkg/agentauth/external)  │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌────────────────┐  ┌────────────────┐  ┌───────────────┐ │
@@ -114,7 +114,7 @@ The External Connectors system provides comprehensive identity verification capa
                        │
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              Database-Backed PIP (pkg/gauth/pip)             │
+│              Database-Backed PIP (pkg/agentauth/pip)             │
 ├─────────────────────────────────────────────────────────────┤
 │  - PostgreSQL attribute storage                              │
 │  - Audit logging                                             │
@@ -161,22 +161,22 @@ The External Connectors system provides comprehensive identity verification capa
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/mauriciomferz/Gauth_go.git
-cd Gauth_go
+git clone https://github.com/mauriciomferz/AgentAuth.git
+cd AgentAuth
 
 # 2. Install dependencies
 go mod download
 
 # 3. Set up database
-psql -U postgres -c "CREATE DATABASE gauth;"
-psql -U postgres -d gauth -f schema/pip_schema.sql
+psql -U postgres -c "CREATE DATABASE agentauth;"
+psql -U postgres -d agentauth -f schema/pip_schema.sql
 
 # 4. Configure environment
-export GAUTH_DB_HOST=localhost
-export GAUTH_DB_PORT=5432
-export GAUTH_DB_NAME=gauth
-export GAUTH_DB_USER=postgres
-export GAUTH_DB_PASSWORD=your_password
+export AGENTAUTH_DB_HOST=localhost
+export AGENTAUTH_DB_PORT=5432
+export AGENTAUTH_DB_NAME=agentauth
+export AGENTAUTH_DB_USER=postgres
+export AGENTAUTH_DB_PASSWORD=your_password
 
 # 5. Build
 go build ./cmd/web-server
@@ -193,8 +193,8 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth/pip"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth/external"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth/pip"
 )
 
 func main() {
@@ -204,7 +204,7 @@ func main() {
     pipDB, err := pip.NewDatabasePIP(&pip.DatabaseConfig{
         Host:     "localhost",
         Port:     5432,
-        Database: "gauth",
+        Database: "agentauth",
         User:     "postgres",
         Password: "password",
     })
@@ -266,7 +266,7 @@ func main() {
 
 ### 🇺🇸 United States Identity Verifier
 
-**File:** `pkg/gauth/external/us_identity_verifier.go` (1,020 lines)
+**File:** `pkg/agentauth/external/us_identity_verifier.go` (1,020 lines)
 
 #### Features
 
@@ -369,7 +369,7 @@ result, err := truliooClient.VerifyIdentity(ctx, &external.TruliooVerifyRequest{
 
 ### 🇩🇪 Germany eID Connector
 
-**File:** `pkg/gauth/external/de_eid_connector.go` (719 lines)
+**File:** `pkg/agentauth/external/de_eid_connector.go` (719 lines)
 
 #### Features
 
@@ -447,7 +447,7 @@ if ageVerified {
 11. IssuingState
 12. DocumentNumber
 13. DateOfExpiry
-14. IssuingAuthority
+14. IssuinagentAuthority
 15. PlaceOfResidence
 16. ResidencePermit1
 17. ResidencePermit2
@@ -469,7 +469,7 @@ if ageVerified {
 
 ### 🇬🇧 United Kingdom Identity Connector
 
-**File:** `pkg/gauth/external/uk_identity_connector.go` (750 lines)
+**File:** `pkg/agentauth/external/uk_identity_connector.go` (750 lines)
 
 #### Features
 
@@ -569,7 +569,7 @@ if verifyResult.Success {
 
 ### 🇳🇱 Netherlands Identity Connector
 
-**File:** `pkg/gauth/external/nl_identity_connector.go` (700 lines)
+**File:** `pkg/agentauth/external/nl_identity_connector.go` (700 lines)
 
 #### Features
 
@@ -685,7 +685,7 @@ Example: `123456789`
 
 ### OCSP Certificate Validator
 
-**File:** `pkg/gauth/external/ocsp_validator.go` (650 lines)
+**File:** `pkg/agentauth/external/ocsp_validator.go` (650 lines)
 
 #### Features
 
@@ -757,7 +757,7 @@ if chainResult.AllValid {
 
 ### Database-Backed PIP
 
-**File:** `pkg/gauth/pip/database_pip.go` (850 lines)
+**File:** `pkg/agentauth/pip/database_pip.go` (850 lines)
 
 #### Features
 
@@ -822,7 +822,7 @@ CREATE INDEX idx_audit_timestamp ON pip_audit_log(timestamp);
 pipDB, err := pip.NewDatabasePIP(&pip.DatabaseConfig{
     Host:            "localhost",
     Port:            5432,
-    Database:        "gauth",
+    Database:        "agentauth",
     User:            "postgres",
     Password:        "password",
     MaxOpenConns:    25,
@@ -1063,14 +1063,14 @@ func VerifyWithCircuitBreaker(ctx context.Context, userID string) error {
 
 ```bash
 # Database configuration
-export GAUTH_DB_HOST=localhost
-export GAUTH_DB_PORT=5432
-export GAUTH_DB_NAME=gauth
-export GAUTH_DB_USER=postgres
-export GAUTH_DB_PASSWORD=your_password
-export GAUTH_DB_MAX_OPEN_CONNS=25
-export GAUTH_DB_MAX_IDLE_CONNS=5
-export GAUTH_DB_CONN_MAX_LIFETIME=5m
+export AGENTAUTH_DB_HOST=localhost
+export AGENTAUTH_DB_PORT=5432
+export AGENTAUTH_DB_NAME=agentauth
+export AGENTAUTH_DB_USER=postgres
+export AGENTAUTH_DB_PASSWORD=your_password
+export AGENTAUTH_DB_MAX_OPEN_CONNS=25
+export AGENTAUTH_DB_MAX_IDLE_CONNS=5
+export AGENTAUTH_DB_CONN_MAX_LIFETIME=5m
 
 # US Identity Provider API keys
 export PERSONA_API_KEY=your_persona_api_key
@@ -1092,19 +1092,19 @@ export EIDAS_NODE_URL=https://eidas.nl/eidas-node
 export IDIN_SERVICE_URL=https://idin.example.com
 
 # Circuit breaker configuration
-export GAUTH_CIRCUIT_BREAKER_ENABLED=true
-export GAUTH_CIRCUIT_BREAKER_MAX_FAILURES=5
-export GAUTH_CIRCUIT_BREAKER_RESET_TIMEOUT=30s
+export AGENTAUTH_CIRCUIT_BREAKER_ENABLED=true
+export AGENTAUTH_CIRCUIT_BREAKER_MAX_FAILURES=5
+export AGENTAUTH_CIRCUIT_BREAKER_RESET_TIMEOUT=30s
 
 # Cache configuration
-export GAUTH_CACHE_ENABLED=true
-export GAUTH_CACHE_TTL=300 # 5 minutes
-export GAUTH_CACHE_MAX_SIZE=1000
+export AGENTAUTH_CACHE_ENABLED=true
+export AGENTAUTH_CACHE_TTL=300 # 5 minutes
+export AGENTAUTH_CACHE_MAX_SIZE=1000
 
 # OCSP configuration
-export GAUTH_OCSP_ENABLED=true
-export GAUTH_OCSP_CACHE_TTL=3600 # 1 hour
-export GAUTH_OCSP_CRL_FALLBACK_ENABLED=true
+export AGENTAUTH_OCSP_ENABLED=true
+export AGENTAUTH_OCSP_CACHE_TTL=3600 # 1 hour
+export AGENTAUTH_OCSP_CRL_FALLBACK_ENABLED=true
 ```
 
 ### Configuration File (config.yaml)
@@ -1113,7 +1113,7 @@ export GAUTH_OCSP_CRL_FALLBACK_ENABLED=true
 database:
   host: localhost
   port: 5432
-  name: gauth
+  name: agentauth
   user: postgres
   password: password
   maxOpenConns: 25
@@ -1175,16 +1175,16 @@ ocsp:
 
 ```bash
 # Run all external connector tests
-go test ./pkg/gauth/external/... -v
+go test ./pkg/agentauth/external/... -v
 
 # Run US identity verifier tests
-go test ./pkg/gauth/external/ -run TestUSIdentityVerifier -v
+go test ./pkg/agentauth/external/ -run TestUSIdentityVerifier -v
 
 # Run PIP tests
-go test ./pkg/gauth/pip/... -v
+go test ./pkg/agentauth/pip/... -v
 
 # Run tests with coverage
-go test ./pkg/gauth/external/... -coverprofile=coverage.out
+go test ./pkg/agentauth/external/... -coverprofile=coverage.out
 go tool cover -html=coverage.out
 ```
 
@@ -1195,18 +1195,18 @@ go tool cover -html=coverage.out
 docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=password postgres:13
 
 # Initialize database
-psql -U postgres -c "CREATE DATABASE gauth_test;"
-psql -U postgres -d gauth_test -f schema/pip_schema.sql
+psql -U postgres -c "CREATE DATABASE agentauth_test;"
+psql -U postgres -d agentauth_test -f schema/pip_schema.sql
 
 # Run integration tests
-export GAUTH_TEST_DB_HOST=localhost
-export GAUTH_TEST_DB_PORT=5432
-export GAUTH_TEST_DB_NAME=gauth_test
-export GAUTH_TEST_DB_USER=postgres
-export GAUTH_TEST_DB_PASSWORD=password
+export AGENTAUTH_TEST_DB_HOST=localhost
+export AGENTAUTH_TEST_DB_PORT=5432
+export AGENTAUTH_TEST_DB_NAME=agentauth_test
+export AGENTAUTH_TEST_DB_USER=postgres
+export AGENTAUTH_TEST_DB_PASSWORD=password
 
-go test ./pkg/gauth/external/... -tags=integration -v
-go test ./pkg/gauth/pip/... -tags=integration -v
+go test ./pkg/agentauth/external/... -tags=integration -v
+go test ./pkg/agentauth/pip/... -tags=integration -v
 ```
 
 ### E2E Tests
@@ -1264,7 +1264,7 @@ curl -X POST http://localhost:8080/api/v1/beta/nl/authenticate \
 
 1. **PostgreSQL Database**
    - Version 13+
-   - Create `gauth` database
+   - Create `agentauth` database
    - Run schema initialization
 
 2. **API Keys** (Optional for Task 5)
@@ -1281,13 +1281,13 @@ curl -X POST http://localhost:8080/api/v1/beta/nl/authenticate \
 
 ```bash
 # Create database
-psql -U postgres -c "CREATE DATABASE gauth;"
+psql -U postgres -c "CREATE DATABASE agentauth;"
 
 # Run schema
-psql -U postgres -d gauth -f schema/pip_schema.sql
+psql -U postgres -d agentauth -f schema/pip_schema.sql
 
 # Verify tables
-psql -U postgres -d gauth -c "\dt"
+psql -U postgres -d agentauth -c "\dt"
 ```
 
 #### 2. Configuration
@@ -1300,37 +1300,37 @@ cp config.example.yaml config.yaml
 vim config.yaml
 
 # Set environment variables
-export GAUTH_CONFIG=/path/to/config.yaml
-export GAUTH_DB_PASSWORD=your_secure_password
+export AGENTAUTH_CONFIG=/path/to/config.yaml
+export AGENTAUTH_DB_PASSWORD=your_secure_password
 ```
 
 #### 3. Build
 
 ```bash
 # Build binary
-go build -o gauth-server ./cmd/web-server
+go build -o agentauth-server ./cmd/web-server
 
 # Or build with version info
 VERSION=$(git describe --tags --always)
 BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 go build -ldflags "-X main.Version=$VERSION -X main.BuildTime=$BUILD_TIME" \
-  -o gauth-server ./cmd/web-server
+  -o agentauth-server ./cmd/web-server
 ```
 
 #### 4. Run
 
 ```bash
 # Run directly
-./gauth-server
+./agentauth-server
 
 # Or with systemd
-sudo systemctl start gauth-server
+sudo systemctl start agentauth-server
 
 # Or with Docker
 docker run -d -p 8080:8080 \
-  -e GAUTH_DB_HOST=postgres \
-  -e GAUTH_DB_PASSWORD=password \
-  gauth-server:latest
+  -e AGENTAUTH_DB_HOST=postgres \
+  -e AGENTAUTH_DB_PASSWORD=password \
+  agentauth-server:latest
 ```
 
 ### Docker Deployment
@@ -1342,27 +1342,27 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o gauth-server ./cmd/web-server
+RUN go build -o agentauth-server ./cmd/web-server
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
-COPY --from=builder /app/gauth-server .
+COPY --from=builder /app/agentauth-server .
 COPY --from=builder /app/config.yaml .
 EXPOSE 8080
-CMD ["./gauth-server"]
+CMD ["./agentauth-server"]
 ```
 
 ```bash
 # Build image
-docker build -t gauth-server:latest .
+docker build -t agentauth-server:latest .
 
 # Run container
 docker run -d -p 8080:8080 \
-  --name gauth-server \
-  -e GAUTH_DB_HOST=postgres \
-  -e GAUTH_DB_PASSWORD=password \
-  gauth-server:latest
+  --name agentauth-server \
+  -e AGENTAUTH_DB_HOST=postgres \
+  -e AGENTAUTH_DB_PASSWORD=password \
+  agentauth-server:latest
 ```
 
 ### Kubernetes Deployment
@@ -1372,29 +1372,29 @@ docker run -d -p 8080:8080 \
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-server
+  name: agentauth-server
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth-server
+      app: agentauth-server
   template:
     metadata:
       labels:
-        app: gauth-server
+        app: agentauth-server
     spec:
       containers:
-      - name: gauth-server
-        image: gauth-server:latest
+      - name: agentauth-server
+        image: agentauth-server:latest
         ports:
         - containerPort: 8080
         env:
-        - name: GAUTH_DB_HOST
+        - name: AGENTAUTH_DB_HOST
           value: postgres
-        - name: GAUTH_DB_PASSWORD
+        - name: AGENTAUTH_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: db-password
         livenessProbe:
           httpGet:
@@ -1412,10 +1412,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth-server
+  name: agentauth-server
 spec:
   selector:
-    app: gauth-server
+    app: agentauth-server
   ports:
   - port: 80
     targetPort: 8080
@@ -1436,7 +1436,7 @@ kubectl get svc
 ```yaml
 # prometheus.yaml
 scrape_configs:
-  - job_name: 'gauth-server'
+  - job_name: 'agentauth-server'
     static_configs:
       - targets: ['localhost:8080']
     metrics_path: /metrics
@@ -1447,13 +1447,13 @@ scrape_configs:
 curl http://localhost:8080/metrics
 
 # Key metrics:
-# - gauth_identity_verifications_total
-# - gauth_identity_verification_errors_total
-# - gauth_identity_verification_duration_seconds
-# - gauth_pip_attribute_operations_total
-# - gauth_pip_cache_hit_rate
-# - gauth_circuit_breaker_state
-# - gauth_ocsp_validations_total
+# - agentauth_identity_verifications_total
+# - agentauth_identity_verification_errors_total
+# - agentauth_identity_verification_duration_seconds
+# - agentauth_pip_attribute_operations_total
+# - agentauth_pip_cache_hit_rate
+# - agentauth_circuit_breaker_state
+# - agentauth_ocsp_validations_total
 ```
 
 ---
@@ -1478,7 +1478,7 @@ sudo systemctl status postgresql
 psql -U postgres -h localhost -p 5432 -c "SELECT 1"
 
 # Verify credentials
-export GAUTH_DB_PASSWORD=correct_password
+export AGENTAUTH_DB_PASSWORD=correct_password
 ```
 
 #### 2. API Provider Authentication Failed
@@ -1516,7 +1516,7 @@ Error: circuit breaker is open for service us_identity_verifier
 sleep 30
 
 # Or disable circuit breaker temporarily
-export GAUTH_CIRCUIT_BREAKER_ENABLED=false
+export AGENTAUTH_CIRCUIT_BREAKER_ENABLED=false
 
 # Check failure count
 curl http://localhost:8080/metrics | grep circuit_breaker
@@ -1538,7 +1538,7 @@ sudo update-ca-certificates
 export SSL_CERT_FILE=/path/to/ca-bundle.crt
 
 # Disable OCSP temporarily for testing
-export GAUTH_OCSP_ENABLED=false
+export AGENTAUTH_OCSP_ENABLED=false
 ```
 
 #### 5. PIP Attribute Not Found
@@ -1551,7 +1551,7 @@ Error: attribute not found: ssn_verified for user user123
 **Solution:**
 ```bash
 # Check database
-psql -U postgres -d gauth -c \
+psql -U postgres -d agentauth -c \
   "SELECT * FROM pip_attributes WHERE user_id='user123'"
 
 # Check cache
@@ -1565,17 +1565,17 @@ curl -X POST http://localhost:8080/api/v1/debug/cache/clear
 
 ```bash
 # Enable debug logging
-export GAUTH_LOG_LEVEL=debug
-export GAUTH_LOG_FORMAT=json
+export AGENTAUTH_LOG_LEVEL=debug
+export AGENTAUTH_LOG_FORMAT=json
 
 # Run with verbose output
-./gauth-server -v
+./agentauth-server -v
 
 # Check logs
-tail -f /var/log/gauth/server.log
+tail -f /var/log/agentauth/server.log
 
 # Or with Docker
-docker logs -f gauth-server
+docker logs -f agentauth-server
 ```
 
 ### Performance Tuning

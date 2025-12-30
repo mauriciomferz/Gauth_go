@@ -114,7 +114,7 @@ Successfully completed **Option 1: Production Deployment Preparation**, transfor
 - Redis exporter
 - Nginx exporter
 
-**Alert Rules** (`monitoring/alerts/gauth-alerts.yml`)
+**Alert Rules** (`monitoring/alerts/agentauth-alerts.yml`)
 
 **Alert Categories**:
 

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // ============================================================================
@@ -394,15 +394,15 @@ func (s *BetaServer) AddPPPEndpoints() {
 }
 
 // Helper to get or create PAP instance
-func (s *BetaServer) getOrCreatePAP() *gauth.PowerAdministrationPoint {
+func (s *BetaServer) getOrCreatePAP() *agentauth.PowerAdministrationPoint {
 	// This would be initialized during server startup
 	// For now, return a placeholder
-	return gauth.NewPowerAdministrationPoint("pap-default", "Default PAP", "Default Policy Administration Point")
+	return agentauth.NewPowerAdministrationPoint("pap-default", "Default PAP", "Default Policy Administration Point")
 }
 
 // Helper to get or create PDP instance
-func (s *BetaServer) getOrCreatePDP() *gauth.SimplePDP {
+func (s *BetaServer) getOrCreatePDP() *agentauth.SimplePDP {
 	// This would be initialized during server startup with PAP integration
 	pap := s.getOrCreatePAP()
-	return gauth.NewSimplePDPWithPAP(pap)
+	return agentauth.NewSimplePDPWithPAP(pap)
 }

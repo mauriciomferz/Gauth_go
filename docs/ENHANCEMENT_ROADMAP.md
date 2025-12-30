@@ -9,12 +9,12 @@
 
 ## Executive Summary
 
-This roadmap consolidates all planned enhancements for AgentAuth following the completion of core development phases (Frontend, Deployment, Testing, Security, Documentation). The system is **currently production-ready** at 98% RFC-0111 compliance. These enhancements are **strategic improvements** that add AI capabilities, scale, and polish but are not blocking for v1.0.0 release.
+This roadmap consolidates all planned enhancements for AgentAuth following the completion of core development phases (Frontend, Deployment, Testing, Security, Documentation). The system is **currently production-ready** at 98% AAP-001 compliance. These enhancements are **strategic improvements** that add AI capabilities, scale, and polish but are not blocking for v1.0.0 release.
 
 ### Current System Status ✅
 
 **Production-Ready Metrics** (November 16, 2025):
-- ✅ 98% RFC-0111 Compliance
+- ✅ 98% AAP-001 Compliance
 - ✅ 100% Test Pass Rate
 - ✅ Sub-millisecond authorization latency
 - ✅ Complete React UI (8 pages, 2,531 lines)
@@ -32,7 +32,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 6. ✅ **Phase 2A: Backend API Integration (100%)** ← JUST COMPLETED
    - ✅ 11 backend endpoints implemented and tested
    - ✅ All UI mocks replaced with real backend
-   - ✅ Server requires `GAUTH_AAP-001_ENABLED=1` flag
+   - ✅ Server requires `AGENTAUTH_AAP-001_ENABLED=1` flag
 
 ---
 
@@ -52,7 +52,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 - ✅ All UI pages integrated with real backend
 - ✅ 0 UI mocks remaining
 - ✅ Comprehensive documentation (3 new docs)
-- ✅ Server configuration documented (`GAUTH_AAP-001_ENABLED=1` required)
+- ✅ Server configuration documented (`AGENTAUTH_AAP-001_ENABLED=1` required)
 
 **Key Documents**:
 - [Completion Report](PHASE_2A_BACKEND_COMPLETION_REPORT.md)
@@ -90,7 +90,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 **Priority**: P1 - Strategic Initiative  
 **Investment**: $50k-75k
 
-**Purpose**: Implement Model Context Protocol (MCP) as the AI-to-system connectivity layer, bringing RFC-0111 compliance from 68% to 75%.
+**Purpose**: Implement Model Context Protocol (MCP) as the AI-to-system connectivity layer, bringing AAP-001 compliance from 68% to 75%.
 
 **Key Deliverables**:
 - MCP client implementation (JSON-RPC 2.0)
@@ -102,7 +102,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 - Comprehensive testing & documentation
 
 **Why Critical**:
-1. RFC-0111 MCP building block requirement
+1. AAP-001 MCP building block requirement
 2. Positions AgentAuth for AI agent authorization market
 3. Enables secure AI-to-resource access
 4. Strategic differentiation from competitors
@@ -370,7 +370,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 
 ```
 Decision Tree:
-├─ Need AI agent authorization? (RFC-0111 requirement)
+├─ Need AI agent authorization? (AAP-001 requirement)
 │  └─ YES → Phase 2B (MCP Integration) - Q1 2026 ⭐
 │
 ├─ Current throughput <1k req/sec adequate?
@@ -390,7 +390,7 @@ Decision Tree:
 ### Triggering Conditions
 
 **Phase 2B (MCP)**:
-- ✅ RFC-0111 compliance requirement
+- ✅ AAP-001 compliance requirement
 - ✅ Q1 2026 AI market timing
 - ✅ Strategic differentiation
 - **Recommendation**: Implement regardless
@@ -484,7 +484,7 @@ Decision Tree:
 - [ ] Zero memory leaks
 
 **Compliance**:
-- [ ] RFC-0111 MCP requirement satisfied (68% → 75%)
+- [ ] AAP-001 MCP requirement satisfied (68% → 75%)
 - [ ] All operations auditable
 - [ ] Compliance reports generated
 
@@ -670,7 +670,7 @@ This enhancement roadmap provides a structured approach to evolving AgentAuth fr
 2. **Performance**: Phase 2C modules as scale demands
 3. **Polish**: Phase 2A for enterprise UX when needed
 
-**Primary Recommendation**: **Proceed with Phase 2B (MCP Integration) in Q1 2026** for highest strategic value and RFC-0111 compliance.
+**Primary Recommendation**: **Proceed with Phase 2B (MCP Integration) in Q1 2026** for highest strategic value and AAP-001 compliance.
 
 **Alternative**: Ship v1.0.0 now if immediate production deployment needed, implement enhancements based on actual usage patterns.
 
@@ -715,7 +715,7 @@ This enhancement roadmap provides a structured approach to evolving AgentAuth fr
 | If You Need... | Implement... | Priority | Timeline |
 |----------------|--------------|----------|----------|
 | AI agent authorization | Phase 2B | P1 | Q1 2026 (6 weeks) |
-| RFC-0111 MCP compliance | Phase 2B | P1 | Q1 2026 (6 weeks) |
+| AAP-001 MCP compliance | Phase 2B | P1 | Q1 2026 (6 weeks) |
 | >10k req/sec throughput | Phase 2C.2 | P2 | 1 week |
 | Persistent policy storage | Phase 2C.1 | P2 | 1 week |
 | Multi-region deployment | Phase 2C.3 | P2 | 2 weeks |

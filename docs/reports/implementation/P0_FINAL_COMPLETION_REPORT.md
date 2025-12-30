@@ -64,7 +64,7 @@ Successfully completed all P0 (CRITICAL) security fixes to prevent authenticatio
    - 10 path validation test cases
    - Container detection verification
 
-3. **pkg/gauth/replay_store_bolt_security_test.go** (87 lines)
+3. **pkg/agentauth/replay_store_bolt_security_test.go** (87 lines)
    - 3 test functions
    - Safety check verification
    - Bypass mechanism testing
@@ -96,11 +96,11 @@ Successfully completed all P0 (CRITICAL) security fixes to prevent authenticatio
 
 ### Files Modified (4)
 
-1. **pkg/gauth/replay_store_bolt.go**
+1. **pkg/agentauth/replay_store_bolt.go**
    - Added import: `internal/security`
    - Enhanced NewBoltReplayStore() with container safety checks
    - Added deprecation warnings
-   - Bypass mechanism via GAUTH_ALLOW_UNSAFE_BOLTDB
+   - Bypass mechanism via AGENTAUTH_ALLOW_UNSAFE_BOLTDB
 
 2. **internal/security/startup_validation.go**
    - Added validateReplayStore() function
@@ -179,7 +179,7 @@ Successfully completed all P0 (CRITICAL) security fixes to prevent authenticatio
 - [x] Validates paths in container environments
 - [x] Fails with detailed error for ephemeral paths
 - [x] Provides remediation guidance
-- [x] Respects GAUTH_ALLOW_UNSAFE_BOLTDB bypass flag
+- [x] Respects AGENTAUTH_ALLOW_UNSAFE_BOLTDB bypass flag
 - [x] Logs warnings when bypass is used
 - [x] Normal operation on bare metal/VMs
 
@@ -211,7 +211,7 @@ Successfully completed all P0 (CRITICAL) security fixes to prevent authenticatio
 - **Cloud Run/App Service:** Would fail at startup (intended)
 
 ### 🔄 Bypass Available (Dev/Test)
-- **GAUTH_ALLOW_UNSAFE_BOLTDB=1:** Bypasses checks (tested)
+- **AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1:** Bypasses checks (tested)
 - **Warning logged:** Bypass usage detected (verified)
 
 ---
@@ -283,7 +283,7 @@ Untracked Files: None
 
 ### Remote Status ✅
 ```
-Repository: github.com/mauriciomferz/Gauth_go
+Repository: github.com/mauriciomferz/AgentAuth
 Last Push: 90b18b82 (Nov 30, 15:45 UTC)
 All commits: Pushed successfully
 ```
@@ -374,31 +374,31 @@ Impact: Negligible (<0.1%)
 ### Recommended Metrics
 ```prometheus
 # Container safety bypass detection (NEW)
-gauth_unsafe_boltdb_bypass_total
+agentauth_unsafe_boltdb_bypass_total
 
 # Replay store type (NEW)
-gauth_replay_store_type{type="redis|bolt|memory"}
+agentauth_replay_store_type{type="redis|bolt|memory"}
 
 # Container environment (NEW)
-gauth_container_environment{env="kubernetes|docker|podman|none"}
+agentauth_container_environment{env="kubernetes|docker|podman|none"}
 
 # Existing replay protection metrics
-gauth_replay_store_checks_total
-gauth_replay_store_hits_total
-gauth_replay_store_errors_total
+agentauth_replay_store_checks_total
+agentauth_replay_store_hits_total
+agentauth_replay_store_errors_total
 ```
 
 ### Recommended Alerts
 ```yaml
 # CRITICAL: Unsafe bypass in production
 - alert: UnsafeBoltDBBypassInProduction
-  expr: gauth_unsafe_boltdb_bypass_total > 0
+  expr: agentauth_unsafe_boltdb_bypass_total > 0
   severity: critical
 
 # WARNING: BoltDB in container
 - alert: BoltDBInContainer
-  expr: gauth_replay_store_type{type="bolt"} and 
-        gauth_container_environment{env!="none"}
+  expr: agentauth_replay_store_type{type="bolt"} and 
+        agentauth_container_environment{env!="none"}
   severity: warning
 ```
 
@@ -506,7 +506,7 @@ go run ./cmd/web-server
 # Error: UNSAFE PERSISTENT STORAGE: replay protection path '/tmp/replay.db'
 
 # Bypass for dev/test
-GAUTH_ALLOW_UNSAFE_BOLTDB=1 go run ./cmd/web-server
+AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1 go run ./cmd/web-server
 ```
 
 **Run Tests:**
@@ -515,14 +515,14 @@ GAUTH_ALLOW_UNSAFE_BOLTDB=1 go run ./cmd/web-server
 go test -v ./internal/security -run TestContainer
 
 # BoltDB security tests
-go test -v ./pkg/gauth -run TestBoltReplayStore_Container
+go test -v ./pkg/agentauth -run TestBoltReplayStore_Container
 ```
 
 ### B. Environment Variables
 
 **New Variables:**
 ```bash
-GAUTH_ALLOW_UNSAFE_BOLTDB=1  # Bypass container safety (dev/test ONLY)
+AGENTAUTH_ALLOW_UNSAFE_BOLTDB=1  # Bypass container safety (dev/test ONLY)
 ```
 
 **Recommended Variables:**
@@ -530,7 +530,7 @@ GAUTH_ALLOW_UNSAFE_BOLTDB=1  # Bypass container safety (dev/test ONLY)
 REDIS_HOST=redis.default.svc.cluster.local
 REDIS_PORT=6379
 REDIS_PASSWORD=your-secure-password
-GAUTH_REPLAY_STORE=redis
+AGENTAUTH_REPLAY_STORE=redis
 ```
 
 ### C. File Checksums

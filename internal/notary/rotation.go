@@ -34,7 +34,7 @@ func canonicalRotationDescriptor(rd *KeyRotationDescriptor) ([]byte, error) {
 		return nil, err
 	}
 	// Domain separation string
-	prefixed := append([]byte("GAUTH_ROTATION_DESCRIPTOR:"), enc...)
+	prefixed := append([]byte("AGENTAUTH_ROTATION_DESCRIPTOR:"), enc...)
 	return prefixed, nil
 }
 

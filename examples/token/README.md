@@ -19,7 +19,7 @@ When working with tokens in AgentAuth, we recommend using the main token package
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/gauth/pkg/token"
+    "github.com/AgentAuth-Foundation/agentauth/pkg/token"
 )
 
 func main() {

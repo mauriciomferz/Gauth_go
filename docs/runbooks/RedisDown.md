@@ -25,7 +25,7 @@ Redis instance is down or unreachable, causing cache unavailability and potentia
 
 **Trigger Condition:**
 ```promql
-redis_up{namespace="gauth-staging"} == 0
+redis_up{namespace="agentauth-staging"} == 0
 ```
 
 **Duration:** 2 minutes  
@@ -37,20 +37,20 @@ redis_up{namespace="gauth-staging"} == 0
 
 1. **Check Redis Pod Status**
    ```bash
-   kubectl get pods -n gauth-staging -l app=redis
-   kubectl describe pod <redis-pod> -n gauth-staging
+   kubectl get pods -n agentauth-staging -l app=redis
+   kubectl describe pod <redis-pod> -n agentauth-staging
    ```
 
 2. **Check Redis Logs**
    ```bash
-   kubectl logs <redis-pod> -n gauth-staging --tail=100
-   kubectl logs <redis-pod> -n gauth-staging --previous
+   kubectl logs <redis-pod> -n agentauth-staging --tail=100
+   kubectl logs <redis-pod> -n agentauth-staging --previous
    ```
 
 3. **Check Service and Endpoints**
    ```bash
-   kubectl get svc redis -n gauth-staging
-   kubectl get endpoints redis -n gauth-staging
+   kubectl get svc redis -n agentauth-staging
+   kubectl get endpoints redis -n agentauth-staging
    ```
 
 ---
@@ -83,20 +83,20 @@ redis_up{namespace="gauth-staging"} == 0
 
 ```bash
 # Check pod events
-kubectl get events -n gauth-staging --field-selector involvedObject.name=<redis-pod>
+kubectl get events -n agentauth-staging --field-selector involvedObject.name=<redis-pod>
 
 # Check persistent volume
-kubectl get pvc -n gauth-staging -l app=redis
-kubectl describe pvc <pvc-name> -n gauth-staging
+kubectl get pvc -n agentauth-staging -l app=redis
+kubectl describe pvc <pvc-name> -n agentauth-staging
 
 # Check memory usage
-kubectl exec <redis-pod> -n gauth-staging -- redis-cli INFO memory
+kubectl exec <redis-pod> -n agentauth-staging -- redis-cli INFO memory
 
 # Check Redis status
-kubectl exec <redis-pod> -n gauth-staging -- redis-cli PING
+kubectl exec <redis-pod> -n agentauth-staging -- redis-cli PING
 
 # Check connected clients
-kubectl exec <redis-pod> -n gauth-staging -- redis-cli CLIENT LIST
+kubectl exec <redis-pod> -n agentauth-staging -- redis-cli CLIENT LIST
 ```
 
 ---
@@ -107,39 +107,39 @@ kubectl exec <redis-pod> -n gauth-staging -- redis-cli CLIENT LIST
 
 1. **Check restart count**
    ```bash
-   kubectl get pod <redis-pod> -n gauth-staging -o jsonpath='{.status.containerStatuses[0].restartCount}'
+   kubectl get pod <redis-pod> -n agentauth-staging -o jsonpath='{.status.containerStatuses[0].restartCount}'
    ```
 
 2. **Review crash logs**
    ```bash
-   kubectl logs <redis-pod> -n gauth-staging --previous | tail -50
+   kubectl logs <redis-pod> -n agentauth-staging --previous | tail -50
    ```
 
 3. **Restart pod**
    ```bash
-   kubectl delete pod <redis-pod> -n gauth-staging
-   kubectl get pods -n gauth-staging -w
+   kubectl delete pod <redis-pod> -n agentauth-staging
+   kubectl get pods -n agentauth-staging -w
    ```
 
 ### Scenario 2: Memory Exhaustion
 
 1. **Check memory usage**
    ```bash
-   kubectl exec <redis-pod> -n gauth-staging -- redis-cli INFO memory | grep used_memory_human
+   kubectl exec <redis-pod> -n agentauth-staging -- redis-cli INFO memory | grep used_memory_human
    ```
 
 2. **Clear unnecessary keys** (if safe)
    ```bash
    # Get key statistics
-   kubectl exec <redis-pod> -n gauth-staging -- redis-cli --bigkeys
+   kubectl exec <redis-pod> -n agentauth-staging -- redis-cli --bigkeys
    
    # Flush specific database (CAUTION)
-   kubectl exec <redis-pod> -n gauth-staging -- redis-cli FLUSHDB
+   kubectl exec <redis-pod> -n agentauth-staging -- redis-cli FLUSHDB
    ```
 
 3. **Increase memory limit**
    ```bash
-   kubectl edit statefulset redis -n gauth-staging
+   kubectl edit statefulset redis -n agentauth-staging
    # Increase memory limits and maxmemory config
    ```
 
@@ -147,17 +147,17 @@ kubectl exec <redis-pod> -n gauth-staging -- redis-cli CLIENT LIST
 
 1. **Check AOF status**
    ```bash
-   kubectl exec <redis-pod> -n gauth-staging -- cat /data/appendonly.aof
+   kubectl exec <redis-pod> -n agentauth-staging -- cat /data/appendonly.aof
    ```
 
 2. **Fix AOF file**
    ```bash
-   kubectl exec <redis-pod> -n gauth-staging -- redis-check-aof --fix /data/appendonly.aof
+   kubectl exec <redis-pod> -n agentauth-staging -- redis-check-aof --fix /data/appendonly.aof
    ```
 
 3. **Restart Redis**
    ```bash
-   kubectl delete pod <redis-pod> -n gauth-staging
+   kubectl delete pod <redis-pod> -n agentauth-staging
    ```
 
 ### Scenario 4: Restore from Snapshot
@@ -166,13 +166,13 @@ If data is corrupted and recent backup exists:
 
 ```bash
 # Stop Redis
-kubectl scale statefulset redis -n gauth-staging --replicas=0
+kubectl scale statefulset redis -n agentauth-staging --replicas=0
 
 # Restore RDB file
 ./scripts/restore-redis-snapshot.sh <snapshot-date>
 
 # Start Redis
-kubectl scale statefulset redis -n gauth-staging --replicas=1
+kubectl scale statefulset redis -n agentauth-staging --replicas=1
 ```
 
 ---
@@ -181,23 +181,23 @@ kubectl scale statefulset redis -n gauth-staging --replicas=1
 
 1. **Redis is running**
    ```bash
-   kubectl get pod <redis-pod> -n gauth-staging
+   kubectl get pod <redis-pod> -n agentauth-staging
    ```
 
 2. **Can connect to Redis**
    ```bash
-   kubectl exec <redis-pod> -n gauth-staging -- redis-cli PING
+   kubectl exec <redis-pod> -n agentauth-staging -- redis-cli PING
    # Should return: PONG
    ```
 
 3. **Check key count**
    ```bash
-   kubectl exec <redis-pod> -n gauth-staging -- redis-cli DBSIZE
+   kubectl exec <redis-pod> -n agentauth-staging -- redis-cli DBSIZE
    ```
 
 4. **AgentAuth can use cache**
    ```bash
-   kubectl logs <gauth-pod> -n gauth-staging | grep -i "redis connection"
+   kubectl logs <agentauth-pod> -n agentauth-staging | grep -i "redis connection"
    ```
 
 5. **Metrics being collected**
@@ -264,7 +264,7 @@ kubectl scale statefulset redis -n gauth-staging --replicas=1
 
 **Contact Information:**
 - On-call: Check PagerDuty
-- Slack: #gauth-redis-incidents
+- Slack: #agentauth-redis-incidents
 - Email: infra-oncall@example.com
 
 ---

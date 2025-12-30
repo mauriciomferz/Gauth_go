@@ -74,10 +74,10 @@ func (s *DiscoveryService) buildDefaultConfiguration() *OIDCConfiguration {
 			"address",        // Physical address
 			"offline_access", // Refresh tokens
 			// AgentAuth-specific scopes
-			"gauth:owner",        // Owner authorization scope
-			"gauth:client",       // Client authorization scope
-			"gauth:resource",     // Resource access scope
-			"gauth:legal_entity", // Legal entity information
+			"agentauth:owner",        // Owner authorization scope
+			"agentauth:client",       // Client authorization scope
+			"agentauth:resource",     // Resource access scope
+			"agentauth:legal_entity", // Legal entity information
 		},
 		TokenEndpointAuthMethodsSupported: []string{
 			"client_secret_basic", // HTTP Basic Auth

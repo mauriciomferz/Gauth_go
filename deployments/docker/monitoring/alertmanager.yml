@@ -1,7 +1,7 @@
 global:
   resolve_timeout: 5m
   smtp_smarthost: 'localhost:587'
-  smtp_from: 'alertmanager@gauth.local'
+  smtp_from: 'alertmanager@agentauth.local'
   smtp_require_tls: false
 
 route:

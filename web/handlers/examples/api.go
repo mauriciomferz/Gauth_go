@@ -72,9 +72,9 @@ func (a *API) RegisterRoutes(r *gin.Engine) {
 
 func (a *API) seedExamples() {
 	a.Examples = []*ExampleMeta{
-		{ID: "gauth_protocol_basics:minimal_poa", Title: "Minimal PoA", Description: "Basic power-of-attorney construction", Group: "basics", EstimatedSeconds: 1},
-		{ID: "gauth_protocol_basics:delegation", Title: "Delegation", Description: "Simple delegation chain", Group: "basics", EstimatedSeconds: 2},
-		{ID: "gauth_protocol_basics:token", Title: "Token Issuance", Description: "Beta token creation", Group: "basics", EstimatedSeconds: 1},
+		{ID: "agentauth_protocol_basics:minimal_poa", Title: "Minimal PoA", Description: "Basic power-of-attorney construction", Group: "basics", EstimatedSeconds: 1},
+		{ID: "agentauth_protocol_basics:delegation", Title: "Delegation", Description: "Simple delegation chain", Group: "basics", EstimatedSeconds: 2},
+		{ID: "agentauth_protocol_basics:token", Title: "Token Issuance", Description: "Beta token creation", Group: "basics", EstimatedSeconds: 1},
 		{ID: "advanced_poa:multi_level", Title: "Advanced Multi-level Delegation", Description: "Complex PoA scenario", Group: "advanced", EstimatedSeconds: 3},
 		{ID: "negative:invalid_scope", Title: "Invalid Scope", Description: "Negative case: scope mismatch", Group: "negative", EstimatedSeconds: 1},
 	}

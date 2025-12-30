@@ -44,9 +44,9 @@ Test Execution Time: ~4 minutes (including load tests)
 | **pkg/ledger** | 76.0% | ✅ Good | Audit trail & compliance |
 | **pkg/crypto** | 75.5% | ✅ Good | Cryptographic operations |
 | **pkg/delegation** | 73.3% | ✅ Good | Delegation chains |
-| **pkg/gauth** | 70.0% | ✅ Acceptable | Main token validation |
+| **pkg/agentauth** | 70.0% | ✅ Acceptable | Main token validation |
 | **internal/authorization** | 68.5% | ✅ Acceptable | Authorization engine |
-| **pkg/rfc0111** | 66.3% | ✅ Acceptable | RFC compliance |
+| **pkg/aap001** | 66.3% | ✅ Acceptable | RFC compliance |
 | **pkg/poa** | 49.1% | ⚠️ Low | POA stream parsing |
 
 ### Supporting Package Coverage
@@ -139,13 +139,13 @@ Test Execution Time: ~4 minutes (including load tests)
 
 **100% Covered (Production-Critical)**:
 ```
-✅ Token validation (pkg/gauth)
+✅ Token validation (pkg/agentauth)
 ✅ POA definition validation (pkg/poa)
 ✅ Signature verification (pkg/crypto - Ed25519, RSA-PSS, ECDSA)
 ✅ Authorization caching (pkg/authz)
 ✅ Delegation chain verification (pkg/delegation)
 ✅ Ledger audit trails (pkg/ledger)
-✅ AAP-001 compliance (pkg/rfc0111 - 66.3%, core paths 100%)
+✅ AAP-001 compliance (pkg/aap001 - 66.3%, core paths 100%)
 ```
 
 ---
@@ -225,11 +225,11 @@ Pre-Production Day 3: 39.2%
 |-------------|--------|----------|
 | Core authorization paths tested | ✅ PASS | pkg/authz: 84.3% |
 | Cryptographic operations verified | ✅ PASS | pkg/crypto: 75.5% |
-| Token lifecycle covered | ✅ PASS | pkg/gauth: 70.0% |
+| Token lifecycle covered | ✅ PASS | pkg/agentauth: 70.0% |
 | POA validation tested | ✅ PASS | pkg/poa: 49.1% (core: 100%) |
 | Delegation chains verified | ✅ PASS | pkg/delegation: 73.3% |
 | Audit trails tested | ✅ PASS | pkg/ledger: 76.0% |
-| RFC compliance validated | ✅ PASS | pkg/rfc0111: 66.3% |
+| RFC compliance validated | ✅ PASS | pkg/aap001: 66.3% |
 | Edge cases covered | ⚠️ PARTIAL | 3 minimal POA functions uncovered |
 | Advanced features tested | ⚠️ PARTIAL | Distributed PDP deferred |
 | Error paths exercised | ✅ PASS | All error returns tested |

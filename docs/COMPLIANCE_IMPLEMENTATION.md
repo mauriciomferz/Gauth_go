@@ -397,9 +397,9 @@ Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
 ### Canonical Delegation Digest
 Deterministic JSON (stable key ordering, sorted scope & restriction keys, RFC3339 UTC timestamps) hashed with domain prefix:
 
-* `GAUTH_AAP-001_POA_V1` – Legacy single-signer (Version <3, Threshold=1)
-* `GAUTH_AAP-001_POA_V2|thr=<T>|w=<sorted-weight-map>` – Multi-signature / threshold mode (any Version) includes threshold + weights in prefix for domain separation
-* `GAUTH_AAP-001_POA_V3|tax=1` – Taxonomy expansion (Version >=3, non multi-sig) signals inclusion eligibility of optional taxonomy object without colliding with prior digests
+* `AGENTAUTH_AAP-001_POA_V1` – Legacy single-signer (Version <3, Threshold=1)
+* `AGENTAUTH_AAP-001_POA_V2|thr=<T>|w=<sorted-weight-map>` – Multi-signature / threshold mode (any Version) includes threshold + weights in prefix for domain separation
+* `AGENTAUTH_AAP-001_POA_V3|tax=1` – Taxonomy expansion (Version >=3, non multi-sig) signals inclusion eligibility of optional taxonomy object without colliding with prior digests
 
 SHA-256(domain || canonicalJSON) in lowercase hex. Mutable operational fields are excluded. Taxonomy object serialized only when non-empty values present (agent_type, sector, action_class) to preserve minimal legacy size.
 
@@ -413,24 +413,24 @@ Key ring retains prior keys. If signature KeyID not found, validation logs a sof
 Hash-linked issuance and revocation chains plus aggregate revocation hash (sequence + set) for compact tamper evidence; future external anchoring planned.
 
 ### Metrics Export (Prometheus)
-Enabled via `GAUTH_METRICS=prometheus` (endpoint `/metrics`).
+Enabled via `AGENTAUTH_METRICS=prometheus` (endpoint `/metrics`).
 
 | Metric | Purpose |
 |--------|---------|
-| gauth_rfc0111_delegations_created_total | Successful delegations issued |
-| gauth_rfc0111_signatures_issued_total | Delegations signed |
-| gauth_rfc0111_signature_issue_failures_total | Signing failures |
-| gauth_rfc0111_signature_verifications_total | Successful verifications |
-| gauth_rfc0111_signature_verification_failures_total | Failed verifications |
-| gauth_rfc0111_signature_public_key_missing_total | Signature present but key not found |
-| gauth_rfc0111_revocation_integrity_failures_total | Revocation chain integrity failures |
-| gauth_rfc0111_validation_latency_seconds | Validation latency histogram |
+| agentauth_aap001_delegations_created_total | Successful delegations issued |
+| agentauth_aap001_signatures_issued_total | Delegations signed |
+| agentauth_aap001_signature_issue_failures_total | Signing failures |
+| agentauth_aap001_signature_verifications_total | Successful verifications |
+| agentauth_aap001_signature_verification_failures_total | Failed verifications |
+| agentauth_aap001_signature_public_key_missing_total | Signature present but key not found |
+| agentauth_aap001_revocation_integrity_failures_total | Revocation chain integrity failures |
+| agentauth_aap001_validation_latency_seconds | Validation latency histogram |
 
 Example PromQL:
 ```
-histogram_quantile(0.95, sum(rate(gauth_rfc0111_validation_latency_seconds_bucket[5m])) by (le))
-rate(gauth_rfc0111_signature_verification_failures_total[5m])
-increase(gauth_rfc0111_signature_public_key_missing_total[1h]) > 0
+histogram_quantile(0.95, sum(rate(agentauth_aap001_validation_latency_seconds_bucket[5m]) by (le))
+rate(agentauth_aap001_signature_verification_failures_total[5m])
+increase(agentauth_aap001_signature_public_key_missing_total[1h]) > 0
 ```
 
 ### Error Codes

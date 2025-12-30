@@ -26,20 +26,20 @@ PoAValidator (interface)
 
 ### Selection Mechanism
 
-Validators are selected via `GAUTH_POA_VALIDATOR` environment variable:
+Validators are selected via `AGENTAUTH_POA_VALIDATOR` environment variable:
 
 ```bash
 # Semantic validator (recommended for production)
-export GAUTH_POA_VALIDATOR=semantic
+export AGENTAUTH_POA_VALIDATOR=semantic
 
 # Advanced governance rules
-export GAUTH_POA_VALIDATOR=advanced
+export AGENTAUTH_POA_VALIDATOR=advanced
 
 # Basic validation only (default)
-export GAUTH_POA_VALIDATOR=basic
+export AGENTAUTH_POA_VALIDATOR=basic
 
 # Disable validation (not recommended)
-export GAUTH_POA_VALIDATOR=none
+export AGENTAUTH_POA_VALIDATOR=none
 ```
 
 ## AAP-002 Semantic Validation Rules
@@ -211,13 +211,13 @@ poa := &PowerOfAttorney{
 
 **Rules**:
 - Detect presence of parent delegation (`ParentPOAID`)
-- Warn about chain depth if `GAUTH_MAX_DELEGATION_DEPTH` set
+- Warn about chain depth if `AGENTAUTH_MAX_DELEGATION_DEPTH` set
 - Actual depth enforcement done by Service layer
 
 **Examples**:
 
 ```bash
-export GAUTH_MAX_DELEGATION_DEPTH=3
+export AGENTAUTH_MAX_DELEGATION_DEPTH=3
 ```
 
 ```go
@@ -329,15 +329,15 @@ import (
     "os"
     "time"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
 )
 
 func main() {
     // Enable semantic validator
-    os.Setenv("GAUTH_POA_VALIDATOR", "semantic")
+    os.Setenv("AGENTAUTH_POA_VALIDATOR", "semantic")
     
     // Create PoA
-    poa := &rfc0111.PowerOfAttorney{
+    poa := &aap001.PowerOfAttorney{
         ID:           "poa-123",
         Grantor:      "alice",
         Grantee:      "bob",
@@ -351,7 +351,7 @@ func main() {
     }
     
     // Validate
-    validator := rfc0111.NewEnhancedPoAValidator()
+    validator := aap001.NewEnhancedPoAValidator()
     result := validator.ValidateWithResult(context.Background(), poa)
     
     if !result.Valid {
@@ -370,7 +370,7 @@ func main() {
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
 )
 
 // Implement DailyLimitStore
@@ -394,13 +394,13 @@ func (s *InMemoryLimitStore) IncrementDailyUsage(delegationID, date string, amou
 }
 
 // Create validator with daily limits
-func CreateValidatorWithLimits() *rfc0111.EnhancedPoAValidator {
+func CreateValidatorWithLimits() *aap001.EnhancedPoAValidator {
     store := &InMemoryLimitStore{
         usage: make(map[string]map[string]float64),
     }
     
-    return rfc0111.NewEnhancedPoAValidator(
-        rfc0111.WithDailyLimitStore(store),
+    return aap001.NewEnhancedPoAValidator(
+        aap001.WithDailyLimitStore(store),
     )
 }
 ```
@@ -412,7 +412,7 @@ import (
     "fmt"
     "strings"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
 )
 
 // Simple conditional engine
@@ -432,11 +432,11 @@ func (e *SimpleEngine) EvaluateCondition(condition string, ctx map[string]interf
 }
 
 // Create validator with conditional engine
-func CreateValidatorWithConditions() *rfc0111.EnhancedPoAValidator {
+func CreateValidatorWithConditions() *aap001.EnhancedPoAValidator {
     engine := &SimpleEngine{}
     
-    return rfc0111.NewEnhancedPoAValidator(
-        rfc0111.WithConditionalEngine(engine),
+    return aap001.NewEnhancedPoAValidator(
+        aap001.WithConditionalEngine(engine),
     )
 }
 ```
@@ -445,7 +445,7 @@ func CreateValidatorWithConditions() *rfc0111.EnhancedPoAValidator {
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
 )
 
 // Simple metrics recorder
@@ -476,11 +476,11 @@ func (m *SimpleMetricsRecorder) RecordDailyLimitCheck(delegationID string, used,
 }
 
 // Create validator with metrics
-func CreateValidatorWithMetrics() *rfc0111.EnhancedPoAValidator {
+func CreateValidatorWithMetrics() *aap001.EnhancedPoAValidator {
     recorder := &SimpleMetricsRecorder{}
     
-    return rfc0111.NewEnhancedPoAValidator(
-        rfc0111.WithMetricsRecorder(recorder),
+    return aap001.NewEnhancedPoAValidator(
+        aap001.WithMetricsRecorder(recorder),
     )
 }
 ```
@@ -489,13 +489,13 @@ func CreateValidatorWithMetrics() *rfc0111.EnhancedPoAValidator {
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
 )
 
 // Custom business rule validator
 type BusinessRuleValidator struct{}
 
-func (v *BusinessRuleValidator) Validate(p *rfc0111.PowerOfAttorney) error {
+func (v *BusinessRuleValidator) Validate(p *aap001.PowerOfAttorney) error {
     // Custom business logic
     if p.Grantor == "alice" && len(p.Scope) > 5 {
         return fmt.Errorf("alice cannot delegate > 5 scopes")
@@ -504,11 +504,11 @@ func (v *BusinessRuleValidator) Validate(p *rfc0111.PowerOfAttorney) error {
 }
 
 // Create validator with custom chain
-func CreateValidatorWithChain() *rfc0111.EnhancedPoAValidator {
+func CreateValidatorWithChain() *aap001.EnhancedPoAValidator {
     businessValidator := &BusinessRuleValidator{}
     
-    return rfc0111.NewEnhancedPoAValidator(
-        rfc0111.WithValidatorChain(businessValidator),
+    return aap001.NewEnhancedPoAValidator(
+        aap001.WithValidatorChain(businessValidator),
     )
 }
 ```
@@ -521,14 +521,14 @@ func CreateValidatorWithChain() *rfc0111.EnhancedPoAValidator {
 
 ```bash
 # In your deployment configuration
-export GAUTH_POA_VALIDATOR=semantic
+export AGENTAUTH_POA_VALIDATOR=semantic
 ```
 
 **Step 2**: Monitor warnings
 
 ```go
-validator := rfc0111.NewEnhancedPoAValidator(
-    rfc0111.WithWarningCollector(rfc0111.NewWarningCollector()),
+validator := aap001.NewEnhancedPoAValidator(
+    aap001.WithWarningCollector(aap001.NewWarningCollector()),
 )
 
 result := validator.ValidateWithResult(ctx, poa)
@@ -555,8 +555,8 @@ type RedisDailyLimitStore struct {
 }
 
 // Register with validator
-validator := rfc0111.NewEnhancedPoAValidator(
-    rfc0111.WithDailyLimitStore(redisStore),
+validator := aap001.NewEnhancedPoAValidator(
+    aap001.WithDailyLimitStore(redisStore),
 )
 ```
 
@@ -568,8 +568,8 @@ type AdvancedConditionalEngine struct {
     parser *DSLParser
 }
 
-validator := rfc0111.NewEnhancedPoAValidator(
-    rfc0111.WithConditionalEngine(advancedEngine),
+validator := aap001.NewEnhancedPoAValidator(
+    aap001.WithConditionalEngine(advancedEngine),
 )
 ```
 
@@ -578,8 +578,8 @@ validator := rfc0111.NewEnhancedPoAValidator(
 **Step 1**: Enable in production
 
 ```bash
-export GAUTH_POA_VALIDATOR=semantic
-export GAUTH_MAX_DELEGATION_DEPTH=5
+export AGENTAUTH_POA_VALIDATOR=semantic
+export AGENTAUTH_MAX_DELEGATION_DEPTH=5
 ```
 
 **Step 2**: Monitor metrics
@@ -591,8 +591,8 @@ type PrometheusMetricsRecorder struct {
     warningCounter    *prometheus.CounterVec
 }
 
-validator := rfc0111.NewEnhancedPoAValidator(
-    rfc0111.WithMetricsRecorder(prometheusRecorder),
+validator := aap001.NewEnhancedPoAValidator(
+    aap001.WithMetricsRecorder(prometheusRecorder),
 )
 ```
 
@@ -608,28 +608,28 @@ validator := rfc0111.NewEnhancedPoAValidator(
 
 ```bash
 # All enhanced validator tests
-go test ./pkg/rfc0111 -run TestEnhanced -v
+go test ./pkg/aap001 -run TestEnhanced -v
 
 # Specific semantic tests
-go test ./pkg/rfc0111 -run TestEnhancedPoAValidator_BasicValidation -v
-go test ./pkg/rfc0111 -run TestEnhancedPoAValidator_FinancialScopes -v
+go test ./pkg/aap001 -run TestEnhancedPoAValidator_BasicValidation -v
+go test ./pkg/aap001 -run TestEnhancedPoAValidator_FinancialScopes -v
 
 # Integration tests
-go test ./pkg/rfc0111 -run TestEnhancedPoAValidator_Integration -v
+go test ./pkg/aap001 -run TestEnhancedPoAValidator_Integration -v
 
 # Stress test (100 PoAs)
-go test ./pkg/rfc0111 -run TestEnhancedPoAValidator_StressTest -v
+go test ./pkg/aap001 -run TestEnhancedPoAValidator_StressTest -v
 
 # Concurrent access test
-go test ./pkg/rfc0111 -run TestEnhancedPoAValidator_ConcurrentAccess -v
+go test ./pkg/aap001 -run TestEnhancedPoAValidator_ConcurrentAccess -v
 ```
 
 ### Test Coverage
 
 ```
-pkg/rfc0111/validator_enhanced.go               100%
-pkg/rfc0111/validator_enhanced_test.go          100%
-pkg/rfc0111/validator_enhanced_integration_*.go 100%
+pkg/aap001/validator_enhanced.go               100%
+pkg/aap001/validator_enhanced_test.go          100%
+pkg/aap001/validator_enhanced_integration_*.go 100%
 
 Total: 14+ test scenarios, 100% pass rate
 ```
@@ -656,11 +656,11 @@ BenchmarkEnhancedValidator_FullChain-8      30000    35000 ns/op    3072 B/op   
 
 | Variable | Values | Default | Description |
 |----------|--------|---------|-------------|
-| `GAUTH_POA_VALIDATOR` | semantic\|advanced\|basic\|none | basic | Validator selection |
-| `GAUTH_MAX_DELEGATION_DEPTH` | integer | unset | Maximum delegation chain depth |
-| `GAUTH_ALLOW_WILDCARD` | 1\|0 | 0 | Allow wildcard scope (advanced only) |
-| `GAUTH_ALLOW_INLINE_MULTISIG` | 1\|0 | 0 | Allow inline multi-signatures (advanced only) |
-| `GAUTH_MAX_SCOPE_AGG_LEN` | integer | unset | Max aggregate scope length (advanced only) |
+| `AGENTAUTH_POA_VALIDATOR` | semantic\|advanced\|basic\|none | basic | Validator selection |
+| `AGENTAUTH_MAX_DELEGATION_DEPTH` | integer | unset | Maximum delegation chain depth |
+| `AGENTAUTH_ALLOW_WILDCARD` | 1\|0 | 0 | Allow wildcard scope (advanced only) |
+| `AGENTAUTH_ALLOW_INLINE_MULTISIG` | 1\|0 | 0 | Allow inline multi-signatures (advanced only) |
+| `AGENTAUTH_MAX_SCOPE_AGG_LEN` | integer | unset | Max aggregate scope length (advanced only) |
 
 ## Comparison Matrix
 
@@ -743,11 +743,11 @@ type ValidationWarning struct {
 
 ## References
 
-- RFC-0115: Power of Attorney Delegation Semantics
-- RFC-0111 § 3.7: PoA Validation Requirements
-- `pkg/rfc0111/validator.go`: Basic/Advanced validators
-- `pkg/rfc0111/validator_enhanced.go`: Semantic validator implementation
-- `pkg/rfc0111/validator_enhanced_test.go`: Test suite
+- AAP-002: Power of Attorney Delegation Semantics
+- AAP-001 § 3.7: PoA Validation Requirements
+- `pkg/aap001/validator.go`: Basic/Advanced validators
+- `pkg/aap001/validator_enhanced.go`: Semantic validator implementation
+- `pkg/aap001/validator_enhanced_test.go`: Test suite
 - `docs/P0_IMPLEMENTATION_PLAN.md`: P0.4 implementation plan
 - `docs/GAP_MATRIX.auto.md`: Gap analysis
 

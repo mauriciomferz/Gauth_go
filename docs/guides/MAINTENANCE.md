@@ -7,7 +7,7 @@ owners: maintainers
 ---
 # AgentAuth Project Maintenance Guide
 
-This guide documents the lightweight hygiene workflow to keep the codebase healthy, reproducible, and compliant with RFC-0111 implementation quality standards.
+This guide documents the lightweight hygiene workflow to keep the codebase healthy, reproducible, and compliant with AAP-001 implementation quality standards.
 
 ## Core Hygiene Loop
 
@@ -92,12 +92,12 @@ make test-race
 make fuzz-cbor   # For serialization stability
 ```
 
-## Extended Token & RFC-0111 Integrity
+## Extended Token & AAP-001 Integrity
 
 Before merging changes that touch authorization chain, PoA, or token serialization:
 ```bash
-go test ./pkg/gauth -run TestE2E_JWTSerializationRoundTrip -count=1
-go test ./pkg/gauth -run TestE2E_ExtendedTokenService_Integration -count=1
+go test ./pkg/agentauth -run TestE2E_JWTSerializationRoundTrip -count=1
+go test ./pkg/agentauth -run TestE2E_ExtendedTokenService_Integration -count=1
 ```
 Both suites must pass to preserve end-to-end token semantics.
 
@@ -132,7 +132,7 @@ The GNAP implementation includes automatic cleanup for in-memory grant and token
 ### Quick Start
 
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/gnap"
+import "github.com/mauriciomferz/AgentAuth/pkg/gnap"
 
 // Initialize stores
 grantStore := gnap.NewMemoryGrantStore()
@@ -187,7 +187,7 @@ The `CleanupManager` tracks:
 
 ## Policy
 
-- No commit should remove required RFC-0111 fields from token flows.
+- No commit should remove required AAP-001 fields from token flows.
 - Always provide PoA + AuthorizationChain + OwnersAuthorizerInfo + LegalFramework in test fixtures invoking `CreateExtendedToken`.
 - New packages must include at least one unit test and be covered by `make test`.
 

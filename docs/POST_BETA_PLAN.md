@@ -20,7 +20,7 @@ Scope: Transition tasks after Beta P0/P1 completion. Focus on strengthening boun
 
 ## RB12: Delegation Depth Limit
 ### Acceptance Criteria
-- Env var `GAUTH_MAX_DELEGATION_DEPTH` honored at validation time.
+- Env var `AGENTAUTH_MAX_DELEGATION_DEPTH` honored at validation time.
 - Error taxonomy code: `delegation_depth_exceeded` with HTTP 400 or 422 (consistent with existing validation errors).
 - Negative tests: depth=limit, depth=limit+1, empty chain, single delegation.
 - Instrumentation: Counter `delegation_depth_exceeded_total` (add if not present) + optional gauge for current max observed depth.
@@ -29,7 +29,7 @@ Scope: Transition tasks after Beta P0/P1 completion. Focus on strengthening boun
 ### Implementation Notes
 - Compute depth via parent traversal; cache depth in delegation struct after first validation to avoid repeated traversal.
 - Guard recursion; prefer iterative loop to avoid stack growth.
-- Future: Soft warning mode (log + metric) before hard enforcement (migration flag `GAUTH_DELEGATION_DEPTH_ENFORCE_STRICT`).
+- Future: Soft warning mode (log + metric) before hard enforcement (migration flag `AGENTAUTH_DELEGATION_DEPTH_ENFORCE_STRICT`).
 
 ### Risks & Mitigations
 - Off-by-one interpretation (root depth = 0 or 1). Mitigation: define depth contract explicitly in code comment & tests.
@@ -69,7 +69,7 @@ Scope: Transition tasks after Beta P0/P1 completion. Focus on strengthening boun
 
 ## RB14: BLS Multi-Sig Bench Harness
 ### Acceptance Criteria
-- Harness executable `build/bin/gauth-multisig-bench` or Go benchmark under `test/` producing JSON summary `build/badges/multisig_latency.json`.
+- Harness executable `build/bin/agentauth-multisig-bench` or Go benchmark under `test/` producing JSON summary `build/badges/multisig_latency.json`.
 - Measures aggregate signature creation & verification across signer counts (e.g., 4,8,16,32).  
 - Outputs p50/p95/p99 & max, plus error rate (should be 0 in controlled run).
 - CI badge generation: convert summary into small table for README.

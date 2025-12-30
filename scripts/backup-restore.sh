@@ -6,8 +6,8 @@
 set -euo pipefail
 
 # Configuration
-NAMESPACE="${NAMESPACE:-gauth-production}"
-BACKUP_BUCKET="${BACKUP_BUCKET:-gauth-backups}"
+NAMESPACE="${NAMESPACE:-agentauth-production}"
+BACKUP_BUCKET="${BACKUP_BUCKET:-agentauth-backups}"
 BACKUP_RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-30}"
 POSTGRES_SERVICE="${POSTGRES_SERVICE:-postgres-service}"
 REDIS_SERVICE="${REDIS_SERVICE:-redis-service}"
@@ -75,7 +75,7 @@ backup_postgres() {
     mkdir -p backups/postgres
     
     # Perform database backup
-    kubectl exec -n "$NAMESPACE" "$pod_name" -- pg_dump -U postgres -d gauth --clean --if-exists > "backups/postgres/$backup_file"
+    kubectl exec -n "$NAMESPACE" "$pod_name" -- pg_dump -U postgres -d agentauth --clean --if-exists > "backups/postgres/$backup_file"
     
     # Compress backup
     gzip "backups/postgres/$backup_file"
@@ -225,7 +225,7 @@ restore_postgres() {
     
     # Copy backup file to pod and restore
     kubectl cp "$backup_file" "$NAMESPACE/$pod_name:/tmp/restore.sql"
-    kubectl exec -n "$NAMESPACE" "$pod_name" -- psql -U postgres -d gauth -f /tmp/restore.sql
+    kubectl exec -n "$NAMESPACE" "$pod_name" -- psql -U postgres -d agentauth -f /tmp/restore.sql
     kubectl exec -n "$NAMESPACE" "$pod_name" -- rm /tmp/restore.sql
     
     log "PostgreSQL restore completed"
@@ -236,7 +236,7 @@ test_disaster_recovery() {
     log "Starting disaster recovery test..."
     
     # Check if all critical services are running
-    local services=("postgres" "redis" "gauth")
+    local services=("postgres" "redis" "agentauth")
     for service in "${services[@]}"; do
         local pod_count=$(kubectl get pods -n "$NAMESPACE" -l app="$service" --field-selector=status.phase=Running -o name | wc -l)
         if [[ $pod_count -eq 0 ]]; then
@@ -295,7 +295,7 @@ main() {
             echo "  cleanup              - Clean up old backup files"
             echo ""
             echo "Environment Variables:"
-            echo "  NAMESPACE            - Kubernetes namespace (default: gauth-production)"
+            echo "  NAMESPACE            - Kubernetes namespace (default: agentauth-production)"
             echo "  BACKUP_BUCKET        - S3 bucket for backups"
             echo "  BACKUP_RETENTION_DAYS - Days to retain backups (default: 30)"
             echo "  POSTGRES_SERVICE     - PostgreSQL service name"

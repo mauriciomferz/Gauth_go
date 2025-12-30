@@ -15,7 +15,7 @@ The model limits subsystem provides runtime safety and governance by enforcing c
 - Output token limit (`max_output_tokens`)
 - Request rate per model (`max_requests_per_minute`)
 
-Limits are loaded from a JSON file referenced by `GAUTH_MODEL_LIMITS_PATH` at server startup:
+Limits are loaded from a JSON file referenced by `AGENTAUTH_MODEL_LIMITS_PATH` at server startup:
 
 ```json
 {
@@ -93,11 +93,11 @@ Concurrency protected by fine-grained mutexes (`modelOutputLimitsMu`, `modelRate
 Implemented:
 - Multi-dimension model limits (input/output/rate)
 - Per-user scoped quotas (input/output/rate overrides) with new metrics counters
-- Audit chain (GAUTH_MODEL_LIMIT_AUDIT_PATH) + verification endpoint `/api/v1/model/limits/audit/verify`
-- Periodic anchor chain (GAUTH_MODEL_LIMIT_ANCHOR_PATH + GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL) + verification endpoint `/api/v1/model/limits/audit/anchor/verify`
-- Dynamic reload (GAUTH_MODEL_LIMITS_RELOAD_INTERVAL seconds polling) for live config adjustments
+- Audit chain (AGENTAUTH_MODEL_LIMIT_AUDIT_PATH) + verification endpoint `/api/v1/model/limits/audit/verify`
+- Periodic anchor chain (AGENTAUTH_MODEL_LIMIT_ANCHOR_PATH + AGENTAUTH_MODEL_LIMIT_ANCHOR_INTERVAL) + verification endpoint `/api/v1/model/limits/audit/anchor/verify`
+- Dynamic reload (AGENTAUTH_MODEL_LIMITS_RELOAD_INTERVAL seconds polling) for live config adjustments
  - Snapshot endpoint `/api/v1/model/limits/snapshot` exposing ordered limits + canonical hash for drift detection
- - Strict unknown-model rejection mode (GAUTH_MODEL_LIMITS_STRICT_UNKNOWN=1)
+ - Strict unknown-model rejection mode (AGENTAUTH_MODEL_LIMITS_STRICT_UNKNOWN=1)
 
 Still pending:
 - External notarization / transparency publication of anchor records
@@ -139,11 +139,11 @@ Future dimensions may include:
 ## Environment Variables Summary
 | Variable | Purpose |
 |----------|---------|
-| `GAUTH_MODEL_LIMITS_PATH` | Path to limits JSON file loaded at startup (and reloaded if interval set). |
-| `GAUTH_MODEL_LIMITS_RELOAD_INTERVAL` | Seconds between polling for modified limits file (mtime change triggers atomic swap). Omit or 0 to disable. |
-| `GAUTH_MODEL_LIMIT_AUDIT_PATH` | Path to audit chain JSONL for exceed events. |
-| `GAUTH_MODEL_LIMIT_ANCHOR_PATH` | Path to periodic anchor chain JSONL. |
-| `GAUTH_MODEL_LIMIT_ANCHOR_INTERVAL` | Emit anchor every N audit entries (default 100). |
+| `AGENTAUTH_MODEL_LIMITS_PATH` | Path to limits JSON file loaded at startup (and reloaded if interval set). |
+| `AGENTAUTH_MODEL_LIMITS_RELOAD_INTERVAL` | Seconds between polling for modified limits file (mtime change triggers atomic swap). Omit or 0 to disable. |
+| `AGENTAUTH_MODEL_LIMIT_AUDIT_PATH` | Path to audit chain JSONL for exceed events. |
+| `AGENTAUTH_MODEL_LIMIT_ANCHOR_PATH` | Path to periodic anchor chain JSONL. |
+| `AGENTAUTH_MODEL_LIMIT_ANCHOR_INTERVAL` | Emit anchor every N audit entries (default 100). |
 
 ## Snapshot Endpoint
 `GET /api/v1/model/limits/snapshot`
@@ -164,12 +164,12 @@ Response:
 Canonical hash is computed over a deterministic JSON (sorted model IDs then user IDs) enabling drift detection and external attestation alignment with anchor chain.
 
 ## Strict Unknown-Model Mode
-Set `GAUTH_MODEL_LIMITS_STRICT_UNKNOWN=1` to reject any validation request referencing a model ID not present (or with non-positive limits) in the current configuration. Response:
+Set `AGENTAUTH_MODEL_LIMITS_STRICT_UNKNOWN=1` to reject any validation request referencing a model ID not present (or with non-positive limits) in the current configuration. Response:
 
 `400 {"success":false,"error":"model_unknown","model_id":"<id>"}`
 
 Metrics: the request is recorded as a `decision_total{action="model_validate",resource="<id>",outcome="deny"}`. No dedicated counter yet (future enhancement if observability gap identified).
-As of current build, a dedicated Prometheus counter `gauth_rfc0111_model_unknown_total` is emitted (incremented per denied request) enabling direct alerting on unexpected model traffic.
+As of current build, a dedicated Prometheus counter `agentauth_aap001_model_unknown_total` is emitted (incremented per denied request) enabling direct alerting on unexpected model traffic.
 
 ## Attestation Endpoint
 Endpoint: `GET /api/v1/model/limits/attestation`
@@ -202,8 +202,8 @@ Integrity model: Attestors record `(snapshot.hash, audit.head_hash, anchor.lates
 Enable attestation signing by setting:
 
 ```
-GAUTH_TOKEN_SIG_MODE=eddsa
-GAUTH_MODEL_LIMIT_ATTEST_SIGN=1
+AGENTAUTH_TOKEN_SIG_MODE=eddsa
+AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN=1
 ```
 
 When active, three additional root fields are emitted:
@@ -246,7 +246,7 @@ Future enhancements:
  - Public publication pipeline for attestation history (append-only receipt log exposed).
 
 ### Surge & Notarization Fields
-When enabled with `GAUTH_MODEL_LIMIT_SURGE_FACTOR` / `GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS`, the attestation may include a `surge` object if a surge was detected in the last few seconds:
+When enabled with `AGENTAUTH_MODEL_LIMIT_SURGE_FACTOR` / `AGENTAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS`, the attestation may include a `surge` object if a surge was detected in the last few seconds:
 
 ```
 "surge": {
@@ -263,8 +263,8 @@ When enabled with `GAUTH_MODEL_LIMIT_SURGE_FACTOR` / `GAUTH_MODEL_LIMIT_SURGE_MI
 Notarization of the attestation triple (snapshot hash, audit head, anchor head) is enabled with:
 
 ```
-GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1
-GAUTH_CAP_ANCHOR_NOTARIZE=1   # ensures prototype notarizer initialization
+AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1
+AGENTAUTH_CAP_ANCHOR_NOTARIZE=1   # ensures prototype notarizer initialization
 ```
 
 Produces a `notarization` object:
@@ -303,7 +303,7 @@ Security considerations:
 
 ### Attestation Streaming (SSE)
 
-Endpoint: `GET /api/v1/model/limits/attestation/stream` (gated by `GAUTH_ATTEST_STREAM_ENABLE=1`).
+Endpoint: `GET /api/v1/model/limits/attestation/stream` (gated by `AGENTAUTH_ATTEST_STREAM_ENABLE=1`).
 
 Behavior:
 - Connection establishes a Server-Sent Events channel (`Content-Type: text/event-stream`).
@@ -319,7 +319,7 @@ data: {"success":true,"configured":true,"snapshot":{...},"audit":{...},"anchor":
 
 Fields match the REST attestation endpoint. A transient `reason` field may be added in future (e.g., `open`, `heartbeat`, `surge_trigger`, `audit_append`) to annotate emission causality.
 
-Current trigger reasons (when `GAUTH_ATTEST_STREAM_ENABLE=1`):
+Current trigger reasons (when `AGENTAUTH_ATTEST_STREAM_ENABLE=1`):
 - `open` – initial connection emission
 - `heartbeat` – periodic refresh (every ~15s)
 - `audit_append` – a new exceed audit chain entry appended (updates audit head)
@@ -331,9 +331,9 @@ Metric:
 
 Enabling:
 ```
-GAUTH_ATTEST_STREAM_ENABLE=1
-GAUTH_MODEL_LIMIT_ATTEST_SIGN=1            # optional signing
-GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1        # optional notarization (requires prototype notarizer)
+AGENTAUTH_ATTEST_STREAM_ENABLE=1
+AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN=1            # optional signing
+AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1        # optional notarization (requires prototype notarizer)
 ```
 
 Planned trigger expansion (future):
@@ -358,8 +358,8 @@ Monitoring:
 
 ## Surge Detection (Experimental)
 Environment variables:
-- `GAUTH_MODEL_LIMIT_SURGE_FACTOR` (default 3.0): multiplier threshold. A surge triggers when last10s exceeds (average_nonzero * factor) and minimum events met.
-- `GAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS` (default 5): minimum exceed events in the last 10s window to evaluate surge condition.
+- `AGENTAUTH_MODEL_LIMIT_SURGE_FACTOR` (default 3.0): multiplier threshold. A surge triggers when last10s exceeds (average_nonzero * factor) and minimum events met.
+- `AGENTAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS` (default 5): minimum exceed events in the last 10s window to evaluate surge condition.
 
 Metric:
 - `model_limit_exceed_surge_total` (Prometheus) increments when a surge condition triggers (cool-down 15s between triggers).
@@ -369,7 +369,7 @@ Windowing: maintains per-model per-second counts over a 60s rolling window. Last
 Limitations / Future:
 - Single global cool-down; per-model cool-down and severity levels (moderate/critical) pending.
 - No external alert hook yet; integrate with anomaly subsystem / SSE stream next.
-\n+As of current build, a dedicated Prometheus counter `gauth_rfc0111_model_unknown_total` is emitted (incremented per denied request) enabling direct alerting on unexpected model traffic.
+\n+As of current build, a dedicated Prometheus counter `agentauth_aap001_model_unknown_total` is emitted (incremented per denied request) enabling direct alerting on unexpected model traffic.
 
 ---
 Status: Partial (multi-dimension enforcement active, persistence & advanced governance pending)

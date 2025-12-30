@@ -219,7 +219,7 @@ Timestamp                  | Coverage | Missing Symbols
 ## Implementation Details
 
 ### File Modified
-- `pkg/rfc0111/rfc0111.go`: Added 15 new type definitions (169 lines)
+- `pkg/aap001/aap001.go`: Added 15 new type definitions (169 lines)
 
 ### Location in Code
 - Lines 169-337: RFC conformance types section
@@ -242,8 +242,8 @@ All 48 required RFC symbols now present and discoverable via AST analysis.
 ### Test Coverage: 81.25%
 - Present: 13/16 test globs
 - Missing: 3 test files (low priority)
-  - `pkg/rfc0111/rfc0111_test.go` (introduction tests)
-  - `pkg/rfc0111/rfc0111_scope_test.go` (scope validation tests)
+  - `pkg/aap001/aap001_test.go` (introduction tests)
+  - `pkg/aap001/aap001_scope_test.go` (scope validation tests)
   - `pkg/authz/authz_test.go` (special conditions tests)
 
 ### Gap Matrix: 67.4% Addressed
@@ -319,7 +319,7 @@ $ go run ./cmd/conformance
 
 ### Build Verification
 ```bash
-$ go build ./pkg/rfc0111
+$ go build ./pkg/aap001
 # Success - no errors
 ```
 

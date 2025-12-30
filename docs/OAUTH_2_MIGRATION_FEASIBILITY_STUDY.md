@@ -21,7 +21,7 @@ owners: [system]
 
 ## Executive Summary
 
-**Question**: Should AgentAuth migrate from AAP-RFC-0111/0115 to standard OAuth 2.0 + RFC 8693 (Token Exchange)?
+**Question**: Should AgentAuth migrate from AAP-001/0115 to standard OAuth 2.0 + RFC 8693 (Token Exchange)?
 
 **Answer**: **NO** - Migration not recommended. AAP-RFC and OAuth 2.0 + RFC 8693 serve **fundamentally different purposes** and are not interchangeable.
 
@@ -35,7 +35,7 @@ owners: [system]
 
 ### 1.1 High-Level Overview
 
-| Aspect | **AAP-RFC-0111/0115** | **OAuth 2.0 + RFC 8693** |
+| Aspect | **AAP-001/0115** | **OAuth 2.0 + RFC 8693** |
 |:-------|:-----------------------|:-------------------------|
 | **Primary Purpose** | Legal delegation chains with Power of Attorney | Token exchange for impersonation/delegation |
 | **Delegation Model** | Multi-level (3+) with legal authority | Single-level with composite tokens |
@@ -53,7 +53,7 @@ owners: [system]
 
 ## 2. Detailed Analysis
 
-### 2.1 AAP-RFC-0111/0115 Capabilities
+### 2.1 AAP-001/0115 Capabilities
 
 #### Core Features
 
@@ -80,7 +80,7 @@ Resource Server (Authorization Validated)
 **Extended Token Structure:**
 ```json
 {
-  "access_token": "gauth_at_...",
+  "access_token": "agentauth_at_...",
   "token_type": "AgentAuth-Extended",
   "power_of_attorney": {
     "poa_id": "poa_xyz789",
@@ -380,8 +380,8 @@ POST /token HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:token-exchange
-&subject_token=<gauth_extended_token>
-&subject_token_type=urn:gimel:params:gauth:token-type:extended
+&subject_token=<agentauth_extended_token>
+&subject_token_type=urn:agentauth:params:agentauth:token-type:extended
 &resource=https://backend.example.com/api
 &audience=urn:example:backend-service
 
@@ -411,7 +411,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
     {"entity": "Client Owner", "authority": "Delegated"},
     {"entity": "Client AI", "authority": "Granted"}
   ],
-  "gauth_compliance": "rfc-0111-compliant"
+  "agentauth_compliance": "rfc-0111-compliant"
 }
 ```
 
@@ -420,7 +420,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  AgentAuth Authorization Server                             │
-│  (AAP-RFC-0111/0115 + RFC 8693)                        │
+│  (AAP-001/0115 + RFC 8693)                        │
 └───────┬─────────────────────────────────┬───────────────┘
         │                                 │
         │ AgentAuth Extended Token            │ RFC 8693 Token Exchange
@@ -544,7 +544,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 **DO NOT migrate from AAP-RFC to OAuth 2.0 + RFC 8693.**
 
 **Instead, ADOPT HYBRID APPROACH:**
-1. ✅ **Retain AAP-RFC-0111/0115** as core authorization framework
+1. ✅ **Retain AAP-001/0115** as core authorization framework
 2. ✅ **Add RFC 8693 token exchange** for service-to-service patterns
 3. ✅ **Maintain backward compatibility** with existing AgentAuth clients
 4. ✅ **Document integration patterns** for OAuth 2.0 ecosystems
@@ -554,13 +554,13 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 **Phase 1: RFC 8693 Core Implementation (Week 1-2)**
 
 ```go
-// pkg/gauth_rfc_001/rfc8693.go
+// pkg/agentauth_rfc_001/rfc8693.go
 
 // TokenExchangeRequest implements RFC 8693 token exchange
 type TokenExchangeRequest struct {
     GrantType         string   `json:"grant_type"`          // urn:ietf:params:oauth:grant-type:token-exchange
     SubjectToken      string   `json:"subject_token"`       // AgentAuth extended token
-    SubjectTokenType  string   `json:"subject_token_type"`  // urn:gimel:params:gauth:token-type:extended
+    SubjectTokenType  string   `json:"subject_token_type"`  // urn:agentauth:params:agentauth:token-type:extended
     ActorToken        string   `json:"actor_token,omitempty"`
     ActorTokenType    string   `json:"actor_token_type,omitempty"`
     Resource          []string `json:"resource,omitempty"`
@@ -625,7 +625,7 @@ func (s *Service) ExchangeToken(ctx context.Context, req TokenExchangeRequest) (
 **Phase 2: JWT with act Claim Support (Week 2)**
 
 ```go
-// pkg/gauth_rfc_001/rfc8693_jwt.go
+// pkg/agentauth_rfc_001/rfc8693_jwt.go
 
 // RFC8693Claims extends standard JWT claims with RFC 8693 delegation
 type RFC8693Claims struct {
@@ -636,9 +636,9 @@ type RFC8693Claims struct {
     MayAct   *ActClaim `json:"may_act,omitempty"`  // RFC 8693 authorization
     
     // AgentAuth extensions (custom namespace)
-    PoAID               string                 `json:"gauth:poa_id,omitempty"`
-    AuthorizationChain  []ChainElement         `json:"gauth:chain,omitempty"`
-    ComplianceLevel     string                 `json:"gauth:compliance,omitempty"`
+    PoAID               string                 `json:"agentauth:poa_id,omitempty"`
+    AuthorizationChain  []ChainElement         `json:"agentauth:chain,omitempty"`
+    ComplianceLevel     string                 `json:"agentauth:compliance,omitempty"`
 }
 
 // ActClaim represents RFC 8693 actor (delegation)
@@ -675,7 +675,7 @@ func (s *Service) generateRFC8693Token(params RFC8693TokenParams) (string, error
     
     claims := RFC8693Claims{
         RegisteredClaims: jwt.RegisteredClaims{
-            Issuer:    "https://auth.gauth.example.com",
+            Issuer:    "https://auth.agentauth.example.com",
             Subject:   params.Subject,
             Audience:  jwt.ClaimStrings(params.Audience),
             ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour)),
@@ -708,7 +708,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
         return
     }
     
-    req := gauth_rfc_001.TokenExchangeRequest{
+    req := agentauth_rfc_001.TokenExchangeRequest{
         GrantType:         r.Form.Get("grant_type"),
         SubjectToken:      r.Form.Get("subject_token"),
         SubjectTokenType:  r.Form.Get("subject_token_type"),
@@ -822,7 +822,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 
 ### 8.2 Final Recommendation
 
-✅ **ADOPT HYBRID APPROACH**: Implement RFC 8693 token exchange while retaining AAP-RFC-0111/0115 core framework.
+✅ **ADOPT HYBRID APPROACH**: Implement RFC 8693 token exchange while retaining AAP-001/0115 core framework.
 
 **Implementation Timeline**: 4 weeks (fits P1 30-day window)
 
@@ -839,12 +839,12 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 - [RFC 6749 - OAuth 2.0 Authorization Framework](https://datatracker.ietf.org/doc/html/rfc6749)
 - [RFC 8693 - OAuth 2.0 Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693)
 - [RFC 9396 - Rich Authorization Requests (RAR)](https://datatracker.ietf.org/doc/html/rfc9396)
-- [AAP-RFC-0111 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
-- [AAP-RFC-0115 - Power-of-Attorney Credential Definition](RFC_ARCHITECTURE.md)
+- [AAP-001 - AgentAuth 1.0 Authorization Framework](Gifo_0111.md)
+- [AAP-002 - Power-of-Attorney Credential Definition](RFC_ARCHITECTURE.md)
 
 ### AgentAuth Documentation
 
-- [RFC 9396 vs AgentAuth Comparison](RFC9767_RAR_GAUTH_COMPARISON_Proposed_Standard.md)
+- [RFC 9396 vs AgentAuth Comparison](RFC9767_RAR_AGENTAUTH_COMPARISON_Proposed_Standard.md)
 - [P1.1 - Wildcard Scope Patterns](WILDCARD_SCOPE_PATTERNS_GUIDE.md)
 - [P1.2 - OPA Integration Guide](OPA_INTEGRATION_GUIDE.md)
 - [AgentAuth Architecture](RFC_ARCHITECTURE.md)
@@ -877,7 +877,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 **AgentAuth Extensions:**
 
 - [ ] AgentAuth extended token as subject_token
-- [ ] PoA metadata in custom claims (`gauth:poa_id`, etc.)
+- [ ] PoA metadata in custom claims (`agentauth:poa_id`, etc.)
 - [ ] Authorization chain embedding
 - [ ] Compliance level indicator
 - [ ] Backward compatibility with existing tokens
@@ -918,15 +918,15 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
    ```
    POST /token
    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
-   &subject_token=<gauth_extended_token>
+   &subject_token=<agentauth_extended_token>
    &resource=https://ehr-backend.hospital.com/api
    &scope=read
    
    → Returns RFC 8693 token with:
      - sub: patient_id
      - act: {sub: healthcare_ai_id}
-     - gauth:poa_id: poa_guardian_123
-     - gauth:chain: [Guardian, Hospital, AI]
+     - agentauth:poa_id: poa_guardian_123
+     - agentauth:chain: [Guardian, Hospital, AI]
    ```
 
 3. **Backend Access**
@@ -937,7 +937,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
    → Backend validates:
      ✓ Standard OAuth Bearer token
      ✓ act claim (delegation)
-     ✓ gauth:poa_id (legal authority)
+     ✓ agentauth:poa_id (legal authority)
    ```
 
 **Benefits**:
@@ -964,7 +964,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
    ```
    POST /token
    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
-   &subject_token=<gauth_extended_token>
+   &subject_token=<agentauth_extended_token>
    &resource=https://payment-gateway.bank.com/api
    &scope=payment:initiate
    
@@ -980,7 +980,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
    → Payment gateway validates:
      ✓ OAuth Bearer token
      ✓ Scope: payment:initiate
-     ✓ Value limit from gauth:restrictions
+     ✓ Value limit from agentauth:restrictions
      ✓ Commercial register verification
    ```
 

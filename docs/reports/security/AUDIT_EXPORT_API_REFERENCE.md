@@ -215,8 +215,8 @@ evt-124,2025-11-26T10:05:00Z,tenant-1,user-456,poa.revoke,poa-789,poa,success,ac
 
 **Structure**:
 ```
-<18>1 2025-11-26T10:00:00Z gauth-audit - - - [tenant="tenant-1" user="user-123" action="poa.create" resource="poa-456" status="success"] poa.create
-<19>1 2025-11-26T10:05:00Z gauth-audit - - - [tenant="tenant-1" user="user-456" action="poa.revoke" resource="poa-789" status="success"] poa.revoke
+<18>1 2025-11-26T10:00:00Z agentauth-audit - - - [tenant="tenant-1" user="user-123" action="poa.create" resource="poa-456" status="success"] poa.create
+<19>1 2025-11-26T10:05:00Z agentauth-audit - - - [tenant="tenant-1" user="user-456" action="poa.revoke" resource="poa-789" status="success"] poa.revoke
 ```
 
 **Content-Type**: `text/plain` (or `application/gzip` if compressed)
@@ -225,7 +225,7 @@ evt-124,2025-11-26T10:05:00Z,tenant-1,user-456,poa.revoke,poa-789,poa,success,ac
 - Priority: `<18>` (facility 2, severity based on event severity)
 - Version: `1` (RFC 5424)
 - Timestamp: ISO 8601 format
-- Hostname: `gauth-audit`
+- Hostname: `agentauth-audit`
 - Structured data: Key audit fields
 - Message: Action performed
 

@@ -22,9 +22,9 @@ monitoring/
     │   ├── datasources/
     │   │   └── prometheus.yml # Prometheus datasource config
     │   └── dashboards/
-    │       └── gauthplus.yml  # Dashboard provisioning
+    │       └── agentauthplus.yml  # Dashboard provisioning
     └── dashboards/
-        └── gauthplus-monitoring.json  # AgentAuth+ dashboard
+        └── agentauthplus-monitoring.json  # AgentAuth+ dashboard
 ```
 
 ## Quick Start
@@ -55,13 +55,13 @@ This starts:
 Check that AgentAuth+ is exposing metrics:
 
 ```bash
-curl http://localhost:8080/metrics | grep gauthplus
+curl http://localhost:8080/metrics | grep agentauthplus
 ```
 
 Check that Prometheus is scraping:
 
 ```bash
-curl http://localhost:9090/api/v1/query?query=up{job="gauth-service"}
+curl http://localhost:9090/api/v1/query?query=up{job="agentauth-service"}
 ```
 
 ## Configuration Files
@@ -71,7 +71,7 @@ curl http://localhost:9090/api/v1/query?query=up{job="gauth-service"}
 Configures Prometheus scraping and alerting:
 
 - **Scrape Interval**: 15 seconds
-- **Targets**: gauth-service, node-exporter, grafana, alertmanager
+- **Targets**: agentauth-service, node-exporter, grafana, alertmanager
 - **Alert Rules**: Loaded from `alert-rules.yml`
 - **AlertManager**: Sends alerts to alertmanager:9093
 
@@ -106,7 +106,7 @@ Auto-provisions Prometheus as Grafana datasource:
 - **Access**: Proxy (server-side)
 - **Default**: True
 
-### grafana/provisioning/dashboards/gauthplus.yml
+### grafana/provisioning/dashboards/agentauthplus.yml
 
 Auto-provisions AgentAuth+ dashboards:
 
@@ -114,7 +114,7 @@ Auto-provisions AgentAuth+ dashboards:
 - **Path**: /var/lib/grafana/dashboards
 - **Update Interval**: 10 seconds
 
-### grafana/dashboards/gauthplus-monitoring.json
+### grafana/dashboards/agentauthplus-monitoring.json
 
 Complete AgentAuth+ monitoring dashboard with 12 panels:
 
@@ -135,24 +135,24 @@ Complete AgentAuth+ monitoring dashboard with 12 panels:
 
 ### AgentAuth+ Metrics Exposed
 
-All metrics are prefixed with `gauthplus_`:
+All metrics are prefixed with `agentauthplus_`:
 
 #### Validation Metrics
-- `gauthplus_validations_total{feature, result}` - Counter
-- `gauthplus_validation_duration_seconds{feature}` - Histogram
+- `agentauthplus_validations_total{feature, result}` - Counter
+- `agentauthplus_validation_duration_seconds{feature}` - Histogram
 
 #### Cache Metrics
-- `gauthplus_cache_hits_total{cache_type}` - Counter
-- `gauthplus_cache_misses_total{cache_type}` - Counter
-- `gauthplus_cache_size{cache_type}` - Gauge
+- `agentauthplus_cache_hits_total{cache_type}` - Counter
+- `agentauthplus_cache_misses_total{cache_type}` - Counter
+- `agentauthplus_cache_size{cache_type}` - Gauge
 
 #### Policy Metrics
-- `gauthplus_policy_violations_total{policy_type, severity}` - Counter
-- `gauthplus_successor_activations_total` - Counter
-- `gauthplus_delegation_depth` - Histogram
-- `gauthplus_dual_control_approvals_total{action_type, status}` - Counter
-- `gauthplus_capability_level{agent_id}` - Gauge
-- `gauthplus_fiduciary_violations_total{duty_type, severity}` - Counter
+- `agentauthplus_policy_violations_total{policy_type, severity}` - Counter
+- `agentauthplus_successor_activations_total` - Counter
+- `agentauthplus_delegation_depth` - Histogram
+- `agentauthplus_dual_control_approvals_total{action_type, status}` - Counter
+- `agentauthplus_capability_level{agent_id}` - Gauge
+- `agentauthplus_fiduciary_violations_total{duty_type, severity}` - Counter
 
 ## Customization
 
@@ -170,8 +170,8 @@ Edit `alert-rules.yml`:
 ```yaml
 - alert: AgentAuthPlusCacheHitRateLow
   expr: |
-    (rate(gauthplus_cache_hits_total[5m]) 
-    / (rate(gauthplus_cache_hits_total[5m]) + rate(gauthplus_cache_misses_total[5m]))) < 0.8  # Changed from 0.7
+    (rate(agentauthplus_cache_hits_total[5m]) 
+    / (rate(agentauthplus_cache_hits_total[5m]) + rate(agentauthplus_cache_misses_total[5m])) < 0.8  # Changed from 0.7
   for: 10m
 ```
 
@@ -189,7 +189,7 @@ curl -X POST http://localhost:9090/-/reload
 2. Click **Add Panel**
 3. Configure PromQL query
 4. Save dashboard
-5. Export JSON to `grafana/dashboards/gauthplus-monitoring.json`
+5. Export JSON to `grafana/dashboards/agentauthplus-monitoring.json`
 
 ## Troubleshooting
 
@@ -203,10 +203,10 @@ curl http://localhost:9090/api/v1/targets
 
 Or navigate to: http://localhost:9090/targets
 
-If `gauth-service` shows as DOWN:
-- Verify AgentAuth service is running: `docker compose ps gauth`
+If `agentauth-service` shows as DOWN:
+- Verify AgentAuth service is running: `docker compose ps agentauth`
 - Check metrics endpoint: `curl http://localhost:8080/metrics`
-- Review network connectivity: `docker compose exec prometheus ping gauth`
+- Review network connectivity: `docker compose exec prometheus ping agentauth`
 
 ### Grafana Dashboard Missing
 
@@ -244,7 +244,7 @@ Or navigate to: http://localhost:9090/alerts
 
 1. Verify metric exists in Prometheus:
    ```bash
-   curl 'http://localhost:9090/api/v1/query?query=gauthplus_validations_total'
+   curl 'http://localhost:9090/api/v1/query?query=agentauthplus_validations_total'
    ```
 
 2. Check time range in Grafana (top-right corner)
@@ -315,8 +315,8 @@ Or navigate to: http://localhost:9090/alerts
      - name: recordings
        interval: 30s
        rules:
-         - record: gauthplus:validation_rate:5m
-           expr: rate(gauthplus_validations_total[5m])
+         - record: agentauthplus:validation_rate:5m
+           expr: rate(agentauthplus_validations_total[5m])
    ```
 
 ## Monitoring Metrics
@@ -365,7 +365,7 @@ docker compose restart grafana
 
 ## Additional Resources
 
-- **Full Guide**: See `GAUTHPLUS_GRAFANA_DASHBOARD_GUIDE.md`
+- **Full Guide**: See `AGENTAUTH_PLUS_GRAFANA_DASHBOARD_GUIDE.md`
 - **Prometheus Docs**: https://prometheus.io/docs/
 - **Grafana Docs**: https://grafana.com/docs/
 - **AlertManager Docs**: https://prometheus.io/docs/alerting/latest/alertmanager/

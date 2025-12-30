@@ -1,6 +1,6 @@
 # JWE Encryption - Phase 3 Completion Report
 
-**Project**: AgentAuth Authorization Framework (RFC-0111)  
+**Project**: AgentAuth Authorization Framework (AAP-001)  
 **Component**: JWE (JSON Web Encryption) - Phase 3  
 **Date**: November 12, 2025  
 **Status**: ✅ **COMPLETE**
@@ -30,7 +30,7 @@
 ### Compliance Impact
 
 - **Security Hardening**: 50% → **70%** (+20%)
-- **Overall RFC-0111 Compliance**: 79% → **81%** (+2%)
+- **Overall AAP-001 Compliance**: 79% → **81%** (+2%)
 
 ---
 
@@ -38,7 +38,7 @@
 
 ### 1.1 Environment Variable Configuration
 
-**File**: `pkg/gauth/jwe_env_config.go` (180 lines)
+**File**: `pkg/agentauth/jwe_env_config.go` (180 lines)
 
 **Features Implemented**:
 - ✅ `JWEConfigFromEnv()` - Load configuration from environment variables
@@ -48,14 +48,14 @@
 
 **Supported Environment Variables**:
 ```
-GAUTH_JWE_ENABLED           (bool, default: true)
-GAUTH_JWE_ALGORITHM         (string, default: RSA-OAEP-256)
-GAUTH_JWE_ENCRYPTION        (string, default: A256GCM)
-GAUTH_JWE_PUBLIC_KEY        (path, required for RSA)
-GAUTH_JWE_PRIVATE_KEY       (path, required for RSA)
-GAUTH_JWE_KEY_ID            (string, required)
-GAUTH_JWE_KEY_DIR           (path, optional for multi-key)
-GAUTH_JWE_ROTATION_DAYS     (int, default: 365)
+AGENTAUTH_JWE_ENABLED           (bool, default: true)
+AGENTAUTH_JWE_ALGORITHM         (string, default: RSA-OAEP-256)
+AGENTAUTH_JWE_ENCRYPTION        (string, default: A256GCM)
+AGENTAUTH_JWE_PUBLIC_KEY        (path, required for RSA)
+AGENTAUTH_JWE_PRIVATE_KEY       (path, required for RSA)
+AGENTAUTH_JWE_KEY_ID            (string, required)
+AGENTAUTH_JWE_KEY_DIR           (path, optional for multi-key)
+AGENTAUTH_JWE_ROTATION_DAYS     (int, default: 365)
 ```
 
 **Example Usage**:
@@ -76,7 +76,7 @@ if len(errors) > 0 {
 
 ### 1.2 Key Registry (Multi-Key Support)
 
-**File**: `pkg/gauth/jwe_key_registry.go` (350 lines)
+**File**: `pkg/agentauth/jwe_key_registry.go` (350 lines)
 
 **Critical Feature**: Addresses Phase 2 requirement for key rotation without service restart
 
@@ -110,18 +110,18 @@ if len(errors) > 0 {
 
 **File Naming Convention**:
 ```
-/etc/gauth/keys/
-├── gauth-prod-2025-11.pub.pem     (old key - still used for decryption)
-├── gauth-prod-2025-11.priv.pem
-├── gauth-prod-2025-12.pub.pem     (new key - used for encryption)
-└── gauth-prod-2025-12.priv.pem
+/etc/agentauth/keys/
+├── agentauth-prod-2025-11.pub.pem     (old key - still used for decryption)
+├── agentauth-prod-2025-11.priv.pem
+├── agentauth-prod-2025-12.pub.pem     (new key - used for encryption)
+└── agentauth-prod-2025-12.priv.pem
 ```
 
 **JWEServiceWithRegistry**:
 ```go
 service := NewJWEServiceWithRegistry(config, registry)
 
-// Encryption: Uses newest key (gauth-prod-2025-12)
+// Encryption: Uses newest key (agentauth-prod-2025-12)
 jwe, err := service.EncryptToken(ctx, jwtString)
 
 // Decryption: Tries all keys (supports old tokens)
@@ -144,14 +144,14 @@ jwt, err := service.DecryptToken(ctx, jweString)
 
 **Dockerfile Features**:
 - ✅ Multi-stage build (builder + production)
-- ✅ Non-root user (`gauth:1000`)
+- ✅ Non-root user (`agentauth:1000`)
 - ✅ Minimal Alpine Linux base
 - ✅ Health checks (`/health` endpoint)
-- ✅ Key directory creation (`/etc/gauth/keys`)
+- ✅ Key directory creation (`/etc/agentauth/keys`)
 - ✅ Environment variable defaults
 
 **Docker Compose Services**:
-- ✅ `gauth-server` - Authorization server with JWE
+- ✅ `agentauth-server` - Authorization server with JWE
 - ✅ `postgres` - PostgreSQL database
 - ✅ `redis` - Redis cache
 - ✅ `prometheus` - Metrics collection
@@ -161,11 +161,11 @@ jwt, err := service.DecryptToken(ctx, jweString)
 ```yaml
 volumes:
   # Option 1: Volume mount (development)
-  - ./keys:/etc/gauth/keys:ro
+  - ./keys:/etc/agentauth/keys:ro
 
 secrets:
   # Option 2: Docker secrets (production)
-  - source: gauth_private_key
+  - source: agentauth_private_key
     target: /run/secrets/private.pem
     mode: 0400
 ```
@@ -178,10 +178,10 @@ docker-compose -f docker-compose.jwe.yml up -d
 
 ### 1.4 Kubernetes Deployment
 
-**File**: `deployments/kubernetes/gauth-jwe-deployment.yaml` (250 lines)
+**File**: `deployments/kubernetes/agentauth-jwe-deployment.yaml` (250 lines)
 
 **Kubernetes Resources**:
-- ✅ `Namespace` - Isolated namespace (gauth)
+- ✅ `Namespace` - Isolated namespace (agentauth)
 - ✅ `ConfigMap` - JWE configuration (non-sensitive)
 - ✅ `Secret` - JWE keys (base64 encoded PEM)
 - ✅ `Deployment` - Application deployment (3 replicas)
@@ -217,16 +217,16 @@ resources:
 **Deployment Commands**:
 ```bash
 # Create secret
-kubectl create secret generic gauth-jwe-keys \
+kubectl create secret generic agentauth-jwe-keys \
   --from-file=public.pem=./public.pem \
   --from-file=private.pem=./private.pem \
-  --namespace=gauth
+  --namespace=agentauth
 
 # Deploy
-kubectl apply -f deployments/kubernetes/gauth-jwe-deployment.yaml
+kubectl apply -f deployments/kubernetes/agentauth-jwe-deployment.yaml
 
 # Check status
-kubectl get all -n gauth
+kubectl get all -n agentauth
 ```
 
 ### 1.5 Deployment Guide
@@ -420,10 +420,10 @@ open load-test-results/*/*.html
 
 **Environment Config Tests** (to be created):
 ```go
-// pkg/gauth/jwe_env_config_test.go
+// pkg/agentauth/jwe_env_config_test.go
 func TestJWEConfigFromEnv(t *testing.T) {
-    os.Setenv("GAUTH_JWE_ENABLED", "true")
-    os.Setenv("GAUTH_JWE_ALGORITHM", "RSA-OAEP-256")
+    os.Setenv("AGENTAUTH_JWE_ENABLED", "true")
+    os.Setenv("AGENTAUTH_JWE_ALGORITHM", "RSA-OAEP-256")
     // ...
     config, err := JWEConfigFromEnv()
     assert.NoError(t, err)
@@ -433,7 +433,7 @@ func TestJWEConfigFromEnv(t *testing.T) {
 
 **Key Registry Tests** (to be created):
 ```go
-// pkg/gauth/jwe_key_registry_test.go
+// pkg/agentauth/jwe_key_registry_test.go
 func TestKeyRegistry_LoadKeysFromDirectory(t *testing.T) {
     registry := NewKeyRegistry()
     err := registry.LoadKeysFromDirectory("./testdata/keys")
@@ -472,10 +472,10 @@ func TestKeyRegistry_LoadKeysFromDirectory(t *testing.T) {
 
 **Test 1: Environment Configuration**
 ```bash
-export GAUTH_JWE_ENABLED=true
-export GAUTH_JWE_PUBLIC_KEY=/etc/gauth/keys/public.pem
-export GAUTH_JWE_PRIVATE_KEY=/etc/gauth/keys/private.pem
-export GAUTH_JWE_KEY_ID=gauth-test-2025-11
+export AGENTAUTH_JWE_ENABLED=true
+export AGENTAUTH_JWE_PUBLIC_KEY=/etc/agentauth/keys/public.pem
+export AGENTAUTH_JWE_PRIVATE_KEY=/etc/agentauth/keys/private.pem
+export AGENTAUTH_JWE_KEY_ID=agentauth-test-2025-11
 
 go run ./cmd/web-server --validate-env
 # Expected: Configuration valid ✓
@@ -483,11 +483,11 @@ go run ./cmd/web-server --validate-env
 
 **Test 2: Key Registry**
 ```bash
-mkdir -p /tmp/gauth-keys
-openssl genpkey -algorithm RSA -out /tmp/gauth-keys/key-1.priv.pem -pkeyopt rsa_keygen_bits:2048
-openssl rsa -pubout -in /tmp/gauth-keys/key-1.priv.pem -out /tmp/gauth-keys/key-1.pub.pem
+mkdir -p /tmp/agentauth-keys
+openssl genpkey -algorithm RSA -out /tmp/agentauth-keys/key-1.priv.pem -pkeyopt rsa_keygen_bits:2048
+openssl rsa -pubout -in /tmp/agentauth-keys/key-1.priv.pem -out /tmp/agentauth-keys/key-1.pub.pem
 
-export GAUTH_JWE_KEY_DIR=/tmp/gauth-keys
+export AGENTAUTH_JWE_KEY_DIR=/tmp/agentauth-keys
 go run ./cmd/web-server
 # Expected: Loaded 1 key from registry
 ```
@@ -495,22 +495,22 @@ go run ./cmd/web-server
 **Test 3: Docker Deployment**
 ```bash
 cd deployments/docker
-docker build -f Dockerfile.jwe -t gauth:jwe-test ../..
-docker run -p 8080:8080 -v $(pwd)/keys:/etc/gauth/keys:ro gauth:jwe-test
+docker build -f Dockerfile.jwe -t agentauth:jwe-test ../..
+docker run -p 8080:8080 -v $(pwd)/keys:/etc/agentauth/keys:ro agentauth:jwe-test
 curl http://localhost:8080/health
 # Expected: {"status":"ok"}
 ```
 
 **Test 4: Kubernetes Deployment**
 ```bash
-kubectl create namespace gauth-test
-kubectl create secret generic gauth-jwe-keys \
+kubectl create namespace agentauth-test
+kubectl create secret generic agentauth-jwe-keys \
   --from-file=public.pem=./keys/public.pem \
   --from-file=private.pem=./keys/private.pem \
-  --namespace=gauth-test
+  --namespace=agentauth-test
 
-kubectl apply -f deployments/kubernetes/gauth-jwe-deployment.yaml
-kubectl get pods -n gauth-test
+kubectl apply -f deployments/kubernetes/agentauth-jwe-deployment.yaml
+kubectl get pods -n agentauth-test
 # Expected: 3 pods running
 ```
 
@@ -581,7 +581,7 @@ BenchmarkJWEIntegration_DecryptOnly    1428 ops    833μs/op     52KB/op      12
 | `jwe_key_registry.go` | 350 | Multi-key registry for rotation |
 | `Dockerfile.jwe` | 70 | Production Docker image |
 | `docker-compose.jwe.yml` | 150 | Docker Compose deployment |
-| `gauth-jwe-deployment.yaml` | 250 | Kubernetes manifests |
+| `agentauth-jwe-deployment.yaml` | 250 | Kubernetes manifests |
 | `JWE_DEPLOYMENT_GUIDE.md` | 600+ | Comprehensive deployment guide |
 | `JWE_SECURITY_AUDIT.md` | 500+ | Security audit and recommendations |
 | `load-test-jwe.sh` | 400+ | Load testing script |
@@ -623,7 +623,7 @@ BenchmarkJWEIntegration_DecryptOnly    1428 ops    833μs/op     52KB/op      12
 - ⚠️ Advanced monitoring (5%)
 - ⚠️ External penetration test (5%)
 
-### 5.2 Overall RFC-0111 Compliance
+### 5.2 Overall AAP-001 Compliance
 
 **Before Phase 3**: 79%  
 **After Phase 3**: **81%** (+2%)
@@ -886,7 +886,7 @@ The JWE implementation is **production-ready** for:
 ## Appendix A: File Summary
 
 ```
-pkg/gauth/
+pkg/agentauth/
 ├── jwe_config.go                    (286 lines) - Phase 1
 ├── jwe_service.go                   (247 lines) - Phase 1
 ├── jwe_service_test.go              (450 lines) - Phase 1
@@ -904,7 +904,7 @@ deployments/
 │   ├── Dockerfile.jwe               (70 lines)  - Phase 3 ✨
 │   └── docker-compose.jwe.yml       (150 lines) - Phase 3 ✨
 └── kubernetes/
-    └── gauth-jwe-deployment.yaml    (250 lines) - Phase 3 ✨
+    └── agentauth-jwe-deployment.yaml    (250 lines) - Phase 3 ✨
 
 scripts/
 └── load-test-jwe.sh                 (400 lines) - Phase 3 ✨
@@ -924,29 +924,29 @@ Phase 3: 2,500+ lines (45% of total)
 
 | Variable | Required | Default | Example |
 |----------|----------|---------|---------|
-| `GAUTH_JWE_ENABLED` | No | `true` | `true` |
-| `GAUTH_JWE_ALGORITHM` | No | `RSA-OAEP-256` | `RSA-OAEP-256` |
-| `GAUTH_JWE_ENCRYPTION` | No | `A256GCM` | `A256GCM` |
-| `GAUTH_JWE_PUBLIC_KEY` | Yes* | - | `/etc/gauth/keys/public.pem` |
-| `GAUTH_JWE_PRIVATE_KEY` | Yes* | - | `/etc/gauth/keys/private.pem` |
-| `GAUTH_JWE_KEY_ID` | Yes | - | `gauth-prod-2025-11` |
-| `GAUTH_JWE_KEY_DIR` | No | - | `/etc/gauth/keys` |
-| `GAUTH_JWE_ROTATION_DAYS` | No | `365` | `365` |
+| `AGENTAUTH_JWE_ENABLED` | No | `true` | `true` |
+| `AGENTAUTH_JWE_ALGORITHM` | No | `RSA-OAEP-256` | `RSA-OAEP-256` |
+| `AGENTAUTH_JWE_ENCRYPTION` | No | `A256GCM` | `A256GCM` |
+| `AGENTAUTH_JWE_PUBLIC_KEY` | Yes* | - | `/etc/agentauth/keys/public.pem` |
+| `AGENTAUTH_JWE_PRIVATE_KEY` | Yes* | - | `/etc/agentauth/keys/private.pem` |
+| `AGENTAUTH_JWE_KEY_ID` | Yes | - | `agentauth-prod-2025-11` |
+| `AGENTAUTH_JWE_KEY_DIR` | No | - | `/etc/agentauth/keys` |
+| `AGENTAUTH_JWE_ROTATION_DAYS` | No | `365` | `365` |
 
-*Required for RSA-OAEP-256 algorithm (unless using `GAUTH_JWE_KEY_DIR`)
+*Required for RSA-OAEP-256 algorithm (unless using `AGENTAUTH_JWE_KEY_DIR`)
 
 ## Appendix C: Quick Start Commands
 
 **Docker**:
 ```bash
-docker build -f deployments/docker/Dockerfile.jwe -t gauth:jwe .
-docker run -p 8080:8080 -v $(pwd)/keys:/etc/gauth/keys:ro gauth:jwe
+docker build -f deployments/docker/Dockerfile.jwe -t agentauth:jwe .
+docker run -p 8080:8080 -v $(pwd)/keys:/etc/agentauth/keys:ro agentauth:jwe
 ```
 
 **Kubernetes**:
 ```bash
-kubectl create secret generic gauth-jwe-keys --from-file=public.pem --from-file=private.pem -n gauth
-kubectl apply -f deployments/kubernetes/gauth-jwe-deployment.yaml
+kubectl create secret generic agentauth-jwe-keys --from-file=public.pem --from-file=private.pem -n agentauth
+kubectl apply -f deployments/kubernetes/agentauth-jwe-deployment.yaml
 ```
 
 **Load Testing**:

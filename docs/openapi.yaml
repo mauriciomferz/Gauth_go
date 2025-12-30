@@ -404,7 +404,7 @@ paths:
       tags: [attestation]
       operationId: postModelLimitsAttestationVerify
       description: |
-        Reconstructs unsigned attestation JSON, prepends domain separation prefix `GAUTH_MODEL_LIMIT_ATTEST:` and verifies Ed25519 signature.
+        Reconstructs unsigned attestation JSON, prepends domain separation prefix `AGENTAUTH_MODEL_LIMIT_ATTEST:` and verifies Ed25519 signature.
         Returns validity and combined hash linking snapshot, audit, and anchor chain heads.
       requestBody:
         required: true
@@ -598,8 +598,8 @@ paths:
       description: |
         Returns the current weighted multi-signature rotation artifact (V2) including per-algorithm verified
         weights, threshold status, and continuity hashes. See docs/ROTATION_V2_DEMO.md for usage, metrics, and
-        security considerations. Prometheus metrics: gauth_rotation_v2_verified_weight, gauth_rotation_v2_verified_weight_alg,
-        gauth_rotation_v2_threshold_weight, gauth_rotation_v2_signature_failures_total, gauth_rotation_v2_continuity_updates_total.
+        security considerations. Prometheus metrics: agentauth_rotation_v2_verified_weight, agentauth_rotation_v2_verified_weight_alg,
+        agentauth_rotation_v2_threshold_weight, agentauth_rotation_v2_signature_failures_total, agentauth_rotation_v2_continuity_updates_total.
       tags: [rotation]
       responses:
         '200': { $ref: '#/components/responses/RotationSummaryV2Ok' }
@@ -799,7 +799,7 @@ paths:
       operationId: postTokenCreate
       description: |
         Issues a new access token with optional TTL and metadata.
-        If GAUTH_USE_JWT_LIB=1, also returns a signed JWT in the response.
+        If AGENTAUTH_USE_JWT_LIB=1, also returns a signed JWT in the response.
       requestBody:
         required: true
         content:
@@ -943,7 +943,7 @@ paths:
                   iss: { type: string }
                   jti: { type: string }
 
-  /api/v1/gauth/auth/login/init:
+  /api/v1/agentauth/auth/login/init:
     post:
       summary: Initiate login
       tags: [validation]
@@ -985,7 +985,7 @@ paths:
         '401':
           description: Invalid credentials
 
-  /api/v1/gauth/auth/login/mfa:
+  /api/v1/agentauth/auth/login/mfa:
     post:
       summary: Verify MFA and get JWT
       tags: [validation]
@@ -1028,7 +1028,7 @@ paths:
         '401':
           description: Invalid MFA code
 
-  /.well-known/gauth-configuration:
+  /.well-known/agentauth-configuration:
     get:
       summary: AgentAuth configuration discovery
       tags: [discovery]
@@ -1080,7 +1080,7 @@ paths:
                         n: { type: string }
                         e: { type: string }
 
-  /api/v1/gauth/mcp/health:
+  /api/v1/agentauth/mcp/health:
     get:
       summary: MCP subsystem health
       tags: [discovery]
@@ -1098,7 +1098,7 @@ paths:
                   status: { type: string }
                   active_connections: { type: integer }
 
-  /api/v1/gauth/mcp/servers:
+  /api/v1/agentauth/mcp/servers:
     get:
       summary: List MCP servers
       tags: [discovery]
@@ -1122,7 +1122,7 @@ paths:
                         name: { type: string }
                         status: { type: string }
 
-  /api/v1/gauth/mcp/servers/{id}:
+  /api/v1/agentauth/mcp/servers/{id}:
     get:
       summary: Get MCP server details
       tags: [discovery]
@@ -1146,7 +1146,7 @@ paths:
         '404':
           description: Server not found
 
-  /api/v1/gauth/mcp/servers/{id}/tools:
+  /api/v1/agentauth/mcp/servers/{id}/tools:
     get:
       summary: List MCP server tools
       tags: [discovery]
@@ -1174,7 +1174,7 @@ paths:
                         name: { type: string }
                         description: { type: string }
 
-  /api/v1/gauth/mcp/servers/{id}/tools/call:
+  /api/v1/agentauth/mcp/servers/{id}/tools/call:
     post:
       summary: Call MCP tool
       tags: [discovery]
@@ -1963,7 +1963,7 @@ paths:
                   edges: { type: array, items: { type: object } }
 
   # ===== AUTH EXTENSIONS =====
-  /api/v1/gauth/auth/logout:
+  /api/v1/agentauth/auth/logout:
     post:
       summary: Logout
       tags: [validation]
@@ -1986,7 +1986,7 @@ paths:
                 properties:
                   success: { type: boolean }
 
-  /api/v1/gauth/auth/token/refresh:
+  /api/v1/agentauth/auth/token/refresh:
     post:
       summary: Refresh token
       tags: [validation]
@@ -2244,7 +2244,7 @@ paths:
           description: SSE event stream
 
   # ===== MCP EXTENSIONS =====
-  /api/v1/gauth/mcp/servers/{id}/status:
+  /api/v1/agentauth/mcp/servers/{id}/status:
     get:
       summary: MCP server status
       tags: [discovery]
@@ -2266,7 +2266,7 @@ paths:
                   status: { type: string }
                   last_heartbeat: { type: string, format: date-time }
 
-  /api/v1/gauth/mcp/servers/{id}/resources:
+  /api/v1/agentauth/mcp/servers/{id}/resources:
     get:
       summary: List MCP server resources
       tags: [discovery]
@@ -3045,11 +3045,11 @@ paths:
               schema:
                 type: object
 
-  /api/openapi/gauth.yaml:
+  /api/openapi/agentauth.yaml:
     get:
       summary: AgentAuth OpenAPI spec
       tags: [discovery]
-      operationId: getOpenAPIGauthYaml
+      operationId: getOpenAPIAgentAuthYaml
       responses:
         '200':
           description: OpenAPI specification
@@ -3057,11 +3057,11 @@ paths:
             application/x-yaml:
               schema: { type: string }
 
-  /api/v1/.well-known/gauth:
+  /api/v1/.well-known/agentauth:
     get:
       summary: AgentAuth well-known config
       tags: [discovery]
-      operationId: getWellKnownGauth
+      operationId: getWellKnownAgentAuth
       responses:
         '200':
           description: AgentAuth configuration
@@ -3519,11 +3519,11 @@ paths:
               schema:
                 type: object
 
-  /api/v1/gauth/action:
+  /api/v1/agentauth/action:
     post:
       summary: AgentAuth action
       tags: [learning]
-      operationId: postGauthAction
+      operationId: postAgentAuthAction
       requestBody:
         required: true
         content:
@@ -3538,11 +3538,11 @@ paths:
               schema:
                 type: object
 
-  /api/v1/gauth/auth/mfa/verify:
+  /api/v1/agentauth/auth/mfa/verify:
     post:
       summary: Verify MFA
       tags: [validation]
-      operationId: postGauthAuthMFAVerify
+      operationId: postAgentAuthAuthMFAVerify
       requestBody:
         required: true
         content:
@@ -3561,7 +3561,7 @@ paths:
                 properties:
                   success: { type: boolean }
 
-  /api/v1/gauth/mcp/servers/{id}/resources/read:
+  /api/v1/agentauth/mcp/servers/{id}/resources/read:
     post:
       summary: Read MCP resource
       tags: [discovery]
@@ -4305,7 +4305,7 @@ paths:
         operationId: postPoARevocationInitiate
         description: |
           Starts a dual-control revocation workflow (suspends PoA) requiring subsequent approvals to finalize.
-          Supports count-based quorum (GAUTH_REVOCATION_REQUIRED_COUNT) or weight-based quorum (GAUTH_REVOCATION_REQUIRED_WEIGHT).
+          Supports count-based quorum (AGENTAUTH_REVOCATION_REQUIRED_COUNT) or weight-based quorum (AGENTAUTH_REVOCATION_REQUIRED_WEIGHT).
           Returns updated PoA with pending_revocation metadata. Unauthorized initiators receive 401.
         parameters:
           - in: path

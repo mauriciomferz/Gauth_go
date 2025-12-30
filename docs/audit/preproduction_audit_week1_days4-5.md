@@ -41,11 +41,11 @@ Changed all occurrences from 0755 to 0750 (rwxr-x---), removing read/execute per
 **Files Modified** (8 total):
 
 **Production Files** (5):
-1. `pkg/rfc0111/validator_enhanced_store.go` (line 43)
+1. `pkg/aap001/validator_enhanced_store.go` (line 43)
    - BoltDB daily limit storage directory
    - Test: TestBoltDailyLimitStore ✅
 
-2. `pkg/gauth/replay_store_bolt.go` (line 31)
+2. `pkg/agentauth/replay_store_bolt.go` (line 31)
    - JTI replay protection storage directory
    - Tests: TestReplayFailClosed, TestReplayFailClosedRecord, TestReplayStorePrecedence, TestReplayProtection ✅
 
@@ -69,7 +69,7 @@ Changed all occurrences from 0755 to 0750 (rwxr-x---), removing read/execute per
 ### Verification
 ```bash
 # All affected tests passed
-go test ./pkg/rfc0111 ./pkg/gauth ./internal/crypto -v
+go test ./pkg/aap001 ./pkg/agentauth ./internal/crypto -v
 # PASS (all 9 tests)
 
 # Confirmed no remaining 0755 in production code
@@ -97,7 +97,7 @@ Executed comprehensive search: `grep -r "defer.*\.Close()" --include="*.go"`
 - **Total found**: 50+ occurrences (search truncated at max results)
 
 **Breakdown**:
-- **Test files**: 40+ occurrences (pkg/rfc0111, pkg/gauth, pkg/pdp, pkg/replay)
+- **Test files**: 40+ occurrences (pkg/aap001, pkg/agentauth, pkg/pdp, pkg/replay)
   - Test cleanup where errors are acceptable to ignore
   - Pattern: `defer store.Close()`, `defer service.Close()`
 - **Production files**: 3 occurrences
@@ -132,7 +132,7 @@ Searched codebase for G404 occurrences:
 
 **Examples**:
 ```go
-// pkg/gauth/gauth_prop_test.go:65
+// pkg/agentauth/agentauth_prop_test.go:65
 //nolint:gosec // G404: weak random acceptable for property-based testing
 rng := rand.New(rand.NewSource(seed))
 
@@ -239,8 +239,8 @@ POA deserialization handles untrusted input from external systems. Comprehensive
 2. **8c439f7b**: POA minimal format test coverage (10 new tests)
 
 ### Files Modified
-- `pkg/rfc0111/validator_enhanced_store.go` (permissions)
-- `pkg/gauth/replay_store_bolt.go` (permissions)
+- `pkg/aap001/validator_enhanced_store.go` (permissions)
+- `pkg/agentauth/replay_store_bolt.go` (permissions)
 - `internal/crypto/rotation_audit_sink.go` (permissions)
 - `cmd/conformance/main.go` (permissions)
 - `cmd/validate-gaps/main.go` (permissions)

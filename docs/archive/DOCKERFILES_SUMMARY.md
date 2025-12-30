@@ -15,7 +15,7 @@ This repository contains multiple Dockerfiles tailored for different build/runti
 ## Inventory
 | File | Purpose | Build Style | CGO | Base Runtime | Assets Included | Multi-Arch Ready | Healthcheck | Non-root |
 |------|---------|------------|-----|--------------|-----------------|------------------|-------------|----------|
-| `Dockerfile` | Generic multi-stage prod (legacy gauth-server path) | Multi-stage | No (CGO_DISABLED=0 but static) | `alpine:3.18.4` | No web assets copied | amd64 | wget /health | Yes |
+| `Dockerfile` | Generic multi-stage prod (legacy agentauth-server path) | Multi-stage | No (CGO_DISABLED=0 but static) | `alpine:3.18.4` | No web assets copied | amd64 | wget /health | Yes |
 | `Dockerfile.production` | Full prod with templates/static & CGO (BLS) | Multi-stage | Yes | `alpine:3.19` | templates/static/static_ui | amd64 | binary flag | Yes |
 | `Dockerfile.minimal` | Ultra-minimal scratch debug | Two-stage -> scratch | No | `scratch` | No (binary only) | amd64 | binary flag | Yes (uid) |
 | `Dockerfile.simple` | Runtime only (pre-built binary) | Single-stage runtime | N/A | `alpine:3.18.4` | None | amd64 | curl /healthz | Yes |
@@ -52,7 +52,7 @@ This repository contains multiple Dockerfiles tailored for different build/runti
    - Add vulnerability scan (Grype/Trivy) quality gate.
 
 ## Immediate Actions Suggested
-- Create buildx workflow producing: `gauth:{version}-{arch}`, `gauth:{version}` multi-arch manifest.
+- Create buildx workflow producing: `agentauth:{version}-{arch}`, `agentauth:{version}` multi-arch manifest.
 - Add `LABEL org.opencontainers.image.source`, `description`, `licenses` to production image.
 - Standardize health endpoint to `/api/v1/beta/health` across all Dockerfiles.
 - Replace duplicate pre-built binary Dockerfiles with docs instructing: `GOOS=linux GOARCH=$arch go build ...` then single runtime stage.

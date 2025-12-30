@@ -21,8 +21,8 @@ type OTELCollector struct {
 func NewOTELCollector() *OTELCollector {
 	meterProvider := noop.NewMeterProvider()
 	return &OTELCollector{
-		meter:  meterProvider.Meter("gauth-monitoring"),
-		tracer: otel.Tracer("gauth-monitoring"),
+		meter:  meterProvider.Meter("agentauth-monitoring"),
+		tracer: otel.Tracer("agentauth-monitoring"),
 	}
 }
 
@@ -48,7 +48,7 @@ func (c *OTELCollector) EndSpan(span trace.Span) {
 }
 
 // Example integration with MetricsCollector
-// func (mc *MetricsCollector) WithTrace(ctx context.Context, name string, fn func(ctx context.Context)) {
+// func (mc *MetricsCollector) WithTrace(ctx context.Context, name string, fn func(ctx context.Context) {
 // 	otelCollector := NewOTELCollector()
 // 	ctx, span := otelCollector.StartSpan(ctx, name)
 // 	defer otelCollector.EndSpan(span)

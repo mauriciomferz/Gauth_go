@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // RunDemo runs the advanced delegation & attestation flow
 func RunDemo() {
 	// Initialize AgentAuth service with example config
-	svc, err := gauth.New(gauth.Config{
+	svc, err := agentauth.New(agentauth.Config{
 		AuthServerURL:     "https://example-auth-server",
 		ClientID:          "test-client",
 		ClientSecret:      "supersecret",
@@ -23,7 +23,7 @@ func RunDemo() {
 	}
 
 	// Step 1: Initiate authorization (delegation)
-	grant, err := svc.InitiateAuthorization(gauth.AuthorizationRequest{
+	grant, err := svc.InitiateAuthorization(agentauth.AuthorizationRequest{
 		ClientID: "test-client",
 		Scopes:   []string{"sign_contract"},
 	})
@@ -32,7 +32,7 @@ func RunDemo() {
 	}
 
 	// Step 2: Request a token for the delegated grant
-	tokenResp, err := svc.RequestToken(gauth.TokenRequest{
+	tokenResp, err := svc.RequestToken(agentauth.TokenRequest{
 		GrantID: grant.GrantID,
 		Scope:   grant.Scope,
 	})

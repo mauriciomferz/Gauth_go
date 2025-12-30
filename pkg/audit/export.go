@@ -77,7 +77,7 @@ type ExportService struct {
 // NewExportService creates a new export service
 func NewExportService(repo *Repository, exportDir string) *ExportService {
 	if exportDir == "" {
-		exportDir = "/tmp/gauth-audit-exports"
+		exportDir = "/tmp/agentauth-audit-exports"
 	}
 
 	// Create export directory if it doesn't exist
@@ -340,7 +340,7 @@ func (s *ExportService) exportSyslog(w io.Writer, events []AuditEvent) error {
 		priority := s.severityToPriority(event.Severity)
 
 		// Format: <priority>version timestamp hostname app-name procid msgid structured-data message
-		line := fmt.Sprintf("<%d>1 %s gauth-audit - - - [tenant=\"%s\" user=\"%s\" action=\"%s\" resource=\"%s\" status=\"%s\"] %s\n",
+		line := fmt.Sprintf("<%d>1 %s agentauth-audit - - - [tenant=\"%s\" user=\"%s\" action=\"%s\" resource=\"%s\" status=\"%s\"] %s\n",
 			priority,
 			event.Timestamp.Format(time.RFC3339),
 			event.TenantID,

@@ -17,7 +17,7 @@ Elevate cryptographic agility, external verifiability, and interoperability whil
 | CRYPTO-ALG-01 | P0 | Signature Algorithm Abstraction | Introduce interface + registry for Ed25519, ECDSA P-256, BLS aggregate | PoA issuance configurable; tests for each algo; canonical unchanged |
 | LEDGER-ANCHOR-01 | P1 | External Anchoring | Sign audit entries + periodic Merkle root publish | `anchor_publish_test.go` passing; CLI anchor verification |
 | REVOCATION-EXT-01 | P1 | Partial Revocation & Suspension | Add `suspended`, `partially_revoked` statuses + validation logic | State transitions tested; canonical digest unaffected |
-| OPENAPI-EXPORT-01 | P1 | OpenAPI/Discovery | Generate OpenAPI spec + `/well-known/gauth/config` endpoint | Spec file + endpoint integration tests |
+| OPENAPI-EXPORT-01 | P1 | OpenAPI/Discovery | Generate OpenAPI spec + `/well-known/agentauth/config` endpoint | Spec file + endpoint integration tests |
 | REPLAY-DURABLE-01 | P1 | Durable Replay Store | Persistent JTI index with TTL + compaction snapshot | Recovery test after restart retains anti-replay guarantees |
 
 ## Secondary (P2)
@@ -43,5 +43,5 @@ Elevate cryptographic agility, external verifiability, and interoperability whil
 - Conformance run shows reduction in Missing items by ≥3.
 
 ## References
-- Current compliance matrix: `docs/rfc0111_compliance_matrix.md`
+- Current compliance matrix: `docs/aap001_compliance_matrix.md`
 - Latest release notes: `docs/RELEASE_NOTES_2025-10-25.md`

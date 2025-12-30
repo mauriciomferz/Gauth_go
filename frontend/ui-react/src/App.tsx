@@ -82,7 +82,7 @@ function App() {
           <Route path="revocation" element={<RevocationTransparency />} />
           <Route path="configuration" element={<ConfigurationManager />} />
           <Route path="oidc-providers" element={<OIDCProviders />} />
-          <Route path="gauthplus" element={<AgentAuthPlus />} />
+          <Route path="agentauthplus" element={<AgentAuthPlus />} />
           <Route path="saml-providers" element={<SAMLProviders />} />
           <Route path="scim-settings" element={<SCIMSettings />} />
           <Route path="gnap" element={<GNAP />} />

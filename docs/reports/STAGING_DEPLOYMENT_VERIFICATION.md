@@ -89,13 +89,13 @@ docker compose ps
 
 ```bash
 # 1. Build binary locally
-go build -o bin/gauth-server ./cmd/webserver
+go build -o bin/agentauth-server ./cmd/webserver
 
 # 2. Run with environment
-export DATABASE_URL="postgresql://gauth:gauth_dev_password@localhost:5432/gauth"
+export DATABASE_URL="postgresql://agentauth:agentauth_dev_password@localhost:5432/agentauth"
 export REDIS_URL="redis://localhost:6379"
 export PORT=8080
-./bin/gauth-server
+./bin/agentauth-server
 
 # 3. Test on port 8080
 curl http://localhost:8080/api/v1/health

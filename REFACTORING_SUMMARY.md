@@ -17,7 +17,7 @@ owners: [system]
 - Centralized configuration system
 
 ### Phase 2: Package Restructuring ✅
-Split `gauth.go` (1,227 lines) into 5 focused files:
+Split `agentauth.go` (1,227 lines) into 5 focused files:
 - `errors.go` - Error definitions
 - `types.go` - Domain types and interfaces
 - `pap.go` - PowerAdministrationPoint
@@ -25,7 +25,7 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 - `service.go` - Core service (662 lines, 46% reduction)
 
 ### Phase 3b, 3c, 4: Full Codebase Refactoring & Cleanup ✅
-- Updated `pkg/gauth`, `pkg/poa`, `pkg/delegation`, `pkg/verification`, `pkg/attest`, `web`, `cmd` to accept `crypto.Manager`
+- Updated `pkg/agentauth`, `pkg/poa`, `pkg/delegation`, `pkg/verification`, `pkg/attest`, `web`, `cmd` to accept `crypto.Manager`
 - Completely removed `GlobalEdDSARegistry` and `GlobalRotatingSigner` from `pkg/crypto`
 - Cleaned up deprecated usage in all packages
 - Verified all tests pass for refactored packages
@@ -36,17 +36,17 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 
 ### Phase 6: Final Verification & Web Package Cleanup ✅
 - Patched `web` package to fully remove `GlobalEdDSARegistry`
-- Fixed algorithm constant mismatch in `pkg/gauth_rfc_001`
+- Fixed algorithm constant mismatch in `pkg/agentauth_rfc_001`
 - Refactored `pkg/revocation` integration tests to be white-box for better isolation
 - Resolved integration test build failures by cleaning up duplicate tests and fixing import paths
 - Fixed `test/load` runtime failure by updating authorization policies for load testing
 - Verified full suite stability (including `test/load` and `test/integration`)
 
 ### Phase 7: Cyclomatic Complexity Reduction ✅
-- Refactored 7 high-complexity functions (> 25) in `pkg/gauth` and `pkg/poa`.
+- Refactored 7 high-complexity functions (> 25) in `pkg/agentauth` and `pkg/poa`.
 - Extracted helper functions to improve readability and maintainability.
 - Resolved all linter flagged complexity issues.
-- Fixed `nil Context` usage in `pkg/gauth` tests.
+- Fixed `nil Context` usage in `pkg/agentauth` tests.
 - Fixed CI/CD workflows and scripts referencing stale `web/ui-react` path (updated to `frontend/ui-react`).
 
 ### Phase 8: RFC 9396 (RAR) & Metrics Stability ✅
@@ -63,7 +63,7 @@ Split `gauth.go` (1,227 lines) into 5 focused files:
 **Before:**
 ```go
 // Global state pollution
-svc, _ := gauth.New(cfg)
+svc, _ := agentauth.New(cfg)
 // Internally: crypto.RegisterGlobalEdDSAManager(km)
 ```
 
@@ -71,23 +71,23 @@ svc, _ := gauth.New(cfg)
 ```go
 // Clean dependency injection
 km, _ := crypto.NewManager(24 * time.Hour)
-svc, _ := gauth.New(cfg, gauth.WithKeyManager(km))
+svc, _ := agentauth.New(cfg, agentauth.WithKeyManager(km))
 ```
 
 ## Usage Examples
 
 ### Basic Service Creation
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+import "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 
-cfg := gauth.Config{
+cfg := agentauth.Config{
     AuthServerURL:     "https://auth.example.com",
     ClientID:          "my-client",
     ClientSecret:      "secret",
     AccessTokenExpiry: 1 * time.Hour,
 }
 
-svc, err := gauth.New(cfg)
+svc, err := agentauth.New(cfg)
 if err != nil {
     log.Fatal(err)
 }
@@ -97,8 +97,8 @@ defer svc.Close()
 ### EdDSA Mode with Custom Key Manager
 ```go
 import (
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
-    "github.com/mauriciomferz/Gauth_go/internal/crypto"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+    "github.com/mauriciomferz/AgentAuth/internal/crypto"
 )
 
 // Create manager with 48-hour rotation
@@ -107,7 +107,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-cfg := gauth.Config{
+cfg := agentauth.Config{
     AuthServerURL: "https://auth.example.com",
     ClientID:      "my-client",
 }
@@ -115,9 +115,9 @@ cfg.AppConfig = &config.Config{
     TokenSigMode: "eddsa",
 }
 
-svc, err := gauth.New(cfg, 
-    gauth.WithKeyManager(km),      // Inject manager
-    gauth.WithMetrics(myMetrics),  // Add instrumentation
+svc, err := agentauth.New(cfg, 
+    agentauth.WithKeyManager(km),      // Inject manager
+    agentauth.WithMetrics(myMetrics),  // Add instrumentation
 )
 ```
 
@@ -128,10 +128,10 @@ func TestTokenGeneration(t *testing.T) {
     testKM, _ := crypto.NewManager(24 * time.Hour)
     
     // Create service with injected dependencies
-    cfg := gauth.Config{...}
-    svc, _ := gauth.New(cfg,
-        gauth.WithKeyManager(testKM),
-        gauth.WithMetrics(mockMetrics),
+    cfg := agentauth.Config{...}
+    svc, _ := agentauth.New(cfg,
+        agentauth.WithKeyManager(testKM),
+        agentauth.WithMetrics(mockMetrics),
     )
     
     // Test without affecting global state
@@ -144,8 +144,8 @@ func TestTokenGeneration(t *testing.T) {
 ### Using Multiple Services
 ```go
 // Different services can have different configurations
-svc1, _ := gauth.New(cfg1, gauth.WithKeyManager(km1))
-svc2, _ := gauth.New(cfg2, gauth.WithKeyManager(km2))
+svc1, _ := agentauth.New(cfg1, agentauth.WithKeyManager(km1))
+svc2, _ := agentauth.New(cfg2, agentauth.WithKeyManager(km2))
 
 // No conflicts - each service has its own manager
 token1, _ := svc1.RequestToken(req)
@@ -171,8 +171,8 @@ WithRFCCompliance(...)               // Enable RFC-0111 compliance
 **Old code:**
 ```go
 func main() {
-    cfg := gauth.Config{...}
-    svc, _ := gauth.New(cfg)
+    cfg := agentauth.Config{...}
+    svc, _ := agentauth.New(cfg)
     // Service sets crypto.GlobalEdDSARegistry internally
 }
 ```
@@ -180,8 +180,8 @@ func main() {
 **New code (no changes required for basic usage):**
 ```go
 func main() {
-    cfg := gauth.Config{...}
-    svc, _ := gauth.New(cfg)
+    cfg := agentauth.Config{...}
+    svc, _ := agentauth.New(cfg)
     // Works the same - manager created locally
 }
 ```
@@ -190,8 +190,8 @@ func main() {
 ```go
 func main() {
     km, _ := crypto.NewManager(24 * time.Hour)
-    cfg := gauth.Config{...}
-    svc, _ := gauth.New(cfg, gauth.WithKeyManager(km))
+    cfg := agentauth.Config{...}
+    svc, _ := agentauth.New(cfg, agentauth.WithKeyManager(km))
     // Better control, no global state
 }
 ```
@@ -228,7 +228,7 @@ Codebase refactoring is complete. The system is now fully using dependency injec
 
 All core tests pass:
 ```bash
-go test -short ./pkg/gauth/...
+go test -short ./pkg/agentauth/...
 # ✅ All packages passing in ~5.6 seconds
 ```
 

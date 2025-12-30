@@ -27,7 +27,7 @@ Following an external security audit (V-2025 series), our initial assessment con
 
 ### 1. Proprietary Standards Risk ⚠️ HIGH
 
-**Issue:** System built on AAP-RFC-0111/0115 (custom protocols)
+**Issue:** System built on AAP-001/0115 (custom protocols)
 
 **Problem:**
 - NOT approved by IETF (Internet Engineering Task Force)
@@ -288,7 +288,7 @@ T=140s: Attacker replays captured token → ACCEPTED ❌
 | **Auth0** | OAuth 2.0 + OIDC | Redis/PostgreSQL | RBAC + ABAC | LOW |
 | **Okta** | OAuth 2.0 + OIDC | Distributed DB | Policy Engine | LOW |
 | **Keycloak** | OAuth 2.0 + OIDC | Infinispan | Role Mapping | LOW |
-| **Gauth_go** | **AAP-RFC (custom)** | **BoltDB/Redis** | **String Matching** | **MEDIUM-HIGH** |
+| **AgentAuth** | **AAP-RFC (custom)** | **BoltDB/Redis** | **String Matching** | **MEDIUM-HIGH** |
 
 **Market Positioning:**
 - Current: Niche/experimental market only

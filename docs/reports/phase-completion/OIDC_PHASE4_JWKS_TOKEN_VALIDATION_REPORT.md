@@ -481,7 +481,7 @@ ef031c8f feat: OIDC Phase 4 Day 1 - JWKS Fetcher & External Token Validator
 
 ## Compliance Impact
 
-### RFC-0111 Compliance Status
+### AAP-001 Compliance Status
 
 **Before Phase 4**: 68%  
 **After Phase 4**: 68%

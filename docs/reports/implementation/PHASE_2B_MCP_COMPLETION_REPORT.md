@@ -33,7 +33,7 @@ Phase 2B MCP (Model Context Protocol) Integration is now **complete**. The exist
 
 **File Size:** 280 lines  
 **Language:** Go with Gin framework  
-**Environment Variable:** `GAUTH_MCP_ENABLED=1`
+**Environment Variable:** `AGENTAUTH_MCP_ENABLED=1`
 
 #### Endpoints Implemented:
 
@@ -59,13 +59,13 @@ Phase 2B MCP (Model Context Protocol) Integration is now **complete**. The exist
 mcpConnectionManager *mcp.ConnectionManager
 
 // Initialization in NewBetaServerWithMetrics
-if os.Getenv("GAUTH_MCP_ENABLED") == "1" {
+if os.Getenv("AGENTAUTH_MCP_ENABLED") == "1" {
     s.mcpConnectionManager = mcp.NewConnectionManager()
     fmt.Fprintf(os.Stderr, "[MCP] Connection manager initialized\n")
 }
 
 // Route registration in routes()
-if os.Getenv("GAUTH_MCP_ENABLED") == "1" {
+if os.Getenv("AGENTAUTH_MCP_ENABLED") == "1" {
     mcpHandlers := betaHandlers.NewMCPHandlers(s.mcpConnectionManager)
     mcpGroup := s.router.Group("/api/v1/beta/mcp")
     mcpGroup.POST("/servers", mcpHandlers.RegisterServer)
@@ -223,10 +223,10 @@ $ curl -s http://localhost:8080/api/v1/beta/mcp/servers | jq .
 
 ---
 
-## RFC-0111 Compliance Impact
+## AAP-001 Compliance Impact
 
-**Before Phase 2B:** 78% RFC-0111 compliance  
-**After Phase 2B:** 80% RFC-0111 compliance (+2%)
+**Before Phase 2B:** 78% AAP-001 compliance  
+**After Phase 2B:** 80% AAP-001 compliance (+2%)
 
 **MCP-Specific Compliance:**
 - **Before:** 60% MCP implementation
@@ -272,9 +272,9 @@ web/ui-react/src/components/Layout.tsx     +2 lines (import + nav item)
 ### Starting the Server with MCP:
 
 ```bash
-# Enable MCP and RFC-0111
-export GAUTH_MCP_ENABLED=1
-export GAUTH_AAP-001_ENABLED=1
+# Enable MCP and AAP-001
+export AGENTAUTH_MCP_ENABLED=1
+export AGENTAUTH_AAP-001_ENABLED=1
 
 # Start backend
 go run ./cmd/web-server
@@ -438,7 +438,7 @@ Phase 2B MCP Integration is **complete and production-ready** for stdio-based MC
 ✅ **Type-Safe Client** - Comprehensive TypeScript definitions  
 ✅ **Integrated Navigation** - Seamless user experience  
 ✅ **Tested & Validated** - Backend API verified with curl tests  
-✅ **RFC-0111 Compliant** - 80% overall compliance, 100% MCP compliance  
+✅ **AAP-001 Compliant** - 80% overall compliance, 100% MCP compliance  
 
 The system is ready for:
 - Registering and managing MCP servers

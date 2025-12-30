@@ -8,7 +8,7 @@ owners: [system]
 
 
 Audit Report: AgentAuth Server Compliance Certification
-Target: https://github.com/mauriciomferz/Gauth_go
+Target: https://github.com/mauriciomferz/AgentAuth
 Version Reviewed: v0.9.1 (Release Commit: 028d1f08)
 Date: November 21, 2025
 
@@ -43,7 +43,7 @@ Status: Secure. This prevents Privilege Escalation via ignored constraints.
 C. Identity Binding (AAP-001, Security Considerations)
 Spec Requirement: "The Presenter of the VC must be cryptographically bound to the credentialSubject.id."
 
-Audit Finding:The rfc0111.go logic now includes defensive checks for the sessionUser context.
+Audit Finding:The aap001.go logic now includes defensive checks for the sessionUser context.
 It explicitly returns ErrConfiguration if the context is empty, preventing nil-pointer exceptions or "empty-string" matching exploits.
 
 The architectural documentation (SECURITY.md) correctly delegates the cryptographic proof (mTLS/DPoP) to the gateway layer, satisfying the library's contract.
@@ -67,11 +67,11 @@ code
 
 Go
 // MANDATORY PRODUCTION CONFIGURATION
-svc := rfc0111.NewService(
+svc := aap001.NewService(
     auditLogger, 
     authzPolicy,
-    rfc0111.WithReplayFailClosed(),           // Enforces AAP-001 §4.1.2
-    rfc0111.WithStrictConstraintValidation(), // Enforces AAP-002 §3.4
+    aap001.WithReplayFailClosed(),           // Enforces AAP-001 §4.1.2
+    aap001.WithStrictConstraintValidation(), // Enforces AAP-002 §3.4
 )
 
 Certification: GRANTED 🟢

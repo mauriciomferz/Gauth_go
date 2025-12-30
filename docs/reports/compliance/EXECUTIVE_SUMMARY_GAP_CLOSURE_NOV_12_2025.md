@@ -5,7 +5,7 @@
 
 ## 📊 BOTTOM LINE
 
-**QA Audit Claimed**: 55-60% RFC-0111 Compliance ⚠️  
+**QA Audit Claimed**: 55-60% AAP-001 Compliance ⚠️  
 **Actual Compliance**: **75-80%** ✅  
 **Difference**: +20 percentage points (15-25% more complete than assessed)
 
@@ -46,7 +46,7 @@
 
 ## 📈 REVISED COMPLIANCE BREAKDOWN
 
-### Core RFC-0111 Components
+### Core AAP-001 Components
 
 | Component | QA Audit | Actual | Status |
 |-----------|----------|--------|--------|
@@ -73,7 +73,7 @@
 
 ### Technical Reasons
 
-1. **Narrow Search Scope**: Only searched `pkg/gauth/*.go`
+1. **Narrow Search Scope**: Only searched `pkg/agentauth/*.go`
    - Missed entire `pkg/oidc/` package (40+ files)
    - Missed entire `pkg/pdp/` package (15+ files)
 
@@ -190,7 +190,7 @@
 
 ## ✅ FINAL VERDICT
 
-### RFC-0111 Compliance: 75-80% ✅
+### AAP-001 Compliance: 75-80% ✅
 
 ### Production Readiness: 3-4 months ✅
 

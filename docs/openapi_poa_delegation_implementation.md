@@ -104,14 +104,14 @@ Comprehensive OpenAPI 3.1 specification documenting all Power-of-Attorney (PoA) 
 
 ### Multi-Signature PoA Features
 - **M-of-N Threshold Enforcement**: Configurable signature threshold (e.g., 3-of-5)
-- **Weighted Signatures**: Optional weighted voting via `GAUTH_MULTI_SIG_WEIGHTS`
+- **Weighted Signatures**: Optional weighted voting via `AGENTAUTH_MULTI_SIG_WEIGHTS`
 - **Canonical Digest Computation**: Deterministic signature verification
 - **Signature Collection Lifecycle**: pending → completed → active states
 - **Expiration Tracking**: Automatic collection expiry enforcement
 - **Concurrent Submission Support**: Thread-safe signature acceptance
 
 ### Delegation Features
-- **Capability Enforcement**: Integration with `GAUTH_CAPABILITY_ENFORCE`
+- **Capability Enforcement**: Integration with `AGENTAUTH_CAPABILITY_ENFORCE`
 - **Lifecycle Management**: status transitions (active/suspended/terminated/revoked/expired)
 - **Audit Trail**: All delegation operations logged
 - **Revocation Control**: Authorization verification for revokers
@@ -256,7 +256,7 @@ Response (200 OK):
 ### Implementation Files
 - **API Handlers**: `internal/multisig/api.go` (336 lines, 4 HTTP handlers)
 - **Service Logic**: `internal/multisig/manager.go` (387 lines, SignatureManager)
-- **PoA Core**: `pkg/rfc0111/rfc0111.go` (CreateDelegationCtx, ValidateDelegationCtx, RevokeDelegationCtx)
+- **PoA Core**: `pkg/aap001/aap001.go` (CreateDelegationCtx, ValidateDelegationCtx, RevokeDelegationCtx)
 - **Web Server**: `web/server_clean.go` (route registration, endpoint mounting)
 
 ### Test Coverage
@@ -315,7 +315,7 @@ ok      internal/multisig       0.123s
 
 The OpenAPI specification is discoverable through:
 
-1. **Well-Known Discovery**: `GET /.well-known/gauth-configuration`
+1. **Well-Known Discovery**: `GET /.well-known/agentauth-configuration`
    - Returns `openapi_url` field pointing to `/openapi.yaml`
 
 2. **YAML Endpoint**: `GET /openapi.yaml`
@@ -333,7 +333,7 @@ sec10.item1,OpenAPI for PoA & delegation,Missing,P1,No documented contract,docs/
 
 ### After
 ```csv
-sec10.item1,OpenAPI for PoA & delegation,Implemented,P1,Complete OpenAPI 3.1 specification (docs/openapi.yaml 1487 lines 53 endpoints) covering all PoA and delegation REST APIs: token lifecycle (create validate revoke status introspect metrics) multi-signature PoA workflow (POST /api/v1/beta/poa/sign GET /api/v1/beta/poa/:id/multisig/status POST /api/v1/beta/poa/:id/activate GET /api/v1/beta/poa/multisig/pending) delegation management (POST /api/v1/delegation/create POST /api/v1/delegation/revoke POST /api/v1/delegation/status/update + beta aliases) with comprehensive schemas (MultiSignatureRequest MultiSignatureResponse MultiSignatureStatusResponse MultiSignatureActivateResponse MultiSignaturePendingResponse DelegationCreateRequest DelegationCreateResponse DelegationRevokeRequest DelegationRevokeResponse) request/response examples error codes (400/403/404/409/500) and detailed descriptions for all 12 PoA/delegation endpoints.,docs/openapi.yaml|web/server_clean.go|internal/multisig/api.go|pkg/rfc0111/rfc0111.go
+sec10.item1,OpenAPI for PoA & delegation,Implemented,P1,Complete OpenAPI 3.1 specification (docs/openapi.yaml 1487 lines 53 endpoints) covering all PoA and delegation REST APIs: token lifecycle (create validate revoke status introspect metrics) multi-signature PoA workflow (POST /api/v1/beta/poa/sign GET /api/v1/beta/poa/:id/multisig/status POST /api/v1/beta/poa/:id/activate GET /api/v1/beta/poa/multisig/pending) delegation management (POST /api/v1/delegation/create POST /api/v1/delegation/revoke POST /api/v1/delegation/status/update + beta aliases) with comprehensive schemas (MultiSignatureRequest MultiSignatureResponse MultiSignatureStatusResponse MultiSignatureActivateResponse MultiSignaturePendingResponse DelegationCreateRequest DelegationCreateResponse DelegationRevokeRequest DelegationRevokeResponse) request/response examples error codes (400/403/404/409/500) and detailed descriptions for all 12 PoA/delegation endpoints.,docs/openapi.yaml|web/server_clean.go|internal/multisig/api.go|pkg/aap001/aap001.go
 ```
 
 ## Next Steps

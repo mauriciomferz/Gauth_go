@@ -34,7 +34,7 @@ export function SkipLink() {
   useEffect(() => {
     // Ensure main content has tabindex for focusing
     const mainContent = document.getElementById('main-content')
-    if (mainContent && !mainContent.hasAttribute('tabindex')) {
+    if (mainContent && !mainContent.hasAttribute('tabindex') {
       mainContent.setAttribute('tabindex', '-1')
     }
   }, [])

@@ -23,7 +23,7 @@ JWE Phase 2 (Integration Tests & E2E Validation) has been **successfully complet
 
 **Compliance Impact**:
 - Security Hardening: 50% (no change from Phase 1)
-- Overall RFC-0111: 79% (no change, implementation focus)
+- Overall AAP-001: 79% (no change, implementation focus)
 
 **Timeline**:
 - Estimated: 1 week
@@ -36,7 +36,7 @@ JWE Phase 2 (Integration Tests & E2E Validation) has been **successfully complet
 
 ### 1. Integration Test Suite
 
-**File**: `pkg/gauth/jwe_integration_bench_test.go` (265 lines)
+**File**: `pkg/agentauth/jwe_integration_bench_test.go` (265 lines)
 
 #### Tests Created
 
@@ -109,7 +109,7 @@ Step 1: Setting up RSA keys...
 ✅ Token encrypted to JWE:
    Format: JWE (5 parts)
    Size: 1024 bytes
-   Key ID: gauth-example-2025-11
+   Key ID: agentauth-example-2025-11
 ```
 
 #### Monitoring Guide
@@ -144,7 +144,7 @@ Step 1: Setting up RSA keys...
 **Prometheus Integration**:
 ```yaml
 scrape_configs:
-  - job_name: 'gauth-jwe'
+  - job_name: 'agentauth-jwe'
     static_configs:
       - targets: ['localhost:9090']
     metrics_path: '/metrics'
@@ -185,7 +185,7 @@ scrape_configs:
 **Analysis**:
 - Overhead is higher than Phase 1 estimate (30-60%)
 - Likely due to:
-  1. Extended Token payload size (comprehensive RFC-0111 fields)
+  1. Extended Token payload size (comprehensive AAP-001 fields)
   2. RSA-OAEP-256 header overhead (256 bytes)
   3. A256GCM authentication tag (16 bytes)
   4. Base64URL encoding overhead (~33%)
@@ -228,7 +228,7 @@ scrape_configs:
 ### Code Coverage
 
 ```bash
-$ go test -cover ./pkg/gauth -run TestJWE
+$ go test -cover ./pkg/agentauth -run TestJWE
 PASS
 coverage: 64.2% of statements
 ```
@@ -300,7 +300,7 @@ coverage: 64.2% of statements
 **Problem**: JWE overhead higher than estimated (30-60%)
 
 **Root Cause**:
-- Extended Token payload is large (comprehensive RFC-0111 fields)
+- Extended Token payload is large (comprehensive AAP-001 fields)
 - RSA-OAEP-256 adds fixed 256-byte overhead
 - Base64URL encoding adds ~33% overhead
 
@@ -354,7 +354,7 @@ coverage: 64.2% of statements
 
 **Note**: Phase 2 focused on validation and integration, not new features. Compliance percentage remains at 50% (from Phase 1). Phase 3 will add production deployment features to reach 70%.
 
-### Overall RFC-0111 Compliance
+### Overall AAP-001 Compliance
 
 | Category | Before Phase 2 | After Phase 2 | Change |
 |----------|----------------|---------------|--------|
@@ -399,7 +399,7 @@ coverage: 64.2% of statements
 **Tasks**:
 
 1. **Environment Variable Configuration** (1 day)
-   - Implement `GAUTH_JWE_ENABLED`, `GAUTH_JWE_PUBLIC_KEY`, etc.
+   - Implement `AGENTAUTH_JWE_ENABLED`, `AGENTAUTH_JWE_PUBLIC_KEY`, etc.
    - Add configuration validation
    - Add default values and fallbacks
 
@@ -437,7 +437,7 @@ coverage: 64.2% of statements
 
 **Target Compliance**:
 - Security Hardening: 50% → 70% (+20%)
-- Overall RFC-0111: 79% → 81% (+2%)
+- Overall AAP-001: 79% → 81% (+2%)
 
 ---
 
@@ -474,7 +474,7 @@ JWE Phase 2 (Integration Tests & E2E Validation) has been **successfully complet
 
 ### Integration Tests
 ```bash
-$ go test -v ./pkg/gauth -run TestJWEIntegration
+$ go test -v ./pkg/agentauth -run TestJWEIntegration
 === RUN   TestJWEIntegration_TokenFormat
     jwe_integration_bench_test.go:139: ✅ JWE format test passed: 960 bytes
 --- PASS: TestJWEIntegration_TokenFormat (0.02s)
@@ -490,24 +490,24 @@ $ go test -v ./pkg/gauth -run TestJWEIntegration
     jwe_integration_bench_test.go:261: ✅ Key rotation test passed
 --- PASS: TestJWEIntegration_KeyRotation (0.11s)
 PASS
-ok      pkg/gauth      0.723s
+ok      pkg/agentauth      0.723s
 ```
 
 ### Benchmarks
 ```bash
-$ go test -bench=BenchmarkJWEIntegration ./pkg/gauth -benchmem
+$ go test -bench=BenchmarkJWEIntegration ./pkg/agentauth -benchmem
 BenchmarkJWEIntegration_FullCycle/Encrypt+Decrypt-11      1168      1015617 ns/op    1271542 B/op    249 allocs/op
 BenchmarkJWEIntegration_EncryptOnly-11                    9114       125735 ns/op    1219057 B/op    128 allocs/op
 BenchmarkJWEIntegration_DecryptOnly-11                    1428       832552 ns/op      52474 B/op    121 allocs/op
 PASS
-ok      pkg/gauth      7.160s
+ok      pkg/agentauth      7.160s
 ```
 
 ## APPENDIX B: File Inventory
 
 ### New Files Created (Phase 2)
 
-1. `pkg/gauth/jwe_integration_bench_test.go` (265 lines)
+1. `pkg/agentauth/jwe_integration_bench_test.go` (265 lines)
    - 4 integration tests + 3 benchmarks
    - Validates JWE format, size, errors, key rotation
 

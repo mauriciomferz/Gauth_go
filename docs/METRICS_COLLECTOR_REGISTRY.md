@@ -27,7 +27,7 @@ The Metrics Collector Registry Framework provides a pluggable architecture for c
 
 ```
 ┌─────────────────┐
-│  rfc0111.Service │
+│  aap001.Service │
 │   (metrics field)│
 └────────┬─────────┘
          │
@@ -76,7 +76,7 @@ The Metrics Collector Registry Framework provides a pluggable architecture for c
 import (
     "github.com/.../internal/metrics"
     "github.com/.../internal/metrics/collectors"
-    "github.com/.../pkg/rfc0111"
+    "github.com/.../pkg/aap001"
 )
 
 // Create registry
@@ -94,9 +94,9 @@ if err := registry.Register(promCollector); err != nil {
 }
 
 // Use registry with Service
-svc := rfc0111.New(
+svc := aap001.New(
     store,
-    rfc0111.WithCollectorRegistry(registry),
+    aap001.WithCollectorRegistry(registry),
 )
 ```
 
@@ -109,7 +109,7 @@ registry := metrics.NewCollectorRegistry(true)
 // Register multiple collectors
 collectors := []metrics.MetricsCollector{
     collectors.NewPrometheusCollector("prom", promMetrics, "Prometheus"),
-    collectors.NewJSONCollector("json-debug", "/tmp/gauth-metrics.json", false),
+    collectors.NewJSONCollector("json-debug", "/tmp/agentauth-metrics.json", false),
     // Add StatsD, CloudWatch, custom collectors, etc.
 }
 
@@ -120,7 +120,7 @@ for _, collector := range collectors {
 }
 
 // Use with Service
-svc := rfc0111.New(store, rfc0111.WithCollectorRegistry(registry))
+svc := aap001.New(store, aap001.WithCollectorRegistry(registry))
 
 // Later: graceful shutdown
 if errors := registry.FlushAll(); len(errors) > 0 {
@@ -218,7 +218,7 @@ registry := metrics.NewCollectorRegistry(true) // concurrent for performance
 registry.Register(collectors.NewPrometheusCollector("prom", promMetrics, "Dashboards"))
 
 // StatsD for aggregation
-registry.Register(NewStatsDCollector("statsd", "localhost:8125", "gauth"))
+registry.Register(NewStatsDCollector("statsd", "localhost:8125", "agentauth"))
 
 // CloudWatch for AWS monitoring
 registry.Register(NewCloudWatchCollector(cwClient, "AgentAuth/Production"))
@@ -237,7 +237,7 @@ mock := NewMockCollector()
 registry.Register(mock)
 
 // Run tests
-svc := rfc0111.New(store, rfc0111.WithCollectorRegistry(registry))
+svc := aap001.New(store, aap001.WithCollectorRegistry(registry))
 // ... test code ...
 
 // Assert on mock.callCounts
@@ -263,7 +263,7 @@ func main() {
     }
     
     // Create service
-    svc := rfc0111.New(store, rfc0111.WithCollectorRegistry(registry))
+    svc := aap001.New(store, aap001.WithCollectorRegistry(registry))
     
     // Start server...
 }
@@ -353,9 +353,9 @@ go func() {
 **Before:**
 ```go
 promMetrics := metrics.NewPrometheusMetrics(promRegistry)
-svc := rfc0111.New(
+svc := aap001.New(
     store,
-    rfc0111.WithMetrics(promMetrics),
+    aap001.WithMetrics(promMetrics),
 )
 ```
 
@@ -365,9 +365,9 @@ svc := rfc0111.New(
 registry := metrics.NewCollectorRegistry(true)
 registry.Register(collectors.NewPrometheusCollector("prom", promMetrics, "Main"))
 
-svc := rfc0111.New(
+svc := aap001.New(
     store,
-    rfc0111.WithCollectorRegistry(registry),
+    aap001.WithCollectorRegistry(registry),
 )
 ```
 
@@ -520,5 +520,5 @@ A: Log the errors and continue shutdown. Partial failures are acceptable for met
   - CollectorRegistry with 119-method dispatch
   - PrometheusCollector and JSONCollector examples
   - Comprehensive test suite (8 tests, 100% pass rate)
-  - `WithCollectorRegistry` option added to rfc0111.Service
+  - `WithCollectorRegistry` option added to aap001.Service
   - Status: sec7.item2 Partial → Implemented

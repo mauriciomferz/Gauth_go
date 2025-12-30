@@ -31,7 +31,7 @@ func (s *Service) BuildAuthnRequest(ctx context.Context, tenantID, providerID st
 
 	id := "_" + uuid.New().String()
 	issueInstant := time.Now().UTC().Format(time.RFC3339)
-	issuer := fmt.Sprintf("https://gauth.example.com/api/saml/acs/%s", providerID)
+	issuer := fmt.Sprintf("https://agentauth.example.com/api/saml/acs/%s", providerID)
 
 	xmlTemplate := `<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ` +
 		`xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="%s" Version="2.0" IssueInstant="%s" ` +

@@ -135,14 +135,14 @@ func (k *KMSKeyStore) Generate(ctx context.Context, tenant string) (string, erro
 
 	// Create a KMS key for this tenant key (using it as a metadata container)
 	tags := map[string]string{
-		"GauthKeyID":    keyID,
-		"GauthTenant":   tenant,
-		"GauthKeyType":  "Ed25519",
-		"GauthActive":   "false",
-		"GauthMetadata": k.encodeMetadata(keyMetadata),
+		"AgentAuthKeyID":    keyID,
+		"AgentAuthTenant":   tenant,
+		"AgentAuthKeyType":  "Ed25519",
+		"AgentAuthActive":   "false",
+		"AgentAuthMetadata": k.encodeMetadata(keyMetadata),
 	}
 
-	description := fmt.Sprintf("Gauth Ed25519 key for tenant %s (key ID: %s)", tenant, keyID)
+	description := fmt.Sprintf("AgentAuth Ed25519 key for tenant %s (key ID: %s)", tenant, keyID)
 
 	output, err := k.client.CreateKey(ctx, &CreateKeyInput{
 		KeyUsage:    "ENCRYPT_DECRYPT", // Use for metadata storage
@@ -173,8 +173,8 @@ func (k *KMSKeyStore) Activate(ctx context.Context, tenant, keyID string) error 
 	}
 
 	// Update active status
-	tags["GauthActive"] = "true"
-	tags["GauthActivatedAt"] = time.Now().UTC().Format(time.RFC3339)
+	tags["AgentAuthActive"] = "true"
+	tags["AgentAuthActivatedAt"] = time.Now().UTC().Format(time.RFC3339)
 
 	if err := k.client.TagResource(ctx, keyID, tags); err != nil {
 		return fmt.Errorf("failed to update key tags: %w", err)
@@ -190,8 +190,8 @@ func (k *KMSKeyStore) Archive(ctx context.Context, tenant, keyID string) error {
 		return fmt.Errorf("failed to get key tags: %w", err)
 	}
 
-	tags["GauthActive"] = "false"
-	tags["GauthArchivedAt"] = time.Now().UTC().Format(time.RFC3339)
+	tags["AgentAuthActive"] = "false"
+	tags["AgentAuthArchivedAt"] = time.Now().UTC().Format(time.RFC3339)
 
 	if err := k.client.TagResource(ctx, keyID, tags); err != nil {
 		return fmt.Errorf("failed to update key tags: %w", err)
@@ -214,7 +214,7 @@ func (k *KMSKeyStore) GetActive(ctx context.Context, tenant string) (*Key, error
 			continue
 		}
 
-		if tags["GauthActive"] == "true" && tags["GauthTenant"] == tenant {
+		if tags["AgentAuthActive"] == "true" && tags["AgentAuthTenant"] == tenant {
 			return key, nil
 		}
 	}
@@ -236,7 +236,7 @@ func (k *KMSKeyStore) GetKey(ctx context.Context, tenant, keyID string) (*Key, e
 	}
 
 	// Verify this key belongs to the tenant
-	if tags["GauthTenant"] != tenant {
+	if tags["AgentAuthTenant"] != tenant {
 		return nil, fmt.Errorf("key does not belong to tenant %s", tenant)
 	}
 
@@ -264,7 +264,7 @@ func (k *KMSKeyStore) ListKeys(ctx context.Context, tenant string) ([]*Key, erro
 				continue // Skip keys we can't read
 			}
 
-			if tags["GauthTenant"] == tenant {
+			if tags["AgentAuthTenant"] == tenant {
 				keyDesc, err := k.client.DescribeKey(ctx, keyEntry.KeyID)
 				if err != nil {
 					continue
@@ -296,7 +296,7 @@ func (k *KMSKeyStore) Delete(ctx context.Context, tenant, keyID string) error {
 		return fmt.Errorf("failed to get key tags: %w", err)
 	}
 
-	if tags["GauthTenant"] != tenant {
+	if tags["AgentAuthTenant"] != tenant {
 		return fmt.Errorf("key does not belong to tenant %s", tenant)
 	}
 
@@ -330,8 +330,8 @@ func (k *KMSKeyStore) deactivateAllKeys(ctx context.Context, tenant string) erro
 			continue
 		}
 
-		if tags["GauthActive"] == "true" {
-			tags["GauthActive"] = "false"
+		if tags["AgentAuthActive"] == "true" {
+			tags["AgentAuthActive"] = "false"
 			if err := k.client.TagResource(ctx, key.ID, tags); err != nil {
 				// Log error but continue deactivating other keys
 				continue
@@ -345,7 +345,7 @@ func (k *KMSKeyStore) deactivateAllKeys(ctx context.Context, tenant string) erro
 // parseKMSKey converts KMS key data to Key struct.
 func (k *KMSKeyStore) parseKMSKey(keyID string, keyDesc *DescribeKeyOutput, tags map[string]string) (*Key, error) {
 	// Decode metadata from tags
-	metadataStr := tags["GauthMetadata"]
+	metadataStr := tags["AgentAuthMetadata"]
 	if metadataStr == "" {
 		return nil, fmt.Errorf("no metadata found for key")
 	}

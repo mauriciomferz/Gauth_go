@@ -6,7 +6,7 @@
 ## 📊 Executive Overview
 
 **Status**: ✅ **PRODUCTION READY**  
-**RFC Compliance**: 95% (RFC-0111), 100% (RFC-0115)  
+**RFC Compliance**: 95% (AAP-001), 100% (AAP-002)  
 **UI Completion**: 100% (8/8 pages fully functional)  
 **Date**: November 12, 2025  
 
@@ -26,8 +26,8 @@
    - Automated setup script
 
 2. **RFC Compliance Verification & Gap Closure**
-   - Verified 95% RFC-0111 compliance (AgentAuth Authorization)
-   - Verified 100% RFC-0115 compliance (Power of Attorney)
+   - Verified 95% AAP-001 compliance (AgentAuth Authorization)
+   - Verified 100% AAP-002 compliance (Power of Attorney)
    - Fixed 3 critical integration gaps
    - Backend already had 50K+ lines of production code
    - All core P*P components implemented and wired
@@ -48,7 +48,7 @@
 
 ## ✅ What's Complete
 
-### Backend (RFC-0111/0115)
+### Backend (AAP-001/0115)
 - ✅ JWT/JWE token serialization
 - ✅ Token validation and parsing
 - ✅ OpenID Connect integration (8K+ lines)
@@ -59,7 +59,7 @@
 - ✅ PEP enforcement (547 lines)
 - ✅ PIP information point (605 lines)
 - ✅ Complete PoA implementation (16 action types)
-- ✅ RequestToken() API using RFC-0111 by default
+- ✅ RequestToken() API using AAP-001 by default
 - ✅ PDP/PEP integration wired and functional
 
 ### Frontend (React UI)
@@ -88,12 +88,12 @@
 ## 📁 Project Structure
 
 ```
-Gauth_go/
+AgentAuth/
 ├── pkg/                          # Backend Go code (~50K lines)
-│   ├── gauth/                    # Core authorization engine
+│   ├── agentauth/                    # Core authorization engine
 │   ├── policy/                   # PAP implementation (1.3K lines)
 │   ├── mcp/                      # Model Context Protocol (Phases 1-2)
-│   ├── poa/                      # Power of Attorney (RFC-0115)
+│   ├── poa/                      # Power of Attorney (AAP-002)
 │   ├── oidc/                     # OpenID Connect (8K lines)
 │   └── ...
 │
@@ -149,8 +149,8 @@ go build -o bin/web-server ./cmd/web-server
 |----------|--------|-------|
 | **Backend** | Lines of Code | ~50,000+ Go |
 | | Test Coverage | 76.9% (policy), 56.9% (MCP) |
-| | RFC-0111 Compliance | 95% ✅ |
-| | RFC-0115 Compliance | 100% ✅ |
+| | AAP-001 Compliance | 95% ✅ |
+| | AAP-002 Compliance | 100% ✅ |
 | **Frontend** | Lines of Code | 2,970 TypeScript/React |
 | | Pages Complete | 8/8 (100%) ✅ |
 | | Components | 4 reusable |
@@ -180,7 +180,7 @@ go build -o bin/web-server ./cmd/web-server
 
 ## 🎯 RFC Compliance Breakdown
 
-### RFC-0111 (AgentAuth 1.0 Authorization): 95% ✅
+### AAP-001 (AgentAuth 1.0 Authorization): 95% ✅
 
 | Component | Status | Compliance |
 |-----------|--------|-----------|
@@ -199,7 +199,7 @@ go build -o bin/web-server ./cmd/web-server
 | - OpenID Connect | ✅ 8K+ lines | 90% |
 | - MCP | ⚠️ Phases 1-2 | 60% |
 
-### RFC-0115 (Power of Attorney): 100% ✅
+### AAP-002 (Power of Attorney): 100% ✅
 
 | Component | Status | Compliance |
 |-----------|--------|-----------|
@@ -288,7 +288,7 @@ go build -o bin/web-server ./cmd/web-server
 ### Quick Links
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
-- Repository: mauriciomferz/Gauth_go
+- Repository: mauriciomferz/AgentAuth
 
 ---
 
@@ -296,8 +296,8 @@ go build -o bin/web-server ./cmd/web-server
 
 | Criterion | Target | Actual | Status |
 |-----------|--------|--------|--------|
-| RFC-0111 Compliance | 80%+ | 95% | ✅ Exceeded |
-| RFC-0115 Compliance | 90%+ | 100% | ✅ Exceeded |
+| AAP-001 Compliance | 80%+ | 95% | ✅ Exceeded |
+| AAP-002 Compliance | 90%+ | 100% | ✅ Exceeded |
 | UI Pages Complete | 8/8 | 8/8 | ✅ Met |
 | Documentation | Comprehensive | 16+ guides | ✅ Exceeded |
 | Build Success | Clean | Zero errors | ✅ Met |
@@ -311,8 +311,8 @@ go build -o bin/web-server ./cmd/web-server
 
 AgentAuth 1.0 has achieved **production-ready status** with:
 
-- ✅ **95% RFC-0111 compliance** (AgentAuth Authorization Framework)
-- ✅ **100% RFC-0115 compliance** (Power of Attorney)
+- ✅ **95% AAP-001 compliance** (AgentAuth Authorization Framework)
+- ✅ **100% AAP-002 compliance** (Power of Attorney)
 - ✅ **100% UI completion** (8/8 pages fully functional)
 - ✅ **Comprehensive documentation** (16+ guides)
 - ✅ **Zero build errors** (all code compiles)

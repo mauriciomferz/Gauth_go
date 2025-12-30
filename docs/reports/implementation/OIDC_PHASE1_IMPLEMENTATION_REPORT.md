@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Successfully implemented **OIDC Phase 1: Core Infrastructure** as the first step toward RFC-0111 OpenID Connect integration. This phase delivers production-ready Discovery Service, ID Token Service, and Identity Bridge components that enable OIDC as an identity verification mechanism in AgentAuth.
+Successfully implemented **OIDC Phase 1: Core Infrastructure** as the first step toward AAP-001 OpenID Connect integration. This phase delivers production-ready Discovery Service, ID Token Service, and Identity Bridge components that enable OIDC as an identity verification mechanism in AgentAuth.
 
 ### Key Achievements
 
@@ -35,7 +35,7 @@ Successfully implemented **OIDC Phase 1: Core Infrastructure** as the first step
 - ✅ Subject types: public, pairwise
 - ✅ Signing algorithms: RS256 (required), RS384, RS512, ES256, ES384, ES512
 - ✅ Standard scopes: openid, profile, email, phone, address
-- ✅ AgentAuth scopes: gauth:owner, gauth:client, gauth:resource, gauth:legal_entity
+- ✅ AgentAuth scopes: agentauth:owner, agentauth:client, agentauth:resource, agentauth:legal_entity
 - ✅ ACR values: 0, 1, 2, substantial, high, loa-4, InCommon IAP
 - ✅ Token auth methods: client_secret_basic, client_secret_post, private_key_jwt
 - ✅ HTTP handler with JSON response
@@ -113,7 +113,7 @@ CreateIDTokenFromIdentity(ctx, subjectID, audience, identityType, trustLevel, ad
 ### 3. Identity Bridge (`identity_bridge.go` - 282 lines)
 
 **Purpose**: Convert between OIDC and AgentAuth identity structures  
-**Integration Point**: Enable OIDC in RFC-0111 Steps I, III, VI
+**Integration Point**: Enable OIDC in AAP-001 Steps I, III, VI
 
 **Features**:
 - ✅ OIDC → AgentAuth conversion: ConvertIDTokenToIdentityProof()
@@ -282,12 +282,12 @@ DefaultACRMappings = []TrustLevelMapping{
 
 ---
 
-## RFC-0111 Integration Readiness
+## AAP-001 Integration Readiness
 
 ### Current State
 
 **Phase 1 Status**: ✅ Core infrastructure complete  
-**RFC-0111 Compliance**: Still 62% (implementation in Phase 2)
+**AAP-001 Compliance**: Still 62% (implementation in Phase 2)
 
 ### Integration Points (Phase 2)
 
@@ -431,10 +431,10 @@ DefaultACRMappings = []TrustLevelMapping{
 
 **Duration**: 4-5 days  
 **Files to Create/Modify**:
-- `pkg/gauth/pvp_oidc.go` (new, ~200 lines)
-- `pkg/gauth/subscription_flow.go` (modify, +50 lines)
-- `pkg/gauth/pvp_oidc_test.go` (new, ~300 lines)
-- `web/handlers/rfc0111/subscription_handlers.go` (modify, +30 lines)
+- `pkg/agentauth/pvp_oidc.go` (new, ~200 lines)
+- `pkg/agentauth/subscription_flow.go` (modify, +50 lines)
+- `pkg/agentauth/pvp_oidc_test.go` (new, ~300 lines)
+- `web/handlers/aap001/subscription_handlers.go` (modify, +30 lines)
 
 ### Success Criteria
 
@@ -442,7 +442,7 @@ DefaultACRMappings = []TrustLevelMapping{
 - ✅ 80%+ test coverage maintained
 - ✅ All existing tests still passing
 - ✅ Integration tests passing
-- ✅ RFC-0111 compliance: 62% → 65%
+- ✅ AAP-001 compliance: 62% → 65%
 
 ---
 
@@ -535,7 +535,7 @@ DefaultACRMappings = []TrustLevelMapping{
 | JWT Token | 100% | 100% | 100% | 100% | 100% |
 | PDP | 80% | 80% | 80% | 80% | 80% |
 | OIDC | 0% | **25%** (core infra) | **50%** (PVP) | **85%** (providers) | **90%** (production) |
-| **Overall RFC-0111** | **62%** | **62%** | **65%** | **68%** | **68%** |
+| **Overall AAP-001** | **62%** | **62%** | **65%** | **68%** | **68%** |
 
 ### OIDC Component Breakdown
 
@@ -567,7 +567,7 @@ DefaultACRMappings = []TrustLevelMapping{
 - 86 test cases (all passing)
 - OpenID Connect Core 1.0 compliant
 - eIDAS/NIST trust level support
-- Ready for RFC-0111 integration (Phase 2)
+- Ready for AAP-001 integration (Phase 2)
 
 **Next Session**: Begin Phase 2 - OIDC-Enabled PVP Integration
 

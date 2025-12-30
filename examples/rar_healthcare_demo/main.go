@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
@@ -18,7 +18,7 @@ import (
 func main() {
 	fmt.Println("=== Healthcare AI RAR Demo ===")
 
-	validator := gauth.NewRARValidator()
+	validator := agentauth.NewRARValidator()
 
 	// 2. Define the PoADefinition (Correct Structure)
 	// Dr. Smith grants RadiologyAI access to "dept:radiology:images:*"
@@ -54,7 +54,7 @@ func main() {
 		poaDef.Parties.Principal.Identity, poaDef.Parties.AuthorizedClient.Identity, poaDef.Requirements.PowerLimits.InteractionBounds)
 
 	// 3. Define the Rich Authorization Request (RAR)
-	details := []gauth.AuthorizationDetail{
+	details := []agentauth.AuthorizationDetail{
 		{
 			Type:       "healthcare_record",
 			Locations:  []string{"dept:radiology:images:patient-123"},
@@ -77,7 +77,7 @@ func main() {
 
 	// 5. Negative Test
 	fmt.Println("\n[4] Negative Test: Agent requests Oncology records...")
-	badDetails := []gauth.AuthorizationDetail{
+	badDetails := []agentauth.AuthorizationDetail{
 		{
 			Type:      "healthcare_record",
 			Locations: []string{"dept:oncology:records:patient-999"}, // Mismatch

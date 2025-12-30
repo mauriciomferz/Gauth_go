@@ -27,13 +27,13 @@ type RevocationService struct {
 }
 
 // NewRevocationService initializes the revocation system with Redis connection.
-// It returns nil if GAUTH_REVOCATION_ENABLED != "1" or initialization fails.
+// It returns nil if AGENTAUTH_REVOCATION_ENABLED != "1" or initialization fails.
 func NewRevocationService(ctx context.Context) *RevocationService {
 	// Check if revocation system is enabled
 	// Check if revocation system is enabled
-	if os.Getenv("GAUTH_REVOCATION_ENABLED") != "1" {
-		if os.Getenv("GAUTH_REVOCATION_ENABLED") != "0" && os.Getenv("GAUTH_TEST_SILENT") != "1" {
-			log.Println("[revocation] Revocation system disabled (set GAUTH_REVOCATION_ENABLED=1 to enable)")
+	if os.Getenv("AGENTAUTH_REVOCATION_ENABLED") != "1" {
+		if os.Getenv("AGENTAUTH_REVOCATION_ENABLED") != "0" && os.Getenv("AGENTAUTH_TEST_SILENT") != "1" {
+			log.Println("[revocation] Revocation system disabled (set AGENTAUTH_REVOCATION_ENABLED=1 to enable)")
 		}
 		return &RevocationService{enabled: false}
 	}
@@ -69,7 +69,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	}
 
 	// Configure two-phase timeout
-	if timeoutStr := os.Getenv("GAUTH_REVOCATION_TWOPHASE_TIMEOUT"); timeoutStr != "" {
+	if timeoutStr := os.Getenv("AGENTAUTH_REVOCATION_TWOPHASE_TIMEOUT"); timeoutStr != "" {
 		if timeout, err := time.ParseDuration(timeoutStr); err == nil {
 			twoPhase.SetDisableTimeout(timeout)
 		}
@@ -85,7 +85,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	}
 
 	// Configure optimistic revocation
-	if windowStr := os.Getenv("GAUTH_REVOCATION_OPTIMISTIC_WINDOW"); windowStr != "" {
+	if windowStr := os.Getenv("AGENTAUTH_REVOCATION_OPTIMISTIC_WINDOW"); windowStr != "" {
 		if window, err := time.ParseDuration(windowStr); err == nil {
 			optimistic.SetChallengeWindow(window)
 		}
@@ -93,7 +93,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 
 	// Initialize Circuit Breaker
 	rateLimit := 10
-	if rateLimitStr := os.Getenv("GAUTH_REVOCATION_CIRCUIT_RATE"); rateLimitStr != "" {
+	if rateLimitStr := os.Getenv("AGENTAUTH_REVOCATION_CIRCUIT_RATE"); rateLimitStr != "" {
 		if rate, err := strconv.Atoi(rateLimitStr); err == nil {
 			rateLimit = rate
 		}
@@ -208,7 +208,7 @@ func (rs *RevocationService) registerDisabledHandlers(group *gin.RouterGroup) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"success": false,
 			"error":   "revocation_disabled",
-			"message": "Revocation system is not enabled. Set GAUTH_REVOCATION_ENABLED=1 and configure Redis.",
+			"message": "Revocation system is not enabled. Set AGENTAUTH_REVOCATION_ENABLED=1 and configure Redis.",
 		})
 	}
 

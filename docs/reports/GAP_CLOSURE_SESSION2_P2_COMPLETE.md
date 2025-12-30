@@ -124,8 +124,8 @@ recover() - Loads snapshot + replays WAL
 Close() - Creates final snapshot before exit
 
 // Configuration from environment
-GAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC
-GAUTH_REPLAY_WAL_PATH
+AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC
+AGENTAUTH_REPLAY_WAL_PATH
 ```
 
 **Action Taken**: Updated gap matrix to reflect implemented status
@@ -161,7 +161,7 @@ threats:
       - control_id: "M01"
         type: "Preventive"
         implementation:
-          - "pkg/gauth/gauth.go:VerifyToken"
+          - "pkg/agentauth/agentauth.go:VerifyToken"
         status: "Implemented"
         effectiveness: "High"
     residual_risk: "Low"
@@ -183,7 +183,7 @@ threats:
 - Elevation of Privilege: 4 threats
 
 **Implementation Packages Referenced**:
-- pkg/gauth, pkg/rfc0111, pkg/replay
+- pkg/agentauth, pkg/aap001, pkg/replay
 - pkg/pdp, pkg/limits, pkg/attest, pkg/compliance
 - internal/crypto, internal/chains, internal/notary, internal/metrics
 

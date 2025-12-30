@@ -78,278 +78,278 @@ func (s *StatsDCollector) Close() error {
 // Health checks StatsD connectivity.
 func (s *StatsDCollector) Health() error {
 	// Send a heartbeat metric to verify connectivity
-	return s.client.Gauge("gauth.collector.health", 1.0, nil, 1.0)
+	return s.client.Gauge("agentauth.collector.health", 1.0, nil, 1.0)
 }
 
 // Metrics interface implementation (119 methods)
 // Each method translates to StatsD metric format
 
 func (s *StatsDCollector) IncDelegationsCreated() {
-	_ = s.client.Incr("gauth.delegations.created", nil, 1.0)
+	_ = s.client.Incr("agentauth.delegations.created", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncDelegationsPartiallyRevoked() {
-	_ = s.client.Incr("gauth.delegations.partially_revoked", nil, 1.0)
+	_ = s.client.Incr("agentauth.delegations.partially_revoked", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncDelegationDepthExceeded() {
-	_ = s.client.Incr("gauth.delegation.depth_exceeded", nil, 1.0)
+	_ = s.client.Incr("agentauth.delegation.depth_exceeded", nil, 1.0)
 }
 
 func (s *StatsDCollector) SetMaxObservedDelegationDepth(depth int) {
-	_ = s.client.Gauge("gauth.delegation.max_depth", float64(depth), nil, 1.0)
+	_ = s.client.Gauge("agentauth.delegation.max_depth", float64(depth), nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveValidationLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.validation.latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.validation.latency", d, nil, 1.0)
 }
 
 func (s *StatsDCollector) IncSignaturesIssued() {
-	_ = s.client.Incr("gauth.signatures.issued", nil, 1.0)
+	_ = s.client.Incr("agentauth.signatures.issued", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncSignatureIssueFailures() {
-	_ = s.client.Incr("gauth.signatures.issue_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.signatures.issue_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncSignatureVerifications() {
-	_ = s.client.Incr("gauth.signatures.verifications", nil, 1.0)
+	_ = s.client.Incr("agentauth.signatures.verifications", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncSignatureVerificationFailures() {
-	_ = s.client.Incr("gauth.signatures.verification_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.signatures.verification_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAttestationProofIssued() {
-	_ = s.client.Incr("gauth.attestation.issued", nil, 1.0)
+	_ = s.client.Incr("agentauth.attestation.issued", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAttestationProofIssueFailures() {
-	_ = s.client.Incr("gauth.attestation.issue_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.attestation.issue_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAttestationProofVerifications() {
-	_ = s.client.Incr("gauth.attestation.verifications", nil, 1.0)
+	_ = s.client.Incr("agentauth.attestation.verifications", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAttestationProofVerificationFailures() {
-	_ = s.client.Incr("gauth.attestation.verification_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.attestation.verification_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAttestationProofDigestMismatch() {
-	_ = s.client.Incr("gauth.attestation.digest_mismatch", nil, 1.0)
+	_ = s.client.Incr("agentauth.attestation.digest_mismatch", nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveAttestationProofVerificationLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.attestation.verification_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.attestation.verification_latency", d, nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveAttestationProofIssueLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.attestation.issue_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.attestation.issue_latency", d, nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAttestationProofVerificationFailureReason(reason string) {
 	tags := []string{fmt.Sprintf("reason:%s", reason)}
-	_ = s.client.Incr("gauth.attestation.verification_failure_reason", tags, 1.0)
+	_ = s.client.Incr("agentauth.attestation.verification_failure_reason", tags, 1.0)
 }
 
 // Revocation metrics
 func (s *StatsDCollector) IncRevocationsIssued() {
-	_ = s.client.Incr("gauth.revocations.issued", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocations.issued", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevocationIssueFailures() {
-	_ = s.client.Incr("gauth.revocations.issue_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocations.issue_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevocationVerifications() {
-	_ = s.client.Incr("gauth.revocations.verifications", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocations.verifications", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevocationVerificationFailures() {
-	_ = s.client.Incr("gauth.revocations.verification_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocations.verification_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevocationProofsIssued() {
-	_ = s.client.Incr("gauth.revocation_proofs.issued", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocation_proofs.issued", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevocationProofIssueFailures() {
-	_ = s.client.Incr("gauth.revocation_proofs.issue_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocation_proofs.issue_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevocationProofVerifications() {
-	_ = s.client.Incr("gauth.revocation_proofs.verifications", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocation_proofs.verifications", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevocationProofVerificationFailures() {
-	_ = s.client.Incr("gauth.revocation_proofs.verification_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.revocation_proofs.verification_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveRevocationProofVerificationLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.revocation_proofs.verification_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.revocation_proofs.verification_latency", d, nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveRevocationProofIssueLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.revocation_proofs.issue_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.revocation_proofs.issue_latency", d, nil, 1.0)
 }
 
 // Anchor metrics
 func (s *StatsDCollector) IncAnchorsCreated() {
-	_ = s.client.Incr("gauth.anchors.created", nil, 1.0)
+	_ = s.client.Incr("agentauth.anchors.created", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAnchorVerifications() {
-	_ = s.client.Incr("gauth.anchors.verifications", nil, 1.0)
+	_ = s.client.Incr("agentauth.anchors.verifications", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAnchorVerificationFailures() {
-	_ = s.client.Incr("gauth.anchors.verification_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.anchors.verification_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveAnchorVerificationLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.anchors.verification_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.anchors.verification_latency", d, nil, 1.0)
 }
 
 func (s *StatsDCollector) IncExternalAnchorsCreated() {
-	_ = s.client.Incr("gauth.external_anchors.created", nil, 1.0)
+	_ = s.client.Incr("agentauth.external_anchors.created", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncExternalAnchorRetries() {
-	_ = s.client.Incr("gauth.external_anchors.retries", nil, 1.0)
+	_ = s.client.Incr("agentauth.external_anchors.retries", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAnchorAttempts() {
-	_ = s.client.Incr("gauth.anchors.attempts", nil, 1.0)
+	_ = s.client.Incr("agentauth.anchors.attempts", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncAnchorFailures() {
-	_ = s.client.Incr("gauth.anchors.failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.anchors.failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncExternalAnchorForcedFailures() {
-	_ = s.client.Incr("gauth.external_anchors.forced_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.external_anchors.forced_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncCombinedAnchorEmitted() {
-	_ = s.client.Incr("gauth.combined_anchors.emitted", nil, 1.0)
+	_ = s.client.Incr("agentauth.combined_anchors.emitted", nil, 1.0)
 }
 
 // Obligation metrics
 func (s *StatsDCollector) IncObligationsExecuted() {
-	_ = s.client.Incr("gauth.obligations.executed", nil, 1.0)
+	_ = s.client.Incr("agentauth.obligations.executed", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncObligationsFailed() {
-	_ = s.client.Incr("gauth.obligations.failed", nil, 1.0)
+	_ = s.client.Incr("agentauth.obligations.failed", nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveObligationLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.obligations.latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.obligations.latency", d, nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMandatoryObligationFailures() {
-	_ = s.client.Incr("gauth.obligations.mandatory_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.obligations.mandatory_failures", nil, 1.0)
 }
 
 // Replay/cache metrics
 func (s *StatsDCollector) IncReplayCacheHits() {
-	_ = s.client.Incr("gauth.replay_cache.hits", nil, 1.0)
+	_ = s.client.Incr("agentauth.replay_cache.hits", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncReplayCacheMisses() {
-	_ = s.client.Incr("gauth.replay_cache.misses", nil, 1.0)
+	_ = s.client.Incr("agentauth.replay_cache.misses", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncReplayDetected() {
-	_ = s.client.Incr("gauth.replay.detected", nil, 1.0)
+	_ = s.client.Incr("agentauth.replay.detected", nil, 1.0)
 }
 
 func (s *StatsDCollector) SetReplayCacheSize(size int) {
-	_ = s.client.Gauge("gauth.replay_cache.size", float64(size), nil, 1.0)
+	_ = s.client.Gauge("agentauth.replay_cache.size", float64(size), nil, 1.0)
 }
 
 func (s *StatsDCollector) IncReplayStoreWrites() {
-	_ = s.client.Incr("gauth.replay_store.writes", nil, 1.0)
+	_ = s.client.Incr("agentauth.replay_store.writes", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncReplayStoreWriteFailures() {
-	_ = s.client.Incr("gauth.replay_store.write_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.replay_store.write_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveReplayStoreWriteLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.replay_store.write_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.replay_store.write_latency", d, nil, 1.0)
 }
 
 // Multi-signature metrics
 func (s *StatsDCollector) IncMultiSignatureVerifications() {
-	_ = s.client.Incr("gauth.multisig.verifications", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.verifications", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMultiSignatureVerificationFailures() {
-	_ = s.client.Incr("gauth.multisig.verification_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.verification_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMultiSignatureStructuralFailures() {
-	_ = s.client.Incr("gauth.multisig.structural_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.structural_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMultiSignatureDigestFailures() {
-	_ = s.client.Incr("gauth.multisig.digest_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.digest_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMultiSignaturePublicKeyMissing() {
-	_ = s.client.Incr("gauth.multisig.pubkey_missing", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.pubkey_missing", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMultiSignatureInvalidSignatureFailures() {
-	_ = s.client.Incr("gauth.multisig.invalid_signature", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.invalid_signature", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMultiSignatureThresholdFailures() {
-	_ = s.client.Incr("gauth.multisig.threshold_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.threshold_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncMultiSignatureWeightFailures() {
-	_ = s.client.Incr("gauth.multisig.weight_failures", nil, 1.0)
+	_ = s.client.Incr("agentauth.multisig.weight_failures", nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveMultiSignatureVerificationLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.multisig.verification_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.multisig.verification_latency", d, nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveMultiSignatureBatchSize(size int) {
-	_ = s.client.Histogram("gauth.multisig.batch_size", float64(size), nil, 1.0)
+	_ = s.client.Histogram("agentauth.multisig.batch_size", float64(size), nil, 1.0)
 }
 
 func (s *StatsDCollector) ObserveMultiSignatureAggregateLatency(d time.Duration) {
-	_ = s.client.Timing("gauth.multisig.aggregate_latency", d, nil, 1.0)
+	_ = s.client.Timing("agentauth.multisig.aggregate_latency", d, nil, 1.0)
 }
 
 // Violation metrics
 func (s *StatsDCollector) IncViolation(cat interface{}) {
 	tags := []string{fmt.Sprintf("category:%v", cat)}
-	_ = s.client.Incr("gauth.violations", tags, 1.0)
+	_ = s.client.Incr("agentauth.violations", tags, 1.0)
 }
 
 func (s *StatsDCollector) IncScopeViolations() {
-	_ = s.client.Incr("gauth.violations.scope", nil, 1.0)
+	_ = s.client.Incr("agentauth.violations.scope", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRestrictionViolations() {
-	_ = s.client.Incr("gauth.violations.restriction", nil, 1.0)
+	_ = s.client.Incr("agentauth.violations.restriction", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncUnauthorized() {
-	_ = s.client.Incr("gauth.violations.unauthorized", nil, 1.0)
+	_ = s.client.Incr("agentauth.violations.unauthorized", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncExpired() {
-	_ = s.client.Incr("gauth.violations.expired", nil, 1.0)
+	_ = s.client.Incr("agentauth.violations.expired", nil, 1.0)
 }
 
 func (s *StatsDCollector) IncRevoked() {
-	_ = s.client.Incr("gauth.violations.revoked", nil, 1.0)
+	_ = s.client.Incr("agentauth.violations.revoked", nil, 1.0)
 }
 
 // Stub implementations for remaining methods (to satisfy interface)
@@ -448,7 +448,7 @@ func (s *StatsDCollector) ObserveDistributedTraceLatency(d time.Duration)       
 func (s *StatsDCollector) SetDistributedTraceActiveSpans(count int)                   {}
 
 func (s *StatsDCollector) ObserveExternalAnchorInterval(seconds float64) {
-	_ = s.client.Histogram("gauth.external_anchor.interval", seconds, nil, 1.0)
+	_ = s.client.Histogram("agentauth.external_anchor.interval", seconds, nil, 1.0)
 }
 
 func (s *StatsDCollector) HygieneSnapshot() map[string]uint64 {

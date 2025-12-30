@@ -58,7 +58,7 @@ func InitSecurityMetrics() *SecurityMetrics {
 	metrics := &SecurityMetrics{
 		RateLimitViolations: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "gauth_rate_limit_violations_total",
+				Name: "agentauth_rate_limit_violations_total",
 				Help: "Total number of rate limit violations",
 			},
 			[]string{"endpoint", "client_ip"},
@@ -66,14 +66,14 @@ func InitSecurityMetrics() *SecurityMetrics {
 
 		DDoSBlocked: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_ddos_blocked_total",
+				Name: "agentauth_ddos_blocked_total",
 				Help: "Total number of requests blocked by DDoS protection",
 			},
 		),
 
 		AuthenticationAttempts: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "gauth_authentication_attempts_total",
+				Name: "agentauth_authentication_attempts_total",
 				Help: "Total number of authentication attempts",
 			},
 			[]string{"result"},
@@ -81,56 +81,56 @@ func InitSecurityMetrics() *SecurityMetrics {
 
 		AuthenticationFailures: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_authentication_failures_total",
+				Name: "agentauth_authentication_failures_total",
 				Help: "Total number of authentication failures",
 			},
 		),
 
 		SQLInjectionAttempts: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_sql_injection_attempts_total",
+				Name: "agentauth_sql_injection_attempts_total",
 				Help: "Total number of SQL injection attempts detected",
 			},
 		),
 
 		XSSAttempts: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_xss_attempts_total",
+				Name: "agentauth_xss_attempts_total",
 				Help: "Total number of XSS attempts detected",
 			},
 		),
 
 		PathTraversalAttempts: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_path_traversal_attempts_total",
+				Name: "agentauth_path_traversal_attempts_total",
 				Help: "Total number of path traversal attempts detected",
 			},
 		),
 
 		CORSRejected: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_cors_rejected_total",
+				Name: "agentauth_cors_rejected_total",
 				Help: "Total number of rejected CORS requests",
 			},
 		),
 
 		TokenCreated: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_token_created_total",
+				Name: "agentauth_token_created_total",
 				Help: "Total number of tokens created",
 			},
 		),
 
 		TokenValidationFailures: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_token_validation_failures_total",
+				Name: "agentauth_token_validation_failures_total",
 				Help: "Total number of token validation failures",
 			},
 		),
 
 		SecurityEvents: promauto.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "gauth_security_events_total",
+				Name: "agentauth_security_events_total",
 				Help: "Total number of security events",
 			},
 			[]string{"event_type", "severity"},
@@ -138,35 +138,35 @@ func InitSecurityMetrics() *SecurityMetrics {
 
 		CriticalSecurityEvents: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_critical_security_events_total",
+				Name: "agentauth_critical_security_events_total",
 				Help: "Total number of critical security events",
 			},
 		),
 
 		SecureRequests: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_secure_requests_total",
+				Name: "agentauth_secure_requests_total",
 				Help: "Total number of secure requests (passed all security checks)",
 			},
 		),
 
 		InsecureRequests: promauto.NewCounter(
 			prometheus.CounterOpts{
-				Name: "gauth_insecure_requests_total",
+				Name: "agentauth_insecure_requests_total",
 				Help: "Total number of insecure requests (failed security checks)",
 			},
 		),
 
 		ActiveSessions: promauto.NewGauge(
 			prometheus.GaugeOpts{
-				Name: "gauth_active_sessions",
+				Name: "agentauth_active_sessions",
 				Help: "Current number of active sessions",
 			},
 		),
 
 		RateLimitedClients: promauto.NewGauge(
 			prometheus.GaugeOpts{
-				Name: "gauth_rate_limited_clients",
+				Name: "agentauth_rate_limited_clients",
 				Help: "Current number of rate-limited clients",
 			},
 		),

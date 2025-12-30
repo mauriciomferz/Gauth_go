@@ -14,11 +14,11 @@ owners: [system]
 
 ## Executive Summary
 
-Started comprehensive integration testing for RFC-0111/0115 compliance as part of Gap G10 closure. Created initial test suite for Extended Token validation, covering authorization chains, legal frameworks, and commercial register proofs.
+Started comprehensive integration testing for AAP-001/0115 compliance as part of Gap G10 closure. Created initial test suite for Extended Token validation, covering authorization chains, legal frameworks, and commercial register proofs.
 
 ## Completed Work
 
-### 1. Extended Token Tests (`pkg/gauth/extended_token_test.go`)
+### 1. Extended Token Tests (`pkg/agentauth/extended_token_test.go`)
 **Status**: ✅ COMPLETE - All tests passing  
 **Lines of Code**: 450+  
 **Test Coverage**: Core validation, authorization chains, commercial register, legal framework, restrictions
@@ -77,11 +77,11 @@ Started comprehensive integration testing for RFC-0111/0115 compliance as part o
 === RUN   TestExtendedToken_RestrictionsValidation
 --- PASS: TestExtendedToken_RestrictionsValidation (0.00s)
 PASS
-ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth      0.246s
+ok      github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth      0.246s
 ```
 
 #### Key Validations Covered:
-1. **RFC-0111 §3 Compliance**: Extended token structure with all required fields
+1. **AAP-001 §3 Compliance**: Extended token structure with all required fields
 2. **Authorization Chain Integrity**: 3-level hierarchy validation (Owner's Authorizer → Client Owner → Client)
 3. **Chain Continuity**: Validates AuthorizedBy relationships across chain links
 4. **Commercial Register Proof**: Validates CommercialRegisterEntry and CommercialRegisterID presence
@@ -116,7 +116,7 @@ Test Coverage:
 
 Dependencies:
 - NewDefaultPVP(trustListURL string) constructor ✅
-- RFC-0111 §VII identity verification compliance ✅
+- AAP-001 §VII identity verification compliance ✅
 
 ### 3. Phase 3: Commercial Register Integration Tests (1 day) ✅ COMPLETE
 **Status**: Complete  
@@ -185,13 +185,13 @@ Dependencies:
 === RUN   TestEntityDetails_Validation
 --- PASS: TestEntityDetails_Validation (0.00s)
 PASS
-ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/registry   6.324s
+ok      github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/registry   6.324s
 ```
 
 **Results**: ✅ **28/28 tests passing** in 6.324s (includes 100ms simulated delays)
 
 #### Key Validations Covered:
-1. **RFC-0111 §II Compliance**: Commercial register verification for DE and GB jurisdictions
+1. **AAP-001 §II Compliance**: Commercial register verification for DE and GB jurisdictions
 2. **Registration Verification**: Entity name, legal form, registration date, status validation
 3. **Authorized Representatives**: Managing director and Prokura holder authority verification
 4. **Prokura Types**: Einzelprokura (sole) and validation of Prokura attributes
@@ -210,7 +210,7 @@ ok      github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentA
 Dependencies:
 - CommercialRegisterService interface (5 methods) ✅
 - MockCommercialRegisterService with seed data ✅
-- RFC-0111 §II commercial register compliance ✅
+- AAP-001 §II commercial register compliance ✅
 
 ### 4. Phase 4: PIP (Power Information Point) Tests (1.5 days) ✅ COMPLETE
 **Status**: ✅ Complete - All tests passing
@@ -333,7 +333,7 @@ ok      pkg/pip    8.416s
 2. **Nil Pointer Fixes** (pkg/verification/pvp.go:226, 242, 269): Added nil checks for ResourceOwner, ClientOwner, and Client in identity verification
 
 #### Key Validations Covered:
-1. **RFC-0111 §5 Compliance**: PIP data consolidation from multiple sources
+1. **AAP-001 §5 Compliance**: PIP data consolidation from multiple sources
 2. **Commercial Register Integration**: Verification and caching of registration data
 3. **PVP Integration**: Identity chain verification delegation
 4. **Authorization Validation**: Action, geographic, and sector restrictions
@@ -467,7 +467,7 @@ ok      pkg/poa    0.840s
 **Results**: ✅ **15/15 tests PASSING** (100% pass rate, 47 subtests)
 
 #### Key Validations Covered:
-1. **RFC-0115 Compliance**: Power of Attorney structure and validation rules
+1. **AAP-002 Compliance**: Power of Attorney structure and validation rules
 2. **Representative Types**: ManagingDirector, ProvidedWithProkura, LegalCounsel validation
 3. **Action Types**: Transactions, decisions, physical, non-physical actions
 4. **Geographic Scope**: National, EU, multiple countries, global authorization
@@ -480,8 +480,8 @@ ok      pkg/poa    0.840s
 
 Dependencies:
 - PoADefinition validation logic ✅
-- RFC-0115 representative types ✅
-- RFC-0115 action types ✅
+- AAP-002 representative types ✅
+- AAP-002 action types ✅
 - Geographic scope validation ✅
 - Industry sector validation ✅
 
@@ -549,7 +549,7 @@ Dependencies:
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/InvalidCommercialRegisterEntry (0.10s)
     --- PASS: TestGapG10E2E_ErrorHandlingFlow/BrokenAuthorizationChain (0.00s)
 PASS
-ok  github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/test/integration  0.635s
+ok  github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/test/integration  0.635s
 ```
 
 **Results**: ✅ **4/4 main tests + 12/12 subtests PASSING** (100% pass rate)
@@ -641,7 +641,7 @@ Dependencies:
 
 ## RFC Compliance Coverage
 
-### RFC-0111 (AgentAuth 1.0) - Test Coverage
+### AAP-001 (AgentAuth 1.0) - Test Coverage
 
 | Section | Requirement | Test Status |
 |---------|-------------|-------------|
@@ -655,7 +655,7 @@ Dependencies:
 | Step II/VII | Commercial Register | PENDING |
 | §5 | PIP Data Consolidation | PENDING |
 
-### RFC-0115 (Power of Attorney) - Test Coverage
+### AAP-002 (Power of Attorney) - Test Coverage
 
 | Section | Requirement | Test Status |
 |---------|-------------|-------------|
@@ -800,14 +800,14 @@ Dependencies:
 
 ### RFC Compliance Coverage
 
-**RFC-0111 (AgentAuth 1.0)**: ✅ COMPLETE
+**AAP-001 (AgentAuth 1.0)**: ✅ COMPLETE
 - §3 Extended Token Structure
 - §3 Authorization Chain (3-level hierarchy)
 - §5 PIP Data Consolidation
 - Step II Commercial Register Verification
 - Step VII PVP Identity Verification
 
-**RFC-0115 (Power of Attorney)**: ✅ COMPLETE
+**AAP-002 (Power of Attorney)**: ✅ COMPLETE
 - §A.2 Representative Types
 - §B.4 Action Types (Physical, Non-Physical, Transactions, Decisions)
 - §C Geographic Scope

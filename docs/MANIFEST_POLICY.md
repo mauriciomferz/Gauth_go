@@ -56,7 +56,7 @@ Top‑level JSON object:
 6. Compute `sha256(canonical_bytes)` → hex; store as `manifest_hash` prefixed `sha256:`.
 
 ## Signature Domain Separation
-Signing payload: `GAUTH_POLICY_MANIFEST:` + `canonical_bytes` (same bytes used for hash).
+Signing payload: `AGENTAUTH_POLICY_MANIFEST:` + `canonical_bytes` (same bytes used for hash).
 Signature: Ed25519 using active key from `crypto.GlobalEdDSARegistry` (sig_kid = active ID, sig_mode = `eddsa`).
 
 ## ETag & Caching
@@ -74,7 +74,7 @@ Mismatch Behavior: A different (stale or random) `If-None-Match` value yields a 
 2. Temporarily remove `generated_at`, `signature`, `sig_kid`, `sig_mode`, `manifest_hash` from a copy.
 3. Re-marshal copy → `canonical_bytes`.
 4. Compute local hash; compare with `manifest_hash` (prefix handling). Fail if mismatch.
-5. Prepend `GAUTH_POLICY_MANIFEST:` to `canonical_bytes`; verify Ed25519 signature using public key discovered through `/.well-known/gauth-configuration` JWKS (or dedicated EdDSA key list endpoint if available). Fail if verification fails.
+5. Prepend `AGENTAUTH_POLICY_MANIFEST:` to `canonical_bytes`; verify Ed25519 signature using public key discovered through `/.well-known/agentauth-configuration` JWKS (or dedicated EdDSA key list endpoint if available). Fail if verification fails.
 6. (Optional) Record `manifest_hash` for drift / change detection dashboards.
 6. Use `ETag` for subsequent conditional requests.
 
@@ -179,7 +179,7 @@ JSON Output (failure example):
 - Tamper detection validated in tests (altering capability version invalidates signature).
 
 ## RB4 Implementation Summary
-RB4 introduces a cryptographically signed policy manifest consolidating capability governance and action matrix into a stable, verifiable artifact. The endpoint returns a canonical JSON structure, a SHA256 manifest hash (`manifest_hash`), and an Ed25519 signature with domain separation (`GAUTH_POLICY_MANIFEST:` prefix). Caching is optimized using a weak ETag with 60 second TTL; conditional requests reduce recomputation. Error handling standardizes structured payloads via `respondError`. Instrumentation adds the `policyManifestEmitted` counter. A standalone CLI (`verify-manifest`) enables offline verification (hash + signature) supporting audits and drift monitoring. Tests cover determinism, signature verification & tamper detection, conditional caching (304), error path (`signing_unavailable`), and metrics emission.
+RB4 introduces a cryptographically signed policy manifest consolidating capability governance and action matrix into a stable, verifiable artifact. The endpoint returns a canonical JSON structure, a SHA256 manifest hash (`manifest_hash`), and an Ed25519 signature with domain separation (`AGENTAUTH_POLICY_MANIFEST:` prefix). Caching is optimized using a weak ETag with 60 second TTL; conditional requests reduce recomputation. Error handling standardizes structured payloads via `respondError`. Instrumentation adds the `policyManifestEmitted` counter. A standalone CLI (`verify-manifest`) enables offline verification (hash + signature) supporting audits and drift monitoring. Tests cover determinism, signature verification & tamper detection, conditional caching (304), error path (`signing_unavailable`), and metrics emission.
 
 ---
 RB4 schema design document.

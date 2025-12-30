@@ -253,7 +253,7 @@ This document tracks the implementation progress of the AgentAuth Admin Portal, 
   - `GET /api/admin/tokens/rotation` - Key rotation status
   - `POST /api/admin/tokens/rotation/trigger` - Manual key rotation
   - Mock data with 5 tokens, 3 blacklist entries
-  - TODO: Integrate with `pkg/gauth/extended_token_service.go`
+  - TODO: Integrate with `pkg/agentauth/extended_token_service.go`
 
 ### 12. Authorization Engine UI
 **Status: ✅ Complete**
@@ -376,7 +376,7 @@ This document tracks the implementation progress of the AgentAuth Admin Portal, 
   - `POST /api/admin/audit/siem/:id/test` - Test SIEM connection
   - `GET /api/admin/audit/metrics` - Audit metrics
   - Mock data with 6 events, 5 compliance reports, 3 correlation patterns, 3 SIEM integrations
-  - TODO: Integrate with `pkg/audit/` and `pkg/rfc0111/audit_sink_integration.go`
+  - TODO: Integrate with `pkg/audit/` and `pkg/aap001/audit_sink_integration.go`
 
 ### 17. Configuration Management System
 **Status: ✅ Complete**
@@ -399,7 +399,7 @@ This document tracks the implementation progress of the AgentAuth Admin Portal, 
   - **Tenant Overrides:** GET/POST/POST toggle/DELETE endpoints
   - **Feature Flags:** GET/POST/POST toggle/DELETE endpoints
   - Mock data with 10 environment variables, 4 services, 7 versions, 3 tenant overrides, 8 feature flags
-  - TODO: Integrate with `pkg/gauth/jwe_env_config.go`
+  - TODO: Integrate with `pkg/agentauth/jwe_env_config.go`
 
 ### 18. Revocation Transparency
 **Status: ✅ Complete**
@@ -477,7 +477,7 @@ This document tracks the implementation progress of the AgentAuth Admin Portal, 
 5. **Incomplete Error Handling:** Network errors show generic messages
 
 ### Integration Points
-- `pkg/gauth/extended_token_service.go` - Token management backend (569 lines, complete)
+- `pkg/agentauth/extended_token_service.go` - Token management backend (569 lines, complete)
 - `pkg/events/events.go` - Event system (complete)
 - `internal/crypto/multitenant_manager.go` - Key rotation (complete)
 - `pkg/oidc/dynamic_provider.go` - Multi-tenant OIDC (complete)

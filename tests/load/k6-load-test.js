@@ -238,7 +238,7 @@ export function testMexicoCURPValidation() {
 
 export function testMCPResourcesList() {
   const start = Date.now();
-  const res = http.get(`${BASE_URL}/api/v1/gauth/mcp/servers`);
+  const res = http.get(`${BASE_URL}/api/v1/agentauth/mcp/servers`);
   const duration = Date.now() - start;
 
   const success = check(res, {
@@ -351,7 +351,7 @@ export function testAuditPersistence() {
 
   let initialCount = 0;
   if (resBefore.status === 200) {
-    const match = resBefore.body.match(/gauth_audit_events_total\s+(\d+)/);
+    const match = resBefore.body.match(/agentauth_audit_events_total\s+(\d+)/);
     if (match) {
       initialCount = parseInt(match[1], 10);
     }
@@ -366,7 +366,7 @@ export function testAuditPersistence() {
 
   let finalCount = 0;
   if (resAfter.status === 200) {
-    const match = resAfter.body.match(/gauth_audit_events_total\s+(\d+)/);
+    const match = resAfter.body.match(/agentauth_audit_events_total\s+(\d+)/);
     if (match) {
       finalCount = parseInt(match[1], 10);
     }

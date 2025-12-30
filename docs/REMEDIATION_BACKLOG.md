@@ -24,13 +24,13 @@ Deliverable Types: CODE, TEST, DOC, OPS.
 | RB3 | P0 | Discovery Endpoint | `/api/v1/discovery` returns: active digest domain, algorithm list, replay strict mode, PoA version, capabilities hash, rotation tip hash. Cache-Control: 30s. | GOV | CODE(TEST,DOC) |
 | RB4 | P0 | Signed Policy Manifest | Create manifest (JSON) with capability matrix + hash; sign with Ed25519 server key; expose `/api/v1/policy/manifest`. Verify CLI mode. | GOV | CODE(TEST,DOC) |
 | RB5 | P1 | Ledger Entry Signatures | Each rotation ledger append signed (prev_hash + new_hash + timestamp). Verification tool & test chain tamper detection. | LEDGER | CODE(TEST,DOC) |
-| RB6 | P1 | Signature Agility Interface (Abstract) | Introduce `Signer` interface (Sign(msg) ([]byte,error), Algo() string, KeyID()) and `Verifier`; adapt existing Ed25519; registry returns interface. Tests unchanged digest. (Completed: attestation + manifest signing routed through rotating signer fallback; no remaining direct raw ed25519.Sign outside agility helpers.) | CRYPTO | CODE(TEST,DOC) |
+| RB6 | P1 | Signature Agility Interface (Abstract) | Introduce `Signer` interface (Sign(msg) ([]byte,error), Algo() string, KeyID() and `Verifier`; adapt existing Ed25519; registry returns interface. Tests unchanged digest. (Completed: attestation + manifest signing routed through rotating signer fallback; no remaining direct raw ed25519.Sign outside agility helpers.) | CRYPTO | CODE(TEST,DOC) |
 | RB7 | P1 | Attestation Embedded Verifier Service | Factor attestation verification logic out of `server_clean.go` into `pkg/attest`. Expose stable API & unit tests (nonce replay, signature, notarization consistency, domain signature failure modes). | SEC | CODE(TEST,DOC) |
 | RB8 | P1 | Modular HTTP Handlers | Split `server_clean.go` into packages: `web/handlers/{token,revocation,attestation,capabilities,multisig,anchor}`. Maintain identical routes & error taxonomy. | GOV | CODE(TEST,DOC) |
 | RB9 | P1 | Observability Phase 1 | OTEL spans in place: token.issue, token.validate, rotation.perform, rotation.append, attestation.verify. Prometheus counters updated (aggregate outcome + domain signature). Remaining minor tasks: confirm percentile export alignment in docs, optional error tagging. | OBS | CODE(DOC) |
 | RB10 | P1 | Revocation Consistency Phase 2 | Implement non‑trivial consistency proofs (Merkle subtree hash progression). Tests for mismatch rejection & positive path. | GOV | CODE(TEST,DOC) |
 | RB11 | P1 | Replay WAL Metrics | Add metrics: wal_pending, wal_flush_latency_ms, snapshot_duration_ms; alert thresholds in `monitoring/`. | OBS | CODE(DOC,OPS) |
-| RB12 | P2 | Delegation Depth Limit | Enforce configurable max delegation chain length (env `GAUTH_MAX_DELEGATION_DEPTH`). Return error taxonomy code `delegation_depth_exceeded`. | GOV | CODE(TEST,DOC) |
+| RB12 | P2 | Delegation Depth Limit | Enforce configurable max delegation chain length (env `AGENTAUTH_MAX_DELEGATION_DEPTH`). Return error taxonomy code `delegation_depth_exceeded`. | GOV | CODE(TEST,DOC) |
 | RB13 | P2 | Capability Version Diff Endpoint | `/api/v1/capabilities/diff?since=<hash>` returns changed capabilities for clients. | GOV | CODE(TEST,DOC) |
 | RB14 | P2 | BLS Multi-Sig Bench Harness | Separate performance harness collecting aggregate latency distribution stored under `build/badges/`. | PERF | CODE(DOC) |
 
@@ -59,7 +59,7 @@ Update status inline with badges (✅, 🚧, ⛔). Link PRs below:
 - RB4: ✅ Signed Policy Manifest (/api/v1/policy/manifest, deterministic hash + Ed25519 signature, CLI verifier, metrics counter `policy_manifest_emitted_total`)  
 - RB5: ✅ Ledger Entry Signatures (per‑entry Ed25519 signatures, verification CLI, tamper chain test, ADR index updated)  
 - RB6: ✅ Signature Agility Interface (Global rotating signer integrated; attestation and related domain-separated signing paths use agility abstraction with fallback; no remaining direct ed25519.Sign invocations in non-test code aside from agility fallback logic; docs updated.)  
-- RB7: ✅ Attestation Embedded Verifier Service (Verification extracted to `pkg/attest/verify.go`; added replay, primary signature, notarization consistency checks, domain signature validation & failure codes (invalid, prefix_missing, base64_invalid); tests: replay, mutation, domain tamper variants passing; docs updated (`ATTESTATION_SIGNING.md`))  
+- RB7: ✅ Attestation Embedded Verifier Service (Verification extracted to `pkg/attest/verify.go`; added replay, primary signature, notarization consistency checks, domain signature validation & failure codes (invalid, prefix_missing, base64_invalid); tests: replay, mutation, domain tamper variants passing; docs updated (`ATTESTATION_SIGNING.md`)  
 - RB8: 🚧 Modular HTTP Handlers (Deferred: awaiting RB6/RB7 completion to reduce merge churn; no structural refactor started)  
 - RB9: 🚧 Observability Phase 1 (Spans implemented: token.issue, token.validate, rotation.perform, rotation.append, attestation.verify; remaining: finalize percentile export alignment + optional error tagging docs)  
 - RB10: ✅ Revocation Consistency Phase 2 (Merkle subtree & progression proofs, tamper tests, benchmark baselines; ADR published)  
@@ -78,8 +78,8 @@ Sprint 3 complete (RB5, RB10, RB11). Post-Beta items RB12–RB14 implemented. Re
 |----|----------|-------|------------------------------------|-------|--------------|
 | RB15 | P2 | Domain Signature Metrics | Implemented metrics: `attestation_domain_signature_failures_total{reason="domain_signature_invalid|domain_signature_prefix_missing|domain_signature_base64_invalid"}` and `attestation_domain_signature_success_total`; provide Grafana example panel. | OBS | CODE(DOC) |
 | RB16 | P2 | Attestation Fuzz Harness | Go fuzz target mutating nonce/snapshot/signature fields; ensure only expected failure codes; integrate into nightly CI. | SEC | TEST(CODE,DOC) |
-| RB17 | P2 | Persistent Replay Backend | Redis adapter (implemented) configurable via `GAUTH_ATTEST_REPLAY_BACKEND=redis` + `GAUTH_ATTEST_REDIS_ADDR`; benchmark + external backend test added; Badger adapter deferred. | SEC | CODE(TEST,DOC) |
-| RB18 | P2 | Canonicalization v2 | Deterministic key ordering & float normalization for unsigned payload with downgrade flag `GAUTH_ATTEST_CANONICAL_V1`; signatures remain stable; migration guide. | CRYPTO | CODE(TEST,DOC) |
+| RB17 | P2 | Persistent Replay Backend | Redis adapter (implemented) configurable via `AGENTAUTH_ATTEST_REPLAY_BACKEND=redis` + `AGENTAUTH_ATTEST_REDIS_ADDR`; benchmark + external backend test added; Badger adapter deferred. | SEC | CODE(TEST,DOC) |
+| RB18 | P2 | Canonicalization v2 | Deterministic key ordering & float normalization for unsigned payload with downgrade flag `AGENTAUTH_ATTEST_CANONICAL_V1`; signatures remain stable; migration guide. | CRYPTO | CODE(TEST,DOC) |
 | RB19 | P2 | SSE Attestation Negative Tests | Validate domain signature tamper in stream via internal subscription; client re-verify soft invalid. | SEC | TEST |
 | RB20 | P2 | Signed Capability Diff Artifact | Extend RB13 diff endpoint to optionally sign diff output; hash domain separated; CLI verify mode. | GOV | CODE(TEST,DOC) |
 | RB21 | P2 | Notarization Inconsistency Test | Inject failing receipt (success=false) path; expect `notarization_inconsistent` failure code; metric increment. | SEC | TEST |
@@ -134,7 +134,7 @@ go tool cover -func=coverage.out | grep -E 'total:'
 go test ./web -run ^$ -bench BenchmarkAttestationReplay -count=3 -benchmem
 
 # Token issue benchmark (placeholder if implemented)
-go test ./pkg/gauth -bench BenchmarkTokenIssue -count=5 -benchmem || echo 'BenchmarkTokenIssue not implemented yet'
+go test ./pkg/agentauth -bench BenchmarkTokenIssue -count=5 -benchmem || echo 'BenchmarkTokenIssue not implemented yet'
 
 # Domain signature fuzz (short run)
 go test ./pkg/attest -run ^$ -fuzz=FuzzVerifyModelLimitsAttestation -fuzztime=30s

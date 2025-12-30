@@ -6,12 +6,12 @@ import (
 
 // Cache key prefixes for different types of data
 const (
-	PrefixVerification = "gauth:verification:"
-	PrefixPoA          = "gauth:poa:"
-	PrefixUser         = "gauth:user:"
-	PrefixStats        = "gauth:stats:"
-	PrefixBlockchain   = "gauth:blockchain:"
-	PrefixSession      = "gauth:session:"
+	PrefixVerification = "agentauth:verification:"
+	PrefixPoA          = "agentauth:poa:"
+	PrefixUser         = "agentauth:user:"
+	PrefixStats        = "agentauth:stats:"
+	PrefixBlockchain   = "agentauth:blockchain:"
+	PrefixSession      = "agentauth:session:"
 )
 
 // KeyBuilder provides helper methods for building cache keys
@@ -64,7 +64,7 @@ func (k *KeyBuilder) SessionKey(sessionID string) string {
 
 // InvalidatePoAPattern returns a pattern to invalidate all PoA-related cache entries
 func (k *KeyBuilder) InvalidatePoAPattern(poaID string) string {
-	return fmt.Sprintf("gauth:*:%s", poaID)
+	return fmt.Sprintf("agentauth:*:%s", poaID)
 }
 
 // InvalidateUserPattern returns a pattern to invalidate all user-related cache entries

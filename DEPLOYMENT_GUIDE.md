@@ -23,13 +23,13 @@ PORT=8080
 LOG_LEVEL=debug
 
 # Database
-DATABASE_URL=postgresql://gauth_user:secure_password@localhost:5432/gauth_staging
+DATABASE_URL=postgresql://agentauth_user:secure_password@localhost:5432/agentauth_staging
 
 # Redis (optional)
 REDIS_URL=redis://localhost:6379
 
 # Audit Export
-AUDIT_EXPORT_DIR=/var/gauth/exports
+AUDIT_EXPORT_DIR=/var/agentauth/exports
 
 # Monitoring
 ENABLE_METRICS=true
@@ -59,16 +59,16 @@ docker-compose -f docker-compose.staging.yml build
 docker-compose -f docker-compose.staging.yml up -d
 
 # Check logs
-docker-compose logs -f gauth-server
+docker-compose logs -f agentauth-server
 ```
 
 Or build locally:
 ```bash
 # Build server
-go build -o bin/gauth-server
+go build -o bin/agentauth-server
 
 # Run
-./bin/gauth-server
+./bin/agentauth-server
 ```
 
 ### 4. Health Check
@@ -222,9 +222,9 @@ go_memstats_alloc_bytes
 ### Grafana Dashboards
 
 Import dashboards from `deployments/grafana/`:
-- `gauth-overview.json` - System overview
-- `gauth-api-keys.json` - API key analytics
-- `gauth-audit.json` - Audit trail metrics
+- `agentauth-overview.json` - System overview
+- `agentauth-api-keys.json` - API key analytics
+- `agentauth-audit.json` - Audit trail metrics
 
 ---
 
@@ -244,8 +244,8 @@ psql $DATABASE_URL -c "SELECT 1;"
 **Issue**: `Export directory not writable`
 ```bash
 # Create directory with correct permissions
-mkdir -p /var/gauth/exports
-chmod 755 /var/gauth/exports
+mkdir -p /var/agentauth/exports
+chmod 755 /var/agentauth/exports
 ```
 
 **Issue**: `High memory usage`
@@ -261,13 +261,13 @@ go tool pprof http://localhost:8080/debug/pprof/heap
 
 ```bash
 # Docker logs
-docker-compose logs -f --tail=100 gauth-server
+docker-compose logs -f --tail=100 agentauth-server
 
 # Application logs (if running locally)
-tail -f /var/log/gauth/server.log
+tail -f /var/log/agentauth/server.log
 
 # Filter for errors
-docker-compose logs gauth-server | grep ERROR
+docker-compose logs agentauth-server | grep ERROR
 ```
 
 ---
@@ -318,7 +318,7 @@ If issues arise:
 docker-compose down
 
 # 2. Restore database backup (if needed)
-pg_restore -d gauth_db backup.sql
+pg_restore -d agentauth_db backup.sql
 
 # 3. Start previous version
 git checkout <previous-commit>
@@ -337,7 +337,7 @@ curl http://localhost:8080/api/v1/health
 **Compliance**: 100/100  
 **Load Tested**: 25K+ ops/sec
 
-**Repository**: https://github.com/mauriciomferz/Gauth_go  
+**Repository**: https://github.com/mauriciomferz/AgentAuth  
 **Commits**: 
 - f158d5a0f - Concurrency fix
 - fade6f86a - API key management

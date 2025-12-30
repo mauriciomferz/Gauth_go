@@ -78,7 +78,7 @@ func (rbac *RBACEngine) Authorize(req *AccessRequest) (*AuthorizationDecision, e
     decision := rbac.evaluatePermissions(allPermissions, req)
     
     // Log the decision
-    rbac.auditLogger.LogAuthorizationDecision(req, decision)
+    rbac.auditLogger.LoagentAuthorizationDecision(req, decision)
     
     return decision, nil
 }
@@ -473,7 +473,7 @@ Editing `policies.json` (e.g. flip an effect to `deny`) and saving will update d
 ### Revocation Chain Integration (AAP-001 Service)
 After revocation, validation checks chain integrity and revoked state:
 ```go
-svc := rfc0111.NewService(audit.NewMemoryLogger(nil), authzMem)
+svc := aap001.NewService(audit.NewMemoryLogger(nil), authzMem)
 // create delegation (ensure create_delegation policy permits it)
 _ = svc.RevokeDelegationCtx(ctx, poaID, grantor) // appends RevocationEvent
 err := svc.ValidateDelegationCtx(ctx, poaID, grantee, "read") // returns error: revoked
@@ -692,7 +692,7 @@ Notes:
 |------|------|---------|
 | Scopes Round Trip | `test/auth/jwt_scope_test.go` | Ensures token scopes encode/decode correctly |
 | Revocation Chain | `pkg/delegation/revocation_chain_test.go` | Hash linkage integrity & tamper detection |
-| AAP-001 Revocation Integration | `pkg/rfc0111/rfc0111_revocation_integration_test.go` | Service-level revocation enforcement |
+| AAP-001 Revocation Integration | `pkg/aap001/aap001_revocation_integration_test.go` | Service-level revocation enforcement |
 | Roles & Required Scopes | `pkg/authz/authz_enhanced_test.go` | Policy match via roles and scope set |
 | ABAC Operators | `pkg/authz/authz_enhanced_test.go` | Advanced condition operator semantics |
 
@@ -816,11 +816,11 @@ Previously token integrity outside the issuing system depended on either (a) emb
 ### Feature Flags & Preconditions
 | Flag | Purpose | Default |
 |------|---------|---------|
-| `GAUTH_POA_ENVELOPE_V2=1` | Enables V2 issuance/verification path | Off (0) |
-| `GAUTH_DETACHED_SIGNATURE=1` | Adds detached signature during issuance & enforces verification if present | Off (0) |
-| `GAUTH_EMBED_FULL_POA=1` | (Optional) Embeds full canonical PoA JSON (`RawPOA`) | Off (0) |
+| `AGENTAUTH_POA_ENVELOPE_V2=1` | Enables V2 issuance/verification path | Off (0) |
+| `AGENTAUTH_DETACHED_SIGNATURE=1` | Adds detached signature during issuance & enforces verification if present | Off (0) |
+| `AGENTAUTH_EMBED_FULL_POA=1` | (Optional) Embeds full canonical PoA JSON (`RawPOA`) | Off (0) |
 
-Detached signature issuance only occurs when BOTH V2 and `GAUTH_DETACHED_SIGNATURE` are enabled. Verification is adaptive: if the fields are present they are validated; absence when the flag is off does not fail verification (forward compatibility window).
+Detached signature issuance only occurs when BOTH V2 and `AGENTAUTH_DETACHED_SIGNATURE` are enabled. Verification is adaptive: if the fields are present they are validated; absence when the flag is off does not fail verification (forward compatibility window).
 
 ### Issuance Flow (Simplified)
 1. Construct canonical POA JSON and marshal to bytes (pre-sorted / normalized).
@@ -858,11 +858,11 @@ Current implementation reuses existing signature verification latency histogram 
 | 0 – Disabled | No detached fields emitted; verifiers ignore absence. |
 | 1 – Opt‑In (current) | Selected environments enable flag; verifiers accept both forms. |
 | 2 – Dual Metrics | Track adoption %; add explicit detached verification counters. |
-| 3 – Enforce | New flag (`GAUTH_REQUIRE_DETACHED_SIGNATURE=1` planned) rejects envelopes lacking detached signature once adoption ≥ threshold. |
+| 3 – Enforce | New flag (`AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1` planned) rejects envelopes lacking detached signature once adoption ≥ threshold. |
 | 4 – Algorithm Agility | Introduce alternate algorithms (ecdsa-p256, ed25519-batch, bls12-381) with negotiation. |
 
 ### Test Coverage
-File: `pkg/rfc0111/rfc0111_detached_signature_test.go`
+File: `pkg/aap001/aap001_detached_signature_test.go`
 | Test | Purpose |
 |------|---------|
 | `TestDetachedSignatureIssuanceAndVerification` | Happy path: issuance + verify sets `DetachedSignatureValid` |
@@ -889,7 +889,7 @@ File: `pkg/rfc0111/rfc0111_detached_signature_test.go`
 The KMS abstraction now optionally emits Prometheus metrics for core operations. Enable via environment variable:
 
 ```bash
-export GAUTH_KMS_METRICS=1
+export AGENTAUTH_KMS_METRICS=1
 ```
 
 Must be set before KMS construction (e.g. service start) so registration occurs once. The mock implementation invokes `maybeEnableKMSMetrics()` inside `NewMockKMS()`.

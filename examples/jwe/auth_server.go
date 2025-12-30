@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
@@ -32,11 +32,11 @@ func main() {
 
 	// Step 2: Create JWE service
 	fmt.Println("Step 2: Creating JWE service...")
-	jweConfig := &gauth.JWEConfig{
+	jweConfig := &agentauth.JWEConfig{
 		Enabled:    true,
 		Algorithm:  "RSA-OAEP-256",
 		Encryption: "A256GCM",
-		KeyID:      "gauth-example-2025-11",
+		KeyID:      "agentauth-example-2025-11",
 	}
 
 	tmpDir, _ := os.MkdirTemp("", "jwe-example-*")
@@ -45,13 +45,13 @@ func main() {
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
 	publicKeyPath := filepath.Join(tmpDir, "public.pem")
 
-	gauth.SaveRSAPrivateKey(privateKey, privateKeyPath)
-	gauth.SaveRSAPublicKey(publicKey, publicKeyPath)
+	agentauth.SaveRSAPrivateKey(privateKey, privateKeyPath)
+	agentauth.SaveRSAPublicKey(publicKey, publicKeyPath)
 
 	jweConfig.PublicKeyPath = publicKeyPath
 	jweConfig.PrivateKeyPath = privateKeyPath
 
-	jweService, err := gauth.NewJWEService(jweConfig)
+	jweService, err := agentauth.NewJWEService(jweConfig)
 	if err != nil {
 		log.Fatalf("Failed to create JWE service: %v", err)
 	}
@@ -59,9 +59,9 @@ func main() {
 
 	// Step 3: Create Extended Token Service
 	fmt.Println("Step 3: Creating Extended Token Service...")
-	tokenService := gauth.NewExtendedTokenService(
-		&gauth.AuthorizationChainValidator{},
-		&gauth.ComplianceValidator{},
+	tokenService := agentauth.NewExtendedTokenService(
+		&agentauth.AuthorizationChainValidator{},
+		&agentauth.ComplianceValidator{},
 		&mockPIP{},
 		"https://authserver.example.com",
 		"https://authserver.example.com",
@@ -90,7 +90,7 @@ func main() {
 		log.Fatalf("Failed to encode token: %v", err)
 	}
 
-	if !gauth.IsJWE(encodedToken) {
+	if !agentauth.IsJWE(encodedToken) {
 		log.Fatal("ERROR: Token is not JWE format!")
 	}
 
@@ -111,13 +111,13 @@ func main() {
 
 func setupKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	// Check for existing keys in environment
-	privKeyPath := os.Getenv("GAUTH_JWE_PRIVATE_KEY")
-	pubKeyPath := os.Getenv("GAUTH_JWE_PUBLIC_KEY")
+	privKeyPath := os.Getenv("AGENTAUTH_JWE_PRIVATE_KEY")
+	pubKeyPath := os.Getenv("AGENTAUTH_JWE_PUBLIC_KEY")
 
 	if privKeyPath != "" && pubKeyPath != "" {
 		// Load existing keys
 		fmt.Println("  Loading keys from environment variables...")
-		privateKey, err := gauth.LoadRSAPrivateKey(privKeyPath)
+		privateKey, err := agentauth.LoadRSAPrivateKey(privKeyPath)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -134,7 +134,7 @@ func setupKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	return privateKey, &privateKey.PublicKey, nil
 }
 
-func createSampleTokenRequest() *gauth.ExtendedTokenRequest {
+func createSampleTokenRequest() *agentauth.ExtendedTokenRequest {
 	now := time.Now()
 
 	// Sample Power of Attorney
@@ -158,14 +158,14 @@ func createSampleTokenRequest() *gauth.ExtendedTokenRequest {
 	}
 
 	// Sample Authorization Chain
-	chain := &gauth.AuthorizationChain{
-		OwnersAuthorizer: &gauth.AuthorizationLink{
+	chain := &agentauth.AuthorizationChain{
+		OwnersAuthorizer: &agentauth.AuthorizationLink{
 			EntityID:   "company-abc-123",
 			EntityType: "organization",
 			EntityName: "Company ABC Ltd.",
 			Role:       "authorizer",
 		},
-		ClientOwner: &gauth.AuthorizationLink{
+		ClientOwner: &agentauth.AuthorizationLink{
 			EntityID:   "john-doe-456",
 			EntityType: "natural_person",
 			EntityName: "John Doe",
@@ -173,28 +173,28 @@ func createSampleTokenRequest() *gauth.ExtendedTokenRequest {
 		},
 	}
 
-	return &gauth.ExtendedTokenRequest{
+	return &agentauth.ExtendedTokenRequest{
 		GrantID:            "grant-example-001",
 		Scope:              []string{"read:accounts", "write:payments"},
 		PowerOfAttorney:    samplePoA,
 		AuthorizationChain: chain,
-		LegalFramework:     &gauth.LegalFrameworkInfo{Jurisdiction: "DE"},
+		LegalFramework:     &agentauth.LegalFrameworkInfo{Jurisdiction: "DE"},
 	}
 }
 
 // Mock PIP for example
 type mockPIP struct{}
 
-func (m *mockPIP) GetClientInfo(ctx context.Context, clientID string) (*gauth.ClientInfo, error) {
-	return &gauth.ClientInfo{
+func (m *mockPIP) GetClientInfo(ctx context.Context, clientID string) (*agentauth.ClientInfo, error) {
+	return &agentauth.ClientInfo{
 		ClientID:   clientID,
 		ClientName: "Example Client",
 		Active:     true,
 	}, nil
 }
 
-func (m *mockPIP) GetAuthorizationServerInfo(ctx context.Context, serverID string) (*gauth.AuthorizationServerInfo, error) {
-	return &gauth.AuthorizationServerInfo{
+func (m *mockPIP) GetAuthorizationServerInfo(ctx context.Context, serverID string) (*agentauth.AuthorizationServerInfo, error) {
+	return &agentauth.AuthorizationServerInfo{
 		ServerID:   serverID,
 		ServerName: "Example Auth Server",
 	}, nil

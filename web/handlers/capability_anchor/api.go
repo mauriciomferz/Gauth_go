@@ -135,12 +135,12 @@ func (a *API) apiCapabilityAnchorPrometheus(c *gin.Context) {
 	last := a.handler.GetLastReceipt()
 
 	var b string
-	b += "# HELP gauth_anchor_last_timestamp_seconds Timestamp of last successful external anchor\n"
-	b += "# TYPE gauth_anchor_last_timestamp_seconds gauge\n"
+	b += "# HELP agentauth_anchor_last_timestamp_seconds Timestamp of last successful external anchor\n"
+	b += "# TYPE agentauth_anchor_last_timestamp_seconds gauge\n"
 	if !last.Timestamp.IsZero() {
-		b += fmt.Sprintf("gauth_anchor_last_timestamp_seconds %d\n", last.Timestamp.Unix())
+		b += fmt.Sprintf("agentauth_anchor_last_timestamp_seconds %d\n", last.Timestamp.Unix())
 	} else {
-		b += "gauth_anchor_last_timestamp_seconds 0\n"
+		b += "agentauth_anchor_last_timestamp_seconds 0\n"
 	}
 
 	active := 0
@@ -150,9 +150,9 @@ func (a *API) apiCapabilityAnchorPrometheus(c *gin.Context) {
 	}
 	a.handler.mu.RUnlock()
 
-	b += "# HELP gauth_anchor_provider_active Indicates if an external anchor provider is configured (1=yes, 0=no)\n"
-	b += "# TYPE gauth_anchor_provider_active gauge\n"
-	b += fmt.Sprintf("gauth_anchor_provider_active %d\n", active)
+	b += "# HELP agentauth_anchor_provider_active Indicates if an external anchor provider is configured (1=yes, 0=no)\n"
+	b += "# TYPE agentauth_anchor_provider_active gauge\n"
+	b += fmt.Sprintf("agentauth_anchor_provider_active %d\n", active)
 
 	c.Data(http.StatusOK, "text/plain; version=0.0.4", []byte(b))
 }

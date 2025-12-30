@@ -31,7 +31,7 @@ threats:
         type: "Preventive"
         description: "Short-lived tokens with bounded delegation duration"
         implementation:
-          - "pkg/gauth/gauth.go:VerifyToken"
+          - "pkg/agentauth/agentauth.go:VerifyToken"
           - "pkg/rfc0111/rfc0111.go:ValidateDelegationCtx"
         status: "Implemented"
         effectiveness: "High"
@@ -40,7 +40,7 @@ threats:
         type: "Preventive"
         description: "JTI replay cache (first-seen acceptance, then reject)"
         implementation:
-          - "pkg/gauth/replay_store_bolt.go:BoltReplayStore"
+          - "pkg/agentauth/replay_store_bolt.go:BoltReplayStore"
           - "pkg/replay/durable_replay_store.go:DurableReplayStore"
           - "pkg/rfc0111/redis_replay_store.go:RedisReplayStore"
         status: "Implemented"
@@ -126,7 +126,7 @@ threats:
         type: "Detective"
         description: "Strict authenticity mode flags missing keys"
         implementation:
-          - "pkg/gauth/gauth.go:WithStrictAuthenticity"
+          - "pkg/agentauth/agentauth.go:WithStrictAuthenticity"
           - "pkg/rfc0111/rfc0111.go:strictAuthenticity"
         status: "Implemented"
         effectiveness: "High"
@@ -157,7 +157,7 @@ threats:
         description: "Revocation chain integrity verification on validation"
         implementation:
           - "internal/chains/revocation_chain.go:VerifyIntegrity"
-          - "pkg/gauth/gauth.go:CheckRevocation"
+          - "pkg/agentauth/agentauth.go:CheckRevocation"
         status: "Implemented"
         effectiveness: "High"
         
@@ -173,8 +173,8 @@ threats:
         type: "Preventive"
         description: "Suspension and partial revocation support"
         implementation:
-          - "pkg/gauth/gauth.go:SuspendDelegation"
-          - "pkg/gauth/gauth.go:PartialRevocation"
+          - "pkg/agentauth/agentauth.go:SuspendDelegation"
+          - "pkg/agentauth/agentauth.go:PartialRevocation"
         status: "Implemented"
         effectiveness: "High"
         
@@ -233,7 +233,7 @@ threats:
         type: "Preventive"
         description: "BoltDB ACID properties with atomic writes"
         implementation:
-          - "pkg/gauth/bolt_repository.go"
+          - "pkg/agentauth/bolt_repository.go"
         status: "Implemented"
         effectiveness: "Medium"
         
@@ -328,7 +328,7 @@ threats:
         type: "Preventive"
         description: "Strict authenticity mode rejects missing keys"
         implementation:
-          - "pkg/gauth/gauth.go:WithStrictAuthenticity"
+          - "pkg/agentauth/agentauth.go:WithStrictAuthenticity"
           - "pkg/rfc0111/rfc0111.go:strictAuthenticity"
         status: "Implemented"
         effectiveness: "High"
@@ -357,7 +357,7 @@ threats:
         type: "Preventive"
         description: "Explicit size caps on scope and restrictions"
         implementation:
-          - "pkg/gauth/size_limits.go:ValidateSizeLimits"
+          - "pkg/agentauth/size_limits.go:ValidateSizeLimits"
           - "pkg/limits/limits.go"
         status: "Implemented"
         effectiveness: "High"
@@ -448,7 +448,7 @@ coverage:
 
 # Implementation references
 implementation_packages:
-  - pkg/gauth
+  - pkg/agentauth
   - pkg/rfc0111
   - pkg/replay
   - pkg/pdp

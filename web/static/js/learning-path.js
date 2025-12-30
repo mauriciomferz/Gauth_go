@@ -20,17 +20,17 @@ class AgentAuthLearningPath {
     bindEvents() {
         // Module navigation
         document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-start-module]')) {
+            if (e.target.matches('[data-start-module]') {
                 const moduleId = e.target.dataset.startModule;
                 this.startModule(moduleId);
             }
-            if (e.target.matches('[data-next-step]')) {
+            if (e.target.matches('[data-next-step]') {
                 this.nextStep();
             }
-            if (e.target.matches('[data-prev-step]')) {
+            if (e.target.matches('[data-prev-step]') {
                 this.previousStep();
             }
-            if (e.target.matches('[data-run-exercise]')) {
+            if (e.target.matches('[data-run-exercise]') {
                 const exerciseId = e.target.dataset.runExercise;
                 this.runExercise(exerciseId);
             }
@@ -923,7 +923,7 @@ class AgentAuthLearningPath {
         Object.keys(modules).forEach(moduleId => {
             const el = document.querySelector(`[data-module="${moduleId}"] .progress-indicator`);
             if (el) {
-                if (this.completedModules.has(moduleId)) {
+                if (this.completedModules.has(moduleId) {
                     el.className = 'progress-indicator completed';
                     el.textContent = '✓';
                 } else if (moduleId === this.currentModule) {
@@ -939,7 +939,7 @@ class AgentAuthLearningPath {
 
     loadProgress() {
         try {
-            const saved = localStorage.getItem('gauth-learning-progress');
+            const saved = localStorage.getItem('agentauth-learning-progress');
             if (saved) {
                 const progress = JSON.parse(saved);
                 this.completedModules = new Set(progress.completed || []);
@@ -957,7 +957,7 @@ class AgentAuthLearningPath {
                 user: this.userProgress,
                 lastUpdated: new Date().toISOString()
             };
-            localStorage.setItem('gauth-learning-progress', JSON.stringify(progress));
+            localStorage.setItem('agentauth-learning-progress', JSON.stringify(progress));
         } catch (error) {
             console.warn('Failed to save learning progress:', error);
         }

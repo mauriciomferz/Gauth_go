@@ -40,7 +40,7 @@ func main() {
 		Scopes:    scopes,
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(duration),
-		Issuer:    "gauth-demo",
+		Issuer:    "agentauth-demo",
 	}
 	// Note: Generate method not available in current API
 	fmt.Printf("Would generate JWT for token: %s\n", tokenObj.ID)
@@ -84,7 +84,7 @@ func main() {
 		Scopes:    scopes,
 		IssuedAt:  time.Now().Add(-2 * time.Hour),
 		ExpiresAt: time.Now().Add(-1 * time.Hour), // Already expired
-		Issuer:    "gauth-demo",
+		Issuer:    "agentauth-demo",
 	}
 	// Note: Generate method not available in current API
 	fmt.Printf("Would generate expired JWT for token: %s\n", expiredTokenObj.ID)

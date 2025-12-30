@@ -284,7 +284,7 @@ Duration: 0.548s
 
 ## Files Created
 
-1. **Test File**: `pkg/gauth/external/us_identity_verifier_test.go`
+1. **Test File**: `pkg/agentauth/external/us_identity_verifier_test.go`
    - 737 lines
    - 15 test functions
    - 50+ test cases (with table-driven tests)
@@ -326,8 +326,8 @@ Duration: 0.548s
 
 ### Short-Term (P2)
 2. **Implement API Providers**:
-   - Create `pkg/gauth/external/providers/persona_provider.go`
-   - Create `pkg/gauth/external/providers/trulioo_provider.go`
+   - Create `pkg/agentauth/external/providers/persona_provider.go`
+   - Create `pkg/agentauth/external/providers/trulioo_provider.go`
    - Obtain sandbox API keys
    - Integration tests with real APIs
 

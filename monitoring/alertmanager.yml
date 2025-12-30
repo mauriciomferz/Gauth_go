@@ -1,6 +1,6 @@
 global:
   smtp_smarthost: 'localhost:587'
-  smtp_from: 'gauth-alerts@company.com'
+  smtp_from: 'agentauth-alerts@company.com'
 
 route:
   group_by: ['alertname']

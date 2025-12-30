@@ -19,7 +19,7 @@ The Beta MVP has progressed through the Week 2 enhancement plan and advanced Wee
 - Expanded PoA lifecycle states (`suspended`, `terminated`) with dedicated endpoints and anchoring events.
 - A tamper-evident hash-chain audit ledger (append-only, BoltDB-backed) with verification, export (NDJSON/CSV), and size metrics.
 - Metrics instrumentation for issuance, revocation reasons, audit ledger appends/size, lifecycle status transitions, and groundwork for sub-delegation depth metrics (depth field added).
-- Partial persistent PoA repository activation (BoltDB) via `GAUTH_PERSIST_PATH` env selection (durability tests implemented for restart resilience).
+- Partial persistent PoA repository activation (BoltDB) via `AGENTAUTH_PERSIST_PATH` env selection (durability tests implemented for restart resilience).
 - Sub-delegation structural fields (`parent_poa_id`, `delegation_depth`) added to PoA objects and request model with max depth validation.
 - Conservative scope inheritance enforcement (child scope must be subset: exact match or covered by parent prefix wildcard) implemented with tests.
 - Dual-control (quorum) revocation workflow with suspension during pending state (supports count or weight quorum via env configuration) and full metrics instrumentation (initiation, approvals, quorum satisfied, cancellations, failures, unauthorized attempts) + tests (count quorum + weight quorum + unauthorized attempt). Test-only helper isolated via build tag.
@@ -30,7 +30,7 @@ The Beta MVP has progressed through the Week 2 enhancement plan and advanced Wee
 Remaining gaps now center on hierarchical digest cascade revocation implementation (design completed), persistent PoA durability validation (formal migration + restart resilience docs), and V4 domain validation-time verification.
 
 ## Scope
-- Components assessed: `examples/ai_capability_demo`, `pkg/rfc0111`, multisig tests, JWT/JWKS auth middleware, SQLite decision persistence.
+- Components assessed: `examples/ai_capability_demo`, `pkg/aap001`, multisig tests, JWT/JWKS auth middleware, SQLite decision persistence.
 - Standards: AAP-001 (Delegation & Authorization protocol core) and AAP-002 (PoA definition attributes).
 
 ## Achievements (Cumulative to Week 2)
@@ -52,7 +52,7 @@ Remaining gaps now center on hierarchical digest cascade revocation implementati
 | Gap | Risk / Impact | Status |
 |-----|--------------|--------|
 | Persistent PoA durability tests | Unverified restart resilience | PARTIAL (repo wired) |
-| Scope inheritance for sub-delegation | Over-broad child authority risk | COMPLETE (subset + prefix wildcard + regex patterns gated by GAUTH_ENABLE_ADVANCED_SCOPE) |
+| Scope inheritance for sub-delegation | Over-broad child authority risk | COMPLETE (subset + prefix wildcard + regex patterns gated by AGENTAUTH_ENABLE_ADVANCED_SCOPE) |
 | Hierarchical digest domain | Absent parent linkage & depth integrity in digest | IN PROGRESS (V4 canonical + ParentDigest + validation mismatch checks implemented; **Prometheus metrics fully implemented**; cascade semantics & README/OpenAPI docs pending) |
 | Evidence hash attachments | Attestation evidentiary strength limited | IMPLEMENTED (endpoint + metrics) |
 | Replay store for PoA operations | Signature replay exploitation | IMPLEMENTED (signature digest+keyID replay store, fail-open/closed semantics, metrics hits/misses/errors/latency) |
@@ -113,13 +113,13 @@ Tamper detection test introduced (`TestAuditLedgerTamper`) validates integrity o
 - **Operational Alerts**: Alert on rapid increases in `hier_digest_parent_digest_missing_total` (parent fetch failures)
 - **Validation Monitoring**: Track `hier_digest_version_mismatch_total` for client/server version alignment issues
 
-**Cascade Revocation Design**: Comprehensive implementation plan documented with environment configuration (`GAUTH_CASCADE_PARENT_REVOCATION`, `GAUTH_CASCADE_MODE`, `GAUTH_CASCADE_MAX_DEPTH`), batch processing, and administrative restoration capabilities.
+**Cascade Revocation Design**: Comprehensive implementation plan documented with environment configuration (`AGENTAUTH_CASCADE_PARENT_REVOCATION`, `AGENTAUTH_CASCADE_MODE`, `AGENTAUTH_CASCADE_MAX_DEPTH`), batch processing, and administrative restoration capabilities.
 
 ## Sub-Delegation Model Concept (Implemented Foundations)
 | Field | Purpose | Status |
 |-------|---------|--------|
 | `parent_poa_id` | Links child delegation to parent | Implemented (request + struct) |
-| `delegation_depth` | Derived; ensures configurable max depth via `GAUTH_MAX_DELEGATION_DEPTH` | Implemented (validation + test) |
+| `delegation_depth` | Derived; ensures configurable max depth via `AGENTAUTH_MAX_DELEGATION_DEPTH` | Implemented (validation + test) |
 | `inherited_scope` | Intersection of parent scope & requested child scope | Conservative subset enforced (exact or prefix wildcard) |
 | Canonical Digest Impact | Exclude dynamic depth fields; new domain version when hierarchy present | Pending digest version rules update |
 

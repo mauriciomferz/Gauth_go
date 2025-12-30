@@ -17,7 +17,7 @@ owners: [system]
 - **Binary Size**: 49MB
 - **Build Time**: November 22, 2025 18:03
 - **Compilation**: SUCCESS (zero errors)
-- **Location**: `/tmp/test-gauth`
+- **Location**: `/tmp/test-agentauth`
 
 ### ✅ Test 2: Graceful Degradation (No Database)
 **Configuration**: No `DB_HOST` environment variable set
@@ -38,7 +38,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_USER=test
 DB_PASSWORD=test
-DB_NAME=gauth_test
+DB_NAME=agentauth_test
 DB_SSLMODE=disable
 ```
 
@@ -54,7 +54,7 @@ DB_SSLMODE=disable
 ### ✅ Test 4: Code Structure Verification
 
 **Imports Verified**:
-- ✅ `github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/database`
+- ✅ `github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/database`
 - ✅ `adminHandlers` alias for admin package
 
 **Handler Instantiation Verified**:
@@ -103,7 +103,7 @@ When a PostgreSQL database is properly configured and running:
 
 **With Invalid Database** (connection fails):
 ```log
-[database] connection failed: failed to ping database: failed to connect to `user=test database=gauth_test`
+[database] connection failed: failed to ping database: failed to connect to `user=test database=agentauth_test`
 [database] admin handlers will not be initialized
 ```
 
@@ -166,20 +166,20 @@ When a PostgreSQL database is properly configured and running:
 
 ### Test Server Startup (No Database)
 ```bash
-export GAUTH_JWT_SIGNING_KEY="test-key"
-/tmp/test-gauth
+export AGENTAUTH_JWT_SIGNING_KEY="test-key"
+/tmp/test-agentauth
 # Expected: "[database] DB_HOST not configured, admin handlers will not be initialized"
 ```
 
 ### Test Server with Database Attempt
 ```bash
-export GAUTH_JWT_SIGNING_KEY="test-key"
+export AGENTAUTH_JWT_SIGNING_KEY="test-key"
 export DB_HOST=localhost
 export DB_PORT=5432
 export DB_USER=postgres
 export DB_PASSWORD=password
-export DB_NAME=gauth
-/tmp/test-gauth
+export DB_NAME=agentauth
+/tmp/test-agentauth
 # Expected: Either connection success or error with graceful handling
 ```
 
@@ -212,7 +212,7 @@ Before deploying to production:
 - [ ] Set `DB_NAME` (required)
 - [ ] Configure `DB_SSLMODE=require` for production
 - [ ] Tune connection pool settings (`DB_MAX_CONNS`, `DB_MIN_CONNS`)
-- [ ] Set `GAUTH_JWT_SIGNING_KEY` (required for server startup)
+- [ ] Set `AGENTAUTH_JWT_SIGNING_KEY` (required for server startup)
 
 ### Security
 - [ ] Enable SSL/TLS for database connections

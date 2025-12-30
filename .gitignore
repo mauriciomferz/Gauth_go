@@ -52,7 +52,7 @@ Thumbs.db
 # Logs
 *.log
 server.log
-gauth-web.log
+agentauth-web.log
 *.pid
 
 # Lint and build reports
@@ -64,17 +64,17 @@ build/*.json
 build/*.md
 
 # Built executables
-gauth-server
-gauth-web
-gauth-http-server
+agentauth-server
+agentauth-web
+agentauth-http-server
 demo
 demo_cascade
 demo_cascade_build
 demo_executable
-gauth-original-demo
-gauth-server
+agentauth-original-demo
+agentauth-server
 !cmd/web-server/main.go
-gauth-web-server
+agentauth-web-server
 main
 basic
 basic_example
@@ -82,7 +82,7 @@ cascade_main
 # Test executables
 advanced
 advanced_revocation_flow
-advanced_gauth_rfc_001_flow
+advanced_agentauth_rfc_001_flow
 advanced_server
 basic_server
 combined_rfc_demo
@@ -94,7 +94,7 @@ key_rotation
 # ledger-verify
 microservices
 professional_interfaces_demo
-gauth_rfc_001_protocol_flow
+agentauth_rfc_001_protocol_flow
 rfc_0115_poa_definition
 rfc_functional_test
 rfc_implementation_demo
@@ -129,7 +129,7 @@ bench_summary.txt
 
 # Test artifacts
 testdata/
-gauth-demo-app/web/backend/test-build
+agentauth-demo-app/web/backend/test-build
 test/tmp/
 test_results.txt
 internal/crypto/test_recovery.json
@@ -168,11 +168,11 @@ yarn-error.log*
 /logs/server.log
 
 # Demo and example binaries
-gauth-demo
-gauth-demo-*
-gauth-backend*
-gauth-enhanced-*
-gauth-gauth_rfc_001-*
+agentauth-demo
+agentauth-demo-*
+agentauth-backend*
+agentauth-enhanced-*
+agentauth-agentauth_rfc_001-*
 # Ignore built server binaries but not source directories
 bin/*-server
 bin/web-server-new

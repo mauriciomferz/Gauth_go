@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	_ "net/http/pprof" // #nosec G108 // Enable pprof HTTP handlers, gated by GAUTH_ENABLE_PPROF
+	_ "net/http/pprof" // #nosec G108 // Enable pprof HTTP handlers, gated by AGENTAUTH_ENABLE_PPROF
 	"os"
 	"strings"
 	"time"
@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	if *healthcheck {
-		url := config.Get("GAUTH_HEALTH_URL", "http://localhost:8080/api/v1/beta/health")
+		url := config.Get("AGENTAUTH_HEALTH_URL", "http://localhost:8080/api/v1/beta/health")
 		client := &http.Client{Timeout: 3 * time.Second}
 		resp, err := client.Get(url)
 		if err != nil {
@@ -39,7 +39,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	port := os.Getenv("GAUTH_WEB_PORT")
+	port := os.Getenv("AGENTAUTH_WEB_PORT")
 	if port == "" {
 		port = "8080"
 	}
@@ -50,9 +50,9 @@ func main() {
 		port = ":" + port
 	}
 
-	// Enable pprof profiling endpoints if GAUTH_ENABLE_PPROF=1
-	if os.Getenv("GAUTH_ENABLE_PPROF") == "1" {
-		pprofPort := os.Getenv("GAUTH_PPROF_PORT")
+	// Enable pprof profiling endpoints if AGENTAUTH_ENABLE_PPROF=1
+	if os.Getenv("AGENTAUTH_ENABLE_PPROF") == "1" {
+		pprofPort := os.Getenv("AGENTAUTH_PPROF_PORT")
 		if pprofPort == "" {
 			pprofPort = "6060"
 		}

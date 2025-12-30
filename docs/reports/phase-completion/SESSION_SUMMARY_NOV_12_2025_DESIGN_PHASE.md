@@ -2,7 +2,7 @@
 ## November 12, 2025 - OIDC & MCP Architecture Design
 
 **Session Type**: Design & Architecture  
-**Focus**: RFC-0111 P1 Requirements (Building Blocks)  
+**Focus**: AAP-001 P1 Requirements (Building Blocks)  
 **Duration**: Extended session  
 **Status**: ✅ **COMPLETE**
 
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-This session focused on **designing comprehensive architectures** for the two remaining **Priority 1 (P1) RFC-0111 requirements**: OpenID Connect (OIDC) and Model Context Protocol (MCP). Both are explicitly required building blocks per RFC-0111 Section 1 (Scope).
+This session focused on **designing comprehensive architectures** for the two remaining **Priority 1 (P1) AAP-001 requirements**: OpenID Connect (OIDC) and Model Context Protocol (MCP). Both are explicitly required building blocks per AAP-001 Section 1 (Scope).
 
 ### Key Achievements
 
@@ -38,9 +38,9 @@ This session focused on **designing comprehensive architectures** for the two re
 5. **OIDC-Enabled PowerVerificationPoint** - Extend existing PVP interface
 
 **Integration Points**:
-- RFC-0111 Step I: Owner's Authorizer Identity Proof
-- RFC-0111 Step III: Client Owner Identity Proof
-- RFC-0111 Step VI: Resource Owner Identity Proof
+- AAP-001 Step I: Owner's Authorizer Identity Proof
+- AAP-001 Step III: Client Owner Identity Proof
+- AAP-001 Step VI: Resource Owner Identity Proof
 
 **Implementation Plan**:
 - **Phase 1** (Week 1): Core OIDC infrastructure (Discovery, ID Token Service, Identity Bridge)
@@ -123,7 +123,7 @@ mcp:prompt:get                 - Access prompt templates
 
 ### Design Principles
 
-1. **RFC-0111 Compliance First** - Both designs explicitly satisfy building block requirements
+1. **AAP-001 Compliance First** - Both designs explicitly satisfy building block requirements
 2. **Standards-Based** - Use official specifications (OIDC, MCP, JSON-RPC 2.0)
 3. **Security by Design** - Zero-trust, policy enforcement, audit logging
 4. **Backward Compatibility** - Maintain existing AgentAuth functionality
@@ -148,21 +148,21 @@ mcp:prompt:get                 - Access prompt templates
 | PDP Implementation | 80% | ✅ Implemented (previous session) |
 | OIDC Integration | 0% | ❌ Not implemented |
 | MCP Integration | 0% | ❌ Not implemented |
-| **Overall RFC-0111** | **62%** | 🟡 Functional but incomplete |
+| **Overall AAP-001** | **62%** | 🟡 Functional but incomplete |
 
 ### After OIDC Implementation (Projected)
 
 | Component | Compliance | Status |
 |-----------|------------|--------|
 | OIDC Integration | 90% | ✅ Designed (this session) |
-| **Overall RFC-0111** | **68%** | 🟢 Enterprise-ready identity |
+| **Overall AAP-001** | **68%** | 🟢 Enterprise-ready identity |
 
 ### After MCP Implementation (Projected)
 
 | Component | Compliance | Status |
 |-----------|------------|--------|
 | MCP Integration | 85% | ✅ Designed (this session) |
-| **Overall RFC-0111** | **75%** | 🟢 **Production-ready threshold** |
+| **Overall AAP-001** | **75%** | 🟢 **Production-ready threshold** |
 
 ---
 
@@ -175,7 +175,7 @@ mcp:prompt:get                 - Access prompt templates
 - `pkg/oidc/id_token.go` - ID token service (200 lines estimated)
 - `pkg/oidc/identity_bridge.go` - Identity bridge (150 lines estimated)
 - `pkg/oidc/provider_client.go` - External provider client (250 lines estimated)
-- `pkg/gauth/pvp_oidc.go` - OIDC-enabled PVP (200 lines estimated)
+- `pkg/agentauth/pvp_oidc.go` - OIDC-enabled PVP (200 lines estimated)
 
 **Total Estimated Code**: ~1,000 lines production code + ~800 lines tests
 
@@ -193,7 +193,7 @@ mcp:prompt:get                 - Access prompt templates
 - `pkg/mcp/audit_logger.go` - Audit logger (150 lines estimated)
 - `pkg/mcp/transport.go` - Transport implementations (300 lines estimated)
 - `pkg/gagent/mcp_integration.go` - Agent MCP wrapper (200 lines estimated)
-- `pkg/gauth/pdp_bridge_mcp.go` - PDP MCP integration (150 lines estimated)
+- `pkg/agentauth/pdp_bridge_mcp.go` - PDP MCP integration (150 lines estimated)
 
 **Total Estimated Code**: ~1,750 lines production code + ~1,200 lines tests
 
@@ -384,7 +384,7 @@ Week 9-12:  Production Hardening
 
 ### Quantitative Metrics
 
-- ✅ **RFC-0111 Compliance**: 62% → 75% (+13%)
+- ✅ **AAP-001 Compliance**: 62% → 75% (+13%)
 - ✅ **Code Coverage**: 80%+ (unit tests)
 - ✅ **Performance**: <100ms OIDC validation, <500ms MCP operations
 - ✅ **Documentation**: 3,000+ lines architecture docs (complete)
@@ -404,7 +404,7 @@ Week 9-12:  Production Hardening
 
 ### For Executive Leadership
 
-**Bottom Line**: Two critical RFC-0111 requirements (OIDC and MCP) now have comprehensive, production-ready architecture designs. Combined implementation will increase compliance from 62% to 75%, reaching the **production-ready threshold**.
+**Bottom Line**: Two critical AAP-001 requirements (OIDC and MCP) now have comprehensive, production-ready architecture designs. Combined implementation will increase compliance from 62% to 75%, reaching the **production-ready threshold**.
 
 **Investment**: 12 weeks, 2-3 engineers  
 **ROI**: Enterprise-grade identity integration + AI resource governance  
@@ -476,7 +476,7 @@ Week 9-12:  Production Hardening
 
 ## Conclusion
 
-This session successfully **designed comprehensive, production-ready architectures** for both OIDC and MCP integration—the two remaining Priority 1 requirements from RFC-0111. 
+This session successfully **designed comprehensive, production-ready architectures** for both OIDC and MCP integration—the two remaining Priority 1 requirements from AAP-001. 
 
 **Key Accomplishments**:
 ✅ **3,003 lines** of detailed architecture documentation  

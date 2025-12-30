@@ -25,7 +25,7 @@ refreshCadence: annually
 ```
 AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/
 ├── pkg/                  # Core packages (auth, authz, audit, delegation, policy, token, rate/ratelimit, events, compliance, validation, etc.)
-│   ├── gauth/            # High-level service facade (authorization lifecycle)
+│   ├── agentauth/            # High-level service facade (authorization lifecycle)
 │   ├── auth/             # Authentication primitives
 │   ├── authz/            # Authorization engine (memory + regex metrics)
 │   ├── audit/            # Hash‑chained audit logging
@@ -35,10 +35,10 @@ AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/
 │   ├── events/           # Typed event hub
 │   ├── ratelimit/        # Unified interface + token bucket wrapper
 │   ├── resilience/       # Retry / bulkhead patterns
-│   └── ...               # Additional RFC & utility packages (store, testutil, rfc0111, compliance, validation)
+│   └── ...               # Additional RFC & utility packages (store, testutil, aap001, compliance, validation)
 │
 ├── internal/             # Internal helpers (circuit breaker, rate limiting, etc.)
-├── cmd/                  # Server entry points (web-server, gauth-server)
+├── cmd/                  # Server entry points (web-server, agentauth-server)
 ├── web/                  # Beta web UI (embedded assets & handlers)
 ├── examples/             # Extensive runnable examples (delegation, policy, token, resilience, tracing ...)
 ├── test/                 # Cross‑package tests & benchmarks
@@ -55,7 +55,7 @@ AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/
 **⚠️ IMPORTANT**: This is a **beta implementation** designed for learning and demonstration purposes only. **NOT production ready. Do NOT use for real security, production, or commercial deployment.**
 
 **Beta Verification Snapshot (Representative, Not Exhaustive):**
-- ✅ Core servers build (`web-server`, `gauth-server`)
+- ✅ Core servers build (`web-server`, `agentauth-server`)
 - ✅ Delegation + token examples run
 - ✅ Policy provenance endpoints exposed
 - ✅ Audit chain verification tests pass

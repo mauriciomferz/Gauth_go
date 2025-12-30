@@ -7,7 +7,7 @@ import { backoffFetchJSON } from './refresh.js';
 const REFRESH_MS = 20000;
 
 function formatAge(sec) {
-  if (typeof sec !== 'number' || isNaN(sec)) return '—';
+  if (typeof sec !== 'number' || isNaN(sec) return '—';
   if (sec < 60) return sec.toFixed(0) + 's';
   if (sec < 3600) return (sec/60).toFixed(1) + 'm';
   return (sec/3600).toFixed(1) + 'h';

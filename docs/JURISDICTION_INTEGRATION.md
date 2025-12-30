@@ -52,14 +52,14 @@ CreateDelegationCtx()                    VerifyToken()
 
 ### Files Added/Modified
 
-1. **pkg/rfc0111/jurisdiction_integration.go** (NEW, 265 lines)
+1. **pkg/aap001/jurisdiction_integration.go** (NEW, 265 lines)
    - `WithJurisdictionEnforcement()` option
    - `enforceJurisdictionOnIssuance()` - gates delegation creation
    - `enforceJurisdictionOnVerification()` - validates token usage
    - `ExtractJurisdictionFromPOA()` - jurisdiction extraction helper
    - `ValidateJurisdictionCompliance()` - standalone validation
 
-2. **pkg/rfc0111/jurisdiction_integration_test.go** (NEW, 380 lines)
+2. **pkg/aap001/jurisdiction_integration_test.go** (NEW, 380 lines)
    - 9 comprehensive integration tests
    - EU GDPR consent scenarios
    - US CCPA opt-out scenarios
@@ -67,7 +67,7 @@ CreateDelegationCtx()                    VerifyToken()
    - Data residency enforcement
    - Blocked actions testing
 
-3. **pkg/rfc0111/rfc0111.go** (MODIFIED)
+3. **pkg/aap001/aap001.go** (MODIFIED)
    - Added `jurisdictionEnforcement *JurisdictionEnforcement` field to `Service` struct (line 1288)
    - Added `Claims map[string]interface{}` field to `DelegationRequest` struct (line 459)
    - Added jurisdiction enforcement call in `CreateDelegationCtx()` (line 1747)
@@ -79,10 +79,10 @@ CreateDelegationCtx()                    VerifyToken()
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/rfc0111"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/jurisdiction"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/audit"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/authz"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/aap001"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/jurisdiction"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/audit"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/authz"
 )
 
 // Create jurisdiction enforcement integration
@@ -92,10 +92,10 @@ integration := jurisdiction.NewServerIntegration()
 logger := audit.NewMemoryLogger(nil)
 authorizer := authz.NewMemoryAuthorizer()
 
-svc := rfc0111.NewService(
+svc := aap001.NewService(
     logger,
     authorizer,
-    rfc0111.WithJurisdictionEnforcement(integration),
+    aap001.WithJurisdictionEnforcement(integration),
 )
 ```
 
@@ -103,7 +103,7 @@ svc := rfc0111.NewService(
 
 ```go
 // Create delegation requiring GDPR consent
-req := rfc0111.DelegationRequest{
+req := aap001.DelegationRequest{
     Grantor:  "alice@eubank.com",
     Grantee:  "bob@eubank.com",
     Scope:    []string{"gdpr_data_processing"},
@@ -126,7 +126,7 @@ if err != nil {
 
 ```go
 // Create delegation with CCPA opt-out check
-req := rfc0111.DelegationRequest{
+req := aap001.DelegationRequest{
     Grantor:  "alice@usbank.com",
     Grantee:  "bob@usbank.com",
     Scope:    []string{"ccpa_data_processing"},
@@ -149,7 +149,7 @@ if err != nil {
 
 ```go
 // EU to UK cross-border transfer (adequacy country)
-req := rfc0111.DelegationRequest{
+req := aap001.DelegationRequest{
     Grantor:  "alice@eubank.com",
     Grantee:  "bob@ukbank.com",
     Scope:    []string{"personal_data_transfer"},
@@ -176,7 +176,7 @@ _, err = svc.CreateDelegationCtx(ctx, reqBlocked)
 
 ```go
 // EU personal data must stay in EU
-req := rfc0111.DelegationRequest{
+req := aap001.DelegationRequest{
     Grantor:  "alice@eubank.com",
     Grantee:  "bob@usbank.com",
     Scope:    []string{"data_export"},
@@ -197,7 +197,7 @@ _, err := svc.CreateDelegationCtx(ctx, req)
 
 ```go
 // EU blocks "unrestricted_data_export" action
-req := rfc0111.DelegationRequest{
+req := aap001.DelegationRequest{
     Grantor:  "alice@eubank.com",
     Grantee:  "bob@eubank.com",
     Scope:    []string{"unrestricted_data_export"}, // Blocked in EU
@@ -231,7 +231,7 @@ Jurisdiction enforcement can be configured via external rules:
 
 ```bash
 # Point to external jurisdiction rules JSON file
-export GAUTH_JURISDICTION_RULES_PATH=/path/to/jurisdiction_rules.json
+export AGENTAUTH_JURISDICTION_RULES_PATH=/path/to/jurisdiction_rules.json
 ```
 
 ### jurisdiction_rules.json Example
@@ -283,8 +283,8 @@ export GAUTH_JURISDICTION_RULES_PATH=/path/to/jurisdiction_rules.json
 1. **Enable Enforcement in Test Environment**
    ```go
    integration := jurisdiction.NewServerIntegration()
-   svc := rfc0111.NewService(logger, authz, 
-       rfc0111.WithJurisdictionEnforcement(integration),
+   svc := aap001.NewService(logger, authz, 
+       aap001.WithJurisdictionEnforcement(integration),
    )
    ```
 
@@ -311,7 +311,7 @@ export GAUTH_JURISDICTION_RULES_PATH=/path/to/jurisdiction_rules.json
 
 2. **Full Activation**
    - Enable enforcement for all delegation operations
-   - Configure external jurisdiction rules via `GAUTH_JURISDICTION_RULES_PATH`
+   - Configure external jurisdiction rules via `AGENTAUTH_JURISDICTION_RULES_PATH`
    - Set up alerting for enforcement denials
 
 3. **Documentation & Training**
@@ -324,8 +324,8 @@ export GAUTH_JURISDICTION_RULES_PATH=/path/to/jurisdiction_rules.json
 ### Running Integration Tests
 
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
-go test -v ./pkg/rfc0111 -run "TestJurisdiction"
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+go test -v ./pkg/aap001 -run "TestJurisdiction"
 ```
 
 ### Test Coverage
@@ -408,7 +408,7 @@ Enables jurisdiction enforcement for AAP-001 Service operations.
 **Example:**
 ```go
 integration := jurisdiction.NewServerIntegration()
-svc := rfc0111.NewService(logger, authz, rfc0111.WithJurisdictionEnforcement(integration))
+svc := aap001.NewService(logger, authz, aap001.WithJurisdictionEnforcement(integration))
 ```
 
 ### `ExtractJurisdictionFromPOA(poa *PowerOfAttorney) compliance.Jurisdiction`
@@ -457,7 +457,7 @@ if err := svc.ValidateJurisdictionCompliance(ctx, poa); err != nil {
 
 **Resolution:**
 - Ensure required claims present in `DelegationRequest.Claims`
-- Verify jurisdiction rules via `GAUTH_JURISDICTION_RULES_PATH` configuration
+- Verify jurisdiction rules via `AGENTAUTH_JURISDICTION_RULES_PATH` configuration
 - Check enforcement engine logs for detailed denial reasons
 
 ### Missing Jurisdiction Data

@@ -75,18 +75,18 @@ func OpenFileLogger(path string) (*FileLogger, error) {
 		currentSize:    originalSize,
 
 		// Archival defaults (RR-009)
-		archivePath:     os.Getenv("GAUTH_AUDIT_ARCHIVE_DIR"),
-		compress:        os.Getenv("GAUTH_AUDIT_ARCHIVE_COMPRESS") != "0",
+		archivePath:     os.Getenv("AGENTAUTH_AUDIT_ARCHIVE_DIR"),
+		compress:        os.Getenv("AGENTAUTH_AUDIT_ARCHIVE_COMPRESS") != "0",
 		maxArchiveSize:  1 * 1024 * 1024 * 1024, // 1GB default
 		maxArchiveCount: 100,                    // 100 files default
 	}
 
-	if v := os.Getenv("GAUTH_AUDIT_ARCHIVE_MAX_SIZE"); v != "" {
+	if v := os.Getenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_SIZE"); v != "" {
 		if s, err := strconv.ParseInt(v, 10, 64); err == nil {
 			fl.maxArchiveSize = s
 		}
 	}
-	if v := os.Getenv("GAUTH_AUDIT_ARCHIVE_MAX_COUNT"); v != "" {
+	if v := os.Getenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT"); v != "" {
 		if c, err := strconv.Atoi(v); err == nil {
 			fl.maxArchiveCount = c
 		}

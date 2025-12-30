@@ -14,7 +14,7 @@ This document summarizes the current directory layout and proposes incremental c
 
 ```
 cmd/                # Entry points (web-server, examples, tooling)
-pkg/                # Public packages (gauth core, policy, poa, crypto, etc.)
+pkg/                # Public packages (agentauth core, policy, poa, crypto, etc.)
 internal/           # Internal implementations (replay store, jurisdiction, rotation)
 web/                # Server wiring + handlers + tests (gin)
 web/ui-react/       # Frontend React application (Vite)
@@ -46,7 +46,7 @@ artifacts/          # Audit and status reports (may consolidate into docs/ later
 
 | Area            | Path                | Proposed Owner Alias |
 |-----------------|---------------------|----------------------|
-| Core Auth       | `pkg/gauth`         | @core-auth          |
+| Core Auth       | `pkg/agentauth`         | @core-auth          |
 | Delegation      | `pkg/delegation`    | @delegation-team    |
 | PDP / Policy    | `pkg/pdp`, `pkg/policy` | @policy-engine  |
 | Cryptography    | `pkg/crypto`, `internal/crypto` | @crypto-sec |

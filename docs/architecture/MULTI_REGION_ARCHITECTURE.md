@@ -157,7 +157,7 @@ synchronous_standby_names = 'dr_standby'
 
 # WAL Archiving
 archive_mode = on
-archive_command = 'aws s3 cp %p s3://gauth-wal-archive/%f'
+archive_command = 'aws s3 cp %p s3://agentauth-wal-archive/%f'
 archive_timeout = 300  # 5 minutes
 
 # Performance
@@ -374,7 +374,7 @@ func (c *MultiRegionCache) Delete(ctx context.Context, key string) error {
   "HealthCheckConfig": {
     "Type": "HTTPS",
     "ResourcePath": "/api/v1/health",
-    "FullyQualifiedDomainName": "gauth.us-east-1.example.com",
+    "FullyQualifiedDomainName": "agentauth.us-east-1.example.com",
     "Port": 443,
     "RequestInterval": 30,
     "FailureThreshold": 3
@@ -406,13 +406,13 @@ func (c *MultiRegionCache) Delete(ctx context.Context, key string) error {
 **Patroni Configuration** (PostgreSQL HA):
 ```yaml
 # patroni.yml
-scope: gauth
+scope: agentauth
 namespace: /db/
 name: postgresql-1
 
 restapi:
   listen: 0.0.0.0:8008
-  connect_address: postgresql-1.gauth.svc:8008
+  connect_address: postgresql-1.agentauth.svc:8008
 
 etcd:
   hosts: etcd-1:2379,etcd-2:2379,etcd-3:2379
@@ -431,7 +431,7 @@ bootstrap:
 
 postgresql:
   listen: 0.0.0.0:5432
-  connect_address: postgresql-1.gauth.svc:5432
+  connect_address: postgresql-1.agentauth.svc:5432
   data_dir: /var/lib/postgresql/data
   pgpass: /tmp/pgpass
   authentication:
@@ -504,7 +504,7 @@ func (rcb *RegionCircuitBreaker) Execute(ctx context.Context, operation func(reg
 ```javascript
 // CloudFlare Load Balancer Config
 {
-  "name": "gauth-global-lb",
+  "name": "agentauth-global-lb",
   "default_pools": [
     "pool-us-east-1",
     "pool-eu-west-1",
@@ -692,10 +692,10 @@ func (s *Service) CreatePoAWithDependency(ctx context.Context, poa *PoA, depends
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth
+  name: agentauth
 spec:
   selector:
-    app: gauth
+    app: agentauth
     version: blue  # Switch to 'green' for deployment
   ports:
     - port: 8080
@@ -706,44 +706,44 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-blue
+  name: agentauth-blue
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       version: blue
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         version: blue
     spec:
       containers:
-        - name: gauth
-          image: gauth:v1.2.0
+        - name: agentauth
+          image: agentauth:v1.2.0
           
 ---
 # Green Deployment (new version)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-green
+  name: agentauth-green
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       version: green
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         version: green
     spec:
       containers:
-        - name: gauth
-          image: gauth:v1.3.0
+        - name: agentauth
+          image: agentauth:v1.3.0
 ```
 
 **Deployment Process**:
@@ -762,7 +762,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: gauth
+  name: agentauth
 spec:
   replicas: 10
   strategy:
@@ -779,7 +779,7 @@ spec:
       trafficRouting:
         istio:
           virtualService:
-            name: gauth-vsvc
+            name: agentauth-vsvc
       analysis:
         templates:
           - templateName: success-rate
@@ -803,7 +803,7 @@ scrape_configs:
     metrics_path: '/federate'
     params:
       'match[]':
-        - '{job="gauth"}'
+        - '{job="agentauth"}'
         - '{__name__=~"up|http_.*"}'
     static_configs:
       - targets:
@@ -828,19 +828,19 @@ scrape_configs:
       {
         "title": "Request Rate by Region",
         "targets": [{
-          "expr": "sum(rate(http_requests_total[5m])) by (region)"
+          "expr": "sum(rate(http_requests_total[5m]) by (region)"
         }]
       },
       {
         "title": "Cross-Region Latency",
         "targets": [{
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (region, le))"
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m]) by (region, le))"
         }]
       },
       {
         "title": "Region Health Status",
         "targets": [{
-          "expr": "up{job=\"gauth\"}"
+          "expr": "up{job=\"agentauth\"}"
         }]
       },
       {
@@ -868,7 +868,7 @@ groups:
     rules:
       # Region Down
       - alert: RegionDown
-        expr: up{job="gauth"} == 0
+        expr: up{job="agentauth"} == 0
         for: 2m
         labels:
           severity: critical
@@ -878,7 +878,7 @@ groups:
       
       # High Cross-Region Latency
       - alert: HighCrossRegionLatency
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{path=~"/api/.*"}[5m])) > 0.5
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{path=~"/api/.*"}[5m]) > 0.5
         for: 5m
         labels:
           severity: warning
@@ -936,7 +936,7 @@ echo "DR region: $DR_REGION"
 
 # 1. Promote DR database to primary
 echo "Promoting DR database..."
-kubectl exec -n gauth postgresql-0 -- \
+kubectl exec -n agentauth postgresql-0 -- \
   pg_ctl promote -D /var/lib/postgresql/data
 
 # 2. Update DNS to point to DR region
@@ -947,12 +947,12 @@ aws route53 change-resource-record-sets \
 
 # 3. Scale up DR region replicas
 echo "Scaling up DR region..."
-kubectl scale deployment gauth -n gauth --replicas=10
+kubectl scale deployment agentauth -n agentauth --replicas=10
 
 # 4. Verify health
 echo "Verifying health..."
 for i in {1..30}; do
-  if curl -f "https://gauth.$DR_REGION.example.com/api/v1/health"; then
+  if curl -f "https://agentauth.$DR_REGION.example.com/api/v1/health"; then
     echo "DR region is healthy!"
     break
   fi
@@ -1035,7 +1035,7 @@ echo "Disaster recovery complete!"
         "rds:DescribeDBInstances",
         "rds:FailoverDBCluster"
       ],
-      "Resource": "arn:aws:rds:us-east-1:*:db:gauth-*",
+      "Resource": "arn:aws:rds:us-east-1:*:db:agentauth-*",
       "Condition": {
         "StringEquals": {
           "aws:RequestedRegion": "us-east-1"

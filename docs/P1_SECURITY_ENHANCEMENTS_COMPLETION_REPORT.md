@@ -49,7 +49,7 @@ Comprehensive documentation of AgentAuth's existing wildcard pattern matching ca
   - Performance considerations
 
 **Key Findings**:
-- Feature already implemented in `pkg/gauth_rfc_001/rfc0111.go:419-445`
+- Feature already implemented in `pkg/agentauth_rfc_001/aap001.go:419-445`
 - Supports `*` (match within segment) and `**` (match across segments)
 - Enforces scope narrowing through inheritance chains
 - Validated with property-based tests
@@ -96,14 +96,14 @@ Complete integration guide for enterprise-grade policy management using Open Pol
 
 2. **Policy Development**
    - 8 production-ready Rego policies:
-     - Basic AgentAuth integration (`gauth_basic.rego`)
-     - Multi-level delegation chains (`gauth_delegation.rego`)
-     - Time-based restrictions (`gauth_time_restrictions.rego`)
-     - Value limits and thresholds (`gauth_value_limits.rego`)
-     - Geographic restrictions (`gauth_geographic.rego`)
-     - Risk-based authorization (`gauth_risk_based.rego`)
-     - Healthcare HIPAA compliance (`gauth_healthcare.rego`)
-     - Financial PSD2 compliance (`gauth_financial.rego`)
+     - Basic AgentAuth integration (`agentauth_basic.rego`)
+     - Multi-level delegation chains (`agentauth_delegation.rego`)
+     - Time-based restrictions (`agentauth_time_restrictions.rego`)
+     - Value limits and thresholds (`agentauth_value_limits.rego`)
+     - Geographic restrictions (`agentauth_geographic.rego`)
+     - Risk-based authorization (`agentauth_risk_based.rego`)
+     - Healthcare HIPAA compliance (`agentauth_healthcare.rego`)
+     - Financial PSD2 compliance (`agentauth_financial.rego`)
 
 3. **Go Integration**
    - Complete middleware implementation
@@ -128,14 +128,14 @@ Complete integration guide for enterprise-grade policy management using Open Pol
 examples/opa-integration/
 ├── README.md (300 lines)
 ├── policies/
-│   ├── gauth_basic.rego
-│   ├── gauth_delegation.rego
-│   ├── gauth_time_restrictions.rego
-│   ├── gauth_value_limits.rego
-│   ├── gauth_geographic.rego
-│   ├── gauth_risk_based.rego
-│   ├── gauth_healthcare.rego
-│   └── gauth_financial.rego (200 lines each)
+│   ├── agentauth_basic.rego
+│   ├── agentauth_delegation.rego
+│   ├── agentauth_time_restrictions.rego
+│   ├── agentauth_value_limits.rego
+│   ├── agentauth_geographic.rego
+│   ├── agentauth_risk_based.rego
+│   ├── agentauth_healthcare.rego
+│   └── agentauth_financial.rego (200 lines each)
 ├── go-integration/
 │   └── opa_middleware.go (400 lines)
 └── kubernetes/
@@ -263,7 +263,7 @@ Comprehensive strategic analysis comparing AAP-RFC proprietary delegation framew
    **PRIMARY FINDING**: AAP-RFC and OAuth 2.0 + RFC 8693 are **complementary, not competing** (consistent with RFC 9396 analysis).
 
    **RECOMMENDATION**: **ADOPT HYBRID APPROACH**
-   - Retain AAP-RFC-0111/0115 as core framework
+   - Retain AAP-001/0115 as core framework
    - Add RFC 8693 token exchange for interoperability
    - Implement in 4 weeks for $15K-$25K
    - Maintain 100% backward compatibility
@@ -494,14 +494,14 @@ docs/WILDCARD_SCOPE_PATTERNS_GUIDE.md (392 lines)
 ```
 docs/OPA_INTEGRATION_GUIDE.md (500+ lines)
 examples/opa-integration/README.md (300 lines)
-examples/opa-integration/policies/gauth_basic.rego
-examples/opa-integration/policies/gauth_delegation.rego
-examples/opa-integration/policies/gauth_time_restrictions.rego
-examples/opa-integration/policies/gauth_value_limits.rego
-examples/opa-integration/policies/gauth_geographic.rego
-examples/opa-integration/policies/gauth_risk_based.rego
-examples/opa-integration/policies/gauth_healthcare.rego
-examples/opa-integration/policies/gauth_financial.rego
+examples/opa-integration/policies/agentauth_basic.rego
+examples/opa-integration/policies/agentauth_delegation.rego
+examples/opa-integration/policies/agentauth_time_restrictions.rego
+examples/opa-integration/policies/agentauth_value_limits.rego
+examples/opa-integration/policies/agentauth_geographic.rego
+examples/opa-integration/policies/agentauth_risk_based.rego
+examples/opa-integration/policies/agentauth_healthcare.rego
+examples/opa-integration/policies/agentauth_financial.rego
 examples/opa-integration/go-integration/opa_middleware.go (400 lines)
 examples/opa-integration/kubernetes/deployment.yaml
 examples/opa-integration/kubernetes/service.yaml

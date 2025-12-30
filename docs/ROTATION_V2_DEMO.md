@@ -19,7 +19,7 @@ Rotation V2 produces a JSON artifact containing:
 
 Signatures (currently Ed25519) are domain‑separated over:
 ```
-preimage = "GAUTH_ROTATION_V2:" + canonical_digest
+preimage = "AGENTAUTH_ROTATION_V2:" + canonical_digest
 ```
 
 ## Configuration File
@@ -42,22 +42,22 @@ Total weight = 120; threshold = 100.
 ## Environment Variables
 | Variable | Purpose | Values |
 |----------|---------|--------|
-| `GAUTH_ROTATIONS_V2_CONFIG` | Path to weights config JSON | e.g. `config/multisig_weights.json` |
-| `GAUTH_ROTATIONS_V2_SIGN` | Enable signing path | `1` to enable |
-| `GAUTH_ROTATIONS_V2_AUTO_GEN` | Auto‑generate ephemeral Ed25519 private keys when no registry/import provided | `1` to enable |
-| `GAUTH_ROTATIONS_V2_ED25519_KEYS` | Explicit private key import (comma list `id:base64urlPriv`) | Optional |
-| `GAUTH_ROTATIONS_V2_EMBED_PUBS` | Embed public keys (if resolvable) into artifact | `1` to enable |
+| `AGENTAUTH_ROTATIONS_V2_CONFIG` | Path to weights config JSON | e.g. `config/multisig_weights.json` |
+| `AGENTAUTH_ROTATIONS_V2_SIGN` | Enable signing path | `1` to enable |
+| `AGENTAUTH_ROTATIONS_V2_AUTO_GEN` | Auto‑generate ephemeral Ed25519 private keys when no registry/import provided | `1` to enable |
+| `AGENTAUTH_ROTATIONS_V2_ED25519_KEYS` | Explicit private key import (comma list `id:base64urlPriv`) | Optional |
+| `AGENTAUTH_ROTATIONS_V2_EMBED_PUBS` | Embed public keys (if resolvable) into artifact | `1` to enable |
 
 Notes:
-- AUTO_GEN implies signing even if `GAUTH_ROTATIONS_V2_SIGN` is not set.
+- AUTO_GEN implies signing even if `AGENTAUTH_ROTATIONS_V2_SIGN` is not set.
 - Explicit key import takes precedence over auto‑generation when provided.
 
 ## Running (Ephemeral Auto‑Gen)
 ```bash
-cd Gauth_go
-GAUTH_ROTATIONS_V2_CONFIG=config/multisig_weights.json \
-GAUTH_ROTATIONS_V2_SIGN=1 \
-GAUTH_ROTATIONS_V2_AUTO_GEN=1 \
+cd AgentAuth
+AGENTAUTH_ROTATIONS_V2_CONFIG=config/multisig_weights.json \
+AGENTAUTH_ROTATIONS_V2_SIGN=1 \
+AGENTAUTH_ROTATIONS_V2_AUTO_GEN=1 \
 ./bin/web-server &
 SERVER_PID=$!
 sleep 2
@@ -94,31 +94,31 @@ notary-c:BASE64URL_PRIV3
 ```
 Set environment:
 ```bash
-GAUTH_ROTATIONS_V2_CONFIG=config/multisig_weights.json \
-GAUTH_ROTATIONS_V2_SIGN=1 \
-GAUTH_ROTATIONS_V2_ED25519_KEYS="hsm-a:BASE64URL_PRIV1,soft-b:BASE64URL_PRIV2,notary-c:BASE64URL_PRIV3" \
+AGENTAUTH_ROTATIONS_V2_CONFIG=config/multisig_weights.json \
+AGENTAUTH_ROTATIONS_V2_SIGN=1 \
+AGENTAUTH_ROTATIONS_V2_ED25519_KEYS="hsm-a:BASE64URL_PRIV1,soft-b:BASE64URL_PRIV2,notary-c:BASE64URL_PRIV3" \
 ./bin/web-server &
 ```
 Verification should show same weights.
 
 ## Optional: Embed Public Keys
-If a global Ed25519 registry is active and `GAUTH_ROTATIONS_V2_EMBED_PUBS=1`, each signer will include `public` key (base64url). Embedding does NOT alter the canonical digest.
+If a global Ed25519 registry is active and `AGENTAUTH_ROTATIONS_V2_EMBED_PUBS=1`, each signer will include `public` key (base64url). Embedding does NOT alter the canonical digest.
 
 ## Failure Diagnostics
 Artifact fields:
 - `failures`: array of reason codes (`signature_invalid`, `public_key_not_found`, `signature_decode`, `resolver_nil`, `unknown_alg`, `artifact_nil`).
-- `verified_weight` < threshold sets `threshold_met=false` and increments `gauth_rotation_v2_threshold_violations_total`.
+- `verified_weight` < threshold sets `threshold_met=false` and increments `agentauth_rotation_v2_threshold_violations_total`.
 
 Enable stderr debug logging via the signing block messages already present (look for `[rotation-v2]` lines).
 
 ## Metrics Exposed
 Prometheus metrics (names):
-- `gauth_rotation_v2_verified_weight`
-- `gauth_rotation_v2_verified_weight_alg{alg="ED25519"}`
-- `gauth_rotation_v2_threshold_weight`
-- `gauth_rotation_v2_signature_failures_total{reason=...}`
-- `gauth_rotation_v2_signature_failures_by_alg_total{alg,reason}`
-- `gauth_rotation_v2_continuity_updates_total`, `gauth_rotation_v2_chain_starts_total`
+- `agentauth_rotation_v2_verified_weight`
+- `agentauth_rotation_v2_verified_weight_alg{alg="ED25519"}`
+- `agentauth_rotation_v2_threshold_weight`
+- `agentauth_rotation_v2_signature_failures_total{reason=...}`
+- `agentauth_rotation_v2_signature_failures_by_alg_total{alg,reason}`
+- `agentauth_rotation_v2_continuity_updates_total`, `agentauth_rotation_v2_chain_starts_total`
 
 ## Web UI Panel
 A lightweight dashboard panel is now available (served from `web/static_ui`) displaying:
@@ -130,7 +130,7 @@ A lightweight dashboard panel is now available (served from `web/static_ui`) dis
 
 ### Client-Side Signature Verification
 If public keys are embedded in the artifact (`public` field per signer) and the browser supports WebCrypto Ed25519:
-- The panel performs a best-effort verification of each signer using the domain separated preimage `GAUTH_ROTATION_V2:<canonical_digest>`.
+- The panel performs a best-effort verification of each signer using the domain separated preimage `AGENTAUTH_ROTATION_V2:<canonical_digest>`.
 - A checkmark (✓) appears in the "Verified" column for each successful signature, a cross (✗) for failed verification, and a dash (—) if verification was skipped (missing public key / unsupported alg / browser API limitation).
 
 Limitations:
@@ -138,7 +138,7 @@ Limitations:
 - Browsers without Ed25519 `crypto.subtle` support (older versions) will skip verification gracefully.
 - Client verification is informational and SHOULD NOT replace server-side verification or auditing.
 
-To embed public keys for demo purposes set `GAUTH_ROTATIONS_V2_EMBED_PUBS=1` (requires the server to have or reconstruct the public keys for imported/generated private keys).
+To embed public keys for demo purposes set `AGENTAUTH_ROTATIONS_V2_EMBED_PUBS=1` (requires the server to have or reconstruct the public keys for imported/generated private keys).
 
 ### Copy & Download Utilities
 The Rotation V2 panel provides quick actions:
@@ -203,10 +203,10 @@ Scroll to the "Rotation V2" panel.
 - AUTO_GEN mode is for development only (keys are ephemeral and discarded on process exit).
 - Explicit private keys should be supplied via secure secret management in production, not inline environment variables.
 - Public key embedding is optional; verification SHOULD rely on a trusted key registry in production.
-- Domain separation string `GAUTH_ROTATION_V2:` MUST remain unchanged to avoid cross‑protocol signature reuse.
+- Domain separation string `AGENTAUTH_ROTATION_V2:` MUST remain unchanged to avoid cross‑protocol signature reuse.
 
 ## Next Steps / Extensions
-- Add ECDSA-P256 support using `GAUTH_ROTATIONS_V2_ECDSA_KEYS` for public key embedding.
+- Add ECDSA-P256 support using `AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS` for public key embedding.
 - Integrate real key rotation manager for persistent key sets.
 - Provide `/api/v1/rotation/summary/v2/debug` for richer diagnostics without using stderr logs.
 

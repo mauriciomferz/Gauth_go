@@ -27,7 +27,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 // SetAuthorizationChecker enables privilege escalation protection by validating
 // that the grantor (principal) actually holds the permissions being delegated.
 //
-// SECURITY RECOMMENDATION: Enable this in production to prevent CVE-2025-GAUTH-005.
+// SECURITY RECOMMENDATION: Enable this in production to prevent CVE-2025-AGENTAUTH-005.
 // Without this, a user with "Editor" role can delegate "Admin" permissions if they
 // can forge a valid signature (e.g., compromised key, social engineering).
 //
@@ -328,7 +328,7 @@ func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy,
 
 // ValidatePoA checks if a representative can perform an action for a grantor.
 //
-// Security Enhancement (CVE-2025-GAUTH-005): Now performs TWO-LEVEL validation:
+// Security Enhancement (CVE-2025-AGENTAUTH-005): Now performs TWO-LEVEL validation:
 //  1. Database check: PoA exists, is active, contains requested action (EXISTING)
 //  2. Authorization check: Grantor actually holds permissions being delegated (NEW)
 //

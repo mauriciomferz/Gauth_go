@@ -100,8 +100,8 @@ For local development with hot reload:
    ```bash
    ```bash
    go run web/server.go 9090              # CLI arg overrides
-   GAUTH_WEB_PORT=7070 go run web/server.go
-   GAUTH_PORT=9091 scripts/start-web-demo.sh
+   AGENTAUTH_WEB_PORT=7070 go run web/server.go
+   AGENTAUTH_PORT=9091 scripts/start-web-demo.sh
    ```
 
 3. **Access the beta interface:**
@@ -114,7 +114,7 @@ This beta interface is part of the broader AgentAuth evaluation ecosystem:
 **Beta Demonstration Notice**: This web interface is designed exclusively for evaluation and demonstration. It implements beta demonstration versions of AgentAuth concepts to help users understand authorization patterns, power-of-attorney flows, and AI-native authentication. This implementation is NOT production ready and should not be used in production environments or for any security-critical applications.
 
 ### Stable vs Ephemeral Tokens
-If you do not export `GAUTH_CLIENT_SECRET` / `GAUTH_SIGNING_KEY`, the server generates ephemeral values (tokens invalid after restart). Using the script + `.env` gives deterministic secrets for the session (still insecure for real use).
+If you do not export `AGENTAUTH_CLIENT_SECRET` / `AGENTAUTH_SIGNING_KEY`, the server generates ephemeral values (tokens invalid after restart). Using the script + `.env` gives deterministic secrets for the session (still insecure for real use).
 
 ## Beta Learning Path
 

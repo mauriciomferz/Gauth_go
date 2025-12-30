@@ -103,12 +103,12 @@ Successfully completed **Phase 3 Task 9** - full integration of all 5 migrated a
 
 **Line 56**: Database import
 ```go
-"github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/database"
+"github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/database"
 ```
 
 **Line 63**: Admin handlers import
 ```go
-adminHandlers "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/web/handlers/admin"
+adminHandlers "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/web/handlers/admin"
 ```
 
 **Lines 3555-3605**: Database initialization and handler registration
@@ -155,14 +155,14 @@ if dbHost := os.Getenv("DB_HOST"); dbHost != "" {
 
 ```bash
 # Server Security (Required)
-export GAUTH_JWT_SIGNING_KEY="your-secure-signing-key"
+export AGENTAUTH_JWT_SIGNING_KEY="your-secure-signing-key"
 
 # Database Configuration (Required for Admin Handlers)
 export DB_HOST="localhost"           # Required to enable admin handlers
 export DB_PORT="5432"                # Default: 5432
 export DB_USER="postgres"            # Required
 export DB_PASSWORD="your_password"   # Required
-export DB_NAME="gauth"               # Required
+export DB_NAME="agentauth"               # Required
 export DB_SSLMODE="disable"          # Production: "require"
 
 # Connection Pool Tuning (Optional)
@@ -173,9 +173,9 @@ export DB_MAX_CONN_IDLE_MIN="30"     # Default: 30 minutes
 export DB_HEALTH_CHECK_SEC="60"      # Default: 60 seconds
 
 # Development Mode (Optional)
-export GAUTH_DEV_INDEX="1"
-export GAUTH_AAP-001_ENABLED="1"
-export GAUTH_USE_JWT_LIB="1"
+export AGENTAUTH_DEV_INDEX="1"
+export AGENTAUTH_AAP-001_ENABLED="1"
+export AGENTAUTH_USE_JWT_LIB="1"
 ```
 
 ---
@@ -295,8 +295,8 @@ DELETE /api/admin/config/feature-flags/:id
 
 ### Build Verification ✅
 ```bash
-$ ls -lh /tmp/test-gauth
--rwxr-xr-x  49M Nov 22 18:03 /tmp/test-gauth
+$ ls -lh /tmp/test-agentauth
+-rwxr-xr-x  49M Nov 22 18:03 /tmp/test-agentauth
 ```
 
 ### Integration Test Results ✅
@@ -329,7 +329,7 @@ $ ./test-admin-integration.sh
 
 **With Database** (DB_HOST set, but PostgreSQL not running):
 ```
-[database] connection failed: failed to ping database: failed to connect to `user=test database=gauth_test`
+[database] connection failed: failed to ping database: failed to connect to `user=test database=agentauth_test`
 [database] admin handlers will not be initialized
 [startup] BetaServer starting PID=xxxxx on http://localhost:8080
 ```
@@ -349,17 +349,17 @@ $ ./test-admin-integration.sh
 
 ```bash
 # Start PostgreSQL
-docker run --name gauth-postgres \
+docker run --name agentauth-postgres \
   -e POSTGRES_PASSWORD=secure_password \
-  -e POSTGRES_DB=gauth \
+  -e POSTGRES_DB=agentauth \
   -p 5432:5432 \
   -d postgres:15
 
 # Run migrations (create 17 tables)
-psql -h localhost -U postgres -d gauth -f database/migrations/001_initial_schema.sql
+psql -h localhost -U postgres -d agentauth -f database/migrations/001_initial_schema.sql
 
 # Verify tables
-psql -h localhost -U postgres -d gauth -c "\dt"
+psql -h localhost -U postgres -d agentauth -c "\dt"
 ```
 
 ### 2. Environment Configuration
@@ -367,14 +367,14 @@ psql -h localhost -U postgres -d gauth -c "\dt"
 Create `.env.production`:
 ```bash
 # Security (Required)
-GAUTH_JWT_SIGNING_KEY="production-secure-key-min-32-chars"
+AGENTAUTH_JWT_SIGNING_KEY="production-secure-key-min-32-chars"
 
 # Database (Required for Admin APIs)
 DB_HOST="db.production.example.com"
 DB_PORT="5432"
-DB_USER="gauth_prod"
+DB_USER="agentauth_prod"
 DB_PASSWORD="secure-production-password"
-DB_NAME="gauth_production"
+DB_NAME="agentauth_production"
 DB_SSLMODE="require"  # Always require in production
 
 # Connection Pool Tuning
@@ -389,10 +389,10 @@ DB_HEALTH_CHECK_SEC="30"
 
 ```bash
 source .env.production
-./gauth-server
+./agentauth-server
 
 # Or with systemd
-sudo systemctl start gauth-server
+sudo systemctl start agentauth-server
 ```
 
 ### 4. Verify Deployment
@@ -405,7 +405,7 @@ curl https://your-domain.com/api/v1/beta/health
 curl https://your-domain.com/api/admin/poa
 
 # Check logs
-journalctl -u gauth-server -f
+journalctl -u agentauth-server -f
 ```
 
 ---
@@ -430,7 +430,7 @@ journalctl -u gauth-server -f
 ## Troubleshooting
 
 ### Issue: Server won't start
-**Error**: `GAUTH_JWT_SIGNING_KEY is not set`  
+**Error**: `AGENTAUTH_JWT_SIGNING_KEY is not set`  
 **Solution**: Set the JWT signing key environment variable
 
 ### Issue: Admin endpoints return 404
@@ -532,7 +532,7 @@ The AgentAuth server is now ready for production deployment with full admin API 
 ---
 
 **Completion Date**: November 22, 2025  
-**Build Version**: test-gauth (49MB)  
+**Build Version**: test-agentauth (49MB)  
 **Integration Status**: ✅ COMPLETE  
 **Test Status**: ✅ ALL PASS  
 **Documentation Status**: ✅ COMPLETE

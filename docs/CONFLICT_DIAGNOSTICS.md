@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-The **Conflict Diagnostics** system provides comprehensive policy conflict detection and resolution reporting for the Policy Decision Point (PDP) engine. This capability addresses RFC-0111 § 3.8.1 requirements for transparent policy conflict identification and resolution.
+The **Conflict Diagnostics** system provides comprehensive policy conflict detection and resolution reporting for the Policy Decision Point (PDP) engine. This capability addresses AAP-001 § 3.8.1 requirements for transparent policy conflict identification and resolution.
 
 ## Features
 
@@ -361,20 +361,20 @@ Track conflict diagnostics metrics:
 
 ```prometheus
 # Total conflicts detected
-gauth_pdp_conflicts_total{type="permit_deny"} 12
-gauth_pdp_conflicts_total{type="scope_overlap"} 5
-gauth_pdp_conflicts_total{type="rule_contradiction"} 2
+agentauth_pdp_conflicts_total{type="permit_deny"} 12
+agentauth_pdp_conflicts_total{type="scope_overlap"} 5
+agentauth_pdp_conflicts_total{type="rule_contradiction"} 2
 
 # Conflicts by severity
-gauth_pdp_conflicts_by_severity{severity="critical"} 3
-gauth_pdp_conflicts_by_severity{severity="high"} 8
-gauth_pdp_conflicts_by_severity{severity="medium"} 6
-gauth_pdp_conflicts_by_severity{severity="low"} 2
+agentauth_pdp_conflicts_by_severity{severity="critical"} 3
+agentauth_pdp_conflicts_by_severity{severity="high"} 8
+agentauth_pdp_conflicts_by_severity{severity="medium"} 6
+agentauth_pdp_conflicts_by_severity{severity="low"} 2
 
 # Resolution strategy usage
-gauth_pdp_strategy_conflicts{strategy="deny_overrides"} 10
-gauth_pdp_strategy_conflicts{strategy="permit_overrides"} 5
-gauth_pdp_strategy_conflicts{strategy="first_applicable"} 4
+agentauth_pdp_strategy_conflicts{strategy="deny_overrides"} 10
+agentauth_pdp_strategy_conflicts{strategy="permit_overrides"} 5
+agentauth_pdp_strategy_conflicts{strategy="first_applicable"} 4
 ```
 
 ## Environment Variables
@@ -420,8 +420,8 @@ go test ./pkg/pdp -v
 
 ## References
 
-- RFC-0111 § 3.8.1: Conflict Resolution Requirements
-- RFC-0111 § 3.5: Combining Algorithms
+- AAP-001 § 3.8.1: Conflict Resolution Requirements
+- AAP-001 § 3.5: Combining Algorithms
 - `pkg/pdp/engine.go`: Core PDP implementation
 - `pkg/pdp/conflict_diagnostics.go`: Conflict detection engine
 - `pkg/pdp/conflict_diagnostics_test.go`: Test suite

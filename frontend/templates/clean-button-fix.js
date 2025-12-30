@@ -64,7 +64,7 @@ function emergencyButtonFix() {
         console.log('Setting up direct handler for button ' + (index + 1) + ': ' + action);
         
         // Skip if already handled above
-        if (['start-learning-path', 'quick-compliance-check', 'create-token'].includes(action)) {
+        if (['start-learning-path', 'quick-compliance-check', 'create-token'].includes(action) {
             return;
         }
         

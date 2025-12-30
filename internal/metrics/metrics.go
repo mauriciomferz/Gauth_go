@@ -77,7 +77,7 @@ type Metrics interface {
 	SetSunsetPhaseSatisfactionProgress(p float64)
 	// RawPOA embedding counters (AAP002 sec3.item2 implementation progress)
 	IncEnvelopeRawPOAEmbedded() // successful embedding of canonical RawPOA into EnvelopeV2
-	IncEnvelopeRawPOATooLarge() // attempted embedding omitted due to size > GAUTH_MAX_RAW_POA_BYTES
+	IncEnvelopeRawPOATooLarge() // attempted embedding omitted due to size > AGENTAUTH_MAX_RAW_POA_BYTES
 	IncMultiSignatureVerifications()
 	IncMultiSignatureSuccess()
 	IncMultiSignatureVerificationFailures()
@@ -109,7 +109,7 @@ type Metrics interface {
 	IncExternalAnchorAttempts(provider string)
 	// IncExternalAnchorFailures increments external anchor failures, labeled by provider.
 	IncExternalAnchorFailures(provider string)
-	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via GAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
+	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
 	// distinguishing deterministic test harness failures from probabilistic model failures.
 	IncExternalAnchorForcedFailures()
 	IncExternalAnchorForcedFailuresProvider(provider string)

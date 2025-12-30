@@ -12,7 +12,7 @@ refreshCadence: on-change
 Date: 2025-10-20
 Status: Draft
 Authors: Automated Assistant
-Context: Introduction of Envelope V2 (`ver="gauth-rfc0111-env2"`) adds canonical digest and multi-signature satisfaction metadata. A structured lifecycle is required to retire Envelope V1 safely while preserving verification compatibility and minimizing operational risk.
+Context: Introduction of Envelope V2 (`ver="agentauth-aap001-env2"`) adds canonical digest and multi-signature satisfaction metadata. A structured lifecycle is required to retire Envelope V1 safely while preserving verification compatibility and minimizing operational risk.
 
 Summary: Outlines metrics-driven multi-phase migration from Envelope V1 to V2, operational playbooks, rollback, and communication matrix. Implementation in beta-refactor branch.
 
@@ -29,12 +29,12 @@ Running two envelope formats indefinitely increases maintenance overhead, compli
 - Integrity assurance: mismatch anomalies below threshold pre-sunset.
 
 ## 3. Non-Goals
-- Changing canonical digest algorithm or domain separation rules (handled by separate flag `GAUTH_MULTI_SIG_DOMAIN_V2`).
+- Changing canonical digest algorithm or domain separation rules (handled by separate flag `AGENTAUTH_MULTI_SIG_DOMAIN_V2`).
 - Introducing labels to adoption ratio gauge (keep cardinality low).
 
 ## 4. Terminology
-- Adoption Ratio: Gauge `gauth_rfc0111_envelope_v2_adoption_ratio` (0-1).
-- Mismatch Counter: `gauth_rfc0111_envelope_digest_mismatch_total`.
+- Adoption Ratio: Gauge `agentauth_aap001_envelope_v2_adoption_ratio` (0-1).
+- Mismatch Counter: `agentauth_aap001_envelope_digest_mismatch_total`.
 - Issuance Counters: `envelope_v1_issued_total`, `envelope_v2_issued_total`.
 
 ## 5. Lifecycle Phases & Gates
@@ -49,7 +49,7 @@ Running two envelope formats indefinitely increases maintenance overhead, compli
 
 Mismatch Ratio Formula:
 ```
-mismatch_ratio_5m = increase(gauth_rfc0111_envelope_digest_mismatch_total[5m]) / (increase(gauth_rfc0111_envelope_v1_issued_total[5m]) + increase(gauth_rfc0111_envelope_v2_issued_total[5m]))
+mismatch_ratio_5m = increase(agentauth_aap001_envelope_digest_mismatch_total[5m]) / (increase(agentauth_aap001_envelope_v1_issued_total[5m]) + increase(agentauth_aap001_envelope_v2_issued_total[5m]))
 ```
 
 ## 6. Metrics Acceptance Criteria
@@ -60,7 +60,7 @@ Before disabling V1 issuance:
 
 ## 7. Operational Playbooks
 ### Rollout
-1. Enable `GAUTH_POA_ENVELOPE_V2=1` on canary pods only.
+1. Enable `AGENTAUTH_POA_ENVELOPE_V2=1` on canary pods only.
 2. Validate dashboards: adoption ratio updates; mismatch counter remains stable.
 3. Incrementally update remaining pods (batch size 10-20%).
 4. Record progression timestamps in change log; tag release after Broad Adoption gate.
@@ -86,7 +86,7 @@ Criteria:
 ## 8. Communication Matrix
 | Audience | Trigger | Channel | Artifact |
 |----------|---------|---------|----------|
-| Internal Eng | Phase transitions | Slack #gauth-migration | Phase summary w/ metrics screenshot |
+| Internal Eng | Phase transitions | Slack #agentauth-migration | Phase summary w/ metrics screenshot |
 | SRE | Rollback initiation | PagerDuty | Incident runbook + PromQL queries |
 | Integrators | Soft Deprecation start | Email + Portal Announcement | Deprecation notice (FAQ) |
 | Security | Mismatch spike | Security incident workflow | Digest diff + token samples (sanitized) |
@@ -125,14 +125,14 @@ Criteria:
 ### Appendix: PromQL Snippets
 ```
 # 7d adoption average & min
-adoption_avg_7d = avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[7d])
-adoption_min_7d = min_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[7d])
+adoption_avg_7d = avg_over_time(agentauth_aap001_envelope_v2_adoption_ratio[7d])
+adoption_min_7d = min_over_time(agentauth_aap001_envelope_v2_adoption_ratio[7d])
 
 # Mismatch ratio 1h window
-mismatch_ratio_1h = increase(gauth_rfc0111_envelope_digest_mismatch_total[1h]) / (increase(gauth_rfc0111_envelope_v1_issued_total[1h]) + increase(gauth_rfc0111_envelope_v2_issued_total[1h]))
+mismatch_ratio_1h = increase(agentauth_aap001_envelope_digest_mismatch_total[1h]) / (increase(agentauth_aap001_envelope_v1_issued_total[1h]) + increase(agentauth_aap001_envelope_v2_issued_total[1h]))
 
 # V1 issuance stalled post sunset (should remain flat)
-rate(gauth_rfc0111_envelope_v1_issued_total[30m]) == 0
+rate(agentauth_aap001_envelope_v1_issued_total[30m]) == 0
 ```
 
 ---

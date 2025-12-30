@@ -62,7 +62,7 @@ The implementation provides **three revocation strategies**:
 ## Quick Start
 
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+import "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 
 // 1. Create Emergency Oracle (required by all systems)
 oracle, _ := revocation.NewEmergencyOracle(redisAddrs, logger)
@@ -174,7 +174,7 @@ redis-cli --cluster create 127.0.0.1:7000 127.0.0.1:7001 127.0.0.1:7002
 ### Step 2: Initialize Revocation Systems
 
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+import "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 
 redisAddrs := []string{"localhost:7000", "localhost:7001", "localhost:7002"}
 
@@ -234,11 +234,11 @@ func ValidateTransaction(ctx context.Context, poaID string) error {
 ```go
 import (
     "context"
-    "github.com/mauriciomferz/Gauth_go/pkg/revocation"
+    "github.com/mauriciomferz/AgentAuth/pkg/revocation"
 )
 
 // Initialize emergency oracle
-logger := revocation.NewSimpleLogger("gauth")
+logger := revocation.NewSimpleLogger("agentauth")
 oracle, err := revocation.NewEmergencyOracle(
     []string{"redis-1:6379", "redis-2:6379", "redis-3:6379"},
     logger,
@@ -320,13 +320,13 @@ go test ./pkg/revocation -bench=. -benchmem
 ```yaml
 # Prometheus alerts
 - alert: HighRevocationLatency
-  expr: histogram_quantile(0.95, rate(gauth_emergency_revocation_duration_seconds_bucket[5m])) > 1
+  expr: histogram_quantile(0.95, rate(agentauth_emergency_revocation_duration_seconds_bucket[5m]) > 1
   
 - alert: RedisClusterDown
   expr: redis_up == 0
 
 - alert: FlashbotsSubmissionFailures
-  expr: rate(gauth_flashbots_submission_failures[5m]) > 0.1
+  expr: rate(agentauth_flashbots_submission_failures[5m]) > 0.1
 ```
 
 ## Limitations & Future Work

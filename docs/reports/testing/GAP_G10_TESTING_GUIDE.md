@@ -28,7 +28,7 @@ refreshCadence: monthly
 
 ## Overview
 
-The Gap G10 integration test suite validates RFC-0111 (AgentAuth 1.0) and RFC-0115 (Power of Attorney) compliance across all authorization components. The suite includes:
+The Gap G10 integration test suite validates AAP-001 (AgentAuth 1.0) and AAP-002 (Power of Attorney) compliance across all authorization components. The suite includes:
 
 - **91 functional tests** across 6 test files
 - **19 performance benchmarks** (16 component + 3 E2E)
@@ -58,7 +58,7 @@ The Gap G10 integration test suite validates RFC-0111 (AgentAuth 1.0) and RFC-01
 go version
 
 # Verify workspace
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 ```
 
 ### Run All Tests (Fast)
@@ -78,7 +78,7 @@ go test -tags=integration ./...
 
 ```bash
 # Extended Token tests
-go test -v ./pkg/gauth -run TestExtendedToken
+go test -v ./pkg/agentauth -run TestExtendedToken
 
 # PVP tests
 go test -v ./pkg/verification -run TestDefaultPVP
@@ -103,9 +103,9 @@ go test -v -tags=integration ./test/integration -run TestGapG10E2E
 ### Directory Layout
 
 ```
-Gauth_go/
+AgentAuth/
 ├── pkg/
-│   ├── gauth/
+│   ├── agentauth/
 │   │   └── extended_token_test.go      # Phase 1: Extended Token (13 tests)
 │   ├── verification/
 │   │   └── pvp_test.go                 # Phase 2: PVP (15 tests)
@@ -146,10 +146,10 @@ package integration
 
 ```bash
 # Run unit tests without integration tag
-go test ./pkg/gauth ./pkg/verification ./pkg/registry ./pkg/pip ./pkg/poa
+go test ./pkg/agentauth ./pkg/verification ./pkg/registry ./pkg/pip ./pkg/poa
 
 # With verbose output
-go test -v ./pkg/gauth ./pkg/verification ./pkg/registry ./pkg/pip ./pkg/poa
+go test -v ./pkg/agentauth ./pkg/verification ./pkg/registry ./pkg/pip ./pkg/poa
 
 # With timeout
 go test -timeout 30s ./pkg/...
@@ -184,10 +184,10 @@ go test -v -tags=integration ./...
 
 ```bash
 # Run single test
-go test -v ./pkg/gauth -run TestExtendedToken_Validate
+go test -v ./pkg/agentauth -run TestExtendedToken_Validate
 
 # Run test with subtest
-go test -v ./pkg/gauth -run "TestExtendedToken_Validate/Valid_complete_token"
+go test -v ./pkg/agentauth -run "TestExtendedToken_Validate/Valid_complete_token"
 
 # Multiple test patterns
 go test -v ./pkg/poa -run "TestPoADefinition_Validate|TestPoADefinition_RepresentativeTypes"
@@ -312,7 +312,7 @@ benchstat baseline.txt new.txt
 
 ```bash
 # Component coverage
-go test -cover ./pkg/gauth
+go test -cover ./pkg/agentauth
 go test -cover ./pkg/verification
 go test -cover ./pkg/registry
 go test -cover ./pkg/pip
@@ -326,7 +326,7 @@ go test -cover ./...
 
 ```bash
 # Generate coverage profile
-go test -coverprofile=coverage.out ./pkg/gauth ./pkg/verification ./pkg/registry ./pkg/pip ./pkg/poa
+go test -coverprofile=coverage.out ./pkg/agentauth ./pkg/verification ./pkg/registry ./pkg/pip ./pkg/poa
 
 # View in browser
 go tool cover -html=coverage.out
@@ -339,7 +339,7 @@ go tool cover -func=coverage.out
 
 ```bash
 # Individual package reports
-go test -coverprofile=gauth_coverage.out ./pkg/gauth
+go test -coverprofile=agentauth_coverage.out ./pkg/agentauth
 go test -coverprofile=pvp_coverage.out ./pkg/verification
 go test -coverprofile=registry_coverage.out ./pkg/registry
 go test -coverprofile=pip_coverage.out ./pkg/pip
@@ -450,7 +450,7 @@ sudo pmset -a disablesleep 1
 
 ```bash
 # Show all test output
-go test -v ./pkg/gauth
+go test -v ./pkg/agentauth
 
 # Show logs even for passing tests
 go test -v -args -test.v
@@ -460,7 +460,7 @@ go test -v -args -test.v
 
 ```bash
 # Run specific test with verbose output
-go test -v ./pkg/gauth -run TestExtendedToken_Validate
+go test -v ./pkg/agentauth -run TestExtendedToken_Validate
 
 # Add debug prints in test code
 t.Logf("Debug: value = %+v", variable)
@@ -692,8 +692,8 @@ See [GAP_G10_PHASE7_PERFORMANCE_REPORT.md](./GAP_G10_PHASE7_PERFORMANCE_REPORT.m
 ## Additional Resources
 
 ### Documentation
-- [RFC-0111: AgentAuth 1.0 Specification](./docs/RFC-0111.md)
-- [RFC-0115: Power of Attorney](./docs/RFC-0115.md)
+- [AAP-001: AgentAuth 1.0 Specification](./docs/AAP-001.md)
+- [AAP-002: Power of Attorney](./docs/AAP-002.md)
 - [Gap G10 Integration Tests Progress](./GAP_G10_INTEGRATION_TESTS_PROGRESS.md)
 - [Phase 6: E2E Tests Completion](./GAP_G10_PHASE6_E2E_TESTS_COMPLETION.md)
 - [Phase 7: Performance Report](./GAP_G10_PHASE7_PERFORMANCE_REPORT.md)

@@ -29,7 +29,7 @@ type PDPCacheEntry struct {
 //   - LRU eviction when capacity exceeded
 //   - TTL-based expiration (lazy cleanup on access)
 //   - Thread-safe with sync.RWMutex
-//   - Configurable via env vars (GAUTH_PDP_CACHE_SIZE, GAUTH_PDP_CACHE_TTL)
+//   - Configurable via env vars (AGENTAUTH_PDP_CACHE_SIZE, AGENTAUTH_PDP_CACHE_TTL)
 //   - Invalidation hooks for policy updates
 //
 // Performance Impact:
@@ -38,8 +38,8 @@ type PDPCacheEntry struct {
 //   - Memory overhead: ~1KB per cached decision
 //
 // Configuration:
-//   - GAUTH_PDP_CACHE_SIZE: Max cache entries (default 1000, 0=disabled)
-//   - GAUTH_PDP_CACHE_TTL: Entry lifetime (default 5m, 0=no expiration)
+//   - AGENTAUTH_PDP_CACHE_SIZE: Max cache entries (default 1000, 0=disabled)
+//   - AGENTAUTH_PDP_CACHE_TTL: Entry lifetime (default 5m, 0=no expiration)
 type InMemoryCache struct {
 	capacity int
 	ttl      time.Duration
@@ -99,20 +99,20 @@ func NewInMemoryCache(capacity int, ttl time.Duration) *InMemoryCache {
 // NewInMemoryCacheFromEnv creates cache from environment variables.
 //
 // Environment Variables:
-//   - GAUTH_PDP_CACHE_SIZE: Max entries (default 1000)
-//   - GAUTH_PDP_CACHE_TTL: TTL duration (default 5m, e.g., "300s", "5m", "1h")
+//   - AGENTAUTH_PDP_CACHE_SIZE: Max entries (default 1000)
+//   - AGENTAUTH_PDP_CACHE_TTL: TTL duration (default 5m, e.g., "300s", "5m", "1h")
 //
 // Returns cache instance or no-op cache if disabled.
 func NewInMemoryCacheFromEnv() *InMemoryCache {
 	capacity := 1000 // default
-	if s := os.Getenv("GAUTH_PDP_CACHE_SIZE"); s != "" {
+	if s := os.Getenv("AGENTAUTH_PDP_CACHE_SIZE"); s != "" {
 		if v, err := strconv.Atoi(s); err == nil {
 			capacity = v
 		}
 	}
 
 	ttl := 5 * time.Minute // default
-	if s := os.Getenv("GAUTH_PDP_CACHE_TTL"); s != "" {
+	if s := os.Getenv("AGENTAUTH_PDP_CACHE_TTL"); s != "" {
 		if d, err := time.ParseDuration(s); err == nil {
 			ttl = d
 		}

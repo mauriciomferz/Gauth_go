@@ -158,7 +158,7 @@ export default function SubscribersList() {
           throw new Error('Subscribers endpoint requires database connection');
         }
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes('application/json') {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to fetch subscribers');
         }
@@ -166,7 +166,7 @@ export default function SubscribersList() {
       }
 
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+      if (!contentType || !contentType.includes('application/json') {
         throw new Error('Invalid response format from server');
       }
 
@@ -182,7 +182,7 @@ export default function SubscribersList() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
+    switch (status.toLowerCase() {
       case 'active':
         return <Badge appearance="filled" color="success">Active</Badge>;
       case 'suspended':
@@ -232,7 +232,7 @@ export default function SubscribersList() {
       );
       if (response.ok) {
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes('application/json') {
           const data = await response.json();
           setSecuritySettings(data);
         }
@@ -248,7 +248,7 @@ export default function SubscribersList() {
       );
       if (response.ok) {
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes('application/json') {
           const data = await response.json();
           setApiKeys(data.apiKeys || []);
         }
@@ -261,7 +261,7 @@ export default function SubscribersList() {
   };
 
   const handleDelete = async (subscriber: Subscriber) => {
-    if (!confirm(`Are you sure you want to delete subscriber "${subscriber.tenantName}"? This action cannot be undone.`)) {
+    if (!confirm(`Are you sure you want to delete subscriber "${subscriber.tenantName}"? This action cannot be undone.`) {
       return;
     }
 
@@ -492,7 +492,7 @@ export default function SubscribersList() {
 
                             if (response.ok) {
                               const contentType = response.headers.get('content-type');
-                              if (contentType && contentType.includes('application/json')) {
+                              if (contentType && contentType.includes('application/json') {
                                 const data = await response.json();
                                 alert(`API Key Created!\n\nKey: ${data.secretKey}\n\nStore this securely - it won't be shown again!`);
 
@@ -502,7 +502,7 @@ export default function SubscribersList() {
                                 );
                                 if (listResponse.ok) {
                                   const listContentType = listResponse.headers.get('content-type');
-                                  if (listContentType && listContentType.includes('application/json')) {
+                                  if (listContentType && listContentType.includes('application/json') {
                                     const listData = await listResponse.json();
                                     setApiKeys(listData.apiKeys || []);
                                   }
@@ -572,7 +572,7 @@ export default function SubscribersList() {
                                     size="small"
                                     onClick={async () => {
                                       const reason = prompt('Reason for revocation:');
-                                      if (!confirm(`Revoke API key "${key.keyName}"?`)) return;
+                                      if (!confirm(`Revoke API key "${key.keyName}"?`) return;
 
                                       try {
                                         const response = await fetch(
@@ -592,7 +592,7 @@ export default function SubscribersList() {
                                           );
                                           if (listResponse.ok) {
                                             const contentType = listResponse.headers.get('content-type');
-                                            if (contentType && contentType.includes('application/json')) {
+                                            if (contentType && contentType.includes('application/json') {
                                               const listData = await listResponse.json();
                                               setApiKeys(listData.apiKeys || []);
                                             }

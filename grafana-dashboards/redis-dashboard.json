@@ -215,7 +215,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) * 100",
+          "expr": "rate(redis_keyspace_hits_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]) * 100",
           "legendFormat": "Cache Hit Rate",
           "range": true,
           "refId": "A"
@@ -694,7 +694,7 @@
   "tags": [
     "redis",
     "cache",
-    "gauth"
+    "agentauth"
   ],
   "templating": {
     "list": []
@@ -706,7 +706,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Redis Cache Metrics",
-  "uid": "redis-gauth",
+  "uid": "redis-agentauth",
   "version": 0,
   "weekStart": ""
 }

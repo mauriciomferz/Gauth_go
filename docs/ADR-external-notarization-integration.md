@@ -67,10 +67,10 @@ Receipt structure (JSON + binary fields):
 ```
 
 ## Metrics Additions
-- `gauth_capability_anchor_notarization_latency_seconds` (already present) extended with provider label.
-- `gauth_notarization_failures_total` (counter, labeled by kind/provider).
-- `gauth_notarization_age_seconds` (gauge per kind: capability, audit, revocation).
-- `gauth_notarization_pending_total` (current in-flight submissions).
+- `agentauth_capability_anchor_notarization_latency_seconds` (already present) extended with provider label.
+- `agentauth_notarization_failures_total` (counter, labeled by kind/provider).
+- `agentauth_notarization_age_seconds` (gauge per kind: capability, audit, revocation).
+- `agentauth_notarization_pending_total` (current in-flight submissions).
 - `capability_anchor_notarization_receipts_integrity` (gauge – receipt hash-chain integrity: ok=1 mismatch=0 unconfigured/legacy/empty=-1)
 
 ### Prototype Provider Selection (Implemented)
@@ -79,12 +79,12 @@ Environment variables now enable choosing a stub external provider:
 
 | Env | Purpose | Values | Default |
 | --- | --- | --- | --- |
-| `GAUTH_CAP_ANCHOR_NOTARIZE` | Enable capability anchor notarization path | `1` to enable | unset |
-| `GAUTH_CAP_ANCHOR_NOTARY_PROVIDER` | Select provider implementation | `memory`, `external_stub` | `memory` |
-| `GAUTH_NOTARY_STUB_MIN_LATENCY_MS` | Minimum simulated latency (ms) | 0-1000 | 40 |
-| `GAUTH_NOTARY_STUB_MAX_LATENCY_MS` | Maximum simulated latency (ms) | >=min, <=5000 | 250 |
-| `GAUTH_NOTARY_STUB_FAIL_PROB` | Failure probability (0.0-1.0) | float | 0 |
-| `GAUTH_NOTARY_STUB_PROVIDER_NAME` | Override receipt provider field | string | `external_stub` |
+| `AGENTAUTH_CAP_ANCHOR_NOTARIZE` | Enable capability anchor notarization path | `1` to enable | unset |
+| `AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER` | Select provider implementation | `memory`, `external_stub` | `memory` |
+| `AGENTAUTH_NOTARY_STUB_MIN_LATENCY_MS` | Minimum simulated latency (ms) | 0-1000 | 40 |
+| `AGENTAUTH_NOTARY_STUB_MAX_LATENCY_MS` | Maximum simulated latency (ms) | >=min, <=5000 | 250 |
+| `AGENTAUTH_NOTARY_STUB_FAIL_PROB` | Failure probability (0.0-1.0) | float | 0 |
+| `AGENTAUTH_NOTARY_STUB_PROVIDER_NAME` | Override receipt provider field | string | `external_stub` |
 
 The `external_stub` provider offers randomized latency and probabilistic failures to exercise metrics & error paths. It does NOT provide cryptographic guarantees and must be replaced before marking GAP_MATRIX external anchoring items as fully implemented.
 
@@ -112,7 +112,7 @@ The `external_stub` provider offers randomized latency and probabilistic failure
 
 ## Migration Plan
 1. Implement `NotaryProvider` adapter with memory + TSA implementation stub.
-2. Add provider configuration env vars: `GAUTH_NOTARY_PROVIDER`, `GAUTH_NOTARY_TSA_URL`.
+2. Add provider configuration env vars: `AGENTAUTH_NOTARY_PROVIDER`, `AGENTAUTH_NOTARY_TSA_URL`.
 3. Register metrics & extend status endpoint.
 4. Add receipt persistence layer + tests (inclusion of hash, consistent retrieval).
 5. Build verification endpoint with TSA token checks (timestamp validity, imprint match).

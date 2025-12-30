@@ -3,7 +3,7 @@
 ## 🚀 Quick Start
 
 ```go
-import "github.com/mauriciomferz/Gauth_go/pkg/gnap"
+import "github.com/mauriciomferz/AgentAuth/pkg/gnap"
 
 // Initialize
 grantStore := gnap.NewMemoryGrantStore()

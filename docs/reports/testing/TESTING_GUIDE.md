@@ -57,7 +57,7 @@ The AgentAuth project includes a comprehensive testing suite with multiple layer
 ### Directory Structure
 
 ```
-Gauth_go/
+AgentAuth/
 ├── web/ui-react/
 │   ├── e2e/                          # E2E test files
 │   │   ├── global-setup.ts           # Pre-test setup

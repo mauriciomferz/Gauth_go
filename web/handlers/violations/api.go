@@ -113,27 +113,27 @@ func (a *API) apiViolationMetricsPrometheus(c *gin.Context) {
 	for _, cat := range categories {
 		total += counters[cat]
 	}
-	out += "# HELP gauth_validation_total Total validation checks\n"
-	out += "# TYPE gauth_validation_total counter\n"
-	out += "gauth_validation_total " + fmtUint(total) + "\n"
+	out += "# HELP agentauth_validation_total Total validation checks\n"
+	out += "# TYPE agentauth_validation_total counter\n"
+	out += "agentauth_validation_total " + fmtUint(total) + "\n"
 
 	// Per-category counters
 	for _, cat := range categories {
-		out += "# HELP gauth_validation_" + cat + "_total Total " + cat + " violations\n"
-		out += "# TYPE gauth_validation_" + cat + "_total counter\n"
-		out += "gauth_validation_" + cat + "_total " + fmtUint(counters[cat]) + "\n"
+		out += "# HELP agentauth_validation_" + cat + "_total Total " + cat + " violations\n"
+		out += "# TYPE agentauth_validation_" + cat + "_total counter\n"
+		out += "agentauth_validation_" + cat + "_total " + fmtUint(counters[cat]) + "\n"
 	}
 
-	out += "# HELP gauth_violations_rate_60s Per-second rate of violations over last 60s\n"
-	out += "# TYPE gauth_violations_rate_60s gauge\n"
+	out += "# HELP agentauth_violations_rate_60s Per-second rate of violations over last 60s\n"
+	out += "# TYPE agentauth_violations_rate_60s gauge\n"
 	for k, v := range rates60 {
 		out += "# " + k + " " + fmtFloat(v) + "\n" // Comment line
-		out += "gauth_violations_rate_60s{type=\"" + k + "\"} " + fmtFloat(v) + "\n"
+		out += "agentauth_violations_rate_60s{type=\"" + k + "\"} " + fmtFloat(v) + "\n"
 	}
-	out += "# HELP gauth_violations_rate_300s Per-second rate of violations over last 300s\n"
-	out += "# TYPE gauth_violations_rate_300s gauge\n"
+	out += "# HELP agentauth_violations_rate_300s Per-second rate of violations over last 300s\n"
+	out += "# TYPE agentauth_violations_rate_300s gauge\n"
 	for k, v := range rates300 {
-		out += "gauth_violations_rate_300s{type=\"" + k + "\"} " + fmtFloat(v) + "\n"
+		out += "agentauth_violations_rate_300s{type=\"" + k + "\"} " + fmtFloat(v) + "\n"
 	}
 
 	// Integrity status as a gauge (1=ok, 0=bad)
@@ -141,9 +141,9 @@ func (a *API) apiViolationMetricsPrometheus(c *gin.Context) {
 	if status == "ok" {
 		integrityVal = 1
 	}
-	out += "# HELP gauth_persistence_integrity_violation Violation persistence integrity check (1=ok, 0=mismatch/fail)\n"
-	out += "# TYPE gauth_persistence_integrity_violation gauge\n"
-	out += "gauth_persistence_integrity_violation " + fmtInt(integrityVal) + "\n"
+	out += "# HELP agentauth_persistence_integrity_violation Violation persistence integrity check (1=ok, 0=mismatch/fail)\n"
+	out += "# TYPE agentauth_persistence_integrity_violation gauge\n"
+	out += "agentauth_persistence_integrity_violation " + fmtInt(integrityVal) + "\n"
 
 	c.Data(http.StatusOK, "text/plain; version=0.0.4", []byte(out))
 }

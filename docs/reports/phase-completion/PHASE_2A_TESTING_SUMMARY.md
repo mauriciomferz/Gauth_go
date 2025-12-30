@@ -85,10 +85,10 @@ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
    - Status: ✅ Working (bug fixed)
    - Payload: `subject`, `action`, `resource`, `context`
 
-2. **Token Validation** (`/api/v1/rfc0111/token/validate`)
+2. **Token Validation** (`/api/v1/aap001/token/validate`)
    - Used by: Tokens page
    - Status: ✅ Working
-   - Real RFC-0111 endpoint
+   - Real AAP-001 endpoint
 
 3. **Prometheus Metrics** (`/api/v1/beta/metrics/prometheus`)
    - Used by: Metrics page
@@ -100,7 +100,7 @@ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 **Rationale**: Backend has internal clients (PVP, Commercial Registry, PoA) but no direct HTTP endpoints exposed for UI consumption.
 
 1. **Token Creation** (Tokens page)
-   - Reason: RFC-0111 requires 8-step subscription flow
+   - Reason: AAP-001 requires 8-step subscription flow
    - Strategy: Generate JWT-like mock tokens
    - Future: Implement subscription flow UI
 
@@ -117,7 +117,7 @@ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 4. **PoA Management** (PoA page)
    - Reason: Backend has PoA logic, requires integration work
    - Strategy: UI mock with PoA CRUD
-   - Future: Wire to RFC-0111 PoA functionality
+   - Future: Wire to AAP-001 PoA functionality
 
 5. **E2E Testing** (E2E Testing page)
    - Reason: Test execution happens outside UI
@@ -130,8 +130,8 @@ curl -X POST http://localhost:8080/api/v1/beta/authz/evaluate \
 
 ### Backend (Port 8080)
 ```bash
-# Running with RFC-0111 enabled
-GAUTH_AAP-001_ENABLED=1 GAUTH_AAP-001_USE_MOCKS=1 go run ./cmd/web-server
+# Running with AAP-001 enabled
+AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_AAP-001_USE_MOCKS=1 go run ./cmd/web-server
 
 # Health check
 curl http://localhost:8080/api/v1/beta/health
@@ -142,9 +142,9 @@ curl http://localhost:8080/api/v1/beta/health
 - ✅ `/api/v1/beta/health` - Health check
 - ✅ `/api/v1/beta/authz/evaluate` - Authorization validation
 - ✅ `/api/v1/beta/metrics/prometheus` - Prometheus metrics
-- ✅ `/api/v1/rfc0111/token/validate` - Token validation
-- ✅ `/api/v1/rfc0111/authorize` - Token creation (requires subscription)
-- ✅ `/api/v1/rfc0111/subscriptions` - Subscription flow (8 steps)
+- ✅ `/api/v1/aap001/token/validate` - Token validation
+- ✅ `/api/v1/aap001/authorize` - Token creation (requires subscription)
+- ✅ `/api/v1/aap001/subscriptions` - Subscription flow (8 steps)
 
 ### Frontend (Port 3000)
 ```bash
@@ -172,7 +172,7 @@ npm run dev
 | # | Criterion | Status | Progress |
 |---|-----------|--------|----------|
 | 1 | Servers running and healthy | ✅ Complete | 100% |
-| 2 | RFC-0111 endpoints discovered | ✅ Complete | 100% |
+| 2 | AAP-001 endpoints discovered | ✅ Complete | 100% |
 | 3 | API client updated | ✅ Complete | 100% |
 | 4 | Integration guide created | ✅ Complete | 100% |
 | 5 | Token page tested | ✅ Complete | 100% |

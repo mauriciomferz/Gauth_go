@@ -17,10 +17,10 @@
 2. ✅ **Audit Logger** (`pkg/mcp/audit_logger.go` - 304 lines)
 3. ✅ **Comprehensive Tests** (18 tests, 80.8%/64.1% coverage, all passing)
 
-**Overall RFC-0111 Compliance Impact**:
+**Overall AAP-001 Compliance Impact**:
 - **MCP Building Block**: 60% → **85%** (+25%)
 - **Building Blocks Category**: 54% → **67%** (+13%)
-- **Overall RFC-0111**: 78% → **80%** (+2%)
+- **Overall AAP-001**: 78% → **80%** (+2%)
 
 **Production Readiness**: MCP integration now **production-ready** for file-based deployments. Phase 4 (WebSocket/HTTP-SSE transports, monitoring) is optional enhancement.
 
@@ -307,7 +307,7 @@ ok   pkg/gagent  0.410s  coverage: 80.8% of statements
 | | | | |
 | **MCP Overall** | **60%** | **85%** | **+25%** |
 
-### RFC-0111 Overall Compliance
+### AAP-001 Overall Compliance
 
 | Category | Before Phase 3 | After Phase 3 | Change |
 |----------|----------------|---------------|--------|
@@ -321,7 +321,7 @@ ok   pkg/gagent  0.410s  coverage: 80.8% of statements
 | **Security** | 70% | 70% | - |
 | **Production Readiness** | 50% | 50% | - |
 | | | | |
-| **OVERALL RFC-0111** | **78%** | **80%** | **+2%** |
+| **OVERALL AAP-001** | **78%** | **80%** | **+2%** |
 
 **Production Readiness Threshold Achieved**: ✅ **80%**
 
@@ -435,7 +435,7 @@ log.Printf("Average duration: %v", stats.AverageDuration)
 
 ```go
 // Production setup with file logging
-fileLogger := mcp.NewFileAuditLogger("/var/log/gauth/mcp-audit.log", 100)
+fileLogger := mcp.NewFileAuditLogger("/var/log/agentauth/mcp-audit.log", 100)
 defer fileLogger.Close()
 
 agent, err := gagent.NewMCPAgent(&gagent.MCPAgentConfig{
@@ -683,12 +683,12 @@ $ go vet ./pkg/gagent/... ./pkg/mcp/...
 ✅ **High-Level Agent API**: Simple, secure MCP resource access  
 ✅ **Comprehensive Audit Logging**: In-memory and file backends  
 ✅ **80.8% Test Coverage**: All tests passing, no flaky tests  
-✅ **80% Overall RFC-0111 Compliance**: Production readiness threshold achieved  
+✅ **80% Overall AAP-001 Compliance**: Production readiness threshold achieved  
 
 **Overall Impact**:
 - **MCP Compliance**: 60% → **85%** (+25%)
 - **Building Blocks**: 54% → **67%** (+13%)
-- **RFC-0111 Overall**: 78% → **80%** (+2%)
+- **AAP-001 Overall**: 78% → **80%** (+2%)
 
 **Next Priority**: **External Connectors** (critical path, 8-12 weeks)
 

@@ -50,7 +50,7 @@ function testMixedWorkload() {
 
     const res = http.post(`${BASE_URL}/api/v1/beta/poa`, payload, { headers: { 'Content-Type': 'application/json' } });
 
-    if (check(res, { 'created': (r) => r.status === 200 })) {
+    if (check(res, { 'created': (r) => r.status === 200 }) {
         const body = JSON.parse(res.body);
         const id = body.poa?.id;
         if (id) {

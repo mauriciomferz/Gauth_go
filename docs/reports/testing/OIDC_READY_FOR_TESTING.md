@@ -25,7 +25,7 @@ owners: [system]
 - ✅ **OIDC Routes**: `/oidc-login` and `/auth/callback` registered
 
 ### Database
-- ✅ **PostgreSQL Container**: Running (gauth-postgres)
+- ✅ **PostgreSQL Container**: Running (agentauth-postgres)
 - ✅ **Tables Created**: 5 OIDC tables operational
 - ✅ **Existing Provider**: 1 Azure AD provider configured
   - Tenant: `test-tenant-1`

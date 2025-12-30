@@ -81,8 +81,8 @@ func (h *Handler) IntrospectRS(c *gin.Context) {
 	}
 
 	// Attempt to introspect via TokenStore if it supported lookup (it doesn't explicitly in the interface yet).
-	// But let's check if the token starts with "gauth_gnap_"
-	if strings.HasPrefix(req.Token, "gauth_gnap_") {
+	// But let's check if the token starts with "agentauth_gnap_"
+	if strings.HasPrefix(req.Token, "agentauth_gnap_") {
 		resp.Active = true
 		resp.Access = []gnap.AccessRight{
 			{Type: "financial-data", Actions: []string{"read"}, DataTypes: []string{"balance"}},

@@ -15,9 +15,9 @@ NC='\033[0m' # No Color
 # Configuration
 BACKEND_PORT=8080
 FRONTEND_PORT=3000
-DB_NAME=gauth
-DB_USER=gauth
-DB_PASSWORD=gauth_dev_password
+DB_NAME=agentauth
+DB_USER=agentauth
+DB_PASSWORD=agentauth_dev_password
 
 echo -e "${YELLOW}Step 1: Generating JWT Signing Key${NC}"
 JWT_SIGNING_KEY=$(openssl rand -hex 32)
@@ -26,7 +26,7 @@ echo ""
 
 echo -e "${YELLOW}Step 2: Checking Prerequisites${NC}"
 # Check if PostgreSQL is running
-if docker ps | grep -q gauth-postgres; then
+if docker ps | grep -q agentauth-postgres; then
     echo "✓ PostgreSQL container running"
 else
     echo "✗ PostgreSQL not running, starting..."
@@ -35,7 +35,7 @@ else
 fi
 
 # Check if Redis is running
-if docker ps | grep -q gauth-redis; then
+if docker ps | grep -q agentauth-redis; then
     echo "✓ Redis container running"
 else
     echo "✗ Redis not running, starting..."
@@ -45,9 +45,9 @@ fi
 echo ""
 
 echo -e "${YELLOW}Step 3: Stopping old backend${NC}"
-docker stop gauth-backend 2>/dev/null || true
-docker stop gauth-backend-new 2>/dev/null || true
-docker rm gauth-backend-new 2>/dev/null || true
+docker stop agentauth-backend 2>/dev/null || true
+docker stop agentauth-backend-new 2>/dev/null || true
+docker rm agentauth-backend-new 2>/dev/null || true
 echo "✓ Old backend containers stopped"
 echo ""
 
@@ -58,11 +58,11 @@ echo ""
 
 echo -e "${YELLOW}Step 5: Starting backend with proper environment${NC}"
 docker run -d \
-  --name gauth-backend-new \
-  --network gauth_go_gauth-network \
+  --name agentauth-backend-new \
+  --network agentauth_go_agentauth-network \
   -p ${BACKEND_PORT}:8080 \
-  -e GAUTH_JWT_SIGNING_KEY="${JWT_SIGNING_KEY}" \
-  -e GAUTH_DB_HOST=postgres \
+  -e AGENTAUTH_JWT_SIGNING_KEY="${JWT_SIGNING_KEY}" \
+  -e AGENTAUTH_DB_HOST=postgres \
   -e DB_HOST=postgres \
   -e DB_PORT=5432 \
   -e DB_NAME=${DB_NAME} \
@@ -73,11 +73,11 @@ docker run -d \
   -e REDIS_PORT=6379 \
   -e PORT=8080 \
   -e GIN_MODE=release \
-  -e GAUTH_AAP-001_ENABLED=1 \
-  -e GAUTH_METRICS_ENABLED=true \
-  -e GAUTH_LOG_LEVEL=info \
-  -e AUDIT_EXPORT_DIR=/tmp/gauth-audit-exports \
-  gauth_go-backend
+  -e AGENTAUTH_AAP-001_ENABLED=1 \
+  -e AGENTAUTH_METRICS_ENABLED=true \
+  -e AGENTAUTH_LOG_LEVEL=info \
+  -e AUDIT_EXPORT_DIR=/tmp/agentauth-audit-exports \
+  agentauth_go-backend
 
 echo "✓ Backend container started"
 echo ""
@@ -100,7 +100,7 @@ if [ "$HEALTH" = "healthy" ]; then
 else
     echo -e "${RED}✗ Backend health check failed${NC}"
     echo "Logs:"
-    docker logs gauth-backend-new --tail=20
+    docker logs agentauth-backend-new --tail=20
     exit 1
 fi
 echo ""
@@ -151,9 +151,9 @@ echo "Backend URL: http://localhost:${BACKEND_PORT}"
 echo "Health Check: http://localhost:${BACKEND_PORT}/api/v1/beta/health"
 echo "API Docs: http://localhost:${BACKEND_PORT}/api/docs/swagger"
 echo ""
-echo "Container Name: gauth-backend-new"
-echo "View logs: docker logs -f gauth-backend-new"
-echo "Stop: docker stop gauth-backend-new"
+echo "Container Name: agentauth-backend-new"
+echo "View logs: docker logs -f agentauth-backend-new"
+echo "Stop: docker stop agentauth-backend-new"
 echo ""
 echo "JWT Signing Key (save this securely):"
 echo "${JWT_SIGNING_KEY}"

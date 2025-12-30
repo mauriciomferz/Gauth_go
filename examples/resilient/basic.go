@@ -8,18 +8,18 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/internal/circuit"
 	"github.com/mauriciomferz/AgentAuth/internal/monitoring"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // ResilientService combines circuit breaker and monitoring
 type ResilientService struct {
-	auth    *gauth.Service
-	server  *gauth.ResourceServer
+	auth    *agentauth.Service
+	server  *agentauth.ResourceServer
 	breaker *circuit.Breaker
 	metrics *monitoring.DefaultMetricsCollector
 }
 
-func NewResilientService(auth *gauth.Service) *ResilientService {
+func NewResilientService(auth *agentauth.Service) *ResilientService {
 	metrics := monitoring.NewMetricsCollector()
 	breaker := circuit.NewBreaker(circuit.Options{
 		Name:             "auth-service",
@@ -29,13 +29,13 @@ func NewResilientService(auth *gauth.Service) *ResilientService {
 	})
 	return &ResilientService{
 		auth:    auth,
-		server:  gauth.NewResourceServer("resilient-service", auth),
+		server:  agentauth.NewResourceServer("resilient-service", auth),
 		breaker: breaker,
 		metrics: metrics,
 	}
 }
 
-func (s *ResilientService) ProcessRequest(tx gauth.TransactionDetails, token string) error {
+func (s *ResilientService) ProcessRequest(tx agentauth.TransactionDetails, token string) error {
 	return s.breaker.Execute(context.Background(), func() error {
 		start := time.Now()
 

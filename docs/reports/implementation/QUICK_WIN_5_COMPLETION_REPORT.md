@@ -25,7 +25,7 @@ Successfully implemented comprehensive audit log export functionality with async
 ```go
 type ExportService struct {
     repo      *Repository
-    exportDir string         // /tmp/gauth-audit-exports
+    exportDir string         // /tmp/agentauth-audit-exports
     jobs      map[string]*ExportJob
     mu        sync.RWMutex   // Thread-safe job management
 }
@@ -50,7 +50,7 @@ evt-123,2025-11-26T10:00:00Z,tenant-1,user-1,poa.create,poa-456,poa,success,acce
 
 **Syslog Export** (RFC 5424):
 ```
-<18>1 2025-11-26T10:00:00Z gauth-audit - - - [tenant="tenant-1" user="user-1" action="poa.create" resource="poa-456" status="success"] poa.create
+<18>1 2025-11-26T10:00:00Z agentauth-audit - - - [tenant="tenant-1" user="user-1" action="poa.create" resource="poa-456" status="success"] poa.create
 ```
 
 **CEF Export** (Common Event Format):

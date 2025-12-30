@@ -199,14 +199,14 @@ Root CA (offline, 4096-bit RSA, 10-year validity)
 
 ```bash
 # 1. Verify TLS 1.3 enforcement
-openssl s_client -connect gauth-api.example.com:443 -tls1_3
+openssl s_client -connect agentauth-api.example.com:443 -tls1_3
 # ✅ Connection successful with TLS 1.3
 
 # 2. Test mTLS requirement
-curl https://gauth-api.example.com/api/v1/poa
+curl https://agentauth-api.example.com/api/v1/poa
 # ✅ 400 Bad Request (no client certificate)
 
-curl --cert client.crt --key client.key https://gauth-api.example.com/api/v1/poa
+curl --cert client.crt --key client.key https://agentauth-api.example.com/api/v1/poa
 # ✅ 200 OK (valid client certificate)
 
 # 3. Verify Vault auto-unseal
@@ -214,11 +214,11 @@ kubectl delete pod vault-0 -n vault && sleep 60 && kubectl exec -n vault vault-0
 # ✅ Sealed: false (auto-unsealed with CloudHSM)
 
 # 4. Check dynamic database credentials
-kubectl exec -n gauth gauth-api-0 -- cat /vault/secrets/db-creds
+kubectl exec -n agentauth agentauth-api-0 -- cat /vault/secrets/db-creds
 # ✅ New credentials every 30 minutes
 
 # 5. Verify certificate rotation
-kubectl get certificate gauth-api-server-cert -n gauth -w
+kubectl get certificate agentauth-api-server-cert -n agentauth -w
 # ✅ Renewed 24 hours before expiry
 ```
 
@@ -327,17 +327,17 @@ kubectl apply -f k8s/security/mtls-config.yaml
 ./scripts/security-automation.sh all
 
 # 2. Review security report
-cat /var/log/gauth/security-reports/report-$(date +%Y-%m-%d).md
+cat /var/log/agentauth/security-reports/report-$(date +%Y-%m-%d).md
 
 # 3. Check alerts
-kubectl logs -n gauth -l app=alertmanager --tail=100
+kubectl logs -n agentauth -l app=alertmanager --tail=100
 ```
 
 ### Weekly Operations
 
 ```bash
 # 1. Review vulnerability scan results
-cat /var/log/gauth/security-scans/scan-*.json | jq '.[] | select(.Severity == "HIGH" or .Severity == "CRITICAL")'
+cat /var/log/agentauth/security-scans/scan-*.json | jq '.[] | select(.Severity == "HIGH" or .Severity == "CRITICAL")'
 
 # 2. Certificate expiry review
 ./scripts/security-automation.sh certs
@@ -377,7 +377,7 @@ kubectl exec -n vault vault-0 -- vault token revoke -mode orphan -accessor <acce
 2. Patch vulnerability
 3. Rotate all certificates: `./scripts/security-automation.sh rotate <cert-name>`
 4. Unseal Vault with new keys
-5. Restart all services: `kubectl rollout restart deployment -n gauth`
+5. Restart all services: `kubectl rollout restart deployment -n agentauth`
 6. Post-incident report (document learnings)
 
 ---

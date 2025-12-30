@@ -4,9 +4,9 @@
 
 set -e
 
-NAMESPACE="gauth-staging"
+NAMESPACE="agentauth-staging"
 TARGET_VERSION="${1:-blue}"
-INGRESS_NAME="gauth-ingress"
+INGRESS_NAME="agentauth-ingress"
 
 # Colors for output
 RED='\033[0;31m'
@@ -34,14 +34,14 @@ fi
 
 # Check if target deployment exists and is ready
 echo -e "${YELLOW}📋 Checking target deployment status...${NC}"
-if ! kubectl get deployment "gauth-deployment-${TARGET_VERSION}" -n "$NAMESPACE" &> /dev/null; then
-    echo -e "${RED}❌ Error: Deployment 'gauth-deployment-${TARGET_VERSION}' not found${NC}"
+if ! kubectl get deployment "agentauth-deployment-${TARGET_VERSION}" -n "$NAMESPACE" &> /dev/null; then
+    echo -e "${RED}❌ Error: Deployment 'agentauth-deployment-${TARGET_VERSION}' not found${NC}"
     exit 1
 fi
 
 # Check if target deployment is ready
-READY_REPLICAS=$(kubectl get deployment "gauth-deployment-${TARGET_VERSION}" -n "$NAMESPACE" -o jsonpath='{.status.readyReplicas}')
-DESIRED_REPLICAS=$(kubectl get deployment "gauth-deployment-${TARGET_VERSION}" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}')
+READY_REPLICAS=$(kubectl get deployment "agentauth-deployment-${TARGET_VERSION}" -n "$NAMESPACE" -o jsonpath='{.status.readyReplicas}')
+DESIRED_REPLICAS=$(kubectl get deployment "agentauth-deployment-${TARGET_VERSION}" -n "$NAMESPACE" -o jsonpath='{.spec.replicas}')
 
 if [[ "$READY_REPLICAS" != "$DESIRED_REPLICAS" ]]; then
     echo -e "${RED}❌ Error: Target deployment not ready (${READY_REPLICAS}/${DESIRED_REPLICAS} replicas ready)${NC}"
@@ -86,22 +86,22 @@ kubectl patch ingress "$INGRESS_NAME" -n "$NAMESPACE" --type=json -p="[
   {
     \"op\": \"replace\",
     \"path\": \"/spec/rules/0/http/paths/0/backend/service/name\",
-    \"value\": \"gauth-service-${TARGET_VERSION}\"
+    \"value\": \"agentauth-service-${TARGET_VERSION}\"
   },
   {
     \"op\": \"replace\",
     \"path\": \"/spec/rules/0/http/paths/1/backend/service/name\",
-    \"value\": \"gauth-service-${TARGET_VERSION}\"
+    \"value\": \"agentauth-service-${TARGET_VERSION}\"
   },
   {
     \"op\": \"replace\",
     \"path\": \"/spec/rules/0/http/paths/2/backend/service/name\",
-    \"value\": \"gauth-service-${TARGET_VERSION}\"
+    \"value\": \"agentauth-service-${TARGET_VERSION}\"
   },
   {
     \"op\": \"replace\",
     \"path\": \"/spec/rules/0/http/paths/3/backend/service/name\",
-    \"value\": \"gauth-service-${TARGET_VERSION}\"
+    \"value\": \"agentauth-service-${TARGET_VERSION}\"
   }
 ]"
 
@@ -111,7 +111,7 @@ sleep 10
 
 # Verify switch
 NEW_SERVICE=$(kubectl get ingress "$INGRESS_NAME" -n "$NAMESPACE" -o jsonpath='{.spec.rules[0].http.paths[0].backend.service.name}')
-if [[ "$NEW_SERVICE" == "gauth-service-${TARGET_VERSION}" ]]; then
+if [[ "$NEW_SERVICE" == "agentauth-service-${TARGET_VERSION}" ]]; then
     echo -e "${GREEN}✅ Traffic successfully switched to ${TARGET_VERSION}${NC}"
 else
     echo -e "${RED}❌ Error: Traffic switch failed${NC}"
@@ -139,14 +139,14 @@ fi
 # Show pod status
 echo ""
 echo -e "${BLUE}=== Pod Status ===${NC}"
-kubectl get pods -n "$NAMESPACE" -l "app=gauth,version=${TARGET_VERSION}"
+kubectl get pods -n "$NAMESPACE" -l "app=agentauth,version=${TARGET_VERSION}"
 
 echo ""
 echo -e "${GREEN}✅ Traffic switch complete!${NC}"
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
-echo "1. Monitor logs: kubectl logs -n $NAMESPACE -l app=gauth,version=${TARGET_VERSION} --tail=100 -f"
-echo "2. Check metrics: curl -k https://${INGRESS_IP}/metrics | grep gauth_http_requests_total"
+echo "1. Monitor logs: kubectl logs -n $NAMESPACE -l app=agentauth,version=${TARGET_VERSION} --tail=100 -f"
+echo "2. Check metrics: curl -k https://${INGRESS_IP}/metrics | grep agentauth_http_requests_total"
 echo "3. If issues arise, rollback: $0 ${CURRENT_VERSION}"
 echo ""
 echo -e "${BLUE}=== Rollback Command ===${NC}"

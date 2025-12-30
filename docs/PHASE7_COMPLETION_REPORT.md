@@ -1,6 +1,6 @@
 # Phase 7 Completion Report: Advanced Token Operations
 
-**Project**: AgentAuth OIDC Implementation (RFC-0111)  
+**Project**: AgentAuth OIDC Implementation (AAP-001)  
 **Phase**: 7 - Advanced Token Operations  
 **Date**: November 12, 2025  
 **Compliance Progress**: 75% → 85% (+10%)
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Phase 7 successfully implements advanced token lifecycle management operations, increasing RFC-0111 compliance from 75% to 85%. This phase delivers production-ready implementations of:
+Phase 7 successfully implements advanced token lifecycle management operations, increasing AAP-001 compliance from 75% to 85%. This phase delivers production-ready implementations of:
 
 - **Token Refresh** (RFC 6749 Section 6)
 - **Token Revocation** (RFC 7009)

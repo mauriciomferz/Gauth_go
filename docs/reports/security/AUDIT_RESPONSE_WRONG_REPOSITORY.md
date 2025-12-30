@@ -47,7 +47,7 @@ func AuthorizeRequest(poa *Credential, requestScope string) (string, error) {
 
 Based on the file structure you referenced, you appear to have audited a **completely different codebase**, possibly:
 - A minimal proof-of-concept implementation
-- A different AgentAuth implementation (not `Gauth_go`)
+- A different AgentAuth implementation (not `AgentAuth`)
 - A hypothetical/example implementation from documentation
 - A different branch or fork
 
@@ -57,8 +57,8 @@ Based on the file structure you referenced, you appear to have audited a **compl
 
 ### Actual File Structure:
 ```
-pkg/rfc0111/
-├── rfc0111.go (4,530 lines)              ← ACTUAL IMPLEMENTATION
+pkg/aap001/
+├── aap001.go (4,530 lines)              ← ACTUAL IMPLEMENTATION
 ├── delegation_chain_validator.go (263)    ← Chain validation logic
 ├── redis_atomic_counter.go (302)          ← Atomic constraints
 ├── redis_revocation_blacklist.go (214)    ← Revocation checking
@@ -76,7 +76,7 @@ internal/
 
 ### Actual Implementation (NOT YOUR AUDIT TARGETS):
 
-**Actual Scope Validation** (`pkg/rfc0111/rfc0111.go` lines 3088-3098):
+**Actual Scope Validation** (`pkg/aap001/aap001.go` lines 3088-3098):
 ```go
 // Scope validation (MANDATORY)
 if !containsScope(poa.Scope, vctx.Action) {
@@ -88,7 +88,7 @@ if !containsScope(poa.Scope, vctx.Action) {
 }
 ```
 
-**Actual Constraint Enforcement** (`pkg/rfc0111/rfc0111.go` lines 3100-3205):
+**Actual Constraint Enforcement** (`pkg/aap001/aap001.go` lines 3100-3205):
 ```go
 // Constraint validation: max_amount
 if limitStr, ok := poa.Restrictions["max_amount"]; ok {
@@ -109,7 +109,7 @@ if s.atomicCounterStore != nil {
 }
 ```
 
-**Actual Revocation Checking** (`pkg/rfc0111/redis_revocation_blacklist.go`):
+**Actual Revocation Checking** (`pkg/aap001/redis_revocation_blacklist.go`):
 ```go
 type RedisRevocationBlacklistStore struct {
     client *redis.Client
@@ -124,7 +124,7 @@ func (r *RedisRevocationBlacklistStore) IsRevoked(
 }
 ```
 
-**Integration** (`pkg/rfc0111/rfc0111.go` lines 1260-1268):
+**Integration** (`pkg/aap001/aap001.go` lines 1260-1268):
 ```go
 // Check revocation blacklist (if configured)
 if s.revocationBlacklistStore != nil {
@@ -135,7 +135,7 @@ if s.revocationBlacklistStore != nil {
 }
 ```
 
-**Actual Agent Binding** (`pkg/rfc0111/rfc0111.go` line 3056):
+**Actual Agent Binding** (`pkg/aap001/aap001.go` line 3056):
 ```go
 // Grantee binding check (MANDATORY)
 if poa.Grantee != grantee {
@@ -177,7 +177,7 @@ if poa.Grantee != grantee {
 
 ### Security Tests:
 ```bash
-$ go test ./pkg/rfc0111/ -v -run Security
+$ go test ./pkg/aap001/ -v -run Security
 === RUN   TestSecurityFix1_AgentSessionBinding
 --- PASS: TestSecurityFix1_AgentSessionBinding (0.00s)
 === RUN   TestSecurityFix2_ReplayProtection
@@ -191,7 +191,7 @@ PASS
 
 ### Phase 3 Load Tests:
 ```bash
-$ go test ./pkg/rfc0111/ -v -run Phase3
+$ go test ./pkg/aap001/ -v -run Phase3
 === RUN   Test1_LuaLockThroughput_Reduced
 --- PASS: Test1_LuaLockThroughput_Reduced (13.16s)
     RESULT: P95 Latency = 28.3ms (< 50ms target) ✅
@@ -209,7 +209,7 @@ PASS
 ## What Went Wrong
 
 ### Possible Explanations:
-1. **Wrong Repository:** You audited a different codebase (not `mauriciomferz/Gauth_go`)
+1. **Wrong Repository:** You audited a different codebase (not `mauriciomferz/AgentAuth`)
 2. **Wrong Branch:** You audited an old/abandoned branch (not `main`)
 3. **Documentation Confusion:** You audited example code from RFC documentation, not actual implementation
 4. **Outdated Materials:** You audited an old version (pre-v0.9.0-beta)
@@ -226,15 +226,15 @@ PASS
 
 ### For Software Quality Lead:
 1. ✅ **Verify you have the correct repository:**
-   - Repository: `https://github.com/mauriciomferz/Gauth_go`
+   - Repository: `https://github.com/mauriciomferz/AgentAuth`
    - Branch: `main`
    - Tag: `v0.9.0-beta` (or latest)
 
 2. ✅ **Review actual implementation files:**
-   - `pkg/rfc0111/rfc0111.go` (4,530 lines)
-   - `pkg/rfc0111/delegation_chain_validator.go` (263 lines)
-   - `pkg/rfc0111/redis_atomic_counter.go` (302 lines)
-   - `pkg/rfc0111/redis_revocation_blacklist.go` (214 lines)
+   - `pkg/aap001/aap001.go` (4,530 lines)
+   - `pkg/aap001/delegation_chain_validator.go` (263 lines)
+   - `pkg/aap001/redis_atomic_counter.go` (302 lines)
+   - `pkg/aap001/redis_revocation_blacklist.go` (214 lines)
 
 3. ✅ **Re-run audit against THIS codebase:**
    - Check actual function signatures
@@ -253,7 +253,7 @@ PASS
 
 **Your audit report is INVALID because it audits a different codebase than this repository.**
 
-The files you reference (`internal/attestation/verifier.go`, `cmd/server/handlers.go`, `pkg/vc/status.go`, `middleware/auth.go`, `internal/logic/policy.go`) **do not exist** in `mauriciomferz/Gauth_go`.
+The files you reference (`internal/attestation/verifier.go`, `cmd/server/handlers.go`, `pkg/vc/status.go`, `middleware/auth.go`, `internal/logic/policy.go`) **do not exist** in `mauriciomferz/AgentAuth`.
 
 The code you quoted:
 ```go
@@ -265,7 +265,7 @@ func AuthorizeRequest(poa *Credential, requestScope string) (string, error) {
 **DOES NOT EXIST** in this repository.
 
 ### THIS Repository Contains:
-- ✅ 4,530-line RFC-0115 Power of Attorney implementation
+- ✅ 4,530-line AAP-002 Power of Attorney implementation
 - ✅ Full scope validation (line 3088)
 - ✅ Full constraint enforcement (lines 3100-3205)
 - ✅ Redis-backed revocation checking (lines 1260-1268)
@@ -281,4 +281,4 @@ func AuthorizeRequest(poa *Credential, requestScope string) (string, error) {
 **Prepared By:** Engineering Team  
 **Date:** November 21, 2025  
 **Status:** 🚨 **AUDIT REPORT REJECTED - AUDITED WRONG CODEBASE**  
-**Next Action:** Quality Lead must verify they are auditing `mauriciomferz/Gauth_go:main`
+**Next Action:** Quality Lead must verify they are auditing `mauriciomferz/AgentAuth:main`

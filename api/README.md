@@ -16,7 +16,7 @@ This directory contains the API definitions and specifications for the AgentAuth
 
 > **⚠️ Beta Purpose Only**: This implementation is designed for learning and demonstration. It is NOT production ready. Do NOT use for real security, production, or commercial deployment.
 
-The AgentAuth beta implementation provides a demonstration Go API through the `pkg/gauth` package for learning purposes, now with complete OpenAPI specifications for all endpoints.
+The AgentAuth beta implementation provides a demonstration Go API through the `pkg/agentauth` package for learning purposes, now with complete OpenAPI specifications for all endpoints.
 
 ## Directory Structure
 
@@ -41,7 +41,7 @@ The OpenAPI specification has been upgraded from Partial to **Implemented** stat
 - ✅ POST `/api/v1/delegation/create` - Create delegation
 - ✅ GET `/api/v1/metrics` - System metrics and observability
 - ✅ GET `/api/v1/provenance` - Audit trail and provenance
-- ✅ GET `/.well-known/gauth-configuration` - Discovery endpoint
+- ✅ GET `/.well-known/agentauth-configuration` - Discovery endpoint
 
 **Documentation Quality:**
 - Complete request/response schemas
@@ -55,7 +55,7 @@ The OpenAPI specification has been upgraded from Partial to **Implemented** stat
 - `docs/openapi.yaml` (documentation copy)
 - Inline annotations in `web/server_clean.go`
 
-authService, err := gauth.New(config)
+authService, err := agentauth.New(config)
 authGrant, err := authService.InitiateAuthorization(authReq)
 tokenResp, err := authService.RequestToken(tokenReq)
 tokenStore := tokenstore.NewMemoryStore()
@@ -68,16 +68,16 @@ The beta AgentAuth API demonstrates authorization, token, tracing, metrics, and 
 
 ### Core Service API
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 
-cfg := gauth.Config{AuthServerURL: "https://auth.example.com", ClientID: "demo", ClientSecret: "secret"}
-svc, err := gauth.New(cfg)
+cfg := agentauth.Config{AuthServerURL: "https://auth.example.com", ClientID: "demo", ClientSecret: "secret"}
+svc, err := agentauth.New(cfg)
 
 // Authorization grant issuance
-grant, err := svc.InitiateAuthorization(gauth.AuthorizationRequest{ClientID: cfg.ClientID, Scopes: []string{"transaction:execute"}})
+grant, err := svc.InitiateAuthorization(agentauth.AuthorizationRequest{ClientID: cfg.ClientID, Scopes: []string{"transaction:execute"}})
 
 // Token request
-tok, err := svc.RequestToken(gauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope, Restrictions: grant.Restrictions})
+tok, err := svc.RequestToken(agentauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope, Restrictions: grant.Restrictions})
 
 // Token validation now returns a structured result
 vr, err := svc.ValidateToken(tok.Token)
@@ -176,7 +176,7 @@ JSON Shape (multisig enabled):
 		"kid": "ed25519:abcdef12",          // legacy single-signature KID (omitted when pure multisig mode)
 		"signature": "base64url...",        // legacy single signature (omitted in pure multisig mode)
 		"mode": "EdDSA",                    // signature mode (currently EdDSA only)
-		"threshold": 2,                      // required signature quorum (only if GAUTH_ROTATIONS_MULTISIG=1)
+		"threshold": 2,                      // required signature quorum (only if AGENTAUTH_ROTATIONS_MULTISIG=1)
 		"satisfied_weight": 2,               // number of valid signatures collected
 		"signatures": [                      // multisig entries
 			{ "kid": "ed25519:abcdef12", "mode": "EdDSA", "signature": "base64url..." },
@@ -191,9 +191,9 @@ Legacy single-signature path (multisig disabled) includes only: `kid`, `signatur
 Environment Flags:
 | Flag | Purpose |
 |------|---------|
-| `GAUTH_ROTATIONS_SIGN=1` | Enable rotation summary signing. |
-| `GAUTH_ROTATIONS_MULTISIG=1` | Aggregate signatures from all current Ed25519 keys. |
-| `GAUTH_ROTATIONS_THRESHOLD` | Optional integer quorum; error if greater than available signatures. |
+| `AGENTAUTH_ROTATIONS_SIGN=1` | Enable rotation summary signing. |
+| `AGENTAUTH_ROTATIONS_MULTISIG=1` | Aggregate signatures from all current Ed25519 keys. |
+| `AGENTAUTH_ROTATIONS_THRESHOLD` | Optional integer quorum; error if greater than available signatures. |
 
 Error Codes (rotation summary path):
 | Code | Condition |
@@ -214,7 +214,7 @@ Use `pkg/verification.VerifyRotationSummarySignature(sum)` which:
 - Falls back to legacy single signature (`kid` + `signature`).
 
 Canonical Signing Payload:
-Only the minimal fields `{chain_length, head_hash, aggregate_hash, generated_at}` are serialized and prefixed with `GAUTH_ROTATION_SUMMARY:` before Ed25519 signing. This keeps signatures stable across future schema extensions.
+Only the minimal fields `{chain_length, head_hash, aggregate_hash, generated_at}` are serialized and prefixed with `AGENTAUTH_ROTATION_SUMMARY:` before Ed25519 signing. This keeps signatures stable across future schema extensions.
 
 Example Go verification snippet:
 ```go
@@ -233,22 +233,22 @@ Planned Extensions:
 
 Endpoint: `GET /api/v1/model/limits/attestation` produces a governance attestation describing current model limits, audit chain head, optional anchor chain head, surge detection status, and strict unknown-model enforcement.
 
-Signature (when `GAUTH_MODEL_LIMIT_ATTEST_SIGN=1`):
+Signature (when `AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN=1`):
  - Includes `nonce` (random base64url) for replay protection; unique per signed attestation
 
 Verification (`POST /api/v1/model/limits/attestation/verify`):
 1. Reconstruct unsigned object preserving field order.
-2. Prepend identical prefix `GAUTH_MODEL_LIMIT_ATTEST:`.
+2. Prepend identical prefix `AGENTAUTH_MODEL_LIMIT_ATTEST:`.
 3. Verify Ed25519 signature using provided `sig_kid` key.
 4. Return `combined_hash = sha256(attest|snapshot.hash|audit.head_hash|anchor.latest_hash)` for external anchoring / linkage.
 
 Environment Flags:
 | Flag | Purpose |
 |------|---------|
-| `GAUTH_MODEL_LIMIT_ATTEST_SIGN=1` | Enable attestation signing with domain-separated payload. |
-| `GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1` | Attach external notarization receipt over combined hash seed. |
-| `GAUTH_ATTEST_STREAM_ENABLE=1` | Enable SSE stream of periodic attestation updates. |
-| `GAUTH_ATTEST_NONCE_TTL=30m` | Optional TTL (Go duration string) to evict cached replay nonces (default 1h). |
+| `AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN=1` | Enable attestation signing with domain-separated payload. |
+| `AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1` | Attach external notarization receipt over combined hash seed. |
+| `AGENTAUTH_ATTEST_STREAM_ENABLE=1` | Enable SSE stream of periodic attestation updates. |
+| `AGENTAUTH_ATTEST_NONCE_TTL=30m` | Optional TTL (Go duration string) to evict cached replay nonces (default 1h). |
 
 Error Codes (attestation verify path):
 | Code | Condition |
@@ -270,7 +270,7 @@ The prefix ensures signatures cannot be replayed or confused with rotation summa
 Example Verification (client-side pseudocode):
 ```go
 rawUnsigned := rebuildUnsigned(att) // drop signature fields
-msg := append([]byte("GAUTH_MODEL_LIMIT_ATTEST:"), rawUnsigned...)
+msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), rawUnsigned...)
 ok := ed25519.Verify(pubKey, msg, sigBytes)
 if nonceCache.Seen(att.Nonce) { /* reject replay */ }
 ```
@@ -283,12 +283,12 @@ The beta surfaces Prometheus metrics for cryptographic integrity operations.
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `gauth_rotation_signature_verify_latency_seconds` | histogram | (none) | Latency per rotation summary signature verification (each signature). |
-| `gauth_rotation_signature_verify_failures_total` | counter | `reason` | Count of rotation signature verification failures by reason (e.g. `missing_signature`, `kid_mismatch`). |
-| `gauth_attestation_verify_latency_seconds` | histogram | (none) | Latency of full attestation verification (reconstruction + signature + replay check). |
-| `gauth_attestation_verify_failures_total` | counter | `reason` | Count of attestation verification failures by reason (e.g. `invalid_json`, `signature_invalid`, `nonce_replay`). |
-| `gauth_attestation_verify_total` | counter | `outcome`, `soft_invalid` | Total attestation verification attempts classified by outcome (success|failure) and whether failure was soft-invalid. |
-| `gauth_attestation_nonce_cache_size` | gauge | (none) | Current size of replay nonce cache after periodic TTL prune. |
+| `agentauth_rotation_signature_verify_latency_seconds` | histogram | (none) | Latency per rotation summary signature verification (each signature). |
+| `agentauth_rotation_signature_verify_failures_total` | counter | `reason` | Count of rotation signature verification failures by reason (e.g. `missing_signature`, `kid_mismatch`). |
+| `agentauth_attestation_verify_latency_seconds` | histogram | (none) | Latency of full attestation verification (reconstruction + signature + replay check). |
+| `agentauth_attestation_verify_failures_total` | counter | `reason` | Count of attestation verification failures by reason (e.g. `invalid_json`, `signature_invalid`, `nonce_replay`). |
+| `agentauth_attestation_verify_total` | counter | `outcome`, `soft_invalid` | Total attestation verification attempts classified by outcome (success|failure) and whether failure was soft-invalid. |
+| `agentauth_attestation_nonce_cache_size` | gauge | (none) | Current size of replay nonce cache after periodic TTL prune. |
 | `attestation_domain_signature_failures_total` | counter | `reason` | Domain signature soft invalid verification failures (invalid, prefix_missing, base64_invalid). |
 | `attestation_domain_signature_success_total` | counter | (none) | Count of attestations where optional domain signature verified successfully. |
 
@@ -296,15 +296,15 @@ Example PromQL dashboards:
 
 ```promql
 # 95th percentile latency (5m window)
-histogram_quantile(0.95, sum(rate(gauth_rotation_signature_verify_latency_seconds_bucket[5m])) by (le))
-histogram_quantile(0.95, sum(rate(gauth_attestation_verify_latency_seconds_bucket[5m])) by (le))
+histogram_quantile(0.95, sum(rate(agentauth_rotation_signature_verify_latency_seconds_bucket[5m]) by (le))
+histogram_quantile(0.95, sum(rate(agentauth_attestation_verify_latency_seconds_bucket[5m]) by (le))
 
 # Failure ratios
-sum(increase(gauth_rotation_signature_verify_failures_total[5m])) / sum(increase(gauth_rotation_signature_verify_latency_seconds_count[5m]))
-sum(increase(gauth_attestation_verify_failures_total[5m])) / sum(increase(gauth_attestation_verify_latency_seconds_count[5m]))
+sum(increase(agentauth_rotation_signature_verify_failures_total[5m]) / sum(increase(agentauth_rotation_signature_verify_latency_seconds_count[5m]))
+sum(increase(agentauth_attestation_verify_failures_total[5m]) / sum(increase(agentauth_attestation_verify_latency_seconds_count[5m]))
 
 # Top attestation failure reasons (5m)
-topk(5, sum(increase(gauth_attestation_verify_failures_total[5m])) by (reason))
+topk(5, sum(increase(agentauth_attestation_verify_failures_total[5m]) by (reason))
 ```
 
 Operational Notes:
@@ -333,7 +333,7 @@ If upgrading existing examples, adapt the signatures per the table above.
 ## Usage Examples
 
 See the working examples in:
-- `cmd/gauth-server/main.go` - Complete demo application ✅
+- `cmd/agentauth-server/main.go` - Complete demo application ✅
 - `examples/typed_structures_demo/` - Event system usage ✅
 - `examples/token/advanced_revocation_flow/` - Token management ✅
 
@@ -373,7 +373,7 @@ Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md
 Recent security & integrity improvements:
 1. Automatic multi-signature domain separation (threshold >1 triggers V2; binds sorted weights).
 2. Embedded deterministic `weights` + `version` fields in canonical JSON (future evolution ready).
-3. Strict authenticity default (missing signature key => integrity failure unless `GAUTH_STRICT_AUTHENTICITY=0`).
+3. Strict authenticity default (missing signature key => integrity failure unless `AGENTAUTH_STRICT_AUTHENTICITY=0`).
 4. Mandatory `jti` claim baseline (replay fail-closed by default).
 
 Status snapshot: Multi-signature threshold & canonical serialization Implemented; several authorization engine, lifecycle, and observability items remain Partial/Missing. Full matrix in `docs/rfc0111_compliance_matrix.md`.

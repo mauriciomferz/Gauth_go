@@ -1,0 +1,223 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agentauth-development
+  labels:
+    name: agentauth-development
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agentauth-config
+  namespace: agentauth-development
+data:
+  config.yaml: |
+    server:
+      port: 8080
+      host: "0.0.0.0"
+    database:
+      url: "postgres://agentauth_app:secure_app_password@postgres-service:5432/agentauth?sslmode=require"
+      max_connections: 50
+      connection_timeout: "30s"
+    redis:
+      url: "redis://redis-service:6379"
+      pool_size: 10
+    vault:
+      address: "https://vault-service:8200"
+      mount_path: "agentauth"
+    monitoring:
+      enabled: true
+      metrics_port: 9090
+    logging:
+      level: "info"
+      format: "json"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: agentauth-secrets
+  namespace: agentauth-development
+type: Opaque
+data:
+  # DEVELOPMENT VAULT TOKEN ONLY (base64 of dev-root-token). Replace for any non-local use:
+  # echo -n "your-dev-token" | base64
+  vault-token: ZGV2LXJvb3QtdG9rZW4=
+  # jwt-signing-key: base64-encoded symmetric signing key (placeholder empty)
+  jwt-signing-key: ""
+  eth-private-key: ""  # Add actual base64 encoded private key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agentauth-deployment
+  namespace: agentauth-development
+  labels:
+    app: agentauth
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: agentauth
+  template:
+    metadata:
+      labels:
+        app: agentauth
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: agentauth
+        image: agentauth-demo:dev  # Build locally with: docker build -t agentauth-demo:dev .
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: CONFIG_FILE
+          value: "/etc/agentauth/config.yaml"
+        - name: VAULT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: agentauth-secrets
+              key: vault-token
+        - name: JWT_SIGNING_KEY
+          valueFrom:
+            secretKeyRef:
+              name: agentauth-secrets
+              key: jwt-signing-key
+        - name: AGENTAUTH_ETH_RPC_URL
+          value: "https://sepolia.infura.io/v3/YOUR-PROJECT-ID"
+        - name: AGENTAUTH_ETH_CONTRACT_ADDRESS
+          value: "0xD8AeB2e81C8b9A8b136519d737eba220fE5b9D59" # PoARegistry on Sepolia
+        - name: AGENTAUTH_ETH_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: agentauth-secrets
+              key: eth-private-key
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/agentauth
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /api/v1/beta/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config-volume
+        configMap:
+          name: agentauth-config
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentauth-service
+  namespace: agentauth-development
+  labels:
+    app: agentauth
+spec:
+  selector:
+    app: agentauth
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agentauth-ingress
+  namespace: agentauth-development
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+  - hosts:
+    - agentauth-dev.example.com
+    secretName: agentauth-tls
+  rules:
+  - host: agentauth-dev.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: agentauth-service
+            port:
+              number: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: agentauth-pdb
+  namespace: agentauth-development
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: agentauth
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: agentauth-hpa
+  namespace: agentauth-development
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: agentauth-deployment
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

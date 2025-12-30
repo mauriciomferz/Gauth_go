@@ -22,7 +22,7 @@ All web pages are loading correctly and serving proper resources:
 
 ### 1. Protocol Flow Navigator (`/protocol-flow.html`)
 
-**Purpose**: Interactive visualization of AgentAuth RFC-0111 protocol flow
+**Purpose**: Interactive visualization of AgentAuth AAP-001 protocol flow
 
 **How to Use**:
 1. Navigate to `http://localhost:8080/protocol-flow.html`
@@ -75,8 +75,8 @@ All web pages are loading correctly and serving proper resources:
 ## 🔧 Development Mode
 
 Server is running with:
-- `GAUTH_DEV_INDEX=1` - Enables disk-based HTML serving (hot reload)
-- `GAUTH_DEV_MODULES=1` - Enables disk-based module serving (hot reload)
+- `AGENTAUTH_DEV_INDEX=1` - Enables disk-based HTML serving (hot reload)
+- `AGENTAUTH_DEV_MODULES=1` - Enables disk-based module serving (hot reload)
 
 **Benefits**:
 - Edit HTML/CSS/JS files and refresh browser to see changes
@@ -118,7 +118,7 @@ curl -I http://localhost:8080/static/css/protocol-navigator.css
 curl -I http://localhost:8080/static/js/modules/protocol-navigator.js
 
 # Check server logs
-tail -30 gauth-web.log
+tail -30 agentauth-web.log
 ```
 
 All should return HTTP 200.

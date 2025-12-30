@@ -522,7 +522,7 @@ curl -X PUT 'http://localhost:8080/api/admin/policy-templates/<id>' \
 
 Load pre-configured templates:
 ```bash
-docker exec -i gauth-postgres psql -U postgres -d gauth < database/seeds/policy_templates_seed.sql
+docker exec -i agentauth-postgres psql -U postgres -d agentauth < database/seeds/policy_templates_seed.sql
 ```
 
 ## Files Created

@@ -22,7 +22,7 @@ type BLSProvider struct {
 // NewBLSProvider creates a new provider with a domain separation tag.
 func NewBLSProvider(dst string) *BLSProvider {
 	if dst == "" {
-		dst = "GAUTH_BLS_SIG_V1"
+		dst = "AGENTAUTH_BLS_SIG_V1"
 	}
 	return &BLSProvider{
 		domain: []byte(dst),

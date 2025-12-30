@@ -5,7 +5,7 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'gauth-production'
+    cluster: 'agentauth-production'
     environment: 'production'
 
 # Alertmanager configuration
@@ -22,7 +22,7 @@ rule_files:
 # Scrape configurations
 scrape_configs:
   # AgentAuth Backend Metrics
-  - job_name: 'gauth-backend'
+  - job_name: 'agentauth-backend'
     static_configs:
       - targets: ['backend:8080']
     metrics_path: '/api/v1/beta/metrics'

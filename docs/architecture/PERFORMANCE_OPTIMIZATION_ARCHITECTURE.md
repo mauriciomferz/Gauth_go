@@ -467,7 +467,7 @@ func (b *BatchInserter) BatchInsertPoAs(ctx context.Context, poas []*PoA) error 
 ```ini
 # k8s/database/pgbouncer-config.ini
 [databases]
-gauth = host=postgresql-primary.gauth.svc.cluster.local port=5432 dbname=gauth
+agentauth = host=postgresql-primary.agentauth.svc.cluster.local port=5432 dbname=agentauth
 
 [pgbouncer]
 # Connection pooling mode
@@ -513,11 +513,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: pgbouncer-config
-  namespace: gauth
+  namespace: agentauth
 data:
   pgbouncer.ini: |
     [databases]
-    gauth = host=postgresql-primary.gauth.svc.cluster.local port=5432 dbname=gauth
+    agentauth = host=postgresql-primary.agentauth.svc.cluster.local port=5432 dbname=agentauth
     
     [pgbouncer]
     pool_mode = transaction
@@ -540,11 +540,11 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: pgbouncer-secret
-  namespace: gauth
+  namespace: agentauth
 type: Opaque
 stringData:
   userlist.txt: |
-    "gauth" "SCRAM-SHA-256$4096:salt$hash:serverhash"
+    "agentauth" "SCRAM-SHA-256$4096:salt$hash:serverhash"
     "pgbouncer_admin" "SCRAM-SHA-256$4096:salt$hash:serverhash"
 
 ---
@@ -552,7 +552,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pgbouncer
-  namespace: gauth
+  namespace: agentauth
   labels:
     app: pgbouncer
 spec:
@@ -638,7 +638,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: pgbouncer
-  namespace: gauth
+  namespace: agentauth
   labels:
     app: pgbouncer
 spec:
@@ -658,7 +658,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: pgbouncer-pdb
-  namespace: gauth
+  namespace: agentauth
 spec:
   minAvailable: 2
   selector:
@@ -672,10 +672,10 @@ spec:
 // Update database connection to use pgBouncer
 func NewDatabaseConnection() (*pgx.Conn, error) {
     // Before: Direct connection to PostgreSQL
-    // dsn := "host=postgresql-primary.gauth.svc.cluster.local port=5432 ..."
+    // dsn := "host=postgresql-primary.agentauth.svc.cluster.local port=5432 ..."
     
     // After: Connection through pgBouncer
-    dsn := "host=pgbouncer.gauth.svc.cluster.local port=6432 dbname=gauth user=gauth password=xxx sslmode=require"
+    dsn := "host=pgbouncer.agentauth.svc.cluster.local port=6432 dbname=agentauth user=agentauth password=xxx sslmode=require"
     
     config, err := pgx.ParseConfig(dsn)
     if err != nil {
@@ -684,7 +684,7 @@ func NewDatabaseConnection() (*pgx.Conn, error) {
     
     // Optimize for pgBouncer transaction pooling
     config.ConnConfig.ConnectTimeout = 10 * time.Second
-    config.ConnConfig.RuntimeParams["application_name"] = "gauth-api"
+    config.ConnConfig.RuntimeParams["application_name"] = "agentauth-api"
     
     // No need for large pool - pgBouncer handles it
     config.MaxConns = 20  // Reduced from 200
@@ -742,13 +742,13 @@ Resources:
         Origins:
           # Static assets from S3
           - Id: S3Origin
-            DomainName: gauth-static-assets.s3.amazonaws.com
+            DomainName: agentauth-static-assets.s3.amazonaws.com
             S3OriginConfig:
               OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${CloudFrontOAI}'
           
           # API origin
           - Id: APIOrigin
-            DomainName: api.gauth.example.com
+            DomainName: api.agentauth.example.com
             CustomOriginConfig:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
@@ -1256,7 +1256,7 @@ func NewShardedCache(redisNodes []string) *ShardedCache {
 func (sc *ShardedCache) getShard(key string) *RedisCache {
     h := fnv.New32a()
     h.Write([]byte(key))
-    shardIndex := int(h.Sum32()) % sc.numShards
+    shardIndex := int(h.Sum32() % sc.numShards
     return sc.shards[shardIndex]
 }
 
@@ -1391,8 +1391,8 @@ func (cc *CompressedCache) decompress(data []byte) ([]byte, error) {
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gauth-api-ingress
-  namespace: gauth
+  name: agentauth-api-ingress
+  namespace: agentauth
   annotations:
     # Load balancing algorithm
     nginx.ingress.kubernetes.io/load-balance: "least_conn"  # Route to least busy pod
@@ -1429,14 +1429,14 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: api.gauth.example.com
+  - host: api.agentauth.example.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: gauth-api
+            name: agentauth-api
             port:
               number: 8080
 ```
@@ -1590,69 +1590,69 @@ groups:
     interval: 30s
     rules:
       # Database query performance
-      - record: gauth:db_query_duration_seconds:p95
-        expr: histogram_quantile(0.95, rate(gauth_db_query_duration_seconds_bucket[5m]))
+      - record: agentauth:db_query_duration_seconds:p95
+        expr: histogram_quantile(0.95, rate(agentauth_db_query_duration_seconds_bucket[5m]))
       
-      - record: gauth:db_query_duration_seconds:p99
-        expr: histogram_quantile(0.99, rate(gauth_db_query_duration_seconds_bucket[5m]))
+      - record: agentauth:db_query_duration_seconds:p99
+        expr: histogram_quantile(0.99, rate(agentauth_db_query_duration_seconds_bucket[5m]))
       
       # Slow queries (>100ms)
       - alert: SlowDatabaseQueries
-        expr: gauth:db_query_duration_seconds:p95 > 0.1
+        expr: agentauth:db_query_duration_seconds:p95 > 0.1
         for: 5m
         annotations:
           summary: "Slow database queries detected"
           description: "P95 query latency is {{ $value }}s (threshold: 100ms)"
       
       # Cache performance
-      - record: gauth:cache_hit_rate
-        expr: rate(gauth_cache_hits_total[5m]) / (rate(gauth_cache_hits_total[5m]) + rate(gauth_cache_misses_total[5m]))
+      - record: agentauth:cache_hit_rate
+        expr: rate(agentauth_cache_hits_total[5m]) / (rate(agentauth_cache_hits_total[5m]) + rate(agentauth_cache_misses_total[5m]))
       
       - alert: LowCacheHitRate
-        expr: gauth:cache_hit_rate < 0.7
+        expr: agentauth:cache_hit_rate < 0.7
         for: 10m
         annotations:
           summary: "Cache hit rate below 70%"
           description: "Cache hit rate is {{ $value | humanizePercentage }}"
       
       # pgBouncer metrics
-      - record: gauth:pgbouncer_active_connections
-        expr: pgbouncer_pools_cl_active{database="gauth"}
+      - record: agentauth:pgbouncer_active_connections
+        expr: pgbouncer_pools_cl_active{database="agentauth"}
       
       - alert: pgBouncerConnectionPoolExhausted
-        expr: pgbouncer_pools_cl_waiting{database="gauth"} > 10
+        expr: pgbouncer_pools_cl_waiting{database="agentauth"} > 10
         for: 2m
         annotations:
           summary: "pgBouncer connection pool exhausted"
           description: "{{ $value }} clients waiting for connections"
       
       # API latency
-      - record: gauth:api_request_duration_seconds:p50
-        expr: histogram_quantile(0.50, rate(gauth_http_request_duration_seconds_bucket[5m]))
+      - record: agentauth:api_request_duration_seconds:p50
+        expr: histogram_quantile(0.50, rate(agentauth_http_request_duration_seconds_bucket[5m]))
       
-      - record: gauth:api_request_duration_seconds:p95
-        expr: histogram_quantile(0.95, rate(gauth_http_request_duration_seconds_bucket[5m]))
+      - record: agentauth:api_request_duration_seconds:p95
+        expr: histogram_quantile(0.95, rate(agentauth_http_request_duration_seconds_bucket[5m]))
       
-      - record: gauth:api_request_duration_seconds:p99
-        expr: histogram_quantile(0.99, rate(gauth_http_request_duration_seconds_bucket[5m]))
+      - record: agentauth:api_request_duration_seconds:p99
+        expr: histogram_quantile(0.99, rate(agentauth_http_request_duration_seconds_bucket[5m]))
       
       # Throughput
-      - record: gauth:api_requests_per_second
-        expr: rate(gauth_http_requests_total[1m])
+      - record: agentauth:api_requests_per_second
+        expr: rate(agentauth_http_requests_total[1m])
       
       - alert: LowThroughput
-        expr: gauth:api_requests_per_second < 100
+        expr: agentauth:api_requests_per_second < 100
         for: 5m
         annotations:
           summary: "API throughput below expected"
           description: "Current throughput: {{ $value | humanize }} req/s"
       
       # CDN cache hit rate
-      - record: gauth:cdn_cache_hit_rate
+      - record: agentauth:cdn_cache_hit_rate
         expr: rate(cloudfront_requests_cached[5m]) / rate(cloudfront_requests_total[5m])
       
       - alert: LowCDNCacheHitRate
-        expr: gauth:cdn_cache_hit_rate < 0.8
+        expr: agentauth:cdn_cache_hit_rate < 0.8
         for: 10m
         annotations:
           summary: "CDN cache hit rate below 80%"

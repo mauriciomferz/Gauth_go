@@ -6,31 +6,31 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# AAP-RFC-0115 Implementation Summary
+# AAP-002 Implementation Summary
 
 > Last Updated: 2025-10-17
 > Status: Active
 
 > **⚠️ BETA DEMONSTRATION NOTICE**
 >
-> This is a **beta demonstration** of RFC-0115 concepts (pre-release; not production).
+> This is a **beta demonstration** of AAP-002 concepts (pre-release; not production).
 > **NOT production ready. This is for beta demonstration and learning purposes only. Do NOT use for real security, production, or commercial deployment.**
 
 **Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+**AgentAuth Community gGmbH i.G.**, www.agentauth.io
 Operated by AgentAuth Technologies GmbH
 MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.agentauth.io
 
 ## Overview
 
-This document summarizes the complete implementation of **AAP-RFC-0115 Power-of-Attorney Credential Definition (PoA-Definition)** within the AgentAuth framework. The implementation provides a complete, type-safe Go implementation of the official AgentAuth Community standard.
+This document summarizes the complete implementation of **AAP-002 Power-of-Attorney Credential Definition (PoA-Definition)** within the AgentAuth framework. The implementation provides a complete, type-safe Go implementation of the official AgentAuth Community standard.
 
 ## Implementation Status: ✅ COMPLETE
 
-### RFC-0115 Section 3.A - Parties ✅
+### AAP-002 Section 3.A - Parties ✅
 - **Principal**: Complete implementation with Individual/Organization types
   - `PrincipalType`: Individual, Organization with full type safety
   - `Individual`: Name, citizenship, additional individual-specific fields
@@ -44,7 +44,7 @@ This document summarizes the complete implementation of **AAP-RFC-0115 Power-of-
   - `ClientType`: LLM, DigitalAgent, AgenticAI, HumanoidRobot, Other
   - Identity, version, operational status tracking
 
-### RFC-0115 Section 3.B - Type and Scope of Authorization ✅
+### AAP-002 Section 3.B - Type and Scope of Authorization ✅
 - **AuthorizationType**: Complete authorization framework
   - `RepresentationType`: Sole, Joint representation
   - `SignatureType`: Single, Joint, Collective signatures
@@ -61,7 +61,7 @@ This document summarizes the complete implementation of **AAP-RFC-0115 Power-of-
   - `NonPhysicalAction`: Sharing, Brainstorming, Research, RAG operations
   - `PhysicalAction`: Shipments, Production, Storage, Customization
 
-### RFC-0115 Section 3.C - Requirements ✅
+### AAP-002 Section 3.C - Requirements ✅
 - **ValidityPeriod**: Complete time-based controls
   - Start/end times with timezone support
   - Auto-renewal conditions and termination rules
@@ -91,7 +91,7 @@ This document summarizes the complete implementation of **AAP-RFC-0115 Power-of-
 ## Technical Implementation
 
 ### Type Safety ✅
-- **Complete Go Type System**: All RFC-0115 structures fully typed
+- **Complete Go Type System**: All AAP-002 structures fully typed
 - **JSON Serialization**: Complete serialization/deserialization implementation
 - **Validation**: Type-level validation through Go's type system
 - **Extensibility**: Plugin architecture for custom validators
@@ -100,10 +100,10 @@ This document summarizes the complete implementation of **AAP-RFC-0115 Power-of-
 - **Error Handling**: Comprehensive error types and handling
 - **Documentation**: Complete GoDoc documentation for all types
 - **Testing**: Demonstration implementation with full examples
-- **Integration**: Seamless integration with existing gauth ecosystem
+- **Integration**: Seamless integration with existing agentauth ecosystem
 
 ### Security Implementation ⚠️
-- **Structure**: Complete RFC-0115 compliant structure ✅
+- **Structure**: Complete AAP-002 compliant structure ✅
 - **Cryptography**: DEMONSTRATION ONLY - requires real crypto implementation
 - **Authentication**: DEMONSTRATION ONLY - requires real identity verification
 - **Authorization**: DEMONSTRATION ONLY - requires real RBAC implementation
@@ -112,13 +112,13 @@ This document summarizes the complete implementation of **AAP-RFC-0115 Power-of-
 
 ```
 pkg/poa/
-├── definition.go              # Complete RFC-0115 PoA-Definition implementation
+├── definition.go              # Complete AAP-002 PoA-Definition implementation
 examples/rfc_0115_poa_definition/
 ├── main.go                   # Working demonstration
 ├── README.md                 # Implementation documentation
 docs/
 ├── RFC_ARCHITECTURE.md       # Updated with official AgentAuth Community info
-├── DEVELOPMENT.md           # RFC-0115 compliance documentation
+├── DEVELOPMENT.md           # AAP-002 compliance documentation
 ```
 
 ## Legal Compliance
@@ -127,7 +127,7 @@ docs/
 - **Official Organization**: AgentAuth Community gGmbH i.G.
 - **Leadership**: MD AgentAuth Contributor, the AgentAuth Community, Chairman Daniel Hartert
 - **Registration**: Siegburg HRB 18660, Hardtweg 31, D-53639 Königswinter
-- **Websites**: www.AgentAuthFoundation.com, www.AgentAuthID.com
+- **Websites**: www.agentauth.io, www.agentauth.io
 - **License**: Apache 2.0
 
 ### Regulatory Framework ✅
@@ -141,7 +141,7 @@ docs/
 The implementation includes a complete working example demonstrating:
 
 ```go
-// Create RFC-0115 compliant PoA-Definition
+// Create AAP-002 compliant PoA-Definition
 poaDefinition := &poa.PoADefinition{
     Parties: poa.Parties{
         Principal: poa.Principal{
@@ -166,7 +166,7 @@ jsonData, _ := json.MarshalIndent(poaDefinition, "", "  ")
 ## Development Readiness
 
 ### 🎓 Beta Demonstration Implementation Available
-- **Structure**: Demonstrates RFC-0115 compliant data structures
+- **Structure**: Demonstrates AAP-002 compliant data structures
 - **Type Safety**: Shows Go type system concepts
 - **Documentation**: Beta learning materials and examples
 - **Legal Framework**: Proper AgentAuth Community attribution for beta usage
@@ -180,7 +180,7 @@ jsonData, _ := json.MarshalIndent(poaDefinition, "", "  ")
 
 ## Testing and Validation
 
-Run the complete RFC-0115 demonstration:
+Run the complete AAP-002 demonstration:
 
 ```bash
 cd examples/rfc_0115_poa_definition
@@ -188,22 +188,22 @@ go run main.go
 ```
 
 Expected output includes:
-- Complete JSON structure with all RFC-0115 sections
+- Complete JSON structure with all AAP-002 sections
 - Type safety demonstration
 - AgentAuth Community attribution
 - Success confirmation
 
 ## Conclusion
 
-The AAP-RFC-0115 implementation is **COMPLETE** and **COMPLIANT** with the official AgentAuth Community standard. The implementation provides:
+The AAP-002 implementation is **COMPLETE** and **COMPLIANT** with the official AgentAuth Community standard. The implementation provides:
 
-1. **100% RFC-0115 Coverage**: All sections (3.A, 3.B, 3.C) fully implemented
+1. **100% AAP-002 Coverage**: All sections (3.A, 3.B, 3.C) fully implemented
 2. **Complete Implementation Structure**: Type-safe, documented, tested
 3. **Official Attribution**: Proper AgentAuth Community gGmbH i.G. licensing
 4. **Legal Compliance**: German law jurisdiction, proper regulatory framework
 5. **Beta Architecture**: Demonstrates concepts for learning purposes
 
-This implementation serves as the foundation for PoA-Definition systems requiring RFC-0115 compliance.
+This implementation serves as the foundation for PoA-Definition systems requiring AAP-002 compliance.
 
 ---
 Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

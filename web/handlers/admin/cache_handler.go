@@ -48,8 +48,8 @@ func (h *CacheHandler) GetCacheStats(c *gin.Context) {
 
 // ClearCache handles POST /api/v1/admin/cache/clear
 func (h *CacheHandler) ClearCache(c *gin.Context) {
-	// Clear all keys with gauth: prefix
-	err := h.cache.DeletePattern(c.Request.Context(), "gauth:*")
+	// Clear all keys with agentauth: prefix
+	err := h.cache.DeletePattern(c.Request.Context(), "agentauth:*")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to clear cache",
@@ -73,9 +73,9 @@ func (h *CacheHandler) ClearCachePattern(c *gin.Context) {
 		return
 	}
 
-	// Add gauth: prefix if not present
-	if len(pattern) < 6 || pattern[:6] != "gauth:" {
-		pattern = "gauth:" + pattern
+	// Add agentauth: prefix if not present
+	if len(pattern) < 6 || pattern[:6] != "agentauth:" {
+		pattern = "agentauth:" + pattern
 	}
 
 	err := h.cache.DeletePattern(c.Request.Context(), pattern)

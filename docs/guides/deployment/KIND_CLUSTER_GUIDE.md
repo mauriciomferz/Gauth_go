@@ -12,27 +12,27 @@ refreshCadence: on-change
 
 ## Cluster Information
 
-- **Cluster Name**: `gauth-staging`
+- **Cluster Name**: `agentauth-staging`
 - **Type**: kind (Kubernetes in Docker)
-- **Namespace**: `gauth-staging`
+- **Namespace**: `agentauth-staging`
 - **Created**: November 10, 2025
 
 ## Current Deployments
 
 ### Blue Environment
-- **Deployment**: `gauth-blue`
+- **Deployment**: `agentauth-blue`
 - **Replicas**: 2
-- **Image**: `gauth-mock:blue`
+- **Image**: `agentauth-mock:blue`
 - **Status**: Running
 
 ### Green Environment
-- **Deployment**: `gauth-green`
+- **Deployment**: `agentauth-green`
 - **Replicas**: 2
-- **Image**: `gauth-mock:green`
+- **Image**: `agentauth-mock:green`
 - **Status**: Running
 
 ### Service
-- **Name**: `gauth-service`
+- **Name**: `agentauth-service`
 - **Type**: ClusterIP
 - **IP**: `10.96.227.186`
 - **Port**: 80 → 8080
@@ -45,13 +45,13 @@ refreshCadence: on-change
 kind get clusters
 
 # Get cluster info
-kubectl cluster-info --context kind-gauth-staging
+kubectl cluster-info --context kind-agentauth-staging
 
 # View all resources
-kubectl get all -n gauth-staging
+kubectl get all -n agentauth-staging
 
 # View pods with version labels
-kubectl get pods -n gauth-staging -L version
+kubectl get pods -n agentauth-staging -L version
 ```
 
 ### Test Deployments
@@ -59,8 +59,8 @@ kubectl get pods -n gauth-staging -L version
 # Test blue environment (if service points to blue)
 kubectl run test-client --rm -i --tty \
   --image=curlimages/curl:latest \
-  --restart=Never -n gauth-staging \
-  -- curl -s http://gauth-service/api/v1/beta/health
+  --restart=Never -n agentauth-staging \
+  -- curl -s http://agentauth-service/api/v1/beta/health
 
 # Expected output: {"status":"healthy","version":"blue"}
 # or: {"status":"healthy","version":"green"}
@@ -69,39 +69,39 @@ kubectl run test-client --rm -i --tty \
 ### Traffic Switching
 ```bash
 # Switch to green
-kubectl patch service gauth-service -n gauth-staging \
-  -p '{"spec":{"selector":{"app":"gauth","version":"green"}}}'
+kubectl patch service agentauth-service -n agentauth-staging \
+  -p '{"spec":{"selector":{"app":"agentauth","version":"green"}}}'
 
 # Switch to blue (rollback)
-kubectl patch service gauth-service -n gauth-staging \
-  -p '{"spec":{"selector":{"app":"gauth","version":"blue"}}}'
+kubectl patch service agentauth-service -n agentauth-staging \
+  -p '{"spec":{"selector":{"app":"agentauth","version":"blue"}}}'
 
 # Check current routing
-kubectl get service gauth-service -n gauth-staging -o yaml | grep -A 3 selector
+kubectl get service agentauth-service -n agentauth-staging -o yaml | grep -A 3 selector
 ```
 
 ### View Logs
 ```bash
 # Blue logs
-kubectl logs -l version=blue -n gauth-staging --tail=50
+kubectl logs -l version=blue -n agentauth-staging --tail=50
 
 # Green logs
-kubectl logs -l version=green -n gauth-staging --tail=50
+kubectl logs -l version=green -n agentauth-staging --tail=50
 
 # Follow logs
-kubectl logs -f deployment/gauth-blue -n gauth-staging
+kubectl logs -f deployment/agentauth-blue -n agentauth-staging
 ```
 
 ### Scale Deployments
 ```bash
 # Scale blue
-kubectl scale deployment gauth-blue -n gauth-staging --replicas=3
+kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=3
 
 # Scale green
-kubectl scale deployment gauth-green -n gauth-staging --replicas=3
+kubectl scale deployment agentauth-green -n agentauth-staging --replicas=3
 
 # Scale down
-kubectl scale deployment gauth-blue -n gauth-staging --replicas=1
+kubectl scale deployment agentauth-blue -n agentauth-staging --replicas=1
 ```
 
 ### Load Testing
@@ -112,8 +112,8 @@ kubectl scale deployment gauth-blue -n gauth-staging --replicas=1
 # Or manually with kubectl
 kubectl run load-test --rm -i --tty \
   --image=curlimages/curl:latest \
-  --restart=Never -n gauth-staging \
-  -- sh -c 'for i in $(seq 1 50); do curl -s http://gauth-service/api/v1/beta/health; done'
+  --restart=Never -n agentauth-staging \
+  -- sh -c 'for i in $(seq 1 50); do curl -s http://agentauth-service/api/v1/beta/health; done'
 ```
 
 ## Cluster Management
@@ -121,13 +121,13 @@ kubectl run load-test --rm -i --tty \
 ### Stop the Cluster
 ```bash
 # Stop the cluster (preserves state)
-docker stop gauth-staging-control-plane
+docker stop agentauth-staging-control-plane
 ```
 
 ### Start the Cluster
 ```bash
 # Start the cluster
-docker start gauth-staging-control-plane
+docker start agentauth-staging-control-plane
 
 # Verify it's running
 kubectl get nodes
@@ -136,7 +136,7 @@ kubectl get nodes
 ### Delete the Cluster
 ```bash
 # Delete the entire cluster
-kind delete cluster --name gauth-staging
+kind delete cluster --name agentauth-staging
 
 # Verify deletion
 kind get clusters
@@ -145,7 +145,7 @@ kind get clusters
 ### Recreate the Cluster
 ```bash
 # Create new cluster with port mapping
-kind create cluster --name gauth-staging --config - <<EOF
+kind create cluster --name agentauth-staging --config - <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
@@ -157,10 +157,10 @@ nodes:
 EOF
 
 # Create namespace
-kubectl create namespace gauth-staging
+kubectl create namespace agentauth-staging
 
 # Load images
-kind load docker-image gauth-mock:blue gauth-mock:green --name gauth-staging
+kind load docker-image agentauth-mock:blue agentauth-mock:green --name agentauth-staging
 
 # Deploy applications
 kubectl apply -f k8s-test-blue.yaml
@@ -172,46 +172,46 @@ kubectl apply -f k8s-test-green.yaml
 ### Pods Not Starting
 ```bash
 # Check pod status
-kubectl get pods -n gauth-staging
+kubectl get pods -n agentauth-staging
 
 # Describe pod for events
-kubectl describe pod <pod-name> -n gauth-staging
+kubectl describe pod <pod-name> -n agentauth-staging
 
 # Check pod logs
-kubectl logs <pod-name> -n gauth-staging
+kubectl logs <pod-name> -n agentauth-staging
 ```
 
 ### Service Not Routing
 ```bash
 # Check service endpoints
-kubectl get endpoints gauth-service -n gauth-staging
+kubectl get endpoints agentauth-service -n agentauth-staging
 
 # Check service details
-kubectl describe service gauth-service -n gauth-staging
+kubectl describe service agentauth-service -n agentauth-staging
 
 # Verify selectors match pod labels
-kubectl get pods -n gauth-staging --show-labels
+kubectl get pods -n agentauth-staging --show-labels
 ```
 
 ### Image Not Found
 ```bash
 # List loaded images in kind
-docker exec -it gauth-staging-control-plane crictl images | grep gauth
+docker exec -it agentauth-staging-control-plane crictl images | grep agentauth
 
 # Reload image if needed
-kind load docker-image gauth-mock:blue --name gauth-staging
+kind load docker-image agentauth-mock:blue --name agentauth-staging
 ```
 
 ### Cluster Connection Issues
 ```bash
 # Check if cluster is running
-docker ps | grep gauth-staging
+docker ps | grep agentauth-staging
 
 # Check kubectl context
 kubectl config current-context
 
 # Switch context if needed
-kubectl config use-context kind-gauth-staging
+kubectl config use-context kind-agentauth-staging
 ```
 
 ## Resource Cleanup
@@ -219,17 +219,17 @@ kubectl config use-context kind-gauth-staging
 ### Delete Deployments Only
 ```bash
 # Delete all resources in namespace (keeps namespace)
-kubectl delete all --all -n gauth-staging
+kubectl delete all --all -n agentauth-staging
 
 # Delete specific deployment
-kubectl delete deployment gauth-blue -n gauth-staging
-kubectl delete deployment gauth-green -n gauth-staging
+kubectl delete deployment agentauth-blue -n agentauth-staging
+kubectl delete deployment agentauth-green -n agentauth-staging
 ```
 
 ### Delete Namespace
 ```bash
 # Delete namespace and all resources
-kubectl delete namespace gauth-staging
+kubectl delete namespace agentauth-staging
 ```
 
 ## Performance Notes

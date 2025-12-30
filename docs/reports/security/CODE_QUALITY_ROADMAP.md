@@ -57,7 +57,7 @@ After completing the linter cleanup campaign (194 → 84 warnings, 57% reduction
 
 ```go
 // Current (vulnerable):
-o.ObserveInt64(g, int64(v)) // uint64 → int64 conversion
+o.ObserveInt64(g, int64(v) // uint64 → int64 conversion
 
 // Fixed:
 if v > math.MaxInt64 {
@@ -72,7 +72,7 @@ if v > math.MaxInt64 {
 **Fix Effort**: 2-3 hours
 
 #### 2. Integer Overflow in Replay Store (HIGH severity)
-**Location**: `pkg/gauth/replay_store_bolt.go:161`, `pkg/gauth/replay_store_bolt.go:120`
+**Location**: `pkg/agentauth/replay_store_bolt.go:161`, `pkg/agentauth/replay_store_bolt.go:120`
 
 ```go
 // Current (vulnerable):
@@ -344,7 +344,7 @@ _ = resp.Body.Close() // Explicitly ignore cleanup error
 
 #### 5A: Core Package Documentation
 Created comprehensive doc.go files for 5 core packages (806 lines):
-- **pkg/gauth** (124 lines): Core authorization framework
+- **pkg/agentauth** (124 lines): Core authorization framework
 - **pkg/auth** (160 lines): Authentication and token validation
 - **pkg/authz** (193 lines): Authorization enforcement
 - **pkg/policy** (168 lines): Policy management and storage
@@ -452,7 +452,7 @@ Each doc.go file includes:
 
 **Deliverables**:
 - ✅ Package documentation: 1,133 lines across 7 core packages
-  - pkg/gauth: Core authorization framework (124 lines)
+  - pkg/agentauth: Core authorization framework (124 lines)
   - pkg/auth: Authentication and validation (160 lines)
   - pkg/authz: Authorization enforcement (193 lines)
   - pkg/policy: Policy management (168 lines)
@@ -497,10 +497,10 @@ Each doc.go file includes:
 ```bash
 # Fix integer overflow in metrics
 vim web/server_clean.go  # Lines 3767, 3753
-vim pkg/gauth/replay_store_bolt.go  # Lines 161, 120
+vim pkg/agentauth/replay_store_bolt.go  # Lines 161, 120
 
 # Add boundary validation
-go test -v ./web/... ./pkg/gauth/...
+go test -v ./web/... ./pkg/agentauth/...
 ```
 
 **Option 2: Test Coverage First**

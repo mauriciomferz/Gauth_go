@@ -9,7 +9,7 @@ owners: [system]
 # Key Rotation Example (Multi-Tenant)
 
 The example at `examples/key_rotation/main.go` demonstrates:
-* File-backed key store (`/tmp/gauth-keys`)
+* File-backed key store (`/tmp/agentauth-keys`)
 * Multi-tenant key manager with per-tenant policies
 * HTTP API for rotation operations
 
@@ -58,9 +58,9 @@ curl -X PUT http://localhost:8080/api/v1/keys/rotation/policy/tenant-a \
 ```
 
 ## File Layout
-Keys stored under `/tmp/gauth-keys/<tenant>/<kid>.json`. Inspect:
+Keys stored under `/tmp/agentauth-keys/<tenant>/<kid>.json`. Inspect:
 ```zsh
-find /tmp/gauth-keys -maxdepth 2 -type f -print
+find /tmp/agentauth-keys -maxdepth 2 -type f -print
 ```
 
 ## Grace Period Concept

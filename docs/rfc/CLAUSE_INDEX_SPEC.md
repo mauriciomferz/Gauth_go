@@ -24,7 +24,7 @@ Each clause entry object:
   ],
   "raw_block": "Full original markdown snippet for the section.",
   "block_hash": "sha256-...",
-  "source_file": "rfc0111.md"
+  "source_file": "aap001.md"
 }
 ```
 
@@ -37,7 +37,7 @@ Files aggregated into top-level array:
 ```
 
 ## Hashing
-Use SHA256 over the raw_block string (normalized LF line endings). Domain separate prefix: `GAUTH-RFC-BLOCK:`.
+Use SHA256 over the raw_block string (normalized LF line endings). Domain separate prefix: `AGENTAUTH-RFC-BLOCK:`.
 
 ## Normalization Rules
 - Trim trailing whitespace per line.

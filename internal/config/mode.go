@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ModeEnv  = "GAUTH_MODE"
+	ModeEnv  = "AGENTAUTH_MODE"
 	ModeDev  = "development"
 	ModeProd = "production"
 	ModeTest = "test"
@@ -23,5 +23,5 @@ func ReadMode() string {
 	}
 }
 
-// IsProduction returns true if GAUTH_MODE=production.
+// IsProduction returns true if AGENTAUTH_MODE=production.
 func IsProduction() bool { return ReadMode() == ModeProd }

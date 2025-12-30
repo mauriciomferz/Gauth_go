@@ -68,17 +68,17 @@ Successfully implemented comprehensive multi-region deployment architecture for 
                 └─────────────┼─────────────┘
                               │
                     ┌─────────▼─────
-Based on a comprehensive Software Quality Assurance (SQA) audit of the repository github.com/mauriciomferz/Gauth_go and the associated governance specifications (AgentAuth+ / AgentAuth-RFC-001 / AgentAuth-RFC-002), we have conducted a feature gap analysis and vulnerability assessment.
+Based on a comprehensive Software Quality Assurance (SQA) audit of the repository github.com/mauriciomferz/AgentAuth and the associated governance specifications (AgentAuth+ / AgentAuth-RFC-001 / AgentAuth-RFC-002), we have conducted a feature gap analysis and vulnerability assessment.
 
 The repository attempts to implement a high-assurance AI Power-of-Attorney (PoA) framework. While the architectural intent is robust, attempting to digitize subjective legal concepts (like fiduciary duty) and physical constraints (geography) introduces specific Critical Vulnerabilities.
 
 1. Feature Implementation Audit
 We compared the repository’s capabilities against the requirements defined in your "AgentAuth+" specification.
 
-Requirement (AgentAuth+)	Implementation Status (Gauth_go)	SQA Assessment
-Principal & Grantee Roles	Implemented	The pkg/gauth module clearly distinguishes between Issuer (Principal) and Grantee (AI Agent).
+Requirement (AgentAuth+)	Implementation Status (AgentAuth)	SQA Assessment
+Principal & Grantee Roles	Implemented	The pkg/agentauth module clearly distinguishes between Issuer (Principal) and Grantee (AI Agent).
 Blockchain "Commercial Register"	Partial / Abstracted	The repo uses an "Authorization Server" interface.[1] While it supports ledger writing, the consensus mechanism for reading power-of-attorney (PoA) state is often cached, creating a synchronization gap (see Vulnerability #1).
-Hierarchical Delegation	Implemented (AgentAuth-RFC-002 (formerly RFC 115))	The AgentAuth-RFC-002 (formerly RFC 115) module supports delegation chains. A Grantee can delegate to a Sub-Grantee, provided the DelegationGuidelines struct allows it.
+Hierarchical Delegation	Implemented (AgentAuth-RFC-002 (formerly AAP-002))	The AgentAuth-RFC-002 (formerly AAP-002) module supports delegation chains. A Grantee can delegate to a Sub-Grantee, provided the DelegationGuidelines struct allows it.
 Successor Attribute	Implemented	The schema includes a Successor field for failover AI agents, strictly typed to ensure the successor has equal or lesser privileges.
 Scope & Constraints	Implemented (Syntactically)	The code allows defining constraints (e.g., MaxTransactionValue, AllowedDomains).
 Validity & Revocation	Implemented	Includes NotBefore, NotAfter timestamps and a RevocationList check.
@@ -102,15 +102,15 @@ Vulnerability: Fiduciary duty is a qualitative standard ("Act in the best intere
 The Exploit: An AI authorized to "Invest Surplus Funds" could technically fulfill its code logic by investing 100% of funds into a high-risk, low-liquidity scam token that technically meets the definition of "Investment" but violates the fiduciary duty of "Prudence." The system provides a False Sense of Security by claiming to enforce legal ethics it cannot comprehend.
 Severity: Critical (Legal Liability).
 CRITICAL 4: Standards Naming Collision
-The Issue: The documentation refers to "AgentAuth-RFC-001 (formerly RFC 111)" and "AgentAuth-RFC-002 (formerly RFC 115)."
+The Issue: The documentation refers to "AgentAuth-RFC-001 (formerly AAP-001)" and "AgentAuth-RFC-002 (formerly AAP-002)."
 SQA Finding: In the global IETF standards:
-AgentAuth-RFC-001 (formerly RFC 111) is "Network Control Protocol" (1971).
-AgentAuth-RFC-002 (formerly RFC 115) is "Some Network Information Center" (1971).
-The Risk: By colliding with existing, fundamental internet standards, this framework creates massive interoperability confusion. External auditors or banking systems attempting to validate the AI's "AgentAuth-RFC-002 (formerly RFC 115) compliance" will reference the wrong standard.
+AgentAuth-RFC-001 (formerly AAP-001) is "Network Control Protocol" (1971).
+AgentAuth-RFC-002 (formerly AAP-002) is "Some Network Information Center" (1971).
+The Risk: By colliding with existing, fundamental internet standards, this framework creates massive interoperability confusion. External auditors or banking systems attempting to validate the AI's "AgentAuth-RFC-002 (formerly AAP-002) compliance" will reference the wrong standard.
 Severity: Medium (Integration Failure).
 CRITICAL 5: Identity vs. Authorization Coupling
 The Issue: The prompt notes that verification of powers is insufficient if the "authorizing identity is not clearly verified."
-Vulnerability: The Gauth_go library relies on cryptographic key signatures to prove identity. It assumes Key_Owner == Human_Principal.
+Vulnerability: The AgentAuth library relies on cryptographic key signatures to prove identity. It assumes Key_Owner == Human_Principal.
 The Exploit: If the Principal is phished and loses their private key, the attacker can generate valid "AgentAuth+" PoA credentials. The framework lacks a "Liveness Check" or "Dual-Channel Verification" (e.g., requiring a biometric scan or a secondary hardware confirmation for the creation of a new Power of Attorney) to ensure the key wasn't stolen.
 3. Strategic Recommendations
 To certify this repository for production use under the "AgentAuth Community" standards, the following remediation steps are required:
@@ -119,7 +119,7 @@ Implement TEE Attestation: To fix the Geographic and Logic trust issues, the AI 
 Flashbots/Private Mempool Integration: To fix the Revocation Gap, the revocation mechanism must utilize a priority channel or a centralized "Emergency Stop" oracle that bypasses standard blockchain block times for immediate suspension.
 Semantic Allow-Listing: Abandon the attempt to code "Fiduciary Duty." Replace it with strict Allow-Listing. Do not give the AI "Investment Power"; give it "Permission to interact with Contract 0x123... with Max Slippage 1%."
 Rename Standards: Immediately rename internal standards to AAP-AgentAuth-RFC-001 or AgentAuth-Spec-1.0 to avoid IETF collisions.
-Verdict: The mauriciomferz/Gauth_go repository is a technically competent implementation of an advanced authorization schema, but it currently relies too heavily on trusting the AI agent's software environment. It requires hardware-level proofs to be safe for high-value financial autonomy.       ──┐
+Verdict: The mauriciomferz/AgentAuth repository is a technically competent implementation of an advanced authorization schema, but it currently relies too heavily on trusting the AI agent's software environment. It requires hardware-level proofs to be safe for high-value financial autonomy.       ──┐
                     │  DISASTER RECOVERY       │
                     │ us-west-2 / eu-central-1 │
                     └────────────────────     ─┘
@@ -281,7 +281,7 @@ kubectl exec -it redis-0 -- redis-cli cluster info
 ```bash
 # Test all regions
 for region in us-east-1 eu-west-1 ap-south-1; do
-  curl -f https://gauth-${region}.example.com/health || echo "${region} FAILED"
+  curl -f https://agentauth-${region}.example.com/health || echo "${region} FAILED"
 done
 ```
 
@@ -291,10 +291,10 @@ done
 
 ```bash
 # Insert test record in primary
-kubectl exec -it postgresql-0 -- psql -U gauth -c "INSERT INTO test VALUES (NOW());"
+kubectl exec -it postgresql-0 -- psql -U agentauth -c "INSERT INTO test VALUES (NOW());"
 
 # Verify in DR region (within 5 seconds)
-kubectl --context=us-west-2 exec -it postgresql-0 -- psql -U gauth -c "SELECT * FROM test ORDER BY timestamp DESC LIMIT 1;"
+kubectl --context=us-west-2 exec -it postgresql-0 -- psql -U agentauth -c "SELECT * FROM test ORDER BY timestamp DESC LIMIT 1;"
 ```
 
 **Expected**: Record appears in DR region within 5 seconds
@@ -321,7 +321,7 @@ kubectl --context=eu-west-1 exec -it redis-0 -- redis-cli GET test:key
 ./scripts/multi-region-failover.sh test us-west-2
 
 # Check logs
-tail -f /var/log/gauth/failover.log
+tail -f /var/log/agentauth/failover.log
 ```
 
 **Expected**: Script validates health checks, database readiness, no errors
@@ -331,7 +331,7 @@ tail -f /var/log/gauth/failover.log
 ```bash
 # Test geographic routing
 for i in {1..100}; do
-  curl -H "CF-IPCountry: US" https://gauth.example.com/health | jq -r '.region'
+  curl -H "CF-IPCountry: US" https://agentauth.example.com/health | jq -r '.region'
 done | sort | uniq -c
 ```
 
@@ -344,12 +344,12 @@ done | sort | uniq -c
 ### Prometheus Metrics
 
 **Multi-Region Metrics**:
-- `gauth_region_health{region="us-east-1"}` - Binary health status (0/1)
-- `gauth_request_duration_seconds{region="us-east-1"}` - Request latency by region
-- `gauth_db_replication_lag_seconds{region="us-east-1"}` - PostgreSQL replication lag
-- `gauth_redis_sync_lag_seconds{region="us-east-1"}` - Redis sync lag
-- `gauth_failover_count_total` - Total failover events
-- `gauth_failover_duration_seconds` - Time to complete failover
+- `agentauth_region_health{region="us-east-1"}` - Binary health status (0/1)
+- `agentauth_request_duration_seconds{region="us-east-1"}` - Request latency by region
+- `agentauth_db_replication_lag_seconds{region="us-east-1"}` - PostgreSQL replication lag
+- `agentauth_redis_sync_lag_seconds{region="us-east-1"}` - Redis sync lag
+- `agentauth_failover_count_total` - Total failover events
+- `agentauth_failover_duration_seconds` - Time to complete failover
 
 ### Grafana Dashboards
 
@@ -380,9 +380,9 @@ done | sort | uniq -c
 **Steps**:
 1. Verify secondary region health: `./scripts/multi-region-failover.sh check us-west-2`
 2. Trigger manual failover: `./scripts/multi-region-failover.sh failover us-west-2`
-3. Monitor logs: `tail -f /var/log/gauth/failover.log`
-4. Verify DNS propagation: `dig +short gauth.example.com` (should show us-west-2 IP)
-5. Test application: `curl https://gauth.example.com/health`
+3. Monitor logs: `tail -f /var/log/agentauth/failover.log`
+4. Verify DNS propagation: `dig +short agentauth.example.com` (should show us-west-2 IP)
+5. Test application: `curl https://agentauth.example.com/health`
 6. Notify team via Slack (automatic) and update status page
 
 **Expected Duration**: 5-10 minutes
@@ -392,7 +392,7 @@ done | sort | uniq -c
 **Scenario**: AlertManager fires `ReplicationLagHigh` alert
 
 **Steps**:
-1. Check PostgreSQL lag: `kubectl exec -it postgresql-0 -- psql -U gauth -c "SELECT * FROM pg_stat_replication;"`
+1. Check PostgreSQL lag: `kubectl exec -it postgresql-0 -- psql -U agentauth -c "SELECT * FROM pg_stat_replication;"`
 2. Check network between regions: `kubectl exec -it postgresql-0 -- ping <replica-ip>`
 3. Review WAL sender status: `SELECT slot_name, active, restart_lsn FROM pg_replication_slots;`
 4. If lag >30 seconds, consider temporary read-only mode or failover
@@ -409,7 +409,7 @@ done | sort | uniq -c
 2. Restore database replication: `kubectl apply -f k8s/multi-region/postgresql-replication.yaml`
 3. Wait for replication sync: `patronictl list` (check lag)
 4. Restore Redis cluster: `kubectl apply -f k8s/multi-region/redis-cluster.yaml`
-5. Scale application back up: `kubectl scale deployment gauth --replicas=10`
+5. Scale application back up: `kubectl scale deployment agentauth --replicas=10`
 6. Re-enable health checks in Route53
 7. Monitor for 30 minutes before declaring region stable
 
@@ -449,9 +449,9 @@ done | sort | uniq -c
 
 **Solutions**:
 1. Verify script process: `ps aux | grep multi-region-failover`
-2. Test health check manually: `curl -f https://gauth-us-east-1.example.com/health`
+2. Test health check manually: `curl -f https://agentauth-us-east-1.example.com/health`
 3. Check AWS credentials: `aws sts get-caller-identity`
-4. Review logs: `tail -100 /var/log/gauth/failover.log`
+4. Review logs: `tail -100 /var/log/agentauth/failover.log`
 5. Restart monitoring: `./scripts/multi-region-failover.sh monitor &`
 
 ### Issue 3: Split-Brain Scenario
@@ -523,7 +523,7 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: gauth
+          app: agentauth
     ports:
     - protocol: TCP
       port: 5432

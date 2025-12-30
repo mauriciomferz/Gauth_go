@@ -33,7 +33,7 @@ This document outlines the implementation strategy for all P0 (Critical) priorit
   - Performance benchmarks vs Ed25519
 
 - [ ] **Algorithm Selection API**
-  - Environment variable: `GAUTH_SIGNATURE_ALGORITHM=ed25519|ecdsa|bls`
+  - Environment variable: `AGENTAUTH_SIGNATURE_ALGORITHM=ed25519|ecdsa|bls`
   - Runtime algorithm negotiation
   - Algorithm capability discovery endpoint
 
@@ -52,7 +52,7 @@ This document outlines the implementation strategy for all P0 (Critical) priorit
 
 #### Phase 3: Mandatory Enforcement (2 days)
 - [ ] **Strict Mode Implementation**
-  - Environment variable: `GAUTH_REQUIRE_DETACHED_SIGNATURE=1`
+  - Environment variable: `AGENTAUTH_REQUIRE_DETACHED_SIGNATURE=1`
   - Reject tokens without detached signatures in strict mode
   - Metrics for signature verification failures
   - Audit log for unsigned token attempts
@@ -123,7 +123,7 @@ This document outlines the implementation strategy for all P0 (Critical) priorit
   - Recency-based (newest policy wins)
 
 - [ ] **Configuration**
-  - Environment variable: `GAUTH_CONFLICT_RESOLUTION=deny_overrides|permit_overrides|first_applicable|priority|recency`
+  - Environment variable: `AGENTAUTH_CONFLICT_RESOLUTION=deny_overrides|permit_overrides|first_applicable|priority|recency`
   - Per-policy override capability
   - Runtime strategy switching with audit
 

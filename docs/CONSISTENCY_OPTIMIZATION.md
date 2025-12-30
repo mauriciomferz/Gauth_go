@@ -83,4 +83,4 @@ The algorithm performs at most one merge per level per block insertion → O(k) 
 - Offer streaming verification API returning intermediate reconstructed subtree hashes for external monitors.
 
 ## Status
-Prefix fields generated and validated. Fast reconstruction implemented only for the trivial power-of-two case (single prefix block) behind feature flag `GAUTH_CONSISTENCY_V2_FAST=1`. General multi-block reconstruction deferred due to correctness mismatch observed in early prototype. This document remains the design reference for the future full implementation.
+Prefix fields generated and validated. Fast reconstruction implemented only for the trivial power-of-two case (single prefix block) behind feature flag `AGENTAUTH_CONSISTENCY_V2_FAST=1`. General multi-block reconstruction deferred due to correctness mismatch observed in early prototype. This document remains the design reference for the future full implementation.

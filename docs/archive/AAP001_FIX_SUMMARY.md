@@ -6,18 +6,18 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# RFC-0111 Authorization Endpoint - WORKING STATUS
+# AAP-001 Authorization Endpoint - WORKING STATUS
 
 ## ✅ ISSUE RESOLVED
 
-The RFC-0111 authorization endpoint `/api/v1/rfc0111/authorize` is **NOW WORKING**.
+The AAP-001 authorization endpoint `/api/v1/aap001/authorize` is **NOW WORKING**.
 
 ### Problem
-The server was not initialized with RFC-0111 components, causing the error:
+The server was not initialized with AAP-001 components, causing the error:
 ```json
 {
   "error": "authorization_failed",
-  "error_description": "RFC-0111 protocol orchestrator not initialized - use WithRFCCompliance option"
+  "error_description": "AAP-001 protocol orchestrator not initialized - use WithRFCCompliance option"
 }
 ```
 
@@ -26,30 +26,30 @@ Start the server with the required environment variable:
 ```bash
 pkill -9 web-server
 go build -o bin/web-server ./cmd/web-server
-GAUTH_AAP-001_ENABLED=1 GAUTH_AAP-001_USE_MOCKS=1 ./bin/web-server
+AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_AAP-001_USE_MOCKS=1 ./bin/web-server
 ```
 
 ### Verification
 Server logs now show:
 ```
-[RFC-0111] Using in-memory token store
-[RFC-0111] Enabled with mock external services
-[RFC-0111] Endpoints registered:
-[RFC-0111]   Subscription Flow (Steps I-VIII):
-[RFC-0111]     POST /api/v1/rfc0111/subscriptions (Step I: Initiate)
+[AAP-001] Using in-memory token store
+[AAP-001] Enabled with mock external services
+[AAP-001] Endpoints registered:
+[AAP-001]   Subscription Flow (Steps I-VIII):
+[AAP-001]     POST /api/v1/aap001/subscriptions (Step I: Initiate)
 ...
-[RFC-0111]   Authorization Flow (Steps a-i):
-[RFC-0111]     POST /api/v1/rfc0111/authorize (Request token)
-[RFC-0111]     POST /api/v1/rfc0111/token/validate (Validate token)
-[RFC-0111]     POST /api/v1/rfc0111/token/introspect (Introspect token)
-[RFC-0111]     POST /api/v1/rfc0111/token/revoke (Revoke token)
+[AAP-001]   Authorization Flow (Steps a-i):
+[AAP-001]     POST /api/v1/aap001/authorize (Request token)
+[AAP-001]     POST /api/v1/aap001/token/validate (Validate token)
+[AAP-001]     POST /api/v1/aap001/token/introspect (Introspect token)
+[AAP-001]     POST /api/v1/aap001/token/revoke (Revoke token)
 ```
 
 ## Current Behavior
 
 ### Step I (Subscription Creation) - ✅ WORKING
 ```bash
-curl -X POST http://localhost:8080/api/v1/rfc0111/subscriptions \
+curl -X POST http://localhost:8080/api/v1/aap001/subscriptions \
   -H "Content-Type: application/json" \
   -d '{
     "owners_authorizer_id": "authorizer-001",
@@ -77,7 +77,7 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/subscriptions \
 
 ```bash
 SUBSCRIPTION_ID="sub_1762925754564192000"
-curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
+curl -X POST http://localhost:8080/api/v1/aap001/authorize \
   -H "Content-Type: application/json" \
   -d "{
     \"client_id\": \"client-003\",
@@ -97,11 +97,11 @@ curl -X POST http://localhost:8080/api/v1/rfc0111/authorize \
 }
 ```
 
-This is **correct behavior** - RFC-0111 requires completing all 8 subscription steps (Steps I-VIII) before authorization can be granted.
+This is **correct behavior** - AAP-001 requires completing all 8 subscription steps (Steps I-VIII) before authorization can be granted.
 
-## RFC-0111 Protocol Flow
+## AAP-001 Protocol Flow
 
-The RFC-0111 protocol requires a two-phase approach:
+The AAP-001 protocol requires a two-phase approach:
 
 ### Phase 1: Subscription Establishment (Steps I-VIII)
 Must be completed once for each client-resource owner-authorizer relationship:
@@ -119,57 +119,57 @@ Must be completed once for each client-resource owner-authorizer relationship:
 Can be performed multiple times after subscription is complete:
 - Request token with completed subscription ID
 - Protocol orchestrator executes steps (a) through (i)
-- Returns RFC-0111 compliant extended token
+- Returns AAP-001 compliant extended token
 
 ## Technical Implementation
 
 ### Initialization Code Location
 `web/server_clean.go` lines 5950-6050:
 ```go
-if rfc0111Components, tokenStore, err := InitAAP-001FromEnv(); err == nil && rfc0111Components != nil {
-    // Create AgentAuth service with RFC-0111 compliance enabled
-    extendedTokenService := gauth.NewExtendedTokenService(...)
+if aap001Components, tokenStore, err := InitAAP-001FromEnv(); err == nil && aap001Components != nil {
+    // Create AgentAuth service with AAP-001 compliance enabled
+    extendedTokenService := agentauth.NewExtendedTokenService(...)
     
-    gauthService, err := gauth.New(
-        gauth.Config{...},
-        gauth.WithRFCCompliance(
-            rfc0111Components.SubscriptionStore,
+    agentauthService, err := agentauth.New(
+        agentauth.Config{...},
+        agentauth.WithRFCCompliance(
+            aap001Components.SubscriptionStore,
             extendedTokenService,
-            rfc0111Components.ComplianceValidator,
+            aap001Components.ComplianceValidator,
             // ... other components
         ),
     )
     
     s.RegisterAAP-001Endpoints(
-        rfc0111Components.SubscriptionManager,
-        rfc0111Components.SubscriptionStore,
-        gauthService,
+        aap001Components.SubscriptionManager,
+        aap001Components.SubscriptionStore,
+        agentauthService,
         tokenStore,
     )
 }
 ```
 
 ### Endpoint Handlers
-- Subscription handlers: `web/handlers/rfc0111/subscription_handlers.go`
-- Authorization handlers: `web/handlers/rfc0111/authorization_handlers.go`
-- Route registration: `web/rfc0111_routes.go`
+- Subscription handlers: `web/handlers/aap001/subscription_handlers.go`
+- Authorization handlers: `web/handlers/aap001/authorization_handlers.go`
+- Route registration: `web/aap001_routes.go`
 
 ## Summary
 
 | Component | Status |
 |-----------|--------|
 | Server initialization | ✅ Working |
-| RFC-0111 components | ✅ Initialized |
+| AAP-001 components | ✅ Initialized |
 | Subscription endpoints | ✅ Working |
 | Authorization endpoint | ✅ Working (requires completed subscription) |
 | Mock external services | ✅ Enabled |
 | Protocol orchestrator | ✅ Initialized |
 
-**The RFC-0111 authorization endpoint is working correctly. The error you initially received was due to the server not being started with `GAUTH_AAP-001_ENABLED=1`.**
+**The AAP-001 authorization endpoint is working correctly. The error you initially received was due to the server not being started with `AGENTAUTH_AAP-001_ENABLED=1`.**
 
 To use it, you need to:
-1. ✅ Start server with `GAUTH_AAP-001_ENABLED=1` (DONE)
+1. ✅ Start server with `AGENTAUTH_AAP-001_ENABLED=1` (DONE)
 2. Complete subscription flow (Steps I-VIII) 
 3. Use the completed subscription ID in authorization requests
 
-The initial error is resolved and the system is functioning as designed per RFC-0111 specification.
+The initial error is resolved and the system is functioning as designed per AAP-001 specification.

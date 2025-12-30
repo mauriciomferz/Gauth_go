@@ -229,9 +229,9 @@ func (p *AzureADProvider) isTenantAllowed(tenantID string, allowedTenants []stri
 func (p *AzureADProvider) MapClaims(claims map[string]interface{}) map[string]interface{} {
 	mapped := make(map[string]interface{})
 
-	for azureClaim, gauthClaim := range AzureADClaimMappings {
+	for azureClaim, agentauthClaim := range AzureADClaimMappings {
 		if value, exists := claims[azureClaim]; exists {
-			mapped[gauthClaim] = value
+			mapped[agentauthClaim] = value
 		}
 	}
 

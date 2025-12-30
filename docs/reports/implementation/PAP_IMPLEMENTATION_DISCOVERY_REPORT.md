@@ -413,11 +413,11 @@ func (a *AuthorizerAdapter) Authorize(req Request) (Decision, error) {
 - **Handler**: `apiPolicyMetricsPrometheus`
 - **Format**: Prometheus exposition format
 - **Metrics**:
-  - `gauth_policy_total`
-  - `gauth_policy_allow`
-  - `gauth_policy_deny`
-  - `gauth_policy_p99_latency_ns`
-  - `gauth_policy_active_version`
+  - `agentauth_policy_total`
+  - `agentauth_policy_allow`
+  - `agentauth_policy_deny`
+  - `agentauth_policy_p99_latency_ns`
+  - `agentauth_policy_active_version`
 
 ---
 
@@ -669,7 +669,7 @@ While the PAP implementation is **comprehensive (75-80%)**, some gaps remain:
 
 ## COMPLIANCE IMPACT
 
-### Overall RFC-0111 Compliance Update
+### Overall AAP-001 Compliance Update
 
 **Previous Assessment**:
 - PAP: 10% (stub)
@@ -781,7 +781,7 @@ While the PAP implementation is **comprehensive (75-80%)**, some gaps remain:
 5. **Production-Ready Core**: File persistence, atomic writes, integrity verification
 6. **Audit Error**: QA assessment was based on incomplete discovery
 
-### Impact on RFC-0111 Compliance
+### Impact on AAP-001 Compliance
 
 **Before PAP Discovery**:
 - P*P Architecture: 60%

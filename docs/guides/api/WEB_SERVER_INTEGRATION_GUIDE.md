@@ -32,7 +32,7 @@ brew services start redis
 
 ### 2. Enable Revocation System
 ```bash
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
 ```
@@ -72,7 +72,7 @@ curl http://localhost:8080/api/v1/beta/revocation/health
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `GAUTH_REVOCATION_ENABLED` | Enable revocation system | `0` (disabled) | **Yes** |
+| `AGENTAUTH_REVOCATION_ENABLED` | Enable revocation system | `0` (disabled) | **Yes** |
 | `REDIS_HOST` | Redis server hostname | `localhost` | No |
 | `REDIS_PORT` | Redis server port | `6379` | No |
 
@@ -82,17 +82,17 @@ curl http://localhost:8080/api/v1/beta/revocation/health
 |----------|-------------|---------|
 | `REDIS_PASSWORD` | Redis authentication password | (empty) |
 | `REDIS_DB` | Redis database number | `0` |
-| `GAUTH_REVOCATION_ORACLE_CHANNEL` | Oracle broadcast channel name | `revocation_emergency` |
-| `GAUTH_REVOCATION_TWOPHASE_TIMEOUT` | Disable timeout duration | `60s` |
-| `GAUTH_REVOCATION_OPTIMISTIC_WINDOW` | Challenge window duration | `15m` |
-| `GAUTH_REVOCATION_CIRCUIT_RATE` | Circuit breaker rate limit (per min) | `10` |
-| `GAUTH_REVOCATION_DEBUG` | Enable debug logging | `0` (disabled) |
+| `AGENTAUTH_REVOCATION_ORACLE_CHANNEL` | Oracle broadcast channel name | `revocation_emergency` |
+| `AGENTAUTH_REVOCATION_TWOPHASE_TIMEOUT` | Disable timeout duration | `60s` |
+| `AGENTAUTH_REVOCATION_OPTIMISTIC_WINDOW` | Challenge window duration | `15m` |
+| `AGENTAUTH_REVOCATION_CIRCUIT_RATE` | Circuit breaker rate limit (per min) | `10` |
+| `AGENTAUTH_REVOCATION_DEBUG` | Enable debug logging | `0` (disabled) |
 
 ### Configuration Examples
 
 #### Development (Local Redis)
 ```bash
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
 go run ./cmd/web-server
@@ -100,12 +100,12 @@ go run ./cmd/web-server
 
 #### Production (with Redis Password)
 ```bash
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=redis.production.example.com
 export REDIS_PORT=6380
 export REDIS_PASSWORD=your-secure-password
 export REDIS_DB=1
-export GAUTH_REVOCATION_CIRCUIT_RATE=100
+export AGENTAUTH_REVOCATION_CIRCUIT_RATE=100
 go run ./cmd/web-server
 ```
 
@@ -120,15 +120,15 @@ services:
     volumes:
       - redis-data:/data
   
-  gauth:
+  agentauth:
     build: .
     ports:
       - "8080:8080"
     environment:
-      - GAUTH_REVOCATION_ENABLED=1
+      - AGENTAUTH_REVOCATION_ENABLED=1
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - GAUTH_REVOCATION_CIRCUIT_RATE=100
+      - AGENTAUTH_REVOCATION_CIRCUIT_RATE=100
     depends_on:
       - redis
 
@@ -566,9 +566,9 @@ When revocation system starts:
 
 When revocation system is disabled:
 ```
-[revocation] Revocation system disabled (set GAUTH_REVOCATION_ENABLED=1 to enable)
+[revocation] Revocation system disabled (set AGENTAUTH_REVOCATION_ENABLED=1 to enable)
 [revocation] Production revocation system disabled
-[revocation] Set GAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
+[revocation] Set AGENTAUTH_REVOCATION_ENABLED=1 and configure Redis to enable
 ```
 
 When Redis connection fails:
@@ -581,7 +581,7 @@ When Redis connection fails:
 
 Enable detailed logging:
 ```bash
-export GAUTH_REVOCATION_DEBUG=1
+export AGENTAUTH_REVOCATION_DEBUG=1
 ```
 
 Debug log messages:
@@ -608,7 +608,7 @@ Debug log messages:
 ```
 
 **Solutions**:
-1. Set `GAUTH_REVOCATION_ENABLED=1`
+1. Set `AGENTAUTH_REVOCATION_ENABLED=1`
 2. Verify Redis is running: `redis-cli ping`
 3. Check Redis connection: `telnet localhost 6379`
 4. Restart web server
@@ -649,7 +649,7 @@ Transaction blocked even though PoA should be active.
 
 **Solutions**:
 1. Check current metrics: `GET /api/v1/beta/revocation/circuit/metrics?poa_id=...`
-2. Increase rate limit: `export GAUTH_REVOCATION_CIRCUIT_RATE=100`
+2. Increase rate limit: `export AGENTAUTH_REVOCATION_CIRCUIT_RATE=100`
 3. Temporarily suspend: `POST /api/v1/beta/revocation/circuit/suspend`
 4. Resume after adjustment: `POST /api/v1/beta/revocation/circuit/resume`
 

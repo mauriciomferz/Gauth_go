@@ -41,7 +41,7 @@ If a file lacks this header, add it on next touch (do **not** retroactively bump
 | Runbook | PascalCase service event | `RedisDown.md`, `AgentAuthServiceUnavailable.md` |
 | Report (phase/session) | `PHASE<number>_COMPLETION_REPORT.md` | `PHASE6_COMPLETION_REPORT.md` |
 | Roadmap | `ROADMAP_<scope>.md` | `ROADMAP_NEXT_SPRINT.md` |
-| Compliance Matrix | `*_COMPLIANCE_MATRIX.md` | `rfc0111_compliance_matrix.md` |
+| Compliance Matrix | `*_COMPLIANCE_MATRIX.md` | `aap001_compliance_matrix.md` |
 
 Prefer descriptive prefixes (`SECURITY_`, `PERFORMANCE_`, etc.) when ambiguity exists.
 

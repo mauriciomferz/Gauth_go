@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-deployment
-  namespace: gauth-staging
+  name: agentauth-deployment
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
     version: v1.0.0
 spec:
@@ -16,12 +16,12 @@ spec:
       maxUnavailable: 0  # Zero-downtime rolling update
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       environment: staging
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         environment: staging
         version: v1.0.0
       annotations:
@@ -29,7 +29,7 @@ spec:
         prometheus.io/port: "8080"
         prometheus.io/path: "/api/admin/metrics/prometheus"
     spec:
-      serviceAccountName: gauth-service-account
+      serviceAccountName: agentauth-service-account
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -76,8 +76,8 @@ spec:
           readOnlyRootFilesystem: true
       
       containers:
-      - name: gauth
-        image: gauth:staging  # Build with: docker build -t gauth:staging -f Dockerfile .
+      - name: agentauth
+        image: agentauth:staging  # Build with: docker build -t agentauth:staging -f Dockerfile .
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
@@ -86,43 +86,43 @@ spec:
         
         env:
         # Import all ConfigMap values
-        - name: GAUTH_WEB_PORT
+        - name: AGENTAUTH_WEB_PORT
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
-              key: GAUTH_WEB_PORT
-        - name: GAUTH_HEALTH_URL
+              name: agentauth-config
+              key: AGENTAUTH_WEB_PORT
+        - name: AGENTAUTH_HEALTH_URL
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
-              key: GAUTH_HEALTH_URL
+              name: agentauth-config
+              key: AGENTAUTH_HEALTH_URL
         
         # Feature flags
-        - name: GAUTH_CAPABILITY_ANCHOR_ENABLE
+        - name: AGENTAUTH_CAPABILITY_ANCHOR_ENABLE
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
-              key: GAUTH_CAPABILITY_ANCHOR_ENABLE
-        - name: GAUTH_CAP_ANCHOR_NOTARIZE
+              name: agentauth-config
+              key: AGENTAUTH_CAPABILITY_ANCHOR_ENABLE
+        - name: AGENTAUTH_CAP_ANCHOR_NOTARIZE
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
-              key: GAUTH_CAP_ANCHOR_NOTARIZE
-        - name: GAUTH_ROTATIONS_V2_SIGN
+              name: agentauth-config
+              key: AGENTAUTH_CAP_ANCHOR_NOTARIZE
+        - name: AGENTAUTH_ROTATIONS_V2_SIGN
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
-              key: GAUTH_ROTATIONS_V2_SIGN
-        - name: GAUTH_MODEL_LIMIT_ATTEST_SIGN
+              name: agentauth-config
+              key: AGENTAUTH_ROTATIONS_V2_SIGN
+        - name: AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
-              key: GAUTH_MODEL_LIMIT_ATTEST_SIGN
-        - name: GAUTH_OTEL_METRICS_ENABLE
+              name: agentauth-config
+              key: AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN
+        - name: AGENTAUTH_OTEL_METRICS_ENABLE
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
-              key: GAUTH_OTEL_METRICS_ENABLE
+              name: agentauth-config
+              key: AGENTAUTH_OTEL_METRICS_ENABLE
         
         # Database configuration with secret
         - name: POSTGRES_URL
@@ -130,64 +130,64 @@ spec:
         - name: POSTGRES_HOST
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_HOST
         - name: POSTGRES_PORT
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_PORT
         - name: POSTGRES_DB
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_DB
         - name: POSTGRES_USER
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_USER
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: postgres-password
         - name: POSTGRES_SSL_MODE
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_SSL_MODE
         
         # AgentAuth Server DB Config (Matches server_factory.go)
-        - name: GAUTH_DB_HOST
+        - name: AGENTAUTH_DB_HOST
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_HOST
-        - name: GAUTH_DB_PORT
+        - name: AGENTAUTH_DB_PORT
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_PORT
-        - name: GAUTH_DB_USER
+        - name: AGENTAUTH_DB_USER
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_USER
-        - name: GAUTH_DB_PASSWORD
+        - name: AGENTAUTH_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: postgres-password
-        - name: GAUTH_DB_NAME
+        - name: AGENTAUTH_DB_NAME
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_DB
-        - name: GAUTH_DB_SSL_MODE
+        - name: AGENTAUTH_DB_SSL_MODE
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: POSTGRES_SSL_MODE
         
         # Redis configuration
@@ -196,58 +196,58 @@ spec:
         - name: REDIS_HOST
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: REDIS_HOST
         - name: REDIS_PORT
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: REDIS_PORT
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: redis-password
         
         # JWT configuration with secrets
         - name: JWT_ALGORITHM
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: JWT_ALGORITHM
         - name: JWT_PRIVATE_KEY
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: jwt-private-key
         - name: JWT_PUBLIC_KEY
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: jwt-public-key
-        - name: GAUTH_JWT_SIGNING_KEY
+        - name: AGENTAUTH_JWT_SIGNING_KEY
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: jwt-private-key
         
         # Ed25519 signing keys
-        - name: GAUTH_ROTATIONS_V2_ED25519_KEYS
+        - name: AGENTAUTH_ROTATIONS_V2_ED25519_KEYS
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: ed25519-keys
         
         # Logging configuration
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: LOG_LEVEL
         - name: LOG_FORMAT
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: LOG_FORMAT
         
         # Volume mounts
@@ -332,7 +332,7 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - gauth
+                  - agentauth
               topologyKey: kubernetes.io/hostname
       
       # Tolerate node taints

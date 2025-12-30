@@ -22,7 +22,7 @@ The AgentAuth_go implementation **successfully covers the corrected RFC protocol
 **Critical Finding:** The implementation is **more architecturally correct than the original RFC** - it already includes Resource Server integration that was missing from RFC's protocol flow diagram.
 
 **Gap Closure Update (Nov 15, 2025):**
-- ✅ PAP types comprehensively defined (`pkg/gauth/pap_types.go`)
+- ✅ PAP types comprehensively defined (`pkg/agentauth/pap_types.go`)
 - ✅ Resource Server deployment guide complete (`docs/RESOURCE_SERVER_DEPLOYMENT.md`)
 - ✅ MCP integration roadmap documented (`docs/MCP_INTEGRATION_PLAN.md`)
 
@@ -47,11 +47,11 @@ The AgentAuth_go implementation **successfully covers the corrected RFC protocol
 
 | Extension | Status | Coverage | Files |
 |-----------|--------|----------|-------|
-| **Extended Tokens** | ✅ Complete | 100% | `pkg/gauth/extended_token_service.go` |
+| **Extended Tokens** | ✅ Complete | 100% | `pkg/agentauth/extended_token_service.go` |
 | **PoA Framework** | ✅ Complete | 100% | `pkg/poa/` (multiple files) |
-| **P*P Architecture** | ✅ Complete | 100% | `pkg/gauth/pep.go`, `pkg/gauth/gauth.go`, `pkg/gauth/pap_types.go`, `pkg/gauth/pap_test.go` |
+| **P*P Architecture** | ✅ Complete | 100% | `pkg/agentauth/pep.go`, `pkg/agentauth/agentauth.go`, `pkg/agentauth/pap_types.go`, `pkg/agentauth/pap_test.go` |
 | **Owner's Authorizer** | ✅ Complete | 100% | Authorization chain validation |
-| **Compliance Tracking** | ✅ Complete | 100% | `pkg/gauth/compliance_tracker.go` |
+| **Compliance Tracking** | ✅ Complete | 100% | `pkg/agentauth/compliance_tracker.go` |
 
 ---
 
@@ -62,7 +62,7 @@ The AgentAuth_go implementation **successfully covers the corrected RFC protocol
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/service.go` - Authorization request handling
+- **File:** `pkg/agentauth/service.go` - Authorization request handling
 - **Method:** Authorization flow initiation
 - **OAuth Base:** Standard authorization request
 - **AgentAuth Extension:** Includes PoA context
@@ -81,7 +81,7 @@ The AgentAuth_go implementation **successfully covers the corrected RFC protocol
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/compliance_validator.go`
+- **File:** `pkg/agentauth/compliance_validator.go`
 - **Method:** `ValidateGrant()`, `ValidateRequest()`
 - **Features:**
   - PoA power validation
@@ -92,7 +92,7 @@ The AgentAuth_go implementation **successfully covers the corrected RFC protocol
 
 **Code Evidence:**
 ```go
-// pkg/gauth/compliance_validator.go
+// pkg/agentauth/compliance_validator.go
 func (cv *ComplianceValidator) ValidateGrant(
     ctx context.Context,
     grantID string,
@@ -106,7 +106,7 @@ func (cv *ComplianceValidator) ValidateGrant(
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/extended_token_service.go`
+- **File:** `pkg/agentauth/extended_token_service.go`
 - **Grant Types:** Authorization code (OAuth 2.0)
 - **Security:** PKCE support
 - **Lifecycle:** Short-lived, single-use
@@ -116,7 +116,7 @@ func (cv *ComplianceValidator) ValidateGrant(
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/extended_token_service.go`
+- **File:** `pkg/agentauth/extended_token_service.go`
 - **Method:** `CreateExtendedToken()`
 - **Features:**
   - Grant validation
@@ -125,7 +125,7 @@ func (cv *ComplianceValidator) ValidateGrant(
 
 **Code Evidence:**
 ```go
-// pkg/gauth/extended_token_service.go (Lines 179-220)
+// pkg/agentauth/extended_token_service.go (Lines 179-220)
 func (s *ExtendedTokenService) CreateExtendedToken(
     ctx context.Context,
     request *ExtendedTokenRequest,
@@ -141,7 +141,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
         TokenType:           "Bearer",
         PowerOfAttorney:     request.PowerOfAttorney,
         AuthorizationChain:  request.AuthorizationChain,
-        // ... RFC-0111 extended claims
+        // ... AAP-001 extended claims
     }
     
     return token, nil
@@ -153,7 +153,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 **Status:** ✅ IMPLEMENTED (CORRECTED ORDER)
 
 **Implementation:**
-- **File:** `pkg/gauth/extended_token_service.go`
+- **File:** `pkg/agentauth/extended_token_service.go`
 - **Validation:** Occurs in `CreateExtendedToken()` BEFORE token generation
 - **Checks:**
   - Grant validity
@@ -168,7 +168,7 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/extended_token_service.go`
+- **File:** `pkg/agentauth/extended_token_service.go`
 - **Method:** `EncodeExtendedToken()`
 - **Features:**
   - JWT serialization
@@ -179,12 +179,12 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 
 **Code Evidence:**
 ```go
-// pkg/gauth/extended_token_service.go (Lines 221-278)
+// pkg/agentauth/extended_token_service.go (Lines 221-278)
 func (s *ExtendedTokenService) EncodeExtendedToken(
     ctx context.Context,
     token *ExtendedToken,
 ) (string, error) {
-    // Create JWT claims with RFC-0111 extended claims
+    // Create JWT claims with AAP-001 extended claims
     claims := jwt.MapClaims{
         "iss":        s.issuerID,
         "sub":        token.AuthorizationChain.Client.EntityID,
@@ -198,7 +198,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
         "owners_authorizer": token.OwnersAuthorizer,
         "power_of_attorney": poaJSON,           // PoA credential
         "authorization_chain": chainJSON,        // Full chain
-        // ... additional RFC-0111 claims
+        // ... additional AAP-001 claims
     }
     
     // Sign JWT
@@ -212,7 +212,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 **Status:** ✅ IMPLEMENTED (PEP complete, RS deployment documented)
 
 **Implementation:**
-- **File:** `pkg/gauth/pep.go` - Enforcement point
+- **File:** `pkg/agentauth/pep.go` - Enforcement point
 - **Method:** `ValidateDemandSide()` - Resource Server PEP
 - **Features:**
   - Token validation at RS
@@ -222,7 +222,7 @@ func (s *ExtendedTokenService) EncodeExtendedToken(
 
 **Code Evidence:**
 ```go
-// pkg/gauth/pep.go (Lines 289-330)
+// pkg/agentauth/pep.go (Lines 289-330)
 func (pep *PowerEnforcementPoint) ValidateDemandSide(
     ctx context.Context,
     request *EnforcementRequest,
@@ -251,7 +251,7 @@ func (pep *PowerEnforcementPoint) ValidateDemandSide(
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/extended_token_service.go`
+- **File:** `pkg/agentauth/extended_token_service.go`
 - **Method:** `ValidateExtendedToken()`
 - **Options:**
   - **Local JWT validation** - Signature, expiry, claims
@@ -259,7 +259,7 @@ func (pep *PowerEnforcementPoint) ValidateDemandSide(
 
 **Code Evidence:**
 ```go
-// pkg/gauth/extended_token_service.go (Lines 280-350)
+// pkg/agentauth/extended_token_service.go (Lines 280-350)
 func (s *ExtendedTokenService) ValidateExtendedToken(
     ctx context.Context,
     tokenString string,
@@ -310,7 +310,7 @@ func (s *ExtendedTokenService) ValidateExtendedToken(
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/transaction_executor.go`
+- **File:** `pkg/agentauth/transaction_executor.go`
 - **Method:** `ExecuteTransaction()`
 - **Features:**
   - Transaction execution
@@ -320,7 +320,7 @@ func (s *ExtendedTokenService) ValidateExtendedToken(
 
 **Code Evidence:**
 ```go
-// pkg/gauth/transaction_executor.go (Lines 140-200)
+// pkg/agentauth/transaction_executor.go (Lines 140-200)
 func (te *TransactionExecutor) ExecuteTransaction(
     ctx context.Context,
     request *TransactionRequest,
@@ -358,7 +358,7 @@ func (te *TransactionExecutor) ExecuteTransaction(
 **Status:** ✅ IMPLEMENTED
 
 **Implementation:**
-- **File:** `pkg/gauth/compliance_tracker.go`
+- **File:** `pkg/agentauth/compliance_tracker.go`
 - **Method:** `TrackEvent()`, `ReportCompliance()`
 - **Features:**
   - Event logging
@@ -368,7 +368,7 @@ func (te *TransactionExecutor) ExecuteTransaction(
 
 **Code Evidence:**
 ```go
-// pkg/gauth/compliance_tracker.go (Lines 50-120)
+// pkg/agentauth/compliance_tracker.go (Lines 50-120)
 func (ct *ComplianceTracker) TrackEvent(
     ctx context.Context,
     event *ComplianceEvent,
@@ -418,7 +418,7 @@ func (ct *ComplianceTracker) ReportCompliance(
 ## P*P Architecture Implementation
 
 ### PEP - Power Enforcement Point ✅ COMPLETE
-**File:** `pkg/gauth/pep.go` (400+ lines)
+**File:** `pkg/agentauth/pep.go` (400+ lines)
 
 **Features:**
 - Supply-side enforcement: `EnforceAuthorization()`
@@ -433,7 +433,7 @@ func (ct *ComplianceTracker) ReportCompliance(
 **Coverage:** 100%
 
 ### PDP - Power Decision Point ✅ COMPLETE
-**File:** `pkg/gauth/pdp_adapter.go`, `pkg/pdp/`
+**File:** `pkg/agentauth/pdp_adapter.go`, `pkg/pdp/`
 
 **Features:**
 - Authorization decisions: `MakeDecision()`
@@ -463,8 +463,8 @@ func (ct *ComplianceTracker) ReportCompliance(
    - Complete test coverage: 2 integration tests, all passing (0.414s)
 
 **Testing:**
-- `pkg/gauth/pdp_audit_logger_test.go` (541 lines, 27 tests)
-- `pkg/gauth/pdp_pap_integration_test.go` (85 lines, 2 integration tests)
+- `pkg/agentauth/pdp_audit_logger_test.go` (541 lines, 27 tests)
+- `pkg/agentauth/pdp_pap_integration_test.go` (85 lines, 2 integration tests)
 - Thread safety verified with concurrent access tests
 - FIFO rotation validated with buffer overflow tests
 - Policy lifecycle tested (create, activate, list, revoke, delete)
@@ -476,7 +476,7 @@ func (ct *ComplianceTracker) ReportCompliance(
 **Coverage:** 100% (decision logic, audit logging, policy management complete)
 
 ### PIP - Power Information Point ✅ COMPLETE
-**File:** `pkg/gauth/pip_unified.go`
+**File:** `pkg/agentauth/pip_unified.go`
 
 **Features:**
 - Attribute retrieval
@@ -492,14 +492,14 @@ func (ct *ComplianceTracker) ReportCompliance(
 **Status:** Comprehensive type system defined, service implementation complete with full test coverage
 
 **Current:**
-- ✅ Complete policy type definitions (`pkg/gauth/pap_types.go`)
+- ✅ Complete policy type definitions (`pkg/agentauth/pap_types.go`)
 - ✅ AuthorizationPolicy with full lifecycle
 - ✅ PolicyType enum (PoA, authorization_chain, scope, restriction, compliance)
 - ✅ PolicyStatus enum (draft, active, suspended, revoked, expired)
 - ✅ CRUD request/response types
 - ✅ Policy search, validation, enforcement tracking
-- ✅ Comprehensive PAP service in `gauth.go` with 11 policy management methods (455 lines)
-- ✅ Complete unit test coverage in `pkg/gauth/pap_test.go` (1,024 lines, 59 test cases)
+- ✅ Comprehensive PAP service in `agentauth.go` with 11 policy management methods (455 lines)
+- ✅ Complete unit test coverage in `pkg/agentauth/pap_test.go` (1,024 lines, 59 test cases)
 
 **Service Methods Implemented:**
 - `CreatePolicy()` - Create policies with validation and ID generation
@@ -532,7 +532,7 @@ func (ct *ComplianceTracker) ReportCompliance(
 **Coverage:** 100% (types, service, and tests complete)
 
 ### PVP - Power Verification Point ✅ COMPLETE
-**File:** `pkg/gauth/pvp_types.go`, `pkg/gauth/pvp_router.go`
+**File:** `pkg/agentauth/pvp_types.go`, `pkg/agentauth/pvp_router.go`
 
 **Features:**
 - Identity verification
@@ -549,7 +549,7 @@ func (ct *ComplianceTracker) ReportCompliance(
 
 ### Token Structure ✅ COMPLETE
 
-**File:** `pkg/gauth/types.go`
+**File:** `pkg/agentauth/types.go`
 
 ```go
 type ExtendedToken struct {
@@ -582,7 +582,7 @@ type ExtendedToken struct {
 }
 ```
 
-**Coverage:** 100% of RFC-0111 requirements
+**Coverage:** 100% of AAP-001 requirements
 
 ### Token Operations ✅ COMPLETE
 
@@ -645,7 +645,7 @@ func (v *Validator) ValidatePoA(
 ## Authorization Chain Implementation
 
 ### Chain Validation ✅ COMPLETE
-**File:** `pkg/gauth/authorization_chain_validator.go` (600+ lines)
+**File:** `pkg/agentauth/authorization_chain_validator.go` (600+ lines)
 
 **Features:**
 - Multi-level chain validation
@@ -657,7 +657,7 @@ func (v *Validator) ValidatePoA(
 
 **Code Evidence:**
 ```go
-// pkg/gauth/authorization_chain_validator.go
+// pkg/agentauth/authorization_chain_validator.go
 func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
     ctx context.Context,
     chain *AuthorizationChain,
@@ -692,7 +692,7 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 - Key rotation support
 
 **JWE Encryption (Optional):**
-- File: `pkg/gauth/jwe_service.go`
+- File: `pkg/agentauth/jwe_service.go`
 - Algorithms: RSA-OAEP, ECDH-ES
 - Content encryption: A256GCM
 - Key wrapping: RSA-OAEP-256
@@ -705,7 +705,7 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 ### Data Persistence ✅ PRODUCTION-READY
 
 **PostgreSQL Integration:**
-- File: `pkg/gauth/extended_token_store_postgres.go`
+- File: `pkg/agentauth/extended_token_store_postgres.go`
 - Tables: `extended_tokens`, `subscriptions`, `audit_log`
 - Connection pooling
 - Transaction support
@@ -732,10 +732,10 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 **Coverage:** ~85% of core functionality
 
 ### Integration Tests ✅ E2E SCENARIOS
-**File:** `pkg/gauth/e2e_rfc_flow_test.go`
+**File:** `pkg/agentauth/e2e_rfc_flow_test.go`
 
 **Scenarios:**
-- Full RFC-0111 subscription flow
+- Full AAP-001 subscription flow
 - Request-specific authorization flow
 - Token lifecycle (create, validate, revoke)
 - Authorization chain validation
@@ -745,7 +745,7 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 **Coverage:** All major user flows
 
 ### Property-Based Tests ✅ IMPLEMENTED
-**File:** `pkg/gauth/gauth_parsing_prop_test.go`
+**File:** `pkg/agentauth/agentauth_parsing_prop_test.go`
 
 **Features:**
 - Fuzz testing for token parsing
@@ -760,13 +760,13 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 ### ✅ Gaps Closed (November 15, 2025)
 
 1. **PAP Complete Implementation** ✅
-   - Status: Complete (`pkg/gauth/pap_types.go`, `pkg/gauth/gauth.go`, `pkg/gauth/pap_test.go`)
+   - Status: Complete (`pkg/agentauth/pap_types.go`, `pkg/agentauth/agentauth.go`, `pkg/agentauth/pap_test.go`)
    - Impact: Full policy administration capability
    - Coverage: 100% (types, service, tests complete)
    - Files:
-     * `pkg/gauth/pap_types.go` (235 lines) - Complete type system
-     * `pkg/gauth/gauth.go` (+455 lines) - 11 policy management methods
-     * `pkg/gauth/pap_test.go` (1,024 lines) - 13 test suites, 59 test cases, 100% passing
+     * `pkg/agentauth/pap_types.go` (235 lines) - Complete type system
+     * `pkg/agentauth/agentauth.go` (+455 lines) - 11 policy management methods
+     * `pkg/agentauth/pap_test.go` (1,024 lines) - 13 test suites, 59 test cases, 100% passing
    - Commits: d41e537a (service), 9cb35892 (tests + bug fix)
 
 2. **Resource Server Deployment** ✅
@@ -829,15 +829,15 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 2. **Complete Core Features** - Extended tokens, PoA, authorization chains fully implemented
 3. **Production-Ready Security** - JWT/JWE, signatures, key management complete
 4. **Comprehensive Testing** - Unit, integration, E2E, property-based tests
-5. **RFC-Compliant** - Follows RFC-0111 protocol flow with corrections
+5. **RFC-Compliant** - Follows AAP-001 protocol flow with corrections
 6. **Gap Closure Complete** - PAP types, RS deployment, MCP roadmap (Nov 15, 2025)
 
 ### 📋 Completed Gap Closure (November 15, 2025)
 
 1. ✅ **PAP Complete** - Full implementation with types, service, and tests
-   - Types: `pkg/gauth/pap_types.go` (235 lines)
-   - Service: 11 methods in `pkg/gauth/gauth.go` (+455 lines)
-   - Tests: `pkg/gauth/pap_test.go` (1,024 lines, 59 test cases, all passing)
+   - Types: `pkg/agentauth/pap_types.go` (235 lines)
+   - Service: 11 methods in `pkg/agentauth/agentauth.go` (+455 lines)
+   - Tests: `pkg/agentauth/pap_test.go` (1,024 lines, 59 test cases, all passing)
 2. ✅ **RS Deployment** - Production-ready guide with two patterns (`docs/RESOURCE_SERVER_DEPLOYMENT.md`)
 3. ✅ **MCP Integration** - Complete 6-week roadmap (`docs/MCP_INTEGRATION_PLAN.md`)
 

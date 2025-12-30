@@ -43,7 +43,7 @@ Acceptance: Validated by `swagger-cli validate`; versioned in docs.
 ## 4. Replay WAL Snapshot & Compaction
 Goal: Bound WAL growth & faster recovery.
 Mechanism:
-- Trigger on size > `GAUTH_REPLAY_WAL_MAX_MB` or line count.
+- Trigger on size > `AGENTAUTH_REPLAY_WAL_MAX_MB` or line count.
 - Compact algorithm: load live set -> write new file -> atomic rename -> rotate old to `.bak`.
 Metrics:
 - `replay_wal_compactions_total`
@@ -86,7 +86,7 @@ Metrics: None new (reuse failure counters).
 Acceptance: Runs for N iterations locally without panic.
 
 ## 10. Grafana Dashboard Artifacts
-File: `dashboards/gauth_observability.json`.
+File: `dashboards/agentauth_observability.json`.
 Panels:
 - Multi-signature batch size histogram heat.
 - Per-algorithm anchor ratio pie/time series.
@@ -95,7 +95,7 @@ Panels:
 
 ## 11. Capability Anchor Algorithm Sunset Workflow
 Goal: Decommission legacy algorithm safely.
-Config: `GAUTH_ALGO_SUNSET_TARGET=ed25519:2026-03-01`.
+Config: `AGENTAUTH_ALGO_SUNSET_TARGET=ed25519:2026-03-01`.
 Metrics:
 - `capability_anchor_algorithm_sunset_target_timestamp{algorithm}` (gauge unix seconds)
 - `capability_anchor_algorithm_sunset_progress{algorithm}` (ratio). Progress = anchors_new_algo / (anchors_all_after_announce).

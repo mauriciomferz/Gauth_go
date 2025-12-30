@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	aap001handlers "github.com/mauriciomferz/AgentAuth/web/handlers/aap001"
 )
 
@@ -12,14 +12,14 @@ import (
 // NOTE: This is a basic registration that demonstrates the API structure.
 // Full implementation requires mock external services and proper error handling.
 func (s *BetaServer) RegisterAAP001Endpoints(
-	subscriptionManager *gauth.SubscriptionFlowManager,
-	subscriptionStore gauth.SubscriptionStore,
-	gauthService *gauth.Service,
-	tokenStore gauth.ExtendedTokenStore,
+	subscriptionManager *agentauth.SubscriptionFlowManager,
+	subscriptionStore agentauth.SubscriptionStore,
+	agentauthService *agentauth.Service,
+	tokenStore agentauth.ExtendedTokenStore,
 ) {
 	// Create handlers
 	subscriptionHandlers := aap001handlers.NewSubscriptionHandlers(subscriptionManager, subscriptionStore)
-	authorizationHandlers := aap001handlers.NewAuthorizationHandlers(gauthService, tokenStore)
+	authorizationHandlers := aap001handlers.NewAuthorizationHandlers(agentauthService, tokenStore)
 
 	// Subscription Flow endpoints (Steps I-VIII)
 	s.router.POST("/api/v1/aap-001/subscriptions", subscriptionHandlers.CreateSubscription)

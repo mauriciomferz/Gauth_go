@@ -30,7 +30,7 @@ owners: [system]
 
 ### Database
 - ✅ **Type:** PostgreSQL 15-alpine
-- ✅ **Container:** gauth-postgres
+- ✅ **Container:** agentauth-postgres
 - ✅ **Port:** 5432
 - ✅ **Status:** Running in Docker
 
@@ -56,15 +56,15 @@ owners: [system]
 ## 🔐 API Endpoints Status
 
 ### Authentication API
-- ✅ `POST /api/v1/gauth/auth/login/init` - Login initialization
-- ✅ `POST /api/v1/gauth/auth/login/mfa` - MFA verification
+- ✅ `POST /api/v1/agentauth/auth/login/init` - Login initialization
+- ✅ `POST /api/v1/agentauth/auth/login/mfa` - MFA verification
 - ✅ JWT token generation with refresh tokens
-- ⚠️ `POST /api/v1/gauth/auth/refresh` - Not yet registered in router
+- ⚠️ `POST /api/v1/agentauth/auth/refresh` - Not yet registered in router
 
 ### MCP API
-- ✅ `GET /api/v1/gauth/mcp/servers` - List servers
-- ✅ `POST /api/v1/gauth/mcp/servers` - Register server
-- ✅ `GET /api/v1/gauth/mcp/health` - Health check
+- ✅ `GET /api/v1/agentauth/mcp/servers` - List servers
+- ✅ `POST /api/v1/agentauth/mcp/servers` - Register server
+- ✅ `GET /api/v1/agentauth/mcp/health` - Health check
 - ✅ Input validation and error handling
 
 ### Admin API
@@ -91,15 +91,15 @@ owners: [system]
 
 ### Environment Variables (Required)
 ```bash
-GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
-GAUTH_DEV_INDEX=1
-GAUTH_AAP-001_ENABLED=1
-GAUTH_USE_JWT_LIB=1
+AGENTAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production
+AGENTAUTH_DEV_INDEX=1
+AGENTAUTH_AAP-001_ENABLED=1
+AGENTAUTH_USE_JWT_LIB=1
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
-DB_PASSWORD=gauth_dev_password
-DB_NAME=gauth
+DB_PASSWORD=agentauth_dev_password
+DB_NAME=agentauth
 DB_SSLMODE=disable
 ```
 
@@ -108,10 +108,10 @@ DB_SSLMODE=disable
 ### Option 1: Local Development (Current)
 ```bash
 # Backend
-GAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 GAUTH_USE_JWT_LIB=1 \
+AGENTAUTH_JWT_SIGNING_KEY=dev-secret-change-in-production \
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_USE_JWT_LIB=1 \
 DB_HOST=localhost DB_PORT=5432 DB_USER=postgres \
-DB_PASSWORD=gauth_dev_password DB_NAME=gauth DB_SSLMODE=disable \
+DB_PASSWORD=agentauth_dev_password DB_NAME=agentauth DB_SSLMODE=disable \
 go run ./cmd/web-server
 
 # Frontend
@@ -182,8 +182,8 @@ gh workflow run deploy-staging.yml --ref main \
 
 ## 📞 Support
 
-- **Repository:** https://github.com/mauriciomferz/Gauth_go
-- **Issues:** https://github.com/mauriciomferz/Gauth_go/issues
+- **Repository:** https://github.com/mauriciomferz/AgentAuth
+- **Issues:** https://github.com/mauriciomferz/AgentAuth/issues
 - **Latest Commit:** 92413db8
 - **Branch:** main
 

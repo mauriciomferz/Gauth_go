@@ -39,7 +39,7 @@ refreshCadence: quarterly
 - ✅ **Performance validated** (750K ops/sec throughput)
 
 ### What's Ready
-- Complete RFC-0111/0115 implementation
+- Complete AAP-001/0115 implementation
 - Authorization chain validation (3 levels)
 - Extended token creation and validation
 - PVP identity verification framework
@@ -421,8 +421,8 @@ server:
   
   tls:
     enabled: true
-    cert_file: "/etc/gauth/tls/server.crt"
-    key_file: "/etc/gauth/tls/server.key"
+    cert_file: "/etc/agentauth/tls/server.crt"
+    key_file: "/etc/agentauth/tls/server.key"
     min_version: "TLS1.3"
     cipher_suites:
       - "TLS_AES_128_GCM_SHA256"
@@ -457,7 +457,7 @@ logging:
   
   audit:
     enabled: true
-    output: "/var/log/gauth/audit.log"
+    output: "/var/log/agentauth/audit.log"
     rotate: true
     max_size: 100 # MB
     max_age: 90 # days
@@ -599,14 +599,14 @@ Use environment variables or secret management service:
 # .env.production (DO NOT COMMIT)
 
 # === REQUIRED: Phase 2A Backend Endpoints ===
-GAUTH_AAP-001_ENABLED=1         # MUST be set to enable Phase 2A endpoints
+AGENTAUTH_AAP-001_ENABLED=1         # MUST be set to enable Phase 2A endpoints
                                 # Without this, /beta/pvp/verify, /beta/registry/*, and /beta/poa/* return 404
-GAUTH_DEV_INDEX=1               # Optional: Serve UI from disk for development
+AGENTAUTH_DEV_INDEX=1               # Optional: Serve UI from disk for development
 
 # === Database Configuration ===
 DB_HOST=postgres.example.com
-DB_NAME=gauth_production
-DB_USER=gauth_app
+DB_NAME=agentauth_production
+DB_USER=agentauth_app
 DB_PASSWORD=<secure-password>
 
 # === Cache Configuration ===
@@ -648,7 +648,7 @@ func loadConfig() (*Config, error) {
     
     vault.SetToken(os.Getenv("VAULT_TOKEN"))
     
-    secrets, err := vault.Logical().Read("secret/data/gauth/production")
+    secrets, err := vault.Logical().Read("secret/data/agentauth/production")
     if err != nil {
         return nil, err
     }
@@ -665,27 +665,27 @@ func loadConfig() (*Config, error) {
 
 ```sql
 -- Create production database
-CREATE DATABASE gauth_production
+CREATE DATABASE agentauth_production
     WITH ENCODING 'UTF8'
          LC_COLLATE = 'en_US.UTF-8'
          LC_CTYPE = 'en_US.UTF-8'
          TEMPLATE template0;
 
 -- Create application user
-CREATE USER gauth_app WITH PASSWORD '<secure-password>';
+CREATE USER agentauth_app WITH PASSWORD '<secure-password>';
 
 -- Grant permissions
-GRANT CONNECT ON DATABASE gauth_production TO gauth_app;
-GRANT ALL PRIVILEGES ON DATABASE gauth_production TO gauth_app;
+GRANT CONNECT ON DATABASE agentauth_production TO agentauth_app;
+GRANT ALL PRIVILEGES ON DATABASE agentauth_production TO agentauth_app;
 
 -- Connect to database
-\c gauth_production
+\c agentauth_production
 
 -- Create schema
-CREATE SCHEMA IF NOT EXISTS gauth AUTHORIZATION gauth_app;
+CREATE SCHEMA IF NOT EXISTS agentauth AUTHORIZATION agentauth_app;
 
 -- Set search path
-ALTER USER gauth_app SET search_path TO gauth, public;
+ALTER USER agentauth_app SET search_path TO agentauth, public;
 
 -- Create tables
 -- (Run migration scripts from schema/ directory)
@@ -699,11 +699,11 @@ ALTER USER gauth_app SET search_path TO gauth, public;
 sudo apt-get install certbot
 
 # Obtain certificate
-sudo certbot certonly --standalone -d gauth.example.com
+sudo certbot certonly --standalone -d agentauth.example.com
 
 # Certificates will be at:
-# /etc/letsencrypt/live/gauth.example.com/fullchain.pem
-# /etc/letsencrypt/live/gauth.example.com/privkey.pem
+# /etc/letsencrypt/live/agentauth.example.com/fullchain.pem
+# /etc/letsencrypt/live/agentauth.example.com/privkey.pem
 
 # Auto-renewal (cron job)
 0 0 * * * certbot renew --quiet
@@ -716,7 +716,7 @@ openssl genrsa -out server.key 4096
 
 # Generate CSR
 openssl req -new -key server.key -out server.csr \
-    -subj "/C=DE/ST=Bavaria/L=Munich/O=YourOrg/CN=gauth.example.com"
+    -subj "/C=DE/ST=Bavaria/L=Munich/O=YourOrg/CN=agentauth.example.com"
 
 # Submit CSR to CA, receive certificate
 # Install certificate and chain
@@ -735,25 +735,25 @@ openssl req -new -key server.key -out server.csr \
 # Build production binary
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-s -w -X main.Version=1.0.0 -X main.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    -o gauth-server \
+    -o agentauth-server \
     ./cmd/web-server
 
 # Create deployment package
-tar -czf gauth-1.0.0.tar.gz \
-    gauth-server \
+tar -czf agentauth-1.0.0.tar.gz \
+    agentauth-server \
     config/production.yaml \
     web/static_ui/ \
     schema/
 
 # Deploy to staging
-scp gauth-1.0.0.tar.gz staging-server:/opt/gauth/
-ssh staging-server "cd /opt/gauth && tar -xzf gauth-1.0.0.tar.gz"
+scp agentauth-1.0.0.tar.gz staging-server:/opt/agentauth/
+ssh staging-server "cd /opt/agentauth && tar -xzf agentauth-1.0.0.tar.gz"
 
 # Start service
-ssh staging-server "sudo systemctl restart gauth"
+ssh staging-server "sudo systemctl restart agentauth"
 ```
 
-**Systemd Service** (`/etc/systemd/system/gauth.service`):
+**Systemd Service** (`/etc/systemd/system/agentauth.service`):
 ```ini
 [Unit]
 Description=AgentAuth 1.0 Authorization Service
@@ -762,23 +762,23 @@ Wants=postgresql.service redis.service
 
 [Service]
 Type=simple
-User=gauth
-Group=gauth
-WorkingDirectory=/opt/gauth
-EnvironmentFile=/opt/gauth/.env.production
-ExecStart=/opt/gauth/gauth-server -config /opt/gauth/config/production.yaml
+User=agentauth
+Group=agentauth
+WorkingDirectory=/opt/agentauth
+EnvironmentFile=/opt/agentauth/.env.production
+ExecStart=/opt/agentauth/agentauth-server -config /opt/agentauth/config/production.yaml
 Restart=always
 RestartSec=10
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=gauth
+SyslogIdentifier=agentauth
 
 # Security hardening
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/gauth/logs
+ReadWritePaths=/opt/agentauth/logs
 
 [Install]
 WantedBy=multi-user.target
@@ -806,7 +806,7 @@ COPY . .
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-s -w -X main.Version=1.0.0" \
-    -o gauth-server \
+    -o agentauth-server \
     ./cmd/web-server
 
 # Final stage
@@ -815,27 +815,27 @@ FROM alpine:3.19
 RUN apk add --no-cache ca-certificates tzdata
 
 # Create non-root user
-RUN addgroup -g 1000 gauth && \
-    adduser -D -u 1000 -G gauth gauth
+RUN addgroup -g 1000 agentauth && \
+    adduser -D -u 1000 -G agentauth agentauth
 
 WORKDIR /app
 
 # Copy binary and assets
-COPY --from=builder /build/gauth-server .
+COPY --from=builder /build/agentauth-server .
 COPY --from=builder /build/config ./config
 COPY --from=builder /build/web/static_ui ./web/static_ui
 
 # Change ownership
-RUN chown -R gauth:gauth /app
+RUN chown -R agentauth:agentauth /app
 
-USER gauth
+USER agentauth
 
 EXPOSE 8080 9090
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
-ENTRYPOINT ["./gauth-server"]
+ENTRYPOINT ["./agentauth-server"]
 CMD ["-config", "/app/config/production.yaml"]
 ```
 
@@ -844,18 +844,18 @@ CMD ["-config", "/app/config/production.yaml"]
 version: '3.8'
 
 services:
-  gauth:
+  agentauth:
     build:
       context: .
       dockerfile: Dockerfile.production
-    image: gauth:1.0.0
+    image: agentauth:1.0.0
     ports:
       - "8080:8080"
       - "9090:9090"
     environment:
       - DB_HOST=postgres
-      - DB_NAME=gauth
-      - DB_USER=gauth
+      - DB_NAME=agentauth
+      - DB_USER=agentauth
       - DB_PASSWORD=${DB_PASSWORD}
       - REDIS_HOST=redis
     depends_on:
@@ -863,7 +863,7 @@ services:
       - redis
     restart: unless-stopped
     networks:
-      - gauth-network
+      - agentauth-network
     volumes:
       - ./config:/app/config:ro
       - ./logs:/app/logs
@@ -871,13 +871,13 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=gauth
-      - POSTGRES_USER=gauth
+      - POSTGRES_DB=agentauth
+      - POSTGRES_USER=agentauth
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
   
   redis:
@@ -886,7 +886,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
   
   prometheus:
@@ -897,7 +897,7 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
   
   grafana:
@@ -910,11 +910,11 @@ services:
       - grafana-data:/var/lib/grafana
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
     networks:
-      - gauth-network
+      - agentauth-network
     restart: unless-stopped
 
 networks:
-  gauth-network:
+  agentauth-network:
     driver: bridge
 
 volumes:
@@ -931,10 +931,10 @@ volumes:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth
+  name: agentauth
   namespace: production
   labels:
-    app: gauth
+    app: agentauth
     version: "1.0.0"
 spec:
   replicas: 3
@@ -945,26 +945,26 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
   template:
     metadata:
       labels:
-        app: gauth
+        app: agentauth
         version: "1.0.0"
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: gauth
+      serviceAccountName: agentauth
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
       
       containers:
-      - name: gauth
-        image: your-registry/gauth:1.0.0
+      - name: agentauth
+        image: your-registry/agentauth:1.0.0
         imagePullPolicy: Always
         
         ports:
@@ -979,17 +979,17 @@ spec:
         - name: DB_HOST
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: db-host
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: db-password
         - name: REDIS_HOST
           valueFrom:
             configMapKeyRef:
-              name: gauth-config
+              name: agentauth-config
               key: redis-host
         
         resources:
@@ -1023,21 +1023,21 @@ spec:
           mountPath: /app/config
           readOnly: true
         - name: tls-certs
-          mountPath: /etc/gauth/tls
+          mountPath: /etc/agentauth/tls
           readOnly: true
       
       volumes:
       - name: config
         configMap:
-          name: gauth-config
+          name: agentauth-config
       - name: tls-certs
         secret:
-          secretName: gauth-tls
+          secretName: agentauth-tls
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: gauth
+  name: agentauth
   namespace: production
 spec:
   type: ClusterIP
@@ -1049,12 +1049,12 @@ spec:
     port: 9090
     targetPort: 9090
   selector:
-    app: gauth
+    app: agentauth
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gauth
+  name: agentauth
   namespace: production
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
@@ -1063,17 +1063,17 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - gauth.example.com
-    secretName: gauth-tls
+    - agentauth.example.com
+    secretName: agentauth-tls
   rules:
-  - host: gauth.example.com
+  - host: agentauth.example.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: gauth
+            name: agentauth
             port:
               number: 80
 ```
@@ -1087,7 +1087,7 @@ spec:
 
 set -e
 
-BASE_URL="https://gauth.example.com"
+BASE_URL="https://agentauth.example.com"
 
 echo "🔍 Running smoke tests..."
 
@@ -1097,7 +1097,7 @@ curl -f "$BASE_URL/health" || exit 1
 
 # Create extended token
 echo "Testing token creation..."
-TOKEN=$(curl -s -X POST "$BASE_URL/api/v1/gauth/tokens/create" \
+TOKEN=$(curl -s -X POST "$BASE_URL/api/v1/agentauth/tokens/create" \
     -H "Content-Type: application/json" \
     -d '{
         "clientId": "test-client",
@@ -1114,13 +1114,13 @@ fi
 
 # Validate token
 echo "Testing token validation..."
-curl -s -X POST "$BASE_URL/api/v1/gauth/tokens/validate" \
+curl -s -X POST "$BASE_URL/api/v1/agentauth/tokens/validate" \
     -H "Content-Type: application/json" \
     -d "{\"token\": \"$TOKEN\"}" | jq '.valid' | grep -q true || exit 1
 
 # PVP verification
 echo "Testing PVP identity verification..."
-curl -s -X POST "$BASE_URL/api/v1/gauth/pvp/verify" \
+curl -s -X POST "$BASE_URL/api/v1/agentauth/pvp/verify" \
     -H "Content-Type: application/json" \
     -d '{
         "identityType": "eidas",
@@ -1130,7 +1130,7 @@ curl -s -X POST "$BASE_URL/api/v1/gauth/pvp/verify" \
 
 # Commercial register
 echo "Testing commercial register verification..."
-curl -s -X POST "$BASE_URL/api/v1/gauth/registry/verify-entity" \
+curl -s -X POST "$BASE_URL/api/v1/agentauth/registry/verify-entity" \
     -H "Content-Type: application/json" \
     -d '{
         "jurisdiction": "DE",
@@ -1139,7 +1139,7 @@ curl -s -X POST "$BASE_URL/api/v1/gauth/registry/verify-entity" \
 
 # PIP authorization
 echo "Testing PIP authorization..."
-curl -s -X POST "$BASE_URL/api/v1/gauth/pip/authorize" \
+curl -s -X POST "$BASE_URL/api/v1/agentauth/pip/authorize" \
     -H "Content-Type: application/json" \
     -d '{
         "clientId": "test-client",
@@ -1170,11 +1170,11 @@ export const options = {
   },
 };
 
-const BASE_URL = 'https://gauth.example.com';
+const BASE_URL = 'https://agentauth.example.com';
 
 export default function () {
   // Test token creation
-  const createTokenRes = http.post(`${BASE_URL}/api/v1/gauth/tokens/create`, 
+  const createTokenRes = http.post(`${BASE_URL}/api/v1/agentauth/tokens/create`, 
     JSON.stringify({
       clientId: `client-${__VU}-${__ITER}`,
       ownersAuthorizer: 'HRB12345-DE',
@@ -1193,7 +1193,7 @@ export default function () {
   sleep(1);
   
   // Test PIP authorization
-  const authzRes = http.post(`${BASE_URL}/api/v1/gauth/pip/authorize`,
+  const authzRes = http.post(`${BASE_URL}/api/v1/agentauth/pip/authorize`,
     JSON.stringify({
       clientId: `client-${__VU}`,
       action: 'transaction',
@@ -1225,12 +1225,12 @@ The application exposes metrics at `/metrics`:
 
 ```
 # Example metrics
-gauth_requests_total{method="POST",endpoint="/api/v1/gauth/tokens/create",status="200"} 12345
-gauth_request_duration_seconds{endpoint="/api/v1/gauth/tokens/create",quantile="0.95"} 0.001327
-gauth_token_validations_total{result="success"} 9876
-gauth_pvp_verifications_total{result="success"} 5432
-gauth_cache_hits_total 87654
-gauth_cache_misses_total 1234
+agentauth_requests_total{method="POST",endpoint="/api/v1/agentauth/tokens/create",status="200"} 12345
+agentauth_request_duration_seconds{endpoint="/api/v1/agentauth/tokens/create",quantile="0.95"} 0.001327
+agentauth_token_validations_total{result="success"} 9876
+agentauth_pvp_verifications_total{result="success"} 5432
+agentauth_cache_hits_total 87654
+agentauth_cache_misses_total 1234
 ```
 
 ### Grafana Dashboards
@@ -1253,13 +1253,13 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    - /var/log/gauth/*.log
+    - /var/log/agentauth/*.log
   json.keys_under_root: true
   json.add_error_key: true
   
 output.elasticsearch:
   hosts: ["elasticsearch:9200"]
-  index: "gauth-logs-%{+yyyy.MM.dd}"
+  index: "agentauth-logs-%{+yyyy.MM.dd}"
 ```
 
 **Kibana Query Examples**:
@@ -1268,7 +1268,7 @@ output.elasticsearch:
 level: "error"
 
 # Find slow requests
-duration: >1000 AND endpoint: "/api/v1/gauth/tokens/create"
+duration: >1000 AND endpoint: "/api/v1/agentauth/tokens/create"
 
 # Find failed authentications
 event: "authentication_failed"
@@ -1279,11 +1279,11 @@ event: "authentication_failed"
 **Prometheus AlertManager** (`monitoring/alertmanager.yml`):
 ```yaml
 groups:
-- name: gauth
+- name: agentauth
   interval: 30s
   rules:
   - alert: HighErrorRate
-    expr: rate(gauth_requests_total{status=~"5.."}[5m]) > 0.05
+    expr: rate(agentauth_requests_total{status=~"5.."}[5m]) > 0.05
     for: 5m
     labels:
       severity: critical
@@ -1292,7 +1292,7 @@ groups:
       description: "Error rate is {{ $value | humanizePercentage }} over 5 minutes"
   
   - alert: SlowResponseTime
-    expr: histogram_quantile(0.95, rate(gauth_request_duration_seconds_bucket[5m])) > 1
+    expr: histogram_quantile(0.95, rate(agentauth_request_duration_seconds_bucket[5m]) > 1
     for: 5m
     labels:
       severity: warning
@@ -1301,7 +1301,7 @@ groups:
       description: "95th percentile response time is {{ $value }}s"
   
   - alert: ServiceDown
-    expr: up{job="gauth"} == 0
+    expr: up{job="agentauth"} == 0
     for: 1m
     labels:
       severity: critical
@@ -1310,7 +1310,7 @@ groups:
       description: "Service has been down for more than 1 minute"
   
   - alert: HighCacheMissRate
-    expr: rate(gauth_cache_misses_total[5m]) / rate(gauth_cache_hits_total[5m]) > 0.3
+    expr: rate(agentauth_cache_misses_total[5m]) / rate(agentauth_cache_hits_total[5m]) > 0.3
     for: 10m
     labels:
       severity: warning
@@ -1331,45 +1331,45 @@ groups:
 docker-compose down
 
 # Revert to previous version
-docker-compose pull gauth:1.0.0-previous
+docker-compose pull agentauth:1.0.0-previous
 docker-compose up -d
 ```
 
 **Kubernetes**:
 ```bash
 # Rollback to previous revision
-kubectl rollout undo deployment/gauth -n production
+kubectl rollout undo deployment/agentauth -n production
 
 # Rollback to specific revision
-kubectl rollout undo deployment/gauth -n production --to-revision=2
+kubectl rollout undo deployment/agentauth -n production --to-revision=2
 
 # Check rollout status
-kubectl rollout status deployment/gauth -n production
+kubectl rollout status deployment/agentauth -n production
 ```
 
 **Systemd**:
 ```bash
 # Stop current service
-sudo systemctl stop gauth
+sudo systemctl stop agentauth
 
 # Restore previous binary
-sudo cp /opt/gauth/backups/gauth-server-1.0.0 /opt/gauth/gauth-server
+sudo cp /opt/agentauth/backups/agentauth-server-1.0.0 /opt/agentauth/agentauth-server
 
 # Start service
-sudo systemctl start gauth
+sudo systemctl start agentauth
 
 # Verify
-sudo systemctl status gauth
+sudo systemctl status agentauth
 ```
 
 ### Database Rollback
 
 ```bash
 # Restore from backup
-pg_restore -h localhost -U gauth -d gauth_production /backups/gauth_backup_20251110.dump
+pg_restore -h localhost -U agentauth -d agentauth_production /backups/agentauth_backup_20251110.dump
 
 # Or restore specific schema
-pg_restore -h localhost -U gauth -d gauth_production -n gauth /backups/gauth_backup.dump
+pg_restore -h localhost -U agentauth -d agentauth_production -n agentauth /backups/agentauth_backup.dump
 ```
 
 ---

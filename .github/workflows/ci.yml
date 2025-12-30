@@ -42,9 +42,9 @@ jobs:
       uses: harmon758/postgresql-action@v1
       with:
         postgresql version: '15'
-        postgresql db: 'gauth'
-        postgresql user: 'gauth'
-        postgresql password: 'gauth_test_pass'
+        postgresql db: 'agentauth'
+        postgresql user: 'agentauth'
+        postgresql password: 'agentauth_test_pass'
 
     - name: Install dependencies
       run: go mod download
@@ -192,24 +192,24 @@ jobs:
           echo "📊 cmd contents:"
           ls -la cmd/
           echo ""
-          echo "📊 gauth-server directory check:"
-          if [ -d "cmd/gauth-server" ]; then
-            echo "✅ gauth-server directory exists"
-            echo "📄 gauth-server contents:"
-            ls -la cmd/gauth-server/
+          echo "📊 agentauth-server directory check:"
+          if [ -d "cmd/agentauth-server" ]; then
+            echo "✅ agentauth-server directory exists"
+            echo "📄 agentauth-server contents:"
+            ls -la cmd/agentauth-server/
             echo ""
             echo "📄 main.go check:"
-            if [ -f "cmd/gauth-server/main.go" ]; then
+            if [ -f "cmd/agentauth-server/main.go" ]; then
               echo "✅ main.go exists"
-              echo "� File size: $(wc -c < cmd/gauth-server/main.go) bytes"
-              echo "📊 File permissions: $(ls -la cmd/gauth-server/main.go)"
+              echo "� File size: $(wc -c < cmd/agentauth-server/main.go) bytes"
+              echo "📊 File permissions: $(ls -la cmd/agentauth-server/main.go)"
               echo "🔍 First 3 lines of main.go:"
-              head -3 cmd/gauth-server/main.go
+              head -3 cmd/agentauth-server/main.go
             else
-              echo "❌ main.go missing in cmd/gauth-server/"
+              echo "❌ main.go missing in cmd/agentauth-server/"
             fi
           else
-            echo "❌ gauth-server directory missing in cmd/"
+            echo "❌ agentauth-server directory missing in cmd/"
           fi
         else
           echo "❌ cmd directory missing"
@@ -252,21 +252,21 @@ jobs:
           echo "cmd contents:"
           ls -la cmd/ | head -10
           echo ""
-          echo "Looking for gauth-server in cmd:"
-          if [ -d "cmd/gauth-server" ]; then
-            echo "✅ cmd/gauth-server directory found"
-            echo "gauth-server contents:"
-            ls -la cmd/gauth-server/
+          echo "Looking for agentauth-server in cmd:"
+          if [ -d "cmd/agentauth-server" ]; then
+            echo "✅ cmd/agentauth-server directory found"
+            echo "agentauth-server contents:"
+            ls -la cmd/agentauth-server/
             echo ""
-            if [ -f "cmd/gauth-server/main.go" ]; then
+            if [ -f "cmd/agentauth-server/main.go" ]; then
               echo "✅ main.go found!"
-              echo "File info: $(ls -la cmd/gauth-server/main.go)"
-              echo "File size: $(wc -c < cmd/gauth-server/main.go) bytes"
+              echo "File info: $(ls -la cmd/agentauth-server/main.go)"
+              echo "File size: $(wc -c < cmd/agentauth-server/main.go) bytes"
             else
-              echo "❌ main.go NOT found in cmd/gauth-server/"
+              echo "❌ main.go NOT found in cmd/agentauth-server/"
             fi
           else
-            echo "❌ cmd/gauth-server directory NOT found"
+            echo "❌ cmd/agentauth-server directory NOT found"
             echo "Available directories in cmd:"
             ls -la cmd/ 2>/dev/null || echo "Cannot list cmd contents"
           fi
@@ -277,24 +277,24 @@ jobs:
         fi
         echo ""
         
-        # Function to find gauth-server source (from proven script)
-        find_gauth_server() {
+        # Function to find agentauth-server source (from proven script)
+        find_agentauth_server() {
           # Method 1: Standard relative path
-          if [ -f "./cmd/gauth-server/main.go" ]; then
-            echo "✅ Method 1: Found ./cmd/gauth-server/main.go" >&2
-            echo "./cmd/gauth-server"
+          if [ -f "./cmd/agentauth-server/main.go" ]; then
+            echo "✅ Method 1: Found ./cmd/agentauth-server/main.go" >&2
+            echo "./cmd/agentauth-server"
             return 0
           fi
           
           # Method 2: Without leading dot
-          if [ -f "cmd/gauth-server/main.go" ]; then
-            echo "✅ Method 2: Found cmd/gauth-server/main.go" >&2
-            echo "cmd/gauth-server"
+          if [ -f "cmd/agentauth-server/main.go" ]; then
+            echo "✅ Method 2: Found cmd/agentauth-server/main.go" >&2
+            echo "cmd/agentauth-server"
             return 0
           fi
           
           # Method 3: Filesystem search
-          local main_go_path=$(find . -name "main.go" -path "*/cmd/gauth-server/*" 2>/dev/null | head -1)
+          local main_go_path=$(find . -name "main.go" -path "*/cmd/agentauth-server/*" 2>/dev/null | head -1)
           if [ -n "$main_go_path" ]; then
             local source_path=$(dirname "$main_go_path")
             echo "✅ Method 3: Found $main_go_path" >&2
@@ -303,10 +303,10 @@ jobs:
           fi
           
           # Method 4: Directory search
-          local gauth_dir=$(find . -name "gauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
-          if [ -n "$gauth_dir" ] && [ -f "$gauth_dir/main.go" ]; then
-            echo "✅ Method 4: Found directory $gauth_dir with main.go" >&2
-            echo "$gauth_dir"
+          local agentauth_dir=$(find . -name "agentauth-server" -type d -path "*/cmd/*" 2>/dev/null | head -1)
+          if [ -n "$agentauth_dir" ] && [ -f "$agentauth_dir/main.go" ]; then
+            echo "✅ Method 4: Found directory $agentauth_dir with main.go" >&2
+            echo "$agentauth_dir"
             return 0
           fi
           
@@ -314,11 +314,11 @@ jobs:
         }
         
         # Find source path
-        echo "🔍 Searching for gauth-server source..."
-        SOURCE_PATH=$(find_gauth_server)
+        echo "🔍 Searching for agentauth-server source..."
+        SOURCE_PATH=$(find_agentauth_server)
         
         if [ $? -ne 0 ] || [ -z "$SOURCE_PATH" ]; then
-          echo "❌ ERROR: Could not find cmd/gauth-server/main.go"
+          echo "❌ ERROR: Could not find cmd/agentauth-server/main.go"
           echo ""
           echo "🐛 Enhanced Diagnostic Information"
           echo "================================="
@@ -327,7 +327,7 @@ jobs:
           echo "💻 System: $(uname -a)"
           echo ""
           echo "📁 Complete Directory Contents:"
-          find . -type f -name "*.go" | grep -E "(main\.go|gauth)" | sort
+          find . -type f -name "*.go" | grep -E "(main\.go|agentauth)" | sort
           echo ""
           echo "📂 cmd Directory Analysis:"
           find . -name "cmd" -type d -exec ls -la {} \;
@@ -335,8 +335,8 @@ jobs:
           echo "🔍 All main.go files:"
           find . -name "main.go" 2>/dev/null
           echo ""
-          echo "� All gauth-server directories:"
-          find . -name "*gauth-server*" -type d 2>/dev/null
+          echo "� All agentauth-server directories:"
+          find . -name "*agentauth-server*" -type d 2>/dev/null
           echo ""
           echo "🔍 Git Checkout Verification:"
           echo "Repository URL: $(git config --get remote.origin.url 2>/dev/null || echo 'N/A')"
@@ -353,15 +353,15 @@ jobs:
         mkdir -p build/bin
         
         # Build the server
-        echo "🔧 Building gauth-server from: $SOURCE_PATH"
-        if go build -ldflags="-s -w" -o build/bin/gauth-server "$SOURCE_PATH"; then
+        echo "🔧 Building agentauth-server from: $SOURCE_PATH"
+        if go build -ldflags="-s -w" -o build/bin/agentauth-server "$SOURCE_PATH"; then
           echo "✅ Build successful!"
           echo "📊 Binary info:"
-          ls -la build/bin/gauth-server
+          ls -la build/bin/agentauth-server
           
           # Test the binary
           echo "🧪 Testing binary..."
-          if ./build/bin/gauth-server --help >/dev/null 2>&1; then
+          if ./build/bin/agentauth-server --help >/dev/null 2>&1; then
             echo "✅ Binary test successful!"
           else
             echo "⚠️ Binary test failed (may be normal for some flags)"
@@ -402,7 +402,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository_owner }}/gauth
+        images: ghcr.io/${{ github.repository_owner }}/agentauth
         tags: |
           type=ref,event=branch
           type=sha,prefix={{branch}}-,format=short
@@ -432,7 +432,7 @@ jobs:
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: ghcr.io/${{ github.repository_owner }}/gauth:latest
+        image-ref: ghcr.io/${{ github.repository_owner }}/agentauth:latest
         format: 'sarif'
         output: 'trivy-results.sarif'
         severity: 'CRITICAL,HIGH'
@@ -450,7 +450,7 @@ jobs:
       uses: aquasecurity/trivy-action@master
       if: always()
       with:
-        image-ref: ghcr.io/${{ github.repository_owner }}/gauth:latest
+        image-ref: ghcr.io/${{ github.repository_owner }}/agentauth:latest
         format: 'table'
         severity: 'CRITICAL,HIGH,MEDIUM'
         exit-code: '0'  # Don't fail the build, just report vulnerabilities

@@ -18,11 +18,11 @@ This document provides a comprehensive analysis of the AgentAuth authentication 
 
 ## Vulnerability Assessment & Mitigations
 
-### CVE-2025-GAUTH-001: Broken Agent-Session Binding (HIGH)
+### CVE-2025-AGENTAUTH-001: Broken Agent-Session Binding (HIGH)
 
 **Status:** ✅ **ALREADY PROTECTED**
 
-**Implementation:** `pkg/gauth_rfc_001/security_audit_fixes.go` (lines 74-134)
+**Implementation:** `pkg/agentauth_rfc_001/security_audit_fixes.go` (lines 74-134)
 
 **Protection Mechanism:**
 ```go
@@ -52,20 +52,20 @@ func EnforceAgentSessionBinding(
 
 ---
 
-### CVE-2025-GAUTH-002: Token Replay Attacks (CRITICAL)
+### CVE-2025-AGENTAUTH-002: Token Replay Attacks (CRITICAL)
 
 **Status:** ✅ **ALREADY PROTECTED**
 
 **Implementation:** 
-- Primary: `pkg/gauth_rfc_001/redis_replay_store.go`
-- Fallback: `pkg/gauth_rfc_001/rfc0111.go` (in-memory cache)
+- Primary: `pkg/agentauth_rfc_001/redis_replay_store.go`
+- Fallback: `pkg/agentauth_rfc_001/aap001.go` (in-memory cache)
 
 **Protection Mechanism:**
 ```go
 // Redis-backed distributed JTI tracking
 type RedisReplayStore struct {
     client *redis.Client
-    prefix string // "gauth:jti:"
+    prefix string // "agentauth:jti:"
     ttl    time.Duration // Token lifetime + clock skew
 }
 
@@ -100,17 +100,17 @@ T=24h:  Redis key expires → Token also expired → REJECTED (different reason)
 **Configuration:**
 ```bash
 # Enable distributed replay protection
-export GAUTH_REPLAY_STORE_REDIS_ENABLED=1
+export AGENTAUTH_REPLAY_STORE_REDIS_ENABLED=1
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
 
 # Fail-closed mode (reject if Redis unavailable)
-export GAUTH_REPLAY_FAIL_CLOSED=1
+export AGENTAUTH_REPLAY_FAIL_CLOSED=1
 ```
 
 ---
 
-### CVE-2025-GAUTH-003: Revocation Latency (TOCTOU) (MEDIUM)
+### CVE-2025-AGENTAUTH-003: Revocation Latency (TOCTOU) (MEDIUM)
 
 **Status:** ✅ **SIGNIFICANTLY MITIGATED**
 
@@ -188,23 +188,23 @@ With Three-Tier Cache + Pub/Sub:
 
 **Configuration:**
 ```bash
-export GAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_ENABLED=1
 export REDIS_HOST=localhost
 export REDIS_PORT=6379
 
 # Two-phase revocation timeout (cancel window)
-export GAUTH_REVOCATION_DISABLE_TIMEOUT=30s
+export AGENTAUTH_REVOCATION_DISABLE_TIMEOUT=30s
 ```
 
 **Residual Risk:** If ALL servers are restarted simultaneously (Tier 1 cache cleared) AND Redis is unavailable (Tier 2 miss), there's a ~100ms window where blockchain query (Tier 3) is required. Mitigation: Use Redis Sentinel/Cluster for high availability.
 
 ---
 
-### CVE-2025-GAUTH-004: Algorithm Confusion ("None" Attack) (HIGH)
+### CVE-2025-AGENTAUTH-004: Algorithm Confusion ("None" Attack) (HIGH)
 
 **Status:** ✅ **ALREADY PROTECTED**
 
-**Implementation:** `pkg/gauth_rfc_001/security_audit_fixes.go` (lines 29-73)
+**Implementation:** `pkg/agentauth_rfc_001/security_audit_fixes.go` (lines 29-73)
 
 **Strict Whitelist:**
 ```go
@@ -279,7 +279,7 @@ svc := NewService(
 
 ---
 
-### CVE-2025-GAUTH-005: Weak Delegation Constraints (Privilege Escalation) (CRITICAL)
+### CVE-2025-AGENTAUTH-005: Weak Delegation Constraints (Privilege Escalation) (CRITICAL)
 
 **Status:** ⚠️ **HARDENING IMPLEMENTED** (This Release)
 
@@ -387,11 +387,11 @@ repo.SetAuthorizationChecker(authChecker)
 
 ---
 
-### CVE-2025-GAUTH-006: Unbounded Delegation Chain (DoS) (HIGH)
+### CVE-2025-AGENTAUTH-006: Unbounded Delegation Chain (DoS) (HIGH)
 
 **Status:** ✅ **ALREADY PROTECTED**
 
-**Implementation:** `pkg/gauth_rfc_001/delegation_chain_validator.go` (lines 107-150)
+**Implementation:** `pkg/agentauth_rfc_001/delegation_chain_validator.go` (lines 107-150)
 
 **Hard Limits:**
 ```go
@@ -445,7 +445,7 @@ With limit: Maximum 10 database queries per validation
 **Configuration:**
 ```bash
 # Environment variable (default: 10)
-export GAUTH_MAX_DELEGATION_DEPTH=10
+export AGENTAUTH_MAX_DELEGATION_DEPTH=10
 
 # Adjust for your use case:
 # - Small organizations: 5-10 (typical depth: 2-3)
@@ -467,32 +467,32 @@ export GAUTH_MAX_DELEGATION_DEPTH=10
 # AgentAuth Secure Production Configuration
 
 # Replay Protection (CRITICAL)
-export GAUTH_REPLAY_STORE_REDIS_ENABLED=1
-export GAUTH_REPLAY_FAIL_CLOSED=1
+export AGENTAUTH_REPLAY_STORE_REDIS_ENABLED=1
+export AGENTAUTH_REPLAY_FAIL_CLOSED=1
 export REDIS_HOST=redis-cluster-primary
 export REDIS_PORT=6379
 
 # Revocation Protection (HIGH)
-export GAUTH_REVOCATION_ENABLED=1
-export GAUTH_REVOCATION_DISABLE_TIMEOUT=30s
+export AGENTAUTH_REVOCATION_ENABLED=1
+export AGENTAUTH_REVOCATION_DISABLE_TIMEOUT=30s
 
 # Algorithm Whitelist (CRITICAL)
-export GAUTH_ALLOWED_ALGORITHMS="Ed25519,ECDSA_P256"
+export AGENTAUTH_ALLOWED_ALGORITHMS="Ed25519,ECDSA_P256"
 
 # Delegation Chain Limits (MEDIUM)
-export GAUTH_MAX_DELEGATION_DEPTH=10
+export AGENTAUTH_MAX_DELEGATION_DEPTH=10
 
 # JWT Configuration
-export GAUTH_JWT_ALG=RS256
-export GAUTH_JWT_KID=prod-key-001
-export GAUTH_REPLAY_STRICT=1  # Reject tokens without JTI
+export AGENTAUTH_JWT_ALG=RS256
+export AGENTAUTH_JWT_KID=prod-key-001
+export AGENTAUTH_REPLAY_STRICT=1  # Reject tokens without JTI
 
 # Database
 export DB_HOST=postgres-primary
 export DB_PORT=5432
-export DB_USER=gauth_admin
+export DB_USER=agentauth_admin
 export DB_PASSWORD=${SECRET_DB_PASSWORD}
-export DB_NAME=gauth
+export DB_NAME=agentauth
 export DB_SSLMODE=require  # ENFORCE SSL
 ```
 
@@ -501,23 +501,23 @@ export DB_SSLMODE=require  # ENFORCE SSL
 **Critical Metrics:**
 ```prometheus
 # Replay Attack Detection
-rate(gauth_replay_hits_total[5m]) > 10
+rate(agentauth_replay_hits_total[5m]) > 10
   → Alert: Possible replay attack in progress
 
 # Privilege Escalation Attempts
-rate(gauth_authorization_failures_total{reason="unauthorized_scope"}[5m]) > 5
+rate(agentauth_authorization_failures_total{reason="unauthorized_scope"}[5m]) > 5
   → Alert: Possible privilege escalation attempts
 
 # Algorithm Confusion Attempts
-rate(gauth_algorithm_rejection_total[5m]) > 3
+rate(agentauth_algorithm_rejection_total[5m]) > 3
   → Alert: Algorithm confusion attack detected
 
 # Revocation Cache Health
-gauth_revocation_cache_hit_rate < 0.95
+agentauth_revocation_cache_hit_rate < 0.95
   → Alert: Revocation cache degraded (TOCTOU risk)
 
 # Delegation Chain Abuse
-rate(gauth_max_depth_exceeded_total[5m]) > 2
+rate(agentauth_max_depth_exceeded_total[5m]) > 2
   → Alert: Delegation chain depth limit hit
 ```
 
@@ -526,7 +526,7 @@ rate(gauth_max_depth_exceeded_total[5m]) > 2
 **Replay Attack Detected:**
 ```bash
 1. Identify compromised token (JTI from metrics)
-2. Revoke underlying PoA: redis-cli SET gauth:revoked:poa:${POA_ID} 1
+2. Revoke underlying PoA: redis-cli SET agentauth:revoked:poa:${POA_ID} 1
 3. Alert principal: "Your PoA has been compromised"
 4. Rotate signing keys if attack persists
 5. Review access logs for damage assessment
@@ -602,12 +602,12 @@ rate(gauth_max_depth_exceeded_total[5m]) > 2
 
 | Vulnerability | CVE | OWASP | CWE | NIST | Mitigation Status |
 |---------------|-----|-------|-----|------|-------------------|
-| Agent-Session Binding | CVE-2025-GAUTH-001 | A01:2021 Broken Access Control | CWE-285 | AC-3 | ✅ Protected |
-| Replay Attacks | CVE-2025-GAUTH-002 | A02:2021 Cryptographic Failures | CWE-294 | SC-23 | ✅ Protected |
-| Revocation TOCTOU | CVE-2025-GAUTH-003 | A01:2021 Broken Access Control | CWE-367 | SC-8 | ✅ Mitigated |
-| Algorithm Confusion | CVE-2025-GAUTH-004 | A02:2021 Cryptographic Failures | CWE-327 | SC-13 | ✅ Protected |
-| Privilege Escalation | CVE-2025-GAUTH-005 | A01:2021 Broken Access Control | CWE-269 | AC-6 | ⚠️ Hardened |
-| Unbounded Chain | CVE-2025-GAUTH-006 | A04:2021 Insecure Design | CWE-400 | SC-5 | ✅ Protected |
+| Agent-Session Binding | CVE-2025-AGENTAUTH-001 | A01:2021 Broken Access Control | CWE-285 | AC-3 | ✅ Protected |
+| Replay Attacks | CVE-2025-AGENTAUTH-002 | A02:2021 Cryptographic Failures | CWE-294 | SC-23 | ✅ Protected |
+| Revocation TOCTOU | CVE-2025-AGENTAUTH-003 | A01:2021 Broken Access Control | CWE-367 | SC-8 | ✅ Mitigated |
+| Algorithm Confusion | CVE-2025-AGENTAUTH-004 | A02:2021 Cryptographic Failures | CWE-327 | SC-13 | ✅ Protected |
+| Privilege Escalation | CVE-2025-AGENTAUTH-005 | A01:2021 Broken Access Control | CWE-269 | AC-6 | ⚠️ Hardened |
+| Unbounded Chain | CVE-2025-AGENTAUTH-006 | A04:2021 Insecure Design | CWE-400 | SC-5 | ✅ Protected |
 
 ---
 
@@ -616,12 +616,12 @@ rate(gauth_max_depth_exceeded_total[5m]) > 2
 **Before deploying PoA validation code:**
 
 - [ ] Authorization checker configured: `repo.SetAuthorizationChecker(checker)`
-- [ ] Redis replay store enabled: `GAUTH_REPLAY_STORE_REDIS_ENABLED=1`
-- [ ] Revocation system active: `GAUTH_REVOCATION_ENABLED=1`
+- [ ] Redis replay store enabled: `AGENTAUTH_REPLAY_STORE_REDIS_ENABLED=1`
+- [ ] Revocation system active: `AGENTAUTH_REVOCATION_ENABLED=1`
 - [ ] Algorithm whitelist verified: Only Ed25519/ECDSA allowed
-- [ ] Delegation depth limit set: `GAUTH_MAX_DELEGATION_DEPTH=10`
+- [ ] Delegation depth limit set: `AGENTAUTH_MAX_DELEGATION_DEPTH=10`
 - [ ] TLS/SSL enforced: `DB_SSLMODE=require`
-- [ ] Fail-closed mode enabled: `GAUTH_REPLAY_FAIL_CLOSED=1`
+- [ ] Fail-closed mode enabled: `AGENTAUTH_REPLAY_FAIL_CLOSED=1`
 - [ ] Monitoring alerts configured (see Section 2)
 - [ ] Incident response plan documented (see Section 3)
 - [ ] Security tests passing: `go test ./pkg/poa/... -v`

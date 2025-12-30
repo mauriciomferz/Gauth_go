@@ -1,4 +1,4 @@
-# RFC-0111 Security Remediation - v0.9.1 Release
+# AAP-001 Security Remediation - v0.9.1 Release
 
 **Date:** November 21, 2025  
 **Version:** v0.9.1  
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-In response to the Security Audit dated November 21, 2025, the engineering team has implemented **all required remediations** to achieve secure-by-default behavior for the RFC-0111 Power of Attorney validation framework.
+In response to the Security Audit dated November 21, 2025, the engineering team has implemented **all required remediations** to achieve secure-by-default behavior for the AAP-001 Power of Attorney validation framework.
 
 **Audit Status:**  
 - Previous: 🔴 **NON-COMPLIANT** → Current: 🟢 **COMPLIANT (v0.9.1)**
@@ -34,7 +34,7 @@ In response to the Security Audit dated November 21, 2025, the engineering team 
 
 **Implementation:**
 
-**File:** `pkg/rfc0111/rfc0111.go`  
+**File:** `pkg/aap001/aap001.go`  
 **Changes:**
 1. Updated `Service` struct initialization (line ~818):
    ```go
@@ -64,18 +64,18 @@ In response to the Security Audit dated November 21, 2025, the engineering team 
 
 **BEFORE (v0.9.0-beta):**
 ```go
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // Redis error → continue with degraded security (UNSAFE)
 ```
 
 **AFTER (v0.9.1):**
 ```go
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // Redis error → REJECT with ErrRevoked (SECURE)
 
 // Explicit opt-out required for fail-open:
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithReplayFailOpen(),  // ⚠️ Documented as unsafe
+svc := aap001.NewService(audit, authz,
+    aap001.WithReplayFailOpen(),  // ⚠️ Documented as unsafe
 )
 ```
 
@@ -94,7 +94,7 @@ svc := rfc0111.NewService(audit, authz,
 
 **Implementation:**
 
-**File:** `pkg/rfc0111/rfc0111.go`  
+**File:** `pkg/aap001/aap001.go`  
 **Changes:**
 1. Added `strictConstraints` field to Service struct (line ~1620):
    ```go
@@ -157,15 +157,15 @@ vctx := ValidationContext{Action: "payment:send"}  // No metadata
 
 **AFTER (v0.9.1) - Permissive Mode (Default):**
 ```go
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 // Same behavior as before (backward compatible)
 // Result: ✅ ALLOWED (constraint ignored)
 ```
 
 **AFTER (v0.9.1) - Strict Mode:**
 ```go
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithStrictConstraintValidation(),  // ← Enable strict mode
+svc := aap001.NewService(audit, authz,
+    aap001.WithStrictConstraintValidation(),  // ← Enable strict mode
 )
 // Result: ❌ REJECTED "unknown constraint requires_mfa=true cannot be validated"
 ```
@@ -196,7 +196,7 @@ svc := rfc0111.NewService(audit, authz,
    )
    ```
 
-**File:** `pkg/rfc0111/rfc0111.go`  
+**File:** `pkg/aap001/aap001.go`  
 **Changes:**
 2. Added defensive check after context extraction (lines ~1366-1375):
    ```go
@@ -293,7 +293,7 @@ ctx := context.Background()
 ```markdown
 ## ⚠️ CRITICAL: Integration Security Requirements
 
-The RFC-0111 service is a validation framework, not a complete
+The AAP-001 service is a validation framework, not a complete
 authentication system. It TRUSTS the authenticated identity provided
 via context.Context. Integrators are RESPONSIBLE for secure
 authentication and context population.
@@ -328,14 +328,14 @@ authentication and context population.
 ```go
 // BEFORE (assumed fail-open):
 func TestWithRedisOutage(t *testing.T) {
-    svc := rfc0111.NewService(audit, authz)
+    svc := aap001.NewService(audit, authz)
     // Test expects: validation succeeds despite Redis error
 }
 
 // AFTER (explicit fail-open):
 func TestWithRedisOutage(t *testing.T) {
-    svc := rfc0111.NewService(audit, authz,
-        rfc0111.WithReplayFailOpen(),  // ← Explicit opt-in
+    svc := aap001.NewService(audit, authz,
+        aap001.WithReplayFailOpen(),  // ← Explicit opt-in
     )
     // Test expects: validation succeeds despite Redis error
 }
@@ -349,9 +349,9 @@ func TestWithRedisOutage(t *testing.T) {
 
 | Audit Finding | Severity | Remediation | Status | Evidence |
 |---------------|----------|-------------|--------|----------|
-| **#1: Fail-Open Revocation** | 🔴 CRITICAL | Change default to fail-closed | ✅ COMPLETE | `rfc0111.go:818` |
-| **#2: Unknown Constraint Bypass** | 🟠 HIGH | Add strict validation mode | ✅ COMPLETE | `rfc0111.go:805,3212-3244` |
-| **#3: Implicit Identity Binding** | 🟡 MEDIUM | Add defensive sessionUser check | ✅ COMPLETE | `rfc0111.go:1366-1375` |
+| **#1: Fail-Open Revocation** | 🔴 CRITICAL | Change default to fail-closed | ✅ COMPLETE | `aap001.go:818` |
+| **#2: Unknown Constraint Bypass** | 🟠 HIGH | Add strict validation mode | ✅ COMPLETE | `aap001.go:805,3212-3244` |
+| **#3: Implicit Identity Binding** | 🟡 MEDIUM | Add defensive sessionUser check | ✅ COMPLETE | `aap001.go:1366-1375` |
 | **#4: Integration Security Docs** | 🟡 MEDIUM | Create SECURITY.md guide | ✅ COMPLETE | `SECURITY.md` |
 
 ---
@@ -361,11 +361,11 @@ func TestWithRedisOutage(t *testing.T) {
 ### Auditor Requirements Checklist
 
 - [x] **Requirement 1:** Change `failClosedReplay` default to `true`
-  - Implementation: `pkg/rfc0111/rfc0111.go` line 818
+  - Implementation: `pkg/aap001/aap001.go` line 818
   - Verification: Default initialization sets `failClosedReplay: true`
 
 - [x] **Requirement 2:** Implement `WithStrictConstraintValidation()`
-  - Implementation: `pkg/rfc0111/rfc0111.go` lines 805, 3212-3244
+  - Implementation: `pkg/aap001/aap001.go` lines 805, 3212-3244
   - Verification: Unknown constraints rejected when strict mode enabled
 
 - [x] **Requirement 3:** Create `SECURITY.md` with integration warnings
@@ -373,7 +373,7 @@ func TestWithRedisOutage(t *testing.T) {
   - Verification: Contains critical warnings about context population
 
 - [x] **Requirement 4:** Defensive `sessionUser` validation
-  - Implementation: `pkg/rfc0111/rfc0111.go` lines 1366-1375, `pkg/rfc/errors.go` line 17
+  - Implementation: `pkg/aap001/aap001.go` lines 1366-1375, `pkg/rfc/errors.go` line 17
   - Verification: Returns `ErrConfiguration` when `sessionUser` is empty
 
 ---
@@ -393,15 +393,15 @@ func TestWithRedisOutage(t *testing.T) {
 
 ```go
 // SECURITY-CRITICAL DEPLOYMENT (Financial, Healthcare, Legal)
-svc := rfc0111.NewService(audit, authz,
+svc := aap001.NewService(audit, authz,
     // Revocation/Replay Protection (fail-closed)
-    rfc0111.WithRevocationBlacklistStore(redisStore),
-    rfc0111.WithAtomicCounterStore(atomicStore),
-    rfc0111.WithReplayStore(replayStore),
-    rfc0111.WithReplayFailClosed(),  // ← Explicit (already default)
+    aap001.WithRevocationBlacklistStore(redisStore),
+    aap001.WithAtomicCounterStore(atomicStore),
+    aap001.WithReplayStore(replayStore),
+    aap001.WithReplayFailClosed(),  // ← Explicit (already default)
     
     // Constraint Enforcement (strict mode)
-    rfc0111.WithStrictConstraintValidation(),  // ← RECOMMENDED
+    aap001.WithStrictConstraintValidation(),  // ← RECOMMENDED
     
     // Delegation Chain Validation (automatic)
 )
@@ -409,9 +409,9 @@ svc := rfc0111.NewService(audit, authz,
 
 ```go
 // HIGH-AVAILABILITY DEPLOYMENT (Non-critical services)
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithRevocationBlacklistStore(redisStore),
-    rfc0111.WithReplayFailOpen(),  // ⚠️ Explicit unsafe opt-in
+svc := aap001.NewService(audit, authz,
+    aap001.WithRevocationBlacklistStore(redisStore),
+    aap001.WithReplayFailOpen(),  // ⚠️ Explicit unsafe opt-in
     
     // Monitor: replay_store_errors metric
     // Alert: rate(replay_store_errors[5m]) > 10
@@ -434,8 +434,8 @@ svc := rfc0111.NewService(audit, authz,
 **Mitigation for Existing Deployments:**
 ```go
 // Maintain v0.9.0-beta behavior (not recommended for production):
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithReplayFailOpen(),  // Restore fail-open behavior
+svc := aap001.NewService(audit, authz,
+    aap001.WithReplayFailOpen(),  // Restore fail-open behavior
 )
 ```
 
@@ -464,7 +464,7 @@ The engineering team has completed all required remediations per your audit date
 4. ✅ **Remediation #4:** Comprehensive SECURITY.md documentation created
 
 **Code Evidence:**
-- `pkg/rfc0111/rfc0111.go`: Lines 787-818 (defaults), 805 (strict mode), 1366-1375 (defensive check), 3212-3244 (constraint logic)
+- `pkg/aap001/aap001.go`: Lines 787-818 (defaults), 805 (strict mode), 1366-1375 (defensive check), 3212-3244 (constraint logic)
 - `pkg/rfc/errors.go`: Line 17 (ErrConfiguration)
 - `SECURITY.md`: Comprehensive integration security guide
 

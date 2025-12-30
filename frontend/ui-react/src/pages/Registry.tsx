@@ -19,7 +19,7 @@ interface SignatoryForm {
 }
 
 const mockEntities = [
-  { id: 'HRB12345-DE', name: 'Siemens AG', jurisdiction: 'DE', status: 'Active' },
+  { id: 'HRB12345-DE', name: 'AgentAuth AG', jurisdiction: 'DE', status: 'Active' },
   { id: '12345678-GB', name: 'British Airways PLC', jurisdiction: 'GB', status: 'Active' },
   { id: 'B123456-FR', name: 'Airbus SE', jurisdiction: 'FR', status: 'Active' },
   { id: 'CHE123456-CH', name: 'Nestlé SA', jurisdiction: 'CH', status: 'Active' },

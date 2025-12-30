@@ -15,7 +15,7 @@ func (s *BetaServer) DeepHealthCheck(ctx context.Context) map[string]string {
 
 	// 1. Database Check
 	// Assuming s.audit.repo.db is accessible or similar.
-	// The BetaServer struct references `gauth.Service` indirectly/directly?
+	// The BetaServer struct references `agentauth.Service` indirectly/directly?
 	// It has `audit *AuditLog`. `AuditLog` likely wraps `MemoryLogger` or similar.
 	// We need direct access to a DB pool from BetaServer if we want to check it.
 	// `web/server_clean.go` Line 6501 has a check on `s.router`.

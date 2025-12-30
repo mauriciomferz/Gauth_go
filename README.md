@@ -1,5 +1,3 @@
-CONTINUE
-```
 ---
 title: AgentAuth 1.0 README
 category: overview
@@ -9,7 +7,7 @@ owners: core-maintainers
 ---
 # AgentAuth - The Protocol for Agentic Identity
 
-[![CI Build](https://github.com/mauriciomferz/Gauth_go/actions/workflows/ci.yml/badge.svg)](https://github.com/mauriciomferz/Gauth_go/actions/workflows/ci.yml)
+[![CI Build](https://github.com/mauriciomferz/AgentAuth/actions/workflows/ci.yml/badge.svg)](https://github.com/mauriciomferz/AgentAuth/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## What is AgentAuth?
@@ -49,8 +47,8 @@ owners: core-maintainers
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/mauriciomferz/Gauth_go.git
-cd Gauth_go
+git clone https://github.com/mauriciomferz/AgentAuth.git
+cd AgentAuth
 
 # Start the full stack (Database, Redis, AgentAuth Server)
 docker-compose up -d --build

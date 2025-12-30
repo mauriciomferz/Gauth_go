@@ -30,12 +30,12 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec1.item1 | Mandatory POA signature at issuance | Implemented | P0 | Need configurable algorithms (Ed25519 only) | docs/GAP_MATRIX.md:12\|pkg/rfc0111/signature_negative_test.go |
-| sec1.item2 | Full JWT/PASETO claims | Partial | P0 | sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement) | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
-| sec1.item3 | Robust JSON parsing | Partial | P0 | Manual string scanning; property + fuzz tests cover legacy parser for safety | pkg/gauth/gauth.go\|pkg/gauth/gauth_prop_test.go\|pkg/gauth/gauth_fuzz_test.go |
+| sec1.item1 | Mandatory POA signature at issuance | Implemented | P0 | Need configurable algorithms (Ed25519 only) | docs/GAP_MATRIX.md:12\|pkg/aap001/signature_negative_test.go |
+| sec1.item2 | Full JWT/PASETO claims | Partial | P0 | sub,scope,exp,iat,iss,aud,jti,nbf implemented; missing advanced (claims set metadata, structured nested PASETO footer, typ semantic enforcement) | pkg/agentauth/agentauth.go\|pkg/agentauth/agentauth_claims_test.go |
+| sec1.item3 | Robust JSON parsing | Partial | P0 | Manual string scanning; property + fuzz tests cover legacy parser for safety | pkg/agentauth/agentauth.go\|pkg/agentauth/agentauth_prop_test.go\|pkg/agentauth/agentauth_fuzz_test.go |
 | sec1.item4 | Key rotation & lifecycle | Partial | P1 | Scheduler + disk persistence implemented (env driven); missing multi-tenant segregation & external HSM integration | internal/crypto/keys.go\|internal/crypto/keys_persist_test.go |
 | sec1.item5 | Public verifiable token integrity | Partial | P0 | Local symmetric only; no detached signature | docs/GAP_MATRIX.md:14 |
-| sec1.item6 | Canonical digest stability fuzzing | Implemented | P2 | Property + fuzz tests validate determinism & mutable field exclusion | docs/GAP_MATRIX.md:15\|pkg/rfc0111/canonical.go\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go |
+| sec1.item6 | Canonical digest stability fuzzing | Implemented | P2 | Property + fuzz tests validate determinism & mutable field exclusion | docs/GAP_MATRIX.md:15\|pkg/aap001/canonical.go\|pkg/aap001/canonical_prop_test.go\|pkg/aap001/canonical_fuzz_test.go |
 
 ## Authorization Engine
 
@@ -51,8 +51,8 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec3.item1 | Full semantic validation | Partial | P0 | AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits | docs/GAP_MATRIX.md:32\|pkg/rfc0111/validator.go\|pkg/rfc0111/rfc0111.go |
-| sec3.item2 | Embed full PoA in token | Partial | P1 | RawPOA + PoAVersion embedding implemented behind GAUTH_EMBED_FULL_POA with size cap GAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence | docs/GAP_MATRIX.md:33\|pkg/rfc0111/rfc0111.go\|internal/metrics/metrics.go |
+| sec3.item1 | Full semantic validation | Partial | P0 | AdvancedPoAValidator adds extended rules; lacking warning channel & persistence of daily limits | docs/GAP_MATRIX.md:32\|pkg/aap001/validator.go\|pkg/aap001/aap001.go |
+| sec3.item2 | Embed full PoA in token | Partial | P1 | RawPOA + PoAVersion embedding implemented behind AGENTAUTH_EMBED_FULL_POA with size cap AGENTAUTH_MAX_RAW_POA_BYTES; remaining gaps: verifier exposure helper, CBOR option, streaming for large PoAs, warning channel & audit persistence | docs/GAP_MATRIX.md:33\|pkg/aap001/aap001.go\|internal/metrics/metrics.go |
 | sec3.item3 | Joint/collective signature enforcement | Missing | P1 | No multi-signer aggregation | docs/GAP_MATRIX.md:33 |
 | sec3.item4 | Conditional/special conditions evaluation | Missing | P2 | No runtime interpreter | docs/GAP_MATRIX.md:34 |
 
@@ -76,7 +76,7 @@ Schema Version: 1
 
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
-| sec6.item1 | Fail-closed replay mode | Partial | P1 | In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls | pkg/gauth/gauth.go\|pkg/gauth/gauth_claims_test.go |
+| sec6.item1 | Fail-closed replay mode | Partial | P1 | In-memory JTI map + optional ReplayStore reject duplicates/errors; missing durable persistence & eviction controls | pkg/agentauth/agentauth.go\|pkg/agentauth/agentauth_claims_test.go |
 | sec6.item2 | JTI format validation | Implemented | P2 | Need skew checks | docs/GAP_MATRIX.md:56 |
 | sec6.item3 | Replay persistence recovery | Missing | P2 | No WAL snapshot | docs/GAP_MATRIX.md:57 |
 
@@ -86,7 +86,7 @@ Schema Version: 1
 |----|-------------|--------|----------|-----|----------|
 | sec7.item1 | Decision metrics (allow/deny + action/resource labels) | Implemented | P2 | Reason taxonomy limited; no JSON labeled export yet | docs/GAP_MATRIX.md:62\|internal/metrics/prometheus_adapter.go\|docs/OBSERVABILITY.md |
 | sec7.item2 | Metrics export adapter | Partial | P3 | No collector registration | docs/GAP_MATRIX.md:63 |
-| sec7.item3 | Violation & semantic counters (adaptive anomaly) | Implemented | P2 | Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted & restored with hash chain verification. Remaining gaps: external anchoring & archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks. | internal/observability/violations.go\|pkg/gauth/gauth.go\|pkg/rfc0111/rfc0111.go\|web/server_clean.go\|docs/OBSERVABILITY.md\|web/persistence_verify_test.go\|web/server_anomaly_test.go\|web/server_semantic_persistence_test.go |
+| sec7.item3 | Violation & semantic counters (adaptive anomaly) | Implemented | P2 | Counters + per-category 60s/300s rates + adaptive anomaly detector (EWMA + Welford variance) with z-score export via JSON/Prometheus/OTEL; anomaly EWMA state persisted & restored with hash chain verification. Remaining gaps: external anchoring & archival rotation of semantic snapshots, historical rate archive beyond EWMA, surge alert hooks. | internal/observability/violations.go\|pkg/agentauth/agentauth.go\|pkg/aap001/aap001.go\|web/server_clean.go\|docs/OBSERVABILITY.md\|web/persistence_verify_test.go\|web/server_anomaly_test.go\|web/server_semantic_persistence_test.go |
 | sec7.item4 | Distributed tracing | Missing | P3 | No span linking | docs/GAP_MATRIX.md:65 |
 
 ## Key & Secret Management
@@ -101,7 +101,7 @@ Schema Version: 1
 | ID | Requirement | Status | Priority | Gap | Evidence |
 |----|-------------|--------|----------|-----|----------|
 | sec9.item1 | Clause-to-test mapping | Partial | P0 | Harness maps 8 mapped clause entries (100% of declared set); broader RFC sections still unmapped | docs/GAP_MATRIX.md:76\|conformance/clause_map.json\|report.md |
-| sec9.item2 | Fuzzing / property tests | Partial | P1 | Canonical digest covered; parsing & semantic validators still lack property tests | docs/GAP_MATRIX.md:77\|pkg/rfc0111/canonical_prop_test.go\|pkg/rfc0111/canonical_fuzz_test.go |
+| sec9.item2 | Fuzzing / property tests | Partial | P1 | Canonical digest covered; parsing & semantic validators still lack property tests | docs/GAP_MATRIX.md:77\|pkg/aap001/canonical_prop_test.go\|pkg/aap001/canonical_fuzz_test.go |
 | sec9.item3 | Load/stress benchmarks | Missing | P2 | No high-load harness | docs/GAP_MATRIX.md:78 |
 
 ## Interoperability / External Interfaces

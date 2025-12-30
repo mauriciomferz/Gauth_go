@@ -162,7 +162,7 @@ package main
 
 import (
     "context"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -215,7 +215,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -262,12 +262,12 @@ package main
 
 import (
     "context"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
     // Create audit sink
-    auditSink := pdp.NewJSONFileObligationAuditSink("/var/log/gauth/obligations.jsonl")
+    auditSink := pdp.NewJSONFileObligationAuditSink("/var/log/agentauth/obligations.jsonl")
     defer auditSink.Close()
 
     // Create executor with audit
@@ -279,7 +279,7 @@ func main() {
     engine := pdp.NewInMemoryEngine(pdp.DenyOverridesStrategy{})
     engine.WithObligations(exec, "")
 
-    // Obligations will be audited to /var/log/gauth/obligations.jsonl
+    // Obligations will be audited to /var/log/agentauth/obligations.jsonl
     // Each execution produces a JSON record:
     // {
     //   "timestamp": "2025-11-05T17:00:00Z",
@@ -299,7 +299,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 // Custom handler: Send Slack notification
@@ -340,7 +340,7 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/pdp"
 )
 
 func main() {
@@ -349,7 +349,7 @@ func main() {
     defer adviceChannel.Close()
 
     // 2. Create audit sink
-    auditSink := pdp.NewJSONFileObligationAuditSink("/var/log/gauth/obligations.jsonl")
+    auditSink := pdp.NewJSONFileObligationAuditSink("/var/log/agentauth/obligations.jsonl")
     defer auditSink.Close()
 
     // 3. Create extended executor
@@ -444,9 +444,9 @@ func main() {
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `GAUTH_ADVICE_BUFFER_SIZE` | Advice channel buffer size | 100 |
-| `GAUTH_OBLIGATION_AUDIT_PATH` | JSONL audit file path | (none) |
-| `GAUTH_DENY_ON_MANDATORY_FAILURE` | Flip decision on mandatory obligation failure | false |
+| `AGENTAUTH_ADVICE_BUFFER_SIZE` | Advice channel buffer size | 100 |
+| `AGENTAUTH_OBLIGATION_AUDIT_PATH` | JSONL audit file path | (none) |
+| `AGENTAUTH_DENY_ON_MANDATORY_FAILURE` | Flip decision on mandatory obligation failure | false |
 
 ### PDP Engine Options
 
@@ -504,7 +504,7 @@ go test -v ./pkg/pdp -run TestExtendedObligationExecutor_WithAuditSink
 **Risk:** High advice emission rate can cause buffer overflow (dropped events).
 
 **Mitigation:**
-- Increase buffer size (`GAUTH_ADVICE_BUFFER_SIZE=1000`)
+- Increase buffer size (`AGENTAUTH_ADVICE_BUFFER_SIZE=1000`)
 - Implement backpressure (block emission on critical advice)
 - Monitor advice drop rate
 
@@ -577,7 +577,7 @@ fmt.Printf("Buffer size: %d\n", cap(adviceChannel.AdviceEvents()))
 **Diagnosis:**
 ```bash
 # Check file permissions
-ls -la /var/log/gauth/obligations.jsonl
+ls -la /var/log/agentauth/obligations.jsonl
 
 # Verify sink configured
 grep "WithObligationAuditSink" your_code.go
@@ -617,8 +617,8 @@ grep "WithObligationAuditSink" your_code.go
    ```
 
 4. **Monitor metrics**:
-   - `gauth_rfc0111_obligations_executed_total`
-   - `gauth_rfc0111_obligations_failed_total`
+   - `agentauth_aap001_obligations_executed_total`
+   - `agentauth_aap001_obligations_failed_total`
 
 ### Phase 3: Production Rollout (Weeks 4-6)
 
@@ -629,7 +629,7 @@ grep "WithObligationAuditSink" your_code.go
 
 2. **Add persistent audit sink**:
    ```go
-   auditSink := pdp.NewJSONFileObligationAuditSink("/var/log/gauth/obligations.jsonl")
+   auditSink := pdp.NewJSONFileObligationAuditSink("/var/log/agentauth/obligations.jsonl")
    exec = pdp.NewExtendedObligationExecutor(pdp.WithObligationAuditSink(auditSink))
    ```
 

@@ -35,7 +35,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
 #### Country-Specific Connectors (4)
 
 **🇺🇸 United States Identity Verifier**
-- **File:** `pkg/gauth/external/us_identity_verifier.go` (1,020 lines)
+- **File:** `pkg/agentauth/external/us_identity_verifier.go` (1,020 lines)
 - **Features:**
   - SSN validation (format, checksum, area/group/serial)
   - 50+ state driver's license patterns
@@ -45,7 +45,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
 - **Test Coverage:** 49.2% (737 lines, 15 tests, 100% pass rate)
 
 **🇩🇪 Germany eID Connector**
-- **File:** `pkg/gauth/external/de_eid_connector.go` (719 lines)
+- **File:** `pkg/agentauth/external/de_eid_connector.go` (719 lines)
 - **Features:**
   - nPA authentication (PACE/TA/CA protocols)
   - eIDAS assurance levels (low/substantial/high)
@@ -55,7 +55,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
 - **Status:** Ready for AusweisApp2 SDK integration
 
 **🇬🇧 United Kingdom Identity Connector**
-- **File:** `pkg/gauth/external/uk_identity_connector.go` (750 lines)
+- **File:** `pkg/agentauth/external/uk_identity_connector.go` (750 lines)
 - **Features:**
   - UK passport verification (9-digit, MRZ, RFID)
   - DVLA driving licence (16-character format)
@@ -65,7 +65,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
 - **Status:** Production-ready
 
 **🇳🇱 Netherlands Identity Connector**
-- **File:** `pkg/gauth/external/nl_identity_connector.go` (700 lines)
+- **File:** `pkg/agentauth/external/nl_identity_connector.go` (700 lines)
 - **Features:**
   - DigiD authentication (basis/midden/substantieel/hoog)
   - BSN validation (11-test/elfproef algorithm)
@@ -77,7 +77,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
 #### Identity Provider Integrations (2)
 
 **Persona API Client**
-- **File:** `pkg/gauth/external/persona_provider.go` (506 lines)
+- **File:** `pkg/agentauth/external/persona_provider.go` (506 lines)
 - **Features:**
   - Identity verification
   - Document verification
@@ -86,7 +86,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
   - Production-ready authentication
 
 **Trulioo GlobalGateway Client**
-- **File:** `pkg/gauth/external/trulioo_provider.go` (577 lines)
+- **File:** `pkg/agentauth/external/trulioo_provider.go` (577 lines)
 - **Features:**
   - Global identity verification
   - AML screening
@@ -97,7 +97,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
 #### Supporting Infrastructure (2)
 
 **Database-Backed PIP**
-- **File:** `pkg/gauth/pip/database_pip.go` (850+ lines)
+- **File:** `pkg/agentauth/pip/database_pip.go` (850+ lines)
 - **Features:**
   - PostgreSQL attribute storage
   - Connection pooling
@@ -109,7 +109,7 @@ Implemented comprehensive identity verification capabilities across 4 countries 
   - Schema initialization
 
 **OCSP Certificate Validator**
-- **File:** `pkg/gauth/external/ocsp_validator.go` (650+ lines)
+- **File:** `pkg/agentauth/external/ocsp_validator.go` (650+ lines)
 - **Features:**
   - RFC 6960 compliant
   - Certificate chain validation
@@ -251,7 +251,7 @@ Implemented enterprise-grade production hardening for Model Context Protocol int
 | **Transports Implemented** | 3 (stdio, WebSocket, SSE) |
 | **Files Created** | 3 major components |
 | **Documentation** | 1 comprehensive report |
-| **RFC-0111 Compliance** | 95% (+10% from Phase 3) |
+| **AAP-001 Compliance** | 95% (+10% from Phase 3) |
 
 ### Transport Comparison
 
@@ -276,7 +276,7 @@ Implemented enterprise-grade production hardening for Model Context Protocol int
 - ✅ Real-time metrics
 - ✅ Configurable pool sizes
 
-### RFC-0111 Compliance
+### AAP-001 Compliance
 
 **Before Phase 4:** 85%  
 **After Phase 4:** **95%** (+10%)
@@ -348,7 +348,7 @@ Both initiatives are **production-ready**:
 - Enterprise-grade reliability
 - Connection pooling and rate limiting
 - Circuit breaker protection
-- 95% RFC-0111 compliance
+- 95% AAP-001 compliance
 
 ---
 
@@ -372,7 +372,7 @@ Both initiatives are **production-ready**:
 │  │  Database PIP        │  │  XACML PDP                  │  │
 │  │  - PostgreSQL        │  │  - Policy Engine            │  │
 │  │  - Attribute Storage │  │  - Authorization Decisions  │  │
-│  │  - Audit Logging     │  │  - RFC-0111 Compliance      │  │
+│  │  - Audit Logging     │  │  - AAP-001 Compliance      │  │
 │  └──────────────────────┘  └─────────────────────────────┘  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
@@ -393,7 +393,7 @@ Both initiatives are **production-ready**:
 3. **MCP → Authorization**
    - MCP tools integrated with authorization
    - Audit logging for all operations
-   - RFC-0111 compliance maintained
+   - AAP-001 compliance maintained
 
 4. **Multi-Country → Single PIP**
    - All country connectors use same PIP
@@ -474,24 +474,24 @@ Both initiatives are **production-ready**:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/mauriciomferz/Gauth_go.git
-cd Gauth_go
+git clone https://github.com/mauriciomferz/AgentAuth.git
+cd AgentAuth
 
 # 2. Install dependencies
 go mod download
 
 # 3. Set up database
-psql -U postgres -c "CREATE DATABASE gauth;"
-psql -U postgres -d gauth -f schema/pip_schema.sql
+psql -U postgres -c "CREATE DATABASE agentauth;"
+psql -U postgres -d agentauth -f schema/pip_schema.sql
 
 # 4. Configure environment
-export GAUTH_DB_HOST=localhost
-export GAUTH_DB_PORT=5432
-export GAUTH_DB_NAME=gauth
-export GAUTH_DB_USER=postgres
-export GAUTH_DB_PASSWORD=your_password
-export GAUTH_MCP_ENABLED=1
-export GAUTH_AAP-001_ENABLED=1
+export AGENTAUTH_DB_HOST=localhost
+export AGENTAUTH_DB_PORT=5432
+export AGENTAUTH_DB_NAME=agentauth
+export AGENTAUTH_DB_USER=postgres
+export AGENTAUTH_DB_PASSWORD=your_password
+export AGENTAUTH_MCP_ENABLED=1
+export AGENTAUTH_AAP-001_ENABLED=1
 
 # 5. Build and run
 go build ./cmd/web-server
@@ -503,37 +503,37 @@ go build ./cmd/web-server
 **Environment Variables:**
 ```bash
 # Database
-export GAUTH_DB_HOST=localhost
-export GAUTH_DB_PORT=5432
-export GAUTH_DB_NAME=gauth
+export AGENTAUTH_DB_HOST=localhost
+export AGENTAUTH_DB_PORT=5432
+export AGENTAUTH_DB_NAME=agentauth
 
 # External Connectors
 export PERSONA_API_KEY=your_persona_key
 export TRULIOO_API_KEY=your_trulioo_key
 
 # MCP
-export GAUTH_MCP_ENABLED=1
-export GAUTH_MCP_POOL_SIZE=10
-export GAUTH_MCP_RATE_LIMIT=100
+export AGENTAUTH_MCP_ENABLED=1
+export AGENTAUTH_MCP_POOL_SIZE=10
+export AGENTAUTH_MCP_RATE_LIMIT=100
 
 # Circuit Breaker
-export GAUTH_CIRCUIT_BREAKER_ENABLED=true
-export GAUTH_CIRCUIT_BREAKER_MAX_FAILURES=5
+export AGENTAUTH_CIRCUIT_BREAKER_ENABLED=true
+export AGENTAUTH_CIRCUIT_BREAKER_MAX_FAILURES=5
 ```
 
 ### Docker Deployment
 
 ```bash
 # Build image
-docker build -t gauth-server:latest .
+docker build -t agentauth-server:latest .
 
 # Run container
 docker run -d -p 8080:8080 \
-  --name gauth-server \
-  -e GAUTH_DB_HOST=postgres \
-  -e GAUTH_DB_PASSWORD=password \
-  -e GAUTH_MCP_ENABLED=1 \
-  gauth-server:latest
+  --name agentauth-server \
+  -e AGENTAUTH_DB_HOST=postgres \
+  -e AGENTAUTH_DB_PASSWORD=password \
+  -e AGENTAUTH_MCP_ENABLED=1 \
+  agentauth-server:latest
 ```
 
 ### Kubernetes Deployment
@@ -542,26 +542,26 @@ docker run -d -p 8080:8080 \
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-server
+  name: agentauth-server
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth-server
+      app: agentauth-server
   template:
     metadata:
       labels:
-        app: gauth-server
+        app: agentauth-server
     spec:
       containers:
-      - name: gauth-server
-        image: gauth-server:latest
+      - name: agentauth-server
+        image: agentauth-server:latest
         ports:
         - containerPort: 8080
         env:
-        - name: GAUTH_DB_HOST
+        - name: AGENTAUTH_DB_HOST
           value: postgres
-        - name: GAUTH_MCP_ENABLED
+        - name: AGENTAUTH_MCP_ENABLED
           value: "1"
 ```
 
@@ -572,19 +572,19 @@ spec:
 ### Available Metrics
 
 **External Connectors:**
-- `gauth_identity_verifications_total`
-- `gauth_identity_verification_errors_total`
-- `gauth_identity_verification_duration_seconds`
-- `gauth_pip_attribute_operations_total`
-- `gauth_pip_cache_hit_rate`
-- `gauth_ocsp_validations_total`
+- `agentauth_identity_verifications_total`
+- `agentauth_identity_verification_errors_total`
+- `agentauth_identity_verification_duration_seconds`
+- `agentauth_pip_attribute_operations_total`
+- `agentauth_pip_cache_hit_rate`
+- `agentauth_ocsp_validations_total`
 
 **MCP:**
-- `gauth_mcp_connections_active`
-- `gauth_mcp_connections_total`
-- `gauth_mcp_rate_limit_denials_total`
-- `gauth_mcp_circuit_breaker_state`
-- `gauth_mcp_pool_size`
+- `agentauth_mcp_connections_active`
+- `agentauth_mcp_connections_total`
+- `agentauth_mcp_rate_limit_denials_total`
+- `agentauth_mcp_circuit_breaker_state`
+- `agentauth_mcp_pool_size`
 
 ### Health Endpoints
 
@@ -661,7 +661,7 @@ curl http://localhost:8080/metrics
 - Health endpoints enhancement
 - Alerting system
 
-**Estimated Impact:** RFC-0111 compliance 95% → 98% (+3%)
+**Estimated Impact:** AAP-001 compliance 95% → 98% (+3%)
 
 ---
 
@@ -699,7 +699,7 @@ curl http://localhost:8080/metrics
 | BSI TR-03110 | ✅ 100% |
 | RFC 6960 (OCSP) | ✅ 100% |
 | NIST 800-63-3 | ✅ 80% |
-| RFC-0111 (MCP) | ✅ 95% |
+| AAP-001 (MCP) | ✅ 95% |
 
 ### Production Readiness
 
@@ -733,7 +733,7 @@ This session successfully delivered two major production-ready initiatives:
 - Connection pooling with health checks
 - Rate limiting (100 req/sec default)
 - Circuit breaker protection
-- 95% RFC-0111 compliance achieved
+- 95% AAP-001 compliance achieved
 
 ### Combined Achievements
 
@@ -802,27 +802,27 @@ Both initiatives represent significant enhancements to the AgentAuth authorizati
 
 **Country Connectors:**
 ```
-pkg/gauth/external/us_identity_verifier.go          1,020 lines
-pkg/gauth/external/de_eid_connector.go                719 lines
-pkg/gauth/external/uk_identity_connector.go           750 lines
-pkg/gauth/external/nl_identity_connector.go           700 lines
+pkg/agentauth/external/us_identity_verifier.go          1,020 lines
+pkg/agentauth/external/de_eid_connector.go                719 lines
+pkg/agentauth/external/uk_identity_connector.go           750 lines
+pkg/agentauth/external/nl_identity_connector.go           700 lines
 ```
 
 **Identity Providers:**
 ```
-pkg/gauth/external/persona_provider.go                506 lines
-pkg/gauth/external/trulioo_provider.go                577 lines
+pkg/agentauth/external/persona_provider.go                506 lines
+pkg/agentauth/external/trulioo_provider.go                577 lines
 ```
 
 **Supporting Components:**
 ```
-pkg/gauth/pip/database_pip.go                         850+ lines
-pkg/gauth/external/ocsp_validator.go                  650+ lines
+pkg/agentauth/pip/database_pip.go                         850+ lines
+pkg/agentauth/external/ocsp_validator.go                  650+ lines
 ```
 
 **Tests:**
 ```
-pkg/gauth/external/us_identity_verifier_test.go       737 lines
+pkg/agentauth/external/us_identity_verifier_test.go       737 lines
 ```
 
 **Documentation:**

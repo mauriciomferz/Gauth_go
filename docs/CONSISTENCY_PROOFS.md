@@ -71,7 +71,7 @@ Code | Reason | HTTP | RFC Ref | Notes
 New mode: `revocation-consistency`.
 Usage examples:
 ```
-auditor -mode revocation-consistency -base https://gauth.example -older 100 -newer 150
+auditor -mode revocation-consistency -base https://agentauth.example -older 100 -newer 150
 ```
 Phase 1 behavior:
 - Fetch `/api/v1/revocation/consistency?older=100&newer=150`.
@@ -99,10 +99,10 @@ To support arbitrary historical head queries:
 ## Metrics (Future)
 Metric | Type | Description
 -------|------|------------
-`gauth_revocation_consistency_requests_total` | counter | Total consistency queries.
-`gauth_revocation_consistency_proofs_total` | counter | Proofs successfully generated.
-`gauth_revocation_consistency_failures_total` | counter | Failed proof verifications.
-`gauth_revocation_consistency_latency_seconds` | histogram | Proof build time.
+`agentauth_revocation_consistency_requests_total` | counter | Total consistency queries.
+`agentauth_revocation_consistency_proofs_total` | counter | Proofs successfully generated.
+`agentauth_revocation_consistency_failures_total` | counter | Failed proof verifications.
+`agentauth_revocation_consistency_latency_seconds` | histogram | Proof build time.
 
 ## Phase 1 Deliverables
 - `docs/CONSISTENCY_PROOFS.md` (this document)
@@ -128,5 +128,5 @@ Metric | Type | Description
 ## Next Steps
 1. Implement stub endpoint & CLI mode.
 2. Add trivial proof test.
-3. Introduce head persistence slice with bounded capacity (configurable; e.g. env `GAUTH_REVOCATION_HEAD_CAP`).
+3. Introduce head persistence slice with bounded capacity (configurable; e.g. env `AGENTAUTH_REVOCATION_HEAD_CAP`).
 4. Implement real proof construction.

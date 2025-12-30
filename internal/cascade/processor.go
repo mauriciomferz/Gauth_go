@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/config"
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // ProcessorResult holds the results of cascade processing
@@ -24,14 +24,14 @@ type ProcessorResult struct {
 
 // Processor handles cascade revocation operations
 type Processor struct {
-	repo    gauth_aap_001.POARepository
+	repo    agentauth_aap_001.POARepository
 	auditor *audit.MemoryLogger
 	config  config.CascadeConfig
 	metrics metrics.Metrics
 }
 
 // NewProcessor creates a new cascade processor
-func NewProcessor(repo gauth_aap_001.POARepository, auditor *audit.MemoryLogger, cfg config.CascadeConfig, metricsImpl metrics.Metrics) *Processor {
+func NewProcessor(repo agentauth_aap_001.POARepository, auditor *audit.MemoryLogger, cfg config.CascadeConfig, metricsImpl metrics.Metrics) *Processor {
 	if metricsImpl == nil {
 		metricsImpl = metrics.Noop
 	}
@@ -157,7 +157,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 }
 
 // processBatch processes a batch of descendants at the same depth level
-func (p *Processor) processBatch(ctx context.Context, descendants []*gauth_aap_001.PowerOfAttorney, depth int, revokedBy string) *ProcessorResult {
+func (p *Processor) processBatch(ctx context.Context, descendants []*agentauth_aap_001.PowerOfAttorney, depth int, revokedBy string) *ProcessorResult {
 	result := &ProcessorResult{
 		Errors: []error{},
 	}
@@ -206,18 +206,18 @@ func (p *Processor) processBatch(ctx context.Context, descendants []*gauth_aap_0
 }
 
 // processDescendant processes a single descendant POA based on cascade mode
-func (p *Processor) processDescendant(poa *gauth_aap_001.PowerOfAttorney, depth int, revokedBy string) error {
+func (p *Processor) processDescendant(poa *agentauth_aap_001.PowerOfAttorney, depth int, revokedBy string) error {
 	originalStatus := poa.Status
 	now := time.Now()
 
 	switch p.config.Mode {
 	case config.CascadeModeRevoke:
-		poa.Status = gauth_aap_001.POAStatusRevoked
+		poa.Status = agentauth_aap_001.POAStatusRevoked
 		poa.RevokedAt = &now
 		poa.RevocationReason = fmt.Sprintf("cascade_revocation:parent_revoked:depth_%d", depth)
 
 	case config.CascadeModeSuspend:
-		poa.Status = gauth_aap_001.POAStatusSuspended
+		poa.Status = agentauth_aap_001.POAStatusSuspended
 		poa.RevocationReason = fmt.Sprintf("cascade_suspension:parent_revoked:depth_%d", depth)
 
 	case config.CascadeModeNotify:
@@ -282,8 +282,8 @@ func (p *Processor) processDescendant(poa *gauth_aap_001.PowerOfAttorney, depth 
 }
 
 // groupByDepth organizes descendants by their depth level
-func (p *Processor) groupByDepth(descendants []*gauth_aap_001.PowerOfAttorney) map[int][]*gauth_aap_001.PowerOfAttorney {
-	groups := make(map[int][]*gauth_aap_001.PowerOfAttorney)
+func (p *Processor) groupByDepth(descendants []*agentauth_aap_001.PowerOfAttorney) map[int][]*agentauth_aap_001.PowerOfAttorney {
+	groups := make(map[int][]*agentauth_aap_001.PowerOfAttorney)
 
 	for _, poa := range descendants {
 		depth := poa.Depth

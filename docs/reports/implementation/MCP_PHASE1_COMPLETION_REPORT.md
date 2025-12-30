@@ -1,7 +1,7 @@
 # MCP Integration - Phase 1 Completion Report
 **Date**: November 12, 2025  
 **Status**: ✅ COMPLETE  
-**RFC-0111 Compliance Impact**: +7% (68% → 75% after Phase 3)
+**AAP-001 Compliance Impact**: +7% (68% → 75% after Phase 3)
 
 ---
 
@@ -12,7 +12,7 @@
 **Result**: ✅ **SUCCESS** - All Phase 1 deliverables complete, tested, and integrated.
 
 **Impact**:
-- ✅ RFC-0111 MCP building block requirement addressed (0% → 30%)
+- ✅ AAP-001 MCP building block requirement addressed (0% → 30%)
 - ✅ Foundation laid for Phases 2-3 (Authorization + Agent Integration)
 - ✅ 7 new files created in `pkg/mcp/` package
 - ✅ 45.2% test coverage with all tests passing
@@ -128,7 +128,7 @@
 - MCP protocol specification references
 - Implementation phases (1-4)
 - Testing instructions
-- RFC-0111 compliance tracking
+- AAP-001 compliance tracking
 - Security considerations
 
 ---
@@ -205,7 +205,7 @@ $ go build ./...
 
 ---
 
-## RFC-0111 Compliance Progress
+## AAP-001 Compliance Progress
 
 ### Before MCP Implementation
 - **MCP Compliance**: 0% (not implemented)
@@ -236,7 +236,7 @@ $ go build ./...
 **Tasks**:
 1. **Add MCP Scopes to ExtendedToken**
    - Define MCP scope format: `mcp:resource:read:docs/*`, `mcp:tool:call:calculator`
-   - Update `pkg/gauth/extended_token.go`
+   - Update `pkg/agentauth/extended_token.go`
    - Add scope validation
 
 2. **Implement Authorization Bridge**
@@ -307,7 +307,7 @@ Phase 1 of MCP integration is **complete and successful**. The foundation is now
 - ✅ Managing multiple server connections
 - ✅ Unit testing with 45% coverage
 
-**Phase 2** (Authorization Bridge) is the next priority and will integrate AgentAuth's authorization capabilities with MCP operations, increasing overall RFC-0111 compliance from 68% to 71%.
+**Phase 2** (Authorization Bridge) is the next priority and will integrate AgentAuth's authorization capabilities with MCP operations, increasing overall AAP-001 compliance from 68% to 71%.
 
 **Phase 3** (Agent Integration & Audit) will complete the MCP integration, bringing overall compliance to **75%** and enabling production AI agent workflows.
 

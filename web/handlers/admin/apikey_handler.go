@@ -76,7 +76,7 @@ func generateAPIKey() (string, string, error) {
 	fullKey := base64.URLEncoding.EncodeToString(bytes)
 
 	// Add prefix for identification
-	prefixedKey := fmt.Sprintf("gauth_sk_%s", fullKey)
+	prefixedKey := fmt.Sprintf("agentauth_sk_%s", fullKey)
 
 	// Extract first 16 chars for display prefix
 	keyPrefix := prefixedKey[:16]

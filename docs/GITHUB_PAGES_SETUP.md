@@ -27,7 +27,7 @@ GitHub Pages is now set up for your OpenAPI documentation!
    ```
 
 2. **Enable GitHub Pages in your repository:**
-   - Go to: https://github.com/mauriciomferz/Gauth_go/settings/pages
+   - Go to: https://github.com/mauriciomferz/AgentAuth/settings/pages
    - Under "Build and deployment":
      - **Source:** Deploy from a branch
      - **Branch:** main
@@ -40,10 +40,10 @@ GitHub Pages is now set up for your OpenAPI documentation!
 
 Once enabled, your documentation will be available at:
 
-- **Landing Page:** https://mauriciomferz.github.io/Gauth_go/
-- **Swagger UI:** https://mauriciomferz.github.io/Gauth_go/swagger.html
-- **ReDoc:** https://mauriciomferz.github.io/Gauth_go/redoc.html
-- **OpenAPI Spec:** https://mauriciomferz.github.io/Gauth_go/openapi.yaml
+- **Landing Page:** https://mauriciomferz.github.io/AgentAuth/
+- **Swagger UI:** https://mauriciomferz.github.io/AgentAuth/swagger.html
+- **ReDoc:** https://mauriciomferz.github.io/AgentAuth/redoc.html
+- **OpenAPI Spec:** https://mauriciomferz.github.io/AgentAuth/openapi.yaml
 
 ## 🔄 Updating Documentation
 
@@ -51,7 +51,7 @@ Whenever you update your OpenAPI spec:
 
 ```bash
 # Copy updated spec to docs
-cp api/openapi/gauth.yaml docs/openapi.yaml
+cp api/openapi/agentauth.yaml docs/openapi.yaml
 
 # Commit and push
 git add docs/openapi.yaml
@@ -83,7 +83,7 @@ open docs/index.html
 
 Once live, share this link with developers:
 ```
-https://mauriciomferz.github.io/Gauth_go/
+https://mauriciomferz.github.io/AgentAuth/
 ```
 
 They can:

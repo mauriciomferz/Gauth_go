@@ -487,7 +487,7 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 	}
 	// Determine multi-sig threshold from environment
 	threshold := 1
-	if raw := os.Getenv("GAUTH_MULTI_SIG_THRESHOLD"); raw != "" {
+	if raw := os.Getenv("AGENTAUTH_MULTI_SIG_THRESHOLD"); raw != "" {
 		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
 			threshold = v
 		}
@@ -498,7 +498,7 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 	}
 	sth := &SignedTreeHead{Version: 1, MerkleRoot: root, ChainLength: len(c.events), AggregateHash: c.aggregateHash(), Timestamp: time.Now().UTC()}
 	weightsMap := map[string]int{}
-	if raw := os.Getenv("GAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
+	if raw := os.Getenv("AGENTAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
 		parts := strings.Split(raw, ",")
 		for _, p := range parts {
 			p = strings.TrimSpace(p)
@@ -583,7 +583,7 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 	c.treeHeads = append(c.treeHeads, sth)
 	// Optional persistence
 	// Optional persistence
-	if p := os.Getenv("GAUTH_STH_PERSIST_PATH"); p != "" {
+	if p := os.Getenv("AGENTAUTH_STH_PERSIST_PATH"); p != "" {
 		_ = c.SaveSignedTreeHeads(p) // best-effort; ignore error (log could be added later)
 	}
 
@@ -823,7 +823,7 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 			if a.sz != b.sz {
 				break
 			}
-			parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
+			parent := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
 			ph := hex.EncodeToString(parent[:])
 			// replace a with merged, pop b
 			stack[len(stack)-2] = segment{h: ph, sz: a.sz * 2}
@@ -848,7 +848,7 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 		for len(tmp) > 1 {
 			last := tmp[len(tmp)-1]
 			prev := tmp[len(tmp)-2]
-			parent := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(prev.h)...), []byte(last.h)...))
+			parent := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(prev.h)...), []byte(last.h)...))
 			ph := hex.EncodeToString(parent[:])
 			prefixBridges = append(prefixBridges, ph)
 			tmp[len(tmp)-2] = segment{h: ph, sz: prev.sz + last.sz}
@@ -859,7 +859,7 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 				if a.sz != b.sz {
 					break
 				}
-				parent2 := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
+				parent2 := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(a.h)...), []byte(b.h)...))
 				ph2 := hex.EncodeToString(parent2[:])
 				prefixBridges = append(prefixBridges, ph2)
 				tmp[len(tmp)-2] = segment{h: ph2, sz: a.sz * 2}
@@ -869,8 +869,8 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 	}
 
 	// --- Consistency path construction ---
-	// Interval-based streaming alternative avoids full temp tree build when GAUTH_CONSISTENCY_V2_INTERVAL_PATH=1.
-	useInterval := os.Getenv("GAUTH_CONSISTENCY_V2_INTERVAL_PATH") == "1"
+	// Interval-based streaming alternative avoids full temp tree build when AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH=1.
+	useInterval := os.Getenv("AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH") == "1"
 	if useInterval {
 		// We derive the audit path between oldSize and newSize using binary interval decomposition.
 		// Algorithm sketch (RFC6962 inspired):
@@ -900,7 +900,7 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 					if A.sz != B.sz {
 						break
 					}
-					p := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(A.h)...), []byte(B.h)...))
+					p := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(A.h)...), []byte(B.h)...))
 					segStack[len(segStack)-2] = struct {
 						h  string
 						sz int
@@ -915,7 +915,7 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 			for len(segStack) > 1 {
 				A := segStack[0]
 				B := segStack[1]
-				p := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(A.h)...), []byte(B.h)...))
+				p := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(A.h)...), []byte(B.h)...))
 				segStack[0] = struct {
 					h  string
 					sz int
@@ -928,7 +928,7 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 					if A.sz != B.sz {
 						break
 					}
-					p2 := sha256.Sum256(append(append([]byte("GAUTH_MERKLE_NODE:"), []byte(A.h)...), []byte(B.h)...))
+					p2 := sha256.Sum256(append(append([]byte("AGENTAUTH_MERKLE_NODE:"), []byte(A.h)...), []byte(B.h)...))
 					segStack[0] = struct {
 						h  string
 						sz int

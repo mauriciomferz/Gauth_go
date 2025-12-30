@@ -23,7 +23,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 
 ## 1. Japan Identity Connector 🇯🇵
 
-**File:** `pkg/gauth/external/jp_identity_connector.go`  
+**File:** `pkg/agentauth/external/jp_identity_connector.go`  
 **Lines of Code:** ~450  
 **Status:** ✅ Complete and Compiling
 
@@ -75,7 +75,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 
 ## 2. Australia Identity Connector 🇦🇺
 
-**File:** `pkg/gauth/external/au_identity_connector.go`  
+**File:** `pkg/agentauth/external/au_identity_connector.go`  
 **Lines of Code:** ~480  
 **Status:** ✅ Complete and Compiling
 
@@ -135,7 +135,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 
 ## 3. Singapore Identity Connector 🇸🇬
 
-**File:** `pkg/gauth/external/sg_identity_connector.go`  
+**File:** `pkg/agentauth/external/sg_identity_connector.go`  
 **Lines of Code:** ~520  
 **Status:** ✅ Complete and Compiling
 
@@ -198,7 +198,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 
 ## 4. South Korea Identity Connector 🇰🇷
 
-**File:** `pkg/gauth/external/kr_identity_connector.go`  
+**File:** `pkg/agentauth/external/kr_identity_connector.go`  
 **Lines of Code:** ~510  
 **Status:** ✅ Complete and Compiling
 
@@ -223,7 +223,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 - **Check Digit Algorithm:**
   ```
   Weights: 2, 3, 4, 5, 6, 7, 8, 9, 2, 3, 4, 5
-  Check digit = (11 - (sum % 11)) % 10
+  Check digit = (11 - (sum % 11) % 10
   ```
 - **Privacy:** RRN masked in responses (YYMMDD-*******)
 
@@ -254,7 +254,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 
 ## 5. India Identity Connector 🇮🇳
 
-**File:** `pkg/gauth/external/in_identity_connector.go`  
+**File:** `pkg/agentauth/external/in_identity_connector.go`  
 **Lines of Code:** ~570  
 **Status:** ✅ Complete and Compiling
 
@@ -325,7 +325,7 @@ Successfully implemented comprehensive identity verification connectors for 6 ma
 
 ## 6. New Zealand Identity Connector 🇳🇿
 
-**File:** `pkg/gauth/external/nz_identity_connector.go`  
+**File:** `pkg/agentauth/external/nz_identity_connector.go`  
 **Lines of Code:** ~420  
 **Status:** ✅ Complete and Compiling
 

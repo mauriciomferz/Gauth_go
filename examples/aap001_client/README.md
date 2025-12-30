@@ -57,7 +57,7 @@ Comprehensive test of all 8 subscription steps:
 
 1. **Start the server with RFC-0111 enabled:**
    ```bash
-   GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+   AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
    ```
 
 2. **Verify server is running:**
@@ -145,13 +145,13 @@ After running these examples:
 lsof -ti:8080
 
 # If not running, start it
-GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 ### 404 errors
 ```bash
 # Ensure RFC-0111 is enabled
-export GAUTH_AAP-001_ENABLED=1
+export AGENTAUTH_AAP-001_ENABLED=1
 go run ./cmd/web-server
 ```
 

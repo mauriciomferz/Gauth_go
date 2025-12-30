@@ -593,24 +593,24 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-api-with-vault
-  namespace: gauth
+  name: agentauth-api-with-vault
+  namespace: agentauth
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth-api
+      app: agentauth-api
   template:
     metadata:
       labels:
-        app: gauth-api
+        app: agentauth-api
       annotations:
         # Vault Agent Injector annotations
         vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "gauth-app"
-        vault.hashicorp.com/agent-inject-secret-db-creds: "database/creds/gauth-app"
+        vault.hashicorp.com/role: "agentauth-app"
+        vault.hashicorp.com/agent-inject-secret-db-creds: "database/creds/agentauth-app"
         vault.hashicorp.com/agent-inject-template-db-creds: |
-          {{- with secret "database/creds/gauth-app" -}}
+          {{- with secret "database/creds/agentauth-app" -}}
           {
             "username": "{{ .Data.username }}",
             "password": "{{ .Data.password }}",
@@ -618,9 +618,9 @@ spec:
             "lease_duration": {{ .LeaseDuration }}
           }
           {{- end }}
-        vault.hashicorp.com/agent-inject-secret-config: "secret/data/gauth/config"
+        vault.hashicorp.com/agent-inject-secret-config: "secret/data/agentauth/config"
         vault.hashicorp.com/agent-inject-template-config: |
-          {{- with secret "secret/data/gauth/config" -}}
+          {{- with secret "secret/data/agentauth/config" -}}
           {
             "jwt_signing_key": "{{ .Data.data.jwt_signing_key }}",
             "webhook_secret": "{{ .Data.data.webhook_secret }}",
@@ -630,11 +630,11 @@ spec:
         vault.hashicorp.com/agent-pre-populate-only: "false"
         vault.hashicorp.com/agent-revoke-on-shutdown: "true"
     spec:
-      serviceAccountName: gauth-api
+      serviceAccountName: agentauth-api
       
       containers:
-      - name: gauth-api
-        image: gauth/api:latest
+      - name: agentauth-api
+        image: agentauth/api:latest
         
         env:
         - name: DB_CREDS_FILE
@@ -669,5 +669,5 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gauth-api
-  namespace: gauth
+  name: agentauth-api
+  namespace: agentauth

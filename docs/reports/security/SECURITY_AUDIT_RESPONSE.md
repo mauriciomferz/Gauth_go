@@ -23,8 +23,8 @@ This document provides evidence that each reported vulnerability is **already fi
 
 ### Actual Implementation: ✅ ALREADY FIXED
 
-**Fix Applied:** Phase 1 - CVE-2025-GAUTH-001 (Agent-Session Binding)  
-**Location:** `pkg/rfc0111/rfc0111.go`, lines 3033-3065
+**Fix Applied:** Phase 1 - CVE-2025-AGENTAUTH-001 (Agent-Session Binding)  
+**Location:** `pkg/aap001/aap001.go`, lines 3033-3065
 
 **Code Evidence:**
 ```go
@@ -56,7 +56,7 @@ if s.delegationChainValidator != nil && poa.ParentPOAID != "" {
 - System validates: `"bob@example.com" != "attacker@evil.com"` → **REJECTED** ✅
 
 **Test Coverage:**
-- `pkg/rfc0111/security_audit_fixes_test.go::TestSecurityFix1_AgentSessionBinding`
+- `pkg/aap001/security_audit_fixes_test.go::TestSecurityFix1_AgentSessionBinding`
 - Test scenario: Bob tries to use Alice's PoA → **Rejected**
 
 **Verdict:** ✅ **NOT VULNERABLE** - Agent-session binding is enforced at line 3056
@@ -71,8 +71,8 @@ if s.delegationChainValidator != nil && poa.ParentPOAID != "" {
 
 ### Actual Implementation: ✅ ALREADY FIXED
 
-**Fix Applied:** Phase 1 - CVE-2025-GAUTH-002 (Replay Protection)  
-**Location:** `pkg/rfc0111/rfc0111.go`, replay protection architecture
+**Fix Applied:** Phase 1 - CVE-2025-AGENTAUTH-002 (Replay Protection)  
+**Location:** `pkg/aap001/aap001.go`, replay protection architecture
 
 **Code Evidence:**
 ```go
@@ -104,15 +104,15 @@ s.replay.Record(jti, time.Now())
 
 **Configuration:**
 ```go
-svc := rfc0111.NewService(auditLog, authorizer,
-    rfc0111.WithReplayProtection(1000, 15*time.Minute),  // Enable in-memory
-    rfc0111.WithReplayStore(redisStore),                 // Enable distributed
-    rfc0111.WithFailClosed(true),                        // Recommended
+svc := aap001.NewService(auditLog, authorizer,
+    aap001.WithReplayProtection(1000, 15*time.Minute),  // Enable in-memory
+    aap001.WithReplayStore(redisStore),                 // Enable distributed
+    aap001.WithFailClosed(true),                        // Recommended
 )
 ```
 
 **Test Coverage:**
-- `pkg/rfc0111/security_audit_fixes_test.go::TestSecurityFix2_ReplayProtection`
+- `pkg/aap001/security_audit_fixes_test.go::TestSecurityFix2_ReplayProtection`
 - Test scenario: Token used twice → Second attempt **Rejected**
 
 **Verdict:** ✅ **NOT VULNERABLE** - JTI-based replay protection is mandatory
@@ -127,8 +127,8 @@ svc := rfc0111.NewService(auditLog, authorizer,
 
 ### Actual Implementation: ✅ ALREADY FIXED
 
-**Fix Applied:** Phase 1 - CVE-2025-GAUTH-003 (Scope Enforcement)  
-**Location:** `pkg/rfc0111/rfc0111.go`, lines 3095-3205
+**Fix Applied:** Phase 1 - CVE-2025-AGENTAUTH-003 (Scope Enforcement)  
+**Location:** `pkg/aap001/aap001.go`, lines 3095-3205
 
 **Code Evidence:**
 ```go
@@ -182,7 +182,7 @@ if s.atomicCounterStore != nil {
 - Result: `ErrScopeViolation` → **REJECTED** ✅
 
 **Test Coverage:**
-- `pkg/rfc0111/security_audit_fixes_test.go::TestSecurityFix3_ScopeEnforcement`
+- `pkg/aap001/security_audit_fixes_test.go::TestSecurityFix3_ScopeEnforcement`
 - Test scenario: Bob tries to exceed delegated scopes → **Rejected**
 
 **Verdict:** ✅ **NOT VULNERABLE** - Scope and constraint validation is mandatory
@@ -198,7 +198,7 @@ if s.atomicCounterStore != nil {
 ### Actual Implementation: ✅ ALREADY FIXED
 
 **Fix Applied:** Phase 2 - High Vulnerability (Delegation Chain Validation)  
-**Location:** `pkg/rfc0111/delegation_chain_validator.go` (264 lines)
+**Location:** `pkg/aap001/delegation_chain_validator.go` (264 lines)
 
 **Code Evidence:**
 ```go
@@ -278,7 +278,7 @@ func (v *DelegationChainValidator) ValidateChain(ctx, leafPOA, sessionUser) (*Ch
 
 **Test Coverage:**
 - Test data shows 8-hop chain validated correctly (Phase 3)
-- Delegation chain validator exists: `pkg/rfc0111/delegation_chain_validator.go`
+- Delegation chain validator exists: `pkg/aap001/delegation_chain_validator.go`
 
 **Verdict:** ✅ **NOT VULNERABLE** - Full chain validation with scope inheritance
 
@@ -302,19 +302,19 @@ func (v *DelegationChainValidator) ValidateChain(ctx, leafPOA, sessionUser) (*Ch
 ### Phase 1 Fixes (OWASP Top 10 Level 1)
 Committed: November 21, 2025 (Commit: 9932ee5d)
 
-1. **CVE-2025-GAUTH-001:** Agent-Session Binding
+1. **CVE-2025-AGENTAUTH-001:** Agent-Session Binding
    - Fix: `poa.Grantee == sessionUser` check (line 3056)
    - Test: `TestSecurityFix1_AgentSessionBinding`
 
-2. **CVE-2025-GAUTH-002:** Replay Protection
+2. **CVE-2025-AGENTAUTH-002:** Replay Protection
    - Fix: JTI-based replay cache + Redis store
    - Test: `TestSecurityFix2_ReplayProtection`
 
-3. **CVE-2025-GAUTH-003:** Scope Enforcement
+3. **CVE-2025-AGENTAUTH-003:** Scope Enforcement
    - Fix: `containsScope()` check + constraint validation
    - Test: `TestSecurityFix3_ScopeEnforcement`
 
-4. **CVE-2025-GAUTH-004:** Algorithm Confusion
+4. **CVE-2025-AGENTAUTH-004:** Algorithm Confusion
    - Fix: Mandatory algorithm validation
    - Test: `TestSecurityFix4_AlgorithmConfusion`
 
@@ -352,9 +352,9 @@ Load Test Report: `PHASE3_LOAD_TEST_REPORT.md`
 **Evidence:**
 ```go
 // Service configuration
-svc := rfc0111.NewService(auditLog, authorizer,
-    rfc0111.WithReplayProtection(1000, 15*time.Minute),  // In-memory cache
-    rfc0111.WithReplayStore(redisStore),                 // Redis-backed
+svc := aap001.NewService(auditLog, authorizer,
+    aap001.WithReplayProtection(1000, 15*time.Minute),  // In-memory cache
+    aap001.WithReplayStore(redisStore),                 // Redis-backed
 )
 
 // ReplayStore interface
@@ -440,7 +440,7 @@ This is implemented within `validateDelegationEx` (lines 3095-3205)
 
 **Evidence:**
 ```go
-// pkg/rfc0111/delegation_chain_validator.go (264 lines)
+// pkg/aap001/delegation_chain_validator.go (264 lines)
 type DelegationChainValidator struct {
     repo     POARepository
     nowFunc  func() time.Time

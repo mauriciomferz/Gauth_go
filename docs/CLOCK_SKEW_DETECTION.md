@@ -16,7 +16,7 @@ Clock skew detection validates token timestamps to prevent replay attacks and en
 
 ### 1. Timestamp Validation
 - Validates timestamps against current server time
-- Configurable tolerance via `GAUTH_CLOCK_SKEW_SECONDS` (default: 300 seconds / 5 minutes)
+- Configurable tolerance via `AGENTAUTH_CLOCK_SKEW_SECONDS` (default: 300 seconds / 5 minutes)
 - Returns skew in seconds (positive = future, negative = past)
 - Error when absolute skew exceeds tolerance
 
@@ -39,22 +39,22 @@ Clock skew detection validates token timestamps to prevent replay attacks and en
 ### Files Added
 
 ```
-pkg/gauth/clock_skew.go          - Core implementation (200 lines)
-pkg/gauth/clock_skew_test.go     - Comprehensive tests (300+ lines)
+pkg/agentauth/clock_skew.go          - Core implementation (200 lines)
+pkg/agentauth/clock_skew_test.go     - Comprehensive tests (300+ lines)
 ```
 
 ### Core Components
 
 #### ClockSkewValidator
 ```go
-validator := gauth.NewClockSkewValidator()
+validator := agentauth.NewClockSkewValidator()
 skew, err := validator.ValidateTimestamp(time.Now())
 skew, err := validator.ValidateJTITimestamp(jti)
 ```
 
 #### SkewMetrics
 ```go
-metrics := gauth.NewSkewMetrics()
+metrics := agentauth.NewSkewMetrics()
 metrics.RecordSkew(skewSeconds, exceeded)
 isWarning := metrics.IsWarningLevel(skew, maxAllowed)
 stats := metrics.GetStats()
@@ -66,19 +66,19 @@ stats := metrics.GetStats()
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_CLOCK_SKEW_SECONDS` | 300 | Maximum allowed clock skew in seconds |
+| `AGENTAUTH_CLOCK_SKEW_SECONDS` | 300 | Maximum allowed clock skew in seconds |
 
 ### Usage Example
 
 ```bash
 # Set 10-minute tolerance (600 seconds)
-export GAUTH_CLOCK_SKEW_SECONDS=600
+export AGENTAUTH_CLOCK_SKEW_SECONDS=600
 
 # Set strict 1-minute tolerance
-export GAUTH_CLOCK_SKEW_SECONDS=60
+export AGENTAUTH_CLOCK_SKEW_SECONDS=60
 
 # Use default 5-minute tolerance
-unset GAUTH_CLOCK_SKEW_SECONDS
+unset AGENTAUTH_CLOCK_SKEW_SECONDS
 ```
 
 ## Integration
@@ -87,8 +87,8 @@ unset GAUTH_CLOCK_SKEW_SECONDS
 
 ```go
 // In token validation middleware
-validator := gauth.NewClockSkewValidator()
-metrics := gauth.NewSkewMetrics()
+validator := agentauth.NewClockSkewValidator()
+metrics := agentauth.NewSkewMetrics()
 
 func validateToken(jti string) error {
     // Validate JTI timestamp
@@ -115,24 +115,24 @@ func validateToken(jti string) error {
 
 ```go
 // Export metrics to Prometheus
-func exportSkewMetrics(metrics *gauth.SkewMetrics) {
+func exportSkewMetrics(metrics *agentauth.SkewMetrics) {
     prometheus.NewGauge(prometheus.GaugeOpts{
-        Name: "gauth_clock_skew_total_validations",
+        Name: "agentauth_clock_skew_total_validations",
         Help: "Total number of timestamp validations",
     }).Set(float64(metrics.TotalValidations))
     
     prometheus.NewGauge(prometheus.GaugeOpts{
-        Name: "gauth_clock_skew_excessive_count",
+        Name: "agentauth_clock_skew_excessive_count",
         Help: "Number of excessive skew violations",
     }).Set(float64(metrics.ExcessiveSkewCount))
     
     prometheus.NewGauge(prometheus.GaugeOpts{
-        Name: "gauth_clock_skew_max_observed_seconds",
+        Name: "agentauth_clock_skew_max_observed_seconds",
         Help: "Maximum observed clock skew in seconds",
     }).Set(float64(metrics.MaxObservedSkew))
     
     prometheus.NewGauge(prometheus.GaugeOpts{
-        Name: "gauth_clock_skew_average_seconds",
+        Name: "agentauth_clock_skew_average_seconds",
         Help: "Average clock skew in seconds",
     }).Set(metrics.AverageSkew)
 }
@@ -253,7 +253,7 @@ curl http://localhost:8080/admin/skew-stats
 **Solutions**:
 1. Verify NTP is running: `ntpq -p`
 2. Check system time: `date`
-3. Increase tolerance if needed: `export GAUTH_CLOCK_SKEW_SECONDS=600`
+3. Increase tolerance if needed: `export AGENTAUTH_CLOCK_SKEW_SECONDS=600`
 4. Investigate client clock sync
 
 **Issue**: High warning rate without errors
@@ -274,9 +274,9 @@ Potential improvements for future versions:
 ## References
 
 - **Remediation Plan**: `REMEDIATION_PLAN.md` Section 1.2 Enhancement E5
-- **Implementation**: `pkg/gauth/clock_skew.go`
-- **Tests**: `pkg/gauth/clock_skew_test.go`
-- **RFC-0111**: Section 6 (Replay Protection)
+- **Implementation**: `pkg/agentauth/clock_skew.go`
+- **Tests**: `pkg/agentauth/clock_skew_test.go`
+- **AAP-001**: Section 6 (Replay Protection)
 
 ## Changelog
 

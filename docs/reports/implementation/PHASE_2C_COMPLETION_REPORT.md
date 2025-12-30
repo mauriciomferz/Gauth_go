@@ -381,16 +381,16 @@ authz_latency_p99_nanoseconds 0
 
 **Sample Response**:
 ```
-# HELP gauth_rotation_signature_verify_latency_seconds Latency of individual rotation summary signature verification operations
-# TYPE gauth_rotation_signature_verify_latency_seconds histogram
-gauth_rotation_signature_verify_latency_seconds_bucket{le="0.005"} 0
-gauth_rotation_signature_verify_latency_seconds_bucket{le="0.01"} 0
-gauth_rotation_signature_verify_latency_seconds_sum 0
-gauth_rotation_signature_verify_latency_seconds_count 0
+# HELP agentauth_rotation_signature_verify_latency_seconds Latency of individual rotation summary signature verification operations
+# TYPE agentauth_rotation_signature_verify_latency_seconds histogram
+agentauth_rotation_signature_verify_latency_seconds_bucket{le="0.005"} 0
+agentauth_rotation_signature_verify_latency_seconds_bucket{le="0.01"} 0
+agentauth_rotation_signature_verify_latency_seconds_sum 0
+agentauth_rotation_signature_verify_latency_seconds_count 0
 
-# HELP gauth_rotation_summary_chain_length Latest rotation ledger chain length observed when serving summary
-# TYPE gauth_rotation_summary_chain_length gauge
-gauth_rotation_summary_chain_length 0
+# HELP agentauth_rotation_summary_chain_length Latest rotation ledger chain length observed when serving summary
+# TYPE agentauth_rotation_summary_chain_length gauge
+agentauth_rotation_summary_chain_length 0
 ```
 
 ---

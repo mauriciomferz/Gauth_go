@@ -118,10 +118,10 @@ func main() {
 	vectors := []vector{}
 
 	// Ed25519 deterministic
-	edSeed := sha256.Sum256([]byte("gauth-ed25519-fixture-1"))
+	edSeed := sha256.Sum256([]byte("agentauth-ed25519-fixture-1"))
 	edPriv := ed25519.NewKeyFromSeed(edSeed[:32])
 	edPub := edPriv.Public().(ed25519.PublicKey)
-	edMsg := []byte("gauth-ed25519-fixture-msg")
+	edMsg := []byte("agentauth-ed25519-fixture-msg")
 	edSig := ed25519.Sign(edPriv, edMsg)
 	vectors = append(vectors, vector{Alg: "Ed25519", MessageHex: hexOf(edMsg), PublicHex: hexOf(edPub), SignatureHex: hexOf(edSig), Valid: true})
 	badEd := append([]byte(nil), edSig...)
@@ -131,10 +131,10 @@ func main() {
 	vectors = append(vectors, vector{Alg: "Ed25519", MessageHex: hexOf(edMsg), PublicHex: hexOf(edPub), SignatureHex: hexOf(badEd), Valid: false, Note: "mutated first byte"})
 
 	// ECDSA-P256 deterministic key + nonce
-	ePriv := deterministicECDSAPriv("gauth-ecdsa-fixture-1")
-	eMsg := []byte("gauth-ecdsa-fixture-msg")
+	ePriv := deterministicECDSAPriv("agentauth-ecdsa-fixture-1")
+	eMsg := []byte("agentauth-ecdsa-fixture-msg")
 	digest := sha256.Sum256(eMsg)
-	detRand := newDetReader([]byte("gauth-ecdsa-nonce-seed-1"))
+	detRand := newDetReader([]byte("agentauth-ecdsa-nonce-seed-1"))
 	r, s, err := ecdsa.Sign(detRand, ePriv, digest[:])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ecdsa sign error: %v\n", err)
@@ -162,7 +162,7 @@ func main() {
 		var sk bls.SecretKey
 		sk.SetByCSPRNG()
 		pk := sk.GetPublicKey()
-		bMsg := []byte("gauth-bls-fixture-msg")
+		bMsg := []byte("agentauth-bls-fixture-msg")
 		sig := sk.SignByte(bMsg)
 		vectors = append(vectors, vector{Alg: "BLS12-381", MessageHex: hexOf(bMsg), PublicHex: hexOf(pk.Serialize()), SignatureHex: hexOf(sig.Serialize()), Valid: true, Note: "non-deterministic key (library CSPRNG)"})
 		bad := append([]byte(nil), sig.Serialize()...)

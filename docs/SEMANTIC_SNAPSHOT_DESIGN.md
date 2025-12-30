@@ -153,18 +153,18 @@ type AlertConfig struct {
 ### Environment Variables
 ```bash
 # Rotation
-GAUTH_SNAPSHOT_ROTATION_INTERVAL=24h
-GAUTH_SNAPSHOT_RETENTION=90d
-GAUTH_SNAPSHOT_MAX_COUNT=90
+AGENTAUTH_SNAPSHOT_ROTATION_INTERVAL=24h
+AGENTAUTH_SNAPSHOT_RETENTION=90d
+AGENTAUTH_SNAPSHOT_MAX_COUNT=90
 
 # Anchoring
-GAUTH_SNAPSHOT_ANCHORING_ENABLED=true
-GAUTH_SNAPSHOT_TSA_URL=https://freetsa.org/tsr
+AGENTAUTH_SNAPSHOT_ANCHORING_ENABLED=true
+AGENTAUTH_SNAPSHOT_TSA_URL=https://freetsa.org/tsr
 
 # Alerts
-GAUTH_SNAPSHOT_ALERT_ENABLED=true
-GAUTH_SNAPSHOT_ALERT_THRESHOLD=5000.0
-GAUTH_SNAPSHOT_ALERT_WEBHOOK=https://alerts.example.com/webhook
+AGENTAUTH_SNAPSHOT_ALERT_ENABLED=true
+AGENTAUTH_SNAPSHOT_ALERT_THRESHOLD=5000.0
+AGENTAUTH_SNAPSHOT_ALERT_WEBHOOK=https://alerts.example.com/webhook
 ```
 
 ---
@@ -198,9 +198,9 @@ GAUTH_SNAPSHOT_ALERT_WEBHOOK=https://alerts.example.com/webhook
 ---
 
 ## References
-- [Semantic Analysis Implementation](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/web/handlers/semantics/)
-- [External Anchoring](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/external_anchor.go)
-- [RFC 3161 Client](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/pkg/ledger/rfc3161/client.go)
+- [Semantic Analysis Implementation](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/semantics/)
+- [External Anchoring](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/external_anchor.go)
+- [RFC 3161 Client](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/rfc3161/client.go)
 
 ---
 

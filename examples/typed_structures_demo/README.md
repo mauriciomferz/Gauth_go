@@ -50,12 +50,12 @@ This provides compile-time type checking and better code readability.
 The demo uses helper functions to create typed restrictions:
 
 ```go
-businessHours := gauth.CreateTimeRangeRestriction(
+businessHours := agentauth.CreateTimeRangeRestriction(
     time.Date(2023, 1, 1, 9, 0, 0, 0, time.Local),  // 9 AM
     time.Date(2023, 1, 1, 17, 0, 0, 0, time.Local), // 5 PM
 )
 
-rateLimit := gauth.CreateRateLimitRestriction(100, time.Minute)
+rateLimit := agentauth.CreateRateLimitRestriction(100, time.Minute)
 ```
 
 ### 3. Type-Safe Event Handling

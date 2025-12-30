@@ -445,7 +445,7 @@ ${Object.entries(metrics).slice(0, 10).map(([key, value]) =>
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'gauth-test-report-' + Date.now() + '.txt';
+        a.download = 'agentauth-test-report-' + Date.now() + '.txt';
         a.click();
         URL.revokeObjectURL(url);
         
@@ -698,7 +698,7 @@ document.querySelector('[data-action="generate-compliance-certificate"]').click(
 **Example console output:**
 ```
 🎯 Executing handler for: test-revocation
-Created token: { token: "gauth_abc123...", ttl: 300 }
+Created token: { token: "agentauth_abc123...", ttl: 300 }
 Token revoked successfully
 ✅ Revocation test passed
 ```
@@ -752,13 +752,13 @@ Token revoked successfully
 - **Status:** ✅ RUNNING
 - **PID:** 41023
 - **Port:** 8080
-- **Mode:** Development (GAUTH_DEV_INDEX=1)
+- **Mode:** Development (AGENTAUTH_DEV_INDEX=1)
 - **Memory:** ~18MB
 - **CPU:** <1%
 - **Uptime:** Since 11:23 PM
 
 ### Build Information
-- **Binary:** `/Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/bin/web-server`
+- **Binary:** `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/bin/web-server`
 - **Template:** `web/templates/index.html` (13,617 lines)
 - **Build Time:** ~2 seconds
 - **Build Tool:** Go 1.x

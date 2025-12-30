@@ -91,7 +91,7 @@ Global Load Balancer (CloudFlare/Route53)
 ```bash
 # US-EAST-1 (Primary)
 eksctl create cluster \
-  --name gauth-us-east-1 \
+  --name agentauth-us-east-1 \
   --region us-east-1 \
   --zones us-east-1a,us-east-1b,us-east-1c \
   --nodes 10 \
@@ -101,7 +101,7 @@ eksctl create cluster \
 
 # EU-WEST-1
 eksctl create cluster \
-  --name gauth-eu-west-1 \
+  --name agentauth-eu-west-1 \
   --region eu-west-1 \
   --zones eu-west-1a,eu-west-1b,eu-west-1c \
   --nodes 8 \
@@ -111,7 +111,7 @@ eksctl create cluster \
 
 # AP-SOUTH-1
 eksctl create cluster \
-  --name gauth-ap-south-1 \
+  --name agentauth-ap-south-1 \
   --region ap-south-1 \
   --zones ap-south-1a,ap-south-1b,ap-south-1c \
   --nodes 8 \
@@ -121,7 +121,7 @@ eksctl create cluster \
 
 # US-WEST-2 (DR)
 eksctl create cluster \
-  --name gauth-us-west-2 \
+  --name agentauth-us-west-2 \
   --region us-west-2 \
   --zones us-west-2a,us-west-2b,us-west-2c \
   --nodes 5 \
@@ -134,10 +134,10 @@ eksctl create cluster \
 
 ```bash
 # Add cluster contexts
-aws eks update-kubeconfig --name gauth-us-east-1 --region us-east-1 --alias us-east-1
-aws eks update-kubeconfig --name gauth-eu-west-1 --region eu-west-1 --alias eu-west-1
-aws eks update-kubeconfig --name gauth-ap-south-1 --region ap-south-1 --alias ap-south-1
-aws eks update-kubeconfig --name gauth-us-west-2 --region us-west-2 --alias us-west-2
+aws eks update-kubeconfig --name agentauth-us-east-1 --region us-east-1 --alias us-east-1
+aws eks update-kubeconfig --name agentauth-eu-west-1 --region eu-west-1 --alias eu-west-1
+aws eks update-kubeconfig --name agentauth-ap-south-1 --region ap-south-1 --alias ap-south-1
+aws eks update-kubeconfig --name agentauth-us-west-2 --region us-west-2 --alias us-west-2
 
 # Verify contexts
 kubectx
@@ -156,10 +156,10 @@ done
 ```bash
 # Deploy etcd in each region
 for ctx in us-east-1 eu-west-1 ap-south-1; do
-  kubectl --context=$ctx create namespace gauth
+  kubectl --context=$ctx create namespace agentauth
   
   helm install etcd bitnami/etcd \
-    --namespace gauth \
+    --namespace agentauth \
     --set replicaCount=3 \
     --set auth.rbac.enabled=false \
     --context=$ctx
@@ -172,7 +172,7 @@ done
 # Create secrets
 for ctx in us-east-1 eu-west-1 ap-south-1; do
   kubectl --context=$ctx create secret generic postgresql-secrets \
-    --namespace gauth \
+    --namespace agentauth \
     --from-literal=superuser-password=$(openssl rand -base64 32) \
     --from-literal=replication-password=$(openssl rand -base64 32)
 done
@@ -186,7 +186,7 @@ kubectl --context=ap-south-1 apply -f k8s/multi-region/postgresql-replication.ya
 for ctx in us-east-1 eu-west-1 ap-south-1; do
   kubectl --context=$ctx wait --for=condition=ready pod \
     -l app=postgresql \
-    --namespace=gauth \
+    --namespace=agentauth \
     --timeout=300s
 done
 ```
@@ -196,18 +196,18 @@ done
 ```bash
 # Set up replication from us-east-1 to other regions
 PRIMARY_HOST=$(kubectl --context=us-east-1 get svc postgresql \
-  -n gauth -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+  -n agentauth -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
 # Configure EU replica
-kubectl --context=eu-west-1 exec -n gauth postgresql-0 -- \
+kubectl --context=eu-west-1 exec -n agentauth postgresql-0 -- \
   psql -U postgres -c "SELECT pg_create_physical_replication_slot('eu_west_1_slot');"
 
 # Configure APAC replica
-kubectl --context=ap-south-1 exec -n gauth postgresql-0 -- \
+kubectl --context=ap-south-1 exec -n agentauth postgresql-0 -- \
   psql -U postgres -c "SELECT pg_create_physical_replication_slot('ap_south_1_slot');"
 
 # Verify replication
-kubectl --context=us-east-1 exec -n gauth postgresql-0 -- \
+kubectl --context=us-east-1 exec -n agentauth postgresql-0 -- \
   psql -U postgres -c "SELECT * FROM pg_stat_replication;"
 ```
 
@@ -219,7 +219,7 @@ kubectl --context=us-east-1 exec -n gauth postgresql-0 -- \
 # Create Redis secrets
 for ctx in us-east-1 eu-west-1 ap-south-1; do
   kubectl --context=$ctx create secret generic redis-secrets \
-    --namespace gauth \
+    --namespace agentauth \
     --from-literal=password=$(openssl rand -base64 32)
 done
 
@@ -232,7 +232,7 @@ kubectl --context=ap-south-1 apply -f k8s/multi-region/redis-cluster.yaml
 for ctx in us-east-1 eu-west-1 ap-south-1; do
   kubectl --context=$ctx wait --for=condition=ready pod \
     -l app=redis-cluster \
-    --namespace=gauth \
+    --namespace=agentauth \
     --timeout=300s
 done
 ```
@@ -247,16 +247,16 @@ for ctx in us-east-1 eu-west-1 ap-south-1; do
   # Wait for initialization job
   kubectl --context=$ctx wait --for=condition=complete job \
     redis-cluster-init \
-    --namespace=gauth \
+    --namespace=agentauth \
     --timeout=300s
 done
 
 # Verify cluster health
 for ctx in us-east-1 eu-west-1 ap-south-1; do
   echo "Checking Redis cluster in $ctx..."
-  kubectl --context=$ctx exec -n gauth redis-cluster-0 -- \
+  kubectl --context=$ctx exec -n agentauth redis-cluster-0 -- \
     redis-cli -a $(kubectl --context=$ctx get secret redis-secrets \
-    -n gauth -o jsonpath='{.data.password}' | base64 -d) \
+    -n agentauth -o jsonpath='{.data.password}' | base64 -d) \
     cluster info
 done
 ```
@@ -267,16 +267,16 @@ done
 
 ```bash
 # Build image
-docker build -t gauth:v1.0.0 .
+docker build -t agentauth:v1.0.0 .
 
 # Tag for each region's registry
-docker tag gauth:v1.0.0 123456789012.dkr.ecr.us-east-1.amazonaws.com/gauth:v1.0.0
-docker tag gauth:v1.0.0 123456789012.dkr.ecr.eu-west-1.amazonaws.com/gauth:v1.0.0
-docker tag gauth:v1.0.0 123456789012.dkr.ecr.ap-south-1.amazonaws.com/gauth:v1.0.0
+docker tag agentauth:v1.0.0 123456789012.dkr.ecr.us-east-1.amazonaws.com/agentauth:v1.0.0
+docker tag agentauth:v1.0.0 123456789012.dkr.ecr.eu-west-1.amazonaws.com/agentauth:v1.0.0
+docker tag agentauth:v1.0.0 123456789012.dkr.ecr.ap-south-1.amazonaws.com/agentauth:v1.0.0
 
 # Push to registries
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
-docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/gauth:v1.0.0
+docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/agentauth:v1.0.0
 
 # Repeat for other regions...
 ```
@@ -294,8 +294,8 @@ done
 # Wait for deployments
 for ctx in us-east-1 eu-west-1 ap-south-1; do
   kubectl --context=$ctx wait --for=condition=available deployment \
-    gauth \
-    --namespace=gauth \
+    agentauth \
+    --namespace=agentauth \
     --timeout=300s
 done
 ```
@@ -306,11 +306,11 @@ done
 
 ```bash
 # Get load balancer IPs
-US_EAST_1_IP=$(kubectl --context=us-east-1 get svc gauth -n gauth \
+US_EAST_1_IP=$(kubectl --context=us-east-1 get svc agentauth -n agentauth \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-EU_WEST_1_IP=$(kubectl --context=eu-west-1 get svc gauth -n gauth \
+EU_WEST_1_IP=$(kubectl --context=eu-west-1 get svc agentauth -n agentauth \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-AP_SOUTH_1_IP=$(kubectl --context=ap-south-1 get svc gauth -n gauth \
+AP_SOUTH_1_IP=$(kubectl --context=ap-south-1 get svc agentauth -n agentauth \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
 echo "Regional IPs:"
@@ -328,7 +328,7 @@ aws route53 create-health-check \
   --health-check-config \
     Type=HTTPS,\
     ResourcePath=/api/v1/health,\
-    FullyQualifiedDomainName=gauth.us-east-1.example.com,\
+    FullyQualifiedDomainName=agentauth.us-east-1.example.com,\
     Port=443,\
     RequestInterval=30,\
     FailureThreshold=3
@@ -346,7 +346,7 @@ aws route53 change-resource-record-sets \
     {
       "Action": "CREATE",
       "ResourceRecordSet": {
-        "Name": "gauth.example.com",
+        "Name": "agentauth.example.com",
         "Type": "A",
         "SetIdentifier": "us-east-1",
         "GeoLocation": {
@@ -362,7 +362,7 @@ aws route53 change-resource-record-sets \
     {
       "Action": "CREATE",
       "ResourceRecordSet": {
-        "Name": "gauth.example.com",
+        "Name": "agentauth.example.com",
         "Type": "A",
         "SetIdentifier": "eu-west-1",
         "GeoLocation": {
@@ -378,7 +378,7 @@ aws route53 change-resource-record-sets \
     {
       "Action": "CREATE",
       "ResourceRecordSet": {
-        "Name": "gauth.example.com",
+        "Name": "agentauth.example.com",
         "Type": "A",
         "SetIdentifier": "ap-south-1",
         "GeoLocation": {
@@ -438,9 +438,9 @@ Create `.env` files for each region:
 ```bash
 REGION=us-east-1
 REGION_ROLE=primary
-DB_HOST=postgresql.gauth.svc.cluster.local
+DB_HOST=postgresql.agentauth.svc.cluster.local
 DB_PORT=5432
-REDIS_HOST=redis-cluster.gauth.svc.cluster.local
+REDIS_HOST=redis-cluster.agentauth.svc.cluster.local
 REDIS_PORT=6379
 REPLICA_REGIONS=eu-west-1,ap-south-1
 ```
@@ -449,12 +449,12 @@ REPLICA_REGIONS=eu-west-1,ap-south-1
 
 ```bash
 # Use AWS Secrets Manager or Kubernetes External Secrets
-kubectl create secret generic gauth-secrets \
-  --namespace gauth \
+kubectl create secret generic agentauth-secrets \
+  --namespace agentauth \
   --from-literal=DB_PASSWORD=$(aws secretsmanager get-secret-value \
-    --secret-id gauth/db-password --query SecretString --output text) \
+    --secret-id agentauth/db-password --query SecretString --output text) \
   --from-literal=JWT_SIGNING_KEY=$(aws secretsmanager get-secret-value \
-    --secret-id gauth/jwt-key --query SecretString --output text)
+    --secret-id agentauth/jwt-key --query SecretString --output text)
 ```
 
 ---
@@ -467,7 +467,7 @@ kubectl create secret generic gauth-secrets \
 # Test each region
 for region in us-east-1 eu-west-1 ap-south-1; do
   echo "Testing $region..."
-  curl -f https://gauth.$region.example.com/api/v1/health
+  curl -f https://agentauth.$region.example.com/api/v1/health
 done
 ```
 
@@ -475,27 +475,27 @@ done
 
 ```bash
 # Insert test data in primary
-kubectl --context=us-east-1 exec -n gauth postgresql-0 -- \
-  psql -U postgres -d gauth -c "INSERT INTO test_table VALUES ('test-$(date +%s)');"
+kubectl --context=us-east-1 exec -n agentauth postgresql-0 -- \
+  psql -U postgres -d agentauth -c "INSERT INTO test_table VALUES ('test-$(date +%s)');"
 
 # Verify replication (wait 5 seconds)
 sleep 5
 
-kubectl --context=eu-west-1 exec -n gauth postgresql-0 -- \
-  psql -U postgres -d gauth -c "SELECT * FROM test_table ORDER BY created_at DESC LIMIT 1;"
+kubectl --context=eu-west-1 exec -n agentauth postgresql-0 -- \
+  psql -U postgres -d agentauth -c "SELECT * FROM test_table ORDER BY created_at DESC LIMIT 1;"
 ```
 
 ### 3. Redis Replication Test
 
 ```bash
 # Write to primary region
-kubectl --context=us-east-1 exec -n gauth redis-cluster-0 -- \
+kubectl --context=us-east-1 exec -n agentauth redis-cluster-0 -- \
   redis-cli -a $REDIS_PASSWORD SET test:key "test-value-$(date +%s)"
 
 # Read from replica region (wait 10 seconds)
 sleep 10
 
-kubectl --context=eu-west-1 exec -n gauth redis-cluster-0 -- \
+kubectl --context=eu-west-1 exec -n agentauth redis-cluster-0 -- \
   redis-cli -a $REDIS_PASSWORD GET test:key
 ```
 
@@ -509,7 +509,7 @@ kubectl --context=eu-west-1 exec -n gauth redis-cluster-0 -- \
 ./scripts/multi-region-failover.sh failover us-east-1
 
 # Verify new primary
-curl https://gauth.example.com/api/v1/health
+curl https://agentauth.example.com/api/v1/health
 
 # Rollback
 ./scripts/multi-region-failover.sh rollback us-east-1
@@ -546,7 +546,7 @@ k6 run --vus 100 --duration 5m tests/load/multi-region-test.js
 
 3. Verify new primary:
    ```bash
-   curl https://gauth.example.com/api/v1/health
+   curl https://agentauth.example.com/api/v1/health
    ```
 
 4. Notify team via Slack/PagerDuty
@@ -624,8 +624,8 @@ k6 run --vus 100 --duration 5m tests/load/multi-region-test.js
 **Solutions**:
 ```bash
 # Reset cluster
-redis-cli --cluster fix redis-cluster-0.redis-cluster.gauth.svc:6379
-redis-cli --cluster check redis-cluster-0.redis-cluster.gauth.svc:6379
+redis-cli --cluster fix redis-cluster-0.redis-cluster.agentauth.svc:6379
+redis-cli --cluster check redis-cluster-0.redis-cluster.agentauth.svc:6379
 ```
 
 ---
@@ -634,7 +634,7 @@ redis-cli --cluster check redis-cluster-0.redis-cluster.gauth.svc:6379
 
 ### Key Metrics
 
-1. **Region Health**: `up{job="gauth"}`
+1. **Region Health**: `up{job="agentauth"}`
 2. **Replication Lag**: `pg_replication_lag_bytes`
 3. **Request Latency**: `histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))`
 4. **Error Rate**: `rate(http_requests_total{status=~"5.."}[5m])`

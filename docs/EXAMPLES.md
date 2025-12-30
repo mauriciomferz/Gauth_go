@@ -6,29 +6,29 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# AgentAuth RFC-0115 Examples Documentation
+# AgentAuth AAP-002 Examples Documentation
 
 > Last Updated: 2025-10-17
 > Status: Active
 
-**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 RFC-0115 COMPLETE** | **🏢 GIMEL FOUNDATION**
+**🏗️ DEVELOPMENT PROTOTYPE** | **🏆 AAP-002 COMPLETE** | **🏢 AGENTAUTH COMMUNITY**
 
 **Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+**AgentAuth Community gGmbH i.G.**, www.agentauth.io
 Operated by AgentAuth Technologies GmbH
 MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.agentauth.io
 
-This document describes the working examples demonstrating RFC-0115 PoA-Definition implementation and related functionality.
+This document describes the working examples demonstrating AAP-002 PoA-Definition implementation and related functionality.
 
 ## ✅ **WORKING EXAMPLES**
 
-### **RFC-0115 PoA-Definition Implementation** ⭐
+### **AAP-002 PoA-Definition Implementation** ⭐
 - **Location**: `examples/rfc_0115_poa_definition/`
 - **Status**: ✅ **FULLY FUNCTIONAL**
-- **Description**: Complete demonstration of AAP-RFC-0115 PoA-Definition structure
+- **Description**: Complete demonstration of AAP-002 PoA-Definition structure
 - **Features**: Full type safety, JSON serialization, AgentAuth Community compliance
 
 ## Example Structure

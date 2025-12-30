@@ -41,7 +41,7 @@
 - Per-user scoped quota management
 - Exceed audit hash chain with cryptographic verification
 - Metrics instrumentation (model_limit_exceeded_total, model_output_limit_exceeded_total)
-- Attestation signature support (GAUTH_MODEL_LIMIT_ATTEST_SIGN)
+- Attestation signature support (AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN)
 - Dual-domain notarization for external anchoring
 
 **Test Coverage:**
@@ -62,7 +62,7 @@
 **Status Change**: Missing → **Implemented** ✅
 
 **Completed Features:**
-- Environment-based configuration (GAUTH_MAX_DELEGATION_DEPTH)
+- Environment-based configuration (AGENTAUTH_MAX_DELEGATION_DEPTH)
 - Runtime depth enforcement with error code ErrDelegationDepthExceeded
 - Metrics tracking (max observed depth gauge)
 - Discovery endpoint exposure of depth configuration
@@ -194,8 +194,8 @@
   - Multiple locations: Removed hardcoded attributes
 
 **Deployment:**
-- Successfully pushed to mauriciomferz/Gauth_go (main)
-- Successfully pushed to AgentAuth-Foundation/AgentAuth_Platform-AgentAuth_Server_Prototype (web-interactive-forms-fix)
+- Successfully pushed to mauriciomferz/AgentAuth (main)
+- Successfully pushed to agentauth/AgentAuth_Platform-AgentAuth_Server_Prototype (web-interactive-forms-fix)
 
 ---
 

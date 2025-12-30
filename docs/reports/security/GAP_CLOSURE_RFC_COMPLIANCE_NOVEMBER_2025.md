@@ -1,4 +1,4 @@
-# RFC-0111/0115 GAP CLOSURE REPORT
+# AAP-001/0115 GAP CLOSURE REPORT
 **Date**: November 2025  
 **Auditor**: AI Agent  
 **Status**: ✅ **ALL CRITICAL GAPS CLOSED**
@@ -17,43 +17,43 @@
 | **PoA-Definition Compliance** | 85% 🟡 | **100%** ✅ | +15% |
 | **Production Integration** | 40% 🔴 | **95%** ✅ | +55% |
 
-**KEY ACHIEVEMENT**: System is now **RFC-0111 compliant by default** - all production APIs generate Extended Tokens with full PoA credentials.
+**KEY ACHIEVEMENT**: System is now **AAP-001 compliant by default** - all production APIs generate Extended Tokens with full PoA credentials.
 
 ---
 
 ## GAP ANALYSIS & REMEDIATION
 
-### 🔴 **GAP #1: Main RequestToken() API Not RFC-0111 Compliant**
+### 🔴 **GAP #1: Main RequestToken() API Not AAP-001 Compliant**
 
 **Original Issue** (Priority: BLOCKER):
 ```
-The primary token request API (RequestToken()) generates basic OAuth 2.0 JWTs 
-instead of RFC-0111 Extended Tokens. This means:
+The primary token request API (RequestToken() generates basic OAuth 2.0 JWTs 
+instead of AAP-001 Extended Tokens. This means:
 - No PoA credentials in tokens
 - No authorization chain validation
 - No P*P architecture enforcement
-- Production deployments NOT RFC-0111 compliant
+- Production deployments NOT AAP-001 compliant
 ```
 
 **Root Cause**:
 - `RequestToken()` implementation only called OAuth token generation
-- RFC-0111 flow (`RequestTokenRFC()`) existed but was never invoked by main API
+- AAP-001 flow (`RequestTokenRFC()`) existed but was never invoked by main API
 - Backward compatibility concerns prevented direct refactoring
 
 **✅ REMEDIATION IMPLEMENTED**:
 
-**File Modified**: `pkg/gauth/gauth.go`
+**File Modified**: `pkg/agentauth/agentauth.go`
 
 **Changes**:
 1. **Refactored RequestToken()** (lines 342-376):
    ```go
    func (s *Service) RequestToken(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
        // Check for legacy mode environment variable
-       if os.Getenv("GAUTH_LEGACY_OAUTH_MODE") == "1" {
+       if os.Getenv("AGENTAUTH_LEGACY_OAUTH_MODE") == "1" {
            return s.RequestTokenLegacy(ctx, req)
        }
        
-       // If RFC orchestrator available, use RFC-0111 flow by default
+       // If RFC orchestrator available, use AAP-001 flow by default
        if s.protocolOrchestrator != nil {
            // Convert TokenRequest -> RFCCompliantAuthorizationRequest
            rfcReq := &RFCCompliantAuthorizationRequest{
@@ -62,7 +62,7 @@ instead of RFC-0111 Extended Tokens. This means:
                Context:     convertContextToMap(req.Context),
            }
            
-           // Call RFC-0111 flow
+           // Call AAP-001 flow
            rfcResp, err := s.RequestTokenRFC(ctx, rfcReq)
            if err != nil {
                return nil, err
@@ -79,7 +79,7 @@ instead of RFC-0111 Extended Tokens. This means:
 
 2. **Created RequestTokenLegacy()** (lines 381-440):
    - Original OAuth-only implementation preserved
-   - Used when `GAUTH_LEGACY_OAUTH_MODE=1` environment variable set
+   - Used when `AGENTAUTH_LEGACY_OAUTH_MODE=1` environment variable set
    - Maintains backward compatibility for legacy systems
 
 3. **Added conversion helpers** (lines 1013-1057):
@@ -90,9 +90,9 @@ instead of RFC-0111 Extended Tokens. This means:
    ```
 
 **Impact**:
-- ✅ **100% of production token requests now use RFC-0111 flow by default**
+- ✅ **100% of production token requests now use AAP-001 flow by default**
 - ✅ All tokens include PoA credentials, authorization chains, and P*P validation
-- ✅ Backward compatibility maintained via `GAUTH_LEGACY_OAUTH_MODE` flag
+- ✅ Backward compatibility maintained via `AGENTAUTH_LEGACY_OAUTH_MODE` flag
 - ✅ Zero breaking changes to existing API contracts
 - ✅ **Request Flow compliance: 70% → 100%**
 
@@ -113,7 +113,7 @@ Power Decision Point (PDP) interface exists but is never connected to
 Power Enforcement Point (PEP). This means:
 - Authorization decisions not enforced at runtime
 - PoA credentials present but not validated during request enforcement
-- P*P architecture (RFC-0111 Section 3.1) non-functional
+- P*P architecture (AAP-001 Section 3.1) non-functional
 ```
 
 **Root Cause**:
@@ -123,7 +123,7 @@ Power Enforcement Point (PEP). This means:
 
 **✅ REMEDIATION IMPLEMENTED**:
 
-**File Created**: `pkg/gauth/pdp_adapter.go` (181 lines)
+**File Created**: `pkg/agentauth/pdp_adapter.go` (181 lines)
 
 **Implementation**:
 1. **SimplePDP struct**:
@@ -157,7 +157,7 @@ Power Enforcement Point (PEP). This means:
    type simpleTokenValidator struct{} // Adapter for ExtendedTokenService
    ```
 
-**File Modified**: `pkg/gauth/gauth.go`
+**File Modified**: `pkg/agentauth/agentauth.go`
 
 **Changes to WithRFCCompliance()** (lines 247-262):
 ```go
@@ -204,11 +204,11 @@ $ go build -o bin/web-server ./cmd/web-server
 
 ---
 
-### 🟡 **GAP #3: Missing PoA Action Types (RFC-0115 B.4)**
+### 🟡 **GAP #3: Missing PoA Action Types (AAP-002 B.4)**
 
 **Original Issue** (Priority: HIGH):
 ```
-RFC-0115 Section B.4.3 specifies additional physical action types not 
+AAP-002 Section B.4.3 specifies additional physical action types not 
 implemented in the codebase:
 - Production/Recycling
 - Storage
@@ -219,7 +219,7 @@ implemented in the codebase:
 
 **Root Cause**:
 - Initial implementation focused on core action categories
-- RFC-0115 B.4.3 physical actions partially implemented
+- AAP-002 B.4.3 physical actions partially implemented
 - Specific action types from examples not included
 
 **✅ REMEDIATION IMPLEMENTED**:
@@ -230,23 +230,23 @@ implemented in the codebase:
 1. **Added missing ActionTypePhysical constants** (lines ~127-147):
    ```go
    // ActionPhysicalStorage - Storage and warehousing
-   // RFC-0115 B.4.3: Required for physical asset management
+   // AAP-002 B.4.3: Required for physical asset management
    ActionPhysicalStorage ActionTypePhysical = "Storage"
    
    // ActionPhysicalPackaging - Packaging and wrapping
-   // RFC-0115 B.4.3: Required for product preparation and logistics
+   // AAP-002 B.4.3: Required for product preparation and logistics
    ActionPhysicalPackaging ActionTypePhysical = "Packaging"
    
    // ActionPhysicalCleaning - Cleaning and sanitation
-   // RFC-0115 B.4.3: Required for maintenance and facility management
+   // AAP-002 B.4.3: Required for maintenance and facility management
    ActionPhysicalCleaning ActionTypePhysical = "Cleaning"
    
    // ActionPhysicalRecycling - Recycling and waste management
-   // RFC-0115 B.4.3: Required for environmental compliance
+   // AAP-002 B.4.3: Required for environmental compliance
    ActionPhysicalRecycling ActionTypePhysical = "Recycling"
    
    // ActionPhysicalCustomization - Customization and modification
-   // RFC-0115 B.4.3: Required for bespoke manufacturing
+   // AAP-002 B.4.3: Required for bespoke manufacturing
    ActionPhysicalCustomization ActionTypePhysical = "Customization"
    ```
 
@@ -268,7 +268,7 @@ implemented in the codebase:
    ```
 
 **Impact**:
-- ✅ **100% RFC-0115 B.4.3 physical action coverage**
+- ✅ **100% AAP-002 B.4.3 physical action coverage**
 - ✅ All action types from RFC specification now supported
 - ✅ PoA credentials can authorize complete range of physical actions
 - ✅ **PoA-Definition compliance: 85% → 100%**
@@ -294,11 +294,11 @@ $ go build -o bin/web-server ./cmd/web-server
        │
        ├─> RequestToken() ──> OAuth JWT (basic)
        │                       ❌ No PoA
-       │                       ❌ No RFC-0111
+       │                       ❌ No AAP-001
        │
        └─> RequestTokenRFC() ──> Extended Token
                                   ✅ PoA included
-                                  ✅ RFC-0111 compliant
+                                  ✅ AAP-001 compliant
                                   ⚠️ Never called
 ```
 
@@ -349,19 +349,19 @@ $ go build -o bin/web-server ./cmd/web-server
 
 ### ✅ **What Works Now**
 
-1. **RFC-0111 Flow by Default**:
-   - All `RequestToken()` calls use RFC-0111 flow
+1. **AAP-001 Flow by Default**:
+   - All `RequestToken()` calls use AAP-001 flow
    - Extended Tokens generated with full PoA credentials
    - Authorization chains validated
    - PDP/PEP enforcement active
 
 2. **Backward Compatibility**:
-   - Legacy systems can set `GAUTH_LEGACY_OAUTH_MODE=1`
+   - Legacy systems can set `AGENTAUTH_LEGACY_OAUTH_MODE=1`
    - Original OAuth flow preserved in `RequestTokenLegacy()`
    - No breaking changes to API contracts
 
 3. **Complete Action Type Coverage**:
-   - All RFC-0115 B.4 action types implemented
+   - All AAP-002 B.4 action types implemented
    - Physical actions: 16 types (was 11)
    - Non-physical actions: 20 types (unchanged)
    - Transaction types: 10 types (unchanged)
@@ -397,7 +397,7 @@ $ go build -o bin/web-server ./cmd/web-server
 
 ## COMPLIANCE SCORES - BEFORE/AFTER
 
-### RFC-0111 Section Compliance
+### AAP-001 Section Compliance
 
 | Section | Before | After | Status |
 |---------|--------|-------|--------|
@@ -407,7 +407,7 @@ $ go build -o bin/web-server ./cmd/web-server
 | **3.4 Request Flow** | 70% | 100% | ✅ |
 | **3.5 Verification** | 95% | 100% | ✅ |
 
-### RFC-0115 Section Compliance
+### AAP-002 Section Compliance
 
 | Section | Before | After | Status |
 |---------|--------|-------|--------|
@@ -425,7 +425,7 @@ $ go build -o bin/web-server ./cmd/web-server
 
 ### For Existing Deployments
 
-#### Option 1: Enable RFC-0111 by Default (Recommended)
+#### Option 1: Enable AAP-001 by Default (Recommended)
 ```bash
 # No changes needed - RFC flow is now default
 # Extended Tokens with PoA credentials generated automatically
@@ -434,7 +434,7 @@ $ go build -o bin/web-server ./cmd/web-server
 #### Option 2: Maintain Legacy OAuth Mode
 ```bash
 # Set environment variable to use legacy OAuth flow
-export GAUTH_LEGACY_OAUTH_MODE=1
+export AGENTAUTH_LEGACY_OAUTH_MODE=1
 
 # Start server
 ./bin/web-server
@@ -443,11 +443,11 @@ export GAUTH_LEGACY_OAUTH_MODE=1
 ### For New Deployments
 
 ```bash
-# RFC-0111 enabled by default
+# AAP-001 enabled by default
 # Configure RFC compliance components in Service initialization
 
-service := gauth.NewService(config,
-    gauth.WithRFCCompliance(
+service := agentauth.NewService(config,
+    agentauth.WithRFCCompliance(
         subscriptionStore,
         extendedTokenService,
         complianceValidator,
@@ -463,7 +463,7 @@ service := gauth.NewService(config,
 # PDP and PEP automatically wired and active
 ```
 
-### Testing RFC-0111 Flow
+### Testing AAP-001 Flow
 
 ```bash
 # Request token via main API
@@ -499,7 +499,7 @@ curl -X POST http://localhost:8080/api/v1/token \
 ### Security Risks: **LOW** ✅
 
 - All changes maintain existing security posture
-- RFC-0111 flow adds **additional** validation layers
+- AAP-001 flow adds **additional** validation layers
 - No sensitive data exposure introduced
 - PDP/PEP enforcement strengthens authorization
 
@@ -540,9 +540,9 @@ curl -X POST http://localhost:8080/api/v1/token \
 
 **All 3 critical gaps identified in QA_MANAGER_JWE_PHASE3_RFC_COMPLIANCE_AUDIT.md have been successfully closed**:
 
-1. ✅ **Gap #1**: Main RequestToken() API now RFC-0111 compliant by default
+1. ✅ **Gap #1**: Main RequestToken() API now AAP-001 compliant by default
 2. ✅ **Gap #2**: PDP wired to PEP - P*P architecture fully functional
-3. ✅ **Gap #3**: All RFC-0115 B.4 action types implemented
+3. ✅ **Gap #3**: All AAP-002 B.4 action types implemented
 
 ### Impact
 
@@ -554,7 +554,7 @@ curl -X POST http://localhost:8080/api/v1/token \
 
 **✅ APPROVED FOR PRODUCTION DEPLOYMENT**
 
-The system is now RFC-0111/0115 compliant with:
+The system is now AAP-001/0115 compliant with:
 - Extended Tokens generated by default
 - Full PoA credential support
 - Authorization chain validation

@@ -22,7 +22,7 @@ The initial assessment (v2.0) focused on tactical code-level fixes while **faili
 
 **Problem Statement:**
 
-The framework is built on **AAP-RFC-0111 and AAP-RFC-0115**, which are:
+The framework is built on **AAP-001 and AAP-002**, which are:
 - ❌ NOT IETF-approved standards
 - ❌ NOT peer-reviewed by the broader security community
 - ❌ NOT battle-tested in production at scale
@@ -39,7 +39,7 @@ The framework is built on **AAP-RFC-0111 and AAP-RFC-0115**, which are:
 
 **Comparison to Industry Standards:**
 
-| Feature | AAP-RFC-0111 | OAuth 2.0 (RFC 6749) | OIDC (RFC ????) |
+| Feature | AAP-001 | OAuth 2.0 (RFC 6749) | OIDC (RFC ????) |
 |---------|---------------|---------------------|------------------|
 | Standards Body | None (Proprietary) | IETF | OpenID Foundation |
 | Peer Review | Unknown | Extensive | Extensive |
@@ -62,7 +62,7 @@ The framework is built on **AAP-RFC-0111 and AAP-RFC-0115**, which are:
 
 **Technical Flaw: Exact String Matching Logic**
 
-**Current Implementation:** `pkg/gauth_rfc_001/delegation_chain_validator.go`
+**Current Implementation:** `pkg/agentauth_rfc_001/delegation_chain_validator.go`
 
 ```go
 func validateInheritedScope(parentScopes, childScopes []string) error {
@@ -225,7 +225,7 @@ This handles:
 The documentation lists **BoltDB as a valid option** for single-instance deployments:
 
 ```go
-// pkg/gauth/replay_store_bolt.go
+// pkg/agentauth/replay_store_bolt.go
 // BoltReplayStore implements durable replay detection using BoltDB.
 // Addresses gap sec6.item1 (P1): Durable replay persistence with eviction controls.
 ```
@@ -268,7 +268,7 @@ In modern cloud-native environments:
 
 **Code Review: Insufficient Safeguards**
 
-**File:** `pkg/gauth/replay_store_bolt.go` (Lines 27-56)
+**File:** `pkg/agentauth/replay_store_bolt.go` (Lines 27-56)
 
 ```go
 func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error) {
@@ -302,19 +302,19 @@ func NewBoltReplayStore(path string, ttl time.Duration) (*BoltReplayStore, error
 
 ```bash
 # Single-instance deployment (BoltDB)
-export GAUTH_REPLAY_STORE_TYPE=bolt
-export GAUTH_REPLAY_STORE_PATH=/var/lib/gauth/replay.db
-export GAUTH_REPLAY_TTL=86400  # 24 hours
+export AGENTAUTH_REPLAY_STORE_TYPE=bolt
+export AGENTAUTH_REPLAY_STORE_PATH=/var/lib/agentauth/replay.db
+export AGENTAUTH_REPLAY_TTL=86400  # 24 hours
 
 # Multi-instance deployment (Redis)
-export GAUTH_REPLAY_STORE_TYPE=redis
-export GAUTH_REDIS_ADDR=redis-cluster:6379
+export AGENTAUTH_REPLAY_STORE_TYPE=redis
+export AGENTAUTH_REDIS_ADDR=redis-cluster:6379
 ```
 
 **Problem:** The documentation presents BoltDB and Redis as **equally valid options** for different deployment types. This is **dangerously misleading**:
 
 - **Single-instance** does NOT mean "single container" - even single-instance apps restart
-- Path `/var/lib/gauth/` is **not persistent by default** in containers
+- Path `/var/lib/agentauth/` is **not persistent by default** in containers
 - No warning that BoltDB requires PVC in Kubernetes
 
 **Correct Guidance Should Be:**
@@ -345,25 +345,25 @@ export GAUTH_REDIS_ADDR=redis-cluster:6379
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-server
+  name: agentauth-server
 spec:
   replicas: 1
   template:
     spec:
       containers:
-      - name: gauth
-        image: gauth:latest
+      - name: agentauth
+        image: agentauth:latest
         env:
-        - name: GAUTH_REPLAY_STORE_TYPE
+        - name: AGENTAUTH_REPLAY_STORE_TYPE
           value: "bolt"
-        - name: GAUTH_REPLAY_STORE_PATH
+        - name: AGENTAUTH_REPLAY_STORE_PATH
           value: "/tmp/replay.db"  # ⚠️ EPHEMERAL!
 ```
 
 **Attack Steps:**
 1. Capture valid PoA token
-2. Trigger pod restart: `kubectl delete pod gauth-server-xxx`
-3. Wait for new pod: `kubectl wait --for=condition=ready pod -l app=gauth`
+2. Trigger pod restart: `kubectl delete pod agentauth-server-xxx`
+3. Wait for new pod: `kubectl wait --for=condition=ready pod -l app=agentauth`
 4. Replay captured token → **Accepted** (fresh BoltDB database)
 
 **Proof of Concept:**
@@ -451,17 +451,17 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 3. **Add Startup Validation:**
    ```go
    func ValidateReplayStoreConfig() error {
-       storeType := os.Getenv("GAUTH_REPLAY_STORE_TYPE")
+       storeType := os.Getenv("AGENTAUTH_REPLAY_STORE_TYPE")
        
        if storeType == "bolt" {
-           path := os.Getenv("GAUTH_REPLAY_STORE_PATH")
+           path := os.Getenv("AGENTAUTH_REPLAY_STORE_PATH")
            
            // Check if running in container
            if _, err := os.Stat("/.dockerenv"); err == nil {
                return fmt.Errorf(
                    "CRITICAL: BoltDB replay store detected in containerized environment. " +
                    "This configuration is UNSAFE. Use Redis instead. " +
-                   "Set GAUTH_REPLAY_STORE_TYPE=redis")
+                   "Set AGENTAUTH_REPLAY_STORE_TYPE=redis")
            }
            
            // Check if running in Kubernetes
@@ -469,7 +469,7 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
                return fmt.Errorf(
                    "CRITICAL: BoltDB replay store detected in Kubernetes. " +
                    "This configuration is UNSAFE unless using PersistentVolumeClaim. " +
-                   "Use Redis instead. Set GAUTH_REPLAY_STORE_TYPE=redis")
+                   "Use Redis instead. Set AGENTAUTH_REPLAY_STORE_TYPE=redis")
            }
        }
        
@@ -480,7 +480,7 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 **Strategic Actions (v4.0 Release):**
 
 1. **Remove BoltDB Support Entirely:**
-   - Delete `pkg/gauth/replay_store_bolt.go`
+   - Delete `pkg/agentauth/replay_store_bolt.go`
    - Update ReplayStore interface to require distributed backend
    - Provide migration scripts for existing BoltDB users
 
@@ -491,7 +491,7 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
        if config.ReplayStore == nil {
            return nil, fmt.Errorf(
                "CRITICAL: No replay store configured. " +
-               "Set GAUTH_REDIS_ADDR to enable replay protection. " +
+               "Set AGENTAUTH_REDIS_ADDR to enable replay protection. " +
                "Refusing to start without replay protection.")
        }
        // ... rest of initialization
@@ -513,8 +513,8 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 | OAuth 2.0 (RFC 6749) | Billions of users | Extensive | LOW |
 | OIDC | Billions of users | Extensive | LOW |
 | SAML 2.0 | Millions of enterprises | Extensive | LOW |
-| AAP-RFC-0111 | **This project only** | **None** | **HIGH** |
-| AAP-RFC-0115 | **This project only** | **None** | **HIGH** |
+| AAP-001 | **This project only** | **None** | **HIGH** |
+| AAP-002 | **This project only** | **None** | **HIGH** |
 
 **Consequences:**
 
@@ -539,7 +539,7 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 
 **Recommendation:**
 
-> **STRATEGIC PRIORITY 1:** Conduct a formal analysis comparing AAP-RFC-0111/0115 to OAuth 2.0 + proven delegation extensions. Prepare a migration path to standards-based authentication.
+> **STRATEGIC PRIORITY 1:** Conduct a formal analysis comparing AAP-001/0115 to OAuth 2.0 + proven delegation extensions. Prepare a migration path to standards-based authentication.
 
 ---
 
@@ -563,13 +563,13 @@ func TestBoltReplayStore_RestartVulnerability(t *testing.T) {
 **1. Replay Protection:**
 ```bash
 # ✅ REQUIRED: Redis (only production-safe option)
-export GAUTH_REPLAY_STORE_TYPE=redis
-export GAUTH_REDIS_ADDR=redis-cluster:6379
-export GAUTH_REDIS_PASSWORD=<secret>
-export GAUTH_REPLAY_FAIL_CLOSED=1
+export AGENTAUTH_REPLAY_STORE_TYPE=redis
+export AGENTAUTH_REDIS_ADDR=redis-cluster:6379
+export AGENTAUTH_REDIS_PASSWORD=<secret>
+export AGENTAUTH_REPLAY_FAIL_CLOSED=1
 
 # ❌ FORBIDDEN: BoltDB (unsafe for containers)
-# export GAUTH_REPLAY_STORE_TYPE=bolt  # DO NOT USE
+# export AGENTAUTH_REPLAY_STORE_TYPE=bolt  # DO NOT USE
 ```
 
 **2. Scope Validation:**
@@ -698,7 +698,7 @@ For production systems, use OAuth 2.0 + OIDC with proven delegation extensions.
 
 While the development team has demonstrated **tactical competence** in patching specific vulnerabilities (DoS mitigation, basic replay protection), the framework suffers from **strategic architectural risks** that cannot be resolved through incremental code fixes:
 
-1. **Non-Standard Protocol:** AAP-RFC-0111/0115 lack industry vetting
+1. **Non-Standard Protocol:** AAP-001/0115 lack industry vetting
 2. **Brittle Authorization:** String matching insufficient for modern permissions
 3. **Deployment Anti-Pattern:** BoltDB option encourages unsafe configurations
 
@@ -746,10 +746,10 @@ The team should be commended for **thorough remediation of tactical vulnerabilit
 
 ### Appendix B: Container Restart Test
 
-**File:** `pkg/gauth/replay_store_bolt_vulnerability_test.go`
+**File:** `pkg/agentauth/replay_store_bolt_vulnerability_test.go`
 
 ```go
-package gauth
+package agentauth
 
 import (
     "os"
@@ -867,9 +867,9 @@ func TestBoltReplayStore_KubernetesScenario(t *testing.T) {
 ### Appendix C: Wildcard Matching Implementation Example
 
 ```go
-// pkg/gauth_rfc_001/scope_matcher.go
+// pkg/agentauth_rfc_001/scope_matcher.go
 
-package gauth_rfc_001
+package agentauth_rfc_001
 
 import (
     "strings"

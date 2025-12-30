@@ -30,7 +30,7 @@ class AgentAuthAPIClient {
 
             let data;
             const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
+            if (contentType && contentType.includes('application/json') {
                 data = await response.json();
             } else {
                 data = await response.text();
@@ -380,7 +380,7 @@ class AgentAuthAPIClient {
             return headers.map(header => {
                 const value = row[header];
                 // Escape quotes and wrap in quotes if contains comma or quote
-                if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+                if (typeof value === 'string' && (value.includes(',') || value.includes('"')) {
                     return `"${value.replace(/"/g, '""')}"`;
                 }
                 return value;

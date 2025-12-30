@@ -18,7 +18,7 @@
 ### Commits Delivered
 
 - `f59f387d`: pkg/authz + ai_capability_demo fixes
-- `e16b1081`: pkg/rfc0111 date comparison fix
+- `e16b1081`: pkg/aap001 date comparison fix
 - `a755ce3d`: web modelLimits mutex protection
 - `c594b2fe`: Blue-green validation script
 - `a3c262b8`: Week 4 Day 4 completion report
@@ -48,13 +48,13 @@
 #### 1. Kubernetes Cluster Setup
 - [ ] Provision or access Kubernetes staging cluster
 - [ ] Configure kubectl with cluster credentials
-- [ ] Create `gauth-staging` namespace
+- [ ] Create `agentauth-staging` namespace
 - [ ] Verify cluster connectivity and permissions
 
 #### 2. Deploy Blue Environment
 - [ ] Apply blue deployment manifest
   ```bash
-  kubectl apply -f deployments/k8s/staging/bluegreen/gauth-deployment-blue.yaml
+  kubectl apply -f deployments/k8s/staging/bluegreen/agentauth-deployment-blue.yaml
   ```
 - [ ] Verify blue pods are running and healthy
 - [ ] Check readiness and liveness probes
@@ -63,7 +63,7 @@
 #### 3. Deploy Green Environment
 - [ ] Apply green deployment manifest
   ```bash
-  kubectl apply -f deployments/k8s/staging/bluegreen/gauth-deployment-green.yaml
+  kubectl apply -f deployments/k8s/staging/bluegreen/agentauth-deployment-green.yaml
   ```
 - [ ] Verify green pods are running and healthy
 - [ ] Ensure both environments coexist independently
@@ -71,11 +71,11 @@
 #### 4. Configure Services and Ingress
 - [ ] Apply services manifest
   ```bash
-  kubectl apply -f deployments/k8s/staging/bluegreen/gauth-services.yaml
+  kubectl apply -f deployments/k8s/staging/bluegreen/agentauth-services.yaml
   ```
 - [ ] Apply ingress manifest
   ```bash
-  kubectl apply -f deployments/k8s/staging/bluegreen/gauth-ingress.yaml
+  kubectl apply -f deployments/k8s/staging/bluegreen/agentauth-ingress.yaml
   ```
 - [ ] Verify ingress routes to blue service initially
 
@@ -135,17 +135,17 @@
 
 ### Configuration Files
 
-- [x] Blue deployment manifest (gauth-deployment-blue.yaml)
-- [x] Green deployment manifest (gauth-deployment-green.yaml)
-- [x] Services manifest (gauth-services.yaml)
-- [x] Ingress manifest (gauth-ingress.yaml)
+- [x] Blue deployment manifest (agentauth-deployment-blue.yaml)
+- [x] Green deployment manifest (agentauth-deployment-green.yaml)
+- [x] Services manifest (agentauth-services.yaml)
+- [x] Ingress manifest (agentauth-ingress.yaml)
 - [x] Traffic switch script (switch-traffic.sh)
 - [x] Validation script (validate-bluegreen.sh)
 
 ### Container Images
 
 - [ ] Docker image built and pushed to registry
-- [ ] Image tagged appropriately (e.g., `gauth:v1.0.0`)
+- [ ] Image tagged appropriately (e.g., `agentauth:v1.0.0`)
 - [ ] Image pull secrets configured (if private registry)
 
 ### Dependencies

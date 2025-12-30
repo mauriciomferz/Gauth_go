@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth/mocks"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/mocks"
 )
 
 func main() {
@@ -25,25 +25,25 @@ func main() {
 
 	// 2. Create storage
 	fmt.Println("2. Creating subscription storage...")
-	subscriptionStore := gauth.NewMemorySubscriptionStore()
+	subscriptionStore := agentauth.NewMemorySubscriptionStore()
 	fmt.Println("   ✓ In-memory storage initialized")
 	fmt.Println()
 
 	// 3. Create validators (with mock dependencies)
 	fmt.Println("3. Creating validators...")
 	// Note: Validators need their own dependencies - creating simple mocks
-	authChainValidator := gauth.NewAuthorizationChainValidator(
+	authChainValidator := agentauth.NewAuthorizationChainValidator(
 		commercialRegClient,
 		nil, // TrustServiceProvider (not needed for basic demo)
 		nil, // RevocationChecker (not needed for basic demo)
 	)
-	formalReqValidator := gauth.NewFormalRequirementsValidator(
+	formalReqValidator := agentauth.NewFormalRequirementsValidator(
 		nil,   // NotarialCertificateVerifier
 		nil,   // IdentityDocumentVerifier
 		nil,   // DigitalSignatureVerifier
 		false, // strict mode off for demo
 	)
-	complianceValidator := gauth.NewComplianceValidator(
+	complianceValidator := agentauth.NewComplianceValidator(
 		authChainValidator,
 		pipClient,
 		nil, // PDPClient (not needed for basic demo)
@@ -53,7 +53,7 @@ func main() {
 
 	// 4. Create subscription manager
 	fmt.Println("4. Creating subscription flow manager...")
-	subscriptionManager := gauth.NewSubscriptionFlowManager(
+	subscriptionManager := agentauth.NewSubscriptionFlowManager(
 		pvpClient,
 		pipClient,
 		commercialRegClient,
@@ -66,7 +66,7 @@ func main() {
 
 	// 5. Create compliance tracker
 	fmt.Println("5. Creating compliance tracker...")
-	complianceTracker := gauth.NewMemoryComplianceTracker(complianceValidator)
+	complianceTracker := agentauth.NewMemoryComplianceTracker(complianceValidator)
 	fmt.Println("   ✓ Compliance tracker initialized")
 	fmt.Println()
 
@@ -82,7 +82,7 @@ func main() {
 
 	// 7. Test identity verification with mock PVP
 	fmt.Println("7. Testing identity verification with mock PVP...")
-	identityProof, err := pvpClient.VerifyIdentityProof(ctx, &gauth.IdentityProofRequest{
+	identityProof, err := pvpClient.VerifyIdentityProof(ctx, &agentauth.IdentityProofRequest{
 		SubjectID:     "test_subject_001",
 		IdentityType:  "natural_person",
 		ProofMethod:   "eIDAS",

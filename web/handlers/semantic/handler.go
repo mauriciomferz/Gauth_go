@@ -103,7 +103,7 @@ func (h *Handler) Update() {
 	h.mu.Lock()
 	// Manual unlock later to avoid deadlock/panic with archival calls
 
-	if ss != nil && os.Getenv("GAUTH_SEMANTIC_HISTORY_DISABLE") != "1" {
+	if ss != nil && os.Getenv("AGENTAUTH_SEMANTIC_HISTORY_DISABLE") != "1" {
 		now := time.Now()
 		h.appendHistory(now, ss)
 	}

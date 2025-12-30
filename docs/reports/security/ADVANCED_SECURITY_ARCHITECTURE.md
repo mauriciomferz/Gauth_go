@@ -77,7 +77,7 @@ This document outlines the **Advanced Security Architecture** for AgentAuth, imp
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                      GAUTH APPLICATION                           │
+│                      AGENTAUTH APPLICATION                           │
 │          - Service Mesh (Istio) with mTLS                        │
 │          - Vault Integration for Secrets                         │
 │          - HSM for Cryptographic Operations                      │
@@ -176,13 +176,13 @@ keySize: 2048 bits
 #### Server Certificate (AgentAuth API)
 ```yaml
 subject:
-  commonName: "gauth-api.example.com"
+  commonName: "agentauth-api.example.com"
   organization: "AgentAuth"
   organizationalUnit: "API Services"
 subjectAltNames:
-  - DNS:gauth-api.example.com
-  - DNS:*.gauth-api.example.com
-  - DNS:gauth-api.internal
+  - DNS:agentauth-api.example.com
+  - DNS:*.agentauth-api.example.com
+  - DNS:agentauth-api.internal
   - IP:10.0.1.100
 keyUsage:
   - digitalSignature
@@ -217,7 +217,7 @@ keySize: 2048 bits
 # /etc/nginx/conf.d/mtls.conf
 server {
     listen 443 ssl;
-    server_name gauth-api.example.com;
+    server_name agentauth-api.example.com;
 
     # Server certificate (auto-rotated by cert-manager)
     ssl_certificate /etc/nginx/certs/server.crt;
@@ -254,7 +254,7 @@ server {
 
     # Pass client certificate info to backend
     location / {
-        proxy_pass http://gauth-backend:8080;
+        proxy_pass http://agentauth-backend:8080;
         proxy_set_header X-SSL-Client-Cert $ssl_client_cert;
         proxy_set_header X-SSL-Client-S-DN $ssl_client_s_dn;
         proxy_set_header X-SSL-Client-Serial $ssl_client_serial;
@@ -264,7 +264,7 @@ server {
     # Health check endpoint (no mTLS required)
     location /health {
         ssl_verify_client optional;
-        proxy_pass http://gauth-backend:8080/health;
+        proxy_pass http://agentauth-backend:8080/health;
     }
 }
 ```
@@ -277,7 +277,7 @@ apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
 metadata:
   name: default
-  namespace: gauth
+  namespace: agentauth
 spec:
   mtls:
     mode: STRICT  # Enforce mTLS for all services
@@ -286,41 +286,41 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: gauth-authz
-  namespace: gauth
+  name: agentauth-authz
+  namespace: agentauth
 spec:
   selector:
     matchLabels:
-      app: gauth-api
+      app: agentauth-api
   action: ALLOW
   rules:
   # Allow authenticated clients with valid certificates
   - from:
     - source:
-        principals: ["cluster.local/ns/gauth/sa/gauth-client"]
+        principals: ["cluster.local/ns/agentauth/sa/agentauth-client"]
     to:
     - operation:
         methods: ["GET", "POST", "PUT", "DELETE"]
         paths: ["/api/*"]
     when:
     - key: request.auth.claims[aud]
-      values: ["gauth-api"]
+      values: ["agentauth-api"]
 
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: gauth-api-mtls
-  namespace: gauth
+  name: agentauth-api-mtls
+  namespace: agentauth
 spec:
-  host: gauth-api.gauth.svc.cluster.local
+  host: agentauth-api.agentauth.svc.cluster.local
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
       clientCertificate: /etc/certs/cert-chain.pem
       privateKey: /etc/certs/key.pem
       caCertificates: /etc/certs/root-cert.pem
-      sni: gauth-api.gauth.svc.cluster.local
+      sni: agentauth-api.agentauth.svc.cluster.local
 ```
 
 ### Certificate Rotation Automation
@@ -332,11 +332,11 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: gauth-ca-issuer
+  name: agentauth-ca-issuer
 spec:
   vault:
-    server: https://vault.gauth.svc.cluster.local:8200
-    path: pki/sign/gauth-server
+    server: https://vault.agentauth.svc.cluster.local:8200
+    path: pki/sign/agentauth-server
     auth:
       kubernetes:
         role: cert-manager
@@ -349,10 +349,10 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: gauth-api-cert
-  namespace: gauth
+  name: agentauth-api-cert
+  namespace: agentauth
 spec:
-  secretName: gauth-api-tls
+  secretName: agentauth-api-tls
   duration: 168h  # 7 days
   renewBefore: 24h  # Renew 1 day before expiry
   subject:
@@ -360,11 +360,11 @@ spec:
       - AgentAuth
     organizationalUnits:
       - API Services
-  commonName: gauth-api.example.com
+  commonName: agentauth-api.example.com
   dnsNames:
-    - gauth-api.example.com
-    - "*.gauth-api.example.com"
-    - gauth-api.internal
+    - agentauth-api.example.com
+    - "*.agentauth-api.example.com"
+    - agentauth-api.internal
   ipAddresses:
     - 10.0.1.100
   usages:
@@ -372,7 +372,7 @@ spec:
     - key encipherment
     - server auth
   issuerRef:
-    name: gauth-ca-issuer
+    name: agentauth-ca-issuer
     kind: ClusterIssuer
     group: cert-manager.io
 ```
@@ -427,14 +427,14 @@ HashiCorp Vault provides **centralized secrets management** with dynamic credent
 vault secrets enable -path=secret kv-v2
 
 # Store static secrets
-vault kv put secret/gauth/config \
+vault kv put secret/agentauth/config \
   jwt_signing_key="..." \
   webhook_secret="..." \
   api_encryption_key="..."
 
 # Store with metadata
-vault kv metadata put -max-versions 10 secret/gauth/config
-vault kv metadata put -delete-version-after=30d secret/gauth/config
+vault kv metadata put -max-versions 10 secret/agentauth/config
+vault kv metadata put -delete-version-after=30d secret/agentauth/config
 ```
 
 #### 2. Database Secrets Engine (Dynamic Credentials)
@@ -446,23 +446,23 @@ vault secrets enable database
 # Configure PostgreSQL connection
 vault write database/config/postgresql \
   plugin_name=postgresql-database-plugin \
-  allowed_roles="gauth-app,gauth-readonly" \
-  connection_url="postgresql://{{username}}:{{password}}@postgres:5432/gauth?sslmode=require" \
+  allowed_roles="agentauth-app,agentauth-readonly" \
+  connection_url="postgresql://{{username}}:{{password}}@postgres:5432/agentauth?sslmode=require" \
   username="vault-admin" \
   password="vault-admin-password" \
   password_authentication="scram-sha-256"
 
 # Create role for application (30-minute TTL)
-vault write database/roles/gauth-app \
+vault write database/roles/agentauth-app \
   db_name=postgresql \
-  creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' IN ROLE gauth_app; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+  creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' IN ROLE agentauth_app; GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
   default_ttl="30m" \
   max_ttl="1h"
 
 # Create role for read-only access
-vault write database/roles/gauth-readonly \
+vault write database/roles/agentauth-readonly \
   db_name=postgresql \
-  creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' IN ROLE gauth_readonly; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+  creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}' IN ROLE agentauth_readonly; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
   default_ttl="8h" \
   max_ttl="24h"
 ```
@@ -509,8 +509,8 @@ vault write -format=json pki/root/sign-intermediate \
 vault write pki_int/intermediate/set-signed certificate=@intermediate.cert.pem
 
 # Create role for server certificates (7-day TTL with auto-rotation)
-vault write pki_int/roles/gauth-server \
-  allowed_domains="gauth-api.example.com,*.gauth-api.example.com,*.internal" \
+vault write pki_int/roles/agentauth-server \
+  allowed_domains="agentauth-api.example.com,*.agentauth-api.example.com,*.internal" \
   allow_subdomains=true \
   allow_ip_sans=true \
   server_flag=true \
@@ -521,8 +521,8 @@ vault write pki_int/roles/gauth-server \
   ttl="168h"
 
 # Create role for client certificates (30-day TTL)
-vault write pki_int/roles/gauth-client \
-  allowed_domains="*.client.gauth.internal" \
+vault write pki_int/roles/agentauth-client \
+  allowed_domains="*.client.agentauth.internal" \
   allow_subdomains=true \
   client_flag=true \
   server_flag=false \
@@ -539,34 +539,34 @@ vault write pki_int/roles/gauth-client \
 vault secrets enable transit
 
 # Create encryption keys
-vault write -f transit/keys/gauth-data \
+vault write -f transit/keys/agentauth-data \
   type="aes256-gcm96" \
   derived=false \
   exportable=false \
   allow_plaintext_backup=false
 
-vault write -f transit/keys/gauth-pii \
+vault write -f transit/keys/agentauth-pii \
   type="aes256-gcm96" \
   derived=true \
   exportable=false \
   auto_rotate_period="720h"  # Rotate every 30 days
 
 # Enable convergent encryption for deterministic encryption
-vault write -f transit/keys/gauth-deterministic \
+vault write -f transit/keys/agentauth-deterministic \
   type="aes256-gcm96" \
   derived=true \
   convergent_encryption=true
 
 # Encrypt data
-vault write transit/encrypt/gauth-data \
+vault write transit/encrypt/agentauth-data \
   plaintext=$(echo "sensitive data" | base64)
 
 # Decrypt data
-vault write transit/decrypt/gauth-data \
+vault write transit/decrypt/agentauth-data \
   ciphertext="vault:v1:..."
 
 # Rotate encryption key
-vault write -f transit/keys/gauth-data/rotate
+vault write -f transit/keys/agentauth-data/rotate
 ```
 
 ### Vault Authentication Methods
@@ -584,27 +584,27 @@ vault write auth/kubernetes/config \
   token_reviewer_jwt=@/var/run/secrets/kubernetes.io/serviceaccount/token
 
 # Create policy for AgentAuth application
-vault policy write gauth-app - <<EOF
+vault policy write agentauth-app - <<EOF
 # Read static secrets
-path "secret/data/gauth/*" {
+path "secret/data/agentauth/*" {
   capabilities = ["read"]
 }
 
 # Generate dynamic database credentials
-path "database/creds/gauth-app" {
+path "database/creds/agentauth-app" {
   capabilities = ["read"]
 }
 
 # Issue server certificates
-path "pki_int/issue/gauth-server" {
+path "pki_int/issue/agentauth-server" {
   capabilities = ["create", "update"]
 }
 
 # Encrypt/decrypt with transit engine
-path "transit/encrypt/gauth-*" {
+path "transit/encrypt/agentauth-*" {
   capabilities = ["update"]
 }
-path "transit/decrypt/gauth-*" {
+path "transit/decrypt/agentauth-*" {
   capabilities = ["update"]
 }
 
@@ -615,10 +615,10 @@ path "sys/leases/renew" {
 EOF
 
 # Create Kubernetes role
-vault write auth/kubernetes/role/gauth-app \
-  bound_service_account_names=gauth-api \
-  bound_service_account_namespaces=gauth \
-  policies=gauth-app \
+vault write auth/kubernetes/role/agentauth-app \
+  bound_service_account_names=agentauth-api \
+  bound_service_account_namespaces=agentauth \
+  policies=agentauth-app \
   ttl=1h
 ```
 
@@ -629,19 +629,19 @@ vault write auth/kubernetes/role/gauth-app \
 vault auth enable approle
 
 # Create AppRole for AgentAuth
-vault write auth/approle/role/gauth-app \
+vault write auth/approle/role/agentauth-app \
   secret_id_ttl=24h \
   token_num_uses=0 \
   token_ttl=1h \
   token_max_ttl=4h \
   secret_id_num_uses=0 \
-  policies=gauth-app
+  policies=agentauth-app
 
 # Get Role ID (store securely)
-vault read auth/approle/role/gauth-app/role-id
+vault read auth/approle/role/agentauth-app/role-id
 
 # Generate Secret ID (one-time use, short-lived)
-vault write -f auth/approle/role/gauth-app/secret-id
+vault write -f auth/approle/role/agentauth-app/secret-id
 ```
 
 ### Vault Agent Sidecar (Kubernetes)
@@ -652,7 +652,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vault-agent-config
-  namespace: gauth
+  namespace: agentauth
 data:
   vault-agent-config.hcl: |
     exit_after_auth = false
@@ -662,7 +662,7 @@ data:
       method "kubernetes" {
         mount_path = "auth/kubernetes"
         config = {
-          role = "gauth-app"
+          role = "agentauth-app"
         }
       }
 
@@ -676,7 +676,7 @@ data:
     template {
       source      = "/vault/configs/db-creds.tmpl"
       destination = "/vault/secrets/db-creds.json"
-      command     = "pkill -HUP gauth-api"  # Reload app on secret change
+      command     = "pkill -HUP agentauth-api"  # Reload app on secret change
     }
 
     template {
@@ -685,7 +685,7 @@ data:
     }
 
     vault {
-      address = "https://vault.gauth.svc.cluster.local:8200"
+      address = "https://vault.agentauth.svc.cluster.local:8200"
       ca_cert = "/vault/ca/ca.crt"
     }
 
@@ -694,10 +694,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vault-agent-templates
-  namespace: gauth
+  namespace: agentauth
 data:
   db-creds.tmpl: |
-    {{- with secret "database/creds/gauth-app" -}}
+    {{- with secret "database/creds/agentauth-app" -}}
     {
       "username": "{{ .Data.username }}",
       "password": "{{ .Data.password }}",
@@ -707,7 +707,7 @@ data:
     {{- end }}
 
   app-config.tmpl: |
-    {{- with secret "secret/data/gauth/config" -}}
+    {{- with secret "secret/data/agentauth/config" -}}
     {
       "jwt_signing_key": "{{ .Data.data.jwt_signing_key }}",
       "webhook_secret": "{{ .Data.data.webhook_secret }}",
@@ -803,7 +803,7 @@ seal "awskms" {
 }
 
 storage "consul" {
-  address = "consul.gauth.svc.cluster.local:8500"
+  address = "consul.agentauth.svc.cluster.local:8500"
   path    = "vault/"
   token   = "consul-vault-token"
   
@@ -820,8 +820,8 @@ listener "tcp" {
   tls_min_version = "tls13"
 }
 
-api_addr = "https://vault.gauth.svc.cluster.local:8200"
-cluster_addr = "https://vault-active.gauth.svc.cluster.local:8201"
+api_addr = "https://vault.agentauth.svc.cluster.local:8200"
+cluster_addr = "https://vault-active.agentauth.svc.cluster.local:8201"
 ui = true
 
 # Enable Prometheus metrics
@@ -924,13 +924,13 @@ VALUES (
 # scripts/rotate-certificates.sh
 set -euo pipefail
 
-NAMESPACE="gauth"
-CERT_NAME="gauth-api-cert"
-VAULT_ADDR="https://vault.gauth.svc.cluster.local:8200"
+NAMESPACE="agentauth"
+CERT_NAME="agentauth-api-cert"
+VAULT_ADDR="https://vault.agentauth.svc.cluster.local:8200"
 SLACK_WEBHOOK="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXX"
 
 log() {
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" | tee -a /var/log/gauth/cert-rotation.log
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" | tee -a /var/log/agentauth/cert-rotation.log
 }
 
 notify_slack() {
@@ -995,8 +995,8 @@ rotate_certificate() {
     
     # Reload applications
     log "Reloading applications to pick up new certificate"
-    kubectl rollout restart deployment/gauth-api -n "$NAMESPACE"
-    kubectl rollout status deployment/gauth-api -n "$NAMESPACE" --timeout=5m
+    kubectl rollout restart deployment/agentauth-api -n "$NAMESPACE"
+    kubectl rollout status deployment/agentauth-api -n "$NAMESPACE" --timeout=5m
     
     # Revoke old certificate
     local old_serial=$(openssl x509 -in /tmp/current-cert.crt -noout -serial | cut -d= -f2)
@@ -1081,7 +1081,7 @@ log "Certificate rotation check completed"
 # elastalert-rule: failed-mtls-auth.yaml
 name: "Failed mTLS Authentication Attempts"
 type: frequency
-index: gauth-logs-*
+index: agentauth-logs-*
 num_events: 5
 timeframe:
   minutes: 5
@@ -1122,7 +1122,7 @@ spike_type: "up"
 
 filter:
 - term:
-    request_path: "secret/data/gauth/*"
+    request_path: "secret/data/agentauth/*"
 - term:
     type: "response"
 
@@ -1145,7 +1145,7 @@ alert_text: |
 # elastalert-rule: brute-force-detection.yaml
 name: "Brute Force Attack Detection"
 type: frequency
-index: gauth-logs-*
+index: agentauth-logs-*
 num_events: 10
 timeframe:
   minutes: 5
@@ -1188,7 +1188,7 @@ groups:
   
   # mTLS certificate expiry
   - alert: CertificateExpiringSoon
-    expr: (x509_cert_not_after - time()) < 86400 * 2
+    expr: (x509_cert_not_after - time() < 86400 * 2
     for: 1h
     labels:
       severity: warning
@@ -1221,7 +1221,7 @@ groups:
   
   # Vault token expiry
   - alert: VaultTokenExpiringForApp
-    expr: vault_token_ttl_seconds{app="gauth"} < 300
+    expr: vault_token_ttl_seconds{app="agentauth"} < 300
     for: 1m
     labels:
       severity: warning

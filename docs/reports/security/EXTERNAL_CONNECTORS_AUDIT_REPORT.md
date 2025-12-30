@@ -1,6 +1,6 @@
 # External Connectors and Integrations Audit Report
 
-**Project**: AgentAuth RFC-0111 Implementation  
+**Project**: AgentAuth AAP-001 Implementation  
 **Date**: November 12, 2025  
 **Auditor**: GitHub Copilot (AI Code Analysis)  
 **Priority**: P1 - CRITICAL PATH TO PRODUCTION  
@@ -16,7 +16,7 @@
 
 ### Audit Scope
 
-This audit examined all external system integrations required by RFC-0111:
+This audit examined all external system integrations required by AAP-001:
 1. **Commercial Register Clients** (Germany, EU, UK, US)
 2. **Trust Service Providers** (eIDAS qualified TSPs)
 3. **Revocation Checkers** (OCSP, CRL)
@@ -34,11 +34,11 @@ This audit examined all external system integrations required by RFC-0111:
 
 ### Compliance Impact
 
-Current external connector status affects RFC-0111 compliance:
+Current external connector status affects AAP-001 compliance:
 
 - **Without Real Integrations**: 20% external connector compliance (interfaces only)
 - **With Real Integrations**: 80% external connector compliance (full production)
-- **Impact on Overall**: Overall RFC-0111 compliance remains at ~80%, but **production deployment blocked**
+- **Impact on Overall**: Overall AAP-001 compliance remains at ~80%, but **production deployment blocked**
 
 ---
 
@@ -46,7 +46,7 @@ Current external connector status affects RFC-0111 compliance:
 
 ### 1.1 Interface Definition ✅ COMPLETE
 
-**File**: `pkg/gauth/external_integrations.go`  
+**File**: `pkg/agentauth/external_integrations.go`  
 **Lines**: 300+ lines of comprehensive interface definitions  
 
 **Defined Interfaces**:
@@ -67,11 +67,11 @@ type CommercialRegisterClient interface {
 - `SignatoryRights` - Signature authority, value limits, geographic scope
 - `CompanyStructure` - Legal structure, governance model, shareholders, UBOs
 
-**Assessment**: ✅ **Excellent interface design**. Covers all RFC-0111 requirements for commercial register verification.
+**Assessment**: ✅ **Excellent interface design**. Covers all AAP-001 requirements for commercial register verification.
 
 ### 1.2 Mock Implementation ✅ COMPLETE
 
-**File**: `pkg/gauth/external_integrations_mock.go`  
+**File**: `pkg/agentauth/external_integrations_mock.go`  
 **Lines**: 400+ lines of mock implementation  
 
 **Features**:
@@ -163,7 +163,7 @@ type CommercialRegisterClient interface {
 
 ### 2.1 Interface Definition ✅ COMPLETE
 
-**File**: `pkg/gauth/external_integrations.go`  
+**File**: `pkg/agentauth/external_integrations.go`  
 **Lines**: 200+ lines of TSP interface definitions  
 
 **Defined Interfaces**:
@@ -188,7 +188,7 @@ type TrustServiceProvider interface {
 
 ### 2.2 Mock Implementation ✅ COMPLETE
 
-**File**: `pkg/gauth/external_integrations_mock.go`  
+**File**: `pkg/agentauth/external_integrations_mock.go`  
 **Lines**: 200+ lines of mock TSP  
 
 **Features**:
@@ -288,7 +288,7 @@ type TrustServiceProvider interface {
 
 ### 3.1 Interface Definition ✅ COMPLETE
 
-**File**: `pkg/gauth/external_integrations.go`  
+**File**: `pkg/agentauth/external_integrations.go`  
 **Lines**: 100+ lines of revocation interface  
 
 **Defined Interfaces**:
@@ -308,7 +308,7 @@ type RevocationChecker interface {
 
 ### 3.2 Mock Implementation ✅ COMPLETE
 
-**File**: `pkg/gauth/external_integrations_mock.go`  
+**File**: `pkg/agentauth/external_integrations_mock.go`  
 **Lines**: 100+ lines of mock revocation checker  
 
 **Features**:
@@ -604,7 +604,7 @@ func checkOCSP(cert, issuer *x509.Certificate) error {
    - **Risk**: HIGH - No workaround possible
 
 2. **eIDAS Trust Service Providers** (4-6 weeks)
-   - **Blocker**: Identity verification required for RFC-0111 compliance
+   - **Blocker**: Identity verification required for AAP-001 compliance
    - **Impact**: Cannot verify entity identities
    - **Risk**: HIGH - No workaround possible
 
@@ -637,17 +637,17 @@ func checkOCSP(cert, issuer *x509.Certificate) error {
 
 **Current State** (All Mocks):
 - External Connectors: **20%** (interfaces only)
-- Overall RFC-0111: **80%** (80% from other components)
+- Overall AAP-001: **80%** (80% from other components)
 - Production Readiness: **NOT READY** ❌
 
 **With Critical Path Complete** (12-17 weeks):
 - External Connectors: **70%** (DE, eIDAS, OCSP, PIP DB)
-- Overall RFC-0111: **82%** (+2%)
+- Overall AAP-001: **82%** (+2%)
 - Production Readiness: **READY** ✅
 
 **With High Priority Complete** (20-26 weeks):
 - External Connectors: **85%** (+ UK, NL, more TSPs, LDAP)
-- Overall RFC-0111: **84%** (+4%)
+- Overall AAP-001: **84%** (+4%)
 - Production Readiness: **HIGHLY READY** ✅✅
 
 ### 5.4 Risk Assessment
@@ -900,7 +900,7 @@ external_connectors:
       d_trust:
         enabled: true
         api_url: "https://api.d-trust.net"
-        certificate_path: "/etc/gauth/d-trust-cert.pem"
+        certificate_path: "/etc/agentauth/d-trust-cert.pem"
         timeout: "5s"
 
   revocation:
@@ -973,7 +973,7 @@ external_connectors:
 
 ### 8.1 Current State
 
-The AgentAuth RFC-0111 implementation has **excellent architectural foundations** for external connectors:
+The AgentAuth AAP-001 implementation has **excellent architectural foundations** for external connectors:
 - ✅ Comprehensive interface definitions (300+ lines)
 - ✅ Well-structured data types
 - ✅ High-quality mock implementations for development and testing
@@ -1004,9 +1004,9 @@ The AgentAuth RFC-0111 implementation has **excellent architectural foundations*
 
 ### 8.4 Compliance Impact
 
-**Before External Connectors**: 80% overall RFC-0111 compliance (interfaces only, not production-ready)  
-**After Critical Path**: 82% overall RFC-0111 compliance (**production-ready** ✅)  
-**After High Priority**: 84% overall RFC-0111 compliance (highly optimized)
+**Before External Connectors**: 80% overall AAP-001 compliance (interfaces only, not production-ready)  
+**After Critical Path**: 82% overall AAP-001 compliance (**production-ready** ✅)  
+**After High Priority**: 84% overall AAP-001 compliance (highly optimized)
 
 ### 8.5 Final Recommendation
 
@@ -1032,11 +1032,11 @@ The AgentAuth RFC-0111 implementation has **excellent architectural foundations*
 ### Appendix A: Existing Code References
 
 **Interfaces**:
-- `pkg/gauth/external_integrations.go` - Commercial register, TSP, revocation interfaces
+- `pkg/agentauth/external_integrations.go` - Commercial register, TSP, revocation interfaces
 - `pkg/pip/pip.go` - PIP interfaces and default implementation
 
 **Mocks**:
-- `pkg/gauth/external_integrations_mock.go` - Mock commercial register, TSP, revocation
+- `pkg/agentauth/external_integrations_mock.go` - Mock commercial register, TSP, revocation
 - `pkg/registry/commercial_register.go` - Mock commercial register service
 
 **Related Components**:
@@ -1044,9 +1044,9 @@ The AgentAuth RFC-0111 implementation has **excellent architectural foundations*
 - `pkg/delegation/revocation.go` - Internal revocation (not OCSP/CRL)
 - `pkg/attest/trust_anchor.go` - Trust anchor verification
 
-### Appendix B: RFC-0111 Requirements Cross-Reference
+### Appendix B: AAP-001 Requirements Cross-Reference
 
-| RFC-0111 Section | Requirement | Current Status | Gap |
+| AAP-001 Section | Requirement | Current Status | Gap |
 |------------------|-------------|----------------|-----|
 | §II | Commercial Register Verification | ⚠️ Mock only | Real API needed |
 | §III | Trust Service Provider | ⚠️ Mock only | eIDAS integration needed |

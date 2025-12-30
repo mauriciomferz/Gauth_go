@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: redis-config
-  namespace: gauth-development
+  namespace: agentauth-development
 data:
   redis.conf: |
     # Redis configuration for production
@@ -58,7 +58,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: redis-secrets
-  namespace: gauth-development
+  namespace: agentauth-development
 type: Opaque
 data:
   redis-password: c2VjdXJlX3JlZGlzX3Bhc3N3b3Jk  # base64 encoded 'secure_redis_password'
@@ -67,7 +67,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: redis-pvc
-  namespace: gauth-development
+  namespace: agentauth-development
 spec:
   accessModes:
     - ReadWriteOnce
@@ -80,7 +80,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: redis
-  namespace: gauth-development
+  namespace: agentauth-development
 spec:
   serviceName: redis-service
   replicas: 1
@@ -163,7 +163,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis-service
-  namespace: gauth-development
+  namespace: agentauth-development
 spec:
   selector:
     app: redis

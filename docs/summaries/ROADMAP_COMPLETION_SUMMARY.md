@@ -21,7 +21,7 @@ Successfully completed **83% of the Code Quality Roadmap** with all critical sec
 **Completed Work**:
 - Fixed 4 high-severity G115 integer overflow issues
 - Added boundary validation in `web/server_clean.go` (lines 3753, 3767)
-- Added boundary validation in `pkg/gauth/replay_store_bolt.go` (lines 120, 161)
+- Added boundary validation in `pkg/agentauth/replay_store_bolt.go` (lines 120, 161)
 - Implemented `math.MaxInt64` boundary checks for metrics and timestamps
 
 **Results**:
@@ -71,13 +71,13 @@ Successfully completed **83% of the Code Quality Roadmap** with all critical sec
 **Completed Work**:
 - Updated `github.com/golang-jwt/jwt/v5` from v5.2.2 to v5.3.0
 - Verified build compatibility
-- Regression tested auth, poa, and gauth packages
+- Regression tested auth, poa, and agentauth packages
 - All tests passing
 
 **Results**:
 - JWT library: ✅ v5.3.0 (current)
 - Build: ✅ Passing
-- Tests: ✅ All passing (auth, poa, gauth)
+- Tests: ✅ All passing (auth, poa, agentauth)
 
 **Commits**: `c885b4b9`
 

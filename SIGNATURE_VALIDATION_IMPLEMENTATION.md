@@ -25,8 +25,8 @@ The previous signature validation logic was limited and not easily extensible. T
 - **Rich Telemetry**:
   - **Logging**: Detailed logs are generated for both successful and failed validation attempts, including the algorithm used and the time taken.
   - **Metrics**: Prometheus metrics are exported to provide insights into the validation process:
-    - `gauthtoken_validation_attempts_total`: A counter for validation attempts, labeled by algorithm and status (`success`, `failed`, `unsupported`, etc.).
-    - `gauthtoken_validation_duration_seconds`: A histogram of validation durations, labeled by algorithm.
+    - `agentauthtoken_validation_attempts_total`: A counter for validation attempts, labeled by algorithm and status (`success`, `failed`, `unsupported`, etc.).
+    - `agentauthtoken_validation_duration_seconds`: A histogram of validation durations, labeled by algorithm.
 
 ## Implementation Details
 

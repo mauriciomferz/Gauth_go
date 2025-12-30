@@ -2,7 +2,7 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
   external_labels:
-    cluster: 'gauth-local'
+    cluster: 'agentauth-local'
     environment: 'development'
 
 alerting:
@@ -15,11 +15,11 @@ rule_files:
   - '/etc/prometheus/alert-rules.yml'
 
 scrape_configs:
-  - job_name: 'gauth-service'
+  - job_name: 'agentauth-service'
     static_configs:
       - targets: ['host.docker.internal:8080']
         labels:
-          service: 'gauth'
+          service: 'agentauth'
           component: 'web-server'
     metrics_path: '/metrics'
     scrape_interval: 15s

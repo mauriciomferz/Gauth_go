@@ -10,8 +10,8 @@ vendor
 build
 bin
 dist
-gauth-server
-gauth-web
+agentauth-server
+agentauth-web
 *.exe
 *.test
 *.out

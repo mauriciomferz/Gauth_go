@@ -1,5 +1,5 @@
 # 🚀 QUICK START GUIDE
-## AgentAuth RFC-0111/RFC-0115 Implementation
+## AgentAuth AAP-001/AAP-002 Implementation
 
 **Status**: ✅ **90-95% RFC Compliant** | ✅ **Production-Ready** (pending tests)  
 **Date**: November 10, 2025
@@ -42,9 +42,9 @@
 ### 1. Authorization Chain Validation
 
 ```go
-import "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+import "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 
-validator := gauth.NewAuthorizationChainValidator(
+validator := agentauth.NewAuthorizationChainValidator(
     commercialRegister,
     trustProvider,
     revocationChecker,
@@ -64,7 +64,7 @@ if !result.Valid {
 ### 2. Request/Grant Compliance Validation
 
 ```go
-complianceValidator := gauth.NewComplianceValidator(
+complianceValidator := agentauth.NewComplianceValidator(
     chainValidator,
     pipClient,
     pdpClient,
@@ -80,7 +80,7 @@ grantResult, err := complianceValidator.ValidateGrantCompliance(ctx, grant)
 ### 3. Extended Token Creation
 
 ```go
-tokenService := gauth.NewExtendedTokenService(
+tokenService := agentauth.NewExtendedTokenService(
     chainValidator,
     complianceValidator,
     pipClient,
@@ -94,7 +94,7 @@ if err != nil {
     // Handle error
 }
 
-// Token now contains full RFC-0111 fields
+// Token now contains full AAP-001 fields
 log.Printf("Access Token: %s", token.AccessToken)
 log.Printf("Chain Valid: %v", token.AuthorizationChainValidation.Valid)
 ```
@@ -115,7 +115,7 @@ if !validationResult.Valid {
 ### 5. Formal Requirements Validation
 
 ```go
-formalValidator := gauth.NewFormalRequirementsValidator(
+formalValidator := agentauth.NewFormalRequirementsValidator(
     notaryVerifier,
     idVerifier,
     sigVerifier,
@@ -134,7 +134,7 @@ result, err := formalValidator.ValidateFormalRequirements(
 ### 6. Unified PIP Usage
 
 ```go
-pip := gauth.NewUnifiedPIP(
+pip := agentauth.NewUnifiedPIP(
     commercialRegister,
     trustProvider,
     true,  // cache enabled
@@ -164,9 +164,9 @@ All external integrations have functional mocks for development/testing:
 
 ```go
 // Use mocks for development
-mockCR := gauth.NewMockCommercialRegisterClient(false)  // non-strict
-mockTSP := gauth.NewMockTrustServiceProvider(false)
-mockRevoke := gauth.NewMockRevocationChecker()
+mockCR := agentauth.NewMockCommercialRegisterClient(false)  // non-strict
+mockTSP := agentauth.NewMockTrustServiceProvider(false)
+mockRevoke := agentauth.NewMockRevocationChecker()
 
 // Pre-seeded test data available
 companyInfo, _ := mockCR.VerifyCompany(ctx, "DE", "HRB-12345-DE")  // German GmbH
@@ -305,7 +305,7 @@ config := Config{
 ## 👥 Support
 
 - **Technical Issues**: Check logs, enable debug mode
-- **RFC Compliance Questions**: Refer to RFC-0111 and RFC-0115 specifications
+- **RFC Compliance Questions**: Refer to AAP-001 and AAP-002 specifications
 - **Integration Questions**: Check external_integrations.go interface definitions
 
 ---
@@ -331,8 +331,8 @@ config := Config{
 
 ## ✨ Key Features
 
-- ✅ **RFC-0111 Compliant** (90-95%)
-- ✅ **RFC-0115 Compliant** (88-92%)
+- ✅ **AAP-001 Compliant** (90-95%)
+- ✅ **AAP-002 Compliant** (88-92%)
 - ✅ **Thread-Safe** (sync.RWMutex)
 - ✅ **Caching** (Configurable TTL)
 - ✅ **Audit Trails** (Complete)

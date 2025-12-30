@@ -8,23 +8,23 @@ source: internal
 refreshCadence: annually
 ---
 
-# AgentAuth Beta Compliance Assessment (RFC-0111 / RFC-0115)
+# AgentAuth Beta Compliance Assessment (AAP-001 / AAP-002)
 
 Generated: 2025-10-28
 Scope: Repository internal artifacts only (no external sources). All evidence references point to concrete code, tests, or metrics instrumentation currently in the repo.
 
 ---
 ## Executive Summary
-The beta implementation satisfies core RFC-0111 / RFC-0115 requirements for: capability & policy manifest signing, exclusion enforcement, taxonomy canonicalization, delegation depth limits, durable replay (WAL + snapshot + external Redis backend), attestation dual domain signature and verification, revocation transparency (Merkle inclusion + logarithmic consistency proofs), and observability (tracing spans + Prometheus metrics). Remaining gaps concentrate in algorithm agility (additional signature schemes), extended PoA multi-signature weighting, comprehensive OpenAPI discovery, and fuller governance documentation (risk register). No prohibited technologies (Web3, DNA identity, AI operator misuse) are present beyond guarded config flags—validated via code searches.
+The beta implementation satisfies core AAP-001 / AAP-002 requirements for: capability & policy manifest signing, exclusion enforcement, taxonomy canonicalization, delegation depth limits, durable replay (WAL + snapshot + external Redis backend), attestation dual domain signature and verification, revocation transparency (Merkle inclusion + logarithmic consistency proofs), and observability (tracing spans + Prometheus metrics). Remaining gaps concentrate in algorithm agility (additional signature schemes), extended PoA multi-signature weighting, comprehensive OpenAPI discovery, and fuller governance documentation (risk register). No prohibited technologies (Web3, DNA identity, AI operator misuse) are present beyond guarded config flags—validated via code searches.
 
 ---
 ## Compliance Matrix (Condensed)
 | Area | RFC Ref | Status | Evidence | Gaps / Future Work |
 |------|---------|--------|----------|--------------------|
-| Exclusions Enforcement | 0115 Sec.2 | Complete | `pkg/rfc0111/compat.go` (flags), grep absence of Web3 code | Periodic auto-report endpoint |
-| PoA Taxonomy (agent_type, sector, action_class) | 0111 Sec.3 | Complete | `pkg/rfc0111/taxonomy.go`, `canonical.go`, `canonical_taxonomy_test.go` | Enumeration expansion process doc |
-| Canonical POA Digest (Version ≥3 taxonomy domain) | 0111 Sec.3.4 | Complete | `pkg/rfc0111/canonical.go` domain selection logic | Weight-aware digest for multi-sig issuance |
-| Delegation Depth Limits | 0111 Sec.4 | Complete | `pkg/rfc0111/compat.go`, `pkg/delegation/delegation.go` (ErrDelegationDepthExceeded) | Depth change audit metric |
+| Exclusions Enforcement | 0115 Sec.2 | Complete | `pkg/aap001/compat.go` (flags), grep absence of Web3 code | Periodic auto-report endpoint |
+| PoA Taxonomy (agent_type, sector, action_class) | 0111 Sec.3 | Complete | `pkg/aap001/taxonomy.go`, `canonical.go`, `canonical_taxonomy_test.go` | Enumeration expansion process doc |
+| Canonical POA Digest (Version ≥3 taxonomy domain) | 0111 Sec.3.4 | Complete | `pkg/aap001/canonical.go` domain selection logic | Weight-aware digest for multi-sig issuance |
+| Delegation Depth Limits | 0111 Sec.4 | Complete | `pkg/aap001/compat.go`, `pkg/delegation/delegation.go` (ErrDelegationDepthExceeded) | Depth change audit metric |
 | Attestation Dual Domain Signature | 0115 Sec.5 | Complete | `pkg/attest/service.go`, domain signature tests (`web/model_limits_attestation_*`) | Structured key rotation lineage doc |
 | Replay Protection (Nonce/JTI) | 0115 Sec.6 | Complete | `web/replay_store.go` WAL + snapshot; Redis backend `pkg/replay/redis_backend.go` | Bloom filter aging optimization |
 | Policy Manifest Signing | 0115 Sec.7 | Complete | `web/policy_manifest.go`, signature verify tests | Manifest diff endpoint with field-level change log |
@@ -42,13 +42,13 @@ The beta implementation satisfies core RFC-0111 / RFC-0115 requirements for: cap
 ## Detailed Evidence Sections
 
 ### 1. Exclusions Enforcement
-Config & validation: `pkg/rfc0111/compat.go` requires `ExcludeWeb3`, `ExcludeAIOperators`, `ExcludeDNAIdentities` true; failure paths return descriptive errors. Grep scans show no functional Web3/DNA code—only config flags and comments. Discovery can expose these flags (future enhancement).
+Config & validation: `pkg/aap001/compat.go` requires `ExcludeWeb3`, `ExcludeAIOperators`, `ExcludeDNAIdentities` true; failure paths return descriptive errors. Grep scans show no functional Web3/DNA code—only config flags and comments. Discovery can expose these flags (future enhancement).
 
 ### 2. Taxonomy & Canonical Digest
-Enumerations: `taxonomy.go` (AllowedAgentTypes, AllowedSectors, AllowedActionClasses). Validation only for Version ≥3 POAs (`ValidateTaxonomy`). Canonical inclusion: `canonical.go` inserts ordered taxonomy JSON under `taxonomy` object; digest domain upgrade to `GAUTH_AAP-001_POA_V3|tax=1` prevents collision. Tests: `canonical_taxonomy_test.go`, `taxonomy_validation_test.go`.
+Enumerations: `taxonomy.go` (AllowedAgentTypes, AllowedSectors, AllowedActionClasses). Validation only for Version ≥3 POAs (`ValidateTaxonomy`). Canonical inclusion: `canonical.go` inserts ordered taxonomy JSON under `taxonomy` object; digest domain upgrade to `AGENTAUTH_AAP-001_POA_V3|tax=1` prevents collision. Tests: `canonical_taxonomy_test.go`, `taxonomy_validation_test.go`.
 
 ### 3. Delegation Depth
-`compat.go` rejects zero or >8 depth. Runtime enforcement in `delegation.go` with error `delegation depth %d exceeds max %d`. Discovery endpoint surfaces current max depth (env-driven). Scenario tests in `examples/official_rfc0111_implementation/` for invalid depth.
+`compat.go` rejects zero or >8 depth. Runtime enforcement in `delegation.go` with error `delegation depth %d exceeds max %d`. Discovery endpoint surfaces current max depth (env-driven). Scenario tests in `examples/official_aap001_implementation/` for invalid depth.
 
 ### 4. Replay Durability
 In-memory + TTL + WAL: `web/replay_store.go` (`Record`, `SnapshotAndCompact`, recovery logic). External backend interface: `pkg/replay/external_backend.go`; Redis adapter: `redis_backend.go` using SETNX + TTL. Tests: `replay_snapshot_test.go`, `attestation_replay_persistence_test.go`, Redis external backend test & benchmark. Metrics: snapshot duration & WAL flush latency observed via metrics hooks.
@@ -86,7 +86,7 @@ Global rotating signer: `internal/crypto/agility.go`. Rotation tracing provider:
 ---
 ## Clean Beta Acceptance Criteria (Updated)
 1. Weighted PoA multi-sig canonical digest & enforcement.
-2. OpenAPI + `/well-known/gauth/config` + enumerations and exclusion flags surfaced.
+2. OpenAPI + `/well-known/agentauth/config` + enumerations and exclusion flags surfaced.
 3. Auditor CLI extended (PoA chain, domain signature validity, replay WAL integrity).
 4. Algorithm agility: at least one additional curve (ECDSA P-256 or BLS) for PoA & attestation.
 5. Central error catalog & generated documentation.
@@ -97,8 +97,8 @@ Global rotating signer: `internal/crypto/agility.go`. Rotation tracing provider:
 - Replay durability: `web/replay_store.go`, `pkg/replay/redis_backend.go`, tests `web/replay_snapshot_test.go`
 - Policy manifest: `web/policy_manifest.go`, tests `web/policy_manifest_test.go`
 - Capability registry hash: `web/server_clean.go` (hash fields, anchoring), `web/capability_canonical_hash_test.go`
-- Taxonomy: `pkg/rfc0111/taxonomy.go`, `pkg/rfc0111/canonical.go`, tests
-- Delegation depth: `pkg/delegation/delegation.go`, `pkg/rfc0111/compat.go`
+- Taxonomy: `pkg/aap001/taxonomy.go`, `pkg/aap001/canonical.go`, tests
+- Delegation depth: `pkg/delegation/delegation.go`, `pkg/aap001/compat.go`
 - Attestation dual signature: `pkg/attest/service.go`, `pkg/attest/verify.go`, tests in `web/model_limits_attestation_*`
 - Revocation proofs & consistency: `pkg/delegation/revocation_chain.go`, `web/revocation_transparency_integration_test.go`
 - Observability: spans (`internal/crypto/keys.go`, `web/server_clean.go`), metrics (`internal/metrics/prometheus_adapter.go`)

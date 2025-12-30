@@ -197,7 +197,7 @@ jwe_decryption_error_expired_key
 ```yaml
 # prometheus.yml
 scrape_configs:
-  - job_name: 'gauth-jwe'
+  - job_name: 'agentauth-jwe'
     static_configs:
       - targets: ['localhost:9090']
     metrics_path: '/metrics'
@@ -261,7 +261,7 @@ scrape_configs:
 AgentAuth already has a metrics infrastructure (`pkg/metrics/`). JWE metrics should be added to the existing Prometheus exporter:
 
 - File: `pkg/metrics/prometheus.go`
-- Namespace: `gauth`
+- Namespace: `agentauth`
 - Subsystem: `jwe`
 
 ## Future Enhancements

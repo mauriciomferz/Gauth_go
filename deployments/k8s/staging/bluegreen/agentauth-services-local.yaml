@@ -1,0 +1,67 @@
+---
+# Service for Blue deployment
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentauth-service-blue
+  namespace: agentauth-staging
+  labels:
+    app: agentauth
+    version: blue
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30080  # Accessible at localhost:9080 (mapped via kind)
+    protocol: TCP
+    name: http
+  selector:
+    app: agentauth
+    environment: staging
+    version: blue
+
+---
+# Service for Green deployment
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentauth-service-green
+  namespace: agentauth-staging
+  labels:
+    app: agentauth
+    version: green
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30081  # Accessible at localhost:30081
+    protocol: TCP
+    name: http
+  selector:
+    app: agentauth
+    environment: staging
+    version: green
+
+---
+# Active service (used for traffic switching)
+apiVersion: v1
+kind: Service
+metadata:
+  name: agentauth-service-active
+  namespace: agentauth-staging
+  labels:
+    app: agentauth
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30082  # Accessible at localhost:30082
+    protocol: TCP
+    name: http
+  selector:
+    app: agentauth
+    environment: staging
+    version: blue  # Initially points to blue

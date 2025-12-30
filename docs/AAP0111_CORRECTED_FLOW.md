@@ -1,4 +1,4 @@
-# AAP-AAP-001 - CORRECTED PROTOCOL FLOW
+# AAP-001 - CORRECTED PROTOCOL FLOW
 ## Critical Fix: Protocol Architecture Clarification
 
 **Date:** November 15, 2025  
@@ -53,7 +53,7 @@ The original AAP-0111 RFC **omits the Resource Server** from the protocol flow d
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────────┐
-│               CORRECTED GAUTH PROTOCOL FLOW (with Resource Server)            │
+│               CORRECTED AGENTAUTH PROTOCOL FLOW (with Resource Server)            │
 │                         AAP-001 ERRATA - November 2025                       │
 └───────────────────────────────────────────────────────────────────────────────┘
 
@@ -606,15 +606,15 @@ Resource Servers MUST return standardized errors per OAuth 2.0 Bearer Token Usag
 
 ---
 
-## IMPLEMENTATION STATUS IN GAUTH_GO CODEBASE
+## IMPLEMENTATION STATUS IN AGENTAUTH_GO CODEBASE
 
 The AgentAuth_go implementation **ALREADY IMPLEMENTS THE CORRECTED FLOW**:
 
-✅ **Resource Server Mocked**: `pkg/gauth/mocks.go` - MockResourceServer  
-✅ **Token Validation**: `pkg/gauth/extended_token_service.go` - ValidateExtendedToken  
+✅ **Resource Server Mocked**: `pkg/agentauth/mocks.go` - MockResourceServer  
+✅ **Token Validation**: `pkg/agentauth/extended_token_service.go` - ValidateExtendedToken  
 ✅ **Introspection**: Web server has `/introspect` endpoint  
 ✅ **PoA Enforcement**: `pkg/poa/validator.go` - ValidatePoA  
-✅ **Compliance Tracking**: `pkg/gauth/compliance_tracker.go`  
+✅ **Compliance Tracking**: `pkg/agentauth/compliance_tracker.go`  
 
 **The code is more correct than the RFC!**
 

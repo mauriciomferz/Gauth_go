@@ -22,7 +22,7 @@ refreshCadence: none
 - ✅ CI/CD workflow enhanced with Docker build job
 - ✅ Images automatically built and pushed to GHCR
 - ✅ Build pipeline validated (all jobs passed)
-- ✅ Image successfully published to ghcr.io/mauriciomferz/gauth
+- ✅ Image successfully published to ghcr.io/mauriciomferz/agentauth
 - ✅ Comprehensive documentation created (1,020 lines)
 
 ## Validated Outcomes
@@ -42,7 +42,7 @@ refreshCadence: none
 
 ### ✅ GHCR Image Published
 
-**Registry**: `ghcr.io/mauriciomferz/gauth`  
+**Registry**: `ghcr.io/mauriciomferz/agentauth`  
 **Available Tags**:
 - `latest` - Most recent main branch build
 - `blue` - Blue environment tag
@@ -58,27 +58,27 @@ refreshCadence: none
   "Created": "2025-11-10T02:54:51Z",
   "Labels": {
     "org.opencontainers.image.revision": "79b8b4aa3b5f3cefb610034973c33f66efeb6a1b",
-    "org.opencontainers.image.source": "https://github.com/mauriciomferz/Gauth_go",
+    "org.opencontainers.image.source": "https://github.com/mauriciomferz/AgentAuth",
     "org.opencontainers.image.version": "main"
   },
-  "User": "gauth"
+  "User": "agentauth"
 }
 ```
 
 ### ✅ Image Verification
 
 ```bash
-$ docker pull --platform linux/amd64 ghcr.io/mauriciomferz/gauth:latest
+$ docker pull --platform linux/amd64 ghcr.io/mauriciomferz/agentauth:latest
 ✓ Successfully pulled
 
-$ docker pull --platform linux/amd64 ghcr.io/mauriciomferz/gauth:blue
+$ docker pull --platform linux/amd64 ghcr.io/mauriciomferz/agentauth:blue
 ✓ Successfully pulled (same digest as latest)
 
-$ docker inspect ghcr.io/mauriciomferz/gauth:latest
+$ docker inspect ghcr.io/mauriciomferz/agentauth:latest
 ✓ Architecture: amd64
 ✓ OS: linux
 ✓ Size: 27.7MB
-✓ User: gauth (non-root)
+✓ User: agentauth (non-root)
 ✓ Labels: Git commit, source repo embedded
 ```
 
@@ -114,11 +114,11 @@ docker-build:
 **Change**:
 ```yaml
 # Old (local only)
-image: gauth:blue-v2
+image: agentauth:blue-v2
 imagePullPolicy: Never
 
 # New (registry-based, reverted for local ARM64)
-image: gauth-mock:blue  # Temporary for local kind ARM64
+image: agentauth-mock:blue  # Temporary for local kind ARM64
 imagePullPolicy: Never   # Will be GHCR in production AMD64
 ```
 
@@ -146,13 +146,13 @@ imagePullPolicy: Never   # Will be GHCR in production AMD64
 $ kubectl run arch-check --rm -i --restart=Never --image=alpine -- uname -m
 aarch64  ← Kind node is ARM64
 
-$ docker inspect ghcr.io/mauriciomferz/gauth:latest | jq '.[0].Architecture'
+$ docker inspect ghcr.io/mauriciomferz/agentauth:latest | jq '.[0].Architecture'
 "amd64"  ← Image is AMD64
 ```
 
 **Error When Deploying to Kind**:
 ```
-Failed to pull image "ghcr.io/mauriciomferz/gauth:latest": 
+Failed to pull image "ghcr.io/mauriciomferz/agentauth:latest": 
 no match for platform in manifest: not found
 ```
 
@@ -308,10 +308,10 @@ Step 4: Build and push image          ✓ (60 seconds)
 Step 5: Image digest                  ✓ (sha256:7b6ca775...)
 
 Image pushed with tags:
-- ghcr.io/mauriciomferz/gauth:latest
-- ghcr.io/mauriciomferz/gauth:blue
-- ghcr.io/mauriciomferz/gauth:green
-- ghcr.io/mauriciomferz/gauth:main-79b8b4a
+- ghcr.io/mauriciomferz/agentauth:latest
+- ghcr.io/mauriciomferz/agentauth:blue
+- ghcr.io/mauriciomferz/agentauth:green
+- ghcr.io/mauriciomferz/agentauth:main-79b8b4a
 ```
 
 ### Build Performance
@@ -337,7 +337,7 @@ $ gh run view 19219027437
 ### ✅ Image Pull Validation
 
 ```bash
-$ docker pull --platform linux/amd64 ghcr.io/mauriciomferz/gauth:latest
+$ docker pull --platform linux/amd64 ghcr.io/mauriciomferz/agentauth:latest
 ✓ Successfully pulled
 ✓ Digest: sha256:7b6ca7755808...
 ✓ Size: 112MB (extracted)
@@ -346,11 +346,11 @@ $ docker pull --platform linux/amd64 ghcr.io/mauriciomferz/gauth:latest
 ### ✅ Image Inspection
 
 ```bash
-$ docker inspect ghcr.io/mauriciomferz/gauth:latest
+$ docker inspect ghcr.io/mauriciomferz/agentauth:latest
 ✓ Architecture: amd64 (correct for production)
 ✓ OS: linux
 ✓ Size: 27.7MB (compressed)
-✓ User: gauth (non-root security)
+✓ User: agentauth (non-root security)
 ✓ Labels: Git metadata embedded
 ✓ Created: 2025-11-10T02:54:51Z
 ```
@@ -377,7 +377,7 @@ $ kubectl apply -f k8s-test-blue.yaml  # With mock image
 | Docker build automated | ✅ Complete | New job in ci.yml |
 | GHCR authentication configured | ✅ Complete | GITHUB_TOKEN works |
 | Images built successfully | ✅ Complete | Run 19219027437 passed |
-| Images pushed to GHCR | ✅ Complete | ghcr.io/mauriciomferz/gauth |
+| Images pushed to GHCR | ✅ Complete | ghcr.io/mauriciomferz/agentauth |
 | Multiple tags created | ✅ Complete | latest, blue, green, SHA |
 | Image size optimized | ✅ Complete | 27.7MB (multi-stage) |
 | Platform correct for prod | ✅ Complete | linux/amd64 |

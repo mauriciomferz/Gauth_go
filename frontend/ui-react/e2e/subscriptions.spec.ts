@@ -37,7 +37,7 @@ test.describe.skip('Subscriptions Management', () => {
     test('should open subscription wizard', async ({ page }) => {
       const wizardButton = page.getByRole('button', { name: /New Subscription|Create Subscription|Subscription Wizard/i }).first()
       
-      if (await wizardButton.isVisible({ timeout: 5000 })) {
+      if (await wizardButton.isVisible({ timeout: 5000 }) {
         await wizardButton.click()
         
         // Wait for wizard modal or page
@@ -48,18 +48,18 @@ test.describe.skip('Subscriptions Management', () => {
     test('should navigate through wizard steps', async ({ page }) => {
       const wizardButton = page.getByRole('button', { name: /New Subscription|Create Subscription|Subscription Wizard/i }).first()
       
-      if (await wizardButton.isVisible({ timeout: 5000 })) {
+      if (await wizardButton.isVisible({ timeout: 5000 }) {
         await wizardButton.click()
         await page.waitForTimeout(1000)
         
         // Step 1: Basic Information
         const clientIdInput = page.locator('input[name*="client"], input[placeholder*="client"]').first()
-        if (await clientIdInput.isVisible({ timeout: 5000 })) {
+        if (await clientIdInput.isVisible({ timeout: 5000 }) {
           await clientIdInput.fill(`test-client-${Date.now()}`)
           
           // Next button
           const nextButton = page.getByRole('button', { name: /Next|Continue/i })
-          if (await nextButton.isVisible({ timeout: 5000 })) {
+          if (await nextButton.isVisible({ timeout: 5000 }) {
             await nextButton.click()
             await page.waitForTimeout(500)
           }
@@ -70,13 +70,13 @@ test.describe.skip('Subscriptions Management', () => {
     test('should validate required fields', async ({ page }) => {
       const wizardButton = page.getByRole('button', { name: /New Subscription|Create Subscription|Subscription Wizard/i }).first()
       
-      if (await wizardButton.isVisible({ timeout: 5000 })) {
+      if (await wizardButton.isVisible({ timeout: 5000 }) {
         await wizardButton.click()
         await page.waitForTimeout(1000)
         
         // Try to proceed without filling required fields
         const nextButton = page.getByRole('button', { name: /Next|Continue/i })
-        if (await nextButton.isVisible({ timeout: 5000 })) {
+        if (await nextButton.isVisible({ timeout: 5000 }) {
           await nextButton.click()
           
           // Should show validation error
@@ -92,7 +92,7 @@ test.describe.skip('Subscriptions Management', () => {
   test('should search/filter subscriptions', async ({ page }) => {
     const searchInput = page.locator('input[type="search"], input[placeholder*="search"], input[placeholder*="filter"]').first()
     
-    if (await searchInput.isVisible({ timeout: 5000 })) {
+    if (await searchInput.isVisible({ timeout: 5000 }) {
       await searchInput.fill('test')
       await page.waitForTimeout(500)
       console.log('✅ Search functionality tested')
@@ -115,7 +115,7 @@ test.describe.skip('Subscriptions Management', () => {
   test('should display subscription details', async ({ page }) => {
     const firstSubscription = page.locator('table tbody tr, [class*="subscription-item"]').first()
     
-    if (await firstSubscription.isVisible({ timeout: 5000 })) {
+    if (await firstSubscription.isVisible({ timeout: 5000 }) {
       await firstSubscription.click()
       await page.waitForTimeout(500)
       

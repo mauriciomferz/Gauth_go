@@ -16,18 +16,18 @@ All 5 admin handlers are now integrated into the AgentAuth server at `/api/admin
 
 ### Without Database (Other Endpoints Only)
 ```bash
-export GAUTH_JWT_SIGNING_KEY="your-secret-key"
+export AGENTAUTH_JWT_SIGNING_KEY="your-secret-key"
 go run ./cmd/web-server
 ```
 
 ### With PostgreSQL Database
 ```bash
-export GAUTH_JWT_SIGNING_KEY="your-secret-key"
+export AGENTAUTH_JWT_SIGNING_KEY="your-secret-key"
 export DB_HOST=localhost
 export DB_PORT=5432
 export DB_USER=postgres
 export DB_PASSWORD=your_password
-export DB_NAME=gauth
+export DB_NAME=agentauth
 export DB_SSLMODE=disable  # Use 'require' in production
 
 go run ./cmd/web-server
@@ -73,9 +73,9 @@ curl http://localhost:8080/api/admin/config/variables
 
 ### 1. Start PostgreSQL
 ```bash
-docker run --name gauth-postgres \
+docker run --name agentauth-postgres \
   -e POSTGRES_PASSWORD=password \
-  -e POSTGRES_DB=gauth \
+  -e POSTGRES_DB=agentauth \
   -p 5432:5432 \
   -d postgres:15
 ```
@@ -83,12 +83,12 @@ docker run --name gauth-postgres \
 ### 2. Run Migrations
 ```bash
 # TODO: Run migration files from database/migrations/
-psql -h localhost -U postgres -d gauth -f database/migrations/001_initial_schema.sql
+psql -h localhost -U postgres -d agentauth -f database/migrations/001_initial_schema.sql
 ```
 
 ### 3. Verify Tables
 ```bash
-psql -h localhost -U postgres -d gauth -c "\dt"
+psql -h localhost -U postgres -d agentauth -c "\dt"
 ```
 
 Expected tables (17):
@@ -104,7 +104,7 @@ Expected tables (17):
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `GAUTH_JWT_SIGNING_KEY` | ✅ Yes | none | JWT signing key (server won't start without it) |
+| `AGENTAUTH_JWT_SIGNING_KEY` | ✅ Yes | none | JWT signing key (server won't start without it) |
 | `DB_HOST` | ⚠️ For admin | none | PostgreSQL host (enables admin handlers) |
 | `DB_PORT` | No | 5432 | PostgreSQL port |
 | `DB_USER` | ⚠️ For admin | none | Database user |
@@ -175,8 +175,8 @@ Expected output:
 ## Troubleshooting
 
 ### Server Won't Start
-**Error**: `GAUTH_JWT_SIGNING_KEY is not set`  
-**Fix**: `export GAUTH_JWT_SIGNING_KEY="your-secret-key"`
+**Error**: `AGENTAUTH_JWT_SIGNING_KEY is not set`  
+**Fix**: `export AGENTAUTH_JWT_SIGNING_KEY="your-secret-key"`
 
 ### Admin Endpoints Return 404
 **Cause**: Database not configured  

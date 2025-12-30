@@ -24,7 +24,7 @@ Legend:
   - Canonical digest now binds multi‑signature threshold & weights via automatic V2 domain (no env indirection).
   - Embedded `Version` field and deterministic `weights` object included in canonical JSON (future evolution ready).
   - Strict authenticity default (missing public key is integrity failure unless explicitly disabled).
-  - Mandatory `jti` claim (fail closed unless override flag `GAUTH_ALLOW_MISSING_JTI=1`).
+  - Mandatory `jti` claim (fail closed unless override flag `AGENTAUTH_ALLOW_MISSING_JTI=1`).
   - Weighted multi‑signature structural validation (positive ints, subset of signers, cumulative weight >= threshold).
 
 ## Clause Coverage (Mapped Set)
@@ -35,7 +35,7 @@ Legend:
 | 0111:4 | Audit Logging | Partial | Memory/File loggers + hash chain; external notarization optional; lacks tamper‑evident signature on each entry. | `AuditEvents`, `FileLogger`, `VerifyChain` |
 | 0111:5 | Replay Protection | Partial | JTI enforced & replay store option; needs durable persistence + TTL eviction strategy. | `WithReplayProtection`, `VerifyToken` |
 | 0111:6 | Cryptographic Requirements | Partial | Canonical digest + multi‑sig domain separation done; still single Ed25519 algorithm & no detached verification for tokens. | `CanonicalPOADigest`, `verifyPOASignature` |
-| 0111:10 | Detached Signatures | Partial | Detached PoA signature path present; needs standard envelope negotiation + third‑party verifiers doc. | `rfc0111_detached_signature_test.go` |
+| 0111:10 | Detached Signatures | Partial | Detached PoA signature path present; needs standard envelope negotiation + third‑party verifiers doc. | `aap001_detached_signature_test.go` |
 | 0111:11 | Multi‑Signature Threshold | Implemented | Threshold + embedded weights; deterministic canonicalization & domain V2 separation; property tests updated. | `verifyMultiSignatures`, `ValidateMultiSignature`, `canonical_prop_test.go` |
 | 0115:1 | PoA Structure | Partial | Structure includes Version & Weights; advanced joint conditions & conditional clauses missing. | `PowerOfAttorney`, `ValidateMultiSignature` |
 | 0115:3 | Validity Period | Implemented | UTC normalized RFC3339, canonical digest excludes mutable fields. | `CanonicalPOADigest`, `validateDelegationRequest` |
@@ -48,10 +48,10 @@ Legend:
 ## Remediation Delta
 | Feature | Previous State | Current State | Security Gain |
 |---------|----------------|---------------|---------------|
-| Multi‑sig weights binding | External env var injection (`GAUTH_MULTI_SIG_WEIGHTS`) | Embedded in PoA & canonical digest domain | Removes config race; prevents threshold confusion & replay of single-sig digest |
+| Multi‑sig weights binding | External env var injection (`AGENTAUTH_MULTI_SIG_WEIGHTS`) | Embedded in PoA & canonical digest domain | Removes config race; prevents threshold confusion & replay of single-sig digest |
 | Domain separation | Manual env toggle V2 | Automatic when `Threshold > 1` | Eliminates misconfiguration risk, ensures semantic binding |
 | Canonical JSON | No version / weights | Includes `version`, `weights` (sorted) | Future-proof evolution; integrity across weighted signers |
-| Authenticity default | Soft skip missing public key | Integrity failure unless `GAUTH_STRICT_AUTHENTICITY=0` | Reduces silent downgrade of signature assurance |
+| Authenticity default | Soft skip missing public key | Integrity failure unless `AGENTAUTH_STRICT_AUTHENTICITY=0` | Reduces silent downgrade of signature assurance |
 | Replay claim enforcement | JTI optional outside replay store | JTI mandatory unless explicit override | Eliminates trivial replay vectors |
 
 ## Gap Matrix Highlights (Condensed)
@@ -69,14 +69,14 @@ Legend:
 
 ## New Verification Artifacts
 - Updated property tests: `canonical_prop_test.go` (weight order invariance, threshold domain separation)
-- Rotation & strict authenticity tests adjusted to reflect default strict mode: `rfc0111_rotation_test.go`, `rfc0111_strict_auth_test.go`
+- Rotation & strict authenticity tests adjusted to reflect default strict mode: `aap001_rotation_test.go`, `aap001_strict_auth_test.go`
 - Automatic domain V2 test: `canonical_domain_v2_test.go`
 
 ## Roadmap (Next Steps)
 1. Algorithm Agility: Introduce interface for PoA signature algorithms (Ed25519, ECDSA-P256, BLS aggregate). (P0)
 2. External Anchoring: Signed ledger entries + optional Merkle root publication. (P1)
 3. Partial Revocation & Suspension States: Extend `POAStatus` with `suspended`, `partially_revoked`. (P2)
-4. OpenAPI & Discovery: Emit `/well-known/gauth/config` with canonical digest algorithm list & JTI constraints. (P1)
+4. OpenAPI & Discovery: Emit `/well-known/agentauth/config` with canonical digest algorithm list & JTI constraints. (P1)
 5. Tracing & Metrics: OTEL spans around create/validate; Prometheus collector registration for violation counters. (P2)
 6. Replay Durability: Persistent JTI bloom filter or append-only WAL + snapshot/compaction. (P2)
 7. Validator Property Tests: Add semantic validator corpus; fuzz special conditions once interpreter added. (P2)
@@ -93,13 +93,13 @@ Legend:
 ## Compatibility & Migration Notes
 - Existing single-sig PoAs (Threshold=1) continue using V1 domain (digest unchanged).
 - Multi-sig PoAs issued before remediation that relied solely on env weight mapping will produce different digest if re-issued with embedded weights; consider transitional re-issuance.
-- Strict authenticity may cause new integrity failures for previously accepted delegations missing public key entries—mitigate by setting `GAUTH_STRICT_AUTHENTICITY=0` temporarily during migration.
+- Strict authenticity may cause new integrity failures for previously accepted delegations missing public key entries—mitigate by setting `AGENTAUTH_STRICT_AUTHENTICITY=0` temporarily during migration.
 
 ## Evidence References
 - `conformance/clause_map.json`
 - `conformance/report.json`
-- `pkg/rfc0111/canonical.go`
-- Tests: `pkg/rfc0111/*_test.go` (domain, rotation, strict auth, canonical properties)
+- `pkg/aap001/canonical.go`
+- Tests: `pkg/aap001/*_test.go` (domain, rotation, strict auth, canonical properties)
 
 ---
 Maintainer Action: Review roadmap items, prioritize P0/P1 for next sprint; attach this matrix to release notes.

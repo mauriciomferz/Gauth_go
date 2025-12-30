@@ -198,7 +198,7 @@ This PR completes Phase 2A Enhancement, successfully replacing all UI mocks with
 
 Since you're using an Enterprise Managed User account, please create the PR manually:
 
-1. **Go to GitHub**: https://github.com/mauriciomferz/Gauth_go
+1. **Go to GitHub**: https://github.com/mauriciomferz/AgentAuth_go
 2. **Click "Pull requests"** tab
 3. **Click "New pull request"**
 4. **Select branches**:
@@ -209,4 +209,4 @@ Since you're using an Enterprise Managed User account, please create the PR manu
 7. **Click "Create pull request"**
 
 Alternatively, use this direct link:
-https://github.com/mauriciomferz/Gauth_go/compare/main...phase-2a-enhancement
+https://github.com/mauriciomferz/AgentAuth_go/compare/main...phase-2a-enhancement

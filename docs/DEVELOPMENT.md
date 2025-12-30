@@ -16,12 +16,12 @@ owners: [system]
 **Copyright (c) 2025 AgentAuth Community gGmbH i.G.**
 Licensed under Apache 2.0
 
-**AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com
+**AgentAuth Community gGmbH i.G.**, www.agentauth.io
 Operated by AgentAuth Technologies GmbH
 MD: AgentAuth Contributor, the AgentAuth Community – Chairman of the Board: Daniel Hartert
-Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.AgentAuthID.com
+Hardtweg 31, D-53639 Königswinter, Siegburg HRB 18660, www.agentauth.io
 
-Development guide for the AAP-RFC-0111 and AAP-RFC-0115 implementation, featuring complete RFC-0115 PoA-Definition compliance.
+Development guide for the AAP-001 and AAP-002 implementation, featuring complete AAP-002 PoA-Definition compliance.
 
 ## Policy Chain / Provenance
 Experimental endpoints (beta):
@@ -47,17 +47,17 @@ Rollback semantics:
 
 Prometheus Metrics:
 ```
-# HELP gauth_policy_revisions_total Total appended policy bundle revisions
-# TYPE gauth_policy_revisions_total counter
-gauth_policy_revisions_total <n>
-# HELP gauth_policy_active_version Current effective policy bundle version (rollback aware)
-# TYPE gauth_policy_active_version gauge
-gauth_policy_active_version <v>
+# HELP agentauth_policy_revisions_total Total appended policy bundle revisions
+# TYPE agentauth_policy_revisions_total counter
+agentauth_policy_revisions_total <n>
+# HELP agentauth_policy_active_version Current effective policy bundle version (rollback aware)
+# TYPE agentauth_policy_active_version gauge
+agentauth_policy_active_version <v>
 ```
-Use `gauth_policy_active_version` to detect rollback activation (drops below the highest observed revision). Alert example:
+Use `agentauth_policy_active_version` to detect rollback activation (drops below the highest observed revision). Alert example:
 ```
 ALERT PolicyRollbackActive
-    IF (max_over_time(gauth_policy_revisions_total[5m]) - gauth_policy_active_version) > 0
+    IF (max_over_time(agentauth_policy_revisions_total[5m]) - agentauth_policy_active_version) > 0
     FOR 2m
     LABELS { severity="warning" }
     ANNOTATIONS { summary="Policy rollback active", description="Active version is behind latest revision" }
@@ -65,7 +65,7 @@ ALERT PolicyRollbackActive
 
 Testing Guidelines:
 - `web/policy_version_rollback_test.go` validates auto-increment, rollback switching, override clearing on new append, and evaluation tagging.
-- Set `GAUTH_SEED_POLICY=0` when asserting version genesis (first bundle must be version 1).
+- Set `AGENTAUTH_SEED_POLICY=0` when asserting version genesis (first bundle must be version 1).
 
 Future Roadmap:
 - RBAC / auth gating for rollback (admin-only token currently used for append but not rollback—add header enforcement).
@@ -97,13 +97,13 @@ Key design points:
 4. P99 latency uses interpolation within the crossing bucket: once cumulative >= 99% threshold, we linearly interpolate fractionally between previous and current bucket bounds.
 5. Prometheus exposition (`GET /api/v1/beta/policy/metrics/prometheus`) provides cumulative `_bucket` lines, a `+Inf` bucket, `_count`, and an approximate `_sum` based on midpoint heuristic between successive bounds. Example snippet:
 ```
-# TYPE gauth_policy_eval_latency_ns histogram
-gauth_policy_eval_latency_ns_bucket{le="1000"} 12
+# TYPE agentauth_policy_eval_latency_ns histogram
+agentauth_policy_eval_latency_ns_bucket{le="1000"} 12
 ...
-gauth_policy_eval_latency_ns_bucket{le="+Inf"} 87
-gauth_policy_eval_latency_ns_count 87
-gauth_policy_eval_latency_ns_sum 1234567
-gauth_policy_eval_latency_ns_p99 42000
+agentauth_policy_eval_latency_ns_bucket{le="+Inf"} 87
+agentauth_policy_eval_latency_ns_count 87
+agentauth_policy_eval_latency_ns_sum 1234567
+agentauth_policy_eval_latency_ns_p99 42000
 ```
 
 Limitations / Notes:
@@ -123,20 +123,20 @@ Future enhancements (tracked externally):
 - Optional adaptive bucket growth based on observed max latency.
 
 
-Seeding: The server seeds a demo bundle at startup unless `GAUTH_SEED_POLICY=0` is set. This avoids neutral `"no policy bundles"` evaluation results and provides immediate examples. Disable seeding to test chain bootstrap / genesis behavior.
+Seeding: The server seeds a demo bundle at startup unless `AGENTAUTH_SEED_POLICY=0` is set. This avoids neutral `"no policy bundles"` evaluation results and provides immediate examples. Disable seeding to test chain bootstrap / genesis behavior.
 ### Policy & Metrics Seeding / Admin Controls
 
 Environment variables affecting policy chain & metrics behavior (demo ergonomics vs deterministic tests):
 
 | Variable | Default | Effect |
 |----------|---------|--------|
-| `GAUTH_SEED_POLICY` | unset (treated as non-`0`) | When not `0`, seeds an initial demonstration bundle at server startup so evaluations have immediate provenance & allow decisions. Set to `0` in integration/unit tests that require starting from an empty chain (e.g. lifecycle/bootstrap assertions). |
-| `GAUTH_POLICY_ADMIN_TOKEN` | unset | If set, all bundle submission requests (`POST /api/v1/beta/policy/bundles`) must include matching `X-Admin-Token` header; omission or mismatch yields `401`. Facilitates simple auth gating around policy mutation endpoints without adding full authN. |
+| `AGENTAUTH_SEED_POLICY` | unset (treated as non-`0`) | When not `0`, seeds an initial demonstration bundle at server startup so evaluations have immediate provenance & allow decisions. Set to `0` in integration/unit tests that require starting from an empty chain (e.g. lifecycle/bootstrap assertions). |
+| `AGENTAUTH_POLICY_ADMIN_TOKEN` | unset | If set, all bundle submission requests (`POST /api/v1/beta/policy/bundles`) must include matching `X-Admin-Token` header; omission or mismatch yields `401`. Facilitates simple auth gating around policy mutation endpoints without adding full authN. |
 
 Test guidance:
-- Always set `GAUTH_SEED_POLICY=0` before constructing the server in tests that assert initial empty chain state (`policy_integration_test.go` pattern). Use `defer os.Unsetenv("GAUTH_SEED_POLICY")` to clean up.
+- Always set `AGENTAUTH_SEED_POLICY=0` before constructing the server in tests that assert initial empty chain state (`policy_integration_test.go` pattern). Use `defer os.Unsetenv("AGENTAUTH_SEED_POLICY")` to clean up.
 - Avoid relying on seeded bundle content for authorization logic tests—explicitly submit a test bundle for clarity.
-- If testing admin token enforcement, set `GAUTH_POLICY_ADMIN_TOKEN`, perform a negative request without header (expect 401), then a positive request with header (expect 200) to ensure gating.
+- If testing admin token enforcement, set `AGENTAUTH_POLICY_ADMIN_TOKEN`, perform a negative request without header (expect 401), then a positive request with header (expect 200) to ensure gating.
 
 Observability linkage:
 - The presence or absence of the seeded bundle changes early `/api/v1/beta/policy/metrics` values (allow/deny counters remain zero until first evaluation; chain head hash empty when seeding disabled).
@@ -147,7 +147,7 @@ Prometheus exposition reminders:
 - Authorization metrics follow similar conventions; adding real sums or exemplars would require storing raw durations per evaluation.
 
 Future refinement ideas:
-- Adaptive seeding (e.g., seed only if zero bundles AND a specific demo flag `GAUTH_DEMO_MODE=1`).
+- Adaptive seeding (e.g., seed only if zero bundles AND a specific demo flag `AGENTAUTH_DEMO_MODE=1`).
 - Replace static admin token with signed short-lived management JWT accepted by policy handlers.
 - Persist initial seed bundle hash to disk to demonstrate continuity vs ephemeral resets.
 
@@ -188,7 +188,7 @@ Next Enhancements:
 ### **1. RFC-Compliant Authorization**
 
 ```go
-import "github.com/AgentAuth-Foundation/gauth/pkg/auth"
+import "github.com/agentauth/agentauth/pkg/auth"
 
 // Create RFC service prototype
 service, err := auth.NewRFCCompliantService("YourCompany", "ai-authorization")
@@ -196,7 +196,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-// Create comprehensive PoA Definition (AgentAuth-RFC-002 (formerly RFC 115))
+// Create comprehensive PoA Definition (AgentAuth-RFC-002 (formerly AAP-002))
 poa := auth.PoADefinition{
     Principal: auth.Principal{
         Type:     auth.PrincipalTypeOrganization,
@@ -207,7 +207,7 @@ poa := auth.PoADefinition{
             RegisteredAuthority: true,
         },
     },
-    // ... complete AgentAuth-RFC-002 (formerly RFC 115) structure
+    // ... complete AgentAuth-RFC-002 (formerly AAP-002) structure
 }
 
 // Authorize with full RFC validation
@@ -221,7 +221,7 @@ response, err := service.AuthorizeAgentAuth(ctx, auth.AgentAuthRequest{
 ### **2. Development JWT Foundation**
 
 ```go
-import "github.com/AgentAuth-Foundation/gauth/pkg/auth"
+import "github.com/agentauth/agentauth/pkg/auth"
 
 // JWT service with RSA-256 signatures
 jwtService, err := auth.NewProperJWTService("issuer", "audience")
@@ -288,7 +288,7 @@ if !allowed {
 
 ## Package Structure
 
-### Public API (`pkg/gauth/`)
+### Public API (`pkg/agentauth/`)
 - Core authentication types and functions
 - Stable, versioned interfaces
 - Configuration types
@@ -370,7 +370,7 @@ defer limiter.Close()
 
 ```go
 func TestAuthentication(t *testing.T) {
-    auth := gauth.New(gauth.Config{...})
+    auth := agentauth.New(agentauth.Config{...})
     token, err := auth.Authenticate(ctx, credentials)
     if err != nil {
         t.Errorf("Authentication failed: %v", err)
@@ -383,8 +383,8 @@ func TestAuthentication(t *testing.T) {
 
 1. **Resilient Authentication**
 ```go
-auth := gauth.New(gauth.Config{
-    RateLimit: gauth.RateLimitConfig{
+auth := agentauth.New(agentauth.Config{
+    RateLimit: agentauth.RateLimitConfig{
         RequestsPerSecond: 100,
         WindowSize:       60,
     },
@@ -486,9 +486,9 @@ Issuance can now enforce that every PowerOfAttorney is digitally signed over a c
 
 Enabling:
 ```go
-svc := rfc0111.NewService(auditLogger, authorizer,
-    rfc0111.WithSignerProvider(func() (cr.Signer, error) { kp, _ := cr.NewInMemoryEd25519Provider(); return kp.ActiveSigner() }),
-    rfc0111.WithMandatorySignatures(),
+svc := aap001.NewService(auditLogger, authorizer,
+    aap001.WithSignerProvider(func() (cr.Signer, error) { kp, _ := cr.NewInMemoryEd25519Provider(); return kp.ActiveSigner() }),
+    aap001.WithMandatorySignatures(),
 )
 ```
 Behavior:
@@ -511,8 +511,8 @@ Provided prototype: `BasicPoAValidator` with rules:
 
 Usage:
 ```go
-svc := rfc0111.NewService(auditLogger, authorizer,
-    rfc0111.WithSemanticValidator(rfc0111.BasicPoAValidator{}),
+svc := aap001.NewService(auditLogger, authorizer,
+    aap001.WithSemanticValidator(aap001.BasicPoAValidator{}),
 )
 ```
 
@@ -526,7 +526,7 @@ Extending:
 - Verification counters (`SignatureVerifications`, `SignatureVerificationFailures`, `SignaturePublicKeyMissing`) remain unchanged in semantics.
 
 ### Testing
-New tests: `rfc0111_signature_semantic_test.go` cover mandatory signature success/failure and semantic rule enforcement.
+New tests: `aap001_signature_semantic_test.go` cover mandatory signature success/failure and semantic rule enforcement.
 
 ### Gap Matrix Updates
 "Mandatory POA signature at issuance" moved to Implemented when `WithMandatorySignatures` is active.
@@ -547,9 +547,9 @@ Buckets:
 
 Usage:
 ```go
-repo, err := rfc0111.NewBoltRepository("data/poa.db")
+repo, err := aap001.NewBoltRepository("data/poa.db")
 if err != nil { log.Fatalf("open bolt: %v", err) }
-svc := rfc0111.NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer(), rfc0111.WithPOARepository(repo))
+svc := aap001.NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer(), aap001.WithPOARepository(repo))
 defer repo.Close()
 ```
 
@@ -603,16 +603,16 @@ Fail-Open Strategy: Store outages do not block token validation; heightened repl
 Configuration Examples:
 ```go
 // In-memory only (single node / dev)
-svc := rfc0111.NewService(auditLogger, authorizer,
-    rfc0111.WithMetrics(memMetrics),
-    rfc0111.WithReplayProtection(10_000, 10*time.Minute),
+svc := aap001.NewService(auditLogger, authorizer,
+    aap001.WithMetrics(memMetrics),
+    aap001.WithReplayProtection(10_000, 10*time.Minute),
 )
 
 // Distributed (production recommended)
 redisClient := redis.NewClient(&redis.Options{Addr: "127.0.0.1:6379"})
-svcDist := rfc0111.NewService(auditLogger, authorizer,
-    rfc0111.WithMetrics(promMetrics),
-    rfc0111.WithReplayStoreRedis(redisClient, "gauth", 10*time.Minute),
+svcDist := aap001.NewService(auditLogger, authorizer,
+    aap001.WithMetrics(promMetrics),
+    aap001.WithReplayStoreRedis(redisClient, "agentauth", 10*time.Minute),
 )
 ```
 
@@ -623,7 +623,7 @@ Design Notes / Next Steps:
 - Hardening: Optional fail-closed mode for high-assurance deployments (reject on store error).
 
 Testing:
-- `rfc0111_replay_test.go` exercises in-memory path.
+- `aap001_replay_test.go` exercises in-memory path.
 - `redis_replay_store_test.go` validates Redis first-seen vs replay (skips if Redis unavailable).
 - Metrics tests extended for snapshot changes.
 
@@ -649,11 +649,11 @@ Default limits (applied when a field is zero):
 Usage examples:
 ```go
 // Default limits
-svc := rfc0111.NewService(auditLogger, authorizer)
+svc := aap001.NewService(auditLogger, authorizer)
 
 // Custom tightened limits for a high-assurance environment
-svcStrict := rfc0111.NewService(auditLogger, authorizer,
-    rfc0111.WithValidationLimits(rfc0111.ValidationLimits{
+svcStrict := aap001.NewService(auditLogger, authorizer,
+    aap001.WithValidationLimits(aap001.ValidationLimits{
         MaxScopeItems:          8,
         MaxScopeLen:            48,
         MaxRestrictions:        8,
@@ -664,8 +664,8 @@ svcStrict := rfc0111.NewService(auditLogger, authorizer,
 )
 
 // Looser prototype limits (NOT recommended for production)
-svcWide := rfc0111.NewService(auditLogger, authorizer,
-    rfc0111.WithValidationLimits(rfc0111.ValidationLimits{MaxScopeItems: 100, MaxDuration: 180 * 24 * time.Hour}),
+svcWide := aap001.NewService(auditLogger, authorizer,
+    aap001.WithValidationLimits(aap001.ValidationLimits{MaxScopeItems: 100, MaxDuration: 180 * 24 * time.Hour}),
 )
 ```
 

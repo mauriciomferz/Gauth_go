@@ -76,7 +76,7 @@ func AuthorizeWithDetails(ctx, token, operation, resource, args) (*Authorization
 - Includes decision, reason, obligations, restrictions
 - Suitable for audit logging and detailed reporting
 
-### 2. MCP Scope Management (`pkg/gauth/extended_token.go`)
+### 2. MCP Scope Management (`pkg/agentauth/extended_token.go`)
 
 Added helper methods to ExtendedToken:
 
@@ -261,7 +261,7 @@ ok      pkg/mcp    0.223s
 
 ---
 
-## RFC-0111 Compliance Impact
+## AAP-001 Compliance Impact
 
 ### Overall Compliance Increase
 
@@ -269,10 +269,10 @@ ok      pkg/mcp    0.223s
 |--------|--------|-------|--------|
 | MCP Compliance | 30% | 60% | +30% |
 | Building Blocks | 45% | 52% | +7% |
-| Overall RFC-0111 | 75% | 76% | +1% |
+| Overall AAP-001 | 75% | 76% | +1% |
 
 **Rationale**: 
-- MCP is one of several RFC-0111 building blocks
+- MCP is one of several AAP-001 building blocks
 - 30% increase in MCP compliance contributes ~7% to building blocks category
 - Building blocks category contributes to overall compliance
 - Net effect: +1% overall compliance (75% → 76%)
@@ -312,7 +312,7 @@ ok      pkg/mcp    0.223s
 import (
     "context"
     "github.com/.../pkg/mcp"
-    "github.com/.../pkg/gauth"
+    "github.com/.../pkg/agentauth"
     "github.com/.../pkg/pdp"
 )
 
@@ -408,7 +408,7 @@ if result.Allowed {
    - Coverage for all authorization paths
 
 ### Modified Files
-3. **`pkg/gauth/extended_token.go`** (+45 lines)
+3. **`pkg/agentauth/extended_token.go`** (+45 lines)
    - Added `HasMCPScope()` method
    - Added `GetMCPScopes()` method
    - Added `AddMCPScope()` method
@@ -469,7 +469,7 @@ if result.Allowed {
 
 ## Compliance Certification
 
-### RFC-0111 Building Block: MCP
+### AAP-001 Building Block: MCP
 - ✅ **Phase 1 Complete** (30%): Core client, transport, connection manager
 - ✅ **Phase 2 Complete** (60%): Authorization bridge, PDP integration, scope support
 - ⏳ **Phase 3 Planned** (85%): Agent integration, audit logging, REST API, E2E tests
@@ -501,7 +501,7 @@ The Authorization Bridge successfully integrates AgentAuth's comprehensive autho
 - 16 tests (all passing)
 - 56.9% coverage
 - MCP compliance: 30% → 60%
-- Overall RFC-0111: 75% → 76%
+- Overall AAP-001: 75% → 76%
 
 **Production Readiness**: Phase 2 is production-ready for authorization evaluation. Phase 3 will add operational components (agent integration, audit logging, REST API) to complete the MCP integration.
 

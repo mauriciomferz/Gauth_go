@@ -30,7 +30,7 @@ Each package has comprehensive unit tests:
 ```go
 func TestAuthentication(t *testing.T) {
     // Setup
-    auth := gauth.New(gauth.Config{
+    auth := agentauth.New(agentauth.Config{
         AuthServerURL: "https://auth.example.com",
         ClientID:     "test-client",
     })
@@ -38,12 +38,12 @@ func TestAuthentication(t *testing.T) {
     // Test cases
     tests := []struct {
         name    string
-        creds   gauth.Credentials
+        creds   agentauth.Credentials
         wantErr error
     }{
         {
             name: "valid credentials",
-            creds: gauth.Credentials{
+            creds: agentauth.Credentials{
                 Username: "valid",
                 Password: "valid",
             },
@@ -124,11 +124,11 @@ func (m *mockStore) Get(ctx context.Context, key string) (*token.Token, error) {
 
 ```go
 // testConfig returns a config for testing
-func testConfig() gauth.Config {
-    return gauth.Config{
+func testConfig() agentauth.Config {
+    return agentauth.Config{
         AuthServerURL: "https://test.example.com",
         ClientID:     "test-client",
-        RateLimit: gauth.RateLimitConfig{
+        RateLimit: agentauth.RateLimitConfig{
             RequestsPerSecond: 100,
             WindowSize:       1,
         },
@@ -181,7 +181,7 @@ func TestToken_Revocation(t *testing.T)
 func TestConcurrent(t *testing.T) {
     const workers = 10
     var wg sync.WaitGroup
-    auth := gauth.New(testConfig())
+    auth := agentauth.New(testConfig())
 
     for i := 0; i < workers; i++ {
         wg.Add(1)
@@ -198,7 +198,7 @@ func TestConcurrent(t *testing.T) {
 
 ```go
 func TestWithCleanup(t *testing.T) {
-    auth := gauth.New(testConfig())
+    auth := agentauth.New(testConfig())
     t.Cleanup(func() {
         // Cleanup resources
     })
@@ -223,10 +223,10 @@ func TestWithTimeout(t *testing.T) {
 ### 1. Setup
 
 ```go
-func setupIntegrationTest(t *testing.T) *gauth.Auth {
+func setupIntegrationTest(t *testing.T) *agentauth.Auth {
     t.Helper()
     // Setup test environment
-    return gauth.New(integrationConfig())
+    return agentauth.New(integrationConfig())
 }
 ```
 
@@ -262,7 +262,7 @@ go test -bench=. -memprofile=mem.prof ./...
 
 ```go
 func BenchmarkLoad(b *testing.B) {
-    auth := gauth.New(loadTestConfig())
+    auth := agentauth.New(loadTestConfig())
     b.SetParallelism(100)
 
     b.RunParallel(func(pb *testing.PB) {

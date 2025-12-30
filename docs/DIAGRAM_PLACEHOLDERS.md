@@ -30,7 +30,7 @@ sequenceDiagram
     participant Server
     Client->>Server: GET /model/limits/attestation
     Server->>Server: Build unsigned attestation
-    Server->>Server: Prefix + Sign (GAUTH_MODEL_LIMIT_ATTEST:)
+    Server->>Server: Prefix + Sign (AGENTAUTH_MODEL_LIMIT_ATTEST:)
     Server-->>Client: JSON attestation + signature
     Client->>Server: POST /model/limits/attestation/verify (attestation)
     Server->>Server: Rebuild unsigned + prefix

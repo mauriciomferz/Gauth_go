@@ -10,7 +10,7 @@ owners: [system]
 
 ## What Was Accomplished
 
-You asked to **"revamp webapps"** and we've delivered a complete React-based Single Page Application (SPA) to replace the legacy `index.html` and `gauth1.html` files.
+You asked to **"revamp webapps"** and we've delivered a complete React-based Single Page Application (SPA) to replace the legacy `index.html` and `agentauth1.html` files.
 
 ## Quick Start (5 Minutes)
 

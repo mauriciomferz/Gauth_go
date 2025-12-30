@@ -1,6 +1,6 @@
 # US Identity Verification Architecture
 
-**Project**: AgentAuth RFC-0111 External Connectors Enhancement  
+**Project**: AgentAuth AAP-001 External Connectors Enhancement  
 **Component**: US Identity Verification System  
 **Date**: November 12, 2025  
 **Status**: Design Phase  
@@ -16,7 +16,7 @@ This document defines the architecture for US identity verification integration 
 
 1. **Geographic Expansion**: Enable AgentAuth to support US-based identity verification
 2. **Multi-Document Support**: Verify US passports, driver's licenses, state IDs, and SSN
-3. **Compliance**: Meet RFC-0111 PVP requirements with US-specific adaptations
+3. **Compliance**: Meet AAP-001 PVP requirements with US-specific adaptations
 4. **Integration**: Seamlessly integrate with existing PVPClient framework
 
 ### Scope
@@ -47,13 +47,13 @@ This document defines the architecture for US identity verification integration 
 │                                                                 │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │            Identity Verification Service                  │  │
-│  │  (pkg/gauth/service/identity_verification.go)             │  │
+│  │  (pkg/agentauth/service/identity_verification.go)             │  │
 │  └──────────────────┬────────────────────────────────────────┘  │
 │                     │                                           │
 │                     ▼                                           │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │              PVPClient Framework                          │  │
-│  │       (pkg/gauth/external/pvp_pip_clients.go)             │  │
+│  │       (pkg/agentauth/external/pvp_pip_clients.go)             │  │
 │  │                                                           │  │
 │  │  • Circuit Breaker    • Retry Logic                       │  │
 │  │  • Fallback Handling  • Metrics Tracking                  │  │
@@ -62,7 +62,7 @@ This document defines the architecture for US identity verification integration 
 │                     ▼                                           │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │          US Identity Verifier (NEW)                       │  │
-│  │      (pkg/gauth/external/us_identity_verifier.go)         │  │
+│  │      (pkg/agentauth/external/us_identity_verifier.go)         │  │
 │  │                                                           │  │
 │  │  ┌──────────────────┐  ┌──────────────────┐               │  │
 │  │  │ Passport Verifier│  │  DL Verifier     │               │  │
@@ -88,7 +88,7 @@ This document defines the architecture for US identity verification integration 
 ### 1.2 Component Overview
 
 #### USIdentityVerifier
-**Location**: `pkg/gauth/external/us_identity_verifier.go`  
+**Location**: `pkg/agentauth/external/us_identity_verifier.go`  
 **Responsibility**: US-specific identity verification logic  
 **Methods**:
 - `VerifyPassport(ctx, *PassportVerificationRequest) (*IdentityVerificationResult, error)`
@@ -97,7 +97,7 @@ This document defines the architecture for US identity verification integration 
 - `VerifyStateID(ctx, *StateIDVerificationRequest) (*IdentityVerificationResult, error)`
 
 #### API Provider Adapter
-**Location**: `pkg/gauth/external/us_api_providers.go`  
+**Location**: `pkg/agentauth/external/us_api_providers.go`  
 **Responsibility**: Abstract API provider implementations  
 **Interface**:
 ```go
@@ -297,7 +297,7 @@ type IdentityVerificationResult struct {
     DocumentType         DocumentType           `json:"document_type"`
     DocumentNumber       string                 `json:"document_number"`
     DocumentState        string                 `json:"document_state,omitempty"`
-    IssuingAuthority     string                 `json:"issuing_authority"`
+    IssuinagentAuthority     string                 `json:"issuing_authority"`
     
     // Identity details
     VerifiedIdentity     *VerifiedIdentity      `json:"verified_identity"`
@@ -422,8 +422,8 @@ The USIdentityVerifier integrates with the existing `PVPClient` framework:
 // Example: Using USIdentityVerifier with PVPClient
 func (s *IdentityVerificationService) VerifyUSPassport(
     ctx context.Context,
-    req *gauth.IdentityVerificationRequest,
-) (*gauth.IdentityVerificationResult, error) {
+    req *agentauth.IdentityVerificationRequest,
+) (*agentauth.IdentityVerificationResult, error) {
     
     // Convert to US-specific request format
     passportReq := &external.PassportVerificationRequest{
@@ -837,7 +837,7 @@ func TestValidateDLFormat_StateVariations(t *testing.T) {
 ### 10.1 Phase 1: Core Infrastructure (Week 1-2)
 
 **Deliverables**:
-1. ✅ Create `pkg/gauth/external/us_identity_verifier.go`
+1. ✅ Create `pkg/agentauth/external/us_identity_verifier.go`
 2. ✅ Implement data models (request/response types)
 3. ✅ Create API provider interface (`USIdentityAPIProvider`)
 4. ✅ Implement state-specific validation (DL formats)
@@ -849,7 +849,7 @@ func TestValidateDLFormat_StateVariations(t *testing.T) {
 ### 10.2 Phase 2: API Provider Integration (Week 2-3)
 
 **Deliverables**:
-1. ✅ Implement Persona provider (`pkg/gauth/external/providers/persona_provider.go`)
+1. ✅ Implement Persona provider (`pkg/agentauth/external/providers/persona_provider.go`)
 2. ✅ Implement Trulioo provider (fallback)
 3. ✅ Create provider abstraction layer
 4. ✅ Add caching layer
@@ -1024,7 +1024,7 @@ log.Warn("Identity verification failed",
 
 - External connector compliance: 20% → 40% (+20%)
 - US identity verification support: 0% → 100%
-- RFC-0111 PVP compliance: Enhanced with US support
+- AAP-001 PVP compliance: Enhanced with US support
 
 ---
 

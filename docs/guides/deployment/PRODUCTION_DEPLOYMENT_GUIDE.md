@@ -73,8 +73,8 @@ AgentAuth consists of two main components:
 
 Required secrets:
 ```bash
-GAUTH_JWT_SIGNING_KEY          # JWT signing key (256-bit min)
-GAUTH_DB_PASSWORD              # PostgreSQL password
+AGENTAUTH_JWT_SIGNING_KEY          # JWT signing key (256-bit min)
+AGENTAUTH_DB_PASSWORD              # PostgreSQL password
 REDIS_PASSWORD                 # Redis password
 GRAFANA_ADMIN_PASSWORD         # Grafana admin password
 ```
@@ -97,22 +97,22 @@ Edit `.env` with your production values:
 
 ```bash
 # Core settings
-GAUTH_ENV=production
-GAUTH_CORS_ALLOW=https://your-domain.com
+AGENTAUTH_ENV=production
+AGENTAUTH_CORS_ALLOW=https://your-domain.com
 
 # Security (CHANGE THESE!)
-GAUTH_JWT_SIGNING_KEY=your-secure-256-bit-key-here
+AGENTAUTH_JWT_SIGNING_KEY=your-secure-256-bit-key-here
 
 # Database
-GAUTH_DB_HOST=your-postgres-host
-GAUTH_DB_USER=gauth_prod
-GAUTH_DB_PASSWORD=your-secure-db-password
-GAUTH_DB_NAME=gauth_production
+AGENTAUTH_DB_HOST=your-postgres-host
+AGENTAUTH_DB_USER=agentauth_prod
+AGENTAUTH_DB_PASSWORD=your-secure-db-password
+AGENTAUTH_DB_NAME=agentauth_production
 
 # TLS
-GAUTH_TLS_ENABLED=true
-GAUTH_TLS_CERT_PATH=/etc/gauth/tls/cert.pem
-GAUTH_TLS_KEY_PATH=/etc/gauth/tls/key.pem
+AGENTAUTH_TLS_ENABLED=true
+AGENTAUTH_TLS_CERT_PATH=/etc/agentauth/tls/cert.pem
+AGENTAUTH_TLS_KEY_PATH=/etc/agentauth/tls/key.pem
 ```
 
 ### 2. Frontend Configuration
@@ -136,15 +136,15 @@ VITE_ANALYTICS_ID=your-analytics-id
 Initialize PostgreSQL database:
 
 ```sql
-CREATE USER gauth_prod WITH PASSWORD 'your-secure-password';
-CREATE DATABASE gauth_production OWNER gauth_prod;
-GRANT ALL PRIVILEGES ON DATABASE gauth_production TO gauth_prod;
+CREATE USER agentauth_prod WITH PASSWORD 'your-secure-password';
+CREATE DATABASE agentauth_production OWNER agentauth_prod;
+GRANT ALL PRIVILEGES ON DATABASE agentauth_production TO agentauth_prod;
 ```
 
 Run migrations:
 
 ```bash
-psql -U gauth_prod -d gauth_production -f schema/init.sql
+psql -U agentauth_prod -d agentauth_production -f schema/init.sql
 ```
 
 ---
@@ -156,8 +156,8 @@ psql -U gauth_prod -d gauth_production -f schema/init.sql
 #### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/mauriciomferz/Gauth_go.git
-cd Gauth_go
+git clone https://github.com/mauriciomferz/AgentAuth.git
+cd AgentAuth
 ```
 
 #### Step 2: Configure Environment
@@ -178,11 +178,11 @@ cd ../..
 
 ```bash
 # Build backend
-docker build -f Dockerfile.production -t gauth-backend:latest .
+docker build -f Dockerfile.production -t agentauth-backend:latest .
 
 # Build frontend
 cd web/ui-react
-docker build -f Dockerfile.production -t gauth-frontend:latest .
+docker build -f Dockerfile.production -t agentauth-frontend:latest .
 cd ../..
 ```
 
@@ -191,13 +191,13 @@ cd ../..
 ```bash
 # Create .env file for Docker Compose
 cat > .env.docker <<EOF
-GAUTH_JWT_SIGNING_KEY=your-key-here
-GAUTH_DB_USER=gauth_prod
-GAUTH_DB_PASSWORD=your-db-password
-GAUTH_DB_NAME=gauth_production
+AGENTAUTH_JWT_SIGNING_KEY=your-key-here
+AGENTAUTH_DB_USER=agentauth_prod
+AGENTAUTH_DB_PASSWORD=your-db-password
+AGENTAUTH_DB_NAME=agentauth_production
 REDIS_PASSWORD=your-redis-password
 GRAFANA_ADMIN_PASSWORD=your-grafana-password
-GAUTH_CORS_ALLOW=https://your-domain.com
+AGENTAUTH_CORS_ALLOW=https://your-domain.com
 VITE_API_BASE_URL=https://api.your-domain.com/api/v1
 EOF
 
@@ -228,36 +228,36 @@ docker-compose -f docker-compose.production.yml logs -f
 #### Step 1: Create Namespace
 
 ```bash
-kubectl create namespace gauth-production
+kubectl create namespace agentauth-production
 ```
 
 #### Step 2: Create Secrets
 
 ```bash
 # Create secrets from files
-kubectl create secret generic gauth-secrets \
+kubectl create secret generic agentauth-secrets \
   --from-literal=jwt-signing-key=your-key \
   --from-literal=db-password=your-db-password \
   --from-literal=redis-password=your-redis-password \
-  -n gauth-production
+  -n agentauth-production
 
 # TLS certificates
-kubectl create secret tls gauth-tls \
+kubectl create secret tls agentauth-tls \
   --cert=path/to/cert.pem \
   --key=path/to/key.pem \
-  -n gauth-production
+  -n agentauth-production
 ```
 
 #### Step 3: Deploy Database
 
 ```bash
-kubectl apply -f k8s-postgres.yaml -n gauth-production
+kubectl apply -f k8s-postgres.yaml -n agentauth-production
 ```
 
 #### Step 4: Deploy Redis
 
 ```bash
-kubectl apply -f k8s-redis.yaml -n gauth-production
+kubectl apply -f k8s-redis.yaml -n agentauth-production
 ```
 
 #### Step 5: Deploy Backend
@@ -267,33 +267,33 @@ kubectl apply -f k8s-redis.yaml -n gauth-production
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gauth-backend
-  namespace: gauth-production
+  name: agentauth-backend
+  namespace: agentauth-production
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gauth-backend
+      app: agentauth-backend
   template:
     metadata:
       labels:
-        app: gauth-backend
+        app: agentauth-backend
     spec:
       containers:
       - name: backend
-        image: ghcr.io/mauriciomferz/gauth_go-backend:latest
+        image: ghcr.io/mauriciomferz/agentauth_go-backend:latest
         ports:
         - containerPort: 8080
         env:
-        - name: GAUTH_JWT_SIGNING_KEY
+        - name: AGENTAUTH_JWT_SIGNING_KEY
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: jwt-signing-key
-        - name: GAUTH_DB_PASSWORD
+        - name: AGENTAUTH_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: gauth-secrets
+              name: agentauth-secrets
               key: db-password
         resources:
           requests:
@@ -335,8 +335,8 @@ kubectl apply -f k8s-frontend.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: gauth-ingress
-  namespace: gauth-production
+  name: agentauth-ingress
+  namespace: agentauth-production
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -345,7 +345,7 @@ spec:
   - hosts:
     - your-domain.com
     - api.your-domain.com
-    secretName: gauth-tls
+    secretName: agentauth-tls
   rules:
   - host: your-domain.com
     http:
@@ -354,7 +354,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: gauth-frontend
+            name: agentauth-frontend
             port:
               number: 80
   - host: api.your-domain.com
@@ -364,7 +364,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: gauth-backend
+            name: agentauth-backend
             port:
               number: 8080
 ```
@@ -382,11 +382,11 @@ kubectl apply -f k8s-ingress.yaml
 Backend metrics available at: `http://backend:8080/api/v1/beta/metrics`
 
 Key metrics:
-- `gauth_http_requests_total` - Total HTTP requests
-- `gauth_http_request_duration_seconds` - Request duration
-- `gauth_token_creation_total` - Token creations
-- `gauth_authorization_checks_total` - Authorization checks
-- `gauth_cache_hits_total` - Cache hit rate
+- `agentauth_http_requests_total` - Total HTTP requests
+- `agentauth_http_request_duration_seconds` - Request duration
+- `agentauth_token_creation_total` - Token creations
+- `agentauth_authorization_checks_total` - Authorization checks
+- `agentauth_cache_hits_total` - Cache hit rate
 
 ### Grafana Dashboards
 
@@ -403,7 +403,7 @@ Import dashboards from `grafana-dashboards/`
 docker-compose logs -f backend
 
 # Kubernetes
-kubectl logs -f deployment/gauth-backend -n gauth-production
+kubectl logs -f deployment/agentauth-backend -n agentauth-production
 ```
 
 Log levels: `debug`, `info`, `warn`, `error`
@@ -417,7 +417,7 @@ Production default: `warn` (JSON format)
 docker-compose logs -f frontend
 
 # Kubernetes
-kubectl logs -f deployment/gauth-frontend -n gauth-production
+kubectl logs -f deployment/agentauth-frontend -n agentauth-production
 ```
 
 ### Health Checks
@@ -444,12 +444,12 @@ curl https://api.your-domain.com/api/v1/beta/metrics
 docker-compose -f docker-compose.production.yml down
 
 # Step 2: Pull previous image version
-docker pull ghcr.io/mauriciomferz/gauth_go-backend:v1.0.0
-docker pull ghcr.io/mauriciomferz/gauth_go-frontend:v1.0.0
+docker pull ghcr.io/mauriciomferz/agentauth_go-backend:v1.0.0
+docker pull ghcr.io/mauriciomferz/agentauth_go-frontend:v1.0.0
 
 # Step 3: Tag as latest
-docker tag ghcr.io/mauriciomferz/gauth_go-backend:v1.0.0 gauth-backend:latest
-docker tag ghcr.io/mauriciomferz/gauth_go-frontend:v1.0.0 gauth-frontend:latest
+docker tag ghcr.io/mauriciomferz/agentauth_go-backend:v1.0.0 agentauth-backend:latest
+docker tag ghcr.io/mauriciomferz/agentauth_go-frontend:v1.0.0 agentauth-frontend:latest
 
 # Step 4: Start services
 docker-compose -f docker-compose.production.yml up -d
@@ -459,27 +459,27 @@ docker-compose -f docker-compose.production.yml up -d
 
 ```bash
 # Rollback backend
-kubectl rollout undo deployment/gauth-backend -n gauth-production
+kubectl rollout undo deployment/agentauth-backend -n agentauth-production
 
 # Rollback frontend
-kubectl rollout undo deployment/gauth-frontend -n gauth-production
+kubectl rollout undo deployment/agentauth-frontend -n agentauth-production
 
 # Check rollout status
-kubectl rollout status deployment/gauth-backend -n gauth-production
-kubectl rollout status deployment/gauth-frontend -n gauth-production
+kubectl rollout status deployment/agentauth-backend -n agentauth-production
+kubectl rollout status deployment/agentauth-frontend -n agentauth-production
 
 # Rollback to specific revision
-kubectl rollout undo deployment/gauth-backend --to-revision=2 -n gauth-production
+kubectl rollout undo deployment/agentauth-backend --to-revision=2 -n agentauth-production
 ```
 
 ### Database Rollback
 
 ```bash
 # Backup current database
-pg_dump -U gauth_prod gauth_production > backup_$(date +%Y%m%d_%H%M%S).sql
+pg_dump -U agentauth_prod agentauth_production > backup_$(date +%Y%m%d_%H%M%S).sql
 
 # Restore previous backup
-psql -U gauth_prod -d gauth_production < backup_20251115_120000.sql
+psql -U agentauth_prod -d agentauth_production < backup_20251115_120000.sql
 ```
 
 ---
@@ -494,8 +494,8 @@ psql -U gauth_prod -d gauth_production < backup_20251115_120000.sql
 
 **Check**:
 ```bash
-docker logs gauth-backend-prod
-kubectl logs deployment/gauth-backend -n gauth-production
+docker logs agentauth-backend-prod
+kubectl logs deployment/agentauth-backend -n agentauth-production
 ```
 
 **Common causes**:
@@ -507,10 +507,10 @@ kubectl logs deployment/gauth-backend -n gauth-production
 **Solutions**:
 ```bash
 # Verify environment variables
-docker exec gauth-backend-prod env | grep GAUTH
+docker exec agentauth-backend-prod env | grep AGENTAUTH
 
 # Test database connection
-docker exec gauth-backend-prod psql -h $GAUTH_DB_HOST -U $GAUTH_DB_USER -d $GAUTH_DB_NAME -c "SELECT 1"
+docker exec agentauth-backend-prod psql -h $AGENTAUTH_DB_HOST -U $AGENTAUTH_DB_USER -d $AGENTAUTH_DB_NAME -c "SELECT 1"
 
 # Check port availability
 netstat -tuln | grep 8080
@@ -526,11 +526,11 @@ netstat -tuln | grep 8080
 curl -v http://backend:8080/health
 
 # Check CORS configuration
-docker exec gauth-backend-prod env | grep CORS
+docker exec agentauth-backend-prod env | grep CORS
 ```
 
 **Solutions**:
-- Update `GAUTH_CORS_ALLOW` to include frontend domain
+- Update `AGENTAUTH_CORS_ALLOW` to include frontend domain
 - Verify `VITE_API_BASE_URL` points to correct backend
 - Check network connectivity between containers
 
@@ -541,10 +541,10 @@ docker exec gauth-backend-prod env | grep CORS
 **Check**:
 ```bash
 # Docker
-docker stats gauth-backend-prod
+docker stats agentauth-backend-prod
 
 # Kubernetes
-kubectl top pod -n gauth-production
+kubectl top pod -n agentauth-production
 ```
 
 **Solutions**:
@@ -559,17 +559,17 @@ kubectl top pod -n gauth-production
 
 **Check**:
 ```sql
-SELECT count(*) FROM pg_stat_activity WHERE datname = 'gauth_production';
+SELECT count(*) FROM pg_stat_activity WHERE datname = 'agentauth_production';
 ```
 
 **Solutions**:
 ```bash
 # Increase max connections
-GAUTH_DB_MAX_CONNECTIONS=200
+AGENTAUTH_DB_MAX_CONNECTIONS=200
 
 # Tune connection pool
-GAUTH_DB_IDLE_CONNECTIONS=20
-GAUTH_DB_CONNECTION_LIFETIME=3600
+AGENTAUTH_DB_IDLE_CONNECTIONS=20
+AGENTAUTH_DB_CONNECTION_LIFETIME=3600
 ```
 
 ---
@@ -601,15 +601,15 @@ GAUTH_DB_CONNECTION_LIFETIME=3600
 **Implementation**:
 ```bash
 # Enable TLS
-GAUTH_TLS_ENABLED=true
-GAUTH_TLS_MIN_VERSION=1.3
+AGENTAUTH_TLS_ENABLED=true
+AGENTAUTH_TLS_MIN_VERSION=1.3
 
 # Restrict CORS
-GAUTH_CORS_ALLOW=https://your-domain.com
+AGENTAUTH_CORS_ALLOW=https://your-domain.com
 
 # Enable rate limiting
-GAUTH_RATE_LIMIT_ENABLED=true
-GAUTH_RATE_LIMIT_REQUESTS=100
+AGENTAUTH_RATE_LIMIT_ENABLED=true
+AGENTAUTH_RATE_LIMIT_REQUESTS=100
 ```
 
 ### 3. Access Control
@@ -638,7 +638,7 @@ Alert on:
 # 1. Check service status
 docker-compose ps
 # or
-kubectl get pods -n gauth-production
+kubectl get pods -n agentauth-production
 
 # 2. Check for errors
 docker-compose logs --tail=100 backend | grep ERROR
@@ -686,7 +686,7 @@ docker-compose pull
    ```bash
    # Check all services
    docker-compose ps
-   kubectl get pods -n gauth-production
+   kubectl get pods -n agentauth-production
    ```
 
 2. **Immediate Response**
@@ -694,7 +694,7 @@ docker-compose pull
    # Restart affected service
    docker-compose restart backend
    # or
-   kubectl rollout restart deployment/gauth-backend -n gauth-production
+   kubectl rollout restart deployment/agentauth-backend -n agentauth-production
    ```
 
 3. **Investigate**
@@ -724,16 +724,16 @@ docker-compose pull
 
 ```bash
 # Connection pooling
-GAUTH_DB_MAX_CONNECTIONS=100
-GAUTH_DB_IDLE_CONNECTIONS=10
+AGENTAUTH_DB_MAX_CONNECTIONS=100
+AGENTAUTH_DB_IDLE_CONNECTIONS=10
 
 # Caching
-GAUTH_CACHE_ENABLED=true
-GAUTH_CACHE_TTL=300
+AGENTAUTH_CACHE_ENABLED=true
+AGENTAUTH_CACHE_TTL=300
 
 # Rate limiting
-GAUTH_RATE_LIMIT_REQUESTS=1000
-GAUTH_RATE_LIMIT_WINDOW=60s
+AGENTAUTH_RATE_LIMIT_REQUESTS=1000
+AGENTAUTH_RATE_LIMIT_WINDOW=60s
 ```
 
 ### Frontend Optimization
@@ -770,31 +770,31 @@ BACKUP_DIR=/backups
 DATE=$(date +%Y%m%d_%H%M%S)
 
 # Backup PostgreSQL
-pg_dump -U $GAUTH_DB_USER -h $GAUTH_DB_HOST $GAUTH_DB_NAME | \
-  gzip > $BACKUP_DIR/gauth_db_$DATE.sql.gz
+pg_dump -U $AGENTAUTH_DB_USER -h $AGENTAUTH_DB_HOST $AGENTAUTH_DB_NAME | \
+  gzip > $BACKUP_DIR/agentauth_db_$DATE.sql.gz
 
 # Upload to S3
-aws s3 cp $BACKUP_DIR/gauth_db_$DATE.sql.gz \
-  s3://your-backup-bucket/gauth/
+aws s3 cp $BACKUP_DIR/agentauth_db_$DATE.sql.gz \
+  s3://your-backup-bucket/agentauth/
 
 # Cleanup old backups (keep 30 days)
-find $BACKUP_DIR -name "gauth_db_*.sql.gz" -mtime +30 -delete
+find $BACKUP_DIR -name "agentauth_db_*.sql.gz" -mtime +30 -delete
 ```
 
 ### Recovery Procedure
 
 ```bash
 # 1. Download backup
-aws s3 cp s3://your-backup-bucket/gauth/gauth_db_20251115_120000.sql.gz .
+aws s3 cp s3://your-backup-bucket/agentauth/agentauth_db_20251115_120000.sql.gz .
 
 # 2. Extract
-gunzip gauth_db_20251115_120000.sql.gz
+gunzip agentauth_db_20251115_120000.sql.gz
 
 # 3. Restore
-psql -U gauth_prod -d gauth_production < gauth_db_20251115_120000.sql
+psql -U agentauth_prod -d agentauth_production < agentauth_db_20251115_120000.sql
 
 # 4. Verify
-psql -U gauth_prod -d gauth_production -c "SELECT COUNT(*) FROM subscriptions;"
+psql -U agentauth_prod -d agentauth_production -c "SELECT COUNT(*) FROM subscriptions;"
 ```
 
 ---
@@ -809,7 +809,7 @@ psql -U gauth_prod -d gauth_production -c "SELECT COUNT(*) FROM subscriptions;"
 docker-compose up -d --scale backend=3
 
 # Kubernetes
-kubectl scale deployment gauth-backend --replicas=5 -n gauth-production
+kubectl scale deployment agentauth-backend --replicas=5 -n agentauth-production
 ```
 
 #### Auto-scaling (Kubernetes)
@@ -817,12 +817,12 @@ kubectl scale deployment gauth-backend --replicas=5 -n gauth-production
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gauth-backend-hpa
+  name: agentauth-backend-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gauth-backend
+    name: agentauth-backend
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -851,8 +851,8 @@ Increase resources based on metrics:
 - **Architecture**: `ARCHITECTURE_SOLUTION.md`
 
 ### Repository
-- **GitHub**: https://github.com/mauriciomferz/Gauth_go
-- **Issues**: https://github.com/mauriciomferz/Gauth_go/issues
+- **GitHub**: https://github.com/mauriciomferz/AgentAuth
+- **Issues**: https://github.com/mauriciomferz/AgentAuth/issues
 
 ### Monitoring
 - **Prometheus**: http://localhost:9090

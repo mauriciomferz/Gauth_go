@@ -1,5 +1,5 @@
 # Quantum Resistance Implementation Guide
-**RFC-0111 §4.3 Compliance**  
+**AAP-001 §4.3 Compliance**  
 **Version:** 1.0  
 **Date:** November 10, 2025  
 **Status:** Implementation Guidance
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document provides comprehensive guidance for implementing quantum-resistant cryptographic algorithms in AgentAuth 1.0 per RFC-0111 §4.3 requirements. As quantum computing advances threaten traditional cryptographic systems (RSA, ECC), AgentAuth implementations must prepare for post-quantum security.
+This document provides comprehensive guidance for implementing quantum-resistant cryptographic algorithms in AgentAuth 1.0 per AAP-001 §4.3 requirements. As quantum computing advances threaten traditional cryptographic systems (RSA, ECC), AgentAuth implementations must prepare for post-quantum security.
 
 **Key Requirements:**
 - Support for NIST-standardized post-quantum algorithms
@@ -18,11 +18,11 @@ This document provides comprehensive guidance for implementing quantum-resistant
 
 ---
 
-## RFC-0111 §4.3 Requirements
+## AAP-001 §4.3 Requirements
 
 ### 4.3.1 Quantum Resistance Mandate
 
-RFC-0111 §4.3 states:
+AAP-001 §4.3 states:
 
 > *"Authorization tokens SHOULD employ quantum-resistant cryptographic algorithms where available and practical. Implementations SHALL provide migration paths to post-quantum cryptography as standards mature."*
 
@@ -402,7 +402,7 @@ Implement comprehensive test vectors from NIST:
 ### Hybrid Token Signing
 
 ```go
-package gauth
+package agentauth
 
 import (
     "crypto/ed25519"
@@ -537,7 +537,7 @@ func VerifyHybridToken(token *ExtendedToken, classicalPubKey ed25519.PublicKey, 
 - ✅ **NIST FIPS 203** (ML-KEM): Compliant
 - ✅ **NIST FIPS 204** (ML-DSA): Compliant
 - ✅ **NIST FIPS 205** (SLH-DSA): Compliant
-- ✅ **RFC-0111 §4.3**: Compliant
+- ✅ **AAP-001 §4.3**: Compliant
 
 ### Certification Targets
 
@@ -561,7 +561,7 @@ func VerifyHybridToken(token *ExtendedToken, classicalPubKey ed25519.PublicKey, 
 3. **NIST FIPS 205:** Stateless Hash-Based Digital Signature Standard
    - https://csrc.nist.gov/pubs/fips/205/final
 
-4. **RFC-0111:** AgentAuth 1.0 Authorization Framework
+4. **AAP-001:** AgentAuth 1.0 Authorization Framework
    - §4.3 Quantum Resistance Requirements
 
 ### Technical Resources

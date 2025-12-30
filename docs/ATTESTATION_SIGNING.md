@@ -19,7 +19,7 @@ Streaming: `/api/v1/model/limits/attestation/stream` (SSE)
 1. Build unsigned base struct (snapshot hash, audit/anchor heads, strict flag, nonce).
 2. Optionally augment with surge stats (recent limit exceed surge detection) if a surge
    trigger occurred within the last 5 seconds.
-3. If GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1 and a notarizer is configured, compute the
+3. If AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE=1 and a notarizer is configured, compute the
    combined hash:
 
    ```
@@ -32,8 +32,8 @@ Streaming: `/api/v1/model/limits/attestation/stream` (SSE)
    signature.
 4. Marshal the unsigned attestation (excluding all signature-bearing fields).
 5. Sign primary signature over: `AttestationDomainPrefix + unsignedJSON` where
-   `AttestationDomainPrefix` is the constant `"GAUTH_MODEL_LIMIT_ATTEST:"`.
-6. If `GAUTH_ATTEST_DOMAIN_PREFIX` environment variable is set, also produce a dual
+   `AttestationDomainPrefix` is the constant `"AGENTAUTH_MODEL_LIMIT_ATTEST:"`.
+6. If `AGENTAUTH_ATTEST_DOMAIN_PREFIX` environment variable is set, also produce a dual
    domain signature over: `<env-prefix> + unsignedJSON` (enables migration / agility).
 
 ## Signature Fields
@@ -78,7 +78,7 @@ in the signed payload.
 Primary and domain signing messages:
 
 ```
-primary_msg = "GAUTH_MODEL_LIMIT_ATTEST:" + unsignedJSON
+primary_msg = "AGENTAUTH_MODEL_LIMIT_ATTEST:" + unsignedJSON
 domain_msg  = "EXTRA_ATTEST:" + unsignedJSON
 ```
 
@@ -129,11 +129,11 @@ Verifier reconstructs unsigned JSON (dropping signature fields), prepends the co
 
 | Variable | Purpose |
 |----------|---------|
-| `GAUTH_MODEL_LIMIT_ATTEST_SIGN` | Enable signing (primary and optional dual) |
-| `GAUTH_MODEL_LIMIT_ATTEST_NOTARIZE` | Enable notarization (receipt added before signing) |
-| `GAUTH_ATTEST_DOMAIN_PREFIX` | Enable dual domain signature (agility / migration) |
-| `GAUTH_ATTEST_STREAM_ENABLE` | Enable SSE streaming endpoint |
-| `GAUTH_ATTEST_NONCE_TTL` | TTL (e.g. `1h`) for replay nonce eviction |
+| `AGENTAUTH_MODEL_LIMIT_ATTEST_SIGN` | Enable signing (primary and optional dual) |
+| `AGENTAUTH_MODEL_LIMIT_ATTEST_NOTARIZE` | Enable notarization (receipt added before signing) |
+| `AGENTAUTH_ATTEST_DOMAIN_PREFIX` | Enable dual domain signature (agility / migration) |
+| `AGENTAUTH_ATTEST_STREAM_ENABLE` | Enable SSE streaming endpoint |
+| `AGENTAUTH_ATTEST_NONCE_TTL` | TTL (e.g. `1h`) for replay nonce eviction |
 
 ## Failure Modes
 
@@ -181,7 +181,7 @@ Separating signing agility from verification reduces blast radius for algorithm 
 
 ## Persistent Replay Protection & Fuzz Coverage (RB17/RB16)
 
-Attestation nonce replay protection now supports durability via a WAL + periodic snapshot/compact cycle (every 5 minutes, configurable with `GAUTH_ATTEST_REPLAY_COMPACT_MINUTES`). The durable store ensures replay detection survives process restarts. Tests:
+Attestation nonce replay protection now supports durability via a WAL + periodic snapshot/compact cycle (every 5 minutes, configurable with `AGENTAUTH_ATTEST_REPLAY_COMPACT_MINUTES`). The durable store ensures replay detection survives process restarts. Tests:
 
 * `TestAttestationReplayPersistenceRestart` validates a recorded nonce remains detected after restart.
 * `replay_store_*` tests cover corruption recovery and WAL rotation.
@@ -192,7 +192,7 @@ Environment knobs:
 
 | Variable | Purpose |
 |----------|---------|
-| `GAUTH_ATTEST_REPLAY_COMPACT_MINUTES` | Interval in minutes for WAL snapshot+compact loop |
-| `GAUTH_REPLAY_CAP` | Capacity limit for in-memory nonce map (evicts oldest when exceeded) |
-| `GAUTH_REPLAY_WAL` or the explicit path passed to `NewReplayNonceStoreWithConfig` | Enables durability for replay store |
+| `AGENTAUTH_ATTEST_REPLAY_COMPACT_MINUTES` | Interval in minutes for WAL snapshot+compact loop |
+| `AGENTAUTH_REPLAY_CAP` | Capacity limit for in-memory nonce map (evicts oldest when exceeded) |
+| `AGENTAUTH_REPLAY_WAL` or the explicit path passed to `NewReplayNonceStoreWithConfig` | Enables durability for replay store |
 

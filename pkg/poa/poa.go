@@ -109,7 +109,7 @@ type ModelAttributes struct {
 
 type Certification struct {
 	Type              string
-	IssuingAuthority  string
+	IssuinagentAuthority  string
 	CertificateNumber string
 	ValidFrom         string
 	ValidUntil        string
@@ -578,7 +578,7 @@ const (
 type RegistrationInfo struct {
 	RegisteredName        string `json:"registered_name"`
 	RegistrationNumber    string `json:"registration_number"`
-	RegisteringAuthority  string `json:"registering_authority"`
+	RegisterinagentAuthority  string `json:"registering_authority"`
 	RegistrationDate      string `json:"registration_date"` // ISO 8601
 	Jurisdiction          string `json:"jurisdiction"`
 	BusinessType          string `json:"business_type"`
@@ -959,7 +959,7 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 		Subject:   req.Subject,
 		Resource:  req.Resource,
 		Action:    req.Action,
-		Issuer:    "gauth-poa-service",
+		Issuer:    "agentauth-poa-service",
 		IssuedAt:  time.Now(),
 		ExpiresAt: time.Now().Add(time.Hour), // Default 1 hour
 		Scope:     req.Scope,
@@ -981,7 +981,7 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 
 	// Add basic attestation
 	poa.Attestation = &Attestation{
-		AttestedBy:    "gauth-attestation-service",
+		AttestedBy:    "agentauth-attestation-service",
 		AttestedAt:    time.Now(),
 		Evidence:      make(map[string]interface{}),
 		Confidence:    0.95,
@@ -992,10 +992,10 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 	poa.Digest = CanonicalDigest(poa)
 
 	// Optional multi-signature issuance using KeyProvider (demo). Controlled via env:
-	// GAUTH_POA_MULTISIG_KIDS=<kid1,kid2,...> GAUTH_POA_MULTISIG_THRESHOLD=<n>
-	// If kids not set but provider available, uses active key only when GAUTH_POA_MULTISIG_SIGN=1.
-	if os.Getenv("GAUTH_POA_MULTISIG_SIGN") == "1" {
-		kidsRaw := os.Getenv("GAUTH_POA_MULTISIG_KIDS")
+	// AGENTAUTH_POA_MULTISIG_KIDS=<kid1,kid2,...> AGENTAUTH_POA_MULTISIG_THRESHOLD=<n>
+	// If kids not set but provider available, uses active key only when AGENTAUTH_POA_MULTISIG_SIGN=1.
+	if os.Getenv("AGENTAUTH_POA_MULTISIG_SIGN") == "1" {
+		kidsRaw := os.Getenv("AGENTAUTH_POA_MULTISIG_KIDS")
 		var kids []string
 		if kidsRaw != "" {
 			for _, part := range strings.Split(kidsRaw, ",") {
@@ -1013,7 +1013,7 @@ func (s *MemoryService) Issue(ctx context.Context, req *Request) (*ProofOfAuthor
 		}
 
 		th := 0
-		if rawTh := os.Getenv("GAUTH_POA_MULTISIG_THRESHOLD"); rawTh != "" {
+		if rawTh := os.Getenv("AGENTAUTH_POA_MULTISIG_THRESHOLD"); rawTh != "" {
 			if v, err := strconv.Atoi(rawTh); err == nil && v >= 0 {
 				th = v
 			}
@@ -1291,7 +1291,7 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 		}{AttestedBy: p.Attestation.AttestedBy, AttestedAt: p.Attestation.AttestedAt, Confidence: p.Attestation.Confidence, ValidityScore: p.Attestation.ValidityScore}
 	}
 	raw, _ := json.Marshal(c)
-	return append([]byte("GAUTH_POA:"), raw...)
+	return append([]byte("AGENTAUTH_POA:"), raw...)
 }
 
 // VerifyMultiSig validates all signatures present and evaluates threshold satisfaction.
@@ -1330,8 +1330,8 @@ func VerifyMultiSig(p *ProofOfAuthorization, kp internalCrypto.KeyProvider) (int
 
 		// Verify aggregated signature
 		// Domain tag must match what acts as signer domain.
-		// For now hardcoding GAUTH_BLS_SIG_V1 as per provider default
-		prov := internalCrypto.NewBLSProvider("GAUTH_BLS_SIG_V1")
+		// For now hardcoding AGENTAUTH_BLS_SIG_V1 as per provider default
+		prov := internalCrypto.NewBLSProvider("AGENTAUTH_BLS_SIG_V1")
 		if err := prov.VerifyAggregated(pubKeys, msg, aggSig); err != nil {
 			return 0, false, p.Threshold
 		}

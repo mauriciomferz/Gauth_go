@@ -438,7 +438,7 @@ func NewTokenHandler(db *pgxpool.Pool, redisClient *redis.Client) *TokenHandler 
 **Database Integration**:
 ```bash
 # Test connection
-psql -h localhost -U gauth -d gauth_db -c "SELECT COUNT(*) FROM tokens;"
+psql -h localhost -U agentauth -d agentauth_db -c "SELECT COUNT(*) FROM tokens;"
 
 # Test token insertion
 curl -X POST http://localhost:8080/api/admin/tokens/create \
@@ -446,7 +446,7 @@ curl -X POST http://localhost:8080/api/admin/tokens/create \
   -d '{"subscriberId":"sub-test-001","tokenType":"access","ttl":3600,"scopes":["read","write"]}'
 
 # Verify database
-psql -h localhost -U gauth -d gauth_db -c "SELECT token_id, subject, token_type, expires_at FROM tokens ORDER BY issued_at DESC LIMIT 5;"
+psql -h localhost -U agentauth -d agentauth_db -c "SELECT token_id, subject, token_type, expires_at FROM tokens ORDER BY issued_at DESC LIMIT 5;"
 ```
 
 **Redis Integration**:
@@ -502,7 +502,7 @@ redis-cli TTL "blacklist:default-tenant:tok_xxxxxx"
 Run migration to create tables:
 ```bash
 cd pkg/storage/migrations
-psql -h localhost -U gauth -d gauth_db -f 001_initial_schema.sql
+psql -h localhost -U agentauth -d agentauth_db -f 001_initial_schema.sql
 ```
 
 ### Redis Configuration
@@ -513,7 +513,7 @@ redis-cli ping  # Should return PONG
 
 ### Environment Variables
 ```bash
-export DATABASE_URL="postgres://gauth:password@localhost:5432/gauth_db?sslmode=disable"
+export DATABASE_URL="postgres://agentauth:password@localhost:5432/agentauth_db?sslmode=disable"
 export REDIS_URL="redis://localhost:6379"
 ```
 
@@ -549,7 +549,7 @@ log.Printf("Cleaned up %d expired blacklist entries", deleted)
 SELECT 
     token_type,
     COUNT(*) as total,
-    COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW()) as active,
+    COUNT(*) FILTER (WHERE revoked_at IS NULL AND expires_at > NOW() as active,
     COUNT(*) FILTER (WHERE revoked_at IS NOT NULL) as revoked
 FROM tokens
 GROUP BY token_type;

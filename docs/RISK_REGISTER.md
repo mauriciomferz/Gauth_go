@@ -9,7 +9,7 @@ owners: [system]
 # AgentAuth Risk Register (Initial Beta)
 
 Generated: 2025-10-28
-Scope: Architectural & operational risks for RFC-0111 / RFC-0115 compliance features. Updated per remediation milestone.
+Scope: Architectural & operational risks for AAP-001 / AAP-002 compliance features. Updated per remediation milestone.
 
 | ID | Risk | Description | Impact | Likelihood | Current Mitigation | Residual Risk | Owner | Status |
 |----|------|-------------|--------|------------|--------------------|---------------|-------|--------|
@@ -49,12 +49,12 @@ Monthly during beta; on major feature merges.
 | R3 | Policy Bundle Tampering | Bundle integrity partial; manifest unsigned | Medium | Signed manifest digest (Ed25519) + verification step | Policy Eng | Current | Existing: `pkg/policy/engine.go` |
 | R4 | Ledger Entry Alteration | Hash chain only; per-entry signature missing | Medium | Add entry-level signature fields + verification | Platform Eng | Current | `pkg/ledger/bolt.go` (base) |
 | R5 | Partial Revocation Missing | Cannot suspend / partially revoke; binary state only | Low | Extend status enums + placeholder endpoints (501 until implemented) | Delegation Eng | Next | `delegation/revocation_chain.go` |
-| R6 | No Depth Limits | Delegation chain depth not enforced | Low | Add max depth constant + validation + tests | Delegation Eng | Next | `pkg/rfc0111/rfc0111.go` |
+| R6 | No Depth Limits | Delegation chain depth not enforced | Low | Add max depth constant + validation + tests | Delegation Eng | Next | `pkg/aap001/aap001.go` |
 | R7 | Missing Tracing | No OTEL spans around critical flows | Low | Introduce tracer wrapper (create/validate/revoke/multisig) | Observability Eng | Next | `internal/observability/violations.go` |
-| R8 | Lack Load Bench | No sustained throughput metrics; risk of regression | Medium | Add benchmark harness (token validate + multisig verify) | QA | Next | `pkg/rfc0111/bench_test.go` (seed) |
-| R9 | Replay Store Error Handling | Fail-closed mode present; persistence errors not surfaced clearly | Low | Expand error taxonomy to include replay persistence failures | Security Eng | Current | `pkg/rfc0111/rfc0111_replay_failclosed_test.go` |
-| R10 | Discovery Incompleteness | No public config introspection endpoint | Medium | Implement `/well-known/gauth/config` with algorithms & requirements | Platform Eng | Current | `web/server_clean.go` (add handler) |
-| R11 | Canonical Evolution Risk | Adding fields could break digest inadvertently | Low | Maintain versioned canonical schema doc; property tests for invariance | Crypto Lead | Ongoing | `pkg/rfc0111/canonical_version_weights_test.go` |
+| R8 | Lack Load Bench | No sustained throughput metrics; risk of regression | Medium | Add benchmark harness (token validate + multisig verify) | QA | Next | `pkg/aap001/bench_test.go` (seed) |
+| R9 | Replay Store Error Handling | Fail-closed mode present; persistence errors not surfaced clearly | Low | Expand error taxonomy to include replay persistence failures | Security Eng | Current | `pkg/aap001/aap001_replay_failclosed_test.go` |
+| R10 | Discovery Incompleteness | No public config introspection endpoint | Medium | Implement `/well-known/agentauth/config` with algorithms & requirements | Platform Eng | Current | `web/server_clean.go` (add handler) |
+| R11 | Canonical Evolution Risk | Adding fields could break digest inadvertently | Low | Maintain versioned canonical schema doc; property tests for invariance | Crypto Lead | Ongoing | `pkg/aap001/canonical_version_weights_test.go` |
 | R12 | External Notarization Coverage | Revocation anchoring partial; limited external receipts | Low | Integrate with TSA / blockchain provider adapters | Platform Eng | Future | `pkg/ledger/external_anchor.go` |
 
 ## Status Codes

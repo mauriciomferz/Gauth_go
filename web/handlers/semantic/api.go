@@ -46,13 +46,13 @@ func (a *API) HandlePrometheus(c *gin.Context) {
 
 	ss := a.Handler.Service.SemanticSnapshot()
 	var sb strings.Builder
-	sb.WriteString("# HELP gauth_poa_semantic_counter Prototype AAP001 semantic counters\n")
-	sb.WriteString("# TYPE gauth_poa_semantic_counter counter\n")
+	sb.WriteString("# HELP agentauth_poa_semantic_counter Prototype AAP001 semantic counters\n")
+	sb.WriteString("# TYPE agentauth_poa_semantic_counter counter\n")
 	for k, v := range ss {
 		// sanitization simple
 		kSan := strings.ReplaceAll(k, "-", "_")
 		kSan = strings.ReplaceAll(kSan, ".", "_")
-		sb.WriteString(fmt.Sprintf("gauth_poa_semantic_counter{key=\"%s\"} %d\n", kSan, v))
+		sb.WriteString(fmt.Sprintf("agentauth_poa_semantic_counter{key=\"%s\"} %d\n", kSan, v))
 	}
 
 	// Also expose anomaly scores
@@ -61,34 +61,34 @@ func (a *API) HandlePrometheus(c *gin.Context) {
 	a.Handler.mu.Unlock()
 
 	if len(scores) > 0 {
-		sb.WriteString("\n# HELP gauth_poa_semantic_anomaly_score EWMA Z-score for detected anomalies\n")
-		sb.WriteString("# TYPE gauth_poa_semantic_anomaly_score gauge\n")
+		sb.WriteString("\n# HELP agentauth_poa_semantic_anomaly_score EWMA Z-score for detected anomalies\n")
+		sb.WriteString("# TYPE agentauth_poa_semantic_anomaly_score gauge\n")
 		for k, v := range scores {
 			kSan := strings.ReplaceAll(k, "-", "_")
-			sb.WriteString(fmt.Sprintf("gauth_poa_semantic_anomaly_score{key=\"%s\"} %f\n", kSan, v))
+			sb.WriteString(fmt.Sprintf("agentauth_poa_semantic_anomaly_score{key=\"%s\"} %f\n", kSan, v))
 		}
 	}
 
 	// Add rate metrics
 	rates60 := a.Handler.ComputeRates(60 * time.Second)
 	if len(rates60) > 0 {
-		sb.WriteString("\n# HELP gauth_poa_semantic_rate_60s Per-minute rate of semantic events over last 60s\n")
-		sb.WriteString("# TYPE gauth_poa_semantic_rate_60s gauge\n")
+		sb.WriteString("\n# HELP agentauth_poa_semantic_rate_60s Per-minute rate of semantic events over last 60s\n")
+		sb.WriteString("# TYPE agentauth_poa_semantic_rate_60s gauge\n")
 		for k, v := range rates60 {
 			kSan := strings.ReplaceAll(k, "-", "_")
 			kSan = strings.ReplaceAll(kSan, ".", "_")
-			sb.WriteString(fmt.Sprintf("gauth_poa_semantic_rate_60s{key=\"%s\"} %f\n", kSan, v))
+			sb.WriteString(fmt.Sprintf("agentauth_poa_semantic_rate_60s{key=\"%s\"} %f\n", kSan, v))
 		}
 	}
 
 	rates300 := a.Handler.ComputeRates(300 * time.Second)
 	if len(rates300) > 0 {
-		sb.WriteString("\n# HELP gauth_poa_semantic_rate_300s Per-minute rate of semantic events over last 300s\n")
-		sb.WriteString("# TYPE gauth_poa_semantic_rate_300s gauge\n")
+		sb.WriteString("\n# HELP agentauth_poa_semantic_rate_300s Per-minute rate of semantic events over last 300s\n")
+		sb.WriteString("# TYPE agentauth_poa_semantic_rate_300s gauge\n")
 		for k, v := range rates300 {
 			kSan := strings.ReplaceAll(k, "-", "_")
 			kSan = strings.ReplaceAll(kSan, ".", "_")
-			sb.WriteString(fmt.Sprintf("gauth_poa_semantic_rate_300s{key=\"%s\"} %f\n", kSan, v))
+			sb.WriteString(fmt.Sprintf("agentauth_poa_semantic_rate_300s{key=\"%s\"} %f\n", kSan, v))
 		}
 	}
 
@@ -99,9 +99,9 @@ func (a *API) HandlePrometheus(c *gin.Context) {
 		if status == "ok" {
 			val = 1
 		}
-		sb.WriteString("\n# HELP gauth_persistence_integrity_semantic Semantic persistence integrity check (1=ok, 0=mismatch/fail)\n")
-		sb.WriteString("# TYPE gauth_persistence_integrity_semantic gauge\n")
-		sb.WriteString(fmt.Sprintf("gauth_persistence_integrity_semantic %d\n", val))
+		sb.WriteString("\n# HELP agentauth_persistence_integrity_semantic Semantic persistence integrity check (1=ok, 0=mismatch/fail)\n")
+		sb.WriteString("# TYPE agentauth_persistence_integrity_semantic gauge\n")
+		sb.WriteString(fmt.Sprintf("agentauth_persistence_integrity_semantic %d\n", val))
 	}
 
 	c.String(200, sb.String())

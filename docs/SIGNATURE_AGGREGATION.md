@@ -89,10 +89,10 @@ BLS (Boneh-Lynn-Shacham) signatures use pairing-based cryptography on the BLS12-
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GAUTH_BATCH_VERIFY_PARALLEL` | `1` | Enable parallel batch verification (0=sequential) |
-| `GAUTH_BATCH_VERIFY_WORKERS` | `4` | Max parallel workers for batch verification (1-128) |
-| `GAUTH_BATCH_VERIFY_BLS` | `0` | Enable BLS batch optimization (experimental) |
-| `GAUTH_MULTI_SIG_WEIGHTS` | `` | Weighted threshold: `"alice=5,bob=3,carol=2"` |
+| `AGENTAUTH_BATCH_VERIFY_PARALLEL` | `1` | Enable parallel batch verification (0=sequential) |
+| `AGENTAUTH_BATCH_VERIFY_WORKERS` | `4` | Max parallel workers for batch verification (1-128) |
+| `AGENTAUTH_BATCH_VERIFY_BLS` | `0` | Enable BLS batch optimization (experimental) |
+| `AGENTAUTH_MULTI_SIG_WEIGHTS` | `` | Weighted threshold: `"alice=5,bob=3,carol=2"` |
 
 ### Code Configuration
 
@@ -124,8 +124,8 @@ results, err := svc.BatchVerifyTokens(BatchVerifyTokensRequest{
 package main
 
 import (
-    icrypto "github.com/...Gauth.../internal/crypto"
-    "github.com/...Gauth.../pkg/rfc0111"
+    icrypto "github.com/...AgentAuth.../internal/crypto"
+    "github.com/...AgentAuth.../pkg/aap001"
 )
 
 func main() {
@@ -144,7 +144,7 @@ func main() {
     }
     
     // 2. Aggregate signatures
-    aggSig, err := rfc0111.AggregateBLSSignatures(message, sigs)
+    aggSig, err := aap001.AggregateBLSSignatures(message, sigs)
     if err != nil {
         panic(err)
     }
@@ -171,10 +171,10 @@ func main() {
 ### 2. Batch Token Verification (Parallel)
 
 ```go
-func verifyTokenBatch(svc *rfc0111.Service, tokens []string) error {
+func verifyTokenBatch(svc *aap001.Service, tokens []string) error {
     ctx := context.Background()
     
-    results, err := svc.BatchVerifyTokens(rfc0111.BatchVerifyTokensRequest{
+    results, err := svc.BatchVerifyTokens(aap001.BatchVerifyTokensRequest{
         Tokens:     tokens,
         Parallel:   true,
         MaxWorkers: 4,
@@ -184,7 +184,7 @@ func verifyTokenBatch(svc *rfc0111.Service, tokens []string) error {
         return err
     }
     
-    batchResults := rfc0111.BatchVerifyResults(results)
+    batchResults := aap001.BatchVerifyResults(results)
     
     // Check overall success
     if !batchResults.AllSucceeded() {
@@ -206,10 +206,10 @@ func verifyTokenBatch(svc *rfc0111.Service, tokens []string) error {
 ### 3. Threshold Signatures (Weighted k-of-n)
 
 ```go
-func createWeightedMultiSigPoA(svc *rfc0111.Service) (*rfc0111.PowerOfAttorney, error) {
+func createWeightedMultiSigPoA(svc *aap001.Service) (*aap001.PowerOfAttorney, error) {
     // Create PoA requiring 2 of 3 signers (count-based)
     // With weights: alice=5, bob=3, carol=2
-    poa := &rfc0111.PowerOfAttorney{
+    poa := &aap001.PowerOfAttorney{
         ID:        "multisig-weighted-1",
         Grantor:   "organization",
         Grantee:   "service-account",
@@ -224,7 +224,7 @@ func createWeightedMultiSigPoA(svc *rfc0111.Service) (*rfc0111.PowerOfAttorney, 
     }
     
     // Structural validation
-    if err := rfc0111.ValidateMultiSignature(poa); err != nil {
+    if err := aap001.ValidateMultiSignature(poa); err != nil {
         return nil, err
     }
     
@@ -246,7 +246,7 @@ func createWeightedMultiSigPoA(svc *rfc0111.Service) (*rfc0111.PowerOfAttorney, 
 **1. Inventory Multi-Signature Usage**
 ```bash
 # Find PoAs with multi-signature fields
-grep -r "Threshold\|Weights\|MultiSignatures" pkg/rfc0111/
+grep -r "Threshold\|Weights\|MultiSignatures" pkg/aap001/
 
 # Identify high-volume verification paths
 grep -r "VerifyToken" cmd/ internal/
@@ -268,7 +268,7 @@ log.Printf("Baseline: %v for %d tokens", baseline, len(tokens))
 **1. Enable Batch Verification (Low Risk)**
 ```bash
 # Set parallel workers
-export GAUTH_BATCH_VERIFY_WORKERS=8
+export AGENTAUTH_BATCH_VERIFY_WORKERS=8
 
 # Monitor metrics
 curl http://localhost:9090/metrics | grep multi_signature
@@ -290,7 +290,7 @@ if req.Action == "read" {
 **1. Expand to All Operations**
 ```go
 // Feature flag for batch verification
-if os.Getenv("GAUTH_BATCH_ENABLED") == "1" {
+if os.Getenv("AGENTAUTH_BATCH_ENABLED") == "1" {
     return batchVerificationPath(tokens)
 } else {
     return sequentialPath(tokens)
@@ -300,7 +300,7 @@ if os.Getenv("GAUTH_BATCH_ENABLED") == "1" {
 **2. Enable BLS Optimization (Experimental)**
 ```bash
 # Only for homogeneous BLS signature sets
-export GAUTH_BATCH_VERIFY_BLS=1
+export AGENTAUTH_BATCH_VERIFY_BLS=1
 ```
 
 **3. Monitor Metrics**
@@ -501,7 +501,7 @@ if len(tokens) < 25 {
 }
 
 // Reduce worker count if CPU saturated
-os.Setenv("GAUTH_BATCH_VERIFY_WORKERS", "2")
+os.Setenv("AGENTAUTH_BATCH_VERIFY_WORKERS", "2")
 ```
 
 ### BLS Verification Failures

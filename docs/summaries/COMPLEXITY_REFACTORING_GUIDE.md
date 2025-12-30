@@ -48,7 +48,7 @@ func (s *BetaServer) routes() {
 
 ### Priority 2: Validation Pipeline (ValidateDelegationCtx - Complexity 73)
 
-**File**: `pkg/rfc0111/rfc0111.go:2315`
+**File**: `pkg/aap001/aap001.go:2315`
 **Current**: 224 lines, complexity 73
 **Target**: Complexity < 10 per function
 
@@ -130,7 +130,7 @@ func (v *signatureValidator) validate(ctx context.Context, poa *POA) error {
 
 ### Priority 3: Token Generation (generateAuthToken - Complexity 57)
 
-**File**: `pkg/rfc0111/rfc0111.go:3773`
+**File**: `pkg/aap001/aap001.go:3773`
 **Current**: ~200 lines, complexity 57
 **Target**: Complexity < 10
 
@@ -269,11 +269,11 @@ func (s *BetaServer) validateToken(ctx context.Context, req *ValidateRequest) (*
 ### Priority 5: Remaining Functions (Complexity 27-39)
 
 **Files**:
-- `pkg/rfc0111/rfc0111.go:2740` - `ValidateDelegationRich` (58)
-- `pkg/rfc0111/rfc0111.go:3562` - `validateDelegationRequest` (39)
+- `pkg/aap001/aap001.go:2740` - `ValidateDelegationRich` (58)
+- `pkg/aap001/aap001.go:3562` - `validateDelegationRequest` (39)
 - `web/server_clean.go:11050` - `initUIRevamp` (29)
 - `web/server_clean.go:2020` - `maybeAugmentAndSignAttestation` (28)
-- `pkg/rfc0111/rfc0111.go:2607` - `ApproveRevocation` (27)
+- `pkg/aap001/aap001.go:2607` - `ApproveRevocation` (27)
 - `pkg/replay/durable_replay_store.go:341` - `applyEviction` (27)
 
 **Strategy**: Apply same patterns

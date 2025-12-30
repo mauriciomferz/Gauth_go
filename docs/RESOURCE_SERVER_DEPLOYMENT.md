@@ -84,7 +84,7 @@ The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundatio
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 ```
 
@@ -92,7 +92,7 @@ import (
 
 ```go
 // Initialize Extended Token Service for validation
-tokenService := gauth.NewExtendedTokenService(
+tokenService := agentauth.NewExtendedTokenService(
     privateKey,           // Your RS private key
     authChainValidator,   // Authorization chain validator
     complianceValidator,  // Compliance validator
@@ -107,9 +107,9 @@ tokenValidator := &SimpleTokenValidator{
     extTokenService: tokenService,
 }
 
-pdp := gauth.NewSimplePDP()  // Policy Decision Point
+pdp := agentauth.NewSimplePDP()  // Policy Decision Point
 
-pep := gauth.NewPowerEnforcementPoint(
+pep := agentauth.NewPowerEnforcementPoint(
     tokenValidator,
     pdp,
     auditLogger,          // Audit logger
@@ -121,7 +121,7 @@ pep := gauth.NewPowerEnforcementPoint(
 #### Step 3: Create Middleware
 
 ```go
-func AgentAuthMiddleware(pep *gauth.PowerEnforcementPoint) func(http.Handler) http.Handler {
+func AgentAuthMiddleware(pep *agentauth.PowerEnforcementPoint) func(http.Handler) http.Handler {
     return func(next http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             // Extract Bearer token
@@ -134,7 +134,7 @@ func AgentAuthMiddleware(pep *gauth.PowerEnforcementPoint) func(http.Handler) ht
             token := strings.TrimPrefix(authHeader, "Bearer ")
             
             // Create enforcement request
-            enforcementReq := &gauth.EnforcementRequest{
+            enforcementReq := &agentauth.EnforcementRequest{
                 ExtendedToken: token,
                 Action:        r.Method + " " + r.URL.Path,
                 Resource:      r.URL.Path,
@@ -201,7 +201,7 @@ func main() {
 ```go
 func handleTransaction(w http.ResponseWriter, r *http.Request) {
     // Get extended token from context
-    extToken := r.Context().Value("extended_token").(*gauth.ExtendedToken)
+    extToken := r.Context().Value("extended_token").(*agentauth.ExtendedToken)
     
     // Extract request body
     var req TransactionRequest
@@ -256,7 +256,7 @@ import (
     "net/http/httputil"
     "net/url"
     
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/gauth"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/agentauth"
 )
 
 func main() {
@@ -281,7 +281,7 @@ func main() {
     log.Fatal(http.ListenAndServe(":8443", handler))
 }
 
-func enforceAgentAuthAuthorization(pep *gauth.PowerEnforcementPoint, w http.ResponseWriter, r *http.Request) bool {
+func enforceAgentAuthAuthorization(pep *agentauth.PowerEnforcementPoint, w http.ResponseWriter, r *http.Request) bool {
     // Extract and validate token (same as Pattern 1)
     // ... enforcement logic ...
     return true // if authorized
@@ -315,7 +315,7 @@ spec:
         
       # PEP sidecar container
       - name: pep-sidecar
-        image: gauth-pep-sidecar:latest
+        image: agentauth-pep-sidecar:latest
         ports:
         - containerPort: 8443
         env:
@@ -345,7 +345,7 @@ spec:
 ### Local JWT Validation (Recommended for Performance)
 
 ```go
-func (rs *ResourceServer) ValidateTokenLocally(ctx context.Context, tokenString string) (*gauth.ExtendedToken, error) {
+func (rs *ResourceServer) ValidateTokenLocally(ctx context.Context, tokenString string) (*agentauth.ExtendedToken, error) {
     // Parse JWT
     token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
         // Get AS public key from JWKS endpoint
@@ -393,7 +393,7 @@ func (rs *ResourceServer) ValidateTokenLocally(ctx context.Context, tokenString 
 ### Token Introspection (Optional, for Real-time Status)
 
 ```go
-func (rs *ResourceServer) IntrospectToken(ctx context.Context, tokenString string) (*gauth.ExtendedToken, error) {
+func (rs *ResourceServer) IntrospectToken(ctx context.Context, tokenString string) (*agentauth.ExtendedToken, error) {
     // Prepare introspection request
     data := url.Values{
         "token": {tokenString},
@@ -437,7 +437,7 @@ func (rs *ResourceServer) IntrospectToken(ctx context.Context, tokenString strin
 ### Validate PoA Restrictions
 
 ```go
-func (rs *ResourceServer) EnforcePoA(ctx context.Context, extToken *gauth.ExtendedToken, action string, resource string) error {
+func (rs *ResourceServer) EnforcePoA(ctx context.Context, extToken *agentauth.ExtendedToken, action string, resource string) error {
     if extToken.PowerOfAttorney == nil {
         return fmt.Errorf("no PoA present in token")
     }
@@ -484,7 +484,7 @@ func (rs *ResourceServer) EnforcePoA(ctx context.Context, extToken *gauth.Extend
 ### Report to Authorization Server
 
 ```go
-func (rs *ResourceServer) ReportComplianceEvent(ctx context.Context, event *gauth.ComplianceEvent) error {
+func (rs *ResourceServer) ReportComplianceEvent(ctx context.Context, event *agentauth.ComplianceEvent) error {
     // Prepare event
     eventJSON, _ := json.Marshal(event)
     
@@ -514,13 +514,13 @@ func (rs *ResourceServer) ReportComplianceEvent(ctx context.Context, event *gaut
 // Usage in middleware
 func (rs *ResourceServer) logComplianceEvent(
     ctx context.Context,
-    extToken *gauth.ExtendedToken,
+    extToken *agentauth.ExtendedToken,
     action string,
     resource string,
     allowed bool,
     reason string,
 ) {
-    event := &gauth.ComplianceEvent{
+    event := &agentauth.ComplianceEvent{
         EventID:   uuid.New().String(),
         Timestamp: time.Now(),
         ClientID:  extToken.AuthorizationChain.Client.EntityID,
@@ -544,32 +544,32 @@ func (rs *ResourceServer) logComplianceEvent(
 
 ```bash
 # Authorization Server
-export GAUTH_AS_URL="https://auth.example.com"
-export GAUTH_AS_ISSUER="https://auth.example.com"
-export GAUTH_AS_JWKS_URL="https://auth.example.com/.well-known/jwks.json"
-export GAUTH_AS_INTROSPECT_URL="https://auth.example.com/introspect"
-export GAUTH_AS_COMPLIANCE_URL="https://auth.example.com/compliance/events"
+export AGENTAUTH_AS_URL="https://auth.example.com"
+export AGENTAUTH_AS_ISSUER="https://auth.example.com"
+export AGENTAUTH_AS_JWKS_URL="https://auth.example.com/.well-known/jwks.json"
+export AGENTAUTH_AS_INTROSPECT_URL="https://auth.example.com/introspect"
+export AGENTAUTH_AS_COMPLIANCE_URL="https://auth.example.com/compliance/events"
 
 # Resource Server Identity
-export GAUTH_RS_ID="resource-server-001"
-export GAUTH_RS_CLIENT_ID="rs-client-001"
-export GAUTH_RS_CLIENT_SECRET="secret-key-here"
+export AGENTAUTH_RS_ID="resource-server-001"
+export AGENTAUTH_RS_CLIENT_ID="rs-client-001"
+export AGENTAUTH_RS_CLIENT_SECRET="secret-key-here"
 
 # Enforcement
-export GAUTH_ENFORCEMENT_MODE="strict"  # or "advisory"
-export GAUTH_TOKEN_VALIDATION_MODE="local"  # or "introspection"
+export AGENTAUTH_ENFORCEMENT_MODE="strict"  # or "advisory"
+export AGENTAUTH_TOKEN_VALIDATION_MODE="local"  # or "introspection"
 
 # Performance
-export GAUTH_JWKS_CACHE_TTL="3600"  # 1 hour
-export GAUTH_TOKEN_CACHE_TTL="300"  # 5 minutes
-export GAUTH_REVOCATION_CHECK_TTL="60"  # 1 minute
+export AGENTAUTH_JWKS_CACHE_TTL="3600"  # 1 hour
+export AGENTAUTH_TOKEN_CACHE_TTL="300"  # 5 minutes
+export AGENTAUTH_REVOCATION_CHECK_TTL="60"  # 1 minute
 ```
 
 ### Configuration File
 
 ```yaml
 # config/resource-server.yaml
-gauth:
+agentauth:
   authorization_server:
     url: "https://auth.example.com"
     issuer: "https://auth.example.com"
@@ -624,7 +624,7 @@ Content-Type: application/json
 {
   "error": "insufficient_authorization",
   "error_description": "PoA does not permit this action",
-  "gauth_violations": [
+  "agentauth_violations": [
     {
       "type": "poa_scope",
       "description": "Action type 'contract_signature' not in authorized actions",
@@ -651,7 +651,7 @@ Content-Type: application/json
 var (
     tokenValidationsTotal = prometheus.NewCounterVec(
         prometheus.CounterOpts{
-            Name: "gauth_rs_token_validations_total",
+            Name: "agentauth_rs_token_validations_total",
             Help: "Total number of token validations",
         },
         []string{"result"}, // success, invalid, expired, revoked
@@ -659,7 +659,7 @@ var (
     
     poaEnforcementsTotal = prometheus.NewCounterVec(
         prometheus.CounterOpts{
-            Name: "gauth_rs_poa_enforcements_total",
+            Name: "agentauth_rs_poa_enforcements_total",
             Help: "Total number of PoA enforcements",
         },
         []string{"result"}, // allowed, denied
@@ -667,7 +667,7 @@ var (
     
     authorizationLatency = prometheus.NewHistogram(
         prometheus.HistogramOpts{
-            Name: "gauth_rs_authorization_duration_seconds",
+            Name: "agentauth_rs_authorization_duration_seconds",
             Help: "Authorization check duration",
             Buckets: prometheus.DefBuckets,
         },
@@ -716,7 +716,7 @@ func TestPEPEnforcement(t *testing.T) {
     token := createTestExtendedToken()
     
     // Create enforcement request
-    req := &gauth.EnforcementRequest{
+    req := &agentauth.EnforcementRequest{
         ExtendedToken: token,
         Action:        "POST /api/v1/transaction",
         Resource:      "/api/v1/transaction",
@@ -781,6 +781,6 @@ This guide provides comprehensive patterns for deploying a AgentAuth-compliant R
 5. Deploy and monitor
 
 For questions or issues, refer to:
-- AgentAuth_go codebase: `pkg/gauth/pep.go`
+- AgentAuth_go codebase: `pkg/agentauth/pep.go`
 - RFC corrections: `docs/Gifo_0111_CORRECTED_FLOW.md`
 - Implementation coverage: `docs/RFC_IMPLEMENTATION_COVERAGE.md`

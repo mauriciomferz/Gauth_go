@@ -2,10 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: opa-policies
-  namespace: gauth-system
+  namespace: agentauth-system
 data:
   scope_validation.rego: |
-    package gauth.authz
+    package agentauth.authz
 
     # Default deny
     default allow = false

@@ -59,7 +59,7 @@ export default function PIP() {
     setLoading(true);
     try {
       let parsedContext = {};
-      if (context.trim()) {
+      if (context.trim() {
         parsedContext = JSON.parse(context);
       }
 

@@ -85,7 +85,7 @@ npm run dev           # Start dev server (port 3000)
 ### Start Backend (Separate Terminal)
 
 ```bash
-cd /path/to/Gauth_go
+cd /path/to/AgentAuth
 go run ./cmd/web-server   # Start Go backend (port 8080)
 ```
 

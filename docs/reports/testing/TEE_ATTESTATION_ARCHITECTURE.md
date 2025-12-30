@@ -592,7 +592,7 @@ import (
     "net"
     "time"
     
-    "github.com/mauriciomferz/Gauth_go/pkg/gauth"
+    "github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // ParentApp manages communication with Nitro Enclave
@@ -917,7 +917,7 @@ func (v *AttestationVerifier) verifyTimestamp(attestation *AttestationDoc) error
     }
     
     // Check if from future (clock skew tolerance: 1 minute)
-    if attestationTime.After(time.Now().Add(1 * time.Minute)) {
+    if attestationTime.After(time.Now().Add(1 * time.Minute) {
         return fmt.Errorf("attestation timestamp in future")
     }
     
@@ -1166,13 +1166,13 @@ groups:
           summary: "Nitro enclave is not running"
           
       - alert: AttestationVerificationFailures
-        expr: rate(gauth_tee_attestation_verification_failures[5m]) > 0.1
+        expr: rate(agentauth_tee_attestation_verification_failures[5m]) > 0.1
         for: 5m
         annotations:
           summary: "High rate of attestation verification failures"
           
       - alert: AttestationLatencyHigh
-        expr: histogram_quantile(0.95, rate(gauth_tee_attestation_duration_seconds_bucket[5m])) > 0.5
+        expr: histogram_quantile(0.95, rate(agentauth_tee_attestation_duration_seconds_bucket[5m]) > 0.5
         for: 10m
         annotations:
           summary: "Attestation generation latency above 500ms"
@@ -1195,7 +1195,7 @@ echo "Test: Geographic Spoofing Prevention"
 export VPN_ENDPOINT="frankfurt.vpn.example.com"
 
 # Attempt to get authorization with spoofed IP
-curl -X POST https://api.gauth.example.com/v1/authorize \
+curl -X POST https://api.agentauth.example.com/v1/authorize \
   -H "X-Forwarded-For: 3.125.0.1" \
   -H "X-Real-IP: 3.125.0.1" \
   -d '{
@@ -1221,7 +1221,7 @@ echo "✅ Test PASSED: Spoofing detected via TEE attestation"
 echo "Test: PCR Tampering Detection"
 
 # Attempt authorization with modified code hash
-curl -X POST https://api.gauth.example.com/v1/authorize \
+curl -X POST https://api.agentauth.example.com/v1/authorize \
   -d '{
     "poa_id": "poa_test",
     "attestation": {

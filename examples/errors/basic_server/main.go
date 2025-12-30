@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	gauthErrors "github.com/mauriciomferz/AgentAuth/pkg/errors"
+	agentauthErrors "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 func main() {
@@ -43,8 +43,8 @@ func main() {
 
 func tokenHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate token validation error
-	_ = gauthErrors.New(gauthErrors.ErrInvalidToken, "The token provided is malformed or invalid").
-		WithSource(gauthErrors.SourceToken).
+	_ = agentauthErrors.New(agentauthErrors.ErrInvalidToken, "The token provided is malformed or invalid").
+		WithSource(agentauthErrors.SourceToken).
 		WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789").
 		WithHTTPInfo(r.URL.Path, r.Method, http.StatusUnauthorized, r.RemoteAddr).
 		AddInfo("token_hint", "Check token format and signature")
@@ -53,8 +53,8 @@ func tokenHandler(w http.ResponseWriter, r *http.Request) {
 
 func resourceHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate insufficient scope error
-	err := gauthErrors.New(gauthErrors.ErrInsufficientScope, "The token does not have the required scope")
-	err = err.WithSource(gauthErrors.SourceAuthorization)
+	err := agentauthErrors.New(agentauthErrors.ErrInsufficientScope, "The token does not have the required scope")
+	err = err.WithSource(agentauthErrors.SourceAuthorization)
 	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-456", "user-789")
 	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusForbidden, r.RemoteAddr)
 	err = err.AddInfo("required_scope", "admin")
@@ -68,8 +68,8 @@ func resourceHandler(w http.ResponseWriter, r *http.Request) {
 func rateLimitedHandler(w http.ResponseWriter, r *http.Request) {
 	// Simulate rate limit error
 	baseErr := fmt.Errorf("rate limit of 100 requests per minute exceeded")
-	err := gauthErrors.New(gauthErrors.ErrRateLimited, "API rate limit exceeded")
-	err = err.WithSource(gauthErrors.SourceRateLimiting)
+	err := agentauthErrors.New(agentauthErrors.ErrRateLimited, "API rate limit exceeded")
+	err = err.WithSource(agentauthErrors.SourceRateLimiting)
 	err = err.WithCause(baseErr)
 	err = err.WithRequestInfo(r.Header.Get("X-Request-ID"), "client-123", "")
 	err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusTooManyRequests, r.RemoteAddr)
@@ -91,8 +91,8 @@ func serverErrorHandler(w http.ResponseWriter, r *http.Request) {
 	// middleware.ErrorResponse(w, r, baseErr) // Not available: middleware package missing
 
 	// Or convert to structured error for more context
-	// err := gauthErrors.New(gauthErrors.ErrServerError, "Database operation failed")
-	// err = err.WithSource(gauthErrors.SourceStorage)
+	// err := agentauthErrors.New(agentauthErrors.ErrServerError, "Database operation failed")
+	// err = err.WithSource(agentauthErrors.SourceStorage)
 	// err = err.WithCause(baseErr)
 	// err = err.WithHTTPInfo(r.URL.Path, r.Method, http.StatusInternalServerError, r.RemoteAddr)
 	// middleware.ErrorResponse(w, r, err)

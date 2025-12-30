@@ -180,7 +180,7 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 	}
 
 	// Normalize claims to AgentAuth format
-	gauthClaims := s.normalizeClaims(provider, externalClaims)
+	agentauthClaims := s.normalizeClaims(provider, externalClaims)
 
 	// Determine trust level
 	trustLevel := s.mapTrustLevel(provider, externalClaims)
@@ -190,11 +190,11 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 		for key, value := range req.AdditionalClaims {
 			if key == "acr" {
 				if strVal, ok := value.(string); ok {
-					gauthClaims.ACR = strVal
+					agentauthClaims.ACR = strVal
 				}
 			} else if key == "amr" {
 				if arrVal, ok := value.([]string); ok {
-					gauthClaims.AMR = arrVal
+					agentauthClaims.AMR = arrVal
 				}
 			}
 			// Additional claims can be added to a custom field if needed
@@ -202,15 +202,15 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 	}
 
 	// Issue new AgentAuth token
-	gauthToken, err := s.idTokenService.IssueIDToken(ctx, gauthClaims)
+	agentauthToken, err := s.idTokenService.IssueIDToken(ctx, agentauthClaims)
 	if err != nil {
 		return nil, fmt.Errorf("failed to issue AgentAuth token: %w", err)
 	}
 
 	return &ExchangeResponse{
-		AgentAuthToken: gauthToken,
-		ExpiresAt:  gauthClaims.ExpiresAt.Time,
-		Claims:     gauthClaims,
+		AgentAuthToken: agentauthToken,
+		ExpiresAt:  agentauthClaims.ExpiresAt.Time,
+		Claims:     agentauthClaims,
 		TrustLevel: trustLevel,
 		ProviderID: req.ProviderID,
 	}, nil
@@ -249,40 +249,40 @@ func (s *TokenExchangeService) validateExternalToken(ctx context.Context, provid
 // normalizeClaims converts provider-specific claims to AgentAuth format.
 func (s *TokenExchangeService) normalizeClaims(provider *ProviderConfig, externalClaims *IDTokenClaims) *IDTokenClaims {
 	// Create new claims in AgentAuth format
-	gauthClaims := &IDTokenClaims{
+	agentauthClaims := &IDTokenClaims{
 		RegisteredClaims: externalClaims.RegisteredClaims,
 	}
 
 	// Copy standard OIDC claims
-	gauthClaims.Name = externalClaims.Name
-	gauthClaims.GivenName = externalClaims.GivenName
-	gauthClaims.FamilyName = externalClaims.FamilyName
-	gauthClaims.MiddleName = externalClaims.MiddleName
-	gauthClaims.Nickname = externalClaims.Nickname
-	gauthClaims.PreferredUsername = externalClaims.PreferredUsername
-	gauthClaims.Profile = externalClaims.Profile
-	gauthClaims.Picture = externalClaims.Picture
-	gauthClaims.Website = externalClaims.Website
-	gauthClaims.Email = externalClaims.Email
-	gauthClaims.EmailVerified = externalClaims.EmailVerified
-	gauthClaims.Gender = externalClaims.Gender
-	gauthClaims.Birthdate = externalClaims.Birthdate
-	gauthClaims.Zoneinfo = externalClaims.Zoneinfo
-	gauthClaims.Locale = externalClaims.Locale
-	gauthClaims.PhoneNumber = externalClaims.PhoneNumber
-	gauthClaims.PhoneNumberVerified = externalClaims.PhoneNumberVerified
-	gauthClaims.UpdatedAt = externalClaims.UpdatedAt
+	agentauthClaims.Name = externalClaims.Name
+	agentauthClaims.GivenName = externalClaims.GivenName
+	agentauthClaims.FamilyName = externalClaims.FamilyName
+	agentauthClaims.MiddleName = externalClaims.MiddleName
+	agentauthClaims.Nickname = externalClaims.Nickname
+	agentauthClaims.PreferredUsername = externalClaims.PreferredUsername
+	agentauthClaims.Profile = externalClaims.Profile
+	agentauthClaims.Picture = externalClaims.Picture
+	agentauthClaims.Website = externalClaims.Website
+	agentauthClaims.Email = externalClaims.Email
+	agentauthClaims.EmailVerified = externalClaims.EmailVerified
+	agentauthClaims.Gender = externalClaims.Gender
+	agentauthClaims.Birthdate = externalClaims.Birthdate
+	agentauthClaims.Zoneinfo = externalClaims.Zoneinfo
+	agentauthClaims.Locale = externalClaims.Locale
+	agentauthClaims.PhoneNumber = externalClaims.PhoneNumber
+	agentauthClaims.PhoneNumberVerified = externalClaims.PhoneNumberVerified
+	agentauthClaims.UpdatedAt = externalClaims.UpdatedAt
 
 	// Copy authentication context
-	gauthClaims.ACR = externalClaims.ACR
-	gauthClaims.AMR = externalClaims.AMR
-	gauthClaims.AuthorizedParty = externalClaims.AuthorizedParty
-	gauthClaims.Nonce = externalClaims.Nonce
+	agentauthClaims.ACR = externalClaims.ACR
+	agentauthClaims.AMR = externalClaims.AMR
+	agentauthClaims.AuthorizedParty = externalClaims.AuthorizedParty
+	agentauthClaims.Nonce = externalClaims.Nonce
 
 	// Apply provider-specific claim mappings if needed
 	// This is where custom transformations would happen based on provider.ClaimMappings
 
-	return gauthClaims
+	return agentauthClaims
 }
 
 // mapTrustLevel determines the AgentAuth trust level from external provider claims.

@@ -78,8 +78,8 @@ The External Audit Anchor system provides comprehensive external timestamping an
 
 ```go
 import (
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/anchor"
-    "github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/ledger"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/anchor"
+    "github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/pkg/ledger"
 )
 
 // Create external anchor provider
@@ -200,12 +200,12 @@ Future providers can implement:
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `GAUTH_EXTERNAL_ANCHOR_INTERVAL` | Anchoring interval | 60s |
-| `GAUTH_EXTERNAL_ANCHOR_PROVIDER` | Provider type (`memory`, `tsa_stub`) | none |
-| `GAUTH_EXTERNAL_ANCHOR_RECEIPT_PATH` | Receipt persistence file | none |
-| `GAUTH_TSA_STUB_MIN_LATENCY_MS` | TSA stub min latency | 25ms |
-| `GAUTH_TSA_STUB_MAX_LATENCY_MS` | TSA stub max latency | 100ms |
-| `GAUTH_TSA_STUB_FAIL_PROB` | TSA stub failure probability | 0.0 |
+| `AGENTAUTH_EXTERNAL_ANCHOR_INTERVAL` | Anchoring interval | 60s |
+| `AGENTAUTH_EXTERNAL_ANCHOR_PROVIDER` | Provider type (`memory`, `tsa_stub`) | none |
+| `AGENTAUTH_EXTERNAL_ANCHOR_RECEIPT_PATH` | Receipt persistence file | none |
+| `AGENTAUTH_TSA_STUB_MIN_LATENCY_MS` | TSA stub min latency | 25ms |
+| `AGENTAUTH_TSA_STUB_MAX_LATENCY_MS` | TSA stub max latency | 100ms |
+| `AGENTAUTH_TSA_STUB_FAIL_PROB` | TSA stub failure probability | 0.0 |
 
 ### Programmatic Configuration
 
@@ -378,8 +378,8 @@ For existing deployments:
 2. **Phase 2: Provider Configuration** 
    ```bash
    # Configure external provider via environment
-   export GAUTH_EXTERNAL_ANCHOR_PROVIDER=tsa_stub
-   export GAUTH_EXTERNAL_ANCHOR_INTERVAL=30s
+   export AGENTAUTH_EXTERNAL_ANCHOR_PROVIDER=tsa_stub
+   export AGENTAUTH_EXTERNAL_ANCHOR_INTERVAL=30s
    ```
 
 3. **Phase 3: Production Providers**

@@ -65,7 +65,7 @@ cmd/conformance/main.go
 
 ### Synthetic RFC Clauses
 
-Since RFC markdown files (`docs/RFC-0111.md`, `docs/RFC-0115.md`) don't exist, the tool generates synthetic clauses from `conformance/clause_map.json`:
+Since RFC markdown files (`docs/AAP-001.md`, `docs/AAP-002.md`) don't exist, the tool generates synthetic clauses from `conformance/clause_map.json`:
 
 1. Reads clause_map.json to extract clause prefixes
 2. Creates Clause objects with ID, Title, RFC, LineFrom/LineTo
@@ -244,7 +244,7 @@ Driven by `conformance/clause_map.json`:
     {
       "clause_prefix": "0111:1.-introduction",
       "symbols": ["Service", "NewService", "TokenResult"],
-      "tests_glob": "pkg/rfc0111/rfc0111_test.go"
+      "tests_glob": "pkg/aap001/aap001_test.go"
     },
     ...
   ]
@@ -275,7 +275,7 @@ The CLI extracts clause IDs and generates synthetic Clause objects.
 Potential improvements (not implemented):
 
 1. **Real RFC Markdown Scanning**
-   - Create actual `docs/RFC-0111.md` and `docs/RFC-0115.md`
+   - Create actual `docs/AAP-001.md` and `docs/AAP-002.md`
    - Use `harnesslib.ScanFile()` instead of synthetic clauses
    - Maintain line number traceability
 

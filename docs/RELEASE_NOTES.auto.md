@@ -25,9 +25,9 @@
 - feat: OIDC Phase 3 Day 1 - Provider Config & Discovery Cache
 - feat: implement OIDC Phase 2 - PVP Integration
 - feat: implement OIDC Phase 1 - Core Infrastructure (Discovery, ID Token, Identity Bridge)
-- feat: implement PDP bridge for RFC-0111 compliance (P1)
+- feat: implement PDP bridge for AAP-001 compliance (P1)
 - feat: implement JWT token serialization (fixes critical P0 blocker)
-- feat: Implement missing RFC-0111 components - Steps (c), (g) and PEP
+- feat: Implement missing AAP-001 components - Steps (c), (g) and PEP
 - feat: Complete Task 8 - Performance testing and optimization
 - feat: Complete Task 7 - Comprehensive monitoring and alerting service
 - feat: Complete EU-27 coverage with 16 member states
@@ -36,10 +36,10 @@
 - feat: Complete Task 5 - Enhanced authorization chain validation
 - feat: Complete Tasks 3-4 - Type alignment and documentation
 - feat: Complete type alignment for disclosure API
-- feat: Implement RFC-0111 recommended next steps (Tasks 1-2/8)
-- feat: Beautify gauth1.html with modern enhancements
-- feat: Integrate PostgreSQL token store into RFC-0111 handlers
-- feat: Add PostgreSQL persistence for RFC-0111 Extended Tokens
+- feat: Implement AAP-001 recommended next steps (Tasks 1-2/8)
+- feat: Beautify agentauth1.html with modern enhancements
+- feat: Integrate PostgreSQL token store into AAP-001 handlers
+- feat: Add PostgreSQL persistence for AAP-001 Extended Tokens
 
 ## Fixes
 - fix: Add missing external integration types for PVP/PIP clients
@@ -54,7 +54,7 @@
 - docs: add OIDC Phase 1 implementation report and design phase session summary
 - docs: add OIDC and MCP integration architecture designs (P1 requirements)
 - docs: executive summary of gap remediation session
-- docs: RFC-0111 compliance progress update
+- docs: AAP-001 compliance progress update
 - docs: comprehensive development session summary
 - docs: add PDP implementation report
 - docs: QA Enhancement Initiative - Final Completion Report
@@ -62,7 +62,7 @@
 - docs: Update status to 62.5% complete (5/8 tasks)
 - docs: Add comprehensive next steps guide for type alignment
 - docs: Update implementation status with QA enhancement progress
-- docs: Add comprehensive RFC-0111/0115 compliance assessment
+- docs: Add comprehensive AAP-001/0115 compliance assessment
 - docs: Document PostgreSQL integration completion in architecture guide
 
 ## Chore

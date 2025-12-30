@@ -2,7 +2,7 @@
 
 ## Quick Reference Guide
 
-This document provides a concise summary of what needs to be built to achieve RFC-0111/0115 compliance.
+This document provides a concise summary of what needs to be built to achieve AAP-001/0115 compliance.
 
 ---
 
@@ -12,11 +12,11 @@ This document provides a concise summary of what needs to be built to achieve RF
 No one-off enrollment process. Participants can't establish identities and authorizations before requesting tokens.
 
 ### What to Build
-**New File**: `pkg/gauth/subscription_flow.go` (~600 lines)
+**New File**: `pkg/agentauth/subscription_flow.go` (~600 lines)
 
 ```go
 type SubscriptionFlowManager struct {
-    // Manages RFC-0111 Steps I-VIII
+    // Manages AAP-001 Steps I-VIII
 }
 
 // Eight methods, one per step:
@@ -50,7 +50,7 @@ func (m *SubscriptionFlowManager) ExecuteStepVIII(ctx, subID, serverID)     // R
 Individual validation functions exist but aren't connected. `RequestToken()` generates JWTs directly without calling any validators.
 
 ### What to Build
-**New File**: `pkg/gauth/protocol_orchestrator.go` (~500 lines)
+**New File**: `pkg/agentauth/protocol_orchestrator.go` (~500 lines)
 
 ```go
 type ProtocolOrchestrator struct {
@@ -107,10 +107,10 @@ Client → RequestTokenRFC() → ProtocolOrchestrator.ExecuteRFCCompliantFlow()
 ## 🔴 Gap #3: Wrong Token Type
 
 ### What's Missing
-`RequestToken()` returns standard JWTs instead of RFC-0111 extended tokens with PoA metadata.
+`RequestToken()` returns standard JWTs instead of AAP-001 extended tokens with PoA metadata.
 
 ### What to Change
-**File**: `pkg/gauth/gauth.go` (line 298)
+**File**: `pkg/agentauth/agentauth.go` (line 298)
 
 **Current Code**:
 ```go
@@ -137,7 +137,7 @@ func (g *Service) RequestToken(req TokenRequest) (*ExtendedToken, error) {
 ```
 
 ### Changes Required
-1. **Expand TokenRequest structure** - Add RFC-0111 fields
+1. **Expand TokenRequest structure** - Add AAP-001 fields
 2. **Initialize ExtendedTokenService** in `NewService()`
 3. **Replace RequestToken() body** - Call CreateExtendedToken()
 4. **Create RequestTokenLegacy()** - Keep old JWT mode for backward compatibility
@@ -300,12 +300,12 @@ RequestTokenRFC() flow:
 ## 📁 Files to Create/Modify
 
 ### New Files (3)
-1. `pkg/gauth/subscription_flow.go` - ~600 lines
-2. `pkg/gauth/protocol_orchestrator.go` - ~500 lines
-3. `pkg/gauth/compliance_tracker.go` - ~300 lines
+1. `pkg/agentauth/subscription_flow.go` - ~600 lines
+2. `pkg/agentauth/protocol_orchestrator.go` - ~500 lines
+3. `pkg/agentauth/compliance_tracker.go` - ~300 lines
 
 ### Modified Files (2)
-1. `pkg/gauth/gauth.go` - Update RequestToken()
+1. `pkg/agentauth/agentauth.go` - Update RequestToken()
 2. `cmd/web-server/main.go` - Add new endpoints
 
 ### Total New Code: ~1,400 lines
@@ -317,8 +317,8 @@ RequestTokenRFC() flow:
 ### Week 1: Foundation
 ```bash
 # Create subscription store
-touch pkg/gauth/subscription_store.go
-touch pkg/gauth/subscription_store_memory.go
+touch pkg/agentauth/subscription_store.go
+touch pkg/agentauth/subscription_store_memory.go
 
 # Implement interfaces
 # - SubscriptionStore
@@ -328,7 +328,7 @@ touch pkg/gauth/subscription_store_memory.go
 ### Week 2: Subscription Flow Skeleton
 ```bash
 # Create subscription flow manager
-touch pkg/gauth/subscription_flow.go
+touch pkg/agentauth/subscription_flow.go
 
 # Implement structure
 # - SubscriptionFlowManager
@@ -346,7 +346,7 @@ func (m *SubscriptionFlowManager) ExecuteStepII()  { ... }
 
 ### Week 5: Protocol Orchestrator
 ```bash
-touch pkg/gauth/protocol_orchestrator.go
+touch pkg/agentauth/protocol_orchestrator.go
 
 # Implement:
 # - ProtocolOrchestrator structure
@@ -364,7 +364,7 @@ grantValidation := o.complianceValidator.ValidateGrantCompliance(...)
 
 ### Week 8: Compliance Tracking
 ```bash
-touch pkg/gauth/compliance_tracker.go
+touch pkg/agentauth/compliance_tracker.go
 
 # Implement step (i)
 ```
@@ -389,7 +389,7 @@ r.POST("/v1/token/rfc", handleRFCCompliantTokenRequest)
 // Write tests for:
 // - Each subscription step
 // - Protocol orchestrator
-// - Complete RFC-0111 flow
+// - Complete AAP-001 flow
 // - Validation integration
 ```
 
@@ -408,8 +408,8 @@ r.POST("/v1/token/rfc", handleRFCCompliantTokenRequest)
 - [ ] Compliance tracking (step i) operational
 
 ### Compliance
-- [ ] RFC-0111 conformance tests pass
-- [ ] RFC-0115 conformance tests pass
+- [ ] AAP-001 conformance tests pass
+- [ ] AAP-002 conformance tests pass
 - [ ] Protocol flow matches RFC specification exactly
 - [ ] Commercial register integration works
 - [ ] Extended tokens contain all RFC-required metadata
@@ -451,7 +451,7 @@ r.POST("/v1/token/rfc", handleRFCCompliantTokenRequest)
 - ❌ Extended token usage in main flow
 
 ### The Fix
-**Connect the pieces.** The code quality is excellent, we just need to wire it together following RFC-0111 flow.
+**Connect the pieces.** The code quality is excellent, we just need to wire it together following AAP-001 flow.
 
 ---
 

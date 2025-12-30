@@ -36,7 +36,7 @@ test('revocation inclusion proof verification button enables', async ({ page }) 
   // Button may remain disabled if proof empty; attempt enable by detecting JSON structure
   await page.waitForTimeout(250);
   // Click if enabled
-  if (await verifyBtn.isEnabled()) {
+  if (await verifyBtn.isEnabled() {
     await verifyBtn.click();
     await expect(page.locator('#rev-verify-result')).toBeVisible();
     const text = await page.locator('#rev-verify-result').textContent();
@@ -49,7 +49,7 @@ test('revocation consistency proof fetch & verify', async ({ page }) => {
   await requestConsistency(page);
   const btn = page.locator('#rev-consistency-verify-btn');
   await page.waitForTimeout(250);
-  if (await btn.isEnabled()) {
+  if (await btn.isEnabled() {
     await btn.click();
     const result = page.locator('#rev-consistency-verify-result');
     await expect(result).toBeVisible();

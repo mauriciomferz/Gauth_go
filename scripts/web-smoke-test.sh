@@ -10,7 +10,7 @@ fi
 
 BIN_CMD=(go run cmd/web-server/main.go "${PORT}")
 
-LOG_FILE="$(mktemp -t gauth-web-smoke-XXXX.log)"
+LOG_FILE="$(mktemp -t agentauth-web-smoke-XXXX.log)"
 echo "[web-smoke-test] Using port: ${PORT}" >&2
 
 "${BIN_CMD[@]}" >"${LOG_FILE}" 2>&1 &

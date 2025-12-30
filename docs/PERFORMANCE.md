@@ -144,7 +144,7 @@ Target: Signature verification adds <15% over pre‑signing validation baseline;
 
 To run focused crypto benchmarks:
 ```bash
-go test -run=NONE -bench=Benchmark(Sign|Verify) -benchmem ./pkg/rfc0111
+go test -run=NONE -bench=Benchmark(Sign|Verify) -benchmem ./pkg/aap001
 ```
 
 Nightly benchmarks run via `.github/workflows/bench.yml` (02:00 UTC) and upload raw + parsed artifacts.
@@ -489,7 +489,7 @@ Blocks (R1,R2,R3) formed by streaming; bridges (BR1,BR2) reduce right-to-left to
 | `prefix_roots` | Ordered subtree root hashes for each power-of-two block covering historical prefix | Used for fast reconstruction & auditing |
 | `prefix_sizes` | Length in leaves of each prefix block (power-of-two) | Sum equals `start_length` |
 | `prefix_bridges` | Sequence of intermediate merge results from right-to-left reduction of prefix blocks | Deterministic; replay yields `start_root` |
-| `fast reconstruction` | Algorithm reducing blocks via bridges to compute `start_root` without full tree rebuild | Guarded by `GAUTH_CONSISTENCY_V2_FAST` |
+| `fast reconstruction` | Algorithm reducing blocks via bridges to compute `start_root` without full tree rebuild | Guarded by `AGENTAUTH_CONSISTENCY_V2_FAST` |
 | `temporary tree` | Full Merkle rebuild still used for path derivation (current phase) | Target for removal next phase |
 | `interval-based path` | Planned method computing sibling hashes from streamed frontier without full rebuild | Future optimization |
 | `frontier` | Emerging highest-level subtree roots after each leaf merge | Could underpin interval path algorithm |
@@ -497,7 +497,7 @@ Blocks (R1,R2,R3) formed by streaming; bridges (BR1,BR2) reduce right-to-left to
 > Architectural diagrams of the revocation transparency flow available in `REVOCATION_TRANSPARENCY.md#16-architecture-diagrams-revocation-transparency`.
 
 ### Interval-Based Streaming Consistency Path (Experimental)
-Flag: `GAUTH_CONSISTENCY_V2_INTERVAL_PATH=1`
+Flag: `AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH=1`
 
 Objective: Eliminate temporary full Merkle tree reconstruction during `GenerateConsistencyProofV2` path derivation.
 
@@ -524,7 +524,7 @@ Memory/Alloc Impact:
 - 4096 leaves legacy: 4.77 MB alloc, 49,194 allocs
 - 4096 leaves interval: 3.54 MB alloc, 36,870 allocs (~26% fewer allocs)
 
-Environment: Apple M3 Pro (arm64), Go test benchmark mode, GAUTH_CONSISTENCY_V2_INTERVAL_PATH toggled.
+Environment: Apple M3 Pro (arm64), Go test benchmark mode, AGENTAUTH_CONSISTENCY_V2_INTERVAL_PATH toggled.
 
 Risks / Edge Cases:
 - Non-power-of-two growth segments may yield repeated small sibling extractions (diminishing returns).

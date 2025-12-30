@@ -69,7 +69,7 @@ type PoA struct {
 
 ## Solution Architecture
 
-### Core Package: `pkg/gauth/constraints/`
+### Core Package: `pkg/agentauth/constraints/`
 
 Created new package with **6 main types**:
 
@@ -142,7 +142,7 @@ type Threshold struct {
 ### File Structure
 
 ```
-pkg/gauth/constraints/
+pkg/agentauth/constraints/
 ├── semantic_allowlist.go       (264 lines, 6 types, 9 methods)
 └── semantic_allowlist_test.go  (438 lines, 6 tests, 2 benchmarks)
 ```
@@ -373,14 +373,14 @@ grep -r "FiduciaryDuty\|fiduciary" ./pkg/
 
 **Step 2**: Replace with `SemanticAllowList`
 ```go
-// OLD (pkg/gauthplus/types.go)
+// OLD (pkg/agentauthplus/types.go)
 type FiduciaryDuties struct {
     ActInBestInterest bool   // ❌ Meaningless
     RiskTolerance     string // ❌ Subjective
 }
 
 // NEW
-import "github.com/mauriciomferz/Gauth_go/pkg/gauth/constraints"
+import "github.com/mauriciomferz/AgentAuth/pkg/agentauth/constraints"
 
 constraints := &constraints.SemanticAllowList{
     AllowedContracts: []constraints.ContractPermission{
@@ -470,16 +470,16 @@ Result: AUTHORIZED
 ## Next Steps
 
 ### Immediate (Completed ✅)
-- [x] Create `pkg/gauth/constraints/semantic_allowlist.go`
+- [x] Create `pkg/agentauth/constraints/semantic_allowlist.go`
 - [x] Implement validation methods
 - [x] Write comprehensive test suite (96.6% coverage)
 - [x] Add legal disclaimer
 - [x] Document examples and migration guide
 
 ### Short-Term (1-2 weeks)
-- [ ] Integrate with `pkg/gauth/issuer.go` (PoA creation flow)
+- [ ] Integrate with `pkg/agentauth/issuer.go` (PoA creation flow)
 - [ ] Update `pkg/authz/authz.go` to use `SemanticAllowList`
-- [ ] Replace `pkg/gauthplus/types.go` FiduciaryDuties references
+- [ ] Replace `pkg/agentauthplus/types.go` FiduciaryDuties references
 - [ ] Add runtime tracking for `MaxDailyValue`, `MaxWeeklyValue` circuit breakers
 - [ ] Create audit logging integration
 
@@ -497,7 +497,7 @@ Result: AUTHORIZED
 ### Test Execution
 
 ```bash
-$ go test ./pkg/gauth/constraints -v -cover
+$ go test ./pkg/agentauth/constraints -v -cover
 === RUN   TestSemanticAllowList_Validate
 === RUN   TestMultisigConfig_Validate
 === RUN   TestSemanticAllowList_IsContractAllowed
@@ -512,13 +512,13 @@ $ go test ./pkg/gauth/constraints -v -cover
 --- PASS: TestContractPermission_Validate (0.00s)
 PASS
 coverage: 96.6% of statements
-ok      github.com/mauriciomferz/Gauth_go/pkg/gauth/constraints 0.165s
+ok      github.com/mauriciomferz/AgentAuth/pkg/agentauth/constraints 0.165s
 ```
 
 ### Build Verification
 
 ```bash
-$ go build ./pkg/gauth/constraints
+$ go build ./pkg/agentauth/constraints
 # Success - no errors
 ```
 
@@ -547,7 +547,7 @@ The `SemanticAllowList` package provides a **production-ready** authorization fr
 ---
 
 **Report Generated**: November 26, 2024  
-**Package**: `github.com/mauriciomferz/Gauth_go/pkg/gauth/constraints`  
+**Package**: `github.com/mauriciomferz/AgentAuth/pkg/agentauth/constraints`  
 **Files Changed**: 2 (semantic_allowlist.go, semantic_allowlist_test.go)  
 **Lines Added**: 702  
 **Test Coverage**: 96.6%  

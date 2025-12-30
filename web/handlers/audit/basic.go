@@ -78,7 +78,7 @@ func verifyHandler(c *gin.Context, d Deps) {
 // POST /capabilities/audit/anchor
 // Mirrors monolithic implementation; preserves error codes and fields.
 func anchorHandler(c *gin.Context, d Deps) {
-	if os.Getenv("GAUTH_CAPABILITY_ANCHOR_ENABLE") != "1" {
+	if os.Getenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE") != "1" {
 		respondError(c, http.StatusForbidden, "capability_anchor_disabled", "anchoring_disabled", "capability anchoring disabled", "AAP-001:capability_anchor", nil)
 		return
 	}

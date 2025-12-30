@@ -1,16 +1,16 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gauth-hpa
-  namespace: gauth-staging
+  name: agentauth-hpa
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gauth-deployment
+    name: agentauth-deployment
   minReplicas: 3
   maxReplicas: 10
   metrics:
@@ -65,16 +65,16 @@ spec:
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: gauth-pdb
-  namespace: gauth-staging
+  name: agentauth-pdb
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
 spec:
   minAvailable: 2  # Always keep at least 2 pods running during disruptions
   selector:
     matchLabels:
-      app: gauth
+      app: agentauth
       environment: staging
   unhealthyPodEvictionPolicy: IfHealthyBudget
 ---
@@ -82,10 +82,10 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gauth-service-account
-  namespace: gauth-staging
+  name: agentauth-service-account
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
 automountServiceAccountToken: true
 ---
@@ -93,10 +93,10 @@ automountServiceAccountToken: true
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: gauth-role
-  namespace: gauth-staging
+  name: agentauth-role
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
 rules:
 # Allow reading ConfigMaps and Secrets
@@ -118,33 +118,33 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: gauth-role-binding
-  namespace: gauth-staging
+  name: agentauth-role-binding
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
 subjects:
 - kind: ServiceAccount
-  name: gauth-service-account
-  namespace: gauth-staging
+  name: agentauth-service-account
+  namespace: agentauth-staging
 roleRef:
   kind: Role
-  name: gauth-role
+  name: agentauth-role
   apiGroup: rbac.authorization.k8s.io
 ---
 # NetworkPolicy: Restrict traffic to AgentAuth pods
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: gauth-network-policy
-  namespace: gauth-staging
+  name: agentauth-network-policy
+  namespace: agentauth-staging
   labels:
-    app: gauth
+    app: agentauth
     environment: staging
 spec:
   podSelector:
     matchLabels:
-      app: gauth
+      app: agentauth
   policyTypes:
   - Ingress
   - Egress
@@ -175,7 +175,7 @@ spec:
   - from:
     - podSelector:
         matchLabels:
-          app: gauth
+          app: agentauth
     ports:
     - protocol: TCP
       port: 8080

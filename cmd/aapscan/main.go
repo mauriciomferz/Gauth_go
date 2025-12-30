@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	files := []struct{ Name, ID string }{
-		{"gauth_aap_001.md", "0111"},
+		{"agentauth_aap_001.md", "0111"},
 		{"aap002.md", "0115"},
 	}
 

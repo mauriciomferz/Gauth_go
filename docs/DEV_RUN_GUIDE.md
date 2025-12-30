@@ -23,7 +23,7 @@ go build -o bin/web-server ./cmd/web-server
 ```
 Custom port:
 ```bash
-GAUTH_WEB_PORT=9090 go run ./cmd/web-server
+AGENTAUTH_WEB_PORT=9090 go run ./cmd/web-server
 # or positional arg
 go run ./cmd/web-server 9090
 ```
@@ -52,7 +52,7 @@ gtimeout 10s go run ./examples/key_rotation
 ## Metrics Persistence
 Enable snapshot persistence on graceful shutdown:
 ```bash
-GAUTH_METRICS_PERSIST_PATH=~/.gauth-metrics go run ./cmd/web-server
+AGENTAUTH_METRICS_PERSIST_PATH=~/.agentauth-metrics go run ./cmd/web-server
 ```
 
 ## Troubleshooting

@@ -180,7 +180,7 @@ func (r *Repository) GetConfigFile(ctx context.Context, tenantID, fileName, form
 			TenantID:    &tenantID,
 			FileName:    fileName,
 			FileFormat:  format,
-			FileContent: "# Default Development Configuration\nservice:\n  name: gauth-beta\n  env: development\n",
+			FileContent: "# Default Development Configuration\nservice:\n  name: agentauth-beta\n  env: development\n",
 			Version:     1,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),

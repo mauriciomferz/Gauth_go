@@ -2,7 +2,7 @@
 set -euo pipefail
 
 "#"" Health check for AgentAuth web demo (beta primary, educational fallback)""#
-PORT="${GAUTH_PORT:-8080}"
+PORT="${AGENTAUTH_PORT:-8080}"
 PRIMARY="http://localhost:$PORT/api/v1/beta/health"
 FALLBACK="http://localhost:$PORT/api/v1/educational/health"
 

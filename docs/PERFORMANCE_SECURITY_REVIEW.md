@@ -6,14 +6,14 @@
 | Component | Location | Type | TTL |
 |-----------|----------|------|-----|
 | `VerificationCache` | `pkg/handlers/blockchain_verification_handlers.go` | In-memory map | Configurable |
-| `PDPCache` | `pkg/pdp/engine.go` | LRU + TTL | Env: `GAUTH_PDP_CACHE_TTL` |
+| `PDPCache` | `pkg/pdp/engine.go` | LRU + TTL | Env: `AGENTAUTH_PDP_CACHE_TTL` |
 | `regexCache` | `pkg/pdp/expr/expr.go` | In-memory map | None (grow-only) |
 
 ### Cache Configuration
 ```bash
 # PDP Cache Configuration
-GAUTH_PDP_CACHE_SIZE=1000   # Max entries (0=disabled)
-GAUTH_PDP_CACHE_TTL=5m      # Entry lifetime
+AGENTAUTH_PDP_CACHE_SIZE=1000   # Max entries (0=disabled)
+AGENTAUTH_PDP_CACHE_TTL=5m      # Entry lifetime
 ```
 
 ### Recommendations
@@ -28,7 +28,7 @@ GAUTH_PDP_CACHE_TTL=5m      # Entry lifetime
 ### Existing Components
 | Component | Location | Status |
 |-----------|----------|--------|
-| `RateLimit` struct | `pkg/gauth/resource_server.go` | Placeholder |
+| `RateLimit` struct | `pkg/agentauth/resource_server.go` | Placeholder |
 | `RateLimitObligationHandler` | `pkg/pdp/obligations_extended.go` | Stub (needs Redis) |
 | `ErrRateLimit` | `pkg/errors/errors.go` | Defined |
 | `poa.RateLimit` | `pkg/poa/power_limits.go` | Full implementation |
@@ -63,7 +63,7 @@ GAUTH_PDP_CACHE_TTL=5m      # Entry lifetime
 
 | Setting | Value | Risk |
 |---------|-------|------|
-| `GAUTH_CORS_ALLOW` unset | `allowAll=true` (wildcard) | ⚠️ Medium |
+| `AGENTAUTH_CORS_ALLOW` unset | `allowAll=true` (wildcard) | ⚠️ Medium |
 | `Access-Control-Allow-Credentials` | `true` | ⚠️ Medium |
 | `Access-Control-Allow-Headers` | Content-Type, Authorization, X-Requested-With, X-Tenant-ID | ✅ Good |
 | `Access-Control-Allow-Methods` | GET, POST, PUT, PATCH, DELETE, OPTIONS | ✅ Appropriate |
@@ -71,13 +71,13 @@ GAUTH_PDP_CACHE_TTL=5m      # Entry lifetime
 ### Findings
 
 1. **⚠️ Wildcard Origin with Credentials**
-   - When `GAUTH_CORS_ALLOW` is unset or `*`, any origin is allowed
+   - When `AGENTAUTH_CORS_ALLOW` is unset or `*`, any origin is allowed
    - Combined with `Allow-Credentials: true`, this is a security risk
-   - **Recommendation**: In production, set `GAUTH_CORS_ALLOW` to specific origins
+   - **Recommendation**: In production, set `AGENTAUTH_CORS_ALLOW` to specific origins
 
 2. **✅ Good: Environment-based Configuration**
-   - `GAUTH_CORS_ALLOW` supports comma-separated allowlist
-   - Example: `GAUTH_CORS_ALLOW=https://app.example.com,https://admin.example.com`
+   - `AGENTAUTH_CORS_ALLOW` supports comma-separated allowlist
+   - Example: `AGENTAUTH_CORS_ALLOW=https://app.example.com,https://admin.example.com`
 
 3. **✅ Good: Vary Header**
    - Correctly sets `Vary: Origin` to prevent cache poisoning
@@ -85,7 +85,7 @@ GAUTH_PDP_CACHE_TTL=5m      # Entry lifetime
 ### Recommended Production Configuration
 ```bash
 # Restrict to specific origins in production
-GAUTH_CORS_ALLOW=https://your-frontend.com,https://admin.your-domain.com
+AGENTAUTH_CORS_ALLOW=https://your-frontend.com,https://admin.your-domain.com
 ```
 
 ---

@@ -114,20 +114,20 @@ echo ""
 
 # Step 8: Run conformance tests (if binary exists)
 echo "Step 8: Running conformance tests..."
-if [ -f "./bin/gauth-conformance" ]; then
-    if ./bin/gauth-conformance run 2>&1 | grep -q "100%"; then
+if [ -f "./bin/agentauth-conformance" ]; then
+    if ./bin/agentauth-conformance run 2>&1 | grep -q "100%"; then
         echo -e "${GREEN}✓${NC} Conformance tests: 100% compliance"
     else
         echo -e "${YELLOW}⚠${NC}  Conformance tests completed (check output for details)"
     fi
 else
-    echo -e "${YELLOW}⚠${NC}  gauth-conformance binary not found, skipping"
+    echo -e "${YELLOW}⚠${NC}  agentauth-conformance binary not found, skipping"
 fi
 echo ""
 
 # Step 9: Quick performance check
 echo "Step 9: Running quick performance check..."
-if go test ./pkg/gauth -bench=BenchmarkValidateToken -benchtime=1s -run=^$ 2>&1 | grep -E "ns/op"; then
+if go test ./pkg/agentauth -bench=BenchmarkValidateToken -benchtime=1s -run=^$ 2>&1 | grep -E "ns/op"; then
     echo -e "${GREEN}✓${NC} Performance benchmark completed"
 else
     echo -e "${YELLOW}⚠${NC}  Benchmark not available, skipping"

@@ -1,4 +1,4 @@
-# 🎯 RFC-0111 Gap Remediation - Executive Summary
+# 🎯 AAP-001 Gap Remediation - Executive Summary
 **Date:** November 12, 2025  
 **Session Duration:** ~7 hours (JWT/PDP: 3h, OIDC Phase 1: 2h, OIDC Phase 2: 2h)  
 **Status:** ✅ ALL PRIORITY 0-1 BLOCKERS RESOLVED
@@ -9,7 +9,7 @@
 
 | Metric | Before | After | Achievement |
 |--------|--------|-------|-------------|
-| **RFC-0111 Compliance** | 55% | 65% | **+10% gain** |
+| **AAP-001 Compliance** | 55% | 65% | **+10% gain** |
 | **Critical Blockers** | 2 | 0 | **100% resolved** |
 | **P1 Requirements** | 0/3 | 1/3 | **33% complete** |
 | **System Status** | Non-functional | Functional + OIDC | **Operational** |
@@ -61,7 +61,7 @@ complianceValidator := NewComplianceValidator(
 - ✅ Wraps existing pkg/pdp.Engine
 - ✅ Converts 4 RFC request types
 - ✅ Added 10 unit tests (100% passing)
-- ✅ Integrated with RFC-0111 config
+- ✅ Integrated with AAP-001 config
 - ✅ Added default policies
 
 **Result:** PDP Implementation 0% → 80%
@@ -90,7 +90,7 @@ complianceValidator := NewComplianceValidator(
 
 **Phase 2: PVP Integration (2 hours)**
 - ✅ Created pkg/oidc/pvp.go (165 lines) - OIDC PowerVerificationPoint
-- ✅ Created pkg/gauth/pvp_router.go (88 lines) - Multi-method router
+- ✅ Created pkg/agentauth/pvp_router.go (88 lines) - Multi-method router
 - ✅ Added 2 test files + integration tests (1,165 lines, 44 test cases)
 - ✅ Steps I, III, VI support oidc_id_token proof method
 - ✅ Achieved 89.7% test coverage (maintained)
@@ -122,9 +122,9 @@ Projected:
 ### Production Code
 ```
 Session 1 (JWT/PDP):
-pkg/gauth/extended_token_service.go  +220 lines  (JWT impl)
-pkg/gauth/pdp_bridge.go              +230 lines  (new file)
-pkg/gauth/rfc0111_config.go          +45 lines   (integration)
+pkg/agentauth/extended_token_service.go  +220 lines  (JWT impl)
+pkg/agentauth/pdp_bridge.go              +230 lines  (new file)
+pkg/agentauth/aap001_config.go          +45 lines   (integration)
                                      ─────────
                                      495 lines
 
@@ -138,7 +138,7 @@ pkg/oidc/identity_bridge.go          +282 lines  (new file)
 
 Session 3 (OIDC Phase 2):
 pkg/oidc/pvp.go                      +165 lines  (new file)
-pkg/gauth/pvp_router.go              +88 lines   (new file)
+pkg/agentauth/pvp_router.go              +88 lines   (new file)
                                      ─────────
                                      253 lines
                                      
@@ -148,7 +148,7 @@ TOTAL PRODUCTION CODE:               1,795 lines
 ### Test Code
 ```
 Session 1 (JWT/PDP):
-pkg/gauth/pdp_bridge_test.go         +220 lines  (new file)
+pkg/agentauth/pdp_bridge_test.go         +220 lines  (new file)
                                      ─────────
                                      220 lines
 
@@ -161,7 +161,7 @@ pkg/oidc/identity_bridge_test.go     +432 lines  (new file)
 
 Session 3 (OIDC Phase 2):
 pkg/oidc/pvp_test.go                 +527 lines  (new file)
-pkg/gauth/pvp_router_test.go         +230 lines  (new file)
+pkg/agentauth/pvp_router_test.go         +230 lines  (new file)
 test/integration/oidc_subscription_flow_test.go +408 lines (new file)
                                      ─────────
                                      1,165 lines
@@ -239,9 +239,9 @@ TOTAL DOCUMENTATION:                           ~5,400 lines
 - **Pass Rate:** 100% (all tests passing)
 - **Build Status:** ✅ Clean compilation
 - **Test Coverage:** 
-  - pkg/gauth/pdp_bridge: 100%
+  - pkg/agentauth/pdp_bridge: 100%
   - pkg/oidc: 89.7% (exceeds 80% target)
-  - pkg/gauth/pvp_router: 100%
+  - pkg/agentauth/pvp_router: 100%
   - Integration tests: All scenarios passing
 
 ### Code Quality
@@ -268,7 +268,7 @@ TOTAL DOCUMENTATION:                           ~5,400 lines
 
 ```bash
 Session 1 (JWT/PDP):
-17cd1e21  docs: RFC-0111 compliance progress update
+17cd1e21  docs: AAP-001 compliance progress update
 3b8d21ee  docs: comprehensive development session summary
 edd15295  docs: add PDP implementation report
 50704bf2  feat: implement PDP bridge (P1)
@@ -356,7 +356,7 @@ d70cf63b  feat: implement OIDC Phase 2 - PVP Integration
 💡 Integration tests validate real-world flows better than unit tests alone
 
 ### Technical Insights
-🔧 JWT standard maps well to RFC-0111 extended tokens  
+🔧 JWT standard maps well to AAP-001 extended tokens  
 🔧 Adapter/bridge pattern solves interface mismatches  
 🔧 Deny-overrides strategy is security-first  
 🔧 In-memory PDP scales to 10,000 decisions/sec  
@@ -390,7 +390,7 @@ d70cf63b  feat: implement OIDC Phase 2 - PVP Integration
 
 > **"From broken to functional to OIDC-capable in three sessions."**
 > 
-> **Session 1:** The JWT fix was THE critical blocker - without token serialization, nothing else matters. The system couldn't function as a distributed service, which is the entire point of RFC-0111. Adding real PDP enforcement moved us from "checking structure" to "enforcing policies" - a fundamental upgrade in capability.
+> **Session 1:** The JWT fix was THE critical blocker - without token serialization, nothing else matters. The system couldn't function as a distributed service, which is the entire point of AAP-001. Adding real PDP enforcement moved us from "checking structure" to "enforcing policies" - a fundamental upgrade in capability.
 > 
 > **Session 2:** OIDC Phase 1 delivered production-grade infrastructure. Discovery, ID Token, and Identity Bridge components form a solid foundation with 88.4% test coverage and full standards compliance (OIDC Core 1.0, Discovery 1.0, JWT RFC 7519).
 > 
@@ -501,9 +501,9 @@ We turned a non-functional prototype with critical blockers into a functional, O
 - `OIDC_PHASE2_PVP_INTEGRATION_REPORT.md` - PVP integration report (526 lines)
 
 **Code Reference:**
-- `pkg/gauth/pdp_bridge.go` - Policy Decision Point (230 lines)
+- `pkg/agentauth/pdp_bridge.go` - Policy Decision Point (230 lines)
 - `pkg/oidc/` - Complete OIDC package (1,047 production + 1,146 test lines)
-- `pkg/gauth/pvp_router.go` - Multi-method router (88 lines)
+- `pkg/agentauth/pvp_router.go` - Multi-method router (88 lines)
 - `test/integration/oidc_subscription_flow_test.go` - Integration tests (408 lines)
 
 ---

@@ -86,7 +86,7 @@ Rollback is idempotent (repeated rollback to same version yields same state). Ap
 ## Endpoints
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
-| `/api/v1/beta/policy/bundles` | POST | Append bundle (admin token required if `GAUTH_POLICY_ADMIN_TOKEN` set). |
+| `/api/v1/beta/policy/bundles` | POST | Append bundle (admin token required if `AGENTAUTH_POLICY_ADMIN_TOKEN` set). |
 | `/api/v1/beta/policy/evaluate` | POST | Evaluate subject/action/resource against effective head bundle. |
 | `/api/v1/beta/policy/rollback?version=NN` | POST | Activate historical version as effective head. |
 | `/api/v1/beta/policy/chain` | GET | Paginated hashes; now includes `versions` array + `active_version`. |
@@ -96,17 +96,17 @@ Rollback is idempotent (repeated rollback to same version yields same state). Ap
 
 ## Governance Metrics (Prometheus)
 ```
-# HELP gauth_policy_revisions_total Total appended policy bundle revisions
-# TYPE gauth_policy_revisions_total counter
-# HELP gauth_policy_active_version Current effective policy bundle version (rollback aware)
-# TYPE gauth_policy_active_version gauge
+# HELP agentauth_policy_revisions_total Total appended policy bundle revisions
+# TYPE agentauth_policy_revisions_total counter
+# HELP agentauth_policy_active_version Current effective policy bundle version (rollback aware)
+# TYPE agentauth_policy_active_version gauge
 ```
 Usage:
-- Detect rollback: `gauth_policy_active_version < max_over_time(gauth_policy_revisions_total[5m])`.
-- Rollback ratio: `(gauth_policy_revisions_total - gauth_policy_active_version) / gauth_policy_revisions_total`.
+- Detect rollback: `agentauth_policy_active_version < max_over_time(agentauth_policy_revisions_total[5m])`.
+- Rollback ratio: `(agentauth_policy_revisions_total - agentauth_policy_active_version) / agentauth_policy_revisions_total`.
 
 ## Evaluation Metrics
-Latency histogram: `gauth_policy_eval_latency_ns_bucket{le="..."}` + `_count`, `_sum` (midpoint approximation) + `gauth_policy_eval_latency_ns_p99`.
+Latency histogram: `agentauth_policy_eval_latency_ns_bucket{le="..."}` + `_count`, `_sum` (midpoint approximation) + `agentauth_policy_eval_latency_ns_p99`.
 Allow/Deny counters and last decision metadata also exposed via JSON snapshot.
 
 ## Audit Integration (Planned)
@@ -136,7 +136,7 @@ Plus a dedicated audit event for rollback operations capturing previous vs new e
 | Conflict detection | Policy substitution / diff analysis tooling (partial tests exist for tamper). |
 | Merkle proofs | Replace linear chain with Merkle root + inclusion proofs for scalability. |
 | Multi-tenancy | Namespaced registries keyed by tenant. |
-| Metrics Depth | Add `gauth_policy_rollbacks_total`, version-labeled latency histograms. |
+| Metrics Depth | Add `agentauth_policy_rollbacks_total`, version-labeled latency histograms. |
 | Policy Diff API | Endpoint returning semantic diff between revisions (subject/resource/action changes). |
 
 ## Testing Summary
@@ -163,13 +163,13 @@ POST /policy/bundles {id:"b4", ...} -> rollback cleared, active_version=4
 ## Operational Alerts (Examples)
 ```promql
 ALERT PolicyRollbackActive
-  IF (max_over_time(gauth_policy_revisions_total[5m]) - gauth_policy_active_version) > 0
+  IF (max_over_time(agentauth_policy_revisions_total[5m]) - agentauth_policy_active_version) > 0
   FOR 3m
   LABELS {severity="warning"}
   ANNOTATIONS {summary="Rollback active", description="Active policy version behind latest revision."}
 
 ALERT PolicyRapidChurn
-  IF increase(gauth_policy_revisions_total[30m]) > 10
+  IF increase(agentauth_policy_revisions_total[30m]) > 10
   FOR 5m
   LABELS {severity="info"}
   ANNOTATIONS {summary="High policy churn", description=">10 revisions in last 30m"}
@@ -178,8 +178,8 @@ ALERT PolicyRapidChurn
 ## CLI / Environment Variables
 | Var | Purpose |
 |-----|---------|
-| `GAUTH_SEED_POLICY` | When not `0` seeds an initial demo bundle (disable for deterministic tests). |
-| `GAUTH_POLICY_ADMIN_TOKEN` | If set, required via `X-Admin-Token` header for append (extend to rollback TODO). |
+| `AGENTAUTH_SEED_POLICY` | When not `0` seeds an initial demo bundle (disable for deterministic tests). |
+| `AGENTAUTH_POLICY_ADMIN_TOKEN` | If set, required via `X-Admin-Token` header for append (extend to rollback TODO). |
 
 ## Known Issues
 - Lack of persistence makes rollback ephemeral across restarts.
@@ -230,8 +230,8 @@ UI governance panel displays chain verification status with color-coded badge cl
 ### Metrics Extensions
 `/api/v1/beta/policy/metrics` surface `revisions_total` (monotonic counter) and `active_version` (gauge). Useful PromQL patterns:
 ```
-gauth_policy_revisions_total - gauth_policy_active_version > 0  # rollback active
-rate(gauth_policy_revisions_total[5m])                          # churn velocity
+agentauth_policy_revisions_total - agentauth_policy_active_version > 0  # rollback active
+rate(agentauth_policy_revisions_total[5m])                          # churn velocity
 ```
 
 ### Example Usage

@@ -71,7 +71,7 @@ class ApiClient {
     const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: 'demo-key' }))
     const payload = btoa(JSON.stringify({
       sub: data.clientId,
-      iss: 'gauth-demo',
+      iss: 'agentauth-demo',
       aud: data.clientOwner,
       scope: data.scope,
       iat: Math.floor(Date.now() / 1000),
@@ -677,7 +677,7 @@ class ApiClient {
     }
 
     for (const line of lines) {
-      if (line.startsWith('#') || !line.trim()) continue
+      if (line.startsWith('#') || !line.trim() continue
 
       // Extract metric name and value
       const match = line.match(/^(\w+)(?:{[^}]*})?\s+([0-9.e+-]+)/)
@@ -686,11 +686,11 @@ class ApiClient {
         const numValue = parseFloat(value)
 
         // Map Prometheus metrics to our interface
-        if (name.includes('request') && name.includes('total')) {
+        if (name.includes('request') && name.includes('total') {
           metrics.requests_total = numValue
-        } else if (name.includes('latency') && name.includes('sum')) {
+        } else if (name.includes('latency') && name.includes('sum') {
           metrics.latency_avg_ms = numValue
-        } else if (name.includes('error')) {
+        } else if (name.includes('error') {
           metrics.error_count = numValue
         }
       }
@@ -787,27 +787,27 @@ class ApiClient {
 
   // MCP (Model Context Protocol) APIs
   async registerMCPServer(config: MCPServerConfig): Promise<{ success: boolean; server_id: string; message: string }> {
-    const response = await this.client.post('/gauth/mcp/servers', config)
+    const response = await this.client.post('/agentauth/mcp/servers', config)
     return response.data
   }
 
   async listMCPServers(): Promise<MCPServersResponse> {
-    const response = await this.client.get('/gauth/mcp/servers')
+    const response = await this.client.get('/agentauth/mcp/servers')
     return response.data
   }
 
   async listMCPResources(serverId: string): Promise<MCPResourcesResponse> {
-    const response = await this.client.get(`/gauth/mcp/servers/${serverId}/resources`)
+    const response = await this.client.get(`/agentauth/mcp/servers/${serverId}/resources`)
     return response.data
   }
 
   async readMCPResource(serverId: string, uri: string): Promise<MCPResourceReadResponse> {
-    const response = await this.client.post(`/gauth/mcp/servers/${serverId}/resources/read`, { uri })
+    const response = await this.client.post(`/agentauth/mcp/servers/${serverId}/resources/read`, { uri })
     return response.data
   }
 
   async callMCPTool(serverId: string, name: string, args: Record<string, unknown>): Promise<MCPToolCallResponse> {
-    const response = await this.client.post(`/gauth/mcp/servers/${serverId}/tools/call`, {
+    const response = await this.client.post(`/agentauth/mcp/servers/${serverId}/tools/call`, {
       name,
       arguments: args
     })
@@ -815,12 +815,12 @@ class ApiClient {
   }
 
   async listMCPTools(serverId: string): Promise<MCPToolsResponse> {
-    const response = await this.client.get(`/gauth/mcp/servers/${serverId}/tools`)
+    const response = await this.client.get(`/agentauth/mcp/servers/${serverId}/tools`)
     return response.data
   }
 
   async disconnectMCPServer(serverId: string): Promise<{ success: boolean; server_id: string; message: string }> {
-    const response = await this.client.delete(`/gauth/mcp/servers/${serverId}`)
+    const response = await this.client.delete(`/agentauth/mcp/servers/${serverId}`)
     return response.data
   }
 

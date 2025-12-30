@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/pkg/events"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // logEventHandler implements events.EventHandler for logging
@@ -46,7 +46,7 @@ func main() {
 	bus.Subscribe(eventHandler)
 
 	// Create a new AgentAuth instance (update config fields as needed)
-	auth, err := gauth.New(gauth.Config{
+	auth, err := agentauth.New(agentauth.Config{
 		// Create a AgentAuth instance with sensible defaults.
 		// Fill in required config fields if needed, e.g.:
 		// AuthServerURL: "http://localhost:8080",
@@ -75,7 +75,7 @@ func main() {
 		metadata.SetString("user_agent", r.UserAgent())
 
 		// Create a token for user "demo-user"
-		tokenResp, err := auth.RequestToken(gauth.TokenRequest{
+		tokenResp, err := auth.RequestToken(agentauth.TokenRequest{
 			// Request a token for a demo user.
 			GrantID: "demo-user",
 			Scope:   []string{"demo"},
@@ -168,7 +168,7 @@ func main() {
 		metadata.SetTime("revocation_time", time.Now())
 
 		// Revoke the token (invalidate)
-		p := &gauth.PowerAdministrationPoint{AgentAuth: auth}
+		p := &agentauth.PowerAdministrationPoint{AgentAuth: auth}
 		// Use PowerAdministrationPoint for token revocation.
 		err := p.InvalidateToken(tokenStr)
 		if err != nil {

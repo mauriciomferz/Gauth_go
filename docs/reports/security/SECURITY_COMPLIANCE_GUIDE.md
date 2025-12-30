@@ -227,67 +227,67 @@ The AgentAuth application implements multiple layers of security controls to pro
 #### Security Headers
 ```bash
 # Environment mode (development/staging/production)
-GAUTH_ENV=production
+AGENTAUTH_ENV=production
 
 # HSTS configuration
-GAUTH_HSTS_MAX_AGE=31536000  # 1 year in seconds
+AGENTAUTH_HSTS_MAX_AGE=31536000  # 1 year in seconds
 
 # Frame options
-GAUTH_X_FRAME_OPTIONS=DENY  # or SAMEORIGIN
+AGENTAUTH_X_FRAME_OPTIONS=DENY  # or SAMEORIGIN
 
 # Referrer policy
-GAUTH_REFERRER_POLICY=strict-origin-when-cross-origin
+AGENTAUTH_REFERRER_POLICY=strict-origin-when-cross-origin
 
 # Custom CSP additions
-GAUTH_CSP_ADDITIONS="connect-src https://api.example.com"
+AGENTAUTH_CSP_ADDITIONS="connect-src https://api.example.com"
 
 # Custom permissions policy
-GAUTH_PERMISSIONS_POLICY="fullscreen=(self)"
+AGENTAUTH_PERMISSIONS_POLICY="fullscreen=(self)"
 ```
 
 #### CORS Configuration
 ```bash
 # Allowed origins (comma-separated)
-GAUTH_CORS_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
+AGENTAUTH_CORS_ALLOWED_ORIGINS=https://app.example.com,https://admin.example.com
 
 # Wildcard subdomain support
-GAUTH_CORS_ALLOWED_ORIGINS=*.example.com
+AGENTAUTH_CORS_ALLOWED_ORIGINS=*.example.com
 ```
 
 #### Rate Limiting
 ```bash
 # Global rate limiting
-GAUTH_RATE_LIMIT_RPS=100
-GAUTH_RATE_LIMIT_BURST=200
+AGENTAUTH_RATE_LIMIT_RPS=100
+AGENTAUTH_RATE_LIMIT_BURST=200
 
 # Strict limits for sensitive endpoints
-GAUTH_STRICT_RATE_LIMIT_RPS=10
-GAUTH_STRICT_RATE_LIMIT_BURST=20
+AGENTAUTH_STRICT_RATE_LIMIT_RPS=10
+AGENTAUTH_STRICT_RATE_LIMIT_BURST=20
 
 # Moderate limits for read operations
-GAUTH_MODERATE_RATE_LIMIT_RPS=50
-GAUTH_MODERATE_RATE_LIMIT_BURST=100
+AGENTAUTH_MODERATE_RATE_LIMIT_RPS=50
+AGENTAUTH_MODERATE_RATE_LIMIT_BURST=100
 
 # DDoS protection threshold
-GAUTH_DDOS_MAX_RPS=1000
+AGENTAUTH_DDOS_MAX_RPS=1000
 ```
 
 #### Input Validation
 ```bash
 # Max request body size (bytes)
-GAUTH_MAX_BODY_SIZE=1048576  # 1MB
+AGENTAUTH_MAX_BODY_SIZE=1048576  # 1MB
 ```
 
 #### Audit Logging
 ```bash
 # Max events in memory
-GAUTH_AUDIT_MAX_EVENTS=10000
+AGENTAUTH_AUDIT_MAX_EVENTS=10000
 
 # File logging
-GAUTH_AUDIT_LOG_FILE=/var/log/gauth/audit.log
+AGENTAUTH_AUDIT_LOG_FILE=/var/log/agentauth/audit.log
 
 # Stdout logging
-GAUTH_AUDIT_LOG_STDOUT=1
+AGENTAUTH_AUDIT_LOG_STDOUT=1
 ```
 
 ### Integration Example
@@ -296,7 +296,7 @@ GAUTH_AUDIT_LOG_STDOUT=1
 package main
 
 import (
-	"github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/security"
+	"github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/internal/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -570,25 +570,25 @@ curl http://localhost:8080/api/v1/beta/audit/summary
 ### Prometheus Metrics
 
 **Security Metrics**:
-- `gauth_rate_limit_violations_total` - Rate limit violations
-- `gauth_ddos_blocked_total` - DDoS blocks
-- `gauth_authentication_failures_total` - Authentication failures
-- `gauth_sql_injection_attempts_total` - SQL injection attempts
-- `gauth_xss_attempts_total` - XSS attempts
-- `gauth_path_traversal_attempts_total` - Path traversal attempts
-- `gauth_cors_rejected_total` - CORS rejections
-- `gauth_security_events_total` - Security events by type/severity
+- `agentauth_rate_limit_violations_total` - Rate limit violations
+- `agentauth_ddos_blocked_total` - DDoS blocks
+- `agentauth_authentication_failures_total` - Authentication failures
+- `agentauth_sql_injection_attempts_total` - SQL injection attempts
+- `agentauth_xss_attempts_total` - XSS attempts
+- `agentauth_path_traversal_attempts_total` - Path traversal attempts
+- `agentauth_cors_rejected_total` - CORS rejections
+- `agentauth_security_events_total` - Security events by type/severity
 
 **Query Examples**:
 ```promql
 # Rate of rate limit violations
-rate(gauth_rate_limit_violations_total[5m])
+rate(agentauth_rate_limit_violations_total[5m])
 
 # Authentication failure rate
-rate(gauth_authentication_failures_total[5m])
+rate(agentauth_authentication_failures_total[5m])
 
 # Total security events by severity
-sum by (severity) (gauth_security_events_total)
+sum by (severity) (agentauth_security_events_total)
 ```
 
 ### Alert Configuration

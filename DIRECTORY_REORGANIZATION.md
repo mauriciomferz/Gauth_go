@@ -65,8 +65,8 @@ test/
 ### 3. Policy Store Implementation (New)
 
 **Added Files:**
-- `pkg/gauth/policy_store.go` - PolicyStore interface and in-memory implementation
-- `pkg/gauth/policy_store_db.go` - PostgreSQL-backed implementation
+- `pkg/agentauth/policy_store.go` - PolicyStore interface and in-memory implementation
+- `pkg/agentauth/policy_store_db.go` - PostgreSQL-backed implementation
 
 **Rationale:** Addresses the in-memory scaling limitation by introducing a pluggable storage interface that supports both in-memory (for development/testing) and persistent storage (for production).
 
@@ -96,7 +96,7 @@ Update any task definitions that reference `web/ui-react` to `frontend/ui-react`
 1. **Frontend Changes:**
    ```bash
    # Your changes in web/ui-react, web/static, etc. need to move
-   cd /path/to/Gauth_go
+   cd /path/to/AgentAuth
    
    # Frontend assets are now in frontend/
    # Example: Edit frontend/ui-react/src/... instead of web/ui-react/src/...
@@ -112,17 +112,17 @@ Update any task definitions that reference `web/ui-react` to `frontend/ui-react`
 3. **Policy Storage:**
    ```go
    // Old way (direct in-memory storage)
-   pap := gauth.NewPowerAdministrationPoint("id", "name", "desc")
+   pap := agentauth.NewPowerAdministrationPoint("id", "name", "desc")
    
    // New way (default in-memory)
-   pap := gauth.NewPowerAdministrationPoint("id", "name", "desc")
+   pap := agentauth.NewPowerAdministrationPoint("id", "name", "desc")
    
    // New way (with custom store, e.g., PostgreSQL)
-   dbStore, err := gauth.NewDatabasePolicyStore(db)
+   dbStore, err := agentauth.NewDatabasePolicyStore(db)
    if err != nil {
        log.Fatal(err)
    }
-   pap := gauth.NewPowerAdministrationPointWithStore("id", "name", "desc", dbStore)
+   pap := agentauth.NewPowerAdministrationPointWithStore("id", "name", "desc", dbStore)
    ```
 
 ### Running Tests

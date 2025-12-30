@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/pdp"
 )
 
@@ -28,7 +28,7 @@ func NewAuthorizationBridge(pdpEngine pdp.Engine) *AuthorizationBridge {
 // AuthorizeResourceRead checks if token authorizes reading an MCP resource
 func (b *AuthorizationBridge) AuthorizeResourceRead(
 	ctx context.Context,
-	token *gauth.ExtendedToken,
+	token *agentauth.ExtendedToken,
 	resourceURI string,
 ) (bool, error) {
 	// Validate token first
@@ -89,7 +89,7 @@ func (b *AuthorizationBridge) AuthorizeResourceRead(
 // AuthorizeToolCall checks if token authorizes calling an MCP tool
 func (b *AuthorizationBridge) AuthorizeToolCall(
 	ctx context.Context,
-	token *gauth.ExtendedToken,
+	token *agentauth.ExtendedToken,
 	toolName string,
 	arguments map[string]interface{},
 ) (bool, error) {
@@ -163,7 +163,7 @@ func (b *AuthorizationBridge) AuthorizeToolCall(
 // AuthorizePromptGet checks if token authorizes accessing an MCP prompt template
 func (b *AuthorizationBridge) AuthorizePromptGet(
 	ctx context.Context,
-	token *gauth.ExtendedToken,
+	token *agentauth.ExtendedToken,
 	promptName string,
 ) (bool, error) {
 	// Validate token first
@@ -221,7 +221,7 @@ func (b *AuthorizationBridge) AuthorizePromptGet(
 }
 
 // hasScope checks if token contains required scope (with wildcard support)
-func (b *AuthorizationBridge) hasScope(token *gauth.ExtendedToken, requiredScope string) bool {
+func (b *AuthorizationBridge) hasScope(token *agentauth.ExtendedToken, requiredScope string) bool {
 	for _, scope := range token.Scope {
 		if scope == requiredScope {
 			return true
@@ -238,7 +238,7 @@ func (b *AuthorizationBridge) hasScope(token *gauth.ExtendedToken, requiredScope
 }
 
 // ExtractMCPScopes extracts all MCP-related scopes from token
-func (b *AuthorizationBridge) ExtractMCPScopes(token *gauth.ExtendedToken) []string {
+func (b *AuthorizationBridge) ExtractMCPScopes(token *agentauth.ExtendedToken) []string {
 	mcpScopes := make([]string, 0)
 	for _, scope := range token.Scope {
 		if strings.HasPrefix(scope, "mcp:") {
@@ -249,7 +249,7 @@ func (b *AuthorizationBridge) ExtractMCPScopes(token *gauth.ExtendedToken) []str
 }
 
 // ValidateMCPScopes checks if token has valid MCP scopes
-func (b *AuthorizationBridge) ValidateMCPScopes(token *gauth.ExtendedToken) error {
+func (b *AuthorizationBridge) ValidateMCPScopes(token *agentauth.ExtendedToken) error {
 	mcpScopes := b.ExtractMCPScopes(token)
 	if len(mcpScopes) == 0 {
 		return fmt.Errorf("token contains no MCP scopes")
@@ -282,7 +282,7 @@ func (b *AuthorizationBridge) ValidateMCPScopes(token *gauth.ExtendedToken) erro
 
 // checkToolRestrictions validates tool call against token restrictions
 func (b *AuthorizationBridge) checkToolRestrictions(
-	token *gauth.ExtendedToken,
+	token *agentauth.ExtendedToken,
 	toolName string,
 	arguments map[string]interface{},
 ) error {
@@ -325,7 +325,7 @@ func (b *AuthorizationBridge) checkToolRestrictions(
 
 // checkValueRestrictions validates monetary value against token restrictions
 func (b *AuthorizationBridge) checkValueRestrictions(
-	token *gauth.ExtendedToken,
+	token *agentauth.ExtendedToken,
 	arguments map[string]interface{},
 ) error {
 	// Extract value from arguments
@@ -412,7 +412,7 @@ type AuthorizationResult struct {
 // AuthorizeWithDetails performs authorization and returns detailed result
 func (b *AuthorizationBridge) AuthorizeWithDetails(
 	ctx context.Context,
-	token *gauth.ExtendedToken,
+	token *agentauth.ExtendedToken,
 	operation string,
 	resourceOrTool string,
 	arguments map[string]interface{},
@@ -482,7 +482,7 @@ func (b *AuthorizationBridge) AuthorizeWithDetails(
 }
 
 // extractAgentAssurance retrieves the identity assurance level of the agent (client)
-func (b *AuthorizationBridge) extractAgentAssurance(token *gauth.ExtendedToken) string {
+func (b *AuthorizationBridge) extractAgentAssurance(token *agentauth.ExtendedToken) string {
 	if token.VerificationProof == nil {
 		return "none"
 	}

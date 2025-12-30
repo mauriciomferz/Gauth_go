@@ -16,7 +16,7 @@ cd ../../..
 # Test 2: Core Build Tests
 echo ""
 echo "2. Testing Core Package Builds:"
-if go build ./pkg/gauth ./pkg/token ./pkg/events ./pkg/resilience; then
+if go build ./pkg/agentauth ./pkg/token ./pkg/events ./pkg/resilience; then
     echo "   ✅ PASSED: All core packages build successfully"
 else
     echo "   ❌ FAILED: Core package builds"
@@ -25,7 +25,7 @@ fi
 # Test 3: Main Server Build
 echo ""
 echo "3. Testing Main Server Build:"
-if go build ./cmd/gauth-server; then
+if go build ./cmd/agentauth-server; then
     echo "   ✅ PASSED: Main server builds successfully"
 else
     echo "   ❌ FAILED: Main server build"

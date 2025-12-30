@@ -20,7 +20,7 @@ See root `DISCLAIMER.md` for the broader matrix of intentionally omitted product
 - No real key lifecycle management
 - No authenticated, audited signing infrastructure
 - No encryption service wired into application flows
-- Rotation summary signing now uses a canonical JSON payload (ordered fields: `chain_length`, `head_hash`, `aggregate_hash`, `generated_at`) with domain separation prefix `GAUTH_ROTATION_SUMMARY:` to ensure deterministic Ed25519 signatures. This eliminates Go map iteration ordering non-determinism and is mirrored in client verification. See README section "Canonical Payload Ordering (Deterministic Signing)" for rationale and future versioning notes.
+- Rotation summary signing now uses a canonical JSON payload (ordered fields: `chain_length`, `head_hash`, `aggregate_hash`, `generated_at`) with domain separation prefix `AGENTAUTH_ROTATION_SUMMARY:` to ensure deterministic Ed25519 signatures. This eliminates Go map iteration ordering non-determinism and is mirrored in client verification. See README section "Canonical Payload Ordering (Deterministic Signing)" for rationale and future versioning notes.
 
 ### **Aspirational Production-Grade Capability (Not Implemented):**
 
@@ -51,7 +51,7 @@ func NewJWTService(keySize int) (*JWTService, error) {
         privateKey: privateKey,
         publicKey:  &privateKey.PublicKey,
         keyID:      generateKeyID(),
-        issuer:     "gauth-secure",
+        issuer:     "agentauth-secure",
     }, nil
 }
 

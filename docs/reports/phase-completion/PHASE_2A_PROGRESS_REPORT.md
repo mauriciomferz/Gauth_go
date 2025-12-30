@@ -8,12 +8,12 @@
 
 ## Executive Summary
 
-Phase 2A (UI Backend Integration) has begun with API client updates and endpoint mappings. Both frontend and backend servers are running, RFC-0111 endpoints are active, and initial API integration is complete for authorization validation and metrics.
+Phase 2A (UI Backend Integration) has begun with API client updates and endpoint mappings. Both frontend and backend servers are running, AAP-001 endpoints are active, and initial API integration is complete for authorization validation and metrics.
 
 ### Progress: 100% Complete ✅
 
 - ✅ **Servers Running** (10%)
-- ✅ **RFC-0111 Endpoints Discovered** (10%)
+- ✅ **AAP-001 Endpoints Discovered** (10%)
 - ✅ **API Client Updated** (15%)
 - ✅ **Documentation Created** (5%)
 - ✅ **Page Testing** (40% - all 8 pages tested and verified)
@@ -25,20 +25,20 @@ Phase 2A (UI Backend Integration) has begun with API client updates and endpoint
 ## Today's Achievements (Phase 2A)
 
 ### 1. Server Startup ✅
-- **Backend**: Running on port 8080 with RFC-0111 enabled
+- **Backend**: Running on port 8080 with AAP-001 enabled
 - **Frontend**: Running on port 3000 with Vite dev server
 - **Proxy**: Configured `/api/*` → `http://localhost:8080`
 - **Health Check**: ✅ `/api/v1/beta/health` returns healthy
-- **Environment**: `GAUTH_AAP-001_ENABLED=1 GAUTH_AAP-001_USE_MOCKS=1`
+- **Environment**: `AGENTAUTH_AAP-001_ENABLED=1 AGENTAUTH_AAP-001_USE_MOCKS=1`
 
-### 2. RFC-0111 Endpoints Activated ✅
+### 2. AAP-001 Endpoints Activated ✅
 ```
-POST /api/v1/rfc0111/authorize (token creation - requires subscription)
-POST /api/v1/rfc0111/token/validate (token validation)
-POST /api/v1/rfc0111/token/introspect (token introspection)
-POST /api/v1/rfc0111/token/revoke (token revocation)
-GET  /api/v1/rfc0111/subscriptions (subscription management)
-POST /api/v1/rfc0111/subscriptions (create subscription - Steps I-VIII)
+POST /api/v1/aap001/authorize (token creation - requires subscription)
+POST /api/v1/aap001/token/validate (token validation)
+POST /api/v1/aap001/token/introspect (token introspection)
+POST /api/v1/aap001/token/revoke (token revocation)
+GET  /api/v1/aap001/subscriptions (subscription management)
+POST /api/v1/aap001/subscriptions (create subscription - Steps I-VIII)
 ```
 
 ### 3. API Client Updates ✅
@@ -47,13 +47,13 @@ POST /api/v1/rfc0111/subscriptions (create subscription - Steps I-VIII)
 **Changes Made**:
 1. **Token Creation** (`createToken`):
    - Status: Mock implementation
-   - Reason: RFC-0111 requires full subscription flow (Steps I-VIII)
+   - Reason: AAP-001 requires full subscription flow (Steps I-VIII)
    - Generates JWT-like mock tokens for UI demo
    - TODO: Implement subscription flow UI
 
 2. **Token Validation** (`validateToken`):
    - Status: Real backend integration ✅
-   - Endpoint: `POST /api/v1/rfc0111/token/validate`
+   - Endpoint: `POST /api/v1/aap001/token/validate`
    - Transforms response format correctly
 
 3. **Authorization Validation** (`checkAuthorization`, `validateAuthorization`):
@@ -135,7 +135,7 @@ All 8 React UI pages tested and verified:
 | UI Feature | Frontend Method | Backend Endpoint | Status |
 |------------|----------------|------------------|---------|
 | **Token Create** | `createToken()` | N/A (mock) | 🟡 Mock |
-| **Token Validate** | `validateToken()` | `POST /rfc0111/token/validate` | ✅ Real |
+| **Token Validate** | `validateToken()` | `POST /aap001/token/validate` | ✅ Real |
 | **Authorization** | `validateAuthorization()` | `POST /beta/authz/evaluate` | ✅ Real |
 | **Metrics** | `getMetrics()` | `GET /beta/metrics/prometheus` | ✅ Real |
 | **Health** | `health()` | `GET /beta/health` | ✅ Real |
@@ -163,7 +163,7 @@ All 8 React UI pages tested and verified:
 - **Status**: ✅ Tested and working
 - **API Methods**: `createToken()` (mock), `validateToken()` (real)
 - **Testing**: Complete - page loads successfully
-- **Notes**: Create uses mock, validate uses RFC-0111
+- **Notes**: Create uses mock, validate uses AAP-001
 
 ### 3. PVP Page
 - **Status**: ✅ Tested and working
@@ -214,7 +214,7 @@ Created `parsePrometheusMetrics()` method that:
 4. Returns structured MetricsResponse interface
 5. Falls back to mock data on parse errors
 
-### RFC-0111 Subscription Flow Challenge
+### AAP-001 Subscription Flow Challenge
 
 **Problem**: Token creation requires 8-step subscription flow:
 ```
@@ -258,7 +258,7 @@ Step VIII: Resource Server Authentication
 2. Fill out token creation form
 3. Submit and verify mock token is generated
 4. Copy token and test validation
-5. Verify validation uses real RFC-0111 endpoint
+5. Verify validation uses real AAP-001 endpoint
 6. Check browser console for errors
 
 ### Step 2: Test PIP Page ⏳
@@ -286,7 +286,7 @@ Step VIII: Resource Server Authentication
 
 **Options**:
 - **Option A**: Search backend for existing endpoints
-- **Option B**: Use RFC-0111 mock services (PVP, Registry available)
+- **Option B**: Use AAP-001 mock services (PVP, Registry available)
 - **Option C**: Implement full mock in API client
 - **Option D**: Mix of real and mock (pragmatic)
 
@@ -302,8 +302,8 @@ Step VIII: Resource Server Authentication
 
 ## Challenges & Solutions
 
-### Challenge 1: RFC-0111 Complexity
-**Problem**: Full RFC-0111 authorization requires 8-step subscription flow + PoA credentials  
+### Challenge 1: AAP-001 Complexity
+**Problem**: Full AAP-001 authorization requires 8-step subscription flow + PoA credentials  
 **Solution**: Mock token creation for UI, use real validation endpoint  
 **Status**: ✅ Resolved
 
@@ -314,7 +314,7 @@ Step VIII: Resource Server Authentication
 
 ### Challenge 3: Missing Endpoints
 **Problem**: PVP, Registry, PoA endpoints not immediately obvious  
-**Solution**: RFC-0111 has mock services, need to wire them up or mock in UI  
+**Solution**: AAP-001 has mock services, need to wire them up or mock in UI  
 **Status**: ⏳ In progress
 
 ### Challenge 4: Payload Mismatches
@@ -329,7 +329,7 @@ Step VIII: Resource Server Authentication
 ### Phase 2A Completion Criteria
 
 - [x] Both servers running (backend + frontend)
-- [x] RFC-0111 endpoints discovered and activated
+- [x] AAP-001 endpoints discovered and activated
 - [x] API client updated with real endpoints
 - [x] Documentation created
 - [ ] Tokens page tested and working
@@ -350,9 +350,9 @@ Step VIII: Resource Server Authentication
 
 ### Backend Configuration
 ```bash
-GAUTH_AAP-001_ENABLED=1
-GAUTH_AAP-001_USE_MOCKS=1
-GAUTH_TOKEN_STORE=memory
+AGENTAUTH_AAP-001_ENABLED=1
+AGENTAUTH_AAP-001_USE_MOCKS=1
+AGENTAUTH_TOKEN_STORE=memory
 Port: 8080
 PID: running
 ```
@@ -365,7 +365,7 @@ Node: Latest
 Proxy: /api -> http://localhost:8080
 ```
 
-### RFC-0111 Components Active
+### AAP-001 Components Active
 - ✅ Mock PVP Client (PowerVerificationPoint)
 - ✅ Mock PIP Client (PolicyInformationPoint)
 - ✅ Mock Commercial Register Client
@@ -396,7 +396,7 @@ Proxy: /api -> http://localhost:8080
 3. **Test Metrics page** - Verify Prometheus parser
 
 ### Short-term (Next Session)
-1. **Implement PVP integration** - Use RFC-0111 mock PVP or create adapter
+1. **Implement PVP integration** - Use AAP-001 mock PVP or create adapter
 2. **Implement Registry integration** - Use mock Commercial Register
 3. **Implement PoA integration** - Use PoA service or mock
 4. **End-to-end testing** - Test all pages together

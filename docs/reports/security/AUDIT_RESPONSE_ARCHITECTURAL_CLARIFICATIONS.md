@@ -22,11 +22,11 @@ Thank you for the corrected audit focusing on actual implementation files. Your 
 > "The AgentAuth Server validates the Request, but it issues a Standard Access Token (likely a Bearer JWT) to the client... the downstream Resource Server (API) will receive a valid token but lose the context of the restriction."
 
 **Reality:**
-**This repository (`Gauth_go`) does NOT issue access tokens to external Resource Servers.**
+**This repository (`AgentAuth`) does NOT issue access tokens to external Resource Servers.**
 
 ### What This System Actually Does
 
-The `pkg/rfc0111` package is a **Power of Attorney (PoA) validation framework** used for:
+The `pkg/aap001` package is a **Power of Attorney (PoA) validation framework** used for:
 
 1. **Internal authorization decisions** within AAP ecosystem services
 2. **Validation-as-a-Service** where clients call `ValidateDelegation()` to check if action X is authorized
@@ -103,7 +103,7 @@ The `pkg/rfc0111` package is a **Power of Attorney (PoA) validation framework** 
 // Payment API Service (integrates AAP-001)
 func (api *PaymentAPI) ProcessPayment(ctx context.Context, req PaymentRequest) error {
     // EVERY payment validates against PoA constraints
-    vctx := rfc0111.ValidationContext{
+    vctx := aap001.ValidationContext{
         Action:          "payment:send",
         RequestedAmount: &req.Amount,  // $50
         Metadata: map[string]string{
@@ -112,7 +112,7 @@ func (api *PaymentAPI) ProcessPayment(ctx context.Context, req PaymentRequest) e
     }
     
     // This checks BOTH scope AND constraints (max_amount, daily limit, currency)
-    err := rfc0111Service.ValidateDelegationRich(ctx, 
+    err := aap001Service.ValidateDelegationRich(ctx, 
         req.PoAID,      // "poa-123"
         req.UserID,     // "bob@example.com"
         vctx)
@@ -185,7 +185,7 @@ token := jwt.Sign(map[string]interface{}{
 
 **Status:** 🟡 **PARTIALLY VALID - CONFIGURABLE BEHAVIOR**
 
-**Actual Implementation** (`rfc0111.go` lines 3003-3016):
+**Actual Implementation** (`aap001.go` lines 3003-3016):
 
 ```go
 // Phase 2 Enhancement #3: Real-time revocation checking
@@ -212,7 +212,7 @@ if s.revocationBlacklistStore != nil {
 }
 ```
 
-**Configuration Option** (`rfc0111.go` line 787):
+**Configuration Option** (`aap001.go` line 787):
 ```go
 func WithReplayFailClosed() Option { 
     return func(s *Service) { s.failClosedReplay = true } 
@@ -235,15 +235,15 @@ func WithReplayFailClosed() Option {
 **Recommendation - ACCEPTED:**
 ```go
 // CURRENT DEFAULT (fail-open):
-svc := rfc0111.NewService(audit, authz)
+svc := aap001.NewService(audit, authz)
 
 // SHOULD CHANGE TO (fail-closed):
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithReplayFailClosed(),  // ✅ Secure by default
+svc := aap001.NewService(audit, authz,
+    aap001.WithReplayFailClosed(),  // ✅ Secure by default
 )
 
 // High-availability systems can opt-in to fail-open:
-svc := rfc0111.NewService(audit, authz)  // Explicitly documented as less secure
+svc := aap001.NewService(audit, authz)  // Explicitly documented as less secure
 ```
 
 **Action Item:**
@@ -256,11 +256,11 @@ svc := rfc0111.NewService(audit, authz)  // Explicitly documented as less secure
 ### Gap #3: "Unhandled Unknown Constraints"
 
 **Your Claim:**
-> "If a Principal adds a new critical constraint (e.g., requires_mfa: true) that this version of Gauth_go does not recognize, the loop likely skips it (ignores it) and grants the token anyway."
+> "If a Principal adds a new critical constraint (e.g., requires_mfa: true) that this version of AgentAuth does not recognize, the loop likely skips it (ignores it) and grants the token anyway."
 
 **Status:** 🟡 **PARTIALLY VALID - BY DESIGN, BUT DEBATABLE**
 
-**Actual Implementation** (`rfc0111.go` lines 3190-3201):
+**Actual Implementation** (`aap001.go` lines 3190-3201):
 
 ```go
 // Generic restriction validation
@@ -404,7 +404,7 @@ for rk, rv := range poa.Restrictions {
 
 **Status:** 🟡 **PARTIALLY VALID - DEPENDS ON INTEGRATION CONTEXT**
 
-**Actual Implementation** (`rfc0111.go` line 3056):
+**Actual Implementation** (`aap001.go` line 3056):
 
 ```go
 // Phase 2 Enhancement #2: Delegation Chain Validation
@@ -431,7 +431,7 @@ if s.delegationChainValidator != nil && poa.ParentPOAID != "" {
 
 **However, the `grantee` parameter comes from authenticated context:**
 
-**Extraction from Context** (`rfc0111.go` lines 1344-1358):
+**Extraction from Context** (`aap001.go` lines 1344-1358):
 ```go
 // SECURITY FIX 1: Agent-Session Binding Enforcement
 // Extract session user from context
@@ -602,11 +602,11 @@ provided in the context. Integrators MUST:
 
 **For Security-Critical Deployments:**
 ```go
-svc := rfc0111.NewService(audit, authz,
-    rfc0111.WithReplayFailClosed(),           // ✅ Fail-closed revocation
-    rfc0111.WithStrictConstraintValidation(), // ✅ Reject unknown constraints
-    rfc0111.WithRevocationBlacklistStore(redisStore),
-    rfc0111.WithAtomicCounterStore(atomicStore),
+svc := aap001.NewService(audit, authz,
+    aap001.WithReplayFailClosed(),           // ✅ Fail-closed revocation
+    aap001.WithStrictConstraintValidation(), // ✅ Reject unknown constraints
+    aap001.WithRevocationBlacklistStore(redisStore),
+    aap001.WithAtomicCounterStore(atomicStore),
 )
 ```
 

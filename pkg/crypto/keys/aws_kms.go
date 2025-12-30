@@ -51,7 +51,7 @@ func NewAWSKMSClient(ctx context.Context, keyID string, region string) (*AWSKMSC
 	client := kms.NewFromConfig(cfg)
 
 	// Determine Previous Key ID
-	prevID := os.Getenv("GAUTH_KMS_PREVIOUS_KEY_ID")
+	prevID := os.Getenv("AGENTAUTH_KMS_PREVIOUS_KEY_ID")
 
 	kmsClient := &AWSKMSClient{
 		api:       client,

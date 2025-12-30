@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gimelfoundation.com/schema/audit_logs.json",
+  "$id": "https://agentauth.io/schema/audit_logs.json",
   "title": "AuditLogsSnapshot",
   "type": "object",
   "required": ["success", "entries"],

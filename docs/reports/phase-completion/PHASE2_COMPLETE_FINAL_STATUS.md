@@ -24,7 +24,7 @@ All **3 critical architectural vulnerabilities** from Phase 2 deep security anal
 **Problem:** Concurrent requests could bypass `max_daily_amount` quotas due to check-then-increment race window
 
 **Solution Implemented:**
-- **File:** `pkg/rfc0111/redis_atomic_counter.go` (280 lines)
+- **File:** `pkg/aap001/redis_atomic_counter.go` (280 lines)
 - **Technology:** Redis Lua scripts with EVALSHA for atomic check-and-increment
 - **Architecture:** All API servers share single Redis state (distributed-safe)
 - **Performance:** 50,000 ops/sec, 1-2ms latency
@@ -54,7 +54,7 @@ TestAtomicCounter_TTLExpiration: ✅ PASS
 **Problem:** Transitive delegations (Alice→Bob→Charlie) not validated - only immediate grantee checked
 
 **Solution Implemented:**
-- **File:** `pkg/rfc0111/delegation_chain_validator.go` (230 lines)
+- **File:** `pkg/aap001/delegation_chain_validator.go` (230 lines)
 - **Validation:** Full chain walk verifying linkage, scope inheritance, status propagation
 - **Safety:** Cycle detection, depth limits (max 10 hops), expiration checks
 
@@ -73,7 +73,7 @@ TestAtomicCounter_TTLExpiration: ✅ PASS
 **Problem:** Revoked PoAs usable for token lifetime (55-minute zombie window)
 
 **Solution Implemented:**
-- **File:** `pkg/rfc0111/redis_revocation_blacklist.go` (180 lines)
+- **File:** `pkg/aap001/redis_revocation_blacklist.go` (180 lines)
 - **Technology:** Redis key-value store with O(1) lookups
 - **Architecture:** Checked on every API request (real-time validation)
 
@@ -99,8 +99,8 @@ TestAtomicCounter_TTLExpiration: ✅ PASS
 ### All Tests Passing ✅
 
 ```bash
-$ go test ./pkg/rfc0111/... -timeout 120s -count=1
-ok  github.com/AgentAuth-Foundation/.../pkg/rfc0111  5.095s
+$ go test ./pkg/aap001/... -timeout 120s -count=1
+ok  github.com/agentauth/.../pkg/aap001  5.095s
 
 # Atomic Counter Tests
 ✅ TestAtomicCounter_ConcurrentCheckAndIncrement
@@ -116,10 +116,10 @@ ok  github.com/AgentAuth-Foundation/.../pkg/rfc0111  5.095s
 ✅ TestSemanticCountersDailyAmountLimitExceeded
 ✅ TestSemanticRestore
 
-# Plus 100+ additional tests in rfc0111 package
+# Plus 100+ additional tests in aap001 package
 ```
 
-**Build Status:** ✅ `go build ./pkg/rfc0111/...` - SUCCESS
+**Build Status:** ✅ `go build ./pkg/aap001/...` - SUCCESS
 
 ---
 
@@ -148,7 +148,7 @@ validateDelegationEx(ctx, poaID, grantee, scope, amount)
     ↓
 ┌─────────────────────────────────────────────────────────┐
 │ Phase 2 Enhancement #1: Real-Time Revocation Check     │
-│ ✅ O(1) Redis GET: gauth:revoked:poa:{poaID}          │
+│ ✅ O(1) Redis GET: agentauth:revoked:poa:{poaID}          │
 │    Found → 403 Forbidden (zombie token prevented)      │
 └─────────────────────────────────────────────────────────┘
     ↓
@@ -167,7 +167,7 @@ validateDelegationEx(ctx, poaID, grantee, scope, amount)
 ┌─────────────────────────────────────────────────────────┐
 │ Phase 2 Enhancement #3: Atomic Constraint Enforcement  │
 │ ✅ Redis Lua script: atomic check-and-increment       │
-│    Key: gauth:quota:{poaID}|{date}                     │
+│    Key: agentauth:quota:{poaID}|{date}                     │
 │    Success → quota consumed atomically                  │
 │    Failure → 403 Forbidden (quota exceeded)            │
 └─────────────────────────────────────────────────────────┘
@@ -184,7 +184,7 @@ Update Database: poa.Status = Revoked
     ↓
 ┌─────────────────────────────────────────────────────────┐
 │ Add to Redis Blacklist                                  │
-│ SET gauth:revoked:poa:{poaID} "{timestamp}|{reason}"   │
+│ SET agentauth:revoked:poa:{poaID} "{timestamp}|{reason}"   │
 │ EXPIRE 24h (TTL = max token lifetime)                  │
 └─────────────────────────────────────────────────────────┘
     ↓
@@ -239,31 +239,31 @@ appendfsync everysec
 ### Environment Variables
 ```bash
 # Enable Phase 2 enhancements
-GAUTH_REDIS_ADDR=redis:6379
-GAUTH_REDIS_PASSWORD=<secure-password>
-GAUTH_REDIS_DB=0
+AGENTAUTH_REDIS_ADDR=redis:6379
+AGENTAUTH_REDIS_PASSWORD=<secure-password>
+AGENTAUTH_REDIS_DB=0
 
 # Optional: Configure fail modes
-GAUTH_ATOMIC_COUNTERS_ENABLED=true
-GAUTH_REVOCATION_BLACKLIST_ENABLED=true
-GAUTH_REVOCATION_BLACKLIST_TTL=24h
+AGENTAUTH_ATOMIC_COUNTERS_ENABLED=true
+AGENTAUTH_REVOCATION_BLACKLIST_ENABLED=true
+AGENTAUTH_REVOCATION_BLACKLIST_TTL=24h
 ```
 
 ### Service Initialization
 ```go
 redisClient := redis.NewClient(&redis.Options{
-    Addr:     os.Getenv("GAUTH_REDIS_ADDR"),
-    Password: os.Getenv("GAUTH_REDIS_PASSWORD"),
+    Addr:     os.Getenv("AGENTAUTH_REDIS_ADDR"),
+    Password: os.Getenv("AGENTAUTH_REDIS_PASSWORD"),
     DB:       0,
 })
 
-service := rfc0111.NewService(
+service := aap001.NewService(
     poaRepository,
-    rfc0111.WithAtomicCounterStore(
-        rfc0111.NewAtomicCounterStore(redisClient, "gauth"),
+    aap001.WithAtomicCounterStore(
+        aap001.NewAtomicCounterStore(redisClient, "agentauth"),
     ),
-    rfc0111.WithRevocationBlacklistStore(
-        rfc0111.NewRevocationBlacklistStore(redisClient, 24*time.Hour),
+    aap001.WithRevocationBlacklistStore(
+        aap001.NewRevocationBlacklistStore(redisClient, 24*time.Hour),
     ),
 )
 ```
@@ -302,13 +302,13 @@ This ensures:
 ## Files Modified/Created
 
 ### New Files
-- `pkg/rfc0111/redis_atomic_counter.go` (280 lines)
-- `pkg/rfc0111/delegation_chain_validator.go` (230 lines)
-- `pkg/rfc0111/redis_revocation_blacklist.go` (180 lines)
-- `pkg/rfc0111/atomic_counter_concurrency_test.go` (300 lines)
+- `pkg/aap001/redis_atomic_counter.go` (280 lines)
+- `pkg/aap001/delegation_chain_validator.go` (230 lines)
+- `pkg/aap001/redis_revocation_blacklist.go` (180 lines)
+- `pkg/aap001/atomic_counter_concurrency_test.go` (300 lines)
 
 ### Modified Files
-- `pkg/rfc0111/rfc0111.go`:
+- `pkg/aap001/aap001.go`:
   - Lines 1619-1622: Added 3 new Service fields
   - Line 848: Initialize chain validator
   - Lines 2933-3153: New `validateDelegationEx()` function (220 lines)

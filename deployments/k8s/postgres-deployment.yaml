@@ -2,17 +2,17 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: postgres-secrets
-  namespace: gauth-development
+  namespace: agentauth-development
 type: Opaque
 data:
   postgres-password: c2VjdXJlX3Bvc3RncmVzX3Bhc3N3b3Jk  # base64 encoded 'secure_postgres_password'
-  gauth-password: c2VjdXJlX2FwcF9wYXNzd29yZA==  # base64 encoded 'secure_app_password'
+  agentauth-password: c2VjdXJlX2FwcF9wYXNzd29yZA==  # base64 encoded 'secure_app_password'
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-config
-  namespace: gauth-development
+  namespace: agentauth-development
 data:
   postgresql.conf: |
     # PostgreSQL configuration for production
@@ -60,7 +60,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pvc
-  namespace: gauth-development
+  namespace: agentauth-development
 spec:
   accessModes:
     - ReadWriteOnce
@@ -73,7 +73,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres
-  namespace: gauth-development
+  namespace: agentauth-development
 spec:
   serviceName: postgres-service
   replicas: 1
@@ -95,7 +95,7 @@ spec:
           name: postgres
         env:
         - name: POSTGRES_DB
-          value: gauth
+          value: agentauth
         - name: POSTGRES_USER
           value: postgres
         - name: POSTGRES_PASSWORD
@@ -120,7 +120,7 @@ spec:
             - -U
             - postgres
             - -d
-            - gauth
+            - agentauth
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
@@ -132,7 +132,7 @@ spec:
             - -U
             - postgres
             - -d
-            - gauth
+            - agentauth
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 3
@@ -159,7 +159,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: postgres-service
-  namespace: gauth-development
+  namespace: agentauth-development
 spec:
   selector:
     app: postgres
@@ -173,15 +173,15 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: postgres-init-scripts
-  namespace: gauth-development
+  namespace: agentauth-development
 data:
   init-db.sql: |
     -- AgentAuth Database Initialization Script
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     CREATE EXTENSION IF NOT EXISTS "pgcrypto";
     
-    CREATE SCHEMA IF NOT EXISTS gauth;
-    SET search_path TO gauth, public;
+    CREATE SCHEMA IF NOT EXISTS agentauth;
+    SET search_path TO agentauth, public;
     
     CREATE TABLE IF NOT EXISTS tokens (
         id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -227,10 +227,10 @@ data:
     CREATE INDEX IF NOT EXISTS idx_audit_logs_client_id ON audit_logs(client_id);
     CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at);
     
-    CREATE USER gauth_app WITH PASSWORD 'secure_app_password';
-    GRANT USAGE ON SCHEMA gauth TO gauth_app;
-    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA gauth TO gauth_app;
-    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA gauth TO gauth_app;
+    CREATE USER agentauth_app WITH PASSWORD 'secure_app_password';
+    GRANT USAGE ON SCHEMA agentauth TO agentauth_app;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA agentauth TO agentauth_app;
+    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA agentauth TO agentauth_app;
     
-    ALTER DEFAULT PRIVILEGES IN SCHEMA gauth GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO gauth_app;
-    ALTER DEFAULT PRIVILEGES IN SCHEMA gauth GRANT USAGE, SELECT ON SEQUENCES TO gauth_app;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA agentauth GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO agentauth_app;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA agentauth GRANT USAGE, SELECT ON SEQUENCES TO agentauth_app;

@@ -90,7 +90,7 @@ func (o *EmergencyRevocationOracle) EmergencyRevoke(ctx context.Context, event *
 		return fmt.Errorf("redis set failed: %w", err)
 	}
 
-	if err := o.redis.Publish(ctx, "gauth:revocations", eventJSON).Err(); err != nil {
+	if err := o.redis.Publish(ctx, "agentauth:revocations", eventJSON).Err(); err != nil {
 		o.logger.Errorf("Redis pub/sub publish failed (non-fatal): %v", err)
 	}
 
@@ -164,7 +164,7 @@ func (o *EmergencyRevocationOracle) Unsubscribe(subscriberID string) {
 
 // StartRedisPubSub listens to Redis Pub/Sub for cluster-wide revocation broadcasts
 func (o *EmergencyRevocationOracle) StartRedisPubSub(ctx context.Context) error {
-	pubsub := o.redis.Subscribe(ctx, "gauth:revocations")
+	pubsub := o.redis.Subscribe(ctx, "agentauth:revocations")
 	defer pubsub.Close()
 
 	if _, err := pubsub.Receive(ctx); err != nil {

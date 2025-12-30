@@ -25,7 +25,7 @@ PostgreSQL database instance is down or unreachable, preventing all database ope
 
 **Trigger Condition:**
 ```promql
-pg_up{namespace="gauth-staging"} == 0
+pg_up{namespace="agentauth-staging"} == 0
 ```
 
 **Duration:** 2 minutes  
@@ -37,20 +37,20 @@ pg_up{namespace="gauth-staging"} == 0
 
 1. **Check PostgreSQL Pod Status**
    ```bash
-   kubectl get pods -n gauth-staging -l app=postgresql
-   kubectl describe pod <postgres-pod> -n gauth-staging
+   kubectl get pods -n agentauth-staging -l app=postgresql
+   kubectl describe pod <postgres-pod> -n agentauth-staging
    ```
 
 2. **Check PostgreSQL Logs**
    ```bash
-   kubectl logs <postgres-pod> -n gauth-staging --tail=100
-   kubectl logs <postgres-pod> -n gauth-staging --previous
+   kubectl logs <postgres-pod> -n agentauth-staging --tail=100
+   kubectl logs <postgres-pod> -n agentauth-staging --previous
    ```
 
 3. **Check Service and Endpoints**
    ```bash
-   kubectl get svc postgresql -n gauth-staging
-   kubectl get endpoints postgresql -n gauth-staging
+   kubectl get svc postgresql -n agentauth-staging
+   kubectl get endpoints postgresql -n agentauth-staging
    ```
 
 ---
@@ -83,20 +83,20 @@ pg_up{namespace="gauth-staging"} == 0
 
 ```bash
 # Check pod events
-kubectl get events -n gauth-staging --field-selector involvedObject.name=<postgres-pod>
+kubectl get events -n agentauth-staging --field-selector involvedObject.name=<postgres-pod>
 
 # Check persistent volume
-kubectl get pvc -n gauth-staging -l app=postgresql
-kubectl describe pvc <pvc-name> -n gauth-staging
+kubectl get pvc -n agentauth-staging -l app=postgresql
+kubectl describe pvc <pvc-name> -n agentauth-staging
 
 # Check disk usage
-kubectl exec <postgres-pod> -n gauth-staging -- df -h
+kubectl exec <postgres-pod> -n agentauth-staging -- df -h
 
 # Check PostgreSQL process
-kubectl exec <postgres-pod> -n gauth-staging -- ps aux | grep postgres
+kubectl exec <postgres-pod> -n agentauth-staging -- ps aux | grep postgres
 
 # Try connecting directly
-kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELECT 1"
+kubectl exec <postgres-pod> -n agentauth-staging -- psql -U agentauth -d agentauth -c "SELECT 1"
 ```
 
 ---
@@ -107,37 +107,37 @@ kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELEC
 
 1. **Check for recent restarts**
    ```bash
-   kubectl get pod <postgres-pod> -n gauth-staging -o jsonpath='{.status.containerStatuses[0].restartCount}'
+   kubectl get pod <postgres-pod> -n agentauth-staging -o jsonpath='{.status.containerStatuses[0].restartCount}'
    ```
 
 2. **Review crash logs**
    ```bash
-   kubectl logs <postgres-pod> -n gauth-staging --previous
+   kubectl logs <postgres-pod> -n agentauth-staging --previous
    ```
 
 3. **Restart pod if needed**
    ```bash
-   kubectl delete pod <postgres-pod> -n gauth-staging
+   kubectl delete pod <postgres-pod> -n agentauth-staging
    # StatefulSet will recreate it
-   kubectl get pods -n gauth-staging -w
+   kubectl get pods -n agentauth-staging -w
    ```
 
 ### Scenario 2: Disk Full
 
 1. **Check disk usage**
    ```bash
-   kubectl exec <postgres-pod> -n gauth-staging -- du -sh /var/lib/postgresql/data
+   kubectl exec <postgres-pod> -n agentauth-staging -- du -sh /var/lib/postgresql/data
    ```
 
 2. **Clean up old WAL files** (if safe)
    ```bash
-   kubectl exec <postgres-pod> -n gauth-staging -- \
+   kubectl exec <postgres-pod> -n agentauth-staging -- \
      find /var/lib/postgresql/data/pg_wal -name "*.old" -mtime +7 -delete
    ```
 
 3. **Expand PVC if needed**
    ```bash
-   kubectl edit pvc postgresql-data -n gauth-staging
+   kubectl edit pvc postgresql-data -n agentauth-staging
    # Increase storage size
    ```
 
@@ -145,14 +145,14 @@ kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELEC
 
 1. **Attempt recovery**
    ```bash
-   kubectl exec <postgres-pod> -n gauth-staging -- \
-     psql -U postgres -d gauth -c "REINDEX DATABASE gauth"
+   kubectl exec <postgres-pod> -n agentauth-staging -- \
+     psql -U postgres -d agentauth -c "REINDEX DATABASE agentauth"
    ```
 
 2. **Check for corruption**
    ```bash
-   kubectl exec <postgres-pod> -n gauth-staging -- \
-     psql -U postgres -d gauth -c "SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname)) FROM pg_database"
+   kubectl exec <postgres-pod> -n agentauth-staging -- \
+     psql -U postgres -d agentauth -c "SELECT pg_database.datname, pg_size_pretty(pg_database_size(pg_database.datname) FROM pg_database"
    ```
 
 3. **Restore from backup** (if corruption severe)
@@ -165,18 +165,18 @@ kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELEC
 
 1. **Check service configuration**
    ```bash
-   kubectl get svc postgresql -n gauth-staging -o yaml
+   kubectl get svc postgresql -n agentauth-staging -o yaml
    ```
 
 2. **Test connectivity from AgentAuth pod**
    ```bash
-   kubectl exec <gauth-pod> -n gauth-staging -- \
+   kubectl exec <agentauth-pod> -n agentauth-staging -- \
      nc -zv postgresql 5432
    ```
 
 3. **Check network policies**
    ```bash
-   kubectl get networkpolicies -n gauth-staging
+   kubectl get networkpolicies -n agentauth-staging
    ```
 
 ---
@@ -185,19 +185,19 @@ kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELEC
 
 1. **Database is accessible**
    ```bash
-   kubectl exec <postgres-pod> -n gauth-staging -- \
-     psql -U gauth -d gauth -c "SELECT version()"
+   kubectl exec <postgres-pod> -n agentauth-staging -- \
+     psql -U agentauth -d agentauth -c "SELECT version()"
    ```
 
 2. **Can query data**
    ```bash
-   kubectl exec <postgres-pod> -n gauth-staging -- \
-     psql -U gauth -d gauth -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname = 'public'"
+   kubectl exec <postgres-pod> -n agentauth-staging -- \
+     psql -U agentauth -d agentauth -c "SELECT COUNT(*) FROM pg_tables WHERE schemaname = 'public'"
    ```
 
 3. **AgentAuth can connect**
    ```bash
-   kubectl logs <gauth-pod> -n gauth-staging | grep -i "database connection"
+   kubectl logs <agentauth-pod> -n agentauth-staging | grep -i "database connection"
    ```
 
 4. **Prometheus scraping metrics**
@@ -249,7 +249,7 @@ kubectl exec <postgres-pod> -n gauth-staging -- psql -U gauth -d gauth -c "SELEC
 
 **Contact Information:**
 - DBA on-call: Check PagerDuty
-- Slack: #gauth-database-incidents
+- Slack: #agentauth-database-incidents
 - Email: dba-oncall@example.com
 
 ---

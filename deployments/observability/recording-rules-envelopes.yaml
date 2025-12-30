@@ -1,82 +1,82 @@
 # Prometheus Recording & Alerting Rules for Envelope Migration & Sunset
 # Place in prometheus rules directory (e.g., /etc/prometheus/rules/) and include via 'rule_files'.
-# These rules assume metrics exposed under gauth_rfc0111_* names.
+# These rules assume metrics exposed under agentauth_rfc0111_* names.
 
-# NOTE: Phase gauge (`gauth_envelope_v1_sunset_phase`) not yet implemented; placeholder alert uses label-less expression.
+# NOTE: Phase gauge (`agentauth_envelope_v1_sunset_phase`) not yet implemented; placeholder alert uses label-less expression.
 
 groups:
-  - name: gauth_envelope_migration.rules
+  - name: agentauth_envelope_migration.rules
     interval: 30s
     rules:
       # Adoption ratio smoothed windows
-      - record: gauth:envelope_v2_adoption_ratio:avg_15m
-        expr: avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[15m])
-      - record: gauth:envelope_v2_adoption_ratio:min_15m
-        expr: min_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[15m])
-      - record: gauth:envelope_v2_adoption_ratio:avg_7d
-        expr: avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[7d])
-      - record: gauth:envelope_v2_adoption_ratio:min_7d
-        expr: min_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[7d])
+      - record: agentauth:envelope_v2_adoption_ratio:avg_15m
+        expr: avg_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[15m])
+      - record: agentauth:envelope_v2_adoption_ratio:min_15m
+        expr: min_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[15m])
+      - record: agentauth:envelope_v2_adoption_ratio:avg_7d
+        expr: avg_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[7d])
+      - record: agentauth:envelope_v2_adoption_ratio:min_7d
+        expr: min_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[7d])
 
       # Issuance rates
-      - record: gauth:envelope_v1_issued:rate_5m
-        expr: rate(gauth_rfc0111_envelope_v1_issued_total[5m])
-      - record: gauth:envelope_v2_issued:rate_5m
-        expr: rate(gauth_rfc0111_envelope_v2_issued_total[5m])
+      - record: agentauth:envelope_v1_issued:rate_5m
+        expr: rate(agentauth_rfc0111_envelope_v1_issued_total[5m])
+      - record: agentauth:envelope_v2_issued:rate_5m
+        expr: rate(agentauth_rfc0111_envelope_v2_issued_total[5m])
 
       # Mismatch rate & ratio
-      - record: gauth:envelope_digest_mismatch:rate_5m
-        expr: rate(gauth_rfc0111_envelope_digest_mismatch_total[5m])
-      - record: gauth:envelope_digest_mismatch:ratio_5m
-        expr: increase(gauth_rfc0111_envelope_digest_mismatch_total[5m]) / (increase(gauth_rfc0111_envelope_v1_issued_total[5m]) + increase(gauth_rfc0111_envelope_v2_issued_total[5m]))
+      - record: agentauth:envelope_digest_mismatch:rate_5m
+        expr: rate(agentauth_rfc0111_envelope_digest_mismatch_total[5m])
+      - record: agentauth:envelope_digest_mismatch:ratio_5m
+        expr: increase(agentauth_rfc0111_envelope_digest_mismatch_total[5m]) / (increase(agentauth_rfc0111_envelope_v1_issued_total[5m]) + increase(agentauth_rfc0111_envelope_v2_issued_total[5m]))
 
       # Sunset readiness composite (boolean as 0/1)
-      - record: gauth:envelope_v1_sunset_ready
+      - record: agentauth:envelope_v1_sunset_ready
         expr: (
-          avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[7d]) > 0.95
-          and min_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[7d]) > 0.90
-          and increase(gauth_rfc0111_envelope_digest_mismatch_total[1h]) / (increase(gauth_rfc0111_envelope_v1_issued_total[1h]) + increase(gauth_rfc0111_envelope_v2_issued_total[1h])) < 0.005
+          avg_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[7d]) > 0.95
+          and min_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[7d]) > 0.90
+          and increase(agentauth_rfc0111_envelope_digest_mismatch_total[1h]) / (increase(agentauth_rfc0111_envelope_v1_issued_total[1h]) + increase(agentauth_rfc0111_envelope_v2_issued_total[1h]) < 0.005
         )
 
-  - name: gauth_envelope_migration.alerts
+  - name: agentauth_envelope_migration.alerts
     interval: 30s
     rules:
       - alert: EnvelopeV2AdoptionRegression
-        expr: avg_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[10m]) < 0.80
+        expr: avg_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[10m]) < 0.80
         for: 5m
         labels:
           severity: high
-          component: gauth
+          component: agentauth
         annotations:
           summary: "Envelope V2 adoption ratio regression"
           description: "Adoption ratio <80% for 10m; possible rollback or misconfiguration."
 
       - alert: EnvelopeDigestMismatchSpike
-        expr: increase(gauth_rfc0111_envelope_digest_mismatch_total[10m]) > 3
+        expr: increase(agentauth_rfc0111_envelope_digest_mismatch_total[10m]) > 3
         for: 5m
         labels:
           severity: critical
-          component: gauth
+          component: agentauth
         annotations:
           summary: "Envelope digest mismatch spike"
           description: ">3 mismatches in 10m; potential integrity regression or tampering."
 
       - alert: EnvelopeSunsetReady
-        expr: gauth:envelope_v1_sunset_ready == 1
+        expr: agentauth:envelope_v1_sunset_ready == 1
         for: 30m
         labels:
           severity: info
-          component: gauth
+          component: agentauth
         annotations:
           summary: "Envelope V1 Sunset criteria satisfied"
           description: "Adoption >=95% 7d avg & mismatch ratio <0.5%; proceed with sunset execution per ADR-envelope-v1-sunset.md."
 
       - alert: EnvelopeUnexpectedV1IssuancePostSunset
-        expr: (time() - max_over_time(gauth_rfc0111_envelope_v2_adoption_ratio[30m])) > 0 and rate(gauth_rfc0111_envelope_v1_issued_total[30m]) > 0 and gauth:envelope_v1_sunset_ready == 1
+        expr: (time() - max_over_time(agentauth_rfc0111_envelope_v2_adoption_ratio[30m]) > 0 and rate(agentauth_rfc0111_envelope_v1_issued_total[30m]) > 0 and agentauth:envelope_v1_sunset_ready == 1
         for: 15m
         labels:
           severity: critical
-          component: gauth
+          component: agentauth
         annotations:
           summary: "Unexpected V1 issuance after sunset"
           description: "V1 issuance counters still increasing post sunset readiness; possible misconfiguration or rollback."

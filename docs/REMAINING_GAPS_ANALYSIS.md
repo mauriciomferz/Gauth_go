@@ -180,7 +180,7 @@
 |-----------|--------|------------|----------------|--------|
 | T1 | Token replay | JTI tracking + expiry | pkg/replay/durable_replay_store.go | Complete |
 | T2 | Unauthorized delegation | PDP enforcement | internal/policy/pdp.go | Complete |
-| T3 | Scope escalation | Scope inheritance validation | pkg/rfc0111/rfc0111.go:1885 | Complete |
+| T3 | Scope escalation | Scope inheritance validation | pkg/aap001/aap001.go:1885 | Complete |
 ```
 
 **Recommendation**: Create matrix document, mark as Implemented after review.

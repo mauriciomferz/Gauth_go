@@ -24,7 +24,7 @@ Your AgentAuth implementation has achieved **100% operational readiness**:
 
 - **No blocking issues** preventing production deployment
 - **All security controls** in place and validated
-- **Full RFC compliance** (RFC-0111 and RFC-0115)
+- **Full RFC compliance** (AAP-001 and AAP-002)
 - **Ready for beta release** with documented enhancements
 
 ---
@@ -37,7 +37,7 @@ If you want to deploy to production immediately:
 
 ```bash
 # 1. Run final verification
-cd /Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go
+cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
 make test
 make lint
 
@@ -60,8 +60,8 @@ If you want to implement the 5 minor enhancements before production:
 **Enhancement E5: Clock Skew Detection** (Easiest - 1-2 days)
 ```bash
 # Create new file
-touch pkg/gauth/clock_skew.go
-touch pkg/gauth/clock_skew_test.go
+touch pkg/agentauth/clock_skew.go
+touch pkg/agentauth/clock_skew_test.go
 
 # Implement skew detection
 # See REMEDIATION_PLAN.md Section 1.2 Enhancement E5
@@ -92,7 +92,7 @@ touch pkg/crypto/algorithm_agility_test.go
 ```bash
 # Enhanced diagnostics
 touch pkg/pdp/conflict_diagnostics.go
-touch cmd/gauth-diagnostics/main.go
+touch cmd/agentauth-diagnostics/main.go
 
 # See REMEDIATION_PLAN.md Section 1.1 Enhancement E2
 ```
@@ -173,10 +173,10 @@ make docs
 **Hands-On Labs** (4-6 hours):
 ```bash
 # Lab 1: Basic authorization flow
-go run examples/gauth_protocol_basics/minimal_poa/main.go
+go run examples/agentauth_protocol_basics/minimal_poa/main.go
 
 # Lab 2: Multi-signature delegation
-go run examples/gauth_protocol_basics/advanced_poa/main.go
+go run examples/agentauth_protocol_basics/advanced_poa/main.go
 
 # Lab 3: Run conformance tests
 go run cmd/conformance/main.go
@@ -196,7 +196,7 @@ go run cmd/conformance/main.go
 cp config/prometheus.yml.example config/prometheus.yml
 
 # Set up Grafana dashboards
-cp dashboards/gauth-overview.json /etc/grafana/provisioning/dashboards/
+cp dashboards/agentauth-overview.json /etc/grafana/provisioning/dashboards/
 ```
 
 ---
@@ -241,7 +241,7 @@ If you receive a critical alert:
 curl http://localhost:8080/metrics | grep cache_hit_rate
 
 # Scale horizontally if needed
-kubectl scale deployment gauth --replicas=5
+kubectl scale deployment agentauth --replicas=5
 ```
 
 **Issue**: Authorization failures
@@ -250,13 +250,13 @@ kubectl scale deployment gauth --replicas=5
 curl http://localhost:8080/health/pdp
 
 # View recent decisions
-tail -f /var/log/gauth/decisions.log
+tail -f /var/log/agentauth/decisions.log
 ```
 
 **Issue**: Key rotation failure
 ```bash
 # Check rotation logs
-tail -f /var/log/gauth/rotation.log
+tail -f /var/log/agentauth/rotation.log
 
 # Manual rotation trigger
 curl -X POST http://localhost:8080/admin/rotate-keys
@@ -267,19 +267,19 @@ curl -X POST http://localhost:8080/admin/rotate-keys
 ## 📞 Getting Help
 
 ### Internal Resources
-- **Slack**: #gauth-development
-- **Wiki**: https://wiki.internal/gauth
+- **Slack**: #agentauth-development
+- **Wiki**: https://wiki.internal/agentauth
 - **On-call**: Check PagerDuty schedule
 
 ### External Resources
-- **Documentation**: https://docs.gauth.com
-- **API Reference**: https://api.gauth.com/docs
-- **Community**: https://community.gauth.com
+- **Documentation**: https://docs.agentauth.com
+- **API Reference**: https://api.agentauth.com/docs
+- **Community**: https://community.agentauth.com
 
 ### Emergency Contacts
 - **Project Lead**: Mauricio Fernandez
-- **Security Team**: security@gauth.io
-- **DevOps Team**: devops@gauth.io
+- **Security Team**: security@agentauth.io
+- **DevOps Team**: devops@agentauth.io
 
 ---
 

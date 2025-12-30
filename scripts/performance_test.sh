@@ -37,7 +37,7 @@ run_bench() {
     local output="$OUTPUT_DIR/${name}_${TIMESTAMP}.txt"
     
     echo -e "${YELLOW}Running: $name${NC}"
-    go test -bench="$pattern" -benchmem -benchtime="$BENCH_TIME" ./pkg/gauth 2>&1 | tee "$output"
+    go test -bench="$pattern" -benchmem -benchtime="$BENCH_TIME" ./pkg/agentauth 2>&1 | tee "$output"
     
     # Check if benchmarks passed
     if grep -q "PASS" "$output"; then
@@ -77,7 +77,7 @@ run_bench "prometheus" "BenchmarkHistogram|BenchmarkCounter|BenchmarkGauge"
 echo "=== 7. Comprehensive Benchmark Suite ==="
 COMPREHENSIVE_OUTPUT="$OUTPUT_DIR/comprehensive_${TIMESTAMP}.txt"
 echo -e "${YELLOW}Running comprehensive benchmarks...${NC}"
-go test -bench=. -benchmem -benchtime="$BENCH_TIME" ./pkg/gauth 2>&1 | tee "$COMPREHENSIVE_OUTPUT"
+go test -bench=. -benchmem -benchtime="$BENCH_TIME" ./pkg/agentauth 2>&1 | tee "$COMPREHENSIVE_OUTPUT"
 
 if grep -q "PASS" "$COMPREHENSIVE_OUTPUT"; then
     echo -e "${GREEN}✅ Comprehensive benchmarks completed${NC}"
@@ -121,7 +121,7 @@ if [ "$CPU_PROFILE" = "1" ]; then
     echo ""
     echo "=== 9. CPU Profiling ==="
     echo -e "${YELLOW}Generating CPU profile...${NC}"
-    go test -bench=BenchmarkComprehensive -cpuprofile="$OUTPUT_DIR/cpu_${TIMESTAMP}.prof" -benchtime="$BENCH_TIME" ./pkg/gauth
+    go test -bench=BenchmarkComprehensive -cpuprofile="$OUTPUT_DIR/cpu_${TIMESTAMP}.prof" -benchtime="$BENCH_TIME" ./pkg/agentauth
     echo -e "${GREEN}✅ CPU profile saved: $OUTPUT_DIR/cpu_${TIMESTAMP}.prof${NC}"
     echo "View with: go tool pprof $OUTPUT_DIR/cpu_${TIMESTAMP}.prof"
 fi
@@ -131,7 +131,7 @@ if [ "$MEM_PROFILE" = "1" ]; then
     echo ""
     echo "=== 10. Memory Profiling ==="
     echo -e "${YELLOW}Generating memory profile...${NC}"
-    go test -bench=BenchmarkConcurrent -memprofile="$OUTPUT_DIR/mem_${TIMESTAMP}.prof" -benchmem -benchtime="$BENCH_TIME" ./pkg/gauth
+    go test -bench=BenchmarkConcurrent -memprofile="$OUTPUT_DIR/mem_${TIMESTAMP}.prof" -benchmem -benchtime="$BENCH_TIME" ./pkg/agentauth
     echo -e "${GREEN}✅ Memory profile saved: $OUTPUT_DIR/mem_${TIMESTAMP}.prof${NC}"
     echo "View with: go tool pprof $OUTPUT_DIR/mem_${TIMESTAMP}.prof"
 fi

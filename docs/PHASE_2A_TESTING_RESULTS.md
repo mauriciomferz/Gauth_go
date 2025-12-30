@@ -3,7 +3,7 @@
 **Date**: November 16, 2025  
 **Status**: ✅ **ALL TESTS PASSED**  
 **Server**: `localhost:8080`  
-**Environment**: `GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1`
+**Environment**: `AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1`
 
 ---
 
@@ -206,7 +206,7 @@ curl -X POST http://localhost:8080/api/v1/beta/poa \
 - ✅ Returns HTTP 201 (Created)
 - ✅ `success: true`
 - ✅ PoA assigned unique UUID
-- ✅ Version set to 3 (RFC-0111 compliance)
+- ✅ Version set to 3 (AAP-001 compliance)
 - ✅ All request fields preserved in response
 - ✅ Status defaulted to "active"
 - ✅ Timestamps (created_at, updated_at) generated
@@ -432,49 +432,49 @@ The PoA validation endpoint correctly checks:
 ### Required Environment Variables ✅
 
 ```bash
-GAUTH_DEV_INDEX=1          # Enables dev mode (serves UI from disk)
-GAUTH_AAP-001_ENABLED=1    # Enables RFC-0111 endpoints (REQUIRED for Phase 2A)
+AGENTAUTH_DEV_INDEX=1          # Enables dev mode (serves UI from disk)
+AGENTAUTH_AAP-001_ENABLED=1    # Enables AAP-001 endpoints (REQUIRED for Phase 2A)
 ```
 
 ### Server Startup Command ✅
 
 ```bash
-cd /path/to/Gauth_go
-GAUTH_DEV_INDEX=1 GAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
+cd /path/to/AgentAuth
+AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 ```
 
 ### Endpoint Registration Confirmation ✅
 
 Server logs show all endpoints were registered:
 ```
-[RFC-0111] Enabled with mock external services
-[RFC-0111] Endpoints registered:
-[RFC-0111]   Beta External Service APIs:
-[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)
-[RFC-0111]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)
-[RFC-0111]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)
-[RFC-0111]   Beta Power of Attorney APIs:
-[RFC-0111]     POST   /api/v1/beta/poa (Create PoA)
-[RFC-0111]     GET    /api/v1/beta/poa/:id (Get PoA)
-[RFC-0111]     GET    /api/v1/beta/poa (List PoAs)
-[RFC-0111]     PUT    /api/v1/beta/poa/:id (Update PoA)
-[RFC-0111]     DELETE /api/v1/beta/poa/:id (Revoke PoA)
-[RFC-0111]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)
+[AAP-001] Enabled with mock external services
+[AAP-001] Endpoints registered:
+[AAP-001]   Beta External Service APIs:
+[AAP-001]     POST /api/v1/beta/pvp/verify (PVP identity verification)
+[AAP-001]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)
+[AAP-001]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)
+[AAP-001]   Beta Power of Attorney APIs:
+[AAP-001]     POST   /api/v1/beta/poa (Create PoA)
+[AAP-001]     GET    /api/v1/beta/poa/:id (Get PoA)
+[AAP-001]     GET    /api/v1/beta/poa (List PoAs)
+[AAP-001]     PUT    /api/v1/beta/poa/:id (Update PoA)
+[AAP-001]     DELETE /api/v1/beta/poa/:id (Revoke PoA)
+[AAP-001]     POST   /api/v1/beta/poa/:id/validate (Validate PoA)
 ```
 
 ---
 
 ## Known Issues & Limitations
 
-### ⚠️ CRITICAL: RFC-0111 Flag Required
-**Issue**: Phase 2A endpoints only register if `GAUTH_AAP-001_ENABLED=1` is set.
+### ⚠️ CRITICAL: AAP-001 Flag Required
+**Issue**: Phase 2A endpoints only register if `AGENTAUTH_AAP-001_ENABLED=1` is set.
 
 **Impact**: Without this flag, all `/api/v1/beta/*` endpoints return 404.
 
 **Resolution**: 
 - ✅ Documented in this report
-- ✅ Server logs clearly show when RFC-0111 is enabled
-- 🔜 Consider: Making Phase 2A endpoints always available (not gated by RFC-0111 flag)
+- ✅ Server logs clearly show when AAP-001 is enabled
+- 🔜 Consider: Making Phase 2A endpoints always available (not gated by AAP-001 flag)
 
 ### ℹ️ In-Memory Storage
 **Note**: PoAs are stored in memory only. They will be lost when the server restarts.
@@ -509,8 +509,8 @@ Server logs show all endpoints were registered:
 - Add integration tests with frontend
 
 ### 3. Configuration Improvements 🔜 (Future)
-- Consider removing `GAUTH_AAP-001_ENABLED` gate for Phase 2A endpoints
-- Or: Add separate `GAUTH_BETA_ENDPOINTS_ENABLED` flag
+- Consider removing `AGENTAUTH_AAP-001_ENABLED` gate for Phase 2A endpoints
+- Or: Add separate `AGENTAUTH_BETA_ENDPOINTS_ENABLED` flag
 - Make Phase 2A endpoints always available for UI integration
 
 ### 4. Monitoring & Observability 🔜 (Future)
@@ -535,7 +535,7 @@ The implementation:
 - ✅ Provides clear error messages
 - ✅ Handles validation correctly
 - ✅ Uses realistic mock data
-- ✅ Integrates with RFC-0111 components
+- ✅ Integrates with AAP-001 components
 
 **Next Steps**:
 1. ✅ Document server startup requirements → Done (this report)

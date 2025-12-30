@@ -135,10 +135,10 @@ func (m *MemoryNotarizer) Latest() Receipt {
 // Security: Uses math/rand for latency simulation but seeded from crypto/rand for unpredictability.
 // Env:
 //
-//	GAUTH_NOTARY_STUB_MIN_LATENCY_MS  (default 40)
-//	GAUTH_NOTARY_STUB_MAX_LATENCY_MS  (default 250)
-//	GAUTH_NOTARY_STUB_FAIL_PROB       (0.0-1.0, default 0) e.g. 0.05 for 5% failures
-//	GAUTH_NOTARY_STUB_PROVIDER_NAME   (default "external_stub")
+//	AGENTAUTH_NOTARY_STUB_MIN_LATENCY_MS  (default 40)
+//	AGENTAUTH_NOTARY_STUB_MAX_LATENCY_MS  (default 250)
+//	AGENTAUTH_NOTARY_STUB_FAIL_PROB       (0.0-1.0, default 0) e.g. 0.05 for 5% failures
+//	AGENTAUTH_NOTARY_STUB_PROVIDER_NAME   (default "external_stub")
 //
 // This is strictly for integration & metrics wiring; provides NO integrity guarantees.
 type ExternalStubNotarizer struct {
@@ -153,10 +153,10 @@ type ExternalStubNotarizer struct {
 
 // NewExternalStub constructs a stub notarizer reading configuration from environment.
 func NewExternalStub() *ExternalStubNotarizer {
-	minMs := parseEnvInt("GAUTH_NOTARY_STUB_MIN_LATENCY_MS", 40, 0, 1000)
-	maxMs := parseEnvInt("GAUTH_NOTARY_STUB_MAX_LATENCY_MS", 250, minMs, 5000)
-	fp := parseEnvFloat("GAUTH_NOTARY_STUB_FAIL_PROB", 0, 0, 1)
-	name := os.Getenv("GAUTH_NOTARY_STUB_PROVIDER_NAME")
+	minMs := parseEnvInt("AGENTAUTH_NOTARY_STUB_MIN_LATENCY_MS", 40, 0, 1000)
+	maxMs := parseEnvInt("AGENTAUTH_NOTARY_STUB_MAX_LATENCY_MS", 250, minMs, 5000)
+	fp := parseEnvFloat("AGENTAUTH_NOTARY_STUB_FAIL_PROB", 0, 0, 1)
+	name := os.Getenv("AGENTAUTH_NOTARY_STUB_PROVIDER_NAME")
 	if name == "" {
 		name = "external_stub"
 	}

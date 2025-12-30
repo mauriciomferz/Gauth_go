@@ -3,7 +3,7 @@ package crypto
 // kms_metrics.go
 // Prometheus instrumentation for KMS operations (mock or real). Kept separate from internal/metrics
 // to avoid widening the core Metrics interface prematurely. Enabled automatically when
-// GAUTH_KMS_METRICS=1 is set (or explicitly via EnableKMSPrometheusMetrics()).
+// AGENTAUTH_KMS_METRICS=1 is set (or explicitly via EnableKMSPrometheusMetrics()).
 
 import (
 	"os"
@@ -23,10 +23,10 @@ var (
 )
 
 // EnableKMSPrometheusMetrics registers KMS Prometheus collectors (idempotent).
-// Namespace/subsystem kept consistent with other metrics: namespace=gauth subsystem=crypto unless overridden.
+// Namespace/subsystem kept consistent with other metrics: namespace=agentauth subsystem=crypto unless overridden.
 func EnableKMSPrometheusMetrics(namespace, subsystem string) {
 	if namespace == "" {
-		namespace = "gauth"
+		namespace = "agentauth"
 	}
 	if subsystem == "" {
 		subsystem = "crypto"
@@ -44,8 +44,8 @@ func EnableKMSPrometheusMetrics(namespace, subsystem string) {
 
 // maybeEnableKMSMetrics checks env flag.
 func maybeEnableKMSMetrics() {
-	if os.Getenv("GAUTH_KMS_METRICS") == "1" {
-		EnableKMSPrometheusMetrics("gauth", "crypto")
+	if os.Getenv("AGENTAUTH_KMS_METRICS") == "1" {
+		EnableKMSPrometheusMetrics("agentauth", "crypto")
 	}
 }
 

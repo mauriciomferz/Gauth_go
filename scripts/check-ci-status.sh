@@ -15,25 +15,25 @@ git remote -v
 
 echo ""
 echo "📁 Available Build Artifacts:"
-ls -la gauth-* 2>/dev/null || echo "No build artifacts found"
+ls -la agentauth-* 2>/dev/null || echo "No build artifacts found"
 
 echo ""
 echo "🏗️ Local Build Test Results:"
 echo "Main Demo Build:"
-if go build -v -o test-gauth-demo ./cmd/gauth-server 2>/dev/null; then
+if go build -v -o test-agentauth-demo ./cmd/agentauth-server 2>/dev/null; then
     echo "✅ Main demo builds successfully"
-    rm -f test-gauth-demo
+    rm -f test-agentauth-demo
 else
     echo "❌ Main demo build failed"
 fi
 
 echo ""
 echo "Web Backend Build:"
-if cd gauth-demo-app/web/backend; then
-    if go build -v -o ../../../test-gauth-web-backend ./ 2>/dev/null; then
+if cd agentauth-demo-app/web/backend; then
+    if go build -v -o ../../../test-agentauth-web-backend ./ 2>/dev/null; then
         echo "✅ Web backend builds successfully"
         cd ../../.. || exit
-        rm -f test-gauth-web-backend
+        rm -f test-agentauth-web-backend
     else
         echo "❌ Web backend build failed"
         cd ../../.. || exit
@@ -55,7 +55,7 @@ fi
 echo ""
 echo "🎯 Next Steps:"
 echo "1. Check GitHub Actions tab in each repository:"
-echo "   - https://github.com/mauriciomferz/Gauth_go/actions"
+echo "   - https://github.com/mauriciomferz/AgentAuth/actions"
 echo "   - https://github.com/AgentAuth-Foundation/AgentAuth-App-0001/actions"
 echo "   - https://github.com/AgentAuth-Foundation/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0/actions"
 echo "2. Monitor workflow execution for successful builds"

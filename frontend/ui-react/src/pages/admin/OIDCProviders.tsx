@@ -173,7 +173,7 @@ export default function OIDCProviders() {
 
       if (!response.ok) {
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes('application/json') {
           const errorData = await response.json();
           throw new Error(errorData.error || `Server error: ${response.status}`);
         } else if (response.status === 404) {
@@ -224,7 +224,7 @@ export default function OIDCProviders() {
   };
 
   const handleDelete = async (providerId: string) => {
-    if (!confirm('Are you sure you want to delete this OIDC provider?')) return;
+    if (!confirm('Are you sure you want to delete this OIDC provider?') return;
 
     try {
       const response = await fetch(
@@ -237,7 +237,7 @@ export default function OIDCProviders() {
         loadProviders();
       } else {
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes('application/json') {
           const data = await response.json();
           setError(data.error || 'Failed to delete provider');
         } else {
@@ -263,7 +263,7 @@ export default function OIDCProviders() {
       }
 
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+      if (!contentType || !contentType.includes('application/json') {
         throw new Error('Invalid response format');
       }
 
@@ -322,7 +322,7 @@ export default function OIDCProviders() {
         loadProviders();
       } else {
         const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes('application/json') {
           const data = await response.json();
           setError(data.error || 'Failed to save provider');
         } else {

@@ -221,7 +221,7 @@ return "", fmt.Errorf("private key not found for kid: %s", kid)
 **Recommendation**: Sanitize error messages in production
 
 ```go
-// pkg/gauth/jwe_errors.go
+// pkg/agentauth/jwe_errors.go
 func SanitizeJWEError(err error) error {
     if strings.Contains(err.Error(), "kid:") {
         return errors.New("decryption failed")
@@ -239,7 +239,7 @@ func SanitizeJWEError(err error) error {
 **Recommendation**: Implement secure key zeroing
 
 ```go
-// pkg/gauth/jwe_secure.go
+// pkg/agentauth/jwe_secure.go
 func ZeroPrivateKey(privKey *rsa.PrivateKey) {
     // Zero D (private exponent)
     for i := range privKey.D.Bits() {

@@ -93,14 +93,14 @@ Request → Cache.DeletePattern(pattern)
 ## Cache Keys Structure
 
 ```
-gauth:poa:{poaID}              # Individual PoA (1min TTL)
-gauth:poa:list:{userID}        # User's PoA list (5min TTL)
-gauth:user:{userID}            # User data (5min TTL)
-gauth:verification:{poaID}     # Verification results (5min TTL)
-gauth:stats:{statType}         # Statistics (30sec TTL)
-gauth:blockchain:sync:{poaID}  # Blockchain sync
-gauth:blockchain:verify:{poaID}# Blockchain verification
-gauth:session:{sessionID}      # User sessions
+agentauth:poa:{poaID}              # Individual PoA (1min TTL)
+agentauth:poa:list:{userID}        # User's PoA list (5min TTL)
+agentauth:user:{userID}            # User data (5min TTL)
+agentauth:verification:{poaID}     # Verification results (5min TTL)
+agentauth:stats:{statType}         # Statistics (30sec TTL)
+agentauth:blockchain:sync:{poaID}  # Blockchain sync
+agentauth:blockchain:verify:{poaID}# Blockchain verification
+agentauth:session:{sessionID}      # User sessions
 ```
 
 ---
@@ -131,7 +131,7 @@ export CACHE_STATS_TTL=30s
 
 ### 1. Start Redis
 ```bash
-docker run -d -p 6379:6379 --name gauth-redis redis:7-alpine
+docker run -d -p 6379:6379 --name agentauth-redis redis:7-alpine
 ```
 
 ### 2. Test Cache Endpoints

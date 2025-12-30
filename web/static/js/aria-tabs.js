@@ -43,7 +43,7 @@
       p.setAttribute('tabindex','0');
       const owner = tabs.find(tb => tb.getAttribute('data-tab') === p.id);
       if(owner) p.setAttribute('aria-labelledby', owner.id);
-      if(!p.classList.contains('active')) p.setAttribute('hidden','hidden');
+      if(!p.classList.contains('active') p.setAttribute('hidden','hidden');
     });
     function activate(tab){
       const target = tab.getAttribute('data-tab');
@@ -66,7 +66,7 @@
         }
       });
     }
-    const initial = tabs.find(t=>t.classList.contains('active')) || tabs[0];
+    const initial = tabs.find(t=>t.classList.contains('active') || tabs[0];
     if(initial) activate(initial);
     tabs.forEach(tab => {
       tab.addEventListener('click', e => { e.preventDefault(); activate(tab); tab.focus(); });

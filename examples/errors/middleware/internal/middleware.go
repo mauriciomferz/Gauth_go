@@ -86,7 +86,7 @@ func ErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	errBody := map[string]interface{}{
 		"error_code":    "server_error",
 		"error_message": "An unexpected error occurred",
-		"error_uri":     "https://gauth.example.com/docs/errors#server_error",
+		"error_uri":     "https://agentauth.example.com/docs/errors#server_error",
 		"timestamp":     time.Now().Format(time.RFC3339),
 		"details": map[string]interface{}{
 			"request_id": r.Header.Get("X-Request-ID"),
@@ -100,7 +100,7 @@ func ErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 		}
 		errBody["error_code"] = string(authErr.Code)
 		errBody["error_message"] = authErr.Message
-		errBody["error_uri"] = "https://gauth.example.com/docs/errors#" + string(authErr.Code)
+		errBody["error_uri"] = "https://agentauth.example.com/docs/errors#" + string(authErr.Code)
 		details := map[string]interface{}{
 			"request_id": r.Header.Get("X-Request-ID"),
 		}

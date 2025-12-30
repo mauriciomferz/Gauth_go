@@ -9,14 +9,14 @@
 
 ## Executive Summary
 
-Phase 2 successfully integrates OIDC ID tokens with the RFC-0111 subscription flow, enabling identity verification via OpenID Connect in Steps I, III, and VI. The implementation maintains backward compatibility while adding support for `oidc_id_token` and `oidc_external` proof methods.
+Phase 2 successfully integrates OIDC ID tokens with the AAP-001 subscription flow, enabling identity verification via OpenID Connect in Steps I, III, and VI. The implementation maintains backward compatibility while adding support for `oidc_id_token` and `oidc_external` proof methods.
 
 **Key Achievements**:
 - ✅ OIDC PowerVerificationPoint implementation (165 lines)
 - ✅ PVP Router for multi-method support (88 lines)
 - ✅ Comprehensive test coverage (89.7% maintained)
 - ✅ Integration tests verifying subscription flow (8 scenarios passing)
-- ✅ RFC-0111 compliance increase: **62% → 65%**
+- ✅ AAP-001 compliance increase: **62% → 65%**
 
 ---
 
@@ -56,10 +56,10 @@ type OIDCPVPConfig struct {
 
 **Integration Points**:
 - Uses `IdentityBridge.ConvertIDTokenToIdentityProof()` for conversion
-- Returns `gauth.IdentityProofResult` compatible with subscription flow
+- Returns `agentauth.IdentityProofResult` compatible with subscription flow
 - Supports custom ACR mappings via TrustLevelMapper
 
-### 2. PVP Router (`pkg/gauth/pvp_router.go`)
+### 2. PVP Router (`pkg/agentauth/pvp_router.go`)
 
 **Purpose**: Routes identity proof requests to appropriate PVP implementations based on proof method.
 
@@ -74,7 +74,7 @@ type OIDCPVPConfig struct {
 **Usage Pattern**:
 ```go
 // Create router
-router := gauth.NewPVPRouter(defaultPVP)
+router := agentauth.NewPVPRouter(defaultPVP)
 
 // Register OIDC PVP for multiple methods
 router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
@@ -125,7 +125,7 @@ result, err := router.VerifyIdentityProof(ctx, request)
   - Missing/empty id_token ✓
   - Missing/empty audience ✓
 
-#### Router Tests (`pkg/gauth/pvp_router_test.go` - 230 lines)
+#### Router Tests (`pkg/agentauth/pvp_router_test.go` - 230 lines)
 
 **Test Functions**: 5 functions, 15 test cases
 
@@ -193,7 +193,7 @@ ok  test/integration  0.755s
 
 ---
 
-## RFC-0111 Integration
+## AAP-001 Integration
 
 ### Subscription Flow Modifications
 
@@ -210,14 +210,14 @@ ok  test/integration  0.755s
 
 ### Identity Proof Flow
 
-**RFC-0111 Step I (Owner's Authorizer Identity Proof)**:
+**AAP-001 Step I (Owner's Authorizer Identity Proof)**:
 ```
 Client → Authorization Server
   IdentityProofRequest {
     proof_method: "oidc_id_token"
     proof_data: {
       id_token: "eyJhbGc..."
-      audience: "gauth-server"
+      audience: "agentauth-server"
     }
     required_level: "substantial"
   }
@@ -271,7 +271,7 @@ Authorization Server ← Result
 - ✅ Signature verification
 - ✅ ACR (Authentication Context Class Reference)
 
-### RFC-0111 (AgentAuth)
+### AAP-001 (AgentAuth)
 - ✅ Step I: Owner's Authorizer Identity Proof
 - ✅ Step III: Client Owner Identity Proof
 - ✅ Step VI: Resource Owner Identity Proof
@@ -288,12 +288,12 @@ Authorization Server ← Result
 
 **Production Code**:
 - pkg/oidc/pvp.go: 165 lines
-- pkg/gauth/pvp_router.go: 88 lines
+- pkg/agentauth/pvp_router.go: 88 lines
 - **Total**: 253 lines
 
 **Test Code**:
 - pkg/oidc/pvp_test.go: 527 lines
-- pkg/gauth/pvp_router_test.go: 230 lines
+- pkg/agentauth/pvp_router_test.go: 230 lines
 - test/integration/oidc_subscription_flow_test.go: 408 lines
 - **Total**: 1,165 lines
 
@@ -457,11 +457,11 @@ oidcPVP, _ := oidc.NewOIDCPowerVerificationPoint(oidc.OIDCPVPConfig{
 })
 
 // Create router and register
-router := gauth.NewPVPRouter(defaultPVP)
+router := agentauth.NewPVPRouter(defaultPVP)
 router.RegisterPVP([]string{"oidc_id_token", "oidc_external"}, oidcPVP)
 
 // Use in subscription flow
-subscriptionFlowManager := gauth.NewSubscriptionFlowManager(
+subscriptionFlowManager := agentauth.NewSubscriptionFlowManager(
     router,  // Use router as PVP client
     pipClient,
     commercialRegClient,
@@ -481,7 +481,7 @@ subscriptionFlowManager := gauth.NewSubscriptionFlowManager(
 
 ## Compliance Impact
 
-### RFC-0111 Coverage
+### AAP-001 Coverage
 **Before Phase 2**: 62%  
 **After Phase 2**: **65%** (+3%)
 
@@ -512,7 +512,7 @@ subscriptionFlowManager := gauth.NewSubscriptionFlowManager(
 - ✅ OIDC PVP implementation (165 lines)
 - ✅ PVP Router for multi-method support (88 lines)
 - ✅ Comprehensive tests (1,165 lines, 89.7% coverage)
-- ✅ RFC-0111 Steps I, III, VI integration
+- ✅ AAP-001 Steps I, III, VI integration
 - ✅ Backward compatibility maintained
 - ✅ Compliance increase: **62% → 65%**
 

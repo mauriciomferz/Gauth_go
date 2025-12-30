@@ -53,9 +53,9 @@ var auditLoggerOnce sync.Once
 // InitAuditLogger initializes the global audit logger
 func InitAuditLogger() *AuditLogger {
 	auditLoggerOnce.Do(func() {
-		maxEvents := getEnvInt("GAUTH_AUDIT_MAX_EVENTS", 10000)
-		logToFile := os.Getenv("GAUTH_AUDIT_LOG_FILE") != ""
-		logToStdout := os.Getenv("GAUTH_AUDIT_LOG_STDOUT") == "1"
+		maxEvents := getEnvInt("AGENTAUTH_AUDIT_MAX_EVENTS", 10000)
+		logToFile := os.Getenv("AGENTAUTH_AUDIT_LOG_FILE") != ""
+		logToStdout := os.Getenv("AGENTAUTH_AUDIT_LOG_STDOUT") == "1"
 
 		logger := &AuditLogger{
 			events:      make([]AuditEvent, 0, maxEvents),
@@ -65,7 +65,7 @@ func InitAuditLogger() *AuditLogger {
 
 		// Open log file if configured
 		if logToFile {
-			logPath := os.Getenv("GAUTH_AUDIT_LOG_FILE")
+			logPath := os.Getenv("AGENTAUTH_AUDIT_LOG_FILE")
 			file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 			if err != nil {
 				log.Printf("Failed to open audit log file: %v", err)
@@ -304,8 +304,8 @@ func LogSecurityEvent(eventType, action, result, message string, details map[str
 	globalAuditLogger.LogEvent(event)
 }
 
-// LogAuthenticationAttempt logs an authentication attempt
-func LogAuthenticationAttempt(clientIP, actor, result, message string) {
+// LoagentAuthenticationAttempt logs an authentication attempt
+func LoagentAuthenticationAttempt(clientIP, actor, result, message string) {
 	if globalAuditLogger == nil {
 		return
 	}

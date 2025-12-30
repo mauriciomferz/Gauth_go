@@ -55,8 +55,8 @@ export function metricsInit() {
 	startMetricsPolling();
 	// Wire token metrics button (idempotent) and add lazy first-load
 	const btn = document.getElementById("show-token-metrics");
-	if (btn && !btn.__gauthBound) {
-		btn.__gauthBound = true;
+	if (btn && !btn.__agentauthBound) {
+		btn.__agentauthBound = true;
 		btn.addEventListener("click", () => {
 			console.debug('[metrics] token metrics button clicked');
 			fetchTokenMetrics();
@@ -191,8 +191,8 @@ function bindAuthzEvalForm(){
 	const form = document.getElementById('authz-eval-form');
 	const out = document.getElementById('authz-eval-result');
 	if (!form || !out) return;
-	if (form.__gauthBound) return;
-	form.__gauthBound = true;
+	if (form.__agentauthBound) return;
+	form.__agentauthBound = true;
 	form.addEventListener('submit', async (e)=>{
 		e.preventDefault();
 		out.textContent = 'Evaluating...';

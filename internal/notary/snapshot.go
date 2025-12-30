@@ -40,7 +40,7 @@ type AnchorRef struct {
 }
 
 // GenerateSnapshot builds a snapshot over the current state of a ReceiptStore.
-// It recomputes Merkle root only if enabled via GAUTH_NOTARY_MERKLE_ENABLED.
+// It recomputes Merkle root only if enabled via AGENTAUTH_NOTARY_MERKLE_ENABLED.
 // RotationHead: scans entries for last with Rotation descriptor.
 // PreviousHash must be provided by caller (persisted from prior snapshot) for chaining.
 func GenerateSnapshot(rs *ReceiptStore, previousHash string) (Snapshot, error) {
@@ -105,7 +105,7 @@ func GenerateSnapshot(rs *ReceiptStore, previousHash string) (Snapshot, error) {
 }
 
 // isMerkleEnabled helper (avoids circular import).
-func isMerkleEnabled() bool { return os.Getenv("GAUTH_NOTARY_MERKLE_ENABLED") == "1" }
+func isMerkleEnabled() bool { return os.Getenv("AGENTAUTH_NOTARY_MERKLE_ENABLED") == "1" }
 
 // minimal hex encoder wrapper to avoid pulling fmt.
 func encodeHex(b []byte) string {
