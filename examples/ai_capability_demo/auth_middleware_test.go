@@ -82,8 +82,8 @@ func startJWKS(keys map[string]*rsa.PrivateKey) *httptest.Server {
 func TestAuthMiddleware_HS256_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	os.Setenv("GAUTH_AI_DEMO_JWT_SECRET", "testsecret")
-	defer os.Unsetenv("GAUTH_AI_DEMO_JWT_SECRET")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_SECRET", "testsecret")
+	defer os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_SECRET")
 	r.Use(authMiddleware())
 	r.GET("/protected", func(c *gin.Context) { c.String(200, "ok") })
 	claims := map[string]any{"sub": "user1", "exp": float64(time.Now().Add(1 * time.Hour).Unix())}
@@ -100,8 +100,8 @@ func TestAuthMiddleware_HS256_Success(t *testing.T) {
 func TestAuthMiddleware_HS256_Expired(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	os.Setenv("GAUTH_AI_DEMO_JWT_SECRET", "testsecret")
-	defer os.Unsetenv("GAUTH_AI_DEMO_JWT_SECRET")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_SECRET", "testsecret")
+	defer os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_SECRET")
 	r.Use(authMiddleware())
 	r.GET("/protected", func(c *gin.Context) { c.String(200, "ok") })
 	claims := map[string]any{"sub": "user1", "exp": float64(time.Now().Add(-2 * time.Hour).Unix())}
@@ -121,9 +121,9 @@ func TestAuthMiddleware_RS256_Success(t *testing.T) {
 	keys := map[string]*rsa.PrivateKey{"kid1": priv}
 	srv := startJWKS(keys)
 	defer srv.Close()
-	os.Setenv("GAUTH_AI_DEMO_JWKS_URL", srv.URL)
-	os.Setenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
-	defer func() { os.Unsetenv("GAUTH_AI_DEMO_JWKS_URL"); os.Unsetenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG") }()
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_URL", srv.URL)
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
+	defer func() { os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_URL"); os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG") }()
 	r := gin.New()
 	r.Use(authMiddleware())
 	r.GET("/protected", func(c *gin.Context) { c.String(200, "ok") })
@@ -145,9 +145,9 @@ func TestAuthMiddleware_RS256_KidNotFound(t *testing.T) {
 	keys := map[string]*rsa.PrivateKey{"otherkid": priv}
 	srv := startJWKS(keys)
 	defer srv.Close()
-	os.Setenv("GAUTH_AI_DEMO_JWKS_URL", srv.URL)
-	os.Setenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
-	defer func() { os.Unsetenv("GAUTH_AI_DEMO_JWKS_URL"); os.Unsetenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG") }()
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_URL", srv.URL)
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
+	defer func() { os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_URL"); os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG") }()
 	r := gin.New()
 	r.Use(authMiddleware())
 	r.GET("/protected", func(c *gin.Context) { c.String(200, "ok") })
@@ -166,12 +166,12 @@ func TestAuthMiddleware_RS256_KidNotFound(t *testing.T) {
 func TestAuthMiddleware_RS256_JWKSFetchError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	// Use unreachable URL to force network error on fetch
-	os.Setenv("GAUTH_AI_DEMO_JWKS_URL", "http://127.0.0.1:9/.well-known/jwks.json")
-	os.Setenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_URL", "http://127.0.0.1:9/.well-known/jwks.json")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
 	// Force cache refresh by clearing existing cache and expiry
 	jwksCache = nil
 	jwksExpiry = time.Now().Add(-1 * time.Second)
-	defer func() { os.Unsetenv("GAUTH_AI_DEMO_JWKS_URL"); os.Unsetenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG") }()
+	defer func() { os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_URL"); os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG") }()
 	// Build a token that will attempt RS256 path; the public key won't matter because fetch fails first.
 	// Clear any negative cache entries from prior tests
 	jwksNegative = nil
@@ -221,13 +221,13 @@ func TestAuthMiddleware_RS256_NegativeKidCaching(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(out)
 	}))
 	defer jwksSrv.Close()
-	os.Setenv("GAUTH_AI_DEMO_JWKS_URL", jwksSrv.URL)
-	os.Setenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
-	os.Setenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS", "30")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_URL", jwksSrv.URL)
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS", "30")
 	defer func() {
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_URL")
-		os.Unsetenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG")
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_URL")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS")
 	}()
 	// Reset caches
 	jwksCache = nil
@@ -288,15 +288,15 @@ func TestJWKSBackgroundRefresh(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(out)
 	}))
 	defer jwksSrv.Close()
-	os.Setenv("GAUTH_AI_DEMO_JWKS_URL", jwksSrv.URL)
-	os.Setenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
-	os.Setenv("GAUTH_AI_DEMO_JWKS_CACHE_SECONDS", fmt.Sprintf("%d", ttl))
-	os.Setenv("GAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR", fmt.Sprintf("%f", factor))
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_URL", jwksSrv.URL)
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS", fmt.Sprintf("%d", ttl))
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR", fmt.Sprintf("%f", factor))
 	defer func() {
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_URL")
-		os.Unsetenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG")
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_CACHE_SECONDS")
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_URL")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR")
 	}()
 	// Clear caches
 	jwksCache = nil
@@ -339,20 +339,20 @@ func TestAuthMiddleware_RS256_NegativeKidEviction(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(out)
 	}))
 	defer jwksSrv.Close()
-	os.Setenv("GAUTH_AI_DEMO_JWKS_URL", jwksSrv.URL)
-	os.Setenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_URL", jwksSrv.URL)
+	os.Setenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
 	// Provide API key so /metrics scrape succeeds (we will set header)
-	os.Setenv("GAUTH_AI_DEMO_API_KEY", "testkey")
-	os.Setenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS", "30")
-	os.Setenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES", "1")
-	os.Setenv("GAUTH_AI_DEMO_METRICS", "1") // enable metrics endpoint
+	os.Setenv("AGENTAUTH_AI_DEMO_API_KEY", "testkey")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS", "30")
+	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES", "1")
+	os.Setenv("AGENTAUTH_AI_DEMO_METRICS", "1") // enable metrics endpoint
 	defer func() {
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_URL")
-		os.Unsetenv("GAUTH_AI_DEMO_JWT_EXPECT_ALG")
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS")
-		os.Unsetenv("GAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES")
-		os.Unsetenv("GAUTH_AI_DEMO_METRICS")
-		os.Unsetenv("GAUTH_AI_DEMO_API_KEY")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_URL")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_MAX_ENTRIES")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_METRICS")
+		os.Unsetenv("AGENTAUTH_AI_DEMO_API_KEY")
 	}()
 	// Reset caches and metrics (metrics registered lazily when server starts)
 	jwksCache = nil

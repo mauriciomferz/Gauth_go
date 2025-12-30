@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mauriciomferz/AgentAuth/examples/ai_capability_demo/ledger"
 	"github.com/mauriciomferz/AgentAuth/internal/ai"
-	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // Minimal in-memory copies of global objects for isolated test
@@ -37,7 +37,7 @@ func setupRouterAndLedger() (*gin.Engine, *ledger.Ledger) {
 		c.JSON(200, gin.H{"allowed": allowed, "metadata": meta})
 	})
 	router.POST("/demo/poa/issue", func(c *gin.Context) {
-		poa := &gauth_aap_001.PowerOfAttorney{ID: "t1", Version: 1, Grantor: "g1", Grantee: "g2", Scope: []string{"transaction:read"}, Restrictions: map[string]string{}, ValidFrom: time.Now().UTC(), ValidUntil: time.Now().UTC().Add(time.Hour), Status: gauth_aap_001.POAStatusActive, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
+		poa := &agentauth_aap_001.PowerOfAttorney{ID: "t1", Version: 1, Grantor: "g1", Grantee: "g2", Scope: []string{"transaction:read"}, Restrictions: map[string]string{}, ValidFrom: time.Now().UTC(), ValidUntil: time.Now().UTC().Add(time.Hour), Status: agentauth_aap_001.POAStatusActive, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
 		b, _ := json.Marshal(map[string]any{"event": "poa_issue", "poa_id": poa.ID})
 		l.Append("poa_issue", string(b), "")
 		c.JSON(200, gin.H{"poa_id": poa.ID})
