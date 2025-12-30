@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 func main() {

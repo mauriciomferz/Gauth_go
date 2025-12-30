@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/internal/tracing"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/tracing"
 )
 
 // Status constants

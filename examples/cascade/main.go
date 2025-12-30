@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
+	"github.com/mauriciomferz/AgentAuth/pkg/resilience"
 )
 
 // ServiceType represents different types of microservices

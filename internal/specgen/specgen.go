@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	webpkg "github.com/mauriciomferz/Gauth_go/web"
+	webpkg "github.com/mauriciomferz/AgentAuth/web"
 	"gopkg.in/yaml.v3"
 )
 

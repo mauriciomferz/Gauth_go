@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	metrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	metrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 // fakeExecutor simulates failures for specific IDs.

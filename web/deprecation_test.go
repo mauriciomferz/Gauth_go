@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestLegacyLifecycleAliasDeprecation ensures the legacy alias prints a deprecation warning.

@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // Run starts the BetaServer HTTP listener and blocks until a signal is received or error occurs.

@@ -5,7 +5,7 @@ import (
 	"crypto/ed25519"
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
+	"github.com/mauriciomferz/AgentAuth/pkg/compliance"
 )
 
 // DefaultAttestationVerifier is a robust implementation using compliance core.

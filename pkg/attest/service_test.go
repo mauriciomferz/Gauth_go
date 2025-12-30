@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // helper to setup fresh key state each test

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
 )
 
 // FiduciaryHandlers handles HTTP requests for fiduciary duty management

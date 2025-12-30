@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/metrics"
 )
 
 // CapabilityCache provides thread-safe caching for AI capability assessments

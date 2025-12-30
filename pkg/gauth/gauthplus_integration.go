@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
-	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // AgentAuthPlusValidator validates AgentAuth+ policies during authorization

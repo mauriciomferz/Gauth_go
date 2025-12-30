@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/common"
 )
 
 // AuditRecorder wraps MemoryLogger to expose recorded events for assertions

@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // doPost helper for JSON POST

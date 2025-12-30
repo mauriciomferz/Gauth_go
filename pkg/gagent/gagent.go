@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/enforcement"
+	"github.com/mauriciomferz/AgentAuth/pkg/enforcement"
 )
 
 // Risk level constants

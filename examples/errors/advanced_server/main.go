@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	gauthErrors "github.com/mauriciomferz/Gauth_go/pkg/errors"
+	gauthErrors "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 // Define custom context keys

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	testutil "github.com/mauriciomferz/Gauth_go/web/testutil"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
+	testutil "github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // failingImpl implements notarizer interface but always returns error for failure counter test.

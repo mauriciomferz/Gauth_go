@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestLegacyAliasDisabled ensures setting GAUTH_DISABLE_LEGACY_GOVERNANCE_ALIAS=1 prevents route registration.

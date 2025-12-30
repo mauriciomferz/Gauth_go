@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
-	"github.com/mauriciomferz/Gauth_go/pkg/testutil"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/testutil"
 )
 
 // DelegationScenarioResult captures a summarized outcome for testing.

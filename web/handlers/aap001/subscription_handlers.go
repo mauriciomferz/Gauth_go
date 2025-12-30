@@ -17,9 +17,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
 // SubscriptionHandlers encapsulates RFC-0111 subscription API handlers.

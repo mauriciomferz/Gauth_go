@@ -26,8 +26,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/multisig"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/internal/multisig"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 // BoardMember represents a signing authority

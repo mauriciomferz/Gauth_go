@@ -12,8 +12,8 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // Auditor abstracts the audit logging capability

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 // TestAuthorizationCacheBasic ensures hits/misses and staleness invalidation via policy version changes.

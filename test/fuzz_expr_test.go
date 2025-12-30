@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 // FuzzPolicyExpressionCompile provides fuzz seeds for expression parser; ensures no panics.

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
 )
 
 // API provides HTTP handlers for capability management.

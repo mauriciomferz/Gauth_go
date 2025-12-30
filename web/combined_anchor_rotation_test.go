@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // TestCombinedAnchorEmissionWithRotation ensures rotation ledger head participates in combined hash.

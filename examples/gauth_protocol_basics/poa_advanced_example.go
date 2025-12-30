@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	auth "github.com/mauriciomferz/Gauth_go/pkg/auth"
+	auth "github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 // Advanced RFC 111 Power of Attorney (POA) scenario demonstrating negative cases and compliance checks.

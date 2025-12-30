@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
+	"github.com/mauriciomferz/AgentAuth/pkg/compliance"
 )
 
 // ApprovalLevel mirrors the compliance package type

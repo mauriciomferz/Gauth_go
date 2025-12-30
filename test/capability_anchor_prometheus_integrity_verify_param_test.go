@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/web"
+	"github.com/mauriciomferz/AgentAuth/web"
 )
 
 // TestCapabilityAnchorPrometheusVerifyParam ensures verify=1 triggers re-computation even when status already set.

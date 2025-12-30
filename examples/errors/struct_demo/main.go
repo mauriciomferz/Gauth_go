@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/errors"
+	"github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 func main() {

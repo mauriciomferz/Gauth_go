@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 func main() {

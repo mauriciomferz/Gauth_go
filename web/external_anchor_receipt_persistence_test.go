@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	anchorx "github.com/mauriciomferz/Gauth_go/internal/anchor"
+	anchorx "github.com/mauriciomferz/AgentAuth/internal/anchor"
 )
 
 // containsAll helper

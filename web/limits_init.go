@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/limits"
+	"github.com/mauriciomferz/AgentAuth/internal/limits"
 )
 
 // initLimitsManager initializes the limits manager (idempotent). Logs to stdout on failure.

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 // TestAAP001ConfigValidationErrors exercises all error branches of ValidateAAP001Compliance.

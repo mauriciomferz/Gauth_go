@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 // LoadTestConfig defines parameters for load testing.

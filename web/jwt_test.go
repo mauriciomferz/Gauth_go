@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 )
 
 // TestJWTDiscoveryAlgorithms ensures discovery endpoint reflects JWT algorithms when feature flag enabled.

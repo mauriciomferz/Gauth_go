@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // helper constructing service with signer + key provider and mandatory signatures

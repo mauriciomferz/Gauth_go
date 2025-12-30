@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	webpkg "github.com/mauriciomferz/Gauth_go/web"
+	webpkg "github.com/mauriciomferz/AgentAuth/web"
 )
 
 // helper to perform request against BetaServer

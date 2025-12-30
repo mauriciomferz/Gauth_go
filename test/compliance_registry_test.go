@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	c "github.com/mauriciomferz/Gauth_go/pkg/compliance"
+	c "github.com/mauriciomferz/AgentAuth/pkg/compliance"
 	"github.com/stretchr/testify/require"
 )
 

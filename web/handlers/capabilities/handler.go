@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	// "github.com/mauriciomferz/Gauth_go/internal/anchor" // Avoid circular dependency if possible, inject interface
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	// "github.com/mauriciomferz/AgentAuth/internal/anchor" // Avoid circular dependency if possible, inject interface
 )
 
 // Handler manages capability state, configuration, and enforcement logic.

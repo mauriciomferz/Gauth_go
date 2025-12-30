@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	anchorpkg "github.com/mauriciomferz/Gauth_go/pkg/anchor"
+	anchorpkg "github.com/mauriciomferz/AgentAuth/pkg/anchor"
 )
 
 // Deps defines the narrow dependency surface required for capability audit handlers.

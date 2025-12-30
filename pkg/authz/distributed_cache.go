@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	"github.com/mauriciomferz/AgentAuth/pkg/cache"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
 )

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	web "github.com/mauriciomferz/Gauth_go/web"
+	web "github.com/mauriciomferz/AgentAuth/web"
 )
 
 func TestCompositeAuthorizationHTTP(t *testing.T) {

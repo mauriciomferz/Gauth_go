@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	metricsPkg "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
+	metricsPkg "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 )
 
 // TestReplayNonceStore_CorruptionRecovery ensures malformed WAL lines are skipped and counted.

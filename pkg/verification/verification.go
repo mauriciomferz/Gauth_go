@@ -14,8 +14,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	delegation "github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // DiscoveryResponse minimal shape for revocation support

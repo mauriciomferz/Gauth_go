@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	testutil "github.com/mauriciomferz/Gauth_go/web/testutil"
+	testutil "github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestNotarizationReceiptVerification exercises the /verify endpoint for normal and tampered chains.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // DelegationRevocationAdapter adapts a delegation.RevocationChain to the RevocationChecker interface.

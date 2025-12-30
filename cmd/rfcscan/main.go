@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/rfc"
+	"github.com/mauriciomferz/AgentAuth/internal/rfc"
 	"github.com/pkg/errors"
 )
 

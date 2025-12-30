@@ -1,4 +1,4 @@
-module github.com/mauriciomferz/Gauth_go
+module github.com/mauriciomferz/AgentAuth
 
 go 1.24.0
 

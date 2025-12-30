@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	policy "github.com/mauriciomferz/Gauth_go/pkg/policy"
+	policy "github.com/mauriciomferz/AgentAuth/pkg/policy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

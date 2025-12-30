@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestSignatureAgilityBackwardCompat ensures RB6 interface-based signing produces identical

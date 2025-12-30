@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 )
 
 // MCPClient defines the interface for MCP protocol operations

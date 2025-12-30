@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestCapabilityAnchorMaterial verifies that enabling anchor file emission writes an artifact

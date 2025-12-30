@@ -26,7 +26,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/config"
+	"github.com/mauriciomferz/AgentAuth/internal/config"
 )
 
 // Manager coordinates a Store and a persistence ticker.

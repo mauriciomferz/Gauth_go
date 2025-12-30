@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/common"
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/common"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 // MockAllowAllAuthorizer implements authz.Authorizer and allows everything

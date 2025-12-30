@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestSignTreeHeadBasic ensures signing produces a signature when key manager active.

@@ -9,8 +9,8 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	delegation "github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // buildTestServer constructs an HTTP test server exposing the subset of revocation endpoints

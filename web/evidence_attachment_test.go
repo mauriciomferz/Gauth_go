@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 // helper to POST JSON (reuses performJSONPost in revocation tests if in same package, but redeclare for clarity)

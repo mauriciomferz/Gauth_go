@@ -6,7 +6,7 @@ package collectors
 import (
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // PrometheusCollector wraps an existing PrometheusMetrics implementation

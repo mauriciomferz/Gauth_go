@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/security"
+	"github.com/mauriciomferz/AgentAuth/internal/security"
 	bolt "go.etcd.io/bbolt"
 )
 

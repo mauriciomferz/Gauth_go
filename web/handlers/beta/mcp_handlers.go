@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 )
 
 // MCPHandlers provides HTTP endpoints for Model Context Protocol operations

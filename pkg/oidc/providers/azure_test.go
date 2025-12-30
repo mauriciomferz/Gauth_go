@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
+	"github.com/mauriciomferz/AgentAuth/pkg/oidc"
 )
 
 // Helper function to create a test Azure AD provider

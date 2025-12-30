@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto/keys"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto/keys"
 	"github.com/stretchr/testify/assert"
 )
 

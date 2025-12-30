@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
 )
 
 // TestCapabilityLifecycleDiscovery ensures lifecycle summary object present in /info.

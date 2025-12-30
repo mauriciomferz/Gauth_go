@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 )
 
 // AuditSink defines the interface for external audit event destinations.

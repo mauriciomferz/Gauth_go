@@ -7,11 +7,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	streamPkg "github.com/mauriciomferz/Gauth_go/pkg/poa/stream"
-	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	streamPkg "github.com/mauriciomferz/AgentAuth/pkg/poa/stream"
+	"github.com/mauriciomferz/AgentAuth/pkg/token"
 	"github.com/o1egl/paseto"
 	"github.com/stretchr/testify/require"
 )

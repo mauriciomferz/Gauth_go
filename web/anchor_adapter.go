@@ -3,8 +3,8 @@ package web
 import (
 	"fmt"
 
-	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
-	"github.com/mauriciomferz/Gauth_go/pkg/anchor"
+	anchorint "github.com/mauriciomferz/AgentAuth/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/pkg/anchor"
 )
 
 // anchorClientAdapter adapts pkg/anchor.MemoryAnchor to internal/anchor.Provider.

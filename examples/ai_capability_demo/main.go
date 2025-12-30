@@ -22,9 +22,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/examples/ai_capability_demo/ledger"
-	"github.com/mauriciomferz/Gauth_go/internal/ai"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/examples/ai_capability_demo/ledger"
+	"github.com/mauriciomferz/AgentAuth/internal/ai"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

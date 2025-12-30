@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	auth "github.com/mauriciomferz/Gauth_go/pkg/auth"
+	auth "github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 //nolint:unused // Example function for documentation purposes

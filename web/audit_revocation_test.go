@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // TestRevocationAuditLogging verifies RFC111-R7 compliance.

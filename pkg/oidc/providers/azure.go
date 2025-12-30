@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
+	"github.com/mauriciomferz/AgentAuth/pkg/oidc"
 )
 
 // Azure AD OIDC provider constants

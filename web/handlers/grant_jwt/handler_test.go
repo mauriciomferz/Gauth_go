@@ -13,8 +13,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/grant_jwt"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/grant_jwt"
 )
 
 func TestJWTBearerGrant_Success(t *testing.T) {

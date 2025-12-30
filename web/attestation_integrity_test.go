@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestAttestationIntegrity_Success verifies successful verification path with valid Ed25519 signature.

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	delegation "github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // helper to create beta server with revocation events appended

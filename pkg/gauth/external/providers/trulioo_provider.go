@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth/external"
 )
 
 const (

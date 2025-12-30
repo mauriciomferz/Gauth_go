@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	prom "github.com/prometheus/client_golang/prometheus"
 )
 

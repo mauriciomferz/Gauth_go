@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	metrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	metrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestOTELInitOnce ensures that multiple BetaServer constructions only initialize the OTEL exporter once.

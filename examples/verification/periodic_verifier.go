@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	verification "github.com/mauriciomferz/Gauth_go/pkg/verification"
+	verification "github.com/mauriciomferz/AgentAuth/pkg/verification"
 )
 
 func main() {

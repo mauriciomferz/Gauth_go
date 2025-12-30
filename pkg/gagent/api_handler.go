@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/enforcement"
+	"github.com/mauriciomferz/AgentAuth/pkg/enforcement"
 )
 
 // APIHandler provides HTTP endpoints for G-Agent management

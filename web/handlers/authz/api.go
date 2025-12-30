@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	pkgauthz "github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	pkgauthz "github.com/mauriciomferz/AgentAuth/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // PolicyEvaluator abstracts the policy engine.

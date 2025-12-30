@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // TestRotationV2SignatureInvalid corrupts a signature and ensures verification records failure.

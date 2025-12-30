@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 // SignatureStatus represents the current state of signature collection.

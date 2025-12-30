@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	pkgpolicy "github.com/mauriciomferz/Gauth_go/pkg/policy"
+	pkgpolicy "github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 func TestBoltPolicyVersionStore_SaveLoadVersion(t *testing.T) {

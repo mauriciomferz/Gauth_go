@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	anchorint "github.com/mauriciomferz/AgentAuth/internal/anchor"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 type MockProvider struct {

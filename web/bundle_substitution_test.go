@@ -3,7 +3,7 @@ package web
 import (
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // Bundle substitution tests (initial scaffolding).

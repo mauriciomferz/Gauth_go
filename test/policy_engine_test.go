@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	authz "github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	authz "github.com/mauriciomferz/AgentAuth/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // helper to build a bundle

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/anchor"
-	"github.com/mauriciomferz/Gauth_go/pkg/ledger/rfc3161"
+	"github.com/mauriciomferz/AgentAuth/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/pkg/ledger/rfc3161"
 )
 
 // ExternalAnchorClient integrates external timestamping providers with audit ledger.

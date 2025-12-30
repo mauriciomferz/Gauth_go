@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/registry"
+	"github.com/mauriciomferz/AgentAuth/pkg/registry"
 )
 
 func TestVerificationService_Hardened(t *testing.T) {

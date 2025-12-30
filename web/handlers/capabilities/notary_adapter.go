@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
+	"github.com/mauriciomferz/AgentAuth/pkg/ledger"
 )
 
 // NotaryAdapter bridges ledger.ExternalAnchorClient to the capabilities.AnchorClient interface.

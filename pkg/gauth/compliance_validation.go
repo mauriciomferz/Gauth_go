@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // ComplianceValidator performs RFC-0111 Section 6 compliance validation

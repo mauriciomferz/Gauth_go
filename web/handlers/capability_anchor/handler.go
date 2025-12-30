@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	anchorint "github.com/mauriciomferz/AgentAuth/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // ReceiptStore interface defines persistence for external anchor receipts.

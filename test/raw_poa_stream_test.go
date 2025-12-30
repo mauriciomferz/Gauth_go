@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa/stream"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa/stream"
 )
 
 func TestRawPOAStreamBasic(t *testing.T) {

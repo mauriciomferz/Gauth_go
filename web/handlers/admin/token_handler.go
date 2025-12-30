@@ -11,8 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/mauriciomferz/Gauth_go/pkg/redis"
-	"github.com/mauriciomferz/Gauth_go/pkg/tokens"
+	"github.com/mauriciomferz/AgentAuth/pkg/redis"
+	"github.com/mauriciomferz/AgentAuth/pkg/tokens"
 )
 
 // TokenHandler manages token operations for the admin portal

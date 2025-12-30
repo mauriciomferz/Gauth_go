@@ -7,11 +7,11 @@ import (
 	"time"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
-	"github.com/mauriciomferz/Gauth_go/pkg/database"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth/mocks"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth/external"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth/mocks"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
 )
 
 // InitAAP001FromEnv initializes RFC-0111 components based on environment variables.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
+	"github.com/mauriciomferz/AgentAuth/pkg/compliance"
 )
 
 // ServerIntegration integrates jurisdiction enforcement with the AgentAuth server.

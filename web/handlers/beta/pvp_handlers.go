@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // PVPVerifyRequest represents the request payload for PVP identity verification

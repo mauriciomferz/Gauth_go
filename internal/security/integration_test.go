@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/internal/security"
-	"github.com/mauriciomferz/Gauth_go/pkg/mcp"
+	"github.com/mauriciomferz/AgentAuth/internal/security"
+	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 )
 
 // TestForgedTokenRejection ensures forged tokens are rejected

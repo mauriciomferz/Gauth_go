@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/jurisdiction"
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/internal/jurisdiction"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 // allowAllAuthorizer is a test authorizer that allows all requests.

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestMetricsPersistence ensures labeled lifecycle & decision counts survive save/load cycle.

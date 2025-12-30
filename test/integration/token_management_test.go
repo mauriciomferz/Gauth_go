@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mauriciomferz/Gauth_go/internal/tokenstore"
-	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/AgentAuth/internal/tokenstore"
+	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 func TestTokenManagementIntegration(t *testing.T) {

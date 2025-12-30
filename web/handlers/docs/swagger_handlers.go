@@ -245,7 +245,7 @@ func DocsLandingHandler(c *gin.Context) {
         <div class="footer">
             <p>
                 <a href="/api/docs/openapi.yaml" target="_blank">📄 Download OpenAPI Spec</a> | 
-                <a href="https://github.com/mauriciomferz/Gauth_go" target="_blank">GitHub</a> | 
+                <a href="https://github.com/mauriciomferz/AgentAuth" target="_blank">GitHub</a> | 
                 <a href="/api/v1/beta/health">Health Check</a>
             </p>
             <p style="margin-top: 10px;">

@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // rotate-key is a minimal utility to rotate the Ed25519 signing key when running in eddsa mode.

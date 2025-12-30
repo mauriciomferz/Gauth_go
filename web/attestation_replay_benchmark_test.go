@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	replaypkg "github.com/mauriciomferz/Gauth_go/pkg/replay"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
+	replaypkg "github.com/mauriciomferz/AgentAuth/pkg/replay"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 )
 
 // BenchmarkAttestationReplay compares memory vs redis latency (best-effort, skips if redis unavailable).

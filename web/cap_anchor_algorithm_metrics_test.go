@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	cryptopkg "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestCapabilityAnchorAlgorithmMetrics verifies per-algorithm capability anchor emission counters

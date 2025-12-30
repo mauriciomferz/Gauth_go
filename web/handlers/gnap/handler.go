@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
-	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/gnap"
 )
 
 // AuditLogger interface for logging audit events.

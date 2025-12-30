@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // helper to write a malformed ledger file (continuity gap)

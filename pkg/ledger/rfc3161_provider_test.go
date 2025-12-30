@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/ledger/rfc3161"
+	"github.com/mauriciomferz/AgentAuth/pkg/ledger/rfc3161"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

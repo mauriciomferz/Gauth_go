@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // manifestCanonical represents the unsigned core used for hashing & signature (excludes generated_at & signature fields).

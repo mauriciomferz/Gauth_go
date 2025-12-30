@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestCapabilityAnchorStatusLastWriteUnix verifies the status endpoint includes a unix epoch counter.

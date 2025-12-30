@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	"github.com/mauriciomferz/AgentAuth/pkg/cache"
 )
 
 // CacheHandler handles cache-related HTTP requests

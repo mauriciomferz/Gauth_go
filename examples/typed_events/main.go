@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/AgentAuth/pkg/events"
 )
 
 // Define strongly typed metadata structures for event metadata

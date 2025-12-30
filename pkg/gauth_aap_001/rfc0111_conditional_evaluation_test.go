@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 func TestConditionalSyntaxValidation(t *testing.T) {

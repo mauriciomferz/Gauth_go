@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // TestRotationV2EmbeddedPublicKeyVerification ensures auditor-style verification logic can validate

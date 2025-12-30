@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
-	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
+	auditor "github.com/mauriciomferz/AgentAuth/pkg/auditor"
+	cryptoReg "github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	poa "github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // buildSigningPayload mirrors unexported buildPoASigningPayload for test signature generation.

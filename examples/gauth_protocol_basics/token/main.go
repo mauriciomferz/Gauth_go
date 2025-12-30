@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	auth "github.com/mauriciomferz/Gauth_go/pkg/auth"
+	auth "github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 func main() {

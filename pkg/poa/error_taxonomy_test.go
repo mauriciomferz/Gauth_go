@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc/errs"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc/errs"
 )
 
 func TestErrorTaxonomy(t *testing.T) {

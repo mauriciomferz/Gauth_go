@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // TestNewAuthorizerAdapter verifies AuthorizerAdapter constructor correctly initializes with provided engine.

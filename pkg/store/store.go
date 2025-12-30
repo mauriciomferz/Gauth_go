@@ -4,7 +4,7 @@ package store
 
 import (
 	// no need for context or time
-	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 // Re-export types from token package for compatibility

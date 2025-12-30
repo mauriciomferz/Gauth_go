@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
 // Helper to build minimal valid PoADefinition we can then mutate for negative cases.

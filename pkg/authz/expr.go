@@ -22,7 +22,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz/expr"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz/expr"
 )
 
 // ExprLimits defines resource limits for parsing/evaluation.

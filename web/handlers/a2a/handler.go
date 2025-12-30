@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/a2a"
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/a2a"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 // Handler manages A2A operations.

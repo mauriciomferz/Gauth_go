@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // ExtendedToken represents the RFC-0111 comprehensive authorization credential

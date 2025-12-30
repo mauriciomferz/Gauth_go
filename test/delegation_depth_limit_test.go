@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 func TestDelegationDepthLimitExceeded(t *testing.T) {

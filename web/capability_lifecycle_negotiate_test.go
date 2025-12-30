@@ -8,7 +8,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
 )
 
 const testPastTime = "2025-01-01T00:00:00Z"

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // TestEncodeRawPOAChain_LargeItems tests encoding of large items

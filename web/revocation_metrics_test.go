@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	delegation "github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // TestRevocationAutoSignMetrics validates the emitted / skipped counters for the auto-sign logic.

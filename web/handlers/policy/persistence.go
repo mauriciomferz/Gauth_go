@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // policyChainPersist is the schema for persisted policy chains.

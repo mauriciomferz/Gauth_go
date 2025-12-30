@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

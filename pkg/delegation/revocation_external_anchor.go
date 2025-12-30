@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/anchor"
-	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
+	"github.com/mauriciomferz/AgentAuth/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/pkg/ledger"
 )
 
 // ExternalRevocationAnchor implements RevocationAnchorObserver to anchor

@@ -16,8 +16,8 @@ import (
 	"log"
 	"os"
 
-	fssecrets "github.com/mauriciomferz/Gauth_go/internal/secrets"
-	"github.com/mauriciomferz/Gauth_go/pkg/secret"
+	fssecrets "github.com/mauriciomferz/AgentAuth/internal/secrets"
+	"github.com/mauriciomferz/AgentAuth/pkg/secret"
 )
 
 // SecretStorageDemo demonstrates dual secret provider implementation resolving sec8.item1 DRIFT ISSUE.

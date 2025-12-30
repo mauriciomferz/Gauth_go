@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestHierarchicalDigestRootAndChild verifies Version bump to 4 and parent digest binding.

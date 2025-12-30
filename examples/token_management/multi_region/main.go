@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	token "github.com/mauriciomferz/Gauth_go/pkg/token"
+	token "github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 type Service struct {

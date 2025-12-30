@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	gauth_aap_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	gauth_aap_001 "github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 func TestScopePatternsExactAndWildcard(t *testing.T) {

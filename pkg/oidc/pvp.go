@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // OIDCPowerVerificationPoint implements the PowerVerificationPoint interface for OIDC ID tokens

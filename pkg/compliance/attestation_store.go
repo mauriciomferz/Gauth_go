@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/attest"
+	"github.com/mauriciomferz/AgentAuth/pkg/attest"
 )
 
 // AttestationStore provides persistent storage and retrieval of compliance attestations.

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/rate"
+	"github.com/mauriciomferz/AgentAuth/internal/rate"
 )
 
 func demoBasicUsage(limiter *rate.Limiter) {

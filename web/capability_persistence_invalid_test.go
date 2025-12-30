@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestCapabilityPersistenceInvalidMapping ensures reload with invalid action mapping keeps previous state.

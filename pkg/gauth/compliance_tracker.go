@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // ComplianceTracker monitors ongoing compliance for active authorizations

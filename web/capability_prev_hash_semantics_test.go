@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	testutil "github.com/mauriciomferz/Gauth_go/web/testutil"
+	testutil "github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestCapabilityRegistryPrevHashPermutationSemantics verifies that a permutation-only reload

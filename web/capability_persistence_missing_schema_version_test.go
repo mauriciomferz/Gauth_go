@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestCapabilityPersistenceMissingSchemaVersion ensures that removing schema_version causes reload failure and preserves previous state.

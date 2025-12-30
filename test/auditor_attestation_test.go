@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	cryptoReg "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // minimalAttestationUnsigned mirrors auditor unsigned struct subset

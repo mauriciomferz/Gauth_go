@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	ratelimit "github.com/mauriciomferz/Gauth_go/pkg/limits"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	ratelimit "github.com/mauriciomferz/AgentAuth/pkg/limits"
 )
 
 // Notarizer interface handles external notarization

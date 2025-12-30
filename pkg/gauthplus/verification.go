@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mauriciomferz/Gauth_go/pkg/registry"
+	"github.com/mauriciomferz/AgentAuth/pkg/registry"
 )
 
 // VerificationResult represents the result of a PoA verification

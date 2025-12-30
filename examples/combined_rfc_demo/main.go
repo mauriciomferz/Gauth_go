@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 func displayAAP001Exclusions(ex rfc.AAP001Exclusions) {

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/internal/obligations"
-	"github.com/mauriciomferz/Gauth_go/pkg/pdp/expr"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/obligations"
+	"github.com/mauriciomferz/AgentAuth/pkg/pdp/expr"
 )
 
 // Request represents an authorization evaluation request to the PDP.

@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/anchor"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/anchor"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // buildTestServerMinimal constructs a BetaServer with routes initialized for testing new endpoints.

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 func main() {

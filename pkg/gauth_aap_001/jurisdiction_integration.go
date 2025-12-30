@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/internal/jurisdiction"
-	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
+	"github.com/mauriciomferz/AgentAuth/internal/jurisdiction"
+	"github.com/mauriciomferz/AgentAuth/pkg/compliance"
 )
 
 // JurisdictionEnforcement provides optional jurisdiction-specific runtime enforcement for AAP001 operations.

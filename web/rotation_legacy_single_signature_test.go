@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestRotationSummary_LegacySingleSignature verifies legacy single-sign path when multisig disabled.

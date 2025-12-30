@@ -3,7 +3,7 @@ package poa
 import (
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc/errs"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc/errs"
 )
 
 // Error codes mapped to RFC definitions.

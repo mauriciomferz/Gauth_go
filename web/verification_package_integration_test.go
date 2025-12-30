@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
-	"github.com/mauriciomferz/Gauth_go/pkg/verification"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/verification"
 )
 
 // httpClientAdapter implements verification.HTTPClient

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/common/clock"
-	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/common/clock"
+	"github.com/mauriciomferz/AgentAuth/pkg/metrics"
 )
 
 // DeepHealthCheck performs deep health checks and returns a status map

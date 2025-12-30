@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	pkg_replay "github.com/mauriciomferz/Gauth_go/pkg/replay"
+	pkg_replay "github.com/mauriciomferz/AgentAuth/pkg/replay"
 )
 
 // TestDurableReplayStoreAgentAuthIntegration tests DurableReplayStore with gauth ReplayStore interface.

@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
-	gauthplushandlers "github.com/mauriciomferz/Gauth_go/web/handlers/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
+	gauthplushandlers "github.com/mauriciomferz/AgentAuth/web/handlers/gauthplus"
 )
 
 // RegisterAgentAuthPlusEndpoints registers all AgentAuth+ management endpoints for the five advanced features:

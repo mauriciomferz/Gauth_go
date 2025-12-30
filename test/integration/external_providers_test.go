@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
+	"github.com/mauriciomferz/AgentAuth/pkg/oidc"
 )
 
 const (

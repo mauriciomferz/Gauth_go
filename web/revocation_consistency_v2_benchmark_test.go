@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	delegation "github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // BenchmarkRevocationConsistencyV2Proof measures generation + verification latency for

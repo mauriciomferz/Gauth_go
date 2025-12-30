@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
 // Simplified local POA status constants (legacy compatibility subset)

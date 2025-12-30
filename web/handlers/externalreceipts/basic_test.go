@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
-	externalreceipts "github.com/mauriciomferz/Gauth_go/web/handlers/externalreceipts"
+	anchorint "github.com/mauriciomferz/AgentAuth/internal/anchor"
+	externalreceipts "github.com/mauriciomferz/AgentAuth/web/handlers/externalreceipts"
 )
 
 // Clean test implementation replacing corrupted content.

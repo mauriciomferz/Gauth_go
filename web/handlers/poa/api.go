@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	authpkg "github.com/mauriciomferz/Gauth_go/pkg/auth"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	authpkg "github.com/mauriciomferz/AgentAuth/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // Handler manages Power of Attorney (POA) related endpoints.

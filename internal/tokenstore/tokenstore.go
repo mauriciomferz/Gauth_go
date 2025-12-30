@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 // Re-export types from token package

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 func TestDelegationChainIntegrity(t *testing.T) {

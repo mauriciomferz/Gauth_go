@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mauriciomferz/Gauth_go/pkg/webhook"
+	"github.com/mauriciomferz/AgentAuth/pkg/webhook"
 )
 
 // WebhookHandler handles webhook-related HTTP requests

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/enforcement"
+	"github.com/mauriciomferz/AgentAuth/pkg/enforcement"
 )
 
 // FuzzCapabilityEnforcement fuzzes the capability matrix enforcement with arbitrary inputs

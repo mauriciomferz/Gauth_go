@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
 )
 
 // canonicalSerialize replicates the canonical capability registry serialization used for hashing.

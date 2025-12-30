@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // BenchmarkMerkleAppend measures leaf append throughput for a moderately sized tree.

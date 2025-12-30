@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	observability "github.com/mauriciomferz/Gauth_go/internal/observability"
+	observability "github.com/mauriciomferz/AgentAuth/internal/observability"
 )
 
 const (

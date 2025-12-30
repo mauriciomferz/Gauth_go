@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // TestErrorCatalogEndpoint verifies /api/v1/errors/catalog returns success and non-empty entries.

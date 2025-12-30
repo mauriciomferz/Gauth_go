@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestExternalAnchorMetrics verifies metrics update and status receipt exposure when external anchor provider enabled.

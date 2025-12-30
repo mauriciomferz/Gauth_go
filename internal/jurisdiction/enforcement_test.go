@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
+	"github.com/mauriciomferz/AgentAuth/pkg/compliance"
 )
 
 func TestNewEnforcementEngine(t *testing.T) {

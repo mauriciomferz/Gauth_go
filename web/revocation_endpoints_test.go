@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // TestRevocationEndpoints verifies RFC111-R4, R5, R6, R7 compliance

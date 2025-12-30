@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
 )
 
 // ServerIntegration provides integration between AICapabilityMatrix and BetaServer

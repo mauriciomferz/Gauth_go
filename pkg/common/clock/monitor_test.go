@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/beevik/ntp"
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 // #nosec G101: false positive - these are OIDC/OAuth URN strings, not credentials

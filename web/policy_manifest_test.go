@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/capability"
-	metrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	cryptopkg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/internal/capability"
+	metrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	cryptopkg "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // prepareEdDSAKey ensures an active EdDSA key exists for signing tests.

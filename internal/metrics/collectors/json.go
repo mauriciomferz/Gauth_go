@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // JSONCollector exports metrics as JSON for debugging and testing.

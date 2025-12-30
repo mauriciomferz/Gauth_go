@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	a "github.com/mauriciomferz/Gauth_go/pkg/audit"
-	c "github.com/mauriciomferz/Gauth_go/pkg/compliance"
-	p "github.com/mauriciomferz/Gauth_go/pkg/policy"
-	v "github.com/mauriciomferz/Gauth_go/pkg/validation"
+	a "github.com/mauriciomferz/AgentAuth/pkg/audit"
+	c "github.com/mauriciomferz/AgentAuth/pkg/compliance"
+	p "github.com/mauriciomferz/AgentAuth/pkg/policy"
+	v "github.com/mauriciomferz/AgentAuth/pkg/validation"
 )
 
 // integration_demo shows how the new beta scaffolding components could be wired together.

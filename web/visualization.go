@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/visualization"
+	"github.com/mauriciomferz/AgentAuth/pkg/visualization"
 )
 
 // Global visualizer instance

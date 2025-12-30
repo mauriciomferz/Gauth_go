@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestMemoryService_Issue tests the Issue method

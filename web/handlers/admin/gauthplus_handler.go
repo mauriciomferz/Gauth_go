@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/mauriciomferz/Gauth_go/pkg/database"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
 )
 
 // AgentAuthPlusHandler handles AgentAuth+ enhanced authorization features

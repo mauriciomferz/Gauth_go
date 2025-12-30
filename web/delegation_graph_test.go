@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	gauth_aap_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	gauth_aap_001 "github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 func TestDelegationGraphExport(t *testing.T) {

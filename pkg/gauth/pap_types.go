@@ -5,7 +5,7 @@ package gauth
 import (
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // PolicyType represents the type of authorization policy

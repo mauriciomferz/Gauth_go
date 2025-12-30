@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/oidc"
+	"github.com/mauriciomferz/AgentAuth/pkg/oidc"
 )
 
 // Google OIDC provider constants

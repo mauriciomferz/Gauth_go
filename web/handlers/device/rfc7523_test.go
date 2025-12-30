@@ -13,9 +13,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
-	"github.com/mauriciomferz/Gauth_go/pkg/device"
-	deviceHandler "github.com/mauriciomferz/Gauth_go/web/handlers/device"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/device"
+	deviceHandler "github.com/mauriciomferz/AgentAuth/web/handlers/device"
 )
 
 func TestDeviceToken_WithClientAssertion(t *testing.T) {

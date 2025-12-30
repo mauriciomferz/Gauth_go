@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // EntityVerifyRequest represents the request for entity verification

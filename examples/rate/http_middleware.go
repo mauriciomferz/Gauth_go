@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/rate"
+	"github.com/mauriciomferz/AgentAuth/pkg/rate"
 )
 
 // RateLimitMiddleware wraps an http.Handler with rate limiting

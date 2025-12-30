@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // TestRotationV2EmbeddedECDSAPublicKeyVerification ensures embedded uncompressed P-256 point enables auditor-style verification.

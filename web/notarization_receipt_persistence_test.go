@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestNotarizationReceiptPersistence verifies that successful capability anchor notarization receipts

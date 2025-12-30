@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/internal/anchor"
 	bolt "go.etcd.io/bbolt"
 )
 

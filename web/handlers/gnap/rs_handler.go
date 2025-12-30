@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
+	"github.com/mauriciomferz/AgentAuth/pkg/gnap"
 )
 
 // RegisterRS handles POST /gnap/rs/register (RFC 9767 §3).

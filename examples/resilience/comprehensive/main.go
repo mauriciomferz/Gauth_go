@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
+	"github.com/mauriciomferz/AgentAuth/pkg/resilience"
 )
 
 // SimulatedService represents an external service that might fail

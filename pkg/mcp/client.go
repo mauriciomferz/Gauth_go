@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/mauriciomferz/Gauth_go/internal/security"
+	"github.com/mauriciomferz/AgentAuth/internal/security"
 )
 
 // MCPClient represents an MCP protocol client

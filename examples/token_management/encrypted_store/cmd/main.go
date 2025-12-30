@@ -11,7 +11,7 @@ import (
 	"log"
 	"time"
 
-	token "github.com/mauriciomferz/Gauth_go/pkg/token"
+	token "github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 // EncryptedStore wraps a token store with encryption

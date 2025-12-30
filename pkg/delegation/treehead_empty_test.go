@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	crypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	crypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestSignTreeHeadEmptyChain ensures calling SignTreeHead on an empty revocation chain

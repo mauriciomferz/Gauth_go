@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/anchor"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/anchor"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

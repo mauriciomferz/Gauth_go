@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/enforcement"
+	"github.com/mauriciomferz/AgentAuth/pkg/enforcement"
 )
 
 // TestNewAgent tests agent creation

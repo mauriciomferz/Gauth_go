@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/internal/anchor"
 )
 
 func TestExternalRevocationAnchor(t *testing.T) {

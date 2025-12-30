@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/config"
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/internal/config"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

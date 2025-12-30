@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/anchor"
-	"github.com/mauriciomferz/Gauth_go/pkg/ledger"
+	"github.com/mauriciomferz/AgentAuth/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/pkg/ledger"
 )
 
 func TestHandler_Archival(t *testing.T) {

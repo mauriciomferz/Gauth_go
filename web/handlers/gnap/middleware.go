@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gnap/httpsig"
+	"github.com/mauriciomferz/AgentAuth/pkg/gnap/httpsig"
 )
 
 // KeyResolver resolves a key ID to a public key for signature verification.

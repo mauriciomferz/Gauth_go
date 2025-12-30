@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/mauriciomferz/Gauth_go/internal/config"
-	"github.com/mauriciomferz/Gauth_go/internal/observability"
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/internal/config"
+	"github.com/mauriciomferz/AgentAuth/internal/observability"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // Config represents the configuration for AgentAuth

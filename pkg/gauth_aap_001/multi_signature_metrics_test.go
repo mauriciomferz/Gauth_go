@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // helper to produce signer key id

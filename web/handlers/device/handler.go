@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
-	"github.com/mauriciomferz/Gauth_go/pkg/device"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/device"
 )
 
 // Handler provides HTTP handlers for device authorization.

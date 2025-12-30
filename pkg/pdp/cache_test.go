@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
+	"github.com/mauriciomferz/AgentAuth/pkg/pdp"
 )
 
 // TestPDPCache_GetSet tests basic cache operations

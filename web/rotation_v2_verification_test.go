@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // helper to install keys into global registry (simplified for tests)

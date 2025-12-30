@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 )
 
 // TestReplaySnapshotAndCompact verifies snapshot file creation, WAL rotation, and recovery continuity.

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestCapabilityAnchorMaterialSigned verifies signature wrapper emission when GAUTH_CAP_ANCHOR_SIGN=1 and EdDSA key manager active.

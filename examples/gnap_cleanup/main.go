@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
+	"github.com/mauriciomferz/AgentAuth/pkg/gnap"
 )
 
 // This example demonstrates how to set up the GNAP CleanupManager

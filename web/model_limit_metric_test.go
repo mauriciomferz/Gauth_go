@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestModelLimitExceededMetric ensures the dedicated exceed counter increments.

@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/beta"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/beta"
 )
 
 // RegisterBetaExternalServiceEndpoints registers HTTP endpoints that expose

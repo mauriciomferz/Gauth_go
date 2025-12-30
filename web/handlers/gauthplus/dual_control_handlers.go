@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
 )
 
 // DualControlHandlers handles HTTP requests for dual control approvals

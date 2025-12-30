@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/examples/ai_capability_demo/ledger"
+	"github.com/mauriciomferz/AgentAuth/examples/ai_capability_demo/ledger"
 	bolt "go.etcd.io/bbolt"
 )
 

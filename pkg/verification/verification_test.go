@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	delegation "github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // TestVerifyAllSuccess constructs a minimal chain + STH and ensures VerifyAll returns nil.

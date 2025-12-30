@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/a2a"
-	a2aHandler "github.com/mauriciomferz/Gauth_go/web/handlers/a2a"
+	"github.com/mauriciomferz/AgentAuth/pkg/a2a"
+	a2aHandler "github.com/mauriciomferz/AgentAuth/web/handlers/a2a"
 )
 
 func setupRouter() *gin.Engine {

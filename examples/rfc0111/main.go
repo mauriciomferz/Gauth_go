@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth/mocks"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth/mocks"
 )
 
 func main() {

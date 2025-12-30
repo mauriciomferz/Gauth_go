@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestPolicyPersistenceRoundTrip verifies that setting POLICY_CHAIN_STATE_PATH persists appended bundles and they reload on new server instance.

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // resolverBoth implements PublicKeyResolver for both Ed25519 and ECDSA.

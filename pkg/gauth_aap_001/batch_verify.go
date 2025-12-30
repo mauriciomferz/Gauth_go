@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	icrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	icrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // BatchVerificationResult holds results for batch token verification

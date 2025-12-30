@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	policyHandler "github.com/mauriciomferz/Gauth_go/web/handlers/policy"
+	policyHandler "github.com/mauriciomferz/AgentAuth/web/handlers/policy"
 )
 
 const (

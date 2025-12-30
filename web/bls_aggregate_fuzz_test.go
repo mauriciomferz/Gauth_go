@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // FuzzBLSAggregateEndpoint exercises the aggregate endpoint with malformed / random inputs to surface panics.

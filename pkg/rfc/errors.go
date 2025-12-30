@@ -1,7 +1,7 @@
 package rfc
 
 import (
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc/errs"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc/errs"
 )
 
 // Code aliases from errs package

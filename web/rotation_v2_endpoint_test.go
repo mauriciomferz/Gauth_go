@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // TestRotationV2Endpoint verifies artifact shape, threshold evaluation and continuity advancement when verified weight meets threshold.

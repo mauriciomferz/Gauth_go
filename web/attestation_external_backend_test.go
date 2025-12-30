@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	replaypkg "github.com/mauriciomferz/Gauth_go/pkg/replay"
+	replaypkg "github.com/mauriciomferz/AgentAuth/pkg/replay"
 )
 
 // TestAttestationExternalRedisBackend ensures Redis backend detects replay after Record.

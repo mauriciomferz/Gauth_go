@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	authz "github.com/mauriciomferz/Gauth_go/pkg/authz"
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	authz "github.com/mauriciomferz/AgentAuth/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // Benchmark comparing simple map-based RBAC (MemoryAuthorizer) vs ChainEngine evaluation.

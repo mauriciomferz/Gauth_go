@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // helper creates an ed25519 signature over canonical digest of poa using provided private key & keyID

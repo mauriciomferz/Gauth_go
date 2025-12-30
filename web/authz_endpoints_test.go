@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // TestAuthzMetricsEndpoint ensures metrics JSON shape is returned.

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	rfc "github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	rfc "github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 // DelegationChainValidator provides validation for transitive (multi-hop) delegation chains.

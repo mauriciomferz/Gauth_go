@@ -3,7 +3,7 @@ package gauth
 import (
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 	"github.com/stretchr/testify/assert"
 )
 

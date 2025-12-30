@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/examples/cascade/pkg/mesh"
+	"github.com/mauriciomferz/AgentAuth/examples/cascade/pkg/mesh"
 )
 
 func main() {

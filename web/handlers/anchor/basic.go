@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	anchorpkg "github.com/mauriciomferz/Gauth_go/pkg/anchor"
+	anchorpkg "github.com/mauriciomferz/AgentAuth/pkg/anchor"
 )
 
 // SignedAnchorWrapper duplicated from web package to avoid import cycle.

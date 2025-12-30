@@ -6,13 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/attest"
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	gauth_aap_001 "github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/attest"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	gauth_aap_001 "github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 // simpleAllowAuthorizer always allows

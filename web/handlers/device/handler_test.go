@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/device"
-	deviceHandler "github.com/mauriciomferz/Gauth_go/web/handlers/device"
+	"github.com/mauriciomferz/AgentAuth/pkg/device"
+	deviceHandler "github.com/mauriciomferz/AgentAuth/web/handlers/device"
 )
 
 func setupRouter() *gin.Engine {

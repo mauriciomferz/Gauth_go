@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth_aap_001"
 )
 
 func TestScenarioRunnerSuccessMinimal(t *testing.T) {

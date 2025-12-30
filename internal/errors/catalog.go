@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sort"
 
-	gerrs "github.com/mauriciomferz/Gauth_go/pkg/errors"
+	gerrs "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 // Category represents a coarse grouping for error codes to enable filtering

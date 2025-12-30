@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mauriciomferz/Gauth_go/pkg/database"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
 )
 
 func TestCascadeRevocationBenchmark(t *testing.T) {

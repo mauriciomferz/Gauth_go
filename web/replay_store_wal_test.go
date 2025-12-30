@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 )
 
 func TestReplayNonceStore_WALIntegration(t *testing.T) {

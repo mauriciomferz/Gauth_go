@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	webpkg "github.com/mauriciomferz/Gauth_go/web"
+	webpkg "github.com/mauriciomferz/AgentAuth/web"
 )
 
 // perform helper similar to capabilities tests

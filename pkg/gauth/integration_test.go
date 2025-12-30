@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
 // TestAuthorizationChainValidation tests the authorization chain validator

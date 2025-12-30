@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
-	gnaphandler "github.com/mauriciomferz/Gauth_go/web/handlers/gnap"
+	"github.com/mauriciomferz/AgentAuth/pkg/gnap"
+	gnaphandler "github.com/mauriciomferz/AgentAuth/web/handlers/gnap"
 )
 
 func TestRFC9767_RSConnection(t *testing.T) {

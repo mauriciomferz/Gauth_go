@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	mw "github.com/mauriciomferz/Gauth_go/examples/errors/middleware/internal"
-	gautherr "github.com/mauriciomferz/Gauth_go/pkg/errors"
+	mw "github.com/mauriciomferz/AgentAuth/examples/errors/middleware/internal"
+	gautherr "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 // demoHandler is a sample handler that always returns an error

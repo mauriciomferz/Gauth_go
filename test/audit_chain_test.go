@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	a "github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	a "github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/common"
 	"github.com/stretchr/testify/require"
 )
 

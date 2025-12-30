@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	cr "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // sign helper

@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // CLI snapshot generator.

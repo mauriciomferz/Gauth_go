@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/redis"
+	"github.com/mauriciomferz/AgentAuth/pkg/redis"
 )
 
 const (

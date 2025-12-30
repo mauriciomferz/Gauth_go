@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // SemanticVersion represents a semantic version (major.minor.patch).

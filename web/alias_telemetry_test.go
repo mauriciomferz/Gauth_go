@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/web/testutil"
+	"github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestLegacyAliasTelemetry verifies legacy_alias_hits increments when invoking the deprecated alias.

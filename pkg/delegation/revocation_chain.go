@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // RevocationEvent represents a revocation of a previously issued Delegation.

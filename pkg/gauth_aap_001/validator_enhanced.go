@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 // ValidationWarning represents a non-fatal validation issue that should be logged/monitored

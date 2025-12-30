@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // AuthorizerAdapter bridges the new chain-based policy engine to the legacy simple Authorizer interface.

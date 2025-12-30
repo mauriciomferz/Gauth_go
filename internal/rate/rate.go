@@ -1,7 +1,7 @@
 package rate
 
 import (
-	"github.com/mauriciomferz/Gauth_go/pkg/rate"
+	"github.com/mauriciomferz/AgentAuth/pkg/rate"
 )
 
 // Re-export all types and functions from pkg/rate

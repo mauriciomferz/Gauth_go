@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
 	bolt "go.etcd.io/bbolt"
 )
 

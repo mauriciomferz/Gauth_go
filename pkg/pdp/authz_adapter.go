@@ -3,7 +3,7 @@ package pdp
 import (
 	"context"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 // AuthzAdapter wraps an authz.Authorizer to satisfy the pdp.Engine interface

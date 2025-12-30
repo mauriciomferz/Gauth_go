@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth/external"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth/external"
 )
 
 // Note: CircuitBreaker and related types are now defined in connector_utils.go to avoid duplication

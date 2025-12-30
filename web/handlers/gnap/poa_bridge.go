@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/gnap"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // PoAProvider defines interface for retrieving PoA records compatibility

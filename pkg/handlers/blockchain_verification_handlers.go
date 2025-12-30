@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mauriciomferz/Gauth_go/pkg/blockchain"
+	"github.com/mauriciomferz/AgentAuth/pkg/blockchain"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )

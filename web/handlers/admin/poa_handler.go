@@ -9,8 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/mauriciomferz/Gauth_go/pkg/cache"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/cache"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 const (

@@ -1,8 +1,8 @@
 package web
 
 import (
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	aap001handlers "github.com/mauriciomferz/Gauth_go/web/handlers/aap001"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	aap001handlers "github.com/mauriciomferz/AgentAuth/web/handlers/aap001"
 )
 
 // RegisterAAP001Endpoints registers all RFC-0111 subscription and authorization endpoints.

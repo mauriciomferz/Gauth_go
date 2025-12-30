@@ -38,7 +38,7 @@ import (
 	"strings"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 const (

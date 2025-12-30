@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	token "github.com/mauriciomferz/Gauth_go/pkg/token"
+	token "github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 // TokenMonitor provides token lifecycle monitoring

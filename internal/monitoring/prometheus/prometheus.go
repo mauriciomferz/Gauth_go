@@ -3,7 +3,7 @@ package prometheus
 import (
 	"net/http"
 
-	"github.com/mauriciomferz/Gauth_go/internal/monitoring"
+	"github.com/mauriciomferz/AgentAuth/internal/monitoring"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

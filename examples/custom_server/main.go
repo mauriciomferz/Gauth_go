@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // CustomResourceServer extends the basic ResourceServer with additional functionality

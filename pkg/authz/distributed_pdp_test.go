@@ -3,7 +3,7 @@ package authz
 import (
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // MockEngine implements policy.Engine for testing

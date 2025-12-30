@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // StatsDCollector exports metrics to StatsD/DogStatsD.

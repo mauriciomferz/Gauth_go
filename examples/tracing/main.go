@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/trace"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 func main() {

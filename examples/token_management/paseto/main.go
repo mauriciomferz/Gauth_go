@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	token "github.com/mauriciomferz/Gauth_go/pkg/token"
+	token "github.com/mauriciomferz/AgentAuth/pkg/token"
 	paseto "github.com/o1egl/paseto"
 )
 

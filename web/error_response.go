@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	errorscatalog "github.com/mauriciomferz/Gauth_go/internal/errors"
-	gerrs "github.com/mauriciomferz/Gauth_go/pkg/errors"
+	errorscatalog "github.com/mauriciomferz/AgentAuth/internal/errors"
+	gerrs "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 // ErrorResponse standardizes API error payloads and maps them to RFC references.

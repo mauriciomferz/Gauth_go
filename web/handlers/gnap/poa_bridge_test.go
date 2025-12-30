@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	gnappkg "github.com/mauriciomferz/Gauth_go/pkg/gnap"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	gnappkg "github.com/mauriciomferz/AgentAuth/pkg/gnap"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 type mockPoAProvider struct {

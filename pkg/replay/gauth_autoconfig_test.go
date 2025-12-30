@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // TestAgentAuthDurableReplayAutoConfig demonstrates automatic durable replay store configuration

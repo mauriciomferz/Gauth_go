@@ -15,7 +15,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/loadtest"
+	"github.com/mauriciomferz/AgentAuth/pkg/loadtest"
 )
 
 func main() {

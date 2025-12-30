@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauthplus"
 )
 
 // VerificationHandler handles verification-related HTTP requests

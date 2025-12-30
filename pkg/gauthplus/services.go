@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/database"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
 )
 
 // PostgreSQLSuccessorService implements SuccessorManagementService using PostgreSQL (pgx)

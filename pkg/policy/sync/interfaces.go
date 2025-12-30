@@ -3,7 +3,7 @@ package sync
 import (
 	"context"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 // PolicySource defines the interface for fetching policy updates.

@@ -3,7 +3,7 @@ package gauth_aap_001
 import (
 	"context"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto/keyring"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto/keyring"
 )
 
 // keyRingRotator adapts a KeyRing to the scheduler.Rotator interface.

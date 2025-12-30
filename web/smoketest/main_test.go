@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	webpkg "github.com/mauriciomferz/Gauth_go/web"
+	webpkg "github.com/mauriciomferz/AgentAuth/web"
 )
 
 // TestMain boots a beta server on :8080 so smoketests are self-contained and

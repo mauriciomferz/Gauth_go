@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	anchorint "github.com/mauriciomferz/Gauth_go/internal/anchor"
+	anchorint "github.com/mauriciomferz/AgentAuth/internal/anchor"
 )
 
 const (

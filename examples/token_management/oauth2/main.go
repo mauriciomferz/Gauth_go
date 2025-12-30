@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	token "github.com/mauriciomferz/Gauth_go/pkg/token"
+	token "github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 // joinScopes joins a slice of scopes into a comma-separated string

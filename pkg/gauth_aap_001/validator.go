@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 // PoAValidator defines semantic validation beyond syntactic request checks.

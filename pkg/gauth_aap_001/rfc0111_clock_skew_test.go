@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
-	rfc "github.com/mauriciomferz/Gauth_go/pkg/rfc"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
+	rfc "github.com/mauriciomferz/AgentAuth/pkg/rfc"
 )
 
 // TestClockSkewTolerance validates not-before and expiry grace window behavior controlled by GAUTH_CLOCK_SKEW_SECONDS.

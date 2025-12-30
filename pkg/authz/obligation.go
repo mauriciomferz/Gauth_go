@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 )
 
 // Obligation failure taxonomy

@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/mauriciomferz/Gauth_go/web/handlers/docs"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/docs"
 )
 
 // RegisterAPIDocumentation registers API documentation endpoints (Swagger UI, ReDoc, OpenAPI spec)

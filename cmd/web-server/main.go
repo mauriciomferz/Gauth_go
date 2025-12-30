@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/config"
-	"github.com/mauriciomferz/Gauth_go/internal/security"
-	"github.com/mauriciomferz/Gauth_go/web"
+	"github.com/mauriciomferz/AgentAuth/internal/config"
+	"github.com/mauriciomferz/AgentAuth/internal/security"
+	"github.com/mauriciomferz/AgentAuth/web"
 )
 
 // The web-server binary provides the long-running HTTP API for the beta demonstration.

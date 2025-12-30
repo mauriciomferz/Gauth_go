@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/obligations"
+	"github.com/mauriciomferz/AgentAuth/internal/obligations"
 )
 
 // AdviceEvent represents an advice emission to clients (non-mandatory recommendations).

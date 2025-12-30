@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/circuit"
-	"github.com/mauriciomferz/Gauth_go/internal/monitoring"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/internal/circuit"
+	"github.com/mauriciomferz/AgentAuth/internal/monitoring"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // ResilientService combines circuit breaker and monitoring

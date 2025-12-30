@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/circuit"
-	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
+	"github.com/mauriciomferz/AgentAuth/internal/circuit"
+	"github.com/mauriciomferz/AgentAuth/pkg/resilience"
 )
 
 func TestResiliencePatterns(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	bls "github.com/herumi/bls-eth-go-binary/bls"
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 type Aggregator interface {

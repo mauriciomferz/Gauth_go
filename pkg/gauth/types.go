@@ -3,7 +3,7 @@ package gauth
 import (
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/config"
+	"github.com/mauriciomferz/AgentAuth/internal/config"
 )
 
 // Metrics defines the minimal instrumentation surface for the basic AgentAuth token service.

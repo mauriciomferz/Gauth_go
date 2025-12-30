@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	"github.com/mauriciomferz/AgentAuth/pkg/cache"
 )
 
 // LoadCacheConfig loads cache configuration from environment variables

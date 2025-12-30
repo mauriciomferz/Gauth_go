@@ -2,8 +2,8 @@
 package web
 
 import (
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/disclosure"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/disclosure"
 )
 
 // RegisterDisclosureRoutes registers RFC-0111 disclosure/transparency endpoints

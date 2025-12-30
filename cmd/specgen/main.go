@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mauriciomferz/Gauth_go/internal/specgen"
+	"github.com/mauriciomferz/AgentAuth/internal/specgen"
 )
 
 func main() {

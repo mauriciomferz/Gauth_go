@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
+	"github.com/mauriciomferz/AgentAuth/pkg/pdp"
 )
 
 // PDPBridge implements PDPClient interface by wrapping pkg/pdp.Engine

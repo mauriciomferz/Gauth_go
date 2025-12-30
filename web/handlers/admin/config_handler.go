@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/mauriciomferz/Gauth_go/pkg/config"
+	"github.com/mauriciomferz/AgentAuth/pkg/config"
 )
 
 // ConfigHandler handles configuration management endpoints

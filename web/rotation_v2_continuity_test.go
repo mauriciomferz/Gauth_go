@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // installKey helper returns a manager with a new key.

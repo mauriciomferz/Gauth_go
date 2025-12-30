@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/circuit"
+	"github.com/mauriciomferz/AgentAuth/internal/circuit"
 	assert "github.com/stretchr/testify/assert"
 )
 

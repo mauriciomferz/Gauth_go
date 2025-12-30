@@ -9,7 +9,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/authz"
+	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 )
 
 // FilePolicySource loads policies from a JSON file.

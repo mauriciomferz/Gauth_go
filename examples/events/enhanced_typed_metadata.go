@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/AgentAuth/pkg/events"
 )
 
 // This example demonstrates using the enhanced typed metadata system

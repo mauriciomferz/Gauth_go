@@ -7,7 +7,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/auth"
+	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 // ComplianceRecord is an example compliance record for demonstration

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	redis "github.com/go-redis/redis/v8"
-	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 // --- RedisStore Definition ---

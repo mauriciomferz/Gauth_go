@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
-	"github.com/mauriciomferz/Gauth_go/web"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
+	"github.com/mauriciomferz/AgentAuth/web"
 )
 
 // singleEdResolver implements PublicKeyResolver for a single Ed25519 key.

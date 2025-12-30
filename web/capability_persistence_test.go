@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	testutil "github.com/mauriciomferz/Gauth_go/web/testutil"
+	testutil "github.com/mauriciomferz/AgentAuth/web/testutil"
 )
 
 // TestCapabilityPersistenceAndReload verifies loading from file and reload behavior, including provenance fields.

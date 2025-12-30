@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	// TODO: Missing package. Was: "github.com/mauriciomferz/Gauth_go/pkg/errors"
+	// TODO: Missing package. Was: "github.com/mauriciomferz/AgentAuth/pkg/errors"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/pdp"
+	"github.com/mauriciomferz/AgentAuth/pkg/pdp"
 )
 
 // AAP001Config holds the configuration for RFC-0111 components

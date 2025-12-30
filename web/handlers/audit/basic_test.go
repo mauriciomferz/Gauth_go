@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	webpkg "github.com/mauriciomferz/Gauth_go/web"
+	webpkg "github.com/mauriciomferz/AgentAuth/web"
 )
 
 func perform(server *webpkg.BetaServer, method, path string) *httptest.ResponseRecorder {

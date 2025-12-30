@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 )
 
 // TestScopeInheritanceAdvanced verifies regex pattern coverage when GAUTH_ENABLE_ADVANCED_SCOPE=1.

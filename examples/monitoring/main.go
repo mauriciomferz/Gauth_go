@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/monitoring"
-	"github.com/mauriciomferz/Gauth_go/pkg/rate"
+	"github.com/mauriciomferz/AgentAuth/internal/monitoring"
+	"github.com/mauriciomferz/AgentAuth/pkg/rate"
 )
 
 func main() {

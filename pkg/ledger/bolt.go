@@ -19,7 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto/batch"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto/batch"
 	bolt "go.etcd.io/bbolt"
 )
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	auth "github.com/mauriciomferz/Gauth_go/pkg/auth"
+	auth "github.com/mauriciomferz/AgentAuth/pkg/auth"
 )
 
 func TestJWTServiceScopesRoundTrip(t *testing.T) {

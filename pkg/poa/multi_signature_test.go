@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // MockKeyProvider implements internalCrypto.KeyProvider for testing

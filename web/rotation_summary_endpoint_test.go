@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestRotationSummaryEndpointAnchoring verifies anchoring only occurs once for same head hash when GAUTH_ANCHOR_ROTATIONS=1.

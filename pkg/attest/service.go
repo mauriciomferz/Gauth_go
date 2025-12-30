@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 const (

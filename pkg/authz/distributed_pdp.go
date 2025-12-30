@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // DistributedPDP supports distributed policy decision points.

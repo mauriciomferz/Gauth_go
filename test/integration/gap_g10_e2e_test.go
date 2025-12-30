@@ -13,11 +13,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/pip"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
-	"github.com/mauriciomferz/Gauth_go/pkg/registry"
-	"github.com/mauriciomferz/Gauth_go/pkg/verification"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/pip"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/registry"
+	"github.com/mauriciomferz/AgentAuth/pkg/verification"
 )
 
 // TestGapG10E2E_CompleteTokenIssuanceFlow tests the complete token issuance flow

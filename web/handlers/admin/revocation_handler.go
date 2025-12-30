@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/revocations"
+	"github.com/mauriciomferz/AgentAuth/pkg/revocations"
 )
 
 // RevocationHandler handles revocation transparency endpoints

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	signalgo "github.com/mauriciomferz/Gauth_go/pkg/crypto/signalgo"
+	signalgo "github.com/mauriciomferz/AgentAuth/pkg/crypto/signalgo"
 )
 
 // TestSignatureAgilityEd25519Basic ensures Ed25519 algorithm registry path matches

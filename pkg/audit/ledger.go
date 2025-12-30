@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/AgentAuth/pkg/common"
 )
 
 // LedgerEntry is maintained for backward compatibility with earlier direct hash chain usage.

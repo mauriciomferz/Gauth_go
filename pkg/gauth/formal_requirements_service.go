@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/compliance"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/compliance"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // JurisdictionRequirement defines requirements for a specific jurisdiction

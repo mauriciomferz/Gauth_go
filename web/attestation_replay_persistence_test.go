@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/web/handlers/token"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 )
 
 // TestAttestationReplayPersistenceRestart verifies that an attestation nonce recorded in a durable store

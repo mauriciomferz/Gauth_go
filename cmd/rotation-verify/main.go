@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // artifactFile structure expecting top-level object containing an "artifact" field mirroring RotationSummaryV2.

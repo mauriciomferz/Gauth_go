@@ -20,7 +20,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/verification"
+	"github.com/mauriciomferz/AgentAuth/pkg/verification"
 )
 
 const (

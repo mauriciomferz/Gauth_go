@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/AgentAuth/pkg/events"
 )
 
 // EventHandler manages event system operations for the admin portal

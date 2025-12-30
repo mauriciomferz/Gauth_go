@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 )
 
 // TestPersistenceDurability verifies PoA entries persist across service restarts when Bolt repository is enabled.

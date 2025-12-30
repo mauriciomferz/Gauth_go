@@ -3,7 +3,7 @@ package poa
 import (
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/metrics"
 )
 
 // PoAValidator defines the interface for Power of Attorney validation.

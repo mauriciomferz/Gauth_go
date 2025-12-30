@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/mauriciomferz/Gauth_go/pkg/cache"
+	"github.com/mauriciomferz/AgentAuth/pkg/cache"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/policy"
-	pkgpolicy "github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/internal/policy"
+	pkgpolicy "github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	pkgpolicy "github.com/mauriciomferz/Gauth_go/pkg/policy"
+	pkgpolicy "github.com/mauriciomferz/AgentAuth/pkg/policy"
 	bolt "go.etcd.io/bbolt"
 )
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // TestMultiSignatureTreeHeadUnknownKid ensures verification fails when a signature references a kid

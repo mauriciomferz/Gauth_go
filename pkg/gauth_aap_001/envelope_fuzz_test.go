@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/token"
+	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 
 // FuzzParseEnvelope tests the robustness of envelope unmarshaling and basic field validation.

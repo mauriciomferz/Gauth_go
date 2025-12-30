@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/verification"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/verification"
 )
 
 // TestRotationSummary_MultiSignatureInvalidSignature ensures tampering one signature causes verification failure.

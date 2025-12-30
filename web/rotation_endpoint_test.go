@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	notary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	notary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // Minimal harness constructing a BetaServer with a temporary receipt store containing rotation descriptors.

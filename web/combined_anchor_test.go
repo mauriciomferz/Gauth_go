@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestCombinedAnchorEmission exercises /api/v1/anchor/emitCombined and validates metrics & chain state.

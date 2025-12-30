@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/common"
+	"github.com/mauriciomferz/AgentAuth/pkg/common"
 )
 
 // DatabaseLogger implements audit logging to the database

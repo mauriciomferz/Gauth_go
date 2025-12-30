@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	delegation "github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	delegation "github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // TestRevocationMerkleProofVerification performs end-to-end proof verification by

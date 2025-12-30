@@ -20,11 +20,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
-	cryptoReg "github.com/mauriciomferz/Gauth_go/pkg/crypto"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
-	poa "github.com/mauriciomferz/Gauth_go/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
+	auditor "github.com/mauriciomferz/AgentAuth/pkg/auditor"
+	cryptoReg "github.com/mauriciomferz/AgentAuth/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
+	poa "github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
 // AuditorResult is a generic result envelope printed as JSON.

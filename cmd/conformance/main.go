@@ -14,7 +14,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/mauriciomferz/Gauth_go/conformance/harnesslib"
+	"github.com/mauriciomferz/AgentAuth/conformance/harnesslib"
 )
 
 func main() {

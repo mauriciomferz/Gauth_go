@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/anchor"
+	"github.com/mauriciomferz/AgentAuth/internal/anchor"
 )
 
 // OID for SHA-256: 2.16.840.1.101.3.4.2.1

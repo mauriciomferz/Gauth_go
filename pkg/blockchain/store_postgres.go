@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/mauriciomferz/Gauth_go/pkg/database"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
 )
 
 // PostgresPoAStore implements PoAStore using PostgreSQL

@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/gnap"
+	"github.com/mauriciomferz/AgentAuth/pkg/gnap"
 	"github.com/stretchr/testify/assert"
 )
 

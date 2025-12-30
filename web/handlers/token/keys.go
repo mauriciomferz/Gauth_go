@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"errors"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto/keys"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto/keys"
 )
 
 // LoadOrGenerateRSAKey is DEPRECATED. Use keys.NewLocalKeyManager instead.

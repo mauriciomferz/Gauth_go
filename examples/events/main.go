@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/events"
+	"github.com/mauriciomferz/AgentAuth/pkg/events"
 )
 
 // CustomEventHandler demonstrates how to implement an event handler for typed events

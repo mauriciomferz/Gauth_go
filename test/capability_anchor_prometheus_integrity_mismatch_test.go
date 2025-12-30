@@ -12,8 +12,8 @@ import (
 	"unsafe"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/internal/notary"
-	"github.com/mauriciomferz/Gauth_go/web"
+	"github.com/mauriciomferz/AgentAuth/internal/notary"
+	"github.com/mauriciomferz/AgentAuth/web"
 )
 
 // TestCapabilityAnchorPrometheusIntegrityMismatch simulates a corruption in the receipt chain file

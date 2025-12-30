@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // Mock objects for testing (lightweight versions) Since actual mocks are in a different package (gauth/mocks)

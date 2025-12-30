@@ -3,7 +3,7 @@ package token
 import (
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
 )
 
 // Envelope is a draft structured token payload (Milestone 2A scaffold).

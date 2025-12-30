@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/audit"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 )
 
 // TestScopeInheritance verifies conservative subset enforcement for sub-delegation scopes.

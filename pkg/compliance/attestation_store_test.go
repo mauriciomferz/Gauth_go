@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/attest"
+	"github.com/mauriciomferz/AgentAuth/pkg/attest"
 )
 
 // TestInMemoryAttestationStore_StoreAndGet verifies basic store and retrieval.

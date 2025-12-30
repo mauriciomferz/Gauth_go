@@ -3,7 +3,7 @@ package auditor
 import (
 	"fmt"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // RevocationProofResult captures inclusion verification outcome for a single revocation event.

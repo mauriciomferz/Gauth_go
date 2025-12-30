@@ -3,7 +3,7 @@ package prometheus
 import (
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/internal/monitoring"
+	"github.com/mauriciomferz/AgentAuth/internal/monitoring"
 )
 
 func TestPrometheusExporter_Alerting(t *testing.T) {

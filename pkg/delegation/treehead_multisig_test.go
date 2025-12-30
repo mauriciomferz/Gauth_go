@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	cryptoInt "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	cryptoInt "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 func TestMultiSignatureTreeHeadThreshold(t *testing.T) {

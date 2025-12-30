@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/poa"
-	"github.com/mauriciomferz/Gauth_go/pkg/poa/taxonomy"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa"
+	"github.com/mauriciomferz/AgentAuth/pkg/poa/taxonomy"
 )
 
 // TestE2E_CompleteAuthorizationFlow tests the complete RFC-0111 authorization flow

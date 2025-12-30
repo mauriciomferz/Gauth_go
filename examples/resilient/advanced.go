@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/tracing"
-	"github.com/mauriciomferz/Gauth_go/pkg/gauth"
-	"github.com/mauriciomferz/Gauth_go/pkg/resilience"
+	"github.com/mauriciomferz/AgentAuth/internal/tracing"
+	"github.com/mauriciomferz/AgentAuth/pkg/gauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/resilience"
 )
 
 // HighlyResilientService combines tracing and multiple resilience patterns

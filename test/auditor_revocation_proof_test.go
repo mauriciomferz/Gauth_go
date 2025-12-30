@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	auditor "github.com/mauriciomferz/Gauth_go/pkg/auditor"
-	"github.com/mauriciomferz/Gauth_go/pkg/delegation"
+	auditor "github.com/mauriciomferz/AgentAuth/pkg/auditor"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 // helper to produce deterministic event hash

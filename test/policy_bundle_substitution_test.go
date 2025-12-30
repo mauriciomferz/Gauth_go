@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // TestPolicyBundleSubstitutionDetection simulates a substitution of a middle bundle in the chain.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/jurisdiction"
+	"github.com/mauriciomferz/AgentAuth/internal/jurisdiction"
 )
 
 func main() {

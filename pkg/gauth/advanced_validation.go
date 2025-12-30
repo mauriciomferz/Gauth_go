@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/observability"
+	"github.com/mauriciomferz/AgentAuth/internal/observability"
 )
 
 // ValidateAdvancedToken validates a token with advanced claims support

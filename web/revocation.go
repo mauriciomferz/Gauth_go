@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/pkg/revocation"
+	"github.com/mauriciomferz/AgentAuth/pkg/revocation"
 )
 
 // RevocationService wraps the revocation system components for integration with BetaServer.

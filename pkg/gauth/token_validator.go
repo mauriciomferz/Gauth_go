@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/observability"
+	"github.com/mauriciomferz/AgentAuth/internal/observability"
 )
 
 // TokenSignatureValidator validates tokens using a specific strategy

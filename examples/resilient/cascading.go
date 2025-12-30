@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/internal/circuit"
-	"github.com/mauriciomferz/Gauth_go/internal/ratelimit"
-	"github.com/mauriciomferz/Gauth_go/internal/resilience"
+	"github.com/mauriciomferz/AgentAuth/internal/circuit"
+	"github.com/mauriciomferz/AgentAuth/internal/ratelimit"
+	"github.com/mauriciomferz/AgentAuth/internal/resilience"
 )
 
 // ServiceType represents different types of microservices

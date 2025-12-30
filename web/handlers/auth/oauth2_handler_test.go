@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauriciomferz/Gauth_go/web/handlers/auth"
+	"github.com/mauriciomferz/AgentAuth/web/handlers/auth"
 	"github.com/stretchr/testify/assert"
 )
 

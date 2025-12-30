@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // BetaServerOption allows configuring BetaServer.

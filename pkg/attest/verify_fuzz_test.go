@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	internalCrypto "github.com/mauriciomferz/Gauth_go/pkg/crypto"
+	internalCrypto "github.com/mauriciomferz/AgentAuth/pkg/crypto"
 )
 
 // simpleFakeRegistry provides a minimal KeyFinder for fuzzing.

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
-	iobligations "github.com/mauriciomferz/Gauth_go/internal/obligations"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
+	iobligations "github.com/mauriciomferz/AgentAuth/internal/obligations"
 )
 
 func TestObligationsExecutionSuccessAndAudit(t *testing.T) {

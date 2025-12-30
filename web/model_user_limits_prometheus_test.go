@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"testing"
 
-	pm "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	pm "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestModelUserLimitsPrometheusExposition ensures per-user exceed counters are exposed after triggering violations.

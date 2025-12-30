@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestModelLimitSurgeDetection triggers exceed events and ensures surge counter increments.

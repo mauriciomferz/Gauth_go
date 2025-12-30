@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/Gauth_go/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // TestPolicyDecisionTraceability_RFC111_C4 verifies that audit logs capture

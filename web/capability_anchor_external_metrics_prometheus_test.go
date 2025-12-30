@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	imetrics "github.com/mauriciomferz/Gauth_go/internal/metrics"
+	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 )
 
 // TestExternalAnchorPrometheusMetrics validates that attempts, latency, and age/hash gauges are exposed after a successful anchor.

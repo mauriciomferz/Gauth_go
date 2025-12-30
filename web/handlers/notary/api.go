@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	internalNotary "github.com/mauriciomferz/Gauth_go/internal/notary"
+	internalNotary "github.com/mauriciomferz/AgentAuth/internal/notary"
 )
 
 // CombinedAnchorEntry represents a combined capability+rotation digest entry.
