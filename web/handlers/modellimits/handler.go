@@ -156,7 +156,7 @@ func NewHandler(limitsPath, auditPath, anchorPath string) *Handler {
 // Init loads initial limits and starts reload loop if interval > 0
 func (h *Handler) Init(ctx context.Context) error {
 	h.LoadFromDisk()
-	if h.ReloadInterval > 0 {
+	if h.ReloadInterval > 0 && os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
 		go h.reloader(ctx)
 	}
 	return nil

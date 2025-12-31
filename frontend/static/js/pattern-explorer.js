@@ -370,7 +370,7 @@ class InteractivePatternExplorer {
 
                     <!-- PoA Requirements Section -->
                     <div class="poa-section mt-8">
-                        <h3 class="text-xl font-bold mb-4 text-gray-800">Power of Attorney Requirements</h3>
+                        <h3 class="text-xl font-bold mb-4 text-gray-800">Proof of Authorization Requirements</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="poa-capabilities bg-green-50 p-4 rounded-lg">
                                 <h4 class="font-semibold text-green-800 mb-3">Delegated Capabilities</h4>

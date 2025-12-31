@@ -99,7 +99,7 @@ export default function PAP() {
   }
 
   const handleSearchPolicy = async () => {
-    if (!searchId.trim() {
+    if (!searchId.trim()) {
       toast.error('Please enter a policy ID')
       return
     }
@@ -118,7 +118,7 @@ export default function PAP() {
   }
 
   const handlePolicyAction = async (policyId: string, action: string) => {
-    if (!confirm(`Are you sure you want to ${action} this policy?`) {
+    if (!confirm(`Are you sure you want to ${action} this policy?`)) {
       return
     }
 
@@ -205,7 +205,7 @@ export default function PAP() {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white"
                   required
                 >
-                  <option value="poa">Power of Attorney</option>
+                  <option value="poa">Proof of Authorization</option>
                   <option value="authorization_chain">Authorization Chain</option>
                   <option value="scope">Scope Restriction</option>
                   <option value="restriction">Power Restriction</option>

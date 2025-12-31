@@ -26,7 +26,7 @@ func main() {
 	_ = auth.NewRFCCompliantService()
 
 	// Create a power of attorney request with legal framework compliance
-	fmt.Println("\n1. Creating Power of Attorney Request with Legal Framework...")
+	fmt.Println("\n1. Creating Proof of Authorization Request with Legal Framework...")
 	// Skipping PowerOfAttorneyRequest, as it is not defined in pkg/auth/auth.go
 
 	// Test authorization with legal framework compliance

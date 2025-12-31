@@ -10,7 +10,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
-// CreatePoARequest represents the request to create a Power of Attorney
+// CreatePoARequest represents the request to create a Proof of Authorization
 type CreatePoARequest struct {
 	Grantor      string            `json:"grantor" binding:"required"`
 	Grantee      string            `json:"grantee" binding:"required"`
@@ -25,7 +25,7 @@ type CreatePoARequest struct {
 	Witnesses    []string          `json:"witnesses,omitempty"`
 }
 
-// UpdatePoARequest represents the request to update a Power of Attorney
+// UpdatePoARequest represents the request to update a Proof of Authorization
 type UpdatePoARequest struct {
 	Scope        []string          `json:"scope,omitempty"`
 	Restrictions map[string]string `json:"restrictions,omitempty"`
@@ -33,21 +33,21 @@ type UpdatePoARequest struct {
 	Status       string            `json:"status,omitempty"`
 }
 
-// ValidatePoARequest represents the request to validate a Power of Attorney
+// ValidatePoARequest represents the request to validate a Proof of Authorization
 type ValidatePoARequest struct {
 	Action    string `json:"action" binding:"required"`
 	Context   string `json:"context,omitempty"`
 	Timestamp string `json:"timestamp,omitempty"` // ISO8601
 }
 
-// PoAResponse represents a Power of Attorney response
+// PoAResponse represents a Proof of Authorization response
 type PoAResponse struct {
 	Success bool                           `json:"success"`
 	PoA     *agentauth_aap_001.PowerOfAttorney `json:"poa,omitempty"`
 	Error   string                         `json:"error,omitempty"`
 }
 
-// PoAListResponse represents a list of Power of Attorney documents
+// PoAListResponse represents a list of Proof of Authorization documents
 type PoAListResponse struct {
 	Success bool                             `json:"success"`
 	PoAs    []*agentauth_aap_001.PowerOfAttorney `json:"poas,omitempty"`
@@ -65,7 +65,7 @@ type PoAValidationResponse struct {
 	Error     string                         `json:"error,omitempty"`
 }
 
-// PoAHandler provides HTTP handlers for Power of Attorney CRUD operations
+// PoAHandler provides HTTP handlers for Proof of Authorization CRUD operations
 type PoAHandler struct {
 	store map[string]*agentauth_aap_001.PowerOfAttorney // In-memory store for demo
 }
@@ -77,7 +77,7 @@ func NewPoAHandler() *PoAHandler {
 	}
 }
 
-// HandleCreate creates a new Power of Attorney
+// HandleCreate creates a new Proof of Authorization
 //
 // POST /api/v1/beta/poa
 //
@@ -165,7 +165,7 @@ func (h *PoAHandler) HandleCreate(c *gin.Context) {
 	})
 }
 
-// HandleGet retrieves a Power of Attorney by ID
+// HandleGet retrieves a Proof of Authorization by ID
 //
 // GET /api/v1/beta/poa/:id
 //
@@ -200,7 +200,7 @@ func (h *PoAHandler) HandleGet(c *gin.Context) {
 	})
 }
 
-// HandleList lists all Power of Attorney documents with optional filters
+// HandleList lists all Proof of Authorization documents with optional filters
 //
 // GET /api/v1/beta/poa?grantor=xxx&grantee=yyy&status=active
 //
@@ -240,7 +240,7 @@ func (h *PoAHandler) HandleList(c *gin.Context) {
 	})
 }
 
-// HandleUpdate updates an existing Power of Attorney
+// HandleUpdate updates an existing Proof of Authorization
 //
 // PUT /api/v1/beta/poa/:id
 //
@@ -309,7 +309,7 @@ func (h *PoAHandler) HandleUpdate(c *gin.Context) {
 	})
 }
 
-// HandleDelete revokes/deletes a Power of Attorney
+// HandleDelete revokes/deletes a Proof of Authorization
 //
 // DELETE /api/v1/beta/poa/:id
 //
@@ -344,7 +344,7 @@ func (h *PoAHandler) HandleDelete(c *gin.Context) {
 	})
 }
 
-// HandleValidate validates a Power of Attorney for a specific action
+// HandleValidate validates a Proof of Authorization for a specific action
 //
 // POST /api/v1/beta/poa/:id/validate
 //

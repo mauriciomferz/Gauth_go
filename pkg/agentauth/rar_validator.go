@@ -8,7 +8,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/poa"
 )
 
-// RARValidator validates Rich Authorization Requests against a Power of Attorney
+// RARValidator validates Rich Authorization Requests against a Proof of Authorization
 type RARValidator struct {
 }
 
@@ -23,7 +23,7 @@ func (v *RARValidator) ValidateAuthorizationDetails(
 	details []AuthorizationDetail,
 ) error {
 	if poaDef == nil {
-		return &AgentAuthError{Code: "missing_poa", Message: "Power of Attorney is required for rar validation"}
+		return &AgentAuthError{Code: "missing_poa", Message: "Proof of Authorization is required for rar validation"}
 	}
 
 	for i, detail := range details {

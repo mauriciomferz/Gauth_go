@@ -33,7 +33,7 @@ func TestCapabilityPersistenceInvalidMapping(t *testing.T) {
 	}
 
 	// Discovery should still show original capability and original mapping (transaction:execute)
-	disc := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	disc := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if disc.Code != 200 {
 		t.Fatalf("discovery status=%d", disc.Code)
 	}
@@ -82,7 +82,7 @@ func TestCapabilityPersistenceDuplicateID(t *testing.T) {
 		t.Fatalf("expected 500 on invalid duplicate id reload got %d", w.Code)
 	}
 
-	disc := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	disc := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if disc.Code != 200 {
 		t.Fatalf("discovery status=%d", disc.Code)
 	}

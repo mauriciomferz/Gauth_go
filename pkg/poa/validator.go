@@ -6,7 +6,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/metrics"
 )
 
-// PoAValidator defines the interface for Power of Attorney validation.
+// PoAValidator defines the interface for Proof of Authorization validation.
 type PoAValidator interface {
 	Validate(poA *PowerOfAttorney) ([]ValidationWarning, error)
 }

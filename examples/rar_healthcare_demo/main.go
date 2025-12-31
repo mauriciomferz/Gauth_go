@@ -11,7 +11,7 @@ import (
 )
 
 // Healthcare AI Scenario:
-// A "RadiologyAI" agent (Client) has a Power of Attorney from "Dr. Smith" (Principal)
+// A "RadiologyAI" agent (Client) has a Proof of Authorization from "Dr. Smith" (Principal)
 // to access "Radiology Dept" resources.
 // The agent attempts to get a token specifically for "Patient 123's X-Rays".
 

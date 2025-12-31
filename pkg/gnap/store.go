@@ -75,7 +75,7 @@ type Grant struct {
 
 	// --- AgentAuth Extensions ---
 
-	// PoAID if linked to Power of Attorney
+	// PoAID if linked to Proof of Authorization
 	PoAID string `json:"poa_id,omitempty"`
 
 	// SubscriptionID if linked to AgentAuth subscription

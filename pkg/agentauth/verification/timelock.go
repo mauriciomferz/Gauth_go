@@ -43,7 +43,7 @@ type MultiChannelNotifier interface {
 	SendNotification(ctx context.Context, recipient PrincipalContact, subject, message string) error
 }
 
-// PoAData represents a Power of Attorney with metadata.
+// PoAData represents a Proof of Authorization with metadata.
 type PoAData struct {
 	ID             string
 	Issuer         string
@@ -172,9 +172,9 @@ func (t *TimelockPoA) CancelPoA(ctx context.Context, poaID string) error {
 	t.pendingPoAs.Delete(poaID)
 
 	// Send cancellation confirmation
-	subject := "AgentAuth: Power of Attorney Cancelled"
+	subject := "AgentAuth: Proof of Authorization Cancelled"
 	message := fmt.Sprintf(`
-Your Power of Attorney (ID: %s) has been successfully cancelled.
+Your Proof of Authorization (ID: %s) has been successfully cancelled.
 
 If you did not request this cancellation, your account may be compromised.
 Please contact security@agentauth.example.com immediately.
@@ -210,9 +210,9 @@ func (t *TimelockPoA) activatePoA(ctx context.Context, poaID string) error {
 	t.activationTimers.Delete(poaID)
 
 	// Send activation confirmation
-	subject := "AgentAuth: Power of Attorney Activated"
+	subject := "AgentAuth: Proof of Authorization Activated"
 	message := fmt.Sprintf(`
-Your Power of Attorney (ID: %s) is now ACTIVE.
+Your Proof of Authorization (ID: %s) is now ACTIVE.
 
 Grantee: %s
 Scope: %s
@@ -238,9 +238,9 @@ Monitor activity: https://agentauth.example.com/activity/%s
 func (t *TimelockPoA) sendActivationNotification(ctx context.Context, pending *PendingPoA) error {
 	hoursUntilActivation := time.Until(pending.PoA.ActivationTime).Hours()
 
-	subject := "🔔 AgentAuth: New Power of Attorney Created"
+	subject := "🔔 AgentAuth: New Proof of Authorization Created"
 	message := fmt.Sprintf(`
-IMPORTANT: A new Power of Attorney has been created for your account.
+IMPORTANT: A new Proof of Authorization has been created for your account.
 
 ⏰ Activation Time: %s (%.0f hours from now)
 
@@ -283,7 +283,7 @@ func (t *TimelockPoA) sendReminderNotification(ctx context.Context, poaID string
 
 	subject := "⏰ AgentAuth Reminder: PoA Activates Soon"
 	message := fmt.Sprintf(`
-Reminder: Your Power of Attorney will activate in approximately %.0f hours.
+Reminder: Your Proof of Authorization will activate in approximately %.0f hours.
 
 PoA ID: %s
 Grantee: %s

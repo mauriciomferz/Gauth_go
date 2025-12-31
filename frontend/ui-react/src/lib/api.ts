@@ -71,7 +71,7 @@ class ApiClient {
     const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: 'demo-key' }))
     const payload = btoa(JSON.stringify({
       sub: data.clientId,
-      iss: 'agentauth-demo',
+      iss: 'gauth-demo',
       aud: data.clientOwner,
       scope: data.scope,
       iat: Math.floor(Date.now() / 1000),
@@ -677,7 +677,7 @@ class ApiClient {
     }
 
     for (const line of lines) {
-      if (line.startsWith('#') || !line.trim() continue
+      if (line.startsWith('#') || !line.trim()) continue
 
       // Extract metric name and value
       const match = line.match(/^(\w+)(?:{[^}]*})?\s+([0-9.e+-]+)/)
@@ -686,11 +686,11 @@ class ApiClient {
         const numValue = parseFloat(value)
 
         // Map Prometheus metrics to our interface
-        if (name.includes('request') && name.includes('total') {
+        if (name.includes('request') && name.includes('total')) {
           metrics.requests_total = numValue
-        } else if (name.includes('latency') && name.includes('sum') {
+        } else if (name.includes('latency') && name.includes('sum')) {
           metrics.latency_avg_ms = numValue
-        } else if (name.includes('error') {
+        } else if (name.includes('error')) {
           metrics.error_count = numValue
         }
       }

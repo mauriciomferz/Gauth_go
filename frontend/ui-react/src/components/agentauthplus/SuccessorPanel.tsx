@@ -147,7 +147,7 @@ export default function SuccessorPanel() {
 
   const handleDeactivate = async () => {
     if (!activeSuccessor) return
-    if (!confirm('Are you sure you want to deactivate the current successor?') return
+    if (!confirm('Are you sure you want to deactivate the current successor?')) return
 
     try {
       setLoading(true)
@@ -205,7 +205,7 @@ export default function SuccessorPanel() {
           </div>
         </div>
 
-        <Field label="Power of Attorney ID">
+        <Field label="Proof of Authorization ID">
           <Input
             value={poaId}
             onChange={(_, data) => setPoaId(data.value)}

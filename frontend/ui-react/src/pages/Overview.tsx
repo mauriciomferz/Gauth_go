@@ -116,7 +116,7 @@ export default function Overview() {
               <div>
                 <p className="font-semibold text-gray-900 dark:text-white">RFC-0115</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Power of Attorney Framework
+                  Proof of Authorization Framework
                 </p>
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function Overview() {
               'PAP (Policy Administration)',
               'PDP (Policy Decision)',
               'PEP (Policy Enforcement)',
-              'PoA (Power of Attorney)',
+              'PoA (Proof of Authorization)',
             ].map((component) => (
               <div
                 key={component}

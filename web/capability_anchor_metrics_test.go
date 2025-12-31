@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	imetrics "github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/web/testutil"
@@ -45,11 +46,23 @@ func TestCapabilityAnchorMetrics(t *testing.T) {
 	// Since memory.go does not yet expose accessors for new counters, we rely on unsafe reflection only if necessary. Prefer adding simple exported accessors if test fails.
 	// For minimal intrusion, assert at least one emitted and one skipped by reading file timestamps & size heuristics.
 	// Assertions: Expect at least 1 emission and at least 1 skip.
-	if mem.CapabilityAnchorEmitted() < 1 {
-		t.Fatalf("expected >=1 capability anchor emitted counter got %d", mem.CapabilityAnchorEmitted())
+	// Metrics are updated asynchronously in a goroutine triggered by OnReload.
+	// Wait for metrics to reflect the changes.
+	var emitted, skipped uint64
+	for i := 0; i < 20; i++ {
+		emitted = mem.CapabilityAnchorEmitted()
+		skipped = mem.CapabilityAnchorSkipped()
+		if emitted >= 1 && skipped >= 1 {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
 	}
-	if mem.CapabilityAnchorSkipped() < 1 {
-		t.Fatalf("expected >=1 capability anchor skipped counter got %d", mem.CapabilityAnchorSkipped())
+
+	if emitted < 1 {
+		t.Fatalf("expected >=1 capability anchor emitted counter got %d", emitted)
+	}
+	if skipped < 1 {
+		t.Fatalf("expected >=1 capability anchor skipped counter got %d", skipped)
 	}
 	// Registry hash changed counter increments only on semantic change after initial load; not exercised in this test.
 }

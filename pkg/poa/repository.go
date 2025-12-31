@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Repository handles Power of Attorney data operations
+// Repository handles Proof of Authorization data operations
 type Repository struct {
 	db          *pgxpool.Pool
 	authChecker AuthorizationChecker
@@ -155,7 +155,6 @@ func (r *Repository) ListPoAs(ctx context.Context, tenantID string, limit, offse
 			representative_id, representative_name, representative_type,
 			scope_type, actions, geographic_regions,
 			status, created_at, approved_at, approved_by,
-			revoked_at, revoked_by, revocation_reason,
 			revoked_at, revoked_by, revocation_reason,
 			valid_from, valid_until, conditions, metadata, multi_signatures, updated_at
 		FROM power_of_attorney
@@ -372,7 +371,7 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 	)
 
 	if err == pgx.ErrNoRows {
-		return nil, false, "No valid Power of Attorney found"
+		return nil, false, "No valid Proof of Authorization found"
 	}
 	if err != nil {
 		return nil, false, fmt.Sprintf("Error validating PoA: %v", err)
@@ -404,7 +403,7 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 		}
 	}
 
-	return &poa, true, "Valid Power of Attorney found"
+	return &poa, true, "Valid Proof of Authorization found"
 }
 
 // AddMultiSignature adds a signature to the PoA and transitions to active if threshold matched.

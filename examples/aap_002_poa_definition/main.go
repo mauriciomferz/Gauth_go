@@ -242,7 +242,7 @@ func createExamplePoADefinition() *poa.PoADefinition {
 				PlaceOfJurisdiction: "Königswinter, Germany",
 				AttachedDocuments: []string{
 					"AgentAuth Community Articles of Association",
-					"Corporate Power of Attorney Certificate",
+					"Corporate Proof of Authorization Certificate",
 					"Technical Implementation Specifications",
 				},
 			},

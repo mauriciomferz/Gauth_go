@@ -260,7 +260,7 @@ type PoAStore interface {
 	IsRevoked(ctx context.Context, poaID string) (bool, *RevocationInfo, error)
 }
 
-// EnhancedPoA represents the enhanced Power of Attorney structure
+// EnhancedPoA represents the enhanced Proof of Authorization structure
 type EnhancedPoA struct {
 	ID               string                  `json:"id"`
 	IssuerID         string                  `json:"issuer_id"`
@@ -901,7 +901,7 @@ func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context
 		report.Recommendations = append(report.Recommendations, "PoA expires within 30 days - consider renewal")
 	}
 	if !hasHumanAccountability {
-		report.Recommendations = append(report.Recommendations, "Establish a human-anchored Power of Attorney for this agent")
+		report.Recommendations = append(report.Recommendations, "Establish a human-anchored Proof of Authorization for this agent")
 	}
 
 	return report, nil

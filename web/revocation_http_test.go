@@ -140,7 +140,7 @@ func TestRevocationVerifyEndpointAfterKeyLoss(t *testing.T) {
 func TestDiscoveryIncludesSignatureMetadata(t *testing.T) {
 	s := buildTestServer(t)
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	req, _ := http.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	s.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("expected 200 got %d", w.Code)

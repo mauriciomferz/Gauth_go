@@ -164,7 +164,7 @@ export default function Dashboard() {
 
       if (metricsResponse.ok) {
         const contentType = metricsResponse.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json') {
+        if (!contentType || !contentType.includes('application/json')) {
           console.warn('Dashboard: Metrics endpoint returned non-JSON response');
           return;
         }
@@ -175,7 +175,7 @@ export default function Dashboard() {
         let activePolicies = 0;
         if (policiesResponse.ok) {
           const policyContentType = policiesResponse.headers.get('content-type');
-          if (policyContentType && policyContentType.includes('application/json') {
+          if (policyContentType && policyContentType.includes('application/json')) {
             const policiesData = await policiesResponse.json();
             activePolicies = policiesData.policies?.filter((p: any) => p.status === 'active').length || 0;
           }
@@ -185,7 +185,7 @@ export default function Dashboard() {
         let activeSubscribers = 0;
         if (subscribersResponse.ok) {
           const subscriberContentType = subscribersResponse.headers.get('content-type');
-          if (subscriberContentType && subscriberContentType.includes('application/json') {
+          if (subscriberContentType && subscriberContentType.includes('application/json')) {
             const subscribersData = await subscribersResponse.json();
             activeSubscribers = subscribersData.subscribers?.filter((s: any) => s.status === 'active').length || 0;
           }
@@ -197,7 +197,7 @@ export default function Dashboard() {
         // Calculate system uptime from metrics
         const uptimeSeconds = metricsData.uptime || 0;
         const days = Math.floor(uptimeSeconds / (24 * 60 * 60));
-        const hours = Math.floor((uptimeSeconds % (24 * 60 * 60) / (60 * 60));
+        const hours = Math.floor((uptimeSeconds % (24 * 60 * 60)) / (60 * 60));
 
         setStats({
           activeSubscribers: activeSubscribers,

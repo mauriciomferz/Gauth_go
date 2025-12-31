@@ -223,14 +223,14 @@ function getModuleData(moduleId) {
             `
         },
         'poa-fundamentals': {
-            title: 'Power of Attorney (PoA)',
+            title: 'Proof of Authorization (PoA)',
             description: 'Learn how to delegate specific capabilities to agents with proper constraints and validation.',
             duration: '20 minutes',
             difficulty: 'Intermediate',
             content: `
                 <div class="space-y-6">
                     <div class="bg-purple-50 border-l-4 border-purple-400 p-6">
-                        <h3 class="text-xl font-bold text-purple-800 mb-3">Understanding Power of Attorney</h3>
+                        <h3 class="text-xl font-bold text-purple-800 mb-3">Understanding Proof of Authorization</h3>
                         <p class="text-purple-700 mb-4">PoA allows one entity to delegate specific capabilities to another entity, creating authorized action chains.</p>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

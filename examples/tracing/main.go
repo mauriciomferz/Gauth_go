@@ -55,7 +55,7 @@ func main() {
 	// Demonstrate traced AgentAuth operations
 	fmt.Println("\n3. Executing traced AgentAuth operations...")
 
-	// Create a Power of Attorney request with tracing
+	// Create a Proof of Authorization request with tracing
 	_, childSpan := tracer.Start(ctx, "create-poa-request")
 	poaRequest := auth.PowerOfAttorneyRequest{
 		ClientID:     "traced-client-123",

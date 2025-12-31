@@ -322,7 +322,7 @@ export default function EventSystem() {
   const filteredEvents = events.filter(event => {
     if (filterCategory !== 'all' && event.category !== filterCategory) return false;
     if (filterSeverity !== 'all' && event.severity !== filterSeverity) return false;
-    if (filterSource && !event.source.toLowerCase().includes(filterSource.toLowerCase()) return false;
+    if (filterSource && !event.source.toLowerCase().includes(filterSource.toLowerCase())) return false;
     return true;
   });
 

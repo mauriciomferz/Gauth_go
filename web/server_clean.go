@@ -58,6 +58,7 @@ import (
 	notaryHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/notary"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/violations"
+	"github.com/mauriciomferz/AgentAuth/web/middleware"
 	"gopkg.in/yaml.v3"
 )
 
@@ -1268,6 +1269,7 @@ func (s *BetaServer) routes() {
 
 	// Admin Routes (New)
 	adminGroup := s.router.Group("/api/admin")
+	adminGroup.Use(middleware.TenantMiddleware())
 	if s.adminTokenHandler != nil {
 		s.adminTokenHandler.RegisterRoutes(adminGroup)
 	}
@@ -1727,7 +1729,7 @@ func (s *BetaServer) routes() {
 			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/beta/pvp/verify (PVP identity verification)\n")
 			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)\n")
 			fmt.Fprintf(os.Stderr, "[AAP001]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)\n")
-			fmt.Fprintf(os.Stderr, "[AAP001]   Beta Power of Attorney APIs:\n")
+			fmt.Fprintf(os.Stderr, "[AAP001]   Beta Proof of Authorization APIs:\n")
 			fmt.Fprintf(os.Stderr, "[AAP001]     POST   /api/v1/beta/poa (Create PoA)\n")
 			fmt.Fprintf(os.Stderr, "[AAP001]     GET    /api/v1/beta/poa/:id (Get PoA)\n")
 			fmt.Fprintf(os.Stderr, "[AAP001]     GET    /api/v1/beta/poa (List PoAs)\n")

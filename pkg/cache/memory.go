@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"os"
 	"sync"
 	"time"
 )
@@ -36,8 +37,10 @@ func NewMemoryCache(config *Config) *MemoryCache {
 	}
 
 	// Start cleanup goroutine
-	cache.wg.Add(1)
-	go cache.cleanupExpired()
+	if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
+		cache.wg.Add(1)
+		go cache.cleanupExpired()
+	}
 
 	return cache
 }

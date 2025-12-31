@@ -1452,7 +1452,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                 ]
             },
             'power-of-attorney': {
-                title: 'Power of Attorney (PoA)',
+                title: 'Proof of Authorization (PoA)',
                 description: 'Learn delegation and representation patterns',
                 duration: '25 minutes',
                 difficulty: 'Intermediate',
@@ -1461,7 +1461,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                         title: 'Understanding PoA',
                         content: `
                             <div class="space-y-4">
-                                <p>Power of Attorney allows one entity to act on behalf of another with specific permissions and constraints.</p>
+                                <p>Proof of Authorization allows one entity to act on behalf of another with specific permissions and constraints.</p>
                                 <div class="bg-purple-50 p-4 border-l-4 border-purple-500">
                                     <h4 class="font-semibold text-purple-900">PoA Components:</h4>
                                     <ul class="mt-2 space-y-1 text-purple-800">
@@ -1480,7 +1480,7 @@ window.attachConsistencyHandler = window.attachConsistencyHandler || function() 
                                 try {
                                     const result = await APIClient.runExample('agentauth_protocol_basics:minimal_poa');
                                     if (result.success && result.job_id) {
-                                        return await LearningSystem.pollExampleResult(result.job_id, 'Power of Attorney example');
+                                        return await LearningSystem.pollExampleResult(result.job_id, 'Proof of Authorization example');
                                     }
                                     throw new Error('Failed to start PoA example');
                                 } catch (error) {

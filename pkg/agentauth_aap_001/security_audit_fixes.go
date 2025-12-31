@@ -95,7 +95,7 @@ func WithAllowedAlgorithms(algorithms []string) Option {
 //
 // Parameters:
 //   - ctx: request context (may contain session metadata)
-//   - poa: the Power of Attorney credential being validated
+//   - poa: the Proof of Authorization credential being validated
 //   - sessionUser: the authenticated user identity from the current session (e.g., DID, email, subject claim)
 //
 // Returns:
@@ -188,7 +188,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 //
 // Parameters:
 //   - ctx: request context
-//   - poa: the Power of Attorney credential
+//   - poa: the Proof of Authorization credential
 //   - requestedAction: the action being attempted (e.g., "read", "write", "delete", "payment/send")
 //   - requestedAmount: optional amount for financial transactions (nil if not applicable)
 //

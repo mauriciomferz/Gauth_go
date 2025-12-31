@@ -86,7 +86,7 @@ class AuthorizationSandbox {
                                         <option value="delegation">Delegation Chain</option>
                                         <option value="multisig">Multi-Signature Approval</option>
                                         <option value="revocation">Revocation Cascade</option>
-                                        <option value="poa">Power of Attorney</option>
+                                        <option value="poa">Proof of Authorization</option>
                                         <option value="hierarchical">Hierarchical Permissions</option>
                                     </select>
                                 </div>
@@ -658,7 +658,7 @@ class AuthorizationSandbox {
     }
 
     async runPoAExperiment(experiment) {
-        this.writeToTerminal('\n--- Power of Attorney Validation ---', 'header');
+        this.writeToTerminal('\n--- Proof of Authorization Validation ---', 'header');
         
         const [principal, agent] = experiment.participants;
         if (!agent) {

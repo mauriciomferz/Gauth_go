@@ -2,7 +2,7 @@
 // These match the backend Go structures
 
 // ============================================================================
-// Power of Attorney
+// Proof of Authorization
 // ============================================================================
 
 export interface PowerOfAttorney {

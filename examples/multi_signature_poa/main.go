@@ -1,4 +1,4 @@
-// Multi-Signature Power of Attorney Demo
+// Multi-Signature Proof of Authorization Demo
 //
 // This example demonstrates the complete multi-signature PoA workflow implementing
 // AAP002 Section B (Authorization Type) joint/collective signature enforcement
@@ -66,7 +66,7 @@ func (m *mockKeyProvider) VerifySignature(digest []byte, signature []byte, publi
 
 func main() {
 	fmt.Println("╔═══════════════════════════════════════════════════════════════╗")
-	fmt.Println("║  Multi-Signature Power of Attorney (PoA) Demo                ║")
+	fmt.Println("║  Multi-Signature Proof of Authorization (PoA) Demo                ║")
 	fmt.Println("║  AAP002 Section B - Joint/Collective Signature Enforcement  ║")
 	fmt.Println("║  GAP_MATRIX sec3.item3 Implementation                        ║")
 	fmt.Println("╚═══════════════════════════════════════════════════════════════╝")
@@ -108,7 +108,7 @@ func main() {
 	fmt.Println()
 
 	// Step 4: Create PoA requiring 3-of-5 signatures
-	fmt.Println("📝 Step 4: Creating Power of Attorney")
+	fmt.Println("📝 Step 4: Creating Proof of Authorization")
 	fmt.Println("   Authorization: High-value financial transaction")
 	fmt.Println("   Threshold: 3 of 5 signatures required")
 
@@ -189,7 +189,7 @@ func main() {
 	fmt.Println()
 
 	// Step 9: Activate PoA
-	fmt.Println("🚀 Step 9: Activating Power of Attorney")
+	fmt.Println("🚀 Step 9: Activating Proof of Authorization")
 	if err := manager.ActivatePoA(ctx, poa.ID); err != nil {
 		log.Fatalf("Failed to activate PoA: %v", err)
 	}

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AgentAuth 1.0 - AAP-001 & AAP-002 Compliant Authorization Framework with Extended Tokens, PVP Identity Verification, and Power of Attorney Management">
-    <meta name="keywords" content="AgentAuth, OAuth, AAP-001, AAP-002, Authorization, Extended Tokens, Power of Attorney, eIDAS">
+    <meta name="description" content="AgentAuth 1.0 - AAP-001 & AAP-002 Compliant Authorization Framework with Extended Tokens, PVP Identity Verification, and Proof of Authorization Management">
+    <meta name="keywords" content="AgentAuth, OAuth, AAP-001, AAP-002, Authorization, Extended Tokens, Proof of Authorization, eIDAS">
     <meta name="author" content="AgentAuth Community">
     <title>AgentAuth 1.0 - AAP-001/0115 Dashboard | Production-Ready Authorization Framework</title>
     <link rel="stylesheet" href="/ui/agentauth1.css">
@@ -149,7 +149,7 @@
                         <i class="fas fa-shield-halved" aria-hidden="true"></i>
                         <span>PEP</span>
                     </button>
-                    <button class="nav-link" data-tab="poa" aria-label="Power of Attorney">
+                    <button class="nav-link" data-tab="poa" aria-label="Proof of Authorization">
                         <i class="fas fa-file-contract" aria-hidden="true"></i>
                         <span>PoA</span>
                     </button>
@@ -257,7 +257,7 @@
                             </div>
                             <div class="compliance-item">
                                 <i class="fas fa-check-circle text-success"></i>
-                                <span><strong>AAP-002</strong> - Power of Attorney Framework</span>
+                                <span><strong>AAP-002</strong> - Proof of Authorization Framework</span>
                             </div>
                             <div class="compliance-item">
                                 <i class="fas fa-check-circle text-success"></i>
@@ -298,7 +298,7 @@
                                 <span class="badge badge-success">Active</span>
                             </div>
                             <div class="component-item">
-                                <span class="component-name">PoA (Power of Attorney)</span>
+                                <span class="component-name">PoA (Proof of Authorization)</span>
                                 <span class="badge badge-success">Active</span>
                             </div>
                         </div>
@@ -499,7 +499,7 @@
                                         <p class="text-muted">Building client owner authorization chain...</p>
                                     </div>
                                     <div class="wizard-step-form" data-step="5" style="display: none;">
-                                        <p class="text-muted">Attaching Power of Attorney credential...</p>
+                                        <p class="text-muted">Attaching Proof of Authorization credential...</p>
                                     </div>
                                     <div class="wizard-step-form" data-step="6" style="display: none;">
                                         <p class="text-muted">Verifying resource owner identity...</p>
@@ -966,7 +966,7 @@
                             <div class="form-group">
                                 <label>Policy Type</label>
                                 <select id="policy-type" required>
-                                    <option value="poa">Power of Attorney</option>
+                                    <option value="poa">Proof of Authorization</option>
                                     <option value="scope">Scope</option>
                                     <option value="delegation">Delegation</option>
                                 </select>
@@ -1178,7 +1178,7 @@
 
             <!-- PoA Tab -->
             <div class="tab-content" id="poa-tab">
-                <h2><i class="fas fa-file-contract"></i> Power of Attorney (AAP-002)</h2>
+                <h2><i class="fas fa-file-contract"></i> Proof of Authorization (AAP-002)</h2>
                 <p class="tab-description">Manage delegations with representative types, action scopes, and geographic restrictions.</p>
 
                 <div class="cards-grid">
@@ -1252,7 +1252,7 @@
                 <div class="card">
                     <h3><i class="fas fa-list"></i> Active PoAs</h3>
                     <div id="active-poas" class="table-responsive">
-                        <p class="text-muted">No PoAs created yet. Use the form above to create your first Power of Attorney.</p>
+                        <p class="text-muted">No PoAs created yet. Use the form above to create your first Proof of Authorization.</p>
                     </div>
                 </div>
 

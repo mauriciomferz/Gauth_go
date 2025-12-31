@@ -68,7 +68,7 @@ export function useApi<T>(
 }
 
 // ============================================================================
-// Power of Attorney Hooks
+// Proof of Authorization Hooks
 // ============================================================================
 
 export function usePowerOfAttorneyList() {

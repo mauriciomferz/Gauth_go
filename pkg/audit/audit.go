@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -135,8 +136,10 @@ func NewMemoryLoggerWithQueueSize(logger common.Logger, queueSize int) *MemoryLo
 	}
 
 	// Start background event processor
-	ml.wg.Add(1)
-	go ml.processEvents()
+	if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
+		ml.wg.Add(1)
+		go ml.processEvents()
+	}
 
 	return ml
 }

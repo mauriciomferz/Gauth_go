@@ -372,7 +372,7 @@ func (p *DefaultPVP) verifyClient(ctx context.Context, client *ClientIdentity) V
 func (p *DefaultPVP) verifyChainIntegrity(ctx context.Context, req *IdentityChainVerificationRequest) bool {
 	// Verify linkage between entities
 
-	// 1. Resource Owner → Power of Attorney → Client Owner
+	// 1. Resource Owner → Proof of Authorization → Client Owner
 	if req.PowerOfAttorney == "" {
 		return false
 	}

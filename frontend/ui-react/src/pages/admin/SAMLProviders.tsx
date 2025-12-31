@@ -191,7 +191,7 @@ export default function SAMLProviders() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this provider?') return;
+        if (!confirm('Are you sure you want to delete this provider?')) return;
         try {
             const response = await fetch(`${apiBaseUrl}/saml/providers/${id}`, {
                 method: 'DELETE',

@@ -91,7 +91,7 @@ func (h *BlockchainVerificationHandler) RegisterRoutes(r *mux.Router) {
 	publicAPI.HandleFunc("/health", h.HealthCheck).Methods("GET")
 }
 
-// VerifyPoA verifies a Power of Attorney on the blockchain
+// VerifyPoA verifies a Proof of Authorization on the blockchain
 // Public endpoint - no authentication required
 func (h *BlockchainVerificationHandler) VerifyPoA(w http.ResponseWriter, r *http.Request) {
 	startTime := time.Now()

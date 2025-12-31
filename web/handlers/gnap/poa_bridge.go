@@ -1,4 +1,4 @@
-// Package gnap provides PoA bridge for linking GNAP grants to Power of Attorney credentials.
+// Package gnap provides PoA bridge for linking GNAP grants to Proof of Authorization credentials.
 package gnap
 
 import (
@@ -15,7 +15,7 @@ type PoAProvider interface {
 	GetPoA(ctx context.Context, tenantID, poaID string) (*poa.PoARecord, error)
 }
 
-// PoABridge links GNAP grants to Power of Attorney credentials.
+// PoABridge links GNAP grants to Proof of Authorization credentials.
 type PoABridge struct {
 	grantStore  gnap.GrantStore
 	poaProvider PoAProvider
@@ -39,7 +39,7 @@ type GrantWithPoA struct {
 	ExpiresAt     time.Time `json:"expires_at,omitempty"`
 }
 
-// LinkGrantToPoA associates a GNAP grant with a Power of Attorney credential.
+// LinkGrantToPoA associates a GNAP grant with a Proof of Authorization credential.
 func (b *PoABridge) LinkGrantToPoA(grantID, poaID, delegationRef string) (*GrantWithPoA, error) {
 	grant, err := b.grantStore.Get(grantID)
 	if err != nil {

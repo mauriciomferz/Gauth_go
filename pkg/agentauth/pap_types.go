@@ -12,7 +12,7 @@ import (
 type PolicyType string
 
 const (
-	// PolicyTypePoA - Power of Attorney policy
+	// PolicyTypePoA - Proof of Authorization policy
 	PolicyTypePoA PolicyType = "poa"
 
 	// PolicyTypeAuthorizationChain - Authorization chain policy

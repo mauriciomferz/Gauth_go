@@ -535,7 +535,7 @@ export default function PowerOfAttorney() {
         return (
           <div className={classes.form}>
             <Text weight="semibold" size={400}>Time Validity</Text>
-            <Text size={300}>Set the validity period for this Power of Attorney</Text>
+            <Text size={300}>Set the validity period for this Proof of Authorization</Text>
             <div className={classes.twoColumn}>
               <Field label="Valid From" required>
                 <Input
@@ -612,7 +612,7 @@ export default function PowerOfAttorney() {
               <Textarea
                 value={formData.reason}
                 onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                placeholder="Explain why this Power of Attorney is needed..."
+                placeholder="Explain why this Proof of Authorization is needed..."
                 rows={4}
               />
             </Field>
@@ -622,7 +622,7 @@ export default function PowerOfAttorney() {
       case 6:
         return (
           <div className={classes.form}>
-            <Text weight="semibold" size={500}>Review Power of Attorney</Text>
+            <Text weight="semibold" size={500}>Review Proof of Authorization</Text>
             <Text size={300}>Please review all details before submission</Text>
 
             <div className={classes.reviewSection}>
@@ -811,7 +811,7 @@ export default function PowerOfAttorney() {
       <div className={classes.header}>
         <div className={classes.headerLeft}>
           <PersonAccounts24Regular style={{ fontSize: '24px' }} />
-          <Title3>Power of Attorney Management</Title3>
+          <Title3>Proof of Authorization Management</Title3>
         </div>
         <Dialog open={builderDialogOpen} onOpenChange={(_, data) => {
           setBuilderDialogOpen(data.open);
@@ -819,12 +819,12 @@ export default function PowerOfAttorney() {
         }}>
           <DialogTrigger>
             <Button appearance="primary" icon={<Add24Regular />}>
-              Create Power of Attorney
+              Create Proof of Authorization
             </Button>
           </DialogTrigger>
           <DialogSurface style={{ maxWidth: '900px', maxHeight: '90vh' }}>
             <DialogBody>
-              <DialogTitle>Create New Power of Attorney</DialogTitle>
+              <DialogTitle>Create New Proof of Authorization</DialogTitle>
               <DialogContent>
                 <div className={classes.wizardContainer}>
                   {/* Step Indicator */}

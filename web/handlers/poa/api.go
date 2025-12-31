@@ -11,7 +11,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
-// Handler manages Power of Attorney (POA) related endpoints.
+// Handler manages Proof of Authorization (POA) related endpoints.
 type Handler struct {
 	totalRequests atomic.Uint64
 }

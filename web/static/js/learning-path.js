@@ -73,7 +73,7 @@ class AgentAuthLearningPath {
                 ]
             },
             'poa-fundamentals': {
-                title: 'Power of Attorney (PoA)',
+                title: 'Proof of Authorization (PoA)',
                 description: 'Master delegation and power of attorney concepts',
                 duration: '20 minutes',
                 difficulty: 'Intermediate',
@@ -393,9 +393,9 @@ class AgentAuthLearningPath {
     getPoAStep1() {
         return `
             <div class="learning-content">
-                <h3 class="text-xl font-bold mb-4">Understanding Power of Attorney (PoA)</h3>
+                <h3 class="text-xl font-bold mb-4">Understanding Proof of Authorization (PoA)</h3>
                 <div class="space-y-4">
-                    <p class="text-gray-700">Power of Attorney in AgentAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
+                    <p class="text-gray-700">Proof of Authorization in AgentAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
                     
                     <div class="bg-blue-50 p-4 rounded-lg">
                         <h4 class="font-semibold text-blue-800 mb-2">Core Concepts:</h4>

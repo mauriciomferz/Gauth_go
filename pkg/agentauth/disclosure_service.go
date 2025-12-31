@@ -367,7 +367,7 @@ func (s *DisclosureService) tokenToSummary(token *ExtendedToken) AuthorizationSu
 		status = "expired"
 	}
 
-	// Extract granted actions from Power of Attorney
+	// Extract granted actions from Proof of Authorization
 	grantedActions := []string{}
 	if token.PowerOfAttorney != nil {
 		actions := token.PowerOfAttorney.Authorization.AuthorizedActions

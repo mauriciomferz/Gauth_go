@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -31,18 +32,20 @@ func NewAuditHandler(db *pgxpool.Pool, stopCh <-chan struct{}) *AuditHandler {
 
 	// Start cleanup routine for expired exports
 	if stopCh != nil {
-		go func() {
-			ticker := time.NewTicker(1 * time.Hour)
-			defer ticker.Stop()
-			for {
-				select {
-				case <-ticker.C:
-					exportService.CleanupExpiredJobs()
-				case <-stopCh:
-					return
+		if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
+			go func() {
+				ticker := time.NewTicker(1 * time.Hour)
+				defer ticker.Stop()
+				for {
+					select {
+					case <-ticker.C:
+						exportService.CleanupExpiredJobs()
+					case <-stopCh:
+						return
+					}
 				}
-			}
-		}()
+			}()
+		}
 	}
 
 	return &AuditHandler{

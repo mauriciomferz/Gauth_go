@@ -35,7 +35,7 @@ func TestHardenedDiscoveryFields(t *testing.T) {
 
 	// 3. Verify Discovery Configuration
 	wDisc := httptest.NewRecorder()
-	reqDisc := httptest.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	reqDisc := httptest.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	srv.router.ServeHTTP(wDisc, reqDisc)
 
 	if wDisc.Code != 200 {
@@ -72,7 +72,7 @@ func TestDiscoveryDeprecationSchedule(t *testing.T) {
 	srv.UpdateDeprecationSchedule(schedule)
 
 	wDisc := httptest.NewRecorder()
-	reqDisc := httptest.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	reqDisc := httptest.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	srv.router.ServeHTTP(wDisc, reqDisc)
 
 	var payload map[string]any

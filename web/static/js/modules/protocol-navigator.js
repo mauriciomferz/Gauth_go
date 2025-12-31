@@ -6,7 +6,7 @@
 // Phase 2A Backend Integration:
 //   - PVP Identity Verification (/api/v1/beta/pvp/verify)
 //   - Registry Entity/Signatory Verification (/api/v1/beta/registry/*)
-//   - Power of Attorney (PoA) Management (/api/v1/beta/poa/*)
+//   - Proof of Authorization (PoA) Management (/api/v1/beta/poa/*)
 //   - AAP-001 Token Authorization (/api/v1/rfc0111/authorize)
 //   - Token Security Validation (/api/v1/rfc0111/token/validate)
 //

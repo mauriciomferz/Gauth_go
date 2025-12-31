@@ -1,4 +1,4 @@
-// Package multisig provides multi-signature Power of Attorney (PoA) orchestration.
+// Package multisig provides multi-signature Proof of Authorization (PoA) orchestration.
 //
 // This implements AAP002 Section B (Authorization Type) joint/collective signature
 // enforcement (GAP_MATRIX sec3.item3) with M-of-N threshold policies, signature

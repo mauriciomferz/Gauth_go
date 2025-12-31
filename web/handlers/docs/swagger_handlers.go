@@ -230,7 +230,7 @@ func DocsLandingHandler(c *gin.Context) {
             <h2>Key Features</h2>
             <ul>
                 <li>AAP001 Subscription Flow</li>
-                <li>Power of Attorney Management</li>
+                <li>Proof of Authorization Management</li>
                 <li>Policy-Based Authorization</li>
                 <li>Identity Verification (PVP)</li>
                 <li>Commercial Registry Integration</li>

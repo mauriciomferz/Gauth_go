@@ -112,7 +112,7 @@ id="toc-complete-8-step-subscription-flow">Complete 8-Step Subscription
 Flow</a></li>
 </ul></li>
 <li><a href="#power-of-attorney-management"
-id="toc-power-of-attorney-management">Power of Attorney Management</a>
+id="toc-power-of-attorney-management">Proof of Authorization Management</a>
 <ul>
 <li><a href="#create-validate-and-revoke-poa"
 id="toc-create-validate-and-revoke-poa">Create, Validate, and Revoke
@@ -181,7 +181,7 @@ Tutorials</h1>
 <ol type="1">
 <li><a href="#AAP-001-subscription-flow">AAP-001 Subscription
 Flow</a></li>
-<li><a href="#power-of-attorney-management">Power of Attorney
+<li><a href="#power-of-attorney-management">Proof of Authorization
 Management</a></li>
 <li><a href="#token-management">Token Management</a></li>
 <li><a href="#authorization-evaluation">Authorization
@@ -332,7 +332,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a hr
 <span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    client<span class="op">.</span>SetAccessToken<span class="op">(</span>result<span class="op">.</span>Token<span class="op">)</span></span>
 <span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <hr />
-<h2 id="power-of-attorney-management">Power of Attorney Management</h2>
+<h2 id="power-of-attorney-management">Proof of Authorization Management</h2>
 <h3 id="create-validate-and-revoke-poa">Create, Validate, and Revoke
 PoA</h3>
 <h4 id="curl-1">curl</h4>
@@ -772,7 +772,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href=
 <span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="va">TOKEN</span><span class="op">=</span><span class="va">$(</span><span class="bu">echo</span> <span class="va">$TOKEN_RESP</span> <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> <span class="st">&#39;.token&#39;</span><span class="va">)</span></span>
 <span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Access Token: </span><span class="va">${TOKEN</span><span class="op">:</span><span class="dv">0</span><span class="op">:</span><span class="dv">20</span><span class="va">}</span><span class="st">...&quot;</span></span>
 <span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Create Power of Attorney</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Create Proof of Authorization</span></span>
 <span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="at">-e</span> <span class="st">&quot;\n=== Step 2: Create PoA ===&quot;</span></span>
 <span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="va">POA_RESP</span><span class="op">=</span><span class="va">$(</span><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-X</span> POST http://localhost:8080/api/v1/beta/poa <span class="dt">\</span></span>
 <span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>

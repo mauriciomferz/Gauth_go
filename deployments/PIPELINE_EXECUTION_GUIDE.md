@@ -171,7 +171,7 @@ Immediately after pushing, navigate to GitHub Actions:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Workflow Trigger                         │
+│                     Workflow Trigger                        │
 │  Event: push to main branch                                 │
 │  Commit: 05721f73                                           │
 └─────────────────────────────────────────────────────────────┘
@@ -182,10 +182,10 @@ Immediately after pushing, navigate to GitHub Actions:
 │  ├─ Set up Go 1.25.4                                        │
 │  ├─ Cache Go modules                                        │
 │  ├─ Download dependencies                                   │
-│  ├─ Run unit tests (go test -race -coverprofile)           │
-│  ├─ Run RFC compliance tests                               │
-│  ├─ Run security regression tests                          │
-│  └─ Upload coverage to Codecov                             │
+│  ├─ Run unit tests (go test -race -coverprofile)            │
+│  ├─ Run RFC compliance tests                                │
+│  ├─ Run security regression tests                           │
+│  └─ Upload coverage to Codecov                              │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -193,52 +193,52 @@ Immediately after pushing, navigate to GitHub Actions:
 │  ├─ Checkout code                                           │
 │  ├─ Set up Go 1.25.4                                        │
 │  ├─ Run gosec SAST scan                                     │
-│  ├─ Run govulncheck CVE scan                               │
-│  └─ Check for known vulnerabilities                        │
+│  ├─ Run govulncheck CVE scan                                │
+│  └─ Check for known vulnerabilities                         │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  Job 3: build (~3 minutes)                                  │
 │  ├─ Checkout code                                           │
 │  ├─ Set up Docker Buildx                                    │
-│  ├─ Login to Docker registry (GHCR)                        │
-│  ├─ Extract metadata (tags, labels)                        │
-│  ├─ Build Docker image (multi-stage)                       │
-│  ├─ Run Trivy vulnerability scan                           │
-│  └─ Push image to registry                                 │
-│      Image: ghcr.io/mauriciomferz/agentauth:staging            │
-│             ghcr.io/mauriciomferz/agentauth:main-05721f73       │
+│  ├─ Login to Docker registry (GHCR)                         │
+│  ├─ Extract metadata (tags, labels)                         │
+│  ├─ Build Docker image (multi-stage)                        │
+│  ├─ Run Trivy vulnerability scan                            │
+│  └─ Push image to registry                                  │
+│      Image: ghcr.io/mauriciomferz/agentauth:staging         │
+│             ghcr.io/mauriciomferz/agentauth:main-05721f     │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  Job 4: deploy (~6 minutes)                                 │
 │  ├─ Checkout code                                           │
 │  ├─ Set up kubectl                                          │
-│  ├─ Configure kubeconfig (from secret)                     │
-│  ├─ Apply Kubernetes manifests (9 files)                   │
+│  ├─ Configure kubeconfig (from secret)                      │
+│  ├─ Apply Kubernetes manifests (9 files)                    │
 │  │   ├─ namespace.yaml                                      │
 │  │   ├─ configmap.yaml                                      │
 │  │   ├─ secrets.yaml                                        │
-│  │   ├─ postgres-statefulset.yaml                          │
-│  │   ├─ redis-statefulset.yaml                             │
+│  │   ├─ postgres-statefulset.yaml                           │
+│  │   ├─ redis-statefulset.yaml                              │
 │  │   ├─ deployment.yaml                                     │
 │  │   ├─ service.yaml                                        │
 │  │   ├─ ingress.yaml                                        │
-│  │   └─ hpa.yaml                                           │
-│  ├─ Wait for rollout (timeout: 5m)                         │
-│  ├─ Run smoke tests                                        │
+│  │   └─ hpa.yaml                                            │
+│  ├─ Wait for rollout (timeout: 5m)                          │
+│  ├─ Run smoke tests                                         │
 │  │   ├─ curl https://agentauth-staging.yourdomain.com/healthz  │
-│  │   ├─ curl .../api/v1/beta/health                        │
-│  │   └─ curl .../metrics                                   │
-│  └─ Send Slack notification (success)                      │
+│  │   ├─ curl .../api/v1/beta/health                         │
+│  │   └─ curl .../metrics                                    │
+│  └─ Send Slack notification (success)                       │
 └─────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  Job 5: rollback (only if deploy fails)                    │
+│  Job 5: rollback (only if deploy fails)                     │
 │  ├─ Set up kubectl                                          │
 │  ├─ Configure kubeconfig                                    │
-│  ├─ kubectl rollout undo deployment/agentauth-deployment       │
-│  └─ Send Slack notification (rollback)                     │
+│  ├─ kubectl rollout undo deployment/agentauth-deployment    │
+│  └─ Send Slack notification (rollback)                      │
 └─────────────────────────────────────────────────────────────┘
 ```
 

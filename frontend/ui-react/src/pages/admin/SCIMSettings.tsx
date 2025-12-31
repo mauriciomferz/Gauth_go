@@ -160,7 +160,7 @@ export default function SCIMSettings() {
     };
 
     const handleRevoke = async (id: string) => {
-        if (!confirm('Are you sure you want to revoke this client?') return;
+        if (!confirm('Are you sure you want to revoke this client?')) return;
         try {
             const response = await fetch(`${apiBaseUrl}/admin/scim/clients/${id}`, {
                 method: 'DELETE',

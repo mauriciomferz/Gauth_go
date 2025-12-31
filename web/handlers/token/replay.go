@@ -104,7 +104,9 @@ func newReplayNonceStore(ttl time.Duration, m metrics.Metrics) *ReplayNonceStore
 			}
 		}
 	}
-	go store.backgroundCleanup()
+	if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
+		go store.backgroundCleanup()
+	}
 	return store
 }
 
@@ -146,7 +148,9 @@ func NewReplayNonceStoreWithConfig(ttl time.Duration, capacity int, walPath stri
 			m.IncReplayStoreErrors()
 		}
 	}
-	go store.backgroundCleanup()
+	if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
+		go store.backgroundCleanup()
+	}
 	return store
 }
 

@@ -63,7 +63,7 @@ type RFCCompliantAuthorizationRequest struct {
 	RequestedAction      *ActionRequest
 	AuthorizationDetails []AuthorizationDetail
 
-	// Power of Attorney reference
+	// Proof of Authorization reference
 	PoACredentialRef string
 
 	// Geographic context for scope validation (ISO 3166-1 alpha-2 or ISO 3166-2)

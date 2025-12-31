@@ -97,11 +97,11 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		}
 	}
 
-	// Step 2: Validate Power of Attorney
+	// Step 2: Validate Proof of Authorization
 	if request.PowerOfAttorney == nil {
 		return nil, &AgentAuthError{
 			Code:    "missing_poa",
-			Message: "Power of Attorney is required per AAP001",
+			Message: "Proof of Authorization is required per AAP001",
 		}
 	}
 

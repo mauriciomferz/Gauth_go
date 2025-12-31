@@ -1,6 +1,6 @@
 // Package gnap implements RFC 9635 Grant Negotiation and Authorization Protocol.
 // This provides modern authorization with grant negotiation, flexible interaction
-// modes, and token management, extended with AgentAuth's Power of Attorney support.
+// modes, and token management, extended with AgentAuth's Proof of Authorization support.
 package gnap
 
 import (
@@ -39,7 +39,7 @@ type GrantRequest struct {
 
 	// --- AgentAuth Extensions ---
 
-	// PoACredentialRef references a Power of Attorney credential
+	// PoACredentialRef references a Proof of Authorization credential
 	PoACredentialRef string `json:"poa_credential_ref,omitempty"`
 
 	// SubscriptionID links to existing AgentAuth subscription (migration path)
@@ -288,7 +288,7 @@ type AccessToken struct {
 
 	// --- AgentAuth Extensions ---
 
-	// PoAID references embedded Power of Attorney
+	// PoAID references embedded Proof of Authorization
 	PoAID string `json:"poa_id,omitempty"`
 
 	// IssuedAt timestamp

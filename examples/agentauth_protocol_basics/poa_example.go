@@ -1,6 +1,6 @@
 // poa_example.go
 // Title: Minimal POA (AAP001) Flow
-// Description: Basic Power of Attorney request/response illustrating core required fields.
+// Description: Basic Proof of Authorization request/response illustrating core required fields.
 package main // Unified for go vet ./... compatibility
 
 import (

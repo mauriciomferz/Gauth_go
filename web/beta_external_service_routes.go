@@ -27,7 +27,7 @@ func (s *BetaServer) RegisterBetaExternalServiceEndpoints(components *agentauth.
 		registryGroup.POST("/verify-signatory", registryHandler.HandleVerifySignatory)
 	}
 
-	// Register Power of Attorney CRUD endpoints under /api/v1/beta/poa
+	// Register Proof of Authorization CRUD endpoints under /api/v1/beta/poa
 	poaGroup := s.router.Group("/api/v1/beta/poa")
 	{
 		poaGroup.POST("", poaHandler.HandleCreate)

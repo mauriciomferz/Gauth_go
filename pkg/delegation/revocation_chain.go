@@ -178,7 +178,7 @@ func (c *RevocationChain) Append(e RevocationEvent) (RevocationEvent, error) {
 		c.merkle.AppendLeaf(e.Hash)
 	}
 	if OnRevocationAppended != nil {
-		OnRevocationAppended(e, len(c.events), c.AggregateHash())
+		OnRevocationAppended(e, len(c.events), c.aggregateHash())
 	}
 	return e, nil
 }

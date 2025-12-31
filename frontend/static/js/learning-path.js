@@ -73,8 +73,8 @@ class AgentAuthLearningPath {
                 ]
             },
             'poa-fundamentals': {
-                title: 'Power of Attorney (PoA)',
-                description: 'Master delegation and power of attorney concepts',
+                title: 'Proof of Authorization (PoA)',
+                description: 'Master delegation and proof of authorization concepts',
                 duration: '20 minutes',
                 difficulty: 'Intermediate',
                 steps: [
@@ -393,9 +393,9 @@ class AgentAuthLearningPath {
     getPoAStep1() {
         return `
             <div class="learning-content">
-                <h3 class="text-xl font-bold mb-4">Understanding Power of Attorney (PoA)</h3>
+                <h3 class="text-xl font-bold mb-4">Understanding Proof of Authorization (PoA)</h3>
                 <div class="space-y-4">
-                    <p class="text-gray-700">Power of Attorney in AgentAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
+                    <p class="text-gray-700">Proof of Authorization in AgentAuth allows one entity to delegate specific capabilities to another entity, creating a chain of authorized actions.</p>
                     
                     <div class="bg-blue-50 p-4 rounded-lg">
                         <h4 class="font-semibold text-blue-800 mb-2">Core Concepts:</h4>
@@ -682,7 +682,7 @@ class AgentAuthLearningPath {
     async startModule(moduleId) {
         const modules = this.getModules();
         const module = modules[moduleId];
-        
+
         if (!module) {
             console.error('Module not found:', moduleId);
             return;
@@ -690,7 +690,7 @@ class AgentAuthLearningPath {
 
         this.currentModule = moduleId;
         this.currentStep = 0;
-        
+
         this.renderModule(module);
         this.updateProgress();
     }
@@ -700,7 +700,7 @@ class AgentAuthLearningPath {
         if (!container) return;
 
         const step = module.steps[this.currentStep];
-        
+
         container.innerHTML = `
             <div class="learning-module">
                 <div class="module-header mb-6">
@@ -757,7 +757,7 @@ class AgentAuthLearningPath {
     nextStep() {
         const modules = this.getModules();
         const module = modules[this.currentModule];
-        
+
         if (this.currentStep < module.steps.length - 1) {
             this.currentStep++;
             this.renderModule(module);
@@ -765,7 +765,7 @@ class AgentAuthLearningPath {
             // Module completed
             this.completeModule();
         }
-        
+
         this.updateProgress();
     }
 
@@ -782,9 +782,9 @@ class AgentAuthLearningPath {
     async runExercise(exerciseId) {
         const outputDiv = document.getElementById('exercise-output');
         const resultsDiv = document.getElementById('exercise-results');
-        
+
         if (!outputDiv || !resultsDiv) return;
-        
+
         outputDiv.classList.remove('hidden');
         resultsDiv.innerHTML = '<div class="text-blue-600">Running exercise...</div>';
 
@@ -822,7 +822,7 @@ class AgentAuthLearningPath {
             };
 
             const result = await this.api.evaluateAuthorization(authzData);
-            
+
             return `
                 <div class="space-y-2">
                     <div><strong>Request:</strong> ${JSON.stringify(authzData, null, 2)}</div>
@@ -900,7 +900,7 @@ class AgentAuthLearningPath {
     completeModule() {
         this.completedModules.add(this.currentModule);
         this.saveProgress();
-        
+
         // Show completion message
         const container = document.getElementById('learning-content');
         if (container) {

@@ -2,6 +2,7 @@ package clock
 
 import (
 	"log"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -64,22 +65,24 @@ func NewSystemClockMonitor(server string, maxSkew time.Duration, interval time.D
 
 // Start begins the background monitoring loop.
 func (s *SystemClockMonitor) Start() {
-	go func() {
-		// Initial check immediately
-		s.check()
+	if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
+		go func() {
+			// Initial check immediately
+			s.check()
 
-		ticker := time.NewTicker(s.ntpInterval)
-		defer ticker.Stop()
+			ticker := time.NewTicker(s.ntpInterval)
+			defer ticker.Stop()
 
-		for {
-			select {
-			case <-s.stopCh:
-				return
-			case <-ticker.C:
-				s.check()
+			for {
+				select {
+				case <-s.stopCh:
+					return
+				case <-ticker.C:
+					s.check()
+				}
 			}
-		}
-	}()
+		}()
+	}
 }
 
 // Stop halts the monitoring loop.

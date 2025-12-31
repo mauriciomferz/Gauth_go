@@ -16,13 +16,13 @@ import (
 
 // PowerInformationPoint (PIP) consolidates authorization data from multiple sources
 // AAP001 §5: PIP provides centralized access to:
-// - Power of Attorney definitions
+// - Proof of Authorization definitions
 // - Authorization chains
 // - Commercial register data
 // - Identity verification results
 // - Trust service provider information
 type PowerInformationPoint interface {
-	// GetPoADefinition retrieves a Power of Attorney definition by ID
+	// GetPoADefinition retrieves a Proof of Authorization definition by ID
 	GetPoADefinition(ctx context.Context, poaID string) (*poa.PoADefinition, error)
 
 	// GetAuthorizationChain retrieves the complete authorization chain for a client
@@ -132,7 +132,7 @@ func NewDefaultPIP(
 	}
 }
 
-// GetPoADefinition retrieves a Power of Attorney definition
+// GetPoADefinition retrieves a Proof of Authorization definition
 func (pip *DefaultPIP) GetPoADefinition(ctx context.Context, poaID string) (*poa.PoADefinition, error) {
 	// Check cache first
 	if cached := pip.cache.GetPoA(poaID); cached != nil {

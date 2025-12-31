@@ -56,7 +56,7 @@ func TestRevocationTransparencyIntegration(t *testing.T) {
 	s, kp := buildMultiSigServer(t)
 	// 1. Discovery
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	req, _ := http.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	s.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("discovery status: %d", w.Code)

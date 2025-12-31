@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// PoANode represents a node in the Power of Attorney relationship graph
+// PoANode represents a node in the Proof of Authorization relationship graph
 type PoANode struct {
 	ID          string                 `json:"id"`
 	Type        string                 `json:"type"` // principal, authorizer, client, resource
@@ -41,7 +41,7 @@ type Position struct {
 	Z float64 `json:"z"`
 }
 
-// PoAGraph represents the complete Power of Attorney relationship graph
+// PoAGraph represents the complete Proof of Authorization relationship graph
 type PoAGraph struct {
 	ID          string                 `json:"id"`
 	Name        string                 `json:"name"`
@@ -410,7 +410,7 @@ func CreateMatchingVisualization() *ProtocolStepVisualization {
 	layer0 := VisualizationLayer{
 		ID:          "layer-poa",
 		Name:        "PoA Definition Layer",
-		Description: "Power of Attorney definition document",
+		Description: "Proof of Authorization definition document",
 		Level:       0,
 		Color:       "#8b5cf6",
 		Opacity:     0.9,

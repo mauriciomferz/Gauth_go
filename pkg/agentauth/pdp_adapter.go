@@ -277,7 +277,7 @@ func (pdp *SimplePDP) MakeDecision(
 
 // evaluateRequest performs the actual authorization logic
 func (pdp *SimplePDP) evaluateRequest(request *AuthorizationDecisionRequest) (bool, string) {
-	// Step 1: Validate Power of Attorney exists
+	// Step 1: Validate Proof of Authorization exists
 	if request.PowerOfAttorney == nil {
 		return false, "missing power of attorney credential"
 	}

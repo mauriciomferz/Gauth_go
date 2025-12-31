@@ -57,7 +57,7 @@ type AuthorizationProof struct {
 	ProofType AuthorizationProofType `json:"proof_type"`
 
 	// DocumentReference points to the authorizing document
-	// Examples: "Commercial Register Entry HRB 12345", "Power of Attorney #2024-001"
+	// Examples: "Commercial Register Entry HRB 12345", "Proof of Authorization #2024-001"
 	DocumentReference string `json:"document_reference"`
 
 	// IssuingAuthority identifies who issued the proof

@@ -1,6 +1,6 @@
 /**
  * PoA Visualization Module
- * Star-inspired 3D visualization for Power of Attorney relationships
+ * Star-inspired 3D visualization for Proof of Authorization relationships
  * with particle systems, mouse zoom/navigation, and brightness/color mapping
  */
 

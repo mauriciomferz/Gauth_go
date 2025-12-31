@@ -27,7 +27,7 @@ type PIP interface {
 	GetAuthorizationServerInfo(ctx context.Context, serverID string) (*AuthorizationServerInfo, error)
 	GetResourceOwnerInfo(ctx context.Context, ownerID string) (*ResourceOwnerInfo, error)
 
-	// Power of Attorney Queries
+	// Proof of Authorization Queries
 	GetPoAByID(ctx context.Context, poaID string) (*poa.PoADefinition, error)
 	GetPoAsByClient(ctx context.Context, clientID string) ([]*poa.PoADefinition, error)
 	GetPoAsByOwner(ctx context.Context, ownerID string) ([]*poa.PoADefinition, error)
@@ -307,7 +307,7 @@ func (p *UnifiedPIP) GetResourceOwnerInfo(ctx context.Context, ownerID string) (
 	return nil, fmt.Errorf("resource owner %s not found", ownerID)
 }
 
-// GetPoAByID retrieves a Power of Attorney by ID
+// GetPoAByID retrieves a Proof of Authorization by ID
 func (p *UnifiedPIP) GetPoAByID(ctx context.Context, poaID string) (*poa.PoADefinition, error) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -570,7 +570,7 @@ func (p *UnifiedPIP) RegisterOwnersAuthorizer(authorizerInfo *OwnersAuthorizerIn
 	return nil
 }
 
-// RegisterPoA registers a Power of Attorney in the PIP
+// RegisterPoA registers a Proof of Authorization in the PIP
 func (p *UnifiedPIP) RegisterPoA(poaDef *poa.PoADefinition, poaID string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()

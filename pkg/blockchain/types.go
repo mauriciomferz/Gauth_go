@@ -14,7 +14,7 @@ type PoAStore interface {
 	GetUnsyncedPoAs(ctx context.Context, limit int) ([]*EnhancedPoA, error)
 }
 
-// EnhancedPoA represents the enhanced Power of Attorney structure
+// EnhancedPoA represents the enhanced Proof of Authorization structure
 type EnhancedPoA struct {
 	ID               string      `json:"id"`
 	IssuerID         string      `json:"issuer_id"`

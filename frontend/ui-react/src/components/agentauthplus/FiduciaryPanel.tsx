@@ -120,7 +120,7 @@ export default function FiduciaryPanel() {
         </div>
 
         <div className={styles.filterBar}>
-          <Field label="Power of Attorney ID" style={{ flex: 1 }}>
+          <Field label="Proof of Authorization ID" style={{ flex: 1 }}>
             <Input
               value={poaId}
               onChange={(_, data) => setPoaId(data.value)}

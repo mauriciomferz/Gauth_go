@@ -28,7 +28,7 @@ func TestCapabilityRegistryPrevHashPermutationSemantics(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 
 	// Initial discovery
-	d1 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	d1 := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if d1.Code != 200 {
 		t.Fatalf("discovery status=%d", d1.Code)
 	}
@@ -52,7 +52,7 @@ func TestCapabilityRegistryPrevHashPermutationSemantics(t *testing.T) {
 	if rPerm.Code != 200 {
 		t.Fatalf("perm reload status=%d body=%s", rPerm.Code, rPerm.Body.String())
 	}
-	d2 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	d2 := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if d2.Code != 200 {
 		t.Fatalf("discovery2 status=%d", d2.Code)
 	}
@@ -76,7 +76,7 @@ func TestCapabilityRegistryPrevHashPermutationSemantics(t *testing.T) {
 	if rSem.Code != 200 {
 		t.Fatalf("semantic reload status=%d body=%s", rSem.Code, rSem.Body.String())
 	}
-	d3 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	d3 := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if d3.Code != 200 {
 		t.Fatalf("discovery3 status=%d", d3.Code)
 	}

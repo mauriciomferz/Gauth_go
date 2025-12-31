@@ -121,7 +121,7 @@ export default function PoA() {
       <div>
         <div className="flex items-center gap-3 mb-2">
           <FileText className="w-8 h-8 text-primary" />
-          <h1 className="text-3xl font-bold">Power of Attorney (RFC-0115)</h1>
+          <h1 className="text-3xl font-bold">Proof of Authorization (RFC-0115)</h1>
         </div>
         <p className="text-muted-foreground">
           Manage delegations with representative types, action scopes, and geographic restrictions
@@ -137,7 +137,7 @@ export default function PoA() {
       </div>
 
       {/* Create PoA Form */}
-      <Card title="Create Power of Attorney">
+      <Card title="Create Proof of Authorization">
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
@@ -194,13 +194,13 @@ export default function PoA() {
           />
 
           <Button onClick={handleCreate} loading={loading}>
-            Create Power of Attorney
+            Create Proof of Authorization
           </Button>
         </div>
       </Card>
 
       {/* Validate PoA */}
-      <Card title="Validate Power of Attorney">
+      <Card title="Validate Proof of Authorization">
         <div className="space-y-4">
           <Input
             label="PoA ID"

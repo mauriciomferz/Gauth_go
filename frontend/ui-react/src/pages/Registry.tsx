@@ -19,7 +19,7 @@ interface SignatoryForm {
 }
 
 const mockEntities = [
-  { id: 'HRB12345-DE', name: 'AgentAuth AG', jurisdiction: 'DE', status: 'Active' },
+  { id: 'HRB12345-DE', name: 'Siemens AG', jurisdiction: 'DE', status: 'Active' },
   { id: '12345678-GB', name: 'British Airways PLC', jurisdiction: 'GB', status: 'Active' },
   { id: 'B123456-FR', name: 'Airbus SE', jurisdiction: 'FR', status: 'Active' },
   { id: 'CHE123456-CH', name: 'Nestlé SA', jurisdiction: 'CH', status: 'Active' },
@@ -267,7 +267,7 @@ export default function Registry() {
               required
             >
               <option value="certificate">Appointment Certificate</option>
-              <option value="power_of_attorney">Power of Attorney</option>
+              <option value="power_of_attorney">Proof of Authorization</option>
               <option value="board_resolution">Board Resolution</option>
               <option value="extract">Registry Extract</option>
             </Select>

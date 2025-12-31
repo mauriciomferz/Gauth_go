@@ -13,7 +13,7 @@ func TestDiscoveryCapabilityRegistry(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	req := httptest.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	srv.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("status %d body=%s", w.Code, w.Body.String())
@@ -86,7 +86,7 @@ func TestDiscoveryCapabilityEnforcementFlag(t *testing.T) {
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	req := httptest.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	srv.router.ServeHTTP(w, req)
 	if w.Code != 200 {
 		t.Fatalf("status %d", w.Code)

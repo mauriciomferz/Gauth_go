@@ -30,7 +30,7 @@ func TestCapabilityPersistenceAndReload(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 
 	// Discovery should show source = file and capabilities from file
-	resp := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	resp := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if resp.Code != 200 {
 		t.Fatalf("discovery status=%d", resp.Code)
 	}
@@ -77,7 +77,7 @@ func TestCapabilityPersistenceAndReload(t *testing.T) {
 	}
 
 	// Discovery again should reflect 3 capabilities and updated hash
-	resp2 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	resp2 := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if resp2.Code != 200 {
 		t.Fatalf("discovery2 status=%d", resp2.Code)
 	}
@@ -125,7 +125,7 @@ func TestCapabilityRegistryHashPreservedOnFailedReload(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	d1 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	d1 := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if d1.Code != 200 {
 		t.Fatalf("discovery status=%d", d1.Code)
 	}
@@ -145,7 +145,7 @@ func TestCapabilityRegistryHashPreservedOnFailedReload(t *testing.T) {
 	if r.Code != 500 {
 		t.Fatalf("expected 500 reload failure got %d", r.Code)
 	}
-	d2 := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	d2 := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if d2.Code != 200 {
 		t.Fatalf("discovery2 status=%d", d2.Code)
 	}
@@ -178,7 +178,7 @@ func TestCapabilityRegistryHashDeterminism(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", tmp1.Name())
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
-	dA := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	dA := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if dA.Code != 200 {
 		t.Fatalf("status %d", dA.Code)
 	}
@@ -198,7 +198,7 @@ func TestCapabilityRegistryHashDeterminism(t *testing.T) {
 	if r.Code != 200 {
 		t.Fatalf("reload status %d body=%s", r.Code, r.Body.String())
 	}
-	dB := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	dB := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if dB.Code != 200 {
 		t.Fatalf("status %d", dB.Code)
 	}
@@ -219,7 +219,7 @@ func TestCapabilityRegistryHashDeterminism(t *testing.T) {
 	if r2.Code != 200 {
 		t.Fatalf("reload2 status %d body=%s", r2.Code, r2.Body.String())
 	}
-	dC := performRequest(srv.router, "GET", "/.well-known/AGENTAUTH-configuration")
+	dC := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
 	if dC.Code != 200 {
 		t.Fatalf("status %d", dC.Code)
 	}

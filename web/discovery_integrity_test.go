@@ -13,7 +13,7 @@ func TestDiscoveryETagPresent(t *testing.T) {
 	// Wait for async startup anchor to complete
 	time.Sleep(100 * time.Millisecond)
 	rr := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	req, _ := http.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	bs.router.ServeHTTP(rr, req)
 	if rr.Code != 200 {
 		t.Fatalf("status=%d", rr.Code)
@@ -36,7 +36,7 @@ func TestDiscoverySignatureOptional(t *testing.T) {
 	t.Setenv("AGENTAUTH_DISCOVERY_SIGNING_KEY_ENABLED", "0")
 	unsigned := NewTestServerNoSeed(t)
 	rr := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	req, _ := http.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	unsigned.router.ServeHTTP(rr, req)
 	var doc map[string]any
 	if err := json.Unmarshal(rr.Body.Bytes(), &doc); err != nil {

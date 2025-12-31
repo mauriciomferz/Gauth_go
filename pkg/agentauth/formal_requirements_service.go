@@ -392,7 +392,7 @@ func (s *FormalRequirementsService) checkDocumentRequirements(
 	writtenFormCheck := DocumentRequirementCheck{
 		RequirementType: "written_form",
 		Satisfied:       true,
-		Details:         "Power of Attorney must be in written form",
+		Details:         "Proof of Authorization must be in written form",
 		Evidence:        []string{},
 		Issues:          []string{},
 	}
@@ -723,7 +723,7 @@ func (s *FormalRequirementsService) initializeDefaultJurisdictions() {
 			AcceptedAuthorities: []string{"State_Notary_Public"},
 			MaxCertificateAge:   730 * 24 * time.Hour,
 		},
-		LegalReferences: []string{"Uniform Power of Attorney Act"},
+		LegalReferences: []string{"Uniform Proof of Authorization Act"},
 	}
 
 	// United Kingdom (UK)

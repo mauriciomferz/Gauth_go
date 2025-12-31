@@ -120,7 +120,7 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 		result.Checks["authorization_chain"] = false
 	}
 
-	// Step 4: Validate Power of Attorney
+	// Step 4: Validate Proof of Authorization
 	if request.PowerOfAttorney != nil {
 		if err := v.validatePoA(ctx, request.PowerOfAttorney, result); err != nil {
 			result.Valid = false
@@ -159,14 +159,14 @@ func (v *ComplianceValidator) ValidateRequestCompliance(
 	} else {
 		if v.strictMode {
 			result.Valid = false
-			result.FailureReason = "Power of Attorney is required per AAP001"
+			result.FailureReason = "Proof of Authorization is required per AAP001"
 			result.Checks["power_of_attorney"] = false
 			return result, &AgentAuthError{
 				Code:    "missing_poa",
-				Message: "Power of Attorney is required per AAP001",
+				Message: "Proof of Authorization is required per AAP001",
 			}
 		}
-		result.Warnings = append(result.Warnings, "No Power of Attorney provided")
+		result.Warnings = append(result.Warnings, "No Proof of Authorization provided")
 		result.Checks["power_of_attorney"] = false
 	}
 
@@ -381,7 +381,7 @@ func (v *ComplianceValidator) validateClientIdentification(
 	return nil
 }
 
-// validatePoA validates Power of Attorney
+// validatePoA validates Proof of Authorization
 func (v *ComplianceValidator) validatePoA(
 	ctx context.Context,
 	poaDef *poa.PoADefinition,

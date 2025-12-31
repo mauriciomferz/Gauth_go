@@ -102,7 +102,7 @@ var (
 	PoACreatedTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
 			Name: "agentauth_poa_created_total",
-			Help: "Total number of Power of Attorney credentials created",
+			Help: "Total number of Proof of Authorization credentials created",
 		},
 	)
 

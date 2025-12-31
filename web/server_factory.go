@@ -854,59 +854,62 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// P*P Architecture endpoints (PAP, PDP, PEP)
 	s.AddPPPEndpoints()
 
-	go func() {
-		ticker := time.NewTicker(30 * time.Second)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-s.stopCh:
-				return
-			case <-ticker.C:
-				// compute age
-				// Check staleness via handler
-				stale, age, threshold := s.capabilitiesHandler.GetAnchorState()
-				if age > threshold {
-					if !stale {
-						s.capabilitiesHandler.SetAnchorState(true, age)
-						// Log...
+	// Only start background cleanup if not disabled (e.g. in tests)
+	if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") != "1" {
+		go func() {
+			ticker := time.NewTicker(30 * time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-s.stopCh:
+					return
+				case <-ticker.C:
+					// compute age
+					// Check staleness via handler
+					stale, age, threshold := s.capabilitiesHandler.GetAnchorState()
+					if age > threshold {
+						if !stale {
+							s.capabilitiesHandler.SetAnchorState(true, age)
+							// Log...
+						}
+					} else {
+						if stale {
+							s.capabilitiesHandler.SetAnchorState(false, age)
+						}
 					}
-				} else {
-					if stale {
-						s.capabilitiesHandler.SetAnchorState(false, age)
+					// Update Prometheus adapter gauges if present
+					if pm, ok := s.metrics.(interface {
+						SetCapabilityAnchorAgeSeconds(uint64)
+						SetCapabilityAnchorStale(bool)
+					}); ok {
+						pm.SetCapabilityAnchorAgeSeconds(uint64(age.Seconds()))
+						pm.SetCapabilityAnchorStale(stale)
 					}
-				}
-				// Update Prometheus adapter gauges if present
-				if pm, ok := s.metrics.(interface {
-					SetCapabilityAnchorAgeSeconds(uint64)
-					SetCapabilityAnchorStale(bool)
-				}); ok {
-					pm.SetCapabilityAnchorAgeSeconds(uint64(age.Seconds()))
-					pm.SetCapabilityAnchorStale(stale)
-				}
-				// Notarization age gauge (seconds since last receipt)
-				if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizedAgeSeconds(uint64) }); ok {
-					nAge := uint64(0)
-					if !s.capLastNotarization.IsZero() {
-						nAge = uint64(time.Since(s.capLastNotarization).Seconds())
+					// Notarization age gauge (seconds since last receipt)
+					if pm, ok := s.metrics.(interface{ SetCapabilityAnchorNotarizedAgeSeconds(uint64) }); ok {
+						nAge := uint64(0)
+						if !s.capLastNotarization.IsZero() {
+							nAge = uint64(time.Since(s.capLastNotarization).Seconds())
+						}
+						pm.SetCapabilityAnchorNotarizedAgeSeconds(nAge)
 					}
-					pm.SetCapabilityAnchorNotarizedAgeSeconds(nAge)
-				}
-				// External anchor age gauge
-				if pm, ok := s.metrics.(interface {
-					SetExternalAnchorAgeSeconds(uint64)
-					SetExternalAnchorLastHashLen(int)
-				}); ok && s.capabilityAnchorHandler != nil {
-					ageExt := uint64(0)
-					lastReceipt := s.capabilityAnchorHandler.GetLastReceipt()
-					if !lastReceipt.Timestamp.IsZero() {
-						ageExt = uint64(time.Since(lastReceipt.Timestamp).Seconds())
+					// External anchor age gauge
+					if pm, ok := s.metrics.(interface {
+						SetExternalAnchorAgeSeconds(uint64)
+						SetExternalAnchorLastHashLen(int)
+					}); ok && s.capabilityAnchorHandler != nil {
+						ageExt := uint64(0)
+						lastReceipt := s.capabilityAnchorHandler.GetLastReceipt()
+						if !lastReceipt.Timestamp.IsZero() {
+							ageExt = uint64(time.Since(lastReceipt.Timestamp).Seconds())
+						}
+						pm.SetExternalAnchorAgeSeconds(ageExt)
+						pm.SetExternalAnchorLastHashLen(len(lastReceipt.Hash))
 					}
-					pm.SetExternalAnchorAgeSeconds(ageExt)
-					pm.SetExternalAnchorLastHashLen(len(lastReceipt.Hash))
 				}
 			}
-		}
-	}()
+		}()
+	}
 
 	// Violation persistence path (optional) AGENTAUTH_VIOLATION_PERSIST_PATH
 	s.violationPersistPath = os.Getenv("AGENTAUTH_VIOLATION_PERSIST_PATH")
@@ -1284,7 +1287,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	mcpHandler := mcpHandlers.NewMCPHandler(mcpAuthBridge, mcpAuditLogger, s.extendedTokenService)
 	agentauthAPIGroup := r.Group("/api/v1/agentauth")
 	mcpHandler.RegisterRoutes(agentauthAPIGroup)
-	fmt.Fprintln(os.Stderr, "[mcp] Model Context Protocol handler registered at /api/v1/agentauth/mcp/*")
+	// Legacy alias for backward compatibility (cached frontends)
+	gauthAPIGroup := r.Group("/api/v1/gauth")
+	mcpHandler.RegisterRoutes(gauthAPIGroup)
+	fmt.Fprintln(os.Stderr, "[mcp] Model Context Protocol handler registered at /api/v1/agentauth/mcp/* and /api/v1/gauth/mcp/*")
 
 	// Beta Auth handler - frontend authentication endpoints
 	jwtSecret := os.Getenv("AGENTAUTH_JWT_SIGNING_KEY")

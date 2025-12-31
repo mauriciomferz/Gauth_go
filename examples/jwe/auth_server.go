@@ -137,7 +137,7 @@ func setupKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 func createSampleTokenRequest() *agentauth.ExtendedTokenRequest {
 	now := time.Now()
 
-	// Sample Power of Attorney
+	// Sample Proof of Authorization
 	// Adapt to current poa.PoADefinition struct: Parties + Authorization + Requirements.
 	samplePoA := &poa.PoADefinition{
 		Parties: poa.Parties{

@@ -18,7 +18,7 @@ const (
 	statusRevoked = "revoked"
 )
 
-// PoAHandler manages Power of Attorney operations for the admin portal
+// PoAHandler manages Proof of Authorization operations for the admin portal
 type PoAHandler struct {
 	repo       *poa.Repository
 	cache      cache.Cache
@@ -57,7 +57,7 @@ type PowerOfAttorney struct {
 	CreatedAt          string   `json:"createdAt"`
 }
 
-// PoARequest represents the request to create a Power of Attorney
+// PoARequest represents the request to create a Proof of Authorization
 type PoARequest struct {
 	PrincipalID        string   `json:"principalId" binding:"required"`
 	PrincipalName      string   `json:"principalName"`
@@ -74,13 +74,13 @@ type PoARequest struct {
 	Reason             string   `json:"reason"`
 }
 
-// PoAListResponse represents the list of Power of Attorneys
+// PoAListResponse represents the list of Proof of Authorizations
 type PoAListResponse struct {
 	PowerOfAttorneys []PowerOfAttorney `json:"powerOfAttorneys"`
 	Total            int               `json:"total"`
 }
 
-// ListPoAs returns all Power of Attorney delegations
+// ListPoAs returns all Proof of Authorization delegations
 // GET /api/admin/poa
 func (h *PoAHandler) ListPoAs(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
@@ -106,6 +106,7 @@ func (h *PoAHandler) ListPoAs(c *gin.Context) {
 	// Get PoAs from database
 	records, total, err := h.repo.ListPoAs(c.Request.Context(), tenantID, limit, offset)
 	if err != nil {
+		fmt.Printf("[POA-LIST] ERROR for tenant %s: %v\n", tenantID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list PoAs"})
 		return
 	}
@@ -144,7 +145,7 @@ func (h *PoAHandler) ListPoAs(c *gin.Context) {
 	})
 }
 
-// CreatePoA creates a new Power of Attorney delegation
+// CreatePoA creates a new Proof of Authorization delegation
 // POST /api/admin/poa
 func (h *PoAHandler) CreatePoA(c *gin.Context) {
 	fmt.Printf("[POA-CREATE] Request received from %s\n", c.ClientIP())
@@ -232,7 +233,7 @@ func (h *PoAHandler) CreatePoA(c *gin.Context) {
 	c.JSON(http.StatusCreated, response)
 }
 
-// GetPoA retrieves details of a specific Power of Attorney
+// GetPoA retrieves details of a specific Proof of Authorization
 // GET /api/admin/poa/:id
 func (h *PoAHandler) GetPoA(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
@@ -296,7 +297,7 @@ func (h *PoAHandler) GetPoA(c *gin.Context) {
 	c.JSON(http.StatusOK, poa)
 }
 
-// RevokePoA revokes a Power of Attorney
+// RevokePoA revokes a Proof of Authorization
 // POST /api/admin/poa/:id/revoke
 func (h *PoAHandler) RevokePoA(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
@@ -338,12 +339,12 @@ func (h *PoAHandler) RevokePoA(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Power of Attorney revoked successfully",
+		"message": "Proof of Authorization revoked successfully",
 		"id":      poaID,
 	})
 }
 
-// ApprovePoA approves a pending Power of Attorney
+// ApprovePoA approves a pending Proof of Authorization
 // POST /api/admin/poa/:id/approve
 func (h *PoAHandler) ApprovePoA(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
@@ -366,12 +367,12 @@ func (h *PoAHandler) ApprovePoA(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Power of Attorney approved",
+		"message": "Proof of Authorization approved",
 		"id":      poaID,
 	})
 }
 
-// RejectPoA rejects a pending Power of Attorney
+// RejectPoA rejects a pending Proof of Authorization
 // POST /api/admin/poa/:id/reject
 func (h *PoAHandler) RejectPoA(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
@@ -405,13 +406,13 @@ func (h *PoAHandler) RejectPoA(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "Power of Attorney rejected",
+		"message": "Proof of Authorization rejected",
 		"id":      poaID,
 		"reason":  req.Reason,
 	})
 }
 
-// GetPoAHistory returns the audit history of a Power of Attorney
+// GetPoAHistory returns the audit history of a Proof of Authorization
 // GET /api/admin/poa/:id/history
 func (h *PoAHandler) GetPoAHistory(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
@@ -436,7 +437,7 @@ func (h *PoAHandler) GetPoAHistory(c *gin.Context) {
 			"timestamp": time.Now().Add(-30 * 24 * time.Hour).Format(time.RFC3339),
 			"action":    "created",
 			"actor":     "system",
-			"details":   "Power of Attorney created",
+			"details":   "Proof of Authorization created",
 		},
 	}
 
@@ -447,7 +448,7 @@ func (h *PoAHandler) GetPoAHistory(c *gin.Context) {
 	})
 }
 
-// GetPoAMetrics returns metrics about Power of Attorney usage
+// GetPoAMetrics returns metrics about Proof of Authorization usage
 // GET /api/admin/poa/metrics
 func (h *PoAHandler) GetPoAMetrics(c *gin.Context) {
 	tenantID := c.GetString("tenant_id")
@@ -525,7 +526,7 @@ func (h *PoAHandler) ValidatePoA(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// RegisterRoutes registers all Power of Attorney routes
+// RegisterRoutes registers all Proof of Authorization routes
 func (h *PoAHandler) RegisterRoutes(router *gin.RouterGroup) {
 	poa := router.Group("/poa")
 	{

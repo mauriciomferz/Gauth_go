@@ -12,7 +12,7 @@ func TestOpenAPIDiscoveryEndpoints(t *testing.T) {
 	bs := NewTestServerNoSeed(t)
 	// Discovery
 	rr := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/.well-known/AGENTAUTH-configuration", nil)
+	req, _ := http.NewRequest("GET", "/.well-known/agentauth-configuration", nil)
 	bs.router.ServeHTTP(rr, req)
 	if rr.Code != 200 {
 		t.Fatalf("discovery status=%d body=%s", rr.Code, rr.Body.String())

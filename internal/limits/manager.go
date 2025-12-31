@@ -55,7 +55,7 @@ func InitFromEnv() (*Manager, error) {
 
 	path := config.Get("AGENTAUTH_LIMITS_PERSIST_PATH", DefaultPath())
 	intervalSec := config.Get("AGENTAUTH_LIMITS_PERSIST_INTERVAL_SEC", "60")
-	disable := config.Get("AGENTAUTH_LIMITS_DISABLE_PERSIST", "") == "1"
+	disable := config.Get("AGENTAUTH_LIMITS_DISABLE_PERSIST", "") == "1" || os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") == "1"
 
 	// Ensure directory exists when persistence enabled.
 	if !disable {
