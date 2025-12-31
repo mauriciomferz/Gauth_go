@@ -1,0 +1,25 @@
+graph TB
+    subgraph "Observability Stack"
+        subgraph "Metrics (Prometheus)"
+            M1[agentauth_poa_issued_total]
+            M2[agentauth_authorization_decisions_total]
+            M3[agentauth_verification_latency_seconds]
+            M4[agentauth_revocation_chain_length]
+        end
+        
+        subgraph "Logs (Structured JSON)"
+            L1["Authorization decision log"]
+            L2["Audit trail events"]
+            L3["Revocation events"]
+        end
+        
+        subgraph "Traces (OpenTelemetry)"
+            T1[Request → PEP → PDP → Decision]
+            T2[Token Verification Spans]
+        end
+    end
+    
+    M1 & M2 & M3 & M4 --> PROM[(Prometheus)]
+    L1 & L2 & L3 --> LOKI[(Loki)]
+    T1 & T2 --> TEMPO[(Tempo)]
+    PROM & LOKI & TEMPO --> GRAF[Grafana<br/>Dashboards]

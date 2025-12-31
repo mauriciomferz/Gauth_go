@@ -1,0 +1,24 @@
+graph TD
+    subgraph "Resilience Modes"
+        R[Authorization Request]
+        
+        R --> N{Network Available?}
+        N -->|Yes| F[FULL MODE<br/>Complete verification]
+        N -->|No| C{Cached Policy?}
+        
+        C -->|Yes| D[DEGRADED MODE<br/>Cached authorization]
+        C -->|No| E{Emergency Policy?}
+        
+        E -->|Yes| EM[EMERGENCY MODE<br/>Minimal operations only]
+        E -->|No| FAIL[FAIL CLOSED<br/>No authorization]
+    end
+    
+    F -->|Allow/Deny + Audit| OUT[Decision]
+    D -->|"Allow (limited) + Audit"| OUT
+    EM -->|"Allow (emergency) + Audit"| OUT
+    FAIL -->|Deny + Alert| OUT
+    
+    style F fill:#c8e6c9
+    style D fill:#fff3e0
+    style EM fill:#ffecb3
+    style FAIL fill:#ffcdd2

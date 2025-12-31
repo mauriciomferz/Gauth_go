@@ -1,0 +1,15 @@
+graph TB
+    subgraph "The Three Pillars of AgentAuth"
+        I[🔐 IDENTITY<br/>AAP-001<br/>Cryptographic Entity Profiles]
+        D[📜 DELEGATION<br/>AAP-002<br/>Proof of Authorization Tokens]
+        R[🛡️ RESILIENCE<br/>Degraded Mode<br/>Fail-Safe Operations]
+    end
+    
+    I --> T((TRUST))
+    D --> T
+    R --> T
+    
+    style I fill:#e3f2fd
+    style D fill:#fff3e0
+    style R fill:#e8f5e9
+    style T fill:#fce4ec

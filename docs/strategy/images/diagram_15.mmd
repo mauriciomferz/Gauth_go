@@ -1,0 +1,17 @@
+graph TD
+    subgraph "US Apparent Authority Analysis"
+        TP[Third Party<br/>Receives PoA]
+        
+        TP --> Q1{Was the PoA<br/>reasonably<br/>presented?}
+        Q1 -->|Yes| Q2{Did principal<br/>create appearance<br/>of authority?}
+        Q1 -->|No| NA[No Apparent<br/>Authority]
+        
+        Q2 -->|Yes| Q3{Was third party<br/>reasonable in<br/>relying on it?}
+        Q2 -->|No| NA
+        
+        Q3 -->|Yes| AA[Apparent Authority<br/>Binds Principal]
+        Q3 -->|No| NA
+    end
+    
+    style AA fill:#c8e6c9
+    style NA fill:#ffcdd2

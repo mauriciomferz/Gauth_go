@@ -1,0 +1,22 @@
+graph LR
+    subgraph "Capability Levels"
+        L0[L0: Tool<br/>No autonomy]
+        L1[L1: Assistant<br/>Human confirms]
+        L2[L2: Specialist<br/>Domain autonomy]
+        L3[L3: Operator<br/>Operational autonomy]
+        L4[L4: Delegate<br/>Full agent authority]
+    end
+    
+    L0 --> L1 --> L2 --> L3 --> L4
+    
+    L0 -.->|Human executes| HH[Human in Loop]
+    L1 -.->|Human approves| HH
+    L2 -.->|Human monitors| HM[Human on Loop]
+    L3 -.->|Human reviews| HM
+    L4 -.->|Human audits| HA[Human off Loop]
+    
+    style L0 fill:#e0f7fa
+    style L1 fill:#b2ebf2
+    style L2 fill:#80deea
+    style L3 fill:#4dd0e1
+    style L4 fill:#26c6da

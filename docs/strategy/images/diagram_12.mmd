@@ -1,0 +1,26 @@
+graph TB
+    subgraph "Revocation Merkle Tree"
+        R[Root Hash<br/>0x7a3f...]
+        
+        R --> H1[Hash 01<br/>0x9b2c...]
+        R --> H2[Hash 23<br/>0x4f1d...]
+        
+        H1 --> L0[Leaf 0<br/>Token A: REVOKED]
+        H1 --> L1[Leaf 1<br/>Token B: ACTIVE]
+        H2 --> L2[Leaf 2<br/>Token C: ACTIVE]
+        H2 --> L3[Leaf 3<br/>Token D: REVOKED]
+    end
+    
+    subgraph "Inclusion Proof for Token A"
+        IP[Proof Path:<br/>L0 → H1 → R]
+        L0 -.-> IP
+        H1 -.-> IP
+        IP --> VP{Verify<br/>Path}
+        VP -->|Valid| CONF[Token A<br/>Status: REVOKED<br/>Cryptographically Proven]
+    end
+    
+    style L0 fill:#ffcdd2
+    style L3 fill:#ffcdd2
+    style L1 fill:#c8e6c9
+    style L2 fill:#c8e6c9
+    style CONF fill:#ffcdd2

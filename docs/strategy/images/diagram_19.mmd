@@ -1,0 +1,21 @@
+graph TD
+    subgraph "M&A Transaction: 2-of-3 Board Approval Required"
+        TX[Transaction:<br/>Acquire WidgetCo for $50M]
+        
+        TX --> B1{Board Member 1<br/>CEO}
+        TX --> B2{Board Member 2<br/>CFO}
+        TX --> B3{Board Member 3<br/>General Counsel}
+        
+        B1 -->|Approve ✓| AGG[Aggregate<br/>Approvals]
+        B2 -->|Approve ✓| AGG
+        B3 -->|Pending...| AGG
+        
+        AGG --> TH{Threshold Check<br/>≥2 approvals?}
+        TH -->|Yes| AUTH[Transaction<br/>Authorized]
+        TH -->|No| WAIT[Awaiting<br/>Additional Approval]
+    end
+    
+    style B1 fill:#c8e6c9
+    style B2 fill:#c8e6c9
+    style B3 fill:#fff3e0
+    style AUTH fill:#a5d6a7

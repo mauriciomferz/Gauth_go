@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant AI as AI Agent
+    participant AG as AgentAuth
+    participant HR as Handelsregister API
+    participant RS as Resource Server
+    
+    AI->>AG: Present PoA with HRB claim
+    AG->>HR: Verify HRB 123456 München
+    HR-->>AG: Entity: Mustermann GmbH<br/>Geschäftsführer: Max Mustermann<br/>Vertretungsberechtigung: Einzeln
+    AG->>AG: Match PoA chain to registry
+    AG->>AG: Verify Mustermann → AI delegation
+    AG-->>AI: Authorization confirmed
+    AI->>RS: Execute transaction
+    
+    Note over AI,RS: Transaction legally traceable<br/>to commercial register entry

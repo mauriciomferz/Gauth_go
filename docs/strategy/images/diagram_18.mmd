@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant AG as AgentAuth
+    participant AL as Audit Ledger
+    participant TSA as Timestamp Authority
+    participant BC as Blockchain Anchor
+    
+    AG->>AL: Write audit entry
+    AL->>AL: Compute Merkle root
+    
+    loop Every 5 minutes
+        AL->>TSA: Submit root hash
+        TSA-->>AL: Signed timestamp
+        AL->>BC: Anchor to blockchain
+        BC-->>AL: Transaction ID
+    end
+    
+    Note over AL,BC: Audit entries are now<br/>tamper-evident and<br/>independently verifiable

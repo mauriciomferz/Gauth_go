@@ -1,0 +1,13 @@
+graph TD
+    subgraph "OAuth 2.0 Model (Access-Based)"
+        A[User] -->|Login| B[Identity Provider]
+        B -->|Access Token| C[Application]
+        C -->|Token + Request| D[Resource Server]
+        D -->|Checks Scope| E{Valid Token?}
+        E -->|Yes| F[Grant Access]
+        E -->|No| G[Deny Access]
+    end
+    
+    style A fill:#e1f5fe
+    style F fill:#c8e6c9
+    style G fill:#ffcdd2

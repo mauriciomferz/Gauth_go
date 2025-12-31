@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Agent as AI Procurement Agent
+    participant API as Procurement API
+    participant ERP as ERP System
+    participant Bank as Payment System
+    
+    Agent->>API: POST /purchase-order
+    Note right of Agent: Token: scope=procurement:write
+    API->>API: Check token validity ✓
+    API->>API: Check scope ✓
+    API->>ERP: Create PO #23847
+    ERP->>Bank: Initiate payment
+    Bank-->>Agent: Payment confirmed
+    
+    Note over Agent,Bank: 30 days later...
+    
+    rect rgb(255, 200, 200)
+        Note over Agent,Bank: OFAC Compliance Alert
+        Note over Agent,Bank: Transaction violated sanctions
+        Note over Agent,Bank: $18M fine assessed
+    end

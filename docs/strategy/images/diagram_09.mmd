@@ -1,0 +1,28 @@
+sequenceDiagram
+    participant P as Principal (Human)
+    participant UI as Admin Interface
+    participant PAP as Policy Admin Point
+    participant KEY as Key Service
+    participant DEL as Delegation Service
+    participant POA as PoA Service
+    participant AUD as Audit Ledger
+    
+    P->>UI: Request agent authorization
+    UI->>PAP: Fetch authorization template
+    PAP-->>UI: Template + scope options
+    UI->>P: Display scope configuration
+    P->>UI: Configure scope + constraints
+    UI->>DEL: Validate delegation chain
+    DEL->>DEL: Check authority levels
+    DEL-->>UI: Chain validated ✓
+    UI->>KEY: Request signing key
+    KEY-->>UI: Active signing key
+    UI->>POA: Generate PoA token
+    POA->>POA: Build token structure
+    POA->>KEY: Sign token
+    KEY-->>POA: Signature
+    POA->>AUD: Log issuance event
+    POA-->>UI: PoA Token
+    UI-->>P: Display token + QR code
+    
+    Note over P,AUD: Token now active and verifiable

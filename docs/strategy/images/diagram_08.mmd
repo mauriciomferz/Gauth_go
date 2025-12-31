@@ -1,0 +1,62 @@
+graph TB
+    subgraph "Client Layer"
+        A1[Web App]
+        A2[Mobile App]
+        A3[AI Agent]
+        A4[Partner API]
+    end
+    
+    subgraph "Edge Layer"
+        PEP[Policy Enforcement Point<br/>Authorization Middleware]
+    end
+    
+    subgraph "AgentAuth Core"
+        subgraph "Services"
+            AUTH[Authentication<br/>Service]
+            AUTHZ[Authorization<br/>Service]
+            POA[PoA Token<br/>Service]
+            DEL[Delegation<br/>Service]
+        end
+        
+        subgraph "Policy Engine"
+            PDP[Policy Decision<br/>Point]
+            PIP[Policy Information<br/>Point]
+            PAP[Policy Administration<br/>Point]
+        end
+        
+        subgraph "Cryptographic Services"
+            KEY[Key Management]
+            SIG[Signature Service]
+            REV[Revocation Chain]
+            MKL[Merkle Tree]
+        end
+        
+        subgraph "Persistence"
+            REDIS[(Redis Cache)]
+            PG[(PostgreSQL)]
+            AUDIT[(Audit Ledger)]
+        end
+    end
+    
+    subgraph "External Services"
+        CR[Commercial Register<br/>APIs]
+        TSA[Timestamp<br/>Authority]
+        PKI[PKI/CA<br/>Services]
+    end
+    
+    A1 & A2 & A3 & A4 --> PEP
+    PEP --> AUTH
+    AUTH --> POA
+    AUTH --> REV
+    POA --> DEL
+    POA --> KEY
+    AUTHZ --> PDP
+    PDP --> PIP
+    PIP --> CR
+    SIG --> TSA
+    KEY --> PKI
+    
+    AUTH & AUTHZ & DEL --> REDIS
+    PAP --> PG
+    REV --> MKL
+    PEP --> AUDIT

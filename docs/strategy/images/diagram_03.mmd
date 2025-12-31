@@ -1,0 +1,19 @@
+graph LR
+    subgraph "AgentAuth PoA Model"
+        P[Principal<br/>Human/Org] -->|Signs| POA[PoA Token]
+        POA -->|Grants Authority| A[Agent]
+        A -->|Presents PoA| RS[Resource Server]
+        RS -->|Verifies| V{Full Validation}
+        V -->|1| S[Signature Valid?]
+        V -->|2| R[Revocation Status?]
+        V -->|3| SC[Scope Check?]
+        V -->|4| J[Jurisdiction Check?]
+        V -->|5| L[Liability Check?]
+        S & R & SC & J & L -->|All Pass| GRANT[Grant Authority]
+        S & R & SC & J & L -->|Any Fail| DENY[Deny + Audit]
+    end
+    
+    style P fill:#e3f2fd
+    style POA fill:#fff3e0
+    style GRANT fill:#c8e6c9
+    style DENY fill:#ffcdd2

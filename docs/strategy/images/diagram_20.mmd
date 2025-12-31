@@ -1,0 +1,29 @@
+graph TD
+    subgraph "Cascade Revocation"
+        A[Alice: Root Authority]
+        
+        A --> B[Bob: Department Head]
+        A --> C[Carol: Project Lead]
+        
+        B --> D[David: Team Lead]
+        B --> E[Eve: Specialist]
+        
+        D --> F[Frank: Agent]
+        D --> G[Grace: Agent]
+    end
+    
+    subgraph "Revocation Propagation"
+        REV[Revoke Bob's authority]
+        REV -.->|Cascade| D
+        REV -.->|Cascade| E
+        D -.->|Cascade| F
+        D -.->|Cascade| G
+    end
+    
+    style B fill:#ffcdd2
+    style D fill:#ffcdd2
+    style E fill:#ffcdd2
+    style F fill:#ffcdd2
+    style G fill:#ffcdd2
+    style A fill:#c8e6c9
+    style C fill:#c8e6c9

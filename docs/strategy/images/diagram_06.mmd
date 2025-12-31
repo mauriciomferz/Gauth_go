@@ -1,0 +1,49 @@
+classDiagram
+    class PoAToken {
+        +String jti
+        +String sub
+        +String iss
+        +Integer nbf
+        +Integer exp
+        +DelegationChain chain
+        +AuthorizationScope scope
+        +Constraints constraints
+        +Signature signature
+        +verify() bool
+        +checkRevocation() bool
+        +matchScope(action) bool
+    }
+    
+    class DelegationChain {
+        +Link[] links
+        +String root_authority
+        +Integer depth
+        +validateChain() bool
+    }
+    
+    class Link {
+        +String delegator
+        +String delegate
+        +String[] permissions
+        +Constraints constraints
+        +Signature sig
+    }
+    
+    class AuthorizationScope {
+        +String[] resources
+        +String[] actions
+        +String[] regions
+        +String[] sectors
+    }
+    
+    class Constraints {
+        +Money liability_cap
+        +TimeWindow valid_hours
+        +String[] ip_whitelist
+        +String[] excluded_actions
+    }
+    
+    PoAToken --> DelegationChain
+    DelegationChain --> Link
+    PoAToken --> AuthorizationScope
+    PoAToken --> Constraints

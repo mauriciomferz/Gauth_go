@@ -1,0 +1,40 @@
+sequenceDiagram
+    participant A as AI Agent
+    participant RS as Resource Server
+    participant PEP as Policy Enforcement Point
+    participant AUTH as Authentication Service
+    participant REV as Revocation Chain
+    participant PDP as Policy Decision Point
+    participant PIP as Policy Information Point
+    participant AUD as Audit Ledger
+    
+    A->>RS: Request with PoA token
+    RS->>PEP: Intercept request
+    
+    rect rgb(230, 245, 255)
+        Note over PEP,AUTH: Authentication Phase
+        PEP->>AUTH: Validate token
+        AUTH->>AUTH: Verify signature (EdDSA)
+        AUTH->>AUTH: Check expiration
+        AUTH->>REV: Check revocation status
+        REV-->>AUTH: Not revoked ✓
+        AUTH-->>PEP: Token valid ✓
+    end
+    
+    rect rgb(255, 243, 224)
+        Note over PEP,PIP: Authorization Phase
+        PEP->>PDP: Evaluate authorization
+        PDP->>PIP: Fetch context
+        PIP-->>PDP: User attributes, resource metadata
+        PDP->>PDP: Match policies
+        PDP->>PDP: Evaluate conditions
+        PDP-->>PEP: PERMIT + obligations
+    end
+    
+    rect rgb(232, 245, 233)
+        Note over PEP,AUD: Execution Phase
+        PEP->>PEP: Execute obligations
+        PEP->>AUD: Log decision
+        PEP-->>RS: Forward request
+        RS-->>A: Response
+    end

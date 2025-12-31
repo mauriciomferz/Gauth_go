@@ -1,0 +1,24 @@
+graph LR
+    subgraph "3-of-5 Threshold Signature"
+        S1[Signer 1<br/>CFO]
+        S2[Signer 2<br/>COO]
+        S3[Signer 3<br/>CLO]
+        S4[Signer 4<br/>CTO]
+        S5[Signer 5<br/>CISO]
+        
+        S1 -->|Sign| AGG[Aggregate<br/>Signature]
+        S2 -->|Sign| AGG
+        S3 -->|Sign| AGG
+        S4 -.->|Not required| AGG
+        S5 -.->|Not required| AGG
+        
+        AGG --> V{Threshold Met?<br/>≥3 signatures}
+        V -->|Yes| VALID[Transaction<br/>Authorized]
+    end
+    
+    style S1 fill:#c8e6c9
+    style S2 fill:#c8e6c9
+    style S3 fill:#c8e6c9
+    style S4 fill:#e0e0e0
+    style S5 fill:#e0e0e0
+    style VALID fill:#a5d6a7
