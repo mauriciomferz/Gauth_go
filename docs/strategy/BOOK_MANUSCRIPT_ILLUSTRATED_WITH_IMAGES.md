@@ -2609,3 +2609,589 @@ If you have a proprietary authorization system:
 
 *"In the end, trust is not given—it is proven. Through cryptography, through transparency, through accountability. This is the foundation upon which autonomous agents must stand."*
 
+
+
+---
+
+# Appendix G: Security Architecture Deep Dive
+
+## G.1 Threat Model
+
+AgentAuth is designed to defend against sophisticated adversaries. This section details the complete threat model.
+
+### G.1.1 Adversary Capabilities
+
+| Adversary Class | Capabilities | Example |
+|-----------------|--------------|---------|
+| **Script Kiddie** | Replay attacks, token theft | Automated exploit scripts |
+| **Skilled Attacker** | Cryptographic attacks, social engineering | Targeted corporate espionage |
+| **Nation State** | Quantum computing, supply chain attacks | APT groups |
+| **Insider Threat** | Legitimate access abuse, delegation fraud | Rogue employee |
+
+### G.1.2 Attack Vectors
+
+**1. Token Theft and Replay**
+
+Attack: Attacker captures PoA token and attempts to reuse it.
+
+Mitigation:
+```json
+{
+  "jti": "unique-token-id-2025-001",
+  "nonce": "random-bytes-base64",
+  "issued_at": "2025-12-31T10:00:00Z",
+  "valid_until": "2025-12-31T10:15:00Z",
+  "binding": {
+    "ip_hash": "sha256:client-ip",
+    "session_id": "session-binding-hash"
+  }
+}
+```
+
+Defense layers:
+- Short token validity (15 minutes default)
+- Nonce prevents exact replay
+- IP binding detects environment change
+- Session binding ties to authenticated session
+
+**2. Delegation Chain Manipulation**
+
+Attack: Attacker attempts to insert fraudulent link in delegation chain.
+
+Mitigation: Each link cryptographically signed by delegator.
+
+```go
+func VerifyChainIntegrity(chain []DelegationLink) error {
+    for i, link := range chain {
+        // Verify signature
+        if !verifySignature(link.Delegator.PublicKey, link) {
+            return fmt.Errorf("chain broken at link %d: invalid signature", i)
+        }
+        
+        // Verify delegation is valid
+        if i > 0 {
+            previousDelegate := chain[i-1].Delegate
+            if link.Delegator != previousDelegate {
+                return fmt.Errorf("chain broken at link %d: delegator mismatch", i)
+            }
+        }
+        
+        // Verify scope narrowing (cannot exceed parent scope)
+        if i > 0 {
+            if !isSubsetScope(link.Scope, chain[i-1].Scope) {
+                return fmt.Errorf("chain broken at link %d: scope exceeded", i)
+            }
+        }
+    }
+    return nil
+}
+```
+
+**3. Revocation Bypass**
+
+Attack: Attacker uses revoked token before revocation propagates.
+
+Mitigation: Real-time revocation checking + cryptographic proof.
+
+```go
+type RevocationProof struct {
+    MerkleRoot    []byte    `json:"merkle_root"`
+    InclusionPath [][]byte  `json:"inclusion_path"`
+    Timestamp     time.Time `json:"timestamp"`
+    Signature     []byte    `json:"signature"`
+}
+
+func VerifyNotRevoked(tokenID string, proof *RevocationProof) (bool, error) {
+    // Verify Merkle inclusion proof
+    if isInMerkleTree(tokenID, proof.MerkleRoot, proof.InclusionPath) {
+        return false, ErrTokenRevoked
+    }
+    
+    // Verify proof recency (max 5 minutes old)
+    if time.Since(proof.Timestamp) > 5*time.Minute {
+        return false, ErrStaleRevocationProof
+    }
+    
+    // Verify proof signature from revocation authority
+    if !verifyRevocationAuthoritySignature(proof) {
+        return false, ErrInvalidRevocationProof
+    }
+    
+    return true, nil
+}
+```
+
+### G.1.3 Defense in Depth
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DEFENSE LAYER 1                          │
+│                    Network Security                         │
+│  • TLS 1.3 only • mTLS for service-to-service             │
+│  • Rate limiting • DDoS protection                         │
+├─────────────────────────────────────────────────────────────┤
+│                    DEFENSE LAYER 2                          │
+│                    Token Validation                         │
+│  • Signature verification • Expiration check               │
+│  • Revocation check • Constraint validation                │
+├─────────────────────────────────────────────────────────────┤
+│                    DEFENSE LAYER 3                          │
+│                    Chain Verification                       │
+│  • Each link signed • Scope narrowing enforced             │
+│  • Principal authority verified                             │
+├─────────────────────────────────────────────────────────────┤
+│                    DEFENSE LAYER 4                          │
+│                    Audit & Detection                        │
+│  • Cryptographic audit trail • Anomaly detection           │
+│  • Real-time alerting • Forensic capability                │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## G.2 Key Management Architecture
+
+### G.2.1 Key Hierarchy
+
+```
+                    ┌──────────────────┐
+                    │   Root CA Key    │
+                    │   (Offline HSM)  │
+                    └────────┬─────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              │              │              │
+    ┌─────────▼─────────┐ ┌─▼────────────┐ ┌▼─────────────┐
+    │ Signing Authority │ │ Revocation   │ │ Audit        │
+    │ Key (Online HSM)  │ │ Authority    │ │ Authority    │
+    └─────────┬─────────┘ └──────────────┘ └──────────────┘
+              │
+    ┌─────────┼─────────┬─────────────────┐
+    │         │         │                 │
+┌───▼───┐ ┌───▼───┐ ┌───▼───┐         ┌───▼───┐
+│Agent 1│ │Agent 2│ │Agent 3│   ...   │Agent N│
+│  Key  │ │  Key  │ │  Key  │         │  Key  │
+└───────┘ └───────┘ └───────┘         └───────┘
+```
+
+### G.2.2 Key Generation Ceremony
+
+For production deployments, root keys must be generated in a secure ceremony:
+
+**Participants Required:**
+- Ceremony Leader (facilitates process)
+- Key Custodian 1 (holds key share 1)
+- Key Custodian 2 (holds key share 2)
+- Key Custodian 3 (holds key share 3)
+- Witness (independent observer)
+- Auditor (records all actions)
+
+**Ceremony Steps:**
+
+1. **Preparation (Day Before)**
+   - Air-gapped laptop verified (never connected to network)
+   - HSM firmware verified against known good hash
+   - All software integrity verified
+   - Ceremony room swept for recording devices
+
+2. **Key Generation (Ceremony Day)**
+   ```bash
+   # On air-gapped machine with HSM
+   
+   # Initialize HSM
+   pkcs11-tool --init-token --label "AgentAuth-Root-2025"
+   
+   # Generate root key (Ed25519)
+   pkcs11-tool --keypairgen --key-type EC:ed25519 \
+     --label "root-signing-key-2025"
+   
+   # Export public key only
+   pkcs11-tool --read-object --type pubkey \
+     --label "root-signing-key-2025" > root-public.pem
+   
+   # Generate key shares (Shamir Secret Sharing)
+   # 3-of-5 threshold
+   shamir-split --threshold 3 --shares 5 \
+     --input hsm-backup.enc
+   ```
+
+3. **Key Distribution**
+   - Each custodian receives 1 encrypted share
+   - Shares stored in geographically separate locations
+   - 3 shares required to recover (if HSM fails)
+
+4. **Documentation**
+   - Video recording of ceremony (stored securely)
+   - Written log signed by all participants
+   - Public key published to certificate transparency log
+
+### G.2.3 Key Rotation Schedule
+
+| Key Type | Rotation Interval | Overlap Period |
+|----------|-------------------|----------------|
+| Root CA | 10 years | 2 years |
+| Signing Authority | 2 years | 6 months |
+| Revocation Authority | 2 years | 6 months |
+| Agent Keys | 1 year | 3 months |
+| Session Keys | 24 hours | 1 hour |
+
+---
+
+## G.3 Secure Deployment Checklist
+
+### Pre-Deployment
+
+- [ ] All keys generated in HSM (not in software)
+- [ ] HSM firmware up to date
+- [ ] Network segmentation configured
+- [ ] Firewall rules reviewed
+- [ ] TLS certificates valid (not self-signed in production)
+- [ ] mTLS configured for internal services
+- [ ] Rate limiting configured
+- [ ] DDoS protection enabled
+
+### Application Security
+
+- [ ] All dependencies scanned for vulnerabilities
+- [ ] Container images scanned (Trivy, Grype)
+- [ ] SAST scan completed (gosec, semgrep)
+- [ ] DAST scan completed
+- [ ] Penetration test completed
+- [ ] Security audit completed
+
+### Operational Security
+
+- [ ] Logging configured (no sensitive data in logs)
+- [ ] Metrics and alerting configured
+- [ ] Incident response plan documented
+- [ ] Runbooks for common scenarios
+- [ ] Backup and recovery tested
+- [ ] Disaster recovery plan tested
+
+---
+
+# Appendix H: Regulatory Compliance Matrix
+
+## H.1 Financial Services
+
+### United States
+
+| Regulation | Requirement | AgentAuth Compliance |
+|------------|-------------|---------------------|
+| **SOC 2 Type II** | Access controls, audit logging | PoA tokens + cryptographic audit |
+| **FINRA Rule 3110** | Supervision of registered persons | Delegation chains trace to registered principals |
+| **SEC Rule 17a-4** | Record retention | Immutable audit log with external anchoring |
+| **GLBA** | Customer data protection | Scope constraints limit data access |
+| **Dodd-Frank** | Swap dealer registration | Agent authorization traceable to registered entity |
+
+### European Union
+
+| Regulation | Requirement | AgentAuth Compliance |
+|------------|-------------|---------------------|
+| **MiFID II** | Best execution, transaction reporting | Audit trail with transaction context |
+| **PSD2** | Strong customer authentication | Multi-factor delegation |
+| **DORA** | Digital operational resilience | Degraded mode, failover |
+| **GDPR** | Data protection | Scope-limited access, audit trail |
+
+### Germany
+
+| Regulation | Requirement | AgentAuth Compliance |
+|------------|-------------|---------------------|
+| **KWG** | Banking supervision | Delegation from licensed entity |
+| **WpHG** | Securities trading | Trade-level audit trail |
+| **GwG** | Anti-money laundering | Transaction constraints, sanctions screening |
+
+---
+
+## H.2 Healthcare
+
+### United States
+
+| Regulation | Requirement | AgentAuth Compliance |
+|------------|-------------|---------------------|
+| **HIPAA Privacy Rule** | PHI access controls | Scope-limited PoA for specific data |
+| **HIPAA Security Rule** | Technical safeguards | Encryption, audit controls |
+| **HITECH** | Breach notification | Audit trail identifies scope of breach |
+| **21 CFR Part 11** | Electronic signatures | Cryptographic signatures meet FDA requirements |
+
+### European Union
+
+| Regulation | Requirement | AgentAuth Compliance |
+|------------|-------------|---------------------|
+| **MDR** | Medical device regulation | Agent as software medical device |
+| **IVDR** | In vitro diagnostics | Audit trail for diagnostic decisions |
+| **GDPR (health data)** | Special category data | Explicit consent in delegation |
+
+---
+
+## H.3 Cross-Border Data Transfer
+
+| Framework | Mechanism | AgentAuth Implementation |
+|-----------|-----------|-------------------------|
+| **EU-US DPF** | Adequacy decision | US agents can process EU data |
+| **SCCs** | Standard contractual clauses | Built into delegation agreement |
+| **BCRs** | Binding corporate rules | Multi-entity delegation chains |
+| **APEC CBPR** | Cross-border privacy rules | Asia-Pacific data transfers |
+
+---
+
+# Appendix I: Industry-Specific Patterns
+
+## I.1 Supply Chain & Logistics
+
+### Autonomous Procurement Agent
+
+**Use Case:** AI agent handles routine procurement for manufacturing facility.
+
+**PoA Configuration:**
+```json
+{
+  "scope": {
+    "actions": ["procurement:create", "procurement:approve", "vendor:communicate"],
+    "resources": ["category:raw_materials", "category:office_supplies"]
+  },
+  "constraints": {
+    "liability_cap": {"currency": "EUR", "amount": 100000},
+    "daily_limit": {"currency": "EUR", "amount": 500000},
+    "approval_required_above": {"currency": "EUR", "amount": 50000},
+    "excluded_vendors": ["sanctioned_list"],
+    "required_certifications": ["ISO9001", "ISO14001"],
+    "delivery_regions": ["EU", "CH", "UK"]
+  }
+}
+```
+
+### Logistics Optimization Agent
+
+**Use Case:** AI agent optimizes shipping routes and carrier selection.
+
+**PoA Configuration:**
+```json
+{
+  "scope": {
+    "actions": ["shipment:create", "carrier:select", "route:optimize"],
+    "resources": ["shipment:domestic", "shipment:eu"]
+  },
+  "constraints": {
+    "cost_optimization_target": 0.15,
+    "max_delivery_time": "5d",
+    "required_insurance": true,
+    "hazmat_allowed": false,
+    "carbon_offset_required": true
+  }
+}
+```
+
+---
+
+## I.2 Insurance & Claims
+
+### Claims Processing Agent
+
+**Use Case:** AI agent handles routine insurance claims under threshold.
+
+**PoA Configuration:**
+```json
+{
+  "scope": {
+    "actions": ["claim:review", "claim:approve", "claim:deny", "payment:initiate"],
+    "resources": ["claim:auto", "claim:home", "claim:health"]
+  },
+  "constraints": {
+    "approval_limit": {"currency": "USD", "amount": 25000},
+    "auto_deny_flags": ["fraud_score_high", "watchlist_match"],
+    "required_documentation": ["police_report", "photos", "receipt"],
+    "escalate_to_human": ["bodily_injury", "litigation_risk", "above_limit"]
+  }
+}
+```
+
+---
+
+## I.3 Legal & Professional Services
+
+### Document Review Agent
+
+**Use Case:** AI agent reviews contracts and flags issues for attorneys.
+
+**PoA Configuration:**
+```json
+{
+  "scope": {
+    "actions": ["document:read", "document:annotate", "issue:flag"],
+    "resources": ["matter:M-2025-*"]
+  },
+  "constraints": {
+    "read_only": true,
+    "no_external_communication": true,
+    "redact_pii_in_logs": true,
+    "privilege_maintained": true,
+    "client_consent_required": true
+  }
+}
+```
+
+---
+
+# Appendix J: Troubleshooting Playbook
+
+## J.1 Emergency Procedures
+
+### Scenario: Compromised Agent Key
+
+**Severity: CRITICAL**
+**Response Time: < 5 minutes**
+
+**Immediate Actions:**
+1. Revoke all PoAs issued by compromised agent
+   ```bash
+   agentauth revoke --agent-id urn:agentauth:agent:compromised \
+     --cascade --reason "key_compromise"
+   ```
+
+2. Notify downstream systems
+   ```bash
+   agentauth broadcast-revocation --agent-id urn:agentauth:agent:compromised
+   ```
+
+3. Block agent at network level
+   ```bash
+   iptables -A INPUT -s <agent_ip> -j DROP
+   ```
+
+4. Preserve evidence
+   ```bash
+   agentauth audit-export --agent-id urn:agentauth:agent:compromised \
+     --format json > /secure/evidence/agent-compromised-$(date +%s).json
+   ```
+
+**Follow-up Actions (24 hours):**
+- Root cause analysis
+- Generate new agent key
+- Re-issue PoAs with new key
+- Security incident report
+- Lessons learned document
+
+### Scenario: Revocation Service Down
+
+**Severity: HIGH**
+**Response Time: < 15 minutes**
+
+**Immediate Actions:**
+1. Activate degraded mode
+   ```bash
+   agentauth config set degraded_mode.enabled true
+   agentauth config set degraded_mode.max_cache_age 15m
+   ```
+
+2. Notify operations team
+   ```bash
+   alert-manager send --severity high \
+     --message "Revocation service down, degraded mode active"
+   ```
+
+3. Investigate root cause
+   ```bash
+   kubectl logs -l app=agentauth-revocation --tail 1000
+   ```
+
+**Recovery Actions:**
+1. Fix underlying issue
+2. Restart revocation service
+3. Verify catch-up replication
+4. Disable degraded mode
+5. Post-incident review
+
+### Scenario: Audit Log Integrity Failure
+
+**Severity: CRITICAL**
+**Response Time: < 10 minutes**
+
+**Immediate Actions:**
+1. Preserve current state
+   ```bash
+   pg_dump agentauth_audit > /secure/backup/audit-$(date +%s).sql
+   ```
+
+2. Identify corruption scope
+   ```bash
+   agentauth audit verify --from-timestamp <last_known_good>
+   ```
+
+3. Switch to backup audit log
+   ```bash
+   agentauth config set audit.primary backup
+   ```
+
+4. Notify compliance team
+   ```bash
+   alert-manager send --severity critical \
+     --team compliance \
+     --message "Audit log integrity failure detected"
+   ```
+
+---
+
+## J.2 Common Error Resolution
+
+### Error: "Chain validation failed at link N"
+
+**Cause:** Delegation chain has broken link.
+
+**Diagnosis:**
+```bash
+agentauth chain debug --poa-file poa.json
+
+# Output:
+# Link 0: ✓ Board → CFO (signature valid)
+# Link 1: ✓ CFO → Manager (signature valid)
+# Link 2: ✗ Manager → Agent (SIGNATURE INVALID)
+#   Expected signer: urn:agentauth:entity:manager-001
+#   Actual signer: urn:agentauth:entity:manager-002
+```
+
+**Resolution:**
+- Re-issue delegation from correct manager
+- Verify manager's current signing key
+
+### Error: "Constraint violation: liability_cap exceeded"
+
+**Cause:** Transaction amount exceeds PoA limit.
+
+**Resolution Options:**
+1. Request human approval for this transaction
+2. Split into multiple smaller transactions (if appropriate)
+3. Request principal to issue new PoA with higher limit
+
+### Error: "Revocation check timeout"
+
+**Cause:** Cannot reach revocation service.
+
+**Resolution:**
+1. Check network connectivity
+2. Enable local cache fallback
+3. Consider degraded mode for time-critical operations
+
+---
+
+**END OF EXTENDED MANUSCRIPT**
+
+---
+
+**Document Statistics:**
+- **Total Lines**: 3,400+ (estimated)
+- **Total Pages**: 150+ (estimated with reader formatting)
+- **Chapters**: 11
+- **Appendices**: 10 (A through J)
+- **Code Examples**: 50+
+- **Diagrams**: 20 PNG images
+- **Tables**: 30+
+
+**Author: Mauricio A. Fernandez Fernandez**
+**Version: 3.0 Extended Edition**
+**Date: December 31, 2025**
+
+---
+
+*"Security is not a product, but a process. Authorization is not an event, but a chain. Trust is not granted, but proven."*
+
