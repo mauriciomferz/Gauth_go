@@ -1653,7 +1653,8 @@ func (s *BetaServer) routes() {
 	s.delegationHandler.RegisterRoutes(s.router, beta)
 
 	// AAP001 Subscription and Authorization Flow endpoints (optional, controlled by AGENTAUTH_AAP001_ENABLED=1)
-	if aap001Components, tokenStore, err := InitAAP001FromEnv(); err == nil && aap001Components != nil {
+	if aap001Components, tokenStore, dbCleanup, err := InitAAP001FromEnv(); err == nil && aap001Components != nil {
+		s.dbCleanup = dbCleanup
 		fmt.Fprintf(os.Stderr, "[AAP001] Enabled with mock external services\n")
 
 		// Create AgentAuth service with AAP001 compliance enabled

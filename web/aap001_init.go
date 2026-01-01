@@ -7,11 +7,11 @@ import (
 	"time"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
-	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/external"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/mocks"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
 )
 
 // InitAAP001FromEnv initializes AAP001 components based on environment variables.
@@ -30,10 +30,10 @@ import (
 //
 // Returns nil if AAP001 is not enabled.
 // Returns an ExtendedTokenStore configured based on AGENTAUTH_TOKEN_STORE.
-func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenStore, error) {
+func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenStore, func(), error) {
 	// Check if AAP001 is enabled
 	if os.Getenv("AGENTAUTH_AAP001_ENABLED") != "1" {
-		return nil, nil, nil
+		return nil, nil, func() {}, nil
 	}
 
 	// Determine whether to use mocks (default: yes)
@@ -46,7 +46,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 		// Use real external service implementations (where available)
 		components, err = InitAAP001WithRealServices()
 		if err != nil {
-			return nil, nil, fmt.Errorf("AAP001 real service initialization failed: %w", err)
+			return nil, nil, func() {}, fmt.Errorf("AAP001 real service initialization failed: %w", err)
 		}
 		fmt.Fprintf(os.Stderr, "[AAP001] Using REAL external services (Global Identity Verification)\n")
 	} else {
@@ -62,7 +62,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 			commercialRegClient,
 		)
 		if err != nil {
-			return nil, nil, fmt.Errorf("AAP001 mock initialization failed: %w", err)
+			return nil, nil, func() {}, fmt.Errorf("AAP001 mock initialization failed: %w", err)
 		}
 		fmt.Fprintf(os.Stderr, "[AAP001] Using MOCK external services\n")
 	}
@@ -108,7 +108,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 		// Create PostgreSQL token store
 		pgStore, err := agentauth.NewPostgresExtendedTokenStoreFromDSN(dsn)
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to initialize PostgreSQL token store: %w", err)
+			return nil, nil, func() {}, fmt.Errorf("failed to initialize PostgreSQL token store: %w", err)
 		}
 		tokenStore = pgStore
 		fmt.Fprintf(os.Stderr, "[AAP001] Using PostgreSQL token store (host=%s, db=%s)\n", host, dbname)
@@ -118,13 +118,14 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 		fmt.Fprintf(os.Stderr, "[AAP001] Using in-memory token store\n")
 
 	default:
-		return nil, nil, fmt.Errorf("unknown token store type: %s (supported: memory, postgres)", tokenStoreType)
+		return nil, nil, func() {}, fmt.Errorf("unknown token store type: %s (supported: memory, postgres)", tokenStoreType)
 	}
 
 	// PHASE 3: AgentAuth+ Authorization Integration (optional, controlled by AGENTAUTH_AGENTAUTHPLUS_ENABLED)
 	// Initialize AgentAuth+ services if database connection is available and feature is enabled
+	cleanup := func() {}
 	if os.Getenv("AGENTAUTH_AGENTAUTHPLUS_ENABLED") == "1" {
-		_, err := initializeAgentAuthPlus(components)
+		_, cleanFn, err := initializeAgentAuthPlus(components)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "[AgentAuth+] WARNING: Failed to initialize AgentAuth+ integration: %v\n", err)
 			fmt.Fprintf(os.Stderr, "[AgentAuth+] Continuing without AgentAuth+ features\n")
@@ -132,10 +133,11 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 			fmt.Fprintf(os.Stderr, "[AgentAuth+] Authorization chain integration enabled\n")
 			// Note: Services are stored globally for endpoint registration
 			// See initializeAgentAuthPlusEndpoints in server initialization
+			cleanup = cleanFn
 		}
 	}
 
-	return components, tokenStore, nil
+	return components, tokenStore, cleanup, nil
 }
 
 // InitAAP001WithRealServices initializes AAP001 components with real service connectors.
@@ -260,8 +262,8 @@ func InitAAP001WithRealServices() (*agentauth.AAP001Components, error) {
 //   - AGENTAUTH_AGENTAUTHPLUS_ENFORCE_FIDUCIARY: Set to "1" to enforce fiduciary duty checks
 //   - DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSLMODE: Database connection params
 //
-// Returns a map of services for endpoint registration, or error if initialization fails.
-func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string]interface{}, error) {
+// Returns a map of services for endpoint registration, a cleanup function, or error if initialization fails.
+func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string]interface{}, func(), error) {
 	// Build PostgreSQL DSN from environment variables
 	host := os.Getenv("DB_HOST")
 	if host == "" {
@@ -306,7 +308,12 @@ func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string
 	// Open database connection (pgx pool)
 	db, err := database.NewDB(dbCfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, func() {}, fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	cleanup := func() {
+		db.Close()
+		fmt.Println("[shutdown] Closed AgentAuth+ DB pool")
 	}
 
 	// Test connection is handled by NewDB (Ping)
@@ -396,7 +403,7 @@ func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string
 
 	fmt.Fprintf(os.Stderr, "[AgentAuth+] Services available for API endpoint registration\n")
 
-	return agentAuthPlusServicesGlobal, nil
+	return agentAuthPlusServicesGlobal, cleanup, nil
 }
 
 // Global storage for AgentAuth+ services (initialized by initializeAgentAuthPlus)

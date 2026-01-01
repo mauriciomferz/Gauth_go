@@ -119,6 +119,13 @@ func NewKeyManager(ctx context.Context) (KeyManager, error) {
 			return nil, fmt.Errorf("aws kms init: %w", err)
 		}
 		return NewExternalKeyManager(client), nil
+	case "external":
+		// Use SimulatedKMS for generic external provider testing
+		sim, err := NewSimulatedKMS("external-test-key")
+		if err != nil {
+			return nil, fmt.Errorf("simulated kms init: %w", err)
+		}
+		return NewExternalKeyManager(sim), nil
 	default:
 		return NewLocalKeyManager("")
 	}

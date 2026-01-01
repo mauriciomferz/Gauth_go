@@ -131,6 +131,9 @@ func (s *BetaServer) Shutdown() {
 	if s.systemClockMonitor != nil {
 		s.systemClockMonitor.Stop()
 	}
+	if s.dbCleanup != nil {
+		s.dbCleanup()
+	}
 	ShutdownAgentAuthPlus()
 }
 

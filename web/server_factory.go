@@ -279,7 +279,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// Wire up capabilities handler metrics and OnReload callback for anchor emission
 	capsHandler.Metrics = &capabilityMetricsAdapter{m: s.metrics}
 	capsHandler.OnReload = func(newHash string) {
-		go func() {
+		emitFunc := func() {
 			// Emit anchor artifact (throttled by interval)
 			if s.capAnchorFilePath != "" {
 				// Check throttle
@@ -364,7 +364,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					}
 				}
 			}
-		}()
+		}
+		if os.Getenv("AGENTAUTH_CAP_ANCHOR_SYNC_STARTUP") == "1" {
+			emitFunc()
+		} else {
+			go emitFunc()
+		}
 	}
 
 	// Wire Audit Chaining (Capability Audit Anchor)

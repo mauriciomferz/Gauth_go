@@ -73,7 +73,7 @@ demo_cascade_build
 demo_executable
 agentauth-original-demo
 agentauth-server
-!cmd/web-server/main.go
+
 agentauth-web-server
 main
 basic
@@ -195,7 +195,7 @@ test_output*.txt
 scripts/conformance
 
 # Root level binaries
-web-server
+/web-server
 
 # Certificates and Keys
 *.pem

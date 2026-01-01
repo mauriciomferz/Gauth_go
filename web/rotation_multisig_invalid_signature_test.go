@@ -71,7 +71,7 @@ func TestRotationSummary_MultiSignatureInvalidSignature(t *testing.T) {
 		t.Fatalf("expected multisig signatures >=2")
 	}
 	// Tamper first signature bytes (truncate or replace) -> verification should fail
-	apiResp.Summary.Signatures[0].Signature = "aapAA"
+	apiResp.Summary.Signatures[0].Signature = "aaaa"
 	err := verification.VerifyRotationSummarySignature(apiResp.Summary, m)
 	if err == nil || !strings.Contains(err.Error(), "signature_invalid") {
 		t.Fatalf("expected signature_invalid error, got=%v", err)

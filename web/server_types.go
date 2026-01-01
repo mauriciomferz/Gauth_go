@@ -11,6 +11,8 @@ import (
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
 	"github.com/mauriciomferz/AgentAuth/internal/notary"
 	"github.com/mauriciomferz/AgentAuth/internal/tracing"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	anchor "github.com/mauriciomferz/AgentAuth/pkg/anchor"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/mauriciomferz/AgentAuth/pkg/blockchain"
@@ -18,8 +20,6 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
-	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
-	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 	"github.com/mauriciomferz/AgentAuth/pkg/redis"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/admin"
@@ -40,11 +40,11 @@ import (
 )
 
 type BetaServer struct {
-	router               *gin.Engine
-	mu                   sync.RWMutex
+	router                   *gin.Engine
+	mu                       sync.RWMutex
 	agentAuthPlusInitialized bool
-	start                time.Time
-	keyProvider          crypto.KeyProvider
+	start                    time.Time
+	keyProvider              crypto.KeyProvider
 	// legacyAliasHits counts invocations of deprecated /api/governance/lifecycle_timeline for deprecation timing.
 
 	legacyAliasHits  uint64
@@ -251,6 +251,9 @@ type BetaServer struct {
 
 	// Extended Token Service for AAP001 validation
 	extendedTokenService *agentauth.ExtendedTokenService
+
+	// dbCleanup handles closing the AAP001 DB connection pool which is otherwise leaked
+	dbCleanup func()
 }
 
 // auditChainAnchorAdapter adapts anchor.Provider, anchor.AnchorClient and capabilities.AnchorClient interfaces.

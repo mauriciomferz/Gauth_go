@@ -73,6 +73,12 @@ func (s *Store) Persist() error {
 		return errors.New("limits: no path configured")
 	}
 	tmp := s.path + ".tmp"
+	// Ensure directory exists
+	if dir := filepath.Dir(s.path); dir != "" {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			return err
+		}
+	}
 	s.mu.RLock()
 	data, err := json.MarshalIndent(s.counters, "", "  ")
 	s.mu.RUnlock()
