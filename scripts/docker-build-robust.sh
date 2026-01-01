@@ -8,9 +8,10 @@ set -e
 echo "🐳 AgentAuth Docker Build with Cache Key Workaround"
 echo "==============================================="
 
-# Get the script directory
+# Get the script directory and Project Root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT"
 
 # Check if Docker is available
 if ! command -v docker &> /dev/null; then
@@ -43,7 +44,7 @@ cleanup() {
 # Set trap to ensure cleanup happens
 trap cleanup EXIT
 
-echo "📁 Working directory: $SCRIPT_DIR"
+echo "📁 Working directory: $PROJECT_ROOT"
 
 # Check if problematic directory exists
 if [ -d "$PROBLEM_DIR" ]; then
@@ -123,15 +124,15 @@ if [ "$BUILD_SUCCESS" = true ]; then
     echo "🧪 Testing the built application..."
     
     # Test the application in a container
-    echo "   Running: docker run --rm agentauth-demo:robust-build --help"
-    if timeout 30 docker run --rm agentauth-demo:robust-build --help >/dev/null 2>&1; then
+    echo "   Running: docker run --rm agentauth-demo:robust-build ./agentauth-server --help"
+    if docker run --rm agentauth-demo:robust-build ./agentauth-server --help >/dev/null 2>&1; then
         echo ""
         echo "✅ Application runs successfully in container!"
         
         # Show a brief demo output
         echo ""
         echo "📋 Demo Output:"
-        docker run --rm agentauth-demo:robust-build --help | head -15
+        docker run --rm agentauth-demo:robust-build ./agentauth-server --help | head -15
         
     else
         echo ""

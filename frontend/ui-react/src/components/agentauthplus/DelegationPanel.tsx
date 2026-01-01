@@ -3,7 +3,7 @@
  * View and manage AI-to-AI delegation chains
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   makeStyles,
   Button,
@@ -57,7 +57,7 @@ export default function DelegationPanel() {
   const [agentId, setAgentId] = useState('ai-agent-001')
   const [chain, setChain] = useState<AIDelegation[]>([])
 
-  const fetchChain = async () => {
+  const fetchChain = useCallback(async () => {
     if (!agentId) return
     try {
       setLoading(true)
@@ -68,13 +68,13 @@ export default function DelegationPanel() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [agentId])
 
   useEffect(() => {
     if (agentId) {
       fetchChain()
     }
-  }, [agentId])
+  }, [agentId, fetchChain])
 
   const getStatusBadge = (status: string) => {
     const colors: Record<string, 'success' | 'warning' | 'subtle'> = {

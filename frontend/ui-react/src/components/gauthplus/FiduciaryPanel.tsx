@@ -3,7 +3,7 @@
  * Track and resolve fiduciary duty breaches
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   makeStyles,
   Button,
@@ -60,11 +60,7 @@ export default function FiduciaryPanel() {
   const [poaId, setPoaId] = useState('')
   const [severityFilter, setSeverityFilter] = useState<string>('')
 
-  useEffect(() => {
-    fetchViolations()
-  }, [])
-
-  const fetchViolations = async () => {
+  const fetchViolations = useCallback(async () => {
     try {
       setLoading(true)
       let response
@@ -79,7 +75,11 @@ export default function FiduciaryPanel() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [poaId, severityFilter])
+
+  useEffect(() => {
+    fetchViolations()
+  }, [fetchViolations])
 
   const getSeverityBadge = (severity: string) => {
     const colors: Record<string, 'success' | 'warning' | 'important' | 'danger'> = {

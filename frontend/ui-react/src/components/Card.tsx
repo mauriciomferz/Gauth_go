@@ -6,7 +6,7 @@ interface CardProps {
   className?: string
   title?: string
   // Allow either a ready element or a component type
-  icon?: ReactNode | (() => ReactNode) | any
+  icon?: ReactNode | (() => ReactNode) | React.ComponentType<any> | React.ElementType
 }
 
 export function Card({ children, className, title, icon }: CardProps) {
@@ -62,7 +62,7 @@ export function Card({ children, className, title, icon }: CardProps) {
 interface StatCardProps {
   title: string
   value: string | number
-  icon: ReactNode | (() => ReactNode) | any
+  icon: ReactNode | (() => ReactNode) | React.ComponentType<any> | React.ElementType
   trend?: string
   gradient: string
 }

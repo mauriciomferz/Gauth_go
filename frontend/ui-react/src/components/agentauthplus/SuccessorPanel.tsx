@@ -3,7 +3,7 @@
  * Manage AI successor activations and history
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   makeStyles,
   Button,
@@ -88,15 +88,15 @@ export default function SuccessorPanel() {
       fetchActiveSuccessor()
       fetchHistory()
     }
-  }, [poaId])
+  }, [poaId, fetchActiveSuccessor, fetchHistory])
 
-  const fetchActiveSuccessor = async () => {
+  const fetchActiveSuccessor = useCallback(async () => {
     try {
       setLoading(true)
       const response = await agentAuthPlusAPI.getActiveSuccessor(poaId)
       setActiveSuccessor(response.active_successor)
-    } catch (error: any) {
-      if (error?.response?.status === 404) {
+    } catch (error: unknown) {
+      if ((error as any)?.response?.status === 404) {
         // Endpoint not available (dev mode without database) - silently handle
         setActiveSuccessor(null)
       } else {
@@ -105,21 +105,21 @@ export default function SuccessorPanel() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [poaId])
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     try {
       const response = await agentAuthPlusAPI.listSuccessorHistory(poaId)
       setHistory(response.history || [])
-    } catch (error: any) {
-      if (error?.response?.status === 404) {
+    } catch (error: unknown) {
+      if ((error as any)?.response?.status === 404) {
         // Endpoint not available (dev mode without database) - silently handle
         setHistory([])
       } else {
         console.error('Failed to fetch history:', error)
       }
     }
-  }
+  }, [poaId])
 
   const handleActivate = async () => {
     try {
