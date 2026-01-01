@@ -99,7 +99,7 @@ func TestCapabilityAnchorNotarizationFailureCounter(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARY_PROVIDER", "memory")
 	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH"})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "agentauth"})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm

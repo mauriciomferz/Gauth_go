@@ -14,7 +14,7 @@ import (
 func TestExternalAnchorMetricsIsolatedRegistry(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem:"aap001", Registry: reg})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm

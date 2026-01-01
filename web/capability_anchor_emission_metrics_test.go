@@ -20,8 +20,8 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", t.TempDir()+"/anchor.json")
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "5ms")
 	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{
-		Namespace: "AGENTAUTH",
-		Subsystem:"AAP001",
+		Namespace: "agentauth",
+		Subsystem: "aap001",
 		Registry:  prometheus.NewRegistry(),
 	})
 	srv := NewBetaServer(":0")

@@ -14,7 +14,7 @@ import (
 func TestCapabilityAnchorNotarizationLatencyHistogram(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_NOTARIZE", "1")
 	// We don't rely on emission path; directly observe a latency via adapter method.
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH"})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "agentauth"})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	srv.metrics = pm

@@ -13,4 +13,8 @@ func init() {
 	if os.Getenv("AGENTAUTH_DISABLE_BG_POLLS") == "" {
 		os.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1")
 	}
+	// Force synchronous capability anchor on startup to avoid race conditions in tests
+	if os.Getenv("AGENTAUTH_CAP_ANCHOR_SYNC_STARTUP") == "" {
+		os.Setenv("AGENTAUTH_CAP_ANCHOR_SYNC_STARTUP", "1")
+	}
 }

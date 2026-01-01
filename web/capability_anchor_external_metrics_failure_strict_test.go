@@ -19,7 +19,7 @@ func TestExternalAnchorMetricsFailureStrict(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem:"aap001", Registry: reg})
 	// Construct server with provided metrics adapter so initial attempted (and failing) anchor uses Prometheus.
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })

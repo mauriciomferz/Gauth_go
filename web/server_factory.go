@@ -1967,7 +1967,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// Ensure handler has a hash to anchor (test requirement)
 		s.capabilityAnchorHandler.SetRegistryHash("initial-startup-hash")
 
-		go func() {
+		anchorFunc := func() {
 			fmt.Fprintf(os.Stderr, "[cap-anchor] startup triggering initial anchor...\n")
 			_, err := s.capabilityAnchorHandler.Anchor(context.Background())
 			if err != nil {
@@ -1975,7 +1975,14 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			} else {
 				fmt.Fprintf(os.Stderr, "[cap-anchor] startup anchor success\n")
 			}
-		}()
+		}
+
+		// Run synchronously if configured (checks env var) to prevent test race conditions
+		if os.Getenv("AGENTAUTH_CAP_ANCHOR_SYNC_STARTUP") == "1" {
+			anchorFunc()
+		} else {
+			go anchorFunc()
+		}
 	}
 
 	return s

@@ -49,7 +49,7 @@ func TestEvidenceAttachment_SuccessAndDuplicate(t *testing.T) {
 	// Enable AAP001 service and policy seeding
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem: "aap001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -91,7 +91,7 @@ func TestEvidenceAttachment_InvalidHash(t *testing.T) {
 
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem: "aap001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 
@@ -123,7 +123,7 @@ func TestEvidenceAttachment_NotFound(t *testing.T) {
 
 	t.Setenv("AGENTAUTH_DISABLE_AAP001_SERVICE", "0")
 	t.Setenv("AGENTAUTH_SEED_POLICY", "1")
-	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem: "AAP001"})
+	pm := metrics.NewPrometheusMetrics(metrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem: "aap001"})
 	srv := NewBetaServerWithMetrics("", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	payload := map[string]any{"hashes": []string{"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}

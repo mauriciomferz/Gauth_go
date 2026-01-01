@@ -24,7 +24,7 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 	// Force exactly one initial failure.
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "AGENTAUTH", Subsystem:"AAP001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem:"aap001", Registry: reg})
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Wait for initial attempt & possible retry.
