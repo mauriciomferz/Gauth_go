@@ -41,11 +41,11 @@ type MCPAgent struct {
 
 // MCPAgentConfig configures an MCP agent instance
 type MCPAgentConfig struct {
-	AgentID     string               // Unique agent identifier
+	AgentID     string                   // Unique agent identifier
 	Token       *agentauth.ExtendedToken // AgentAuth authorization token
-	MCPClient   MCPClient            // MCP client for server communication
-	AuthBridge  AuthorizationBridge  // Authorization bridge
-	AuditLogger mcp.AuditLogger      // Audit logger (optional)
+	MCPClient   MCPClient                // MCP client for server communication
+	AuthBridge  AuthorizationBridge      // Authorization bridge
+	AuditLogger mcp.AuditLogger          // Audit logger (optional)
 }
 
 // NewMCPAgent creates a new MCP agent with authorization

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/mauriciomferz/AgentAuth/pkg/errors"
-	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/token"
 )
 

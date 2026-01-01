@@ -24,7 +24,7 @@ type CreateAssessmentRequest struct {
 
 // CheckCapabilityMatchRequest represents the request to check capability match
 type CheckCapabilityMatchRequest struct {
-	AgentID      string                            `json:"agent_id" binding:"required"`
+	AgentID      string                                `json:"agent_id" binding:"required"`
 	Requirements *agentauthplus.CapabilityRequirements `json:"requirements" binding:"required"`
 }
 

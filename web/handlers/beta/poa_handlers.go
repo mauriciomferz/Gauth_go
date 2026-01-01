@@ -42,27 +42,27 @@ type ValidatePoARequest struct {
 
 // PoAResponse represents a Proof of Authorization response
 type PoAResponse struct {
-	Success bool                           `json:"success"`
+	Success bool                               `json:"success"`
 	PoA     *agentauth_aap_001.PowerOfAttorney `json:"poa,omitempty"`
-	Error   string                         `json:"error,omitempty"`
+	Error   string                             `json:"error,omitempty"`
 }
 
 // PoAListResponse represents a list of Proof of Authorization documents
 type PoAListResponse struct {
-	Success bool                             `json:"success"`
+	Success bool                                 `json:"success"`
 	PoAs    []*agentauth_aap_001.PowerOfAttorney `json:"poas,omitempty"`
-	Total   int                              `json:"total"`
-	Error   string                           `json:"error,omitempty"`
+	Total   int                                  `json:"total"`
+	Error   string                               `json:"error,omitempty"`
 }
 
 // PoAValidationResponse represents the validation result
 type PoAValidationResponse struct {
-	Success   bool                           `json:"success"`
-	Valid     bool                           `json:"valid"`
+	Success   bool                               `json:"success"`
+	Valid     bool                               `json:"valid"`
 	PoA       *agentauth_aap_001.PowerOfAttorney `json:"poa,omitempty"`
-	Reason    string                         `json:"reason,omitempty"`
-	Timestamp time.Time                      `json:"timestamp"`
-	Error     string                         `json:"error,omitempty"`
+	Reason    string                             `json:"reason,omitempty"`
+	Timestamp time.Time                          `json:"timestamp"`
+	Error     string                             `json:"error,omitempty"`
 }
 
 // PoAHandler provides HTTP handlers for Proof of Authorization CRUD operations

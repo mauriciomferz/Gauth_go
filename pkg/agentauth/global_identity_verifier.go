@@ -189,14 +189,14 @@ func (v *GlobalIdentityVerifier) verifyFranceDocument(ctx context.Context, doc *
 		}
 
 		return &IDVerificationResult{
-			Valid:             res.Valid,
-			VerificationDate:  time.Now(),
-			DocumentAuthentic: res.Valid,
-			NotExpired:        res.Status == "valid",
-			BiometricMatch:    res.BiometricVerified,
-			SecurityFeatureOK: res.MRZVerified,
-			IssuingAuthorityValid:  true,
-			Issues:            v.errorToIssues(res.Error),
+			Valid:                 res.Valid,
+			VerificationDate:      time.Now(),
+			DocumentAuthentic:     res.Valid,
+			NotExpired:            res.Status == "valid",
+			BiometricMatch:        res.BiometricVerified,
+			SecurityFeatureOK:     res.MRZVerified,
+			IssuingAuthorityValid: true,
+			Issues:                v.errorToIssues(res.Error),
 		}, nil
 	}
 	// Add CNI support similarly

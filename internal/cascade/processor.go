@@ -7,8 +7,8 @@ import (
 
 	"github.com/mauriciomferz/AgentAuth/internal/config"
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
-	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
+	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 )
 
 // ProcessorResult holds the results of cascade processing

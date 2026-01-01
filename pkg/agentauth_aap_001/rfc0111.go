@@ -4864,10 +4864,10 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 			// Build claims metadata with issuer trust level, delegation chain length, and policy version
 			claimsMeta := &agentauth.ClaimsMetadata{
-				Version:      "1.0",             // Claims schema version
-				Capabilities: poa.Scope,         // Supported capabilities = delegated scopes
+				Version:      "1.0",            // Claims schema version
+				Capabilities: poa.Scope,        // Supported capabilities = delegated scopes
 				Source:       "AAP001-service", // Claims source identifier
-				Confidence:   1.0,               // Full confidence for directly issued tokens
+				Confidence:   1.0,              // Full confidence for directly issued tokens
 			}
 			// Populate AdvancedClaims with standard JWT claims + AgentAuth-specific metadata
 			env2.AdvancedClaims = &agentauth.AdvancedClaims{

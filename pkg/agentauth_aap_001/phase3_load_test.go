@@ -92,7 +92,7 @@ func Test1_LuaLockThroughput_Reduced(t *testing.T) {
 
 	// Calculate metrics
 	p50, p95, p99 := calculatePercentiles(latencies)
-	throughput := float64(totalRequests.Load() / duration.Seconds()
+	throughput := float64(totalRequests.Load()) / duration.Seconds()
 
 	t.Logf("\n📊 TEST 1 RESULTS:")
 	t.Logf("   Total Requests: %d", totalRequests.Load())
@@ -223,7 +223,7 @@ func Test2_RecursiveChainDepth_8Hops(t *testing.T) {
 
 	p50, p95, p99 := calculatePercentiles(latencies)
 	maxLatency := getMaxLatency(latencies)
-	throughput := float64(totalRequests.Load() / duration.Seconds()
+	throughput := float64(totalRequests.Load()) / duration.Seconds()
 
 	t.Logf("\n📊 TEST 2 RESULTS:")
 	t.Logf("   Total Requests: %d", totalRequests.Load())
@@ -324,8 +324,8 @@ func Test3_RevocationListLatency(t *testing.T) {
 	duration := time.Since(startTime)
 
 	p50, p95, p99 := calculatePercentiles(latencies)
-	throughput := float64(totalRequests.Load() / duration.Seconds()
-	rejectionRate := float64(rejectedCount.Load() / float64(float64(totalRequests.Load() *) * 100
+	throughput := float64(totalRequests.Load()) / duration.Seconds()
+	rejectionRate := (float64(rejectedCount.Load()) / float64(totalRequests.Load())) * 100
 
 	t.Logf("\n📊 TEST 3 RESULTS:")
 	t.Logf("   Total Requests: %d", totalRequests.Load())

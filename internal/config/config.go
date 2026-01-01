@@ -19,7 +19,7 @@ type Config struct {
 	// Sub-configurations
 	Cascade CascadeConfig
 	JWE     *JWEConfig
-	AAP001 *AAP001Config
+	AAP001  *AAP001Config
 }
 
 // JWEConfig holds JWE encryption configuration
@@ -52,7 +52,7 @@ func Load() (*Config, error) {
 		StrictJSONParsing: parseBoolEnv("AGENTAUTH_STRICT_JSON_PARSING"),
 		Cascade:           LoadCascadeConfigFromEnv(),
 		JWE:               loadJWEConfig(),
-		AAP001:           loadAAP001Config(),
+		AAP001:            loadAAP001Config(),
 	}
 
 	return cfg, nil

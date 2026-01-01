@@ -85,14 +85,14 @@ func RunClauseCoverage() error {
 	}
 
 	// Inject tests into template
-	for/aapID, r := range tpl.RFC {
+	for aapID, r := range tpl.RFC {
 		for i, sec := range r.Sections {
 			if refs, ok := markers[sec.ID]; ok {
 				sec.Tests = append(sec.Tests, refs...)
 			}
 			r.Sections[i] = sec
 		}
-		tpl.RFC/aapID] = r
+		tpl.RFC[aapID] = r
 	}
 	// Coverage metrics
 	covered, total := 0, 0
@@ -106,7 +106,7 @@ func RunClauseCoverage() error {
 	}
 	pct := 0.0
 	if total > 0 {
-		pct = (float64(covered) / float64(total) * 100
+		pct = (float64(covered) / float64(total)) * 100
 	}
 
 	tpl.Generated = time.Now().UTC().Format(time.RFC3339)

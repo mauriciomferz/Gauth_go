@@ -9,7 +9,7 @@ import (
 
 // PowerAdministrationPoint represents a power administration point
 type PowerAdministrationPoint struct {
-	AgentAuth           AgentAuth
+	AgentAuth       AgentAuth
 	ID              string      `json:"id"`
 	Name            string      `json:"name"`
 	Description     string      `json:"description"`

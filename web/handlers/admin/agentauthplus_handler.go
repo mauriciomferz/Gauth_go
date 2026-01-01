@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
 )
 
 // AgentAuthPlusHandler handles AgentAuth+ enhanced authorization features
@@ -533,7 +533,7 @@ func (h *AgentAuthPlusHandler) GetLatestAssessment(c *gin.Context) {
 // POST /api/admin/assessments/check-match
 func (h *AgentAuthPlusHandler) CheckCapabilityMatch(c *gin.Context) {
 	var req struct {
-		AgentID      string                           `json:"agent_id" binding:"required"`
+		AgentID      string                               `json:"agent_id" binding:"required"`
 		Requirements agentauthplus.CapabilityRequirements `json:"requirements" binding:"required"`
 	}
 

@@ -277,7 +277,7 @@ func TestE2E_CompleteAuthorizationFlow(t *testing.T) {
 		}
 
 		if token.ComplianceLevel != "AAP001-compliant" {
-			t.Errorf("Expected compliance level "AAP001-compliant', got '%s'", token.ComplianceLevel)
+			t.Errorf("Expected compliance level 'AAP001-compliant', got '%s'", token.ComplianceLevel)
 		}
 
 		if token.PowerOfAttorney == nil {

@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/events"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
+	"github.com/mauriciomferz/AgentAuth/pkg/events"
 )
 
 // logEventHandler implements events.EventHandler for logging

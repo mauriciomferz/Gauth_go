@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth/external"
+	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 )
 
 func TestGetProvenance(t *testing.T) {

@@ -100,7 +100,7 @@ func createDefaultPDPEngine() pdp.Engine {
 	// Add default policies for AAP001 compliance
 	// Policy 1: Allow authenticated requests with valid authorization chains
 	engine.AddPolicy(pdp.Policy{
-		ID:      "AAP001-allow-valid-chain",
+		ID:       "AAP001-allow-valid-chain",
 		Subjects: []string{"*"}, // Apply to all subjects
 		Rules: []pdp.Rule{
 			{
@@ -118,7 +118,7 @@ func createDefaultPDPEngine() pdp.Engine {
 
 	// Policy 2: Default deny for unknown actions
 	engine.AddPolicy(pdp.Policy{
-		ID:      "AAP001-default-deny",
+		ID:       "AAP001-default-deny",
 		Subjects: []string{"*"},
 		Rules: []pdp.Rule{
 			{

@@ -108,12 +108,12 @@ type ModelAttributes struct {
 }
 
 type Certification struct {
-	Type                 string
-	IssuingAuthority string
-	CertificateNumber    string
-	ValidFrom            string
-	ValidUntil           string
-	Scope                string
+	Type              string
+	IssuingAuthority  string
+	CertificateNumber string
+	ValidFrom         string
+	ValidUntil        string
+	Scope             string
 }
 
 // ValidateClientType validates AAP002 client type

@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	cr "github.com/mauriciomferz/AgentAuth/pkg/crypto"
-	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 )
 
 // EnhancedPoAValidatorExample demonstrates real Service integration with enhanced PoA validator

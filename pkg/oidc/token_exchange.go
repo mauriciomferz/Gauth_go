@@ -209,10 +209,10 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 
 	return &ExchangeResponse{
 		AgentAuthToken: agentauthToken,
-		ExpiresAt:  agentauthClaims.ExpiresAt.Time,
-		Claims:     agentauthClaims,
-		TrustLevel: trustLevel,
-		ProviderID: req.ProviderID,
+		ExpiresAt:      agentauthClaims.ExpiresAt.Time,
+		Claims:         agentauthClaims,
+		TrustLevel:     trustLevel,
+		ProviderID:     req.ProviderID,
 	}, nil
 }
 
@@ -450,10 +450,10 @@ func (s *TokenExchangeService) RefreshExchangedToken(ctx context.Context, refres
 	// Build exchange response
 	exchangeResponse := &ExchangeResponse{
 		AgentAuthToken: response.IDToken,
-		ExpiresAt:  claims.ExpiresAt.Time,
-		Claims:     claims,
-		TrustLevel: determineRefreshTrustLevel(claims),
-		ProviderID: providerID,
+		ExpiresAt:      claims.ExpiresAt.Time,
+		Claims:         claims,
+		TrustLevel:     determineRefreshTrustLevel(claims),
+		ProviderID:     providerID,
 	}
 
 	// Store the new refresh token if rotated

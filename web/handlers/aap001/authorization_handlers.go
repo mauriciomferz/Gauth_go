@@ -16,14 +16,14 @@ import (
 // AuthorizationHandlers encapsulates AAP001 authorization API handlers.
 type AuthorizationHandlers struct {
 	agentauthService *agentauth.Service
-	tokenStore   agentauth.ExtendedTokenStore
+	tokenStore       agentauth.ExtendedTokenStore
 }
 
 // NewAuthorizationHandlers creates a new authorization handlers instance.
 func NewAuthorizationHandlers(service *agentauth.Service, tokenStore agentauth.ExtendedTokenStore) *AuthorizationHandlers {
 	return &AuthorizationHandlers{
 		agentauthService: service,
-		tokenStore:   tokenStore,
+		tokenStore:       tokenStore,
 	}
 }
 

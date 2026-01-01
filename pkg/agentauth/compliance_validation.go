@@ -13,11 +13,11 @@ import (
 
 // ComplianceValidator performs AAP001 Section 6 compliance validation
 type ComplianceValidator struct {
-	chainValidator     *AuthorizationChainValidator
+	chainValidator         *AuthorizationChainValidator
 	AgentAuthPlusValidator *AgentAuthPlusValidator
-	pipClient          PIPClient
-	pdpClient          PDPClient
-	strictMode         bool
+	pipClient              PIPClient
+	pdpClient              PDPClient
+	strictMode             bool
 	enforceAgentAuthPlus   bool
 }
 
@@ -28,10 +28,10 @@ func NewComplianceValidator(
 	pdpClient PDPClient,
 ) *ComplianceValidator {
 	return &ComplianceValidator{
-		chainValidator:   chainValidator,
-		pipClient:        pipClient,
-		pdpClient:        pdpClient,
-		strictMode:       true,
+		chainValidator:       chainValidator,
+		pipClient:            pipClient,
+		pdpClient:            pdpClient,
+		strictMode:           true,
 		enforceAgentAuthPlus: false, // Disabled by default for backward compatibility
 	}
 }
@@ -816,24 +816,24 @@ func (v *ComplianceValidator) validateGrantRestrictions(
 
 // RequestComplianceResult represents request compliance validation result
 type RequestComplianceResult struct {
-	Valid               bool                       `json:"valid"`
-	ValidationTime      time.Time                  `json:"validation_time"`
-	Checks              map[string]bool            `json:"checks"`
-	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
+	Valid                   bool                           `json:"valid"`
+	ValidationTime          time.Time                      `json:"validation_time"`
+	Checks                  map[string]bool                `json:"checks"`
+	ChainValidation         *ChainValidationResult         `json:"chain_validation,omitempty"`
 	AgentAuthPlusValidation *AgentAuthPlusValidationResult `json:"agentauthplus_validation,omitempty"`
-	FailureReason       string                     `json:"failure_reason,omitempty"`
-	Warnings            []string                   `json:"warnings,omitempty"`
+	FailureReason           string                         `json:"failure_reason,omitempty"`
+	Warnings                []string                       `json:"warnings,omitempty"`
 }
 
 // GrantComplianceResult represents grant compliance validation result
 type GrantComplianceResult struct {
-	Valid               bool                       `json:"valid"`
-	ValidationTime      time.Time                  `json:"validation_time"`
-	Checks              map[string]bool            `json:"checks"`
-	ChainValidation     *ChainValidationResult     `json:"chain_validation,omitempty"`
+	Valid                   bool                           `json:"valid"`
+	ValidationTime          time.Time                      `json:"validation_time"`
+	Checks                  map[string]bool                `json:"checks"`
+	ChainValidation         *ChainValidationResult         `json:"chain_validation,omitempty"`
 	AgentAuthPlusValidation *AgentAuthPlusValidationResult `json:"agentauthplus_validation,omitempty"`
-	FailureReason       string                     `json:"failure_reason,omitempty"`
-	Warnings            []string                   `json:"warnings,omitempty"`
+	FailureReason           string                         `json:"failure_reason,omitempty"`
+	Warnings                []string                       `json:"warnings,omitempty"`
 }
 
 // PIPClient interface for Power Information Point

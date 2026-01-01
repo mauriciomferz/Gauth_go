@@ -297,9 +297,9 @@ type IdentityVerificationResult struct {
 	ConfidenceScore   float64           `json:"confidence_score"` // 0.0 to 1.0
 
 	// Document details
-	DocumentType         DocumentType `json:"document_type"`
-	DocumentNumber       string       `json:"document_number"`
-	DocumentState        string       `json:"document_state,omitempty"`
+	DocumentType     DocumentType `json:"document_type"`
+	DocumentNumber   string       `json:"document_number"`
+	DocumentState    string       `json:"document_state,omitempty"`
 	IssuingAuthority string       `json:"issuing_authority"`
 
 	// Identity details

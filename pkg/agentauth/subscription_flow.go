@@ -49,14 +49,14 @@ type SubscriptionFlowManager struct {
 type SubscriptionStatus string
 
 const (
-	SubscriptionStatusPending             SubscriptionStatus = "pending"
-	SubscriptionStatusAwaitingIdentity    SubscriptionStatus = "awaiting_identity"
-	SubscriptionStatusAwaitinAgentAuthProof   SubscriptionStatus = "awaiting_auth_proof"
-	SubscriptionStatusAwaitingClientOwner SubscriptionStatus = "awaiting_client_owner"
-	SubscriptionStatusAwaitingClient      SubscriptionStatus = "awaiting_client"
-	SubscriptionStatusAwaitingResource    SubscriptionStatus = "awaiting_resource"
-	SubscriptionStatusCompleted           SubscriptionStatus = "completed"
-	SubscriptionStatusFailed              SubscriptionStatus = "failed"
+	SubscriptionStatusPending               SubscriptionStatus = "pending"
+	SubscriptionStatusAwaitingIdentity      SubscriptionStatus = "awaiting_identity"
+	SubscriptionStatusAwaitinAgentAuthProof SubscriptionStatus = "awaiting_auth_proof"
+	SubscriptionStatusAwaitingClientOwner   SubscriptionStatus = "awaiting_client_owner"
+	SubscriptionStatusAwaitingClient        SubscriptionStatus = "awaiting_client"
+	SubscriptionStatusAwaitingResource      SubscriptionStatus = "awaiting_resource"
+	SubscriptionStatusCompleted             SubscriptionStatus = "completed"
+	SubscriptionStatusFailed                SubscriptionStatus = "failed"
 )
 
 // Subscription represents a complete AAP001 subscription

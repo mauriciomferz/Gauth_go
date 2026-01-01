@@ -60,52 +60,52 @@ type AgentAuthPlusValidationResult struct {
 
 // SuccessorCheckResult contains successor validation results
 type SuccessorCheckResult struct {
-	CheckPerformed   bool                           `json:"check_performed"`
-	SuccessorActive  bool                           `json:"successor_active"`
+	CheckPerformed   bool                               `json:"check_performed"`
+	SuccessorActive  bool                               `json:"successor_active"`
 	ActiveSuccessor  *agentauthplus.SuccessorActivation `json:"active_successor,omitempty"`
-	EffectiveAgentID string                         `json:"effective_agent_id"` // primary or successor
+	EffectiveAgentID string                             `json:"effective_agent_id"` // primary or successor
 }
 
 // DelegationCheckResult contains delegation validation results
 type DelegationCheckResult struct {
-	CheckPerformed  bool                      `json:"check_performed"`
-	DelegationValid bool                      `json:"delegation_valid"`
-	CurrentDepth    int                       `json:"current_depth"`
-	MaxAllowedDepth int                       `json:"max_allowed_depth"`
+	CheckPerformed  bool                          `json:"check_performed"`
+	DelegationValid bool                          `json:"delegation_valid"`
+	CurrentDepth    int                           `json:"current_depth"`
+	MaxAllowedDepth int                           `json:"max_allowed_depth"`
 	DelegationChain []*agentauthplus.AIDelegation `json:"delegation_chain,omitempty"`
-	DepthExceeded   bool                      `json:"depth_exceeded"`
-	Warnings        []string                  `json:"warnings,omitempty"`
+	DepthExceeded   bool                          `json:"depth_exceeded"`
+	Warnings        []string                      `json:"warnings,omitempty"`
 }
 
 // DualControlCheckResult contains dual control validation results
 type DualControlCheckResult struct {
-	CheckPerformed    bool                           `json:"check_performed"`
-	RequiresApproval  bool                           `json:"requires_approval"`
-	ApprovalObtained  bool                           `json:"approval_obtained"`
+	CheckPerformed    bool                               `json:"check_performed"`
+	RequiresApproval  bool                               `json:"requires_approval"`
+	ApprovalObtained  bool                               `json:"approval_obtained"`
 	PendingApproval   *agentauthplus.DualControlApproval `json:"pending_approval,omitempty"`
 	ApprovedAction    *agentauthplus.DualControlApproval `json:"approved_action,omitempty"`
-	RequiredApprovers int                            `json:"required_approvers"`
-	CurrentApprovers  int                            `json:"current_approvers"`
+	RequiredApprovers int                                `json:"required_approvers"`
+	CurrentApprovers  int                                `json:"current_approvers"`
 }
 
 // CapabilityCheckResult contains capability assessment results
 type CapabilityCheckResult struct {
-	CheckPerformed    bool                              `json:"check_performed"`
-	CapabilityMet     bool                              `json:"capability_met"`
+	CheckPerformed    bool                                  `json:"check_performed"`
+	CapabilityMet     bool                                  `json:"capability_met"`
 	LatestAssessment  *agentauthplus.AICapabilityAssessment `json:"latest_assessment,omitempty"`
-	RequiredLevel     string                            `json:"required_level,omitempty"`
-	ActualLevel       string                            `json:"actual_level,omitempty"`
-	DomainMatches     map[string]bool                   `json:"domain_matches,omitempty"`
-	AssessmentExpired bool                              `json:"assessment_expired"`
+	RequiredLevel     string                                `json:"required_level,omitempty"`
+	ActualLevel       string                                `json:"actual_level,omitempty"`
+	DomainMatches     map[string]bool                       `json:"domain_matches,omitempty"`
+	AssessmentExpired bool                                  `json:"assessment_expired"`
 }
 
 // FiduciaryCheckResult contains fiduciary duty validation results
 type FiduciaryCheckResult struct {
-	CheckPerformed       bool                                `json:"check_performed"`
-	HasViolations        bool                                `json:"has_violations"`
+	CheckPerformed       bool                                    `json:"check_performed"`
+	HasViolations        bool                                    `json:"has_violations"`
 	UnresolvedViolations []*agentauthplus.FiduciaryDutyViolation `json:"unresolved_violations,omitempty"`
-	CriticalViolations   int                                 `json:"critical_violations"`
-	BlockingAction       bool                                `json:"blocking_action"` // whether violations block authorization
+	CriticalViolations   int                                     `json:"critical_violations"`
+	BlockingAction       bool                                    `json:"blocking_action"` // whether violations block authorization
 }
 
 // ValidatePoAWithAgentAuthPlus performs comprehensive AgentAuth+ validation for a PoA

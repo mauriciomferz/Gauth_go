@@ -121,61 +121,61 @@ type ExternalProviderConfig struct {
 
 // TrustLevelMapping maps OIDC ACR values to AgentAuth trust levels
 type TrustLevelMapping struct {
-	ACR             string `json:"acr"`               // OIDC ACR value
+	ACR                 string `json:"acr"`                   // OIDC ACR value
 	AgentAuthTrustLevel string `json:"agentauth_trust_level"` // "low", "substantial", "high"
-	MinMFARequired  bool   `json:"min_mfa_required"`
-	Description     string `json:"description"`
+	MinMFARequired      bool   `json:"min_mfa_required"`
+	Description         string `json:"description"`
 }
 
 // Default ACR → TrustLevel mappings
 var DefaultACRMappings = []TrustLevelMapping{
 	{
-		ACR:             "0",
+		ACR:                 "0",
 		AgentAuthTrustLevel: "low",
-		MinMFARequired:  false,
-		Description:     "No specific authentication context",
+		MinMFARequired:      false,
+		Description:         "No specific authentication context",
 	},
 	{
-		ACR:             "1",
+		ACR:                 "1",
 		AgentAuthTrustLevel: "low",
-		MinMFARequired:  false,
-		Description:     "Basic authentication (password only)",
+		MinMFARequired:      false,
+		Description:         "Basic authentication (password only)",
 	},
 	{
-		ACR:             "2",
+		ACR:                 "2",
 		AgentAuthTrustLevel: "substantial",
-		MinMFARequired:  true,
-		Description:     "Multi-factor authentication",
+		MinMFARequired:      true,
+		Description:         "Multi-factor authentication",
 	},
 	{
-		ACR:             "substantial",
+		ACR:                 "substantial",
 		AgentAuthTrustLevel: "substantial",
-		MinMFARequired:  true,
-		Description:     "eIDAS Substantial - MFA required",
+		MinMFARequired:      true,
+		Description:         "eIDAS Substantial - MFA required",
 	},
 	{
-		ACR:             "high",
+		ACR:                 "high",
 		AgentAuthTrustLevel: "high",
-		MinMFARequired:  true,
-		Description:     "eIDAS High - Hardware token required",
+		MinMFARequired:      true,
+		Description:         "eIDAS High - Hardware token required",
 	},
 	{
-		ACR:             "loa-4",
+		ACR:                 "loa-4",
 		AgentAuthTrustLevel: "high",
-		MinMFARequired:  true,
-		Description:     "NIST LOA-4 - Highest assurance",
+		MinMFARequired:      true,
+		Description:         "NIST LOA-4 - Highest assurance",
 	},
 	{
-		ACR:             "urn:mace:incommon:iap:silver",
+		ACR:                 "urn:mace:incommon:iap:silver",
 		AgentAuthTrustLevel: "substantial",
-		MinMFARequired:  true,
-		Description:     "InCommon Silver - Research/Education institutions",
+		MinMFARequired:      true,
+		Description:         "InCommon Silver - Research/Education institutions",
 	},
 	{
-		ACR:             "urn:mace:incommon:iap:bronze",
+		ACR:                 "urn:mace:incommon:iap:bronze",
 		AgentAuthTrustLevel: "low",
-		MinMFARequired:  false,
-		Description:     "InCommon Bronze - Basic authentication",
+		MinMFARequired:      false,
+		Description:         "InCommon Bronze - Basic authentication",
 	},
 }
 

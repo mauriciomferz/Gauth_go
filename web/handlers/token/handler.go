@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
+	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto/keys"
-	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 )
 
 // Helper interfaces to avoid circular dependencies with web package
@@ -57,21 +57,21 @@ type CapabilityEnforcer func(action string, claims map[string]any) (bool, []stri
 
 // Handler manages token operations
 type Handler struct {
-	Store         *Store
-	Replay        *ReplayNonceStore
-	Auditor       Auditor
-	Emitter       Emitter
-	PrimaryAuth   PrimaryAuth
-	Tracer        Tracer
-	TracerRatio   float64
-	CapEnforcer   CapabilityEnforcer
-	Metrics       metrics.Metrics
-	Lifecycle     LifecycleRecorder
-	KeyProvider   crypto.KeyProvider
-	JWTKeyManager keys.KeyManager
-	ETagUpdater   JWKSETagUpdater
-	AgentAuthService  agentauth.AgentAuth
-	ClockStatus   ClockStatusProvider
+	Store            *Store
+	Replay           *ReplayNonceStore
+	Auditor          Auditor
+	Emitter          Emitter
+	PrimaryAuth      PrimaryAuth
+	Tracer           Tracer
+	TracerRatio      float64
+	CapEnforcer      CapabilityEnforcer
+	Metrics          metrics.Metrics
+	Lifecycle        LifecycleRecorder
+	KeyProvider      crypto.KeyProvider
+	JWTKeyManager    keys.KeyManager
+	ETagUpdater      JWKSETagUpdater
+	AgentAuthService agentauth.AgentAuth
+	ClockStatus      ClockStatusProvider
 
 	// Configs
 	UseJWTLib    bool
