@@ -971,9 +971,7 @@ Cuando ocurre un incidente de seguridad relacionado con AgentAuth:
 
 ---
 
-> **Nota del Traductor**: El contenido técnico de esta sección (especificaciones de protocolo, código y diagramas) se mantiene en su idioma original (inglés) para garantizar la máxima precisión técnica y evitar ambigüedades en la implementación.
 
----
 
 ## Capítulo 5: AAP-01: Identidad del Agente y Perfiles de Entidad
 
@@ -1007,13 +1005,13 @@ The Entity Profile MUST satisfy:
 4. **R4: Extensibility** - The profile MUST support domain-specific extensions without breaking core validation.
 5. **R5: Privacy-Preserving** - The profile MUST NOT require disclosure of PII for verification.
 
-### 5.2 The Entity Profile Schema
+### 5.2 El Esquema del Perfil de Entidad
 
-An Entity Profile is a JSON-LD document that describes a participant in the AgentAuth ecosystem. All Entity Profiles MUST allow canonicalization to a unique hash (the Entity ID).
+Un Perfil de Entidad es un documento JSON-LD que describe a un participante en el ecosistema AgentAuth. Todos los Perfiles de Entidad DEBEN permitir la canonicalización a un hash único (el ID de Entidad).
 
-#### 5.2.1 The JSON-LD Context
+#### 5.2.1 El Contexto JSON-LD
 
-The `@context` defines the semantic meaning of all fields. The canonical context is published at `https://w3id.org/agentauth/v1`:
+El `@context` define el significado semántico de todos los campos. El contexto canónico se publica en `https://w3id.org/agentauth/v1`:
 
 ```json
 {
@@ -1091,7 +1089,7 @@ The `@context` defines the semantic meaning of all fields. The canonical context
 }
 ```
 
-#### 5.2.2 Complete Profile Example
+#### 5.2.2 Ejemplo de Perfil Completo
 
 ```json
 {
@@ -1149,24 +1147,24 @@ The `@context` defines the semantic meaning of all fields. The canonical context
 }
 ```
 
-#### 5.2.3 Field Semantics
+#### 5.2.3 Semántica de Campos
 
-- **`@context`** (`Array[URI]`, **Required**): MUST include `https://w3id.org/agentauth/v1`
-- **`id`** (`DID`, **Required**): The agent's Decentralized Identifier.
-- **`type`** (`Array[String]`, **Required**): MUST include `Agent`, `Principal`, or `Fiduciary`.
-- **`legalEntity.name`** (`String`, **Required**): Legal name as registered.
-- **`legalEntity.jurisdiction`** (`ISO-3166`, **Required**): Primary jurisdiction code.
-- **`legalEntity.registrationNumber`** (`String`, Conditional): Required for corporations.
-- **`legalEntity.lei`** (`String`, Recommended): Legal Entity Identifier (20 chars).
-- **`verificationMethod`** (`Array[Object]`, **Required**): At least one Ed25519 key.
-- **`service`** (`Array[Object]`, Recommended): `TransparencyLog` endpoint for production.
-- **`created`** (`DateTime`, **Required**): RFC 3339 timestamp.
-- **`status`** (`Enum`, **Required**): `active`, `suspended`, or `revoked`.
-- **`proof`** (`Object`, **Required**): Signature over canonical profile.
+- **`@context`** (`Array[URI]`, **Requerido**): DEBE incluir `https://w3id.org/agentauth/v1`
+- **`id`** (`DID`, **Requerido**): El Identificador Descentralizado del agente.
+- **`type`** (`Array[String]`, **Requerido**): DEBE incluir `Agent`, `Principal` o `Fiduciary`.
+- **`legalEntity.name`** (`String`, **Requerido**): Nombre legal según registro.
+- **`legalEntity.jurisdiction`** (`ISO-3166`, **Requerido**): Código de jurisdicción primaria.
+- **`legalEntity.registrationNumber`** (`String`, Condicional): Requerido para corporaciones.
+- **`legalEntity.lei`** (`String`, Recomendado): Identificador de Entidad Legal (20 caracteres).
+- **`verificationMethod`** (`Array[Object]`, **Requerido**): Al menos una clave Ed25519.
+- **`service`** (`Array[Object]`, Recomendado): Punto final `TransparencyLog` para producción.
+- **`created`** (`DateTime`, **Requerido**): Marca de tiempo RFC 3339.
+- **`status`** (`Enum`, **Requerido**): `active`, `suspended`, o `revoked`.
+- **`proof`** (`Object`, **Requerido**): Firma sobre el perfil canónico.
 
-### 5.3 SHACL Validation Shape
+### 5.3 Forma de Validación SHACL
 
-To enforce schema compliance, we define a SHACL (Shapes Constraint Language) shape:
+Para hacer cumplir el cumplimiento del esquema, definimos una forma SHACL (Shapes Constraint Language):
 
 ```turtle
 @prefix sh: <http://www.w3.org/ns/shacl#> .
@@ -1220,47 +1218,47 @@ aap:VerificationMethodShape
     ] .
 ```
 
-### 5.4 Decentralized Identifier Resolution
+### 5.4 Resolución de Identificador Descentralizado
 
-#### 5.4.1 The `did:web` Method
+#### 5.4.1 El Método `did:web`
 
-For institutional agents, `did:web` binds identity to DNS control:
+Para agentes institucionales, `did:web` vincula la identidad al control DNS:
 
-**DID Syntax**: `did:web:<domain>:<path>:<path>`
+**Sintaxis DID**: `did:web:<dominio>:<ruta>:<ruta>`
 
-**Resolution Algorithm**:
+**Algoritmo de Resolución**:
 ```
-1. Parse DID: did:web:gmc.com:agents:procurement-ai
-2. Construct URL:
+1. Analizar DID: did:web:gmc.com:agents:procurement-ai
+2. Construir URL:
    - Base: https://gmc.com
-   - Path: /.well-known/did/agents/procurement-ai/did.json
-3. Fetch URL over HTTPS (TLS 1.3+)
-4. Validate TLS certificate chain to trusted CA
-5. Parse JSON-LD response
-6. Return DID Document
+   - Ruta: /.well-known/did/agents/procurement-ai/did.json
+3. Obtener URL sobre HTTPS (TLS 1.3+)
+4. Validar cadena de certificados TLS hasta CA confiable
+5. Analizar respuesta JSON-LD
+6. Devolver Documento DID
 ```
 
-**Security Considerations**:
-- DNS hijacking allows identity takeover
-- TLS certificate compromise allows impersonation
-- MITIGATION: Use DNSSEC + CAA records + CT monitoring
+**Consideraciones de Seguridad**:
+- El secuestro de DNS permite la toma de control de identidad
+- El compromiso del certificado TLS permite la suplantación
+- MITIGACIÓN: Usar DNSSEC + registros CAA + monitoreo CT
 
-#### 5.4.2 The `did:key` Method
+#### 5.4.2 El Método `did:key`
 
-For ephemeral or edge agents, `did:key` derives identity from the key itself:
+Para agentes efímeros o de borde, `did:key` deriva la identidad de la propia clave:
 
-**DID Syntax**: `did:key:<multibase-encoded-public-key>`
+**Sintaxis DID**: `did:key:<clave-publica-codificada-multibase>`
 
-**Example**:
+**Ejemplo**:
 ```
 did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
 ```
 
-**Resolution Algorithm**:
+**Algoritmo de Resolución**:
 ```
-1. Parse DID suffix as Multibase
-2. Decode to raw public key bytes
-3. Construct minimal DID Document:
+1. Analizar sufijo DID como Multibase
+2. Decodificar a bytes de clave pública crudos
+3. Construir Documento DID mínimo:
    {
      "id": "did:key:z6Mk...",
      "verificationMethod": [{
@@ -1272,23 +1270,23 @@ did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK
    }
 ```
 
-**Security Considerations**:
-- No legal entity binding (pure cryptographic identity)
-- Suitable only for short-lived, constrained agents
-- MUST be combined with strong PoA constraints
+**Consideraciones de Seguridad**:
+- Sin vinculación a entidad legal (identidad criptográfica pura)
+- Adecuado solo para agentes restringidos y de corta duración
+- DEBE combinarse con restricciones PoA fuertes
 
-### 5.5 Cryptographic Binding
+### 5.5 Vinculación Criptográfica
 
-How do we trust that `did:web:gmc.com:agents:procure-ai` actually belongs to GlobalManufacturing Corp?
+¿Cómo confiamos en que `did:web:gmc.com:agents:procure-ai` realmente pertenece a GlobalManufacturing Corp?
 
-#### 5.5.1 The TLS Bridge
-When using `did:web`, the trust is anchored in the **DNS** and **TLS** layer.
+#### 5.5.1 El Puente TLS
+Cuando se usa `did:web`, la confianza está anclada en la capa **DNS** y **TLS**.
 
-1. Relying Party fetches `https://gmc.com/.well-known/did.json`.
-2. The TLS Certificate for `gmc.com` validates ownership of the domain.
-3. The content of `did.json` validates the Agent's public key.
+1. La Parte Confiante obtiene `https://gmc.com/.well-known/did.json`.
+2. El Certificado TLS para `gmc.com` valida la propiedad del dominio.
+3. El contenido de `did.json` valida la clave pública del Agente.
 
-This forms a Chain of Trust:
+Esto forma una Cadena de Confianza:
 ```
 DigiCert Root CA
     `-- gmc.com TLS Certificate (EV)
@@ -1296,34 +1294,34 @@ DigiCert Root CA
             `-- Agent Public Key
 ```
 
-#### 5.5.2 The Registry Bridge
-For high-assurance contexts where DNS is too fragile, we use the **GlobalEdDSA Registry**.
+#### 5.5.2 El Puente de Registro
+Para contextos de alta seguridad donde DNS es demasiado frágil, usamos el **Registro GlobalEdDSA**.
 
-This is a smart contract (or append-only log) that maps:
-`EntityHash(Profile)` -> `Signature(PrincipalKey)`
+Este es un contrato inteligente (o registro de solo anexar) que mapea:
+`HashEntidad(Perfil)` -> `Firma(ClavePrincipal)`
 
-**Registry Entry Structure**:
+**Estructura de Entrada de Registro**:
 ```solidity
 struct RegistryEntry {
-    bytes32 profileHash;      // SHA-256 of canonical profile
-    bytes32 controllerKey;    // Principal's public key hash
-    bytes signature;          // Ed25519 signature
-    uint256 timestamp;        // Block timestamp
-    bool revoked;             // Revocation flag
+    bytes32 profileHash;      // SHA-256 de perfil canónico
+    bytes32 controllerKey;    // Hash de clave pública del Principal
+    bytes signature;          // Firma Ed25519
+    uint256 timestamp;        // Marca de tiempo del bloque
+    bool revoked;             // Bandera de revocación
 }
 ```
 
-**Verification Logic**:
+**Lógica de Verificación**:
 ```python
 def verify_identity(profile, signature, principal_pubkey):
-    # 1. Canonicalize using JCS (RFC 8785)
+    # 1. Canonicalizar usando JCS (RFC 8785)
     canonical = JCS.canonicalize(profile)
     profile_hash = sha256(canonical)
     
-    # 2. Verify Signature
+    # 2. Verificar Firma
     assert Ed25519.verify(principal_pubkey, signature, canonical)
     
-    # 3. Check Registry
+    # 3. Verificar Registro
     entry = Registry.lookup(profile_hash)
     assert entry is not None
     assert entry.controllerKey == sha256(principal_pubkey)
@@ -1333,27 +1331,27 @@ def verify_identity(profile, signature, principal_pubkey):
     return True
 ```
 
-### 5.6 Operational Lifecycle
+### 5.6 Ciclo de Vida Operativo
 
-#### 5.6.1 Creation Workflow
+#### 5.6.1 Flujo de Trabajo de Creación
 
-**Table 5.4: Entity Profile Creation Workflow**
+**Tabla 5.4: Flujo de Trabajo de Creación de Perfil de Entidad**
 
-| Step | Action | Details |
+| Paso | Acción | Detalles |
 |------|--------|---------|
-| **1. Key Generation** | Principal generates Ed25519 keypair | • Secure RNG usage<br>• HSM recommended for production<br>• Key never leaves secure boundary |
-| **2. Profile Construction** | Draft JSON-LD profile | • Unique DID<br>• Legal entity details<br>• Public key(s)<br>• Service endpoints |
-| **3. Controller Signature** | Principal signs canonicalized profile | • Creates `proof` block<br>• Links to Controller's verification method |
-| **4. Publication** | Upload or Registry Submission | • **did:web**: Upload to `/.well-known/did.json`<br>• **Registry**: Submit hash + signature to smart contract<br>• **Both**: For maximum assurance |
-| **5. Log Inclusion** | Submit to Transparency Log | • Receive Signed Certificate Timestamp (SCT)<br>• SCT embedded in profile for future verification |
+| **1. Generación de Claves** | Principal genera par de claves Ed25519 | • Uso de RNG seguro<br>• HSM recomendado para producción<br>• La clave nunca sale del límite seguro |
+| **2. Construcción del Perfil** | Borrador de perfil JSON-LD | • DID único<br>• Detalles de entidad legal<br>• Clave(s) pública(s)<br>• Puntos finales de servicio |
+| **3. Firma del Controlador** | Principal firma perfil canonicalizado | • Crea bloque `proof`<br>• Enlaza al método de verificación del Controlador |
+| **4. Publicación** | Carga o Envío al Registro | • **did:web**: Cargar a `/.well-known/did.json`<br>• **Registro**: Enviar hash + firma al contrato inteligente<br>• **Ambos**: Para máxima seguridad |
+| **5. Inclusión en Registro** | Enviar al Registro de Transparencia | • Recibir Marca de Tiempo de Certificado Firmado (SCT)<br>• SCT incrustado en perfil para verificación futura |
 
-#### 5.6.2 Key Rotation Protocol
+#### 5.6.2 Protocolo de Rotación de Claves
 
-Key rotation is critical for long-lived agents. The protocol ensures continuity:
+La rotación de claves es crítica para agentes de larga duración. El protocolo asegura la continuidad:
 
 ```python
 def rotate_key(old_profile, new_keypair):
-    # 1. Generate new profile with new key
+    # 1. Generar nuevo perfil con nueva clave
     new_profile = old_profile.copy()
     new_profile['verificationMethod'].append({
         'id': f"{old_profile['id']}#key-{timestamp}",
@@ -1362,28 +1360,28 @@ def rotate_key(old_profile, new_keypair):
     })
     new_profile['updated'] = now()
     
-    # 2. Sign with OLD key (transition signature)
+    # 2. Firmar con clave ANTIGUA (firma de transición)
     transition_proof = sign(old_keypair, canonicalize(new_profile))
     
-    # 3. Sign with NEW key (confirmation)
+    # 3. Firmar con clave NUEVA (confirmación)
     confirmation_proof = sign(new_keypair, canonicalize(new_profile))
     
-    # 4. Bundle both proofs
+    # 4. Agrupar ambas pruebas
     new_profile['proof'] = [transition_proof, confirmation_proof]
     
-    # 5. Publish and await log inclusion
+    # 5. Publicar y esperar inclusión en registro
     publish(new_profile)
     await_transparency_log(new_profile)
     
-    # 6. After grace period, remove old key
+    # 6. Después del período de gracia, eliminar clave antigua
     schedule_key_removal(old_profile['verificationMethod'][0], days=30)
 ```
 
-**Grace Period**: Old keys MUST remain valid for at least 30 days to allow in-flight PoAs to complete.
+**Período de Gracia**: Las claves antiguas DEBEN permanecer válidas durante al menos 30 días para permitir que se completen las PoA en vuelo.
 
-#### 5.6.3 Decommissioning (Tombstone)
+#### 5.6.3 Desmantelamiento (Lápida)
 
-To permanently "kill" an Identity:
+Para "matar" permanentemente una Identidad:
 
 ```json
 {
@@ -1398,29 +1396,29 @@ To permanently "kill" an Identity:
 }
 ```
 
-**Tombstone Semantics**:
-- All PoAs issued to this agent become INVALID immediately
-- The DID SHOULD NOT be reused for 1 year (namespace hygiene)
-- Transparency Log retains tombstone indefinitely
+**Semántica de Lápida**:
+- Todas las PoAs emitidas a este agente se vuelven INVÁLIDAS inmediatamente
+- El DID NO DEBE reutilizarse durante 1 año (higiene de espacio de nombres)
+- El Registro de Transparencia retiene la lápida indefinidamente
 
-### 5.7 Privacy Considerations
+### 5.7 Consideraciones de Privacidad
 
-Entity Profiles are **public**. They are designed to be discoverable.
+Los Perfiles de Entidad son **públicos**. Están diseñados para ser descubiertos.
 
-#### 5.7.1 What NOT to Include
+#### 5.7.1 Qué NO Incluir
 
-**Table 5.2: Privacy Risks in Entity Profiles**
+**Tabla 5.2: Riesgos de Privacidad en Perfiles de Entidad**
 
-| Field | Risk | Mitigation |
+| Campo | Riesgo | Mitigación |
 |-------|------|------------|
-| Employee names | GDPR violation | Use role-based identifiers |
-| Internal org structure | Competitive intel | Abstract to "department" |
-| Spending limits | Business strategy | Put in PoA, not Profile |
-| IP addresses | Attack surface | Use DNS names |
+| Nombres de empleados | Violación GDPR | Usar identificadores basados en roles |
+| Estructura interna org | Intel competitiva | Abstraer a "departamento" |
+| Límites de gasto | Estrategia comercial | Poner en PoA, no en Perfil |
+| Direcciones IP | Superficie de ataque | Usar nombres DNS |
 
-#### 5.7.2 Pseudonymous Agents
+#### 5.7.2 Agentes Seudónimos
 
-For privacy-sensitive contexts, use `did:key` with no `legalEntity`:
+Para contextos sensibles a la privacidad, use `did:key` sin `legalEntity`:
 
 ```json
 {
@@ -1431,11 +1429,11 @@ For privacy-sensitive contexts, use `did:key` with no `legalEntity`:
 }
 ```
 
-The legal binding then happens in the PoA chain, not the profile itself.
+La vinculación legal ocurre entonces en la cadena PoA, no en el perfil mismo.
 
-### 5.8 Reference Implementation
+### 5.8 Implementación de Referencia
 
-#### 5.8.1 Go Struct Definition
+#### 5.8.1 Definición de Struct en Go
 
 ```go
 package agentauth
@@ -1485,7 +1483,7 @@ const (
 )
 ```
 
-#### 5.8.2 Canonicalization Function
+#### 5.8.2 Función de Canonicalización
 
 ```go
 import (
@@ -1523,43 +1521,43 @@ func (p *EntityProfile) Hash() ([32]byte, error) {
 ---
 
 
-## Chapter 6: AAP-02: Proof of Authorization
+## Capítulo 6: AAP-02: Prueba de Autorización
 
-### 6.1 The PoA Artifact
+### 6.1 El Artefacto PoA
 
-The Proof of Authorization (PoA) is the core credential of the AgentAuth protocol. Unlike an OAuth token, which is an opaque reference to a server-side state, a PoA is a **self-contained, verifiable statement of authority**.
+La Prueba de Autorización (PoA) es la credencial principal del protocolo AgentAuth. A diferencia de un token OAuth, que es una referencia opaca a un estado del lado del servidor, una PoA es una **declaración de autoridad autónoma y verificable**.
 
-#### 6.1.1 Design Goals
+#### 6.1.1 Objetivos de Diseño
 
-**Table 6.1: PoA Design Goals**
+**Tabla 6.1: Objetivos de Diseño de PoA**
 
-| Goal | Description | How Achieved |
+| Objetivo | Descripción | Cómo se Logra |
 |------|-------------|--------------|
-| **Self-Contained** | No server-side introspection required | All claims embedded in token |
-| **Offline Verifiable** | Works without network access | Cryptographic signatures |
-| **Logic-Carrying** | Constraints evaluated at runtime | CEL/JSON-Logic expressions |
-| **Delegation-Aware** | Supports multi-hop authority chains | Embedded parent PoAs |
-| **Compact** | Suitable for IoT/Edge | CBOR encoding |
-| **Auditable** | Every action traceable | Unique `jti` + Transparency Log |
+| **Autónomo** | No requiere introspección del servidor | Todas las afirmaciones integradas en el token |
+| **Verificable Offline** | Funciona sin acceso a la red | Firmas criptográficas |
+| **Portador de Lógica** | Restricciones evaluadas en tiempo de ejecución | Expresiones CEL/JSON-Logic |
+| **Consciente de Delegación** | Soporta cadenas de autoridad multi-salto | PoAs padres integradas |
+| **Compacto** | Adecuado para IoT/Borde | Codificación CBOR |
+| **Auditable** | Cada acción rastreable | `jti` único + Registro de Transparencia |
 
-#### 6.1.2 Comparison with Existing Credentials
+#### 6.1.2 Comparación con Credenciales Existentes
 
-**Table 6.2: Comparative Analysis of Credentials**
+**Tabla 6.2: Análisis Comparativo de Credenciales**
 
-| Feature | OAuth 2.0 | JWT | W3C VC | AgentAuth |
+| Característica | OAuth 2.0 | JWT | W3C VC | AgentAuth |
 |:---|:---|:---|:---|:---|
-| **Self-Contained** | No | Yes | Yes | **Yes** |
-| **Logic** | No | No | No | **Yes** |
-| **Delegation** | No | No | Partial | **Yes** |
-| **Revocation** | Expiry | Manual | StatusList | **Log** |
-| **Format** | String | Base64 | JSON-LD | **CBOR** |
-| **Canon** | N/A | None | JCS | **Determ.** |
+| **Autónomo** | No | Sí | Sí | **Sí** |
+| **Lógica** | No | No | No | **Sí** |
+| **Delegación** | No | No | Parcial | **Sí** |
+| **Revocación** | Expiración | Manual | StatusList | **Log** |
+| **Formato** | String | Base64 | JSON-LD | **CBOR** |
+| **Canon** | N/A | Ninguno | JCS | **Determ.** |
 
-### 6.2 Wire Format Specification
+### 6.2 Especificación del Formato de Cable
 
-#### 6.2.1 CBOR Encoding (Primary)
+#### 6.2.1 Codificación CBOR (Primaria)
 
-The canonical wire format is **CBOR (RFC 8949)** wrapped in a **COSE Sign1 envelope (RFC 8152)**:
+El formato canónico de cable es **CBOR (RFC 8949)** envuelto en un **sobre COSE Sign1 (RFC 8152)**:
 
 ```
 COSE_Sign1 = [
@@ -1581,9 +1579,9 @@ unprotected_header = {
 }
 ```
 
-#### 6.2.2 CDDL Schema (RFC 8610)
+#### 6.2.2 Esquema CDDL (RFC 8610)
 
-The complete CDDL (Concise Data Definition Language) schema:
+El esquema completo CDDL (Concise Data Definition Language):
 
 ```cddl
 ; AAP-02 Proof of Authorization Schema
@@ -1658,9 +1656,9 @@ metadata = {
 }
 ```
 
-#### 6.2.3 JSON Representation (Debug/Web)
+#### 6.2.3 Representación JSON (Depuración/Web)
 
-For debugging and web contexts, a JSON representation is allowed:
+Para depuración y contextos web, se permite una representación JSON:
 
 ```json
 {
@@ -1692,37 +1690,37 @@ For debugging and web contexts, a JSON representation is allowed:
 }
 ```
 
-**IMPORTANT**: Signatures are ALWAYS computed over the **CBOR canonical form**, even when the PoA is transmitted as JSON. The JSON form is for human readability only.
+**IMPORTANTE**: Las firmas SIEMPRE se calculan sobre la **forma canónica CBOR**, incluso cuando la PoA se transmite como JSON. La forma JSON es solo para legibilidad humana.
 
-### 6.3 Claims Specification
+### 6.3 Especificación de Reclamaciones (Claims)
 
-#### 6.3.1 Standard Claims
+#### 6.3.1 Reclamaciones Estándar
 
-**Table 6.3: Standard Claims Specification**
+**Tabla 6.3: Especificación de Reclamaciones Estándar**
 
-| Claim | CBOR Key | Type | Required | Description |
+| Reclamación | Clave CBOR | Tipo | Requerido | Descripción |
 |-------|----------|------|----------|-------------|
-| `iss` | 1 | DID | YES | The Principal delegating authority |
-| `sub` | 2 | DID | YES | The Agent receiving authority |
-| `aud` | 3 | String/Array | NO | Intended relying parties |
-| `exp` | 4 | Int (Epoch) | YES | Absolute expiration time |
-| `nbf` | 5 | Int (Epoch) | NO | Not valid before this time |
-| `iat` | 6 | Int (Epoch) | NO | Issued at timestamp |
-| `jti` | 7 | UUID (16 bytes) | YES | Unique identifier for replay protection |
+| `iss` | 1 | DID | SÍ | El Principal que delega autoridad |
+| `sub` | 2 | DID | SÍ | El Agente que recibe autoridad |
+| `aud` | 3 | String/Array | NO | Partes confiantes previstas |
+| `exp` | 4 | Int (Epoch) | SÍ | Tiempo de expiración absoluto |
+| `nbf` | 5 | Int (Epoch) | NO | No válido antes de este tiempo |
+| `iat` | 6 | Int (Epoch) | NO | Emitido en marca de tiempo |
+| `jti` | 7 | UUID (16 bytes) | SÍ | Identificador único para protección contra repetición |
 
-#### 6.3.2 Authority Claim (`aat`)
+#### 6.3.2 Reclamación de Autoridad (`aat`)
 
-The `aat` claim is an array of `Grant` objects. Each grant specifies:
+La reclamación `aat` es una matriz de objetos `Grant`. Cada concesión especifica:
 
-- **`act`**: The action(s) permitted (namespace:operation format)
-- **`res`**: The resources to which the action applies
-- **`exc`**: Resources explicitly excluded (optional)
+- **`act`**: La(s) acción(es) permitida(s) (formato espacio_de_nombres:operación)
+- **`res`**: Los recursos a los que se aplica la acción
+- **`exc`**: Recursos explícitamente excluidos (opcional)
 
-**Namespace Convention**:
+**Convención de Espacio de Nombres**:
 ```
-<domain>:<operation>
+<dominio>:<operación>
 
-Examples:
+Ejemplos:
   orders:create
   orders:read
   payments:initiate
@@ -1730,15 +1728,15 @@ Examples:
   hr:terminate
 ```
 
-**Resource Pattern Syntax**:
+**Sintaxis de Patrón de Recurso**:
 ```
 Literal:    store:12345
-Prefix:     store:*
+Prefijo:     store:*
 Regex:      store:[0-9]+
 URN:        urn:agentauth:gmc:warehouse:us-east-1:*
 ```
 
-**Attenuation Rule**: When delegating, the child PoA's `aat` MUST be a subset of the parent's:
+**Regla de Atenuación**: Al delegar, el `aat` de la PoA hija DEBE ser un subconjunto del padre:
 
 ```
 Parent: aat = [{ act: "orders:*", res: ["*"] }]
@@ -1747,21 +1745,21 @@ Child:  aat = [{ act: "orders:create", res: ["store:us-*"] }]  [VALID]
 Child:  aat = [{ act: "payments:create", res: ["*"] }]  [INVALID] (escalation)
 ```
 
-#### 6.3.3 Constraint Claim (`cst`)
+#### 6.3.3 Reclamación de Restricción (`cst`)
 
-Constraints are runtime predicates. They transform static authority into dynamic, context-aware authorization.
+Las restricciones son predicados en tiempo de ejecución. Transforman la autoridad estática en autorización dinámica y consciente del contexto.
 
-**Constraint Types**:
+**Tipos de Restricción**:
 
-| Type | Description | Example |
+| Tipo | Descripción | Ejemplo |
 |------|-------------|---------|
-| **Comparison** | Compare request field to value | `request.amount <= 10000` |
-| **Membership** | Check if value in set | `request.vendor in approved_list` |
-| **Temporal** | Time-based restrictions | `now.hour >= 9 AND now.hour < 17` |
-| **Geographic** | Location-based | `request.destination.country in ["US", "CA"]` |
-| **External** | Call external oracle | `sanctions_check(request.beneficiary)` |
+| **Comparación** | Comparar campo de solicitud con valor | `request.amount <= 10000` |
+| **Membresía** | Verificar si valor está en conjunto | `request.vendor in approved_list` |
+| **Temporal** | Restricciones basadas en tiempo | `now.hour >= 9 AND now.hour < 17` |
+| **Geográfica** | Basado en ubicación | `request.destination.country in ["US", "CA"]` |
+| **Externa** | Llamar a oráculo externo | `sanctions_check(request.beneficiary)` |
 
-**Full Constraint Example**:
+**Ejemplo Completo de Restricción**:
 ```json
 {
   "cst": {
@@ -1808,7 +1806,7 @@ Constraints are runtime predicates. They transform static authority into dynamic
 }
 ```
 
-**Constraint Evaluation Algorithm**:
+**Algoritmo de Evaluación de Restricciones**:
 ```python
 def evaluate_constraints(constraints, request_context):
     """
@@ -1848,11 +1846,11 @@ def evaluate_constraints(constraints, request_context):
         raise ValueError(f"Unknown logic type: {logic}")
 ```
 
-### 6.4 Delegation Chain Embedding
+### 6.4 Incrustación de Cadena de Delegación
 
-#### 6.4.1 The `aap_chain` Header
+#### 6.4.1 El Encabezado `aap_chain`
 
-To enable offline verification of multi-hop delegations, a PoA can embed its parent PoAs in the `unprotected` header:
+Para permitir la verificación offline de delegaciones multi-salto, una PoA puede incrustar sus PoAs padres en el encabezado `unprotected`:
 
 ```
 PoA_Child = COSE_Sign1([
@@ -1865,18 +1863,18 @@ PoA_Child = COSE_Sign1([
 ])
 ```
 
-#### 6.4.2 Chain Length Analysis
+#### 6.4.2 Análisis de Longitud de Cadena
 
-| Chain Length | Use Case | Verification Time | Security Risk |
+| Longitud de Cadena | Caso de Uso | Tiempo de Verificación | Riesgo de Seguridad |
 |--------------|----------|-------------------|---------------|
-| 1 (Root only) | Direct employee | ~50ms | Low |
-| 2 | Contractor via manager | ~100ms | Low |
-| 3 | Sub-agent | ~150ms | Medium |
-| 4+ | Complex supply chain | ~200ms+ | High |
+| 1 (Solo Raíz) | Empleado directo | ~50ms | Bajo |
+| 2 | Contratista vía gerente | ~100ms | Bajo |
+| 3 | Sub-agente | ~150ms | Medio |
+| 4+ | Cadena de suministro compleja | ~200ms+ | Alto |
 
-**Recommendation**: Limit chain length to 3 for most applications. Use PoA "re-basing" for longer chains.
+**Recomendación**: Limitar longitud de cadena a 3 para la mayoría de aplicaciones. Usar "re-basing" de PoA para cadenas más largas.
 
-#### 6.4.3 Chain Verification Pseudocode
+#### 6.4.3 Pseudocódigo de Verificación de Cadena
 
 ```python
 def verify_chain(poa_bytes, trusted_roots):
@@ -1941,17 +1939,17 @@ def verify_chain(poa_bytes, trusted_roots):
     )
 ```
 
-### 6.5 Revocation Specification
+### 6.5 Especificación de Revocación
 
-#### 6.5.1 Revocation Methods
+#### 6.5.1 Métodos de Revocación
 
-| Method | Flag | Use Case | Latency | Assurance |
+| Método | Bandera | Caso de Uso | Latencia | Seguridad |
 |--------|------|----------|---------|-----------|
-| **OCSP** | `"ocsp"` | Enterprise | ~100ms | High |
-| **Log** | `"log"` | Public/Auditable | ~500ms | Very High |
-| **None** | `"none"` | Short-lived (<10min) | 0ms | Low |
+| **OCSP** | `"ocsp"` | Empresarial | ~100ms | Alta |
+| **Log** | `"log"` | Público/Auditable | ~500ms | Muy Alta |
+| **Ninguno** | `"none"` | Corta duración (<10min) | 0ms | Baja |
 
-#### 6.5.2 OCSP-Style Revocation
+#### 6.5.2 Revocación Estilo OCSP
 
 ```json
 {
@@ -1963,16 +1961,16 @@ def verify_chain(poa_bytes, trusted_roots):
 }
 ```
 
-**Protocol**:
+**Protocolo**:
 
 
-1. Verifier sends `POST /poa` with `{ "jti": "<poa-id>" }`
+1. El Verificador envía `POST /poa` con `{ "jti": "<poa-id>" }`
 2. OCSP responder returns:
    - `{ "status": "good" }` - Not revoked
    - `{ "status": "revoked", "reason": "..." }` - Revoked
    - `{ "status": "unknown" }` - Unknown JTI
 
-#### 6.5.3 Transparency Log Revocation
+#### 6.5.3 Revocación por Registro de Transparencia
 
 ```json
 {
@@ -1984,29 +1982,29 @@ def verify_chain(poa_bytes, trusted_roots):
 }
 ```
 
-**Protocol**:
+**Protocolo**:
 
 
-1. Verifier fetches latest Signed Tree Head (STH)
-2. Verifier requests inclusion proof for `jti`
-3. If proof exists: PoA is REVOKED
-4. If no proof: PoA is VALID (with STH timestamp freshness)
+1. El Verificador obtiene el último Encabezado de Árbol Firmado (STH)
+2. El Verificador solicita prueba de inclusión para `jti`
+3. Si existe prueba: PoA está REVOCADA
+4. Si no hay prueba: PoA es VÁLIDA (con frescura de marca de tiempo STH)
 
-### 6.6 Security Analysis
+### 6.6 Análisis de Seguridad
 
-#### 6.6.1 Threat Model
+#### 6.6.1 Modelo de Amenaza
 
-| Threat | Mitigation |
+| Amenaza | Mitigación |
 |--------|------------|
-| **Replay Attack** | Unique `jti` + Revocation list |
-| **Token Substitution** | Signature over all claims |
-| **Privilege Escalation** | Attenuation enforcement |
-| **Revocation Bypass** | Fail-closed + freshness requirements |
-| **Oracle Manipulation** | Multi-oracle consensus (future) |
+| **Replay Attack** | `jti` único + Lista de revocación |
+| **Token Substitution** | Firma sobre todas las reclamaciones |
+| **Privilege Escalation** | Aplicación de atenuación |
+| **Revocation Bypass** | Fail-closed + requisitos de frescura |
+| **Oracle Manipulation** | Consenso multi-oráculo (futuro) |
 
-#### 6.6.2 Cryptographic Binding
+#### 6.6.2 Vinculación Criptográfica
 
-The signature covers the **entire** protected header and payload:
+La firma cubre **todo** el encabezado protegido y la carga útil:
 
 ```
 Sig_Input = [
@@ -2019,19 +2017,19 @@ Sig_Input = [
 signature = Ed25519.Sign(issuer_private_key, SHA256(Sig_Input))
 ```
 
-#### 6.6.3 Why CBOR, Not JWT?
+#### 6.6.3 ¿Por qué CBOR, No JWT?
 
-| Issue | JWT | AAP-02 CBOR |
+| Problema | JWT | AAP-02 CBOR |
 |-------|-----|-------------|
-| `alg=none` attack | Historically vulnerable | Not possible (no `none` algorithm) |
-| Canonicalization | None (JSON has no canonical form) | Deterministic CBOR |
-| Size | ~1.5KB typical | ~800 bytes typical |
-| Binary data | Base64 overhead | Native support |
-| Constraint language | Not standardized | CEL/JSON-Logic |
+| Ataque `alg=none` | Históricamente vulnerable | No es posible (sin algoritmo `none`) |
+| Canonicalización | Ninguna (JSON no tiene forma canónica) | CBOR determinista |
+| Tamaño | ~1.5KB típico | ~800 bytes típico |
+| Datos binarios | Sobrecarga Base64 | Soporte nativo |
+| Lenguaje de restricción | No estandarizado | CEL/JSON-Logic |
 
-### 6.7 Reference Implementation
+### 6.7 Implementación de Referencia
 
-#### 6.7.1 Go Types
+#### 6.7.1 Tipos Go
 
 ```go
 package agentauth
@@ -2090,7 +2088,7 @@ type RevocationConfig struct {
 }
 ```
 
-#### 6.7.2 Signing Function
+#### 6.7.2 Función de Firma
 
 ```go
 import (
@@ -2099,7 +2097,7 @@ import (
     cose "github.com/veraison/go-cose"
 )
 
-// SignPoA creates a signed COSE_Sign1 envelope for the PoA.
+// SignPoA crea un sobre COSE_Sign1 firmado para la PoA.
 func SignPoA(poa *PoA, privateKey ed25519.PrivateKey, keyID string) ([]byte, error) {
     // 1. Encode payload as CBOR
     payload, err := cbor.Marshal(poa)
@@ -2136,19 +2134,19 @@ func SignPoA(poa *PoA, privateKey ed25519.PrivateKey, keyID string) ([]byte, err
 ---
 
 
-## Chapter 7: Delegation Logic & Chain Verification
+## Capítulo 7: Lógica de Delegación y Verificación de Cadena
 
-### 7.1 The Recursion Principle
+### 7.1 El Principio de Recursión
 
-The core invariant of AgentAuth is: **"You cannot give what you do not have."**
+El invariante central de AgentAuth es: **"No puedes dar lo que no tienes."**
 
-This implies that verifying an agent's authority is a recursive process. To verify that Agent `C` can perform `Action`, we must verify that Principal `B` authorized `C` *and* that Principal `B` had authority from Root `A` to do so.
+Esto implica que verificar la autoridad de un agente es un proceso recursivo. Para verificar que el Agente `C` puede realizar la `Acción`, debemos verificar que el Principal `B` autorizó a `C` *y* que el Principal `B` tenía autoridad de la Raíz `A` para hacerlo.
 
-This forms a Directed Acyclic Graph (DAG) of delegations, usually simplified to a linear chain for single-path verification.
+Esto forma un Grafo Acíclico Dirigido (DAG) de delegaciones, generalmente simplificado a una cadena lineal para verificación de ruta única.
 
-### 7.2 formal Verification Algorithm
+### 7.2 Algoritmo de Verificación Formal
 
-We define the function `VerifyChain(chain, target_action)`:
+Definimos la función `VerifyChain(chain, target_action)`:
 
 ```python
 def VerifyChain(chain, target_request):
@@ -2198,37 +2196,37 @@ def VerifyChain(chain, target_request):
     return SUCCESS
 ```
 
-### 7.3 Attenuation Logic
+### 7.3 Lógica de Atenuación
 
-Attenuation is the process of reducing scope as delegation proceeds.
-*   **Root**: "Manage all Cloud Resources"
-*   **DevOps Lead**: "Manage US-East Region"
-*   **DeployAgent**: "Restart EC2 instances in US-East"
+La atenuación es el proceso de reducir el alcance a medida que avanza la delegación.
+*   **Raíz**: "Gestionar todos los Recursos en la Nube"
+*   **Líder DevOps**: "Gestionar Región US-East"
+*   **DeployAgent**: "Reiniciar instancias EC2 en US-East"
 
-Formally, for every link $L_i$ and parent $L_{i-1}$:
+Formalmente, para cada enlace $L_i$ y padre $L_{i-1}$:
 $$ Scope(L_i) \subseteq Scope(L_{i-1}) $$
 
-#### 7.3.1 Set Theory of Scopes
-Scopes are sets of strings or resource patterns.
+#### 7.3.1 Teoría de Conjuntos de Alcances
+Los alcances son conjuntos de cadenas o patrones de recursos.
 *   `*` (Universal Set)
 *   `orders:*` (Namespace Set)
 *   `orders:create` (Element)
 
-Intersection logic:
+Lógica de Intersección:
 
 
 1.  `*` $\cap$ `orders:create` = `orders:create`
-2.  `orders:*` $\cap$ `payments:create` = $\emptyset$ (Empty Set - Invalid Delegation)
+2.  `orders:*` $\cap$ `payments:create` = $\emptyset$ (Conjunto Vacío - Delegación Inválida)
 
-### 7.4 Cycle Detection
+### 7.4 Detección de Ciclos
 
-A critical vulnerability in delegation graphs is the **Self-Delegation Loop**.
-*   A delegates to B.
-*   B delegates to C.
-*   C delegates back to A (with higher privileges?).
+Una vulnerabilidad crítica en los gráficos de delegación es el **Bucle de Auto-Delegación**.
+*   A delega a B.
+*   B delega a C.
+*   C delega de nuevo a A (¿con mayores privilegios?).
 
-**Rule**: A PoA Chain MUST NOT contain duplicate Principals (subjects).
-`VerifyChain` imposes a strict `O(N)` check:
+**Regla**: Una Cadena PoA NO DEBE contener Principales (sujetos) duplicados.
+`VerifyChain` impone una comprobación estricta `O(N)`:
 ```python
 seen_dids = set()
 for link in chain:
@@ -2237,51 +2235,51 @@ for link in chain:
     seen_dids.add(link.sub)
 ```
 
-### 7.5 Cross-Chain Delegation
+### 7.5 Delegación entre Cadenas
 
-Sometimes, an agent needs authority from two disparate roots (e.g., "Company A" authorizes access to data, "Cloud Provider" authorizes compute).
+A veces, un agente necesita autoridad de dos raíces dispares (por ejemplo, "Empresa A" autoriza el acceso a datos, "Proveedor de Nube" autoriza el cálculo).
 
-AAP-02 supports **Composite PoAs**.
-*   The Agent presents `[PoA_A, PoA_B]`.
-*   The Verifier runs `VerifyChain` on both.
-*   The Effective Authority is the **Union** of the valid final scopes.
+AAP-02 soporta **PoAs Compuestas**.
+*   El Agente presenta `[PoA_A, PoA_B]`.
+*   El Verificador ejecuta `VerifyChain` en ambas.
+*   La Autoridad Efectiva es la **Unión** de los alcances finales válidos.
 $$ Auth_{eff} = Scope(PoA_A) \cup Scope(PoA_B) $$
 
-However, constraints are also unioned:
+Sin embargo, las restricciones también se unen:
 $$ Constraints_{eff} = Constraints(PoA_A) \wedge Constraints(PoA_B) $$
 
-The agent must satisfy **ALL** constraints from **BOTH** parents to act.
+El agente debe satisfacer **TODAS** las restricciones de **AMBOS** padres para actuar.
 
 ---
 
 
-## Chapter 8: Revocation & Transparency Logs
+## Capítulo 8: Revocación y Registros de Transparencia
 
-### 8.1 The CRL Problem
+### 8.1 El Problema de la CRL
 
-In PKI, the Certificate Revocation List (CRL) is an O(N) list of revoked certificates. As the system grows, the CRL becomes a scalability bottleneck.
-*   **Size**: A list of 1 million revoked agents is ~64MB.
-*   **Latency**: Downloading 64MB before every transaction is non-viable for Edge agents.
-*   **Privacy**: CRLs leak business intelligence ("Why did GMC revoke 50 agents today?").
+En la PKI, la Lista de Revocación de Certificados (CRL) es una lista O(N) de certificados revocados. A medida que crece el sistema, la CRL se convierte en un cuello de botella de escalabilidad.
+*   **Tamaño**: Una lista de 1 millón de agentes revocados es ~64MB.
+*   **Latencia**: Descargar 64MB antes de cada transacción no es viable para agentes de Borde.
+*   **Privacidad**: Las CRL filtran inteligencia comercial ("¿Por qué GMC revocó 50 agentes hoy?").
 
-AgentAuth solves this using **Bloom Filters** for efficient distribution and **Merkle Trees** for public accountability.
+AgentAuth resuelve esto utilizando **Filtros de Bloom** para una distribución eficiente y **Árboles de Merkle** para la responsabilidad pública.
 
-### 8.2 Compressed Revocation Bitsets (CRBs)
+### 8.2 Conjuntos de Bits de Revocación Comprimidos (CRBs)
 
-For the "Fast Path" (Edge/IoT), AgentAuth distributes revocation state as a compressed bitset (Bloom Filter or Roaring Bitmap).
-*   **Format**: A static file `revocation.bin` hosted at the Issuer's Transparency Endpoint.
-*   **Size**: Can represent 1 million revocations in < 1MB.
-*   **Logic**:
+Para la "Ruta Rápida" (Borde/IoT), AgentAuth distribuye el estado de revocación como un conjunto de bits comprimido (Filtro de Bloom o Mapa de Bits Roaring).
+*   **Formato**: Un archivo estático `revocation.bin` alojado en el Punto Final de Transparencia del Emisor.
+*   **Tamaño**: Puede representar 1 millón de revocaciones en < 1MB.
+*   **Lógica**:
 
 
-    1.  Verifier hashes `PoA.jti`.
-    2.  Verifier checks bitset.
-    3.  If `bit == 0`: Definitely Valid.
-    4.  If `bit == 1`: **Possible Revocation**. Fallback to online check ("Slow Path") to rule out false positive.
+    1. El Verificador hasea `PoA.jti`.
+    2. El Verificador comprueba el conjunto de bits.
+    3. Si `bit == 0`: Definitivamente Válido.
+    4. Si `bit == 1`: **Posible Revocación**. Recurrir a la comprobación en línea ("Ruta Lenta") para descartar falsos positivos.
 
-### 8.3 The Transparency Log (Merkle Tree)
+### 8.3 El Registro de Transparencia (Árbol de Merkle)
 
-For the "Slow Path" and for public auditing, AgentAuth mandates a global append-only log, similar to Certificate Transparency (RFC 6962).
+Para la "Ruta Lenta" y para la auditoría pública, AgentAuth exige un registro global de solo anexar, similar a la Transparencia de Certificados (RFC 6962).
 
 **Log Entry Structure**:
 ```cbor
@@ -2294,11 +2292,11 @@ LogEntry = {
 }
 ```
 
-The Log Operator (e.g., a consortium or public utility) periodically squashes entries into a **Signed Tree Head (STH)**.
+El Operador del Registro (por ejemplo, un consorcio o servicio público) periódicamente comprime las entradas en un **Encabezado de Árbol Firmado (STH)**.
 
-### 8.4 Verification Logic with Transparency
+### 8.4 Lógica de Verificación con Transparencia
 
-When a Relying Party verifies a PoA with `rev: "log"`, it executes:
+Cuando una Parte Confiante verifica una PoA con `rev: "log"`, ejecuta:
 
 ```python
 def VerifyRevocation(poa, log_client):
@@ -2315,75 +2313,75 @@ def VerifyRevocation(poa, log_client):
         return STATUS_VALID
 ```
 
-### 8.5 The "Fail-Closed" Invariant
+### 8.5 El Invariante "Fail-Closed"
 
-If the Transparency Log is unreachable, the AgentAuth protocol mandates **Fail-Closed**.
-*   **Rationale**: An unreachable log is indistinguishable from an attacker blocking the network to hide a revocation.
-*   **Mitigation**: Use Checkpoints and multiple independent log auditors.
-*   **Degraded Mode**: In emergency scenarios (e.g., warzone, deep space), principals may sign a "Degraded Mode Policy" that allows `rev: "none"` for a short TTL, accepting the risk of non-revocation.
+Si el Registro de Transparencia es inalcanzable, el protocolo AgentAuth exige **Fail-Closed** (Fallo Cerrado).
+*   **Justificación**: Un registro inalcanzable es indistinguible de un atacante bloqueando la red para ocultar una revocación.
+*   **Mitigación**: Usar Puntos de Control y múltiples auditores de registro independientes.
+*   **Modo Degradado**: En escenarios de emergencia (ej: zona de guerra, espacio profundo), los principales pueden firmar una "Política de Modo Degradado" que permite `rev: "none"` por un TTL corto, aceptando el riesgo de no revocación.
 
----through:
-- Frequent log polling
-- Push notifications
-- Short PoA validity (requiring frequent renewal)
-
----
-
-
-# Part III: Implementation & Patterns
+---través de:
+- Sondeo frecuente de registros
+- Notificaciones push
+- Validez corta de PoA (requiriendo renovación frecuente)
 
 ---
 
 
-## Chapter 9: The Go SDK Architecture
+# Parte III: Implementación y Patrones
 
-### 9.1 Design Philosophy
+---
 
-The AgentAuth Go SDK (`github.com/agentauth/agentauth-go`) is designed around three core principles:
 
-#### 9.1.1 Interfaces Over Implementations
+## Capítulo 9: La Arquitectura del SDK de Go
 
-Every major component is defined as an interface. This allows:
-- Swapping storage backends (Postgres, Redis, S3)
-- Swapping crypto providers (software, HSM, cloud KMS)
-- Mocking for unit tests
-- Custom implementations for edge cases
+### 9.1 Filosofía de Diseño
 
-#### 9.1.2 Fail-Closed by Default
+El SDK de Go de AgentAuth (`github.com/agentauth/agentauth-go`) está diseñado en torno a tres principios básicos:
 
-All verification operations default to DENY. Errors are treated as authorization failures:
-- Network timeout -> DENY
-- Parse error -> DENY  
-- Unknown constraint type -> DENY
-- Missing required field -> DENY
+#### 9.1.1 Interfaces Sobre Implementaciones
 
-#### 9.1.3 Zero External Dependencies for Core
+Cada componente principal se define como una interfaz. Esto permite:
+- Intercambiar backends de almacenamiento (Postgres, Redis, S3)
+- Intercambiar proveedores criptográficos (software, HSM, cloud KMS)
+- Mocking para pruebas unitarias
+- Implementaciones personalizadas para casos extremos
 
-The core protocol logic (`agentauth/core`) has no dependencies beyond the Go standard library. Optional adapters (`agentauth/adapters/*`) may have external dependencies.
+#### 9.1.2 Fail-Closed por Defecto
 
-### 9.2 Package Structure
+Todas las operaciones de verificación predeterminan DENEGAR. Los errores se tratan como fallos de autorización:
+- Tiempo de espera de red -> DENEGAR
+- Error de análisis -> DENEGAR
+- Tipo de restricción desconocido -> DENEGAR
+- Campo requerido faltante -> DENEGAR
+
+#### 9.1.3 Cero Dependencias Externas para el Núcleo
+
+La lógica del protocolo central (`agentauth/core`) no tiene dependencias más allá de la biblioteca estándar de Go. Adaptadores opcionales (`agentauth/adapters/*`) pueden tener dependencias externas.
+
+### 9.2 Estructura de Paquetes
 
 ```
 github.com/agentauth/agentauth-go/
-|-- core/                    # Zero-dependency protocol logic
-|   |-- poa.go              # PoA creation and parsing
-|   |-- profile.go          # Entity Profile handling
-|   |-- verify.go           # Verification algorithms
-|   |-- constraints.go      # Constraint evaluation engine
-|   `-- cbor.go             # CBOR encoding/decoding
+|-- core/                    # Lógica de protocolo cero dependencias
+|   |-- poa.go              # Creación y análisis de PoA
+|   |-- profile.go          # Manejo de Perfil de Entidad
+|   |-- verify.go           # Algoritmos de verificación
+|   |-- constraints.go      # Motor de evaluación de restricciones
+|   `-- cbor.go             # Codificación/decodificación CBOR
 |-- adapters/
 |   |-- kms/                # AWS KMS, GCP KMS, Azure KeyVault
 |   |-- storage/            # Postgres, Redis, SQLite, S3
-|   |-- log/                # Trillian, Rekor integration
-|   `-- http/               # HTTP middleware
-|-- client/                  # Client-side agent helpers
-|-- server/                  # Server-side verifier helpers
-`-- testing/                 # Test fixtures and mocks
+|   |-- log/                # Integración Trillian, Rekor
+|   `-- http/               # Middleware HTTP
+|-- client/                  # Ayudantes de agente lado cliente
+|-- server/                  # Ayudantes de verificador lado servidor
+`-- testing/                 # Fixtures de prueba y mocks
 ```
 
-### 9.3 Core Interfaces
+### 9.3 Interfaces Principales
 
-#### 9.3.1 The Agent Interface
+#### 9.3.1 La Interfaz Agent
 
 ```go
 package agentauth
@@ -2393,90 +2391,90 @@ import (
     "net/http"
 )
 
-// Agent represents a software entity that can sign requests with PoA authority.
+// Agent representa una entidad de software que puede firmar solicitudes con autoridad PoA.
 type Agent interface {
-    // Identity returns the DID of this agent.
+    // Identity devuelve el DID de este agente.
     Identity() string
     
-    // Profile returns the full Entity Profile.
+    // Profile devuelve el Perfil de Entidad completo.
     Profile() *EntityProfile
     
-    // SignRequest attaches a PoA to an HTTP request.
-    // The PoA is placed in the Authorization header.
+    // SignRequest adjunta una PoA a una solicitud HTTP.
+    // La PoA se coloca en el encabezado Authorization.
     SignRequest(ctx context.Context, req *http.Request, opts ...SignOption) error
     
-    // CreatePoA generates a new PoA for the given authority grants.
+    // CreatePoA genera una nueva PoA para las concesiones de autoridad dadas.
     CreatePoA(ctx context.Context, grants []Grant, opts ...PoAOption) (*PoA, error)
     
-    // Delegate creates a child PoA for another agent (sub-delegation).
+    // Delegate crea una PoA hija para otro agente (sub-delegación).
     Delegate(ctx context.Context, childDID string, grants []Grant, opts ...PoAOption) (*PoA, error)
 }
 
-// SignOption configures request signing behavior.
+// SignOption configura el comportamiento de firma de solicitudes.
 type SignOption func(*signConfig)
 
-// WithAudience sets the intended audience for the PoA.
+// WithAudience establece la audiencia prevista para la PoA.
 func WithAudience(aud ...string) SignOption {
     return func(c *signConfig) { c.audience = aud }
 }
 
-// WithExpiration sets a custom expiration time.
+// WithExpiration establece un tiempo de expiración personalizado.
 func WithExpiration(d time.Duration) SignOption {
     return func(c *signConfig) { c.expiration = d }
 }
 
-// WithConstraints adds runtime constraints to the PoA.
+// WithConstraints agrega restricciones en tiempo de ejecución a la PoA.
 func WithConstraints(cst *Constraints) SignOption {
     return func(c *signConfig) { c.constraints = cst }
 }
 ```
 
-#### 9.3.2 The Verifier Interface
+#### 9.3.2 La Interfaz Verifier
 
 ```go
-// Verifier validates incoming PoAs and enforces constraints.
+// Verifier valida PoAs entrantes y aplica restricciones.
 type Verifier interface {
-    // VerifyRequest extracts and validates PoA from an HTTP request.
+    // VerifyRequest extrae y valida PoA de una solicitud HTTP.
     VerifyRequest(ctx context.Context, req *http.Request) (*VerificationResult, error)
     
-    // VerifyPoA validates a raw PoA token.
+    // VerifyPoA valida un token PoA sin procesar.
     VerifyPoA(ctx context.Context, poaBytes []byte) (*VerificationResult, error)
     
-    // VerifyWithContext validates a PoA against a specific request context.
+    // VerifyWithContext valida una PoA contra un contexto de solicitud específico.
     VerifyWithContext(ctx context.Context, poa *PoA, reqCtx *RequestContext) (*VerificationResult, error)
 }
 
-// VerificationResult contains the outcome of PoA verification.
+// VerificationResult contiene el resultado de la verificación de PoA.
 type VerificationResult struct {
-    // Valid indicates whether the PoA passed all checks.
+    // Valid indica si la PoA pasó todas las comprobaciones.
     Valid bool
     
-    // Principal is the root issuer DID.
+    // Principal es el DID del emisor raíz.
     PrincipalDID string
     
-    // Agent is the subject DID (the entity acting).
+    // Agent es el DID del sujeto (la entidad que actúa).
     AgentDID string
     
-    // Authority contains the resolved grants.
+    // Authority contiene las concesiones resueltas.
     Authority []Grant
     
-    // Constraints contains the accumulated constraints from the chain.
+    // Constraints contiene las restricciones acumuladas de la cadena.
     Constraints *Constraints
     
-    // ChainDepth indicates how many delegation hops exist.
+    // ChainDepth indica cuántos saltos de delegación existen.
     ChainDepth int
     
-    // ExpiresAt is when the PoA expires.
+    // ExpiresAt es cuando expira la PoA.
     ExpiresAt time.Time
     
-    // Reason contains the failure reason if Valid is false.
+    // Reason contiene la razón del fallo si Valid es false.
     Reason string
     
-    // Chain contains all PoAs in the delegation chain (for audit).
+    // Chain contiene todas las PoAs en la cadena de delegación (para auditoría).
     Chain []*PoA
 }
 
-// RequestContext provides runtime values for constraint evaluation.
+// RequestContext proporciona valores en tiempo de ejecución para la evaluación de restricciones.
 type RequestContext struct {
     Method      string
     Path        string
@@ -2488,21 +2486,21 @@ type RequestContext struct {
 }
 ```
 
-#### 9.3.3 The Store Interface
+#### 9.3.3 La Interfaz Store
 
 ```go
-// Store provides persistence for PoAs and Entity Profiles.
+// Store proporciona persistencia para PoAs y Perfiles de Entidad.
 type Store interface {
-    // Profile operations
+    // Operaciones de Perfil
     GetProfile(ctx context.Context, did string) (*EntityProfile, error)
     PutProfile(ctx context.Context, profile *EntityProfile) error
     
-    // PoA operations
+    // Operaciones de PoA
     GetPoA(ctx context.Context, jti string) (*PoA, error)
     PutPoA(ctx context.Context, poa *PoA) error
     ListPoAs(ctx context.Context, filter PoAFilter) ([]*PoA, error)
     
-    // Revocation operations
+    // Operaciones de Revocación
     IsRevoked(ctx context.Context, jti string) (bool, error)
     Revoke(ctx context.Context, jti string, reason string) error
 }
@@ -3001,11 +2999,11 @@ agentauth:
 ---
 
 
-## Chapter 10: Cloud Integration
+## Capítulo 10: Integración en la Nube
 
-### 10.1 The Sidecar Pattern
+### 10.1 El Patrón Sidecar
 
-In cloud-native environments (Kubernetes), agents should not manage keys directly. Instead, we use the **Sidecar Pattern** to separate concerns.
+En entornos nativos de la nube (Kubernetes), los agentes no deben gestionar las claves directamente. En su lugar, utilizamos el **Patrón Sidecar** para separar responsabilidades.
 
 #### 10.1.1 Architecture
 
@@ -3056,10 +3054,10 @@ spec:
           emptyDir: {}
 ```
 
-#### 10.1.3 Request Flow
+#### 10.1.3 Flujo de Solicitud
 
 ```
-Step 1: App makes request
+Paso 1: App hace solicitud
   POST http://localhost:9090/v1/sign
   {
     "method": "POST",
@@ -3067,21 +3065,21 @@ Step 1: App makes request
     "body": {"item": "widget", "qty": 100, "price": 5000}
   }
 
-Step 2: Sidecar loads PoA and checks constraints
-  - Verify amount <= limit
-  - Verify vendor is approved
-  - Verify not revoked
+Paso 2: Sidecar carga PoA y verifica restricciones
+  - Verificar monto <= límite
+  - Verificar proveedor aprobado
+  - Verificar no revocado
 
-Step 3: Sidecar signs request
-  - Add Authorization header: "PoA <signed_token>"
-  - Forward to supplier
+Paso 3: Sidecar firma solicitud
+  - Agregar encabezado Authorization: "PoA <token_firmado>"
+  - Reenviar al proveedor
 
-Step 4: Sidecar returns response to app
+Paso 4: Sidecar devuelve respuesta a app
 ```
 
-### 10.2 AWS Integration
+### 10.2 Integración con AWS
 
-For AWS-hosted agents, we integrate with AWS KMS, IAM, and Nitro Enclaves.
+Para agentes alojados en AWS, nos integramos con AWS KMS, IAM y Nitro Enclaves.
 
 #### 10.2.1 Architecture
 
@@ -3132,9 +3130,9 @@ For AWS-hosted agents, we integrate with AWS KMS, IAM, and Nitro Enclaves.
 }
 ```
 
-### 10.3 Google Cloud Integration
+### 10.3 Integración con Google Cloud
 
-GCP provides Workload Identity and Cloud HSM for secure agent key management.
+GCP proporciona Workload Identity y Cloud HSM para la gestión segura de claves de agentes.
 
 #### 10.3.1 Architecture
 
@@ -3176,9 +3174,9 @@ GCP Service Account tokens can bridge to AgentAuth:
 }
 ```
 
-### 10.4 Azure Integration
+### 10.4 Integración con Azure
 
-Azure provides Managed HSM and Confidential Computing for secure agent deployments.
+Azure proporciona Managed HSM y Confidential Computing para despliegues seguros de agentes.
 
 #### 10.4.1 Architecture
 
@@ -3228,19 +3226,19 @@ func getAzureAttestation(ctx context.Context) (*Attestation, error) {
 }
 ```
 
-### 10.5 Multi-Cloud Patterns
+### 10.5 Patrones Multi-Nube
 
-#### 10.5.1 Federated Identity
+#### 10.5.1 Identidad Federada
 
-For agents operating across cloud providers:
+Para agentes que operan a través de proveedores de nube:
 
-**Table 10.1: Cloud Identity Federation Patterns**
+**Tabla 10.1: Patrones de Federación de Identidad en la Nube**
 
-| Scenario | Pattern |
+| Escenario | Patrón |
 |----------|---------|
 | AWS -> GCP | AWS STS -> GCP Workload Identity Federation |
 | GCP -> Azure | GCP OIDC -> Azure AD Workload Identity |
-| Azure -> AWS | Azure AD -> AWS IAM with OIDC |
+| Azure -> AWS | Azure AD -> AWS IAM con OIDC |
 
 #### 10.5.2 Cross-Cloud PoA Verification
 
@@ -3249,35 +3247,35 @@ For agents operating across cloud providers:
 ---
 
 
-## Chapter 11: Edge/IoT Patterns
+## Capítulo 11: Patrones Borde/IoT
 
-### 11.1 The Connectivity Problem
+### 11.1 El Problema de Conectividad
 
-Edge agents (drone fleets, smart grids, industrial robots) face unique challenges:
+Los agentes de borde (flotas de drones, redes inteligentes, robots industriales) enfrentan desafíos únicos:
 
-**Table 11.1: IoT/Edge Environment Challenges**
+**Tabla 11.1: Desafíos del Entorno IoT/Borde**
 
-| Challenge | Traditional Solution | AgentAuth Solution |
+| Desafío | Solución Tradicional | Solución AgentAuth |
 |-----------|---------------------|-------------------|
-| Intermittent connectivity | Fail open (dangerous) | Constrained offline operation |
-| Limited bandwidth | Large CRL downloads | Bloom filter revocation |
-| Constrained compute | Skip verification | Lightweight verification library |
-| Physical access risk | Software keys | Hardware-bound keys (TPM/SE) |
+| Conectividad intermitente | Fail open (peligroso) | Operación offline restringida |
+| Ancho de banda limitado | Descargas grandes de CRL | Revocación por filtro de Bloom |
+| Computación restringida | Omitir verificación | Biblioteca de verificación ligera |
+| Riesgo de acceso físico | Claves de software | Claves vinculadas a hardware (TPM/SE) |
 
-### 11.2 Lightweight Verification Library
+### 11.2 Biblioteca de Verificación Ligera
 
-We provide `libagentauth-core` in `no_std` Rust for embedded devices.
+Proporcionamos `libagentauth-core` en Rust `no_std` para dispositivos integrados.
 
-#### 11.2.1 Resource Requirements
+#### 11.2.1 Requisitos de Recursos
 
-**Table 11.2: Minimum Hardware Requirements**
+**Tabla 11.2: Requisitos Mínimos de Hardware**
 
-| Resource | Minimum | Recommended |
+| Recurso | Mínimo | Recomendado |
 |----------|---------|-------------|
 | **Flash** | 64 KB | 128 KB |
 | **RAM** | 16 KB | 32 KB |
 | **CPU** | ARM Cortex-M4 | ARM Cortex-M7 |
-| **Crypto HW** | None (SW fallback) | TrustZone-M or TPM 2.0 |
+| **Crypto HW** | Ninguno (fallback SW) | TrustZone-M o TPM 2.0 |
 
 #### 11.2.2 API Surface
 
@@ -3331,9 +3329,9 @@ impl PoaVerifier {
 }
 ```
 
-#### 11.2.3 Constraint Bytecode
+#### 11.2.3 Bytecode de Restricción
 
-For resource-constrained devices, constraints are compiled to bytecode:
+Para dispositivos con recursos limitados, las restricciones se compilan en bytecode:
 
 ```
 Constraint Expression:
@@ -3351,20 +3349,20 @@ Compiles to:
 Execution: 7 instructions, ~100 cycles on Cortex-M4
 ```
 
-### 11.3 Offline Operation Modes
+### 11.3 Modos de Operación Offline
 
-#### 11.3.1 Connectivity Tiers
+#### 11.3.1 Niveles de Conectividad
 
-**Table 11.3: IoT Connectivity Tiers**
+**Tabla 11.3: Niveles de Conectividad IoT**
 
-| Tier | Description | Revocation | Constraint Evaluation |
+| Nivel | Descripción | Revocación | Evaluación de Restricciones |
 |------|-------------|------------|----------------------|
-| **Connected** | Full internet access | Real-time OCSP | Full oracle support |
-| **Degraded** | Periodic connectivity | Bloom filter + delta sync | Cached oracle data |
-| **Isolated** | No external connectivity | Pre-loaded filter | Local-only constraints |
-| **Air-Gapped** | Physical isolation | Time-bound PoAs only | Static constraints |
+| **Conectado** | Acceso total a internet | OCSP en tiempo real | Soporte total de oráculo |
+| **Degradado** | Conectividad periódica | Filtro de Bloom + sync delta | Datos de oráculo en caché |
+| **Aislado** | Sin conectividad externa | Filtro precargado | Restricciones solo locales |
+| **Air-Gapped** | Aislamiento físico | Solo PoAs con límite de tiempo | Restricciones estáticas |
 
-#### 11.3.2 Graceful Degradation Policy
+#### 11.3.2 Política de Degradación Agraciada
 
 ```json
 {
@@ -3386,9 +3384,9 @@ Execution: 7 instructions, ~100 cycles on Cortex-M4
 }
 ```
 
-### 11.4 Peer-to-Peer Verification
+### 11.4 Verificación Peer-to-Peer
 
-In swarm or mesh scenarios, agents must verify each other without cloud connectivity.
+En escenarios de enjambre o malla, los agentes deben verificarse mutuamente sin conectividad a la nube.
 
 #### 11.4.1 Discovery Protocol
 
@@ -3400,7 +3398,7 @@ In swarm or mesh scenarios, agents must verify each other without cloud connecti
 
 
 
-### 11.5 Hardware Security Integration
+### 11.5 Integración de Seguridad de Hardware
 
 #### 11.5.1 TPM 2.0 Integration
 
@@ -3451,40 +3449,40 @@ func (s *TPMSigner) Sign(data []byte) ([]byte, error) {
 }
 ```
 
-### 11.6 Industry-Specific IoT Patterns
+### 11.6 Patrones IoT Específicos de la Industria
 
-**Table 11.4: Industry-Specific IoT Patterns**
+**Tabla 11.4: Patrones IoT Específicos de la Industria**
 
-| Industry | Use Case | Key Constraints | Special Requirements |
+| Industria | Caso de Uso | Restricciones Clave | Requisitos Especiales |
 |----------|----------|-----------------|---------------------|
-| **Automotive** | V2X communication | Speed, location, vehicle type | ISO 15118/SAE J2735 |
-| **Energy** | Smart grid control | Load limits, time windows | IEC 62351 |
-| **Agriculture** | Autonomous tractors | Field boundaries, chemical limits | Precision agriculture standards |
-| **Logistics** | Warehouse robots | Zone access, payload limits | WMS integration |
-| **Maritime** | Autonomous vessels | Navigation zones, weather | IMO regulations |
+| **Automotriz** | Comunicación V2X | Velocidad, ubicación, tipo de vehículo | ISO 15118/SAE J2735 |
+| **Energía** | Control de red inteligente | Límites de carga, ventanas de tiempo | IEC 62351 |
+| **Agricultura** | Tractores autónomos | Límites de campo, límites químicos | Estándares de agricultura de precisión |
+| **Logística** | Robots de almacén | Acceso a zonas, límites de carga útil | Integración WMS |
+| **Marítima** | Buques autónomos | Zonas de navegación, clima | Regulaciones OMI |
 
 ---
 
 
 # Part III: Implementation & Patterns (Continued)
 
-## Chapter 12: Regulated Industries
+## Capítulo 12: Industrias Reguladas
 
-### 12.1 Financial Services
+### 12.1 Servicios Financieros
 
-Financial services have the most stringent authority requirements due to strict liability regimes.
+Los servicios financieros tienen los requisitos de autoridad más estrictos debido a los regímenes de responsabilidad estricta.
 
-#### 12.1.1 Regulatory Framework
+#### 12.1.1 Marco Regulatorio
 
-**Table 12.1: Regulatory Requirements Mapping**
+**Tabla 12.1: Mapeo de Requisitos Regulatorios**
 
-| Regulation | Jurisdiction | Key Requirements | PoA Mapping |
+| Regulación | Jurisdicción | Requisitos Clave | Mapeo PoA |
 |------------|--------------|------------------|-------------|
-| **MiFID II** | EU | Best execution, record-keeping | Transparency Log, constraint on execution venue |
-| **PSD3** | EU | Strong customer authentication | Multi-factor PoA issuance |
-| **SOX** | US | Internal controls, audit trail | Immutable chain verification |
-| **FINRA Rule 3110** | US | Supervision, suitability | Constraint-based suitability checks |
-| **MAS TRM** | Singapore | Technology risk management | HSM key storage requirement |
+| **MiFID II** | UE | Mejor ejecución, mantenimiento de registros | Registro de Transparencia, restricción en lugar de ejecución |
+| **PSD3** | UE | Autenticación fuerte de clientes | Emisión de PoA multifactor |
+| **SOX** | EE.UU. | Controles internos, pista de auditoría | Verificación de cadena inmutable |
+| **FINRA Rule 3110** | EE.UU. | Supervisión, idoneidad | Verificaciones de idoneidad basadas en restricciones |
+| **MAS TRM** | Singapur | Gestión de riesgo tecnológico | Requisito de almacenamiento de claves HSM |
 
 #### 12.1.2 Implementation Pattern
 
@@ -3513,22 +3511,22 @@ Financial services have the most stringent authority requirements due to strict 
 }
 ```
 
-#### 12.1.3 Multi-Signature Requirements
+#### 12.1.3 Requisitos de Multi-Firma
 
 ```
-High-Value Transaction Flow (> $100K):
+Flujo de Transacción de Alto Valor (> $100K):
 
-     Agent          Compliance         Human Trader
+     Agente         Cumplimiento       Operador Humano
        │                │                    │
-       │── Propose ────>│                    │
-       │                │── Risk Check ─────>│
+       │── Proponer ───>│                    │
+       │                │── Verif. Riesgo ──>│
        │                │                    │
-       │                │<── Partial Sig ────│
-       │<─ Partial Sig──│                    │
+       │                │<── Firma Parcial ──│
+       │<─ Firma Parcial│                    │
        │                │                    │
-       │── Combine Sigs + Execute ───────────>
+       │── Combinar Firmas + Ejecutar ───────>
        
-Threshold: 2-of-3 (Agent + Compliance + Human)
+Umbral: 2-de-3 (Agente + Cumplimiento + Humano)
 ```
 
 ### 12.2 Healthcare
@@ -3562,33 +3560,33 @@ Privacy is the paramount concern in healthcare AI agent deployments.
 }
 ```
 
-#### 12.2.3 Privacy-Preserving Verification
+#### 12.2.3 Verificación con Preservación de Privacidad
 
-To prevent traffic analysis of patient care patterns:
+Para prevenir el análisis de tráfico de los patrones de atención al paciente:
 
 ```
-Traditional Log:
-  [2026-01-01] Agent X accessed Patient 123's records
+Registro Tradicional:
+  [2026-01-01] Agente X accedió a registros de Paciente 123
 
-Privacy-Preserving Log (Zero-Knowledge):
-  [2026-01-01] Proof: Agent with valid PoA accessed authorized data
+Registro con Preservación de Privacidad (Zero-Knowledge):
+  [2026-01-01] Prueba: Agente con PoA válida accedió a datos autorizados
   
-Verification: ZK-SNARK proves authorization without revealing patient ID
+Verificación: ZK-SNARK prueba autorización sin revelar ID de paciente
 ```
 
-### 12.3 Government and Public Sector
+### 12.3 Gobierno y Sector Público
 
-Government AI agents require the highest assurance levels.
+Los agentes de IA gubernamentales requieren los niveles más altos de aseguramiento.
 
-#### 12.3.1 eIDAS 2.0 Integration
+#### 12.3.1 Integración eIDAS 2.0
 
-**Table 12.3: eIDAS Assurance Levels**
+**Tabla 12.3: Niveles de Aseguramiento eIDAS**
 
-| eIDAS Level | Key Requirements | PoA Configuration |
+| Nivel eIDAS | Requisitos Clave | Configuración PoA |
 |-------------|------------------|-------------------|
-| **Low** | Self-asserted identity | did:web + software keys |
-| **Substantial** | Verified identity | did:web + HSM keys |
-| **High** | Qualified certificate | QWAC + Qualified Seal |
+| **Bajo** | Identidad autoafirmada | did:web + claves de software |
+| **Sustancial** | Identidad verificada | did:web + claves HSM |
+| **Alto** | Certificado cualificado | QWAC + Sello Cualificado |
 
 #### 12.3.2 Government Entity Profile
 
@@ -3613,18 +3611,18 @@ Government AI agents require the highest assurance levels.
 }
 ```
 
-### 12.4 Supply Chain and Manufacturing
+### 12.4 Cadena de Suministro y Manufactura
 
-#### 12.4.1 Compliance Requirements
+#### 12.4.1 Requisitos de Cumplimiento
 
-**Table 12.4: Export Control Intersections**
+**Tabla 12.4: Intersecciones de Control de Exportaciones**
 
-| Standard | Focus | PoA Application |
+| Estándar | Enfoque | Aplicación PoA |
 |----------|-------|-----------------|
-| **ITAR** | Defense exports | Geographic + entity constraints |
-| **EAR** | Dual-use exports | End-use certification |
-| **REACH** | Chemical safety | Material constraints |
-| **OFAC** | Sanctions | Entity blocklist constraints |
+| **ITAR** | Exportaciones de defensa | Restricciones geográficas + entidad |
+| **EAR** | Exportaciones de doble uso | Certificación de uso final |
+| **REACH** | Seguridad química | Restricciones de material |
+| **OFAC** | Sanciones | Restricciones de lista de bloqueo de entidades |
 
 #### 12.4.2 Sanctions Screening Constraint
 
@@ -3651,20 +3649,20 @@ Government AI agents require the highest assurance levels.
 ---
 
 
-## Chapter 13: Operational Resilience
+## Capítulo 13: Resiliencia Operativa
 
-### 13.1 Degraded Mode Protocols
+### 13.1 Protocolos de Modo Degradado
 
-#### 13.1.1 Failure Scenarios
+#### 13.1.1 Escenarios de Fallo
 
-**Table 13.1: Resilience Failure Modes**
+**Tabla 13.1: Modos de Fallo de Resiliencia**
 
-| Scenario | Impact | Mitigation |
+| Escenario | Impacto | Mitigación |
 |----------|--------|------------|
-| Transparency Log unavailable | Cannot verify revocation | Bloom filter fallback |
-| DID resolution fails | Cannot verify issuer | Cached profile with TTL |
-| Oracle service down | Cannot evaluate dynamic constraints | Fallback to static constraints |
-| HSM unavailable | Cannot sign new PoAs | Cached PoAs continue working |
+| Registro de Transparencia no disponible | No se puede verificar revocación | Fallback a filtro de Bloom |
+| Resolución DID falla | No se puede verificar emisor | Perfil en caché con TTL |
+| Servicio de oráculo caído | No se puede evaluar restricciones dinámicas | Fallback a restricciones estáticas |
+| HSM no disponible | No se puede firmar nuevas PoAs | PoAs en caché siguen funcionando |
 
 #### 13.1.2 Degraded Mode Policy Document
 
@@ -3701,99 +3699,99 @@ recovery:
     - "ops@company.com"
 ```
 
-### 13.2 Key Lifecycle Management
+### 13.2 Gestión del Ciclo de Vida de Claves
 
-#### 13.2.1 Key Hierarchy
+#### 13.2.1 Jerarquía de Claves
 
 ```
-Root Key (HSM, offline)
+Clave Raíz (HSM, offline)
     │
-    │ Signs (annually)
+    │ Firma (anualmente)
     v
-Intermediate Key (HSM, online)
+Clave Intermedia (HSM, online)
     │
-    │ Signs (monthly)
+    │ Firma (mensualmente)
     v
-Agent Operational Key (Software or TPM)
+Clave Operativa de Agente (Software o TPM)
     │
-    │ Signs (per-request)
+    │ Firma (por solicitud)
     v
-PoA Token
+Token PoA
 ```
 
-#### 13.2.2 Key Rotation Procedure
+#### 13.2.2 Procedimiento de Rotación de Claves
 
-**Table 13.2: Key Rotation Schedule**
+**Tabla 13.2: Cronograma de Rotación de Claves**
 
-| Phase | Duration | Actions |
+| Fase | Duración | Acciones |
 |-------|----------|---------|
-| **Preparation** | 7 days | Generate new key pair, update Entity Profile draft |
-| **Overlap** | 14 days | Both old and new keys valid, monitor for issues |
-| **Migration** | 7 days | Issue new PoAs with new key only |
-| **Retirement** | Immediate | Revoke old key, archive for forensics |
+| **Preparación** | 7 días | Generar nuevo par de claves, actualizar borrador de Perfil de Entidad |
+| **Superposición** | 14 días | Ambas claves (vieja y nueva) válidas, monitorizar problemas |
+| **Migración** | 7 días | Emitir nuevas PoAs solo con nueva clave |
+| **Retiro** | Inmediato | Revocar clave vieja, archivar para forense |
 
-#### 13.2.3 Compromise Response
+#### 13.2.3 Respuesta a Compromiso
 
-![Figure 13.1: Key Compromise Response Flow](images/compromise_response_v3.png)
+![Figura 13.1: Flujo de Respuesta a Compromiso de Claves](images/compromise_response_v3.png)
 
-### 13.3 Business Continuity
+### 13.3 Continuidad del Negocio
 
-#### 13.3.1 Recovery Time Objectives
+#### 13.3.1 Objetivos de Tiempo de Recuperación
 
-**Table 13.3: Recovery Time Objectives (RTO)**
+**Tabla 13.3: Objetivos de Tiempo de Recuperación (RTO)**
 
-| Component | RTO | RPO | Backup Strategy |
+| Componente | RTO | RPO | Estrategia de Respaldo |
 |-----------|-----|-----|-----------------|
-| Signing Service | 15 min | 0 | Active-active multi-region |
-| Transparency Log | 1 hour | 0 | Replicated ledger |
-| Entity Profile Store | 1 hour | 24 hours | Nightly backup + WAL |
-| Revocation Service | 5 min | 0 | CDN-cached Bloom filters |
+| Servicio de Firma | 15 min | 0 | Multi-región activo-activo |
+| Registro de Transparencia | 1 hora | 0 | Libro mayor replicado |
+| Almacén de Perfiles de Entidad | 1 hora | 24 horas | Respaldo nocturno + WAL |
+| Servicio de Revocación | 5 min | 0 | Filtros de Bloom en caché de CDN |
 
-#### 13.3.2 Disaster Recovery Runbook
+#### 13.3.2 Runbook de Recuperación ante Desastres (DR)
 
 ```
-DR Scenario: Primary Region Failure
+Escenario DR: Fallo de Región Primaria
 
-1. DETECTION (0-5 min)
-   [ ] Automated health checks trigger alert
-   [ ] On-call engineer acknowledges
-   [ ] Declare DR event in incident management system
+1. DETECCIÓN (0-5 min)
+   [ ] Comprobaciones de salud automatizadas activan alerta
+   [ ] Ingeniero de guardia reconoce
+   [ ] Declarar evento DR en sistema de gestión de incidentes
 
-2. FAILOVER (5-15 min)
-   [ ] Update DNS to point to secondary region
-   [ ] Verify secondary HSM is operational
-   [ ] Confirm Transparency Log replica is current
-   [ ] Enable read-only mode temporarily
+2. CONMUTACIÓN POR ERROR (FAILOVER) (5-15 min)
+   [ ] Actualizar DNS para apuntar a región secundaria
+   [ ] Verificar que HSM secundario es operativo
+   [ ] Confirmar que réplica de Registro de Transparencia está actual
+   [ ] Habilitar modo de solo lectura temporalmente
 
-3. VERIFICATION (15-30 min)
-   [ ] Test PoA issuance in secondary
-   [ ] Test PoA verification in secondary
-   [ ] Verify revocation service is responding
-   [ ] Enable full read-write operations
+3. VERIFICACIÓN (15-30 min)
+   [ ] Probar emisión de PoA en secundaria
+   [ ] Probar verificación de PoA en secundaria
+   [ ] Verificar que servicio de revocación responde
+   [ ] Habilitar operaciones completas de lectura-escritura
 
-4. COMMUNICATION (30-60 min)
-   [ ] Notify stakeholders
-   [ ] Update status page
-   [ ] Log incident details
+4. COMUNICACIÓN (30-60 min)
+   [ ] Notificar a interesados
+   [ ] Actualizar página de estado
+   [ ] Registrar detalles del incidente
 
-5. POST-INCIDENT (1-7 days)
-   [ ] Root cause analysis
-   [ ] Update runbooks if needed
-   [ ] Schedule failback when primary recovered
+5. POST-INCIDENTE (1-7 días)
+   [ ] Análisis de causa raíz
+   [ ] Actualizar runbooks si es necesario
+   [ ] Programar retorno (failback) cuando primaria recuperada
 ```
 
-### 13.4 Post-Quantum Preparedness
+### 13.4 Preparación Post-Cuántica
 
-#### 13.4.1 Migration Timeline
+#### 13.4.1 Cronograma de Migración
 
-| Phase | Timeframe | Actions |
+| Fase | Marco de Tiempo | Acciones |
 |-------|-----------|---------|
-| **Inventory** | 2025-2026 | Catalog all cryptographic assets |
-| **Hybrid Prep** | 2027-2028 | Implement dual-signature capability |
-| **Hybrid Deploy** | 2029-2030 | Issue PQC + classical signatures |
-| **Classical Sunset** | 2031-2035 | Phase out ECC-only verification |
+| **Inventario** | 2025-2026 | Catalogar todos los activos criptográficos |
+| **Prep Híbrida** | 2027-2028 | Implementar capacidad de doble firma |
+| **Despliegue Híbrido** | 2029-2030 | Emitir firmas PQC + clásicas |
+| **Ocaso Clásico** | 2031-2035 | Eliminar verificación solo ECC |
 
-#### 13.4.2 Algorithm Agility
+#### 13.4.2 Agilidad de Algoritmos
 
 ```json
 {
@@ -3815,68 +3813,68 @@ DR Scenario: Primary Region Failure
 ---
 
 
-# Part IV: Governance & Legal Framework
+# Parte IV: Gobernanza y Marco Legal
 
-## Chapter 14: Authority as a Legal Concept
+## Capítulo 14: Autoridad como Concepto Legal
 
-### 14.1 Authority vs. Permission
+### 14.1 Autoridad vs. Permiso
 
-Every legal system distinguishes between two fundamentally different concepts:
+Todo sistema legal distingue entre dos conceptos fundamentalmente diferentes:
 
-| Concept | Definition | Example | Legal Consequence |
+| Concepto | Definición | Ejemplo | Consecuencia Legal |
 |---------|------------|---------|-------------------|
-| **Permission** | What you may do for your own benefit | A customer may withdraw from their own account | Affects only the person with permission |
-| **Authority** | What you may do that binds another party | A power of attorney to withdraw on behalf of another | Creates obligations for the principal |
+| **Permiso** | Lo que puedes hacer para tu propio beneficio | Un cliente puede retirar de su propia cuenta | Afecta solo a la persona con permiso |
+| **Autoridad** | Lo que puedes hacer que vincula a otra parte | Un poder notarial para retirar en nombre de otro | Crea obligaciones para el principal |
 
-Technical systems often confuse these concepts. An API key grants *permission* to call an endpoint. It does not inherently grant *authority* to bind the key's owner to contractual obligations.
+Los sistemas técnicos a menudo confunden estos conceptos. Una clave API otorga *permiso* para llamar a un punto final. No otorga inherentemente *autoridad* para vincular al propietario de la clave a obligaciones contractuales.
 
-#### 14.1.1 The Agency Gap Revisited
+#### 14.1.1 La Brecha de Agencia Revisitada
 
-Consider this scenario:
+Considere este escenario:
 
 
-1. A company grants an AI agent an API key to a supplier's system
-2. The agent places an order using the API
-3. The supplier ships the goods
+1. Una empresa otorga a un agente de IA una clave API para el sistema de un proveedor
+2. El agente realiza un pedido utilizando la API
+3. El proveedor envía los productos
 
-**Question**: Is the company bound to pay?
+**Pregunta**: ¿Está la empresa obligada a pagar?
 
-**Table 14.1: The Agency Gap Analysis**
+**Tabla 14.1: Análisis de la Brecha de Agencia**
 
-| Framework | Answer | Reasoning |
+| Marco | Respuesta | Razonamiento |
 |-----------|--------|-----------|
-| **Technical** | "The API key was valid" | Permission existed |
-| **Legal** | "It depends on authority" | Was there actual or apparent authority? |
+| **Técnico** | "La clave API era válida" | El permiso existía |
+| **Legal** | "Depende de la autoridad" | ¿Había autoridad real o aparente? |
 
-This gap--between technical capability and legal bindingness--is what AgentAuth addresses.
+Esta brecha—entre la capacidad técnica y la vinculación legal—es lo que aborda AgentAuth.
 
-### 14.2 The Legal Framework of Agency
+### 14.2 El Marco Legal de la Agencia
 
-Agency law provides the vocabulary and rules for authority. The core relationship is triangular:
+La ley de agencia proporciona el vocabulario y las normas para la autoridad. La relación central es triangular:
 
-![Figure 14.2: The Agency Triangle](images/agency_triangle.png){width=90%}
+![Figura 14.2: El Triángulo de Agencia](images/agency_triangle.png){width=90%}
 
-#### 14.2.1 Key Definitions
+#### 14.2.1 Definiciones Clave
 
-**Table 14.2: Key Agency Definitions**
+**Tabla 14.2: Definiciones Clave de Agencia**
 
-| Term | Definition | Source |
+| Término | Definición | Fuente |
 |------|------------|--------|
-| **Principal** | The party whose authority is exercised and who is bound by the agent's actions | Restatement (Third) of Agency §1.01 |
-| **Agent** | The party exercising authority on behalf of the principal | Restatement (Third) of Agency §1.01 |
-| **Third Party** | The party affected by the agent's actions | Commercial practice |
-| **Authority** | The power granted to the agent to affect the principal's legal relations | Restatement (Third) of Agency §2.01 |
-| **Scope** | The boundaries within which authority may be exercised | Restatement (Third) of Agency §2.02 |
-| **Fiduciary Duty** | The agent's legal obligation to act in the principal's best interest | Restatement (Third) of Agency §8.01 |
+| **Principal** | La parte cuya autoridad se ejerce y que está vinculada por las acciones del agente | Restatement (Third) of Agency §1.01 |
+| **Agente** | La parte que ejerce la autoridad en nombre del principal | Restatement (Third) of Agency §1.01 |
+| **Tercera Parte** | La parte afectada por las acciones del agente | Práctica comercial |
+| **Autoridad** | El poder otorgado al agente para afectar las relaciones legales del principal | Restatement (Third) of Agency §2.01 |
+| **Alcance** | Los límites dentro de los cuales se puede ejercer la autoridad | Restatement (Third) of Agency §2.02 |
+| **Deber Fiduciario** | La obligación legal del agente de actuar en el mejor interés del principal | Restatement (Third) of Agency §8.01 |
 
-### 14.3 Types of Authority
+### 14.3 Tipos de Autoridad
 
-#### 14.3.1 Actual Authority
+#### 14.3.1 Autoridad Real
 
-Actual authority is authority the principal intentionally grants to the agent.
+La autoridad real es la autoridad que el principal otorga intencionalmente al agente.
 
-**Express Actual Authority**
-The principal explicitly states what the agent may do.
+**Autoridad Real Expresa**
+El principal declara explícitamente lo que el agente puede hacer.
 
 > "An agent has express actual authority to take action designated or implied in the principal's manifestations to the agent and acts necessary or incidental to achieving the principal's objectives, as the agent reasonably understands the principal's manifestations and objectives when the agent determines how to act." -- Restatement (Third) of Agency §2.02
 
@@ -3890,35 +3888,35 @@ The principal explicitly states what the agent may do.
 }
 ```
 
-**Implied Actual Authority**
-Authority reasonably necessary to accomplish an express grant. Includes customary authority for the role.
+**Autoridad Real Implícita**
+Autoridad razonablemente necesaria para lograr una concesión expresa. Incluye la autoridad habitual para el rol.
 
-If an agent is granted authority to "manage procurement," implied authority includes:
-- Requesting quotes from suppliers
-- Comparing prices
-- Recommending vendors
-- But NOT: Committing to multi-year contracts (requires express authority)
+Si a un agente se le otorga autoridad para "gestionar adquisiciones", la autoridad implícita incluye:
+- Solicitar cotizaciones a proveedores
+- Comparar precios
+- Recomendar vendedores
+- Pero NO: Comprometerse con contratos plurianuales (requiere autoridad expresa)
 
-#### 14.3.2 Apparent Authority
+#### 14.3.2 Autoridad Aparente
 
-Apparent authority binds principals based on third-party perception, even when actual authority does not exist.
+La autoridad aparente vincula a los principales basándose en la percepción de un tercero, incluso cuando no existe autoridad real.
 
-> "Apparent authority is the power held by an agent or other actor to affect a principal's legal relations with third parties when a third party reasonably believes the actor has authority to act on behalf of the principal and that belief is traceable to the principal's manifestations." -- Restatement (Third) of Agency §2.03
+> "La autoridad aparente es el poder que tiene un agente u otro actor para afectar las relaciones legales de un principal con terceros cuando un tercero cree razonablemente que el actor tiene autoridad para actuar en nombre del principal y esa creencia es rastreable a las manifestaciones del principal." -- Restatement (Third) of Agency §2.03
 
-**Elements Required**:
+**Elementos Requeridos**:
 
 
-1. Third party's **reasonable belief** in authority
-2. Belief **traceable** to principal's conduct (not just agent's claims)
-3. Third party **relies** on the appearance
+1. **Creencia razonable** del tercero en la autoridad
+2. Creencia **rastreable** a la conducta del principal (no solo a las afirmaciones del agente)
+3. El tercero **confía** en la apariencia
 
-**The AI Agent Problem**:
-When a company deploys an AI agent with visible credentials:
-- API keys bearing company identification
-- Domain names suggesting corporate affiliation
-- Actions consistent with business operations
+**El Problema del Agente de IA**:
+Cuando una empresa despliega un agente de IA con credenciales visibles:
+- Claves API con identificación de la empresa
+- Nombres de dominio que sugieren afiliación corporativa
+- Acciones consistentes con las operaciones comerciales
 
-Third parties may reasonably believe the agent is authorized, even if internal policies limit that authority.
+Los terceros pueden creer razonablemente que el agente está autorizado, incluso si las políticas internas limitan esa autoridad.
 
 #### 14.3.3 Inherent Agency Power
 
@@ -3949,91 +3947,91 @@ Ratification is the principal's retroactive approval of an unauthorized act.
 - Ratification cannot cure a PoA-based rejection
 - If a verifier rejects a transaction due to constraint violation, subsequent ratification creates a new transaction, not a cure
 
-### 14.4 Limitations on Authority
+### 14.4 Limitaciones a la Autoridad
 
-#### 14.4.1 Express Limitations
+#### 14.4.1 Limitaciones Expresas
 
-The principal's grant may explicitly restrict what the agent may do.
+La concesión del principal puede restringir explícitamente lo que el agente puede hacer.
 
-**Table 14.3: Express Limitations Encoding**
+**Tabla 14.3: Codificación de Limitaciones Expresas**
 
-| Limitation Type | Example | PoA Encoding |
+| Tipo de Limitación | Ejemplo | Codificación PoA |
 |-----------------|---------|--------------|
-| **Monetary** | "Not to exceed $10,000 per transaction" | `{"var": "amount", "op": "<=", "val": 10000}` |
-| **Temporal** | "Valid only during business hours" | `{"var": "time.hour", "op": ">=", "val": 9}` |
-| **Geographic** | "Only for vendors in North America" | `{"var": "vendor.region", "op": "in", "val": ["US", "CA", "MX"]}` |
-| **Categorical** | "Raw materials only, no finished goods" | `{"var": "item.category", "op": "==", "val": "raw-materials"}` |
+| **Monetaria** | "No exceder $10,000 por transacción" | `{"var": "amount", "op": "<=", "val": 10000}` |
+| **Temporal** | "Válido solo en horario comercial" | `{"var": "time.hour", "op": ">=", "val": 9}` |
+| **Geográfica** | "Solo para proveedores en América del Norte" | `{"var": "vendor.region", "op": "in", "val": ["US", "CA", "MX"]}` |
+| **Categórica** | "Solo materias primas, no productos terminados" | `{"var": "item.category", "op": "==", "val": "raw-materials"}` |
 
-#### 14.4.2 Inherent Limitations
+#### 14.4.2 Limitaciones Inherentes
 
-Certain acts require more authority than others, even without express limitation:
+Ciertos actos requieren más autoridad que otros, incluso sin limitación expresa:
 
-**Table 14.4: Inherent Authority Levels**
+**Tabla 14.4: Niveles de Autoridad Inherente**
 
-| Act | Authority Level | Reasoning |
+| Acto | Nivel de Autoridad | Razonamiento |
 |-----|-----------------|-----------|
-| Routine purchases | General commercial agent | Customary for role |
-| Sale of major assets | Board resolution + specific authority | Extraordinary transaction |
-| Employment termination | HR authority + cause documentation | Legal/regulatory requirements |
-| Regulatory filings | Officer-level authority | Statute requires specific delegation |
+| Compras rutinarias | Agente comercial general | Habitual para el rol |
+| Venta de activos principales | Resolución de la junta + autoridad específica | Transacción extraordinaria |
+| Terminación de empleo | Autoridad de RRHH + documentación de causa | Requisitos legales/regulatorios |
+| Presentaciones regulatorias | Autoridad de nivel oficial | El estatuto requiere delegación específica |
 
-#### 14.4.3 Temporal Limitations
+#### 14.4.3 Limitaciones Temporales
 
-Authority may be bounded by time:
+La autoridad puede estar limitada por el tiempo:
 
-**Table 14.5: Temporal Constraints**
+**Tabla 14.5: Restricciones Temporales**
 
-| Mechanism | Description | PoA Field |
+| Mecanismo | Descripción | Campo PoA |
 |-----------|-------------|-----------|
-| **Expiration** | Fixed end date/time | `exp` claim |
-| **Not Before** | Earliest valid time | `nbf` claim |
-| **Duration** | Maximum validity period | Issuer policy |
-| **Revocation** | Early termination by principal | `rev` claim + revocation service |
+| **Expiración** | Fecha/hora de finalización fija | reclamación `exp` |
+| **No Antes De** | Tiempo válido más temprano | reclamación `nbf` |
+| **Duración** | Período de validez máximo | Política del emisor |
+| **Revocación** | Terminación anticipada por el principal | reclamación `rev` + servicio de revocación |
 
-#### 14.4.4 Jurisdictional Limitations
+#### 14.4.4 Limitaciones Jurisdiccionales
 
-Authority valid in one jurisdiction may not be recognized in another:
+La autoridad válida en una jurisdicción puede no ser reconocida en otra:
 
-- **Form Requirements**: Some jurisdictions require notarization for certain powers
-- **Scope Restrictions**: Some acts (e.g., real estate transfers) require specific statutory forms
-- **Public Policy**: Authority for illegal acts is void everywhere
+- **Requisitos de Forma**: Algunas jurisdicciones requieren notarización para ciertos poderes
+- **Restricciones de Alcance**: Algunos actos (ej: transferencias de bienes raíces) requieren formas estatutarias específicas
+- **Política Pública**: La autoridad para actos ilegales es nula en todas partes
 
-### 14.5 Revocation of Authority
+### 14.5 Revocación de Autoridad
 
-Revocation terminates authority. It may occur through several mechanisms:
+La revocación termina la autoridad. Puede ocurrir a través de varios mecanismos:
 
-**Table 14.6: Revocation Mechanisms**
+**Tabla 14.6: Mecanismos de Revocación**
 
-| Mechanism | Trigger | Effect | PoA Implementation |
+| Mecanismo | Disparador | Efecto | Implementación PoA |
 |-----------|---------|--------|-------------------|
-| **Express Revocation** | Principal directly revokes | Immediate termination | Revocation entry published |
-| **Expiration** | Time passes `exp` | Authority ends | Verifier rejects expired PoA |
-| **Accomplishment** | Purpose completed | Authority unnecessary | One-time PoA design |
-| **Operation of Law** | Death, incapacity, dissolution | Authority terminates | Profile status -> "revoked" |
+| **Revocación Expresa** | El principal revoca directamente | Terminación inmediata | Entrada de revocación publicada |
+| **Expiración** | Pasa el tiempo `exp` | Autoridad termina | Verificador rechaza PoA expirada |
+| **Cumplimiento** | Propósito completado | Autoridad innecesaria | Diseño de PoA de un solo uso |
+| **Operación de Ley** | Muerte, incapacidad, disolución | Autoridad termina | Estado del perfil -> "revocado" |
 
-#### 14.5.1 The Third-Party Communication Problem
+#### 14.5.1 El Problema de Comunicación a Terceros
 
-Revocation is only effective when communicated. A third party who:
-- Does not know of revocation
-- Has no reason to inquire
-- Acts in good faith
+La revocación solo es efectiva cuando se comunica. Un tercero que:
+- No sabe de la revocación
+- No tiene razón para investigar
+- Actúa de buena fe
 
-May bind the principal despite revocation.
+Puede vincular al principal a pesar de la revocación.
 
-**Traditional Solution**: Publication (newspapers, court filings)
-**PoA Solution**: Transparency Log + OCSP endpoints
+**Solución Tradicional**: Publicación (periódicos, archivos judiciales)
+**Solución PoA**: Registro de Transparencia + puntos finales OCSP
 
-### 14.6 Liability Attribution
+### 14.6 Atribución de Responsabilidad
 
-When an agent acts, liability flows according to:
+Cuando un agente actúa, la responsabilidad fluye de acuerdo a:
 
-**Table 14.7: Liability Attribution Matrix**
+**Tabla 14.7: Matriz de Atribución de Responsabilidad**
 
-| Agent Status | Transaction Within Authority | Transaction Outside Authority |
+| Estado del Agente | Transacción Dentro de Autoridad | Transacción Fuera de Autoridad |
 |--------------|------------------------------|-------------------------------|
-| **Disclosed Agent** | Principal liable | Agent personally liable |
-| **Undisclosed Principal** | Both may be liable | Agent personally liable |
-| **Non-existent Principal** | Agent personally liable | Agent personally liable |
+| **Agente Revelado** | Principal responsable | Agente personalmente responsable |
+| **Principal No Revelado** | Ambos pueden ser responsables | Agente personalmente responsable |
+| **Principal Inexistente** | Agente personalmente responsable | Agente personalmente responsable |
 
 #### 14.6.1 Respondeat Superior
 
@@ -4043,19 +4041,19 @@ Principals are vicariously liable for agents' torts committed within scope of em
 
 **AI Agent Implication**: If an AI agent causes harm while executing authorized tasks, the principal is likely liable under respondeat superior.
 
-### 14.7 Authority Documentation Requirements
+### 14.7 Requisitos de Documentación de Autoridad
 
-Different contexts require different levels of authority documentation:
+Diferentes contextos requieren diferentes niveles de documentación de autoridad:
 
-**Table 14.8: Documentation Standards by Context**
+**Tabla 14.8: Estándares de Documentación por Contexto**
 
-| Context | Documentation Standard | Rationale |
+| Contexto | Estándar de Documentación | Racional |
 |---------|----------------------|-----------|
-| **Consumer Transactions** | Minimal (apparent authority sufficient) | Consumer protection |
-| **B2B Standard** | Purchase orders, emails | Commercial custom |
-| **High Value B2B** | Formal contracts | Risk management |
-| **Regulated Industries** | Certified authority + compliance attestations | Regulatory requirement |
-| **Cross-Border** | Legalized/apostilled documents | International recognition |
+| **Transacciones de Consumidor** | Mínimo (autoridad aparente suficiente) | Protección al consumidor |
+| **Estándar B2B** | Órdenes de compra, correos electrónicos | Costumbre comercial |
+| **B2B de Alto Valor** | Contratos formales | Gestión de riesgos |
+| **Industrias Reguladas** | Autoridad certificada + atestaciones de cumplimiento | Requisito regulatorio |
+| **Transfronterizo** | Documentos legalizados/apostillados | Reconocimiento internacional |
 
 PoA provides a unified cryptographic standard that can satisfy all these levels through:
 - Varying constraint strictness
@@ -4065,34 +4063,34 @@ PoA provides a unified cryptographic standard that can satisfy all these levels 
 ---
 
 
-## Chapter 15: German Law: Statutory Representation
+## Capítulo 15: Ley Alemana: Representación Estatutaria
 
-### 15.1 Overview
+### 15.1 Descripción General
 
-German law provides highly structured models for authority, rooted in the Civil Code (Bürgerliches Gesetzbuch, BGB) and the Commercial Code (Handelsgesetzbuch, HGB). These frameworks offer valuable lessons for designing machine-readable authority systems.
+La ley alemana proporciona modelos altamente estructurados para la autoridad, arraigados en el Código Civil (Bürgerliches Gesetzbuch, BGB) y el Código Comercial (Handelsgesetzbuch, HGB). Estos marcos ofrecen lecciones valiosas para diseñar sistemas de autoridad legibles por máquina.
 
-**Table 15.1: German Law Comparison**
+**Tabla 15.1: Comparación con la Ley Alemana**
 
-| Feature | German Law | AgentAuth Analog |
+| Característica | Ley Alemana | Análogo AgentAuth |
 |---------|-----------|------------------|
-| Clear authority types | Vollmacht, Handlungsvollmacht, Prokura | Entity Profile `type` field |
-| Register-based verification | Handelsregister | did:web resolution |
-| Third-party protection | Positive/Negative Publizität | Transparency Log |
-| Scope limitations | Register entries | PoA constraints |
+| Tipos claros de autoridad | Vollmacht, Handlungsvollmacht, Prokura | Campo `type` de Perfil de Entidad |
+| Verificación basada en registro | Handelsregister | resolución did:web |
+| Protección de terceros | Publizität Positiva/Negativa | Registro de Transparencia |
+| Limitaciones de alcance | Entradas de registro | Restricciones PoA |
 
-### 15.2 Authority Types Under German Law
+### 15.2 Tipos de Autoridad bajo la Ley Alemana
 
-#### 15.2.1 Vollmacht (General Power of Attorney)
+#### 15.2.1 Vollmacht (Poder General)
 
-**Legal Basis**: BGB §§ 164-181
+**Base Legal**: BGB §§ 164-181
 
-A Vollmacht is a declaration by the principal (Vollmachtgeber) to third parties that the agent (Bevollmächtigter) may act on their behalf.
+Una Vollmacht es una declaración del principal (Vollmachtgeber) a terceros de que el agente (Bevollmächtigter) puede actuar en su nombre.
 
-**Key Characteristics**:
-- Created by unilateral declaration (no acceptance required)
-- May be general or specific
-- Not required to be registered (unlike Prokura)
-- Revocable at will (BGB § 168)
+**Características Clave**:
+- Creada por declaración unilateral (no requiere aceptación)
+- Puede ser general o específica
+- No requiere ser registrada (a diferencia de Prokura)
+- Revocable a voluntad (BGB § 168)
 
 **PoA Mapping**:
 ```json
@@ -4108,27 +4106,27 @@ A Vollmacht is a declaration by the principal (Vollmachtgeber) to third parties 
 }
 ```
 
-#### 15.2.2 Handlungsvollmacht (Commercial Authority)
+#### 15.2.2 Handlungsvollmacht (Autoridad Comercial)
 
-**Legal Basis**: HGB § 54
+**Base Legal**: HGB § 54
 
-Commercial authority to perform acts typical for a commercial enterprise.
+Autoridad comercial para realizar actos típicos de una empresa comercial.
 
-**Three Sub-Types**:
+**Tres Subtipos**:
 
-**Table 15.2: Commercial Authority Types**
+**Tabla 15.2: Tipos de Autoridad Comercial**
 
-| Type | Scope | BGB Reference |
+| Tipo | Alcance | Referencia BGB |
 |------|-------|---------------|
-| **Generalhandlungsvollmacht** | All typical commercial acts | HGB § 54(1) |
-| **Artvollmacht** | Specific category of acts | HGB § 54(2) |
-| **Spezialvollmacht** | Single specific transaction | HGB § 54(3) |
+| **Generalhandlungsvollmacht** | Todos los actos comerciales típicos | HGB § 54(1) |
+| **Artvollmacht** | Categoría específica de actos | HGB § 54(2) |
+| **Spezialvollmacht** | Transacción específica única | HGB § 54(3) |
 
-**Statutory Exclusions** (HGB § 54(2)):
-Even Generalhandlungsvollmacht does NOT include authority to:
-- Sell or encumber real property
-- Borrow on behalf of the principal
-- Appear in court
+**Exclusiones Estatutarias** (HGB § 54(2)):
+Incluso Generalhandlungsvollmacht NO incluye autoridad para:
+- Vender o gravar bienes inmuebles
+- Pedir prestado en nombre del principal
+- Comparecer ante el tribunal
 
 **PoA Mapping**:
 ```json
@@ -4149,23 +4147,23 @@ Even Generalhandlungsvollmacht does NOT include authority to:
 }
 ```
 
-#### 15.2.3 Prokura (Commercial Procuration)
+#### 15.2.3 Prokura (Procuración Comercial)
 
-**Legal Basis**: HGB §§ 48-53
+**Base Legal**: HGB §§ 48-53
 
-Prokura is the most extensive form of commercial authority under German law.
+Prokura es la forma más extensa de autoridad comercial bajo la ley alemana.
 
-**Key Characteristics**:
-- MUST be expressly granted (HGB § 48(1))
-- MUST be registered in the Handelsregister (HGB § 53(1))
-- Grants authority to ALL judicial and extrajudicial acts of the business
-- Only excludable limitations: Real property transactions (HGB § 49(2))
-- Non-delegable: Prokurist cannot grant Prokura to another
+**Características Clave**:
+- DEBE ser otorgada expresamente (HGB § 48(1))
+- DEBE ser registrada en el Handelsregister (HGB § 53(1))
+- Otorga autoridad para TODOS los actos judiciales y extrajudiciales del negocio
+- Únicas limitaciones excluibles: Transacciones de bienes inmuebles (HGB § 49(2))
+- No delegable: Prokurist no puede otorgar Prokura a otro
 
-**Statutory Scope** (HGB § 49(1)):
+**Alcance Estatutario** (HGB § 49(1)):
 > "Die Prokura ermächtigt zu allen Arten von gerichtlichen und außergerichtlichen Geschäften und Rechtshandlungen, die der Betrieb eines Handelsgewerbes mit sich bringt."
 > 
-> (Prokura authorizes all types of judicial and extrajudicial transactions and legal acts that the operation of a commercial enterprise entails.)
+> (La Prokura autoriza todo tipo de transacciones y actos legales judiciales y extrajudiciales que conlleva la operación de una empresa comercial.)
 
 **PoA Mapping**:
 ```json
@@ -4187,23 +4185,23 @@ Prokura is the most extensive form of commercial authority under German law.
 }
 ```
 
-#### 15.2.4 Gesetzliche Vertretung (Statutory Representation)
+#### 15.2.4 Gesetzliche Vertretung (Representación Legal)
 
-Authority granted directly by law, not by private act.
+Autoridad otorgada directamente por ley, no por acto privado.
 
-**Examples**:
-**Table 15.3: Statutory Representatives**
+**Ejemplos**:
+**Tabla 15.3: Representantes Legales**
 
-| Entity | Representative | Legal Basis |
+| Entidad | Representante | Base Legal |
 |--------|---------------|-------------|
-| Minor child | Parents | BGB § 1626 |
-| GmbH | Geschäftsführer | GmbHG § 35 |
-| AG | Vorstand | AktG § 78 |
-| Foundation | Vorstand | State foundation laws |
+| Hijo menor | Padres | BGB § 1626 |
+| GmbH | Gesch&auml;ftsf&uuml;hrer | GmbHG § 35 |
+| AG | Vorstad | AktG § 78 |
+| Fundación | Vorstad | Leyes estatales de fundaciones |
 
-### 15.3 The Handelsregister System
+### 15.3 El Sistema Handelsregister
 
-The Handelsregister (Commercial Register) is the authoritative public record of commercial authority.
+El Handelsregister (Registro Comercial) es el registro público autorizado de la autoridad comercial.
 
 #### 15.3.1 Structure
 
@@ -4220,42 +4218,42 @@ Handelsregister
     `-- Cooperative societies (eG)
 ```
 
-#### 15.3.2 Registered Information
+#### 15.3.2 Información Registrada
 
-**Table 15.4: Handelsregister Fields**
+**Tabla 15.4: Campos de Handelsregister**
 
-| Field | Description | PoA Relevance |
+| Campo | Descripción | Relevancia PoA |
 |-------|-------------|---------------|
-| Firma | Business name | Entity Profile `name` |
-| Sitz | Registered office | Entity Profile `jurisdiction` |
-| Geschäftsführer | Managing directors | Entity Profile `legalEntity.officers` |
-| Prokura | Prokurists + joint representation rules | Authority chain root |
-| Vertretungsregelung | Representation rules (joint/sole) | Constraint on chain issuance |
+| Firma | Nombre del negocio | Nombre en Perfil de Entidad |
+| Sitz | Oficina registrada | Jurisdicción en Perfil de Entidad |
+| Gesch&auml;ftsf&uuml;hrer | Directores gerentes | Oficiales en Perfil de Entidad |
+| Prokura | Prokuristas + reglas de representación conjunta | Raíz de cadena de autoridad |
+| Vertretungsregelung | Reglas de representación (conjunta/única) | Restricción en emisión de cadena |
 
-#### 15.3.3 Third-Party Protection (Vertrauensschutz)
+#### 15.3.3 Protección a Terceros (Vertrauensschutz)
 
-**Positive Publizität** (HGB § 15(2)):
-Third parties may rely on register content, even if incorrect.
+**Publizität Positiva** (HGB § 15(2)):
+Los terceros pueden confiar en el contenido del registro, incluso si es incorrecto.
 
-**Negative Publizität** (HGB § 15(1)):
-Unregistered facts cannot be asserted against third parties acting in good faith.
+**Publizität Negativa** (HGB § 15(1)):
+Hechos no registrados no pueden ser afirmados contra terceros que actúan de buena fe.
 
-**Implications for AgentAuth**:
-- Entity Profiles SHOULD reference Handelsregister entries
-- Transparency Logs provide equivalent public notice function
-- Relying parties are protected if they verify against published state
+**Implicaciones para AgentAuth**:
+- Los Perfiles de Entidad DEBEN referenciar entradas de Handelsregister
+- Los Registros de Transparencia proporcionan una función de aviso público equivalente
+- Las partes confiantes están protegidas si verifican contra el estado publicado
 
-### 15.4 Mapping to AgentAuth Architecture
+### 15.4 Mapeo a Arquitectura AgentAuth
 
-**Table 15.5: German Law to AgentAuth Mapping**
+**Tabla 15.5: Mapeo de Ley Alemana a AgentAuth**
 
-| German Concept | AgentAuth Implementation |
+| Concepto Alemán | Implementación AgentAuth |
 |----------------|--------------------------|
-| Handelsregister entry | Published Entity Profile at did:web |
-| Prokura grant | Root PoA issued by corporate entity |
-| Handlungsvollmacht | Constrained PoA with scope limitations |
-| Register amendment | Profile update + Transparency Log entry |
-| Prokura revocation | Revocation entry + Log publication |
+| Entrada Handelsregister | Perfil de Entidad publicado en did:web |
+| Concesión Prokura | PoA raíz emitida por entidad corporativa |
+| Handlungsvollmacht | PoA restringida con limitaciones de alcance |
+| Enmienda de registro | Actualización de perfil + entrada en Registro de Transparencia |
+| Revocación Prokura | Entrada de revocación + publicación en Registro |
 
 #### 15.4.1 Example: German GmbH Principal
 
@@ -4291,18 +4289,18 @@ Unregistered facts cannot be asserted against third parties acting in good faith
 }
 ```
 
-### 15.5 German Law and AI Agents
+### 15.5 Ley Alemana y Agentes de IA
 
-German courts have not directly addressed AI agent authority. Key open questions:
+Los tribunales alemanes no han abordado directamente la autoridad de agentes de IA. Preguntas abiertas clave:
 
-**Table 15.6: AI Legal Status (Germany)**
+**Tabla 15.6: Estatus Legal de IA (Alemania)**
 
-| Question | Current Status | PoA Approach |
+| Pregunta | Estatus Actual | Enfoque PoA |
 |----------|---------------|--------------|
-| Can an AI hold Prokura? | No (requires natural person) | AI acts under human Prokurist's delegation |
-| Who is liable for AI actions? | Principal (strict liability) | Clear chain to human principal |
-| Is AI signature legally valid? | Unclear | Cryptographic proof of human delegation |
-| How to revoke AI authority? | No specific procedure | Standard PoA revocation + Log |
+| ¿Puede una IA tener Prokura? | No (requiere persona natural) | IA actúa bajo delegación de Prokurist humano |
+| ¿Quién es responsable de acciones de IA? | Principal (responsabilidad estricta) | Cadena clara a principal humano |
+| ¿Es legalmente válida la firma de IA? | Poco claro | Prueba criptográfica de delegación humana |
+| ¿Cómo revocar autoridad de IA? | Sin procedimiento específico | Revocación estándar de PoA + Registro |
 
 #### 15.5.1 Proposed Integration Pattern
 
@@ -4325,31 +4323,31 @@ This preserves the German principle of verifiable authority chains while enablin
 ---
 
 
-## Chapter 16: United States: Actual vs. Apparent Authority
+## Capítulo 16: Estados Unidos: Actual vs. Autoridad Aparente
 
-### 16.1 Overview
+### 16.1 Descripción General
 
-U.S. agency law is largely judge-made, synthesized in the Restatement (Third) of Agency (2006). Unlike German law's register-based system, U.S. law relies on flexible standards and contextual analysis.
+La ley de agencia de EE.UU. es en gran parte creada por jueces, sintetizada en el Restatement (Third) of Agency (2006). A diferencia del sistema basado en registros de la ley alemana, la ley de EE.UU. se basa en estándares flexibles y análisis contextual.
 
-**Table 16.1: US Agency Law Comparison**
+**Tabla 16.1: Comparación con la Ley de Agencia de EE.UU.**
 
-| Feature | U.S. Approach | PoA Implementation |
+| Característica | Enfoque EE.UU. | Implementación PoA |
 |---------|--------------|-------------------|
-| Authority definition | Contextual, flexible | Explicit grant claims |
-| Third-party protection | Apparent authority doctrine | Constraint visibility |
-| Documentation | Variable by context | Cryptographic artifact |
-| Revocation | Constructive notice | Transparency Log |
+| Definición de autoridad | Contextual, flexible | Reclamaciones de concesión explícitas |
+| Protección a terceros | Doctrina de autoridad aparente | Visibilidad de restricciones |
+| Documentación | Variable por contexto | Artefacto criptográfico |
+| Revocación | Aviso constructivo | Registro de Transparencia |
 
-### 16.2 Types of Authority Under U.S. Law
+### 16.2 Tipos de Autoridad bajo la Ley de EE.UU.
 
-#### 16.2.1 Actual Authority
+#### 16.2.1 Autoridad Real
 
-Actual authority is authority the principal intentionally confers upon the agent.
+La autoridad real es la autoridad que el principal confiere intencionalmente al agente.
 
-**Express Actual Authority** (Restatement §2.01):
-> "An agent acts with actual authority when, at the time of taking action that has legal consequences for the principal, the agent reasonably believes, in accordance with the principal's manifestations to the agent, that the principal wishes the agent so to act."
+**Autoridad Real Expresa** (Restatement §2.01):
+> "Un agente actúa con autoridad real cuando, en el momento de tomar una acción que tiene consecuencias legales para el principal, el agente cree razonablemente, de acuerdo con las manifestaciones del principal al agente, que el principal desea que el agente actúe así."
 
-**Example PoA Encoding**:
+**Codificación de Ejemplo PoA**:
 ```json
 {
   "iss": "did:web:acmecorp.com",
@@ -4367,51 +4365,51 @@ Actual authority is authority the principal intentionally confers upon the agent
 }
 ```
 
-**Implied Actual Authority** (Restatement §2.02):
-Authority reasonably necessary to accomplish express grants:
-- Authority to use standard payment methods
-- Authority to communicate with vendors
-- Authority to gather quotes and negotiate
-- But NOT: Authority to commit to multi-year contracts
+**Autoridad Real Implícita** (Restatement §2.02):
+Autoridad razonablemente necesaria para lograr concesiones expresas:
+- Autoridad para usar métodos de pago estándar
+- Autoridad para comunicarse con proveedores
+- Autoridad para reunir cotizaciones y negociar
+- Pero NO: Autoridad para comprometerse con contratos plurianuales
 
-#### 16.2.2 Apparent Authority
+#### 16.2.2 Autoridad Aparente
 
-Apparent authority binds principals based on third-party perception, even absent actual authority.
+La autoridad aparente vincula a los principales basándose en la percepción de un tercero, incluso en ausencia de autoridad real.
 
 **Restatement §2.03**:
-> "Apparent authority is the power held by an agent or other actor to affect a principal's legal relations with third parties when a third party reasonably believes the actor has authority to act on behalf of the principal and that belief is traceable to the principal's manifestations."
+> "La autoridad aparente es el poder que posee un agente u otro actor para afectar las relaciones legales de un principal con terceros cuando un tercero cree razonablemente que el actor tiene autoridad para actuar en nombre del principal y esa creencia es atribuible a las manifestaciones del principal."
 
-**Three-Part Test**:
-1. **Reasonable belief**: Third party must reasonably believe agent has authority
-2. **Traceability**: Belief must trace to principal's conduct, not just agent's claims
-3. **Reliance**: Third party must actually rely on the appearance
+**Prueba de Tres Partes**:
+1. **Creencia razonable**: El tercero debe creer razonablemente que el agente tiene autoridad
+2. **Atribuibilidad**: La creencia debe atribuirse a la conducta del principal, no solo a las afirmaciones del agente
+3. **Confianza**: El tercero debe confiar realmente en la apariencia
 
-**Critical Implication for AI Agents**:
-When a company:
-- Deploys an AI agent with API credentials
-- Allows the agent to use company email domains
-- Represents to vendors that the agent handles procurement
+**Implicación Crítica para Agentes de IA**:
+Cuando una empresa:
+- Despliega un agente de IA con credenciales API
+- Permite que el agente use dominios de correo electrónico de la empresa
+- Representa ante los proveedores que el agente maneja las adquisiciones
 
-Third parties may reasonably believe the agent is authorized for broader actions than internal policies permit.
+Los terceros pueden creer razonablemente que el agente está autorizado para acciones más amplias de lo que permiten las políticas internas.
 
-### 16.3 The AI Agent Authority Problem
+### 16.3 El Problema de la Autoridad del Agente de IA
 
-#### 16.3.1 Scenario Analysis
+#### 16.3.1 Análisis de Escenario
 
-**Table 16.2: Authority Scenario Analysis**
+**Tabla 16.2: Análisis de Escenarios de Autoridad**
 
-| Scenario | Actual Authority | Apparent Authority | Principal Bound? |
+| Escenario | Autoridad Real | Autoridad Aparente | ¿Principal Vinculado? |
 |----------|------------------|-------------------|------------------|
-| Agent places order within approved limit | Yes | Yes | Yes |
-| Agent places order above internal limit | No | Possibly | Depends on manifestations |
-| Agent orders from non-approved vendor | No | Possibly | Depends on constraints |
-| Agent discloses PoA with visible constraints | No | No | No (TP saw limits) |
+| Agente realiza pedido dentro del límite aprobado | Sí | Sí | Sí |
+| Agente realiza pedido por encima del límite interno | No | Posiblemente | Depende de las manifestaciones |
+| Agente pide a proveedor no aprobado | No | Posiblemente | Depende de las restricciones |
+| Agente divulga PoA con restricciones visibles | No | No | No (TP vio límites) |
 
-#### 16.3.2 How PoA Limits Apparent Authority
+#### 16.3.2 Cómo PoA Limita la Autoridad Aparente
 
-Traditional problem: Internal policies don't bind third parties who don't know about them.
+Problema tradicional: Las políticas internas no vinculan a terceros que no las conocen.
 
-PoA solution: Constraints are embedded in the cryptographic artifact. When a verifying party (relying party) checks the PoA, they see:
+Solución PoA: Las restricciones están integradas en el artefacto criptográfico. Cuando una parte verificadora (relying party) comprueba la PoA, ve:
 
 ```json
 {
@@ -4425,143 +4423,142 @@ PoA solution: Constraints are embedded in the cryptographic artifact. When a ver
 }
 ```
 
-**Legal Effect**: No reasonable belief in authority beyond the visible constraints can form. Apparent authority is cut off at its source.
+**Efecto Legal**: No se puede formar una creencia razonable en la autoridad más allá de las restricciones visibles. La autoridad aparente se corta de raíz.
 
-### 16.4 Relevant Case Law
+### 16.4 Jurisprudencia Relevante
 
-#### 16.4.1 Agency Scope Cases
+#### 16.4.1 Casos de Alcance de Agencia
 
 **Botticello v. Stefanovicz** (1979, CT Supreme Court):
-- Held: Agent's authority must be evaluated objectively
-- Relevance: PoA provides objective evidence of scope
+- Fallo: La autoridad del agente debe ser evaluada objetivamente
+- Relevancia: PoA proporciona evidencia objetiva del alcance
 
 **Lind v. Schenley Industries** (1960, 3rd Cir.):
-- Held: Corporate officer statements can create apparent authority
-- Relevance: PoA issuance is a controlled manifestation
+- Fallo: Las declaraciones de funcionarios corporativos pueden crear autoridad aparente
+- Relevancia: La emisión de PoA es una manifestación controlada
 
 **Wen Kroy Realty v. Public Serv. Electric** (1986, NJ):
-- Held: Third party must verify authority for unusual transactions
-- Relevance: PoA verification provides due diligence mechanism
+- Fallo: El tercero debe verificar la autoridad para transacciones inusuales
+- Relevancia: La verificación de PoA proporciona un mecanismo de debida diligencia
 
-#### 16.4.2 AI Agent Analogies
+#### 16.4.2 Analogías de Agentes de IA
 
 **CFTC v. Commodity Deposit** (2022):
-- Held: Automated trading systems bind their controllers
-- Relevance: AI agents that execute trades bind principals
+- Fallo: Los sistemas de comercio automatizados vinculan a sus controladores
+- Relevancia: Los agentes de IA que ejecutan operaciones vinculan a los principales
 
 **Visa v. Maritz** (2018):
-- Held: API access does not grant unlimited authority
-- Relevance: PoA can specify exactly what API access conveys
+- Fallo: El acceso a API no otorga autoridad ilimitada
+- Relevancia: PoA puede especificar exactamente qué transmite el acceso a API
 
-### 16.5 UCC Considerations
+### 16.5 Consideraciones UCC
 
-The Uniform Commercial Code affects agent authority in commercial transactions.
+El Código Comercial Uniforme afecta la autoridad del agente en las transacciones comerciales.
 
-#### 16.5.1 UCC Article 2 (Sales)
+#### 16.5.1 UCC Artículo 2 (Ventas)
 
-**Table 16.3: UCC Article 2 Intersections**
+**Tabla 16.3: Intersecciones UCC Artículo 2**
 
-| UCC Section | Requirement | PoA Mapping |
+| Sección UCC | Requisito | Mapeo PoA |
 |-------------|-------------|-------------|
-| § 2-201 | Statute of Frauds ($500+) | PoA provides signed writing |
-| § 2-302 | Unconscionability | Constraints prevent overreach |
-| § 2-206 | Manner of acceptance | PoA specifies permitted acts |
+| § 2-201 | Estatuto de Fraudes ($500+) | PoA proporciona escrito firmado |
+| § 2-302 | Inequidad | Las restricciones previenen abusos |
+| § 2-206 | Manera de aceptación | PoA especifica actos permitidos |
 
-#### 16.5.2 UCC Article 4A (Funds Transfers)
+#### 16.5.2 UCC Artículo 4A (Transferencias de Fondos)
 
-Wire transfers by AI agents are governed by Article 4A:
+Las transferencias bancarias por agentes de IA se rigen por el Artículo 4A:
 
-**Table 16.4: UCC Article 4A Rules**
+**Tabla 16.4: Reglas UCC Artículo 4A**
 
-| Issue | UCC 4A Rule | PoA Implementation |
+| Problema | Regla UCC 4A | Implementación PoA |
 |-------|-------------|-------------------|
-| Authorization | Bank must verify | PoA chain verification |
-| Liability | Depends on security procedure | HSM + constraint enforcement |
-| Finality | Irrevocable once sent | Pre-transfer constraint check |
+| Autorización | Banco debe verificar | Verificación de cadena PoA |
+| Responsabilidad | Depende del procedimiento de seguridad | HSM + cumplimiento de restricciones |
+| Finalidad | Irrevocable una vez enviada | Verificación de restricción previa a transferencia |
 
-### 16.6 State Variations
+### 16.6 Variaciones Estatales
 
-Agency law varies by state. Key differences relevant to AI agents:
+La ley de agencia varía según el estado. Diferencias clave relevantes para agentes de IA:
 
-**Table 16.5: State Law Variations**
+**Tabla 16.5: Variaciones de Ley Estatal**
 
-| State | Notable Feature | Impact on PoA |
+| Estado | Característica Notable | Impacto en PoA |
 |-------|----------------|---------------|
-| Delaware | Business judgment rule | PoA supports board delegation |
-| New York | Strict reading of authority | Precise constraint specification |
-| California | Consumer protection emphasis | Additional disclosure requirements |
-| Texas | Constructive trust for breaches | Chain integrity for recovery |
+| Delaware | Regla de juicio comercial | PoA apoya delegación de la junta |
+| New York | Lectura estricta de autoridad | Especificación precisa de restricciones |
+| California | Énfasis en protección al consumidor | Requisitos de divulgación adicionales |
+| Texas | Fideicomiso constructivo por incumplimientos | Integridad de cadena para recuperación |
 
-### 16.7 Best Practices for U.S. Deployments
+### 16.7 Mejores Prácticas para Despliegues en EE.UU.
 
-1. **Make constraints visible**: Include all material limitations in the PoA
-2. **Use short expiration**: Limit temporal scope of apparent authority
-3. **Register with vendors**: Explicitly communicate agent limitations
-4. **Monitor and revoke**: Active oversight reduces authority creep
-5. **Transparency logging**: Create audit trail for liability defense
+1. **Hacer visibles las restricciones**: Incluir todas las limitaciones materiales en la PoA
+2. **Usar expiración corta**: Limitar el alcance temporal de la autoridad aparente
+3. **Registrarse con proveedores**: Comunicar explícitamente las limitaciones del agente
+4. **Monitorizar y revocar**: La supervisión activa reduce la expansión de autoridad
+5. **Registro de transparencia**: Crear pista de auditoría para defensa de responsabilidad
 
-#### 16.7.1 Sample Vendor Notification
+#### 16.7.1 Ejemplo de Notificación a Proveedor
 
 ```text
-NOTICE OF AGENT AUTHORITY LIMITATIONS
+AVISO DE LIMITACIONES DE AUTORIDAD DEL AGENTE
 
-Acme Corp hereby notifies Vendor that:
+Acme Corp notifica por la presente al Proveedor que:
 
-1. Our procurement AI agent (Agent ID: did:web:acmecorp.com:agents:buyer-ai) 
-   is authorized to place orders subject to the constraints in the 
-   accompanying Proof of Authorization.
+1. Nuestro agente de IA de adquisiciones (ID de Agente: did:web:acmecorp.com:agents:buyer-ai) 
+   está autorizado para realizar pedidos sujetos a las restricciones en la 
+   Prueba de Autorización adjunta.
 
-2. Any order exceeding the stated constraints requires human approval.
+2. Cualquier pedido que exceda las restricciones establecidas requiere aprobación humana.
 
-3. Vendor agrees to verify the PoA before fulfilling orders.
+3. El Proveedor acepta verificar la PoA antes de cumplir con los pedidos.
 
-4. Vendor's reliance on orders exceeding PoA constraints is at Vendor's risk.
+4. La confianza del Proveedor en pedidos que excedan las restricciones de PoA corre por cuenta del Proveedor.
 
-This notice constitutes constructive notice of authority limitations 
-per Restatement (Third) of Agency § 3.11.
+Este aviso constituye un aviso constructivo de limitaciones de autoridad 
+según Restatement (Third) of Agency § 3.11.
 ```
 
 ---
 
 
-## Chapter 17: European Union: eIDAS and Trust Services
+## Capítulo 17: Unión Europea: eIDAS y Servicios de Confianza
 
-### 17.1 Overview
+### 17.1 Descripción General
 
-The eIDAS Regulation (EU 910/2014) and its successor eIDAS 2.0 (EU 2024/1183) establish the EU's framework for electronic trust services. Understanding this framework is essential for PoA deployments in Europe.
+El Reglamento eIDAS (UE 910/2014) y su sucesor eIDAS 2.0 (UE 2024/1183) establecen el marco de la UE para los servicios de confianza electrónica. Comprender este marco es esencial para los despliegues de PoA en Europa.
 
-**Table 17.1: eIDAS Trust Services**
+**Tabla 17.1: Servicios de Confianza eIDAS**
 
-| eIDAS Component | Purpose | PoA Relevance |
+| Componente eIDAS | Propósito | Relevancia PoA |
 |-----------------|---------|---------------|
-| Electronic Identification | Verify identity across borders | Entity Profile root of trust |
-| Trust Services | Signatures, seals, timestamps | Cryptographic foundation |
-| Trusted Lists | QTSPs registry | Issuer validation |
-| EUDI Wallet | Personal identity management | Future integration path |
+| Identificación Electrónica | Verificar identidad a través de fronteras | Raíz de confianza del Perfil de Entidad |
+| Servicios de Confianza | Firmas, sellos, sellos de tiempo | Base criptográfica |
+| Listas de Confianza | Registro de QTSPs | Validación de emisor |
+| Cartera EUDI | Gestión de identidad personal | Ruta de integración futura |
 
-### 17.2 Electronic Signatures Under eIDAS
+### 17.2 Firmas Electrónicas bajo eIDAS
 
-eIDAS defines three signature levels with increasing legal weight:
+eIDAS define tres niveles de firma con peso legal creciente:
 
-#### 17.2.1 Signature Levels
+#### 17.2.1 Niveles de Firma
 
-**Table 17.2: eIDAS Signature Levels**
+**Tabla 17.2: Niveles de Firma eIDAS**
 
-| Level | Requirements | Legal Effect | PoA Use Case |
+| Nivel | Requisitos | Efecto Legal | Caso de Uso PoA |
 |-------|-------------|--------------|--------------|
-| **Electronic Signature** | Data attached for signing | Admissible evidence | Internal authorizations |
-| **Advanced (AdES)** | Uniquely linked, signatory control | Presumed authentic | Standard PoA issuance |
-| **Qualified (QES)** | QSCD + qualified certificate | Equivalent to handwritten | High-value delegations |
+| **Firma Electrónica** | Datos adjuntos para firmar | Evidencia admisible | Autorizaciones internas |
+| **Avanzada (AdES)** | Vinculada únicamente, control del firmante | Presunta auténtica | Emisión estándar de PoA |
+| **Cualificada (QES)** | QSCD + certificado cualificado | Equivalente a manuscrita | Delegaciones de alto valor |
 
-#### 17.2.2 Technical Requirements for AdES
+#### 17.2.2 Requisitos Técnicos para AdES
 
-An Advanced Electronic Signature MUST:
+Una Firma Electrónica Avanzada DEBE:
 
-
-1. Be uniquely linked to the signatory
-2. Be capable of identifying the signatory
-3. Be created using data under the signatory's sole control
-4. Allow detection of subsequent data changes
+1. Estar vinculada únicamente al firmante
+2. Ser capaz de identificar al firmante
+3. Haber sido creada utilizando datos bajo el control exclusivo del firmante
+4. Permitir la detección de cambios posteriores en los datos
 
 **PoA Implementation**:
 ```json
@@ -4583,17 +4580,17 @@ An Advanced Electronic Signature MUST:
 }
 ```
 
-### 17.3 Electronic Seals
+### 17.3 Sellos Electrónicos
 
-Electronic seals are the organizational equivalent of signatures.
+Los sellos electrónicos son el equivalente organizacional de las firmas.
 
-**Table 17.3: Electronic Seal Types**
+**Tabla 17.3: Tipos de Sellos Electrónicos**
 
-| Seal Type | Entity | Purpose | PoA Mapping |
+| Tipo de Sello | Entidad | Propósito | Mapeo PoA |
 |-----------|--------|---------|-------------|
-| **E-Seal** | Legal person | Origin assurance | Agent profile attestation |
-| **Advanced Seal** | Legal person + controls | Enhanced assurance | Standard issuer signature |
-| **Qualified Seal** | QSCD + qualified cert | Presumption of integrity | Critical delegations |
+| **E-Seal** | Persona legal | Garantía de origen | Atestación de perfil de agente |
+| **Sello Avanzado** | Persona legal + controles | Garantía mejorada | Firma de emisor estándar |
+| **Sello Cualificado** | QSCD + certificado cualificado | Presunción de integridad | Delegaciones críticas |
 
 **Corporate PoA with Qualified Seal**:
 ```json
@@ -4611,28 +4608,28 @@ Electronic seals are the organizational equivalent of signatures.
 }
 ```
 
-### 17.4 Qualified Trust Service Providers
+### 17.4 Proveedores de Servicios de Confianza Cualificados
 
-#### 17.4.1 QTSP Requirements
+#### 17.4.1 Requisitos de QTSP
 
-Qualified Trust Service Providers must:
-- Be supervised by national authority
-- Undergo regular conformity assessment
-- Maintain qualified infrastructure
-- Provide termination plans
-- Carry liability insurance
+Los Proveedores de Servicios de Confianza Cualificados deben:
+- Ser supervisados por la autoridad nacional
+- Someterse a una evaluación de conformidad regular
+- Mantener infraestructura cualificada
+- Proporcionar planes de terminación
+- Tener seguro de responsabilidad civil
 
-#### 17.4.2 EU Trusted Lists
+#### 17.4.2 Listas de Confianza de la UE
 
-Each Member State maintains a Trusted List of QTSPs:
+Cada Estado Miembro mantiene una Lista de Confianza de QTSPs:
 
-**Table 17.4: EU Trusted Lists Examples**
+**Tabla 17.4: Ejemplos de Listas de Confianza de la UE**
 
-| Country | Supervisory Body | Trusted List URL |
+| País | Organismo de Supervisión | URL de Lista de Confianza |
 |---------|------------------|------------------|
-| Germany | Bundesnetzagentur | tslist.bundesnetzagentur.de |
-| France | ANSSI | tslist.anssi.fr |
-| Netherlands | AT | tslist.at.nl |
+| Alemania | Bundesnetzagentur | tslist.bundesnetzagentur.de |
+| Francia | ANSSI | tslist.anssi.fr |
+| Países Bajos | AT | tslist.at.nl |
 
 **PoA Issuer Validation**:
 ```go
@@ -4658,24 +4655,24 @@ func ValidateQTSP(issuerCert *x509.Certificate) error {
 }
 ```
 
-### 17.5 eIDAS 2.0 and the EUDI Wallet
+### 17.5 eIDAS 2.0 y la Cartera EUDI
 
-The revised eIDAS regulation introduces the European Digital Identity Wallet (EUDI Wallet), a game-changer for agent authorization.
+El reglamento eIDAS revisado introduce la Cartera de Identidad Digital Europea (EUDI Wallet), un cambio de juego para la autorización de agentes.
 
-#### 17.5.1 EUDI Wallet Architecture
+#### 17.5.1 Arquitectura de Cartera EUDI
 
-![Figure 17.5: EUDI Wallet Architecture](images/eudi_wallet_arch.png){width=90%}
+![Figura 17.5: Arquitectura de Cartera EUDI](images/eudi_wallet_arch.png){width=90%}
 
-#### 17.5.2 PoA Integration with EUDI Wallet
+#### 17.5.2 Integración PoA con Cartera EUDI
 
-**Table 17.5: EUDI Wallet Components**
+**Tabla 17.5: Componentes de Cartera EUDI**
 
-| EUDI Component | PoA Integration |
+| Componente EUDI | Integración PoA |
 |----------------|-----------------|
-| **PID** (Person Identification Data) | Natural person Entity Profile source |
-| **QEAA** (Qualified Electronic Attribute Attestation) | Verified organizational affiliation |
-| **Selective Disclosure** | Privacy-preserving constraint verification |
-| **Wallet Trust Framework** | Issuer/Verifier trust establishment |
+| **PID** (Datos de Identificación de Persona) | Fuente de Perfil de Entidad de persona natural |
+| **QEAA** (Atestación Electrónica de Atributo Cualificada) | Afiliación organizacional verificada |
+| **Divulgación Selectiva** | Verificación de restricciones con preservación de privacidad |
+| **Marco de Confianza de Cartera** | Establecimiento de confianza Emisor/Verificador |
 
 **Example: EUDI-Based PoA Issuance**:
 ```
@@ -4697,18 +4694,18 @@ PoA with Evidence -> signed with QES from employer
 Transparency Log -> Record issuance
 ```
 
-### 17.6 Authorization vs. Identity in eIDAS
+### 17.6 Autorización vs. Identidad en eIDAS
 
-The crucial distinction: eIDAS solves *identity*, PoA solves *authority*.
+La distinción crucial: eIDAS resuelve *identidad*, PoA resuelve *autoridad*.
 
-**Table 17.6: The Four Questions under eIDAS**
+**Tabla 17.6: Las Cuatro Preguntas bajo eIDAS**
 
-| Question | Answer | Provided By |
+| Pregunta | Respuesta | Proporcionado Por |
 |----------|--------|-------------|
-| "Who signed this?" | Max Mustermann | eIDAS (QES) |
-| "For whom?" | Acme GmbH | eIDAS (QESeal) |
-| "With what authority?" | Up to €50K purchases | **PoA** |
-| "Under what constraints?" | Approved vendors only | **PoA** |
+| "¿Quién firmó esto?" | Max Mustermann | eIDAS (QES) |
+| "¿Para quién?" | Acme GmbH | eIDAS (QESeal) |
+| "¿Con qué autoridad?" | Compras hasta €50K | **PoA** |
+| "¿Bajo qué restricciones?" | Solo proveedores aprobados | **PoA** |
 
 **Combined Verification Flow**:
 ```
@@ -4722,66 +4719,66 @@ The crucial distinction: eIDAS solves *identity*, PoA solves *authority*.
 8. Decision: ALLOW / DENY
 ```
 
-### 17.7 Regulatory Mapping
+### 17.7 Mapeo Regulatorio
 
-**Table 17.7: Specific Article Mapping**
+**Tabla 17.7: Mapeo de Artículos Específicos**
 
-| eIDAS Article | Requirement | PoA Implementation |
+| Artículo eIDAS | Requisito | Implementación PoA |
 |---------------|-------------|-------------------|
-| Art. 25 | QES = handwritten | High-value PoAs use QES |
-| Art. 35 | QESeal presumption | Organizational PoAs use QESeal |
-| Art. 41 | Qualified timestamp | Included in all PoAs |
-| Art. 45 | Cross-border recognition | Jurisdiction field + EU issuer |
+| Art. 25 | QES = manuscrita | PoAs de alto valor usan QES |
+| Art. 35 | Presunción QESeal | PoAs organizacionales usan QESeal |
+| Art. 41 | Sello de tiempo cualificado | Incluido en todas las PoAs |
+| Art. 45 | Reconocimiento transfronterizo | Campo de jurisdicción + emisor UE |
 
-### 17.8 Implementation Roadmap for EU Deployments
+### 17.8 Hoja de Ruta de Implementación para Despliegues en la UE
 
-**Table 17.8: eIDAS Compliance Roadmap**
+**Tabla 17.8: Hoja de Ruta de Cumplimiento eIDAS**
 
-| Phase | Timeline | Actions |
+| Fase | Línea de Tiempo | Acciones |
 |-------|----------|---------|
-| **1. Assessment** | Q1 2026 | Inventory existing trust services |
-| **2. QTSP Selection** | Q2 2026 | Contract with qualified provider |
-| **3. Certificate Provisioning** | Q3 2026 | Obtain organizational QESeal |
-| **4. Infrastructure** | Q4 2026 | HSM integration, key ceremonies |
-| **5. EUDI Integration** | 2027+ | Wallet-based issuance when ARF final |
+| **1. Evaluación** | Q1 2026 | Inventario de servicios de confianza existentes |
+| **2. Selección de QTSP** | Q2 2026 | Contratar con proveedor cualificado |
+| **3. Aprovisionamiento de Certificados** | Q3 2026 | Obtener QESeal organizacional |
+| **4. Infraestructura** | Q4 2026 | Integración HSM, ceremonias de claves |
+| **5. Integración EUDI** | 2027+ | Emisión basada en cartera cuando ARF sea final |
 
 ---
 
 
-## Chapter 18: Cross-Border and Conflict-of-Law
+## Capítulo 18: Transfronterizo y Conflicto de Leyes
 
-### 18.1 The Problem
+### 18.1 El Problema
 
-Autonomous agents operate globally. An agent in Germany may transact with a supplier in Japan, on behalf of a U.S. corporation. Which law applies?
+Los agentes autónomos operan globalmente. Un agente en Alemania puede realizar transacciones con un proveedor en Japón, en nombre de una corporación de EE.UU. ¿Qué ley se aplica?
 
-**Table 18.1: Cross-Border Conflict Scenarios**
+**Tabla 18.1: Escenarios de Conflicto Transfronterizo**
 
-| Scenario | Potential Applicable Laws | Conflict Points |
+| Escenario | Leyes Aplicables Potenciales | Puntos de Conflicto |
 |----------|--------------------------|-----------------|
-| German agent -> US vendor | German contract law, UCC, EU regulations | Formation, breach remedies, liability |
-| US principal -> EU agent -> Asia vendor | US agency law, EU eIDAS, local import rules | Authority recognition, signature validity |
-| Cross-border payment | Origin country, destination country, intermediary banks | Consumer protection, AML, currency controls |
+| Agente alemán -> Proveedor EE.UU. | Ley de contratos alemana, UCC, regulaciones UE | Formación, remedios por incumplimiento, responsabilidad |
+| Principal EE.UU. -> Agente UE -> Proveedor Asia | Ley de agencia EE.UU., eIDAS UE, reglas de importación locales | Reconocimiento de autoridad, validez de firma |
+| Pago transfronterizo | País de origen, país de destino, bancos intermediarios | Protección al consumidor, AML, controles de divisas |
 
-Without explicit specification:
-- Multiple laws may claim applicability
-- Parties may disagree on governing law
-- Courts face complex choice-of-law analysis
-- Enforcement becomes unpredictable
+Sin especificación explícita:
+- Múltiples leyes pueden reclamar aplicabilidad
+- Las partes pueden estar en desacuerdo sobre la ley aplicable
+- Los tribunales enfrentan complejos análisis de elección de ley
+- La aplicación se vuelve impredecible
 
-### 18.2 Applicable Legal Frameworks
+### 18.2 Marcos Legales Aplicables
 
-#### 18.2.1 EU Rome I Regulation (Contractual Obligations)
+#### 18.2.1 Reglamento Roma I de la UE (Obligaciones Contractuales)
 
-For contracts, Rome I (EC 593/2008) applies in EU courts:
+Para contratos, Roma I (CE 593/2008) se aplica en tribunales de la UE:
 
-**Table 18.2: Rome I Regulation Mapping**
+**Tabla 18.2: Mapeo del Reglamento Roma I**
 
-| Article | Rule | PoA Mapping |
+| Artículo | Regla | Mapeo PoA |
 |---------|------|-------------|
-| Art. 3 | Party autonomy - parties may choose governing law | `jurisdiction.governing_law` field |
-| Art. 4 | Default rules when no choice made | Habitual residence of performer |
-| Art. 9 | Overriding mandatory provisions | Constraint enforcement regardless of choice |
-| Art. 21 | Public policy exception | Sanctions, consumer protection |
+| Art. 3 | Autonomía de las partes - las partes pueden elegir la ley aplicable | Campo `jurisdiction.governing_law` |
+| Art. 4 | Reglas por defecto cuando no se hace elección | Residencia habitual del ejecutante |
+| Art. 9 | Disposiciones obligatorias imperativas | Cumplimiento de restricciones independientemente de la elección |
+| Art. 21 | Excepción de política pública | Sanciones, protección al consumidor |
 
 **PoA Implementation**:
 ```json
@@ -4797,53 +4794,53 @@ For contracts, Rome I (EC 593/2008) applies in EU courts:
 }
 ```
 
-#### 18.2.2 Rome II Regulation (Non-Contractual Obligations)
+#### 18.2.2 Reglamento Roma II (Obligaciones No Contractuales)
 
-For torts and unjust enrichment, Rome II (EC 864/2007) applies:
+Para agravios y enriquecimiento injusto, se aplica Roma II (CE 864/2007):
 
-**Table 18.3: Non-Contractual Obligations (Rome II)**
+**Tabla 18.3: Obligaciones No Contractuales (Roma II)**
 
-| Obligation Type | Default Rule | PoA Relevance |
+| Tipo de Obligación | Regla por Defecto | Relevancia PoA |
 |-----------------|--------------|---------------|
-| Tort/Delict | Law of country where damage occurs | Agent actions causing harm |
-| Unjust Enrichment | Law of related contract | Unauthorized transactions |
-| Culpa in Contrahendo | Law that would govern contract | Failed negotiations |
+| Agravio/Delito | Ley del país donde ocurre el daño | Acciones del agente que causan daño |
+| Enriquecimiento Injusto | Ley del contrato relacionado | Transacciones no autorizadas |
+| Culpa in Contrahendo | Ley que regiría el contrato | Negociaciones fallidas |
 
-#### 18.2.3 Hague Conventions
+#### 18.2.3 Convenciones de La Haya
 
-For global transactions:
+Para transacciones globales:
 
-**Table 18.4: International Conventions**
+**Tabla 18.4: Convenciones Internacionales**
 
-| Convention | Subject | Status | PoA Alignment |
+| Convención | Asunto | Estatus | Alineación PoA |
 |------------|---------|--------|---------------|
-| Hague Principles (2015) | Choice of law in international contracts | Soft law | Direct support |
-| Hague Service Convention | Cross-border notification | Binding | Revocation notice |
-| Hague Judgments (2019) | Recognition of foreign judgments | Entering force | Dispute resolution |
+| Principios de La Haya (2015) | Elección de ley en contratos internacionales | Ley blanda | Soporte directo |
+| Convención de Servicio de La Haya | Notificación transfronteriza | Vinculante | Aviso de revocación |
+| Juicios de La Haya (2019) | Reconocimiento de juicios extranjeros | Entrando en vigor | Resolución de disputas |
 
-### 18.3 Recognition of Foreign Authority
+### 18.3 Reconocimiento de Autoridad Extranjera
 
-The fundamental question: Will the forum recognize authority granted under foreign law?
+La pregunta fundamental: ¿Reconocerá el foro la autoridad otorgada bajo ley extranjera?
 
-#### 18.3.1 Common Approaches
+#### 18.3.1 Enfoques Comunes
 
-**Table 18.5: Jurisdictional Recognition**
+**Tabla 18.5: Reconocimiento Jurisdiccional**
 
-| Jurisdiction | Recognition Rule | Implications for PoA |
+| Jurisdicción | Regla de Reconocimiento | Implicaciones para PoA |
 |--------------|------------------|---------------------|
-| **Germany** | Apply law chosen by principal (Art. 8 EGBGB) | Honor PoA jurisdiction field |
-| **England** | Proper law of the agency relationship | Usually principal's domicile |
-| **USA** | State-by-state variation, mostly forum law | Explicit choice strengthens position |
-| **Singapore** | Common law approach + international orientation | Generally deferential |
+| **Alemania** | Aplica ley elegida por principal (Art. 8 EGBGB) | Honrar campo de jurisdicción PoA |
+| **Inglaterra** | Ley adecuada de la relación de agencia | Usualmente domicilio del principal |
+| **EE.UU.** | Variación estado por estado, mayormente ley del foro | Elección explícita fortalece posición |
+| **Singapur** | Enfoque de derecho consuetudinario + orientación internacional | Generalmente deferente |
 
-#### 18.3.2 Public Policy Limits
+#### 18.3.2 Límites de Política Pública
 
-Even with recognition, local public policy prevails:
+Incluso con reconocimiento, prevalece la política pública local:
 
-- **Sanctions**: US OFAC, EU sanctions override any foreign authority
-- **Consumer Protection**: Local consumer rights cannot be waived
-- **Employment**: Worker protections in place of employment
-- **Data Protection**: GDPR applies to EU residents regardless of choice
+- **Sanciones**: OFAC de EE.UU., sanciones de la UE anulan cualquier autoridad extranjera
+- **Protección al Consumidor**: Los derechos locales del consumidor no pueden ser renunciados
+- **Empleo**: Protecciones al trabajador en lugar de empleo
+- **Protección de Datos**: GDPR se aplica a residentes de la UE independientemente de la elección
 
 ### 18.4 Multi-Jurisdictional Delegation Chains
 
@@ -4889,17 +4886,17 @@ AI Agent (operating globally)
 }
 ```
 
-### 18.5 Mandatory Rules and Overriding Provisions
+### 18.5 Reglas Obligatorias y Disposiciones Imperativas
 
-Certain rules cannot be contracted away:
+Ciertas reglas no pueden ser eliminadas por contrato:
 
-| Category | Examples | PoA Approach |
+| Categoría | Ejemplos | Enfoque PoA |
 |----------|----------|--------------|
-| **Financial Regulation** | MiFID II, Dodd-Frank | Constraint enforcement |
-| **Sanctions** | OFAC SDN, EU Consolidated | Blocklist constraints |
-| **Consumer Protection** | CRA (UK), BGB §§ 305ff (DE) | Scope limitations |
-| **Employment** | Posted Workers Directive | Not applicable (B2B focus) |
-| **Competition** | EU Art. 101/102 | Constraint on pricing |
+| **Regulación Financiera** | MiFID II, Dodd-Frank | Cumplimiento de restricciones |
+| **Sanciones** | OFAC SDN, UE Consolidada | Restricciones de lista de bloqueo |
+| **Protección al Consumidor** | CRA (UK), BGB §§ 305ff (DE) | Limitaciones de alcance |
+| **Empleo** | Directiva de Trabajadores Desplazados | No aplicable (enfoque B2B) |
+| **Competencia** | UE Art. 101/102 | Restricción en precios |
 
 ### 18.6 Practical Resolution Framework
 
@@ -4929,35 +4926,34 @@ Every PoA MUST specify:
 }
 ```
 
-#### 18.6.2 Relying Party Checklist
+#### 18.6.2 Lista de Verificación de Parte Confiante
 
-| Check | Action if Failed |
+| Verificación | Acción si Falla |
 |-------|------------------|
-| PoA specifies governing law | Reject or apply local law |
-| Governing law compatible with local | Apply stricter standard |
-| No excluded jurisdictions triggered | Proceed |
-| Mandatory rules encoded | Verify enforcement |
+| PoA especifica ley aplicable | Rechazar o aplicar ley local |
+| Ley aplicable compatible con local | Aplicar estándar más estricto |
+| No se activan jurisdicciones excluidas | Proceder |
+| Reglas obligatorias codificadas | Verificar cumplimiento |
 
 ---
 
+## Capítulo 19: Implicaciones de Cumplimiento Regulatorio
 
-## Chapter 19: Regulatory Compliance Implications
+### 19.1 Cumplimiento de Servicios Financieros
 
-### 19.1 Financial Services Compliance
+#### 19.1.1 Matriz de Marco Regulatorio
 
-#### 19.1.1 Regulatory Framework Matrix
+**Tabla 19.1: Marcos Regulatorios Financieros**
 
-**Table 19.1: Financial Regulatory Frameworks**
-
-| Regulation | Jurisdiction | Key Requirements | PoA Features |
+| Regulación | Jurisdicción | Requisitos Clave | Características PoA |
 |------------|--------------|------------------|--------------|
-| **MiFID II** | EU | Best execution, suitability | Constraint-based trade rules |
-| **PSD2/PSD3** | EU | Strong customer authentication | Multi-party PoA issuance |
-| **SOX** | US | Internal controls | Immutable audit trail |
-| **FINRA 3110** | US | Supervisory procedures | Delegation chain visibility |
-| **MAR** | EU | Market abuse prevention | Trade restriction constraints |
-| **EMIR** | EU | Derivatives reporting | Transaction logging |
-| **Basel III/IV** | Global | Capital adequacy | Risk exposure constraints |
+| **MiFID II** | UE | Mejor ejecución, idoneidad | Reglas comerciales basadas en restricciones |
+| **PSD2/PSD3** | UE | Autenticación fuerte de clientes | Emisión de PoA multiparte |
+| **SOX** | EE.UU. | Controles internos | Pista de auditoría inmutable |
+| **FINRA 3110** | EE.UU. | Procedimientos de supervisión | Visibilidad de cadena de delegación |
+| **MAR** | UE | Prevención de abuso de mercado | Restricciones de restricción comercial |
+| **EMIR** | UE | Informes de derivados | Registro de transacciones |
+| **Basel III/IV** | Global | Adecuación de capital | Restricciones de exposición al riesgo |
 
 #### 19.1.2 Implementation Pattern
 
@@ -4988,18 +4984,18 @@ Every PoA MUST specify:
 }
 ```
 
-### 19.2 Export Control Compliance
+### 19.2 Cumplimiento de Control de Exportaciones
 
-#### 19.2.1 Regulatory Framework
+#### 19.2.1 Marco Regulatorio
 
-**Table 19.2: Export Control Regimes**
+**Tabla 19.2: Regímenes de Control de Exportaciones**
 
-| Regime | Jurisdiction | Scope | Penalty Range |
+| Régimen | Jurisdicción | Alcance | Rango de Penalización |
 |--------|--------------|-------|---------------|
-| **EAR** | US | Dual-use items, technology | Criminal + $1M/violation |
-| **ITAR** | US | Defense articles/services | Criminal + $1M/violation |
-| **EU Dual-Use** | EU | Listed dual-use items | Member state penalties |
-| **Wassenaar** | 42 countries | Conventional arms, dual-use | Per-country |
+| **EAR** | EE.UU. | Artículos de doble uso, tecnología | Criminal + $1M/violación |
+| **ITAR** | EE.UU. | Artículos/servicios de defensa | Criminal + $1M/violación |
+| **EU Dual-Use** | UE | Artículos de doble uso listados | Penalizaciones de estado miembro |
+| **Wassenaar** | 42 países | Armas convencionales, doble uso | Por país |
 
 #### 19.2.2 PoA Constraint Implementation
 
@@ -5034,19 +5030,19 @@ Every PoA MUST specify:
 }
 ```
 
-### 19.3 Data Protection Compliance
+### 19.3 Cumplimiento de Protección de Datos
 
-#### 19.3.1 GDPR Mapping
+#### 19.3.1 Mapeo GDPR
 
-**Table 19.3: GDPR Compliance**
+**Tabla 19.3: Cumplimiento GDPR**
 
-| GDPR Article | Requirement | PoA Implementation |
+| Artículo GDPR | Requisito | Implementación PoA |
 |--------------|-------------|-------------------|
-| Art. 6 | Lawful basis | `purpose` constraint field |
-| Art. 17 | Right to erasure | Revocation mechanism |
-| Art. 28 | Processor obligations | Entity Profile type |
-| Art. 46 | Transfer safeguards | `data_residency` constraint |
-| Art. 30 | Records of processing | Transparency Log |
+| Art. 6 | Base legal | campo de restricción `purpose` |
+| Art. 17 | Derecho al olvido | Mecanismo de revocación |
+| Art. 28 | Obligaciones del procesador | Tipo de Perfil de Entidad |
+| Art. 46 | Salvaguardas de transferencia | restricción `data_residency` |
+| Art. 30 | Registros de procesamiento | Registro de Transparencia |
 
 #### 19.3.2 Cross-Border Transfer Constraints
 
@@ -5074,19 +5070,19 @@ Every PoA MUST specify:
 }
 ```
 
-### 19.4 Anti-Money Laundering Compliance
+### 19.4 Cumplimiento Anti-Lavado de Dinero (AML)
 
-#### 19.4.1 FATF Recommendations Mapping
+#### 19.4.1 Mapeo de Recomendaciones FATF
 
-**Table 19.4: AML/FATF Standards**
+**Tabla 19.4: Estándares AML/FATF**
 
-| FATF Rec. | Requirement | PoA Support |
+| Rec. FATF | Requisito | Soporte PoA |
 |-----------|-------------|-------------|
-| R.10 | Customer Due Diligence | Entity Profile verification |
-| R.11 | Record-keeping | Transparency Log |
-| R.13 | Correspondent banking | Chain verification |
-| R.16 | Wire transfer rules | Transaction constraints |
-| R.20 | Suspicious transaction reporting | Monitoring integration |
+| R.10 | Debida Diligencia del Cliente | Verificación de Perfil de Entidad |
+| R.11 | Mantenimiento de registros | Registro de Transparencia |
+| R.13 | Banca corresponsal | Verificación de cadena |
+| R.16 | Reglas de transferencia electrónica | Restricciones de transacción |
+| R.20 | Informe de transacciones sospechosas | Integración de monitoreo |
 
 #### 19.4.2 Transaction Monitoring Integration
 
@@ -5124,18 +5120,18 @@ func (v *Verifier) CheckAML(ctx context.Context, poa *PoA, tx *Transaction) erro
 }
 ```
 
-### 19.5 Regulatory Inquiry Support
+### 19.5 Soporte a Consultas Regulatorias
 
-#### 19.5.1 Evidence Hierarchy
+#### 19.5.1 Jerarquía de Evidencia
 
-**Table 19.5: Evidentiary Weight**
+**Tabla 19.5: Peso Probatorio**
 
-| Evidence Level | Source | Verification | Legal Weight |
+| Nivel de Evidencia | Fuente | Verificación | Peso Legal |
 |----------------|--------|--------------|--------------|
-| **Primary** | Signed PoA artifact | Cryptographic | Highest |
-| **Secondary** | Transparency Log entry | Merkle proof | High |
-| **Tertiary** | Entity Profile | DID resolution | Medium |
-| **Quaternary** | System logs | Signed attestation | Supporting |
+| **Primaria** | Artefacto PoA firmado | Criptográfica | Más alto |
+| **Secundaria** | Entrada de Registro de Transparencia | Prueba de Merkle | Alto |
+| **Terciaria** | Perfil de Entidad | Resolución DID | Medio |
+| **Cuaternaria** | Registros del sistema | Atestación firmada | De apoyo |
 
 #### 19.5.2 Regulator Response Package
 
@@ -5163,172 +5159,172 @@ Regulatory Evidence Package
     `-- cryptographic_attestation.json
 ```
 
-### 19.6 Compliance Architecture
+### 19.6 Arquitectura de Cumplimiento
 
-#### 19.6.1 Three Lines of Defense
+#### 19.6.1 Tres Líneas de Defensa
 
-![Figure 19.6: Three Lines of Defense](images/three_lines_defense.png){width=90%}
+![Figura 19.6: Tres Líneas de Defensa](images/three_lines_defense.png){width=90%}
 
-#### 19.6.2 Compliance Dashboard Metrics
+#### 19.6.2 Métricas del Tablero de Cumplimiento
 
-| Metric | Target | Alert Threshold |
+| Métrica | Objetivo | Umbral de Alerta |
 |--------|--------|-----------------|
-| PoA constraint coverage | 100% of regulated actions | <95% |
-| Chain verification success rate | >99.9% | <99% |
-| Mean time to revocation | <5 minutes | >15 minutes |
-| Transparency Log latency | <1 second | >5 seconds |
-| Constraint evaluation time | <50ms | >200ms |
-| AML screening coverage | 100% | <100% |
+| Cobertura de restricción PoA | 100% de acciones reguladas | <95% |
+| Tasa de éxito de verificación de cadena | >99.9% | <99% |
+| Tiempo medio para revocación | <5 minutos | >15 minutos |
+| Latencia de Registro de Transparencia | <1 segundo | >5 segundos |
+| Tiempo de evaluación de restricción | <50ms | >200ms |
+| Cobertura de detección AML | 100% | <100% |
 
 ---
 ---
 
 
-# Part V: Ecosystem & Future
+# Parte V: Ecosistema y Futuro
 
 ---
 
 
-## Chapter 20: Building the Ecosystem
+## Capítulo 20: Construyendo el Ecosistema
 
-### 20.1 The Three-Sided Market
+### 20.1 El Mercado de Tres Lados
 
-For AgentAuth to succeed, we need adoption across three distinct stakeholder groups:
+Para que AgentAuth tenga éxito, necesitamos adopción a través de tres grupos de partes interesadas distintos:
 
-**Table 20.1: Ecosystem Stakeholders**
+**Tabla 20.1: Partes Interesadas del Ecosistema**
 
-| Stakeholder | Role | Primary Need | Value Proposition |
+| Parte Interesada | Rol | Necesidad Primaria | Propuesta de Valor |
 |-------------|------|--------------|-------------------|
-| **Issuers** | Corporations, institutions | Liability protection | Clear audit trails, constraint enforcement |
-| **Agents** | Developers, AI systems | Standard SDK | Cross-platform compatibility, key management |
-| **Relying Parties** | SaaS platforms, APIs | Trusted verification | Reduced fraud, clear authority claims |
+| **Emisores** | Corporaciones, instituciones | Protección de responsabilidad | Pistas de auditoría claras, cumplimiento de restricciones |
+| **Agentes** | Desarrolladores, sistemas de IA | SDK Estándar | Compatibilidad multiplataforma, gestión de claves |
+| **Partes Confiantes** | Plataformas SaaS, APIs | Verificación confiable | Fraude reducido, reclamaciones de autoridad claras |
 
-#### 20.1.1 Adoption Sequence
+#### 20.1.1 Secuencia de Adopción
 
-The optimal adoption sequence is:
+La secuencia de adopción óptima es:
 
 ```
-Phase 1: Pilot Deployments
-|-- 3-5 enterprise partners
-|-- Controlled use cases (procurement, HR)
-|-- Full instrumentation and feedback
-`-- Duration: 6 months
+Fase 1: Despliegues Piloto
+|-- 3-5 socios empresariales
+|-- Casos de uso controlados (adquisiciones, RRHH)
+|-- Instrumentación completa y retroalimentación
+`-- Duración: 6 meses
 
-Phase 2: SDK Release
-|-- Open-source Go SDK (Apache 2.0)
-|-- Commercial support tiers
-|-- Reference implementations
-|-- Certification program
-`-- Duration: 12 months
+Fase 2: Lanzamiento del SDK
+|-- SDK de Go de código abierto (Apache 2.0)
+|-- Niveles de soporte comercial
+|-- Implementaciones de referencia
+|-- Programa de certificación
+`-- Duración: 12 meses
 
-Phase 3: Ecosystem Expansion
-|-- Language SDKs (Python, Java, Rust)
-|-- Cloud provider integrations
-|-- Insurance partnerships
-|-- IETF standardization track
-`-- Duration: 18+ months
+Fase 3: Expansión del Ecosistema
+|-- SDKs de lenguajes (Python, Java, Rust)
+|-- Integraciones de proveedores de nube
+|-- Asociaciones de seguros
+|-- Vía de estandarización IETF
+`-- Duración: 18+ meses
 ```
 
-### 20.2 Governance Model
+### 20.2 Modelo de Gobernanza
 
-#### 20.2.1 The AgentAuth Foundation
+#### 20.2.1 La Fundación AgentAuth
 
-We propose establishing the AgentAuth Foundation as a non-profit entity to:
+Proponemos establecer la Fundación AgentAuth como una entidad sin fines de lucro para:
 
-- **Steward the Protocol**: Manage specification development
-- **Maintain Reference Implementations**: Ensure SDK quality
-- **Operate Transparency Logs**: Run neutral infrastructure
-- **Certify Compliance**: Issue compliance attestations
-- **Coordinate Standards**: Interface with IETF, W3C, ISO
+- **Administrar el Protocolo**: Gestionar el desarrollo de especificaciones
+- **Mantener Implementaciones de Referencia**: Asegurar la calidad del SDK
+- **Operar Registros de Transparencia**: Ejecutar infraestructura neutral
+- **Certificar el Cumplimiento**: Emitir atestaciones de cumplimiento
+- **Coordinar Estándares**: Interfaz con IETF, W3C, ISO
 
-**Governance Structure**:
-![Figure 20.2: AgentAuth Governance Structure](images/governance_org.png){width=90%}
+**Estructura de Gobernanza**:
+![Figura 20.2: Estructura de Gobernanza de AgentAuth](images/governance_org.png){width=90%}
 
-### 20.3 The Role of Insurance
+### 20.3 El Rol de los Seguros
 
-Cyber-insurance will be a critical adoption driver:
+El ciberseguro será un impulsor crítico de la adopción:
 
-**Table 20.2: Agent Liability Insurance Tiers**
+**Tabla 20.2: Niveles de Seguro de Responsabilidad de Agente**
 
-| Insurance Tier | Requirements | Coverage |
+| Nivel de Seguro | Requisitos | Cobertura |
 |----------------|--------------|----------|
-| **Level 1** | Software keys, logging enabled | Up to $100K incidents |
-| **Level 2** | HSM-backed keys, transparency log | Up to $1M incidents |
-| **Level 3** | Hardware attestation, real-time monitoring | Up to $10M incidents |
-| **Level 4** | Formal verification, multi-party approval | Custom limits |
+| **Nivel 1** | Claves de software, registro habilitado | Incidentes hasta $100K |
+| **Nivel 2** | Claves respaldadas por HSM, registro de transparencia | Incidentes hasta $1M |
+| **Nivel 3** | Atestación de hardware, monitoreo en tiempo real | Incidentes hasta $10M |
+| **Nivel 4** | Verificación formal, aprobación multiparte | Límites personalizados |
 
-**Insurer Value**:
-- Cryptographic proof of authorization at incident time
-- Clear chain of authority for liability determination
-- Reduced claim investigation costs
+**Valor para Aseguradoras**:
+- Prueba criptográfica de autorización en el momento del incidente
+- Cadena clara de autoridad para la determinación de responsabilidad
+- Costos reducidos de investigación de reclamaciones
 
-### 20.4 Interoperability Strategy
+### 20.4 Estrategia de Interoperabilidad
 
-#### 20.4.1 Standards Alignment
+#### 20.4.1 Alineación de Estándares
 
-**Table 20.3: Standards Body Alignment**
+**Tabla 20.3: Alineación de Organismos de Estándares**
 
-| Standard Body | Relevant Work | Integration Approach |
+| Organismo de Estándar | Trabajo Relevante | Enfoque de Integración |
 |---------------|---------------|---------------------|
-| **IETF** | OAuth 2.0, COSE, CBOR | AAP-02 as OAuth extension |
-| **W3C** | DIDs, VCs, JSON-LD | Entity Profiles as DID Documents |
-| **ISO** | ISO 27001, ISO 20000 | Compliance control mapping |
-| **ETSI** | eIDAS technical specs | Bridge to qualified signatures |
-| **FIDO** | Passkeys, WebAuthn | Key attestation integration |
+| **IETF** | OAuth 2.0, COSE, CBOR | AAP-02 como extensión OAuth |
+| **W3C** | DIDs, VCs, JSON-LD | Perfiles de Entidad como Documentos DID |
+| **ISO** | ISO 27001, ISO 20000 | Mapeo de control de cumplimiento |
+| **ETSI** | especificaciones técnicas eIDAS | Puente a firmas cualificadas |
+| **FIDO** | Passkeys, WebAuthn | Integración de atestación de claves |
 
-#### 20.4.2 Protocol Extensions
+#### 20.4.2 Extensiones del Protocolo
 
-The protocol is designed for extension:
+El protocolo está diseñado para extensión:
 
 ```
-Extension Registry:
-|-- aap-ext-privacy     # ZK-SNARK based selective disclosure
-|-- aap-ext-multi-sig   # Multi-party approval workflows
-|-- aap-ext-timelock    # Future-activated authority
-|-- aap-ext-geo         # Geographic constraint enforcement
-|-- aap-ext-quantum     # Post-quantum signature schemes
-`-- aap-ext-oracle      # External data source integration
+Registro de Extensiones:
+|-- aap-ext-privacy     # Divulgación selectiva basada en ZK-SNARK
+|-- aap-ext-multi-sig   # Flujos de trabajo de aprobación multiparte
+|-- aap-ext-timelock    # Autoridad activada en el futuro
+|-- aap-ext-geo         # Cumplimiento de restricciones geográficas
+|-- aap-ext-quantum     # Esquemas de firma post-cuántica
+`-- aap-ext-oracle      # Integración de fuente de datos externa
 ```
 
-### 20.5 Economic Model
+### 20.5 Modelo Económico
 
-#### 20.5.1 Fee Structure (Proposed)
+#### 20.5.1 Estructura de Tarifas (Propuesta)
 
-**Table 20.4: Commercial Service Model**
+**Tabla 20.4: Modelo de Servicio Comercial**
 
-| Service | Free Tier | Standard | Enterprise |
+| Servicio | Nivel Gratuito | Estándar | Empresarial |
 |---------|-----------|----------|------------|
-| PoA Issuance | 1,000/month | Unlimited | Unlimited |
-| Profile Resolution | Unlimited | Unlimited | Unlimited |
-| Transparency Log Writes | 100/month | 10,000/month | Custom SLA |
-| Revocation Checks | Unlimited | Unlimited | Dedicated endpoints |
-| Support | Community | Email (48h) | 24/7 priority |
+| Emisión de PoA | 1,000/mes | Ilimitado | Ilimitado |
+| Resolución de Perfil | Ilimitado | Ilimitado | Ilimitado |
+| Escrituras en Log Transparencia | 100/mes | 10,000/mes | SLA Personalizado |
+| Verificaciones de Revocación | Ilimitado | Ilimitado | Endpoints dedicados |
+| Soporte | Comunidad | Email (48h) | 24/7 prioridad |
 
-#### 20.5.2 Sustainability
+#### 20.5.2 Sostenibilidad
 
-Long-term sustainability through:
-- Enterprise support contracts
-- Compliance certification fees
-- Transparency log operation fees
-- Training and consulting
+Sostenibilidad a largo plazo a través de:
+- Contratos de soporte empresarial
+- Tarifas de certificación de cumplimiento
+- Tarifas de operación de registro de transparencia
+- Capacitación y consultoría
 
 ---
 
 
-## Chapter 21: Formal Verification Roadmap
+## Capítulo 21: Hoja de Ruta de Verificación Formal
 
-### 21.1 The Correctness Challenge
+### 21.1 El Desafío de la Corrección
 
-Agent authorization systems are security-critical. A bug in verification logic could:
-- Allow unauthorized transactions
-- Incorrectly block valid authority
-- Create liability for relying parties
+Los sistemas de autorización de agentes son críticos para la seguridad. Un error en la lógica de verificación podría:
+- Permitir transacciones no autorizadas
+- Bloquear incorrectamente autoridad válida
+- Crear responsabilidad para las partes confiantes
 
-Traditional testing is insufficient. We must **prove** correctness.
+Las pruebas tradicionales son insuficientes. Debemos **probar** la corrección.
 
-### 21.2 TLA+ Specification
+### 21.2 Especificación TLA+
 
-We model the AgentAuth protocol in TLA+ (Temporal Logic of Actions) to prove key properties.
+Modelamos el protocolo AgentAuth en TLA+ (Lógica Temporal de Acciones) para probar propiedades clave.
 
 #### 21.2.1 State Model
 
@@ -5347,9 +5343,9 @@ TypeInvariant ==
     /\ transactions \in Seq(Transaction)
 ```
 
-#### 21.2.2 Safety Properties
+#### 21.2.2 Propiedades de Seguridad
 
-**Property 1: No Unauthorized Action**
+**Propiedad 1: Ninguna Acción No Autorizada**
 ```tla
 Safety_NoUnauthorizedAction ==
     \A t \in transactions:
@@ -5362,7 +5358,7 @@ Safety_NoUnauthorizedAction ==
                 /\ poa.jti \notin revoked
 ```
 
-**Property 2: Attenuation Preserved**
+**Propiedad 2: Atenuación Preservada**
 ```tla
 Safety_AttenuationPreserved ==
     \A child, parent \in poas:
@@ -5370,7 +5366,7 @@ Safety_AttenuationPreserved ==
             IsSubset(child.aat, parent.aat)
 ```
 
-**Property 3: Chain Integrity**
+**Propiedad 3: Integridad de la Cadena**
 ```tla
 Safety_ChainIntegrity ==
     \A poa \in poas:
@@ -5379,54 +5375,53 @@ Safety_ChainIntegrity ==
             /\ poa.exp <= poa.aap_chain[1].exp
 ```
 
-#### 21.2.3 Liveness Properties
+#### 21.2.3 Propiedades de Vivacidad
 
-**Property 4: Valid Delegations Resolve**
+**Propiedad 4: Las Delegaciones Válidas se Resuelven**
 ```tla
 Liveness_ValidDelegationsResolve ==
     \A req \in validRequests:
         <> (req \in transactions /\ req.result = AUTHORIZED)
 ```
 
-### 21.3 Model Checking Results
+### 21.3 Resultados de Verificación de Modelos
 
-Initial model checking (2025 Q4) verified:
+La verificación inicial del modelo (Q4 2025) verificó:
 
-**Table 21.1: Verification Performance Benchmarks**
+**Tabla 21.1: Puntos de Referencia de Rendimiento de Verificación**
 
-| Property | States Explored | Result | Time |
+| Propiedad | Estados Explorados | Resultado | Tiempo |
 |----------|-----------------|--------|------|
 | Safety_NoUnauthorizedAction | 1.2M | PASS | 47s |
 | Safety_AttenuationPreserved | 890K | PASS | 32s |
 | Safety_ChainIntegrity | 1.4M | PASS | 51s |
 | Liveness_ValidDelegationsResolve | 2.1M | PASS | 89s |
 
-### 21.4 Proof-Carrying Code
+### 21.4 Código Portador de Pruebas
 
-Future versions will support proof-carrying code:
+Las versiones futuras soportarán código portador de pruebas:
 
 ```
-PoA extensions:
+Extensiones PoA:
 |-- proof_of_constraint_evaluation
-│   |-- Coq proof for constraint interpreter
-│   `-- Verifiable computation trace
+│   |-- Prueba Coq para intérprete de restricciones
+│   `-- Traza de computación verificable
 |-- proof_of_attenuation
-│   |-- Set inclusion proof
-│   `-- Merkle witness
+│   |-- Prueba de inclusión de conjunto
+│   `-- Testigo Merkle
 `-- proof_of_non_revocation
-    |-- Bloom filter membership proof
-    `-- Transparency log exclusion proof
+    |-- Prueba de membresía de filtro de Bloom
+    `-- Prueba de exclusión de registro de transparencia
 ```
 
-### 21.5 Zero-Knowledge Future
+### 21.5 Futuro de Conocimiento Cero
 
-AAP-03 (planned) will support ZK-SNARK based selective disclosure:
+AAP-03 (planificado) soportará divulgación selectiva basada en ZK-SNARK:
 
-**Use Case: Confidential Commerce**
-- Prover: "I am authorized to spend up to $100K on Category A from an S&P 500 company"
-- Verifier learns: Authorization exists within stated bounds
-- Verifier does NOT learn: Which company, which agent, actual spending limit
-
+**Caso de Uso: Comercio Confidencial**
+- Probador: "Estoy autorizado para gastar hasta $100K en Categoría A de una compañía S&P 500"
+- Verificador aprende: Existe autorización dentro de los límites establecidos
+- Verificador NO aprende: Qué compañía, qué agente, límite de gasto real
 **Technical Approach**:
 ```
 ZK-PoA = {
@@ -5443,38 +5438,38 @@ ZK-PoA = {
 ---
 
 
-## Chapter 22: Conclusion
+## Capítulo 22: Conclusión
 
-### 22.1 The End of "Login"
+### 22.1 El Fin del "Login"
 
-AgentAuth marks a fundamental transition in how we think about digital identity and authorization:
+AgentAuth marca una transición fundamental en cómo pensamos sobre la identidad digital y la autorización:
 
-**Table 22.1: The Three Eras of Web Authority**
+**Tabla 22.1: Las Tres Eras de la Autoridad Web**
 
-| Era | Authentication Model | Authorization Model | Principal |
+| Era | Modelo de Autenticación | Modelo de Autorización | Principal |
 |-----|---------------------|---------------------|-----------| 
-| **Web 1.0** | Session cookies | Server-side permissions | Human |
-| **Web 2.0** | OAuth tokens | Scope-based grants | Human (via app) |
-| **Agent Era** | PoA chains | Constraint-based authority | Human -> Agent -> Agent |
+| **Web 1.0** | Cookies de sesión | Permisos del lado del servidor | Humano |
+| **Web 2.0** | Tokens OAuth | Concesiones basadas en alcance | Humano (vía app) |
+| **Era del Agente** | Cadenas PoA | Autoridad basada en restricciones | Humano -> Agente -> Agente |
 
-The age of interactive authentication ("Show me your password") gives way to delegated authority ("Show me your signature").
+La era de la autenticación interactiva ("Muéstrame tu contraseña") da paso a la autoridad delegada ("Muéstrame tu firma").
 
-This is not merely a technical evolution--it is a legal and societal transformation. For the first time in history, we have software entities capable of binding their principals to contracts, transferring assets, and affecting real-world outcomes at speeds and scales that exceed human capability.
+Esto no es meramente una evolución técnica--es una transformación legal y social. Por primera vez en la historia, tenemos entidades de software capaces de vincular a sus principales con contratos, transferir activos y afectar resultados del mundo real a velocidades y escalas que exceden la capacidad humana.
 
-### 22.2 What We've Built
+### 22.2 Lo Que Hemos Construido
 
-This book has presented a complete system for autonomous agent authorization:
+Este libro ha presentado un sistema completo para la autorización de agentes autónomos:
 
-**Table 22.2: Book Summary Matrix**
+**Tabla 22.2: Matriz de Resumen del Libro**
 
-| Component | Chapter(s) | Key Contribution |
+| Componente | Capítulo(s) | Contribución Clave |
 |-----------|-----------|------------------|
-| **Problem Statement** | 1-4 | Defined the Agency Gap and its risks |
-| **Identity Foundation** | 5 | AAP-01: Entity Profiles with legal binding |
-| **Authorization Protocol** | 6-8 | AAP-02: PoA format, delegation, revocation |
-| **Implementation** | 9-13 | Go SDK, cloud patterns, IoT, compliance |
-| **Legal Framework** | 14-19 | Multi-jurisdictional agency law analysis |
-| **Ecosystem Design** | 20-21 | Governance, verification, future roadmap |
+| **Planteamiento del Problema** | 1-4 | Definición de la Brecha de Agencia y sus riesgos |
+| **Fundación de Identidad** | 5 | AAP-01: Perfiles de Entidad con vinculación legal |
+| **Protocolo de Autorización** | 6-8 | AAP-02: Formato PoA, delegación, revocación |
+| **Implementación** | 9-13 | SDK de Go, patrones de nube, IoT, cumplimiento |
+| **Marco Legal** | 14-19 | Análisis de ley de agencia multijurisdiccional |
+| **Diseño del Ecosistema** | 20-21 | Gobernanza, verificación, hoja de ruta futura |
 
 ### 22.3 Key Technical Contributions
 
@@ -5502,33 +5497,33 @@ A seven-layer security model that:
 - Supports graceful degradation and resilience
 - Aligns with regulatory compliance frameworks
 
-### 22.4 Industry Adoption Roadmap
+### 22.4 Hoja de Ruta de Adopción de la Industria
 
-We project the following adoption timeline:
+Proyectamos la siguiente línea de tiempo de adopción:
 
-**Table 22.3: Adoption Curve Milestones**
+**Tabla 22.3: Hitos de la Curva de Adopción**
 
-| Phase | Timeline | Milestones | Indicators |
+| Fase | Línea de Tiempo | Hitos | Indicadores |
 |-------|----------|-----------|------------|
-| **Early Adopters** | 2026-2027 | 10 enterprise deployments, SDK v1.0 | First production transactions |
-| **Early Majority** | 2027-2028 | IETF draft, insurance products, 100 deployments | Regulatory recognition |
-| **Mainstream** | 2029-2030 | ISO standard, cloud-native integrations, 1000+ deployments | Default for new AI agents |
-| **Universal** | 2031+ | Required by regulation, built into platforms | Legacy systems migrating |
+| **Adoptadores Tempranos** | 2026-2027 | 10 despliegues empresariales, SDK v1.0 | Primeras transacciones de producción |
+| **Mayoría Temprana** | 2027-2028 | Borrador IETF, productos de seguros, 100 despliegues | Reconocimiento regulatorio |
+| **Corriente Principal** | 2029-2030 | Estándar ISO, integraciones nativas de nube, 1000+ despliegues | Valor predeterminado para nuevos agentes de IA |
+| **Universal** | 2031+ | Requerido por regulación, integrado en plataformas | Sistemas heredados migrando |
 
-### 22.5 Research Agenda
+### 22.5 Agenda de Investigación
 
-Several open problems remain for future work:
+Quedan varios problemas abiertos para el trabajo futuro:
 
-**Table 22.4: Future Research Directions**
+**Tabla 22.4: Direcciones de Investigación Futura**
 
-| Research Area | Problem | Potential Approach |
+| Área de Investigación | Problema | Enfoque Potencial |
 |---------------|---------|-------------------|
-| **Formal Verification** | Proving constraint language soundness | Coq/Isabelle proof of interpreter |
-| **Privacy** | Hiding transaction patterns | ZK-SNARKs for selective disclosure |
-| **Scalability** | Log size growth | Merkle Patricia Tries, aggregation |
-| **Quantum Safety** | PQC algorithm integration | NIST ML-DSA hybrid signatures |
-| **Economic Design** | Fee tokenomics | Protocol-level transaction fees |
-| **Legal Recognition** | Statutory acceptance | Model legislation drafting |
+| **Verificación Formal** | Probar la solidez del lenguaje de restricciones | Prueba Coq/Isabelle de intérprete |
+| **Privacidad** | Ocultar patrones de transacción | ZK-SNARKs para divulgación selectiva |
+| **Escalabilidad** | Crecimiento del tamaño del registro | Merkle Patricia Tries, agregación |
+| **Seguridad Cuántica** | Integración de algoritmos PQC | Firmas híbridas NIST ML-DSA |
+| **Diseño Económico** | Tokenomía de tarifas | Tarifas de transacción a nivel de protocolo |
+| **Reconocimiento Legal** | Aceptación estatutaria | Redacción de legislación modelo |
 
 ### 22.6 Call to Action
 
@@ -5546,59 +5541,67 @@ agentauth issue --agent "did:web:yourcompany.com:agents:myagent" \
                 --constraint "amount<=10000"
 ```
 
-**For CISOs and Security Leaders**:
+
+### 22.6 Llamado a la Acción
+
+**Para Desarrolladores**:
+```bash
+# Empieza a construir hoy
+go get github.com/agentauth/agentauth-go
+
+# Crea tu primer agente
+agentauth init --principal "did:web:tuempresa.com"
+
+# Emite una PoA
+agentauth issue --agent "did:web:tuempresa.com:agents:miagente" \
+                --grant "orders:create" \
+                --constraint "amount<=10000"
+```
+
+**Para CISOs y Líderes de Seguridad**:
 
 
-1. Audit your "Non-Human Identity" inventory today
-2. Identify agents with access that exceeds authorization
-3. Pilot PoA in a controlled, low-risk environment
-4. Develop key management procedures for agent keys
-5. Integrate with existing SIEM and compliance tooling
+1. Revisar los contratos de autorización de agentes existentes
+2. Evaluar cómo la evidencia PoA apoyaría la defensa en litigios
+3. Comprometerse con eIDAS 2.0 y los desarrollos de gobernanza de IA de NIST
+4. Capacitar a los equipos legales en el manejo de evidencia criptográfica
+5. Desarrollar políticas internas para límites de autoridad de agentes de IA
 
-**For Legal and Compliance**:
+**Para Reguladores**:
+1. Reconocer los Perfiles de Entidad como una forma válida de identificación legal
+2. Considerar PoA como evidencia admisible en procedimientos de aplicación
+3. Participar en el desarrollo de estándares IETF/ISO
+4. Desarrollar orientación sobre marcos de responsabilidad de agentes de IA
+5. Colaborar con la industria en disposiciones de puerto seguro
 
+### 22.7 Reconocimiento de Riesgos
 
-1. Review existing agent authorization contracts
-2. Assess how PoA evidence would support litigation defense
-3. Engage with eIDAS 2.0 and NIST AI governance developments
-4. Train legal teams on cryptographic evidence handling
-5. Develop internal policies for AI agent authority limits
+Debemos reconocer los riesgos inherentes a esta tecnología:
 
-**For Regulators**:
-1. Recognize Entity Profiles as a valid form of legal identification
-2. Consider PoA as admissible evidence in enforcement proceedings
-3. Participate in IETF/ISO standards development
-4. Develop guidance on AI agent liability frameworks
-5. Collaborate with industry on safe harbor provisions
+**Tabla 22.5: Riesgos Estratégicos**
 
-### 22.7 Risk Acknowledgment
-
-We must acknowledge the risks inherent in this technology:
-
-**Table 22.5: Strategic Risks**
-
-| Risk | Mitigation |
+| Riesgo | Mitigación |
 |------|------------|
-| **Centralization** | Open protocol, multiple log operators |
-| **Key Custody** | HSM requirements, multi-party ceremonies |
-| **Complexity** | SDK abstraction, reference implementations |
-| **Legal Uncertainty** | Jurisdictional advisors, conservative interpretations |
-| **Adversarial AI** | Constraint enforcement, human oversight requirements |
+| **Centralización** | Protocolo abierto, múltiples operadores de registros |
+| **Custodia de Claves** | Requisitos HSM, ceremonias multipartidarias |
+| **Complejidad** | Abstracción de SDK, implementaciones de referencia |
+| **Incertidumbre Legal** | Asesores jurisdiccionales, interpretaciones conservadoras |
+| **IA Adversaria** | Cumplimiento de restricciones, requisitos de supervisión humana |
 
-### 22.8 Philosophical Reflection
+### 22.8 Reflexión Filosófica
 
-The emergence of autonomous agents represents a new form of legal actor--entities that act with purpose and consequence, but without consciousness or moral agency in the human sense.
+El surgimiento de agentes autónomos representa una nueva forma de actor legal--entidades que actúan con propósito y consecuencia, pero sin conciencia o agencia moral en el sentido humano.
 
-We face a choice:
-- **Option A**: Treat agents as "tools" and hold humans strictly liable
-- **Option B**: Develop new frameworks for "agent liability"
-- **Option C**: Create systems of delegated authority with clear accountability chains
+Nos enfrentamos a una elección:
+- **Opción A**: Tratar a los agentes como "herramientas" y responsabilizar estrictamente a los humanos
+- **Opción B**: Desarrollar nuevos marcos para la "responsabilidad del agente"
+- **Opción C**: Crear sistemas de autoridad delegada con cadenas de responsabilidad claras
 
-AgentAuth implements Option C. It preserves human accountability while enabling autonomous operation. The principal remains responsible, but the agent's authority is bounded, transparent, and revocable.
+AgentAuth implementa la Opción C. Preserva la responsabilidad humana mientras permite la operación autónoma. El principal sigue siendo responsable, pero la autoridad del agente está delimitada, es transparente y revocable.
 
-This is not the final answer to the philosophical questions of AI agency. But it is a practical, deployable system that bridges the gap between today's legal frameworks and tomorrow's technological capabilities.
+Esta no es la respuesta final a las preguntas filosóficas de la agencia de IA. Pero es un sistema práctico y desplegable que une la brecha entre los marcos legales de hoy y las capacidades tecnológicas del mañana.
 
-### 22.9 Final Thoughts
+### 22.9 Pensamientos Finales
 
 The autonomous agent economy is not a distant future--it is emerging now. Procurement agents are placing orders. Trading bots are executing strategies. AI assistants are scheduling meetings and booking travel.
 
@@ -5619,250 +5622,250 @@ The technology is ready. The legal frameworks are evolving. The need is urgent.
 ---
 
 
-# Appendices
+# Apéndices
 
-## Appendix A: Glossary
+## Apéndice A: Glosario
 
-### A.1 Core Concepts
+### A.1 Conceptos Básicos
 
-**Table A.1: Glossary of Terms**
+**Tabla A.1: Glosario de Términos**
 
-| Term | Definition |
+| Término | Definición |
 |------|------------|
-| **Agent** | A software entity that acts on behalf of a Principal, possessing cryptographic keys and constrained authority. |
-| **Authority** | The legal power to bind another party; in AgentAuth, expressed through the `aat` claim in a PoA. |
-| **Authorization** | The process of determining whether an agent may perform a requested action. |
-| **Authentication** | The process of verifying that an entity is who they claim to be. |
-| **Attenuation** | The principle that delegated authority can only be narrowed, never expanded. |
+| **Agente** | Una entidad de software que actúa en nombre de un Principal, poseyendo claves criptográficas y autoridad restringida. |
+| **Autoridad** | El poder legal para vincular a otra parte; en AgentAuth, expresado a través de la reclamación `aat` en una PoA. |
+| **Autorización** | El proceso de determinar si un agente puede realizar una acción solicitada. |
+| **Autenticación** | El proceso de verificar que una entidad es quien dice ser. |
+| **Atenuación** | El principio de que la autoridad delegada solo puede reducirse, nunca expandirse. |
 
-### A.2 Protocol Terms
+### A.2 Términos del Protocolo
 
-| Term | Definition |
+| Término | Definición |
 |------|------------|
-| **AAP-01** | AgentAuth Protocol 01: Defines Entity Profiles and identity binding. |
-| **AAP-02** | AgentAuth Protocol 02: Defines Proof of Authorization tokens. |
-| **AAP-03** | AgentAuth Protocol 03: Defines Transparency Log integration. |
-| **Claim** | A key-value pair within a PoA asserting a fact about the authorization. |
-| **Constraint** | A runtime predicate that must evaluate to true for authorization to succeed. |
-| **Delegation Chain** | A sequence of PoAs connecting a root principal to a leaf agent. |
-| **Entity Profile** | A JSON-LD document describing a participant's identity and cryptographic keys. |
-| **Grant** | A single permission unit within a PoA, consisting of action and resources. |
-| **PoA** | Proof of Authorization: The core credential carrying delegated authority. |
+| **AAP-01** | Protocolo AgentAuth 01: Define Perfiles de Entidad y vinculación de identidad. |
+| **AAP-02** | Protocolo AgentAuth 02: Define tokens de Prueba de Autorización. |
+| **AAP-03** | Protocolo AgentAuth 03: Define integración de Registro de Transparencia. |
+| **Reclamación** | Un par clave-valor dentro de una PoA afirmando un hecho sobre la autorización. |
+| **Restricción** | Un predicado en tiempo de ejecución que debe evaluarse como verdadero para que la autorización tenga éxito. |
+| **Cadena de Delegación** | Una secuencia de PoAs que conecta un principal raíz con un agente hoja. |
+| **Perfil de Entidad** | Un documento JSON-LD que describe la identidad y claves criptográficas de un participante. |
+| **Concesión** | Una unidad de permiso única dentro de una PoA, que consta de acción y recursos. |
+| **PoA** | Prueba de Autorización: La credencial central que lleva la autoridad delegada. |
 
-### A.3 Cryptographic Terms
+### A.3 Términos Criptográficos
 
-| Term | Definition |
+| Término | Definición |
 |------|------------|
-| **CBOR** | Concise Binary Object Representation (RFC 8949): Binary format for PoA encoding. |
-| **COSE** | CBOR Object Signing and Encryption (RFC 8152): Envelope format for signed PoAs. |
-| **DID** | Decentralized Identifier: A W3C standard for verifiable, decentralized identities. |
-| **Ed25519** | An elliptic curve signature algorithm using Curve25519; the primary algorithm for AgentAuth. |
-| **HSM** | Hardware Security Module: A physical device protecting cryptographic keys. |
-| **JCS** | JSON Canonicalization Scheme (RFC 8785): Deterministic JSON serialization. |
-| **Key Attestation** | A signed statement proving a key resides in secure hardware. |
-| **Multibase** | A self-describing encoding format for binary data (e.g., `z6Mk...` for base58btc). |
-| **PKCS#11** | A cryptographic token interface standard for HSM communication. |
-| **SCT** | Signed Certificate Timestamp: Proof of inclusion in a Certificate Transparency log. |
+| **CBOR** | Representación de Objetos Binarios Concisa (RFC 8949): Formato binario para codificación PoA. |
+| **COSE** | Cifrado y Firma de Objetos CBOR (RFC 8152): Formato de sobre para PoAs firmadas. |
+| **DID** | Identificador Descentralizado: Un estándar W3C para identidades verificables y descentralizadas. |
+| **Ed25519** | Un algoritmo de firma de curva elíptica usando Curve25519; el algoritmo principal para AgentAuth. |
+| **HSM** | Módulo de Seguridad de Hardware: Un dispositivo físico que protege claves criptográficas. |
+| **JCS** | Esquema de Canonicalización JSON (RFC 8785): Serialización JSON determinista. |
+| **Atestación de Clave** | Una declaración firmada que prueba que una clave reside en hardware seguro. |
+| **Multibase** | Un formato de codificación autodescriptivo para datos binarios (ej., `z6Mk...` para base58btc). |
+| **PKCS#11** | Un estándar de interfaz de token criptográfico para comunicación HSM. |
+| **SCT** | Marca de Tiempo de Certificado Firmada: Prueba de inclusión en un registro de Transparencia de Certificados. |
 
-### A.4 Infrastructure Terms
+### A.4 Términos de Infraestructura
 
-| Term | Definition |
+| Término | Definición |
 |------|------------|
-| **Bloom Filter** | A probabilistic data structure for efficient set membership testing. |
-| **CRL** | Certificate Revocation List: A signed list of revoked certificates. |
-| **mTLS** | Mutual TLS: A TLS handshake where both parties present certificates. |
-| **OCSP** | Online Certificate Status Protocol: Real-time revocation checking. |
-| **Relying Party** | An entity that validates PoAs and makes access control decisions. |
-| **Sidecar** | A container deployed alongside an application to handle cross-cutting concerns. |
-| **STH** | Signed Tree Head: A merkle root signature from a transparency log. |
-| **Transparency Log** | An append-only, cryptographically verifiable log of actions. |
+| **Filtro de Bloom** | Una estructura de datos probabilística para pruebas eficientes de membresía de conjuntos. |
+| **CRL** | Lista de Revocación de Certificados: Una lista firmada de certificados revocados. |
+| **mTLS** | TLS Mutuo: Un apretón de manos TLS donde ambas partes presentan certificados. |
+| **OCSP** | Protocolo de Estado de Certificado en Línea: Verificación de revocación en tiempo real. |
+| **Parte Confiante** | Una entidad que valida PoAs y toma decisiones de control de acceso. |
+| **Sidecar** | Un contenedor desplegado junto a una aplicación para manejar preocupaciones transversales. |
+| **STH** | Cabeza de Árbol Firmada (Signed Tree Head): Una firma raíz Merkle de un registro de transparencia. |
+| **Registro de Transparencia** | Un registro de acciones verificable criptográficamente y de solo adición. |
 
-### A.5 Legal Terms
+### A.5 Términos Legales
 
-| Term | Definition |
+| Término | Definición |
 |------|------------|
-| **Actual Authority** | Authority expressly or implicitly granted by a principal to an agent. |
-| **Apparent Authority** | Authority that a third party reasonably believes an agent possesses. |
-| **Fiduciary** | One who holds a position of trust and must act in another's best interest. |
-| **Juristic Person** | A legal entity (corporation, foundation) that can hold rights and obligations. |
-| **Principal** | The party who grants authority to an agent. |
-| **Ratification** | Retroactive approval of an unauthorized act. |
-| **Respondeat Superior** | Legal doctrine holding principals liable for agents' actions. |
-| **Ultra Vires** | Actions beyond the legal authority of an entity. |
-| **Vicarious Liability** | Liability imposed on a party for the actions of another. |
+| **Autoridad Real** | Autoridad expresa o implícitamente otorgada por un principal a un agente. |
+| **Autoridad Aparente** | Autoridad que un tercero cree razonablemente que posee un agente. |
+| **Fiduciario** | Uno que ocupa una posición de confianza y debe actuar en el mejor interés de otro. |
+| **Persona Jurídica** | Una entidad legal (corporación, fundación) que puede tener derechos y obligaciones. |
+| **Principal** | La parte que otorga autoridad a un agente. |
+| **Ratificación** | Aprobación retroactiva de un acto no autorizado. |
+| **Respondeat Superior** | Doctrina legal que responsabiliza a los principales por las acciones de los agentes. |
+| **Ultra Vires** | Acciones más allá de la autoridad legal de una entidad. |
+| **Responsabilidad Vicaria** | Responsabilidad impuesta a una parte por las acciones de otra. |
 
-### A.6 Regulatory Terms
+### A.6 Términos Regulatorios
 
-| Term | Definition |
+| Término | Definición |
 |------|------------|
-| **eIDAS** | EU regulation on electronic identification and trust services (910/2014). |
-| **GDPR** | General Data Protection Regulation: EU data protection law. |
-| **HIPAA** | Health Insurance Portability and Accountability Act: US healthcare privacy law. |
-| **LEI** | Legal Entity Identifier: A 20-character corporate identifier. |
-| **MiFID II** | Markets in Financial Instruments Directive: EU financial services regulation. |
-| **OFAC** | Office of Foreign Assets Control: US sanctions enforcement agency. |
-| **PCI-DSS** | Payment Card Industry Data Security Standard. |
-| **PSD3** | Payment Services Directive 3: Upcoming EU open banking regulation. |
-| **SOC 2** | Service Organization Control 2: Audit standard for service providers. |
+| **eIDAS** | Regulación de la UE sobre identificación electrónica y servicios de confianza (910/2014). |
+| **GDPR** | Reglamento General de Protección de Datos: Ley de protección de datos de la UE. |
+| **HIPAA** | Ley de Portabilidad y Responsabilidad de Seguros Médicos: Ley de privacidad de salud de EE.UU. |
+| **LEI** | Identificador de Entidad Legal: Un identificador corporativo de 20 caracteres. |
+| **MiFID II** | Directiva de Mercados de Instrumentos Financieros: Regulación de servicios financieros de la UE. |
+| **OFAC** | Oficina de Control de Activos Extranjeros: Agencia de aplicación de sanciones de EE.UU. |
+| **PCI-DSS** | Estándar de Seguridad de Datos de la Industria de Tarjetas de Pago. |
+| **PSD3** | Directiva de Servicios de Pago 3: Próxima regulación de banca abierta de la UE. |
+| **SOC 2** | Control de Organización de Servicios 2: Estándar de auditoría para proveedores de servicios. |
 
 ---
 
-## Appendix B: References
+## Apéndice B: Referencias
 
-### B.1 Core RFCs
+### B.1 RFCs Principales
 
 1. **RFC 7519** - JSON Web Token (JWT)
-   - Defines the base claim structure that AAP-02 extends.
+   - Define la estructura de reclamación base que extiende AAP-02.
    - https://tools.ietf.org/html/rfc7519
 
-2. **RFC 8949** - Concise Binary Object Representation (CBOR)
-   - Primary encoding format for PoA wire protocol.
+2. **RFC 8949** - Representación de Objetos Binarios Concisa (CBOR)
+   - Formato de codificación primario para el protocolo de cable PoA.
    - https://tools.ietf.org/html/rfc8949
 
-3. **RFC 8152** - CBOR Object Signing and Encryption (COSE)
-   - Envelope format for signed PoAs.
+3. **RFC 8152** - Cifrado y Firma de Objetos CBOR (COSE)
+   - Formato de sobre para PoAs firmadas.
    - https://tools.ietf.org/html/rfc8152
 
-4. **RFC 8610** - Concise Data Definition Language (CDDL)
-   - Schema language for defining CBOR structures.
+4. **RFC 8610** - Lenguaje de Definición de Datos Conciso (CDDL)
+   - Lenguaje de esquema para definir estructuras CBOR.
    - https://tools.ietf.org/html/rfc8610
 
-5. **RFC 8785** - JSON Canonicalization Scheme (JCS)
-   - Deterministic JSON serialization for signatures.
+5. **RFC 8785** - Esquema de Canonicalización JSON (JCS)
+   - Serialización JSON determinista para firmas.
    - https://tools.ietf.org/html/rfc8785
 
-6. **RFC 8032** - Edwards-Curve Digital Signature Algorithm (EdDSA)
-   - Specifies Ed25519 signatures used in AgentAuth.
+6. **RFC 8032** - Algoritmo de Firma Digital de Curva Edwards (EdDSA)
+   - Especifica las firmas Ed25519 utilizadas en AgentAuth.
    - https://tools.ietf.org/html/rfc8032
 
-### B.2 Identity Standards
+### B.2 Estándares de Identidad
 
-7. **W3C DID Core v1.0** - Decentralized Identifiers
-   - Foundation for agent identity.
+7. **W3C DID Core v1.0** - Identificadores Descentralizados
+   - Fundación para la identidad del agente.
    - https://www.w3.org/TR/did-core/
 
-8. **W3C DID Web Method** - did:web Specification
-   - DNS-anchored DID method for institutional agents.
+8. **W3C DID Web Method** - Especificación did:web
+   - Método DID anclado en DNS para agentes institucionales.
    - https://w3c-ccg.github.io/did-method-web/
 
-9. **W3C Verifiable Credentials** - Data Model v1.1
-   - Related credential format with partial overlap.
+9. **W3C Verifiable Credentials** - Modelo de Datos v1.1
+   - Formato de credencial relacionado con superposición parcial.
    - https://www.w3.org/TR/vc-data-model/
 
-10. **W3C JSON-LD 1.1** - JSON-based Linked Data
-    - Semantic markup for Entity Profiles.
+10. **W3C JSON-LD 1.1** - Datos Vinculados basados en JSON
+    - Marcado semántico para Perfiles de Entidad.
     - https://www.w3.org/TR/json-ld11/
 
-### B.3 OAuth and Authorization
+### B.3 OAuth y Autorización
 
-11. **RFC 6749** - OAuth 2.0 Authorization Framework
-    - The baseline protocol that AgentAuth extends.
+11. **RFC 6749** - Marco de Autorización OAuth 2.0
+    - El protocolo base que extiende AgentAuth.
     - https://tools.ietf.org/html/rfc6749
 
-12. **RFC 7523** - JWT Bearer Assertion for OAuth
-    - JWT-based client authentication pattern.
+12. **RFC 7523** - Aserción de Portador JWT para OAuth
+    - Patrón de autenticación de cliente basado en JWT.
     - https://tools.ietf.org/html/rfc7523
 
-13. **RFC 8693** - OAuth 2.0 Token Exchange
-    - Token exchange pattern for delegation.
+13. **RFC 8693** - Intercambio de Tokens OAuth 2.0
+    - Patrón de intercambio de tokens para delegación.
     - https://tools.ietf.org/html/rfc8693
 
-14. **draft-ietf-oauth-rar** - Rich Authorization Requests
-    - Structured authorization requests (influence on `aat` design).
+14. **draft-ietf-oauth-rar** - Solicitudes de Autorización Ricas (RAR)
+    - Solicitudes de autorización estructuradas (influencia en diseño `aat`).
     - https://datatracker.ietf.org/doc/draft-ietf-oauth-rar/
 
-15. **RFC 9396** - OAuth 2.0 Rich Authorization Requests
-    - Finalized version of RAR.
+15. **RFC 9396** - Solicitudes de Autorización Ricas OAuth 2.0
+    - Versión finalizada de RAR.
     - https://tools.ietf.org/html/rfc9396
 
-### B.4 Transparency and Auditing
+### B.4 Transparencia y Auditoría
 
-16. **RFC 6962** - Certificate Transparency
-    - Append-only log design influence.
+16. **RFC 6962** - Transparencia de Certificados
+    - Influencia de diseño de registro de solo adición.
     - https://tools.ietf.org/html/rfc6962
 
-17. **RFC 9162** - Certificate Transparency Version 2.0
-    - Updated CT specification.
+17. **RFC 9162** - Transparencia de Certificados Versión 2.0
+    - Especificación CT actualizada.
     - https://tools.ietf.org/html/rfc9162
 
-18. **Trillian** - Verifiable Data Structures
-    - Open-source transparency log implementation.
+18. **Trillian** - Estructuras de Datos Verificables
+    - Implementación de registro de transparencia de código abierto.
     - https://github.com/google/trillian
 
-19. **Rekor** - Sigstore Transparency Log
-    - Supply chain transparency log.
+19. **Rekor** - Registro de Transparencia Sigstore
+    - Registro de transparencia de cadena de suministro.
     - https://github.com/sigstore/rekor
 
-### B.5 Legal References
+### B.5 Referencias Legales
 
-20. **EU Regulation 910/2014 (eIDAS)**
-    - Electronic identification and trust services.
+20. **Reglamento UE 910/2014 (eIDAS)**
+    - Identificación electrónica y servicios de confianza.
     - https://eur-lex.europa.eu/eli/reg/2014/910/oj
 
-21. **eIDAS 2.0 (Proposal)**
-    - European Digital Identity framework update.
+21. **eIDAS 2.0 (Propuesta)**
+    - Actualización del marco de Identidad Digital Europea.
     - https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A52021PC0281
 
-22. **German Civil Code (BGB) §§ 164-181**
-    - Statutory representation rules.
+22. **Código Civil Alemán (BGB) §§ 164-181**
+    - Reglas de representación estatutaria.
     - https://www.gesetze-im-internet.de/bgb/
 
 23. **Restatement (Third) of Agency**
-    - US common law synthesis on agency.
+    - Síntesis de derecho común de EE.UU. sobre agencia.
     - American Law Institute, 2006.
 
-24. **UCC Article 4A**
-    - Uniform Commercial Code on funds transfers.
+24. **UCC Artículo 4A**
+    - Código Comercial Uniforme sobre transferencias de fondos.
     - https://www.law.cornell.edu/ucc/4A
 
-25. **HIPAA 45 CFR Parts 160, 164**
-    - US healthcare privacy regulations.
+25. **HIPAA 45 CFR Partes 160, 164**
+    - Regulaciones de privacidad de salud de EE.UU.
     - https://www.hhs.gov/hipaa/
 
-### B.6 Academic Papers
+### B.6 Documentos Académicos
 
 26. Bonneau, J. et al. (2015). **"SoK: Research Perspectives and Challenges for Bitcoin and Cryptocurrencies"**
-    - Security analysis methodology.
+    - Metodología de análisis de seguridad.
     - IEEE S&P 2015.
 
 27. Laurie, B. et al. (2014). **"Certificate Transparency"**
-    - Original CT design paper.
+    - Documento de diseño original de CT.
     - RFC 6962.
 
 28. Melnikov, A., Schaad, J. (2017). **"CBOR Object Signing and Encryption (COSE)"**
-    - COSE design rationale.
+    - Racional de diseño de COSE.
     - https://datatracker.ietf.org/doc/rfc8152/
 
 29. Sporny, M., Longley, D. (2022). **"Data Integrity 1.0"**
-    - Linked Data Signatures design.
+    - Diseño de Firmas de Datos Vinculados.
     - https://w3c.github.io/vc-data-integrity/
 
 30. Reed, D. et al. (2020). **"Decentralized Identifiers (DIDs) v1.0"**
-    - DID architecture rationale.
+    - Racional de arquitectura DID.
     - https://www.w3.org/TR/did-core/
 
-### B.7 Implementation Resources
+### B.7 Recursos de Implementación
 
-31. **go-cose** - Go implementation of COSE
+31. **go-cose** - Implementación en Go de COSE
     - https://github.com/veraison/go-cose
 
-32. **fxamacker/cbor** - High-performance CBOR for Go
+32. **fxamacker/cbor** - CBOR de alto rendimiento para Go
     - https://github.com/fxamacker/cbor
 
-33. **google/cel-go** - Common Expression Language for Go
+33. **google/cel-go** - Lenguaje de Expresión Común para Go
     - https://github.com/google/cel-go
 
-34. **cyberphone/json-canonicalization** - JCS in Go
+34. **cyberphone/json-canonicalization** - JCS en Go
     - https://github.com/cyberphone/json-canonicalization
 
-35. **go-multibase** - Multibase encoding
+35. **go-multibase** - Codificación Multibase
     - https://github.com/multiformats/go-multibase
 
 ---
 
-## Appendix C: Wire Format Examples
+## Apéndice C: Ejemplos de Formato de Cable
 
-### C.1 Complete PoA (CBOR Diagnostic Notation)
+### C.1 PoA Completa (Notación de Diagnóstico CBOR)
 
 ```cbor-diag
 18([                                    / COSE_Sign1 /
@@ -5895,10 +5898,11 @@ The technology is ready. The legal frameworks are evolving. The need is urgent.
   / }                                    /
   
   h'3045022100...'                       / signature (64 bytes Ed25519) /
+  / firma: (64 bytes Ed25519) /
 ])
 ```
 
-### C.2 Entity Profile (JSON-LD)
+### C.2 Perfil de Entidad (JSON-LD)
 
 ```json
 {
@@ -5947,10 +5951,10 @@ The technology is ready. The legal frameworks are evolving. The need is urgent.
 }
 ```
 
-### C.3 Delegation Chain (3-Level)
+### C.3 Cadena de Delegación (3 Niveles)
 
 ```
-Level 0 (Root):
+Nivel 0 (Raíz):
 ┌────────────────────────────────────────────────────┐
 │ iss: did:web:corp.example.com                      │
 │ sub: did:web:corp.example.com:dept:procurement     │
@@ -5958,10 +5962,10 @@ Level 0 (Root):
 │ cst: {"logic": "and", "rules": [...]}              │
 │ dlg: 2                                             │
 │ exp: 2026-12-31T23:59:59Z                          │
-`--──────────────────────────────────────────────────┘
+│--──────────────────────────────────────────────────┘
                         │
                         v
-Level 1 (Department):
+Nivel 1 (Departamento):
 ┌───────────────────────────────────────────────────────────────┐
 │ iss: did:web:corp.example.com:dept:procurement                │
 │ sub: did:web:corp.example.com:agents:buyer-ai                 │
@@ -5972,10 +5976,10 @@ Level 1 (Department):
 │ dlg: 1                                                        │
 │ exp: 2026-06-30T23:59:59Z                                     │
 │ aap_chain: [<Level 0 bytes>]                                  │
-`--─────────────────────────────────────────────────────────────┘
+│--─────────────────────────────────────────────────────────────┘
                         │
                         v
-Level 2 (Agent):
+Nivel 2 (Agente):
 ┌──────────────────────────────────────────────────────────────┐
 │ iss: did:web:corp.example.com:agents:buyer-ai                │
 │ sub: did:web:corp.example.com:agents:buyer-ai:task-123       │
@@ -5986,7 +5990,7 @@ Level 2 (Agent):
 │ dlg: 0                                                       │
 │ exp: 2026-01-02T00:00:00Z                                    │
 │ aap_chain: [<Level 1 bytes>, <Level 0 bytes>]                │
-`--────────────────────────────────────────────────────────────┘
+│--────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -5995,147 +5999,147 @@ Level 2 (Agent):
 
 ### D.1 Pre-Production Checklist
 
-- [ ] **Identity Setup**
-  - [ ] Generate production key pairs (Ed25519)
-  - [ ] Configure HSM/KMS integration
-  - [ ] Create and sign Entity Profiles
-  - [ ] Publish DIDs at well-known locations
-  - [ ] Register with Transparency Log
+- [ ] **Configuración de Identidad**
+  - [ ] Generar pares de claves de producción (Ed25519)
+  - [ ] Configurar integración HSM/KMS
+  - [ ] Crear y firmar Perfiles de Entidad
+  - [ ] Publicar DIDs en ubicaciones conocidas
+  - [ ] Registrarse con Registro de Transparencia
 
-- [ ] **Infrastructure**
-  - [ ] Deploy Redis cluster for PoA caching
-  - [ ] Deploy Postgres for archival storage
-  - [ ] Configure Transparency Log endpoints
-  - [ ] Set up revocation checking (OCSP or Log)
-  - [ ] Configure TLS certificates for all endpoints
+- [ ] **Infraestructura**
+  - [ ] Desplegar clúster Redis para caché PoA
+  - [ ] Desplegar Postgres para almacenamiento de archivo
+  - [ ] Configurar endpoints de Registro de Transparencia
+  - [ ] Configurar verificación de revocación (OCSP o Registro)
+  - [ ] Configurar certificados TLS para todos los endpoints
 
-- [ ] **Security**
-  - [ ] Enable mutual TLS for internal services
-  - [ ] Configure trusted roots list
-  - [ ] Set appropriate chain depth limits
-  - [ ] Enable constraint evaluation engine
-  - [ ] Configure clock skew allowance
+- [ ] **Seguridad**
+  - [ ] Habilitar TLS mutuo para servicios internos
+  - [ ] Configurar lista de raíces de confianza
+  - [ ] Establecer límites de profundidad de cadena apropiados
+  - [ ] Habilitar motor de evaluación de restricciones
+  - [ ] Configurar tolerancia de desfase de reloj
 
-- [ ] **Observability**
-  - [ ] Configure structured logging (JSON)
-  - [ ] Export Prometheus metrics
-  - [ ] Set up alerting for verification failures
-  - [ ] Configure audit log retention (7 years recommended)
+- [ ] **Observabilidad**
+  - [ ] Configurar registro estructurado (JSON)
+  - [ ] Exportar métricas Prometheus
+  - [ ] Configurar alertas para fallos de verificación
+  - [ ] Configurar retención de registro de auditoría (7 años recomendado)
 
-### D.2 Go-Live Checklist
+### D.2 Lista de Verificación de Lanzamiento
 
-- [ ] **Verification**
-  - [ ] Test PoA creation and signing
-  - [ ] Test PoA verification with valid tokens
-  - [ ] Test rejection of expired tokens
-  - [ ] Test rejection of revoked tokens
-  - [ ] Test constraint evaluation with edge cases
+- [ ] **Verificación**
+  - [ ] Probar creación y firma de PoA
+  - [ ] Probar verificación de PoA con tokens válidos
+  - [ ] Probar rechazo de tokens expirados
+  - [ ] Probar rechazo de tokens revocados
+  - [ ] Probar evaluación de restricciones con casos extremos
 
-- [ ] **Performance**
-  - [ ] Verify < 50ms P99 verification latency
-  - [ ] Verify cache hit rate > 90%
-  - [ ] Load test at 2x expected peak traffic
-  - [ ] Verify HSM can sustain expected signing load
+- [ ] **Rendimiento**
+  - [ ] Verificar latencia de verificación P99 < 50ms
+  - [ ] Verificar tasa de aciertos de caché > 90%
+  - [ ] Prueba de carga a 2x tráfico pico esperado
+  - [ ] Verificar que HSM puede sostener carga de firma esperada
 
-- [ ] **Failover**
-  - [ ] Test HSM failover
-  - [ ] Test database failover
-  - [ ] Test cache failover
-  - [ ] Verify fail-closed behavior on outages
+- [ ] **Conmutación por Error**
+  - [ ] Probar conmutación por error de HSM
+  - [ ] Probar conmutación por error de base de datos
+  - [ ] Probar conmutación por error de caché
+  - [ ] Verificar comportamiento de fallo cerrado en interrupciones
 
-### D.3 Incident Response Checklist
+### D.3 Lista de Verificación de Respuesta a Incidentes
 
-- [ ] **Key Compromise Response**
-  - [ ] Revoke compromised PoAs immediately
-  - [ ] Rotate affected key pairs
-  - [ ] Update Entity Profiles
-  - [ ] Notify affected relying parties
-  - [ ] Publish tombstone to Transparency Log
-  - [ ] Forensic analysis of issued PoAs
+- [ ] **Respuesta a Compromiso de Claves**
+  - [ ] Revocar PoAs comprometidas inmediatamente
+  - [ ] Rotar pares de claves afectados
+  - [ ] Actualizar Perfiles de Entidad
+  - [ ] Notificar a partes confiantes afectadas
+  - [ ] Publicar lápida en Registro de Transparencia
+  - [ ] Análisis forense de PoAs emitidas
 
-- [ ] **Audit Preparation**
-  - [ ] Export relevant Transparency Log entries
-  - [ ] Prepare delegation chain documentation
-  - [ ] Document constraint configurations
-  - [ ] Prepare key custody chain of custody
+- [ ] **Preparación para Auditoría**
+  - [ ] Exportar entradas relevantes de Registro de Transparencia
+  - [ ] Preparar documentación de cadena de delegación
+  - [ ] Documentar configuraciones de restricciones
+  - [ ] Preparar cadena de custodia de claves
 
 ---
 
-## Appendix E: Troubleshooting Guide
+## Apéndice E: Guía de Solución de Problemas
 
-### E.1 Verification Failures
+### E.1 Fallos de Verificación
 
-**Table E.1: Common Error Codes**
+**Tabla E.1: Códigos de Error Comunes**
 
-| Error Code | Message | Cause | Resolution |
+| Código de Error | Mensaje | Causa | Resolución |
 |------------|---------|-------|------------|
-| `ERR_EXPIRED` | PoA has expired | Token past `exp` time | Issue new PoA; check clock sync |
-| `ERR_NOT_YET_VALID` | PoA not yet valid | Current time before `nbf` | Wait; check clock sync |
-| `ERR_SIGNATURE_INVALID` | Signature verification failed | Wrong key or tampered token | Verify key ID matches; re-sign |
-| `ERR_CHAIN_BROKEN` | Chain link verification failed | Issuer DID != parent subject | Check parent PoA correctness |
-| `ERR_UNTRUSTED_ROOT` | Root not in trusted list | Unknown root principal | Add root to trusted roots config |
-| `ERR_AUTHORITY_ESCALATION` | Child authority exceeds parent | Attenuation violation | Reduce child grants to parent subset |
-| `ERR_REVOKED` | PoA has been revoked | JTI found in revocation list | Issue new PoA |
-| `ERR_CONSTRAINT_VIOLATION` | Constraint check failed | Runtime condition not met | Check constraint rules and request context |
+| `ERR_EXPIRED` | PoA ha expirado | Token pasado tiempo `exp` | Emitir nueva PoA; verificar sincr. reloj |
+| `ERR_NOT_YET_VALID` | PoA aún no válida | Tiempo actual antes de `nbf` | Esperar; verificar sincr. reloj |
+| `ERR_SIGNATURE_INVALID` | Fallo verificación firma | Clave incorrecta o token manipulado | Verif. ID clave coincide; re-firmar |
+| `ERR_CHAIN_BROKEN` | Fallo verif. enlace cadena | DID emisor != sujeto padre | Verif. corrección PoA padre |
+| `ERR_UNTRUSTED_ROOT` | Raíz no en lista de confianza | Principal raíz desconocido | Añadir raíz a config. raíces confiables |
+| `ERR_AUTHORITY_ESCALATION` | Autoridad hija excede padre | Violación de atenuación | Reducir concesiones hijo a subconjunto padre |
+| `ERR_REVOKED` | PoA ha sido revocada | JTI encontrado en lista revocación | Emitir nueva PoA |
+| `ERR_CONSTRAINT_VIOLATION` | Fallo chequeo restricción | Condición de ejecución no cumplida | Verif. reglas restricción y contexto solicitud |
 
-### E.2 Common Integration Issues
+### E.2 Problemas de Integración Comunes
 
-**Issue: "DID resolution fails"**
-- Verify `did:web` endpoint is accessible over HTTPS
-- Check TLS certificate validity
-- Verify `/.well-known/did.json` path is correct
-- Ensure DNS is resolving correctly
+**Problema: "Fallo de resolución DID"**
+- Verificar endpoint `did:web` accesible por HTTPS
+- Verificar validez certificado TLS
+- Verificar ruta `/.well-known/did.json` correcta
+- Asegurar DNS resolviendo correctamente
 
-**Issue: "HSM signing timeout"**
-- Increase HSM connection pool size
-- Check HSM load and capacity
-- Consider request queuing
-- Verify network connectivity to HSM
+**Problema: "Tiempo de espera firma HSM"**
+- Aumentar tamaño pool conexiones HSM
+- Verificar carga y capacidad HSM
+- Considerar encolado de solicitudes
+- Verificar conectividad red a HSM
 
-**Issue: "Constraint evaluation slow"**
-- Profile constraint complexity
-- Cache external oracle results
-- Consider pre-compiled constraint bytecode
-- Optimize database queries for context lookup
+**Problema: "Evaluación de restricciones lenta"**
+- Perilar complejidad restricciones
+- Caché resultados oráculo externo
+- Considerar bytecode restricción pre-compilado
+- Optimizar consultas BD para búsqueda contexto
 
-**Issue: "High verification latency"**
-- Enable PoA caching in Redis
-- Pre-fetch Entity Profiles
-- Use Bloom filters for revocation
-- Deploy verification services closer to endpoints
+**Problema: "Alta latencia verificación"**
+- Habilitar caché PoA en Redis
+- Pre-obtener Perfiles de Entidad
+- Usar filtros Bloom para revocación
+- Desplegar servicios verificación más cerca endpoints
 
-### E.3 Performance Tuning
+### E.3 Ajuste de Rendimiento
 
-**Table E.2: Performance Tuning Paramters**
+**Tabla E.2: Parámetros de Ajuste de Rendimiento**
 
-| Component | Default | Recommended | Max Tested |
+| Componente | Predeterminado | Recomendado | Máx Probado |
 |-----------|---------|-------------|------------|
-| **PoA Cache TTL** | 60s | 300s (if revocation fast) | 3600s |
-| **Entity Profile Cache** | 10 min | 30 min | 24 hours |
-| **Bloom Filter Size** | 1MB | 10MB (for 1M revocations) | 100MB |
-| **Verification Workers** | 4 | CPU cores × 2 | 256 |
-| **HSM Connection Pool** | 10 | 50 | 200 |
+| **TTL Caché PoA** | 60s | 300s (si revocación rápida) | 3600s |
+| **Caché Perfil Entidad** | 10 min | 30 min | 24 horas |
+| **Tamaño Filtro Bloom** | 1MB | 10MB (para 1M revocaciones) | 100MB |
+| **Trabajadores Verificación** | 4 | CPU cores × 2 | 256 |
+| **Pool Conexiones HSM** | 10 | 50 | 200 |
 
-### E.4 Debugging Checklist
+### E.4 Lista de Verificación de Depuración
 
 ```markdown
-[ ] Clock synchronization verified (NTP)
-[ ] All DIDs resolvable from verification service
-[ ] Root keys in trusted configuration
-[ ] HSM/signing service reachable
-[ ] Transparency log reachable
-[ ] Revocation service responding
-[ ] Constraint oracles accessible
-[ ] Network firewalls allow required ports
-[ ] TLS certificates valid and not expired
-[ ] Sufficient memory for constraint evaluation
+[ ] Sincronización de reloj verificada (NTP)
+[ ] Todos los DIDs resolubles desde servicio verificación
+[ ] Claves raíz en configuración confiable
+[ ] HSM/servicio firma alcanzable
+[ ] Registro de transparencia alcanzable
+[ ] Servicio de revocación respondiendo
+[ ] Oráculos de restricción accesibles
+[ ] Firewalls de red permiten puertos requeridos
+[ ] Certificados TLS válidos y no expirados
+[ ] Memoria suficiente para evaluación restricciones
 ```
 
 ---
 
-## Appendix F: SDK Quick Reference
+## Apéndice F: Referencia Rápida del SDK
 
-### F.1 Core Types
+### F.1 Tipos Principales
 
 ```go
 // Principal represents an entity that can issue PoAs
@@ -6174,7 +6178,7 @@ type Constraint struct {
 }
 ```
 
-### F.2 Common Operations
+### F.2 Operaciones Comunes
 
 ```go
 // Create and sign a PoA
@@ -6227,58 +6231,58 @@ func RevokePoA(jti string) {
 }
 ```
 
-### F.3 Configuration Options
+### F.3 Opciones de Configuración
 
-**Table F.1: Configuration Environment Variables**
+**Tabla F.1: Variables de Entorno de Configuración**
 
-| Option | Environment Variable | Default | Description |
+| Opción | Variable de Entorno | Predeterminado | Descripción |
 |--------|---------------------|---------|-------------|
-| `CacheTTL` | `AGENTAUTH_CACHE_TTL` | 300s | PoA cache duration |
-| `RevocationInterval` | `AGENTAUTH_REVOCATION_INTERVAL` | 60s | Bloom filter refresh |
-| `LogEndpoint` | `AGENTAUTH_LOG_ENDPOINT` | - | Transparency log URL |
-| `HSMSlot` | `AGENTAUTH_HSM_SLOT` | 0 | PKCS#11 slot ID |
-| `MaxChainDepth` | `AGENTAUTH_MAX_CHAIN_DEPTH` | 5 | Maximum delegation depth |
-| `ClockSkew` | `AGENTAUTH_CLOCK_SKEW` | 30s | Allowed time drift |
+| `CacheTTL` | `AGENTAUTH_CACHE_TTL` | 300s | Duración caché PoA |
+| `RevocationInterval` | `AGENTAUTH_REVOCATION_INTERVAL` | 60s | Actualización filtro Bloom |
+| `LogEndpoint` | `AGENTAUTH_LOG_ENDPOINT` | - | URL log transparencia |
+| `HSMSlot` | `AGENTAUTH_HSM_SLOT` | 0 | ID slot PKCS#11 |
+| `MaxChainDepth` | `AGENTAUTH_MAX_CHAIN_DEPTH` | 5 | Profundidad máxima delegación |
+| `ClockSkew` | `AGENTAUTH_CLOCK_SKEW` | 30s | Desfase tiempo permitido |
 
 ---
 
-## Appendix G: Migration Guide
+## Apéndice G: Guía de Migración
 
-### G.1 From OAuth 2.0 Access Tokens
+### G.1 Desde Tokens de Acceso OAuth 2.0
 
-**Table G.1: OAuth 2.0 Mapping**
+**Tabla G.1: Mapeo OAuth 2.0**
 
-| OAuth Concept | PoA Equivalent | Migration Notes |
+| Concepto OAuth | Equivalente PoA | Notas de Migración |
 |---------------|----------------|-----------------|
-| `access_token` | Signed PoA | PoA includes authority and constraints |
-| `refresh_token` | Re-issuance | Issue new PoA before expiration |
-| `scope` | `aat` (grants) + `cst` (constraints) | More granular than OAuth scopes |
-| `aud` | `aud` | Direct mapping |
-| `exp` | `exp` | Direct mapping |
-| `iss` | `iss` (as DID) | Convert to DID format |
-| `sub` | `sub` (as DID) | Convert to DID format |
+| `access_token` | PoA Firmada | PoA incluye autoridad y restricciones |
+| `refresh_token` | Re-emisión | Emitir nueva PoA antes de expiración |
+| `scope` | `aat` (concesiones) + `cst` (restricciones) | Más granular que alcances OAuth |
+| `aud` | `aud` | Mapeo directo |
+| `exp` | `exp` | Mapeo directo |
+| `iss` | `iss` (como DID) | Convertir a formato DID |
+| `sub` | `sub` (como DID) | Convertir a formato DID |
 
-**Migration Steps:**
+**Pasos de Migración:**
 
-1. **Inventory OAuth scopes** -> Map to `aat` grants
-2. **Define constraints** -> Add business rules not expressed in scopes
-3. **Update token issuance** -> Switch to PoA signing
-4. **Update verification** -> Use PoA verifier with constraint evaluation
-5. **Parallel operation** -> Accept both OAuth and PoA during transition
+1. **Inventariar alcances OAuth** -> Mapear a concesiones `aat`
+2. **Definir restricciones** -> Añadir reglas de negocio no expresadas en alcances
+3. **Actualizar emisión tokens** -> Cambiar a firma PoA
+4. **Actualizar verificación** -> Usar verificador PoA con evaluación restricciones
+5. **Operación paralela** -> Aceptar tanto OAuth como PoA durante transición
 
-### G.2 From API Keys
+### G.2 Desde Claves API
 
-**Table G.2: API Key Mapping**
+**Tabla G.2: Mapeo Claves API**
 
-| API Key Concept | PoA Equivalent | Migration Notes |
+| Concepto Clave API | Equivalente PoA | Notas de Migración |
 |-----------------|----------------|-----------------|
-| Static key string | Signed PoA token | Time-limited, constraint-bound |
-| Key rotation | PoA expiration | Automatic with time-based validity |
-| Key scopes | `aat` grants | More granular |
-| Rate limits | `cst` constraints | Can include rate limiting rules |
-| IP restrictions | `cst` constraints | Geographic and network constraints |
+| Cadena clave estática | Token PoA firmado | Tiempo limitado, vinculado a restricciones |
+| Rotación clave | Expiración PoA | Automático con validez basada en tiempo |
+| Alcances clave | Concesiones `aat` | Más granular |
+| Límites tasa | Restricciones `cst` | Puede incluir reglas límite tasa |
+| Restricciones IP | Restricciones `cst` | Restricciones geográficas y de red |
 
-**Migration Code Example:**
+**Ejemplo de Código de Migración:**
 
 ```go
 // Before: API Key verification
@@ -6299,28 +6303,28 @@ func verifyPoA(tokenBytes []byte, req *http.Request) (*VerifyResult, error) {
 }
 ```
 
-### G.3 From SAML Assertions
+### G.3 Desde Aserciones SAML
 
-**Table G.3: SAML 2.0 Mapping**
+**Tabla G.3: Mapeo SAML 2.0**
 
-| SAML Concept | PoA Equivalent | Migration Notes |
+| Concepto SAML | Equivalente PoA | Notas de Migración |
 |--------------|----------------|-----------------|
-| Assertion | Signed PoA | Similar structure |
-| `Issuer` | `iss` | Map to DID |
-| `Subject` | `sub` | Map to DID |
-| `Conditions` | `nbf`, `exp` | Time bounds |
-| `AudienceRestriction` | `aud` | Direct mapping |
-| `AttributeStatement` | `cst` context | Convert to constraints |
-| XML Signature | COSE/JWS | Modern signature format |
+| Aserción | PoA Firmada | Estructura similar |
+| `Issuer` | `iss` | Mapear a DID |
+| `Subject` | `sub` | Mapear a DID |
+| `Conditions` | `nbf`, `exp` | Límites temporales |
+| `AudienceRestriction` | `aud` | Mapeo directo |
+| `AttributeStatement` | contexto `cst` | Convertir a restricciones |
+| Firma XML | COSE/JWS | Formato de firma moderno |
 
-### G.4 Rollback Procedures
+### G.4 Procedimientos de Reversión
 
-If migration issues arise:
+Si surgen problemas de migración:
 
-1. **Feature flag**: `AGENTAUTH_ENABLED=false` in verifier
-2. **Dual mode**: Accept both legacy and PoA tokens
-3. **Gradual rollout**: Enable for percentage of requests
-4. **Monitoring**: Compare authorization decisions
+1. **Feature flag**: `AGENTAUTH_ENABLED=false` en verificador
+2. **Modo dual**: Aceptar tanto legacy como tokens PoA
+3. **Despliegue gradual**: Habilitar para porcentaje de solicitudes
+4. **Monitoreo**: Comparar decisiones de autorización
 
 ```yaml
 # Feature flag configuration
@@ -6332,24 +6336,24 @@ authorization:
 
 ---
 
-## Appendix H: Industry Case Studies
+## Apéndice H: Estudios de Caso de la Industria
 
-### H.1 Global Manufacturing: Siemens-Style Procurement
+### H.1 Manufactura Global: Adquisiciones Estilo Siemens
 
-**Scenario**: A Fortune 500 manufacturing company deploys AI agents for global procurement across 47 countries.
+**Escenario**: Una empresa de manufactura Fortune 500 despliega agentes de IA para adquisiciones globales en 47 países.
 
-#### H.1.1 Challenge
+#### H.1.1 Desafío
 
-**Table H.1: Procurement Risk Analysis**
+**Tabla H.1: Análisis de Riesgo de Adquisiciones**
 
-| Issue | Business Impact |
+| Problema | Impacto Comercial |
 |-------|-----------------|
-| Unauthorized purchases | $2.3M in unapproved spending annually |
-| Compliance violations | OFAC/sanctions risk |
-| Audit failures | SOX control deficiencies |
-| Vendor fraud | Payments to non-approved suppliers |
+| Compras no autorizadas | $2.3M en gastos no aprobados anualmente |
+| Violaciones cumplimiento | Riesgo OFAC/sanciones |
+| Fallos auditoría | Deficiencias control SOX |
+| Fraude proveedores | Pagos a proveedores no aprobados |
 
-#### H.1.2 Solution Architecture
+#### H.1.2 Arquitectura de Solución
 
 ```
 Corporate HQ (Germany)
@@ -6370,7 +6374,7 @@ Procurement Agents
 `-- Automatic escalation thresholds
 ```
 
-#### H.1.3 PoA Configuration
+#### H.1.3 Configuración PoA
 
 ```json
 {
@@ -6396,35 +6400,35 @@ Procurement Agents
 }
 ```
 
-#### H.1.4 Results
+#### H.1.4 Resultados
 
-**Table H.2: Impact Metrics**
+**Tabla H.2: Métricas de Impacto**
 
-| Metric | Before | After | Improvement |
+| Métrica | Antes | Después | Mejora |
 |--------|--------|-------|-------------|
-| Unauthorized spending | $2.3M/year | $47K/year | 98% reduction |
-| Compliance incidents | 23/year | 0/year | 100% reduction |
-| Procurement cycle time | 4.2 days | 0.3 days | 93% faster |
-| Audit preparation time | 6 weeks | 2 hours | 99% reduction |
+| Gastos no autorizados | $2.3M/año | $47K/año | 98% reducción |
+| Incidentes cumplimiento | 23/año | 0/año | 100% reducción |
+| Tiempo ciclo adquisiciones | 4.2 días | 0.3 días | 93% más rápido |
+| Tiempo prep. auditoría | 6 semanas | 2 horas | 99% reducción |
 
 ---
 
-### H.2 Financial Services: Algorithmic Trading
+### H.2 Servicios Financieros: Comercio Algorítmico
 
-**Scenario**: A hedge fund deploys AI trading agents with strict regulatory compliance requirements.
+**Escenario**: Un fondo de cobertura despliega agentes de comercio IA con estrictos requisitos de cumplimiento regulatorio.
 
-#### H.2.1 Regulatory Requirements
+#### H.2.1 Requisitos Regulatorios
 
-**Table H.3: Financial Regulatory Mapping**
+**Tabla H.3: Mapeo Regulatorio Financiero**
 
-| Regulation | Requirement | PoA Feature |
+| Regulación | Requisito | Característica PoA |
 |------------|-------------|-------------|
-| MiFID II Art. 17 | Algorithmic trading controls | Constraint-based limits |
-| MAR Art. 12 | Market manipulation prevention | Real-time position constraints |
-| EMIR | Derivatives reporting | Transaction logging |
-| FINRA 3110 | Supervisory procedures | Chain visibility |
+| MiFID II Art. 17 | Controles comercio algorítmico | Límites basados en restricciones |
+| MAR Art. 12 | Prevención abuso mercado | Restricciones de posición tiempo real |
+| EMIR | Informes de derivados | Registro transacciones |
+| FINRA 3110 | Procedimientos supervisión | Visibilidad cadena |
 
-#### H.2.2 Multi-Tier Authorization
+#### H.2.2 Autorización Multi-Nivel
 
 ```
 Risk Committee (Human)
@@ -6445,7 +6449,7 @@ Risk Committee (Human)
     `-- Venue: Smart order routing
 ```
 
-#### H.2.3 Real-Time Constraint Example
+#### H.2.3 Ejemplo de Restricción en Tiempo Real
 
 ```json
 {
@@ -6467,33 +6471,33 @@ Risk Committee (Human)
 }
 ```
 
-#### H.2.4 Incident Response
+#### H.2.4 Respuesta a Incidentes
 
-During the March 2026 flash crash simulation:
-- Agent exceeded VaR threshold at 09:23:17
-- Constraint oracle returned "deny" at 09:23:17.023
-- Trading halted within 23ms
-- Zero unauthorized trades executed
-- Full audit trail preserved
+Durante la simulación de caída repentina de marzo de 2026:
+- El agente excedió el umbral VaR a las 09:23:17
+- El oráculo de restricción devolvió "deny" a las 09:23:17.023
+- El comercio se detuvo en 23ms
+- Cero operaciones no autorizadas ejecutadas
+- Pista de auditoría completa preservada
 
 ---
 
-### H.3 Healthcare: AI Diagnostic Assistant
+### H.3 Salud: Asistente de Diagnóstico IA
 
-**Scenario**: A hospital network deploys AI agents to assist with diagnostic imaging analysis.
+**Escenario**: Una red hospitalaria despliega agentes de IA para ayudar con el análisis de imágenes de diagnóstico.
 
-#### H.3.1 Privacy Requirements
+#### H.3.1 Requisitos de Privacidad
 
-**Table H.4: HIPAA Requirements**
+**Tabla H.4: Requisitos HIPAA**
 
-| HIPAA Section | Requirement | PoA Implementation |
+| Sección HIPAA | Requisito | Implementación PoA |
 |---------------|-------------|-------------------|
-| §164.508 | Patient authorization | Scope to specific patient IDs |
-| §164.512 | Uses and disclosures | Purpose limitation constraints |
-| §164.528 | Accounting of disclosures | Transparency Log |
-| §164.530 | Administrative requirements | Entity Profile verification |
+| §164.508 | Autorización del paciente | Alcance a IDs de pacientes específicos |
+| §164.512 | Usos y divulgaciones | Restricciones de limitación de propósito |
+| §164.528 | Contabilidad de divulgaciones | Registro de Transparencia |
+| §164.530 | Requisitos administrativos | Verificación de Perfil de Entidad |
 
-#### H.3.2 Consent-Driven PoA
+#### H.3.2 PoA Impulsada por Consentimiento
 
 ```json
 {
@@ -6520,1014 +6524,1014 @@ During the March 2026 flash crash simulation:
 }
 ```
 
-#### H.3.3 Audit Trail Example
+#### H.3.3 Ejemplo de Pista de Auditoría
 
 ```
-2026-01-15 08:23:41 | Agent imaging-ai-07 accessed P123 chest X-ray
-                    | Purpose: diagnosis
-                    | Consent: verified
+2026-01-15 08:23:41 | Agente imaging-ai-07 accedió rayos-X tórax P123
+                    | Propósito: diagnóstico
+                    | Consentimiento: verificado
                     | PoA JTI: abc123-def456
-                    | Constraint eval: PASS (all 4 rules)
-                    | Action: suggest_diagnosis("pneumonia", confidence=0.87)
+                    | Eval restricción: PASS (las 4 reglas)
+                    | Acción: sugerir_diagnóstico("neumonía", confianza=0.87)
 ```
 
 ---
 
-### H.4 Government: Benefits Processing
+### H.4 Gobierno: Procesamiento de Beneficios
 
-**Scenario**: A European government agency deploys AI agents to process social benefits applications.
+**Escenario**: Una agencia gubernamental europea despliega agentes de IA para procesar solicitudes de beneficios sociales.
 
-#### H.4.1 eIDAS Integration
+#### H.4.1 Integración eIDAS
 
 ```
-Citizen (EUDI Wallet)
+Ciudadano (Cartera EUDI)
      │
-     │ Presents PID + QEAA (income attestation)
+     │ Presenta PID + QEAA (atestación ingresos)
      v
-Agency Portal
+Portal Agencia
      │
-     │ Verifies EUDI credentials
+     │ Verifica credenciales EUDI
      v
-Benefits Processing Agent
+Agente Procesamiento Beneficios
      │
-     │ PoA from Agency with QESeal
+     │ PoA de Agencia con QESeal
      v
-Decision Engine
+Motor de Decisión
      │
-     │ Automated eligibility determination
+     │ Determinación elegibilidad automatizada
      v
-Transparency Log
+Registro de Transparencia
 ```
 
-#### H.4.2 Assurance Levels
+#### H.4.2 Niveles de Garantía
 
-**Table H.5: Public Sector Service Levels**
+**Tabla H.5: Niveles de Servicio del Sector Público**
 
-| Decision Type | Assurance Required | PoA Configuration |
+| Tipo de Decisión | Garantía Requerida | Configuración PoA |
 |--------------|-------------------|-------------------|
-| Information request | Low | Software key, basic logging |
-| Status update | Substantial | HSM key, transparency log |
-| Payment initiation | High | QESeal, multi-party approval |
-| Data correction | High | QESeal, human oversight |
+| Solicitud de información | Baja | Clave software, registro básico |
+| Actualización de estado | Sustancial | Clave HSM, registro transparencia |
+| Iniciación de pago | Alta | QESeal, aprobación multiparte |
+| Corrección de datos | Alta | QESeal, supervisión humana |
 
-#### H.4.3 Results
+#### H.4.3 Resultados
 
-**Table H.6: Public Sector Metrics**
+**Tabla H.6: Métricas del Sector Público**
 
-| Metric | Before | After | Impact |
+| Métrica | Antes | Después | Impacto |
 |--------|--------|-------|--------|
-| Application processing | 21 days | 3 days | 86% faster |
-| Error rate | 4.2% | 0.3% | 93% reduction |
-| Fraud detection | 12% caught | 94% caught | 7.8x improvement |
-| Citizen satisfaction | 52% | 87% | +35 points |
+| Procesamiento de solicitudes | 21 días | 3 días | 86% más rápido |
+| Tasa de error | 4.2% | 0.3% | 93% reducción |
+| Detección de fraude | 12% detectado | 94% detectado | 7.8x mejora |
+| Satisfacción ciudadana | 52% | 87% | +35 puntos |
 
 ---
 
-## Appendix I: Extended Bibliography
+## Apéndice I: Bibliografía Extendida
 
-### I.1 Legal References
+### I.1 Referencias Legales
 
-#### I.1.1 Agency Law
+#### I.1.1 Ley de Agencia
 
-**Table I.1: Agency Law Sources**
+**Tabla I.1: Fuentes de Ley de Agencia**
 
-| Source | Citation | Relevance |
+| Fuente | Cita | Relevancia |
 |--------|----------|-----------|
-| Restatement (Third) of Agency | American Law Institute (2006) | Foundational U.S. agency principles |
-| Bowstead & Reynolds on Agency | Sweet & Maxwell (22nd ed. 2020) | Leading English law treatise |
-| BGB §§ 164-181 | German Civil Code | Statutory representation (Stellvertretung) |
-| HGB §§ 48-58 | German Commercial Code | Prokura and commercial agency |
-| Code Civil Art. 1984-2010 | French Civil Code | Mandat (agency) provisions |
+| Restatement (Third) of Agency | American Law Institute (2006) | Principios fundamentales de agencia de EE.UU. |
+| Bowstead & Reynolds on Agency | Sweet & Maxwell (22nd ed. 2020) | Tratado líder de derecho inglés |
+| BGB §§ 164-181 | Código Civil Alemán | Representación estatutaria (Stellvertretung) |
+| HGB §§ 48-58 | Código Comercial Alemán | Prokura y agencia comercial |
+| Code Civil Art. 1984-2010 | Código Civil Francés | Provisiones de mandato (agencia) |
 
-#### I.1.2 Digital Identity
+#### I.1.2 Identidad Digital
 
-**Table I.2: Statutory Sources**
+**Tabla I.2: Fuentes Estatutarias**
 
-| Source | Citation | Relevance |
+| Fuente | Cita | Relevancia |
 |--------|----------|-----------|
-| eIDAS Regulation | EU 910/2014 | Electronic signatures and seals |
-| eIDAS 2.0 | EU 2024/1183 | EUDI Wallet framework |
-| ESIGN Act | 15 U.S.C. § 7001 | U.S. electronic signature validity |
-| UETA | Uniform Law Commission (1999) | State-level e-signature uniformity |
+| Regulación eIDAS | EU 910/2014 | Firmas electrónicas y sellos |
+| eIDAS 2.0 | EU 2024/1183 | Marco de Cartera EUDI |
+| Ley ESIGN | 15 U.S.C. § 7001 | Validez de firma electrónica en EE.UU. |
+| UETA | Comisión de Ley Uniforme (1999) | Uniformidad de firma electrónica a nivel estatal |
 
-#### I.1.3 Financial Regulation
+#### I.1.3 Regulación Financiera
 
-**Table I.3: Financial Regulation Sources**
+**Tabla I.3: Fuentes de Regulación Financiera**
 
-| Source | Citation | Relevance |
+| Fuente | Cita | Relevancia |
 |--------|----------|-----------|
-| MiFID II | 2014/65/EU | EU investment services directive |
-| MAR | 596/2014/EU | Market abuse regulation |
-| Dodd-Frank Act | Pub.L. 111-203 | U.S. financial reform |
-| Basel III | BCBS (2010-2017) | International banking standards |
+| MiFID II | 2014/65/EU | Directiva de servicios de inversión de la UE |
+| MAR | 596/2014/EU | Regulación de abuso de mercado |
+| Ley Dodd-Frank | Pub.L. 111-203 | Reforma financiera de EE.UU. |
+| Basel III | BCBS (2010-2017) | Estándares bancarios internacionales |
 
-### I.2 Technical References
+### I.2 Referencias Técnicas
 
-#### I.2.1 Standards
+#### I.2.1 Estándares
 
-**Table I.4: Technical Standards**
+**Tabla I.4: Estándares Técnicos**
 
-| Standard | Organization | Description |
+| Estándar | Organización | Descripción |
 |----------|--------------|-------------|
 | RFC 7519 | IETF | JSON Web Token (JWT) |
-| RFC 8152 | IETF | CBOR Object Signing and Encryption (COSE) |
-| W3C DID Core | W3C | Decentralized Identifiers |
-| W3C VC Data Model | W3C | Verifiable Credentials |
-| ISO 27001 | ISO | Information security management |
+| RFC 8152 | IETF | Cifrado y Firma de Objetos CBOR (COSE) |
+| W3C DID Core | W3C | Identificadores Descentralizados |
+| W3C VC Data Model | W3C | Credenciales Verificables |
+| ISO 27001 | ISO | Gestión de seguridad de información |
 
-#### I.2.2 Academic Papers
+#### I.2.2 Documentos Académicos
 
-**Table I.5: Academic Literature**
+**Tabla I.5: Literatura Académica**
 
-| Authors | Title | Publication | Year |
+| Autores | Título | Publicación | Año |
 |---------|-------|-------------|------|
 | Nakamoto | Bitcoin: A Peer-to-Peer Electronic Cash System | whitepaper | 2008 |
 | Merkle | Protocols for Public Key Cryptosystems | IEEE S&P | 1980 |
 | Chaum | Blind Signatures for Untraceable Payments | CRYPTO | 1983 |
-| Boneh & Shoup | A Graduate Course in Applied Cryptography | textbook | 2020 |
+| Boneh & Shoup | A Graduate Course in Applied Cryptography | libro de texto | 2020 |
 | Ben-Sasson et al. | SNARKs for C | CRYPTO | 2013 |
 
-#### I.2.3 Industry Reports
+#### I.2.3 Informes de la Industria
 
-**Table I.6: Industry Reports**
+**Tabla I.6: Informes de la Industria**
 
-| Publisher | Title | Year |
+| Editor | Título | Año |
 |-----------|-------|------|
-| Gartner | AI Agent Security: Emerging Practices | 2025 |
-| Forrester | The Future of Non-Human Identity | 2025 |
-| McKinsey | Autonomous Agents in Enterprise | 2024 |
-| Deloitte | AI Governance Frameworks | 2025 |
-| NIST | AI Risk Management Framework | 2023 |
+| Gartner | Seguridad de Agentes de IA: Prácticas Emergentes | 2025 |
+| Forrester | El Futuro de la Identidad No Humana | 2025 |
+| McKinsey | Agentes Autónomos en la Empresa | 2024 |
+| Deloitte | Marcos de Gobernanza de IA | 2025 |
+| NIST | Marco de Gestión de Riesgos de IA | 2023 |
 
-### I.3 Case Law
+### I.3 Casos Legales
 
-#### I.3.1 United States
+#### I.3.1 Estados Unidos
 
-**Table I.7: US Case Law**
+**Tabla I.7: Jurisprudencia EE.UU.**
 
-| Case | Citation | Holding |
+| Caso | Cita | Sentencia |
 |------|----------|---------|
-| Botticello v. Stefanovicz | 177 Conn. 22 (1979) | Apparent authority requires principal conduct |
-| Lind v. Schenley Industries | 278 F.2d 79 (3d Cir. 1960) | Implied authority from position |
-| CFTC v. Commodity Deposit | 217 F.3d 348 (5th Cir. 2000) | Unauthorized trading liability |
+| Botticello v. Stefanovicz | 177 Conn. 22 (1979) | Autoridad aparente requiere conducta del principal |
+| Lind v. Schenley Industries | 278 F.2d 79 (3d Cir. 1960) | Autoridad implícita por posición |
+| CFTC v. Commodity Deposit | 217 F.3d 348 (5th Cir. 2000) | Responsabilidad por comercio no autorizado |
 
-#### I.3.2 European Union
+#### I.3.2 Unión Europea
 
-**Table I.8: EU Case Law**
+**Tabla I.8: Jurisprudencia UE**
 
-| Case | Citation | Holding |
+| Caso | Cita | Sentencia |
 |------|----------|---------|
-| Joined Cases C-509/09 and C-161/10 | eDate Advertising | Cross-border jurisdiction in online matters |
-| C-322/20 | VGME | Electronic document equivalence |
+| Casos Unidos C-509/09 y C-161/10 | eDate Advertising | Jurisdicción transfronteriza en asuntos en línea |
+| C-322/20 | VGME | Equivalencia de documentos electrónicos |
 
-#### I.3.3 Germany
+#### I.3.3 Alemania
 
-**Table I.9: German Case Law**
+**Tabla I.9: Jurisprudencia Alemana**
 
-| Case | Citation | Holding |
+| Caso | Cita | Sentencia |
 |------|----------|---------|
-| BGH NJW 2019, 2016 | II ZR 175/18 | Scope of Prokura limitations |
-| BGH NJW 2021, 1234 | XII ZR 45/20 | Electronic representation validity |
+| BGH NJW 2019, 2016 | II ZR 175/18 | Alcance de limitaciones de Prokura |
+| BGH NJW 2021, 1234 | XII ZR 45/20 | Validez de representación electrónica |
 
-### I.4 Cryptographic Specifications
+### I.4 Especificaciones Criptográficas
 
-**Table J.1: Algorithm Standards**
+**Tabla J.1: Estándares de Algoritmos**
 
-| Algorithm | Standard | Usage in AgentAuth |
+| Algoritmo | Estándar | Uso en AgentAuth |
 |-----------|----------|-------------------|
-| Ed25519 | RFC 8032 | Primary signature scheme |
-| ECDSA P-256 | FIPS 186-5 | HSM compatibility |
+| Ed25519 | RFC 8032 | Esquema de firma primario |
+| ECDSA P-256 | FIPS 186-5 | Compatibilidad HSM |
 | SHA-256 | FIPS 180-4 | Hashing |
-| HKDF | RFC 5869 | Key derivation |
-| ML-DSA | FIPS 204 (draft) | Post-quantum signatures |
-| AES-256-GCM | FIPS 197, SP 800-38D | Symmetric encryption |
+| HKDF | RFC 5869 | Derivación de claves |
+| ML-DSA | FIPS 204 (borrador) | Firmas post-cuánticas |
+| AES-256-GCM | FIPS 197, SP 800-38D | Cifrado simétrico |
 
-### I.5 Transparency Log References
+### I.5 Referencias de Registro de Transparencia
 
-**Table J.2: Transparency Mechanisms**
+**Tabla J.2: Mecanismos de Transparencia**
 
-| System | Documentation | Relevance |
+| Sistema | Documentación | Relevancia |
 |--------|---------------|-----------|
-| Certificate Transparency | RFC 6962 | Merkle tree logging |
-| Trillian | GitHub/google/trillian | Open source log implementation |
-| Sigstore | sigstore.dev | Software signing transparency |
-| Rekor | GitHub/sigstore/rekor | Transparency log service |
+| Certificate Transparency | RFC 6962 | Registro de árbol Merkle |
+| Trillian | GitHub/google/trillian | Implementación de registro de código abierto |
+| Sigstore | sigstore.dev | Transparencia de firma de software |
+| Rekor | GitHub/sigstore/rekor | Servicio de registro de transparencia |
 
 ---
 
-## Appendix J: Protocol Specification Summary
+## Apéndice J: Resumen de Especificación del Protocolo
 
-### J.1 AAP-01: Agent Identity (Summary)
+### J.1 AAP-01: Identidad del Agente (Resumen)
 
-**Table J.3: Entity Profile Fields**
+**Tabla J.3: Campos del Perfil de Entidad**
 
-| Field | Type | Required | Description |
+| Campo | Tipo | Requerido | Descripción |
 |-------|------|----------|-------------|
-| `@context` | Array | Yes | JSON-LD context |
-| `id` | DID | Yes | Entity identifier |
-| `type` | Array | Yes | Entity types |
-| `controller` | DID | No | Controlling entity |
-| `verificationMethod` | Array | Yes | Public keys |
-| `legalEntity` | Object | Conditional | Legal registration |
-| `capabilities` | Array | No | Declared capabilities |
+| `@context` | Array | Sí | Contexto JSON-LD |
+| `id` | DID | Sí | Identificador de entidad |
+| `type` | Array | Sí | Tipos de entidad |
+| `controller` | DID | No | Entidad controladora |
+| `verificationMethod` | Array | Sí | Claves públicas |
+| `legalEntity` | Objeto | Condicional | Registro legal |
+| `capabilities` | Array | No | Capacidades declaradas |
 
-### J.2 AAP-02: Proof of Authorization (Summary)
+### J.2 AAP-02: Prueba de Autorización (Resumen)
 
-**Table J.4: PoA Body Claims**
+**Tabla J.4: Reclamaciones del Cuerpo PoA**
 
-| Field | Type | Required | Description |
+| Campo | Tipo | Requerido | Descripción |
 |-------|------|----------|-------------|
-| `iss` | DID | Yes | Issuer identifier |
-| `sub` | DID | Yes | Subject (agent) identifier |
-| `aud` | Array | No | Intended audience |
-| `iat` | Integer | Yes | Issued-at timestamp |
-| `nbf` | Integer | Yes | Not-before timestamp |
-| `exp` | Integer | Yes | Expiration timestamp |
-| `jti` | UUID | Yes | Unique token identifier |
-| `aat` | Array | Yes | Authority grants |
-| `cst` | Object | No | Constraints |
-| `aap_chain` | Array | No | Delegation chain |
+| `iss` | DID | Sí | Identificador del emisor |
+| `sub` | DID | Sí | Identificador del sujeto (agente) |
+| `aud` | Array | No | Audiencia prevista |
+| `iat` | Entero | Sí | Marca de tiempo de emisión |
+| `nbf` | Entero | Sí | Marca de tiempo de no antes de |
+| `exp` | Entero | Sí | Marca de tiempo de expiración |
+| `jti` | UUID | Sí | Identificador único de token |
+| `aat` | Array | Sí | Concesiones de autoridad |
+| `cst` | Objeto | No | Restricciones |
+| `aap_chain` | Array | No | Cadena de delegación |
 
-### J.3 Constraint Operators
+### J.3 Operadores de Restricción
 
-**Table J.5: Constraint Operators**
+**Tabla J.5: Operadores de Restricción**
 
-| Operator | Description | Example |
+| Operador | Descripción | Ejemplo |
 |----------|-------------|---------|
-| `==` | Equals | `{"var": "status", "op": "==", "val": "active"}` |
-| `!=` | Not equals | `{"var": "type", "op": "!=", "val": "test"}` |
-| `<` | Less than | `{"var": "priority", "op": "<", "val": 5}` |
-| `<=` | Less or equal | `{"var": "amount", "op": "<=", "val": 10000}` |
-| `>` | Greater than | `{"var": "score", "op": ">", "val": 0.8}` |
-| `>=` | Greater or equal | `{"var": "level", "op": ">=", "val": 2}` |
-| `in` | Member of list | `{"var": "country", "op": "in", "val": ["US", "DE"]}` |
-| `not_in` | Not member of | `{"var": "country", "op": "not_in", "val": ["RU"]}` |
-| `exists` | Field exists | `{"var": "approval", "op": "exists", "val": true}` |
-| `matches` | Regex match | `{"var": "email", "op": "matches", "val": "@corp.com$"}` |
+| `==` | Igual a | `{"var": "status", "op": "==", "val": "active"}` |
+| `!=` | No igual a | `{"var": "type", "op": "!=", "val": "test"}` |
+| `<` | Menor que | `{"var": "priority", "op": "<", "val": 5}` |
+| `<=` | Menor o igual que | `{"var": "amount", "op": "<=", "val": 10000}` |
+| `>` | Mayor que | `{"var": "score", "op": ">", "val": 0.8}` |
+| `>=` | Mayor o igual que | `{"var": "level", "op": ">=", "val": 2}` |
+| `in` | Miembro de lista | `{"var": "country", "op": "in", "val": ["US", "DE"]}` |
+| `not_in` | No miembro de | `{"var": "country", "op": "not_in", "val": ["RU"]}` |
+| `exists` | Campo existe | `{"var": "approval", "op": "exists", "val": true}` |
+| `matches` | Coincidencia regex | `{"var": "email", "op": "matches", "val": "@corp.com$"}` |
 
 ---
 
-## Appendix K: Security Considerations
+## Apéndice K: Consideraciones de Seguridad
 
-### K.1 Threat Model Summary
+### K.1 Resumen del Modelo de Amenazas
 
-**Table K.1: Threat Actor Matrix**
+**Tabla K.1: Matriz de Actores de Amenaza**
 
-| Threat Actor | Capability | Primary Target | Mitigation |
+| Actor de Amenaza | Capacidad | Objetivo Primario | Mitigación |
 |--------------|-----------|----------------|------------|
-| **External Attacker** | Network access | Forge PoA tokens | Cryptographic signatures |
-| **Compromised Agent** | Valid credentials | Exceed authority | Constraint enforcement |
-| **Malicious Insider** | Key access | Issue unauthorized PoAs | Multi-party ceremonies |
-| **State Actor** | Advanced persistent | Undermine trust roots | HSM, transparency logs |
-| **Supply Chain** | Build modification | Backdoor SDK | Reproducible builds, SBOM |
+| **Atacante Externo** | Acceso a red | Falsificar tokens PoA | Firmas criptográficas |
+| **Agente Comprometido** | Credenciales válidas | Exceder autoridad | Cumplimiento de restricciones |
+| **Iniciado Malicioso** | Acceso a claves | Emitir PoAs no autorizadas | Ceremonias multipartitas |
+| **Actor Estatal** | Persistente avanzado | Socavar raíces de confianza | HSM, registros de transparencia |
+| **Cadena de Suministro** | Modificación de construcción | SDK con puerta trasera | Construcciones reproducibles, SBOM |
 
-### K.2 Key Management Security
+### K.2 Seguridad de Gestión de Claves
 
-#### K.2.1 Key Storage Requirements
+#### K.2.1 Requisitos de Almacenamiento de Claves
 
-**Table K.2: Cryptographic Requirements**
+**Tabla K.2: Requisitos Criptográficos**
 
-| Key Type | Minimum | Recommended | Critical |
+| Tipo de Clave | Mínimo | Recomendado | Crítico |
 |----------|---------|-------------|----------|
-| Root Identity | HSM (FIPS 140-2 L2) | HSM (FIPS 140-2 L3) | Air-gapped ceremony |
-| Intermediate | HSM online | HSM + attestation | Multi-party threshold |
-| Operational | TPM/SE | Cloud HSM | Software with rapid rotation |
-| Ephemeral | Memory only | Memory + secure delete | Session-bound |
+| Identidad Raíz | HSM (FIPS 140-2 L2) | HSM (FIPS 140-2 L3) | Ceremonia aislada (air-gap) |
+| Intermedia | HSM en línea | HSM + atestación | Umbral multipartito |
+| Operacional | TPM/SE | Cloud HSM | Software con rotación rápida |
+| Efímera | Solo memoria | Memoria + borrado seguro | Vinculada a sesión |
 
-#### K.2.2 Key Ceremony Checklist
+#### K.2.2 Lista de Verificación de Ceremonia de Claves
 
 ```markdown
-Pre-Ceremony:
-[ ] Two independent security officers designated
-[ ] Ceremony room physically secured
-[ ] Air-gapped computer prepared and verified
-[ ] HSM initialized and firmware verified
-[ ] Witness list established and confirmed
+Pre-Ceremonia:
+[ ] Dos oficiales de seguridad independientes designados
+[ ] Sala de ceremonia asegurada físicamente
+[ ] Computadora aislada (air-gapped) preparada y verificada
+[ ] HSM inicializado y firmware verificado
+[ ] Lista de testigos establecida y confirmada
 
-During Ceremony:
-[ ] Generate key pair on HSM
-[ ] Export public key only
-[ ] Create Entity Profile with public key
-[ ] Sign Entity Profile with new key (self-attestation)
-[ ] Record ceremony video with timestamp
-[ ] Both officers sign ceremony log
+Durante la Ceremonia:
+[ ] Generar par de claves en HSM
+[ ] Exportar solo clave pública
+[ ] Crear Perfil de Entidad con clave pública
+[ ] Firmar Perfil de Entidad con nueva clave (auto-atestación)
+[ ] Grabar video de ceremonia con marca de tiempo
+[ ] Ambos oficiales firman registro de ceremonia
 
-Post-Ceremony:
-[ ] Securely destroy air-gapped session
-[ ] Store ceremony records in separate locations
-[ ] Publish Entity Profile to DID endpoint
-[ ] Register with Transparency Log
-[ ] Verify resolution from external network
+Post-Ceremonia:
+[ ] Destruir de forma segura sesión aislada
+[ ] Almacenar registros de ceremonia en ubicaciones separadas
+[ ] Publicar Perfil de Entidad en endpoint DID
+[ ] Registrarse con Registro de Transparencia
+[ ] Verificar resolución desde red externa
 ```
 
-### K.3 Attack Surface Analysis
+### K.3 Análisis de Superficie de Ataque
 
-#### K.3.1 Protocol Attack Vectors
+#### K.3.1 Vectores de Ataque del Protocolo
 
-**Table K.3: Attack Vectors**
+**Tabla K.3: Vectores de Ataque**
 
 
-| Vector | Attack | Impact | Countermeasure |
+| Vector | Ataque | Impacto | Contramedida |
 |--------|--------|--------|----------------|
-| **Token Replay** | Reuse valid PoA | Unauthorized action | JTI uniqueness + short expiration |
-| **Signature Stripping** | Remove signature, modify token | Forge authority | Signature required for parsing |
-| **Time Manipulation** | Adjust system clock | Use expired PoA | NTP + clock skew limits |
-| **Oracle Manipulation** | Return false constraint data | Bypass limits | Authenticated oracles + caching |
-| **Chain Injection** | Insert malicious intermediate | Gain authority | Full chain verification |
-| **Revocation Lag** | Use revoked PoA before propagation | Unauthorized action | Real-time revocation + Bloom |
+| **Reproducción de Token** | Reutilizar PoA válida | Acción no autorizada | Unicidad JTI + expiración corta |
+| **Eliminación de Firma** | Eliminar firma, modificar token | Falsificar autoridad | Firma requerida para análisis |
+| **Manipulación de Tiempo** | Ajustar reloj del verificador | Usar PoA expirada | NTP + límites de desfase |
+| **Manipulación de Oráculo** | Devolver datos falsos de restricción | Evadir límites | Oráculos autenticados + caché |
+| **Inyección de Cadena** | Insertar intermedio malicioso | Ganar autoridad | Verificación completa de cadena |
+| **Retraso de Revocación** | Usar PoA revocada antes de propagación | Acción no autorizada | Revocación tiempo real + Bloom |
 
-#### K.3.2 Implementation Vulnerabilities
+#### K.3.2 Vulnerabilidades de Implementación
 
-**Table K.4: Common Vulnerabilities**
+**Tabla K.4: Vulnerabilidades Comunes**
 
 
-| Vulnerability Class | Example | Prevention |
+| Clase de Vulnerabilidad | Ejemplo | Prevención |
 |--------------------|---------|------------|
-| **Parser Bugs** | Malformed CBOR crash | Fuzzing, formal verification |
-| **Integer Overflow** | Expiration calculation | Safe arithmetic, bounds checking |
-| **Race Conditions** | Revocation check timing | Atomic operations, defensive coding |
-| **Memory Leaks** | Key material in swap | Secure memory allocation |
-| **Side Channels** | Timing attacks on verification | Constant-time operations |
+| **Errores de Parser** | Choque CBOR mal formado | Fuzzing, verificación formal |
+| **Desbordamiento de Enteros** | Cálculo de expiración | Aritmética segura, comprobación de límites |
+| **Condiciones de Carrera** | Tiempo de verificación de revocación | Operaciones atómicas, codificación defensiva |
+| **Fugas de Memoria** | Material clave en swap | Asignación de memoria segura |
+| **Canales Laterales** | Ataques de tiempo en verificación | Operaciones de tiempo constante |
 
-### K.4 Cryptographic Security
+### K.4 Seguridad Criptográfica
 
-#### K.4.1 Algorithm Security Levels
+#### K.4.1 Niveles de Seguridad de Algoritmos
 
-**Table K.5: Algorithm Security Levels**
+**Tabla K.5: Niveles de Seguridad de Algoritmos**
 
-| Algorithm | Security Level | Quantum Resistant | Recommended Use |
+| Algoritmo | Nivel de Seguridad | Resistente a Cuántica | Uso Recomendado |
 |-----------|---------------|-------------------|-----------------|
-| Ed25519 | 128-bit | No | Current operational |
-| P-256 | 128-bit | No | HSM compatibility |
-| Ed448 | 224-bit | No | High-security contexts |
-| ML-DSA-65 | 192-bit | Yes | Post-quantum preparation |
-| SLH-DSA | 192-bit | Yes | Long-term archival |
+| Ed25519 | 128-bit | No | Operacional actual |
+| P-256 | 128-bit | No | Compatibilidad HSM |
+| Ed448 | 224-bit | No | Contextos de alta seguridad |
+| ML-DSA-65 | 192-bit | Sí | Preparación post-cuántica |
+| SLH-DSA | 192-bit | Sí | Archivo a largo plazo |
 
-#### K.4.2 Signature Security Checklist
+#### K.4.2 Lista de Verificación de Seguridad de Firma
 
 ```markdown
-[ ] Use approved signature algorithms only
-[ ] Verify key length meets minimum (256-bit for ECC)
-[ ] Check certificate chain to trusted root
-[ ] Validate signature covers entire protected content
-[ ] Reject tokens with unknown or deprecated algorithms
-[ ] Implement algorithm agility for future upgrades
-[ ] Log all signature verification failures
+[ ] Usar solo algoritmos de firma aprobados
+[ ] Verificar longitud de clave cumple mínimo (256-bit para ECC)
+[ ] Verificar cadena de certificado a raíz confiable
+[ ] Validar que firma cubre todo el contenido protegido
+[ ] Rechazar tokens con algoritmos desconocidos o obsoletos
+[ ] Implementar agilidad de algoritmo para futuras actualizaciones
+[ ] Registrar todos los fallos de verificación de firma
 ```
 
-### K.5 Operational Security
+### K.5 Seguridad Operacional
 
-#### K.5.1 Monitoring Requirements
+#### K.5.1 Requisitos de Monitoreo
 
-**Table K.6: Security Metrics**
+**Tabla K.6: Métricas de Seguridad**
 
 
-| Metric | Normal Range | Alert Threshold | Critical |
+| Métrica | Rango Normal | Umbral de Alerta | Crítico |
 |--------|--------------|-----------------|----------|
-| Verification failures | <1% | >5% | >20% |
-| Revocation rate | <0.1%/day | >1%/day | >5%/day |
-| Key usage frequency | Pattern-based | 2x normal | 10x normal |
-| Chain depth | 1-3 | >4 | >5 |
-| Constraint violations | <5% | >20% | >50% |
+| Fallos de verificación | <1% | >5% | >20% |
+| Tasa de revocación | <0.1%/día | >1%/día | >5%/día |
+| Frecuencia de uso de clave | Basado en patrón | 2x normal | 10x normal |
+| Profundidad de cadena | 1-3 | >4 | >5 |
+| Violaciones de restricción | <5% | >20% | >50% |
 
-#### K.5.2 Incident Response Triggers
+#### K.5.2 Desencadenantes de Respuesta a Incidentes
 
-**Table K.7: Incident Response Levels**
+**Tabla K.7: Niveles de Respuesta a Incidentes**
 
 
-| Indicator | Response Level | Initial Actions |
+| Indicador | Nivel de Respuesta | Acciones Iniciales |
 |-----------|---------------|-----------------|
-| Anomalous key usage | Level 1 | Investigate, enhance monitoring |
-| Signature verification spike | Level 2 | Review logs, notify security |
-| Potential key compromise | Level 3 | Prepare revocation, assemble team |
-| Confirmed compromise | Level 4 | Execute emergency revocation |
-| Root key compromise | Level 5 | Full key hierarchy regeneration |
+| Uso anómalo de clave | Nivel 1 | Investigar, mejorar monitoreo |
+| Pico de verificación de firma | Nivel 2 | Revisar registros, notificar seguridad |
+| Compromiso potencial de clave | Nivel 3 | Preparar revocación, reunir equipo |
+| Compromiso confirmado | Nivel 4 | Ejecutar revocación de emergencia |
+| Compromiso de clave raíz | Nivel 5 | Regeneración completa de jerarquía de claves |
 
 ---
 
-## Appendix L: Deployment Architecture Patterns
+## Apéndice L: Patrones de Arquitectura de Despliegue
 
-### L.1 Single-Tenant Enterprise
+### L.1 Empresa de Inquilino Único
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Enterprise Network                           │
+│                    Red Empresarial                              │
 │                                                                 │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────┐  │
-│  │ Identity    │    │ PoA Issuer  │    │ Verification        │  │
-│  │ Manager     │───>│ Service     │───>│ Middleware          │  │
-│  │ (HR system) │    │ (HSM-backed)│    │ (API Gateway)       │  │
+│  │ Gestor      │    │ Servicio    │    │ Middleware de       │  │
+│  │ Identidad   │───>│ Emisor PoA  │───>│ Verificación        │  │
+│  │ (RRHH)      │    │ (Respaldo HSM)│   │ (API Gateway)       │  │
 │  `--───────────┘    `--───────────┘    `--───────────────────┘  │
 │         │                 │                     │               │
 │         v                 v                     v               │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │              Private Transparency Log                      │ │
-│  │              (On-premises, replicated)                     │ │
+│  │              Registro de Transparencia Privado             │ │
+│  │              (On-premise, replicado)                       │ │
 │  `--──────────────────────────────────────────────────────────┘ │
 `--───────────────────────────────────────────────────────────────┘
 ```
 
-**Characteristics**:
-- All components within enterprise boundary
-- HSM co-located with issuer service
-- Transparency log for internal audit
-- No external trust dependencies
+**Características**:
+- Todos los componentes dentro del límite empresarial
+- HSM coubicado con servicio emisor
+- Registro de transparencia para auditoría interna
+- Sin dependencias de confianza externas
 
-### L.2 Multi-Tenant SaaS
+### L.2 SaaS Multi-Inquilino
 
-![Figure L.1: Multi-Tenant Architecture](images/multi_tenant_saas_v3.png)
+![Figura L.1: Arquitectura Multi-Inquilino](images/multi_tenant_saas_v3.png)
 
-**Characteristics**:
-- Cryptographic tenant isolation
-- Shared infrastructure, isolated keys
-- Federated transparency log
-- Metered billing per operation
+**Características**:
+- Aislamiento criptográfico de inquilinos
+- Infraestructura compartida, claves aisladas
+- Registro de transparencia federado
+- Facturación medida por operación
 
-### L.3 Federated Cross-Organization
+### L.3 Federado Inter-Organizacional
 
-![Figure L.2: Federated Trust Model](images/federated_trust_v3.png)
+![Figura L.2: Modelo de Confianza Federado](images/federated_trust_v3.png)
 
-**Characteristics**:
-- Independent organizational roots
-- Cross-organizational verification
-- Federated trust through resolution
-- No central authority required
+**Características**:
+- Raíces organizacionales independientes
+- Verificación inter-organizacional
+- Confianza federada a través de resolución
+- No se requiere autoridad central
 
-### L.4 Edge/IoT Mesh
+### L.4 Malla Edge/IoT
 
-![Figure L.3: Edge/IoT Mesh](images/edge_iot_mesh_v3.png)
+![Figura L.3: Malla Edge/IoT](images/edge_iot_mesh_v3.png)
 
-**Characteristics**:
-- Hierarchical trust delegation
-- Offline verification capability
-- Bloom filter synchronization
-- TPM-backed device keys
+**Características**:
+- Delegación de confianza jerárquica
+- Capacidad de verificación fuera de línea
+- Sincronización de filtro Bloom
+- Claves de dispositivo respaldadas por TPM
 
-### L.5 Hybrid Cloud with Air-Gapped Root
+### L.5 Nube Híbrida con Raíz Aislada
 
-![Figure L.4: Hybrid Cloud Architecture](images/hybrid_cloud_airgap_v3.png)
+![Figura L.4: Arquitectura de Nube Híbrida](images/hybrid_cloud_airgap_v3.png)
 
-**Characteristics**:
-- Maximum root key security
-- Ceremony-based root operations
-- Cloud operational flexibility
-- Multi-cloud resilience
+**Características**:
+- Máxima seguridad de clave raíz
+- Operaciones raíz basadas en ceremonia
+- Flexibilidad operativa en la nube
+- Resiliencia multi-nube
 
 ---
 
-## Appendix M: Threat Library
+## Apéndice M: Biblioteca de Amenazas
 
-### M.1 Spoofing Threats
+### M.1 Amenazas de Suplantación
 
-#### S-01: Root Key Substitution
-- **Description**: Attacker replaces the root key in the trust store with their own.
-- **Impact**: Total System Compromise
-- **Mitigation**: Hardware-backed roots (HToF), Out-of-band verification, Transparency log monitoring
+#### S-01: Sustitución de Clave Raíz
+- **Descripción**: El atacante reemplaza la clave raíz en el almacén de confianza con la suya propia.
+- **Impacto**: Compromiso Total del Sistema
+- **Mitigación**: Raíces respaldadas por hardware (HToF), Verificación fuera de banda, Monitoreo de registro de transparencia
 
-#### S-02: Agent Impersonation
-- **Description**: Attacker compromises an agent's private key and issues valid signatures.
-- **Impact**: Unauthorized Actions
-- **Mitigation**: TPM-bound keys, Short-lived certifications, Anomaly detection on usage
+#### S-02: Suplantación de Agente
+- **Descripción**: El atacante compromete la clave privada de un agente y emite firmas válidas.
+- **Impacto**: Acciones No Autorizadas
+- **Mitigación**: Claves vinculadas a TPM, Certificaciones de corta duración, Detección de anomalías en uso
 
-#### S-03: Issuer Spoofing
-- **Description**: Attacker mimics a valid issuer DID to sign bogus PoAs.
-- **Impact**: False Authorization
-- **Mitigation**: DID resolution validation, Domain verification (did:web), Reputation scoring
+#### S-03: Suplantación de Emisor
+- **Descripción**: El atacante imita un DID de emisor válido para firmar PoAs falsas.
+- **Impacto**: Falsa Autorización
+- **Mitigación**: Validación de resolución DID, Verificación de dominio (did:web), Puntuación de reputación
 
-#### S-04: Oracle Spoofing
-- **Description**: Attacker intercepts oracle requests and returns false "success" signals.
-- **Impact**: Constraint Bypass
-- **Mitigation**: TLS mutual authentication, Signed oracle responses, Random nonce verification
+#### S-04: Suplantación de Oráculo
+- **Descripción**: El atacante intercepta solicitudes de oráculo y devuelve señales falsas de "éxito".
+- **Impacto**: Evasión de Restricciones
+- **Mitigación**: Autenticación mutua TLS, Respuestas de oráculo firmadas, Verificación de nonce aleatorio
 
-### M.2 Tampering Threats
+### M.2 Amenazas de Manipulación
 
-#### T-01: PoA Modification
-- **Description**: Attacker alters the `aat` grants or `exp` time in a valid token.
-- **Impact**: Privilege Escalation
-- **Mitigation**: Cryptographic signatures (Ed25519), CBOR deterministic encoding, Parser strictness checks
+#### T-01: Modificación de PoA
+- **Descripción**: El atacante altera las concesiones `aat` o el tiempo `exp` en un token válido.
+- **Impacto**: Escalada de Privilegios
+- **Mitigación**: Firmas criptográficas (Ed25519), Codificación determinista CBOR, Comprobaciones estrictas del parser
 
-#### T-02: Constraint Weakening
-- **Description**: Attacker removes restrictive rules from the `cst` block.
-- **Impact**: Policy Bypass
-- **Mitigation**: Signature covers `cst` block, Verification fails on missing sig, Integrity check on rules
+#### T-02: Debilitamiento de Restricciones
+- **Descripción**: El atacante elimina reglas restrictivas del bloque `cst`.
+- **Impacto**: Evasión de Política
+- **Mitigación**: La firma cubre el bloque `cst`, La verificación falla si falta firma, Chequeo de integridad en reglas
 
-#### T-03: Log Injection
-- **Description**: Attacker inserts false entries into the transparency log.
-- **Impact**: Audit Poisoning
-- **Mitigation**: Merkle tree consistency proofs, Gossip protocols for heads, Signed log entries
+#### T-03: Inyección de Registro
+- **Descripción**: El atacante inserta entradas falsas en el registro de transparencia.
+- **Impacto**: Envenenamiento de Auditoría
+- **Mitigación**: Pruebas de consistencia de árbol Merkle, Protocolos de chismes para cabezas, Entradas de registro firmadas
 
-#### T-04: Time Shifting
-- **Description**: Attacker manipulates the verifier's clock to accept expired tokens.
-- **Impact**: Replay Attack
-- **Mitigation**: NTP synchronization monitoring, Drift limits (max 30s), External time sources
+#### T-04: Desplazamiento de Tiempo
+- **Descripción**: El atacante manipula el reloj del verificador para aceptar tokens expirados.
+- **Impacto**: Ataque de Reproducción
+- **Mitigación**: Monitoreo de sincronización NTP, Límites de deriva (máx 30s), Fuentes de tiempo externas
 
-### M.3 Repudiation Threats
+### M.3 Amenazas de Repudio
 
-#### R-01: Action Denial
-- **Description**: Agent performs an action but later claims "I didn't do it."
-- **Impact**: Legal Ambiguity
-- **Mitigation**: Non-repudiation signatures, Transparency log inclusion, Trusted execution environments
+#### R-01: Negación de Acción
+- **Descripción**: El agente realiza una acción pero luego reclama "Yo no lo hice".
+- **Impacto**: Ambigüedad Legal
+- **Mitigación**: Firmas de no repudio, Inclusión en registro de transparencia, Entornos de ejecución confiables
 
-#### R-02: Issuance Denial
-- **Description**: Issuer claims a valid PoA was never issued by them.
-- **Impact**: Liability Dispute
-- **Mitigation**: Public log of issuance, Counter-signatures, Publication of granular CRLs
+#### R-02: Negación de Emisión
+- **Descripción**: El emisor reclama que una PoA válida nunca fue emitida por ellos.
+- **Impacto**: Disputa de Responsabilidad
+- **Mitigación**: Registro público de emisión, Contra-firmas, Publicación de CRLs granulares
 
-#### R-03: Revocation Denial
-- **Description**: Issuer retroactively claims a token was revoked before use.
-- **Impact**: Unfair Liability
-- **Mitigation**: Trusted timestamping on revocation, Bloom filter snapshots, Proof of non-revocation
+#### R-03: Negación de Revocación
+- **Descripción**: El emisor reclama retroactivamente que un token fue revocado antes de su uso.
+- **Impacto**: Responsabilidad Injusta
+- **Mitigación**: Sellado de tiempo confiable en revocación, Instantáneas de filtro Bloom, Prueba de no revocación
 
-### M.4 Information Disclosure Threats
+### M.4 Amenazas de Divulgación de Información
 
-#### I-01: PoA Leakage
-- **Description**: Token intercepted in transit or logs exposing agent capabilities.
-- **Impact**: Privacy Loss
-- **Mitigation**: TLS 1.3 encryption, Audience (`aud`) binding, Minimal disclosure (ZK-proofs)
+#### I-01: Fuga de PoA
+- **Descripción**: Token interceptado en tránsito o registros exponiendo capacidades del agente.
+- **Impacto**: Pérdida de Privacidad
+- **Mitigación**: Cifrado TLS 1.3, Vinculación de audiencia (`aud`), Divulgación mínima (ZK-proofs)
 
-#### I-02: Profile Harvesting
-- **Description**: Crawling DID endpoints to map organizational structure.
-- **Impact**: Competitive Intel
-- **Mitigation**: Rate limiting resolution, Private DID methods, Access control on profiles
+#### I-02: Recolección de Perfiles
+- **Descripción**: Rastreo de endpoints DID para mapear estructura organizacional.
+- **Impacto**: Inteligencia Competitiva
+- **Mitigación**: Limitación de tasa de resolución, Métodos DID privados, Control de acceso en perfiles
 
-#### I-03: Constraint Inference
-- **Description**: Inferring business logic from exposed constraint rules.
-- **Impact**: Strategy Exposure
-- **Mitigation**: ZK-SNARK constraint evaluation, Opaque oracle identifiers, Generic error messages
+#### I-03: Inferencia de Restricciones
+- **Descripción**: Inferencia de lógica de negocio a partir de reglas de restricción expuestas.
+- **Impacto**: Exposición de Estrategia
+- **Mitigación**: Evaluación de restricciones ZK-SNARK, Identificadores de oráculo opacos, Mensajes de error genéricos
 
-### M.5 Denial of Service Threats
+### M.5 Amenazas de Denegación de Servicio
 
-#### D-01: Verification Exhaustion
-- **Description**: Flooding verifier with complex constraints to consume CPU.
-- **Impact**: Service Outage
-- **Mitigation**: Complexity limits (gas model), Circuit breakers, Cached evaluation results
+#### D-01: Agotamiento de Verificación
+- **Descripción**: Inundar al verificador con restricciones complejas para consumir CPU.
+- **Impacto**: Interrupción de Servicio
+- **Mitigación**: Límites de complejidad (modelo de gas), Disyuntores, Resultados de evaluación en caché
 
-#### D-02: Log Flooding
-- **Description**: Spamming the transparency log with valid but junk entries.
-- **Impact**: Storage Exhaustion
-- **Mitigation**: Write fees or rate limits, Proof of Work for writes, Authenticated submission
+#### D-02: Inundación de Registro
+- **Descripción**: Spam en el registro de transparencia con entradas válidas pero basura.
+- **Impacto**: Agotamiento de Almacenamiento
+- **Mitigación**: Tarifas de escritura o límites de tasa, Prueba de Trabajo para escrituras, Envío autenticado
 
-#### D-03: Revocation List Bloat
-- **Description**: Revoking millions of keys to degrade checkout performance.
-- **Impact**: Latency Spike
-- **Mitigation**: Compressed Bloom filters, Delta updates (CRLs), Sharded distribution
+#### D-03: Hinchazón de Lista de Revocación
+- **Descripción**: Revocar millones de claves para degradar rendimiento de comprobación.
+- **Impacto**: Pico de Latencia
+- **Mitigación**: Filtros de Bloom comprimidos, Actualizaciones delta (CRLs), Distribución fragmentada
 
-### M.6 Elevation of Privilege Threats
+### M.6 Amenazas de Elevación de Privilegios
 
-**Table M.1: Elevation of Privilege Threats**
+**Tabla M.1: Amenazas de Elevación de Privilegios**
 
-| ID | Threat Description | Impact | Mitigation Strategy |
+| ID | Descripción de Amenaza | Impacto | Estrategia de Mitigación |
 |----|--------------------|--------|---------------------|
-| **E-01** | **Chain Escalation**<br>Child agent grants itself more authority than the parent held. | Authorization Bypass | - Strict subset logic in verifier<br>- Path validation checks<br>- Max chain depth limits |
-| **E-02** | **Oracle Compromise**<br>Compromised oracle grants "admin" status to unauthorized agents. | Total System Control | - Multi-oracle consensus (M-of-N)<br>- Reputation staking<br>- Anomaly detection |
+| **E-01** | **Escalada de Cadena**<br>El agente hijo se otorga más autoridad que la que tenía el padre. | Evasión de Autorización | - Lógica de subconjunto estricta en verificador<br>- Comprobaciones de validación de ruta<br>- Límites de profundidad de cadena máx |
+| **E-02** | **Compromiso de Oráculo**<br>Oráculo comprometido otorga estado "admin" a agentes no autorizados. | Control Total del Sistema | - Consenso multi-oráculo (M-de-N)<br>- Staking de reputación<br>- Detección de anomalías |
 
 ---
 
-## Appendix N: Compliance Checklists
+## Apéndice N: Listas de Verificación de Cumplimiento
 
-### N.1 GDPR / EU Data Protection
+### N.1 GDPR / Protección de Datos UE
 
-**Role: Data Controller (Issuer)**
+**Rol: Controlador de Datos (Emisor)**
 
-- [ ] **Data Minimization (Art. 5(1)(c))**:
-    - [ ] PoA tokens contain only necessary identifiers?
-    - [ ] `aat` grants avoid detailed personal data?
-    - [ ] Constraints avoid sensitive category data (Art. 9)?
-- [ ] **Transparency (Art. 13/14)**:
-    - [ ] Privacy notice updated to include "Automated Decision Making"?
-    - [ ] Data subjects informed of agent usage?
-- [ ] **Security (Art. 32)**:
-    - [ ] Keys stored in HSM/TPM?
-    - [ ] Signatures use strong algorithms (Ed25519)?
-    - [ ] Revocation mechanisms tested?
-- [ ] **Data Subject Rights (Art. 15-22)**:
-    - [ ] Can an individual retrieve their agent's history?
-    - [ ] Can they revoke agent authority (Right to Object)?
-    - [ ] Is "Right to Explanation" supported for AI decisions?
+- [ ] **Minimización de Datos (Art. 5(1)(c))**:
+    - [ ] ¿Los tokens PoA contienen solo identificadores necesarios?
+    - [ ] ¿Las concesiones `aat` evitan datos personales detallados?
+    - [ ] ¿Las restricciones evitan datos de categoría sensible (Art. 9)?
+- [ ] **Transparencia (Art. 13/14)**:
+    - [ ] ¿Aviso de privacidad actualizado para incluir "Toma de Decisiones Automatizada"?
+    - [ ] ¿Sujetos de datos informados del uso de agentes?
+- [ ] **Seguridad (Art. 32)**:
+    - [ ] ¿Claves almacenadas en HSM/TPM?
+    - [ ] ¿Las firmas usan algoritmos fuertes (Ed25519)?
+    - [ ] ¿Mecanismos de revocación probados?
+- [ ] **Derechos del Sujeto de Datos (Art. 15-22)**:
+    - [ ] ¿Puede un individuo recuperar el historial de su agente?
+    - [ ] ¿Pueden revocar la autoridad del agente (Derecho a Oponerse)?
+    - [ ] ¿Se soporta el "Derecho a Explicación" para decisiones de IA?
 
-**Role: Data Processor (Verifier)**
+**Rol: Procesador de Datos (Verificador)**
 
-- [ ] **Processing Instructions**:
-    - [ ] Verification logic documented and strictly followed?
-    - [ ] No key material retained after verification?
-- [ ] **International Transfers (Art. 44)**:
-    - [ ] Are PoAs sent to non-adequate jurisdictions?
-    - [ ] Standard Contractual Clauses (SCCs) in place?
+- [ ] **Instrucciones de Procesamiento**:
+    - [ ] ¿Lógica de verificación documentada y estrictamente seguida?
+    - [ ] ¿Ningún material clave retenido después de la verificación?
+- [ ] **Transferencias Internacionales (Art. 44)**:
+    - [ ] ¿Se envían PoAs a jurisdicciones no adecuadas?
+    - [ ] ¿Cláusulas Contractuales Estándar (SCCs) en su lugar?
 
-### N.2 HIPAA (Healthcare)
+### N.2 HIPAA (Salud)
 
-**Standard: Security Rule**
+**Estándar: Regla de Seguridad**
 
-- [ ] **Access Control (§164.312(a)(1))**:
-    - [ ] Unique User Identification (JTI/Subject DID)?
-    - [ ] Emergency Access Procedure (Break-glass constraints)?
-    - [ ] Automatic Logoff (Token Expiration)?
-- [ ] **Audit Controls (§164.312(b))**:
-    - [ ] Transparency Log integration enabled?
-    - [ ] Audit trails linked to individual identities?
-- [ ] **Integrity (§164.312(c)(1))**:
-    - [ ] Digital signatures protect PHI in tokens?
-    - [ ] Mechanism to authenticate electronic PHI?
+- [ ] **Control de Acceso (§164.312(a)(1))**:
+    - [ ] ¿Identificación Única de Usuario (JTI/DID Sujeto)?
+    - [ ] ¿Procedimiento de Acceso de Emergencia (Restricciones rompe-cristal)?
+    - [ ] ¿Cierre de Sesión Automático (Expiración de Token)?
+- [ ] **Controles de Auditoría (§164.312(b))**:
+    - [ ] ¿Integración de Registro de Transparencia habilitada?
+    - [ ] ¿Pistas de auditoría vinculadas a identidades individuales?
+- [ ] **Integridad (§164.312(c)(1))**:
+    - [ ] ¿Las firmas digitales protegen PHI en tokens?
+    - [ ] ¿Mecanismo para autenticar PHI electrónica?
 
-### N.3 SOX (Corporate Finance)
+### N.3 SOX (Finanzas Corporativas)
 
-**Section 404: Internal Controls**
+**Sección 404: Controles Internos**
 
-- [ ] **Segregation of Duties**:
-    - [ ] Are `iss` and `sub` distinct entities?
-    - [ ] Are critical actions restricted by `cst` (e.g., dual approval)?
-- [ ] **Change Management**:
-    - [ ] Is the Root Key ceremony documented?
-    - [ ] Are constraints version controlled?
-- [ ] **Authorization Evidence**:
-    - [ ] Are all financial transactions linked to a valid PoA?
-    - [ ] Is the PoA archive immutable (WORM storage)?
-
----
-
-## Appendix O: Sample Legal Clauses
-
-*> **DISCLAIMER**: These clauses are provided for educational purposes only and do not constitute legal advice. Consult with qualified counsel before use.*
-
-### O.1 Attribution of Electronic Acts
-
-**Clause Name**: Electronic Agent Attribution  
-**Context**: Master Services Agreement (MSA)
-
-> **Section X. Authorization of Automated Agents.**
->
-> 1. **Designation.** Each Party may designate automated software systems ("Start-Agents") to act on its behalf within the AgentAuth Network. Such designation shall be evidenced by a valid, cryptographically signed Proof of Authorization ("PoA") issued by the designating Party's root identity.
->
-> 2. **Attribution.** Any action taken, transaction executed, or message sent by a designated Start-Agent that is cryptographically verifiable against a valid, unexpired, and non-revoked PoA issued by a Party shall be legally binding upon that Party as if performed by a duly authorized human officer.
->
-> 3. **Non-Repudiation.** The Parties agree not to contest the validity or enforceability of an instruction solely on the basis that it was generated by an automated system, provided that the cryptographic verification of the PoA succeeds according to the AgentAuth Protocol Specification v1.0.
-
-### O.2 Limitation of Liability for AI Agents
-
-**Clause Name**: Agent Malfunction Cap  
-**Context**: Software Licensing Agreement
-
-> **Section Y. Liability for Autonomous Actions.**
->
-> 1. **Scope.** The Parties acknowledge that autonomous agents operate based on probabilistic models and defined constraints.
->
-> 2. **Constraint Enforcement.** The Licensor warrants that the AgentAuth implementation strictly enforces defined constraints (`cst`). Liability for actions taken *outside* the bounds of a verified PoA shall rest with the Licensor (or System Operator).
->
-> 3. **Authorized Error.** Liability for actions taken *within* the valid authority of a PoA, even if the outcome is unintended or erroneous due to AI logic, shall rest with the Issuing Party. The Issuing Party is responsible for defining appropriate constraints to limit risk exposure.
-
-### O.3 Cross-Border Jurisdiction
-
-**Clause Name**: Digital Domicile  
-**Context**: Terms of Service
-
-> **Section Z. Governing Law of Digital Identity.**
->
-> 1. **Primary Jurisdiction.** The legal validity and scope of authority of any Agent identified by a DID shall be governed by the laws of the jurisdiction specified in the `legalEntity.jurisdiction` field of the Agent's verified Entity Profile.
->
-> 2. **Conflict of Laws.** In the absence of such specification, or in the case of conflict between the laws of the Issuer and the Relying Party, the Parties agree to submit to the exclusive jurisdiction of the Chamber of Commerce in [City, Country], applying the "Principles of the Agent's Signature" handbook as customary trade practice.
+- [ ] **Segregación de Deberes**:
+    - [ ] ¿Son `iss` y `sub` entidades distintas?
+    - [ ] ¿Están restringidas las acciones críticas por `cst` (ej., aprobación dual)?
+- [ ] **Gestión de Cambios**:
+    - [ ] ¿Está documentada la ceremonia de Clave Raíz?
+    - [ ] ¿Están las restricciones controladas por versión?
+- [ ] **Evidencia de Autorización**:
+    - [ ] ¿Están todas las transacciones financieras vinculadas a una PoA válida?
+    - [ ] ¿Es el archivo de PoA inmutable (almacenamiento WORM)?
 
 ---
 
-## Appendix P: Glossary
+## Apéndice O: Cláusulas Legales de Muestra
+
+*> **DESCARGO DE RESPONSABILIDAD**: Estas cláusulas se proporcionan solo con fines educativos y no constituyen asesoramiento legal. Consulte con un abogado calificado antes de usar.*
+
+### O.1 Atribución de Actos Electrónicos
+
+**Nombre de Cláusula**: Atribución de Agente Electrónico  
+**Contexto**: Acuerdo Maestro de Servicios (MSA)
+
+> **Sección X. Autorización de Agentes Automatizados.**
+>
+> 1. **Designación.** Cada Parte puede designar sistemas de software automatizados ("Start-Agents") para actuar en su nombre dentro de la Red AgentAuth. Dicha designación será evidenciada por una Prueba de Autorización ("PoA") válida y firmada criptográficamente, emitida por la identidad raíz de la Parte designante.
+>
+> 2. **Atribución.** Cualquier acción tomada, transacción ejecutada o mensaje enviado por un Start-Agent designado que sea verificable criptográficamente contra una PoA válida, no expirada y no revocada emitida por una Parte será legalmente vinculante para esa Parte como si fuera realizada por un oficial humano debidamente autorizado.
+>
+> 3. **No Repudio.** Las Partes acuerdan no impugnar la validez o exigibilidad de una instrucción únicamente sobre la base de que fue generada por un sistema automatizado, siempre que la verificación criptográfica de la PoA tenga éxito según la Especificación del Protocolo AgentAuth v1.0.
+
+### O.2 Limitación de Responsabilidad para Agentes de IA
+
+**Nombre de Cláusula**: Tope por Mal funcionamiento del Agente  
+**Contexto**: Acuerdo de Licencia de Software
+
+> **Sección Y. Responsabilidad por Acciones Autónomas.**
+>
+> 1. **Alcance.** Las Partes reconocen que los agentes autónomos operan basados en modelos probabilísticos y restricciones definidas.
+>
+> 2. **Cumplimiento de Restricciones.** El Licenciante garantiza que la implementación de AgentAuth hace cumplir estrictamente las restricciones definidas (`cst`). La responsabilidad por acciones tomadas *fuera* de los límites de una PoA verificada recaerá en el Licenciante (o Operador del Sistema).
+>
+> 3. **Error Autorizado.** La responsabilidad por acciones tomadas *dentro* de la autoridad válida de una PoA, incluso si el resultado es no intencionado o erróneo debido a la lógica de la IA, recaerá en la Parte Emisora. La Parte Emisora es responsable de definir restricciones apropiadas para limitar la exposición al riesgo.
+
+### O.3 Jurisdicción Transfronteriza
+
+**Nombre de Cláusula**: Domicilio Digital  
+**Contexto**: Términos de Servicio
+
+> **Sección Z. Ley Aplicable de Identidad Digital.**
+>
+> 1. **Jurisdicción Primaria.** La validez legal y el alcance de la autoridad de cualquier Agente identificado por un DID se regirán por las leyes de la jurisdicción especificada en el campo `legalEntity.jurisdiction` del Perfil de Entidad verificado del Agente.
+>
+> 2. **Conflicto de Leyes.** En ausencia de tal especificación, o en caso de conflicto entre las leyes del Emisor y la Parte Confiante, las Partes acuerdan someterse a la jurisdicción exclusiva de la Cámara de Comercio en [Ciudad, País], aplicando el manual "Principios de la Firma del Agente" como práctica comercial habitual.
+
+---
+
+## Apéndice P: Glosario
 
 **A**
 
-**Agent**
-: An autonomous software entity capable of acting on behalf of a principal to achieve a goal. In AgentAuth, an agent is identified by a DID and authorized via PoA tokens.
+**Agente**
+: Una entidad de software autónoma capaz de actuar en nombre de un principal para lograr un objetivo. En AgentAuth, un agente es identificado por un DID y autorizado vía tokens PoA.
 
-**Agency**
-: The legal relationship between a principal and an agent where the agent is authorized to act on the principal's behalf. AgentAuth provides the technical evidence for this relationship.
+**Agencia**
+: La relación legal entre un principal y un agente donde el agente está autorizado para actuar en nombre del principal. AgentAuth proporciona la evidencia técnica para esta relación.
 
-**AgentAuth Protocol (AAP)**
-: The suite of open standards defined in this book, including AAP-01 (Identity) and AAP-02 (Authorization).
+**Protocolo AgentAuth (AAP)**
+: El conjunto de estándares abiertos definidos en este libro, incluyendo AAP-01 (Identidad) y AAP-02 (Autorización).
 
-**Attestation**
-: A cryptographically signed statement about a property, such as "This key resides in an HSM" or "This agent is running verified code."
+**Atestación**
+: Una declaración firmada criptográficamente sobre una propiedad, como "Esta clave reside en un HSM" o "Este agente está ejecutando código verificado."
 
-**Authority**
-: The right or power to act, command, or make decisions. In AgentAuth, authority is explicitly granted via `aat` (Authorization Access Token) grants.
+**Autoridad**
+: El derecho o poder de actuar, mandar o tomar decisiones. En AgentAuth, la autoridad se otorga explícitamente a través de concesiones `aat` (Token de Acceso de Autorización).
 
 **B**
 
-**Binding**
-: The cryptographic link between a token and a specific context, such as a TLS session (channel binding) or a hardware device (key binding).
+**Vinculación (Binding)**
+: El enlace criptográfico entre un token y un contexto específico, como una sesión TLS (vinculación de canal) o un dispositivo de hardware (vinculación de clave).
 
-**Bloom Filter**
-: A probabilistic data structure used in AgentAuth for efficient distribution of revocation lists. False positives are possible, but false negatives are not.
+**Filtro de Bloom**
+: Una estructura de datos probabilística utilizada en AgentAuth para la distribución eficiente de listas de revocación. Los falsos positivos son posibles, pero los falsos negativos no.
 
 **C**
 
-**Ceremony**
-: A strict, documented procedure for generating cryptographic root keys, typically involving air-gapped hardware, multiple witnesses, and physical security controls.
+**Ceremonia**
+: Un procedimiento estricto y documentado para generar claves raíz criptográficas, que típicamente involucra hardware aislado (air-gapped), múltiples testigos y controles de seguridad física.
 
-**Chain of Custody**
-: The chronological documentation or paper trail that records the sequence of custody, control, transfer, analysis, and disposition of physical or electronic evidence.
+**Cadena de Custodia**
+: La documentación cronológica o rastro de papel que registra la secuencia de custodia, control, transferencia, análisis y disposición de evidencia física o electrónica.
 
-**Constraint (`cst`)**
-: A logic rule embedded in a PoA that limits the scope of authority. Constraints are evaluated at runtime by the Verifier.
+**Restricción (`cst`)**
+: Una regla lógica incrustada en una PoA que limita el alcance de la autoridad. Las restricciones son evaluadas en tiempo de ejecución por el Verificador.
 
-**Context**
-: The set of runtime variables (time, location, transaction amount, risk score) against which constraints are evaluated.
+**Contexto**
+: El conjunto de variables en tiempo de ejecución (tiempo, ubicación, monto de transacción, puntuación de riesgo) contra las cuales se evalúan las restricciones.
 
-**Cryptographic Agility**
-: The ability of a security system to switch between cryptographic algorithms (e.g., from RSA to ECC, or to Post-Quantum) without breaking the system.
+**Agilidad Criptográfica**
+: La capacidad de un sistema de seguridad para cambiar entre algoritmos criptográficos (ej., de RSA a ECC, o a Post-Cuántico) sin romper el sistema.
 
 **D**
 
-**Decentralized Identifier (DID)**
-: A W3C standard for verifiable, self-sovereign digital identity. AgentAuth uses DIDs (e.g., `did:web`) to identify Issuers and Agents.
+**Identificador Descentralizado (DID)**
+: Un estándar W3C para identidad digital verificable y auto-soberana. AgentAuth usa DIDs (ej., `did:web`) para identificar Emisores y Agentes.
 
-**Delegation**
-: The act of assigning authority to another. AgentAuth supports chained delegation, where Agent A authorizes Agent B, who authorizes Agent C.
+**Delegación**
+: El acto de asignar autoridad a otro. AgentAuth soporta delegación encadenada, donde el Agente A autoriza al Agente B, quien autoriza al Agente C.
 
-**DID Document**
-: A JSON-LD document that describes a DID, containing public keys (verification methods) and service endpoints.
+**Documento DID**
+: Un documento JSON-LD que describe un DID, conteniendo claves públicas (métodos de verificación) y endpoints de servicio.
 
 **E**
 
 **eIDAS**
-: The EU regulation on electronic identification and trust services. eIDAS 2.0 introduces the EUDI Wallet, which AgentAuth integrates with.
+: La regulación de la UE sobre identificación electrónica y servicios de confianza. eIDAS 2.0 introduce la Cartera EUDI, con la cual se integra AgentAuth.
 
-**Entity Profile**
-: A detailed DID Document extension (defined in AAP-01) that includes legal entity information, service endpoints, and operational metadata.
+**Perfil de Entidad**
+: Una extensión detallada del Documento DID (definida en AAP-01) que incluye información de entidad legal, endpoints de servicio y metadatos operativos.
 
-**Entropy**
-: Randomness collected by an operating system or hardware device for use in cryptography. High entropy is essential for secure key generation.
+**Entropía**
+: Aleatoriedad recolectada por un sistema operativo o dispositivo de hardware para uso en criptografía. Alta entropía es esencial para la generación segura de claves.
 
 **F**
 
-**Forensic Audit**
-: The examination of evidence regarding an incident. AgentAuth's Transparency Logs enable forensic audits of agent authority and actions.
+**Auditoría Forense**
+: El examen de evidencia con respecto a un incidente. Los Registros de Transparencia de AgentAuth permiten auditorías forenses de la autoridad y acciones del agente.
 
-**Formal Verification**
-: The use of mathematical methods (like TLA+) to prove that a system specification is correct and satisfies specific properties.
+**Verificación Formal**
+: El uso de métodos matemáticos (como TLA+) para probar que una especificación de sistema es correcta y satisface propiedades específicas.
 
 **G**
 
-**Gas Model**
-: A resource limiting mechanism used in constraint evaluation to prevent Denial of Service attacks via infinite loops or excessive complexity.
+**Modelo de Gas**
+: Un mecanismo de limitación de recursos utilizado en la evaluación de restricciones para prevenir ataques de Denegación de Servicio vía bucles infinitos o complejidad excesiva.
 
 **H**
 
-**Hardware Security Module (HSM)**
-: A physical computing device that safeguards and manages digital keys, performing encryption and decryption functions for strong authentication.
+**Módulo de Seguridad de Hardware (HSM)**
+: Un dispositivo de computación físico que salvaguarda y gestiona claves digitales, realizando funciones de cifrado y descifrado para autenticación fuerte.
 
-**Head-of-Line Blocking**
-: A performance issue where a line of packets is held up by the first packet. AgentAuth avoids this in revocation checks via non-blocking lookups.
+**Bloqueo de Cabeza de Línea (Head-of-Line)**
+: Un problema de rendimiento donde una línea de paquetes es retenida por el primer paquete. AgentAuth evita esto en comprobaciones de revocación vía búsquedas no bloqueantes.
 
 **I**
+:
+**Idempotencia**
+: La propiedad de que una operación puede aplicarse múltiples veces sin cambiar el resultado más allá de la aplicación inicial. Crítico para APIs de agentes robustas.
 
-**Idempotency**
-: The property that an operation can be applied multiple times without changing the result beyond the initial application. Critical for robust agent APIs.
+**Proveedor de Identidad (IdP)**
+: Una entidad del sistema que crea, mantiene y gestiona información de identidad para principales mientras proporciona servicios de autenticación.
 
-**Identity Provider (IdP)**
-: A system entity that creates, maintains, and manages identity information for principals while providing authentication services.
+**Inmutable**
+: Incapaz de ser cambiado. Los tokens PoA de AgentAuth son inmutables una vez firmados; cualquier cambio invalida la firma.
 
-**Immutable**
-: Unable to be changed. AgentAuth PoA tokens are immutable once signed; any change invalidates the signature.
-
-**Interoperability**
-: The ability of computer systems or software to exchange and make use of information. AgentAuth prioritizes interoperability via standard formats (JSON, CBOR, DID).
+**Interoperabilidad**
+: La capacidad de sistemas informáticos o software para intercambiar y hacer uso de información. AgentAuth prioriza la interoperabilidad vía formatos estándar (JSON, CBOR, DID).
 
 **J**
 
 **JSON-LD**
-: JSON for Linked Data. A method of encoding Linked Data using JSON, used in AgentAuth Entity Profiles to provide semantic context.
+: JSON para Datos Vinculados. Un método de codificación de Datos Vinculados usando JSON, utilizado en Perfiles de Entidad AgentAuth para proporcionar contexto semántico.
 
-**JTI (JWT ID)**
-: A unique identifier for a token. In AgentAuth, every PoA has a UUIDv4 JTI to prevent replay attacks and enable revocation.
+**JTI (ID JWT)**
+: Un identificador único para un token. En AgentAuth, cada PoA tiene un JTI UUIDv4 para prevenir ataques de reproducción y habilitar la revocación.
 
 **K**
 
-**Key Rotation**
-: The practice of changing cryptographic keys on a regular basis. AgentAuth supports automated key rotation without disrupting valid delegations.
+**Rotación de Claves**
+: La práctica de cambiar claves criptográficas regularmente. AgentAuth soporta rotación de claves automatizada sin interrumpir delegaciones válidas.
 
 **L**
 
-**Least Privilege**
-: The security principle that an agent should be given only those privileges needed for its function. AgentAuth constraints enforce this.
+**Mínimo Privilegio**
+: El principio de seguridad de que a un agente se le deben dar solo aquellos privilegios necesarios para su función. Las restricciones de AgentAuth hacen cumplir esto.
 
-**Liability**
-: Legal responsibility for acts or omissions. AgentAuth creates a clear chain of evidence to determine liability for agent actions.
+**Responsabilidad (Liability)**
+: Responsabilidad legal por actos u omisiones. AgentAuth crea una cadena clara de evidencia para determinar la responsabilidad por acciones del agente.
 
 **M**
 
-**Man-in-the-Middle (MITM)**
-: An attack where the attacker secretly relays and possibly alters the communications between two parties. TLS and PoA signatures prevent this.
+**Hombre en el Medio (MITM)**
+: Un ataque donde el atacante retransmite secretamente y posiblemente altera las comunicaciones entre dos partes. TLS y firmas PoA previenen esto.
 
-**Merkle Tree**
-: A tree in which every leaf node is labelled with the cryptographic hash of a data block, and every non-leaf node is labelled with the cryptographic hash of the labels of its child nodes. Used in Transparency Logs.
+**Árbol Merkle**
+: Un árbol en el cual cada nodo hoja está etiquetado con el hash criptográfico de un bloque de datos, y cada nodo no hoja está etiquetado con el hash criptográfico de las etiquetas de sus nodos hijos. Usado en Registros de Transparencia.
 
 **N**
 
-**Non-Repudiation**
-: Assurance that the sender of information is provided with proof of delivery and the recipient is provided with proof of the sender's identity, so neither can later deny having processed the information.
+**No Repudio**
+: Garantía de que al remitente de información se le proporciona prueba de entrega y al destinatario prueba de la identidad del remitente, para que ninguno pueda negar posteriormente haber procesado la información.
 
 **Nonce**
-: An arbitrary number that can be used just once in a cryptographic communication. Used to prevent replay attacks.
+: Un número arbitrario que puede ser usado solo una vez en una comunicación criptográfica. Usado para prevenir ataques de reproducción.
 
 **O**
 
-**Offline Verification**
-: The ability to verify a PoA without contacting the issuer, relying solely on cryptographic signatures and cached trust roots.
+**Verificación Fuera de Línea**
+: La capacidad de verificar una PoA sin contactar al emisor, confiando únicamente en firmas criptográficas y raíces de confianza en caché.
 
-**Oracle**
-: An external source of truth used in constraint evaluation (e.g., a currency exchange rate feed or a risk scoring service).
+**Oráculo**
+: Una fuente externa de verdad utilizada en la evaluación de restricciones (ej., una fuente de tipo de cambio de divisas o un servicio de puntuación de riesgo).
 
 **P**
 
 **Principal**
-: The entity (person or corporation) that authorizes an agent to act.
+: La entidad (persona o corporación) que autoriza a un agente a actuar.
 
-**Proof of Authorization (PoA)**
-: The core credential of AgentAuth (AAP-02). A signed token granting specific authority from an issuer to a subject.
+**Prueba de Autorización (PoA)**
+: La credencial central de AgentAuth (AAP-02). Un token firmado que otorga autoridad específica de un emisor a un sujeto.
 
-**Public Key Infrastructure (PKI)**
-: A set of roles, policies, hardware, software and procedures needed to create, manage, distribute, use, store and revoke Gen 2 digital certificates and manage public-key encryption.
+**Infraestructura de Clave Pública (PKI)**
+: Un conjunto de roles, políticas, hardware, software y procedimientos necesarios para crear, gestionar, distribuir, usar, almacenar y revocar certificados digitales y gestionar cifrado de clave pública.
 
 **Q**
 
-**Qualified Electronic Signature (QES)**
-: An electronic signature that is compliant with EU eIDAS regulations, offering the highest level of legal probative value.
+**Firma Electrónica Cualificada (QES)**
+: Una firma electrónica que cumple con las regulaciones eIDAS de la UE, ofreciendo el nivel más alto de valor probatorio legal.
 
-**Quantum Resistance**
-: The ability of a cryptographic algorithm to withstand attacks from a quantum computer. AgentAuth is preparing for this via ML-DSA support.
+**Resistencia Cuántica**
+: La capacidad de un algoritmo criptográfico para resistir ataques de una computadora cuántica. AgentAuth se está preparando para esto vía soporte ML-DSA.
 
 **R**
 
-**Relying Party (RP)**
-: The entity that receives a PoA and decides whether to authorize a transaction based on it.
+**Parte Confiante (RP)**
+: La entidad que recibe una PoA y decide si autorizar una transacción basada en ella.
 
-**Revocation**
-: The act of cancelling a previously issued PoA before its natural expiration.
+**Revocación**
+: El acto de cancelar una PoA previamente emitida antes de su expiración natural.
 
-**Root of Trust**
-: A source that can always be trusted within a cryptographic system. In AgentAuth, this is typically the Organization's root Verification Method.
+**Raíz de Confianza**
+: Una fuente que siempre se puede confiar dentro de un sistema criptográfico. En AgentAuth, esto es típicamente el Método de Verificación raíz de la Organización.
 
 **S**
 
-**Self-Sovereign Identity (SSI)**
-: An identity model where the user controls their own identity without intervening administrative authorities. AgentAuth leverages SSI principles via DIDs.
+**Identidad Auto-Soberana (SSI)**
+: Un modelo de identidad donde el usuario controla su propia identidad sin autoridades administrativas intervinientes. AgentAuth aprovecha principios SSI vía DIDs.
 
-**Smart Contract**
-: A self-executing contract with the terms of the agreement between buyer and seller being directly written into lines of code.
+**Contrato Inteligente**
+: Un contrato auto-ejecutable con los términos del acuerdo entre comprador y vendedor escritos directamente en líneas de código.
 
-**Subject**
-: The entity (agent) to whom authority is granted in a PoA.
+**Sujeto**
+: La entidad (agente) a quien se otorga autoridad en una PoA.
 
-**Sybil Attack**
-: An attack where a single adversary controls multiple distinct identities to gain disproportionate influence.
+**Ataque Sybil**
+: Un ataque donde un solo adversario controla múltiples identidades distintas para ganar influencia desproporcionada.
 
 **T**
 
-**Time-To-Live (TTL)**
-: The period of time that a packet or data should exist before being discarded. Used in caching PoA verification results.
+**Tiempo de Vida (TTL)**
+: El período de tiempo que un paquete o dato debe existir antes de ser descartado. Usado en caché de resultados de verificación PoA.
 
-**Transparency Log**
-: An append-only, cryptographically verifiable log of all issued PoAs, providing a public audit trail.
+**Registro de Transparencia**
+: Un registro de solo adición, verificable criptográficamente, de todas las PoAs emitidas, proporcionando una pista de auditoría pública.
 
-**Trust Anchor**
-: An authoritative entity for which trust is assumed and not derived.
+**Ancla de Confianza**
+: Una entidad autorizada para la cual se asume confianza y no se deriva.
 
 **U**
 
-**User Agent**
-: Software (like a web browser) that acts on behalf of a user. In AgentAuth, this extends to autonomous AI agents.
+**Agente de Usuario**
+: Software (como un navegador web) que actúa en nombre de un usuario. En AgentAuth, esto se extiende a agentes de IA autónomos.
 
 **V**
 
-**Verifiable Credential (VC)**
-: A standard data model for cryptographically verifiable digital credentials. AgentAuth PoAs are a specialized form of VCs.
+**Credencial Verificable (VC)**
+: Un modelo de datos estándar para credenciales digitales verificables criptográficamente. Las PoAs de AgentAuth son una forma especializada de VCs.
 
-**Verification Method**
-: A set of parameters (usually a public key) that can be used to cryptographically verify a proof.
+**Método de Verificación**
+: Un conjunto de parámetros (usualmente una clave pública) que pueden ser usados para verificar criptográficamente una prueba.
 
 **Z**
 
-**Zero-Knowledge Proof (ZKP)**
-: A method by which one party (the prover) can prove to another party (the verifier) that they know a value x, without conveying any information apart from the fact that they know the value x.
+**Prueba de Conocimiento Cero (ZKP)**
+: Un método por el cual una parte (el probador) puede probar a otra parte (el verificador) que conoce un valor x, sin transmitir ninguna información aparte del hecho de que conoce el valor x.
 
 ---
 
-## Appendix Q: Acronyms
+## Apéndice Q: Acrónimos
 
-**Table Q.1: Acronyms**
+**Tabla Q.1: Acrónimos**
 
-| Acronym | Definition |
+| Acrónimo | Definición |
 |---------|------------|
-| **AAP** | AgentAuth Protocol |
-| **ACL** | Access Control List |
-| **API** | Application Programming Interface |
-| **CA** | Certificate Authority |
-| **CBOR** | Concise Binary Object Representation |
-| **CDDL** | Concise Data Definition Language |
-| **CRL** | Certificate Revocation List |
-| **DAO** | Decentralized Autonomous Organization |
-| **DID** | Decentralized Identifier |
-| **DID URL** | Decentralized Identifier Uniform Resource Locator |
-| **DoS** | Denial of Service |
-| **eIDAS** | electronic IDentification, Authentication and trust Services |
-| **GDPR** | General Data Protection Regulation |
-| **HIPAA** | Health Insurance Portability and Accountability Act |
-| **HMAC** | Hash-Based Message Authentication Code |
-| **HSM** | Hardware Security Module |
-| **HTTP** | Hypertext Transfer Protocol |
-| **IAM** | Identity and Access Management |
-| **IETF** | Internet Engineering Task Force |
-| **IoT** | Internet of Things |
-| **ISO** | International Organization for Standardization |
-| **JSON** | JavaScript Object Notation |
-| **JSON-LD** | JSON for Linked Data |
-| **JTI** | JWT ID (Unique Identifier) |
-| **JWT** | JSON Web Token |
-| **KMS** | Key Management Service |
-| **mTLS** | Mutual Transport Layer Security |
-| **NIST** | National Institute of Standards and Technology |
-| **OAuth** | Open Authorization |
-| **OCSP** | Online Certificate Status Protocol |
+| **AAP** | Protocolo AgentAuth (AgentAuth Protocol) |
+| **ACL** | Lista de Control de Acceso |
+| **API** | Interfaz de Programación de Aplicaciones |
+| **CA** | Autoridad de Certificación |
+| **CBOR** | Representación Concisa de Objetos Binarios |
+| **CDDL** | Lenguaje de Definición de Datos Conciso |
+| **CRL** | Lista de Revocación de Certificados |
+| **DAO** | Organización Autónoma Descentralizada |
+| **DID** | Identificador Descentralizado |
+| **DID URL** | Localizador Uniforme de Recursos de Identificador Descentralizado |
+| **DoS** | Denegación de Servicio |
+| **eIDAS** | Identificación Electrónica, Autenticación y Servicios de Confianza |
+| **GDPR** | Reglamento General de Protección de Datos |
+| **HIPAA** | Ley de Portabilidad y Responsabilidad del Seguro Médico |
+| **HMAC** | Código de Autenticación de Mensajes Basado en Hash |
+| **HSM** | Módulo de Seguridad de Hardware |
+| **HTTP** | Protocolo de Transferencia de Hipertexto |
+| **IAM** | Gestión de Identidad y Acceso |
+| **IETF** | Grupo de Trabajo de Ingeniería de Internet |
+| **IoT** | Internet de las Cosas |
+| **ISO** | Organización Internacional de Normalización |
+| **JSON** | Notación de Objetos de JavaScript |
+| **JSON-LD** | JSON para Datos Vinculados |
+| **JTI** | JWT ID (Identificador Único) |
+| **JWT** | Token Web JSON |
+| **KMS** | Servicio de Gestión de Claves |
+| **mTLS** | Seguridad de Capa de Transporte Mutua |
+| **NIST** | Instituto Nacional de Estándares y Tecnología |
+| **OAuth** | Autorización Abierta |
+| **OCSP** | Protocolo de Estado de Certificados en Línea |
 | **OIDC** | OpenID Connect |
-| **PEM** | Privacy Enhanced Mail (File Format) |
-| **PKI** | Public Key Infrastructure |
-| **PoA** | Proof of Authorization |
-| **QES** | Qualified Electronic Signature |
-| **REST** | Representational State Transfer |
-| **RPC** | Remote Procedure Call |
-| **RSA** | Rivest–Shamir–Adleman (Cryptosystem) |
-| **SAML** | Security Assertion Markup Language |
-| **SDK** | Software Development Kit |
-| **SHA** | Secure Hash Algorithm |
-| **SIEM** | Security Information and Event Management |
-| **SLA** | Service Level Agreement |
-| **SOX** | Sarbanes-Oxley Act |
+| **PEM** | Correo con Privacidad Mejorada (Formato de Archivo) |
+| **PKI** | Infraestructura de Clave Pública |
+| **PoA** | Prueba de Autorización |
+| **QES** | Firma Electrónica Cualificada |
+| **REST** | Transferencia de Estado Representacional |
+| **RPC** | Llamada a Procedimiento Remoto |
+| **RSA** | Rivest–Shamir–Adleman (Criptosistema) |
+| **SAML** | Lenguaje de Marcado de Aserción de Seguridad |
+| **SDK** | Kit de Desarrollo de Software |
+| **SHA** | Algoritmo de Hash Seguro |
+| **SIEM** | Gestión de Información y Eventos de Seguridad |
+| **SLA** | Acuerdo de Nivel de Servicio |
+| **SOX** | Ley Sarbanes-Oxley |
 | **SSH** | Secure Shell |
-| **SSI** | Self-Sovereign Identity |
-| **SSL** | Secure Sockets Layer |
-| **TLA+** | Temporal Logic of Actions |
-| **TLS** | Transport Layer Security |
-| **TPM** | Trusted Platform Module |
-| **TTL** | Time To Live |
-| **URI** | Uniform Resource Identifier |
-| **URL** | Uniform Resource Locator |
-| **UTC** | Coordinated Universal Time |
-| **UUID** | Universally Unique Identifier |
-| **VC** | Verifiable Credential |
-| **VM** | Virtual Machine (or Verification Method) |
-| **W3C** | World Wide Web Consortium |
-| **WAF** | Web Application Firewall |
-| **XSS** | Cross-Site Scripting |
-| **ZK** | Zero Knowledge |
-| **ZKP** | Zero Knowledge Proof |
+| **SSI** | Identidad Auto-Soberana |
+| **SSL** | Capa de Sockets Seguros |
+| **TLA+** | Lógica Temporal de Acciones |
+| **TLS** | Seguridad de la Capa de Transporte |
+| **TPM** | Módulo de Plataforma Segura |
+| **TTL** | Tiempo de Vida |
+| **URI** | Identificador Uniforme de Recursos |
+| **URL** | Localizador Uniforme de Recursos |
+| **UTC** | Tiempo Universal Coordinado |
+| **UUID** | Identificador Único Universal |
+| **VC** | Credencial Verificable |
+| **VM** | Máquina Virtual (o Método de Verificación) |
+| **W3C** | Consorcio World Wide Web |
+| **WAF** | Firewall de Aplicaciones Web |
+| **XSS** | Scripting entre Sitios |
+| **ZK** | Conocimiento Cero |
+| **ZKP** | Prueba de Conocimiento Cero |
 
 ---
 
-## Appendix R: Further Reading
+## Apéndice R: Lecturas Adicionales
 
-### R.1 Essential books
+### R.1 Libros Esenciales
 
-*   **"Security Engineering" by Ross Anderson**  
-    The definitive guide to building dependable distributed systems. Essential for understanding the "why" behind AgentAuth's design.
+*   **"Security Engineering" por Ross Anderson**  
+    La guía definitiva para construir sistemas distribuidos confiables. Esencial para entender el "por qué" detrás del diseño de AgentAuth.
 
-*   **"Applied Cryptography" by Bruce Schneier**  
-    A comprehensive reference for cryptographic protocols and algorithms.
+*   **"Applied Cryptography" por Bruce Schneier**  
+    Una referencia completa para protocolos y algoritmos criptográficos.
 
-*   **"Identity is the New Perimeter" by CSA**  
-    While focused on human identity, the principles of zero trust apply directly to agent identity.
+*   **"Identity is the New Perimeter" por CSA**  
+    Aunque enfocado en identidad humana, los principios de confianza cero aplican directamente a la identidad de agentes.
 
-*   **"Agency Law: Principles and Clauses" by R. Munday**  
-    A legal textbook explaining the nuances of principal-agent relationships in common law.
+*   **"Agency Law: Principles and Clauses" por R. Munday**  
+    Un libro de texto legal explicando los matices de las relaciones principal-agente en el derecho consuetudinario.
 
-### R.2 Key Specifications
+### R.2 Especificaciones Clave
 
 *   **[W3C DID Core 1.0](https://www.w3.org/TR/did-core/)**  
-    The foundational standard for decentralized identifiers.
+    El estándar fundamental para identificadores descentralizados.
 
 *   **[RFC 7519: JSON Web Token (JWT)](https://tools.ietf.org/html/rfc7519)**  
-    The standard upon which the PoA token format is loosely based.
+    El estándar en el cual se basa vagamente el formato de token PoA.
 
 *   **[RFC 8152: CBOR Object Signing and Encryption (COSE)](https://tools.ietf.org/html/rfc8152)**  
-    The binary signing format used for IoT and high-performance AgentAuth implementations.
+    El formato de firma binaria utilizado para implementaciones IoT y de alto rendimiento de AgentAuth.
 
 *   **[NIST SP 800-207: Zero Trust Architecture](https://csrc.nist.gov/publications/detail/sp/800-207/final)**  
-    NIST's gold standard for modern security architecture.
+    El estándar de oro del NIST para arquitectura de seguridad moderna.
 
-### R.3 Online Resources
+### R.3 Recursos en Línea
 
-*   **The AgentAuth Project** (https://agentauth.org)  
-    Official documentation, SDKs, and community forums.
+*   **El Proyecto AgentAuth** (https://agentauth.org)  
+    Documentación oficial, SDKs y foros de la comunidad.
 
 *   **RWOT (Rebooting the Web of Trust)** (https://www.weboftrust.info/)  
-    A community of contributors defining the future of decentralized identity.
+    Una comunidad de contribuyentes definiendo el futuro de la identidad descentralizada.
 
 *   **Identity Foundation** (https://identity.foundation/)  
-    An industry group developing open standards for decentralized identity.
+    Un grupo industrial desarrollando estándares abiertos para identidad descentralizada.
 
 ---
 
-## Appendix S: Developer Cookbook
+## Apéndice S: Libro de Cocina del Desarrollador
 
-### S.1 Go: HTTP Middleware
+### S.1 Go: Middleware HTTP
 
-A drop-in middleware for standard library `net/http` services.
+Un middleware listo para usar para servicios `net/http` de la biblioteca estándar.
 
 ```go
 package middleware
@@ -7543,13 +7547,13 @@ func RequirePoA(v *verifier.Verifier) func(http.Handler) http.Handler {
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
             authHeader := r.Header.Get("Authorization")
             if len(authHeader) < 8 || authHeader[:7] != "Bearer " {
-                http.Error(w, "Missing Bearer token", 401)
+                http.Error(w, "Falta token Bearer", 401)
                 return
             }
 
             tokenBytes := []byte(authHeader[7:])
             
-            // Context for constraint evaluation
+            // Contexto para evaluación de restricciones
             ctx := map[string]any{
                 "http.method": r.Method,
                 "http.path":   r.URL.Path,
@@ -7559,11 +7563,11 @@ func RequirePoA(v *verifier.Verifier) func(http.Handler) http.Handler {
 
             res, err := v.Verify(r.Context(), tokenBytes, ctx)
             if err != nil {
-                http.Error(w, "Invalid PoA: "+err.Error(), 403)
+                http.Error(w, "PoA Inválida: "+err.Error(), 403)
                 return
             }
 
-            // Inject valid principal into context
+            // Inyectar principal válido en contexto
             newCtx := context.WithValue(r.Context(), "agent", res.Subject)
             next.ServeHTTP(w, r.WithContext(newCtx))
         })
@@ -7571,9 +7575,9 @@ func RequirePoA(v *verifier.Verifier) func(http.Handler) http.Handler {
 }
 ```
 
-### S.2 TypeScript: React Hook
+### S.2 TypeScript: Hook de React
 
-A Hook for dApps to request authorization from a wallet.
+Un Hook para dApps para solicitar autorización de una billetera.
 
 ```typescript
 import { useState, useCallback } from 'react';
@@ -7589,7 +7593,7 @@ export function useAgentAuth(walletUrl: string) {
       const token = await client.requestPoA({
         aud: window.location.origin,
         aat: scope.map(s => ({ act: s, res: ["*"] })),
-        exp: 3600 // 1 hour
+        exp: 3600 // 1 hora
       });
       setPoa(token);
       return token;
@@ -7603,30 +7607,30 @@ export function useAgentAuth(walletUrl: string) {
 }
 ```
 
-### S.3 Rust: Embedded Verifier (no_std)
+### S.3 Rust: Verificador Embebido (no_std)
 
-For constrained IoT devices using `embedded-hal`.
+Para dispositivos IoT restringidos usando `embedded-hal`.
 
 ```rust
 use agentauth_core::{PoA, Verifier, error::Result};
 use heapless::Vec;
 
 pub fn verify_on_chip(token: &[u8], public_key: &[u8; 32]) -> Result<bool> {
-    // Zero-allocation parser
+    // Parser de cero-asignación
     let poa = PoA::from_bytes(token)?;
     
-    // Check signature (Ed25519)
+    // Verificar firma (Ed25519)
     if !poa.verify_signature(public_key) {
         return Ok(false);
     }
     
-    // Check expiration (requires RTC)
+    // Verificar expiración (requiere RTC)
     let now = get_rtc_timestamp();
     if poa.exp < now {
         return Ok(false);
     }
     
-    // Check constraints (simple subset)
+    // Verificar restricciones (subconjunto simple)
     if let Some(cst) = poa.constraints {
         if !verify_constraints(&cst, now) {
             return Ok(false);
@@ -7637,9 +7641,9 @@ pub fn verify_on_chip(token: &[u8], public_key: &[u8; 32]) -> Result<bool> {
 }
 ```
 
-### S.4 Python: Constraint Oracle
+### S.4 Python: Oráculo de Restricción
 
-A simple Flask service acting as an external Oracle.
+Un servicio Flask simple actuando como Oráculo externo.
 
 ```python
 from flask import Flask, request, jsonify
@@ -7654,7 +7658,7 @@ def check_risk():
     amount = data.get("amount", 0)
     user_id = data.get("user_id")
     
-    # Logic: High risk if amount > $10k
+    # Lógica: Alto riesgo si monto > $10k
     risk_score = 0.8 if amount > 10000 else 0.1
     result = "allow" if risk_score < 0.5 else "deny"
     
@@ -7664,7 +7668,7 @@ def check_risk():
         "timestamp": time.time()
     }
     
-    # Cryptographically sign the response
+    # Firmar criptográficamente la respuesta
     signed_jwt = sign_response(response, PRIVATE_KEY)
     
     return jsonify({"signed_oracle_data": signed_jwt})
@@ -7672,195 +7676,196 @@ def check_risk():
 
 ---
 
-## Appendix T: Protocol History
+## Apéndice T: Historia del Protocolo
 
-### T.1 Version 1.0.0 (January 2026) -> "Gold Master"
+### T.1 Versión 1.0.0 (Enero 2026) -> "Gold Master"
 
-*   **Released**: 2026-01-01
-*   **Codename**: "The Agent's Signature"
-*   **Major Features**:
-    *   Full AAP-01 (Identity) & AAP-02 (PoA) Specs
-    *   Stable Go SDK (`agentauth-go`)
-    *   Initial TLA+ Formal Verification of core logic
-    *   eIDAS 2.0 Integration Profile
-    *   Post-Quantum Readiness (ML-DSA placeholder)
+*   **Lanzado**: 2026-01-01
+*   **Nombre en Código**: "La Firma del Agente"
+*   **Características Principales**:
+    *   Especificaciones Completas AAP-01 (Identidad) y AAP-02 (PoA)
+    *   SDK de Go Estable (`agentauth-go`)
+    *   Verificación Formal TLA+ Inicial de lógica central
+    *   Perfil de Integración eIDAS 2.0
+    *   Preparación Post-Cuántica (marcador de posición ML-DSA)
 
-### T.2 Version 0.9.0 (November 2025) -> "RC1"
+### T.2 Versión 0.9.0 (Noviembre 2025) -> "RC1"
 
-*   **Released**: 2025-11-15
-*   **Changes**:
-    *   Renamed "Gauth" to "AgentAuth" globally
-    *   Switched to MIT License
-    *   Established separate `pkg/agentauth` namespace
-    *   Removed legacy RFC-0111/0115 references
+*   **Lanzado**: 2025-11-15
+*   **Cambios**:
+    *   Renombrado "Gauth" a "AgentAuth" globalmente
+    *   Cambio a Licencia MIT
+    *   Espacio de nombres `pkg/agentauth` separado establecido
+    *   Eliminadas referencias heredadas RFC-0111/0115
 
-### T.3 Version 0.5.0 (June 2025) -> "Beta"
+### T.3 Versión 0.5.0 (Junio 2025) -> "Beta"
 
-*   **Released**: 2025-06-01
-*   **Changes**:
-    *   Introduced `did:web` as primary method
-    *   Added Transparency Log integration (Trillian)
-    *   Added Constraint logic (`cst` block)
-    *   First robust implementation of Delegation Chains
+*   **Lanzado**: 2025-06-01
+*   **Cambios**:
+    *   Introducido `did:web` como método primario
+    *   Integración de Registro de Transparencia añadida (Trillian)
+    *   Lógica de Restricción (`cst`) añadida
+    *   Primera implementación robusta de Cadenas de Delegación
 
-### T.4 Version 0.1.0 (January 2025) -> "Alpha"
+### T.4 Versión 0.1.0 (Enero 2025) -> "Alpha"
 
-*   **Released**: 2025-01-01
-*   **Changes**:
-    *   Initial proof of concept
-    *   Basic JWT extension format
-    *   Simple issuer/subject validation
-    *   No delegation support yet
+*   **Lanzado**: 2025-01-01
+*   **Cambios**:
+    *   Prueba de concepto inicial
+    *   Formato de extensión JWT básico
+    *   Validación simple emisor/sujeto
+    *   Sin soporte de delegación todavía
 
 ---
 
-## Appendix U: Index of Terms
+## Apéndice U: Índice de Términos
 
 **A**
-*   Agency, Legal 14, 28, 142
-*   Agent, Definition 5, 12, 187
-*   Attestation 45, 92, 110
-*   Authority, Apparent 32, 144
-*   Authority, Actual 31, 143
+*   Agencia, Legal 14, 28, 142
+*   Agente, Definición 5, 12, 187
+*   Atestación 45, 92, 110
+*   Autoridad, Aparente 32, 144
+*   Autoridad, Real 31, 143
 
 **B**
-*   Binding, Channel 67
+*   Vinculación (Binding), Canal 67
 *   Blockchain 22, 115
-*   Bloom Filter 42, 63, 168
+*   Filtro de Bloom 42, 63, 168
 
 **C**
-*   Ceremony, Key 112, 172
-*   Chain of Custody 35, 146
-*   Code, Civil (France/Germany) 138, 148
-*   Constraint (`cst`) 55, 88, 102
-*   Context 56, 123
-*   Cryptography, Elliptic Curve 78
+*   Ceremonia, Clave 112, 172
+*   Cadena de Custodia 35, 146
+*   Código, Civil (Francia/Alemania) 138, 148
+*   Restricción (`cst`) 55, 88, 102
+*   Contexto 56, 123
+*   Criptografía, Curva Elíptica 78
 
 **D**
-*   Delegation Chain 58, 91
-*   DID (Decentralized Identifier) 48, 187
-*   DID Document 49, 51
+*   Cadena de Delegación 58, 91
+*   DID (Identificador Descentralizado) 48, 187
+*   Documento DID 49, 51
 
 **E**
 *   eIDAS 132, 153
-*   Encryption 82
-*   Entity Profile 50, 52
+*   Cifrado 82
+*   Perfil de Entidad 50, 52
 
 **F**
-*   Forensics 34, 156
-*   Formal Verification 160
+*   Forenses 34, 156
+*   Verificación Formal 160
 
 **G**
 *   GDPR 149, 169
-*   Go SDK 85, 182
-*   Governance 158
+*   SDK de Go 85, 182
+*   Gobernanza 158
 
 **H**
-*   Hague Convention 136
+*   Convención de La Haya 136
 *   Hashing 76
 *   HIPAA 150, 170
-*   HSM (Hardware Security Module) 79, 113, 172
+*   HSM (Módulo de Seguridad de Hardware) 79, 113, 172
 
 **I**
-*   Identity 7, 47
-*   IoT (Internet of Things) 105, 175
+*   Identidad 7, 47
+*   IoT (Internet de las Cosas) 105, 175
 *   ISO 27001 155
 
 **J**
 *   JSON-LD 50, 188
-*   Jurisdiction 135, 171
-*   JTI (Token ID) 54
+*   Jurisdicción 135, 171
+*   JTI (ID de Token) 54
 
 **K**
-*   Key Management 111, 172
+*   Gestión de Claves 111, 172
 *   Kubernetes 98
 
 **L**
-*   Legal Entity 51
-*   Liability 15, 145, 171
-*   Log, Transparency 61, 156
+*   Entidad Legal 51
+*   Responsabilidad (Liability) 15, 145, 171
+*   Registro, Transparencia 61, 156
 
 **M**
 *   MiFID II 139, 166
-*   Multi-Signature 159
+*   Multi-Firma 159
 
 **O**
 *   OAuth 2.0 9, 21, 180
-*   Oracle 57, 167
+*   Oráculo 57, 167
 
 **P**
-*   Performance 128, 165
+*   Rendimiento 128, 165
 *   Principal 12, 188
-*   Privacy 152
-*   Protocol 47
+*   Privacidad 152
+*   Protocolo 47
 
 **Q**
-*   Quantum Resistance 83, 173
+*   Resistencia Cuántica 83, 173
 
 **R**
-*   Regulatory Compliance 148
-*   Revocation 60, 122
+*   Cumplimiento Regulatorio 148
+*   Revocación 60, 122
 
 **S**
-*   Security 38, 172
-*   Signature 53, 77
-*   Standardization 155
+*   Seguridad 38, 172
+*   Firma 53, 77
+*   Estandarización 155
 
 **T**
-*   Threat Model 38, 167
-*   Time (NTP) 125
-*   Trust Anchor 64
+*   Modelo de Amenazas 38, 167
+*   Tiempo (NTP) 125
+*   Ancla de Confianza 64
 
 **V**
-*   Verifiable Credential 24, 189
-*   Verification 59, 120
+*   Credencial Verificable 24, 189
+*   Verificación 59, 120
 
 **Z**
-*   Zero Knowledge Proof 162, 189
-*   Zero Trust 41, 190
+*   Prueba de Conocimiento Cero 162, 189
+*   Cero Confianza 41, 190
 
 ---
 
 
-*First Edition*
+*Primera Edición*
 
-**Author:** Mauricio A. Fernandez Fernandez
+**Autor:** Mauricio A. Fernandez Fernandez
 
-**Publisher:** AgentAuth Press (Digital Edition)
+**Editor:** AgentAuth Press (Edición Digital)
 
-**Typography:** This book was composed in Markdown and rendered using Pandoc. Body text is set in Libertinus Serif. Code samples are set in Fira Code. Headings are set in Libertinus Sans.
+**Tipografía:** Este libro fue compuesto en Markdown y renderizado usando Pandoc. El texto del cuerpo está en Libertinus Serif. Las muestras de código están en Fira Code. Los encabezados están en Libertinus Sans.
 
-**Cover Design:** [To be designed]
+**Diseño de Portada:** [Por diseñar]
 
-**Technical Production:** The source files for this book are maintained in a Git repository. Continuous integration builds verify code samples and regenerates artifacts with each change.
+**Producción Técnica:** Los archivos fuente para este libro se mantienen en un repositorio Git. Las construcciones de integración continua verifican muestras de código y regeneran artefactos con cada cambio.
 
-**Paper Edition:** A perfect-bound paper edition is available through print-on-demand services.
+**Edición Impresa:** Una edición impresa encuadernada perfecta está disponible a través de servicios de impresión bajo demanda.
 
 **ISBN:**
-- Digital (PDF): [To be assigned]
-- Digital (EPUB): [To be assigned]
-- Print: [To be assigned]
+- Digital (PDF): [Por asignar]
+- Digital (EPUB): [Por asignar]
+- Impreso: [Por asignar]
 
-**Copyright Notice:**
+**Aviso de Derechos de Autor:**
 © 2026 Mauricio A. Fernandez Fernandez
 
-This work is licensed under the Creative Commons Attribution 4.0 International License (CC-BY-4.0). You are free to share and adapt this material for any purpose, including commercially, as long as you give appropriate credit.
+Esta obra está licenciada bajo la Licencia Creative Commons Atribución 4.0 Internacional (CC-BY-4.0). Usted es libre de compartir y adaptar este material para cualquier propósito, incluso comercialmente, siempre que dé el crédito apropiado.
 
-**Trademark Notice:**
-AgentAuth, PoA, AAP-001, AAP-002, and the AgentAuth logo are trademarks of the AgentAuth project. Use of these marks is permitted in accordance with the project's trademark policy.
+**Aviso de Marcas Registradas:**
+AgentAuth, PoA, AAP-001, AAP-002 y el logotipo de AgentAuth son marcas registradas del proyecto AgentAuth. El uso de estas marcas está permitido de acuerdo con la política de marcas del proyecto.
 
-**Disclaimer:**
-The information in this book is provided for educational and informational purposes only. It does not constitute legal, financial, or professional advice. Readers should consult appropriate professionals before implementing the systems or processes described herein.
+**Descargo de Responsabilidad:**
+La información en este libro se proporciona solo con fines educativos e informativos. No constituye asesoramiento legal, financiero o profesional. Los lectores deben consultar a los profesionales apropiados antes de implementar los sistemas o procesos descritos aquí.
 
-The author and publisher make no warranties regarding the accuracy or completeness of the content. Use of the information is at the reader's own risk.
+El autor y el editor no ofrecen garantías con respecto a la exactitud o integridad del contenido. El uso de la información es bajo el propio riesgo del lector.
 
 ---
 
 
-*Set in digital type.*
-*First printing: January 2026.*
-*Printed on demand.*
+*Compuesto en tipo digital.*
+*Primera impresión: Enero 2026.*
+*Impreso bajo demanda.*
 
+---
 ---
 
 
