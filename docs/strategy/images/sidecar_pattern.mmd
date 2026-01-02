@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant App as Application<br/>(Business Logic)
+    participant Sidecar as AgentAuth Sidecar<br/>(Security Boundary)
+    participant OPA as Policy Engine<br/>(Constraint Check)
+    participant KMS as Key Management<br/>(Signing Oracle)
+
+    Note over App, Sidecar: Mutualized Local Network (localhost)
+
+    App->>Sidecar: POST /v1/sign (Payload)
+    activate Sidecar
+    
+    Sidecar->>Sidecar: Load Active PoA
+    
+    rect rgb(240, 248, 255)
+        Note right of Sidecar: Verification Phase
+        Sidecar->>OPA: Eval(PoA.Constraints, Context)
+        OPA-->>Sidecar: Allow/Deny
+    end
+    
+    alt Policy Allowed
+        Sidecar->>KMS: Sign(Hash(Payload)) [Auth: PCR0/Token]
+        activate KMS
+        KMS-->>Sidecar: Signature (Ed25519)
+        deactivate KMS
+        
+        Sidecar->>Sidecar: Construct JWT/Proof
+        Sidecar-->>App: 200 OK (Signed Token)
+    else Policy Denied
+        Sidecar-->>App: 403 Forbidden (Violation Details)
+    end
+    deactivate Sidecar

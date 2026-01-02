@@ -1,0 +1,33 @@
+graph TB
+    subgraph Azure_Sub["Azure Subscription (Production)"]
+        style Azure_Sub fill:#f0f6ff,stroke:#0078d4,stroke-width:2px
+
+        subgraph AD["Azure Active Directory (Entra ID)"]
+            style AD fill:#ffffff,stroke:#dddddd
+            MI["Managed Identity<br/>(User Assigned)"]
+            MAA["Microsoft Azure Attestation<br/>(MAA Service)"]
+        end
+
+        subgraph CVM["Confidential Cloud"]
+            style CVM fill:#0078d4,stroke:#333,color:white
+            
+            subgraph VM["Confidential VM (AMD SEV-SNP)"]
+                style VM fill:#ffffff,stroke:#0078d4,color:black
+                Agent["AgentAuth Process<br/>(Linux Daemon)"]
+                vTPM["vTPM Device<br/>(Virtual Trusted Platform Module)"]
+            end
+        end
+
+        subgraph Vault["Azure Managed HSM"]
+            style Vault fill:#5c2d91,stroke:#333,color:white
+            KV_Key[("HSM Key<br/>(CRV: Ed25519)<br/>Premium SKU")]
+            AccessPol["Access Policy<br/>(RBAC: Key Sign)"]
+        end
+    end
+
+    Agent -- "1. Get Attestation Report (SNP)" --> vTPM
+    vTPM -- "2. Verify Quote" --> MAA
+    MAA -- "3. Issue MAA Token" --> MI
+    MI -- "4. Authenticate (OIDC)" --> AccessPol
+    AccessPol -- "5. Allow Sign" --> KV_Key
+    KV_Key -- "6. Return Signature" --> Agent

@@ -1,0 +1,39 @@
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{float}
+
+% Font Standardization
+\usepackage{fontspec}
+\setmainfont{Arial}
+\setsansfont{Arial}
+\setmonofont[Scale=0.85]{Menlo}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Code Wrapping with Listings (Fallback for missing fvextra)
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false
+}
+
+% Better table styling  
+\renewcommand{\arraystretch}{1.5}
+\setlength{\tabcolsep}{3pt}
+
+% Make tables smaller to fit
+\let\oldlongtable\longtable
+\renewcommand{\longtable}{\footnotesize\oldlongtable}
+
+% Center all figures
+\makeatletter
+\g@addto@macro\@floatboxreset\centering
+\makeatother
+
+% Disable automatic figure numbering - we use our own
+\usepackage[justification=centering,font=small,labelfont=bf,labelformat=empty]{caption}

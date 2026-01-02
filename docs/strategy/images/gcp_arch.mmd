@@ -1,0 +1,35 @@
+graph TB
+    subgraph GCP_Project["GCP Project (my-agent-project)"]
+        style GCP_Project fill:#e8f0fe,stroke:#4285f4,stroke-width:2px
+
+        subgraph IAM_Fed["Workload Identity Federation"]
+            style IAM_Fed fill:#ffffff,stroke:#dddddd
+            Pool["Workload Identity Pool"]
+            SA["GCP Service Account<br/>(Signer Role)<br/>iam.gserviceaccount.com"]
+        end
+
+        subgraph GKE_Cluster["GKE Cluster (Confidential Nodes)"]
+            style GKE_Cluster fill:#34a853,stroke:#333
+            
+            subgraph Pod["Agent Pod"]
+                style Pod fill:#ffffff,stroke:#34a853
+                Container["AgentAuth Sidecar<br/>(gRPC Server)"]
+                Token["Projected SA Token<br/>(OIDC JWT)<br/>/var/run/secrets/..."]
+            end
+            
+            Node["AMD SEV Node<br/>(Memory Encryption)"]
+        end
+
+        subgraph Cloud_HSM["Cloud Key Management Service"]
+            style Cloud_HSM fill:#ea4335,stroke:#333,color:white
+            HSM_Key[("Cloud HSM Key<br/>(FIPS 140-2 L3)<br/>Algorithm: EC_SIGN_ED25519")]
+        end
+    end
+
+    Container -- "1. Read Token" --> Token
+    Token -- "2. OIDC Exchange" --> Pool
+    Pool -- "3. Impersonate SA" --> SA
+    SA -- "4. Authorize kms.sign" --> HSM_Key
+    HSM_Key -- "5. Return Signature" --> Container
+
+    Node -. "Hardware Memory Encryption" .- Pod

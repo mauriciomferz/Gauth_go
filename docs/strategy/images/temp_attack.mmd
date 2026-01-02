@@ -1,0 +1,32 @@
+graph TD
+    %% Root
+    Root((Illicitly Transfer Assets))
+    
+    %% Branches
+    Root --> Path1["PATH 1: Steal Authority\nCost: Medium"]
+    Root --> Path2["PATH 2: Forge Authority\nCost: High"]
+    Root --> Path3["PATH 3: Confuse Deputy\nCost: Low"]
+    
+    %% Leaves
+    Path1 --> P1_1(Exfiltrate Private Key)
+    Path1 --> P1_2(Replay Valid PoA)
+    
+    Path2 --> P2_1(Compromise Principal)
+    Path2 --> P2_2(Crypto Attack)
+    
+    Path3 --> P3_1(Prompt Injection)
+    Path3 --> P3_2(Model Manipulation)
+    
+    %% Styling
+    style Root fill:#ffccbc,stroke:#bf360c,stroke-width:4px,color:#d84315
+    
+    style Path1 fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    style Path2 fill:#e1bee7,stroke:#8e24aa,stroke-width:2px
+    style Path3 fill:#ffcdd2,stroke:#e57373,stroke-width:2px
+    
+    style P1_1 fill:#ffffff,stroke:#333
+    style P1_2 fill:#ffffff,stroke:#333
+    style P2_1 fill:#ffffff,stroke:#333
+    style P2_2 fill:#ffffff,stroke:#333
+    style P3_1 fill:#ffffff,stroke:#333
+    style P3_2 fill:#ffffff,stroke:#333

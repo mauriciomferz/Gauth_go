@@ -1,0 +1,79 @@
+classDiagram
+    direction TB
+    
+    class Config {
+        +VerifierConfig verifier
+        +SignerConfig signer
+        +StorageConfig storage
+        +TelemetryConfig telemetry
+        +load(path: string) error
+    }
+
+    class VerifierConfig {
+        +List~string~ trusted_roots
+        +int max_chain_depth
+        +bool require_revocation_check
+        +RevocationConfig revocation
+        +ConstraintConfig constraints
+    }
+
+    class SignerConfig {
+        +string key_source
+        +string profile_path
+        +KeyConfig kms_config
+        +AttestationConfig attestation
+    }
+
+    class RevocationConfig {
+        +bool enabled
+        +string mode (FAIL_OPEN/CLOSED)
+        +List~string~ ocsp_responders
+        +List~string~ crl_endpoints
+        +Duration cache_ttl
+    }
+
+    class ConstraintConfig {
+        +string engine (CEL/OPA)
+        +string policy_path
+        +bool allow_unknown_fields
+        +int max_execution_ms
+    }
+
+    class KeyConfig {
+        +string provider (AWS/GCP/Azure)
+        +string region
+        +string key_id
+        +map~string,string~ auth_params
+    }
+
+    class StorageConfig {
+        +string backend (Postgres/Redis/Memory)
+        +string connection_string
+        +int pool_size
+    }
+
+    class TelemetryConfig {
+        +bool enabled
+        +string address
+        +string protocol (Prometheus/OTLP)
+    }
+
+    Config *-- VerifierConfig
+    Config *-- SignerConfig
+    Config *-- StorageConfig
+    Config *-- TelemetryConfig
+
+    VerifierConfig *-- RevocationConfig
+    VerifierConfig *-- ConstraintConfig
+    SignerConfig *-- KeyConfig
+
+    note for Config "Root configuration object\nLoaded from YAML/JSON"
+    
+    style Config fill:#232f3e,color:white,stroke-width:2px
+    style VerifierConfig fill:#1976d2,color:white
+    style SignerConfig fill:#388e3c,color:white
+    style RevocationConfig fill:#e3f2fd,stroke:#1976d2
+    style ConstraintConfig fill:#e3f2fd,stroke:#1976d2
+    style KeyConfig fill:#e8f5e9,stroke:#388e3c
+    style StorageConfig fill:#f5f5f5,stroke:#333
+    style TelemetryConfig fill:#f5f5f5,stroke:#333

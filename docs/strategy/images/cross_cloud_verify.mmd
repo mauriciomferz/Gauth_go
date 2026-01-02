@@ -1,0 +1,32 @@
+graph TD
+    subgraph Trust_Root["Trust Infrastructure"]
+        style Trust_Root fill:#fafafa,stroke:#666,stroke-dasharray: 5 5
+        DID_Reg["DID Registry<br/>(did:web)"]
+        TL["Transparency Log<br/>(Rekor/Trillian)"]
+    end
+
+    subgraph AWS_Region["AWS (us-east-1)"]
+        AWS_Agent["AWS Agent"]
+    end
+
+    subgraph GCP_Region["GCP (us-central1)"]
+        GCP_Agent["GCP Agent"]
+    end
+
+    subgraph Azure_Region["Azure (westeurope)"]
+        Azure_Agent["Azure Agent"]
+    end
+
+    AWS_Agent -- "1. Issue PoA" --> GCP_Agent
+    
+    GCP_Agent -- "2. Fetch Public Key" --> DID_Reg
+    GCP_Agent -- "3. Verify Log Inclusion" --> TL
+    
+    GCP_Agent -- "4. Delegate to" --> Azure_Agent
+    
+    Azure_Agent -- "5. Verify Chain" --> AWS_Agent
+    Azure_Agent -- "6. Report Audit" --> TL
+
+    style AWS_Agent fill:#ff9900,color:white
+    style GCP_Agent fill:#4285f4,color:white
+    style Azure_Agent fill:#0078d4,color:white

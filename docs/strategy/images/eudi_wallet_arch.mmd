@@ -1,0 +1,29 @@
+graph TD
+    subgraph EUDI_Wallet["EUDI Wallet App (User Device)"]
+        style EUDI_Wallet fill:#f3f3f3,stroke:#333
+        
+        subgraph Secure_Enclave["Secure Enclave / TEE"]
+            style Secure_Enclave fill:#e0e0e0,stroke:#666
+            UserKey["User Signing Key"]
+        end
+        
+        PID["PID Credential<br/>(Gov ID)"]
+        QEAA["PoA Attribute<br/>(QEAA Attestation)"]
+    end
+
+    subgraph Trust_List["Trusted Lists"]
+        EAA_Issuer["Qualified Issuer<br/>(TSPs)"]
+    end
+
+    subgraph Ext_Verifier["Relying Party"]
+        Verifier_App["Verifier Service"]
+    end
+
+    UserKey -- "1. Sign Presentation" --> Verifier_App
+    EAA_Issuer -- "2. Issues QEAA" --> QEAA
+    QEAA -. "3. Linked to" .- PID
+    Verifier_App -- "4. Verify Signature" --> UserKey
+    Verifier_App -- "5. Verify Issuer Trust" --> EAA_Issuer
+
+    linkStyle 1 stroke:#2e7d32,stroke-width:2px
+    linkStyle 2 stroke-dasharray: 5 5

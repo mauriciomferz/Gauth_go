@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant Device as IoT Device<br/>(MCU + TPM)
+    participant Factory as Manufacturer<br/>(Secure Facility)
+    participant Owner as Owner/Operator<br/>(Enterprise)
+    participant Registry as DID Registry<br/>(Public Ledger)
+
+    Note over Device, Factory: Manufacturing Phase
+    
+    Factory->>Device: 1. Inject Identity Key (EK)
+    Device->>Factory: 2. Return Public EK
+    Factory->>Registry: 3. Register Reference (SerialNumber -> PubKey)
+    
+    Note over Device, Owner: Onboarding Phase
+    
+    Owner->>Device: 4. Power On & Connect
+    Device->>Device: 5. Generate Attestation Key (AK)
+    Device->>Owner: 6. Send Attestation (Quote(AK) signed by EK)
+    
+    Owner->>Registry: 7. Verify EK Trust Chain
+    Registry-->>Owner: Valid Manufacturer
+    
+    Owner->>Device: 8. Issue Root PoA (Bind AK to Owner DID)
+    Device->>Device: 9. Store PoA in Secure Flash
+    
+    Note right of Device: Device is now<br/>Authorized Agent

@@ -1,0 +1,18 @@
+graph TD
+    Principal((Principal<br/>Source of Authority)) 
+    Agent((Agent<br/>Actor)) 
+    ThirdParty((Third Party<br/>Relying Party))
+
+    Principal -- "1. Grants Authority (PoA)\nControl & Instruction" --> Agent
+    Agent -- "2. Acts on behalf of\nTransaction / Binding" --> ThirdParty
+    ThirdParty -- "3. Enforces Liability\nContractual/Tort" --> Principal
+    
+    Agent -. "Fiduciary Duty\nLoyalty & Care" .-> Principal
+    
+    style Principal fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style Agent fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style ThirdParty fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    
+    linkStyle 0 stroke:#01579b,stroke-width:2px
+    linkStyle 1 stroke:#ef6c00,stroke-width:2px
+    linkStyle 2 stroke:#2e7d32,stroke-width:2px

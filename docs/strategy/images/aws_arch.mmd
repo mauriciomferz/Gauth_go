@@ -1,0 +1,39 @@
+graph TB
+    subgraph AWS_Cloud["AWS Cloud Region (us-east-1)"]
+        style AWS_Cloud fill:#f2f3f4,stroke:#232f3e,stroke-width:2px
+        
+        subgraph IAM["IAM & Security Control"]
+            style IAM fill:#ffffff,stroke:#dddddd
+            Role["IAM Role<br/>(AgentAuthEnclaveRole)"]
+            Policy["KMS Key Policy<br/>Condition: kms:RecipientAttestation<br/>== PCR0_Hash"]
+        end
+
+        subgraph Host_Instance["EC2 c6i.xlarge (Nitro Enabled)"]
+            style Host_Instance fill:#ec7211,stroke:#232f3e,color:white
+            App["Client Application<br/>(Untrusted Context)<br/>Process"]
+            Driver["Nitro CLI / VSock_Proxy"]
+        end
+
+        subgraph Enclave["Nitro Enclave (Trusted Execution Environment)"]
+            style Enclave fill:#232f3e,stroke:#ec7211,stroke-width:3px,color:white
+            Runtime["AgentAuth Runtime<br/>(Go Standard Library)"]
+            PCRs["PCR0: Image Hash<br/>PCR1: Kernel Hash"]
+            Keys["Ephemeral Session Keys<br/>(Memory Only)"]
+            Attest["Attestation Doc<br/>(Signed by AWS Nitro CA)"]
+        end
+
+        subgraph KMS_Service["AWS KMS (FIPS 140-2 L3)"]
+            style KMS_Service fill:#dd2222,stroke:#333,color:white
+            MasterKey[("Ed25519 Master Key<br/>(HSM Backed)<br/>User: aws/kms")]
+        end
+    end
+
+    App ==>|"VSock (CID: 8888)"| Runtime
+    Runtime -- "1. Generate Attestation" --> Attest
+    Attest -- "2. Authenticate (PCR0)" --> Role
+    Role -- "3. Assume Role" --> Policy
+    Policy -- "4. Grant kms:Sign" --> MasterKey
+    MasterKey -- "5. Sign(Payload)" --> Runtime
+    Runtime ==>|"Signed PoA"| App
+
+    note right of Enclave: "Cryptographic boundary.\nNo SSH access.\nNo persistent storage.\nOnly VSock comms."

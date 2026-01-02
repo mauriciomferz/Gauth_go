@@ -1,0 +1,32 @@
+graph TD
+    %% Nodes
+    User([USER REQUEST]) -->|Action Intent| LLM
+    
+    subgraph Core["LLM AGENT CORE (Compromised?)"]
+        style Core fill:#ffcdd2,stroke:#d32f2f,stroke-width:2px,stroke-dasharray: 5 5
+        LLM["LLM Agent Core"]
+    end
+    
+    LLM -->|Untrusted Intent| Enforcer
+    
+    subgraph Defense["TRUSTED BOUNDARY"]
+        style Defense fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+        Enforcer["AGENTAUTH ENFORCER\n(Trusted & Isolated)"]
+    end
+    
+    Enforcer -->|Signed Request| Service
+    
+    subgraph External["EXTERNAL SYSTEM"]
+        style External fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+        Service["Service Verifier"]
+    end
+    
+    %% Styling
+    style User fill:#ffffff,stroke:#333,stroke-width:2px
+    style LLM fill:#ffbee7,stroke:#c2185b,stroke-width:2px
+    style Enforcer fill:#b9f6ca,stroke:#00c853,stroke-width:3px
+    style Service fill:#bbdefb,stroke:#0d47a1,stroke-width:2px
+    
+    %% Link Styling
+    linkStyle 1 stroke:#d32f2f,stroke-width:2px,fill:none
+    linkStyle 2 stroke:#00c853,stroke-width:3px,fill:none

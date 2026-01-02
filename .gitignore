@@ -72,7 +72,9 @@ demo_cascade
 demo_cascade_build
 demo_executable
 agentauth-original-demo
-agentauth-server
+# agentauth-server (Binary only, assume root or build)
+/agentauth-server
+
 
 agentauth-web-server
 main

@@ -1,0 +1,26 @@
+graph TD
+    Regulator["REGULATORY OVERSIGHT<br/>(DPAs, Central Banks)"]
+    
+    subgraph Org["Organization"]
+        style Org fill:#fafafa,stroke:#333
+        
+        L3["3RD LINE: Internal Audit<br/><br/>- Independent assurance<br/>- Periodic Log verification<br/>- Control fail-safe checks"]
+        
+        L2["2ND LINE: Risk & Compliance<br/><br/>- Policy Definition (Constraints)<br/>- Automated Monitoring<br/>- Incident Response"]
+        
+        L1["1ST LINE: Operational Units<br/><br/>- Agent Deployment<br/>- Key Custody<br/>- Daily Approvals"]
+    end
+
+    Regulator ==>|"Supervision"| L3
+    
+    L3 ==>|"Audit Reports"| Regulator
+    L3 ==>|"Assurance"| L2
+    
+    L2 ==>|"Oversight"| L1
+    L2 -.->|"Escalation"| L3
+    
+    L1 ==>|"Execution"| L2
+
+    style L3 fill:#fff,stroke:#d32f2f,stroke-width:2px
+    style L2 fill:#fff,stroke:#fbc02d,stroke-width:2px
+    style L1 fill:#fff,stroke:#388e3c,stroke-width:2px

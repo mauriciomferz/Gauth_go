@@ -1,0 +1,34 @@
+graph TB
+    subgraph Foundation["AgentAuth Foundation (Non-Profit 501c6)"]
+        style Foundation fill:#f9f9f9,stroke:#333
+        
+        Board["Board of Directors<br/>(7 Seats: 3 Ent, 2 Tech, 2 Ind)<br/>Vote: Simple Majority"]
+        
+        subgraph Committees["Standing Committees (Chartered)"]
+            TSC["Technical Steering Committee<br/>(Architecture Spec)<br/>Vote: Maintainers Only"]
+            Eco["Ecosystem Committee<br/>(Adoption & Partners)<br/>Vote: Member Companies"]
+            Gov["Governance Committee<br/>(Legal & Ethics)<br/>Vote: Board Appointed"]
+        end
+        
+        subgraph WGs["Working Groups (Open Membership)"]
+            WG_Core["Core Protocol WG<br/>(RFCs, Specs)"]
+            WG_Ind["Industry Vertical WG<br/>(Finance, Supply Chain)"]
+            WG_Safe["AI Safety WG<br/>(Alignment, Limits)"]
+        end
+    end
+    
+    Members["Member Organizations<br/>(Enterprises, Vendors)<br/>Fees: Tiered"]
+
+    Members -- "Elect (Annual)" --> Board
+    Board -- "Appoints Chair" --> TSC
+    Board -- "Charters" --> Gov
+    Board -- "Funds/Budgets" --> Eco
+    
+    TSC -- "Oversees" --> WG_Core
+    Eco -- "Coordinates" --> WG_Ind
+    Gov -- "Guides/Vetos" --> WG_Safe
+
+    style Board fill:#232f3e,color:white,stroke:#333
+    style TSC fill:#1976d2,color:white
+    style Eco fill:#388e3c,color:white
+    style Gov fill:#fbc02d,color:black

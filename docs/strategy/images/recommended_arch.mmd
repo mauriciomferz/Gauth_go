@@ -1,0 +1,55 @@
+graph TB
+    subgraph Compute_Layer["Compute Layer (Kubernetes)"]
+        style Compute_Layer fill:#f0f6ff,stroke:#0078d4,stroke-width:2px
+
+        subgraph Pod_1["App Pod 1"]
+            style Pod_1 fill:#ffffff,stroke:#333
+            App1["Client App<br/>(Business Logic)"]
+            Sidecar1["AgentAuth Sidecar<br/>(Signing Agent)"]
+        end
+
+        subgraph Pod_2["App Pod 2"]
+            style Pod_2 fill:#ffffff,stroke:#333
+            App2["Client App"]
+            Sidecar2["AgentAuth Sidecar"]
+        end
+
+        subgraph Pod_N["App Pod N"]
+            style Pod_N fill:#ffffff,stroke:#333
+            AppN["Client App"]
+            SidecarN["AgentAuth Sidecar"]
+        end
+    end
+
+    subgraph Data_Layer["Data Persistence"]
+        style Data_Layer fill:#f5f5f5,stroke:#333,stroke-width:2px
+        
+        Redis[("Redis Cluster<br/>(Hot Store: Profiles, Nonces)")]
+        style Redis fill:#d32f2f,color:white,stroke:#333
+
+        Postgres[("Postgres DB<br/>(Cold Store: Archive)")]
+        style Postgres fill:#336791,color:white,stroke:#333
+    end
+
+    subgraph Security_Layer["Trust Infrastructure"]
+        style Security_Layer fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+
+        KMS[("KMS / HashiVault<br/>(Master Keys)")]
+        style KMS fill:#ff6f00,color:white,stroke:#333
+
+        TLog[("Transparency Log<br/>(Audit Trail)")]
+        style TLog fill:#4caf50,color:white,stroke:#333
+    end
+
+    App1 ==>|"gRPC (Sign/Verify)"| Sidecar1
+    App2 ==> Sidecar2
+    AppN ==> SidecarN
+
+    Sidecar1 -->|"Cache/State"| Redis
+    Sidecar2 --> Redis
+    SidecarN --> Redis
+
+    Sidecar1 -.->|"Async Archive"| Postgres
+
+    Sidecar1 ==>|"Key Usage"| KMS
+    Sidecar1 -.->|"Publish Proof"| TLog
