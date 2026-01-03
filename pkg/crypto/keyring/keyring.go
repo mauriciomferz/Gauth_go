@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -16,6 +17,7 @@ type SymKey struct {
 
 // KeyRing maintains an active key and a bounded set of previous keys (grace window).
 type KeyRing struct {
+	mu       sync.RWMutex
 	active   *SymKey
 	previous []*SymKey
 	maxPrev  int
@@ -28,13 +30,23 @@ func NewKeyRing() *KeyRing {
 }
 
 // Active returns the current active key.
-func (kr *KeyRing) Active() *SymKey { return kr.active }
+func (kr *KeyRing) Active() *SymKey {
+	kr.mu.RLock()
+	defer kr.mu.RUnlock()
+	return kr.active
+}
 
 // Previous returns snapshot of previous keys.
-func (kr *KeyRing) Previous() []*SymKey { return append([]*SymKey(nil), kr.previous...) }
+func (kr *KeyRing) Previous() []*SymKey {
+	kr.mu.RLock()
+	defer kr.mu.RUnlock()
+	return append([]*SymKey(nil), kr.previous...)
+}
 
 // Rotate replaces the active key, pushing the old key into the previous list.
 func (kr *KeyRing) Rotate() *SymKey {
+	kr.mu.Lock()
+	defer kr.mu.Unlock()
 	if kr.active != nil {
 		kr.previous = append([]*SymKey{kr.active}, kr.previous...)
 		if len(kr.previous) > kr.maxPrev {
