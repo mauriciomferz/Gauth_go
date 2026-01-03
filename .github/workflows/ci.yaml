@@ -83,8 +83,12 @@ jobs:
           export REDIS_HOST=localhost
           export REDIS_PORT=6379
           
+          # Build binary first to separate build errors from runtime errors
+          echo "🔧 Building web-server..."
+          go build -v -o web-server cmd/web-server/main.go
+          
           # Start server in background
-          go run cmd/web-server/main.go > server.log 2>&1 &
+          ./web-server > server.log 2>&1 &
           SERVER_PID=$!
           echo "Server PID: $SERVER_PID"
           
