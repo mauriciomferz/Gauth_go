@@ -570,7 +570,8 @@ func (s *BetaServer) RegisterUIRoutes() {
 				nonceStr = s
 			}
 			// Strict CSP as expected by tests
-			c.Header("Content-Security-Policy", fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s'; style-src 'self' 'unsafe-inline'", nonceStr))
+			csp := "default-src 'self'; script-src 'self' 'nonce-" + nonceStr + "'; style-src 'self' 'unsafe-inline'"
+			c.Header("Content-Security-Policy", csp)
 			c.Header("Content-Type", contentType)
 
 			data, err := staticUI.ReadFile("static_ui/" + path)
