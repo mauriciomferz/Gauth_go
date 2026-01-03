@@ -459,25 +459,26 @@ Built in Go, MIT licensed, production ready (v1.0.0).
 *Context: Responding to concerns about Agent Identity standards (SPIFFE, Entra, OBO).*
 
 
+
 **Identity is Solved. Accountability is Not.**
 
-Christian Posta’s latest deep dive on "Agentic OBO" clarifies a crucial mechanism:
+Christian Posta’s latest deep dive on "Agentic OBO" and "SPIFFE" clarifies a crucial mechanism:
 **OBO = Policy Intersection.**
-The resulting token is the *intersection* of what the User can do AND what the Agent is allowed to do. This is great for "Scope Narrowing" (least privilege).
+The resulting token is the *intersection* of what the User can do AND what the Agent is allowed to do. This is great for "Scope Narrowing".
 
-**But what about the Capability Gap?**
-Christian rightfully points out: "An agent may need capabilities describing *intent* that a user does not have."
-If Alice (User) can't access Production Logs, but her Debug Agent *needs* to... OBO Intersection fails. You need **Delegated Authority** that *exceeds* the user's direct access, but is bound by strict **Fiduciary Constraints**.
+**But what about the Policy Explosion?**
+Christian asks: "If every agent instance has a unique SPIFFE ID (e.g. `instance/001`), how do you possibly write authorization policies for millions of them?"
+You can't. Managing RBAC for dynamic, non-deterministic agents is impossible.
 
 **Enter AgentAuth (The Governance Layer):**
-We complement the OBO flow by wrapping the Identity in a **Proof of Authorization**:
+We complement the OBO/SPIFFE flow by wrapping the Identity in a **Proof of Authorization**:
 
 1.  **Identity Layer (OBO/Entra/SPIFFE)**: Handles the "Who" and the "Chain of Trust" (via `act` claims).
 2.  **Governance Layer (AgentAuth)**: Handles the "Mandate".
-    *   *Instead of just narrowing scopes, we define the Sandbox.*
-    *   "Agent can access Prod Logs (Capability Expansion), BUT only for read, only for 10 minutes, and only for this specific Ticket ID (Fiduciary Constraint)."
+    *   *You don't grant permissions to the Agent's ID.*
+    *   *You grant permissions to the **Delegation Token** that the Agent carries.*
 
-This solves the **Liability** problem.
-Use OBO to transport the identity. Use AgentAuth to define the **Law**.
+This solves the **Policy Explosion**:
+The resource doesn't need to know who `instance/001` is. It just needs to verify the **Signature** on the PoA token it holds.
 
 #AgentAuth #Identity #Governance #FiduciaryAI #CyberSecurity
