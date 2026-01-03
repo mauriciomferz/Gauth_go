@@ -1,15 +1,18 @@
-# Comparative Analysis: AgentAuth vs. Entra Agent ID (OBO Flow)
+# Comparative Analysis: AgentAuth vs. Entra Agent ID (Gateway & OBO)
+
+This document provides a technical comparison between **AgentAuth** (this project) and the **Microsoft Entra Agent ID Gateway Architecture** (including the OBO Flow), as implemented in the [entra-agent-id-agw](https://github.com/christian-posta/entra-agent-id-agw) repository.
 
 This document provides a technical comparison between **AgentAuth** (this project) and the **Microsoft Entra Agent ID On-Behalf-Of (OBO) Flow** as described in the [OBO Guide](https://github.com/christian-posta/entra-agent-id-agw/blob/main/OBO-GUIDE.md).
 
 ## 1. Executive Summary
 
-| Feature | Entra Agent ID (OBO) | AgentAuth (GAuth) |
+| Feature | Entra Agent ID (Gateway/OBO) | AgentAuth (GAuth) |
 | :--- | :--- | :--- |
-| **Core Mechanism** | **Optimization of Centralized Trust**. Relies on exchanging tokens (`T1` + `Tc` → `T2`) via a central IdP (Entra ID). | **Decentralized Authorization Chain**. Relies on cryptographic PoA chains and local verification services, independent of a central IdP during runtime. |
-| **Agent Identity** | **Implicit / Token-Based**. Agent identity is represented by a `client_id` and secret used to mint `T1`. | **Explicit / Cryptographic**. Agents hold key pairs attested by a registry (`AttestationProof`), distinguishing Humans vs. AI Agents via `PrincipalVerifier`. |
-| **Delegation Scope** | **OAuth Scopes**. Coarse-grained (e.g., `User.Read`). Defined by application registration. | **Fine-Grained Policies**. Defined in signed PoA (e.g., "Spend < $50 on X", "Valid only M-F"). Enforceable offline. |
-| **Verification** | **IdP-Centric**. The resource server trusts the issuance of `T2` by Entra. | **Self-Contained**. The resource server verifies the PoA signature chain and compliance proofs locally. |
+| **Architectural Model** | **Infrastructure-Centric**. Relies on Azure "Blueprints" and centralized IdP (Entra ID) for identity definition. | **Protocol-Centric**. Relies on cryptographic key pairs and Power of Attorney (PoA) chains for identity and delegation. |
+| **Trust Model** | **Centralized Trust**. Trust flows from the IdP (Entra) minting tokens (`T1`, `T2`). | **Decentralized Trust**. Trust flows from the Principal's signature on the PoA and local verification. |
+| **Runtime Dependency** | **Online with Azure**. Requires connectivity to Entra ID for OBO exchange and Blueprint validation. | **Offline-Capable**. Verification is local using public keys; no centralized runtime dependency. |
+| **Agent Identity** | **Implicit / Metadata**. Defined by "Blueprint" registration in Entra and associated Service Principal. | **Explicit / Attested**. Defined by cryptographic keys and signed `AttestationProof` (Human vs. AI distinction). |
+| **Delegation Policy** | **Coarse-Grained**. OAuth Scopes (e.g., `User.Read`) defined in Azure App Registrations. | **Fine-Grained**. Value limits, time windows, and tool restrictions defined in the PoA itself. |
 
 ---
 
@@ -32,10 +35,32 @@ The flow depends on **Cryptographic Chaining** and **Attestation**:
 3.  **Invocation**: Agent presents the **PoA Chain** + **Request Signature** directly to the Resource (or Sidecar).
 4.  **Verification**: The Resource (via AgentAuth Policy Engine) validates the signature chain locally. No "exchange" call to a central server is required at runtime.
 
-### B. Agent Identity & Attestation
+### B. Identity Provisioning & Definition
 
-*   **Entra**: "Agent Identity Impersonation" is a token claim. The "Agent" is effectively an OAuth Client.
-*   **GAuth**: Distinguishes **Entity Types** (`Human`, `Corporation`, `AI Agent`). It uses **Attestation Proofs** (Phase 11) to cryptographically bind capability assessments (e.g., "Model Safety Level") to the agent's identity. This allows policies like *"Only allow AI agents with Safety Level 5 to spend > $1000"*.
+#### Entra Agent ID ("Blueprints")
+Identity is defined via **Infrastructure Configuration**:
+*   **Blueprints**: Created via PowerShell/Graph API in Azure.
+*   **Service Principals**: The runtime identity is an Azure Service Principal associated with the Blueprint.
+*   **Constraint**: Tightly coupled to the Azure control plane. An agent *is* an Azure object.
+
+#### AgentAuth ("Attestation")
+Identity is defined via **Cryptographic Attestation**:
+*   **Key Generation**: The agent generates its own Key Pair (Ed25519/BLS).
+*   **Attestation**: The agent submits proof of its configuration (model hash, safety capabilities) to an `AttestationAuthority`.
+*   **Result**: A signed `AttestationProof` (Phase 11) is issued. The agent *is* a key pair with a certified safety rating.
+*   **Advantage**: Portable across clouds, on-prem, and edge devices.
+
+### C. Gateway vs. Sidecar Patterns
+
+#### Entra AGW (Gateway Pattern)
+*   **Focus**: Bridging legacy apps to Entra ID.
+*   **Mechanism**: A Gateway (or Sidecar) intercepts traffic, performs the OBO exchange with Entra, and injects the resulting `T2` token.
+*   **Goal**: App code behaves as if the user called it directly; the "Agent" nature is abstracted by the infra.
+
+#### AgentAuth (Verification Service)
+*   **Focus**: Enforcing complex delegations.
+*   **Mechanism**: The `VerificationService` (embedded library or microservice) inspects the *entire delegation chain*.
+*   **Goal**: The App acts on the specific *constraints* (e.g., "Authorized for $50 only"). The "Agent" nature is explicit and critical for liability tracking.
 
 ### C. Offline vs. Online
 
