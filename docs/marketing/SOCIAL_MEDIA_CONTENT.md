@@ -458,33 +458,26 @@ Built in Go, MIT licensed, production ready (v1.0.0).
 
 *Context: Responding to concerns about Agent Identity standards (SPIFFE, Entra, OBO).*
 
+
 **Identity is Solved. Accountability is Not.**
 
-I've been following Christian Posta's recent deep dives on "Agent Identity" vs "User Impersonation", and he hits the nail on the head regarding two critical problems:
+Christian Posta’s latest deep dive on "Agentic OBO" clarifies a crucial mechanism:
+**OBO = Policy Intersection.**
+The resulting token is the *intersection* of what the User can do AND what the Agent is allowed to do. This is great for "Scope Narrowing" (least privilege).
 
-1.  **The Capability Gap**: Alice (Marketing) asks an agent to check GDPR compliance. The agent needs access to *all* logs (which Alice doesn't have). Impersonating Alice fails.
-2.  **The Decision Attribution Problem**: If an agent autonomously orders 50 laptops, and I only said "optimize supply", why does the audit log say *I* placed the order?
+**But what about the Capability Gap?**
+Christian rightfully points out: "An agent may need capabilities describing *intent* that a user does not have."
+If Alice (User) can't access Production Logs, but her Debug Agent *needs* to... OBO Intersection fails. You need **Delegated Authority** that *exceeds* the user's direct access, but is bound by strict **Fiduciary Constraints**.
 
-Christian advocates for **Delegation** (via RFC 8693 Token Exchange) over Impersonation. I 100% agree.
+**Enter AgentAuth (The Governance Layer):**
+We complement the OBO flow by wrapping the Identity in a **Proof of Authorization**:
 
-**But we need to go one step further.**
+1.  **Identity Layer (OBO/Entra/SPIFFE)**: Handles the "Who" and the "Chain of Trust" (via `act` claims).
+2.  **Governance Layer (AgentAuth)**: Handles the "Mandate".
+    *   *Instead of just narrowing scopes, we define the Sandbox.*
+    *   "Agent can access Prod Logs (Capability Expansion), BUT only for read, only for 10 minutes, and only for this specific Ticket ID (Fiduciary Constraint)."
 
-A token with an `act` claim tells you *who* acted (Identity).
-It doesn't tell you *if they were allowed to* (Authority).
-
-We need a **Governance Standard** that sits on top of Identity.
-
-**Enter AgentAuth (The Fiduciary Layer):**
-We built AgentAuth to wrap any identity (Entra, SPIFFE, Key Pair) in a **Proof of Authorization (PoA)**.
-
-*   **Identity**: "This is the Supply Chain Agent" (via Entra/SPIFFE).
-*   **AgentAuth**: "This agent is authorized to spend up to $50k, only on hardware, and only M-F."
-
-This solves the **Accountability Chain**:
-1.  **User** delegates to **Agent** (via signed PoA).
-2.  **Agent** acts with its own Identity + Use Key.
-3.  **Resource** verifies the *entire chain* locally.
-
-Don't just solve Identity. Solve **Liability**.
+This solves the **Liability** problem.
+Use OBO to transport the identity. Use AgentAuth to define the **Law**.
 
 #AgentAuth #Identity #Governance #FiduciaryAI #CyberSecurity
