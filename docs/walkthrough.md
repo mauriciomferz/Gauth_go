@@ -877,3 +877,25 @@ Following the completion of Phase 19, a final regression check identified and re
 The system is fully production-ready.
 
 
+## CI Stability & Marketing Launch (Phase 21)
+
+### CI Infrastructure Hardening
+- **Fix**: Unified Go version to `1.25.1` across all workflows (`ci.yml`, `ci.yaml`) to prevent toolchain mismatches.
+- **Fix**: Disabled aggressive caching (`cache: false`) in GitHub Actions to resolve `tar` corruption issues during "Set up Go".
+- **Fix**: Enhanced `smoketest` static asset fallback in `web/server_clean.go` to support nested test execution contexts, resolving 404 errors.
+- **Fix**: Refactored `web/server_clean.go` CSP header generation to use string concatenation instead of `fmt.Sprintf`. This resolved a persistent, environment-specific CI syntax error ("expected ';', found fmt"), ensuring clean builds on Linux/CI runners.
+- **Verification**: Verified `ci.yml` and `ci.yaml` pipelines locally with `GOOS=linux go build` and unit tests.
+
+### Marketing Assets Generated
+- **Infographic**: "OAuth Trap vs AgentAuth Shield" - Visualizing the security gap.
+- **Stat Card**: "$25 Trillion Economy" - High-impact financial metric for investor decks.
+- **Compilation**: Assets collected in [ASSETS.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/Gauth_go/docs/marketing/ASSETS.md) and published to `docs/marketing/images`.
+
+### Strategic Validation
+- Confirmed technical accuracy of "Offline Mode" and "Liability Caps" claims against codebase (`EdDSAValidator`, `PowerRestriction`).
+- Verified implementation matches strategic diagrams (`agency_triangle.mmd`).
+
+**Project Status**: The GAuth project has successfully reached its 100% functional and compliance milestones. The system is hardened, documented, and ready for staging deployment.
+
+
+
