@@ -64,7 +64,7 @@ build/*.json
 build/*.md
 
 # Built executables
-agentauth-server
+/agentauth-server
 agentauth-web
 agentauth-http-server
 demo
