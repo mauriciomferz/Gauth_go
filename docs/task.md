@@ -219,3 +219,18 @@
     - [x] Run initial database migration
     - [x] Verify Event Stream and Audit endpoints
 
+## Phase 21: Marketing Launch
+- [x] Content Validation
+    - [x] Verify technical claims in `SOCIAL_MEDIA_CONTENT.md` (Offline mode, Liability caps)
+    - [x] Confirm strategic alignment with `agency_triangle.mmd`
+- [x] Infrastructure Stability (Pre-Launch)
+    - [x] Fix CI `tar` corruption (Unify Go 1.25.1 + Disable Cache)
+    - [x] Fix `web/smoketest` static asset 404s (Fallback logic)
+    - [x] Fix CI build syntax error (`fmt` dependency in CSP)
+- [x] Asset Generation
+    - [x] Generate "OAuth vs AgentAuth" Infographic
+    - [x] Generate "$25 Trillion" Stat Card
+    - [x] Compile `MARKETING_ASSETS.md`
+- [ ] Strategic Publication
+    - [ ] Publish Book (Chapters 6-10)
+    - [ ] Launch Blog Post (Medium/Dev.to)
