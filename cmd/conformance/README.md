@@ -12,7 +12,7 @@ Automated conformance analysis tool for AAP-001 and AAP-002 compliance verificat
 
 ## Overview
 
-The conformance CLI tool analyzes your AgentAuth implementation against AAP-001 (AgentAuth Core) and AAP-002 (Power of Attorney) specifications. It:
+The conformance CLI tool analyzes your AgentAuth implementation against AAP-001 (AgentAuth Core) and AAP-002 (Proof of Authorization) specifications. It:
 
 - Scans the codebase for required symbols and test coverage
 - Generates compliance reports in multiple formats (JSON, Markdown, CSV)

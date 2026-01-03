@@ -1,6 +1,6 @@
 # AgentAuth+ Verification Service Architecture
 
-The `agentauthplus` package provides a high-level verification service that aggregates multiple sources of truth to determine the validity of a Power of Attorney (PoA) and the entities involved.
+The `agentauthplus` package provides a high-level verification service that aggregates multiple sources of truth to determine the validity of a Proof of Authorization (PoA) and the entities involved.
 
 ## Overview
 
@@ -29,7 +29,7 @@ One of the key features of AgentAuth+ is the ability to issue **Authoritative At
 
 ## Storage & Persistence
 The service uses a PostgreSQL backend (via `pgx`) for:
-- `PoAStore`: Durable storage of Power of Attorney records.
+- `PoAStore`: Durable storage of Proof of Authorization records.
 - `FiduciaryDutyService`: Tracking violations and compliance.
 - `CapabilityAssessmentService`: Storing AI agent evaluations.
 

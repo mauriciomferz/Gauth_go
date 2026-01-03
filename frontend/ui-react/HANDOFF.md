@@ -31,7 +31,7 @@ A production-ready React 18 application with:
 - ✅ **PVP** - Identity verification with eIDAS trust levels
 - 🔄 **Registry** - Entity/signatory verification (placeholder)
 - 🔄 **PIP** - Authorization validation (placeholder)
-- 🔄 **PoA** - Power of Attorney management (placeholder)
+- 🔄 **PoA** - Proof of Authorization management (placeholder)
 - 🔄 **E2E Testing** - Test execution (placeholder)
 - 🔄 **Metrics** - System metrics charts (placeholder)
 
@@ -105,7 +105,7 @@ go run ./cmd/web-server   # Start Go backend (port 8080)
 - Identity verification (PVP)
 - Entity verification (Registry)
 - Authorization validation (PIP)
-- Power of Attorney management
+- Proof of Authorization management
 - Real-time system metrics
 
 ---
@@ -235,7 +235,7 @@ npm run preview      # Preview production build
 **Tasks**:
 1. Implement Registry page (entity/signatory verification)
 2. Implement PIP page (authorization validation)
-3. Implement PoA page (Power of Attorney)
+3. Implement PoA page (Proof of Authorization)
 4. Implement E2E Testing page
 5. Implement Metrics page (charts with Recharts)
 

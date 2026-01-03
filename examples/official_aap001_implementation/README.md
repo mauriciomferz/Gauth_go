@@ -14,7 +14,7 @@ refreshCadence: on-change
 > **⚠️ BETA DEMONSTRATION NOTICE**
 > This example reflects a **refactored, lean representation** of RFC‑0111 delegation concepts using the *current* exported `AAP-001` package API (delegation lifecycle + audit + in‑memory authz). It is **not production ready** and omits notarization workflows, policy engines, evidence retention, and formal identity assurance. See `DISCLAIMER.md` and `docs/DEPRECATION_TIMELINE.md`.
 
-This directory previously showcased a large graph of deep RFC‑0111 domain structs (`AAP-001ResourceOwner`, `AAP-001Client`, `AAP-001ExtendedToken`, P*P architecture objects, etc.). Those types no longer exist in the simplified public API; the example now focuses on the **delegation (Power of Attorney) lifecycle**, which is the practical core for demonstrating authority transfer.
+This directory previously showcased a large graph of deep RFC‑0111 domain structs (`AAP-001ResourceOwner`, `AAP-001Client`, `AAP-001ExtendedToken`, P*P architecture objects, etc.). Those types no longer exist in the simplified public API; the example now focuses on the **delegation (Proof of Authorization) lifecycle**, which is the practical core for demonstrating authority transfer.
 
 ## Overview (Simplified Scope)
 
@@ -41,7 +41,7 @@ The intent: keep the example runnable and aligned with the real code while still
 ## Key Demonstrated Features
 
 - Mandatory exclusion flags (`ExcludeWeb3`, `ExcludeAIOperators`, `ExcludeDNAIdentities`) validated.
-- Creation of a delegation (Power of Attorney) with scope + simple restrictions.
+- Creation of a delegation (Proof of Authorization) with scope + simple restrictions.
 - Validation of allowed vs. disallowed actions.
 - Revocation and post‑revocation denial.
 - JSON snapshot bundling framework metadata + delegation state.

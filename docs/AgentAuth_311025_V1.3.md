@@ -706,7 +706,7 @@ relying party`s expectations
 Technical enforcement by AgentAuth
 (controls and mechanisms embedded in the AgentAuth architecture)
 
-PoA: Power of Attorney
+PoA: Proof of Authorization
 * G-Agent
 Note: In line with NIST SP 800-162 and NIST SP 800-207
 - All rights reserved -
@@ -876,7 +876,7 @@ ion
 Evaluation of new whitepapers is ongoing - overall trend: current approaches are not
 comprehensively meeting needs for AI identification and authorization
 Legend: X: Requirement not met, O: Requirement partly met; V: Requirement met; * Incl. Owner`s Authorizer; ** I.e., lead agent delegates to team agents
-AIR: Agent Identity Registration; ID: Identity; Agency: Law of Agency; ANS: Agent Naming Service; PoA: Power of Attorney; OIDF: Open ID Foundation, CSA: Cloud Security Alliance
+AIR: Agent Identity Registration; ID: Identity; Agency: Law of Agency; ANS: Agent Naming Service; PoA: Proof of Authorization; OIDF: Open ID Foundation, CSA: Cloud Security Alliance
 Source: Internal review of third-party whitepapers versus AgentAuth protocols (work in progress); A2A: Agent-to-Agent/Google; CSA: Agentic AI IAM; IETF: Wahl, SCIM; OIDF: Identity Management for Agentic AI
 10
 - All rights reserved -
@@ -1318,7 +1318,7 @@ PoA-map level 4 – N:
 Use-case specific PoA attributes
 (example Marketing)
 
-PoA: Power of Attorney; ABPC: Attribute Based Power-of-Attorney Control; RBPC: Role Based Power-of-Attorney Control
+PoA: Proof of Authorization; ABPC: Attribute Based Power-of-Attorney Control; RBPC: Role Based Power-of-Attorney Control
 - All rights reserved -
 
 •
@@ -1371,7 +1371,7 @@ PoA-map of requesting agent, e.g.,
 marketing agent of AgentAuth
 (within AgentAuth called “Client”)
 : Overlap, i.e., collaboration space between agents
-PoA: Power of Attorney
+PoA: Proof of Authorization
 - All rights reserved -
 
 PoA-map of relying agent, e.g.,
@@ -1456,7 +1456,7 @@ compliance with general powers)
 ✅ : Matching, i.e., request being subset of PoA (in other words, each attribute in the transaction must exist in the PoA credential,
 
 and its requested value must be allowed by the credential).
-PoA: Power of Attorney
+PoA: Proof of Authorization
 - All rights reserved -
 
 •
@@ -1569,7 +1569,7 @@ advertising
 
 ✅ : Compliance confirmed (example, )audit trail documented, opportunities to finetune marketing agent identified.
 
-PoA: Power of Attorney
+PoA: Proof of Authorization
 - All rights reserved -
 
 #Restrictions:
@@ -1835,7 +1835,7 @@ Proprietary AgentAuth agreement
 The AgentAuth project to establish both an effective AI governance as well as secure IDs for AgentAuth and its Agent
 Factory is including five PoC workstreams, the 4S-planning and a subsequent global implementation.
 * Conditional OS license subject to overall agreement
-G: AgentAuth; S: AgentAuth; AIR: Agent Identity Registration; SSI: Self-Sovereign-Identity; PoA: Power of Attorney; UKMS: University Clinics of Münster
+G: AgentAuth; S: AgentAuth; AIR: Agent Identity Registration; SSI: Self-Sovereign-Identity; PoA: Proof of Authorization; UKMS: University Clinics of Münster
 - All rights reserved -
 
 22

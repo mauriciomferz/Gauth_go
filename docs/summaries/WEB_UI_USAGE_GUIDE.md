@@ -45,7 +45,7 @@ All web pages are loading correctly and serving proper resources:
 
 ### 2. PoA Visualization (`/poa-visualization.html`)
 
-**Purpose**: 3D visualization of Power of Attorney relationships using Three.js
+**Purpose**: 3D visualization of Proof of Authorization relationships using Three.js
 
 **How to Use**:
 1. Navigate to `http://localhost:8080/poa-visualization.html`

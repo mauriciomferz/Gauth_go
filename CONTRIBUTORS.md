@@ -35,8 +35,8 @@ refreshCadence: quarterly
 - Website: www.AgentAuthFoundation.com
 - Role: Framework Design and Specification
 - Contributions:
-  - AAP-RFC-0111 AgentAuth 1.0 Authorization Framework
-  - AAP-RFC-0115 Power-of-Attorney Credential Definition
+  - AAP-001 AgentAuth 1.0 Authorization Framework
+  - AAP-002 Power-of-Attorney Credential Definition
   - System architecture and security concepts
 
 ## Acknowledgments

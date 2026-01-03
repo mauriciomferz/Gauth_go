@@ -390,7 +390,7 @@ npm run dev
 ### Priority 3: Complete Remaining Pages (1-2 days)
 - [ ] Registry.tsx - Entity/signatory verification
 - [ ] PIP.tsx - Authorization validation
-- [ ] PoA.tsx - Power of Attorney management
+- [ ] PoA.tsx - Proof of Authorization management
 - [ ] E2ETesting.tsx - Test execution
 - [ ] Metrics.tsx - System metrics charts
 

@@ -11,7 +11,7 @@ owners: architecture-team
 ## Purpose
 
 This document provides a practical implementation guide for integrating RFC 9396 (Rich Authorization Requests) into AgentAuth to combine:
-- **AgentAuth**: Legal delegation chains and Power of Attorney framework
+- **AgentAuth**: Legal delegation chains and Proof of Authorization framework
 - **RFC 9396**: Fine-grained resource-level permissions
 
 ---
@@ -22,7 +22,7 @@ This document provides a practical implementation guide for integrating RFC 9396
 
 | Capability | AgentAuth Provides | RFC 9396 Provides |
 |:-----------|:---------------|:------------------|
-| **Legal Authority** | ✅ Power of Attorney | - |
+| **Legal Authority** | ✅ Proof of Authorization | - |
 | **Authorization Chains** | ✅ Multi-level validation | - |
 | **Commercial Register** | ✅ Corporate authority | - |
 | **Identity Verification** | ✅ PVP (18 countries) | - |
@@ -249,7 +249,7 @@ Client Request
 ┌─────────────────────────────────────────┐
 │ Step (a): Authorization Request         │
 │ • Subscription ID                       │
-│ • Power of Attorney reference           │
+│ • Proof of Authorization reference           │
 │ • authorization_details (RFC 9396) ←NEW │
 └─────────────────────────────────────────┘
       ↓
@@ -687,7 +687,7 @@ Integrating RFC 9396 (Rich Authorization Requests) into AgentAuth creates **the 
 
 **Implementation is straightforward**:
 1. Add `authorization_details` field to token requests
-2. Validate details against Power of Attorney
+2. Validate details against Proof of Authorization
 3. Embed details in Extended Tokens
 4. Validate at Resource Server
 

@@ -6,7 +6,7 @@ lastUpdated: 2025-11-12
 owners: architecture-team
 refreshCadence: on-change
 ---
-# Multi-Signature Power of Attorney (PoA) - Beta Implementation
+# Multi-Signature Proof of Authorization (PoA) - Beta Implementation
 
 **GAP_MATRIX Reference:** `sec3.item3` - Joint/collective signature enforcement  
 **AAP-002 Section:** Section B (Authorization Type)  
@@ -14,7 +14,7 @@ refreshCadence: on-change
 
 ## Overview
 
-This **beta implementation** provides M-of-N threshold signature collection and verification for Power of Attorney (PoA) delegations, enabling multi-party authorization workflows with cryptographic proof of collective approval.
+This **beta implementation** provides M-of-N threshold signature collection and verification for Proof of Authorization (PoA) delegations, enabling multi-party authorization workflows with cryptographic proof of collective approval.
 
 ### Key Features
 

@@ -93,7 +93,7 @@ npm run test:codegen
 
 ### Other Pages (all-pages.spec.ts)
 - ✅ PIP authorization form & cache stats
-- ✅ PoA creation form & RFC-0115 compliance
+- ✅ PoA creation form & AAP-002 compliance
 - ✅ E2E Testing controls & coverage
 - ✅ Metrics dashboard & stat cards
 

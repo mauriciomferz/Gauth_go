@@ -1,5 +1,5 @@
 ---
-title: ADR Multi-Signature / Threshold Enforcement for Power of Attorney
+title: ADR Multi-Signature / Threshold Enforcement for Proof of Authorization
 category: adr
 status: proposed
 lastUpdated: 2025-11-12
@@ -7,13 +7,13 @@ owners: architecture-team
 source: internal
 refreshCadence: on-change
 ---
-# ADR: Multi-Signature / Threshold Enforcement for Power of Attorney
+# ADR: Multi-Signature / Threshold Enforcement for Proof of Authorization
 
 Status: Proposed
 Date: 2025-10-20
 Drivers:
 
-Summary: Proposes N-of-M multi-signature/threshold enforcement for Power of Attorney, verification API, metrics, and audit log integration. Implementation in beta-refactor branch.
+Summary: Proposes N-of-M multi-signature/threshold enforcement for Proof of Authorization, verification API, metrics, and audit log integration. Implementation in beta-refactor branch.
 
 References: See GAP_MATRIX Section 15, implementation in `internal/poa/multisig.go`, tests in `internal/poa/multisig_test.go`.
 

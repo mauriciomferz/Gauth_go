@@ -3437,7 +3437,7 @@ type EnhancedPoA struct {
 	CreatedAt        time.Time   `json:"created_at"`
 	UpdatedAt        time.Time   `json:"updated_at"`
 }
-    EnhancedPoA represents the enhanced Power of Attorney structure
+    EnhancedPoA represents the enhanced Proof of Authorization structure
 
 type EthereumAdapter struct {
 	// Has unexported fields.
@@ -11308,7 +11308,7 @@ type PIP interface {
 	GetAuthorizationServerInfo(ctx context.Context, serverID string) (*AuthorizationServerInfo, error)
 	GetResourceOwnerInfo(ctx context.Context, ownerID string) (*ResourceOwnerInfo, error)
 
-	// Power of Attorney Queries
+	// Proof of Authorization Queries
 	GetPoAByID(ctx context.Context, poaID string) (*poa.PoADefinition, error)
 	GetPoAsByClient(ctx context.Context, clientID string) ([]*poa.PoADefinition, error)
 	GetPoAsByOwner(ctx context.Context, ownerID string) ([]*poa.PoADefinition, error)
@@ -11628,7 +11628,7 @@ type PolicyType string
     PolicyType represents the type of authorization policy
 
 const (
-	// PolicyTypePoA - Power of Attorney policy
+	// PolicyTypePoA - Proof of Authorization policy
 	PolicyTypePoA PolicyType = "poa"
 
 	// PolicyTypeAuthorizationChain - Authorization chain policy
@@ -12011,7 +12011,7 @@ type RFCCompliantAuthorizationRequest struct {
 	RequestedAction      *ActionRequest
 	AuthorizationDetails []AuthorizationDetail
 
-	// Power of Attorney reference
+	// Proof of Authorization reference
 	PoACredentialRef string
 
 	// Geographic context for scope validation (ISO 3166-1 alpha-2 or ISO 3166-2)
@@ -12911,7 +12911,7 @@ func (p *UnifiedPIP) GetOwnersAuthorizerInfo(ctx context.Context, authorizerID s
     GetOwnersAuthorizerInfo retrieves owner's authorizer information
 
 func (p *UnifiedPIP) GetPoAByID(ctx context.Context, poaID string) (*poa.PoADefinition, error)
-    GetPoAByID retrieves a Power of Attorney by ID
+    GetPoAByID retrieves a Proof of Authorization by ID
 
 func (p *UnifiedPIP) GetPoAsByClient(ctx context.Context, clientID string) ([]*poa.PoADefinition, error)
     GetPoAsByClient retrieves all PoAs for a client
@@ -12941,7 +12941,7 @@ func (p *UnifiedPIP) RegisterOwnersAuthorizer(authorizerInfo *OwnersAuthorizerIn
     RegisterOwnersAuthorizer registers an owner's authorizer in the PIP
 
 func (p *UnifiedPIP) RegisterPoA(poaDef *poa.PoADefinition, poaID string) error
-    RegisterPoA registers a Power of Attorney in the PIP
+    RegisterPoA registers a Proof of Authorization in the PIP
 
 func (p *UnifiedPIP) SetAttribute(ctx context.Context, attrName string, subject string, value interface{}) error
     SetAttribute sets an attribute value for a subject
@@ -18307,7 +18307,7 @@ type PoAData struct {
 	Signature      []byte
 	Principal      PrincipalContact
 }
-    PoAData represents a Power of Attorney with metadata.
+    PoAData represents a Proof of Authorization with metadata.
 
 type PoARegistry interface {
 	Store(ctx context.Context, poa *PoAData) error
@@ -19814,7 +19814,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 
     Parameters:
       - ctx: request context (may contain session metadata)
-      - poa: the Power of Attorney credential being validated
+      - poa: the Proof of Authorization credential being validated
       - sessionUser: the authenticated user identity from the current session
         (e.g., DID, email, subject claim)
 
@@ -19847,7 +19847,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 
     Parameters:
       - ctx: request context
-      - poa: the Power of Attorney credential
+      - poa: the Proof of Authorization credential
       - requestedAction: the action being attempted (e.g., "read", "write",
         "delete", "payment/send")
       - requestedAmount: optional amount for financial transactions (nil if not
@@ -20537,7 +20537,7 @@ type EnhancedPoA struct {
 	RevokedBy        *string                 `json:"revoked_by,omitempty"`
 	RevocationReason *string                 `json:"revocation_reason,omitempty"`
 }
-    EnhancedPoA represents the enhanced Power of Attorney structure
+    EnhancedPoA represents the enhanced Proof of Authorization structure
 
 type FiduciaryComplianceCheck struct {
 	Compliant      bool                 `json:"compliant"`
@@ -21117,7 +21117,7 @@ package gnap // import "github.com/mauriciomferz/AgentAuth/pkg/gnap"
 
 Package gnap implements RFC 9635 Grant Negotiation and Authorization Protocol.
 This provides modern authorization with grant negotiation, flexible interaction
-modes, and token management, extended with AgentAuth's Power of Attorney support.
+modes, and token management, extended with AgentAuth's Proof of Authorization support.
 
 CONSTANTS
 
@@ -21187,7 +21187,7 @@ type AccessToken struct {
 	// Flags for this token
 	Flags []TokenFlag `json:"flags,omitempty"`
 
-	// PoAID references embedded Power of Attorney
+	// PoAID references embedded Proof of Authorization
 	PoAID string `json:"poa_id,omitempty"`
 
 	// IssuedAt timestamp
@@ -21308,7 +21308,7 @@ type Grant struct {
 	// ExpiresAt for grant timeout
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 
-	// PoAID if linked to Power of Attorney
+	// PoAID if linked to Proof of Authorization
 	PoAID string `json:"poa_id,omitempty"`
 
 	// SubscriptionID if linked to AgentAuth subscription
@@ -21347,7 +21347,7 @@ type GrantRequest struct {
 	// Interact describes interaction capabilities (§2.5)
 	Interact *InteractionRequest `json:"interact,omitempty"`
 
-	// PoACredentialRef references a Power of Attorney credential
+	// PoACredentialRef references a Proof of Authorization credential
 	PoACredentialRef string `json:"poa_credential_ref,omitempty"`
 
 	// SubscriptionID links to existing AgentAuth subscription (migration path)
@@ -21845,7 +21845,7 @@ func (h *BlockchainVerificationHandler) VerifyAIAgent(w http.ResponseWriter, r *
     VerifyAIAgent verifies an AI agent's registration and powers
 
 func (h *BlockchainVerificationHandler) VerifyPoA(w http.ResponseWriter, r *http.Request)
-    VerifyPoA verifies a Power of Attorney on the blockchain Public endpoint -
+    VerifyPoA verifies a Proof of Authorization on the blockchain Public endpoint -
     no authentication required
 
 type CachedVerification struct {
@@ -23056,7 +23056,7 @@ var (
 	PoACreatedTotal = promauto.NewCounter(
 		prometheus.CounterOpts{
 			Name: "agentauth_poa_created_total",
-			Help: "Total number of Power of Attorney credentials created",
+			Help: "Total number of Proof of Authorization credentials created",
 		},
 	)
 
@@ -27967,7 +27967,7 @@ func (pip *DefaultPIP) GetOwnersAuthorizerInfo(ctx context.Context, authorizerID
     GetOwnersAuthorizerInfo retrieves owner's authorizer information
 
 func (pip *DefaultPIP) GetPoADefinition(ctx context.Context, poaID string) (*poa.PoADefinition, error)
-    GetPoADefinition retrieves a Power of Attorney definition
+    GetPoADefinition retrieves a Proof of Authorization definition
 
 func (pip *DefaultPIP) GetPowerLimits(ctx context.Context, clientID string) (*poa.PowerLimitSet, error)
     GetPowerLimits retrieves power limitations for a client
@@ -27991,7 +27991,7 @@ func (pip *DefaultPIP) VerifyIdentityChain(ctx context.Context, req *pvp.Identit
     VerifyIdentityChain verifies complete identity verification chain
 
 type PowerInformationPoint interface {
-	// GetPoADefinition retrieves a Power of Attorney definition by ID
+	// GetPoADefinition retrieves a Proof of Authorization definition by ID
 	GetPoADefinition(ctx context.Context, poaID string) (*poa.PoADefinition, error)
 
 	// GetAuthorizationChain retrieves the complete authorization chain for a client
@@ -28037,7 +28037,7 @@ type PowerInformationPoint interface {
 	GetCacheStats() *CacheStats
 }
     PowerInformationPoint (PIP) consolidates authorization data from multiple
-    sources AAP-001 §5: PIP provides centralized access to: - Power of Attorney
+    sources AAP-001 §5: PIP provides centralized access to: - Proof of Authorization
     definitions - Authorization chains - Commercial register data - Identity
     verification results - Trust service provider information
 
@@ -28625,7 +28625,7 @@ type AuthorizationProof struct {
 	ProofType AuthorizationProofType `json:"proof_type"`
 
 	// DocumentReference points to the authorizing document
-	// Examples: "Commercial Register Entry HRB 12345", "Power of Attorney #2024-001"
+	// Examples: "Commercial Register Entry HRB 12345", "Proof of Authorization #2024-001"
 	DocumentReference string `json:"document_reference"`
 
 	// IssuingAuthority identifies who issued the proof
@@ -29518,7 +29518,7 @@ type PoATemplate struct {
 type PoAValidator interface {
 	Validate(poA *PowerOfAttorney) ([]ValidationWarning, error)
 }
-    PoAValidator defines the interface for Power of Attorney validation.
+    PoAValidator defines the interface for Proof of Authorization validation.
 
 type PowerLimitSet struct {
 	ModelLimits         *ModelLimits         `json:"model_limits,omitempty"`
@@ -29720,7 +29720,7 @@ func (rd *ReportingDuty) Validate() error
 type Repository struct {
 	// Has unexported fields.
 }
-    Repository handles Power of Attorney data operations
+    Repository handles Proof of Authorization data operations
 
 func NewRepository(db *pgxpool.Pool) *Repository
     NewRepository creates a new PoA repository
@@ -34828,7 +34828,7 @@ type PoAGraph struct {
 	UpdatedAt   time.Time              `json:"updated_at"`
 	Stats       PoAGraphStats          `json:"stats"`
 }
-    PoAGraph represents the complete Power of Attorney relationship graph
+    PoAGraph represents the complete Proof of Authorization relationship graph
 
 func (g *PoAGraph) AddEdge(sourceID, targetID, edgeType, label string, strength float64, metadata map[string]interface{}) *PoAEdge
     AddEdge adds an edge between two nodes
@@ -34871,7 +34871,7 @@ type PoANode struct {
 	CreatedAt   time.Time              `json:"created_at"`
 	UpdatedAt   time.Time              `json:"updated_at"`
 }
-    PoANode represents a node in the Power of Attorney relationship graph
+    PoANode represents a node in the Proof of Authorization relationship graph
 
 type PoAVisualizer struct {
 	// Has unexported fields.
@@ -36773,41 +36773,41 @@ type PerformanceMetric struct {
 type PoAHandler struct {
 	// Has unexported fields.
 }
-    PoAHandler manages Power of Attorney operations for the admin portal
+    PoAHandler manages Proof of Authorization operations for the admin portal
 
 func NewPoAHandler(db *pgxpool.Pool) *PoAHandler
     NewPoAHandler creates a new PoA handler instance
 
 func (h *PoAHandler) ApprovePoA(c *gin.Context)
-    ApprovePoA approves a pending Power of Attorney POST
+    ApprovePoA approves a pending Proof of Authorization POST
     /api/admin/poa/:id/approve
 
 func (h *PoAHandler) CreatePoA(c *gin.Context)
-    CreatePoA creates a new Power of Attorney delegation POST /api/admin/poa
+    CreatePoA creates a new Proof of Authorization delegation POST /api/admin/poa
 
 func (h *PoAHandler) GetPoA(c *gin.Context)
-    GetPoA retrieves details of a specific Power of Attorney GET
+    GetPoA retrieves details of a specific Proof of Authorization GET
     /api/admin/poa/:id
 
 func (h *PoAHandler) GetPoAHistory(c *gin.Context)
-    GetPoAHistory returns the audit history of a Power of Attorney GET
+    GetPoAHistory returns the audit history of a Proof of Authorization GET
     /api/admin/poa/:id/history
 
 func (h *PoAHandler) GetPoAMetrics(c *gin.Context)
-    GetPoAMetrics returns metrics about Power of Attorney usage GET
+    GetPoAMetrics returns metrics about Proof of Authorization usage GET
     /api/admin/poa/metrics
 
 func (h *PoAHandler) ListPoAs(c *gin.Context)
-    ListPoAs returns all Power of Attorney delegations GET /api/admin/poa
+    ListPoAs returns all Proof of Authorization delegations GET /api/admin/poa
 
 func (h *PoAHandler) RegisterRoutes(router *gin.RouterGroup)
-    RegisterRoutes registers all Power of Attorney routes
+    RegisterRoutes registers all Proof of Authorization routes
 
 func (h *PoAHandler) RejectPoA(c *gin.Context)
-    RejectPoA rejects a pending Power of Attorney POST /api/admin/poa/:id/reject
+    RejectPoA rejects a pending Proof of Authorization POST /api/admin/poa/:id/reject
 
 func (h *PoAHandler) RevokePoA(c *gin.Context)
-    RevokePoA revokes a Power of Attorney POST /api/admin/poa/:id/revoke
+    RevokePoA revokes a Proof of Authorization POST /api/admin/poa/:id/revoke
 
 func (h *PoAHandler) SetCache(c cache.Cache)
     SetCache sets the cache instance for the handler
@@ -36820,7 +36820,7 @@ type PoAListResponse struct {
 	PowerOfAttorneys []PowerOfAttorney `json:"powerOfAttorneys"`
 	Total            int               `json:"total"`
 }
-    PoAListResponse represents the list of Power of Attorneys
+    PoAListResponse represents the list of Proof of Authorizations
 
 type PoARequest struct {
 	PrincipalID        string   `json:"principalId" binding:"required"`
@@ -36837,7 +36837,7 @@ type PoARequest struct {
 	NotificationEmail  string   `json:"notificationEmail"`
 	Reason             string   `json:"reason"`
 }
-    PoARequest represents the request to create a Power of Attorney
+    PoARequest represents the request to create a Proof of Authorization
 
 type Policy struct {
 	ID          string   `json:"id"`
@@ -38114,7 +38114,7 @@ type CreatePoARequest struct {
 	Jurisdiction string            `json:"jurisdiction,omitempty"`
 	Witnesses    []string          `json:"witnesses,omitempty"`
 }
-    CreatePoARequest represents the request to create a Power of Attorney
+    CreatePoARequest represents the request to create a Proof of Authorization
 
 type EntityDetails struct {
 	ID           string    `json:"id"`
@@ -38263,13 +38263,13 @@ type PersonDetails struct {
 type PoAHandler struct {
 	// Has unexported fields.
 }
-    PoAHandler provides HTTP handlers for Power of Attorney CRUD operations
+    PoAHandler provides HTTP handlers for Proof of Authorization CRUD operations
 
 func NewPoAHandler() *PoAHandler
     NewPoAHandler creates a new PoA HTTP handler
 
 func (h *PoAHandler) HandleCreate(c *gin.Context)
-    HandleCreate creates a new Power of Attorney
+    HandleCreate creates a new Proof of Authorization
 
     POST /api/v1/beta/poa
 
@@ -38299,7 +38299,7 @@ func (h *PoAHandler) HandleCreate(c *gin.Context)
         }
 
 func (h *PoAHandler) HandleDelete(c *gin.Context)
-    HandleDelete revokes/deletes a Power of Attorney
+    HandleDelete revokes/deletes a Proof of Authorization
 
     DELETE /api/v1/beta/poa/:id
 
@@ -38311,7 +38311,7 @@ func (h *PoAHandler) HandleDelete(c *gin.Context)
         }
 
 func (h *PoAHandler) HandleGet(c *gin.Context)
-    HandleGet retrieves a Power of Attorney by ID
+    HandleGet retrieves a Proof of Authorization by ID
 
     GET /api/v1/beta/poa/:id
 
@@ -38330,7 +38330,7 @@ func (h *PoAHandler) HandleGet(c *gin.Context)
         }
 
 func (h *PoAHandler) HandleList(c *gin.Context)
-    HandleList lists all Power of Attorney documents with optional filters
+    HandleList lists all Proof of Authorization documents with optional filters
 
     GET /api/v1/beta/poa?grantor=xxx&grantee=yyy&status=active
 
@@ -38343,7 +38343,7 @@ func (h *PoAHandler) HandleList(c *gin.Context)
         }
 
 func (h *PoAHandler) HandleUpdate(c *gin.Context)
-    HandleUpdate updates an existing Power of Attorney
+    HandleUpdate updates an existing Proof of Authorization
 
     PUT /api/v1/beta/poa/:id
 
@@ -38363,7 +38363,7 @@ func (h *PoAHandler) HandleUpdate(c *gin.Context)
         }
 
 func (h *PoAHandler) HandleValidate(c *gin.Context)
-    HandleValidate validates a Power of Attorney for a specific action
+    HandleValidate validates a Proof of Authorization for a specific action
 
     POST /api/v1/beta/poa/:id/validate
 
@@ -38399,14 +38399,14 @@ type PoAListResponse struct {
 	Total   int                              `json:"total"`
 	Error   string                           `json:"error,omitempty"`
 }
-    PoAListResponse represents a list of Power of Attorney documents
+    PoAListResponse represents a list of Proof of Authorization documents
 
 type PoAResponse struct {
 	Success bool                           `json:"success"`
 	PoA     *agentauth_rfc_001.PowerOfAttorney `json:"poa,omitempty"`
 	Error   string                         `json:"error,omitempty"`
 }
-    PoAResponse represents a Power of Attorney response
+    PoAResponse represents a Proof of Authorization response
 
 type PoAValidationResponse struct {
 	Success   bool                           `json:"success"`
@@ -38516,14 +38516,14 @@ type UpdatePoARequest struct {
 	ValidUntil   string            `json:"valid_until,omitempty"` // ISO8601
 	Status       string            `json:"status,omitempty"`
 }
-    UpdatePoARequest represents the request to update a Power of Attorney
+    UpdatePoARequest represents the request to update a Proof of Authorization
 
 type ValidatePoARequest struct {
 	Action    string `json:"action" binding:"required"`
 	Context   string `json:"context,omitempty"`
 	Timestamp string `json:"timestamp,omitempty"` // ISO8601
 }
-    ValidatePoARequest represents the request to validate a Power of Attorney
+    ValidatePoARequest represents the request to validate a Proof of Authorization
 
 type VerificationDetails struct {
 	Method     string    `json:"method"`
@@ -39389,7 +39389,7 @@ Package gnap provides Prometheus metrics for GNAP operations.
 
 Package gnap provides HTTP handlers for RFC 9635 GNAP endpoints.
 
-Package gnap provides PoA bridge for linking GNAP grants to Power of Attorney
+Package gnap provides PoA bridge for linking GNAP grants to Proof of Authorization
 credentials.
 
 VARIABLES
@@ -39556,7 +39556,7 @@ type KeyResolver func(keyID string) (any, error)
 type PoABridge struct {
 	// Has unexported fields.
 }
-    PoABridge links GNAP grants to Power of Attorney credentials.
+    PoABridge links GNAP grants to Proof of Authorization credentials.
 
 func NewPoABridge(store gnap.GrantStore, poaProvider PoAProvider) *PoABridge
     NewPoABridge creates a new GNAP-PoA bridge.
@@ -39565,7 +39565,7 @@ func (b *PoABridge) GetPoAForGrant(grantID string) (poaID string, err error)
     GetPoAForGrant retrieves the PoA reference for a GNAP grant.
 
 func (b *PoABridge) LinkGrantToPoA(grantID, poaID, delegationRef string) (*GrantWithPoA, error)
-    LinkGrantToPoA associates a GNAP grant with a Power of Attorney credential.
+    LinkGrantToPoA associates a GNAP grant with a Proof of Authorization credential.
 
 func (b *PoABridge) ValidatePoAAuthority(grantID string) (valid bool, reason string, err error)
     ValidatePoAAuthority checks if a GNAP grant's linked PoA has valid
@@ -40051,7 +40051,7 @@ TYPES
 type Handler struct {
 	// Has unexported fields.
 }
-    Handler manages Power of Attorney (POA) related endpoints.
+    Handler manages Proof of Authorization (POA) related endpoints.
 
 func NewHandler() *Handler
     NewHandler creates a new POA handler.

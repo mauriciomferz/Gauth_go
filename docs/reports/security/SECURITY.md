@@ -2,7 +2,7 @@
 
 **Version:** 1.0 (v0.9.1)  
 **Date:** November 21, 2025  
-**Applies To:** `pkg/aap001` Power of Attorney Validation Framework
+**Applies To:** `pkg/aap001` Proof of Authorization Validation Framework
 
 ---
 

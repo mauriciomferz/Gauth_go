@@ -25,7 +25,7 @@ All 8 steps of the subscription flow are implemented and tested:
 - **Step II**: Identity Verification - PIP token validation with idempotency protection
 - **Step III**: Subscriber Confirmation - User consent and confirmation
 - **Step IV**: Authorization Chain Building - 3-level chain (authorizer → owner → client)
-- **Step V**: PoA Credential Submission - Power of Attorney creation and validation
+- **Step V**: PoA Credential Submission - Proof of Authorization creation and validation
 - **Step VI**: PoA Validation - Comprehensive PoA structure validation
 - **Step VII**: Subscription Finalization - Subscription state transition to "completed"
 - **Step VIII**: Subscription Confirmation - Final status reporting
@@ -57,7 +57,7 @@ All 9 steps of the authorization flow are implemented and tested:
 **Token Features**:
 - OAuth 2.0 compatible (Bearer token)
 - Extended metadata per AAP-001
-- Power of Attorney embedded in token
+- Proof of Authorization embedded in token
 - 3-level authorization chain (owners_authorizer → client_owner → client)
 - Legal framework (EU-GDPR, Germany jurisdiction)
 - Compliance status tracking
@@ -78,7 +78,7 @@ Implemented OAuth scope to AAP-001 action mapping:
 - `web/handlers/aap001/authorization_handlers.go` - Enhanced `parseBasicScope()`
 - `pkg/agentauth/protocol_orchestrator.go` - Scopes array population
 
-### 2. Power of Attorney Integration
+### 2. Proof of Authorization Integration
 
 Implemented complete PoA structure with all required fields:
 - Parties (Principal, AuthorizedClient)
@@ -221,7 +221,7 @@ The implementation validates the following AAP-001 requirements:
 - ✅ Request structure (client ID, scopes)
 - ✅ Client identification via PIP
 - ✅ Authorization chain validation (3 levels)
-- ✅ Power of Attorney presence and validation
+- ✅ Proof of Authorization presence and validation
 - ✅ PoA authorized client active status
 - ✅ Legal framework requirements
 
@@ -233,7 +233,7 @@ The implementation validates the following AAP-001 requirements:
 
 ### Token Compliance (Step e)
 - ✅ Authorization chain validation
-- ✅ Power of Attorney validation
+- ✅ Proof of Authorization validation
 - ✅ Client owner information
 - ✅ Owner's authorizer information
 - ✅ Legal framework information
@@ -298,7 +298,7 @@ The AAP-001 implementation is **fully operational** with both subscription and a
 
 The implementation successfully demonstrates:
 - ✅ Multi-party authorization chains
-- ✅ Power of Attorney integration
+- ✅ Proof of Authorization integration
 - ✅ Legal framework compliance
 - ✅ Comprehensive verification proofs
 - ✅ Compliance tracking

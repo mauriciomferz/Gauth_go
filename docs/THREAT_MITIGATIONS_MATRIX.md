@@ -155,6 +155,6 @@ See `docs/RESIDUAL_RISKS.md` for unmitigated risks requiring future work (sec14.
 ## References
 
 - AAP-001: AgentAuth Protocol Specification
-- AAP-002: Power of Attorney Definition
+- AAP-002: Proof of Authorization Definition
 - [GAP_MATRIX.md](GAP_MATRIX.md): Detailed conformance tracking
 - [REMAINING_GAPS_ANALYSIS.md](REMAINING_GAPS_ANALYSIS.md): Architectural gaps discussion

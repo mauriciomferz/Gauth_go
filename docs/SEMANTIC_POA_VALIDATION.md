@@ -6,11 +6,11 @@ lastUpdated: 2025-12-25
 owners: [system]
 ---
 
-# Semantic Power of Attorney (PoA) Validation (P0.4)
+# Semantic Proof of Authorization (PoA) Validation (P0.4)
 
 ## Overview
 
-The **Semantic PoA Validator** provides comprehensive AAP-002-compliant semantic validation for Power of Attorney delegations, ensuring that PoA structures conform to both syntactic and semantic requirements. This addresses the final P0 critical gap (sec3.item1) by extending beyond basic field validation to full semantic checking.
+The **Semantic PoA Validator** provides comprehensive AAP-002-compliant semantic validation for Proof of Authorization delegations, ensuring that PoA structures conform to both syntactic and semantic requirements. This addresses the final P0 critical gap (sec3.item1) by extending beyond basic field validation to full semantic checking.
 
 ## Architecture
 
@@ -743,7 +743,7 @@ type ValidationWarning struct {
 
 ## References
 
-- AAP-002: Power of Attorney Delegation Semantics
+- AAP-002: Proof of Authorization Delegation Semantics
 - AAP-001 § 3.7: PoA Validation Requirements
 - `pkg/aap001/validator.go`: Basic/Advanced validators
 - `pkg/aap001/validator_enhanced.go`: Semantic validator implementation

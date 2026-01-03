@@ -11,7 +11,7 @@
 
 | Handler | Status | Endpoint | Records |
 |---------|--------|----------|---------|
-| Power of Attorney | ✅ | `/api/admin/poa` | 1 |
+| Proof of Authorization | ✅ | `/api/admin/poa` | 1 |
 | Resilience | ✅ | `/api/admin/resilience/*` | 1 CB |
 | Events | ✅ | `/api/admin/events` | 0 |
 | Authorization | ✅ | `/api/admin/authz/*` | 1 |

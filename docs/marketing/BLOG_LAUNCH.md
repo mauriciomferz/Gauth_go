@@ -51,7 +51,7 @@ Consider the difference:
 | Concept | Real-World Analog | Digital Equivalent |
 |---------|------------------|-------------------|
 | **Access Token** | House key | Can open door; cannot sell house |
-| **Power of Attorney** | Legal document | Can act on behalf of principal; legally binding |
+| **Proof of Authorization** | Legal document | Can act on behalf of principal; legally binding |
 | **PoA Token** | Notarized, limited PoA | Cryptographically verifiable; scope-limited; auditable |
 
 Today's AI agents are running around with house keys. They need powers of attorney.

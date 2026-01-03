@@ -41,7 +41,7 @@ Successfully completed comprehensive API documentation and developer experience 
 **Coverage:**
 - System endpoints (health, info, ping)
 - AAP-001 subscription flow (10 endpoints)
-- Power of Attorney (6 endpoints)
+- Proof of Authorization (6 endpoints)
 - Authorization evaluation (2 endpoints)
 - PVP identity verification (1 endpoint)
 - Commercial registry (2 endpoints)
@@ -141,7 +141,7 @@ Successfully completed comprehensive API documentation and developer experience 
 **Deliverables:**
 - 7 major workflow tutorials:
   1. AAP-001 Subscription Flow
-  2. Power of Attorney Management
+  2. Proof of Authorization Management
   3. Token Management
   4. Authorization Evaluation
   5. Identity Verification (PVP)

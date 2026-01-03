@@ -17,7 +17,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 - **HTTP Message Signatures**: RFC 9421 support for Ed25519, ECDSA, RSA key types
 - **Discovery Endpoint**: `/.well-known/gnap-as-rs` for client configuration
 - **Auth Middleware**: Signature verification and token validation middleware
-- **PoA Bridge**: Link GNAP grants to Power of Attorney credentials
+- **PoA Bridge**: Link GNAP grants to Proof of Authorization credentials
 - **Prometheus Metrics**: 6 metrics for grants, tokens, and signature verification
 - **Audit Logging**: 6 new event types for GNAP operations
 
@@ -47,7 +47,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 - **Test Coverage**: 100% conformance (8/8 clauses, 24/24 symbols)
 
 ### Fixed
-- **Web Interface**: Fixed non-working "Check Authorization" and "Generate Power of Attorney" buttons
+- **Web Interface**: Fixed non-working "Check Authorization" and "Generate Proof of Authorization" buttons
 - **Jurisdiction Validation**: Corrected invalid jurisdiction from 'US-CA' to 'US' (valid jurisdictions: US, EU, UK, DE)
 - **Pattern Simulation**: Removed all hardcoded pattern IDs and data-action attributes
 - **Authorization Demo**: Updated defaults to show ALLOW decisions with alice@example.com and report:finance

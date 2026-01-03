@@ -737,7 +737,7 @@ The following residual risks have been accepted with documented justification:
 ├─────────────────────────────────────────────────────────┤
 │  Week 1: AgentAuth Fundamentals                             │
 │  • AAP-001 overview (2 hours)                          │
-│  • AAP-002 Power of Attorney (2 hours)                 │
+│  • AAP-002 Proof of Authorization (2 hours)                 │
 │  • Architecture deep dive (3 hours)                     │
 │  • Hands-on lab exercises (3 hours)                     │
 │                                                         │

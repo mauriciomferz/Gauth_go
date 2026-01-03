@@ -8,12 +8,12 @@ owners: [system]
 
 # PoA Visualization System
 
-Think Machine-inspired 3D visualization for Power of Attorney relationships and protocol flows.
+Think Machine-inspired 3D visualization for Proof of Authorization relationships and protocol flows.
 
 ## Overview
 
 The PoA Visualization system provides interactive 3D visualizations for understanding:
-- **Power of Attorney Graphs**: Relationship networks between principals, agents, AI clients, and resources
+- **Proof of Authorization Graphs**: Relationship networks between principals, agents, AI clients, and resources
 - **Protocol Steps**: Layered 3D visualization of AgentAuth protocol steps (Subscription, Matching, Request)
 
 ## Architecture

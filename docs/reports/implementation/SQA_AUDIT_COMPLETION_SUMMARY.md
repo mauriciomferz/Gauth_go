@@ -294,7 +294,7 @@ Before: AAP-001 (both AgentAuth and Ethereum use same identifier)
 After:  agentauth_rfc_001 (unique namespace, no collision)
 
 Conflict: Ethereum AAP-001 defines "Account Abstraction"
-          AgentAuth AAP-001 defines "Power of Attorney Lifecycle"
+          AgentAuth AAP-001 defines "Proof of Authorization Lifecycle"
           
 Impact: Tooling confusion, governance conflicts, implementation ambiguity
 ```
@@ -490,7 +490,7 @@ func (t *TimelockPoA) CreateWithDelay(ctx context.Context, poa *PoAData) (string
     
     // Send multi-channel notification
     notification := fmt.Sprintf(`
-🔔 AgentAuth: New Power of Attorney Created
+🔔 AgentAuth: New Proof of Authorization Created
 
 ⏰ Activation Time: %s (24 hours from now)
 
@@ -537,7 +537,7 @@ func (t *TimelockPoA) CancelPoA(ctx context.Context, poaID string) error {
     
     // Send cancellation confirmation
     notification := fmt.Sprintf(`
-AgentAuth: Power of Attorney Cancelled
+AgentAuth: Proof of Authorization Cancelled
 
 Your PoA (ID: %s) has been successfully cancelled.
 
@@ -554,9 +554,9 @@ If you did not request this cancellation, contact security@agentauth.example.com
 
 **Initial Alert** (sent immediately):
 ```
-🔔 AgentAuth: New Power of Attorney Created
+🔔 AgentAuth: New Proof of Authorization Created
 
-IMPORTANT: A new Power of Attorney has been created for your account.
+IMPORTANT: A new Proof of Authorization has been created for your account.
 
 ⏰ Activation Time: 2025-11-27T16:00:00Z (24 hours from now)
 
@@ -577,7 +577,7 @@ delay gives you time to cancel the fraudulent PoA before it becomes active.
 ```
 ⏰ AgentAuth Reminder: PoA Activates Soon
 
-Your Power of Attorney will activate in approximately 12 hours.
+Your Proof of Authorization will activate in approximately 12 hours.
 
 PoA ID: poa_abc123
 Grantee: 0xAIAgent
@@ -588,9 +588,9 @@ To cancel: https://agentauth.example.com/cancel/poa_abc123
 
 **Activation Confirmation**:
 ```
-✅ AgentAuth: Power of Attorney Activated
+✅ AgentAuth: Proof of Authorization Activated
 
-Your Power of Attorney is now ACTIVE.
+Your Proof of Authorization is now ACTIVE.
 
 PoA ID: poa_abc123
 Grantee: 0xAIAgent
@@ -605,9 +605,9 @@ $ go test ./pkg/agentauth/verification -v -cover
 
 === RUN   TestDualChannelVerifier_RequestVerification
 [MOCK SMS] To: +1234567890
-Message: AgentAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A
+Message: AgentAuth Security: Confirm Proof of Authorization creation with code: VA3R-XZ3A
 [MOCK EMAIL] To: principal@example.com
-Subject: AgentAuth: Confirm Power of Attorney Creation
+Subject: AgentAuth: Confirm Proof of Authorization Creation
 --- PASS: TestDualChannelVerifier_RequestVerification (0.00s)
 
 === RUN   TestDualChannelVerifier_ConfirmVerification

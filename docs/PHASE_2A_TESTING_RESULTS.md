@@ -164,7 +164,7 @@ curl -X POST http://localhost:8080/api/v1/beta/registry/verify-signatory \
 
 ---
 
-### 4. Power of Attorney - Create ✅
+### 4. Proof of Authorization - Create ✅
 
 **Endpoint**: `POST /api/v1/beta/poa`
 
@@ -214,7 +214,7 @@ curl -X POST http://localhost:8080/api/v1/beta/poa \
 
 ---
 
-### 5. Power of Attorney - Get by ID ✅
+### 5. Proof of Authorization - Get by ID ✅
 
 **Endpoint**: `GET /api/v1/beta/poa/:id`
 
@@ -251,7 +251,7 @@ curl http://localhost:8080/api/v1/beta/poa/52633206-a6b8-4d19-95c9-0996fc579130
 
 ---
 
-### 6. Power of Attorney - List ✅
+### 6. Proof of Authorization - List ✅
 
 **Endpoint**: `GET /api/v1/beta/poa`
 
@@ -295,7 +295,7 @@ curl http://localhost:8080/api/v1/beta/poa
 
 ---
 
-### 7. Power of Attorney - Validate (Valid Action) ✅
+### 7. Proof of Authorization - Validate (Valid Action) ✅
 
 **Endpoint**: `POST /api/v1/beta/poa/:id/validate`
 
@@ -341,7 +341,7 @@ curl -X POST http://localhost:8080/api/v1/beta/poa/52633206-a6b8-4d19-95c9-0996f
 
 ---
 
-### 8. Power of Attorney - Validate (Invalid Action) ✅
+### 8. Proof of Authorization - Validate (Invalid Action) ✅
 
 **Endpoint**: `POST /api/v1/beta/poa/:id/validate`
 
@@ -453,7 +453,7 @@ Server logs show all endpoints were registered:
 [AAP-001]     POST /api/v1/beta/pvp/verify (PVP identity verification)
 [AAP-001]     POST /api/v1/beta/registry/verify-entity (Commercial Registry entity)
 [AAP-001]     POST /api/v1/beta/registry/verify-signatory (Commercial Registry signatory)
-[AAP-001]   Beta Power of Attorney APIs:
+[AAP-001]   Beta Proof of Authorization APIs:
 [AAP-001]     POST   /api/v1/beta/poa (Create PoA)
 [AAP-001]     GET    /api/v1/beta/poa/:id (Get PoA)
 [AAP-001]     GET    /api/v1/beta/poa (List PoAs)

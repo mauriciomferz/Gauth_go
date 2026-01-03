@@ -35,7 +35,7 @@ api/
 The OpenAPI specification has been upgraded from Partial to **Implemented** status:
 
 **Documented Endpoints:**
-- ✅ POST `/api/v1/poa/issue` - Issue new Power of Attorney
+- ✅ POST `/api/v1/poa/issue` - Issue new Proof of Authorization
 - ✅ POST `/api/v1/beta/policy/evaluate` - Evaluate authorization policies
 - ✅ GET `/api/v1/poa/status/{id}` - Get PoA delegation status
 - ✅ POST `/api/v1/delegation/create` - Create delegation
@@ -140,7 +140,7 @@ mc.GaugeWithLabels("response_time_seconds", 0.123, map[string]string{"endpoint":
 Lightweight summaries are exposed under `pkg/rfc`:
 ```go
 info := rfc.GetComplianceInfo()
-_ = rfc.ValidateCompliance("RFC-0111")
+_ = rfc.ValidateCompliance("AAP-001")
 
 combined := rfc.CreateCombinedRFCConfig() // detailed combined config
 _ = rfc.ValidateCombinedRFCConfig(combined)

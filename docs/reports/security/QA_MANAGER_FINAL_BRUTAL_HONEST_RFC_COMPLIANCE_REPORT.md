@@ -503,7 +503,7 @@ type ExtendedToken struct {
 
 ---
 
-### Power of Attorney Verification Requirements
+### Proof of Authorization Verification Requirements
 
 AAP-001 requires verification of:
 

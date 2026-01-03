@@ -29,7 +29,7 @@ But as we enter the Agentic Economy—an economy driven not by users clicking bu
 To understand the gap, consider the difference between a **key** and a **contract**.
 
 *   **OAuth is a Key.** If I give my house key to a dog walker, they have *access* to my house. They can unlock the door and walk in.
-*   **Power of Attorney is a Contract.** If I give Power of Attorney to my lawyer, they have *authority* to sell my house.
+*   **Proof of Authorization is a Contract.** If I give Proof of Authorization to my lawyer, they have *authority* to sell my house.
 
 Today's AI agents are running around with keys (API tokens), but they lack contracts. They have **Technical Access** but no **Legal Standing**.
 
@@ -63,7 +63,7 @@ In the AgentAuth model, we don't just issue an access token. We issue a **Proof 
 3.  **The Mandate**: What *exactly* is the agent authorized to do? (e.g., "Spend up to $10k, but only on Office Supplies, and never on Tuesdays.")
 4.  **The Fiduciary Duty**: A verifiable assertion that the agent is acting in the principal's best interest.
 
-When an AgentAuth-enabled service receives a request, it doesn't just check for a valid signature. It evaluates the **Chain of Trust**. It asks: *"Is this agent's Power of Attorney still valid? Has the principal revoked it? Does the transaction amount exceed the liability cap encoded in the token?"*
+When an AgentAuth-enabled service receives a request, it doesn't just check for a valid signature. It evaluates the **Chain of Trust**. It asks: *"Is this agent's Proof of Authorization still valid? Has the principal revoked it? Does the transaction amount exceed the liability cap encoded in the token?"*
 
 ## The Road Ahead
 
@@ -165,7 +165,7 @@ Standard OAuth scopes are binary: `read`, `write`, `admin`.
 *   `payments:write` allows the agent to send $1 or $1,000,000.
 *   It does not capture nuance.
 
-In the legal world, a Power of Attorney often contains specific constraints:
+In the legal world, a Proof of Authorization often contains specific constraints:
 *   "You may sell my car, **but not for less than $5,000**."
 *   "You may manage my healthcare, **but do not authorize experimental treatments**."
 
@@ -231,12 +231,12 @@ But the Agentic Economy is decentralized. A "Global Terms of Service" doesn't wo
 
 AgentAuth solves this through a concept borrowed from software design: **Adapters**.
 
-Just as a travel adapter allows a US plug to fit into a UK socket, a **Legal Adapter** translates a generic "Power of Attorney" intent into the specific requirements of a local jurisdiction.
+Just as a travel adapter allows a US plug to fit into a UK socket, a **Legal Adapter** translates a generic "Proof of Authorization" intent into the specific requirements of a local jurisdiction.
 
 ### Case Study: US vs. Germany
 
 **The US View (Common Law):**
-In the United States, a Power of Attorney (PoA) is relatively flexible. "I authorize Agent X to act for me" is often enough, provided it's signed.
+In the United States, a Proof of Authorization (PoA) is relatively flexible. "I authorize Agent X to act for me" is often enough, provided it's signed.
 
 **The German View (Civil Law / BGB):**
 Germany is stricter. The *Bürgerliches Gesetzbuch* (BGB) has specific requirements for representation (*Stellvertretung*). For certain transactions (like real estate), a digital signature might not be enough unless it meets eIDAS "Qualified Electronic Signature" (QES) standards.
@@ -486,7 +486,7 @@ This `agent_id` is now the verifiable "soul" of the software.
 
 ## Step 2: The Delegation (Issuing the PoA)
 
-Now, a Human Principal (e.g., a Manager) issues a Power of Attorney to this agent. In a real system, this happens via a UI. Here is the logic:
+Now, a Human Principal (e.g., a Manager) issues a Proof of Authorization to this agent. In a real system, this happens via a UI. Here is the logic:
 
 **Go (The Authority Service)**:
 ```go
@@ -514,7 +514,7 @@ func IssueMandate() string {
 }
 ```
 
-This token is the **Digital Power of Attorney**. It says: *"I, Human, authorize ProcureBot to spend $5k."*
+This token is the **Digital Proof of Authorization**. It says: *"I, Human, authorize ProcureBot to spend $5k."*
 
 ## Step 3: The Agent Makes a Request
 

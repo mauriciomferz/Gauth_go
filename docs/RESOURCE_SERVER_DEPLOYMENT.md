@@ -21,7 +21,7 @@ The **Resource Server (RS)** is part of the OAuth 2.0 / OpenID Connect foundatio
 
 **AgentAuth Extensions:**
 - Validates **Extended Tokens** with PoA claims
-- Enforces **Power of Attorney (PoA)** restrictions
+- Enforces **Proof of Authorization (PoA)** restrictions
 - Implements **PEP** (Policy Enforcement Point) for authorization decisions
 - Reports **compliance events** to Authorization Server
 - Validates **authorization chains**

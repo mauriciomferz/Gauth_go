@@ -8,7 +8,7 @@
 
 ## Overview
 
-An external security researcher conducted a comprehensive audit of the AgentAuth authentication framework, focusing on AAP-002 (Power of Attorney) implementation and potential architectural vulnerabilities. This document provides an executive summary of findings and remediation status.
+An external security researcher conducted a comprehensive audit of the AgentAuth authentication framework, focusing on AAP-002 (Proof of Authorization) implementation and potential architectural vulnerabilities. This document provides an executive summary of findings and remediation status.
 
 ---
 

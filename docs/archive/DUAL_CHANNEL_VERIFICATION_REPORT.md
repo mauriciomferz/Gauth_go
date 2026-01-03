@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-Successfully implemented **multi-factor verification** to prevent CRITICAL-5 vulnerability: stolen private keys enabling fraudulent Power of Attorney (PoA) creation.
+Successfully implemented **multi-factor verification** to prevent CRITICAL-5 vulnerability: stolen private keys enabling fraudulent Proof of Authorization (PoA) creation.
 
 ### The Problem
 
@@ -164,10 +164,10 @@ challengeID, err := verifier.RequestVerification(ctx, "poa_abc123", PrincipalCon
 **Generated Messages**:
 ```
 [SMS to +1234567890]
-AgentAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A (expires in 5 min)
+AgentAuth Security: Confirm Proof of Authorization creation with code: VA3R-XZ3A (expires in 5 min)
 
 [Email to principal@example.com]
-Subject: AgentAuth: Confirm Power of Attorney Creation
+Subject: AgentAuth: Confirm Proof of Authorization Creation
 Body:
 Verification Code: VA3R-XZ3A
 This code expires in 5 minutes.
@@ -214,9 +214,9 @@ poaID, cancelURL, err := timelock.CreateWithDelay(ctx, poa)
 
 **Notification Sent**:
 ```
-🔔 AgentAuth: New Power of Attorney Created
+🔔 AgentAuth: New Proof of Authorization Created
 
-IMPORTANT: A new Power of Attorney has been created for your account.
+IMPORTANT: A new Proof of Authorization has been created for your account.
 
 ⏰ Activation Time: 2025-11-27T16:00:00Z (24 hours from now)
 
@@ -237,7 +237,7 @@ This 24-hour delay gives you time to cancel fraudulent PoAs.
 [12 hours later]
 ⏰ AgentAuth Reminder: PoA Activates Soon
 
-Reminder: Your Power of Attorney will activate in approximately 12 hours.
+Reminder: Your Proof of Authorization will activate in approximately 12 hours.
 
 PoA ID: poa_abc123
 Grantee: 0xAIAgent
@@ -261,9 +261,9 @@ err := timelock.CancelPoA(ctx, "poa_abc123")
 
 **Cancellation Confirmation**:
 ```
-AgentAuth: Power of Attorney Cancelled
+AgentAuth: Proof of Authorization Cancelled
 
-Your Power of Attorney (ID: poa_abc123) has been successfully cancelled.
+Your Proof of Authorization (ID: poa_abc123) has been successfully cancelled.
 
 If you did not request this cancellation, your account may be compromised.
 Please contact security@agentauth.example.com immediately.
@@ -292,9 +292,9 @@ $ go test ./pkg/agentauth/verification -v -cover
 
 === RUN   TestDualChannelVerifier_RequestVerification
 [MOCK SMS] To: +1234567890
-Message: AgentAuth Security: Confirm Power of Attorney creation with code: VA3R-XZ3A
+Message: AgentAuth Security: Confirm Proof of Authorization creation with code: VA3R-XZ3A
 [MOCK EMAIL] To: principal@example.com
-Subject: AgentAuth: Confirm Power of Attorney Creation
+Subject: AgentAuth: Confirm Proof of Authorization Creation
 --- PASS: TestDualChannelVerifier_RequestVerification (0.00s)
 
 === RUN   TestDualChannelVerifier_ConfirmVerification

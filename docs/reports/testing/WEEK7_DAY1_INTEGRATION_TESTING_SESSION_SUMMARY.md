@@ -227,7 +227,7 @@ Initiated comprehensive integration testing as the final phase of AAP-001/AAP-00
 - ✅ §5 PIP Consolidation (testing pending)
 - ✅ §4.3 Quantum Resistance (documentation complete)
 
-**AAP-002 (Power of Attorney)**: **95% compliant**
+**AAP-002 (Proof of Authorization)**: **95% compliant**
 - ✅ §A.2 Representative Types (testing pending)
 - ✅ §B.4 Action Types (testing pending)
 - ✅ §B.4.4 Non-Physical Actions (testing pending)

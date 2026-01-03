@@ -10,7 +10,7 @@ owners: [system]
 
 Date: 2025-10-29
 
-This document captures current implementation status for key clauses of AAP-001 (Delegation & Authorization Protocol) and AAP-002 (Power of Attorney Definition) as reflected in the Beta MVP demo (`ai_capability_demo`) and core packages (`pkg/aap001`, `internal/multisig`).
+This document captures current implementation status for key clauses of AAP-001 (Delegation & Authorization Protocol) and AAP-002 (Proof of Authorization Definition) as reflected in the Beta MVP demo (`ai_capability_demo`) and core packages (`pkg/aap001`, `internal/multisig`).
 
 ## Status Legend
 | Status | Meaning |
@@ -40,7 +40,7 @@ This document captures current implementation status for key clauses of AAP-001 
 | Metrics - Multi-Sig Failures | Categorized counters | Partial | Basic structural validation; granular failure metrics deferred |
 | Observability (Tracing) | Spans for enforcement & conflict | Implemented | `main.go` tracing spans |
 
-## AAP-002 Power of Attorney Attributes
+## AAP-002 Proof of Authorization Attributes
 | Attribute Group | Elements | Status | Evidence |
 |-----------------|----------|--------|----------|
 | Parties | Grantor / Grantee identities | Implemented | `PowerOfAttorney` struct |

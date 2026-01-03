@@ -310,7 +310,7 @@ The client owner authorizes a client (AI system) to act with the authorization s
 
 **Parameters:**
 - `client_id` - Unique identifier for the AI client/system
-- `poa_credential` - Power of Attorney credential reference
+- `poa_credential` - Proof of Authorization credential reference
 - `enable_identity_sharing` - Allow client to share user identities
 - `enable_prompting` - Allow client to prompt users for additional permissions
 
@@ -589,7 +589,7 @@ Executes the complete AAP-001 authorization flow, including:
 - `client_id` (required): Client identifier from subscription
 - `subscription_id` (required): Completed subscription ID
 - `resource_owner_id` (required): Resource owner from subscription
-- `poa_credential_ref` (required): Power of Attorney credential reference
+- `poa_credential_ref` (required): Proof of Authorization credential reference
 - `scope` (required): Requested authorization scope
 - `context` (optional): Additional contextual information
 

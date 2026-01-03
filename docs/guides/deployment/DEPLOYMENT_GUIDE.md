@@ -45,7 +45,7 @@ refreshCadence: quarterly
 - PVP identity verification framework
 - Commercial register integration framework
 - PIP policy information point
-- Power of Attorney management
+- Proof of Authorization management
 - Comprehensive test suite
 
 ### What's Needed for Production

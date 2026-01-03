@@ -12,7 +12,7 @@ owners: architecture-team
 
 **RFC 9396** is an OAuth 2.0 extension that enables **fine-grained, structured authorization requests** using the `authorization_details` parameter.
 
-**AgentAuth** is a AgentAuth Community framework focused on **legal delegation chains and Power of Attorney** for AI agents.
+**AgentAuth** is a AgentAuth Community framework focused on **legal delegation chains and Proof of Authorization** for AI agents.
 
 **Key Finding**: These frameworks address **different aspects** of OAuth 2.0 authorization but are **highly complementary**. AgentAuth provides the legal framework and authorization chains, while RFC 9396 provides fine-grained resource permissions.
 
@@ -50,7 +50,7 @@ owners: architecture-team
 
 | Aspect | **AgentAuth (AAP-001/AAP-002)** | **RFC 9396 (RAR)** |
 |:-------|:--------------------------|:-------------------|
-| **Primary Focus** | Legal delegation chains & Power of Attorney | Fine-grained resource authorization |
+| **Primary Focus** | Legal delegation chains & Proof of Authorization | Fine-grained resource authorization |
 | **Authorization Model** | Multi-party chains (3+ levels) | Single request with detailed permissions |
 | **Scope Expression** | Structured authorization chains | `authorization_details` JSON array |
 | **Legal Framework** | ✅ Commercial register, PoA credentials | ❌ Not addressed |
@@ -141,7 +141,7 @@ Resource Server (demand-side PEP)
 - 3+ levels of delegation
 - Each level verified (identity + authority)
 - Commercial register integration
-- Legal Power of Attorney credentials
+- Legal Proof of Authorization credentials
 
 #### RFC 9396 - Single-Level Fine-Grained Permissions
 
@@ -253,7 +253,7 @@ type AuthorizationDetail struct {
 
 ✅ AI agents need **legal authority** to act  
 ✅ **Multi-party delegation chains** required (Board → Company → AI → User)  
-✅ **Power of Attorney validation** is critical  
+✅ **Proof of Authorization validation** is critical  
 ✅ **Commercial register verification** needed  
 ✅ EU regulatory compliance (**eIDAS, PoA laws**)  
 
@@ -286,7 +286,7 @@ type AuthorizationDetail struct {
 
 ## 6. Practical Example: Combined Use Case
 
-### Scenario: Healthcare AI with Legal Power of Attorney
+### Scenario: Healthcare AI with Legal Proof of Authorization
 
 An AI diagnostic assistant needs to access specific patient records with legal authorization from a guardian.
 
@@ -368,7 +368,7 @@ type AuthorizationDetail struct {
 
 **This would make AgentAuth the first authorization server combining:**
 - Legal delegation chains
-- Power of Attorney validation
+- Proof of Authorization validation
 - Fine-grained resource permissions (RFC 9396)
 
 ---
@@ -438,7 +438,7 @@ func (v *ComplianceValidator) ValidateAuthorizationDetails(
 **RFC 9396 and AgentAuth solve different problems but are highly complementary:**
 
 - **RFC 9396 (RAR)**: Fine-grained resource permissions within OAuth 2.0
-- **AgentAuth**: Legal delegation chains and Power of Attorney for AI agents
+- **AgentAuth**: Legal delegation chains and Proof of Authorization for AI agents
 
 **They are NOT competing** - they work together:
 - AgentAuth provides the **legal framework** (authorization chains, PoA validation)

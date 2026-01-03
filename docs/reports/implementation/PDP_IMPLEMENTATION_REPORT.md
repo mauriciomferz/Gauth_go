@@ -267,7 +267,7 @@ ComplianceValidator
 **Section 3.3 - Policy Decision Point (PDP):**
 > "The PDP evaluates access control policies to determine whether a requested action should be permitted. It considers:
 > - Authorization chain validity ✅
-> - Power of Attorney scope and restrictions ✅
+> - Proof of Authorization scope and restrictions ✅
 > - Resource owner policies ✅
 > - Legal framework compliance ✅
 > - Contextual attributes ✅"

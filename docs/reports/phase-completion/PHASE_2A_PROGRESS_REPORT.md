@@ -116,7 +116,7 @@ All 8 React UI pages tested and verified:
 
 6. **PoA Page** (http://localhost:3000/poa)
    - ✅ Loads successfully
-   - ✅ Power of Attorney management working
+   - ✅ Proof of Authorization management working
    - ✅ Using UI mock (backend integration pending)
 
 7. **E2E Testing Page** (http://localhost:3000/e2e-testing)

@@ -284,7 +284,7 @@ export VAULT_NAMESPACE=agentauth  # Optional for Enterprise
 - ✅ **AI governance** (runtime enforcement with model metadata)
 - ✅ **Comprehensive testing** (unit + integration)
 
-The implementation now provides **production-grade** Power of Attorney operations with robust security, durability, and compliance features suitable for enterprise deployment.
+The implementation now provides **production-grade** Proof of Authorization operations with robust security, durability, and compliance features suitable for enterprise deployment.
 
 ---
 

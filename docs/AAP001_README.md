@@ -10,7 +10,7 @@ owners: [system]
 
 ## Overview
 
-This directory contains the complete implementation of the AAP-001 Authorization Protocol for AI systems, including multi-party authorization chains, Power of Attorney integration, and comprehensive compliance validation.
+This directory contains the complete implementation of the AAP-001 Authorization Protocol for AI systems, including multi-party authorization chains, Proof of Authorization integration, and comprehensive compliance validation.
 
 ## Quick Start
 
@@ -211,7 +211,7 @@ The implementation validates multiple AAP-001 compliance requirements:
 - ✅ Request structure (client ID, scopes)
 - ✅ Client identification via PIP
 - ✅ Authorization chain validation
-- ✅ Power of Attorney validation
+- ✅ Proof of Authorization validation
 - ✅ Legal framework requirements
 
 ### Grant Compliance (Step f)
@@ -222,7 +222,7 @@ The implementation validates multiple AAP-001 compliance requirements:
 
 ### Token Compliance (Step e)
 - ✅ Authorization chain integrity
-- ✅ Power of Attorney validity
+- ✅ Proof of Authorization validity
 - ✅ Multi-party verification
 - ✅ Legal framework information
 
@@ -265,7 +265,7 @@ Extended tokens are **not persisted** after creation. The token validation, intr
 
 **Future Enhancement**: Implement `ExtendedTokenStore` for token persistence.
 
-### Power of Attorney
+### Proof of Authorization
 Currently uses **mock PoA** creation in Step V. Production implementation should:
 - Parse full PoADefinition from request body
 - Validate PoA structure completely
@@ -348,7 +348,7 @@ pkg/agentauth/
 └── subscription_manager.go      # Subscription lifecycle
 
 pkg/poa/
-├── poa.go                       # Power of Attorney types
+├── poa.go                       # Proof of Authorization types
 ├── action_taxonomy.go           # Action type definitions
 └── validation.go                # PoA validation logic
 

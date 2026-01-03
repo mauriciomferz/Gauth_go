@@ -45,7 +45,7 @@ web/ui-react/                           # React SPA Root Directory
 │   │   ├── PVP.tsx                     # ✅ Identity verification - 240 lines
 │   │   ├── Registry.tsx                # 🔄 Entity verification - 23 lines
 │   │   ├── PIP.tsx                     # 🔄 Authorization - 23 lines
-│   │   ├── PoA.tsx                     # 🔄 Power of Attorney - 23 lines
+│   │   ├── PoA.tsx                     # 🔄 Proof of Authorization - 23 lines
 │   │   ├── E2ETesting.tsx              # 🔄 Test execution - 23 lines
 │   │   └── Metrics.tsx                 # 🔄 System metrics - 23 lines
 │   │

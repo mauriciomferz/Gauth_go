@@ -161,7 +161,7 @@ WithMetrics(m Metrics)               // Inject metrics collector
 WithStrictAuthMode()                 // Enforce strict auth requirements  
 WithReplayStore(rs ReplayStore)      // Add JTI replay protection
 WithKeyManager(km *crypto.Manager)   // Inject EdDSA key manager ⭐ NEW
-WithRFCCompliance(...)               // Enable RFC-0111 compliance
+WithRFCCompliance(...)               // Enable AAP-001 compliance
 ```
 
 ## Migration Guide

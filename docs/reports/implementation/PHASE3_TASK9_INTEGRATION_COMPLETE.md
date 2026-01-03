@@ -36,7 +36,7 @@ When database is available, the server now:
 - Registers routes for each handler
 
 ```go
-// Power of Attorney handler
+// Proof of Authorization handler
 poaHandler := adminHandlers.NewPoAHandler(dbPool)
 poaHandler.RegisterRoutes(adminGroup)
 
@@ -116,7 +116,7 @@ export DB_SSLMODE=disable  # For development
 
 Once the server starts with database configuration, the following endpoints are available:
 
-### Power of Attorney (PoA)
+### Proof of Authorization (PoA)
 - `GET /api/admin/poa` - List all PoAs
 - `POST /api/admin/poa` - Create new PoA
 - `GET /api/admin/poa/:id` - Get PoA by ID

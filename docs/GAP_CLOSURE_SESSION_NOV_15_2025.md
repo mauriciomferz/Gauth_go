@@ -82,7 +82,7 @@ type AuthorizationPolicy struct {
 ```
 
 **PolicyType Enum:**
-- `poa` - Power of Attorney policies
+- `poa` - Proof of Authorization policies
 - `authorization_chain` - Authorization chain rules
 - `scope` - Scope-based policies
 - `restriction` - Restriction policies

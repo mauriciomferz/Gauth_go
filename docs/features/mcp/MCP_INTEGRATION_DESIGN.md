@@ -241,7 +241,7 @@ type ExtendedToken struct {
 
 **Strengths**:
 - ✅ Comprehensive authorization structure
-- ✅ Power of Attorney (PoA) chain
+- ✅ Proof of Authorization (PoA) chain
 - ✅ Scope-based access control
 - ✅ Token serialization (JWT)
 

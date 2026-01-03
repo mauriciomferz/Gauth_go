@@ -354,7 +354,7 @@ func (r *Repository) ValidatePoA(...) (*PoARecord, bool, string) {
         }
     }
     
-    return &poa, true, "Valid Power of Attorney found"
+    return &poa, true, "Valid Proof of Authorization found"
 }
 ```
 

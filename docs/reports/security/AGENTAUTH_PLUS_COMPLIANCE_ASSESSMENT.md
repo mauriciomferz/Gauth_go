@@ -22,7 +22,7 @@ The current AgentAuth implementation provides a **solid foundation** for power-o
 
 ### ✅ **IMPLEMENTED (Well-Covered Areas)**
 
-#### 1. Power of Attorney Data Structures (80% Complete)
+#### 1. Proof of Authorization Data Structures (80% Complete)
 **AgentAuth+ Requirement:**
 - Issuer (principal/grantor)
 - Grantee (AI system receiving authority)

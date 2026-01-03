@@ -417,7 +417,7 @@ type ExtendedToken struct {
     AuthorizationChain        *AuthorizationChain      ✅ PRESENT
     AuthorizationChainHash    string                   ✅ PRESENT
     
-    // Power of Attorney
+    // Proof of Authorization
     PoACredentialRef          string                   ✅ PRESENT
     PoADefinition             *poa.PoADefinition       ✅ PRESENT
     

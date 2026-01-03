@@ -42,7 +42,7 @@ go run ./cmd/web-server
 ## Test Endpoints
 
 ```bash
-# List Power of Attorney records
+# List Proof of Authorization records
 curl http://localhost:8080/api/admin/poa
 
 # Create a PoA
@@ -116,7 +116,7 @@ Expected tables (17):
 
 ## Available Endpoints (63+)
 
-### Power of Attorney `/api/admin/poa`
+### Proof of Authorization `/api/admin/poa`
 - `GET /` - List all
 - `POST /` - Create
 - `GET /:id` - Get by ID

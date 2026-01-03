@@ -1,7 +1,7 @@
 # AgentAuth Project Status Report - November 2025
 
 **Report Date:** November 26, 2025  
-**Project:** AgentAuth - AI Governance Framework (Power of Attorney Protocol)  
+**Project:** AgentAuth - AI Governance Framework (Proof of Authorization Protocol)  
 **Repository:** github.com/mauriciomferz/AgentAuth  
 **Overall Status:** ✅ **PRODUCTION-READY** (All critical vulnerabilities resolved)
 

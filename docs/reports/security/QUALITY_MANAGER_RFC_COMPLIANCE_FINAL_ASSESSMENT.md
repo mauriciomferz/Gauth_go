@@ -478,7 +478,7 @@ type AAP-001Exclusions struct {
 ### 2.1 PoA Definition Structure - ✅ **85% COMPLIANT**
 
 **RFC Requirement** (Section 3, Pages 3-7):
-Comprehensive Power of Attorney credential definition with parties, authorization scope, and requirements.
+Comprehensive Proof of Authorization credential definition with parties, authorization scope, and requirements.
 
 #### **Section A: Parties - 88% ✅**
 

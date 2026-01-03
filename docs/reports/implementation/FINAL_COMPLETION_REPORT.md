@@ -186,7 +186,7 @@ export AGENTAUTH_USE_JWT_LIB="1"
 
 All admin handlers are now accessible under this prefix.
 
-#### 1. Power of Attorney (`/api/admin/poa`) - 9 Endpoints
+#### 1. Proof of Authorization (`/api/admin/poa`) - 9 Endpoints
 ```
 GET    /api/admin/poa                       # List all PoAs
 POST   /api/admin/poa                       # Create new PoA

@@ -36,7 +36,7 @@
    - `policy_attributes` - Context attributes for ABAC (user/resource/environment/action)
    - `authorization_logs` - Policy decision logs with performance metrics
 
-4. **Power of Attorney (2 tables)**
+4. **Proof of Authorization (2 tables)**
    - `poa_records` - PoA records with grantor/representative, scope, lifecycle
    - `poa_templates` - Reusable PoA templates (full/limited/financial/healthcare/legal/administrative)
 

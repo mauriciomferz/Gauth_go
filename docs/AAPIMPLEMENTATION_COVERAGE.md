@@ -598,7 +598,7 @@ type ExtendedToken struct {
 
 ---
 
-## Power of Attorney (PoA) Implementation
+## Proof of Authorization (PoA) Implementation
 
 ### PoA Validation ✅ COMPLETE
 **File:** `pkg/poa/validator.go` (500+ lines)
@@ -811,7 +811,7 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 | §2 Nomenclature | All roles defined | ✅ | 100% |
 | §3 P*P Architecture | PEP, PDP, PIP, PAP, PVP | ✅ | 100% |
 | §4 Extended Tokens | Token structure & lifecycle | ✅ | 100% |
-| §5 PoA Framework | Power of Attorney validation | ✅ | 100% |
+| §5 PoA Framework | Proof of Authorization validation | ✅ | 100% |
 | §6 Protocol Flow | Steps (a) through (j) | ✅ | 98% |
 | §7 Authorization Chain | Multi-level validation | ✅ | 100% |
 | §8 Compliance | Tracking & audit | ✅ | 100% |

@@ -27,7 +27,7 @@ Phase 3 Task 9 successfully migrated all 5 admin portal handlers from mock data 
 
 ## Handler Migration Details
 
-### Handler 1: Power of Attorney (PoA) ✅
+### Handler 1: Proof of Authorization (PoA) ✅
 
 **File**: `web/handlers/admin/poa_handler.go`  
 **Repository**: `pkg/poa/repository.go`

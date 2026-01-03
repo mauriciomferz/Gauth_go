@@ -28,7 +28,7 @@ refreshCadence: monthly
 
 ## Overview
 
-The Gap G10 integration test suite validates AAP-001 (AgentAuth 1.0) and AAP-002 (Power of Attorney) compliance across all authorization components. The suite includes:
+The Gap G10 integration test suite validates AAP-001 (AgentAuth 1.0) and AAP-002 (Proof of Authorization) compliance across all authorization components. The suite includes:
 
 - **91 functional tests** across 6 test files
 - **19 performance benchmarks** (16 component + 3 E2E)
@@ -44,7 +44,7 @@ The Gap G10 integration test suite validates AAP-001 (AgentAuth 1.0) and AAP-002
 | PVP (Power Verification Point) | 15 | 90% | ✅ |
 | Commercial Register | 28 | 85% | ✅ |
 | PIP (Power Information Point) | 16 | 90% | ✅ |
-| PoA (Power of Attorney) | 15 | 90% | ✅ |
+| PoA (Proof of Authorization) | 15 | 90% | ✅ |
 | E2E Integration | 4 | 95% | ✅ |
 
 ---
@@ -693,7 +693,7 @@ See [GAP_G10_PHASE7_PERFORMANCE_REPORT.md](./GAP_G10_PHASE7_PERFORMANCE_REPORT.m
 
 ### Documentation
 - [AAP-001: AgentAuth 1.0 Specification](./docs/AAP-001.md)
-- [AAP-002: Power of Attorney](./docs/AAP-002.md)
+- [AAP-002: Proof of Authorization](./docs/AAP-002.md)
 - [Gap G10 Integration Tests Progress](./GAP_G10_INTEGRATION_TESTS_PROGRESS.md)
 - [Phase 6: E2E Tests Completion](./GAP_G10_PHASE6_E2E_TESTS_COMPLETION.md)
 - [Phase 7: Performance Report](./GAP_G10_PHASE7_PERFORMANCE_REPORT.md)

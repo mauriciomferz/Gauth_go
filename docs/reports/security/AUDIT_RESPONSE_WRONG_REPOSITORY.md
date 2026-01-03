@@ -265,7 +265,7 @@ func AuthorizeRequest(poa *Credential, requestScope string) (string, error) {
 **DOES NOT EXIST** in this repository.
 
 ### THIS Repository Contains:
-- ✅ 4,530-line AAP-002 Power of Attorney implementation
+- ✅ 4,530-line AAP-002 Proof of Authorization implementation
 - ✅ Full scope validation (line 3088)
 - ✅ Full constraint enforcement (lines 3100-3205)
 - ✅ Redis-backed revocation checking (lines 1260-1268)

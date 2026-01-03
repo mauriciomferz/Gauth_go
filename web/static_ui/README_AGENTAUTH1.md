@@ -72,14 +72,14 @@ http://localhost:8080/agentauth1.html
 - **Cache Statistics**: Real-time cache performance metrics
 - **Performance Benchmarks**: Sub-microsecond authorization decisions (224.5 ns/op)
 
-### Power of Attorney (PoA) Tab
-- **Create PoA**: Generate AAP-002 compliant Power of Attorney delegations
+### Proof of Authorization (PoA) Tab
+- **Create PoA**: Generate AAP-002 compliant Proof of Authorization delegations
   - Representative types (Managing Director, Prokura, Legal Counsel)
   - Action scopes with granular permissions
   - Geographic restrictions
   - Temporal validity periods
 - **Validate PoA**: Verify PoA authorization for specific actions and locations
-- **Active PoAs**: View and manage all active Power of Attorney delegations
+- **Active PoAs**: View and manage all active Proof of Authorization delegations
 - **Ultra-Fast Performance**: 21.19 ns/op validation (60.8M ops/sec!)
 
 ### E2E Testing Tab
@@ -192,7 +192,7 @@ go test -bench=. -benchmem ./pkg/...
 - §V: PIP Data Consolidation
 - §VII: PVP Identity Verification
 
-### AAP-002 (Power of Attorney)
+### AAP-002 (Proof of Authorization)
 ✅ **100% Compliant**
 - §A.2: Representative Types
 - §B.4: Action Types (Transactions, Decisions, Physical, Non-Physical)
@@ -258,7 +258,7 @@ For production deployment, implement these endpoints in the Go backend:
 - `POST /api/v1/agentauth/registry/verify-signatory` - Verify signatory authority
 - `POST /api/v1/agentauth/pip/authorize` - Validate authorization
 - `GET /api/v1/agentauth/pip/cache-stats` - Get cache statistics
-- `POST /api/v1/agentauth/poa/create` - Create Power of Attorney
+- `POST /api/v1/agentauth/poa/create` - Create Proof of Authorization
 - `POST /api/v1/agentauth/poa/validate` - Validate PoA
 - `POST /api/v1/agentauth/e2e/test` - Run E2E tests
 - `GET /api/v1/agentauth/metrics` - Get system metrics

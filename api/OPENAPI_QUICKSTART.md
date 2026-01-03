@@ -27,7 +27,7 @@ open http://localhost:8000/swagger-ui.html
 **37+ Total Endpoints** = 27 Authenticated + 10 Public
 
 ### Categories
-1. **Power of Attorney** (8) - Core CRUD operations
+1. **Proof of Authorization** (8) - Core CRUD operations
 2. **Advanced Features** (11) - Successor, Delegation, Dual Control, Capability, Fiduciary
 3. **Public Blockchain** (10) - No auth verification endpoints 🔓
 4. **Admin & Monitoring** (8) - System management

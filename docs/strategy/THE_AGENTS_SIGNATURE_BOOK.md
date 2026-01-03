@@ -4088,7 +4088,7 @@ German law provides highly structured models for authority, rooted in the Civil 
 
 ### 15.2 Authority Types Under German Law
 
-#### 15.2.1 Vollmacht (General Power of Attorney)
+#### 15.2.1 Vollmacht (General Proof of Authorization)
 
 **Legal Basis**: BGB §§ 164-181
 
@@ -7698,7 +7698,7 @@ def check_risk():
     *   Renamed "Gauth" to "AgentAuth" globally
     *   Switched to MIT License
     *   Established separate `pkg/agentauth` namespace
-    *   Removed legacy RFC-0111/0115 references
+    *   Removed legacy AAP-001/0115 references
 
 ### T.3 Version 0.5.0 (June 2025) -> "Beta"
 

@@ -7696,7 +7696,7 @@ def check_risk():
     *   Renombrado "Gauth" a "AgentAuth" globalmente
     *   Cambio a Licencia MIT
     *   Espacio de nombres `pkg/agentauth` separado establecido
-    *   Eliminadas referencias heredadas RFC-0111/0115
+    *   Eliminadas referencias heredadas AAP-001/0115
 
 ### T.3 Versión 0.5.0 (Junio 2025) -> "Beta"
 

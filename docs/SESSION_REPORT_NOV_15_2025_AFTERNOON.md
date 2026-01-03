@@ -266,7 +266,7 @@ if err := s.complianceTracker.StopTracking(ctx, authorizationID); err != nil {
 
 **Extraction Logic:**
 ```go
-// Extract granted actions from Power of Attorney
+// Extract granted actions from Proof of Authorization
 grantedActions := []string{}
 if token.PowerOfAttorney != nil {
     actions := token.PowerOfAttorney.Authorization.AuthorizedActions

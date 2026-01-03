@@ -6,7 +6,7 @@ Enhance load testing capabilities to include coverage for Revocation and Admin A
 ## Key Actions Taken
 
 1.  **Script Enhancement (`tests/load/k6-load-test.js`)**:
-    *   Added `testRevocation` scenario: Simulates the full lifecycle of creating a Power of Attorney (PoA) and immediately revoking it via the Admin API.
+    *   Added `testRevocation` scenario: Simulates the full lifecycle of creating a Proof of Authorization (PoA) and immediately revoking it via the Admin API.
     *   Added `testAdminAudit` scenario: Tests the asynchronous Audit Export API (`/api/admin/audit/export`).
     *   Updated the execution mix to include these new scenarios (10% and 5% probability respectively).
     *   Added dynamic configuration: `DURATION`, `RAMP_DURATION`, and `STAGE_DURATION` can now be injected via environment variables for flexible testing (e.g., short verification runs vs. full stress tests).

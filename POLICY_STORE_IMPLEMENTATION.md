@@ -210,7 +210,7 @@ For production deployments:
 
 ## Related Documentation
 - See `DIRECTORY_REORGANIZATION.md` for frontend/testing structure changes
-- See RFC-0111 Section 3.1 for P*P Architecture specification
+- See AAP-001 Section 3.1 for P*P Architecture specification
 - See `API_REFERENCE.md` for policy management endpoints
 
 ## Future Enhancements

@@ -9,7 +9,7 @@
 
 ## Implementation Overview
 
-This document summarizes the comprehensive implementation of AAP-001 (AgentAuth 1.0) and AAP-002 (Power of Attorney for LLMs) specifications in Go.
+This document summarizes the comprehensive implementation of AAP-001 (AgentAuth 1.0) and AAP-002 (Proof of Authorization for LLMs) specifications in Go.
 
 ### Session Timeline
 
@@ -316,7 +316,7 @@ This document summarizes the comprehensive implementation of AAP-001 (AgentAuth 
 ### Overall Compliance: **92-96%**
 
 #### AAP-001 (AgentAuth 1.0): **95%**
-- ✅ Section 3: Power of Attorney Model - 100%
+- ✅ Section 3: Proof of Authorization Model - 100%
 - ✅ Section 4: Authorization Chain - 100%
 - ✅ Section 5: External Integrations - 100%
 - ✅ Section 6: Authorization Flow - 95% (pending real PDP integration)
@@ -482,5 +482,5 @@ This implementation provides **92-96% RFC compliance** with comprehensive covera
 
 ## References
 - AAP-001: AgentAuth 1.0 - Generic Authorization Framework
-- AAP-002: Power of Attorney for Large Language Models
+- AAP-002: Proof of Authorization for Large Language Models
 - Implementation: github.com/agentauth/AAP-RFC-0150-Go-Implementation-of-AgentAuth-1.0

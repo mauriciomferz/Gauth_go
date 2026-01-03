@@ -12,7 +12,7 @@ owners: [system]
 
 **Status**: All 27 endpoints now active and serving requests. Set `AGENTAUTH_AGENTAUTH_PLUS_ENABLED=1` to enable.
 
-AgentAuth+ extends the AgentAuth RFC-0111 implementation with five advanced authorization features designed for AI agent governance: successor management, delegation chains, dual control, capability assessment, and fiduciary duty enforcement.
+AgentAuth+ extends the AgentAuth AAP-001 implementation with five advanced authorization features designed for AI agent governance: successor management, delegation chains, dual control, capability assessment, and fiduciary duty enforcement.
 
 **Quick Verification**:
 ```bash
@@ -324,7 +324,7 @@ ORDER BY detected_at DESC;
 
 ## License
 
-This is part of the AAP AgentAuth RFC-0111 Go implementation.
+This is part of the AAP AgentAuth AAP-001 Go implementation.
 
 ## Contact
 

@@ -520,7 +520,7 @@ Ideas:
 - Simulate multi-jurisdiction conflict resolution across policy sets
 - Emit OpenTelemetry spans for capability evaluation
 - Expose Prometheus metrics for decisions & jurisdiction conflicts (`AGENTAUTH_AI_DEMO_METRICS=1`)
-- Integrate Power of Attorney (delegation) records and revocation lifecycle
+- Integrate Proof of Authorization (delegation) records and revocation lifecycle
 - Issue extended tokens referencing PoA for delegated actions
 - Bind extended tokens to PoA integrity via canonical digest and version (implemented)
 - Add persistent BoltDB PoA storage (implemented via `AGENTAUTH_AI_DEMO_POA_DB_PATH`)

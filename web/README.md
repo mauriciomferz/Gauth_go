@@ -227,7 +227,7 @@ All API endpoints are under `/api/v1/beta`:
 - [Examples Repository](../examples/) - 37+ working code examples
 
 ### RFC Standards
-- **AAP-AAP-001**: Power of Attorney Framework
+- **AAP-AAP-001**: Proof of Authorization Framework
 - **AAP-AAP-002**: Authorization Implementation
 - **AAP-RFC-0150**: Go Implementation Guidelines
 

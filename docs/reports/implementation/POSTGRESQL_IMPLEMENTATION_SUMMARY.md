@@ -36,7 +36,7 @@ Successfully implemented PostgreSQL persistence layer for AAP-001 Extended Token
 
 **PostgresExtendedTokenStore** (`pkg/agentauth/extended_token_store_postgres.go`)
 - All 7 ExtendedTokenStore methods implemented
-- JSONB storage for Power of Attorney, Authorization Chain, Legal Framework, Verification Proof
+- JSONB storage for Proof of Authorization, Authorization Chain, Legal Framework, Verification Proof
 - Automatic client_id extraction from authorization chain
 - Computed `expires_at` column for efficient cleanup
 - Connection pooling (25 max open, 5 idle, 5min lifetime)

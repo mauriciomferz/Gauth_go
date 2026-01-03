@@ -29,7 +29,7 @@ Transformed the AgentAuth backend from a "Degraded Mode" state to a fully functi
 - **Database Schema**: Created `004_create_agentauthplus_tables.sql` and corrected volume mount path to `./schema/migrations` to fix "relation does not exist" errors for AgentAuth+ features.
 - **Audit Trail**: Created `005_create_audit_and_subscriber_tables.sql` to resolve 500 errors on Audit APIs caused by missing `audit_events` and `subscribers` tables.
 - **Subscribers & Tokens**: Created `006_create_tokens_table.sql` and updated `005` with legacy columns (`subscriber_id`, `subscriber_name`) to resolve 500 errors on `/api/admin/subscribers` and `/api/admin/tokens`.
-- **Power of Attorney**: Created `007_create_poa_tables.sql` to resolve 500 errors on `/api/admin/poa`, defining `power_of_attorney` and `poa_templates` tables.
+- **Proof of Authorization**: Created `007_create_poa_tables.sql` to resolve 500 errors on `/api/admin/poa`, defining `power_of_attorney` and `poa_templates` tables.
 - **Revocation**: Created `008_create_revocation_tables.sql` to resolve 500 errors on `/api/admin/revocation/*` caused by missing tables.
 - **Config**: Created `009_seed_default_config.sql` to resolve 404 errors on `/api/admin/config/yaml` by seeding default configuration.
 - **Events**: Created `010_create_event_tables.sql` to resolve 500 errors on `/api/admin/events/*`, defining `events`, `event_types`, and `event_handlers` tables.

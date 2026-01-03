@@ -26,7 +26,7 @@ There's a difference.
 
 ```
 3/7: Access = House key (can open door)
-Authority = Power of Attorney (can sell house)
+Authority = Proof of Authorization (can sell house)
 
 Today's AI agents are running around with keys.
 They need legal mandates.

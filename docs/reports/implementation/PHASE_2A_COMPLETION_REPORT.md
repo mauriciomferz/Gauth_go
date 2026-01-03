@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-**Phase 2A Enhancement successfully replaced all UI mocks with real backend endpoints.** This phase implemented a complete Beta API layer for PVP, Commercial Registry, Power of Attorney (PoA), and AAP-001 subscription flow. All 9 planned backend endpoints were created, tested, and integrated with the React UI.
+**Phase 2A Enhancement successfully replaced all UI mocks with real backend endpoints.** This phase implemented a complete Beta API layer for PVP, Commercial Registry, Proof of Authorization (PoA), and AAP-001 subscription flow. All 9 planned backend endpoints were created, tested, and integrated with the React UI.
 
 ### Final Status: 100% Complete ✅
 
@@ -41,7 +41,7 @@
   - Handler: `web/handlers/beta/registry_handlers.go`
   - Support: Germany HRB, UK Companies House, EU registries
 
-#### Power of Attorney (PoA) - Complete CRUD
+#### Proof of Authorization (PoA) - Complete CRUD
 - `POST /api/v1/beta/poa` - Create PoA
 - `GET /api/v1/beta/poa/:id` - Get specific PoA
 - `GET /api/v1/beta/poa` - List PoAs (with filters)
@@ -100,7 +100,7 @@
 | Metrics | ✅ Working | Real | Prometheus parser implemented |
 | PVP | ✅ Working | UI Mock | Identity verification form |
 | Registry | ✅ Working | UI Mock | Entity/signatory verification |
-| PoA | ✅ Working | UI Mock | Power of Attorney management |
+| PoA | ✅ Working | UI Mock | Proof of Authorization management |
 | E2E Testing | ✅ Working | UI Mock | Test simulation (8 suites) |
 
 ### 4. Critical Bug Fixed ✅

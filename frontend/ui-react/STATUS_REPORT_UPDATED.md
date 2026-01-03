@@ -55,7 +55,7 @@ The React UI is **100% complete** with all 8 pages fully implemented and functio
 
 **Features**:
 - 4 stat cards with gradients (Tests: 91, Benchmarks: 19, Coverage: 72.6%, E2E: 1.3µs)
-- RFC-0111 compliance section (Disclosure, PVP, PoA status)
+- AAP-001 compliance section (Disclosure, PVP, PoA status)
 - System components overview (5 components: PDP, PEP, PAP, PIP, PVP)
 - Quick start guide (5 steps)
 - Dark mode support with smooth transitions
@@ -159,7 +159,7 @@ The React UI is **100% complete** with all 8 pages fully implemented and functio
 ---
 
 ### 6. PoA Page (364 lines) ✅
-**Purpose**: Power of Attorney management system
+**Purpose**: Proof of Authorization management system
 
 **Features**:
 - PoA issuance form:
@@ -319,7 +319,7 @@ The API client in `src/lib/api.ts` covers **all AgentAuth backend endpoints**:
 - `validateAuthorization(request)` → POST /api/pip/validate
 - `getCacheStats()` → GET /api/pip/cache-stats
 
-#### PoA (Power of Attorney)
+#### PoA (Proof of Authorization)
 - `createPoA(request)` → POST /api/poa/create
 - `validatePoA(request)` → POST /api/poa/validate
 - `listPoAs()` → GET /api/poa/list
@@ -457,4 +457,4 @@ The React UI implementation is **100% complete** with all 8 pages fully function
 
 **Report generated**: November 15, 2025  
 **Implementation by**: GitHub Copilot  
-**Project**: AgentAuth RFC-0111 Authorization System
+**Project**: AgentAuth AAP-001 Authorization System

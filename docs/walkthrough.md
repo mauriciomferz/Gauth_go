@@ -56,7 +56,7 @@ Enhanced the existing RFC 7523 implementation to align with the latest RFC 7523b
 ## AI Agent Collaboration - Phase 2: MCP Integration & GNAP Linking
 
 ### Overview
-Deepened the integration between AgentAuth's authorization system and AI agent protocols by enhancing the Model Context Protocol (MCP) bridge and establishing critical links between GNAP and AgentAuth's Power of Attorney infrastructure.
+Deepened the integration between AgentAuth's authorization system and AI agent protocols by enhancing the Model Context Protocol (MCP) bridge and establishing critical links between GNAP and AgentAuth's Proof of Authorization infrastructure.
 
 ### MCP Authorization Enhancements
 
@@ -71,7 +71,7 @@ Implemented monetary value extraction and validation in tool calls:
 - Created `extractMonetaryValue` function to parse `amount`, `value`, `price`, and `cost` fields from tool arguments
 - Enhanced `checkToolRestrictions` to validate monetary limits against PoA `value_limit` restrictions
 - PDP requests now include `monetary_value` attribute for tools like `payment_processor`
-- Enables enforcement of financial constraints defined in Power of Attorney tokens
+- Enables enforcement of financial constraints defined in Proof of Authorization tokens
 
 #### Integration Testing
 Created [`pkg/mcp/mcp_integration_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/mcp/mcp_integration_test.go) with comprehensive test coverage:
@@ -82,7 +82,7 @@ Created [`pkg/mcp/mcp_integration_test.go`](file:///Users/mauricio.fernandez_fer
 ### GNAP-AgentAuth Integration
 
 #### VerificationService Integration
-Established the critical link between GNAP grant requests and AgentAuth's Power of Attorney system by integrating [`pkg/agentauthplus/VerificationService`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/verification.go) into the GNAP handler:
+Established the critical link between GNAP grant requests and AgentAuth's Proof of Authorization system by integrating [`pkg/agentauthplus/VerificationService`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauthplus/verification.go) into the GNAP handler:
 
 **Modified Files:**
 - [`web/handlers/gnap/handler.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/gnap/handler.go#L25): Added `VerificationService` to `Handler` struct
@@ -91,7 +91,7 @@ Established the critical link between GNAP grant requests and AgentAuth's Power 
 
 #### Authorization Chain Propagation
 When a GNAP grant request includes a `PoACredentialRef`, the handler now:
-1. Verifies the Power of Attorney using `VerificationService.VerifyPowerOfAttorney`
+1. Verifies the Proof of Authorization using `VerificationService.VerifyPowerOfAttorney`
 2. Populates `PowerOfAttorneyRef` in the grant response with issuer, grantee, and scope
 3. Fetches and transforms the full authorization chain via `VerifyAuthorizationChain`
 4. Converts AgentAuth `AuthorityLink` structures to GNAP `ChainLink` format
@@ -576,7 +576,7 @@ config := TSAConfig{
 
 ## Summary
 
-This walkthrough documents the completed implementation of RFC 7523bis hardening and AI Agent Collaboration Phase 2. The RFC 7523bis implementation adds critical security features including JTI replay protection, algorithm agility, and flexible audience validation. Phase 2 deepens MCP integration with AI agent identity propagation and monetary value validation, while establishing the crucial link between GNAP and AgentAuth's Power of Attorney system through `VerificationService` integration. All changes are fully tested and verified, with gosec security findings reduced from 251 to 247.
+This walkthrough documents the completed implementation of RFC 7523bis hardening and AI Agent Collaboration Phase 2. The RFC 7523bis implementation adds critical security features including JTI replay protection, algorithm agility, and flexible audience validation. Phase 2 deepens MCP integration with AI agent identity propagation and monetary value validation, while establishing the crucial link between GNAP and AgentAuth's Proof of Authorization system through `VerificationService` integration. All changes are fully tested and verified, with gosec security findings reduced from 251 to 247.
 
 ### Admin Config 404 & Stale Assets
 - **Issue**: `/api/admin/config/yaml` returned 404 in dev mode (no DB).

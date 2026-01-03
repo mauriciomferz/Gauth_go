@@ -347,7 +347,7 @@ type PIP interface {
     GetAuthorizationServerInfo(ctx, serverID) (*AuthorizationServerInfo, error)
     GetResourceOwnerInfo(ctx, ownerID) (*ResourceOwnerInfo, error)
     
-    // Power of Attorney Queries
+    // Proof of Authorization Queries
     GetPoAByID(ctx, poaID) (*poa.PoADefinition, error)
     GetPoAsByClient(ctx, clientID) ([]*poa.PoADefinition, error)
     GetPoAsByOwner(ctx, ownerID) ([]*poa.PoADefinition, error)

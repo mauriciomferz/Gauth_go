@@ -67,7 +67,7 @@ The complete React-based Single Page Application for AgentAuth 1.0 is **100% fin
 - Create PoA form (6 fields)
 - Validate PoA form
 - Active PoAs table (2 samples)
-- RFC-0115 compliance features
+- AAP-002 compliance features
 - **Status**: ✅ Complete
 
 ### 7. E2E Testing Page (230+ lines)

@@ -15,13 +15,13 @@
 
 ## 🎯 System Overview
 
-AgentAuth is a production-ready, enterprise-grade authorization system implementing AAP-001 with comprehensive identity verification, Power of Attorney (PoA) delegation, Model Context Protocol (MCP) integration, and multi-country identity verification capabilities.
+AgentAuth is a production-ready, enterprise-grade authorization system implementing AAP-001 with comprehensive identity verification, Proof of Authorization (PoA) delegation, Model Context Protocol (MCP) integration, and multi-country identity verification capabilities.
 
 ### Key Capabilities
 
 ✅ **AAP-001 Authorization System** - 98% compliant  
 ✅ **Multi-Country Identity Verification** - 18 countries  
-✅ **Power of Attorney (PoA) Delegation** - Full lifecycle management  
+✅ **Proof of Authorization (PoA) Delegation** - Full lifecycle management  
 ✅ **Model Context Protocol (MCP)** - 3 transports, enterprise-grade  
 ✅ **React Web UI** - 8 pages, 2,531 lines, production-ready  
 ✅ **40+ HTTP API Endpoints** - Complete OpenAPI documentation  
@@ -82,7 +82,7 @@ AgentAuth is a production-ready, enterprise-grade authorization system implement
 
 **Features:**
 - ✅ Extended Token System (refresh, revocation, hierarchical)
-- ✅ Power of Attorney (PoA) delegation with dual-control revocation
+- ✅ Proof of Authorization (PoA) delegation with dual-control revocation
 - ✅ Subscription-based authorization
 - ✅ Audit logging with hash-chained immutability
 - ✅ Real-time policy evaluation (<5ms P95)
@@ -175,7 +175,7 @@ AgentAuth is a production-ready, enterprise-grade authorization system implement
 **Pages (8):**
 1. **Token Demo** - Token issuance, validation, management
 2. **Authorization** - AAP-001 authorization decisions
-3. **Power of Attorney** - PoA creation, management, revocation
+3. **Proof of Authorization** - PoA creation, management, revocation
 4. **Identity Verification** - Multi-country PVP/PIP
 5. **Commercial Registry** - Business entity verification
 6. **MCP Servers** - MCP connection management
@@ -204,7 +204,7 @@ AgentAuth is a production-ready, enterprise-grade authorization system implement
 - `/api/v1/aap001/*` - AAP-001 authorization (10 endpoints)
 - `/api/v1/beta/pvp/*` - Identity verification (8 endpoints)
 - `/api/v1/beta/registry/*` - Commercial registry (5 endpoints)
-- `/api/v1/beta/poa/*` - Power of Attorney (7 endpoints)
+- `/api/v1/beta/poa/*` - Proof of Authorization (7 endpoints)
 - `/api/v1/beta/mcp/*` - MCP operations (10 endpoints)
 - `/healthz`, `/metrics`, `/jwks.json` - System endpoints
 
@@ -491,7 +491,7 @@ export AGENTAUTH_CIRCUIT_BREAKER_TIMEOUT=60
 
 - [x] AAP-001 Authorization Engine
 - [x] Extended Token System (issue, refresh, revoke)
-- [x] Power of Attorney (PoA) delegation
+- [x] Proof of Authorization (PoA) delegation
 - [x] Subscription-based authorization
 - [x] Policy engine (XACML-based)
 - [x] Audit logging (hash-chained)
@@ -523,7 +523,7 @@ export AGENTAUTH_CIRCUIT_BREAKER_TIMEOUT=60
 - [x] React UI (8 pages)
 - [x] Token management page
 - [x] Authorization page
-- [x] Power of Attorney page
+- [x] Proof of Authorization page
 - [x] Identity verification page
 - [x] Commercial registry page
 - [x] MCP servers page

@@ -305,7 +305,7 @@ BenchmarkDefaultPVP_TraceAuthorizationChain-11           2863112               4
 #### Phase 5: PoA Tests
 - **Target**: pkg/poa/poa_test.go
 - **Estimate**: 1 day, 12+ tests
-- **Coverage**: AAP-002 Power of Attorney credentials
+- **Coverage**: AAP-002 Proof of Authorization credentials
 
 #### Phase 6: E2E Integration Tests
 - **Target**: test/integration/token_flow_test.go
@@ -390,7 +390,7 @@ BenchmarkDefaultPVP_TraceAuthorizationChain-11           2863112               4
 
 ### Near-Term (Days 3-4)
 1. **Phase 4**: PIP integration tests (Power Information Point)
-2. **Phase 5**: PoA integration tests (Power of Attorney)
+2. **Phase 5**: PoA integration tests (Proof of Authorization)
 
 ### Mid-Term (Days 5-7)
 1. **Phase 6**: E2E integration tests (complete token flow)

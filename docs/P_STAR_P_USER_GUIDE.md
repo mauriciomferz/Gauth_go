@@ -127,7 +127,7 @@ func main() {
 
     ctx := context.Background()
 
-    // Create a Power of Attorney policy
+    // Create a Proof of Authorization policy
     createRequest := &agentauth.PolicyCreateRequest{
         PolicyType:       agentauth.PolicyTypePoA,
         PolicyName:       "Healthcare Data Access Policy",

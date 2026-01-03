@@ -20,7 +20,7 @@ web/ui-react/
 │
 ├── 🔄 **4 Placeholder Pages** (ready for implementation)
 │   ├── PIP.tsx - Authorization validation
-│   ├── PoA.tsx - Power of Attorney
+│   ├── PoA.tsx - Proof of Authorization
 │   ├── E2ETesting.tsx - Test execution
 │   └── Metrics.tsx - System metrics
 │
@@ -78,7 +78,7 @@ That's it! The script installs everything and starts the dev server.
 - Quick start guide
 
 #### 2. Token Management  
-- Create extended tokens (RFC-0111 compliant)
+- Create extended tokens (AAP-001 compliant)
 - Validate tokens with detailed checks
 - Recent tokens list
 - Copy to clipboard
@@ -156,7 +156,7 @@ That's it! The script installs everything and starts the dev server.
 - [x] PVP - Identity verification  
 - [x] Registry - Entity verification
 - [ ] PIP - Authorization validation
-- [ ] PoA - Power of Attorney
+- [ ] PoA - Proof of Authorization
 - [ ] E2E Testing - Test execution
 - [ ] Metrics - System metrics
 
@@ -181,7 +181,7 @@ That's it! The script installs everything and starts the dev server.
 
 Pages to implement:
 1. **PIP** - Authorization validation with policy checks
-2. **PoA** - Power of Attorney creation/validation
+2. **PoA** - Proof of Authorization creation/validation
 3. **E2E Testing** - Test execution interface
 4. **Metrics** - Charts and system health
 

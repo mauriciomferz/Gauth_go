@@ -12,7 +12,7 @@ owners: architecture-team
 
 **RFC 9635** is an IETF Standards Track specification (October 2024) that defines the Grant Negotiation and Authorization Protocol (GNAP) - a next-generation authorization framework designed to replace OAuth 2.0.
 
-**AgentAuth** is a AgentAuth Community specification (AAP-001/AAP-002, August 2025) designed as a comprehensive authorization framework specifically for AI governance, Power of Attorney delegation, and legal compliance.
+**AgentAuth** is a AgentAuth Community specification (AAP-001/AAP-002, August 2025) designed as a comprehensive authorization framework specifically for AI governance, Proof of Authorization delegation, and legal compliance.
 
 **Key Finding**: GNAP is a **modern successor to OAuth 2.0** focused on flexible, negotiated authorization, while AgentAuth is a **specialized framework for AI systems** that builds on OAuth 2.0 with added legal/compliance layers. They address related but distinct problem spaces.
 
@@ -24,7 +24,7 @@ owners: architecture-team
 |:-------|:-------------------|:--------------------------|
 | **Standards Body** | IETF (Internet Engineering Task Force) | AgentAuth Community |
 | **Publication Date** | October 2024 | August 2025 |
-| **Primary Goal** | Modern, flexible authorization protocol to replace OAuth 2.0 | AI authorization framework with Power of Attorney |
+| **Primary Goal** | Modern, flexible authorization protocol to replace OAuth 2.0 | AI authorization framework with Proof of Authorization |
 | **Built On** | New protocol (not OAuth 2.0 extension) | OAuth 2.0, OpenID Connect, MCP |
 | **Design Philosophy** | Grant negotiation, flexibility, state management | Legal delegation chains, AI governance |
 | **Interaction Model** | Multiple interaction modes (redirect, user_code, app, push) | Subscription + Request-specific flows |
@@ -257,7 +257,7 @@ Per-Request Flow
 
 **Key Features**:
 - **Self-Contained**: All authorization info embedded
-- **PoA Embedded**: Power of Attorney in token
+- **PoA Embedded**: Proof of Authorization in token
 - **Authorization Chain**: Full delegation chain
 - **Compliance Tracking**: Legal framework metadata
 - **Always Bound**: Never bearer tokens
@@ -510,7 +510,7 @@ Despite their differences, GNAP and AgentAuth share several concepts:
 ```
 ┌────────────────────────────────────┐
 │    AgentAuth Legal/Compliance Logic    │
-│  • Power of Attorney               │
+│  • Proof of Authorization               │
 │  • Authorization Chains            │
 │  • Commercial Register             │
 └────────────────────────────────────┘

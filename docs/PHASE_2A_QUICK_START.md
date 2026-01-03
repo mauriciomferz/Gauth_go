@@ -35,7 +35,7 @@ curl -X POST http://localhost:8080/api/v1/beta/pvp/verify \
 - `POST /api/v1/beta/registry/verify-entity` - Verify company registration
 - `POST /api/v1/beta/registry/verify-signatory` - Verify signing authority
 
-**Power of Attorney CRUD** (6 endpoints):
+**Proof of Authorization CRUD** (6 endpoints):
 - `POST /api/v1/beta/poa` - Create new PoA
 - `GET /api/v1/beta/poa/:id` - Get PoA by ID
 - `GET /api/v1/beta/poa` - List all PoAs (with filters)
@@ -158,7 +158,7 @@ curl -X POST http://localhost:8080/api/v1/beta/registry/verify-signatory \
   }'
 ```
 
-### 4. Test Power of Attorney
+### 4. Test Proof of Authorization
 
 ```bash
 # Create PoA
@@ -234,7 +234,7 @@ npm run dev
 6. Click "Verify Signatory"
 7. ✅ Should show authorization status
 
-**Power of Attorney Page** (`/poa`):
+**Proof of Authorization Page** (`/poa`):
 1. Click "Create PoA"
 2. Fill in grantor, grantee, scope
 3. Set validity period

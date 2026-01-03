@@ -31,7 +31,7 @@ POST /api/admin/poa?tenant_id={tenant_id}
 
 ---
 
-## 1. Power of Attorney Integration
+## 1. Proof of Authorization Integration
 
 ### Backend Endpoint
 ```

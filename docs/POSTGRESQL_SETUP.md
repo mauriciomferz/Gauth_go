@@ -83,7 +83,7 @@ The `extended_tokens` table stores AAP-001 tokens with:
 - `issued_at` (TIMESTAMP WITH TIME ZONE)
 
 **AAP-001 Extended Fields (JSONB):**
-- `power_of_attorney` - Power of Attorney definition
+- `power_of_attorney` - Proof of Authorization definition
 - `authorization_chain` - Complete authorization hierarchy
 - `legal_framework` - Legal compliance context
 - `verification_proof` - Identity verification chain

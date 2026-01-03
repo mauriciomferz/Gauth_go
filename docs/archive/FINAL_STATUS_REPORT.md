@@ -11,7 +11,7 @@
 
 ### What We Built
 
-A complete, production-ready implementation of **AAP-001 (AgentAuth 1.0)** and **AAP-002 (Power of Attorney for LLMs)** with:
+A complete, production-ready implementation of **AAP-001 (AgentAuth 1.0)** and **AAP-002 (Proof of Authorization for LLMs)** with:
 
 - ✅ **Complete Authorization Framework** (5,516 lines of production code)
 - ✅ **Comprehensive Test Suite** (38 integration tests, 100% passing)
@@ -122,7 +122,7 @@ A complete, production-ready implementation of **AAP-001 (AgentAuth 1.0)** and *
    - Client/Owner/PoA registration
    - Attribute management
 
-6. **Power of Attorney**
+6. **Proof of Authorization**
    - Complete action taxonomy (54 types)
    - Representative types (Managing Director, Prokura, etc.)
    - Geographic scope validation

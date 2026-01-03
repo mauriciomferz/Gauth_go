@@ -128,7 +128,7 @@ This document provides a comprehensive mapping between AAP-001/AAP-002 requireme
 
 ---
 
-## AAP-002 - Power of Attorney Extensions
+## AAP-002 - Proof of Authorization Extensions
 
 ### Section 1: PoA Structure
 - **Clause**: `AAP-002:1.-power-of-attorney-structure`

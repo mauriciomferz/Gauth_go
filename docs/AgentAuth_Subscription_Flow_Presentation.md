@@ -27,7 +27,7 @@ November 19, 2025
 
 ### What is AgentAuth?
 
-**AgentAuth** is a specialized OAuth 2.0 authorization server implementing **AAP-001**, designed specifically for **AI agent authorization** with **Power of Attorney (PoA)** delegation scenarios.
+**AgentAuth** is a specialized OAuth 2.0 authorization server implementing **AAP-001**, designed specifically for **AI agent authorization** with **Proof of Authorization (PoA)** delegation scenarios.
 
 ### Key Value Proposition
 
@@ -304,7 +304,7 @@ type ResourceServerAuthorization struct {
 
 **Use AgentAuth AAP-001 When:**
 - ✅ AI agents need legal authorization
-- ✅ Power of Attorney validation required
+- ✅ Proof of Authorization validation required
 - ✅ Multi-party authorization chains (3+ levels)
 - ✅ EU regulatory compliance (eIDAS)
 - ✅ Commercial register verification needed
@@ -456,7 +456,7 @@ type ResourceServerAuthorization struct {
 **Use AgentAuth AAP-001 When:**
 - ✅ AI agents need legal authorization
 - ✅ Resources span multiple cloud platforms
-- ✅ Power of Attorney validation required
+- ✅ Proof of Authorization validation required
 - ✅ Corporate hierarchy authorization chains
 - ✅ EU regulatory compliance critical
 
@@ -471,7 +471,7 @@ type ResourceServerAuthorization struct {
 **AgentAuth:**
 - ✅ Commercial register verification (18 countries)
 - ✅ Statutory representative validation
-- ✅ Power of Attorney credential embedding
+- ✅ Proof of Authorization credential embedding
 - ✅ Authorization chain integrity checks
 
 **Azure/Okta/AWS:**
@@ -582,7 +582,7 @@ A multinational corporation deploys an AI agent to manage HR records across EU s
 ### Scenario 2: Healthcare AI with Patient Data Access
 
 **Business Need:**
-A healthcare AI assistant needs to access patient records with explicit Power of Attorney from patients unable to consent (e.g., elderly, disabled).
+A healthcare AI assistant needs to access patient records with explicit Proof of Authorization from patients unable to consent (e.g., elderly, disabled).
 
 **AgentAuth Solution:**
 1. **Subscription:** Hospital's statutory representative establishes authority
@@ -874,7 +874,7 @@ LAYER 5: Audit & Monitoring
    - Autonomous AI systems acting on behalf of legal entities
    - Require proof of statutory authority
 
-2. **Power of Attorney validation required**
+2. **Proof of Authorization validation required**
    - Healthcare scenarios (patient → guardian → AI)
    - Financial services (client → advisor → AI)
    - Corporate scenarios (owner → representative → AI)

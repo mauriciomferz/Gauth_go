@@ -44,7 +44,7 @@ This roadmap consolidates all planned enhancements for AgentAuth following the c
 **Priority**: P1 - Core Feature (Completed)
 **Actual Investment**: Minimal (already implemented)
 
-**Purpose**: Replace UI mocks with real backend HTTP endpoints for PVP, Commercial Registry, and Power of Attorney.
+**Purpose**: Replace UI mocks with real backend HTTP endpoints for PVP, Commercial Registry, and Proof of Authorization.
 
 **Delivered** (November 16, 2025):
 - ✅ 11 backend API endpoints (PVP, Registry, PoA CRUD)

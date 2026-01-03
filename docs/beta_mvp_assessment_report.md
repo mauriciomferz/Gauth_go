@@ -13,7 +13,7 @@ refreshCadence: none
 Date: 2025-10-30 (Updated Post Week 3 Replay Protection + Delegation Graph Export + Advanced Scope Inheritance)
 
 ## Executive Summary
-The Beta MVP has progressed through the Week 2 enhancement plan and advanced Week 3 items (hierarchical delegation, persistence, and dual-control revocation workflow). In addition to foundational Power of Attorney (PoA) features (issuance, revocation, decision linkage, multi-signature preparation & finalization, digest domain separation V1/V2/V3, and JWT/JWKS hardening), it now includes:
+The Beta MVP has progressed through the Week 2 enhancement plan and advanced Week 3 items (hierarchical delegation, persistence, and dual-control revocation workflow). In addition to foundational Proof of Authorization (PoA) features (issuance, revocation, decision linkage, multi-signature preparation & finalization, digest domain separation V1/V2/V3, and JWT/JWKS hardening), it now includes:
 
 - Embedded extended token integrity claims (`poa_digest`, `poa_version`, `token_version`) with enforcement-time validation and explicit failure metrics (IMPLEMENTED).
 - Expanded PoA lifecycle states (`suspended`, `terminated`) with dedicated endpoints and anchoring events.

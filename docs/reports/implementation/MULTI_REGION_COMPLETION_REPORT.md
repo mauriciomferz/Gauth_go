@@ -111,7 +111,7 @@ Severity: Medium (Integration Failure).
 CRITICAL 5: Identity vs. Authorization Coupling
 The Issue: The prompt notes that verification of powers is insufficient if the "authorizing identity is not clearly verified."
 Vulnerability: The AgentAuth library relies on cryptographic key signatures to prove identity. It assumes Key_Owner == Human_Principal.
-The Exploit: If the Principal is phished and loses their private key, the attacker can generate valid "AgentAuth+" PoA credentials. The framework lacks a "Liveness Check" or "Dual-Channel Verification" (e.g., requiring a biometric scan or a secondary hardware confirmation for the creation of a new Power of Attorney) to ensure the key wasn't stolen.
+The Exploit: If the Principal is phished and loses their private key, the attacker can generate valid "AgentAuth+" PoA credentials. The framework lacks a "Liveness Check" or "Dual-Channel Verification" (e.g., requiring a biometric scan or a secondary hardware confirmation for the creation of a new Proof of Authorization) to ensure the key wasn't stolen.
 3. Strategic Recommendations
 To certify this repository for production use under the "AgentAuth Community" standards, the following remediation steps are required:
 

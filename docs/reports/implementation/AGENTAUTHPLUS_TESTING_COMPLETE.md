@@ -24,7 +24,7 @@ Successfully created and executed comprehensive integration test suite for all 2
 - **Method:** curl-based black-box testing
 - **Validation:** HTTP status code verification
 - **Server:** http://localhost:8080 (BetaServer with AgentAuth+ enabled)
-- **Database:** PostgreSQL with test Power of Attorney (PoA ID: 00000000-0000-0000-0000-000000000001)
+- **Database:** PostgreSQL with test Proof of Authorization (PoA ID: 00000000-0000-0000-0000-000000000001)
 
 ### Test Structure
 ```bash

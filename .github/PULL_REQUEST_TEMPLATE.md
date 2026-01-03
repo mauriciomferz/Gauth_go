@@ -19,7 +19,7 @@ This PR completes Phase 2A Enhancement, successfully replacing all UI mocks with
 - ✅ Created 9 new backend endpoints (PVP, Registry, PoA CRUD)
 - ✅ Built SubscriptionWizard UI component (310 lines)
 - ✅ Removed all sessionStorage mocks from frontend
-- ✅ Integrated RFC-0111 subscription flow into Tokens page
+- ✅ Integrated AAP-001 subscription flow into Tokens page
 - ✅ Zero TypeScript compilation errors
 - ✅ All endpoints tested with curl
 - ✅ Complete documentation updates
@@ -41,7 +41,7 @@ This PR completes Phase 2A Enhancement, successfully replacing all UI mocks with
    - Support: Germany HRB, UK Companies House, EU registries
 
 3. **`web/handlers/beta/poa_handlers.go`** (458 lines)
-   - Complete Power of Attorney CRUD API
+   - Complete Proof of Authorization CRUD API
    - 6 endpoints:
      - `POST /api/v1/beta/poa` - Create
      - `GET /api/v1/beta/poa/:id` - Get by ID
@@ -61,7 +61,7 @@ This PR completes Phase 2A Enhancement, successfully replacing all UI mocks with
 
 #### New Component
 **`web/ui-react/src/components/subscription/SubscriptionWizard.tsx`** (310 lines)
-- Complete RFC-0111 8-step subscription flow UI
+- Complete AAP-001 8-step subscription flow UI
 - Visual progress indicator with step tracking
 - Automatic progression through Steps II-VIII
 - Error handling with dismissible alerts
@@ -84,7 +84,7 @@ This PR completes Phase 2A Enhancement, successfully replacing all UI mocks with
    - Added 15 new API client methods:
      - 3 for PVP/Registry integration
      - 3 for PoA operations
-     - 9 for RFC-0111 subscription flow
+     - 9 for AAP-001 subscription flow
    - Removed all sessionStorage mocks
 
 2. **`web/ui-react/src/pages/Tokens.tsx`**

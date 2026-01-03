@@ -77,7 +77,7 @@ Breakdown by Category:
 │                                                              │
 │  REST API (27 endpoints)                                     │
 │       │                                                      │
-│       ├─── Power of Attorney Service                         │
+│       ├─── Proof of Authorization Service                         │
 │       │     ├─── Basic PoA CRUD                              │
 │       │     ├─── Successor Designation                       │
 │       │     ├─── Delegation Chains                           │

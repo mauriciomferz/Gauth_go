@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-Version 0.9.1 implements **secure-by-default** behavior for the AAP-001 Power of Attorney validation framework, addressing all critical security gaps identified in the November 21, 2025 security audit. This release transitions the framework from **PARTIALLY COMPLIANT** to certification-ready **COMPLIANT** status.
+Version 0.9.1 implements **secure-by-default** behavior for the AAP-001 Proof of Authorization validation framework, addressing all critical security gaps identified in the November 21, 2025 security audit. This release transitions the framework from **PARTIALLY COMPLIANT** to certification-ready **COMPLIANT** status.
 
 ---
 

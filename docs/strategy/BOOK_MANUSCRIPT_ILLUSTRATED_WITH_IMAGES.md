@@ -51,8 +51,8 @@ Consider the legal distinction:
 | Concept | Technical Analog | Legal Implication |
 |---------|-----------------|-------------------|
 | **Access Token** | House key | Can unlock door; no authority to sell house |
-| **Delegation Token** | Power of Attorney | Can act on behalf of principal; legally binding |
-| **PoA Token** | Notarized Limited Power of Attorney | Cryptographically verifiable; scope-limited; auditable |
+| **Delegation Token** | Proof of Authorization | Can act on behalf of principal; legally binding |
+| **PoA Token** | Notarized Limited Proof of Authorization | Cryptographically verifiable; scope-limited; auditable |
 
 ---
 
@@ -2363,7 +2363,7 @@ This Addendum is governed by the GDPR (Regulation (EU) 2016/679).
 
 ---
 
-## D.3 Healthcare Power of Attorney (HIPAA Compliant)
+## D.3 Healthcare Proof of Authorization (HIPAA Compliant)
 
 ```
 HEALTHCARE POWER OF ATTORNEY

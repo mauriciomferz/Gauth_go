@@ -58,7 +58,7 @@ Open your browser to **http://localhost:3000** and you'll see:
 - **PVP Identity Verification** - Verify identities with eIDAS trust levels
 - **Commercial Registry** - Verify entities and signatories
 - **PIP Authorization** - Validate authorization chains
-- **Power of Attorney** - Create and validate PoAs
+- **Proof of Authorization** - Create and validate PoAs
 - **E2E Testing** - Run end-to-end tests
 - **Metrics** - View system performance metrics
 

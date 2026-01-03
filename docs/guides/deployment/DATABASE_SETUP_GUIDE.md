@@ -135,7 +135,7 @@ The migration creates **17 tables** for **5 admin handlers**:
 ### Core (1 table)
 - `subscribers` - Tenant management
 
-### Handler 1: Power of Attorney (2 tables)
+### Handler 1: Proof of Authorization (2 tables)
 - `power_of_attorney` - PoA records
 - `delegation_chains` - Delegation tracking
 

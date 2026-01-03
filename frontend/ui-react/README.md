@@ -8,7 +8,7 @@ owners: [system]
 
 # AgentAuth 1.0 React Dashboard
 
-Modern React-based Single Page Application (SPA) for the AgentAuth 1.0 RFC-0111/0115 compliant authorization framework.
+Modern React-based Single Page Application (SPA) for the AgentAuth 1.0 AAP-001/0115 compliant authorization framework.
 
 ## 🚀 Features
 
@@ -95,7 +95,7 @@ web/ui-react/
 │   │   ├── PVP.tsx       # PVP identity verification
 │   │   ├── Registry.tsx  # Commercial registry
 │   │   ├── PIP.tsx       # Policy information point
-│   │   ├── PoA.tsx       # Power of Attorney
+│   │   ├── PoA.tsx       # Proof of Authorization
 │   │   ├── E2ETesting.tsx # E2E testing
 │   │   └── Metrics.tsx   # System metrics
 │   ├── lib/               # Utilities and API client
@@ -119,11 +119,11 @@ web/ui-react/
 ### Pages
 
 1. **Overview** - Dashboard with system stats and quick links
-2. **Extended Tokens** - Create, validate, and manage RFC-0111 tokens
+2. **Extended Tokens** - Create, validate, and manage AAP-001 tokens
 3. **PVP** - eIDAS identity verification with trust levels
 4. **Registry** - Commercial register entity verification (HRB/Companies House)
 5. **PIP** - Authorization validation with policy checks
-6. **PoA** - Power of Attorney management (RFC-0115)
+6. **PoA** - Proof of Authorization management (AAP-002)
 7. **E2E Testing** - End-to-end integration testing
 8. **Metrics** - System performance and health metrics
 
@@ -139,7 +139,7 @@ web/ui-react/
 
 The `lib/api.ts` file provides a complete API client with TypeScript types for all AgentAuth backend endpoints:
 
-- **Token operations** - Create, validate (RFC-0111)
+- **Token operations** - Create, validate (AAP-001)
 - **PVP identity verification** - `POST /api/v1/beta/pvp/verify` ✅ Phase 2A
 - **Commercial registry queries** - `POST /api/v1/beta/registry/verify-entity|verify-signatory` ✅ Phase 2A
 - **PoA management** - Full CRUD at `/api/v1/beta/poa` ✅ Phase 2A
@@ -267,9 +267,9 @@ AGENTAUTH_DEV_INDEX=1 AGENTAUTH_AAP-001_ENABLED=1 go run ./cmd/web-server
 
 **Verify**: Check backend logs for this message:
 ```
-[RFC-0111] Endpoints registered:
-[RFC-0111]   Beta External Service APIs:
-[RFC-0111]     POST /api/v1/beta/pvp/verify (PVP identity verification)
+[AAP-001] Endpoints registered:
+[AAP-001]   Beta External Service APIs:
+[AAP-001]     POST /api/v1/beta/pvp/verify (PVP identity verification)
 ...
 ```
 

@@ -14,7 +14,7 @@ refreshCadence: on-change
 
 This directory contains clear, concise Go examples demonstrating the core AgentAuth protocol flows:
 
-- **Power of Attorney (POA) Request/Response**
+- **Proof of Authorization (POA) Request/Response**
 - **Advanced POA (AAP-001) Scenarios**
 - **Delegation (AAP-002) Request/Response**
 - **Token Creation and Validation**
@@ -24,7 +24,7 @@ Each example is self-contained and annotated for Beta demonstration clarity.
 ---
 
 
-## 1. Power of Attorney (POA) Flow
+## 1. Proof of Authorization (POA) Flow
 
 - Shows how a client requests a POA and receives a response.
 

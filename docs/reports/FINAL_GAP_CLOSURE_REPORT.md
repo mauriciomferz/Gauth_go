@@ -144,7 +144,7 @@ multiSink.Write(event)
 **Files**: `api/openapi/agentauth-api.yaml` (357 lines)
 
 **Documented Endpoints**:
-- `POST /poa/issue` - Issue new Power of Attorney
+- `POST /poa/issue` - Issue new Proof of Authorization
 - `POST /poa/verify` - Verify PoA token
 - `POST /poa/revoke` - Revoke PoA delegation
 - `GET /poa/{id}` - Retrieve PoA details

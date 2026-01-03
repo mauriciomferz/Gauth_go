@@ -202,7 +202,7 @@ type OwnersAuthorizerInfo struct {
 
 **Authorization Proof Types:**
 - Commercial Register
-- Power of Attorney
+- Proof of Authorization
 - Corporate Resolution
 - Employment Contract
 - Service Agreement
@@ -355,7 +355,7 @@ ExtendedToken =
         ├─ Certificate-based identity
         ├─ Operational status
         └─ Capability level
-  +Power of Attorney (embedded PoA definition)
+  +Proof of Authorization (embedded PoA definition)
   +Legal Framework (jurisdiction, fiduciary duties)
   +Verification Proof (PVP identity chain with TSP verification)
   +Restrictions (power limitations)

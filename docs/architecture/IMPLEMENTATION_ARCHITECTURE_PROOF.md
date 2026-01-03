@@ -14,7 +14,7 @@
 > "The repository implements a flat validation model (User -> Secret -> Code)"
 
 ### Reality:
-This repository contains **4,530 lines of Go code implementing a complete RFC-compliant Power of Attorney authorization framework**, NOT a TOTP library.
+This repository contains **4,530 lines of Go code implementing a complete RFC-compliant Proof of Authorization authorization framework**, NOT a TOTP library.
 
 ---
 
@@ -83,7 +83,7 @@ type PowerOfAttorney struct {
 }
 ```
 
-**This is a complete AAP-002 Power of Attorney data model, NOT a TOTP secret.**
+**This is a complete AAP-002 Proof of Authorization data model, NOT a TOTP secret.**
 
 ---
 
@@ -317,7 +317,7 @@ type ValidationContext struct {
 - ❌ "Flat validation model (User -> Secret -> Code)"
 
 ### ACTUALLY:
-- ✅ **Complete AAP-002 Power of Attorney implementation (4,530 lines)**
+- ✅ **Complete AAP-002 Proof of Authorization implementation (4,530 lines)**
 - ✅ **Delegation chain validation (263 lines)**
 - ✅ **Redis-backed replay protection (JTI tracking)**
 - ✅ **Atomic quota enforcement (Lua scripts)**
@@ -395,7 +395,7 @@ PASS
 
 ## Conclusion
 
-Your assessment contains **fundamental factual errors** about what this codebase implements. You have incorrectly assessed a **4,530-line RFC-compliant Power of Attorney authorization framework** as a "TOTP library."
+Your assessment contains **fundamental factual errors** about what this codebase implements. You have incorrectly assessed a **4,530-line RFC-compliant Proof of Authorization authorization framework** as a "TOTP library."
 
 ### Key Facts:
 1. This is **NOT** a TOTP implementation

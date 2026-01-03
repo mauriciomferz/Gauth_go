@@ -9,7 +9,7 @@ owners: [system]
 # Beta Readiness Plan (AAP-001 & AAP-002 Compliance)
 
 ## Objective
-Deliver a demonstrably compliant, transparent, and resilient beta implementation of core AAP-001 (delegation, revocation, cryptographic integrity, replay protection) and AAP-002 (Power of Attorney structure, multi-signature semantics, canonical serialization, validity period) for live demo usage.
+Deliver a demonstrably compliant, transparent, and resilient beta implementation of core AAP-001 (delegation, revocation, cryptographic integrity, replay protection) and AAP-002 (Proof of Authorization structure, multi-signature semantics, canonical serialization, validity period) for live demo usage.
 
 ## Scope In Beta
 Included:

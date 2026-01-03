@@ -55,7 +55,7 @@ go run ./cmd/web-server
    - **PVP** (✅ Complete): Identity verification, TSP list, verification history
    - **Registry** (🔄 Placeholder): Entity/signatory verification
    - **PIP** (🔄 Placeholder): Authorization validation
-   - **PoA** (🔄 Placeholder): Power of Attorney management
+   - **PoA** (🔄 Placeholder): Proof of Authorization management
    - **E2E Testing** (🔄 Placeholder): Test execution
    - **Metrics** (🔄 Placeholder): System metrics charts
 
@@ -88,7 +88,7 @@ web/ui-react/                    # NEW DIRECTORY
 │   │   ├── PVP.tsx             # Identity verification ✅ (240 lines)
 │   │   ├── Registry.tsx        # Entity verification 🔄 (23 lines)
 │   │   ├── PIP.tsx             # Authorization 🔄 (23 lines)
-│   │   ├── PoA.tsx             # Power of Attorney 🔄 (23 lines)
+│   │   ├── PoA.tsx             # Proof of Authorization 🔄 (23 lines)
 │   │   ├── E2ETesting.tsx      # Testing 🔄 (23 lines)
 │   │   └── Metrics.tsx         # Metrics 🔄 (23 lines)
 │   ├── lib/

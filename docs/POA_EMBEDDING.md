@@ -14,7 +14,7 @@ owners: [system]
 
 ## Overview
 
-PoA (Power of Attorney) embedding is a feature that allows the full PoA definition to be included directly in the token envelope, enabling **offline verification** without requiring access to the PoA repository. This significantly improves token portability, reduces dependency on external stores, and enables verification in disconnected or low-trust environments.
+PoA (Proof of Authorization) embedding is a feature that allows the full PoA definition to be included directly in the token envelope, enabling **offline verification** without requiring access to the PoA repository. This significantly improves token portability, reduces dependency on external stores, and enables verification in disconnected or low-trust environments.
 
 ## Architecture
 

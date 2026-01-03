@@ -59,7 +59,7 @@ That's it! The app opens at **http://localhost:3000**
 
 ### 🔄 Ready for Implementation
 - PIP page (authorization)
-- PoA page (Power of Attorney)
+- PoA page (Proof of Authorization)
 - E2E Testing page
 - Metrics page
 

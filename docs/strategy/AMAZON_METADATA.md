@@ -10,7 +10,7 @@
 ```html
 <h1>The missing manual for the Agentic Economy.</h1>
 
-<p><b>"OAuth gave us 'Login with Google'. AgentAuth gives us 'Power of Attorney for AI'."</b></p>
+<p><b>"OAuth gave us 'Login with Google'. AgentAuth gives us 'Proof of Authorization for AI'."</b></p>
 
 <p>We are entering a new era of the internet. Autonomous AI agents are no longer just summarizing emails; they are negotiating contracts, managing corporate treasuries, and accessing healthcare records. But our infrastructure is stuck in 2010.</p>
 

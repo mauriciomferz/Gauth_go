@@ -56,7 +56,7 @@ AgentAuth issues **PoA (Proof of Authorization) tokens** with:
 Agents possess self-sovereign cryptographic identities (Ed25519/ECDSA) wrapped in verifiable metadata profiles.
 
 ### 2. Delegation Chains (AAP-002)
-Implements "Power of Attorney" for software. CEO → CFO → Manager → Agent, each cryptographically signed.
+Implements "Proof of Authorization" for software. CEO → CFO → Manager → Agent, each cryptographically signed.
 
 ### 3. Fiduciary Logic
 Tokens embed business rules:

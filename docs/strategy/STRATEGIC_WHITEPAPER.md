@@ -6,13 +6,13 @@
 ## 1. The Narrative: How to Explain AgentAuth to the World
 
 **Core Pitch:**
-"OAuth 2.0 gave us 'Login with Google'. AgentAuth gives us 'Power of Attorney for AI'."
+"OAuth 2.0 gave us 'Login with Google'. AgentAuth gives us 'Proof of Authorization for AI'."
 
 **The Problem:**
 In the coming "Agentic Economy," AI agents will negotiate contracts, spend budgets, and access healthcare data. Current standards (OAuth 2.0) only handle *technical access* (can this token call this API?), not *legal authority* (is this agent legally allowed to sign this contract on my behalf?).
 
 **The AgentAuth Solution:**
-AgentAuth is a **Legal-Grade Authorization Framework**. It bridges the gap between code and law. It doesn't just pass a token; it passes a **cryptographically verifiable Power of Attorney (PoA)** with embedded fiduciary duties, liability limits, and multi-jurisdiction compliance.
+AgentAuth is a **Legal-Grade Authorization Framework**. It bridges the gap between code and law. It doesn't just pass a token; it passes a **cryptographically verifiable Proof of Authorization (PoA)** with embedded fiduciary duties, liability limits, and multi-jurisdiction compliance.
 
 ### Target Audience & Use Cases
 1.  **Autonomous Finance**: AI Hedge Funds / DeFi Agents.
@@ -48,7 +48,7 @@ AgentAuth is a **Legal-Grade Authorization Framework**. It bridges the gap betwe
 *   How AgentAuth enforces liability caps programmatically.
 
 **Chapter 4: The 18-Jurisdiction Challenge**
-*   Does a "Digital Power of Attorney" hold up in a German court vs a US court?
+*   Does a "Digital Proof of Authorization" hold up in a German court vs a US court?
 *   AgentAuth's regional adapter architecture.
 
 **Chapter 5: Building the Future**

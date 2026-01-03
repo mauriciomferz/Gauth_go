@@ -10,7 +10,7 @@
 
 ## 🎯 Project Overview
 
-AgentAuth+ is an enterprise-grade authorization system with AI-powered capabilities, featuring comprehensive Power of Attorney (PoA) management, blockchain-backed verification, and advanced delegation patterns including successor designation, dual control, capability-based access, and fiduciary responsibility tracking.
+AgentAuth+ is an enterprise-grade authorization system with AI-powered capabilities, featuring comprehensive Proof of Authorization (PoA) management, blockchain-backed verification, and advanced delegation patterns including successor designation, dual control, capability-based access, and fiduciary responsibility tracking.
 
 ### Key Differentiators
 
@@ -62,7 +62,7 @@ Breakdown by Category:
 │                                                              │
 │  REST API (27 endpoints)                                     │
 │       │                                                      │
-│       ├─── Power of Attorney Service                         │
+│       ├─── Proof of Authorization Service                         │
 │       │     ├─── Basic PoA CRUD                              │
 │       │     ├─── Successor Designation                       │
 │       │     ├─── Delegation Chains                           │

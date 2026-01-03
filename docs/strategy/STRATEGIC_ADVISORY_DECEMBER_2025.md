@@ -20,7 +20,7 @@ You have created **AgentAuth** - a legal-grade authorization framework for the A
 ## Question 1: What's the Best Way to Explain This Project to the World?
 
 ### **The Elevator Pitch** (30 seconds)
-> "OAuth 2.0 gave us 'Login with Google.' AgentAuth gives us 'Power of Attorney for AI.' It's the missing legal layer that allows autonomous agents to sign contracts, spend money, and access healthcare data with cryptographically verifiable authority—not just technical access."
+> "OAuth 2.0 gave us 'Login with Google.' AgentAuth gives us 'Proof of Authorization for AI.' It's the missing legal layer that allows autonomous agents to sign contracts, spend money, and access healthcare data with cryptographically verifiable authority—not just technical access."
 
 ### **The Problem Statement** (2 minutes)
 Current AI agents operate with **OAuth tokens** (technical access), but lack **legal standing** (authority). This creates liability nightmares:

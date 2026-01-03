@@ -81,7 +81,7 @@ audit_trail          - Complete audit log
 | `subscription_not_found`    | Subscription doesn't exist             |
 | `step_already_completed`    | Step executed twice (idempotency)      |
 | `missing_scope`             | Request scope required                 |
-| `missing_poa`               | Power of Attorney required             |
+| `missing_poa`               | Proof of Authorization required             |
 | `missing_legal_framework`   | Legal framework required               |
 | `request_compliance_failed` | Compliance validation failed           |
 

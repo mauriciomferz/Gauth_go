@@ -91,7 +91,7 @@ const response = await apiFetch('/api/admin/poa'); // auto-adds tenant_id
 
 ## 🎯 Admin Handler Endpoints
 
-### Power of Attorney
+### Proof of Authorization
 - `GET /api/admin/poa` - List all PoAs
 - `POST /api/admin/poa` - Create new PoA
 - `PUT /api/admin/poa/{id}` - Update PoA
@@ -176,7 +176,7 @@ PORT=8081 go run ./cmd/web-server
 ## 📊 Available React Hooks
 
 ```typescript
-// Power of Attorney
+// Proof of Authorization
 usePowerOfAttorneyList() // → { data, loading, error, refetch }
 usePoAMutations() // → { createPoA, updatePoA, deletePoA }
 
@@ -240,7 +240,7 @@ function MyComponent() {
 - [ ] Frontend running on port 5173
 - [ ] Database connected (PostgreSQL)
 - [ ] Navigate to http://localhost:5173
-- [ ] Open admin pages (Power of Attorney, Resilience, etc.)
+- [ ] Open admin pages (Proof of Authorization, Resilience, etc.)
 - [ ] Check browser DevTools Network tab
 - [ ] Verify `tenant_id` parameter in requests
 - [ ] No console errors

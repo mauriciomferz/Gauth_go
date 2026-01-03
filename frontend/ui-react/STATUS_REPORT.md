@@ -89,7 +89,7 @@ The React UI modernization is **complete at the foundation level** with all infr
 | **PVP** | ✅ Enhanced | 240 | Verify identity form, TSP list, verification history, eIDAS trust levels |
 | Registry | 🔄 Placeholder | ~23 | Entity/signatory verification - *needs implementation* |
 | PIP | 🔄 Placeholder | ~23 | Authorization validation - *needs implementation* |
-| PoA | 🔄 Placeholder | ~23 | Power of Attorney management - *needs implementation* |
+| PoA | 🔄 Placeholder | ~23 | Proof of Authorization management - *needs implementation* |
 | E2E Testing | 🔄 Placeholder | ~23 | Test execution - *needs implementation* |
 | Metrics | 🔄 Placeholder | ~23 | System metrics charts - *needs implementation* |
 
@@ -278,7 +278,7 @@ Total: 30+ files, ~1,300 lines of TypeScript/React
   - Policy checks visualization
   - Connect to `apiClient.validateAuthorization()` and `getCacheStats()`
   
-- [ ] **PoA Page** (Power of Attorney)
+- [ ] **PoA Page** (Proof of Authorization)
   - PoA creation form (grantor, representative, actions, geographic, validity)
   - PoA validation form
   - Active PoAs table

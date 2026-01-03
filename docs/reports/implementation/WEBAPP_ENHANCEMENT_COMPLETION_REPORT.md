@@ -199,7 +199,7 @@ docker-compose down
    - ✅ RFC compliance info (regex pattern matching)
    - ✅ Stat cards (Tests Passing, Benchmarks, Coverage)
    - ✅ Backend status indicator (with 2s wait for health check)
-   - ✅ RFC compliance section (AgentAuth 1.0, Power of Attorney, eIDAS)
+   - ✅ RFC compliance section (AgentAuth 1.0, Proof of Authorization, eIDAS)
    - ✅ System components (Extended Token, PVP, Commercial Register)
    - ✅ Quick start section
    - ✅ Navigation links (getByRole('link') navigation)

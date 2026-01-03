@@ -360,7 +360,7 @@ Dependencies:
 - Action authorization logic ✅
 - Geographic/sector validation ✅
 
-### 5. Phase 5: PoA (Power of Attorney) Tests (1 day) ✅ COMPLETE
+### 5. Phase 5: PoA (Proof of Authorization) Tests (1 day) ✅ COMPLETE
 **Status**: ✅ Complete - All tests passing
 **File**: `pkg/poa/poa_test.go`  
 **Target**: 12+ tests ✅ **15 tests passing (11 functional + 4 benchmarks)**  
@@ -467,7 +467,7 @@ ok      pkg/poa    0.840s
 **Results**: ✅ **15/15 tests PASSING** (100% pass rate, 47 subtests)
 
 #### Key Validations Covered:
-1. **AAP-002 Compliance**: Power of Attorney structure and validation rules
+1. **AAP-002 Compliance**: Proof of Authorization structure and validation rules
 2. **Representative Types**: ManagingDirector, ProvidedWithProkura, LegalCounsel validation
 3. **Action Types**: Transactions, decisions, physical, non-physical actions
 4. **Geographic Scope**: National, EU, multiple countries, global authorization
@@ -655,7 +655,7 @@ Dependencies:
 | Step II/VII | Commercial Register | PENDING |
 | §5 | PIP Data Consolidation | PENDING |
 
-### AAP-002 (Power of Attorney) - Test Coverage
+### AAP-002 (Proof of Authorization) - Test Coverage
 
 | Section | Requirement | Test Status |
 |---------|-------------|-------------|
@@ -807,7 +807,7 @@ Dependencies:
 - Step II Commercial Register Verification
 - Step VII PVP Identity Verification
 
-**AAP-002 (Power of Attorney)**: ✅ COMPLETE
+**AAP-002 (Proof of Authorization)**: ✅ COMPLETE
 - §A.2 Representative Types
 - §B.4 Action Types (Physical, Non-Physical, Transactions, Decisions)
 - §C Geographic Scope

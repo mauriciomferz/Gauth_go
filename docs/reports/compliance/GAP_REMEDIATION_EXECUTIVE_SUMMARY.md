@@ -181,7 +181,7 @@ AFTER: AAP-001 Comprehensive Authorization Credential
 │   ├─ Owner's Authorizer (statutory authority)
 │   ├─ Client Owner (AI system owner)
 │   └─ Client (AI agent)
-├─ Power of Attorney (embedded PoA definition)
+├─ Proof of Authorization (embedded PoA definition)
 ├─ Legal Framework (jurisdiction, fiduciary duties)
 ├─ Verification Proof (PVP identity chain)
 ├─ Restrictions (power limitations)

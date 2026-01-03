@@ -183,7 +183,7 @@ Comprehensive strategic analysis comparing AAP-RFC proprietary delegation framew
 
 2. **Gap Analysis**
    - **AAP-RFC Unique Capabilities**:
-     - ✅ Legal Power of Attorney framework (CRITICAL)
+     - ✅ Legal Proof of Authorization framework (CRITICAL)
      - ✅ Commercial register integration (18 countries)
      - ✅ National ID verification (eIDAS compliant)
      - ✅ Multi-level chain validation (3+ levels)
@@ -357,7 +357,7 @@ Comprehensive strategic analysis comparing AAP-RFC proprietary delegation framew
 ### Strategic Positioning
 
 **AgentAuth's Competitive Advantage**:
-- ✅ **Unique**: Legal Power of Attorney framework (no OAuth equivalent)
+- ✅ **Unique**: Legal Proof of Authorization framework (no OAuth equivalent)
 - ✅ **Compliant**: eIDAS, GDPR, commercial register integration
 - ✅ **Flexible**: Wildcard patterns for simple cases, OPA for complex
 - ✅ **Interoperable**: Can add RFC 8693 for OAuth ecosystem integration

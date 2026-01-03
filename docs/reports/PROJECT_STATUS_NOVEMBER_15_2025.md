@@ -179,7 +179,7 @@ BenchmarkTokenCreation: ~1.3 µs/op
 ### AAP-001 Compliance ✅
 - Disclosure (G1): ✅ 100%
 - Person Verification (G2): ✅ 100%
-- Power of Attorney (G3): ✅ 100%
+- Proof of Authorization (G3): ✅ 100%
 - Entity Verification (G4-G7): ✅ 95%
 - Transparency (G8-G9): ✅ 100%
 - Policy Management (G10): ✅ 100%

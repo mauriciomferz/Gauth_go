@@ -185,7 +185,7 @@ The React app expects these endpoints (already defined in `lib/api.ts`):
 - `POST /api/v1/agentauth/pip/authorize` - Validate authorization
 - `GET /api/v1/agentauth/pip/cache/stats` - Get cache statistics
 
-### PoA (Power of Attorney)
+### PoA (Proof of Authorization)
 - `POST /api/v1/agentauth/poa` - Create PoA
 - `POST /api/v1/agentauth/poa/validate` - Validate PoA
 - `GET /api/v1/agentauth/poa/list` - List all PoAs

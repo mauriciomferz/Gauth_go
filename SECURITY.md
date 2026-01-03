@@ -1,19 +1,19 @@
-# Security Considerations for RFC-0111 Integration
+# Security Considerations for AAP-001 Integration
 
 **Version:** 1.0 (v0.9.1)  
 **Date:** November 21, 2025  
-**Applies To:** `pkg/rfc0111` Power of Attorney Validation Framework
+**Applies To:** `pkg/rfc0111` Proof of Authorization Validation Framework
 
 ---
 
 **AgentAuth Community gGmbH i.G.**, www.AgentAuthFoundation.com  
-Official Go implementation of AAP-RFC-0111 and AAP-RFC-0115 specifications
+Official Go implementation of AAP-001 and AAP-002 specifications
 
 ---
 
 ## ⚠️ CRITICAL: Integration Security Requirements
 
-The RFC-0111 service is a **validation framework**, not a complete authentication system. It **trusts** the authenticated identity provided via `context.Context`. Integrators are **responsible** for secure authentication and context population.
+The service is a **validation framework**, not a complete authentication system. It **trusts** the authenticated identity provided via `context.Context`. Integrators are **responsible** for secure authentication and context population.
 
 ### 🚨 MANDATORY Integration Requirements
 
@@ -35,7 +35,7 @@ The RFC-0111 service is a **validation framework**, not a complete authenticatio
 
 ## 🔒 Secure-By-Default Configuration (v0.9.1+)
 
-As of version **v0.9.1**, the RFC-0111 service defaults to **secure behavior**:
+As of version **v0.9.1**, the service defaults to **secure behavior**:
 
 ### Default Security Settings
 

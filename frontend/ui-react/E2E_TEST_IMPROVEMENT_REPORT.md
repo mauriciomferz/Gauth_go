@@ -74,7 +74,7 @@ Nine tests are skipped due to a React hydration problem in the Playwright enviro
 
 **PoA Page (2 tests)**
 - PoA creation form display
-- RFC-0115 compliance
+- AAP-002 compliance
 
 **Metrics Page (2 tests)**
 - Metrics dashboard display

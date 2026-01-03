@@ -175,7 +175,7 @@
 
 **Problems Resolved:**
 1. ✅ Check Authorization button not working
-2. ✅ Generate Power of Attorney button failing with jurisdiction error
+2. ✅ Generate Proof of Authorization button failing with jurisdiction error
 3. ✅ Pattern simulation showing hardcoded results
 4. ✅ Load Pattern always displaying same content
 5. ✅ Authorization demo showing DENY for all inputs

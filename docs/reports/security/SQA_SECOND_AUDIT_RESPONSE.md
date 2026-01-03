@@ -60,7 +60,7 @@ $ git log --oneline | grep -i rfc
 1a9c4d2 Update all RFC references to agentauth_rfc_* namespace
 ```
 
-**Resolution**: ✅ **COMPLETE** - No confusion with IETF standards. All references now use `agentauth_rfc_001` (Power of Attorney Lifecycle) and `agentauth_rfc_002` (Advanced Delegation).
+**Resolution**: ✅ **COMPLETE** - No confusion with IETF standards. All references now use `agentauth_rfc_001` (Proof of Authorization Lifecycle) and `agentauth_rfc_002` (Advanced Delegation).
 
 **Auditor's Recommendation**: "Rename Standards: Immediately rename 'AAP-001/115' to 'Agent Authorization Protocol (AAP)'"  
 **Our Implementation**: Already done. We use **AAP-001** (formerly AAP-001) and **AAP-002** (formerly AAP-002).
@@ -96,7 +96,7 @@ func (d *DualChannelVerifier) RequestVerification(ctx context.Context,
     
     // Send via Email (out-of-band channel 2)
     d.emailService.SendEmail(ctx, principal.Email, 
-        "Confirm Power of Attorney Creation", 
+        "Confirm Proof of Authorization Creation", 
         fmt.Sprintf("Verification Code: %s\nPoA ID: %s", code, poaID))
     
     // Store challenge with 5-minute expiry

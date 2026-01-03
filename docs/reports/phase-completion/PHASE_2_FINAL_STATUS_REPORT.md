@@ -67,7 +67,7 @@ Phase 2 has been **successfully completed** with all frontend pages integrated w
 - ✅ Entity and Signatory verification
 - ✅ All endpoints tested
 
-### 5. Power of Attorney (PoA)
+### 5. Proof of Authorization (PoA)
 - ✅ Full PoA lifecycle management
 - ✅ Create, read, update, revoke
 - ✅ PoA validation

@@ -23,7 +23,7 @@ source: integration-test-suite
 
 Create comprehensive End-to-End (E2E) integration tests demonstrating complete authorization flows across all Gap G10 components:
 - Extended Token (agentauth)
-- Power of Attorney (PoA)
+- Proof of Authorization (PoA)
 - Commercial Register Service
 - Power Verification Point (PVP)
 - Policy Information Point (PIP)
@@ -128,7 +128,7 @@ Create comprehensive End-to-End (E2E) integration tests demonstrating complete a
 
 ### Component Integration
 
-**1. Power of Attorney (PoA)**
+**1. Proof of Authorization (PoA)**
 - Structure: PoADefinition with Parties, Authorization, Requirements
 - Parties: Principal (Organization), Representative, AuthorizedClient
 - Authorization: AuthorizedActions (NonPhysicalActions), ApplicableRegions (GeographicScope), ApplicableSectors (IndustrySector)

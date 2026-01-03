@@ -37,9 +37,9 @@ owners: [system]
 
 | Aspect | **AAP-001/AAP-002** | **OAuth 2.0 + RFC 8693** |
 |:-------|:-----------------------|:-------------------------|
-| **Primary Purpose** | Legal delegation chains with Power of Attorney | Token exchange for impersonation/delegation |
+| **Primary Purpose** | Legal delegation chains with Proof of Authorization | Token exchange for impersonation/delegation |
 | **Delegation Model** | Multi-level (3+) with legal authority | Single-level with composite tokens |
-| **Legal Framework** | ✅ Power of Attorney credentials | ❌ No legal framework |
+| **Legal Framework** | ✅ Proof of Authorization credentials | ❌ No legal framework |
 | **Identity Verification** | ✅ 18-country national ID systems | ❌ Not addressed |
 | **Commercial Register** | ✅ Integrated verification | ❌ Not addressed |
 | **Token Structure** | Extended tokens with PoA metadata | Standard OAuth + act/may_act claims |
@@ -62,14 +62,14 @@ owners: [system]
 Owner's Authorizer (Legal Authority)
         ↓ (Commercial Register Verified)
   Client Owner (Principal)
-        ↓ (Power of Attorney Issued)
+        ↓ (Proof of Authorization Issued)
      Client AI (Agent)
         ↓ (Extended Token)
 Resource Server (Authorization Validated)
 ```
 
 **Key Components:**
-- ✅ **Power of Attorney (PoA) Credentials**: Machine-readable legal delegation documents
+- ✅ **Proof of Authorization (PoA) Credentials**: Machine-readable legal delegation documents
 - ✅ **Commercial Register Integration**: Real-time verification of legal entities
 - ✅ **National ID Systems**: 18-country identity verification (eIDAS)
 - ✅ **Multi-Level Chains**: 3+ delegation levels with authority validation
@@ -130,7 +130,7 @@ Resource Server (Authorization Validated)
 
 1. **Legal Authority Validation**
    - Commercial register lookups
-   - Power of Attorney document verification
+   - Proof of Authorization document verification
    - Statutory authority checks
 
 2. **Multi-Party Delegation**
@@ -146,7 +146,7 @@ Resource Server (Authorization Validated)
 4. **Regulatory Compliance**
    - EU eIDAS compliance
    - GDPR data processing records
-   - Power of Attorney law compliance
+   - Proof of Authorization law compliance
 
 ---
 
@@ -279,7 +279,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 | Capability | AAP-RFC | OAuth 2.0 + RFC 8693 | Gap Severity |
 |:-----------|:---------|:---------------------|:-------------|
-| **Legal Power of Attorney** | ✅ Core feature | ❌ Not addressed | **CRITICAL** |
+| **Legal Proof of Authorization** | ✅ Core feature | ❌ Not addressed | **CRITICAL** |
 | **Commercial Register Integration** | ✅ Real-time | ❌ Not addressed | **CRITICAL** |
 | **National ID Verification** | ✅ 18 countries | ❌ Not addressed | **CRITICAL** |
 | **Multi-Level Chain Validation** | ✅ 3+ levels | ⚠️ Informational only | **HIGH** |
@@ -323,7 +323,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 **Why Not:**
 
 1. **Loss of Legal Framework**
-   - ❌ No Power of Attorney support → AI cannot act with legal authority
+   - ❌ No Proof of Authorization support → AI cannot act with legal authority
    - ❌ No commercial register integration → Cannot verify legal entities
    - ❌ No statutory authority → Cannot validate delegation chains legally
 
@@ -358,7 +358,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 **Benefits:**
 
 1. **Retain Core Capabilities**
-   - ✅ Legal Power of Attorney support preserved
+   - ✅ Legal Proof of Authorization support preserved
    - ✅ Commercial register integration maintained
    - ✅ Compliance frameworks intact
 
@@ -806,7 +806,7 @@ func (h *Handlers) HandleTokenExchange(w http.ResponseWriter, r *http.Request) {
 ### 8.1 Key Findings
 
 1. **AAP-RFC and OAuth 2.0 + RFC 8693 are NOT interchangeable**
-   - AAP-RFC: Legal delegation with Power of Attorney
+   - AAP-RFC: Legal delegation with Proof of Authorization
    - RFC 8693: Service-to-service token exchange
 
 2. **Full migration would destroy AgentAuth's core value**

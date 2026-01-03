@@ -999,7 +999,7 @@ func (d *DualChannelVerifier) RequestPoACreation(ctx context.Context, poa *PoA) 
     
     // Channel 2: Email
     if err := d.emailService.Send(principal.Email,
-        "Confirm Power of Attorney Creation",
+        "Confirm Proof of Authorization Creation",
         fmt.Sprintf("Enter code %s to authorize AI agent", challenge)); err != nil {
         return nil, err
     }
@@ -1107,7 +1107,7 @@ func (t *TimelockPoA) CreatePoAWithDelay(poa *PoA) error {
     // Notify Principal via multiple channels
     t.notifier.SendMultiChannel(poa.Principal, 
         "New PoA Scheduled",
-        fmt.Sprintf("A Power of Attorney will activate in 24 hours. If you did not authorize this, revoke immediately: https://agentauth.example.com/revoke/%s", poa.ID))
+        fmt.Sprintf("A Proof of Authorization will activate in 24 hours. If you did not authorize this, revoke immediately: https://agentauth.example.com/revoke/%s", poa.ID))
     
     // Schedule activation
     time.AfterFunc(24*time.Hour, func() {

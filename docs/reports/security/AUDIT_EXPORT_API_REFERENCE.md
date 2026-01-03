@@ -167,7 +167,7 @@ Content-Length: 524288
       "action": "poa.create",
       "resourceType": "poa",
       "resourceId": "poa-456",
-      "resourceName": "Power of Attorney #456",
+      "resourceName": "Proof of Authorization #456",
       "status": "success",
       "statusCode": 201,
       "ipAddress": "192.168.1.1",

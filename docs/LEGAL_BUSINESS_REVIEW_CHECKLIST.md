@@ -27,7 +27,7 @@ This document provides a comprehensive checklist for reviewing the legal and bus
 
 ---
 
-## 1. Power of Attorney (PoA) Legal Framework
+## 1. Proof of Authorization (PoA) Legal Framework
 
 ### ✅ Items to Review with Legal Counsel:
 

@@ -22,7 +22,7 @@
 ### Layer 2: AgentAuth Extensions (What AgentAuth Defines/Adds)
 - **Extended Tokens** - Enhanced tokens beyond OAuth access tokens, includes PoA context and authorization chain
 - **P*P Architecture Roles** - PEP (Enforcement), PDP (Decision), PAP (Administration), PIP (Information), PVP (Validation)
-- **Power of Attorney (PoA)** - AI legitimization framework with verifiable authorization chains
+- **Proof of Authorization (PoA)** - AI legitimization framework with verifiable authorization chains
 - **Owner's Authorizer** - New role for approving AI actions on behalf of Client Owner
 - **PoA Validation Logic** - Extended AS behavior to validate power delegation chains
 - **Compliance Event Reporting** - Extended RS behavior for AI governance audit trails
@@ -174,7 +174,7 @@ Actor: Authorization Server
 Purpose: Validate request complies with client's PoA powers
 Details:
   • Authorization server validates request against:
-    - Client's registered Power of Attorney
+    - Client's registered Proof of Authorization
     - Client owner's authorization scope
     - Geographic restrictions
     - Value limits
@@ -432,7 +432,7 @@ The Resource Server in a AgentAuth-enabled system:
 
 **What AgentAuth Adds to Resource Server Behavior:**
 - Extended token validation (beyond OAuth access tokens)
-- PoA (Power of Attorney) claim verification
+- PoA (Proof of Authorization) claim verification
 - P*P architecture policy enforcement (PEP role at RS)
 - Compliance event reporting for AI action tracking
 
@@ -599,7 +599,7 @@ Resource Servers MUST return standardized errors per OAuth 2.0 Bearer Token Usag
 
 **What AgentAuth Defines (Entirely New Concepts):**
 - **Extended Tokens** - Token type with PoA context beyond OAuth access tokens
-- **Power of Attorney (PoA)** - AI legitimization framework with delegation chains
+- **Proof of Authorization (PoA)** - AI legitimization framework with delegation chains
 - **P*P Architecture** - PEP, PDP, PAP, PIP, PVP roles for policy-based authorization
 - **Owner's Authorizer** - Entirely new role for AI action approval
 - **AI-Specific Operations** - Transaction/decision/action semantics and endpoints

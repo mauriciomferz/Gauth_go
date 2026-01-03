@@ -28,7 +28,7 @@ web/ui-react/
 │   │   ├── PVP.tsx       # Identity verification
 │   │   ├── Registry.tsx  # Commercial register
 │   │   ├── PIP.tsx       # Policy information point
-│   │   ├── PoA.tsx       # Power of Attorney
+│   │   ├── PoA.tsx       # Proof of Authorization
 │   │   ├── E2ETesting.tsx # Integration testing
 │   │   └── Metrics.tsx   # System metrics
 │   ├── lib/               # ✅ Utilities & API
@@ -92,7 +92,7 @@ web/ui-react/
 - **PVP**: Identity verification placeholder
 - **Registry**: Entity verification placeholder
 - **PIP**: Authorization validation placeholder
-- **PoA**: Power of Attorney placeholder
+- **PoA**: Proof of Authorization placeholder
 - **E2E Testing**: Testing interface placeholder
 - **Metrics**: System metrics placeholder
 
@@ -143,7 +143,7 @@ App will be available at http://localhost:3000
 - **PVP Page**: Identity verification forms
 - **Registry Page**: Entity lookup and verification
 - **PIP Page**: Authorization validation with cache stats
-- **PoA Page**: Create and validate Power of Attorney
+- **PoA Page**: Create and validate Proof of Authorization
 - **E2E Page**: Test execution interface
 - **Metrics Page**: Charts and performance graphs
 

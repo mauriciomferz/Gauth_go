@@ -54,7 +54,7 @@ This document tracks the implementation progress of the AgentAuth Admin Portal, 
     - Subscribers
     - Token Management
     - Authorization Engine
-    - Power of Attorney
+    - Proof of Authorization
     - Event System
     - Resilience Patterns
     - Audit Trail
@@ -278,7 +278,7 @@ This document tracks the implementation progress of the AgentAuth Admin Portal, 
   - Mock data with 5 policies, 12 attributes, 6 log entries
   - TODO: Integrate with `pkg/authz/authz_core.go`
 
-### 13. Power of Attorney Builder
+### 13. Proof of Authorization Builder
 **Status: ✅ Complete**
 
 - **Frontend:** `web/ui-react/src/pages/admin/PowerOfAttorney.tsx` (822 lines)
@@ -529,7 +529,7 @@ go run ./cmd/web-server
 1. **Subscriber Onboarding:** 824 lines (frontend) + 245 lines (backend) = 1,069 lines
 2. **Token Management:** 478 lines (frontend) + 321 lines (backend) = 799 lines
 3. **Authorization Engine:** 706 lines (frontend) + 364 lines (backend) = 1,070 lines
-4. **Power of Attorney:** 822 lines (frontend) + 332 lines (backend) = 1,154 lines
+4. **Proof of Authorization:** 822 lines (frontend) + 332 lines (backend) = 1,154 lines
 5. **Event System:** 894 lines (frontend) + 385 lines (backend) = 1,279 lines
 6. **Resilience Patterns:** 1,347 lines (frontend) + 609 lines (backend) = 1,956 lines
 7. **Audit Trail:** 1,098 lines (frontend) + 552 lines (backend) = 1,650 lines

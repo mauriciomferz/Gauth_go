@@ -303,7 +303,7 @@ claims := jwt.MapClaims{
 | Resource Owner | **HIGHLY SENSITIVE** | PII, company info | **REQUIRED** |
 | Legal Framework | SENSITIVE | Jurisdiction, legal basis | Recommended |
 | Restrictions | SENSITIVE | Financial limits (reveals business data) | Recommended |
-| Power of Attorney | **HIGHLY SENSITIVE** | Full PoA scope, limitations, authority | **REQUIRED** |
+| Proof of Authorization | **HIGHLY SENSITIVE** | Full PoA scope, limitations, authority | **REQUIRED** |
 | Authorization Chain | **HIGHLY SENSITIVE** | Complete chain (3 entities, relationships) | **REQUIRED** |
 
 **Summary**:

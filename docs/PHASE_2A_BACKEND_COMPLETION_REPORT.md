@@ -157,7 +157,7 @@ Phase 2A Backend Integration is **fully complete**. All three endpoint groups (P
 
 ---
 
-### 3. Power of Attorney CRUD API ✅
+### 3. Proof of Authorization CRUD API ✅
 
 **File**: `web/handlers/beta/poa_handlers.go` (403 lines)
 

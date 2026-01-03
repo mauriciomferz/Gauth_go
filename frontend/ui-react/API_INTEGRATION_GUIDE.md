@@ -16,7 +16,7 @@
 - ✅ **PVP Endpoint**: POST /api/v1/beta/pvp/verify
 - ✅ **Registry Endpoints**: POST /api/v1/beta/registry/verify-entity, verify-signatory
 - ✅ **PoA CRUD API**: 6 endpoints (create, get, list, update, revoke, validate)
-- ✅ **Subscription Flow UI**: RFC-0111 8-step wizard component
+- ✅ **Subscription Flow UI**: AAP-001 8-step wizard component
 - ✅ **Mock Removal**: All sessionStorage mocks replaced with real API calls
 
 ---
@@ -95,7 +95,7 @@ POST /api/v1/beta/registry/verify-signatory
 }
 ```
 
-### Power of Attorney (PoA) CRUD ✅
+### Proof of Authorization (PoA) CRUD ✅
 ```
 POST   /api/v1/beta/poa              # Create PoA
 GET    /api/v1/beta/poa/:id          # Get specific PoA
@@ -116,7 +116,7 @@ POST   /api/v1/beta/poa/:id/validate # Validate PoA
 }
 ```
 
-### RFC-0111 Subscription Flow ✅
+### AAP-001 Subscription Flow ✅
 ```
 POST /api/v1/rfc0111/subscriptions                 # Step I: Initiate
 POST /api/v1/rfc0111/subscriptions/:id/step-ii     # Step II: Authorizer Auth
@@ -248,7 +248,7 @@ POST /api/v1/beta/examples/run/jobs/:id/cancel
 1. ✅ Created PVP verification endpoint
 2. ✅ Created Registry entity/signatory endpoints
 3. ✅ Created complete PoA CRUD API (6 endpoints)
-4. ✅ Integrated RFC-0111 subscription flow (8 steps)
+4. ✅ Integrated AAP-001 subscription flow (8 steps)
 5. ✅ Created SubscriptionWizard UI component
 6. ✅ Updated all API client methods in `api.ts`
 7. ✅ Removed all sessionStorage mocks
@@ -406,9 +406,9 @@ POST /api/v1/beta/examples/run/jobs/:id/cancel
 ## Questions for Backend Team
 
 1. **Token Validation**: Is there a JWT validation endpoint? Or should UI decode client-side?
-2. **PVP Verification**: Does `/api/v1/beta/pvp/*` exist? Or should we use RFC-0111 service?
+2. **PVP Verification**: Does `/api/v1/beta/pvp/*` exist? Or should we use AAP-001 service?
 3. **Registry**: Are entity/signatory verification endpoints implemented?
-4. **PoA**: Are Power of Attorney endpoints available? Or use delegation endpoints?
+4. **PoA**: Are Proof of Authorization endpoints available? Or use delegation endpoints?
 5. **JWT Structure**: What claims/structure do delegation JWTs have?
 
 ---
@@ -425,7 +425,7 @@ POST /api/v1/beta/examples/run/jobs/:id/cancel
 ## Success Criteria
 
 ### Phase 2A (COMPLETE ✅)
-- [x] Tokens page: Create token via RFC-0111 subscription wizard ✅
+- [x] Tokens page: Create token via AAP-001 subscription wizard ✅
 - [x] Tokens page: Validate token (mock validation) ✅
 - [x] Registry page: Verify entities with real backend ✅
 - [x] PVP page: Verify identities with real backend ✅
@@ -460,7 +460,7 @@ import { SubscriptionWizard } from '../components/subscription/SubscriptionWizar
 ```
 
 ### Features
-- **8-Step Flow**: Guides user through RFC-0111 subscription process
+- **8-Step Flow**: Guides user through AAP-001 subscription process
 - **Visual Progress**: Step indicator shows completed, current, and pending steps
 - **Automatic Progression**: Steps II-VIII execute automatically after Step I
 - **Error Handling**: Displays errors with dismissible alerts

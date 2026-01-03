@@ -9,7 +9,7 @@ owners: [system]
 # Geographic Scope Validation Fix - Summary Report
 
 ## Issue Description
-**Problem**: Power of Attorney (PoA) validation always passed regardless of geographic scope restrictions. The system was not checking if requested operations were authorized in the specified jurisdiction, allowing operations in any country even when the PoA explicitly restricted authorization to specific regions.
+**Problem**: Proof of Authorization (PoA) validation always passed regardless of geographic scope restrictions. The system was not checking if requested operations were authorized in the specified jurisdiction, allowing operations in any country even when the PoA explicitly restricted authorization to specific regions.
 
 **Impact**: Critical security vulnerability - clients could perform unauthorized operations outside their permitted geographic boundaries, violating AAP-001 compliance requirements.
 

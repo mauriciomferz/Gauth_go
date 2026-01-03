@@ -8,7 +8,7 @@ This document provides a technical comparison between **AgentAuth** (this projec
 
 | Feature | Entra Agent ID (Gateway/OBO) | AgentAuth (GAuth) |
 | :--- | :--- | :--- |
-| **Architectural Model** | **Infrastructure-Centric**. Relies on Azure "Blueprints" and centralized IdP (Entra ID) for identity definition. | **Protocol-Centric**. Relies on cryptographic key pairs and Power of Attorney (PoA) chains for identity and delegation. |
+| **Architectural Model** | **Infrastructure-Centric**. Relies on Azure "Blueprints" and centralized IdP (Entra ID) for identity definition. | **Protocol-Centric**. Relies on cryptographic key pairs and Proof of Authorization (PoA) chains for identity and delegation. |
 | **Trust Model** | **Centralized Trust**. Trust flows from the IdP (Entra) minting tokens (`T1`, `T2`). | **Decentralized Trust**. Trust flows from the Principal's signature on the PoA and local verification. |
 | **Runtime Dependency** | **Online with Azure**. Requires connectivity to Entra ID for OBO exchange and Blueprint validation. | **Offline-Capable**. Verification is local using public keys; no centralized runtime dependency. |
 | **Agent Identity** | **Implicit / Metadata**. Defined by "Blueprint" registration in Entra and associated Service Principal. | **Explicit / Attested**. Defined by cryptographic keys and signed `AttestationProof` (Human vs. AI distinction). |
@@ -30,7 +30,7 @@ The flow depends on a **Token Exchange** pattern (RFC 8693 style):
 
 #### AgentAuth (GAuth)
 The flow depends on **Cryptographic Chaining** and **Attestation**:
-1.  **Delegation (PoA)**: Principal (User) signs a **Power of Attorney** object (JSON/CBOR) granting specific rights to the Agent's public key.
+1.  **Delegation (PoA)**: Principal (User) signs a **Proof of Authorization** object (JSON/CBOR) granting specific rights to the Agent's public key.
 2.  **Agent Integrity**: Agent authenticates via its private key (Ed25519/BLS). The `VerificationService` validates the agent's standing via `CommercialRegisterService`.
 3.  **Invocation**: Agent presents the **PoA Chain** + **Request Signature** directly to the Resource (or Sidecar).
 4.  **Verification**: The Resource (via AgentAuth Policy Engine) validates the signature chain locally. No "exchange" call to a central server is required at runtime.

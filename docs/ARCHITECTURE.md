@@ -164,7 +164,7 @@ web/handlers/
 ├── mcp/            # Model Context Protocol handlers
 ├── modellimits/    # Model usage limits and quotas
 ├── notary/         # Notarization receipts and combined anchors
-├── poa/            # Power of Attorney authorization
+├── poa/            # Proof of Authorization authorization
 ├── policy/         # Policy CRUD, chain, bundles, provenance
 ├── semantic/       # Semantic anomaly detection
 ├── token/          # Token store and JWKS endpoints

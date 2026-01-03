@@ -153,7 +153,7 @@ curl http://localhost:8080/api/v1/beta/authz/metrics \
 
 ## Common Workflows
 
-### Workflow 1: Create and Validate a Power of Attorney
+### Workflow 1: Create and Validate a Proof of Authorization
 
 ```bash
 # Create PoA

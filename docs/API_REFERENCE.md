@@ -140,7 +140,7 @@ Use Cases:
 Limitations (Prototype):
 - Path-only reconstruction using prefix blocks is not yet active (meta-tree algorithm deferred for correctness); integrity currently relies on full start & end tree recomputation plus prefix subtree matching.
 - Merkle tree uses copy-up promotion for odd nodes; path algorithm adapted accordingly.
-### 🪪 Power of Attorney Semantic Validation Modes
+### 🪪 Proof of Authorization Semantic Validation Modes
 
 The service supports selectable semantic validation tiers for delegation issuance controlled by `AGENTAUTH_POA_VALIDATOR`:
 

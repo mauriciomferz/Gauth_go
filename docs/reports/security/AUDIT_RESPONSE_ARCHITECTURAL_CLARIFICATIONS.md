@@ -26,7 +26,7 @@ Thank you for the corrected audit focusing on actual implementation files. Your 
 
 ### What This System Actually Does
 
-The `pkg/aap001` package is a **Power of Attorney (PoA) validation framework** used for:
+The `pkg/aap001` package is a **Proof of Authorization (PoA) validation framework** used for:
 
 1. **Internal authorization decisions** within AAP ecosystem services
 2. **Validation-as-a-Service** where clients call `ValidateDelegation()` to check if action X is authorized

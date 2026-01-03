@@ -27,7 +27,7 @@
 
 2. **RFC Compliance Verification & Gap Closure**
    - Verified 95% AAP-001 compliance (AgentAuth Authorization)
-   - Verified 100% AAP-002 compliance (Power of Attorney)
+   - Verified 100% AAP-002 compliance (Proof of Authorization)
    - Fixed 3 critical integration gaps
    - Backend already had 50K+ lines of production code
    - All core P*P components implemented and wired
@@ -68,7 +68,7 @@
 - ✅ **PVP Page** (272 lines) - Identity verification with 4 TSPs
 - ✅ **Registry Page** (354 lines) - Entity/signatory verification (8 jurisdictions)
 - ✅ **PIP Page** (254 lines) - Authorization validation with policy rules
-- ✅ **PoA Page** (323 lines) - Power of Attorney creation/validation
+- ✅ **PoA Page** (323 lines) - Proof of Authorization creation/validation
 - ✅ **E2E Testing Page** (249 lines) - Test execution with coverage metrics
 - ✅ **Metrics Page** (262 lines) - System analytics with charts
 
@@ -93,7 +93,7 @@ AgentAuth/
 │   ├── agentauth/                    # Core authorization engine
 │   ├── policy/                   # PAP implementation (1.3K lines)
 │   ├── mcp/                      # Model Context Protocol (Phases 1-2)
-│   ├── poa/                      # Power of Attorney (AAP-002)
+│   ├── poa/                      # Proof of Authorization (AAP-002)
 │   ├── oidc/                     # OpenID Connect (8K lines)
 │   └── ...
 │
@@ -199,7 +199,7 @@ go build -o bin/web-server ./cmd/web-server
 | - OpenID Connect | ✅ 8K+ lines | 90% |
 | - MCP | ⚠️ Phases 1-2 | 60% |
 
-### AAP-002 (Power of Attorney): 100% ✅
+### AAP-002 (Proof of Authorization): 100% ✅
 
 | Component | Status | Compliance |
 |-----------|--------|-----------|
@@ -312,7 +312,7 @@ go build -o bin/web-server ./cmd/web-server
 AgentAuth 1.0 has achieved **production-ready status** with:
 
 - ✅ **95% AAP-001 compliance** (AgentAuth Authorization Framework)
-- ✅ **100% AAP-002 compliance** (Power of Attorney)
+- ✅ **100% AAP-002 compliance** (Proof of Authorization)
 - ✅ **100% UI completion** (8/8 pages fully functional)
 - ✅ **Comprehensive documentation** (16+ guides)
 - ✅ **Zero build errors** (all code compiles)

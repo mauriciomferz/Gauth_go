@@ -515,7 +515,7 @@ Host: localhost:8080
   {
     "id": "aap002-basic",
     "name": "AAP-002 Basic PoA Definition",
-    "description": "Basic AAP-002 Power of Attorney definition scenario",
+    "description": "Basic AAP-002 Proof of Authorization definition scenario",
     "config": {
       "parties": {
         "grantor": "User A",
@@ -795,7 +795,7 @@ Creates and validates an AAP-001 configuration using the combined RFC implementa
 ### **📋 AAP-002 PoA Definition**
 
 #### **POST /aap002/poa**
-Creates and validates an AAP-002 Power of Attorney definition.
+Creates and validates an AAP-002 Proof of Authorization definition.
 
 **Request:**
 ```json
@@ -814,7 +814,7 @@ Creates and validates an AAP-002 Power of Attorney definition.
 ```json
 {
   "success": true,
-  "message": "AAP-002 Power of Attorney definition validated successfully",
+  "message": "AAP-002 Proof of Authorization definition validated successfully",
   "poa_definition": {
     "parties": {
       "principal": {

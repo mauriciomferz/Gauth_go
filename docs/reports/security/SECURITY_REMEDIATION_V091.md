@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-In response to the Security Audit dated November 21, 2025, the engineering team has implemented **all required remediations** to achieve secure-by-default behavior for the AAP-001 Power of Attorney validation framework.
+In response to the Security Audit dated November 21, 2025, the engineering team has implemented **all required remediations** to achieve secure-by-default behavior for the AAP-001 Proof of Authorization validation framework.
 
 **Audit Status:**  
 - Previous: 🔴 **NON-COMPLIANT** → Current: 🟢 **COMPLIANT (v0.9.1)**
