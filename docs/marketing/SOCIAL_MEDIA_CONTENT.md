@@ -451,3 +451,40 @@ Built in Go, MIT licensed, production ready (v1.0.0).
 
 *Last Updated: December 31, 2025*
 *Author: Mauricio A. Fernandez Fernandez*
+
+---
+
+### Post 4: Response to "The Identity Fragmentation"
+
+*Context: Responding to concerns about Agent Identity standards (SPIFFE, Entra, OBO).*
+
+**Identity is Solved. Accountability is Not.**
+
+I've been following Christian Posta's recent deep dives on "Agent Identity" vs "User Impersonation", and he hits the nail on the head regarding two critical problems:
+
+1.  **The Capability Gap**: Alice (Marketing) asks an agent to check GDPR compliance. The agent needs access to *all* logs (which Alice doesn't have). Impersonating Alice fails.
+2.  **The Decision Attribution Problem**: If an agent autonomously orders 50 laptops, and I only said "optimize supply", why does the audit log say *I* placed the order?
+
+Christian advocates for **Delegation** (via RFC 8693 Token Exchange) over Impersonation. I 100% agree.
+
+**But we need to go one step further.**
+
+A token with an `act` claim tells you *who* acted (Identity).
+It doesn't tell you *if they were allowed to* (Authority).
+
+We need a **Governance Standard** that sits on top of Identity.
+
+**Enter AgentAuth (The Fiduciary Layer):**
+We built AgentAuth to wrap any identity (Entra, SPIFFE, Key Pair) in a **Proof of Authorization (PoA)**.
+
+*   **Identity**: "This is the Supply Chain Agent" (via Entra/SPIFFE).
+*   **AgentAuth**: "This agent is authorized to spend up to $50k, only on hardware, and only M-F."
+
+This solves the **Accountability Chain**:
+1.  **User** delegates to **Agent** (via signed PoA).
+2.  **Agent** acts with its own Identity + Use Key.
+3.  **Resource** verifies the *entire chain* locally.
+
+Don't just solve Identity. Solve **Liability**.
+
+#AgentAuth #Identity #Governance #FiduciaryAI #CyberSecurity
