@@ -460,25 +460,31 @@ Built in Go, MIT licensed, production ready (v1.0.0).
 
 
 
+
 **Identity is Solved. Accountability is Not.**
 
-Christian Posta’s latest deep dive on "Agentic OBO" and "SPIFFE" clarifies a crucial mechanism:
-**OBO = Policy Intersection.**
-The resulting token is the *intersection* of what the User can do AND what the Agent is allowed to do. This is great for "Scope Narrowing".
+Christian Posta’s comprehensive series (Identity, OBO, SPIFFE, CIBA) paints the full picture of the "Agent Identity Stack":
+1.  **Identity**: SPIFFE/Entities (Who is it?)
+2.  **Transport**: OBO/RFC 8693 (How does it travel?)
+3.  **Oversight**: CIBA (How do humans verify it?)
 
-**But what about the Policy Explosion?**
-Christian asks: "If every agent instance has a unique SPIFFE ID (e.g. `instance/001`), how do you possibly write authorization policies for millions of them?"
-You can't. Managing RBAC for dynamic, non-deterministic agents is impossible.
+**The Bottleneck: CIBA is slow.**
+Christian correctly identifies that non-deterministic agents need human oversight. His solution is **CIBA** (Async Human Approval).
+*   *Agent wants to delete DB → Pings Human → Human clicks Approve → Token Issued.*
+This works for high-stakes ops. It **fails** for high-frequency autonomous trading or real-time defense. You can't have a human loop for every micro-decision.
 
-**Enter AgentAuth (The Governance Layer):**
-We complement the OBO/SPIFFE flow by wrapping the Identity in a **Proof of Authorization**:
+**Enter AgentAuth (The "Pre-Signed" Oversight):**
+AgentAuth bridges the gap between **Fast Autonomy** and **Safe Oversight**.
+Instead of waiting for a runtime click (CIBA), the human signs a **Fiduciary Policy** (PoA) *ahead of time*.
 
-1.  **Identity Layer (OBO/Entra/SPIFFE)**: Handles the "Who" and the "Chain of Trust" (via `act` claims).
-2.  **Governance Layer (AgentAuth)**: Handles the "Mandate".
-    *   *You don't grant permissions to the Agent's ID.*
-    *   *You grant permissions to the **Delegation Token** that the Agent carries.*
+*   **CIBA**: "Human, can I do X now?" (Runtime, Slow)
+*   **AgentAuth**: "Human, sign this envelope defining the *limits* of X." (Design time, Fast)
+    *   *The Agent runs at machine speed inside the signed sandbox.*
+    *   *The Resource verifies the signature instantly (offline).*
 
-This solves the **Policy Explosion**:
-The resource doesn't need to know who `instance/001` is. It just needs to verify the **Signature** on the PoA token it holds.
+**The Complete Stack:**
+Use **SPIFFE** for Identity.
+Use **OBO** for Transport.
+Use **AgentAuth** for *Scalable* Oversight.
 
-#AgentAuth #Identity #Governance #FiduciaryAI #CyberSecurity
+#AgentAuth #Identity #Governance #FiduciaryAI #CyberSecurity #CIBA
