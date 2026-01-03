@@ -73,12 +73,16 @@ func BenchmarkVerifyChain(b *testing.B) {
 
 	ctx := context.Background()
 	for i := 0; i < 5000; i++ {
-		store.Append(ctx, &Entry{ID: "id", TS: time.Now(), Type: "bench"})
+		if err := store.Append(ctx, &Entry{ID: "id", TS: time.Now(), Type: "bench"}); err != nil {
+			b.Fatal(err)
+		}
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		store.VerifyChain(ctx)
+		if _, err := store.VerifyChain(ctx); err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
@@ -93,12 +97,16 @@ func BenchmarkVerifyChainParallel(b *testing.B) {
 
 	ctx := context.Background()
 	for i := 0; i < 5000; i++ {
-		store.Append(ctx, &Entry{ID: "id", TS: time.Now(), Type: "bench"})
+		if err := store.Append(ctx, &Entry{ID: "id", TS: time.Now(), Type: "bench"}); err != nil {
+			b.Fatal(err)
+		}
 	}
 	bs := store.(*boltStore)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		bs.VerifyChainParallel(ctx)
+		if _, err := bs.VerifyChainParallel(ctx); err != nil {
+			b.Fatal(err)
+		}
 	}
 }

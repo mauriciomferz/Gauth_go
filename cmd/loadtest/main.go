@@ -74,7 +74,9 @@ func main() {
 			}
 			defer resp.Body.Close()
 
-			io.Copy(io.Discard, resp.Body) // Ensure body is read
+			if _, err := io.Copy(io.Discard, resp.Body); err != nil { // Ensure body is read
+				return nil, fmt.Errorf("read body failed: %w", err)
+			}
 
 			if resp.StatusCode >= 400 {
 				return nil, fmt.Errorf("status %d", resp.StatusCode)

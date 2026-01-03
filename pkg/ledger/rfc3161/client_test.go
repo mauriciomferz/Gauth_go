@@ -58,7 +58,9 @@ func TestClient_Anchor(t *testing.T) {
 		require.NoError(t, err)
 
 		w.Header().Set("Content-Type", "application/timestamp-reply")
-		w.Write(respBytes)
+		if _, err := w.Write(respBytes); err != nil {
+			t.Logf("failed to write response: %v", err)
+		}
 	}))
 	defer mockTSA.Close()
 
@@ -98,7 +100,9 @@ func TestClient_Anchor_Rejection(t *testing.T) {
 			},
 		}
 		respBytes, _ := asn1.Marshal(resp)
-		w.Write(respBytes)
+		if _, err := w.Write(respBytes); err != nil {
+			t.Logf("failed to write response: %v", err)
+		}
 	}))
 	defer mockTSA.Close()
 

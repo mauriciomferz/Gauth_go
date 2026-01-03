@@ -73,7 +73,8 @@ func TestLocalCAS_IntegrityCheck(t *testing.T) {
 	// Tamper with file
 	path := filepath.Join(tempDir, hash)
 	// Must change permission back to write
-	os.Chmod(path, 0o600)
+	err = os.Chmod(path, 0o600)
+	require.NoError(t, err)
 	err = os.WriteFile(path, []byte("tampered data"), 0o644)
 	require.NoError(t, err)
 

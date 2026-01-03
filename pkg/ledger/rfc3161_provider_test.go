@@ -124,7 +124,9 @@ func TestRFC3161Provider_Integration(t *testing.T) {
 
 		respBytes, _ := asn1.Marshal(resp)
 		w.Header().Set("Content-Type", "application/timestamp-reply")
-		w.Write(respBytes)
+		if _, err := w.Write(respBytes); err != nil {
+			t.Logf("failed to write response: %v", err)
+		}
 	}))
 	defer mockTSA.Close()
 

@@ -95,7 +95,8 @@ func TestBoltReceiptStore_ManualVerification(t *testing.T) {
 		assert.NotNil(t, k)
 
 		var loaded anchor.StoredExternalAnchorReceipt
-		json.Unmarshal(v, &loaded)
+		err = json.Unmarshal(v, &loaded)
+		require.NoError(t, err)
 		assert.Equal(t, "test", loaded.Hash)
 		return nil
 	})
