@@ -218,11 +218,8 @@ jobs:
     - name: Build
       run: |
         echo "🔧 Building agentauth-server..."
-        mkdir -p build/bin
-        go build -v -ldflags="-s -w" -o build/bin/agentauth-server ./cmd/agentauth-server
+        go build -v ./cmd/agentauth-server
         echo "✅ Build successful!"
-        ls -la build/bin/agentauth-server
-        ./build/bin/agentauth-server --help >/dev/null 2>&1 || true
 
   docker-build:
     name: Build and Push Docker Image
