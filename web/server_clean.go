@@ -576,10 +576,12 @@ func (s *BetaServer) RegisterUIRoutes() {
 			data, err := staticUI.ReadFile("static_ui/" + path)
 			if err != nil {
 				// Fallback to repository disk copy (useful for CI and local dev when embedding isn't used)
-				// Try relative to module root (web/static/...) and relative to package (static/...)
+				// Try relative to module root (web/static/...), relative to package (static/...), and parent dirs (../static/...)
 				candidates := []string{
 					filepath.Join("web", "static", path),
 					filepath.Join("static", path),
+					filepath.Join("..", "static", path),
+					filepath.Join("..", "..", "web", "static", path),
 				}
 				var d2 []byte
 				var err2 error
