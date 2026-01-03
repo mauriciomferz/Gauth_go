@@ -884,6 +884,7 @@ The system is fully production-ready.
 - **Fix**: Disabled aggressive caching (`cache: false`) in GitHub Actions to resolve `tar` corruption issues during "Set up Go".
 - **Fix**: Enhanced `smoketest` static asset fallback in `web/server_clean.go` to support nested test execution contexts, resolving 404 errors.
 - **Fix**: Refactored `web/server_clean.go` CSP header generation to use string concatenation instead of `fmt.Sprintf`. This resolved a persistent, environment-specific CI syntax error ("expected ';', found fmt"), ensuring clean builds on Linux/CI runners.
+- **Fix**: Resolved critical "Exit Code 1" build failure by correcting `.gitignore` rule which inadvertently hid `cmd/agentauth-server/main.go` from the repository. anchored `/agentauth-server` to ignore only the binary.
 - **Verification**: Verified `ci.yml` and `ci.yaml` pipelines locally with `GOOS=linux go build` and unit tests.
 
 ### Marketing Assets Generated
