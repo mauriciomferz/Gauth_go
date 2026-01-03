@@ -52,7 +52,7 @@ No guarantee of confidentiality, integrity, authenticity, non-repudiation, or av
 See the “High-Level Production Hardening Roadmap” in `docs/ARCHITECTURE.md` for a starting point.
 
 ## 📄 Licensing & Attribution
-Licensed under Apache 2.0 (see `LICENSE`). References to RFC identifiers are contextual and do not imply formal certification or compliance.
+Licensed under MIT License (see `LICENSE`). References to AAP identifiers are contextual and do not imply formal certification or compliance.
 
 ---
 **Summary**: This project is a beta learning & evaluation tool. It is **NOT production ready**. Any resemblance to a production system is illustrative only.
