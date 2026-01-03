@@ -3107,7 +3107,7 @@ func (s *BetaServer) routes() {
 		}
 
 		// Override with strict CSP (no unsafe-inline for scripts)
-		cspPolicy := fmt.Sprintf("default-src 'self'; script-src 'self' 'nonce-%s' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'", nonce)
+		cspPolicy := "default-src 'self'; script-src 'self' 'nonce-" + nonce + "' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 		if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
 			if wd, err := os.Getwd(); err == nil {
