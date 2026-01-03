@@ -600,6 +600,7 @@ func (s *BetaServer) RegisterUIRoutes() {
 				}
 			}
 			_, _ = c.Writer.Write(data)
+			// Force CI refresh
 		}
 	}
 
