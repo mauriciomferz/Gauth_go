@@ -333,7 +333,7 @@ The system includes 8 production-ready templates:
      - Manager department access
      - User read-only
    - Compliance: ISO27001
-   - License: MIT
+   - License: Apache 2.0
 
 8. **Time-Based Access Control**
    - Category: Access Control
@@ -345,7 +345,7 @@ The system includes 8 production-ready templates:
      - Maintenance window handling
      - Emergency override
    - Compliance: ISO27001
-   - License: MIT
+   - License: Apache 2.0
 
 ## Using Industry Templates
 

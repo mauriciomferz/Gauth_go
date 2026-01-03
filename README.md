@@ -8,7 +8,7 @@ owners: core-maintainers
 # AgentAuth - The Trust Layer for Autonomous AI Agents
 
 [![CI Build](https://github.com/mauriciomferz/AgentAuth/actions/workflows/ci.yml/badge.svg)](https://github.com/mauriciomferz/AgentAuth/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/mauriciomferz/AgentAuth/releases/tag/v1.0.0)
 
 **Author**: Mauricio A. Fernandez Fernandez
@@ -193,7 +193,7 @@ Edge agents operating in contested networks with offline verification.
 | **Standards** | AAP-001 ✅ AAP-002 ✅ |
 | **Test Coverage** | 80%+ core packages |
 | **Build** | Passing |
-| **License** | MIT (Open Source) |
+| **License** | Apache 2.0 (Open Source) |
 | **Documentation** | 650+ markdown files |
 | **Marketing** | Ready for launch |
 
@@ -222,7 +222,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
+This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for details.
 
 **AgentAuth** is a community-driven open-source project, not affiliated with any proprietary foundation.
 

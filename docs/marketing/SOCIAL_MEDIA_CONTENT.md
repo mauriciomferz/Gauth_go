@@ -76,7 +76,7 @@ We call it "Degraded Mode"
 
 ```
 7/7: AgentAuth is:
-✅ Open source (MIT)
+✅ Open source (Apache 2.0)
 ✅ Production ready (v1.0.0)
 ✅ 100% AAP-001/002 compliant
 
@@ -180,7 +180,7 @@ With AgentAuth's embedded compliance checks, this would have been blocked at the
 
 **The Project:**
 
-🔓 Open source (MIT License)
+🔓 Open source (Apache 2.0)
 📦 Production ready (v1.0.0)
 📚 Full technical book: "The Agent's Signature: Identity & Law in the Age of AI"
 🌍 Multi-jurisdiction support (German, US, EU frameworks)
@@ -244,7 +244,7 @@ Critical for industrial/military edge deployments.
 - Prometheus/Grafana observability
 
 **Open Source:**
-MIT licensed, production ready, 1,360-page technical manual included.
+Apache 2.0 licensed, production ready, 1,360-page technical manual included.
 
 If you're wrestling with AI agent authorization, let's connect.
 
@@ -443,7 +443,7 @@ Feedback welcome, especially on cryptographic implementation and legal framework
 
 The difference? AgentAuth encodes business rules and legal constraints at protocol level.
 
-Built in Go, MIT licensed, production ready (v1.0.0).
+Built in Go, Apache 2.0 licensed, production ready (v1.0.0).
 
 [GitHub link]
 

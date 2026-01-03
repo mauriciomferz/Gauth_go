@@ -1,0 +1,21 @@
+/* Ensure vector lines are crisp for print */
+.node rect,
+.node circle,
+.node polygon,
+.node path {
+    stroke-width: 1.5px !important;
+}
+
+.edgePath path {
+    stroke-width: 1.5px !important;
+    stroke: #333 !important;
+}
+
+tcleext {
+    font-family: "Libertinus Sans" !important;
+}
+
+code,
+pre {
+    font-family: "Fira Code" !important;
+}
