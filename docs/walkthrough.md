@@ -711,3 +711,9 @@ We have verified the final deployment readiness of the GAuth system:
   - Corrected YAML frontmatter indentation in `docs/API_REFERENCE.md`.
   - Added `*.pdf` to `.gitignore` to prevent artifact commit.
 - **Result**: `./generate_api_docs_pdf.sh` runs successfully, producing `AgentAuth_API_Complete_Documentation.pdf`.
+
+#### 7. CI Stability Fix (Crypto Tests)
+- **Objective**: Resolve persistent "1 Failed" test in `pkg/crypto` reported by CI.
+- **Root Cause**: `TestRecoveryAutomation_KeyRotation` created `test_recovery.json` but failed to clean it up if the test failed or panicked early, causing subsequent runs or parallel tests to fail due to dirty state.
+- **Action**: Corrected verify cleanup logic in `pkg/crypto/recovery_test.go` to use `defer os.Remove("test_recovery.json")`.
+- **Result**: `pkg/crypto` stress tests (repeated runs) pass consistently.

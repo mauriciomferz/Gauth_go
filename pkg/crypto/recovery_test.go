@@ -11,6 +11,7 @@ func TestRecoveryAutomation_KeyRotation(t *testing.T) {
 	os.Setenv("AGENTAUTH_EDDSA_PERSIST_PATH", "test_recovery.json")
 	os.Setenv("AGENTAUTH_EDDSA_AUTO_ROTATE", "1")
 	os.Setenv("AGENTAUTH_EDDSA_ROTATE_INTERVAL", "2s")
+	defer os.Remove("test_recovery.json")
 	t.Logf("Test: creating manager with 10s TTL and auto-rotation interval 2s enabled")
 	m, err := NewManager(10 * time.Second)
 	if err != nil {
@@ -37,5 +38,5 @@ func TestRecoveryAutomation_KeyRotation(t *testing.T) {
 	if m.Active() == nil {
 		t.Fatalf("active key missing after recovery rotation")
 	}
-	_ = os.Remove("test_recovery.json")
+
 }
