@@ -9,7 +9,7 @@ on:
 
 env:
   NODE_VERSION: '20.x'
-  GO_VERSION: '1.22'  # Stable version without covdata issues
+  GO_VERSION: '1.25.5'  # Stable version without covdata issues
 
 jobs:
   # Backend tests

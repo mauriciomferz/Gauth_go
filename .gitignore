@@ -205,3 +205,4 @@ scripts/conformance
 k8s-secrets-patched.yaml
 dist/
 *.pdf
+pkg/crypto/test_recovery.json

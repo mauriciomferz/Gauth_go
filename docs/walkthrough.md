@@ -717,3 +717,11 @@ We have verified the final deployment readiness of the GAuth system:
 - **Root Cause**: `TestRecoveryAutomation_KeyRotation` created `test_recovery.json` but failed to clean it up if the test failed or panicked early, causing subsequent runs or parallel tests to fail due to dirty state.
 - **Action**: Corrected verify cleanup logic in `pkg/crypto/recovery_test.go` to use `defer os.Remove("test_recovery.json")`.
 - **Result**: `pkg/crypto` stress tests (repeated runs) pass consistently.
+
+#### 8. Security Remediation (Go StdLib)
+- **Objective**: Resolve moderate vulnerabilities in `crypto/x509` (GO-2025-4175, GO-2025-4155).
+- **Action**: Upgraded project Go version from `1.24.0` to `1.25.5` in:
+  - `go.mod`
+  - `.github/workflows/ci.yml`
+  - `.github/workflows/test-suite.yml`
+- **Result**: `govulncheck` reports zero vulnerabilities. `pkg/crypto` tests pass with new runtime.
