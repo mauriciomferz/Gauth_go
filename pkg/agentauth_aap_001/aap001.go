@@ -209,7 +209,7 @@ type RevocationRequest struct {
 }
 
 // ========================================
-// AAP001 & 0115 Conformance Types
+// AAP001 & AAP002 Conformance Types
 // ========================================
 
 // TokenResult represents the result of token verification or issuance operations (AAP001:1).

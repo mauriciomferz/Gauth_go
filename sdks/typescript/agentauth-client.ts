@@ -2,7 +2,7 @@
  * AgentAuth TypeScript/JavaScript SDK
  * 
  * Official client library for the AgentAuth OAuth 2.0 Authorization Server
- * Supports RFC-0111 subscription flow, Power of Attorney, and more.
+ * Supports AAP-001 subscription flow, Power of Attorney, and more.
  * 
  * @version 1.0.0-beta
  * @author AgentAuth Team
@@ -226,21 +226,21 @@ export class AgentAuthClient {
   }
 
   // ==========================================================================
-  // RFC-0111 Subscription Flow Methods
+  // AAP-001 Subscription Flow Methods
   // ==========================================================================
 
   /**
    * Create a new subscription (Step I)
    */
   async createSubscription(data: SubscriptionCreate): Promise<Subscription> {
-    return this.request<Subscription>('POST', '/api/v1/rfc0111/subscriptions', data);
+    return this.request<Subscription>('POST', '/api/v1/aap001/subscriptions', data);
   }
 
   /**
    * Get subscription details
    */
   async getSubscription(id: string): Promise<Subscription> {
-    return this.request<Subscription>('GET', `/api/v1/rfc0111/subscriptions/${id}`);
+    return this.request<Subscription>('GET', `/api/v1/aap001/subscriptions/${id}`);
   }
 
   /**
@@ -258,7 +258,7 @@ export class AgentAuthClient {
         if (value !== undefined) params.append(key, String(value));
       });
     }
-    const path = `/api/v1/rfc0111/subscriptions${params.toString() ? `?${params}` : ''}`;
+    const path = `/api/v1/aap001/subscriptions${params.toString() ? `?${params}` : ''}`;
     return this.request<{ subscriptions: Subscription[]; total: number }>('GET', path);
   }
 
@@ -266,42 +266,42 @@ export class AgentAuthClient {
    * Execute Step II - Authorizer Authentication (PVP)
    */
   async executeStepII(id: string, proof: Omit<PVPVerifyRequest, 'subject'>): Promise<StepResult> {
-    return this.request<StepResult>('POST', `/api/v1/rfc0111/subscriptions/${id}/step-ii`, proof);
+    return this.request<StepResult>('POST', `/api/v1/aap001/subscriptions/${id}/step-ii`, proof);
   }
 
   /**
    * Execute Step III - Client Owner Identification
    */
   async executeStepIII(id: string): Promise<StepResult> {
-    return this.request<StepResult>('POST', `/api/v1/rfc0111/subscriptions/${id}/step-iii`);
+    return this.request<StepResult>('POST', `/api/v1/aap001/subscriptions/${id}/step-iii`);
   }
 
   /**
    * Execute Step IV - Client Owner Authorization
    */
   async executeStepIV(id: string): Promise<StepResult> {
-    return this.request<StepResult>('POST', `/api/v1/rfc0111/subscriptions/${id}/step-iv`);
+    return this.request<StepResult>('POST', `/api/v1/aap001/subscriptions/${id}/step-iv`);
   }
 
   /**
    * Execute Step V - Client Authorization
    */
   async executeStepV(id: string): Promise<StepResult> {
-    return this.request<StepResult>('POST', `/api/v1/rfc0111/subscriptions/${id}/step-v`);
+    return this.request<StepResult>('POST', `/api/v1/aap001/subscriptions/${id}/step-v`);
   }
 
   /**
    * Execute Step VI - Resource Owner Identification
    */
   async executeStepVI(id: string): Promise<StepResult> {
-    return this.request<StepResult>('POST', `/api/v1/rfc0111/subscriptions/${id}/step-vi`);
+    return this.request<StepResult>('POST', `/api/v1/aap001/subscriptions/${id}/step-vi`);
   }
 
   /**
    * Execute Step VII - Resource Owner Authorization
    */
   async executeStepVII(id: string): Promise<StepResult> {
-    return this.request<StepResult>('POST', `/api/v1/rfc0111/subscriptions/${id}/step-vii`);
+    return this.request<StepResult>('POST', `/api/v1/aap001/subscriptions/${id}/step-vii`);
   }
 
   /**
@@ -311,12 +311,12 @@ export class AgentAuthClient {
   async executeStepVIII(id: string): Promise<{ status: string; token: string; token_type: string; expires_in: number }> {
     return this.request<{ status: string; token: string; token_type: string; expires_in: number }>(
       'POST',
-      `/api/v1/rfc0111/subscriptions/${id}/step-viii`
+      `/api/v1/aap001/subscriptions/${id}/step-viii`
     );
   }
 
   /**
-   * Complete entire RFC-0111 subscription flow automatically
+   * Complete entire AAP-001 subscription flow automatically
    * Executes all 8 steps in sequence
    */
   async completeSubscriptionFlow(data: SubscriptionCreate): Promise<{ subscription: Subscription; token: string }> {

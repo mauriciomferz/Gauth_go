@@ -43,7 +43,7 @@
     - [x] Support `urn:ietf:params:oauth:grant-type:identity-assertion` in `web/handlers/grant_jwt`
     - [x] Create `test/integration/identity_assertion_test.go`
 - [x] Gosec Remediation
-    - [x] Fix unhandled errors in `cmd/agentauth-server/main.go`
+    - [x] Fix unhandled errors in `cmd/gauth-server/main.go`
     - [x] Run `gosec` and fix high-priority issues
 
 ## Phase 6: Aggregated Signatures & Crypto Hardening
@@ -61,7 +61,7 @@
 
 ## Phase 7: System Wiring & Refactoring
 - [x] Wire `VerificationService` for GNAP
-    - [x] Refactor `pkg/agentauthplus` services to use `pgx` (consistent with `pkg/database`).
+    - [x] Refactor `pkg/gauthplus` services to use `pgx` (consistent with `pkg/database`).
     - [x] Implement `PostgreSQLPoAStore`, `FiduciaryDutyService` (PG), `CapabilityAssessmentService` (PG).
     - [x] Wire services in `web/server_factory.go`.
     - [x] Verify compilation and tests.
@@ -75,15 +75,15 @@
     - [x] Add tests for enhanced verification flows
 
 ## Phase 9: Attestation Verification Integration
-- [x] Implement `DefaultAttestationVerifier` in `pkg/agentauthplus`
-    - [x] Create `AttestationAdapter` to bridge `agentauthplus` and `compliance` types
+- [x] Implement `DefaultAttestationVerifier` in `pkg/gauthplus`
+    - [x] Create `AttestationAdapter` to bridge `gauthplus` and `compliance` types
     - [x] Integrate `compliance.DefaultAttestationVerifier`
 - [x] Update `VerifyAttestations` in `VerificationServiceImpl`
 - [x] Add tests for attestation verification
 
 ## Phase 10: GNAP Authorization Context Enrichment
 - [x] Implement `ComplianceReporter` logic in GNAP handler
-- [x] Update `linkAgentAuthContext` in `web/handlers/gnap/handler.go` to use `GenerateVerificationReport`
+- [x] Update `linkGAuthContext` in `web/handlers/gnap/handler.go` to use `GenerateVerificationReport`
 - [x] Propagate `CapabilityCheck` and `FiduciaryCompliance` results into GNAP response
 - [x] Add integration tests for enriched GNAP responses
 
@@ -95,18 +95,18 @@
 
 ## Phase 12: Deployment & Final Validation
 - [x] Final end-to-end verification in production-like environment (Tested via `verification_hardening_test.go`)
-- [x] Documentation update (ARCHITECTURE.md created in `pkg/agentauthplus`)
+- [x] Documentation update (ARCHITECTURE.md created in `pkg/gauthplus`)
 
 ## Phase 13: Protocol Hardening & Observability Extensions [x]
 - [x] Hardened Discovery Protocol
-    - [x] Update `/.well-known/agentauth-configuration` with `jwks_signature` and `deprecation_metadata`
+    - [x] Update `/.well-known/gauth-configuration` with `jwks_signature` and `deprecation_metadata`
     - [x] Implement `UpdateJWKSSignature` in `web/server_clean.go`
 - [x] Extended Metrics & OTEL
     - [x] Add `ObserveCapabilityAnchorInterval` and `IncReplayStoreAvailabilityImpact` to `Metrics` interface
     - [x] Implement new metrics in `Memory` and `PrometheusMetrics`
     - [x] Complete `OpenTelemetryCollector` mapping in `otel.go`
 - [x] Replay Store Hardening
-    - [x] Record availability impact in `aap001.go` fail-closed path
+    - [x] Record availability impact in `rfc0111.go` fail-closed path
 - [x] Verification
     - [x] Verify discovery integrity via integration test
     - [x] Verify OTEL export functionality
@@ -174,18 +174,6 @@
     - [x] Implement rotation policies - DEFERRED (Design in SEMANTIC_SNAPSHOT_DESIGN.md)
     - [x] Add snapshot archival - DEFERRED
     - [x] External anchoring integration - DEFERRED
-- [x] Fix Admin Config 404
-- [x] Fix 404 on `rotation_v2.js`
-- [x] Fix stale asset `index-Bj2Ul4WE.js`
-- [x] Fix hardcoded API URL in frontend build
-- [x] Fix Admin Navigation (Profile/Settings)
-    - [x] Create Profile page
-    - [x] wiring up settings to configuration page
-    - [x] Verify navigation
-- [x] Fix System Metrics (Static Values)
-    - [x] Implement simulated dynamic metrics in Dev Mode
-- [x] Fix Profile Actions
-    - [x] Add feedback handlers for Edit/Change Password
 - [x] Verification
     - [x] Test TSA integration
     - [x] Test certificate validation
@@ -213,24 +201,14 @@
 - [x] Deployment Verification
     - [x] Analyze CI/CD workflows (`ci.yml`, `deploy-staging.yml`)
     - [x] Simulate staging deployment steps
-    - [x] Update Gap Matrix with deployment coverage
-- [x] Fix Local Runtime Connectivity
-    - [x] Expose Postgres/Redis ports in Docker
-    - [x] Run initial database migration
-    - [x] Verify Event Stream and Audit endpoints
 
-## Phase 21: Marketing Launch
-- [x] Content Validation
-    - [x] Verify technical claims in `SOCIAL_MEDIA_CONTENT.md` (Offline mode, Liability caps)
-    - [x] Confirm strategic alignment with `agency_triangle.mmd`
-- [x] Infrastructure Stability (Pre-Launch)
-    - [x] Fix CI `tar` corruption (Unify Go 1.25.1 + Disable Cache)
-    - [x] Fix `web/smoketest` static asset 404s (Fallback logic)
-    - [x] Fix CI build syntax error (`fmt` dependency in CSP)
-- [x] Asset Generation
-    - [x] Generate "OAuth vs AgentAuth" Infographic
-    - [x] Generate "$25 Trillion" Stat Card
-    - [x] Compile `MARKETING_ASSETS.md`
-- [ ] Strategic Publication
-    - [ ] Publish Book (Chapters 6-10)
-    - [ ] Launch Blog Post (Medium/Dev.to)
+    - [x] Update Gap Matrix with deployment coverage
+    - [x] Fix CI Stability (Crypto Loop Cleanliness)
+    - [x] Fix CI Build Syntax (OPA Integration)
+    - [x] Fix CI Flaky Tests (Authz Distributed Cache)
+    - [x] Check Repository Analytics (Blocked by Auth)
+    - [x] Cleanup Legacy RFC References (RFC 111/115 -> AAP-001/002)
+        - [x] Initial Backend Cleanup
+        - [x] Frontend & SDK Cleanup (Round 2)
+    - [x] Debug CI Failure (Documentation Links & Build Verification)
+    - [x] Debug CI Failure (Documentation Links & Build Verification)
