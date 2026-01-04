@@ -1,12 +1,12 @@
 ---
 title: AgentAuth RFC API Reference
- category: api-reference
- status: active
- lastUpdated: 2025-11-12
- owners: architecture-team
- refreshCadence: on-change
- source: source-code
- ---
+category: api-reference
+status: active
+lastUpdated: 2025-11-12
+owners: architecture-team
+refreshCadence: on-change
+source: source-code
+---
 ## 🌲 Revocation Transparency Endpoint Examples (Beta)
 > For internal model details (Merkle accumulator, Signed Tree Heads v1/v2, multi-sig threshold & weights, persistence, consistency proofs) consult `REVOCATION_TRANSPARENCY.md`.
 ### Inclusion Proof
@@ -1548,7 +1548,4 @@ X-API-Replacement: /api/v1/beta
 
 Clients should plan migration paths accordingly.
 
----
 
----
-Need context? See: README.md | docs/ARCHITECTURE.md | docs/GETTING_STARTED.md

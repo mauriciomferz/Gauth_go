@@ -204,3 +204,4 @@ scripts/conformance
 *.key
 k8s-secrets-patched.yaml
 dist/
+*.pdf

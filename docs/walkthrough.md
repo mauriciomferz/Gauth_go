@@ -702,3 +702,12 @@ We have verified the final deployment readiness of the GAuth system:
   - `pkg/storage/cas_test.go` (1)
   - `pkg/ledger/rfc3161/client_test.go` (2)
   - `cmd/loadtest/main.go` (1)
+
+#### 6. Tooling Fixes (PDF Generation)
+- **Objective**: Resolve failure in generating combined API documentation PDF.
+- **Root Cause**: Invalid YAML syntax (ambiguous trailing `---`) in `docs/API_REFERENCE.md` confused the `pandoc` parser during concatenation.
+- **Action**:
+  - Removed redundant trailing dashes from `docs/API_REFERENCE.md`.
+  - Corrected YAML frontmatter indentation in `docs/API_REFERENCE.md`.
+  - Added `*.pdf` to `.gitignore` to prevent artifact commit.
+- **Result**: `./generate_api_docs_pdf.sh` runs successfully, producing `AgentAuth_API_Complete_Documentation.pdf`.
