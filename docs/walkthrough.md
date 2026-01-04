@@ -725,3 +725,9 @@ We have verified the final deployment readiness of the GAuth system:
   - `.github/workflows/ci.yml`
   - `.github/workflows/test-suite.yml`
 - **Result**: `govulncheck` reports zero vulnerabilities. `pkg/crypto` tests pass with new runtime.
+
+#### 9. CI Build Fix (Syntax Error)
+- **Objective**: Resolve "Build & Unit Test" failure with error `expected ';', found fmt`.
+- **Root Cause**: `examples/opa-integration/main.go` was corrupted (scrambled content/missing newlines), causing a parser error that blocked the build.
+- **Action**: Reconstructed the file with valid Go syntax, restoring `main`, `ValidateScope`, and example functions.
+- **Result**: File passes `gofmt` and syntax checks.
