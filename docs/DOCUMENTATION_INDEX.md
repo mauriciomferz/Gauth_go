@@ -17,7 +17,7 @@ refreshCadence: weekly
 | Category | Purpose | Representative Files (subset) | Location / Pattern | Steward |
 |----------|---------|--------------------------------|--------------------|---------|
 | Architecture & Design | High-level system, components, flows | `ARCHITECTURE_SOLUTION.md`, `docs/ARCHITECTURE.md`, `docs/ARCHITECTURE_DIAGRAM_SPEC.md`, `docs/STRUCTURE.md`, `docs/DEMO_ARCHITECTURE.md` | root + `docs/*ARCHITECTURE*` | Lead Architect |
-| RFC & Standards Compliance | AAP-001/002 specs, matrices, gap analysis | `AAP001_README.md`, `docs/AAP-001.md`, `docs/AAP-002.md`, `docs/rfc_endpoint_mapping.md`, `docs/AAPCOMPLIANCE_MATRIX.md` | `docs/`, `docs/*AAP*` | Compliance Lead |
+| RFC & Standards Compliance | AAP-001/002 specs, matrices, gap analysis | `AAP001_README.md`, `docs/AAP-001.md`, `docs/AAP-002.md`, `docs/aap_endpoint_mapping.md`, `docs/AAPCOMPLIANCE_MATRIX.md` | `docs/`, `docs/*AAP*` | Compliance Lead |
 | Implementation Guides | How to run, integrate, quick start | `README.md`, `QUICK_START_GUIDE.md`, `docs/GETTING_STARTED.md`, `docs/RUNNING_SERVER.md`, `docs/DEV_RUN_GUIDE.md` | root + `docs/*RUN*` | Developer Experience |
 | Operations & Runbooks | Incident response & procedures | `docs/runbooks/README.md`, `docs/runbooks/PostgreSQLDown.md`, `docs/runbooks/RedisDown.md`, `docs/DISASTER_RECOVERY_GUIDE.md`, `docs/BACKUP_RESTORE_PROCEDURES.md` | `docs/runbooks/`, ops guides | SRE |
 | Security & Hardening | Threat model, hardening, crypto | `SECURITY.md`, `docs/HARDENING_ROADMAP.md`, `docs/THREAT_MODEL.md`, `docs/SECURITY_SETUP_GUIDE.md`, `docs/CRYPTOGRAPHY_IMPLEMENTATION.md` | root + `docs/*SECURITY*` | Security Team |

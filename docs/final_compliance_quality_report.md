@@ -52,7 +52,7 @@ Strict Unavailable Test | `web/diagnostics_semantic_test.go:52-70` | Verifies 50
 - JWT path refactored into structured taxonomy (`web/server_clean.go:248-264`).
 
 ## 5. Documentation Assessment
-Present: Extensive ADRs, compliance documents (`docs/compliance_AAP-001_AAP-002.md`, `docs/rfc_endpoint_mapping.md`, `docs/demo_readiness.md`).
+Present: Extensive ADRs, compliance documents (`docs/compliance_AAP-001_AAP-002.md`, `docs/aap_endpoint_mapping.md`, `docs/demo_readiness.md`).
 Missing: Visual diagrams (no mermaid/diagram markers found in `docs/diagrams.md` search), inclusion proof example artifact, explicit semantic → governance feedback diagram.
 
 ## 6. Gaps & Recommendations

@@ -35,7 +35,7 @@ This checklist enumerates remaining polish items to ensure a clear, compelling l
 
 ## UX / Documentation Improvements
 - Link diagrams in `docs/diagrams.md` directly from README with anchors.
-- Add short “RFC Mapping” section in README linking to `docs/rfc_endpoint_mapping.md` and compliance matrix.
+- Add short “RFC Mapping” section in README linking to `docs/aap_endpoint_mapping.md` and compliance matrix.
 - Include sample JSON for a capability anchor and revocation root in `examples/`.
 
 ## Testing Gaps to Consider (Optional pre-demo)
@@ -60,6 +60,6 @@ This checklist enumerates remaining polish items to ensure a clear, compelling l
 
 ## Completion Criteria
 - All referenced endpoints returning expected structured payloads.
-- Compliance docs (`compliance_AAP-001_AAP-002.md`, `rfc_endpoint_mapping.md`) accessible and linked.
+- Compliance docs (`compliance_AAP-001_AAP-002.md`, `aap_endpoint_mapping.md`) accessible and linked.
 - Demo script runs end-to-end without manual intervention.
 - Anomaly scores non-zero in at least one semantic counter during live session.
