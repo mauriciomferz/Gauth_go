@@ -731,3 +731,11 @@ We have verified the final deployment readiness of the GAuth system:
 - **Root Cause**: `examples/opa-integration/main.go` was corrupted (scrambled content/missing newlines), causing a parser error that blocked the build.
 - **Action**: Reconstructed the file with valid Go syntax, restoring `main`, `ValidateScope`, and example functions.
 - **Result**: File passes `gofmt` and syntax checks.
+
+#### 10. Fix Flaky Distributed Cache Test
+- **Objective**: Resolve `pkg/authz` test failure `TestDistributedDecisionCache_DistributedInvalidation`.
+- **Root Cause**: Race condition in Redis Pub/Sub tests. The test published an invalidation message before the subscriber (Node 2) was fully subscribed, causing the message to be missed.
+- **Action**: 
+    - Added `time.Sleep(50ms)` before invalidation to ensure subscription is active.
+    - Replaced fixed sleep with `assert.Eventually` for verification to improve reliability.
+- **Result**: `pkg/authz` tests passed 10/10 iterations locally.

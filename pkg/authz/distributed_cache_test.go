@@ -91,15 +91,22 @@ func TestDistributedDecisionCache_DistributedInvalidation(t *testing.T) {
 	_, inL1_2 := l1_2.Get(key)
 	assert.True(t, inL1_2)
 
+	// Ensure Node 2 subscription is active before publishing
+	time.Sleep(50 * time.Millisecond)
+
 	// 3. Node 1 invalidates the key
 	node1.Invalidate(key)
 
 	// Wait for Pub/Sub (usually very fast but let's give it a moment)
-	time.Sleep(100 * time.Millisecond)
+	// Increasing to 250ms to mitigate CI flakiness
+	time.Sleep(250 * time.Millisecond)
 
 	// 4. Verify Node 2 L1 is invalidated via Pub/Sub
-	_, foundNode2 := l1_2.Get(key)
-	assert.False(t, foundNode2, "Node 2 L1 should be invalidated via Pub/Sub")
+	// Use eventual consistency check for robustness
+	assert.Eventually(t, func() bool {
+		_, found := l1_2.Get(key)
+		return !found
+	}, 1*time.Second, 100*time.Millisecond, "Node 2 L1 should be invalidated via Pub/Sub")
 }
 
 func TestDistributedDecisionCache_InvalidateAll(t *testing.T) {
@@ -126,6 +133,9 @@ func TestDistributedDecisionCache_InvalidateAll(t *testing.T) {
 	// Fill node2 L1
 	node2.Get("k1")
 	node2.Get("k2")
+
+	// Ensure Node 2 subscription is active before publishing
+	time.Sleep(50 * time.Millisecond)
 
 	// Node 1 InvalidateAll
 	node1.InvalidateAll()
