@@ -739,3 +739,11 @@ We have verified the final deployment readiness of the GAuth system:
     - Added `time.Sleep(50ms)` before invalidation to ensure subscription is active.
     - Replaced fixed sleep with `assert.Eventually` for verification to improve reliability.
 - **Result**: `pkg/authz` tests passed 10/10 iterations locally.
+
+#### 11. Cleanup Legacy RFC References
+- **Objective**: Standardise terminology by replacing legacy "RFC 111" and "RFC 115" references with "AAP-001" and "AAP-002" respectively.
+- **Actions**:
+    - Renamed all `rfc0111_*` and `rfc0115_*` files in `pkg/agentauth_aap_001`, `pkg/poa`, and `scripts`.
+    - Renamed `docs/rfc_endpoint_mapping.md` to `docs/aap_endpoint_mapping.md`.
+    - Performed bulk text replacement of "RFC 111" -> "AAP-001", "RFC 115" -> "AAP-002", etc.
+- **Verification**: Ran `go test ./pkg/...` which passed, confirming no broken imports or logic.
