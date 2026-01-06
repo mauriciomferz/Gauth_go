@@ -9,8 +9,8 @@ import (
 
 // TestNewAuthorizerAdapter verifies AuthorizerAdapter constructor correctly initializes with provided engine.
 func TestNewAuthorizerAdapter(t *testing.T) {
-	reg := policy.NewRegistry()
-	engine := policy.NewChainEngine(reg)
+	store := policy.NewInMemoryStore()
+	engine := policy.NewChainEngine(store)
 	adapter := NewAuthorizerAdapter(engine)
 
 	if adapter == nil {
@@ -42,13 +42,14 @@ func TestAuthorizerAdapterAuthorize_Allow(t *testing.T) {
 			},
 		},
 	}
-	reg := policy.NewRegistry()
-	_, err := reg.AddBundle(bundle)
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
+	_, err := store.AppendBundle(ctx, bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := policy.NewChainEngine(reg)
+	engine := policy.NewChainEngine(store)
 	adapter := NewAuthorizerAdapter(engine)
 
 	req := Request{
@@ -90,13 +91,14 @@ func TestAuthorizerAdapterAuthorize_Deny(t *testing.T) {
 			},
 		},
 	}
-	reg := policy.NewRegistry()
-	_, err := reg.AddBundle(bundle)
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
+	_, err := store.AppendBundle(ctx, bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := policy.NewChainEngine(reg)
+	engine := policy.NewChainEngine(store)
 	adapter := NewAuthorizerAdapter(engine)
 
 	req := Request{
@@ -138,13 +140,14 @@ func TestAuthorizerAdapterAuthorize_NotApplicable(t *testing.T) {
 			},
 		},
 	}
-	reg := policy.NewRegistry()
-	_, err := reg.AddBundle(bundle)
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
+	_, err := store.AppendBundle(ctx, bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := policy.NewChainEngine(reg)
+	engine := policy.NewChainEngine(store)
 	adapter := NewAuthorizerAdapter(engine)
 
 	// Request from different user/action
@@ -165,8 +168,8 @@ func TestAuthorizerAdapterAuthorize_NotApplicable(t *testing.T) {
 
 // TestAuthorizerAdapterAuthorize_EmptyRegistry verifies Authorize handles empty registry correctly.
 func TestAuthorizerAdapterAuthorize_EmptyRegistry(t *testing.T) {
-	reg := policy.NewRegistry()
-	engine := policy.NewChainEngine(reg)
+	store := policy.NewInMemoryStore()
+	engine := policy.NewChainEngine(store)
 	adapter := NewAuthorizerAdapter(engine)
 
 	req := Request{
@@ -205,13 +208,14 @@ func TestAuthorizerAdapterAuthorize_ContextAttributes(t *testing.T) {
 			},
 		},
 	}
-	reg := policy.NewRegistry()
-	_, err := reg.AddBundle(bundle)
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
+	_, err := store.AppendBundle(ctx, bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := policy.NewChainEngine(reg)
+	engine := policy.NewChainEngine(store)
 	adapter := NewAuthorizerAdapter(engine)
 
 	// Request with matching context
@@ -278,13 +282,14 @@ func TestAuthorizerAdapterAuthorize_DenyOverrides(t *testing.T) {
 			},
 		},
 	}
-	reg := policy.NewRegistry()
-	_, err := reg.AddBundle(bundle)
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
+	_, err := store.AppendBundle(ctx, bundle)
 	if err != nil {
 		t.Fatalf("failed to add bundle: %v", err)
 	}
 
-	engine := policy.NewChainEngine(reg)
+	engine := policy.NewChainEngine(store)
 	adapter := NewAuthorizerAdapter(engine)
 
 	req := Request{
