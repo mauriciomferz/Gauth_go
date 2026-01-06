@@ -35,8 +35,9 @@ func TestEvalExprNotAndParens(t *testing.T) {
 }
 
 func TestPolicyEvaluateWithNotAndParens(t *testing.T) {
-	reg := NewRegistry()
-	b, err := reg.AddBundle(Bundle{ID: "b1", Policies: []Policy{{
+	store := NewInMemoryStore()
+	ctx := context.Background()
+	_, err := store.AppendBundle(ctx, Bundle{ID: "b1", Policies: []Policy{{
 		ID:       "p1",
 		Subjects: []string{"alice@example.com"},
 		Rules: []Rule{{
@@ -44,10 +45,10 @@ func TestPolicyEvaluateWithNotAndParens(t *testing.T) {
 			Expr: "role == 'finance' && !(amount > 500) && (amount > 100)",
 		}},
 	}}})
-	if err != nil || b.Hash == "" {
+	if err != nil {
 		t.Fatalf("add bundle: %v", err)
 	}
-	eng := NewChainEngine(reg)
+	eng := NewChainEngine(store)
 	dec, err := eng.Evaluate(context.Background(), EvalRequest{Subject: "alice@example.com", Action: "read", Resource: "report:finance", Attrs: map[string]string{"role": "finance", "amount": "150"}, Now: time.Now()})
 	if err != nil {
 		t.Fatalf("eval: %v", err)

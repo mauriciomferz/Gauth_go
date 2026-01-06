@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,11 +15,12 @@ func TestFileStoreAppendAndReload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("new filestore: %v", err)
 	}
-	if fs.Head() != nil {
+	ctx := context.Background()
+	if h, _ := fs.Head(ctx); h != nil {
 		t.Fatalf("expected empty head")
 	}
 	// Append bundle
-	b1, err := fs.AppendBundle(Bundle{ID: "b1", Policies: []Policy{{ID: "p1", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"res"}, Effect: Allow}}}}})
+	b1, err := fs.AppendBundle(ctx, Bundle{ID: "b1", Policies: []Policy{{ID: "p1", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"res"}, Effect: Allow}}}}})
 	if err != nil {
 		t.Fatalf("append: %v", err)
 	}
@@ -30,15 +32,18 @@ func TestFileStoreAppendAndReload(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reload: %v", err)
 	}
-	head := fs2.Head()
+	head, err := fs2.Head(ctx)
+	if err != nil {
+		t.Fatalf("head: %v", err)
+	}
 	if head == nil || head.Hash != b1.Hash {
 		t.Fatalf("expected head hash %s got %+v", b1.Hash, head)
 	}
-	if verifyErr := fs2.VerifyChain(); verifyErr != nil {
+	if verifyErr := fs2.VerifyChain(ctx); verifyErr != nil {
 		t.Fatalf("verify chain: %v", verifyErr)
 	}
 	// Append second bundle and check linkage
-	b2, err := fs2.AppendBundle(Bundle{ID: "b2", Policies: []Policy{{ID: "p2", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"res2"}, Effect: Allow}}}}})
+	b2, err := fs2.AppendBundle(ctx, Bundle{ID: "b2", Policies: []Policy{{ID: "p2", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"res2"}, Effect: Allow}}}}})
 	if err != nil {
 		t.Fatalf("append2: %v", err)
 	}
@@ -62,19 +67,20 @@ func TestFileStoreConcurrencySafety(t *testing.T) {
 		t.Fatalf("new filestore: %v", err)
 	}
 	done := make(chan struct{})
+	ctx := context.Background()
 	for i := 0; i < 10; i++ {
 		go func(i int) {
 			defer func() { done <- struct{}{} }()
-			_, _ = fs.AppendBundle(Bundle{ID: "b" + time.Now().Format("150405.000") + string(rune('a'+i)), Policies: []Policy{{ID: "p", Subjects: []string{"u"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"r"}, Effect: Allow}}}}})
+			_, _ = fs.AppendBundle(ctx, Bundle{ID: "b" + time.Now().Format("150405.000") + string(rune('a'+i)), Policies: []Policy{{ID: "p", Subjects: []string{"u"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"r"}, Effect: Allow}}}}})
 		}(i)
 	}
 	for i := 0; i < 10; i++ {
 		<-done
 	}
-	if fs.Head() == nil {
+	if h, _ := fs.Head(ctx); h == nil {
 		t.Fatalf("expected head after concurrent appends")
 	}
-	if err := fs.VerifyChain(); err != nil {
+	if err := fs.VerifyChain(ctx); err != nil {
 		t.Fatalf("verify chain: %v", err)
 	}
 }

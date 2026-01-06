@@ -310,22 +310,24 @@ func Diff(ctx context.Context, store Store, fromVersion, toVersion int) (PolicyD
 	}
 
 	// Fetch bundles
-	// We need GetByVersion... Store only has GetByHash.
-	// We might need GetByVersion on Store interface?
-	// Or we scan? ListAll?
-	// Adding GetByVersion to Store is cleanest.
-	// But I don't want to change interface again if I can avoid it.
-	// We have ChainHashes. We can iterate.
-	// Or we can assume ChainHashes returns ordered list? Yes.
-	// Wait, ChainHashes returns IDs (Hashes). We don't know version mapping easily without fetching.
-	// Except InMemoryStore/FileStore returns ChainWithVersions in API... wait api.go used ChainWithVersions() on Registry.
-	// Store interface does NOT have ChainWithVersions.
+	fromB, err := store.GetByVersion(ctx, fromVersion)
+	if err != nil {
+		return PolicyDiff{}, fmt.Errorf("failed to fetch from version %d: %w", fromVersion, err)
+	}
+	if fromB == nil {
+		return PolicyDiff{}, fmt.Errorf("from version %d not found", fromVersion)
+	}
 
-	// Let's add GetByVersion to Store interface?
-	// Or ChainWithVersions?
-	// PostgresRegistry can implement GetByVersion easily.
+	toB, err := store.GetByVersion(ctx, toVersion)
+	if err != nil {
+		return PolicyDiff{}, fmt.Errorf("failed to fetch to version %d: %w", toVersion, err)
+	}
+	if toB == nil {
+		return PolicyDiff{}, fmt.Errorf("to version %d not found", toVersion)
+	}
 
-	return PolicyDiff{}, errors.New("Diff not fully implemented for Store yet")
+	chainHashes, _ := store.ChainHashes(ctx)
+	return DiffBundles(fromB, toB, fromVersion, toVersion, chainHashes)
 }
 
 // DiffBundles computes diff between two loaded bundles.

@@ -10,15 +10,16 @@ import (
 //   - read is allowed (matches allow-read policy, no deny rule for read)
 //   - write is denied (matches deny-write policy)
 func TestPolicyEvaluationCombiningStub(t *testing.T) {
-	reg := NewRegistry()
+	store := NewInMemoryStore()
+	ctx := context.TODO()
 	b := Bundle{ID: "b1", Policies: []Policy{
 		{ID: "allow-read", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"doc:1"}, Effect: Allow}}},
 		{ID: "deny-write", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"write"}, Resources: []string{"doc:1"}, Effect: Deny}}},
 	}}
-	if _, err := reg.AddBundle(b); err != nil {
+	if _, err := store.AppendBundle(ctx, b); err != nil {
 		t.Fatalf("add bundle: %v", err)
 	}
-	eng := NewChainEngine(reg)
+	eng := NewChainEngine(store)
 	dec, err := eng.Evaluate(context.TODO(), EvalRequest{Subject: "alice", Action: "read", Resource: "doc:1"})
 	if err != nil {
 		t.Fatalf("eval read: %v", err)
