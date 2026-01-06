@@ -440,6 +440,12 @@ func (h *Handler) StatusUpdate(c *gin.Context) {
 		return
 	}
 
+	// Retrieve old status for metrics accuracy
+	oldStatus := "unknown"
+	if _, t := h.Store.Validate(req.TokenID); t != nil {
+		oldStatus = t.Status
+	}
+
 	success, reason, tok := h.Store.UpdateStatus(req.TokenID, req.NewStatus)
 
 	if !success {
@@ -536,27 +542,30 @@ func (h *Handler) StatusUpdate(c *gin.Context) {
 	}
 
 	// If we are here, reason == "success"
-	// We don't have 'old' status explicitly, but we know it wasn't 'terminated' or same as new.
-	// For metrics, we can just say "previous".
+	// We don't have 'old' status explicitly, so we must rely on what we fetched earlier or "unknown"
+	// For accurate metrics, we should have fetched it.
+	// Since we didn't fetch it before (to save a call), we have "unknown".
+	// To fix the test/metrics, we SHOULD fetch it.
+	// NOTE: We could move the fetch to top of function.
 
 	if h.Auditor != nil {
 		h.Auditor.LogAction("api", "token_status_update", tok.ID, "success")
 	}
 	if h.Emitter != nil {
-		h.Emitter.EmitTokenStatusChanged(tok.ID, "unknown", tok.Status, "status_change")
+		h.Emitter.EmitTokenStatusChanged(tok.ID, oldStatus, tok.Status, "status_change")
 	}
 
 	if h.Metrics != nil {
 		h.Metrics.IncTokenStatusTransitions()
-		h.Metrics.RecordLifecycleTransition("token", "unknown", req.NewStatus, "success")
+		h.Metrics.RecordLifecycleTransition("token", oldStatus, req.NewStatus, "success")
 		h.Metrics.ObserveLifecycleTransitionLatency("token", "success", time.Since(start))
 	}
 	lat := time.Since(start).Nanoseconds()
 	if h.Lifecycle != nil {
-		h.Lifecycle.RecordEvent("token", tok.ID, "unknown", tok.Status, "success", "status_change", lat)
+		h.Lifecycle.RecordEvent("token", tok.ID, oldStatus, tok.Status, "success", "status_change", lat)
 	}
 
-	c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": "unknown", "new_status": tok.Status})
+	c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": oldStatus, "new_status": tok.Status})
 }
 
 func (h *Handler) Introspect(c *gin.Context) {

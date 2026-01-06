@@ -95,6 +95,14 @@ func (f *FileStore) AppendBundle(ctx context.Context, b Bundle) (Bundle, error) 
 	if b.Created.IsZero() {
 		b.Created = time.Now().UTC()
 	}
+	// Assign monotonically increasing version if not explicitly set
+	if b.Version == 0 {
+		if len(f.reg.bundles) == 0 {
+			b.Version = 1
+		} else {
+			b.Version = f.reg.bundles[len(f.reg.bundles)-1].Version + 1
+		}
+	}
 	if len(f.reg.bundles) > 0 {
 		b.PrevHash = f.reg.bundles[len(f.reg.bundles)-1].Hash
 	}

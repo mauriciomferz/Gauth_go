@@ -208,6 +208,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Initialize Cache (early init for use in handlers)
 	cacheConf := cacheConfig.LoadCacheConfig()
+	// Force memory cache if Redis skip is requested (e.g. for tests)
+	if os.Getenv("AGENTAUTH_SKIP_REDIS") == "1" {
+		cacheConf.Type = "memory"
+		fmt.Fprintln(os.Stderr, "[factory] forcing memory cache via AGENTAUTH_SKIP_REDIS")
+	}
 	if err := cacheConfig.ValidateCacheConfig(cacheConf); err != nil {
 		fmt.Fprintf(os.Stderr, "[WARNING] Invalid cache configuration: %v - using memory cache fallback\n", err)
 		cacheConf.Type = "memory"

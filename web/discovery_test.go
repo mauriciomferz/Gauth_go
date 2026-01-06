@@ -46,9 +46,9 @@ func TestWellKnownDiscovery(t *testing.T) {
 
 // TestDiscoveryExactKeys ensures discovery payload contains required keys and jwks_uri empties when JWT disabled.
 func TestDiscoveryExactKeys(t *testing.T) {
-	// Scenario 1: Neither JWT library nor EdDSA mode active -> jwks_uri should be empty.
+	// Scenario 1: Neither JWT library nor EdDSA mode active -> jwks_uri should still be populated (Dynamic Identity default).
 	os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
-	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC to ensure JWKS suppression
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
 	w := performRequest(srv.router, "GET", "/.well-known/agentauth-configuration")
@@ -68,8 +68,8 @@ func TestDiscoveryExactKeys(t *testing.T) {
 			t.Fatalf("missing key %s", k)
 		}
 	}
-	if body["jwks_uri"] != "" {
-		t.Fatalf("jwks_uri should be empty when neither JWT nor eddsa mode enabled; got %v", body["jwks_uri"])
+	if body["jwks_uri"] == "" {
+		t.Fatalf("jwks_uri should be populated even in legacy mode (Dynamic Identity support)")
 	}
 
 	// Scenario 2: Enable JWT library -> jwks_uri populated.

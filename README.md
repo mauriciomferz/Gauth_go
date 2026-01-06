@@ -9,7 +9,7 @@ owners: core-maintainers
 
 [![CI Build](https://github.com/mauriciomferz/AgentAuth/actions/workflows/ci.yml/badge.svg)](https://github.com/mauriciomferz/AgentAuth/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/mauriciomferz/AgentAuth/releases/tag/v1.0.0)
+[![Version](https://img.shields.io/badge/version-v1.1.0--beta-orange.svg)](https://github.com/mauriciomferz/AgentAuth/releases/tag/v1.1.0-beta)
 
 **Author**: Mauricio A. Fernandez Fernandez
 
@@ -168,6 +168,7 @@ AgentAuth/
 - **[Marketing Guide](docs/marketing/README.md)** - Complete launch strategy
 
 ### 📋 Release Notes
+- **[v1.1.0-beta Release Notes](docs/release_notes/v1.1.0-beta.md)** - Dynamic Identity & MCP
 - **[v1.0.0 Release Notes](docs/release_notes/v1.0.0.md)** - Gold Master status
 
 ---
@@ -192,7 +193,7 @@ Edge agents operating in contested networks with offline verification.
 
 | Metric | Status |
 |--------|--------|
-| **Version** | v1.0.0 (Gold Master) ✅ |
+| **Version** | v1.1.0-beta (Identity & MCP) ✅ |
 | **Standards** | AAP-001 ✅ AAP-002 ✅ |
 | **Test Coverage** | 80%+ core packages |
 | **Build** | Passing |
