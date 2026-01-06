@@ -12,6 +12,8 @@ owners: [system]
 
 Curated navigation for major reports, compliance summaries, gap analyses, and architectural references.
 
+- Reports: `docs/reports/INDEX.md`
+
 ## Core Architecture & Organization
 - `ARCHITECTURE_SOLUTION.md` – High-level solution design.
 - `ORGANIZATION.md` – Repository & subsystem organization.
