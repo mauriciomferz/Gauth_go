@@ -54,7 +54,8 @@ func TestTokenScalingAbstraction(t *testing.T) {
 		assert.Equal(t, http.StatusOK, revResp.StatusCode)
 
 		// Validate again (should be revoked)
-		valResp2, _ := http.Post(baseURL+"/api/v1/token/validate", "application/json", bytes.NewBuffer(valJson))
+		valResp2, err := http.Post(baseURL+"/api/v1/token/validate", "application/json", bytes.NewBuffer(valJson))
+		require.NoError(t, err)
 		defer valResp2.Body.Close()
 		var valRes2 map[string]interface{}
 		json.NewDecoder(valResp2.Body).Decode(&valRes2)
