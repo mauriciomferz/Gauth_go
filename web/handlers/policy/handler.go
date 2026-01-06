@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"fmt"
 	"sync/atomic"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 )
 
 type Handler struct {
-	Registry        *policy.Registry
+	Store           policy.Store
 	Engine          *policy.ChainEngine
 	RateLimiter     *SimpleRateLimiter
 	Metrics         *Metrics
@@ -25,9 +24,10 @@ type Handler struct {
 	OnPolicyChange func()
 }
 
-func NewHandler(persistPath string, m metrics.Metrics) *Handler {
+func NewHandler(store policy.Store, m metrics.Metrics) *Handler {
 	h := &Handler{
-		Config:      Config{PersistPath: persistPath},
+		Store:       store,
+		Config:      Config{},
 		RateLimiter: NewSimpleRateLimiter(20, time.Minute),
 		Metrics: &Metrics{
 			LatencyBuckets: make(map[int64]*uint64),
@@ -53,27 +53,16 @@ func NewHandler(persistPath string, m metrics.Metrics) *Handler {
 	return h
 }
 
-// EnsureInitialized makes sure the registry and engine are ready
+// EnsureInitialized makes sure the engine is ready
 func (h *Handler) EnsureInitialized() {
-	if h.Registry == nil {
-		if h.Config.PersistPath != "" {
-			if err := h.loadState(h.Config.PersistPath); err != nil {
-				fmt.Printf("[policy] Warning: Failed to load state: %v\n", err)
-			}
-		}
-		if h.Registry == nil {
-			h.Registry = policy.NewRegistry()
-		}
-	}
 	if h.Engine == nil {
-		h.Engine = policy.NewChainEngine(h.Registry)
+		h.Engine = policy.NewChainEngine(h.Store)
 	}
 }
 
 func (h *Handler) SaveState() error {
-	if h.Registry != nil && h.Config.PersistPath != "" {
-		return h.saveState(h.Config.PersistPath)
-	}
+	// Persistence is now handled by the Store implementation internally.
+	// This method is kept for compatibility but might be no-op for DB stores.
 	return nil
 }
 
@@ -96,9 +85,6 @@ func (h *Handler) RecordLatency(d time.Duration) {
 func (h *Handler) Evaluate(ctx context.Context, req policy.EvalRequest) (policy.EvalDecision, error) {
 	if h.Engine == nil {
 		h.EnsureInitialized()
-	}
-	if h.Engine == nil {
-		return policy.EvalDecision{}, fmt.Errorf("policy engine not initialized")
 	}
 	return h.Engine.Evaluate(ctx, req)
 }

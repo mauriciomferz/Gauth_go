@@ -18,13 +18,13 @@ func BenchmarkPolicyEvaluation(b *testing.B) {
 	mem.AddPolicy(authz.Policy{ID: "p1", Subject: "alice", Resource: "doc", Actions: []string{"read"}, Effect: authz.Allow})
 
 	// Setup chain engine with equivalent policy
-	reg := policy.NewRegistry()
-	if _, err := reg.AddBundle(policy.Bundle{ID: "b1", Policies: []policy.Policy{{ID: "rbac", Subjects: []string{"alice"}, Rules: []policy.Rule{{Actions: []string{"read"}, Resources: []string{"doc"}, Effect: policy.Allow}}}}}); err != nil {
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
+
+	if _, err := store.AppendBundle(ctx, policy.Bundle{ID: "b1", Policies: []policy.Policy{{ID: "rbac", Subjects: []string{"alice"}, Rules: []policy.Rule{{Actions: []string{"read"}, Resources: []string{"doc"}, Effect: policy.Allow}}}}}); err != nil {
 		b.Fatalf("add bundle b1 failed: %v", err)
 	}
-	eng := policy.NewChainEngine(reg)
-
-	ctx := context.Background()
+	eng := policy.NewChainEngine(store)
 
 	b.Run("memory_authorizer", func(b *testing.B) {
 		req := authz.Request{Subject: "alice", Action: "read", Resource: "doc"}
@@ -45,7 +45,7 @@ func BenchmarkPolicyEvaluation(b *testing.B) {
 	})
 
 	// Add a bundle with attribute expression and time window plus deny override
-	if _, err := reg.AddBundle(policy.Bundle{ID: "b2", Policies: []policy.Policy{
+	if _, err := store.AppendBundle(ctx, policy.Bundle{ID: "b2", Policies: []policy.Policy{
 		{ID: "abac", Subjects: []string{"*"}, Rules: []policy.Rule{{Actions: []string{"view"}, Resources: []string{"report"}, Expr: "department == 'finance' && time_between(\"09:00\",\"17:00\")", Effect: policy.Allow}}},
 		// Deny applies to a different resource to avoid overriding allow benchmark
 		{ID: "deny-secret", Subjects: []string{"*"}, Rules: []policy.Rule{{Actions: []string{"view"}, Resources: []string{"secret"}, Expr: "department == 'finance'", Effect: policy.Deny}}},
@@ -73,7 +73,7 @@ func BenchmarkPolicyEvaluation(b *testing.B) {
 	})
 
 	// Add bundle with OR chains and numeric comparisons
-	if _, err := reg.AddBundle(policy.Bundle{ID: "b3", Policies: []policy.Policy{
+	if _, err := store.AppendBundle(ctx, policy.Bundle{ID: "b3", Policies: []policy.Policy{
 		{ID: "or-policy", Subjects: []string{"*"}, Rules: []policy.Rule{{Actions: []string{"transfer"}, Resources: []string{"acct"}, Expr: "role == 'ops' || role == 'finance' || role == 'admin'", Effect: policy.Allow}}},
 		{ID: "numeric-policy", Subjects: []string{"*"}, Rules: []policy.Rule{{Actions: []string{"purchase"}, Resources: []string{"item"}, Expr: "amount <= 1000 && amount >= 10", Effect: policy.Allow}}},
 	}}); err != nil {

@@ -11,7 +11,7 @@ import (
 )
 
 func startWebDemo(t *testing.T) func() {
-	cmd := exec.Command("bash", "scripts/start-web-demo.sh")
+	cmd := exec.Command("bash", "../../scripts/test/start-web-demo.sh")
 	err := cmd.Start()
 	if err != nil {
 		t.Fatalf("Failed to start web demo: %v", err)

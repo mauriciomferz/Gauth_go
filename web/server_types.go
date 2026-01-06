@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -14,8 +15,10 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	anchor "github.com/mauriciomferz/AgentAuth/pkg/anchor"
+	"github.com/mauriciomferz/AgentAuth/pkg/apikey"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
 	"github.com/mauriciomferz/AgentAuth/pkg/blockchain"
+	"github.com/mauriciomferz/AgentAuth/pkg/cache"
 	"github.com/mauriciomferz/AgentAuth/pkg/common/clock"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/database"
@@ -23,6 +26,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 	"github.com/mauriciomferz/AgentAuth/pkg/redis"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/admin"
+	apikeyHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/apikey"
 	authzHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/authz"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/capabilities"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/capability_anchor"
@@ -35,13 +39,15 @@ import (
 	"github.com/mauriciomferz/AgentAuth/web/handlers/semantic"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/violations"
+	"github.com/mauriciomferz/AgentAuth/web/middleware"
 	"go.opentelemetry.io/otel/metric"
 	metricsdk "go.opentelemetry.io/otel/sdk/metric"
 )
 
 type BetaServer struct {
-	router                   *gin.Engine
-	mu                       sync.RWMutex
+	router *gin.Engine
+	mu     sync.RWMutex
+
 	agentAuthPlusInitialized bool
 	start                    time.Time
 	keyProvider              crypto.KeyProvider
@@ -100,7 +106,10 @@ type BetaServer struct {
 
 	// Admin Handlers
 	adminTokenHandler *admin.TokenHandler
-	apiKeyHandler     *admin.APIKeyHandler
+	// apiKeyHandler     *admin.APIKeyHandler // Legacy
+	apiKeyHandler     *apikeyHandlers.Handler
+	apiKeyManager     *apikey.Manager
+	apiKeyMiddleware  *middleware.APIKeyMiddleware
 	resilienceHandler *admin.ResilienceHandler
 
 	// OTel Metrics (prototype)
@@ -237,6 +246,8 @@ type BetaServer struct {
 
 	// Redis client for token blacklist, rate limiting, etc.
 	redisClient *redis.Client
+	// Cache abstraction (L1/L2)
+	cache cache.Cache
 
 	// Blockchain components (Active if AGENTAUTH_ETH_RPC_URL is set)
 	blockchainRegistry blockchain.BlockchainRegistry
@@ -254,6 +265,11 @@ type BetaServer struct {
 
 	// dbCleanup handles closing the AAP001 DB connection pool which is otherwise leaked
 	dbCleanup func()
+}
+
+// Handler returns the underlying http.Handler for testing purposes.
+func (s *BetaServer) Handler() http.Handler {
+	return s.router
 }
 
 // auditChainAnchorAdapter adapts anchor.Provider, anchor.AnchorClient and capabilities.AnchorClient interfaces.

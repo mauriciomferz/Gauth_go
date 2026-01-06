@@ -105,10 +105,13 @@ docker-compose up -d --build
 
 # Option 2: Local development
 go mod download
-go run cmd/server/main.go
+# Run with development security settings and a demo signing key
+AGENTAUTH_JWT_SIGNING_KEY=devkey_must_be_long_enough_for_32_bytes_12345678901234567890 \
+GO_ENV=development \
+go run cmd/web-server/main.go
 
 # Check health
-curl http://localhost:8080/healthz
+curl http://localhost:8080/api/v1/beta/health
 ```
 
 ### First PoA Token
@@ -151,7 +154,7 @@ AgentAuth/
 ## Documentation
 
 ### 📚 Books & Guides
-- **[The Agent's Signature](docs/strategy/BOOK_MANUSCRIPT_ILLUSTRATED.md)** (1,360 pages, 22+ diagrams)
+- **[The Agent's Signature](docs/strategy/BOOK_MANUSCRIPT_ILLUSTRATED.md)** (1,360 lines, 22+ diagrams)
   - Comprehensive technical & legal guide
   - Real-world case studies
   - Multi-jurisdiction analysis

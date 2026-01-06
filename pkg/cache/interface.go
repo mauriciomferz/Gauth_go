@@ -42,7 +42,9 @@ type Stats struct {
 	Memory      int64   `json:"memory_bytes"`
 	HitRate     float64 `json:"hit_rate"`
 	Uptime      int64   `json:"uptime_seconds"`
-	Connections int     `json:"connections"`
+	Connections int     `json:"connections"` // Configured pool size
+	PoolActive  int     `json:"pool_active"`
+	PoolIdle    int     `json:"pool_idle"`
 }
 
 // Config represents cache configuration

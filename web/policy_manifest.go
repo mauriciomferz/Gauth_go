@@ -103,6 +103,10 @@ func (s *BetaServer) buildPolicyManifest() (manifestCanonical, []byte, string, e
 
 // registerPolicyManifest mounts the /api/v1/policy/manifest endpoint.
 func (s *BetaServer) registerPolicyManifest() {
+	if s.router == nil {
+		fmt.Fprintf(os.Stderr, "[policy_manifest] error: s.router is nil, cannot register routes\n")
+		return
+	}
 	s.router.GET("/api/v1/policy/manifest", func(c *gin.Context) {
 		canon, raw, hash, err := s.buildPolicyManifest()
 		if err != nil {

@@ -32,7 +32,7 @@ jobs:
             echo "✅ Fallback build succeeded"
           else
             echo "⚠️ Using standalone build script..."
-            ./scripts/ci-build.sh
+            ./scripts/build/ci-build.sh
           fi
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

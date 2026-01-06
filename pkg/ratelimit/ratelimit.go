@@ -35,6 +35,11 @@ type Limiter interface {
 	Close() error
 }
 
+// DynamicLimiter defines a rate limiter that allows per-call limits
+type DynamicLimiter interface {
+	AllowWithLimit(key string, limit int, period time.Duration) bool
+}
+
 // TokenBucketLimiter implements a token bucket rate limiter
 type TokenBucketLimiter struct {
 	config  Config

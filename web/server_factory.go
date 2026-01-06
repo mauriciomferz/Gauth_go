@@ -3,8 +3,10 @@ package web
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
 	"crypto/ed25519"
 	crand "crypto/rand"
+	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
@@ -21,6 +23,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus"
 	otel "go.opentelemetry.io/otel"
@@ -38,6 +41,7 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauth_aap_001"
 	"github.com/mauriciomferz/AgentAuth/pkg/agentauthplus"
 	"github.com/mauriciomferz/AgentAuth/pkg/anchor"
+	"github.com/mauriciomferz/AgentAuth/pkg/apikey"
 	"github.com/mauriciomferz/AgentAuth/pkg/audit"
 	"github.com/mauriciomferz/AgentAuth/pkg/auth"
 	"github.com/mauriciomferz/AgentAuth/pkg/authz"
@@ -49,18 +53,23 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto"
 	"github.com/mauriciomferz/AgentAuth/pkg/crypto/keys"
 	"github.com/mauriciomferz/AgentAuth/pkg/database"
+	"github.com/mauriciomferz/AgentAuth/pkg/database/migrate"
 	"github.com/mauriciomferz/AgentAuth/pkg/delegation"
 	devicePkg "github.com/mauriciomferz/AgentAuth/pkg/device"
 	gnapPkg "github.com/mauriciomferz/AgentAuth/pkg/gnap"
+	identityPkg "github.com/mauriciomferz/AgentAuth/pkg/identity"
 	"github.com/mauriciomferz/AgentAuth/pkg/ledger"
 	"github.com/mauriciomferz/AgentAuth/pkg/mcp"
 	"github.com/mauriciomferz/AgentAuth/pkg/pdp"
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
+	"github.com/mauriciomferz/AgentAuth/pkg/ratelimit"
 	"github.com/mauriciomferz/AgentAuth/pkg/redis"
 	"github.com/mauriciomferz/AgentAuth/pkg/registry"
 	"github.com/mauriciomferz/AgentAuth/pkg/scim"
 	a2aHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/a2a"
 	adminHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/admin"
 	anchorHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/anchor"
+	apikeyHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/apikey"
 	authHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/auth"
 	authzHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/authz"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/capabilities"
@@ -68,10 +77,12 @@ import (
 	delegationHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/delegation"
 	deviceHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/device"
 	grantJWTHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/grant_jwt"
+	"github.com/mauriciomferz/AgentAuth/web/middleware"
 
 	"github.com/mauriciomferz/AgentAuth/pkg/saml"
 	eventsHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/events"
 	gnapHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/gnap"
+	identityHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/identity"
 	mcpHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/mcp"
 	modellimits "github.com/mauriciomferz/AgentAuth/web/handlers/modellimits"
 	notaryHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/notary"
@@ -195,6 +206,15 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		keyProvider:         nil, // default to nil; expected to be injected or initialized via options
 	}
 
+	// Initialize Cache (early init for use in handlers)
+	cacheConf := cacheConfig.LoadCacheConfig()
+	if err := cacheConfig.ValidateCacheConfig(cacheConf); err != nil {
+		fmt.Fprintf(os.Stderr, "[WARNING] Invalid cache configuration: %v - using memory cache fallback\n", err)
+		cacheConf.Type = "memory"
+	}
+	cacheInstance := cache.NewCacheWithFallback(cacheConf)
+	s.cache = cacheInstance
+
 	// Tracing initialization: primary enable flag AGENTAUTH_TRACING_ENABLED or legacy AGENTAUTH_OTEL_ENABLE.
 	if os.Getenv("AGENTAUTH_TRACING_ENABLED") == "1" || os.Getenv("AGENTAUTH_OTEL_ENABLE") == "1" {
 		if tp, err := tracing.NewTracerProvider(tracing.Config{ServiceName: "agentauth-beta"}); err == nil {
@@ -258,12 +278,119 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		opt(s)
 	}
 
+	// Initialize Database
+	if host := os.Getenv("AGENTAUTH_DB_HOST"); host != "" {
+		port := atoiDefault(os.Getenv("AGENTAUTH_DB_PORT"), 5432)
+		dbCfg := &database.Config{
+			Host:     host,
+			Port:     port,
+			User:     os.Getenv("AGENTAUTH_DB_USER"),
+			Password: os.Getenv("AGENTAUTH_DB_PASSWORD"),
+			Database: os.Getenv("AGENTAUTH_DB_NAME"),
+			SSLMode:  os.Getenv("AGENTAUTH_DB_SSL_MODE"),
+		}
+		if db, err := database.NewDB(dbCfg); err == nil {
+			s.db = db
+			fmt.Printf("Database connected: %s\n", host)
+
+			// Run database migrations
+			if os.Getenv("AGENTAUTH_DB_MIGRATE") != "0" {
+				// Construct connection string for migration (standard library compatible)
+				dbURL := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+					os.Getenv("AGENTAUTH_DB_USER"),
+					os.Getenv("AGENTAUTH_DB_PASSWORD"),
+					host, port,
+					os.Getenv("AGENTAUTH_DB_NAME"),
+					os.Getenv("AGENTAUTH_DB_SSL_MODE"),
+				)
+				m, err := migrate.NewMigrator(dbURL)
+				if err != nil {
+					// Log but don't fatal, allowing checking later or manual migration
+					fmt.Printf("Warning: Failed to initialize migrator: %v\n", err)
+				} else {
+					if err := m.Up(); err != nil {
+						fmt.Printf("Warning: Failed to run migrations: %v\n", err)
+					} else {
+						fmt.Println("Database migrations applied successfully")
+					}
+					m.Close()
+				}
+			}
+
+			// Initialize Blockchain Components if configured
+			if ethRPC := os.Getenv("AGENTAUTH_ETH_RPC_URL"); ethRPC != "" {
+				ethKey := os.Getenv("AGENTAUTH_ETH_PRIVATE_KEY")
+				// We allow empty private key for read-only mode if needed, but warnings usually apply
+
+				ethConfig := &blockchain.EthereumConfig{
+					RPCURL:          ethRPC,
+					PrivateKey:      ethKey,
+					ContractAddress: os.Getenv("AGENTAUTH_ETH_CONTRACT_ADDRESS"),
+					NetworkName:     "sepolia", // defaulting to sepolia for this phase
+					ChainID:         11155111,  // Sepolia ChainID
+					GasLimit:        3000000,
+				}
+
+				adapter, err := blockchain.NewEthereumAdapter(ethConfig)
+				if err != nil {
+					fmt.Printf("Warning: Failed to initialize Ethereum Adapter: %v\n", err)
+				} else {
+					s.blockchainRegistry = adapter
+					fmt.Println("Blockchain Adapter initialized (Ethereum/Sepolia)")
+
+					// Initialize Sync Service
+					poaStore := blockchain.NewPostgresPoAStore(s.db)
+					hashingService := blockchain.NewSimpleHashingService()
+					// IPFS service is optional/nil for now
+
+					syncConfig := blockchain.DefaultSyncConfig()
+					// Override sync config from env if needed
+					if mode := os.Getenv("AGENTAUTH_SYNC_MODE"); mode != "" {
+						syncConfig.SyncMode = mode
+					}
+
+					s.syncService = blockchain.NewBlockchainSyncService(
+						adapter,
+						poaStore,
+						hashingService,
+						nil, // ipfsService
+						syncConfig,
+					)
+
+					// Start Sync Service
+					// Note: Background context used for long-running service
+					if err := s.syncService.Start(context.Background()); err != nil {
+						fmt.Printf("Warning: Failed to start Blockchain Sync Service: %v\n", err)
+					} else {
+						fmt.Println("Blockchain Sync Service started")
+					}
+				}
+			}
+
+			// Wire up audit logger
+			repo := audit.NewRepository(db.Pool)
+			l := common.NewSimpleLogger()
+			dbLogger := audit.NewDatabaseLogger(repo, l)
+			s.audit.SetDatabaseLogger(dbLogger)
+		} else {
+			fmt.Printf("Failed to connect to database: %v\n", err)
+		}
+	}
+
 	// Initialize Admin Handlers using injected DB pool and Redis client
 	if s.db != nil && s.redisClient != nil {
 		s.adminTokenHandler = adminHandlers.NewTokenHandler(s.db.Pool, s.redisClient)
 	}
 	if s.db != nil {
-		s.apiKeyHandler = adminHandlers.NewAPIKeyHandler(s.db.Pool)
+		s.apiKeyManager = apikey.NewManager(s.db)
+		s.apiKeyHandler = apikeyHandlers.NewHandler(s.apiKeyManager)
+
+		var limiter ratelimit.DynamicLimiter
+		if s.redisClient != nil {
+			limiter = ratelimit.NewRedisLimiter(s.redisClient.GetClient(), ratelimit.DefaultConfig())
+		}
+		s.apiKeyMiddleware = middleware.NewAPIKeyMiddleware(s.apiKeyManager, limiter)
+
 		s.resilienceHandler = adminHandlers.NewResilienceHandler(s.db.Pool)
 	}
 
@@ -446,7 +573,21 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 	}
 	// Initialize Token Handler
-	s.tokens = token.NewStore(500) // Re-initialize if overwritten or just ensure it matches
+	// Initialize Token Handler
+	var tokenStore token.TokenStorer
+	tokenCap := 500
+	if c, err := strconv.Atoi(os.Getenv("AGENTAUTH_TOKEN_CAPACITY")); err == nil && c > 0 {
+		tokenCap = c
+	}
+
+	if os.Getenv("AGENTAUTH_REDIS_ENABLED") == "1" && s.redisClient != nil {
+		tokenStore = token.NewRedisTokenStore(s.cache) // Reuse s.cache which wraps s.redisClient if configured
+		fmt.Println("[info] Token Store: Redis")
+	} else {
+		s.tokens = token.NewStore(tokenCap)
+		tokenStore = s.tokens // s.tokens is concrete *Store, but implements TokenStorer
+		fmt.Println("[info] Token Store: In-Memory")
+	}
 	s.delegationHandler = delegationHandlers.NewHandler(s.metrics, s.audit, s, s.enforceCapabilities, s.tracerProvider, s.capabilitiesHandler.GetRequiredCaps)
 
 	// Initialize Key Manager
@@ -459,13 +600,30 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// We can proceed but token issuance might fail
 	}
 
-	s.tokenHandler = token.NewHandler(s.tokens, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider, km, s.systemClockMonitor)
+	s.tokenHandler = token.NewHandler(tokenStore, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider, km, s.systemClockMonitor)
 
 	s.tokenHandler.ETagUpdater = s // Server implements JWKSETagUpdater
 	s.tokenHandler.RegisterRoutes(s.router)
 
 	// Initialize Policy Handler
-	s.policyHandler = policyHandler.NewHandler(os.Getenv("POLICY_CHAIN_STATE_PATH"), s.metrics)
+	var policyStore policy.Store
+	if s.db != nil && os.Getenv("AGENTAUTH_DB_ENABLED") == "1" {
+		policyStore = policy.NewPostgresRegistry(s.db.Pool)
+		fmt.Println("[info] Policy Store: PostgreSQL")
+	} else if path := os.Getenv("POLICY_CHAIN_STATE_PATH"); path != "" {
+		st, err := policy.NewFileStore(path)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "[factory] warning: failed to init policy file store: %v\n", err)
+			policyStore = policy.NewInMemoryStore()
+		} else {
+			policyStore = st
+			fmt.Println("[info] Policy Store: File")
+		}
+	} else {
+		policyStore = policy.NewInMemoryStore()
+		fmt.Println("[info] Policy Store: In-Memory")
+	}
+	s.policyHandler = policyHandler.NewHandler(policyStore, s.metrics)
 	// Inject revocation chain for end-to-end provenance (Roadmap Item 5)
 	if s.revocationChain != nil {
 		s.policyHandler.RevocationChain = s.revocationChain
@@ -473,6 +631,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	s.policyHandler.EnsureInitialized()
 	s.policyAPI = &policyHandler.API{Handler: s.policyHandler, Auditor: &policyAuditorAdapter{log: s.audit}}
 	s.policyAPI.RegisterRoutes(s.router)
+
+	// Register API Key routes (Phase 4)
+	if s.apiKeyHandler != nil {
+		s.apiKeyHandler.RegisterRoutes(s.router)
+	}
 
 	// Initialize Authorizer (ensure initialized for handler)
 	if s.authorizer == nil {
@@ -548,81 +711,6 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		fmt.Fprintf(os.Stderr, "[model-limits] init failed: %v\n", err)
 	}
 	s.modelLimitsAPI = modellimits.NewAPI(s.modelLimitsHandler)
-
-	// Initialize Database
-	if host := os.Getenv("AGENTAUTH_DB_HOST"); host != "" {
-		port := atoiDefault(os.Getenv("AGENTAUTH_DB_PORT"), 5432)
-		dbCfg := &database.Config{
-			Host:     host,
-			Port:     port,
-			User:     os.Getenv("AGENTAUTH_DB_USER"),
-			Password: os.Getenv("AGENTAUTH_DB_PASSWORD"),
-			Database: os.Getenv("AGENTAUTH_DB_NAME"),
-			SSLMode:  os.Getenv("AGENTAUTH_DB_SSL_MODE"),
-		}
-		if db, err := database.NewDB(dbCfg); err == nil {
-			s.db = db
-			fmt.Printf("Database connected: %s\n", host)
-
-			// Initialize Blockchain Components if configured
-			if ethRPC := os.Getenv("AGENTAUTH_ETH_RPC_URL"); ethRPC != "" {
-				ethKey := os.Getenv("AGENTAUTH_ETH_PRIVATE_KEY")
-				// We allow empty private key for read-only mode if needed, but warnings usually apply
-
-				ethConfig := &blockchain.EthereumConfig{
-					RPCURL:          ethRPC,
-					PrivateKey:      ethKey,
-					ContractAddress: os.Getenv("AGENTAUTH_ETH_CONTRACT_ADDRESS"),
-					NetworkName:     "sepolia", // defaulting to sepolia for this phase
-					ChainID:         11155111,  // Sepolia ChainID
-					GasLimit:        3000000,
-				}
-
-				adapter, err := blockchain.NewEthereumAdapter(ethConfig)
-				if err != nil {
-					fmt.Printf("Warning: Failed to initialize Ethereum Adapter: %v\n", err)
-				} else {
-					s.blockchainRegistry = adapter
-					fmt.Println("Blockchain Adapter initialized (Ethereum/Sepolia)")
-
-					// Initialize Sync Service
-					poaStore := blockchain.NewPostgresPoAStore(s.db)
-					hashingService := blockchain.NewSimpleHashingService()
-					// IPFS service is optional/nil for now
-
-					syncConfig := blockchain.DefaultSyncConfig()
-					// Override sync config from env if needed
-					if mode := os.Getenv("AGENTAUTH_SYNC_MODE"); mode != "" {
-						syncConfig.SyncMode = mode
-					}
-
-					s.syncService = blockchain.NewBlockchainSyncService(
-						adapter,
-						poaStore,
-						hashingService,
-						nil, // ipfsService
-						syncConfig,
-					)
-
-					// Start Sync Service
-					// Note: Background context used for long-running service
-					if err := s.syncService.Start(context.Background()); err != nil {
-						fmt.Printf("Warning: Failed to start Blockchain Sync Service: %v\n", err)
-					} else {
-						fmt.Println("Blockchain Sync Service started")
-					}
-				}
-			}
-
-			// Wire up audit logger
-			repo := audit.NewRepository(db.Pool)
-			l := common.NewSimpleLogger()
-			dbLogger := audit.NewDatabaseLogger(repo, l)
-			s.audit.SetDatabaseLogger(dbLogger)
-		} else {
-			fmt.Printf("Failed to connect to database: %v\n", err)
-		}
-	}
 
 	// Defer semantic diagnostics integrity endpoint registration to initUIRevamp (invoked immediately below)
 	s.initUIRevamp()
@@ -745,8 +833,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	notaryHandler.RegisterRoutes(s.router)
 	// RB3 Discovery endpoint (cacheable config snapshot)
 	s.registerRB3Discovery()
-	// RB4 Signed Policy Manifest endpoint (hash-addressed snapshot + signature)
-	s.registerPolicyManifest()
+	// RB4 Signed Policy Manifest endpoint (hash-addressed snapshot + signature) invoked via s.routes()
+	// s.registerPolicyManifest()
 	// Crypto algorithms introspection endpoint required by tests
 	s.router.GET("/api/v1/crypto/algorithms", s.apiCryptoAlgorithms)
 
@@ -798,8 +886,45 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	clientKeyStore := auth.NewMemoryKeyStore()
 	clientAuthenticator := &auth.PrivateKeyJWTValidator{
 		KeyProvider:    clientKeyStore,
-		ValidAudiences: []string{envFallback("AGENTAUTH_TOKEN_ENDPOINT", "http://localhost:8080/device/token")},
-		Replay:         s.replayStore,
+		ValidAudiences: []string{"https://auth.example.com", "http://localhost:8080"},
+	}
+
+	// Create and wire grant_jwt handler
+	jwtHandler := grantJWTHandlers.NewHandler(clientAuthenticator)
+
+	// Inject signer if KeyManager is available
+	var signingKeyManager keys.KeyManager
+	if s.keyProvider == nil {
+		// Default path: use the locally initialized KeyManager (km is in scope from line 455)
+		if km != nil {
+			signingKeyManager = km
+		}
+	} else if injectedKM, ok := s.keyProvider.(keys.KeyManager); ok {
+		// Injected provider implements full interface
+		signingKeyManager = injectedKM
+	}
+
+	var signingAdapter *keyManagerSignerAdapter
+	if signingKeyManager != nil {
+		signingAdapter = &keyManagerSignerAdapter{km: signingKeyManager}
+		jwtHandler.SetSigner(signingAdapter)
+	}
+
+	jwtHandler.RegisterRoutes(s.router)
+
+	// Identity Provisioning (Phase 23)
+	if signingAdapter != nil {
+		// Use gnapVerificationService if available, otherwise nil (it's optional for now)
+		// We fallback to AGENTAUTH_ISSUER env var
+		issuer := envFallback("AGENTAUTH_ISSUER", "agentauth-issuer")
+		provisioningService := identityPkg.NewProvisioningService(signingAdapter, gnapVerificationService, issuer)
+		identityHandler := identityHandlers.NewHandler(provisioningService)
+		identityGroup := s.router.Group("/api/v1/identity")
+		if s.apiKeyMiddleware != nil {
+			identityGroup.Use(s.apiKeyMiddleware.Authenticate())
+		}
+		identityHandler.RegisterRoutes(identityGroup)
+		log.Println("[identity] Provisioning endpoint registered at /api/v1/identity/provision (API Key Protected)")
 	}
 
 	// RFC 8628 Device Authorization Grant
@@ -813,9 +938,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	a2aHandler.SetAuthenticator(clientAuthenticator)
 	a2aHandler.RegisterRoutes(s.router)
 
-	// RFC 7523 JWT Bearer Grant ("Identity Assertion")
-	jwtGrantHandler := grantJWTHandlers.NewHandler(clientAuthenticator)
-	jwtGrantHandler.RegisterRoutes(s.router)
+	// RFC 7523 JWT Bearer Grant ("Identity Assertion") - already registered above at lines 808-825
+	// jwtGrantHandler := grantJWTHandlers.NewHandler(clientAuthenticator)
+	// jwtGrantHandler.RegisterRoutes(s.router)
 
 	// OAuth2 Handler (CIBA & Token Exchange)
 	var oauth2DBPool *pgxpool.Pool
@@ -855,6 +980,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// Register Static UI Routes (Dashboard & CSP)
 	s.RegisterUIRoutes()
+
+	// Register MCP Dashboard (Phase 2B)
+	s.router.StaticFile("/dashboard/mcp", "./web/static/mcp_dashboard.html")
 
 	// P*P Architecture endpoints (PAP, PDP, PEP)
 	s.AddPPPEndpoints()
@@ -1164,18 +1292,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			securityHandler.RegisterRoutes(adminGroup)
 
 			// Initialize Redis cache for PoA handler
-			cacheConf := cacheConfig.LoadCacheConfig()
-			if err := cacheConfig.ValidateCacheConfig(cacheConf); err != nil {
-				log.Printf("[WARNING] Invalid cache configuration: %v - using memory cache fallback", err)
-				cacheConf.Type = "memory"
-			}
-			cacheInstance := cache.NewCacheWithFallback(cacheConf)
-			// defer cacheInstance.Close() // Removed to prevent early closure
+			// (Already initialized in s.cache)
 
 			// Set cache on PoA handler
-			poaHandler.SetCache(cacheInstance)
+			poaHandler.SetCache(s.cache)
 
-			cacheHandler := adminHandlers.NewCacheHandler(cacheInstance)
+			cacheHandler := adminHandlers.NewCacheHandler(s.cache)
 			cacheHandler.RegisterRoutes(adminGroup)
 
 			// OIDC providers handler
@@ -1991,4 +2113,47 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	}
 
 	return s
+}
+
+// keyManagerSignerAdapter adapts keys.KeyManager to grant_jwt.TokenSigner interface.
+type keyManagerSignerAdapter struct {
+	km keys.KeyManager
+}
+
+func (a *keyManagerSignerAdapter) Sign(claims jwt.MapClaims) (string, error) {
+	ctx := context.Background()
+	// Get the crypto.Signer from KeyManager
+	signer, err := a.km.CryptoSigner(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get crypto signer: %w", err)
+	}
+
+	// Use RS256 for now as widely supported (KeyManager default is RSA)
+	// If KeyManager has Ed25519, we should use EdDSA.
+	// We can check the public key type to decide.
+	pub, err := a.km.GetPublicKey(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get public key: %w", err)
+	}
+
+	var method jwt.SigningMethod
+	switch pub.(type) {
+	case *rsa.PublicKey:
+		method = jwt.SigningMethodRS256
+	case ed25519.PublicKey:
+		method = jwt.SigningMethodEdDSA
+	case *ecdsa.PublicKey:
+		method = jwt.SigningMethodES256
+	default:
+		return "", fmt.Errorf("unsupported key type for signing")
+	}
+
+	token := jwt.NewWithClaims(method, claims)
+
+	// Set 'kid' header if available
+	if kid, err := a.km.GetKeyID(ctx); err == nil && kid != "" {
+		token.Header["kid"] = kid
+	}
+
+	return token.SignedString(signer)
 }

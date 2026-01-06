@@ -1278,7 +1278,7 @@ func (s *BetaServer) routes() {
 		s.adminTokenHandler.RegisterRoutes(adminGroup)
 	}
 	if s.apiKeyHandler != nil {
-		s.apiKeyHandler.RegisterRoutes(adminGroup)
+		s.apiKeyHandler.RegisterGroupRoutes(adminGroup)
 	}
 	if s.resilienceHandler != nil {
 		s.resilienceHandler.RegisterRoutes(adminGroup)
@@ -1292,7 +1292,8 @@ func (s *BetaServer) routes() {
 	// Capability diff endpoint (added/removed/modified vs baseline hash) prototype
 	s.router.GET("/api/v1/capabilities/diff", s.apiCapabilityDiff)
 	// Compact timeline endpoint (versions + short hashes + created times)
-	// Audit log entries endpoint - handled by auditHandlers.API.RegisterRoutes()
+	// RB4 Signed Policy Manifest endpoint (hash-addressed snapshot + signature)
+	s.registerPolicyManifest()
 	// Audit-policy consistency endpoint
 
 	// --- Authorization - Handled by authzAPI.RegisterRoutes()
@@ -2039,14 +2040,12 @@ func (s *BetaServer) routes() {
 				"mode":       "canonical_poa_v1",
 			},
 			"jwks_uri": func() string {
-				if jwtEnabled || os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {
-					issuer := os.Getenv("AGENTAUTH_ISSUER")
-					if issuer != "" {
-						return strings.TrimRight(issuer, "/") + "/.well-known/jwks.json"
-					}
-					return "/.well-known/jwks.json"
+				// Always expose JWKS URI as endpoint is active by default in token handler
+				issuer := os.Getenv("AGENTAUTH_ISSUER")
+				if issuer != "" {
+					return strings.TrimRight(issuer, "/") + "/.well-known/jwks.json"
 				}
-				return ""
+				return "/.well-known/jwks.json"
 			}(),
 			"jwks_etag": func() string {
 				if jwtEnabled || os.Getenv("AGENTAUTH_TOKEN_SIG_MODE") == sigModeEdDSA {

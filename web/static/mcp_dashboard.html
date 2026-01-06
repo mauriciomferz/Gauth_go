@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentAuth MCP Dashboard</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2 { margin-bottom: 1rem; }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        input, select, button {
+            padding: 0.5rem;
+            margin-right: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        button:hover { opacity: 0.9; }
+        .status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .status.connected { background: var(--success); }
+        .status.disconnected { background: var(--error); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--border); }
+        th { font-weight: 600; color: #64748b; }
+        pre { background: #f1f5f9; padding: 0.5rem; border-radius: 4px; overflow-x: auto; }
+        .audit-log { max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AgentAuth MCP Dashboard (Beta)</h1>
+        
+        <div class="card">
+            <h2>Add MCP Server</h2>
+            <form id="addServerForm" onsubmit="registerServer(event)">
+                <input type="text" id="serverName" placeholder="Server Name (e.g. filesystem)" required>
+                <select id="transportType">
+                    <option value="stdio">stdio</option>
+                    <option value="sse">sse</option>
+                </select>
+                <input type="text" id="serverCommand" placeholder="Command / URL" required style="width: 300px;">
+                <input type="text" id="serverArgs" placeholder="Args (comma separated)">
+                <button type="submit">Connect</button>
+            </form>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Active Connections</h2>
+                <div id="connectionsList">Loading...</div>
+            </div>
+            <div class="card">
+                <h2>Available Tools</h2>
+                <div id="toolsList">Select a server to view tools</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>System Audit Log</h2>
+            <div class="audit-log" id="auditLog">Loading logs...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1/agentauth/mcp';
+
+        async function fetchConnections() {
+            try {
+                const res = await fetch(`${API_BASE}/servers`);
+                const data = await res.json();
+                const list = document.getElementById('connectionsList');
+                if (data.servers && data.servers.length > 0) {
+                    list.innerHTML = `<table>
+                        <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>${data.servers.map(s => `
+                            <tr>
+                                <td>${s.name}</td>
+                                <td>${s.transport}</td>
+                                <td><span class="status ${s.status === 'connected' ? 'connected' : 'disconnected'}"></span>${s.status}</td>
+                                <td>
+                                    <button onclick="inspectServer('${s.name}')" style="background:#64748b;font-size:0.8rem">Inspect</button>
+                                </td>
+                            </tr>
+                        `).join('')}</tbody>
+                    </table>`;
+                } else {
+                    list.innerHTML = '<p style="color:#64748b">No servers connected.</p>';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function registerServer(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('serverName').value,
+                transport: document.getElementById('transportType').value,
+                command: document.getElementById('serverCommand').value,
+                args: document.getElementById('serverArgs').value.split(',').filter(x => x.trim())
+            };
+            
+            try {
+                const res = await fetch(`${API_BASE}/servers`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert('Server connected!');
+                    fetchConnections();
+                    document.getElementById('addServerForm').reset();
+                } else {
+                    const err = await res.json();
+                    alert('Error: ' + err.error);
+                }
+            } catch (e) {
+                alert('Connection failed: ' + e.message);
+            }
+        }
+
+        async function inspectServer(name) {
+            document.getElementById('toolsList').innerHTML = 'Loading tools...';
+            try {
+                const res = await fetch(`${API_BASE}/servers/${name}/tools`);
+                const data = await res.json();
+                const toolsDiv = document.getElementById('toolsList');
+                if (data.tools && data.tools.length > 0) {
+                    toolsDiv.innerHTML = `<ul>${data.tools.map(t => `
+                        <li>
+                            <strong>${t.name}</strong>: ${t.description || 'No description'}
+                            <br><small>Schema: <pre>${JSON.stringify(t.inputSchema, null, 2)}</pre></small>
+                        </li>
+                    `).join('')}</ul>`;
+                } else {
+                    toolsDiv.innerHTML = '<p>No tools available.</p>';
+                }
+            } catch (e) {
+                document.getElementById('toolsList').innerHTML = 'Failed to load tools.';
+            }
+        }
+
+        async function fetchAuditLogs() {
+            // Mocking audit logs for now as the endpoint might vary
+            // In a real implementation this would hit /api/v1/audit or similar
+            document.getElementById('auditLog').innerHTML = `
+                <table>
+                    <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Outcome</th></tr></thead>
+                    <tbody>
+                        <tr><td>${new Date().toISOString()}</td><td>system</td><td>mcp_server_init</td><td>success</td></tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Init
+        fetchConnections();
+        fetchAuditLogs();
+        // Poll status
+        setInterval(fetchConnections, 5000);
+    </script>
+</body>
+</html>

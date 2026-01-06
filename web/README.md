@@ -57,12 +57,12 @@ web/
 
 | Target                | Description |
 |-----------------------|-------------|
-| `web-start`           | Start the web demo (scripts/start-web-demo.sh) |
-| `web-stop`            | Stop the web demo (scripts/stop-web-demo.sh) |
+| `web-start`           | Start the web demo (scripts/test/start-web-demo.sh) |
+| `web-stop`            | Stop the web demo (scripts/test/stop-web-demo.sh) |
 | `web-restart`         | Restart the web demo (stop+start) |
 3. **Access the beta interface:**
-| `web-health`          | Health check for web demo (scripts/health.sh) |
-| `web-tail-logs`       | Tail logs for web demo (scripts/tail-logs.sh) |
+| `web-health`          | Health check for web demo (scripts/test/health.sh) |
+| `web-tail-logs`       | Tail logs for web demo (scripts/test/tail-logs.sh) |
    - Beta API: `http://localhost:8080/api/v1/beta/`
    - Health check: `http://localhost:8080/api/v1/beta/health`
 | `web-integration-test`| Run integration tests for web demo (integration tag) |

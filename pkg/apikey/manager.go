@@ -3,14 +3,14 @@ package apikey
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5"
+	"github.com/mauriciomferz/AgentAuth/pkg/database"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,11 +26,11 @@ var (
 
 // Manager handles API key operations
 type Manager struct {
-	db *sqlx.DB
+	db *database.DB
 }
 
 // NewManager creates a new API key manager
-func NewManager(db *sqlx.DB) *Manager {
+func NewManager(db *database.DB) *Manager {
 	return &Manager{db: db}
 }
 
@@ -42,7 +42,7 @@ func (m *Manager) CreateAPIKey(ctx context.Context, userID string, req *CreateAP
 		return nil, fmt.Errorf("failed to generate key ID: %w", err)
 	}
 
-	secretKey, err := generateSecretKey()
+	secretKey, err := generateSecretKey(keyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate secret key: %w", err)
 	}
@@ -103,11 +103,11 @@ func (m *Manager) CreateAPIKey(ctx context.Context, userID string, req *CreateAP
 		) RETURNING id
 	`
 
-	err = m.db.QueryRowContext(ctx, query,
+	err = m.db.Pool.QueryRow(ctx, query,
 		apiKey.KeyID, apiKey.KeyHash, apiKey.Name, apiKey.Description, apiKey.UserID,
 		apiKey.RateLimitPerMinute, apiKey.RateLimitPerHour, apiKey.RateLimitPerDay,
 		apiKey.QuotaRequestsTotal, apiKey.QuotaRequestsUsed, apiKey.Enabled,
-		pq.Array(apiKey.IPWhitelist), pq.Array(apiKey.AllowedEndpoints), apiKey.Metadata,
+		apiKey.IPWhitelist, apiKey.AllowedEndpoints, apiKey.Metadata,
 		apiKey.CreatedAt, apiKey.UpdatedAt, apiKey.ExpiresAt,
 	).Scan(&apiKey.ID)
 
@@ -123,7 +123,6 @@ func (m *Manager) CreateAPIKey(ctx context.Context, userID string, req *CreateAP
 
 // GetAPIKey retrieves an API key by key_id
 func (m *Manager) GetAPIKey(ctx context.Context, keyID string) (*APIKey, error) {
-	apiKey := &APIKey{}
 	query := `
 		SELECT id, key_id, key_hash, name, description, user_id,
 			   rate_limit_per_minute, rate_limit_per_hour, rate_limit_per_day,
@@ -134,15 +133,21 @@ func (m *Manager) GetAPIKey(ctx context.Context, keyID string) (*APIKey, error) 
 		WHERE key_id = $1
 	`
 
-	err := m.db.GetContext(ctx, apiKey, query, keyID)
-	if err == sql.ErrNoRows {
+	rows, err := m.db.Pool.Query(ctx, query, keyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query API key: %w", err)
+	}
+	defer rows.Close()
+
+	apiKey, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[APIKey])
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrAPIKeyNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get API key: %w", err)
+		return nil, fmt.Errorf("failed to collect API key: %w", err)
 	}
 
-	return apiKey, nil
+	return &apiKey, nil
 }
 
 // ListAPIKeys lists API keys with optional filtering
@@ -182,7 +187,7 @@ func (m *Manager) ListAPIKeys(ctx context.Context, query *ListAPIKeysQuery) ([]A
 
 	// Get total count
 	var total int
-	err := m.db.GetContext(ctx, &total, countQuery, args...)
+	err := m.db.Pool.QueryRow(ctx, countQuery, args...).Scan(&total)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to count API keys: %w", err)
 	}
@@ -201,9 +206,15 @@ func (m *Manager) ListAPIKeys(ctx context.Context, query *ListAPIKeysQuery) ([]A
 		args = append(args, query.Offset)
 	}
 
-	err = m.db.SelectContext(ctx, &apiKeys, sqlQuery, args...)
+	rows, err := m.db.Pool.Query(ctx, sqlQuery, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to list API keys: %w", err)
+	}
+	defer rows.Close()
+
+	apiKeys, err = pgx.CollectRows(rows, pgx.RowToStructByName[APIKey])
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to collect API keys: %w", err)
 	}
 
 	return apiKeys, total, nil
@@ -259,13 +270,13 @@ func (m *Manager) UpdateAPIKey(ctx context.Context, keyID string, req *UpdateAPI
 
 	if req.IPWhitelist != nil {
 		updates = append(updates, fmt.Sprintf("ip_whitelist = $%d", argPos))
-		args = append(args, pq.Array(req.IPWhitelist))
+		args = append(args, req.IPWhitelist) // pgx handles slices
 		argPos++
 	}
 
 	if req.AllowedEndpoints != nil {
 		updates = append(updates, fmt.Sprintf("allowed_endpoints = $%d", argPos))
-		args = append(args, pq.Array(req.AllowedEndpoints))
+		args = append(args, req.AllowedEndpoints) // pgx handles slices
 		argPos++
 	}
 
@@ -286,17 +297,12 @@ func (m *Manager) UpdateAPIKey(ctx context.Context, keyID string, req *UpdateAPI
 		WHERE key_id = $%d
 	`, join(updates, ", "), argPos)
 
-	result, err := m.db.ExecContext(ctx, updateQuery, args...)
+	result, err := m.db.Pool.Exec(ctx, updateQuery, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update API key: %w", err)
 	}
 
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return nil, fmt.Errorf("failed to check update result: %w", err)
-	}
-
-	if rows == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrAPIKeyNotFound
 	}
 
@@ -306,17 +312,12 @@ func (m *Manager) UpdateAPIKey(ctx context.Context, keyID string, req *UpdateAPI
 // DeleteAPIKey deletes an API key
 func (m *Manager) DeleteAPIKey(ctx context.Context, keyID string) error {
 	query := `DELETE FROM api_keys WHERE key_id = $1`
-	result, err := m.db.ExecContext(ctx, query, keyID)
+	result, err := m.db.Pool.Exec(ctx, query, keyID)
 	if err != nil {
 		return fmt.Errorf("failed to delete API key: %w", err)
 	}
 
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to check delete result: %w", err)
-	}
-
-	if rows == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrAPIKeyNotFound
 	}
 
@@ -326,7 +327,7 @@ func (m *Manager) DeleteAPIKey(ctx context.Context, keyID string) error {
 // RegenerateSecret generates a new secret for an API key
 func (m *Manager) RegenerateSecret(ctx context.Context, keyID string) (*RegenerateSecretResponse, error) {
 	// Generate new secret
-	newSecret, err := generateSecretKey()
+	newSecret, err := generateSecretKey(keyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate new secret: %w", err)
 	}
@@ -343,17 +344,12 @@ func (m *Manager) RegenerateSecret(ctx context.Context, keyID string) (*Regenera
 		SET key_hash = $1
 		WHERE key_id = $2
 	`
-	result, err := m.db.ExecContext(ctx, query, keyHash, keyID)
+	result, err := m.db.Pool.Exec(ctx, query, keyHash, keyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update secret: %w", err)
 	}
 
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return nil, fmt.Errorf("failed to check update result: %w", err)
-	}
-
-	if rows == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrAPIKeyNotFound
 	}
 
@@ -366,7 +362,7 @@ func (m *Manager) RegenerateSecret(ctx context.Context, keyID string) (*Regenera
 
 // ValidateAPIKey validates an API key and returns the associated API key record
 func (m *Manager) ValidateAPIKey(ctx context.Context, secretKey string) (*APIKey, error) {
-	// Extract key ID from secret (format: sk_live_keyid_secret or sk_test_keyid_secret)
+	// Extract key ID from secret (format: keyID.randomSecret)
 	keyID, err := extractKeyIDFromSecret(secretKey)
 	if err != nil {
 		return nil, ErrAPIKeyInvalid
@@ -375,6 +371,9 @@ func (m *Manager) ValidateAPIKey(ctx context.Context, secretKey string) (*APIKey
 	// Get API key from database
 	apiKey, err := m.GetAPIKey(ctx, keyID)
 	if err != nil {
+		if errors.Is(err, ErrAPIKeyNotFound) {
+			return nil, ErrAPIKeyInvalid
+		}
 		return nil, err
 	}
 
@@ -411,7 +410,7 @@ func (m *Manager) RecordUsage(ctx context.Context, usage *APIKeyUsage) error {
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 
-	_, err := m.db.ExecContext(ctx, query,
+	_, err := m.db.Pool.Exec(ctx, query,
 		usage.KeyID, usage.Endpoint, usage.Method, usage.StatusCode, usage.ResponseTimeMs,
 		usage.RequestIP, usage.UserAgent, usage.ErrorMessage, usage.Timestamp,
 	)
@@ -428,7 +427,7 @@ func (m *Manager) RecordUsage(ctx context.Context, usage *APIKeyUsage) error {
 		WHERE key_id = $2
 	`
 
-	_, err = m.db.ExecContext(ctx, updateQuery, time.Now(), usage.KeyID)
+	_, err = m.db.Pool.Exec(ctx, updateQuery, time.Now(), usage.KeyID)
 	if err != nil {
 		return fmt.Errorf("failed to update usage counter: %w", err)
 	}
@@ -438,18 +437,23 @@ func (m *Manager) RecordUsage(ctx context.Context, usage *APIKeyUsage) error {
 
 // GetAPIKeyStats retrieves statistics for an API key
 func (m *Manager) GetAPIKeyStats(ctx context.Context, keyID string) (*APIKeyStats, error) {
-	stats := &APIKeyStats{}
 	query := `SELECT * FROM api_key_stats WHERE key_id = $1`
 
-	err := m.db.GetContext(ctx, stats, query, keyID)
-	if err == sql.ErrNoRows {
+	rows, err := m.db.Pool.Query(ctx, query, keyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query API key stats: %w", err)
+	}
+	defer rows.Close()
+
+	stats, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[APIKeyStats])
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, ErrAPIKeyNotFound
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to get API key stats: %w", err)
+		return nil, fmt.Errorf("failed to collect stats: %w", err)
 	}
 
-	return stats, nil
+	return &stats, nil
 }
 
 // Helper functions
@@ -462,12 +466,13 @@ func generateKeyID() (string, error) {
 	return "pk_live_" + hex.EncodeToString(bytes), nil
 }
 
-func generateSecretKey() (string, error) {
+func generateSecretKey(keyID string) (string, error) {
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
-	return "sk_live_" + hex.EncodeToString(bytes), nil
+	// Embed KeyID in secret: <KeyID>.<RandomHex>
+	return fmt.Sprintf("%s.sk_live_%s", keyID, hex.EncodeToString(bytes)), nil
 }
 
 func hashSecret(secret string) (string, error) {
@@ -479,14 +484,13 @@ func hashSecret(secret string) (string, error) {
 }
 
 func extractKeyIDFromSecret(secretKey string) (string, error) {
-	// Secret format: sk_live_<hex> or sk_test_<hex>
-	// We need to derive the corresponding pk_live_<hex> or pk_test_<hex>
-	// For now, we'll generate a separate pk ID during creation and store it
-	// This is a simplified implementation - in production you'd store the mapping
-
-	// For this implementation, we'll assume the keyID is embedded or stored separately
-	// This is a placeholder - actual implementation would need proper key derivation
-	return "", errors.New("key ID extraction not implemented - use ValidateAPIKey with database lookup")
+	// Expected format: <KeyID>.sk_live_<UniquePart>
+	// We split by first dot to get KeyID
+	parts := strings.SplitN(secretKey, ".", 2)
+	if len(parts) != 2 {
+		return "", errors.New("invalid secret key format")
+	}
+	return parts[0], nil
 }
 
 func join(strs []string, sep string) string {

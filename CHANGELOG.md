@@ -67,7 +67,7 @@ The format is inspired by Keep a Changelog and uses date-based sections.
 - Badge in `README.md` highlighting NOT production ready status.
 - Documentation table row linking to `DISCLAIMER.md`.
 - Cross-file disclaimer references added to: `docs/ARCHITECTURE.md`, `docs/CRYPTOGRAPHY_IMPLEMENTATION.md`, `docs/GETTING_STARTED.md`, `docs/TESTING.md`, `docs/PATTERNS_GUIDE.md`, `docs/API_REFERENCE.md`.
-- `scripts/lint-disclaimers.sh` to detect unqualified production-readiness phrases.
+- `scripts/util/lint-disclaimers.sh` to detect unqualified production-readiness phrases.
 
 ### Changed
 - Consolidated and standardized disclaimers across all markdown files (removed duplicate or divergent phrasing).

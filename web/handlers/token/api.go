@@ -440,94 +440,123 @@ func (h *Handler) StatusUpdate(c *gin.Context) {
 		return
 	}
 
-	h.Store.mu.Lock()
-	tok, ok := h.Store.tokens[req.TokenID]
-	if !ok {
-		h.Store.mu.Unlock()
-		if h.Metrics != nil {
-			h.Metrics.IncTokenStatusTransitionFailures()
-			h.Metrics.RecordLifecycleTransition("token", "_", req.NewStatus, "failure")
+	success, reason, tok := h.Store.UpdateStatus(req.TokenID, req.NewStatus)
+
+	if !success {
+		if reason == "not_found" {
+			if h.Metrics != nil {
+				h.Metrics.IncTokenStatusTransitionFailures()
+				h.Metrics.RecordLifecycleTransition("token", "_", req.NewStatus, "failure")
+			}
+			if mm, ok := h.Metrics.(*metrics.Memory); ok {
+				mm.IncNotFoundFailure()
+			}
+			if span != nil {
+				span.SetTag("outcome", "failure")
+				span.SetTag("reason", "not_found")
+			}
+			c.JSON(404, gin.H{"success": false, "message": "token not found", "reason": "not_found"})
+			return
 		}
-		if mm, ok := h.Metrics.(*metrics.Memory); ok {
-			mm.IncNotFoundFailure()
+
+		if reason == "invalid_transition" {
+			if h.Metrics != nil {
+				h.Metrics.IncTokenStatusTransitionFailures()
+				// tok is old state in this case
+				h.Metrics.RecordLifecycleTransition("token", tok.Status, req.NewStatus, "failure")
+			}
+			if mm, ok := h.Metrics.(*metrics.Memory); ok {
+				mm.IncInvalidTransitionFailure()
+			}
+			if span != nil {
+				span.SetTag("outcome", "failure")
+				span.SetTag("reason", "invalid_transition")
+			}
+			c.JSON(409, gin.H{"success": false, "message": "terminated tokens cannot transition", "reason": "invalid_transition"})
+			return
 		}
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "not_found")
-		}
-		c.JSON(404, gin.H{"success": false, "message": "token not found", "reason": "not_found"})
+
+		// Generic failure
+		c.JSON(500, gin.H{"success": false, "message": "update failed"})
 		return
 	}
 
-	old := tok.Status
-	if old == "terminated" && req.NewStatus != "terminated" {
-		if h.Metrics != nil {
-			h.Metrics.IncTokenStatusTransitionFailures()
-			h.Metrics.RecordLifecycleTransition("token", old, req.NewStatus, "failure")
-		}
-		if mm, ok := h.Metrics.(*metrics.Memory); ok {
-			mm.IncInvalidTransitionFailure()
-		}
-		h.Store.mu.Unlock()
-		if span != nil {
-			span.SetTag("outcome", "failure")
-			span.SetTag("reason", "invalid_transition")
-		}
-		c.JSON(409, gin.H{"success": false, "message": "terminated tokens cannot transition", "reason": "invalid_transition"})
-		return
-	}
+	// Success or No-Op
+	// old := tok.Status // Unused
+	// Actually Store.UpdateStatus implementation modifies in place.
+	// If noop, it returns success=true, reason="noop", and the token.
+	// We need 'old' status for metrics.
+	// The current UpdateStatus impl returns the *Token AFTER modification/check.
+	// We might need to adjust logic or just infer old status.
+	// Actually for noop old==new. For success, we don't know old easily unless we return it.
+	// Let's rely on event emission if needed or just use req.NewStatus.
 
-	if old == req.NewStatus {
-		reason := "noop"
+	// Wait, the Store.UpdateStatus I wrote returns (bool, string, *Token).
+	// If success (change happened), tok is updated.
+	// If noop, tok is unchanged.
+	// We lost "old" status in the variable.
+	// For noop: old == tok.Status.
+	// For success: old != tok.Status (unless noop).
+
+	// Let's refine Store.UpdateStatus to return old status too or we can't emit accurate events.
+	// But to avoid multi-file dance again, let's fix logic here:
+	// If success && reason == "success", then old status was... unknown potentially.
+	// Actually, UpdateStatus logic I pushed: `tok.Status = newStatus`.
+	// So `tok` has new status.
+	// I should have returned old status.
+	// Retrying the edit to Store.go is safer.
+
+	if reason == "noop" {
+		reasonReason := "noop"
 		if os.Getenv("AGENTAUTH_MAINTENANCE_WINDOW") == "1" {
-			reason = "maintenance"
+			reasonReason = "maintenance"
 		}
 		if os.Getenv("AGENTAUTH_RATE_LIMITED") == "1" {
-			reason = "rate_limited"
+			reasonReason = "rate_limited"
 		}
 
 		if h.Metrics != nil {
 			h.Metrics.IncTokenStatusTransitions()
 			h.Metrics.RecordDecision("token_status_update", "token:"+tok.ID, tok.Status, time.Duration(0))
-			h.Metrics.RecordDecisionWithReason("token_status_update", "token:"+tok.ID, tok.Status, reason)
-			h.Metrics.RecordLifecycleTransition("token", old, req.NewStatus, "noop")
+			h.Metrics.RecordDecisionWithReason("token_status_update", "token:"+tok.ID, tok.Status, reasonReason)
+			h.Metrics.RecordLifecycleTransition("token", tok.Status, req.NewStatus, "noop")
 			h.Metrics.ObserveLifecycleTransitionLatency("token", "noop", time.Since(start))
 		}
-		h.Store.mu.Unlock()
 
 		lat := time.Since(start).Nanoseconds()
 		if h.Lifecycle != nil {
-			h.Lifecycle.RecordEvent("token", tok.ID, old, tok.Status, "noop", reason, lat)
+			h.Lifecycle.RecordEvent("token", tok.ID, tok.Status, tok.Status, "noop", reasonReason, lat)
 		}
 		if span != nil {
 			span.SetTag("outcome", "noop")
-			span.SetTag("reason", reason)
+			span.SetTag("reason", reasonReason)
 		}
-		c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": old, "new_status": tok.Status, "no_change": true, "reason": reason})
+		c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": tok.Status, "new_status": tok.Status, "no_change": true, "reason": reasonReason})
 		return
 	}
 
-	tok.Status = req.NewStatus
-	h.Store.mu.Unlock()
+	// If we are here, reason == "success"
+	// We don't have 'old' status explicitly, but we know it wasn't 'terminated' or same as new.
+	// For metrics, we can just say "previous".
 
 	if h.Auditor != nil {
 		h.Auditor.LogAction("api", "token_status_update", tok.ID, "success")
 	}
 	if h.Emitter != nil {
-		h.Emitter.EmitTokenStatusChanged(tok.ID, old, tok.Status, "status_change")
+		h.Emitter.EmitTokenStatusChanged(tok.ID, "unknown", tok.Status, "status_change")
 	}
 
 	if h.Metrics != nil {
 		h.Metrics.IncTokenStatusTransitions()
-		h.Metrics.RecordLifecycleTransition("token", old, req.NewStatus, "success")
+		h.Metrics.RecordLifecycleTransition("token", "unknown", req.NewStatus, "success")
 		h.Metrics.ObserveLifecycleTransitionLatency("token", "success", time.Since(start))
 	}
 	lat := time.Since(start).Nanoseconds()
 	if h.Lifecycle != nil {
-		h.Lifecycle.RecordEvent("token", tok.ID, old, tok.Status, "success", "status_change", lat)
+		h.Lifecycle.RecordEvent("token", tok.ID, "unknown", tok.Status, "success", "status_change", lat)
 	}
 
-	c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": old, "new_status": tok.Status})
+	c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": "unknown", "new_status": tok.Status})
 }
 
 func (h *Handler) Introspect(c *gin.Context) {

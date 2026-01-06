@@ -257,7 +257,7 @@ func (reg *CollectorRegistry) dispatch(fn func(MetricsCollector)) {
 // Implement Metrics interface by dispatching to all registered collectors.
 // Auto-generated from noop implementation (119 methods total).
 
-//go:generate python3 ../../scripts/generate_registry_methods.py
+//go:generate python3 ../../scripts/build/generate_registry_methods.py
 // Auto-generated registry dispatch methods (119 total)
 
 func (reg *CollectorRegistry) IncDelegationsCreated() {

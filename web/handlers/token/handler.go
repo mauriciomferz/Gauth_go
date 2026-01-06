@@ -57,7 +57,7 @@ type CapabilityEnforcer func(action string, claims map[string]any) (bool, []stri
 
 // Handler manages token operations
 type Handler struct {
-	Store            *Store
+	Store            TokenStorer
 	Replay           *ReplayNonceStore
 	Auditor          Auditor
 	Emitter          Emitter
@@ -84,7 +84,7 @@ type Handler struct {
 	ClockSkew    time.Duration
 }
 
-func NewHandler(store *Store, replay *ReplayNonceStore, auditor Auditor, emitter Emitter, primaryAuth PrimaryAuth, tracer Tracer, capEnforcer CapabilityEnforcer, m metrics.Metrics, lifecycle LifecycleRecorder, kp crypto.KeyProvider, km keys.KeyManager, clock ClockStatusProvider) *Handler {
+func NewHandler(store TokenStorer, replay *ReplayNonceStore, auditor Auditor, emitter Emitter, primaryAuth PrimaryAuth, tracer Tracer, capEnforcer CapabilityEnforcer, m metrics.Metrics, lifecycle LifecycleRecorder, kp crypto.KeyProvider, km keys.KeyManager, clock ClockStatusProvider) *Handler {
 	// Defaults/Env loading could be here or passed in.
 	// For now, load envs that are "static" here, or assume caller sets them.
 	// But apiTokenCreate heavily used os.Getenv. Let's load them for convenience.

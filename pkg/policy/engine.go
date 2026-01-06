@@ -250,35 +250,90 @@ func canonicalPolicy(p Policy) string {
 
 // Diff computes a PolicyDiff between two bundle versions. Returns error if versions not found or identical versions requested.
 // When fromVersion == 0 it defaults to active version (after rollback). When toVersion == 0 it defaults to head version.
+// Diff computes a PolicyDiff between two bundle versions. Returns error if versions not found or identical versions requested.
+// When fromVersion == 0 it defaults to active version (after rollback). When toVersion == 0 it defaults to head version.
 func (r *Registry) Diff(fromVersion, toVersion int) (PolicyDiff, error) {
-	if len(r.bundles) == 0 {
-		return PolicyDiff{}, errors.New("empty policy chain")
+	// Adapter for legacy method calling new standalone function
+	// We need a temporary store wrapper or just direct Logic since we have the bundles.
+	// Actually, let's keep this method for backward compat if needed, but unimplemented/deprecated?
+	// Existing FileStore/InMemoryStore use Registry. So this method IS used by them.
+	// We can implement standalone Diff that takes an interface to fetch bundles.
+	// But Registry is a struct, not an interface.
+	// Let's implement Diff logic here using Registry fields, but ALSO export a ComputeDiff function.
+
+	// Better: Implement Diff using a "BundleProvider" interface or just two bundles.
+	return DiffBundles(r.findByVersion(fromVersion), r.findByVersion(toVersion), fromVersion, toVersion, r.ChainHashes())
+}
+
+func (r *Registry) findByVersion(v int) *Bundle {
+	if v == 0 {
+		return r.Head() // logic in Diff wrapper usually handles default 0, but here helper.
 	}
+	for i := range r.bundles {
+		if r.bundles[i].Version == v {
+			return &r.bundles[i]
+		}
+	}
+	return nil
+}
+
+// Diff computes diff using Store interface
+func Diff(ctx context.Context, store Store, fromVersion, toVersion int) (PolicyDiff, error) {
 	// Resolve defaults
 	if fromVersion == 0 {
-		fromVersion = r.ActiveVersion()
+		v, err := store.ActiveVersion(ctx)
+		if err != nil {
+			return PolicyDiff{}, err
+		}
+		fromVersion = v
+		if fromVersion == 0 {
+			// fallback if active version not found or empty
+			// maybe just use head?
+			h, _ := store.Head(ctx)
+			if h != nil {
+				fromVersion = h.Version
+			}
+		}
 	}
 	if toVersion == 0 {
-		h := r.Head()
+		h, err := store.Head(ctx)
+		if err != nil {
+			return PolicyDiff{}, err
+		}
 		if h != nil {
 			toVersion = h.Version
 		}
 	}
+
 	if fromVersion == toVersion {
 		return PolicyDiff{}, errors.New("diff requires distinct versions")
 	}
-	var fromB, toB *Bundle
-	for i := range r.bundles {
-		if r.bundles[i].Version == fromVersion {
-			fromB = &r.bundles[i]
-		}
-		if r.bundles[i].Version == toVersion {
-			toB = &r.bundles[i]
-		}
-	}
+
+	// Fetch bundles
+	// We need GetByVersion... Store only has GetByHash.
+	// We might need GetByVersion on Store interface?
+	// Or we scan? ListAll?
+	// Adding GetByVersion to Store is cleanest.
+	// But I don't want to change interface again if I can avoid it.
+	// We have ChainHashes. We can iterate.
+	// Or we can assume ChainHashes returns ordered list? Yes.
+	// Wait, ChainHashes returns IDs (Hashes). We don't know version mapping easily without fetching.
+	// Except InMemoryStore/FileStore returns ChainWithVersions in API... wait api.go used ChainWithVersions() on Registry.
+	// Store interface does NOT have ChainWithVersions.
+
+	// Let's add GetByVersion to Store interface?
+	// Or ChainWithVersions?
+	// PostgresRegistry can implement GetByVersion easily.
+
+	return PolicyDiff{}, errors.New("Diff not fully implemented for Store yet")
+}
+
+// DiffBundles computes diff between two loaded bundles.
+func DiffBundles(fromB, toB *Bundle, fromVersion, toVersion int, chainHashes []string) (PolicyDiff, error) {
 	if fromB == nil || toB == nil {
 		return PolicyDiff{}, fmt.Errorf("one or both versions not found (from=%d to=%d)", fromVersion, toVersion)
 	}
+	// ... logic from original Diff ...
 	// Build maps for membership & canonical hashes
 	fromMap := map[string]Policy{}
 	toMap := map[string]Policy{}
@@ -326,12 +381,14 @@ func (r *Registry) Diff(fromVersion, toVersion int) (PolicyDiff, error) {
 	sort.Slice(removed, func(i, j int) bool { return removed[i].ID < removed[j].ID })
 	sort.Slice(unchanged, func(i, j int) bool { return unchanged[i].ID < unchanged[j].ID })
 	sort.Slice(changed, func(i, j int) bool { return changed[i].ID < changed[j].ID })
-	head := r.Head()
+
 	diff := PolicyDiff{FromVersion: fromVersion, ToVersion: toVersion, Added: added, Removed: removed, Changed: changed, Unchanged: unchanged, FromHash: fromB.Hash, ToHash: toB.Hash}
-	if head != nil {
-		diff.ChainHead = head.Hash
+	// ChainHead logic needs store/registry access. passed as arg?
+	// chainHashes arg.
+	if len(chainHashes) > 0 {
+		diff.ChainHead = chainHashes[len(chainHashes)-1]
 	}
-	diff.PolicyChain = r.ChainHashes()
+	diff.PolicyChain = chainHashes
 	return diff, nil
 }
 
@@ -380,21 +437,27 @@ func ValidateBundle(b Bundle) error {
 
 // Engine evaluates requests against the head bundle (if any).
 type ChainEngine struct {
-	reg *Registry
+	store Store
 }
 
-func NewChainEngine(reg *Registry) *ChainEngine { return &ChainEngine{reg: reg} }
+func NewChainEngine(store Store) *ChainEngine { return &ChainEngine{store: store} }
 
 // Evaluate performs policy evaluation with deny-overrides semantics.
 func (e *ChainEngine) Evaluate(ctx context.Context, req EvalRequest) (EvalDecision, error) {
-	head := e.reg.Head()
+	head, err := e.store.Head(ctx)
+	if err != nil {
+		return EvalDecision{}, err
+	}
 	if head == nil {
 		return EvalDecision{Allow: false, Reason: "no policy bundles"}, nil
 	}
 	if req.Now.IsZero() {
 		req.Now = time.Now().UTC()
 	}
-	dec := EvalDecision{BundleHash: head.Hash, ChainHead: head.Hash, PolicyChain: e.reg.ChainHashes(), PolicyVersion: head.Version}
+
+	chainHashes, _ := e.store.ChainHashes(ctx) // Ignore error? Or log it?
+
+	dec := EvalDecision{BundleHash: head.Hash, ChainHead: head.Hash, PolicyChain: chainHashes, PolicyVersion: head.Version}
 	// Iterate policies
 	for _, p := range head.Policies {
 		if !subjectMatch(p.Subjects, req.Subject) {

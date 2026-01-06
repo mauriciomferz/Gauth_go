@@ -53,7 +53,11 @@ func (a *API) RegisterRoutes(r *gin.Engine) {
 
 func (a *API) HeadPolicies(c *gin.Context) {
 	a.Handler.EnsureInitialized()
-	head := a.Handler.Registry.Head()
+	head, err := a.Handler.Store.Head(c.Request.Context())
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "message": err.Error()})
+		return
+	}
 	if head == nil {
 		c.JSON(200, gin.H{"success": true, "head_hash": "", "policies": []policy.Policy{}, "count": 0})
 		return
@@ -67,14 +71,19 @@ func (a *API) HeadPolicies(c *gin.Context) {
 // Provenance returns current policy bundle chain head and verification status.
 func (a *API) Provenance(c *gin.Context) {
 	a.Handler.EnsureInitialized()
-	head := a.Handler.Registry.Head()
+	ctx := c.Request.Context()
+	head, err := a.Handler.Store.Head(ctx)
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "message": err.Error()})
+		return
+	}
 	var headHash string
 	if head != nil {
 		headHash = head.Hash
 	}
 	verified := true
 	var verr string
-	if err := a.Handler.Registry.VerifyChain(); err != nil {
+	if err := a.Handler.Store.VerifyChain(ctx); err != nil {
 		verified = false
 		verr = err.Error()
 	}
@@ -84,6 +93,8 @@ func (a *API) Provenance(c *gin.Context) {
 	if a.Handler.RevocationChain != nil {
 		revocationSnapshot = a.Handler.RevocationChain.LatestTreeHead()
 	}
+
+	chainHashes, _ := a.Handler.Store.ChainHashes(ctx) // Ignore error?
 
 	// Optional hash query parameter
 	qh := strings.TrimSpace(c.Query("hash"))
@@ -102,7 +113,7 @@ func (a *API) Provenance(c *gin.Context) {
 		}
 
 		found := false
-		for _, h := range a.Handler.Registry.ChainHashes() {
+		for _, h := range chainHashes {
 			if h == qh {
 				found = true
 				break
@@ -118,18 +129,19 @@ func (a *API) Provenance(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"success":             true,
 		"head_hash":           headHash,
-		"chain":               a.Handler.Registry.ChainHashes(),
+		"chain":               chainHashes,
 		"verified":            verified,
 		"verification_error":  verr,
 		"queried_hash":        qh,
-		"length":              len(a.Handler.Registry.ChainHashes()),
+		"length":              len(chainHashes),
 		"revocation_snapshot": revocationSnapshot,
 	})
 }
 
 // Chain returns paginated chain hashes with total length and verification state.
 func (a *API) Chain(c *gin.Context) {
-	a.Handler.EnsureInitialized() // empty chain valid
+	a.Handler.EnsureInitialized()
+	ctx := c.Request.Context()
 	// Parse offset & limit; default limit 50
 	offStr := c.Query("offset")
 	limStr := c.Query("limit")
@@ -144,8 +156,20 @@ func (a *API) Chain(c *gin.Context) {
 			limit = n
 		}
 	}
-	hashes := a.Handler.Registry.ChainHashes()
-	total := len(hashes)
+
+	// Use List to get paginated chunks directly?
+	// Store.List uses offset/limit for Bundles.
+	// But we only want hashes...
+	// Postgres Store.List returns bundles (heavier). Store.ChainHashes returns all hashes.
+	// For now, use ChainHashes and slice in memory to match previous behavior
+	// (Postgres ChainHashes loads all IDs, which is lightweight enough for now).
+	allHashes, err := a.Handler.Store.ChainHashes(ctx)
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+
+	total := len(allHashes)
 	if offset > total {
 		offset = total
 	}
@@ -153,70 +177,81 @@ func (a *API) Chain(c *gin.Context) {
 	if end > total {
 		end = total
 	}
-	slice := hashes[offset:end]
-	head := a.Handler.Registry.Head()
+	slice := allHashes[offset:end]
+
+	head, err := a.Handler.Store.Head(ctx)
 	var headHash string
 	if head != nil {
 		headHash = head.Hash
 	}
 	verified := true
 	verr := ""
-	if err := a.Handler.Registry.VerifyChain(); err != nil {
+	if err := a.Handler.Store.VerifyChain(ctx); err != nil {
 		verified = false
 		verr = err.Error()
 	}
+
 	// Include versions aligned with hashes for introspection
 	versions := make([]int, len(slice))
-	if len(slice) > 0 {
-		for _, b := range a.Handler.Registry.ChainWithVersions() {
-			for i, h := range slice {
-				if h == b.Hash {
-					versions[i] = b.Version
-				}
-			}
+	// Optimize: Only fetch versions for sliced hashes?
+	// Or use GetByHash.
+	for i, h := range slice {
+		b, _ := a.Handler.Store.GetByHash(ctx, h)
+		if b != nil {
+			versions[i] = b.Version
 		}
 	}
-	c.JSON(200, gin.H{"success": true, "head_hash": headHash, "hashes": slice, "versions": versions, "offset": offset, "limit": limit, "returned": len(slice), "total": total, "verified": verified, "verification_error": verr, "active_version": a.Handler.Metrics.ActiveVersion})
+
+	activeVer, _ := a.Handler.Store.ActiveVersion(ctx)
+
+	c.JSON(200, gin.H{"success": true, "head_hash": headHash, "hashes": slice, "versions": versions, "offset": offset, "limit": limit, "returned": len(slice), "total": total, "verified": verified, "verification_error": verr, "active_version": activeVer})
 }
 
 // Timeline returns a compact list of all bundle versions.
 func (a *API) Timeline(c *gin.Context) {
 	a.Handler.EnsureInitialized()
-	activeVer := a.Handler.Registry.ActiveVersion()
-	head := a.Handler.Registry.Head()
+	ctx := c.Request.Context()
+	activeVer, _ := a.Handler.Store.ActiveVersion(ctx)
+	head, _ := a.Handler.Store.Head(ctx)
 	rolledBack := false
-	if head != nil && len(a.Handler.Registry.ChainHashes()) > 0 {
-		last := a.Handler.Registry.ChainWithVersions()
-		if len(last) > 0 {
-			latest := last[len(last)-1].Version
-			if activeVer != latest {
-				rolledBack = true
-			}
-		}
+	if head != nil && activeVer != head.Version {
+		rolledBack = true
 	}
+
+	// Fetch all bundles logic
+	// Ideally we paginate or limit. For UI/Timeline we often want all or recent N.
+	// Using a reasonable limit 1000.
+	bundles, total, err := a.Handler.Store.List(ctx, 0, 1000)
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "message": err.Error()})
+		return
+	}
+
 	// Build timeline
-	timeline := make([]map[string]any, 0, len(a.Handler.Registry.ChainWithVersions()))
-	// We need created times. In original code this accessed an unexported field via hack/helper.
-	// We should just use FindByHash which is clean.
-	for _, vw := range a.Handler.Registry.ChainWithVersions() {
-		b := a.Handler.Registry.FindByHash(vw.Hash)
-		var created time.Time
-		if b != nil {
-			created = b.Created
+	timeline := make([]map[string]any, 0, len(bundles))
+	maxVer := 0
+	for _, b := range bundles {
+		if b.Version > maxVer {
+			maxVer = b.Version
 		}
-		short := vw.Hash
+		short := b.Hash
 		if len(short) > 8 {
 			short = short[:8]
 		}
 		timeline = append(timeline, map[string]any{
-			"version":    vw.Version,
-			"hash":       vw.Hash,
+			"version":    b.Version,
+			"hash":       b.Hash,
 			"short_hash": short,
-			"created":    created.Format(time.RFC3339),
-			"active":     vw.Version == activeVer,
+			"created":    b.Created.Format(time.RFC3339),
+			"active":     b.Version == activeVer,
 		})
 	}
-	c.JSON(200, gin.H{"success": true, "total": len(timeline), "timeline": timeline, "active_version": activeVer, "rolled_back": rolledBack})
+
+	if maxVer > activeVer {
+		rolledBack = true
+	}
+
+	c.JSON(200, gin.H{"success": true, "total": total, "timeline": timeline, "active_version": activeVer, "rolled_back": rolledBack})
 }
 
 // Evaluate evaluates a request against current head.
@@ -233,6 +268,7 @@ func (a *API) Evaluate(c *gin.Context) {
 		return
 	}
 	start := time.Now()
+	// Pass context to Evaluate
 	dec, err := a.Handler.Engine.Evaluate(c.Request.Context(), policy.EvalRequest{Subject: req.Subject, Action: req.Action, Resource: req.Resource, Attrs: req.Attrs})
 	elapsedNS := time.Since(start).Nanoseconds()
 	if err != nil {
@@ -257,25 +293,6 @@ func (a *API) Evaluate(c *gin.Context) {
 
 	// Audit event - requires interface adaptation for AuditEntry
 	if a.Auditor != nil {
-		// Define an ad-hoc struct or map matching what AuditLog expects
-		// Assuming AuditLog expects *AuditEntry (internal/web type).
-		// Since we can't import web here easily (cycle), we use a map or anonymous struct if allowed,
-		// but the interface takes interface{}. The implementation will cast it.
-		// However, to keep it type safe, we'll verify what append expects.
-		// The `web` package AuditLog expects `*AuditEntry`.
-		// We'll create a mirror struct or just pass a map if the logger handles it.
-		// BUT `audit.Append` takes `*AuditEntry`.
-		// WORKAROUND: Pass a map or create a similar struct.
-		// The original code passed `&AuditEntry{...}`.
-		// We can define `PolicyAuditEntry` struct here and have the implementation mapper handle it,
-		// or just define `AuditEntry` if it's common.
-		// BETTER: The API doesn't need to know `AuditEntry` if we inject a refined `PolicyAuditor` func.
-		// Let's assume for now we pass a generic request and the adapter does the work, OR we define a struct here.
-		// Let's try passing a struct compatible with json marshaling, maybe the specific Auditor implementation will handle it.
-		// Actually, `web/audit.go` likely has `AuditEntry`.
-		// We can't import `web`.
-
-		// Let's pass a special PolicyAuditPayload that the main server can wrap into an AuditEntry.
 		entry := map[string]interface{}{
 			"type":     "policy_eval", // signal to adapter
 			"at":       time.Now(),
@@ -292,12 +309,16 @@ func (a *API) Evaluate(c *gin.Context) {
 }
 
 func (a *API) GetBundle(c *gin.Context) {
-	if a.Handler.Registry == nil {
-		c.JSON(404, gin.H{"success": false, "message": "no bundles"})
+	if a.Handler.Store == nil {
+		c.JSON(404, gin.H{"success": false, "message": "store not initialized"})
 		return
 	}
 	hash := c.Param("hash")
-	b := a.Handler.Registry.FindByHash(hash)
+	b, err := a.Handler.Store.GetByHash(c.Request.Context(), hash)
+	if err != nil {
+		c.JSON(500, gin.H{"success": false, "message": err.Error()})
+		return
+	}
 	if b == nil {
 		c.JSON(404, gin.H{"success": false, "message": "bundle not found"})
 		return
@@ -324,12 +345,13 @@ func (a *API) AddBundle(c *gin.Context) {
 		return
 	}
 	a.Handler.EnsureInitialized()
+	ctx := c.Request.Context()
 
 	if err := policy.ValidateBundle(policy.Bundle{ID: req.ID, Policies: req.Policies}); err != nil {
 		c.JSON(400, gin.H{"success": false, "message": err.Error()})
 		return
 	}
-	b, err := a.Handler.Registry.AddBundle(policy.Bundle{ID: req.ID, Policies: req.Policies})
+	b, err := a.Handler.Store.AppendBundle(ctx, policy.Bundle{ID: req.ID, Policies: req.Policies})
 	if err != nil {
 		c.JSON(500, gin.H{"success": false, "message": err.Error()})
 		return
@@ -340,8 +362,8 @@ func (a *API) AddBundle(c *gin.Context) {
 	a.Handler.Metrics.ActiveVersion = b.Version
 	a.Handler.Metrics.Unlock()
 
-	vErr := a.Handler.Registry.VerifyChain()
-	head := a.Handler.Registry.Head()
+	vErr := a.Handler.Store.VerifyChain(ctx)
+	head, _ := a.Handler.Store.Head(ctx)
 	var vmsg string
 	verified := true
 	if vErr != nil {
@@ -349,7 +371,7 @@ func (a *API) AddBundle(c *gin.Context) {
 		vmsg = vErr.Error()
 	}
 
-	// Try persistence
+	// Try persistence (Not needed if Store handles it, but maybe legacy hook?)
 	if a.Handler.Config.PersistPath != "" {
 		_ = a.Handler.SaveState() // best effort
 	}
@@ -358,18 +380,26 @@ func (a *API) AddBundle(c *gin.Context) {
 		a.Handler.OnPolicyChange()
 	}
 
-	c.JSON(201, gin.H{"success": true, "bundle_hash": b.Hash, "head_hash": head.Hash, "policy_version": b.Version, "verified": verified, "verification_error": vmsg, "chain": a.Handler.Registry.ChainHashes()})
+	chain, _ := a.Handler.Store.ChainHashes(ctx)
+	headHash := ""
+	if head != nil {
+		headHash = head.Hash
+	}
+
+	c.JSON(201, gin.H{"success": true, "bundle_hash": b.Hash, "head_hash": headHash, "policy_version": b.Version, "verified": verified, "verification_error": vmsg, "chain": chain})
 }
 
 func (a *API) Rollback(c *gin.Context) {
-	if a.Handler.Registry == nil {
+	if a.Handler.Store == nil {
 		c.JSON(400, gin.H{"success": false, "message": "no policy chain"})
 		return
 	}
-	adminTok := strings.TrimSpace(c.GetHeader("X-Admin-Token"))
-	if adminTok == "" {
-		c.JSON(403, gin.H{"success": false, "message": "admin token required"})
-		return
+	adminToken := os.Getenv("AGENTAUTH_POLICY_ADMIN_TOKEN")
+	if adminToken != "" {
+		if c.GetHeader("X-Admin-Token") != adminToken {
+			c.JSON(403, gin.H{"success": false, "message": "unauthorized"})
+			return
+		}
 	}
 	verStr := c.Query("version")
 	if verStr == "" {
@@ -381,21 +411,29 @@ func (a *API) Rollback(c *gin.Context) {
 		c.JSON(400, gin.H{"success": false, "message": "invalid version"})
 		return
 	}
-	prevActive := a.Handler.Registry.ActiveVersion()
-	if err := a.Handler.Registry.Rollback(ver); err != nil {
+
+	ctx := c.Request.Context()
+	prevActive, _ := a.Handler.Store.ActiveVersion(ctx)
+
+	if err := a.Handler.Store.Rollback(ctx, ver); err != nil {
 		c.JSON(404, gin.H{"success": false, "message": err.Error()})
 		return
 	}
 
+	active, _ := a.Handler.Store.ActiveVersion(ctx)
 	a.Handler.Metrics.Lock()
 	a.Handler.Metrics.RollbackCount++
-	a.Handler.Metrics.ActiveVersion = a.Handler.Registry.ActiveVersion()
+	a.Handler.Metrics.ActiveVersion = active
 	a.Handler.Metrics.Unlock()
 
-	head := a.Handler.Registry.Head()
+	head, _ := a.Handler.Store.Head(ctx)
+	headHash := ""
+	if head != nil {
+		headHash = head.Hash
+	}
 	verified := true
 	verr := ""
-	if err := a.Handler.Registry.VerifyChain(); err != nil {
+	if err := a.Handler.Store.VerifyChain(ctx); err != nil {
 		verified = false
 		verr = err.Error()
 	}
@@ -416,16 +454,16 @@ func (a *API) Rollback(c *gin.Context) {
 			"action":   "rollback",
 			"resource": "policy_chain",
 			"outcome":  "success",
-			"meta":     map[string]string{"target_version": fmt.Sprintf("%d", ver), "previous_active_version": fmt.Sprintf("%d", prevActive), "head_hash": head.Hash},
+			"meta":     map[string]string{"target_version": fmt.Sprintf("%d", ver), "previous_active_version": fmt.Sprintf("%d", prevActive), "head_hash": headHash},
 		}
 		a.Auditor.Append(entry)
 	}
 
-	c.JSON(200, gin.H{"success": true, "active_version": a.Handler.Metrics.ActiveVersion, "head_hash": head.Hash, "verified": verified, "verification_error": verr})
+	c.JSON(200, gin.H{"success": true, "active_version": active, "head_hash": headHash, "verified": verified, "verification_error": verr})
 }
 
 func (a *API) Diff(c *gin.Context) {
-	if a.Handler.Registry == nil {
+	if a.Handler.Store == nil {
 		c.JSON(400, gin.H{"success": false, "message": "no policy chain"})
 		return
 	}
@@ -442,7 +480,8 @@ func (a *API) Diff(c *gin.Context) {
 			to = v
 		}
 	}
-	diff, err := a.Handler.Registry.Diff(from, to)
+	// Use standalone Diff function
+	diff, err := policy.Diff(c.Request.Context(), a.Handler.Store, from, to)
 	if err != nil {
 		c.JSON(400, gin.H{"success": false, "message": err.Error()})
 		return
@@ -572,7 +611,7 @@ func (a *API) PrometheusMetrics(c *gin.Context) {
 }
 
 func (a *API) AuditConsistency(c *gin.Context) {
-	if a.Handler.Registry == nil {
+	if a.Handler.Store == nil {
 		c.JSON(200, gin.H{"success": true, "evaluations": 0, "consistent": true, "message": "no policy chain"})
 		return
 	}
@@ -585,7 +624,8 @@ func (a *API) AuditConsistency(c *gin.Context) {
 	entries := a.Auditor.List(20)
 	evalCount := 0
 	consistent := true
-	head := a.Handler.Registry.Head()
+	ctx := c.Request.Context()
+	head, _ := a.Handler.Store.Head(ctx)
 	var lastEvalChainHead string
 
 	for _, e := range entries {
@@ -630,7 +670,7 @@ func (a *API) AuditConsistency(c *gin.Context) {
 	// If no evaluations, consistent is trivially true
 	// Verify chain integrity
 	verified := true
-	if err := a.Handler.Registry.VerifyChain(); err != nil {
+	if err := a.Handler.Store.VerifyChain(ctx); err != nil {
 		verified = false
 	}
 

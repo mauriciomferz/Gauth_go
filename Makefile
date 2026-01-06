@@ -7,7 +7,7 @@ rfc_clause_index: ## Generate RFC clause index JSON from placeholder spec files
 crypto-rotate: ## Manually rotate Ed25519 key (requires AGENTAUTH_TOKEN_SIG_MODE=eddsa); prints new kid
 	@echo "🔄 Rotating Ed25519 key..."; \
 	AGENTAUTH_TOKEN_SIG_MODE=eddsa go test -run TestEdDSA -count=1 ./pkg/agentauth >/dev/null || true; \
-	go run ./scripts/rotate_key.go || echo "(rotate script missing - future implementation)";
+	go run ./scripts/util/rotate_key.go || echo "(rotate script missing - future implementation)";
 
 crypto-test: ## Run EdDSA-focused tests only
 	@echo "🧪 Running EdDSA test subset..."; \
@@ -346,15 +346,15 @@ format: ## Format code
 	$(GOFMT) ./...
 	$(GOCMD) mod tidy
 
-format-enhanced: ## Enhanced formatting (goimports + gofmt + tidy via scripts/format.sh)
+format-enhanced: ## Enhanced formatting (goimports + gofmt + tidy via scripts/util/format.sh)
 	@echo "🛠  Enhanced formatting (imports + canonical style + tidy)"
-	@if [ ! -x scripts/format.sh ]; then chmod +x scripts/format.sh; fi; \
-		scripts/format.sh
+	@if [ ! -x scripts/util/format.sh ]; then chmod +x scripts/util/format.sh; fi; \
+		scripts/util/format.sh
 
 format-dry: ## Preview formatting changes without modifying files (DRY=1)
 	@echo "🔍 Dry-run format preview"
-	@if [ ! -x scripts/format.sh ]; then chmod +x scripts/format.sh; fi; \
-		DRY=1 scripts/format.sh || true
+	@if [ ! -x scripts/util/format.sh ]; then chmod +x scripts/util/format.sh; fi; \
+		DRY=1 scripts/util/format.sh || true
 
 lint-fix: ## Apply formatting & import fixes (gofmt + goimports; install tools if missing)
 	@echo "🛠  Auto-fixing common lint issues (format + imports)..."; \
@@ -402,8 +402,8 @@ docker-build-minimal: ## Build minimal beta web image (Dockerfile.minimal)
 
 docker-smoke-minimal: ## Build & run smoke test against minimal image
 	@echo "🧪 Running minimal image smoke test..."; \
-	if [ ! -x scripts/smoke-minimal.sh ]; then chmod +x scripts/smoke-minimal.sh; fi; \
-	scripts/smoke-minimal.sh
+	if [ ! -x scripts/test/smoke-minimal.sh ]; then chmod +x scripts/test/smoke-minimal.sh; fi; \
+	scripts/test/smoke-minimal.sh
 
 docker-run: ## Run Docker container
 	@echo "🚀 Running Docker container..."
@@ -432,20 +432,20 @@ run-rfc-demo: build-security-test ## Build and run RFC demo
 	./$(BINARY_DIR)/$(BINARY_NAME)-rfc-demo
 
 ## Documentation
-docs: ## Generate aggregated API documentation (scripts/gen-docs.sh -> docs/GENERATED_API.md)
+docs: ## Generate aggregated API documentation (scripts/build/gen-docs.sh -> docs/GENERATED_API.md)
 	@echo "📖 Generating aggregated API docs..."
-	@if [ ! -x scripts/gen-docs.sh ]; then chmod +x scripts/gen-docs.sh; fi; \
-	./scripts/gen-docs.sh
+	@if [ ! -x scripts/build/gen-docs.sh ]; then chmod +x scripts/build/gen-docs.sh; fi; \
+	./scripts/build/gen-docs.sh
 
-docs-validate: ## Validate documentation metadata headers (scripts/docs_index.sh --validate)
+docs-validate: ## Validate documentation metadata headers (scripts/build/docs_index.sh --validate)
 	@echo "🧪 Validating documentation headers..."; \
-	if [ ! -x scripts/docs_index.sh ]; then chmod +x scripts/docs_index.sh; fi; \
-	bash scripts/docs_index.sh --validate
+	if [ ! -x scripts/build/docs_index.sh ]; then chmod +x scripts/build/docs_index.sh; fi; \
+	bash scripts/build/docs_index.sh --validate
 
 docs-summary: ## Show category counts for documentation corpus
 	@echo "📊 Documentation category summary"; \
-	if [ ! -x scripts/docs_index.sh ]; then chmod +x scripts/docs_index.sh; fi; \
-	bash scripts/docs_index.sh --summary
+	if [ ! -x scripts/build/docs_index.sh ]; then chmod +x scripts/build/docs_index.sh; fi; \
+	bash scripts/build/docs_index.sh --summary
 
 docs-meta-validate: ## Run Go-based validator for documentation front matter (tools/docvalidate)
 	@echo "🧪 Running Go docs validator..."; \
@@ -469,12 +469,12 @@ help: ## Show this help message
 	@echo "  make run-web             # Build and run web demo server (UI)"
 	@echo "  make run-rfc-demo        # Build and run RFC demo"
 	@echo "  make docker-build        # Build Docker image"
-	@echo "  make web-start           # Start web demo (scripts/start-web-demo.sh)"
-	@echo "  make web-stop            # Stop web demo (scripts/stop-web-demo.sh)"
+	@echo "  make web-start           # Start web demo (scripts/test/start-web-demo.sh)"
+	@echo "  make web-stop            # Stop web demo (scripts/test/stop-web-demo.sh)"
 	@echo "  make web-restart         # Restart web demo (stop+start)"
 	@echo "  make web-logs            # Tail web demo logs (agentauth-web.log)"
-	@echo "  make web-health           # Health check for web demo (scripts/health.sh)"
-	@echo "  make web-tail-logs        # Tail web demo logs (scripts/tail-logs.sh)"
+	@echo "  make web-health           # Health check for web demo (scripts/test/health.sh)"
+	@echo "  make web-tail-logs        # Tail web demo logs (scripts/test/tail-logs.sh)"
 	@echo "  make web-integration-test  # Run integration tests for web demo (test/integration, integration tag)"
 	@echo "  make compose-build         # Build Docker Compose stack (full demo)"
 	@echo "  make compose-up            # Start Docker Compose stack (full demo)"
@@ -489,12 +489,12 @@ help: ## Show this help message
 ## Gap Matrix Automation
 gap-matrix: ## Generate GAP_MATRIX.auto.md (ignores drift for local review)
 	@echo "🧩 Generating gap matrix (non-enforcing)..."; \
-	go run ./scripts/gen_gap_matrix.go || echo "(drift detected - see docs/GAP_MATRIX.auto.md for details)"; \
+	go run ./scripts/build/gen_gap_matrix.go || echo "(drift detected - see docs/GAP_MATRIX.auto.md for details)"; \
 	if [ -f docs/GAP_MATRIX.auto.md ]; then echo "✅ Generated docs/GAP_MATRIX.auto.md"; else echo "❌ Generation failed"; fi;
 
 gap-matrix-check: ## Generate and enforce no drift between CSV and curated markdown
 	@echo "🧪 Checking gap matrix drift..."; \
-	go run ./scripts/gen_gap_matrix.go; \
+	go run ./scripts/build/gen_gap_matrix.go; \
 	echo "✅ Gap matrix in sync";
 
 openapi-guard: ## Validate minimal OpenAPI spec structure (presence of openapi: & paths:)
@@ -561,11 +561,11 @@ js-bundle: js-build ## Alias (deprecated) - use 'make js-build'
 	@true
 	@echo "  make compose-logs          # Tail logs for Docker Compose stack"
 	@echo "  make bench                # Run focused benchmarks (set B=Regex to filter)"
-	@echo "  make verify-csp           # Run CSP verification script (scripts/verify_csp.sh)"
+	@echo "  make verify-csp           # Run CSP verification script (scripts/test/verify_csp.sh)"
 verify-sse: ## Verify SSE log stream contract (server must be running on :8080)
 	@echo "📡 Verifying SSE log stream..."; \
-	if [ ! -x scripts/test_sse.sh ]; then chmod +x scripts/test_sse.sh; fi; \
-	scripts/test_sse.sh || (echo "❌ SSE verification failed" && exit 1); \
+	if [ ! -x scripts/test/test_sse.sh ]; then chmod +x scripts/test/test_sse.sh; fi; \
+	scripts/test/test_sse.sh || (echo "❌ SSE verification failed" && exit 1); \
 	echo "✅ SSE verification passed"
 ## Docker Compose stack management
 .PHONY: compose-build compose-up compose-down compose-logs
@@ -584,28 +584,28 @@ compose-logs: ## Tail logs for Docker Compose stack
 web-integration-test: ## Run integration tests for web demo (integration tag)
 	@echo "🧪 Running web demo integration tests..."
 	$(GOTEST) -v -tags=integration ./test/integration/...
-web-health: ## Health check for web demo (scripts/health.sh)
+web-health: ## Health check for web demo (scripts/test/health.sh)
 	@echo "🩺 Checking web demo health..."
-	./scripts/health.sh
+	./scripts/test/health.sh
 
-web-tail-logs: ## Tail web demo logs using scripts/tail-logs.sh
+web-tail-logs: ## Tail web demo logs using scripts/test/tail-logs.sh
 	@echo "📜 Tailing web demo logs (Ctrl+C to stop)..."
-	./scripts/tail-logs.sh
+	./scripts/test/tail-logs.sh
 ## Web demo management
 .PHONY: web-start web-stop web-restart web-logs
 
-web-start: ## Start the web demo using scripts/start-web-demo.sh
+web-start: ## Start the web demo using scripts/test/start-web-demo.sh
 	@echo "🚦 Starting web demo..."
-	./scripts/start-web-demo.sh
+	./scripts/test/start-web-demo.sh
 
-web-stop: ## Stop the web demo using scripts/stop-web-demo.sh
+web-stop: ## Stop the web demo using scripts/test/stop-web-demo.sh
 	@echo "🛑 Stopping web demo..."
-	./scripts/stop-web-demo.sh
+	./scripts/test/stop-web-demo.sh
 
 web-restart: ## Restart the web demo (stop then start)
 	@echo "🔄 Restarting web demo..."
-	-./scripts/stop-web-demo.sh || true
-	./scripts/start-web-demo.sh
+	-./scripts/test/stop-web-demo.sh || true
+	./scripts/test/start-web-demo.sh
 
 web-logs: ## Tail the web demo logs
 	@echo "📜 Tailing web demo logs (Ctrl+C to stop)..."
@@ -665,8 +665,8 @@ fuzz-cbor: ## Fuzz CBOR codec for PoA (FUZZ_TIME=10s to extend)
 
 verify-csp: ## Run CSP verification script (fails if violations found) 
 	@echo "🔐 Verifying Content Security Policy..."; \
-	if [ ! -x scripts/verify_csp.sh ]; then chmod +x scripts/verify_csp.sh; fi; \
-	scripts/verify_csp.sh http://localhost:8080/ || (echo "❌ CSP verification failed" && exit 1); \
+	if [ ! -x scripts/test/verify_csp.sh ]; then chmod +x scripts/test/verify_csp.sh; fi; \
+	scripts/test/verify_csp.sh http://localhost:8080/ || (echo "❌ CSP verification failed" && exit 1); \
 	echo "✅ CSP verification passed"
 
 openapi_coverage: ## Generate OpenAPI coverage report (fails if <100%)

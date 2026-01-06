@@ -27,9 +27,22 @@ func (s *BetaServer) DeepHealthCheck(ctx context.Context) map[string]string {
 	status["server"] = "ok"
 	status["uptime"] = time.Since(s.start).String()
 
-	// 2. Redis Check (if enabled)
+	// 2. Redis Check (Deep Probe)
+	if s.cache != nil {
+		if err := s.cache.Ping(ctx); err != nil {
+			status["redis"] = "down"
+			status["redis_error"] = err.Error()
+			status["overall"] = "degraded"
+		} else {
+			status["redis"] = "ok"
+		}
+	} else {
+		status["redis"] = "disabled"
+	}
+
+	// Legacy Service Check
 	if s.revocationService != nil {
-		status["revocation_service"] = "ok" // Simplified
+		status["revocation_service"] = "ok"
 	} else {
 		status["revocation_service"] = "disabled"
 	}

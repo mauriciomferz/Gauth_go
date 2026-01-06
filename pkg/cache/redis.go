@@ -143,6 +143,14 @@ func (r *RedisCache) GetStats(ctx context.Context) (*Stats, error) {
 		Connections: r.config.PoolSize,
 	}
 
+	// Pool Stats
+	if r.client != nil {
+		poolStats := r.client.PoolStats()
+		stats.PoolActive = int(poolStats.TotalConns) - int(poolStats.IdleConns) // Approx active
+		stats.PoolIdle = int(poolStats.IdleConns)
+		// TotalConns includes idle.
+	}
+
 	// Parse memory usage from INFO output
 	lines := strings.Split(info, "\r\n")
 	for _, line := range lines {

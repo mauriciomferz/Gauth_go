@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -82,7 +83,7 @@ func (f *FileStore) persist() error {
 }
 
 // AppendBundle appends and persists a new bundle.
-func (f *FileStore) AppendBundle(b Bundle) (Bundle, error) {
+func (f *FileStore) AppendBundle(ctx context.Context, b Bundle) (Bundle, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	if !f.loaded {
@@ -109,29 +110,35 @@ func (f *FileStore) AppendBundle(b Bundle) (Bundle, error) {
 	return b, nil
 }
 
-func (f *FileStore) Head() *Bundle {
+func (f *FileStore) Head(ctx context.Context) (*Bundle, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	if len(f.reg.bundles) == 0 {
-		return nil
+		return nil, nil
 	}
 	b := f.reg.bundles[len(f.reg.bundles)-1]
-	return &b
+	return &b, nil
 }
 
-func (f *FileStore) GetByHash(hash string) *Bundle {
+func (f *FileStore) GetByHash(ctx context.Context, hash string) (*Bundle, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	for i := range f.reg.bundles {
 		if f.reg.bundles[i].Hash == hash {
 			b := f.reg.bundles[i]
-			return &b
+			return &b, nil
 		}
 	}
-	return nil
+	return nil, nil
 }
 
-func (f *FileStore) List(offset, limit int) ([]Bundle, int) {
+func (f *FileStore) GetByVersion(ctx context.Context, version int) (*Bundle, error) {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	return f.reg.findByVersion(version), nil
+}
+
+func (f *FileStore) List(ctx context.Context, offset, limit int) ([]Bundle, int, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	total := len(f.reg.bundles)
@@ -139,7 +146,7 @@ func (f *FileStore) List(offset, limit int) ([]Bundle, int) {
 		offset = 0
 	}
 	if offset >= total {
-		return []Bundle{}, total
+		return []Bundle{}, total, nil
 	}
 	end := offset + limit
 	if limit <= 0 || end > total {
@@ -147,23 +154,41 @@ func (f *FileStore) List(offset, limit int) ([]Bundle, int) {
 	}
 	out := make([]Bundle, end-offset)
 	copy(out, f.reg.bundles[offset:end])
-	return out, total
+	return out, total, nil
 }
 
-func (f *FileStore) ChainHashes() []string {
+func (f *FileStore) ChainHashes(ctx context.Context) ([]string, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	hashes := make([]string, len(f.reg.bundles))
 	for i, b := range f.reg.bundles {
 		hashes[i] = b.Hash
 	}
-	return hashes
+	return hashes, nil
 }
 
-func (f *FileStore) VerifyChain() error {
+func (f *FileStore) VerifyChain(ctx context.Context) error {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 	return f.reg.VerifyChain()
+}
+
+func (f *FileStore) ActiveVersion(ctx context.Context) (int, error) {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	return f.reg.ActiveVersion(), nil
+}
+
+func (f *FileStore) Rollback(ctx context.Context, version int) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if err := f.reg.Rollback(version); err != nil {
+		return err
+	}
+	// Note: ActiveVersion state is not persisted in current FileStore format (only bundles).
+	// Restarting server will reset active version to Head.
+	// This is known limitation of current FileStore.
+	return nil
 }
 func (f *FileStore) Registry() *Registry { return f.reg }
 

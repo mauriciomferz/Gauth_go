@@ -16,9 +16,10 @@ func buildBundle(id string, policies []policy.Policy) policy.Bundle {
 }
 
 func TestPolicyEnginePatterns(t *testing.T) {
-	reg := policy.NewRegistry()
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
 	// Policies: RBAC allow, ABAC dept match, time window allow, explicit deny
-	b, err := reg.AddBundle(buildBundle("b1", []policy.Policy{
+	b, err := store.AppendBundle(ctx, buildBundle("b1", []policy.Policy{
 		{ID: "rbac-admin", Subjects: []string{"alice"}, Rules: []policy.Rule{{Actions: []string{"create"}, Resources: []string{"doc"}, Effect: policy.Allow}}},
 		{ID: "abac-dept", Subjects: []string{"*"}, Rules: []policy.Rule{{Actions: []string{"read"}, Resources: []string{"doc"}, Expr: "department == 'finance'", Effect: policy.Allow}}},
 		{ID: "time-window", Subjects: []string{"*"}, Rules: []policy.Rule{{Actions: []string{"export"}, Resources: []string{"report"}, Expr: "time_between(\"09:00\",\"17:00\")", Effect: policy.Allow}}},
@@ -30,13 +31,12 @@ func TestPolicyEnginePatterns(t *testing.T) {
 	if b.Hash == "" {
 		t.Fatalf("expected bundle hash computed")
 	}
-	if verifyErr := reg.VerifyChain(); verifyErr != nil {
+	if verifyErr := store.VerifyChain(ctx); verifyErr != nil {
 		t.Fatalf("verify chain failed: %v", verifyErr)
 	}
 
-	eng := policy.NewChainEngine(reg)
+	eng := policy.NewChainEngine(store)
 	adapter := authz.NewAuthorizerAdapter(eng)
-	ctx := context.Background()
 
 	// 1. RBAC allow
 	dec, err := adapter.Authorize(ctx, authz.Request{Subject: "alice", Action: "create", Resource: "doc"})
@@ -76,14 +76,16 @@ func TestPolicyEnginePatterns(t *testing.T) {
 }
 
 func TestExpressionOrAndNumeric(t *testing.T) {
-	reg := policy.NewRegistry()
-	eng := policy.NewChainEngine(reg)
+	store := policy.NewInMemoryStore()
+	eng := policy.NewChainEngine(store)
+	ctx := context.Background()
+
 	bundle := policy.Bundle{ID: "expr-advanced", Policies: []policy.Policy{{
 		ID: "p-or", Subjects: []string{"user"}, Rules: []policy.Rule{{Actions: []string{"read"}, Resources: []string{"obj"}, Effect: policy.Allow, Expr: "role == 'admin' || level >= 5"}},
 	}, {
 		ID: "p-deny-num", Subjects: []string{"user"}, Rules: []policy.Rule{{Actions: []string{"read"}, Resources: []string{"obj"}, Effect: policy.Deny, Expr: "sensitivity > 7"}},
 	}}}
-	if _, err := reg.AddBundle(bundle); err != nil {
+	if _, err := store.AppendBundle(ctx, bundle); err != nil {
 		t.Fatalf("add bundle: %v", err)
 	}
 
@@ -115,20 +117,21 @@ func mustParseClock(t *testing.T, clock string) time.Time {
 }
 
 func TestPolicyBundleChainIntegrity(t *testing.T) {
-	reg := policy.NewRegistry()
+	store := policy.NewInMemoryStore()
+	ctx := context.Background()
 	for i := 0; i < 3; i++ {
-		_, err := reg.AddBundle(buildBundle(fmt.Sprintf("b%d", i), []policy.Policy{}))
+		_, err := store.AppendBundle(ctx, buildBundle(fmt.Sprintf("b%d", i), []policy.Policy{}))
 		if err != nil {
 			t.Fatalf("add bundle: %v", err)
 		}
 	}
-	if verifyErr := reg.VerifyChain(); verifyErr != nil {
+	if verifyErr := store.VerifyChain(ctx); verifyErr != nil {
 		t.Fatalf("expected chain valid: %v", verifyErr)
 	}
 	// Tamper
-	head := reg.Head()
+	head, _ := store.Head(ctx)
 	head.PrevHash = "deadbeef" // breaks link
-	if err := reg.VerifyChain(); err == nil {
+	if err := store.VerifyChain(ctx); err == nil {
 		t.Fatalf("expected verification failure after tamper")
 	}
 }

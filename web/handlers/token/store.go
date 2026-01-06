@@ -27,6 +27,15 @@ type Token struct {
 	Status    string     `json:"status,omitempty"` // active, suspended, terminated
 }
 
+// TokenStorer defines the interface for token storage operations.
+type TokenStorer interface {
+	Create(ttlSeconds int, meta any) *Token
+	Validate(idOrVal string) (string, *Token)
+	Revoke(id string) string
+	Metrics() map[string]any
+	UpdateStatus(id, newStatus string) (bool, string, *Token)
+}
+
 type Store struct {
 	mu        sync.RWMutex
 	cap       int
@@ -36,6 +45,9 @@ type Store struct {
 	validated int
 	revoked   int
 }
+
+// Store implements TokenStorer
+var _ TokenStorer = (*Store)(nil)
 
 func NewStore(capacity int) *Store {
 	if capacity <= 0 {
@@ -120,6 +132,30 @@ func (ts *Store) Revoke(id string) string {
 	t.RevokedAt = &now
 	ts.revoked++
 	return TokenStatusRevoked
+}
+
+func (ts *Store) UpdateStatus(id, newStatus string) (bool, string, *Token) {
+	ts.mu.Lock()
+	defer ts.mu.Unlock()
+
+	tok, ok := ts.tokens[id]
+	if !ok {
+		return false, "not_found", nil
+	}
+
+	old := tok.Status
+	// Terminated is a terminal state
+	if old == "terminated" && newStatus != "terminated" {
+		return false, "invalid_transition", tok
+	}
+
+	// No-op
+	if old == newStatus {
+		return true, "noop", tok
+	}
+
+	tok.Status = newStatus
+	return true, "success", tok
 }
 
 func (ts *Store) Metrics() map[string]any {
