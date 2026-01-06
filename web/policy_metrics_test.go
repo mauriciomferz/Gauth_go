@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -17,7 +18,8 @@ func TestPolicyMetricsEndpoint(t *testing.T) {
 
 	// Inject a policy to allow the first request:
 	// Subject: alice@example.com, Action: read, Resource: report:finance
-	if bs.policyHandler != nil && bs.policyHandler.Registry != nil {
+	// Subject: alice@example.com, Action: read, Resource: report:finance
+	if bs.policyHandler != nil && bs.policyHandler.Store != nil {
 		p := policy.Policy{
 			ID:       "allow-alice",
 			Subjects: []string{"alice@example.com"},
@@ -33,7 +35,7 @@ func TestPolicyMetricsEndpoint(t *testing.T) {
 			ID:       "test-bundle",
 			Policies: []policy.Policy{p},
 		}
-		if _, err := bs.policyHandler.Registry.AddBundle(b); err != nil {
+		if _, err := bs.policyHandler.Store.AppendBundle(context.Background(), b); err != nil {
 			t.Fatalf("failed to add test policy bundle: %v", err)
 		}
 	}

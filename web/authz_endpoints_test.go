@@ -2,6 +2,7 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +41,7 @@ func TestAuthzEvaluateEndpoint(t *testing.T) {
 	t.Cleanup(func() { srv.Shutdown() })
 
 	// Inject test policy to allow alice@example.com to read report:finance
-	if srv.policyHandler != nil && srv.policyHandler.Registry != nil {
+	if srv.policyHandler != nil && srv.policyHandler.Store != nil {
 		p := policy.Policy{
 			ID:       "allow-alice-authz",
 			Subjects: []string{"alice@example.com"},
@@ -56,7 +57,7 @@ func TestAuthzEvaluateEndpoint(t *testing.T) {
 			ID:       "authz-test-bundle",
 			Policies: []policy.Policy{p},
 		}
-		if _, err := srv.policyHandler.Registry.AddBundle(b); err != nil {
+		if _, err := srv.policyHandler.Store.AppendBundle(context.Background(), b); err != nil {
 			t.Fatalf("failed to add test policy bundle: %v", err)
 		}
 	}

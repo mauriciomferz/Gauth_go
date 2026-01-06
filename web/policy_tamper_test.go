@@ -1,11 +1,14 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/mauriciomferz/AgentAuth/pkg/policy"
 )
 
 // TestPolicyProvenanceTamperDetection ensures provenance endpoint reports verification failure after in-memory tampering.
@@ -53,15 +56,21 @@ func TestPolicyProvenanceTamperDetection(t *testing.T) {
 	}
 
 	// Tamper: break prev hash link of second bundle
-	if srv.policyHandler.Registry == nil || len(srv.policyHandler.Registry.ChainHashes()) < 2 {
+	if srv.policyHandler.Store == nil {
+		t.Fatalf("Store is nil")
+	}
+	ctx := context.TODO()
+	chainHashes, _ := srv.policyHandler.Store.ChainHashes(ctx)
+	if len(chainHashes) < 2 {
 		t.Fatalf("expected at least 2 bundles")
 	}
 	// Access underlying registry via reflection of known field; we can mutate by retrieving head then altering PrevHash
-	// (Simpler: directly set bundles[1].PrevHash = "deadbeef" )
-	// Directly tamper: modify PrevHash of second bundle (unsafe test-only access)
-	// NOTE: registry.bundles is unexported; we can't reach it directly from here without adding a helper.
-	// Instead we exploit that we can alter the head bundle Hash to break link by reassigning Hash field (accessible via pointer returned by Head()).
-	head := srv.policyHandler.Registry.Head()
+	// Cast to InMemoryStore to access deprecated Registry() method for tampering
+	memStore, ok := srv.policyHandler.Store.(*policy.InMemoryStore)
+	if !ok {
+		t.Fatalf("Store is not InMemoryStore, cannot tamper")
+	}
+	head := memStore.Registry().Head()
 	if head == nil {
 		t.Fatalf("expected head bundle")
 	}
