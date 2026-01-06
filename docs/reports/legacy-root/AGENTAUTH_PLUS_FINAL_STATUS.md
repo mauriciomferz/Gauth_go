@@ -1,10 +1,3 @@
-# AgentAuth+ Final Status (Moved)
-
-This document has moved to:
-
-- docs/reports/legacy-root/AGENTAUTH_PLUS_FINAL_STATUS.md
-
-The repo-root file is kept as a stub to preserve legacy links.
 # AgentAuth+ Project - Final Status Report
 
 **Project**: AgentAuth+ Enhanced Authorization Framework  

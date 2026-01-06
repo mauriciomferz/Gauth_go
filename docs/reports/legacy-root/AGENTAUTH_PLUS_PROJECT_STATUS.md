@@ -1,10 +1,3 @@
-# AgentAuth+ Project Status (Moved)
-
-This document has moved to:
-
-- docs/reports/legacy-root/AGENTAUTH_PLUS_PROJECT_STATUS.md
-
-The repo-root file is kept as a stub to preserve legacy links.
 # AgentAuth+ Project Status
 
 **Last Updated**: December 28, 2025  

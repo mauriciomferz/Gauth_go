@@ -46,3 +46,20 @@ This folder contains the project’s canonical reports grouped by area.
   - [GAP_G10_TESTING_GUIDE.md](testing/GAP_G10_TESTING_GUIDE.md)
   - [OIDC_TESTING_GUIDE.md](testing/OIDC_TESTING_GUIDE.md)
   - [PERFORMANCE_TEST_REPORT.md](testing/PERFORMANCE_TEST_REPORT.md)
+
+## Legacy root (stubs)
+
+These documents used to live at repo root and are now archived under `docs/reports/legacy-root/`.
+The repo-root files are kept as stubs to preserve legacy links.
+
+- [AGENTAUTH_PLUS_FINAL_STATUS.md](legacy-root/AGENTAUTH_PLUS_FINAL_STATUS.md)
+- [AGENTAUTH_PLUS_PROJECT_STATUS.md](legacy-root/AGENTAUTH_PLUS_PROJECT_STATUS.md)
+- [AGENTAUTH_PLUS_README.md](legacy-root/AGENTAUTH_PLUS_README.md)
+- [API_REFERENCE.md](legacy-root/API_REFERENCE.md)
+- [COMMIT_GUIDE.md](legacy-root/COMMIT_GUIDE.md)
+- [DEPLOYMENT_GUIDE.md](legacy-root/DEPLOYMENT_GUIDE.md)
+- [DIRECTORY_REORGANIZATION.md](legacy-root/DIRECTORY_REORGANIZATION.md)
+- [FINAL_HANDOFF.md](legacy-root/FINAL_HANDOFF.md)
+- [IMPLEMENTATION_COMPLETE.md](legacy-root/IMPLEMENTATION_COMPLETE.md)
+- [POLICY_STORE_IMPLEMENTATION.md](legacy-root/POLICY_STORE_IMPLEMENTATION.md)
+- [SIGNATURE_VALIDATION_IMPLEMENTATION.md](legacy-root/SIGNATURE_VALIDATION_IMPLEMENTATION.md)

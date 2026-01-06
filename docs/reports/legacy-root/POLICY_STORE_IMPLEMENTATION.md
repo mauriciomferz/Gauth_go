@@ -1,10 +1,3 @@
-# Policy Store Implementation (Moved)
-
-This document has moved to:
-
-- docs/reports/legacy-root/POLICY_STORE_IMPLEMENTATION.md
-
-The repo-root file is kept as a stub to preserve legacy links.
 ---
 title: Policy Store Implementation
 category: guide

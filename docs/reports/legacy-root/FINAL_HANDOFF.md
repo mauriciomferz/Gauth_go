@@ -1,10 +1,3 @@
-# Final Handoff (Moved)
-
-This document has moved to:
-
-- docs/reports/legacy-root/FINAL_HANDOFF.md
-
-The repo-root file is kept as a stub to preserve legacy links.
 # Final Handoff: AgentAuth+ Observability Stack
 
 **Date:** December 29, 2025

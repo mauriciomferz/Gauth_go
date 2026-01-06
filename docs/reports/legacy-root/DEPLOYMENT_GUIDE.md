@@ -1,14 +1,3 @@
-# Deployment Guide (Moved)
-
-The canonical deployment guide is here:
-
-- docs/guides/deployment/DEPLOYMENT_GUIDE.md
-
-The previous repo-root version has been archived here:
-
-- docs/reports/legacy-root/DEPLOYMENT_GUIDE.md
-
-The repo-root file is kept as a stub to preserve legacy links.
 # AgentAuth+ Deployment Guide
 
 **Status**: Production Ready - 100/100 Compliance ✅  

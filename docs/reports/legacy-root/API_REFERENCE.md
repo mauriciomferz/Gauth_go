@@ -1,14 +1,3 @@
-# API Reference (Moved)
-
-The canonical API reference is here:
-
-- docs/reference/API_REFERENCE.md
-
-The previous repo-root version has been archived here:
-
-- docs/reports/legacy-root/API_REFERENCE.md
-
-The repo-root file is kept as a stub to preserve legacy links.
 # AgentAuth API Reference
 
 **Version**: 1.0.0  

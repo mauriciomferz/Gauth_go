@@ -86,6 +86,13 @@ Offline authorization for edge devices, military, industrial IoT.
 
 ---
 
+## Documentation
+
+- [Documentation Index](docs/INDEX.md)
+- [Reports Index](docs/reports/INDEX.md)
+- [API Reference](docs/reference/API_REFERENCE.md)
+- [Deployment Guide](docs/guides/deployment/DEPLOYMENT_GUIDE.md)
+
 ## Quick Start
 
 ### Prerequisites
