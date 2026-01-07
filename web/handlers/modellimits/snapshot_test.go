@@ -18,7 +18,8 @@ func TestModelLimitsSnapshotHashChange(t *testing.T) {
 	tmp.Close()
 
 	h := NewHandler(tmp.Name(), "", "")
-	h.ReloadInterval = 100 * time.Millisecond // fast poll
+	// Don't rely on background polling (it can be disabled in CI); explicitly reload.
+	h.ReloadInterval = 0
 
 	if err := h.Init(context.Background()); err != nil {
 		t.Fatalf("init: %v", err)
@@ -28,24 +29,34 @@ func TestModelLimitsSnapshotHashChange(t *testing.T) {
 
 	// Modify limits (tighten) to force different canonical representation
 	updated := `{"model_limits":{"snap-model":{"max_input_tokens":80}}}`
-	// Ensure mtime
-	time.Sleep(1 * time.Second)
 	if err := os.WriteFile(tmp.Name(), []byte(updated), 0600); err != nil {
 		t.Fatalf("rewrite: %v", err)
 	}
 
+	// Best-effort mtime bump (avoids flakes on coarse timestamp filesystems).
+	if err := os.Chtimes(tmp.Name(), time.Now().Add(2*time.Second), time.Now().Add(2*time.Second)); err != nil {
+		// If chtimes isn't supported, rewrite after a delay to force mtime to advance.
+		time.Sleep(1100 * time.Millisecond)
+		if err := os.WriteFile(tmp.Name(), []byte(updated), 0600); err != nil {
+			t.Fatalf("rewrite2: %v", err)
+		}
+	}
+
 	deadline := time.Now().Add(3 * time.Second)
-	var h2 string
-	changed := false
+	loaded := false
 	for time.Now().Before(deadline) {
-		h2, _, _, _ = h.ComputeSnapshot()
-		if h2 != h1 {
-			changed = true
+		if h.LoadFromDisk() {
+			loaded = true
 			break
 		}
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
-	if !changed {
+	if !loaded {
+		t.Fatalf("expected reload to detect updated limits")
+	}
+
+	h2, _, _, _ := h.ComputeSnapshot()
+	if h1 == h2 {
 		t.Fatalf("expected hash change after reload h1=%s h2=%s", h1, h2)
 	}
 }
