@@ -1,0 +1,5 @@
+# (Moved) WEEK7_DAY1_INTEGRATION_TESTING_SESSION_SUMMARY.md
+
+This report has been moved to:
+
+- [docs/reports/legacy-root/WEEK7_DAY1_INTEGRATION_TESTING_SESSION_SUMMARY.md](docs/reports/legacy-root/WEEK7_DAY1_INTEGRATION_TESTING_SESSION_SUMMARY.md)
