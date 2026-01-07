@@ -198,7 +198,7 @@ rm -f jwt-private-key.pem jwt-public-key.pem ed25519-key1.pem auth
 ### Step 1: Build and Push Docker Image
 ```bash
 # Navigate to project root
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 
 # Build Docker image (multi-stage, production-ready)
 docker build -t agentauth:staging -f Dockerfile .
