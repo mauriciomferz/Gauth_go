@@ -7,10 +7,11 @@
   "main": "web/static/js/modules/main.js",
   "scripts": {
     "lint": "eslint web/static/js/modules/*.js web/static/js/app.js",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.config.cjs",
+    "test": "npm run -s test:go && node --experimental-vm-modules ./node_modules/jest/bin/jest.js --colors --env=jsdom --testMatch \"**/web/static/js/tests/**/*.test.js\" \"**/frontend/static/js/tests/**/*.test.js\"",
     "build": "node web/static/js/build.js",
     "ui:test": "playwright test",
-    "ui:report": "playwright show-report"
+    "ui:report": "playwright show-report",
+    "test:go": "go test ./..."
   },
   "dependencies": {
     "tweetnacl": "^1.0.3"
