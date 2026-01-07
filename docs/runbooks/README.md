@@ -85,7 +85,7 @@ This directory contains operational runbooks for all AgentAuth monitoring alerts
 - [Incident Response Plan](../INCIDENT_RESPONSE_PLAN.md)
 - [Disaster Recovery Guide](../DISASTER_RECOVERY_GUIDE.md)
 - [Monitoring Architecture](../../WEEK5_DAY4-5_MONITORING_REPORT.md)
-- [Alert Configuration](../../k8s-prometheus-alerts-enhanced.yaml)
+- [Alert Configuration]../../deployments/k8s/monitoring/
 
 ---
 

@@ -567,7 +567,7 @@ Efficiency:
 
 ### Updated Configuration Files (2)
 1. `k8s-monitoring-stack.yaml` - Enhanced Prometheus config (+50 lines)
-2. `k8s-prometheus-alerts-enhanced.yaml` - 15 alert rules (350 lines)
+2. `deployments/k8s/monitoring/k8s-alerts.yaml` - 15 alert rules (350 lines)
 
 ### New Dashboards (2)
 1. `grafana-dashboards/postgresql-dashboard.json` (850 lines)

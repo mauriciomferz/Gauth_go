@@ -188,8 +188,7 @@ kubectl run test-health --rm -i --image=curlimages/curl --restart=Never \
 # Deploy Prometheus, Grafana, AlertManager
 kubectl apply -f k8s-monitoring-stack.yaml
 kubectl apply -f k8s-alertmanager.yaml
-kubectl apply -f k8s-prometheus-alerts-enhanced.yaml
-
+kubectl apply -f deployments/k8s/monitoring/k8s-alerts.yaml
 # Wait for monitoring pods
 kubectl wait --for=condition=ready pod -l app=prometheus -n agentauth-staging --timeout=300s
 kubectl wait --for=condition=ready pod -l app=grafana -n agentauth-staging --timeout=300s

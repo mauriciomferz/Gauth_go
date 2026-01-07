@@ -317,7 +317,7 @@ cat docs/SECURITY.md
 - **Image**: `agentauth:staging` (local load)
 - **Manifests**:
     - `k8s-monitoring-stack.yaml`: Prometheus & Grafana in `monitoring` ns.
-    - `k8s-alerts.yaml`: Alert rules ConfigMap.
+    - `deployments/k8s/monitoring/k8s-alerts.yaml`: Alert rules ConfigMap.
     - `deployments/k8s/staging/`: Application stack in `agentauth-staging`.
 - **Status**:
     - `postgres-0`: Running (1/1)

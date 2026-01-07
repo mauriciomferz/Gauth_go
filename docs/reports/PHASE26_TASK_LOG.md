@@ -91,7 +91,7 @@
 
 ## Phase 24: Staging Deployment (Kubernetes) [x]
 - [x] Prepare Manifests
-    - [x] Create `k8s-alerts.yaml` ConfigMap
+    - [x] Create `deployments/k8s/monitoring/k8s-alerts.yaml` ConfigMap
     - [x] Update `k8s-monitoring-stack.yaml`
 - [x] Deploy Services
     - [x] Build and Load Docker Image
