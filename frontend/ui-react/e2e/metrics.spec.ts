@@ -50,7 +50,7 @@ test.describe('Metrics and Monitoring', () => {
     // Check for auto-refresh toggle
     const autoRefreshToggle = page.getByText(/Auto.*refresh|Refresh/i)
     
-    if (await autoRefreshToggle.first().isVisible({ timeout: 5000 }) {
+    if (await autoRefreshToggle.first().isVisible({ timeout: 5000 })) {
       console.log('✅ Auto-refresh control found')
       
       // Wait for a refresh cycle
@@ -64,7 +64,7 @@ test.describe('Metrics and Monitoring', () => {
   test('should manually refresh metrics', async ({ page }) => {
     const refreshButton = page.getByRole('button', { name: /Refresh|Reload|Update/i })
     
-    if (await refreshButton.first().isVisible({ timeout: 5000 }) {
+    if (await refreshButton.first().isVisible({ timeout: 5000 })) {
       await refreshButton.first().click()
       await page.waitForTimeout(1000)
       console.log('✅ Manual refresh tested')
@@ -90,7 +90,7 @@ test.describe('Metrics and Monitoring', () => {
     // Look for HTTP-related metrics
     const httpMetrics = page.getByText(/requests.*total|http.*count|status.*code/i)
     
-    if (await httpMetrics.first().isVisible({ timeout: 5000 }) {
+    if (await httpMetrics.first().isVisible({ timeout: 5000 })) {
       console.log('✅ HTTP metrics visible')
     } else {
       console.log('ℹ️  HTTP metrics not loaded')
@@ -101,7 +101,7 @@ test.describe('Metrics and Monitoring', () => {
     // Look for performance indicators
     const perfMetrics = page.getByText(/response.*time|latency|duration|throughput/i)
     
-    if (await perfMetrics.first().isVisible({ timeout: 5000 }) {
+    if (await perfMetrics.first().isVisible({ timeout: 5000 })) {
       console.log('✅ Performance metrics visible')
     } else {
       console.log('ℹ️  Performance metrics not loaded')
@@ -112,7 +112,7 @@ test.describe('Metrics and Monitoring', () => {
     // Look for system resource metrics
     const sysMetrics = page.getByText(/memory|cpu|goroutines|threads/i)
     
-    if (await sysMetrics.first().isVisible({ timeout: 5000 }) {
+    if (await sysMetrics.first().isVisible({ timeout: 5000 })) {
       console.log('✅ System metrics visible')
     } else {
       console.log('ℹ️  System metrics not loaded')
@@ -123,7 +123,7 @@ test.describe('Metrics and Monitoring', () => {
     // Look for category filter/tabs
     const filters = page.locator('button, [role="tab"]').filter({ hasText: /HTTP|System|Performance|All/i })
     
-    if (await filters.first().isVisible({ timeout: 5000 }) {
+    if (await filters.first().isVisible({ timeout: 5000 })) {
       const filterCount = await filters.count()
       
       // Try clicking different filters
@@ -142,7 +142,7 @@ test.describe('Metrics and Monitoring', () => {
     // Look for "Last updated" or timestamp info
     const timestamp = page.getByText(/last.*update|updated|ago|timestamp/i)
     
-    if (await timestamp.first().isVisible({ timeout: 5000 }) {
+    if (await timestamp.first().isVisible({ timeout: 5000 })) {
       console.log('✅ Timestamp information visible')
     } else {
       console.log('ℹ️  No timestamp info found')
@@ -172,7 +172,7 @@ test.describe('Metrics and Monitoring', () => {
       page.locator('label:has-text("Interval")')
     )
     
-    if (await intervalControl.first().isVisible({ timeout: 5000 }) {
+    if (await intervalControl.first().isVisible({ timeout: 5000 })) {
       console.log('✅ Refresh interval control found')
     } else {
       console.log('ℹ️  No interval control visible')

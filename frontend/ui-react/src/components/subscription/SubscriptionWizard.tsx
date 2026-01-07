@@ -14,6 +14,23 @@ interface SubscriptionState {
   error: string | null
 }
 
+type ErrorWithMessage = { message?: unknown }
+type ErrorWithResponseMessage = { response?: { data?: { message?: unknown } } }
+
+function getErrorMessage(error: unknown): string {
+  const responseMessage = (error as ErrorWithResponseMessage).response?.data?.message
+  if (typeof responseMessage === 'string' && responseMessage.trim() !== '') {
+    return responseMessage
+  }
+
+  const message = (error as ErrorWithMessage).message
+  if (typeof message === 'string' && message.trim() !== '') {
+    return message
+  }
+
+  return 'Step failed'
+}
+
 /**
  * SubscriptionWizard implements the RFC-0111 8-step subscription flow
  * This is a simplified implementation showing the pattern.
@@ -80,10 +97,10 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
           await executeStepVIII()
           break
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setState(prev => ({
         ...prev,
-        error: error.response?.data?.message || error.message || 'Step failed'
+        error: getErrorMessage(error)
       }))
     } finally {
       setLoading(false)
@@ -103,7 +120,7 @@ export function SubscriptionWizard({ onComplete, onCancel }: SubscriptionWizardP
         proof_data: { verified: true, eidas_level: 'high' },
         required_level: 'high'
       }
-    } as any)
+    } as unknown as { client_id: string; requested_scope: string[] })
 
     setState(prev => ({
       ...prev,

@@ -47,14 +47,14 @@ test.describe('Overview Page', () => {
   test('should have working navigation links', async ({ page }) => {
     // Test navigation to other pages
     const tokensLink = page.getByRole('link', { name: /Tokens/i })
-    if (await tokensLink.isVisible({ timeout: 5000 }) {
+    if (await tokensLink.isVisible({ timeout: 5000 })) {
       await tokensLink.click()
       await expect(page).toHaveURL(/.*tokens/)
     }
     
     await page.goto('/')
     const pvpLink = page.getByRole('link', { name: /PVP/i })
-    if (await pvpLink.isVisible({ timeout: 5000 }) {
+    if (await pvpLink.isVisible({ timeout: 5000 })) {
       await pvpLink.click()
       await expect(page).toHaveURL(/.*pvp/)
     }
@@ -74,7 +74,7 @@ test.describe('Overview Page', () => {
 
   test('should have working theme toggle', async ({ page }) => {
     const themeToggle = page.locator('[aria-label="Toggle theme"]')
-    if (await themeToggle.isVisible() {
+    if (await themeToggle.isVisible()) {
       await themeToggle.click()
       // Wait for theme transition
       await page.waitForTimeout(300)

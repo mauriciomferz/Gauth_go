@@ -4,15 +4,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiFetch, apiPost, apiPut, apiDelete, ApiError, TenantError } from '../utils/api';
 import type {
+  PowerOfAttorney,
   PoAListResponse,
+  PoACreateRequest,
   CircuitBreakerListResponse,
+  CircuitBreakerCreateRequest,
   RateLimiterListResponse,
+  RateLimiterCreateRequest,
   RetryPolicyListResponse,
+  RetryPolicyCreateRequest,
   EventListResponse,
   EventTypeListResponse,
   PolicyListResponse,
+  PolicyCreateRequest,
   VariableListResponse,
+  VariableCreateRequest,
   FeatureFlagListResponse,
+  FeatureFlagCreateRequest,
 } from '../types/admin';
 
 interface UseApiOptions {
@@ -76,14 +84,14 @@ export function usePowerOfAttorneyList() {
 }
 
 export function usePowerOfAttorney(id: string) {
-  return useApi<any>(`/api/admin/poa/${id}`);
+  return useApi<PowerOfAttorney>(`/api/admin/poa/${id}`);
 }
 
 export function usePoAMutations() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createPoA = async (data: any) => {
+  const createPoA = async (data: PoACreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -101,7 +109,7 @@ export function usePoAMutations() {
     }
   };
 
-  const updatePoA = async (id: string, data: any) => {
+  const updatePoA = async (id: string, data: PoACreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -164,7 +172,7 @@ export function useResilienceMutations() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createCircuitBreaker = async (data: any) => {
+  const createCircuitBreaker = async (data: CircuitBreakerCreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -181,7 +189,7 @@ export function useResilienceMutations() {
     }
   };
 
-  const createRateLimiter = async (data: any) => {
+  const createRateLimiter = async (data: RateLimiterCreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -198,7 +206,7 @@ export function useResilienceMutations() {
     }
   };
 
-  const createRetryPolicy = async (data: any) => {
+  const createRetryPolicy = async (data: RetryPolicyCreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -248,7 +256,7 @@ export function useAuthzMutations() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createPolicy = async (data: any) => {
+  const createPolicy = async (data: PolicyCreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -265,7 +273,7 @@ export function useAuthzMutations() {
     }
   };
 
-  const updatePolicy = async (id: string, data: any) => {
+  const updatePolicy = async (id: string, data: PolicyCreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -323,7 +331,7 @@ export function useConfigMutations() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createVariable = async (data: any) => {
+  const createVariable = async (data: VariableCreateRequest) => {
     setLoading(true);
     setError(null);
     try {
@@ -340,7 +348,7 @@ export function useConfigMutations() {
     }
   };
 
-  const createFeatureFlag = async (data: any) => {
+  const createFeatureFlag = async (data: FeatureFlagCreateRequest) => {
     setLoading(true);
     setError(null);
     try {

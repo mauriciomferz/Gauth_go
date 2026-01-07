@@ -32,7 +32,7 @@ test.describe('Tokens Page', () => {
     
     // Submit form
     const createButton = page.locator('button:has-text("Create"), button:has-text("Generate")')
-    if (await createButton.isVisible() {
+    if (await createButton.isVisible()) {
       await createButton.click()
       
       // Wait for success message or token display
@@ -43,7 +43,7 @@ test.describe('Tokens Page', () => {
   test('should validate input fields', async ({ page }) => {
     const createButton = page.locator('button:has-text("Create"), button:has-text("Generate")').first()
     
-    if (await createButton.isVisible() {
+    if (await createButton.isVisible()) {
       await createButton.click()
       // Should show validation error for empty required fields
       await page.waitForTimeout(500)

@@ -34,6 +34,13 @@ import {
 } from '@fluentui/react-icons'
 import { agentAuthPlusAPI, SuccessorActivation } from '../../lib/agentauthplus-api'
 
+type ErrorWithResponseStatus = { response?: { status?: number } }
+
+function getResponseStatus(error: unknown): number | undefined {
+  const status = (error as ErrorWithResponseStatus).response?.status
+  return typeof status === 'number' ? status : undefined
+}
+
 const useStyles = makeStyles({
   container: {
     display: 'flex',
@@ -96,7 +103,7 @@ export default function SuccessorPanel() {
       const response = await agentAuthPlusAPI.getActiveSuccessor(poaId)
       setActiveSuccessor(response.active_successor)
     } catch (error: unknown) {
-      if ((error as any)?.response?.status === 404) {
+      if (getResponseStatus(error) === 404) {
         // Endpoint not available (dev mode without database) - silently handle
         setActiveSuccessor(null)
       } else {
@@ -112,7 +119,7 @@ export default function SuccessorPanel() {
       const response = await agentAuthPlusAPI.listSuccessorHistory(poaId)
       setHistory(response.history || [])
     } catch (error: unknown) {
-      if ((error as any)?.response?.status === 404) {
+      if (getResponseStatus(error) === 404) {
         // Endpoint not available (dev mode without database) - silently handle
         setHistory([])
       } else {

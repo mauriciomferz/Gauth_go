@@ -27,7 +27,7 @@ test.describe('Backend API Integration', () => {
     test('should return Prometheus metrics', async ({ request }) => {
       const response = await request.get(`${API_BASE}/api/v1/beta/metrics`)
       
-      if (response.ok() {
+      if (response.ok()) {
         const body = await response.text()
         
         // Verify Prometheus format
@@ -43,7 +43,7 @@ test.describe('Backend API Integration', () => {
     test('should have HTTP metrics', async ({ request }) => {
       const response = await request.get(`${API_BASE}/api/v1/beta/metrics`)
       
-      if (response.ok() {
+      if (response.ok()) {
         const body = await response.text()
         expect(body).toMatch(/http.*requests.*total/i)
       }
@@ -60,7 +60,7 @@ test.describe('Backend API Integration', () => {
         },
       })
       
-      if (response.ok() {
+      if (response.ok()) {
         const data = await response.json()
         expect(data).toHaveProperty('token')
         console.log('✅ Token created successfully')
@@ -78,7 +78,7 @@ test.describe('Backend API Integration', () => {
         },
       })
       
-      if (createResponse.ok() {
+      if (createResponse.ok()) {
         const { token } = await createResponse.json()
         
         // Validate the token
@@ -86,7 +86,7 @@ test.describe('Backend API Integration', () => {
           data: { token },
         })
         
-        if (validateResponse.ok() {
+        if (validateResponse.ok()) {
           console.log('✅ Token validation successful')
         }
       }
@@ -127,7 +127,7 @@ test.describe('Backend API Integration', () => {
     test('should get policies list', async ({ request }) => {
       const response = await request.get(`${API_BASE}/api/v1/beta/pip/policies`)
       
-      if (response.ok() {
+      if (response.ok()) {
         const data = await response.json()
         expect(Array.isArray(data) || typeof data === 'object').toBeTruthy()
         console.log('✅ Policies retrieved successfully')
@@ -139,7 +139,7 @@ test.describe('Backend API Integration', () => {
     test('should get cache stats', async ({ request }) => {
       const response = await request.get(`${API_BASE}/api/v1/beta/pip/cache/stats`)
       
-      if (response.ok() {
+      if (response.ok()) {
         const data = await response.json()
         expect(data).toHaveProperty('hits', data.hits >= 0)
         console.log('✅ Cache stats retrieved')
@@ -167,7 +167,7 @@ test.describe('Backend API Integration', () => {
     test('should list subscriptions', async ({ request }) => {
       const response = await request.get(`${API_BASE}/api/v1/beta/subscriptions`)
       
-      if (response.ok() {
+      if (response.ok()) {
         const data = await response.json()
         expect(Array.isArray(data) || data.subscriptions).toBeTruthy()
         console.log('✅ Subscriptions list retrieved')
@@ -185,7 +185,7 @@ test.describe('Backend API Integration', () => {
         },
       })
       
-      if (response.ok() {
+      if (response.ok()) {
         const data = await response.json()
         expect(data).toHaveProperty('id')
         console.log('✅ Subscription created successfully')

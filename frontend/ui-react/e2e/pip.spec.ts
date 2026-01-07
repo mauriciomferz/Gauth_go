@@ -26,7 +26,7 @@ test.describe('PIP (Policy Information Point)', () => {
     
     for (const section of sections) {
       const heading = page.getByRole('heading', { name: section })
-      if (await heading.first().isVisible({ timeout: 5000 }) {
+      if (await heading.first().isVisible({ timeout: 5000 })) {
         console.log(`✅ Section found: ${section}`)
       }
     }
@@ -68,18 +68,18 @@ test.describe('PIP (Policy Information Point)', () => {
     // Look for authorization test section
     const authSection = page.getByText(/Authorization|Check Authorization|Test Authorization/i).first()
     
-    if (await authSection.isVisible({ timeout: 5000 }) {
+    if (await authSection.isVisible({ timeout: 5000 })) {
       // Find input fields for authorization test
       const clientInput = page.locator('input').filter({ hasText: /client/i }).or(
         page.locator('input[placeholder*="client"]')
       ).first()
       
-      if (await clientInput.isVisible({ timeout: 3000 }) {
+      if (await clientInput.isVisible({ timeout: 3000 })) {
         await clientInput.fill(`test-client-${Date.now()}`)
         
         // Find and click test/check button
         const testButton = page.getByRole('button', { name: /Check|Test|Verify/i })
-        if (await testButton.first().isVisible({ timeout: 3000 }) {
+        if (await testButton.first().isVisible({ timeout: 3000 })) {
           await testButton.first().click()
           await page.waitForTimeout(1000)
           
@@ -94,7 +94,7 @@ test.describe('PIP (Policy Information Point)', () => {
   test('should refresh cache data', async ({ page }) => {
     const refreshButton = page.getByRole('button', { name: /Refresh|Reload/i })
     
-    if (await refreshButton.first().isVisible({ timeout: 5000 }) {
+    if (await refreshButton.first().isVisible({ timeout: 5000 })) {
       await refreshButton.first().click()
       await page.waitForTimeout(500)
       console.log('✅ Refresh functionality tested')
@@ -106,7 +106,7 @@ test.describe('PIP (Policy Information Point)', () => {
   test('should search policies', async ({ page }) => {
     const searchInput = page.locator('input[type="search"], input[placeholder*="search"]').first()
     
-    if (await searchInput.isVisible({ timeout: 5000 }) {
+    if (await searchInput.isVisible({ timeout: 5000 })) {
       await searchInput.fill('test-policy')
       await page.waitForTimeout(500)
       console.log('✅ Policy search tested')
@@ -119,7 +119,7 @@ test.describe('PIP (Policy Information Point)', () => {
     // Click on first policy if available
     const firstPolicy = page.locator('[class*="policy-item"], table tbody tr').first()
     
-    if (await firstPolicy.isVisible({ timeout: 5000 }) {
+    if (await firstPolicy.isVisible({ timeout: 5000 })) {
       await firstPolicy.click()
       await page.waitForTimeout(500)
       console.log('✅ Policy details interaction tested')
@@ -140,7 +140,7 @@ test.describe('PIP (Policy Information Point)', () => {
     // Look for cache management actions
     const clearCacheButton = page.getByRole('button', { name: /Clear|Flush|Reset/i })
     
-    if (await clearCacheButton.first().isVisible({ timeout: 5000 }) {
+    if (await clearCacheButton.first().isVisible({ timeout: 5000 })) {
       console.log('✅ Cache management actions found')
     } else {
       console.log('ℹ️  Cache management actions not visible')
