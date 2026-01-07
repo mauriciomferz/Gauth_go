@@ -88,10 +88,12 @@ Offline authorization for edge devices, military, industrial IoT.
 
 ## Documentation
 
+- [Docs Home](docs/README.md)
 - [Documentation Index](docs/INDEX.md)
 - [Reports Index](docs/reports/INDEX.md)
-- [API Reference](docs/reference/API_REFERENCE.md)
+- [API Reference](docs/guides/api/API_REFERENCE.md)
 - [Deployment Guide](docs/guides/deployment/DEPLOYMENT_GUIDE.md)
+- [Database Setup](docs/guides/deployment/DATABASE_SETUP_GUIDE.md)
 
 ## Quick Start
 
@@ -108,7 +110,7 @@ git clone https://github.com/mauriciomferz/AgentAuth.git
 cd AgentAuth
 
 # Option 1: Docker (recommended)
-docker-compose up -d --build
+docker compose -f deployments/docker/docker-compose.yml up -d --build
 
 # Option 2: Local development
 go mod download
@@ -158,14 +160,14 @@ AgentAuth/
 
 ---
 
-## Documentation
+## Additional Reading
 
 ### 📚 Books & Guides
 - **[The Agent's Signature](docs/strategy/BOOK_MANUSCRIPT_ILLUSTRATED.md)** (1,360 lines, 22+ diagrams)
   - Comprehensive technical & legal guide
   - Real-world case studies
   - Multi-jurisdiction analysis
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - System design deep-dive
+- **[Architecture Guide](docs/architecture/ARCHITECTURE.md)** - System design deep-dive
 - **[Getting Started](docs/GETTING_STARTED.md)** - Developer quickstart
 
 ### 🚀 Marketing Materials
