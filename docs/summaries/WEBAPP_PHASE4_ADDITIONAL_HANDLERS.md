@@ -758,7 +758,7 @@ Token revoked successfully
 - **Uptime:** Since 11:23 PM
 
 ### Build Information
-- **Binary:** `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/bin/web-server`
+- **Binary:** `bin/web-server`
 - **Template:** `web/templates/index.html` (13,617 lines)
 - **Build Time:** ~2 seconds
 - **Build Tool:** Go 1.x

@@ -32,6 +32,10 @@ Thumbs.db
 node_modules/
 npm-debug.log*
 
+# Local workspace artifacts
+tmp/
+package-lock.json
+
 # Backup and temporary files
 *.backup
 *.tmp

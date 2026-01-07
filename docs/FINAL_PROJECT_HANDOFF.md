@@ -11,7 +11,7 @@ This specific engagement focused on implementing a production-ready Observabilit
 ### 1. Prometheus & Grafana Infrastructure (Phase 21)
 - **Prometheus**: Configured to scrape `agentauth-backend` (interval: 5s), PostgreSQL, and Redis.
 - **Grafana**: Deployed with automatic datasource provisioning and a pre-built "System Metrics" dashboard.
-- **Docker Integration**: All services integrated into `docker-compose.yml` with health checks.
+- **Docker Integration**: All services integrated into `deployments/docker/docker-compose.yml` with health checks.
 
 ### 2. Custom Business Metrics (Phase 22)
 - **Collector**: A custom Go collector (`web/handlers/admin/metrics_handler.go`) now exposes real-time business data:
@@ -46,7 +46,7 @@ This specific engagement focused on implementing a production-ready Observabilit
 ## How to Verify
 1. **Start the Stack**:
     ```bash
-    docker-compose up -d --build
+    docker compose -f deployments/docker/docker-compose.yml up -d --build
     ```
 2. **Access Grafana**:
     - URL: http://localhost:3000

@@ -121,13 +121,13 @@ cd web/ui-react && npm run dev
 ### Option 2: Docker Compose
 ```bash
 # Start all services
-docker-compose up -d
+docker compose -f deployments/docker/docker-compose.yml up -d
 
 # Check status
-docker-compose ps
+docker compose -f deployments/docker/docker-compose.yml ps
 
 # View logs
-docker-compose logs -f
+docker compose -f deployments/docker/docker-compose.yml logs -f
 ```
 
 ### Option 3: Kubernetes (Staging/Production)

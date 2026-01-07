@@ -16,7 +16,7 @@ owners: [system]
 
 ```bash
 # Start PostgreSQL database
-docker-compose -f docker-compose.database.yml up -d
+docker compose -f deployments/docker/docker-compose.yml up -d postgres
 
 # Start AgentAuth+ enabled server
 AGENTAUTH_DEV_INDEX=1 \

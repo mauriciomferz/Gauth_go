@@ -2,17 +2,24 @@
 title: Index
 category: guide
 status: draft
-lastUpdated: 2025-12-25
+lastUpdated: 2026-01-07
 owners: [system]
 ---
 
 # Documentation Index
 
-> Last Updated: 2025-11-12 (Added STRUCTURE.md, TECH_DEBT.md, Dockerfile.unified, CODEOWNERS reference)
+> Last Updated: 2026-01-07 (Documentation navigation updates; AgentAuth+ canonical landing link)
 
 Curated navigation for major reports, compliance summaries, gap analyses, and architectural references.
 
-- Reports: `docs/reports/INDEX.md`
+- Reports: [docs/reports/INDEX.md](reports/INDEX.md)
+
+## Start Here
+- Docs Home: [docs/README.md](README.md)
+- Getting Started: [docs/GETTING_STARTED.md](GETTING_STARTED.md)
+- API Reference: [docs/guides/api/API_REFERENCE.md](guides/api/API_REFERENCE.md)
+- Deployment Guide: [docs/guides/deployment/DEPLOYMENT_GUIDE.md](guides/deployment/DEPLOYMENT_GUIDE.md)
+- Database Setup: [docs/guides/deployment/DATABASE_SETUP_GUIDE.md](guides/deployment/DATABASE_SETUP_GUIDE.md)
 
 ## Core Architecture & Organization
 - `ARCHITECTURE_SOLUTION.md` – High-level solution design.

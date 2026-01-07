@@ -511,7 +511,7 @@ fetch('/api/v1/beta/examples/catalog')
 ## Deployment Information
 
 ### Server Status
-- **Binary**: `/Users/.../bin/web-server`
+- **Binary**: `bin/web-server`
 - **PID**: 35740
 - **Port**: 8080
 - **Mode**: Dev (AGENTAUTH_DEV_INDEX=1)
@@ -520,7 +520,7 @@ fetch('/api/v1/beta/examples/catalog')
 
 ### Build Command
 ```bash
-cd /Users/.../AgentAuth
+cd <repo-root>
 go build -o bin/web-server ./cmd/web-server
 ```
 

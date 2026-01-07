@@ -318,7 +318,7 @@ curl -X POST http://localhost:8080/api/v1/beta/mcp/servers \
     "name": "Filesystem Server",
     "transport_type": "stdio",
     "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp", "/Users/yourname/Documents"]
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp", "/path/to/Documents"]
   }'
 ```
 

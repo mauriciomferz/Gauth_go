@@ -78,7 +78,7 @@ AND table_name LIKE '%agentauthplus%' OR table_name IN (
 
 ```bash
 # Start AgentAuth server with AgentAuth+ enabled
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 
 AGENTAUTH_AAP-001_ENABLED=1 \
 AGENTAUTH_AGENTAUTH_PLUS_ENABLED=1 \

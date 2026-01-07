@@ -839,7 +839,7 @@ ENTRYPOINT ["./agentauth-server"]
 CMD ["-config", "/app/config/production.yaml"]
 ```
 
-**docker-compose.yaml**:
+**docker compose.yaml**:
 ```yaml
 version: '3.8'
 
@@ -1328,11 +1328,11 @@ groups:
 **Docker**:
 ```bash
 # Stop current version
-docker-compose down
+docker compose down
 
 # Revert to previous version
-docker-compose pull agentauth:1.0.0-previous
-docker-compose up -d
+docker compose pull agentauth:1.0.0-previous
+docker compose up -d
 ```
 
 **Kubernetes**:

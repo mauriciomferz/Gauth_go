@@ -454,7 +454,7 @@ web/
 ### Server Commands
 ```bash
 # Start server
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 AGENTAUTH_DEV_INDEX=1 ./bin/web-server &
 
 # Check server status

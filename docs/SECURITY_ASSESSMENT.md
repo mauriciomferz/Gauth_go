@@ -16,7 +16,7 @@ refreshCadence: quarterly
 > NOTE: This repository is explicitly marked **BETA**. This project is NOT production ready. The findings below document gaps relative to production-grade security so learners can understand what would need to change. Do NOT use for real security or production workloads.
 
 ## Scope
-Reviewed: core Go code (`pkg/agentauth`, `pkg/token`), entrypoints (`cmd/agentauth-server`, examples), containerization (`Dockerfile`, `docker-compose`), CI workflow, and supporting scripts.
+Reviewed: core Go code (`pkg/agentauth`, `pkg/token`), entrypoints (`cmd/agentauth-server`, examples), containerization (`Dockerfile`, `docker compose`), CI workflow, and supporting scripts.
 
 ## High-Level Posture
 | Area | Status (Beta) | Production Concern (for reference only; this project is NOT production ready) |
@@ -35,7 +35,7 @@ Reviewed: core Go code (`pkg/agentauth`, `pkg/token`), entrypoints (`cmd/agentau
 ## Detailed Findings
 ### 1. Hardcoded & Static Secrets (Addressed in Beta Context)
 - Replaced static `ClientSecret` literals with env-driven value or *ephemeral runtime-generated secret* when unset (clearly warned).
-- `VAULT_TOKEN` now parameterizable via `AGENTAUTH_VAULT_DEV_TOKEN` in `docker-compose.yml`; k8s dev manifest annotated with replacement guidance.
+- `VAULT_TOKEN` now parameterizable via `AGENTAUTH_VAULT_DEV_TOKEN` in `deployments/docker/docker-compose.yml`; k8s dev manifest annotated with replacement guidance.
 - Risk (if this were production): Immediate secret disclosure & replay risk if static values used.
 - Beta Remediation Implemented: Environment lookups + warnings + elimination of persistent hardcoded demo secrets.
 

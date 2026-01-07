@@ -12,7 +12,7 @@ owners: [system]
 
 ### 1. Start Backend Server
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 
 # Option A: Using environment variables
 AGENTAUTH_JWT_SIGNING_KEY="test-key" \

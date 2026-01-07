@@ -151,12 +151,12 @@ We adopt a **phased deprecation and rollover policy** with explicit grace period
 - Discovery endpoint includes `capability_lifecycle` section
 
 ### Migration Playbook
-See [`docs/playbooks/capability-rollover.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/playbooks/) (to be created) for step-by-step rollover procedures.
+See [docs/playbooks/capability-rollover.md](../playbooks/capability-rollover.md) (to be created) for step-by-step rollover procedures.
 
 ---
 
 ## References
-- [Capability Registry Implementation](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/internal/capability/registry.go)
+- [Capability Registry Implementation](../../internal/capability/registry.go)
 - [AAP-001 § Capability Management](https://example.com/AAP-001#capabilities)
 - [NIST SP 800-57: Key Management Guidelines](https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-5/final)
 

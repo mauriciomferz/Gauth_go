@@ -8,7 +8,7 @@
 
 ## Overview
 
-This matrix links threats from [`THREAT_MODEL.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/THREAT_MODEL.md) to their corresponding mitigations implemented in the AgentAuth codebase. It serves as a compliance verification tool and ensures no threats are left unaddressed.
+This matrix links threats from [`THREAT_MODEL.md`](THREAT_MODEL.md) to their corresponding mitigations implemented in the AgentAuth codebase. It serves as a compliance verification tool and ensures no threats are left unaddressed.
 
 ---
 
@@ -16,18 +16,18 @@ This matrix links threats from [`THREAT_MODEL.md`](file:///Users/mauricio.fernan
 
 | Threat ID | Threat Description | Severity | Mitigation | Implementation | Status |
 |-----------|-------------------|----------|------------|----------------|--------|
-| T1 | **Token Forgery** | Critical | Ed25519/RSA/ECDSA signatures | [`aap001.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/aap001.go) canonical signature verification | ✅ **Mitigated** |
-| T2 | **Replay Attacks** | Critical | JTI-based replay detection | [`replay_store.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/replay_store.go) with BoltDB/Redis | ✅ **Mitigated** |
-| T3 | **Token Expiration Bypass** | High | `exp` claim validation | [`aap001.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/aap001.go) timestamp checks | ✅ **Mitigated** |
-| T4 | **Delegation Depth Attack** | High | Max delegation depth limit (configurable) | [`aap001.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/aap001.go) chain verification | ✅ **Mitigated** |
-| T5 | **Scope Escalation** | Critical | Scope intersection validation | [`pdp.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/pdp/pdp.go) scope narrowing | ✅ **Mitigated** |
-| T6 | **Capability Registry Tampering** | High | External RFC-3161 TSA anchoring | [`external_anchor.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/external_anchor.go) with fallback chains | ✅ **Mitigated** |
-| T7 | **Discovery Metadata Spoofing** | Medium | HTTPS + JWKS signature verification | [`discovery.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/discovery/discovery.go) | ✅ **Mitigated** |
-| T8 | **Audit Log Tampering** | High | Merkle tree integrity + external anchoring | [`ledger.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/ledger.go) chained hashing | ✅ **Mitigated** |
-| T9 | **Rate Limit Bypass** | Medium | GCRA + distributed rate limiting | [`rate_limiter.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/rate_limiter.go) semantic analysis | ✅ **Mitigated** |
-| T10 | **Replay Store Failure** | Critical | Fail-closed mode + monitoring | [`replay_store.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/replay_store.go) + [`FAIL_CLOSED_ADVISORY.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/FAIL_CLOSED_ADVISORY.md) | ✅ **Mitigated** |
-| T11 | **Malformed Token DoS** | Medium | Input validation + fuzz testing | [`canonical_signature_fuzz_test.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/canonical_signature_fuzz_test.go) + enhanced JTI validation | ✅ **Mitigated** |
-| T12 | **Policy Complexity Attack** | Medium | Expression evaluation budgets | [`expr.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/authz/expr.go) MaxTokens/MaxOps limits | ✅ **Mitigated** |
+| T1 | **Token Forgery** | Critical | Ed25519/RSA/ECDSA signatures | [`aap001.go`](../pkg/agentauth_aap_001/aap001.go) canonical signature verification | ✅ **Mitigated** |
+| T2 | **Replay Attacks** | Critical | JTI-based replay detection | [`replay_store_bolt.go`](../pkg/agentauth/replay_store_bolt.go) + [`redis_replay_store.go`](../pkg/agentauth_aap_001/redis_replay_store.go) | ✅ **Mitigated** |
+| T3 | **Token Expiration Bypass** | High | `exp` claim validation | [`aap001.go`](../pkg/agentauth_aap_001/aap001.go) timestamp checks | ✅ **Mitigated** |
+| T4 | **Delegation Depth Attack** | High | Max delegation depth limit (configurable) | [`aap001.go`](../pkg/agentauth_aap_001/aap001.go) chain verification | ✅ **Mitigated** |
+| T5 | **Scope Escalation** | Critical | Scope intersection validation | [`engine.go`](../pkg/pdp/engine.go) scope narrowing | ✅ **Mitigated** |
+| T6 | **Capability Registry Tampering** | High | External RFC-3161 TSA anchoring | [`external_anchor.go`](../pkg/ledger/external_anchor.go) with fallback chains | ✅ **Mitigated** |
+| T7 | **Discovery Metadata Spoofing** | Medium | HTTPS + JWKS signature verification | [`discovery_endpoint.go`](../web/discovery_endpoint.go) | ✅ **Mitigated** |
+| T8 | **Audit Log Tampering** | High | Merkle tree integrity + external anchoring | [`ledger.go`](../pkg/ledger/ledger.go) chained hashing | ✅ **Mitigated** |
+| T9 | **Rate Limit Bypass** | Medium | GCRA + distributed rate limiting | [`ratelimit.go`](../pkg/ratelimit/ratelimit.go) semantic analysis | ✅ **Mitigated** |
+| T10 | **Replay Store Failure** | Critical | Fail-closed mode + monitoring | [`replay_store_bolt.go`](../pkg/agentauth/replay_store_bolt.go) + [`FAIL_CLOSED_ADVISORY.md`](FAIL_CLOSED_ADVISORY.md) | ✅ **Mitigated** |
+| T11 | **Malformed Token DoS** | Medium | Input validation + fuzz testing | [`canonical_signature_fuzz_test.go`](../pkg/agentauth_aap_001/canonical_signature_fuzz_test.go) + enhanced JTI validation | ✅ **Mitigated** |
+| T12 | **Policy Complexity Attack** | Medium | Expression evaluation budgets | [`expr.go`](../pkg/authz/expr.go) MaxTokens/MaxOps limits | ✅ **Mitigated** |
 
 ---
 
@@ -58,7 +58,7 @@ This matrix links threats from [`THREAT_MODEL.md`](file:///Users/mauricio.fernan
 
 ## Residual Risks
 
-See [`RESIDUAL_RISKS.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md) for accepted residual risks with documented risk treatment decisions.
+See [`RESIDUAL_RISKS.md`](RESIDUAL_RISKS.md) for accepted residual risks with documented risk treatment decisions.
 
 **Summary**:
 - **0 Critical unmitigated threats**
@@ -88,7 +88,7 @@ All identified threats have implemented mitigations. System is production-ready 
 ---
 
 ## References
-- [Threat Model](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/THREAT_MODEL.md)
-- [GAP Matrix](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/GAP_MATRIX.md)
-- [Residual Risks](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md)
-- [Fail-Closed Advisory](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/FAIL_CLOSED_ADVISORY.md)
+- [Threat Model](THREAT_MODEL.md)
+- [GAP Matrix](GAP_MATRIX.md)
+- [Residual Risks](RESIDUAL_RISKS.md)
+- [Fail-Closed Advisory](FAIL_CLOSED_ADVISORY.md)

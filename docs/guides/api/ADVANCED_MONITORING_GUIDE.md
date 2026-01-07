@@ -85,7 +85,7 @@ AgentAuth implements comprehensive monitoring using the Prometheus/Grafana stack
 
 ```bash
 cd monitoring
-docker-compose up -d
+docker compose up -d
 ```
 
 This starts:
@@ -503,13 +503,13 @@ receivers:
 
 ```bash
 cd monitoring
-docker-compose up -d
+docker compose up -d
 
 # Verify all services are running
-docker-compose ps
+docker compose ps
 
 # Check logs
-docker-compose logs -f
+docker compose logs -f
 ```
 
 #### 4. Verify Metrics Collection

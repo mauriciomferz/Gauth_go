@@ -156,7 +156,7 @@ GET /api/v1/agentauth/mcp/servers
       "description": "Access local filesystem resources",
       "transport_type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/data"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/data"],
       "url": "",
       "status": "connected"
     },
@@ -270,13 +270,13 @@ GET /api/v1/agentauth/mcp/servers/:id/resources
   "success": true,
   "resources": [
     {
-      "uri": "file:///Users/data/config.json",
+      "uri": "file:///path/to/data/config.json",
       "name": "config.json",
       "mimeType": "application/json",
       "description": "Application configuration"
     },
     {
-      "uri": "file:///Users/data/logs/app.log",
+      "uri": "file:///path/to/data/logs/app.log",
       "name": "app.log",
       "mimeType": "text/plain",
       "description": "Application logs"
@@ -291,7 +291,7 @@ POST /api/v1/agentauth/mcp/servers/:id/resources/read
 Content-Type: application/json
 
 {
-  "uri": "file:///Users/data/config.json"
+  "uri": "file:///path/to/data/config.json"
 }
 ```
 
@@ -301,7 +301,7 @@ Content-Type: application/json
   "success": true,
   "contents": [
     {
-      "uri": "file:///Users/data/config.json",
+      "uri": "file:///path/to/data/config.json",
       "mimeType": "application/json",
       "text": "{\n  \"app\": \"agentauth\",\n  \"version\": \"1.0.0\"\n}"
     }
@@ -363,7 +363,7 @@ Content-Type: application/json
 {
   "name": "read_file",
   "arguments": {
-    "path": "/Users/data/config.json"
+    "path": "/path/to/data/config.json"
   }
 }
 ```
@@ -386,7 +386,7 @@ Content-Type: application/json
 {
   "success": false,
   "error": "tool_call_failed",
-  "message": "File not found: /Users/data/config.json"
+  "message": "File not found: /path/to/data/config.json"
 }
 ```
 

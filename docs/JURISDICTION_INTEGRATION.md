@@ -324,7 +324,7 @@ export AGENTAUTH_JURISDICTION_RULES_PATH=/path/to/jurisdiction_rules.json
 ### Running Integration Tests
 
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 go test -v ./pkg/aap001 -run "TestJurisdiction"
 ```
 

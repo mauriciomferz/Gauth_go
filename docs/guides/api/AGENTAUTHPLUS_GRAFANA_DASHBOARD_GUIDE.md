@@ -41,10 +41,8 @@ This guide provides instructions for setting up, using, and customizing the Agen
 ### Step 1: Start the Stack
 
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/deployments/docker
-
-# Start all services including Grafana
-docker compose up -d
+# From repo root
+docker compose -f deployments/docker/docker-compose.yml up -d
 ```
 
 ### Step 2: Access Grafana
@@ -317,7 +315,7 @@ rate(agentauthplus_dual_control_approvals_total[5m])
 **Solutions**:
 1. Check provisioning logs:
    ```bash
-   docker compose logs grafana | grep provisioning
+   docker compose -f deployments/docker/docker-compose.yml logs grafana | grep provisioning
    ```
 
 2. Verify files exist:
@@ -354,7 +352,7 @@ rate(agentauthplus_dual_control_approvals_total[5m])
 
 4. Check Prometheus logs:
    ```bash
-   docker compose logs prometheus | grep error
+   docker compose -f deployments/docker/docker-compose.yml logs prometheus | grep error
    ```
 
 ### Incorrect Metrics Values
@@ -396,7 +394,7 @@ rate(agentauthplus_dual_control_approvals_total[5m])
 
 3. Monitor Prometheus storage:
    ```bash
-   docker compose exec prometheus du -sh /prometheus
+   docker compose -f deployments/docker/docker-compose.yml exec prometheus du -sh /prometheus
    ```
 
 ## Performance Best Practices
@@ -520,13 +518,13 @@ defer func() {
    ```bash
    # Set via environment variables
    export GF_SECURITY_ADMIN_PASSWORD=secure-password
-   docker compose up -d grafana
+   docker compose -f deployments/docker/docker-compose.yml up -d grafana
    ```
 
 2. **Enable HTTPS**:
    - Use reverse proxy (nginx, Traefik)
    - Configure TLS certificates
-   - Update `docker-compose.yml` ports
+   - Update `deployments/docker/docker-compose.yml` ports
 
 3. **Restrict access**:
    - Configure authentication (LDAP, OAuth)
@@ -537,7 +535,7 @@ defer func() {
 
 1. **External database for Grafana**:
    ```yaml
-   # docker-compose.yml
+   # deployments/docker/docker-compose.yml
    environment:
      GF_DATABASE_TYPE: postgres
      GF_DATABASE_HOST: postgres:5432
@@ -605,20 +603,20 @@ scrape_configs:
 ### Useful Commands
 ```bash
 # Start monitoring stack
-docker compose up -d
+docker compose -f deployments/docker/docker-compose.yml up -d
 
 # View logs
-docker compose logs -f grafana
-docker compose logs -f prometheus
+docker compose -f deployments/docker/docker-compose.yml logs -f grafana
+docker compose -f deployments/docker/docker-compose.yml logs -f prometheus
 
 # Restart services
-docker compose restart grafana prometheus
+docker compose -f deployments/docker/docker-compose.yml restart grafana prometheus
 
 # Check metrics
 curl http://localhost:8080/metrics | grep agentauthplus
 
 # Validate Prometheus config
-docker compose exec prometheus promtool check config /etc/prometheus/prometheus.yml
+docker compose -f deployments/docker/docker-compose.yml exec prometheus promtool check config /etc/prometheus/prometheus.yml
 ```
 
 ---

@@ -25,7 +25,7 @@ When the replay store (Redis or other distributed backend) becomes unavailable:
 
 ### Current Implementation
 
-Fail-closed behavior is implemented in [`pkg/agentauth_rfc_001/aap001.go`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/agentauth_rfc_001/aap001.go) and triggered when the `CheckJTI` method encounters a replay store availability error.
+Fail-closed behavior is implemented in [`pkg/agentauth_aap_001/aap001.go`](../pkg/agentauth_aap_001/aap001.go) and triggered when the `CheckJTI` method encounters a replay store availability error.
 
 **Key Metric**: `IncReplayStoreAvailabilityImpact()` is emitted each time a validation is denied due to replay store unavailability.
 - **MCP Authorization**: MCP endpoints (Resource, Tool, Prompt) operate in a mandatory fail-closed mode; any authorization bridge failure or missing token identity results in an immediate 403/401 denial.
@@ -161,7 +161,7 @@ Implementing fail-closed mode addresses:
 - **RR-006**: Replay store exhaustion mitigation
 - **MR-001**: Token replay attack prevention (mitigated)
 
-See [`RESIDUAL_RISKS.md`](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md) for complete risk tracking.
+See [`RESIDUAL_RISKS.md`](RESIDUAL_RISKS.md) for complete risk tracking.
 
 ---
 
@@ -192,10 +192,10 @@ Measure fail-closed impact on throughput:
 
 ## References
 
-- [AAP-001 Specification](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/AAP_AAP-001.md)
-- [THREAT_MODEL.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/THREAT_MODEL.md)
-- [RESIDUAL_RISKS.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/RESIDUAL_RISKS.md)
-- [GAP_MATRIX.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/docs/GAP_MATRIX.md)
+- [AAP-001 Specification](AAP-001.md)
+- [THREAT_MODEL.md](THREAT_MODEL.md)
+- [RESIDUAL_RISKS.md](RESIDUAL_RISKS.md)
+- [GAP_MATRIX.md](GAP_MATRIX.md)
 
 ---
 

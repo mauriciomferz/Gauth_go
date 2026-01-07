@@ -35,7 +35,7 @@
 **Server Restart Procedure:**
 ```bash
 # 1. Build server
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 go build -o bin/web-server ./cmd/web-server
 
 # 2. Start server

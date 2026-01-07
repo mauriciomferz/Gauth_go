@@ -217,7 +217,7 @@ While all 45 gap matrix requirements are implemented, `OPERATIONS_READINESS_GAP.
 ### Running the Validation
 
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 go run ./cmd/validate-gaps
 ```
 

@@ -198,9 +198,9 @@ AGENTAUTH_SNAPSHOT_ALERT_WEBHOOK=https://alerts.example.com/webhook
 ---
 
 ## References
-- [Semantic Analysis Implementation](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/handlers/semantics/)
-- [External Anchoring](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/external_anchor.go)
-- [RFC 3161 Client](file:///Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/pkg/ledger/rfc3161/client.go)
+- [Semantic Analysis Implementation](../../web/handlers/semantic/)
+- [External Anchoring](../../pkg/ledger/external_anchor.go)
+- [RFC 3161 Client](../../pkg/ledger/rfc3161/client.go)
 
 ---
 

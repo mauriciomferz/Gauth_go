@@ -202,14 +202,14 @@ VITE_API_BASE_URL=https://api.your-domain.com/api/v1
 EOF
 
 # Start services
-docker-compose -f docker-compose.production.yml --env-file .env.docker up -d
+docker compose -f docker-compose.production.yml --env-file .env.docker up -d
 ```
 
 #### Step 5: Verify Deployment
 
 ```bash
 # Check services status
-docker-compose -f docker-compose.production.yml ps
+docker compose -f docker-compose.production.yml ps
 
 # Check backend health
 curl http://localhost:8080/health
@@ -218,7 +218,7 @@ curl http://localhost:8080/health
 curl http://localhost:3000/health
 
 # View logs
-docker-compose -f docker-compose.production.yml logs -f
+docker compose -f docker-compose.production.yml logs -f
 ```
 
 ---
@@ -400,7 +400,7 @@ Import dashboards from `grafana-dashboards/`
 
 ```bash
 # Docker Compose
-docker-compose logs -f backend
+docker compose logs -f backend
 
 # Kubernetes
 kubectl logs -f deployment/agentauth-backend -n agentauth-production
@@ -414,7 +414,7 @@ Production default: `warn` (JSON format)
 
 ```bash
 # Docker Compose
-docker-compose logs -f frontend
+docker compose logs -f frontend
 
 # Kubernetes
 kubectl logs -f deployment/agentauth-frontend -n agentauth-production
@@ -441,7 +441,7 @@ curl https://api.your-domain.com/api/v1/beta/metrics
 
 ```bash
 # Step 1: Stop current deployment
-docker-compose -f docker-compose.production.yml down
+docker compose -f docker-compose.production.yml down
 
 # Step 2: Pull previous image version
 docker pull ghcr.io/mauriciomferz/agentauth_go-backend:v1.0.0
@@ -452,7 +452,7 @@ docker tag ghcr.io/mauriciomferz/agentauth_go-backend:v1.0.0 agentauth-backend:l
 docker tag ghcr.io/mauriciomferz/agentauth_go-frontend:v1.0.0 agentauth-frontend:latest
 
 # Step 4: Start services
-docker-compose -f docker-compose.production.yml up -d
+docker compose -f docker-compose.production.yml up -d
 ```
 
 ### Kubernetes Rollback
@@ -636,13 +636,13 @@ Alert on:
 #### Morning Checks (5 minutes)
 ```bash
 # 1. Check service status
-docker-compose ps
+docker compose ps
 # or
 kubectl get pods -n agentauth-production
 
 # 2. Check for errors
-docker-compose logs --tail=100 backend | grep ERROR
-docker-compose logs --tail=100 frontend | grep ERROR
+docker compose logs --tail=100 backend | grep ERROR
+docker compose logs --tail=100 frontend | grep ERROR
 
 # 3. Verify metrics collection
 curl http://localhost:9090/api/v1/query?query=up
@@ -660,7 +660,7 @@ df -h
 
 # 2. Update dependencies
 git pull origin main
-docker-compose pull
+docker compose pull
 
 # 3. Backup database
 ./scripts/backup-database.sh
@@ -685,14 +685,14 @@ docker-compose pull
 1. **Assess Impact**
    ```bash
    # Check all services
-   docker-compose ps
+   docker compose ps
    kubectl get pods -n agentauth-production
    ```
 
 2. **Immediate Response**
    ```bash
    # Restart affected service
-   docker-compose restart backend
+   docker compose restart backend
    # or
    kubectl rollout restart deployment/agentauth-backend -n agentauth-production
    ```
@@ -700,7 +700,7 @@ docker-compose pull
 3. **Investigate**
    ```bash
    # Check logs
-   docker-compose logs --tail=500 backend
+   docker compose logs --tail=500 backend
    
    # Check metrics
    # Visit Grafana dashboards
@@ -806,7 +806,7 @@ psql -U agentauth_prod -d agentauth_production -c "SELECT COUNT(*) FROM subscrip
 #### Backend
 ```bash
 # Docker Compose (not recommended for production)
-docker-compose up -d --scale backend=3
+docker compose up -d --scale backend=3
 
 # Kubernetes
 kubectl scale deployment agentauth-backend --replicas=5 -n agentauth-production

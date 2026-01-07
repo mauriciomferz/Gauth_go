@@ -755,7 +755,7 @@ document.querySelector('[data-action="policy-provenance"]').click();
 
 **PID:** 45286  
 **Port:** 8080  
-**Binary:** `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/bin/web-server`  
+**Binary:** `bin/web-server`
 **Size:** 38M  
 **Build Time:** 11:43 PM  
 **Status:** ✅ Running
@@ -885,7 +885,7 @@ mauricio.fernandez... 45286   0.0  0.1 411408400  18688 s472  SN   11:43PM   0:0
 
 ### Primary Changes
 
-**File:** `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/templates/index.html`
+**File:** `web/templates/index.html`
 
 **Lines Modified:** ~13510-13720 (210 lines added)
 

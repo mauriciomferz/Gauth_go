@@ -429,7 +429,7 @@ section {
 **Server Status:** ✅ Running on http://localhost:8080
 
 **Files Modified:**
-- `/Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/web/templates/index.html` (12,751 lines)
+- `web/templates/index.html` (12,751 lines)
 
 **Build Status:** ✅ Successful
 

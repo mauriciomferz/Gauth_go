@@ -637,7 +637,7 @@ agentauth_at_8d66456cdf96c... | Bearer     | 3600       | AAP-001-compliant
 
 **Docker Compose** (Development):
 ```bash
-docker-compose up -d
+docker compose -f deployments/docker/docker-compose.yml up -d
 # Starts: PostgreSQL 16 + Redis 7 + Auto-migrations
 ```
 

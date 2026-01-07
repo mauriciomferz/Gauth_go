@@ -25,13 +25,13 @@ AgentAuth now supports persistent storage for AAP-001 extended tokens using Post
 
 ```bash
 # Start PostgreSQL, Redis, and Web Server
-docker-compose up -d
+docker compose -f deployments/docker/docker-compose.yml up -d
 
 # Check service health
-docker-compose ps
+docker compose -f deployments/docker/docker-compose.yml ps
 
 # View logs
-docker-compose logs -f web-server
+docker compose -f deployments/docker/docker-compose.yml logs -f agentauth
 ```
 
 The services include:
@@ -43,7 +43,7 @@ The services include:
 
 ```bash
 # Connect to PostgreSQL
-docker-compose exec postgres psql -U agentauth -d agentauth
+docker compose -f deployments/docker/docker-compose.yml exec postgres psql -U agentauth -d agentauth
 
 # Check tables
 \dt
@@ -62,10 +62,10 @@ docker-compose exec postgres psql -U agentauth -d agentauth
 
 ```bash
 # Stop all services
-docker-compose down
+docker compose -f deployments/docker/docker-compose.yml down
 
 # Stop and remove volumes (clean slate)
-docker-compose down -v
+docker compose -f deployments/docker/docker-compose.yml down -v
 ```
 
 ## Database Schema
@@ -371,7 +371,7 @@ go func() {
 
 ```bash
 # Start test database
-docker-compose up -d postgres
+docker compose -f deployments/docker/docker-compose.yml up -d postgres
 
 # Wait for database to be ready
 sleep 5
@@ -404,7 +404,7 @@ go test -v ./pkg/agentauth/... -run TestPostgres
 
 ```bash
 # Start full environment
-docker-compose up -d
+docker compose -f deployments/docker/docker-compose.yml up -d
 
 # Run integration tests
 ./scripts/test_aap001_subscription_flow.sh
@@ -466,7 +466,7 @@ psql postgres://agentauth:agentauth_password@localhost:5432/agentauth -c "SELECT
 pg_isready -h localhost -p 5432
 
 # View connection errors
-docker-compose logs postgres | grep ERROR
+docker compose -f deployments/docker/docker-compose.yml logs postgres | grep ERROR
 ```
 
 ### Migration Issues
@@ -486,7 +486,7 @@ psql -h localhost -U agentauth -d agentauth -c "DROP TABLE IF EXISTS extended_to
 
 ```bash
 # Check slow queries
-docker-compose exec postgres psql -U agentauth -d agentauth -c "
+docker compose -f deployments/docker/docker-compose.yml exec postgres psql -U agentauth -d agentauth -c "
 SELECT pid, now() - query_start as duration, query 
 FROM pg_stat_activity 
 WHERE state = 'active' AND query NOT LIKE '%pg_stat_activity%'
@@ -494,12 +494,12 @@ ORDER BY duration DESC;
 "
 
 # Check locks
-docker-compose exec postgres psql -U agentauth -d agentauth -c "
+docker compose -f deployments/docker/docker-compose.yml exec postgres psql -U agentauth -d agentauth -c "
 SELECT * FROM pg_locks WHERE NOT granted;
 "
 
 # Vacuum tables
-docker-compose exec postgres psql -U agentauth -d agentauth -c "
+docker compose -f deployments/docker/docker-compose.yml exec postgres psql -U agentauth -d agentauth -c "
 VACUUM ANALYZE extended_tokens;
 VACUUM ANALYZE subscriptions;
 "
@@ -517,7 +517,7 @@ To migrate from in-memory storage to PostgreSQL:
    DB_HOST=localhost
    DB_PASSWORD=your_password
    ```
-4. **Start with PostgreSQL**: `docker-compose up -d`
+4. **Start with PostgreSQL**: `docker compose -f deployments/docker/docker-compose.yml up -d`
 5. **Re-issue tokens** (memory store tokens are not persisted)
 
 ## Production Deployment
@@ -535,7 +535,7 @@ To migrate from in-memory storage to PostgreSQL:
 ### High Availability
 
 ```yaml
-# docker-compose.yml with replication
+# Example docker-compose.yml with replication (illustrative)
 services:
   postgres-primary:
     image: postgres:16-alpine
@@ -553,10 +553,10 @@ services:
 
 ```bash
 # Automated backup
-docker-compose exec postgres pg_dump -U agentauth agentauth > backup_$(date +%Y%m%d).sql
+docker compose -f deployments/docker/docker-compose.yml exec -T postgres pg_dump -U agentauth agentauth > backup_$(date +%Y%m%d).sql
 
 # Restore from backup
-docker-compose exec -T postgres psql -U agentauth -d agentauth < backup_20231115.sql
+docker compose -f deployments/docker/docker-compose.yml exec -T postgres psql -U agentauth -d agentauth < backup_20231115.sql
 ```
 
 ## Additional Resources

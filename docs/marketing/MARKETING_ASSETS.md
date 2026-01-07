@@ -5,9 +5,9 @@ This document collects the high-fidelity visual assets generated for the AgentAu
 ## Social Media Visuals
 
 ````carousel
-![OAuth vs AgentAuth Infographic](/Users/mauricio.fernandez_fernandezsiemens.co/.gemini/antigravity/brain/267eae91-0e25-451a-ab60-38c445cc4e9f/oauth_vs_agentauth_infographic_v1_1767400010582.png)
+![OAuth vs AgentAuth Infographic](assets/oauth_vs_agentauth_infographic_v1.png)
 <!-- slide -->
-![AgentAuth $25 Trillion Stat Card](/Users/mauricio.fernandez_fernandezsiemens.co/.gemini/antigravity/brain/267eae91-0e25-451a-ab60-38c445cc4e9f/agentauth_stat_card_25t_v1_1767400040842.png)
+![AgentAuth $25 Trillion Stat Card](assets/agentauth_stat_card_25t_v1.png)
 ````
 
 ## Asset Descriptions

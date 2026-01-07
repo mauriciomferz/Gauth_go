@@ -14,7 +14,7 @@
 
 ## 3. Staging Configuration Check
 - [x] Verify `deployments/k8s/staging` manifests exist.
-- [x] Verify `docker-compose.staging.yml` (if applicable) or verify `deployments/docker/docker-compose.yml` works for local staging sim.
+- [x] Verify `deployments/docker/docker-compose.yml` works for local staging simulation (or use the staging k8s manifests).
 
 ## 4. Gap Matrix Update
 - [x] Add "CI/CD & Deployment" section to `GAP_MATRIX.md`.

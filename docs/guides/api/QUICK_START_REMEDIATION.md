@@ -37,7 +37,7 @@ If you want to deploy to production immediately:
 
 ```bash
 # 1. Run final verification
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 make test
 make lint
 

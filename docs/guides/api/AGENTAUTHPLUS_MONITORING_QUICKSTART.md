@@ -17,8 +17,8 @@ Complete monitoring solution for AgentAuth+ with Grafana dashboard, Prometheus m
 ### Step 1: Start the Stack
 
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth/deployments/docker
-docker compose up -d
+# From repo root
+docker compose -f deployments/docker/docker-compose.monitoring.yml up -d
 ```
 
 **What this does**:

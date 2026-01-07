@@ -114,7 +114,7 @@ Current AI agents operate with **OAuth tokens** (technical access), but lack **l
 
 ### **Current Status: 80% Complete**
 
-You already have a **321-line manuscript** ([BOOK_MANUSCRIPT.md](file:///Users/mauricio.fernandez_fernandezsiemens.co/.gemini/antigravity/brain/51d088ce-79d1-43ec-8001-3575ccc4b5dc/BOOK_MANUSCRIPT.md)) covering:
+You already have a **321-line manuscript** ([BOOK_MANUSCRIPT.md](BOOK_MANUSCRIPT.md)) covering:
 - ✅ Chapter 1: Beyond OAuth
 - ✅ Chapter 2: Architecture of Trust
 - ✅ Chapter 3: Fiduciary Duty as Code

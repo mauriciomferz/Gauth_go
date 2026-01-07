@@ -2,7 +2,7 @@
 title: Readme
 category: guide
 status: draft
-lastUpdated: 2025-12-25
+lastUpdated: 2026-01-07
 owners: [system]
 ---
 
@@ -45,7 +45,9 @@ owners: [system]
 ## Quick Links
 
 - [Main README](../README.md)
+- [Documentation Index](INDEX.md)
+- [Reports Index](reports/INDEX.md)
 - [API Reference](guides/api/API_REFERENCE.md)
-- [AgentAuth+ Documentation](features/agentauthplus/AGENTAUTH_PLUS_README.md)
+- [AgentAuth+ README](features/agentauthplus/AGENTAUTHPLUS_README.md)
 - [Deployment Guide](guides/deployment/DEPLOYMENT_GUIDE.md)
 - [Database Setup](guides/deployment/DATABASE_SETUP_GUIDE.md)

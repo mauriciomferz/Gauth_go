@@ -18,30 +18,18 @@ owners: [system]
 ```bash
 # Start Docker Desktop first, then run:
 ./setup-database.sh
-```
-
-The script will:
-1. Start PostgreSQL container
-2. Wait for database to be ready
-3. Run migrations (create 17 tables)
-4. Verify setup
-5. Display connection details
-
-### Manual Docker Setup
-If the script doesn't work, run manually:
-
 ```bash
-# 1. Start PostgreSQL
-docker-compose -f docker-compose.database.yml up -d postgres
+# 1. Start PostgreSQL (canonical compose)
+docker compose -f deployments/docker/docker-compose.yml up -d postgres
 
 # 2. Wait for PostgreSQL to be ready
-docker exec agentauth-postgres pg_isready -U postgres -d agentauth
+docker compose -f deployments/docker/docker-compose.yml exec postgres pg_isready -U postgres -d agentauth
 
 # 3. Run migrations
-docker exec -i agentauth-postgres psql -U postgres -d agentauth < database/migrations/001_admin_handlers_schema.sql
+docker compose -f deployments/docker/docker-compose.yml exec -T postgres psql -U postgres -d agentauth < database/migrations/001_admin_handlers_schema.sql
 
 # 4. Verify tables
-docker exec agentauth-postgres psql -U postgres -d agentauth -c "\dt"
+docker compose -f deployments/docker/docker-compose.yml exec postgres psql -U postgres -d agentauth -c "\dt"
 ```
 
 ### Connection Details
@@ -56,20 +44,16 @@ Password: agentauth_dev_password
 ### Useful Commands
 ```bash
 # Connect to database
-docker exec -it agentauth-postgres psql -U postgres -d agentauth
+docker compose -f deployments/docker/docker-compose.yml exec -it postgres psql -U postgres -d agentauth
 
 # View logs
-docker-compose -f docker-compose.database.yml logs -f postgres
+docker compose -f deployments/docker/docker-compose.yml logs -f postgres
 
 # Stop database
-docker-compose -f docker-compose.database.yml down
+docker compose -f deployments/docker/docker-compose.yml down
 
 # Stop and remove data
-docker-compose -f docker-compose.database.yml down -v
-
-# Start with pgAdmin UI
-docker-compose -f docker-compose.database.yml --profile with-ui up -d
-# Access at: http://localhost:5050 (admin@agentauth.local / admin)
+docker compose -f deployments/docker/docker-compose.yml down -v
 ```
 
 ## Option 2: Local PostgreSQL Installation
@@ -210,26 +194,26 @@ lsof -i:5432
 kill -9 <PID>
 
 # Remove old container and try again
-docker rm -f agentauth-postgres
-docker-compose -f docker-compose.database.yml up -d postgres
+docker compose -f deployments/docker/docker-compose.yml down
+docker compose -f deployments/docker/docker-compose.yml up -d postgres
 ```
 
 ### Migration Fails
 ```bash
 # Check PostgreSQL logs
-docker-compose -f docker-compose.database.yml logs postgres
+docker compose -f deployments/docker/docker-compose.yml logs postgres
 
 # Try running migration manually
-docker exec -it agentauth-postgres psql -U postgres -d agentauth
+docker compose -f deployments/docker/docker-compose.yml exec -it postgres psql -U postgres -d agentauth
 
 # Then in psql:
 \i /docker-entrypoint-initdb.d/001_admin_handlers_schema.sql
 ```
 
 ### Connection Refused
-- Ensure PostgreSQL is running: `docker ps | grep postgres`
-- Check port mapping: `docker port agentauth-postgres`
-- Verify network: `docker network ls`
+- Ensure PostgreSQL is running: `docker compose -f deployments/docker/docker-compose.yml ps postgres`
+- Check port mapping: `docker compose -f deployments/docker/docker-compose.yml port postgres 5432`
+- Verify network: `docker compose -f deployments/docker/docker-compose.yml ps`
 
 ### Permission Denied
 ```bash

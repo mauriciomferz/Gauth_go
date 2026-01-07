@@ -52,14 +52,14 @@ This folder contains the project’s canonical reports grouped by area.
 These documents used to live at repo root and are now archived under `docs/reports/legacy-root/`.
 The repo-root files are kept as stubs to preserve legacy links.
 
-- [AGENTAUTH_PLUS_FINAL_STATUS.md](legacy-root/AGENTAUTH_PLUS_FINAL_STATUS.md)
-- [AGENTAUTH_PLUS_PROJECT_STATUS.md](legacy-root/AGENTAUTH_PLUS_PROJECT_STATUS.md)
-- [AGENTAUTH_PLUS_README.md](legacy-root/AGENTAUTH_PLUS_README.md)
-- [API_REFERENCE.md](legacy-root/API_REFERENCE.md)
-- [COMMIT_GUIDE.md](legacy-root/COMMIT_GUIDE.md)
-- [DEPLOYMENT_GUIDE.md](legacy-root/DEPLOYMENT_GUIDE.md)
-- [DIRECTORY_REORGANIZATION.md](legacy-root/DIRECTORY_REORGANIZATION.md)
-- [FINAL_HANDOFF.md](legacy-root/FINAL_HANDOFF.md)
-- [IMPLEMENTATION_COMPLETE.md](legacy-root/IMPLEMENTATION_COMPLETE.md)
-- [POLICY_STORE_IMPLEMENTATION.md](legacy-root/POLICY_STORE_IMPLEMENTATION.md)
-- [SIGNATURE_VALIDATION_IMPLEMENTATION.md](legacy-root/SIGNATURE_VALIDATION_IMPLEMENTATION.md)
+- [AGENTAUTH_PLUS_FINAL_STATUS.md](legacy-root/AGENTAUTH_PLUS_FINAL_STATUS.md) — Canonical: [AGENTAUTHPLUS_FINAL_STATUS.md](../features/agentauthplus/AGENTAUTHPLUS_FINAL_STATUS.md)
+- [AGENTAUTH_PLUS_PROJECT_STATUS.md](legacy-root/AGENTAUTH_PLUS_PROJECT_STATUS.md) — Canonical: [AGENTAUTHPLUS_PROJECT_STATUS.md](../features/agentauthplus/AGENTAUTHPLUS_PROJECT_STATUS.md)
+- [AGENTAUTH_PLUS_README.md](legacy-root/AGENTAUTH_PLUS_README.md) — Canonical: [AGENTAUTHPLUS_README.md](../features/agentauthplus/AGENTAUTHPLUS_README.md)
+- [API_REFERENCE.md](legacy-root/API_REFERENCE.md) — Canonical: [docs/guides/api/API_REFERENCE.md](../guides/api/API_REFERENCE.md)
+- [COMMIT_GUIDE.md](legacy-root/COMMIT_GUIDE.md) — Archived snapshot only
+- [DEPLOYMENT_GUIDE.md](legacy-root/DEPLOYMENT_GUIDE.md) — Canonical: [docs/guides/deployment/DEPLOYMENT_GUIDE.md](../guides/deployment/DEPLOYMENT_GUIDE.md)
+- [DIRECTORY_REORGANIZATION.md](legacy-root/DIRECTORY_REORGANIZATION.md) — Archived snapshot only
+- [FINAL_HANDOFF.md](legacy-root/FINAL_HANDOFF.md) — Archived snapshot only
+- [IMPLEMENTATION_COMPLETE.md](legacy-root/IMPLEMENTATION_COMPLETE.md) — Archived snapshot only
+- [POLICY_STORE_IMPLEMENTATION.md](legacy-root/POLICY_STORE_IMPLEMENTATION.md) — Archived snapshot only
+- [SIGNATURE_VALIDATION_IMPLEMENTATION.md](legacy-root/SIGNATURE_VALIDATION_IMPLEMENTATION.md) — Archived snapshot only

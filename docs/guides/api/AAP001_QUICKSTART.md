@@ -24,7 +24,7 @@ This guide helps you quickly get started with the AAP-001 implementation in Agen
 
 ### 1. Build and Run
 ```bash
-cd /Users/mauricio.fernandez_fernandezsiemens.co/AgentAuth
+cd <repo-root>
 go build -o bin/web-server ./cmd/web-server
 ./bin/web-server
 ```

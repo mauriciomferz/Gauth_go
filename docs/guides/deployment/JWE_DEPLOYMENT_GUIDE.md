@@ -232,13 +232,13 @@ cp ../../public.pem ./keys/
 cp ../../private.pem ./keys/
 
 # Start all services
-docker-compose -f docker-compose.jwe.yml up -d
+docker compose -f docker-compose.jwe.yml up -d
 
 # Check logs
-docker-compose -f docker-compose.jwe.yml logs -f agentauth-server
+docker compose -f docker-compose.jwe.yml logs -f agentauth-server
 
 # Stop services
-docker-compose -f docker-compose.jwe.yml down
+docker compose -f docker-compose.jwe.yml down
 ```
 
 ### Docker Secrets (Production)
