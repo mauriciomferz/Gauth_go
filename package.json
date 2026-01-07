@@ -11,7 +11,8 @@
     "build": "node web/static/js/build.js",
     "ui:test": "playwright test",
     "ui:report": "playwright show-report",
-    "test:go": "go test ./..."
+    "test:go": "go test ./...",
+    "test:js": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --colors --env=jsdom --testMatch \"**/web/static/js/tests/**/*.test.js\" \"**/frontend/static/js/tests/**/*.test.js\""
   },
   "dependencies": {
     "tweetnacl": "^1.0.3"
