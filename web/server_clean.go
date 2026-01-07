@@ -58,7 +58,6 @@ import (
 	notaryHandlers "github.com/mauriciomferz/AgentAuth/web/handlers/notary"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/token"
 	"github.com/mauriciomferz/AgentAuth/web/handlers/violations"
-	"github.com/mauriciomferz/AgentAuth/web/middleware"
 	"gopkg.in/yaml.v3"
 )
 
@@ -1272,17 +1271,8 @@ func (s *BetaServer) routes() {
 	beta.GET("/ping", s.ping)
 
 	// Admin Routes (New)
-	adminGroup := s.router.Group("/api/admin")
-	adminGroup.Use(middleware.TenantMiddleware())
-	if s.adminTokenHandler != nil {
-		s.adminTokenHandler.RegisterRoutes(adminGroup)
-	}
-	if s.apiKeyHandler != nil {
-		s.apiKeyHandler.RegisterGroupRoutes(adminGroup)
-	}
-	if s.resilienceHandler != nil {
-		s.resilienceHandler.RegisterRoutes(adminGroup)
-	}
+	// NOTE: /api/admin routes are registered in server_factory.go (DB and degraded modes).
+	// Keeping registration in one place avoids duplicate Gin route panics.
 
 	// Examples Handler
 	s.examplesAPI.RegisterRoutes(s.router)
