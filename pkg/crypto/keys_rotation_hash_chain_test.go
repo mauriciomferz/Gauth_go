@@ -22,14 +22,14 @@ func TestRotationLogHashChain(t *testing.T) {
 	if cerr := tmp.Close(); cerr != nil {
 		t.Fatalf("close temp: %v", cerr)
 	}
-	os.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", path)
-	defer func() { _ = os.Unsetenv("AGENTAUTH_EDDSA_ROTATION_LOG") }()
+	t.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", path)
 
 	// Short TTL to force multiple rotations quickly
 	m, err := NewManager(200 * time.Millisecond)
 	if err != nil {
 		t.Fatalf("manager err: %v", err)
 	}
+	defer m.Stop()
 	// Perform several rotations
 	for i := 0; i < 5; i++ {
 		time.Sleep(210 * time.Millisecond)

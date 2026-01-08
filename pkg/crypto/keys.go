@@ -40,14 +40,15 @@ type Key struct {
 
 // Manager manages active + previous keys (simple in-memory rotation).
 type Manager struct {
-	mu          sync.RWMutex
-	active      *Key
-	history     []*Key // previous keys retained until expiry
-	archived    []*Key // expired keys retained for verification
-	ttl         time.Duration
-	persistPath string        // optional persistence path for key material (private keys base64 encoded)
-	stopCh      chan struct{} // for scheduler shutdown (not yet exposed)
-	ledgerStore ledger.Store  // optional immutable audit ledger for rotation events
+	mu            sync.RWMutex
+	active        *Key
+	history       []*Key // previous keys retained until expiry
+	archived      []*Key // expired keys retained for verification
+	ttl           time.Duration
+	persistPath   string        // optional persistence path for key material (private keys base64 encoded)
+	stopCh        chan struct{} // for scheduler shutdown
+	schedulerDone chan struct{} // closed when scheduler goroutine exits (if started)
+	ledgerStore   ledger.Store  // optional immutable audit ledger for rotation events
 }
 
 // OnKeyRotated is an optional global callback fired after a successful rotation.
@@ -165,7 +166,9 @@ func NewManager(ttl time.Duration) (*Manager, error) {
 			interval = time.Minute
 		}
 		fmt.Fprintf(os.Stderr, "[crypto] NewManager: about to launch auto-rotation scheduler goroutine with interval %v\n", interval)
+		m.schedulerDone = make(chan struct{})
 		go func() {
+			defer close(m.schedulerDone)
 			fmt.Fprintf(os.Stderr, "[crypto] NewManager: auto-rotation scheduler goroutine launched\n")
 			m.runScheduler(interval)
 		}()
@@ -307,9 +310,12 @@ func (m *Manager) Stop() {
 	}
 	select {
 	case <-m.stopCh: // already closed
-		return
+		// fall through: scheduler goroutine may still be shutting down
 	default:
 		close(m.stopCh)
+	}
+	if m.schedulerDone != nil {
+		<-m.schedulerDone
 	}
 }
 

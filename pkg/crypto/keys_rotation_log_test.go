@@ -13,18 +13,16 @@ import (
 func TestRotationAuditTrail(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "rotation.log")
-	os.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", logPath)
-	defer func() { _ = os.Unsetenv("AGENTAUTH_EDDSA_ROTATION_LOG") }()
+	t.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", logPath)
 	m, err := NewManager(1 * time.Hour)
 	if err != nil {
 		t.Fatalf("manager: %v", err)
 	}
+	defer m.Stop()
 	// First rotation already logged (initial key generation). Force another rotation.
 	if _, rotErr := m.Rotate(); rotErr != nil {
 		t.Fatalf("rotate: %v", rotErr)
 	}
-	// Small sleep to ensure write flush
-	time.Sleep(50 * time.Millisecond)
 	f, err := os.Open(logPath)
 	if err != nil {
 		t.Fatalf("open log: %v", err)

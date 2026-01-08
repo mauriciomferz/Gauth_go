@@ -6,14 +6,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
 
 func TestRotationLogSignatureVerification(t *testing.T) {
-	logPath := "test_rotation_log.jsonl"
-	os.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", logPath)
-	defer os.Remove(logPath)
+	logPath := filepath.Join(t.TempDir(), "rotation_log.jsonl")
+	t.Setenv("AGENTAUTH_EDDSA_ROTATION_LOG", logPath)
 
 	m, err := NewManager(10 * time.Second)
 	if err != nil {

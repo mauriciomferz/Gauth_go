@@ -1,42 +1,40 @@
 package crypto
 
 import (
-	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
 
 func TestRecoveryAutomation_KeyRotation(t *testing.T) {
-	t.Logf("Test: PID=%d, start=%v", os.Getpid(), time.Now())
-	os.Setenv("AGENTAUTH_EDDSA_PERSIST_PATH", "test_recovery.json")
-	os.Setenv("AGENTAUTH_EDDSA_AUTO_ROTATE", "1")
-	os.Setenv("AGENTAUTH_EDDSA_ROTATE_INTERVAL", "2s")
-	defer os.Remove("test_recovery.json")
-	t.Logf("Test: creating manager with 10s TTL and auto-rotation interval 2s enabled")
+	persistPath := filepath.Join(t.TempDir(), "recovery.json")
+	t.Setenv("AGENTAUTH_EDDSA_PERSIST_PATH", persistPath)
+	t.Setenv("AGENTAUTH_EDDSA_AUTO_ROTATE", "1")
+	t.Setenv("AGENTAUTH_EDDSA_ROTATE_INTERVAL", "200ms")
+
 	m, err := NewManager(10 * time.Second)
 	if err != nil {
 		t.Fatalf("manager err: %v", err)
 	}
 	defer m.Stop()
-	t.Logf("Test: manager created, sleeping 5s to allow scheduler goroutine to start and rotate")
-	time.Sleep(5 * time.Second)
-	// Manually trigger rotation for reliability
-	_, err = m.Rotate()
-	if err != nil {
+
+	// Give the scheduler a moment to run, but keep the test fast.
+	time.Sleep(750 * time.Millisecond)
+
+	// Manually trigger rotation for determinism.
+	if _, err := m.Rotate(); err != nil {
 		t.Fatalf("manual rotate err: %v", err)
 	}
 	keys := m.ListCurrent()
-	t.Logf("After manual rotate: found %d keys", len(keys))
 	if len(keys) < 2 {
 		t.Fatalf("expected at least 2 keys after manual rotation, got %d", len(keys))
 	}
-	// Simulate failover: forcibly rotate and check recovery
-	_, err = m.Rotate()
-	if err != nil {
+
+	// Simulate failover: rotate again and ensure active key exists.
+	if _, err := m.Rotate(); err != nil {
 		t.Fatalf("manual rotate err: %v", err)
 	}
 	if m.Active() == nil {
 		t.Fatalf("active key missing after recovery rotation")
 	}
-
 }
