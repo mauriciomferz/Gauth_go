@@ -165,16 +165,18 @@ func TestAuthMiddleware_RS256_KidNotFound(t *testing.T) {
 
 func TestAuthMiddleware_RS256_JWKSFetchError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	stopJWKSBackgroundRefresh()
 	// Use unreachable URL to force network error on fetch
 	os.Setenv("AGENTAUTH_AI_DEMO_JWKS_URL", "http://127.0.0.1:9/.well-known/jwks.json")
 	os.Setenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG", "RS256")
 	// Force cache refresh by clearing existing cache and expiry
+	jwksMu.Lock()
 	jwksCache = nil
 	jwksExpiry = time.Now().Add(-1 * time.Second)
+	jwksNegative = nil
+	jwksMu.Unlock()
 	defer func() { os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_URL"); os.Unsetenv("AGENTAUTH_AI_DEMO_JWT_EXPECT_ALG") }()
 	// Build a token that will attempt RS256 path; the public key won't matter because fetch fails first.
-	// Clear any negative cache entries from prior tests
-	jwksNegative = nil
 	priv, _ := rsa.GenerateKey(rand.Reader, 1024)
 	claims := map[string]any{"sub": "user-fetch-error", "exp": float64(time.Now().Add(1 * time.Hour).Unix())}
 	uniqueKid := fmt.Sprintf("kid-fetch-error-%d", time.Now().UnixNano())
@@ -199,6 +201,7 @@ func TestAuthMiddleware_RS256_JWKSFetchError(t *testing.T) {
 
 func TestAuthMiddleware_RS256_NegativeKidCaching(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	stopJWKSBackgroundRefresh()
 	// JWKS server with single key 'validkid'
 	privValid, _ := rsa.GenerateKey(rand.Reader, 1024)
 	reqCount := 0
@@ -230,9 +233,11 @@ func TestAuthMiddleware_RS256_NegativeKidCaching(t *testing.T) {
 		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS")
 	}()
 	// Reset caches
+	jwksMu.Lock()
 	jwksCache = nil
 	jwksNegative = nil
 	jwksExpiry = time.Now().Add(-1 * time.Second)
+	jwksMu.Unlock()
 	// Build tokens with missing kid 'missingkid'
 	privMissing, _ := rsa.GenerateKey(rand.Reader, 1024)
 	claims := map[string]any{"sub": "user-missing", "exp": float64(time.Now().Add(1 * time.Hour).Unix())}
@@ -264,6 +269,7 @@ func TestAuthMiddleware_RS256_NegativeKidCaching(t *testing.T) {
 
 func TestJWKSBackgroundRefresh(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	stopJWKSBackgroundRefresh()
 	// Short cache TTL and small refresh factor to force early refresh
 	ttl := 4 // seconds
 	factor := 0.25
@@ -299,10 +305,14 @@ func TestJWKSBackgroundRefresh(t *testing.T) {
 		os.Unsetenv("AGENTAUTH_AI_DEMO_JWKS_BG_REFRESH_FACTOR")
 	}()
 	// Clear caches
+	jwksMu.Lock()
 	jwksCache = nil
 	jwksExpiry = time.Now().Add(-1 * time.Second)
+	jwksNegative = nil
+	jwksMu.Unlock()
 	// Start background refresh loop manually
 	startJWKSBackgroundRefresh()
+	defer stopJWKSBackgroundRefresh()
 	// Wait a moment for initial fetch
 	time.Sleep(200 * time.Millisecond)
 	if fetches.Load() < 1 {
@@ -319,6 +329,7 @@ func TestJWKSBackgroundRefresh(t *testing.T) {
 // TestAuthMiddleware_RS256_NegativeKidEviction validates eviction metric when max entries reached.
 func TestAuthMiddleware_RS256_NegativeKidEviction(t *testing.T) {
 	gin.SetMode(gin.TestMode)
+	stopJWKSBackgroundRefresh()
 	// JWKS server with single valid key
 	privValid, _ := rsa.GenerateKey(rand.Reader, 1024)
 	jwksSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -355,9 +366,11 @@ func TestAuthMiddleware_RS256_NegativeKidEviction(t *testing.T) {
 		os.Unsetenv("AGENTAUTH_AI_DEMO_API_KEY")
 	}()
 	// Reset caches and metrics (metrics registered lazily when server starts)
+	jwksMu.Lock()
 	jwksCache = nil
 	jwksNegative = nil
 	jwksExpiry = time.Now().Add(-1 * time.Second)
+	jwksMu.Unlock()
 	// Build two tokens with distinct missing kids (kidA, kidB) to trigger eviction of first
 	privMissingA, _ := rsa.GenerateKey(rand.Reader, 1024)
 	privMissingB, _ := rsa.GenerateKey(rand.Reader, 1024)

@@ -4386,6 +4386,7 @@ type IssuanceEvent struct {
 
 // DelegationChain maintains a hash chain of issuance events.
 type DelegationChain struct {
+	mu     sync.RWMutex
 	events []IssuanceEvent
 }
 
@@ -4394,6 +4395,8 @@ func NewDelegationChain() *DelegationChain { return &DelegationChain{events: mak
 
 // Append adds an issuance event computing its hash.
 func (dc *DelegationChain) Append(ev IssuanceEvent) error {
+	dc.mu.Lock()
+	defer dc.mu.Unlock()
 	idx := len(dc.events)
 	var prev string
 	if idx > 0 {
@@ -4416,10 +4419,15 @@ func (dc *DelegationChain) Append(ev IssuanceEvent) error {
 
 // Verify checks the hash chain integrity.
 func (dc *DelegationChain) Verify() error {
-	for i, ev := range dc.events {
+	dc.mu.RLock()
+	events := make([]IssuanceEvent, len(dc.events))
+	copy(events, dc.events)
+	dc.mu.RUnlock()
+
+	for i, ev := range events {
 		var prev string
 		if i > 0 {
-			prev = dc.events[i-1].Hash
+			prev = events[i-1].Hash
 		}
 		hInput, _ := json.Marshal(struct {
 			ID, DelegationID, Grantor, Grantee string
@@ -4957,7 +4965,12 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 }
 
 func chainTip(dc *DelegationChain) string {
-	if dc == nil || len(dc.events) == 0 {
+	if dc == nil {
+		return ""
+	}
+	dc.mu.RLock()
+	defer dc.mu.RUnlock()
+	if len(dc.events) == 0 {
 		return ""
 	}
 	return dc.events[len(dc.events)-1].Hash

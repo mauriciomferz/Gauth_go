@@ -43,7 +43,17 @@ import {
 
 // Import admin API hooks
 import { useCircuitBreakers, useRateLimiters, useRetryPolicies, useResilienceMutations } from '../../hooks/useAdminApi'
-import type { CircuitBreaker, RateLimiter, RetryPolicy, Bulkhead } from '../../types/admin'
+import type {
+  CircuitBreaker,
+  RateLimiter,
+  RetryPolicy,
+  Bulkhead,
+  RateLimiterCreateRequest,
+  RetryPolicyCreateRequest,
+} from '../../types/admin'
+
+type RateLimiterAlgorithm = RateLimiterCreateRequest['algorithm']
+type RetryStrategy = RetryPolicyCreateRequest['strategy']
 
 const useStyles = makeStyles({
   container: {
@@ -241,7 +251,7 @@ export default function ResiliencePatterns() {
   // Form state for Rate Limiter
   const [rlName, setRlName] = useState('')
   const [rlResource, setRlResource] = useState('')
-  const [rlAlgorithm, setRlAlgorithm] = useState<string>('token-bucket')
+  const [rlAlgorithm, setRlAlgorithm] = useState<RateLimiterAlgorithm>('token-bucket')
   const [rlLimit, setRlLimit] = useState(100)
   const [rlWindow, setRlWindow] = useState(60)
   const [rlBurst, setRlBurst] = useState(120)
@@ -249,7 +259,7 @@ export default function ResiliencePatterns() {
   // Form state for Retry Policy
   const [rpName, setRpName] = useState('')
   const [rpOperation, setRpOperation] = useState('')
-  const [rpStrategy, setRpStrategy] = useState<string>('exponential')
+  const [rpStrategy, setRpStrategy] = useState<RetryStrategy>('exponential')
   const [rpMaxAttempts, setRpMaxAttempts] = useState(3)
   const [rpBaseDelay, setRpBaseDelay] = useState(1000)
   const [rpMaxDelay, setRpMaxDelay] = useState(30000)
@@ -841,7 +851,9 @@ export default function ResiliencePatterns() {
                           <Label>Algorithm</Label>
                           <Dropdown
                             value={rlAlgorithm}
-                            onOptionSelect={(_, data) => setRlAlgorithm(data.optionValue || 'token-bucket')}
+                            onOptionSelect={(_, data) =>
+                              setRlAlgorithm((data.optionValue as RateLimiterAlgorithm) || 'token-bucket')
+                            }
                           >
                             <Option value="token-bucket">Token Bucket</Option>
                             <Option value="leaky-bucket">Leaky Bucket</Option>
@@ -963,7 +975,9 @@ export default function ResiliencePatterns() {
                           <Label>Strategy</Label>
                           <Dropdown
                             value={rpStrategy}
-                            onOptionSelect={(_, data) => setRpStrategy(data.optionValue || 'exponential')}
+                            onOptionSelect={(_, data) =>
+                              setRpStrategy((data.optionValue as RetryStrategy) || 'exponential')
+                            }
                           >
                             <Option value="fixed">Fixed</Option>
                             <Option value="exponential">Exponential</Option>

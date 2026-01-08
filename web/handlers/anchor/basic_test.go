@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	webpkg "github.com/mauriciomferz/AgentAuth/web"
 )
@@ -24,7 +23,13 @@ func TestAnchorEndpointsFullCycle(t *testing.T) {
 	// Enable anchoring + file emission
 	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "1")
 	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
+	t.Setenv("AGENTAUTH_CAP_ANCHOR_SYNC_STARTUP", "1")
+	t.Setenv("AGENTAUTH_DISABLE_BG_POLLS", "1")
+	t.Setenv("AGENTAUTH_SKIP_SMOKETEST", "1")
 	anchorFile := filepath.Join(t.TempDir(), "cap-anchor.json")
+	if err := os.WriteFile(anchorFile, []byte(""), 0o600); err != nil {
+		t.Fatalf("create anchor file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile)
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
 	// Provide capabilities file for registry hash population
@@ -34,6 +39,7 @@ func TestAnchorEndpointsFullCycle(t *testing.T) {
 	}
 	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)
 	srv := webpkg.NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	// Force reload to populate registry hash and trigger emission
 	_ = perform(srv, http.MethodPost, "/api/v1/beta/capabilities/reload")
 	// POST anchor
@@ -58,8 +64,6 @@ func TestAnchorEndpointsFullCycle(t *testing.T) {
 		t.Fatalf("latest status=%d", wLatest.Code)
 	}
 	// Material
-	// Allow a tiny delay for write interval logic
-	time.Sleep(2 * time.Millisecond)
 	wMaterial := perform(srv, http.MethodGet, "/api/v1/beta/capabilities/anchor/material")
 	if wMaterial.Code != http.StatusOK {
 		t.Fatalf("material status=%d body=%s", wMaterial.Code, wMaterial.Body.String())
@@ -97,6 +101,7 @@ func TestAnchorEndpointsFullCycle(t *testing.T) {
 func TestAnchorPostDisabled(t *testing.T) {
 	// Ensure disabled env (unset) -> 403
 	srv := webpkg.NewBetaServer(":0")
+	t.Cleanup(func() { srv.Shutdown() })
 	w := perform(srv, http.MethodPost, "/api/v1/beta/capabilities/anchor")
 	if w.Code != http.StatusForbidden {
 		t.Fatalf("expected 403 got %d", w.Code)

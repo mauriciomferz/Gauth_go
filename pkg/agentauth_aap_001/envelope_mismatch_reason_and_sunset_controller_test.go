@@ -45,6 +45,7 @@ func TestDigestMismatchReasonHeuristics(t *testing.T) {
 		poa.Signature = &POASignature{Algorithm: algEd25519, KeyID: "test", DigestHex: dig, SigBase64: base64.StdEncoding.EncodeToString(sig), Canonical: canon}
 	}
 	poa.Signature.DigestHex = testDeadbeefCafebabe // change length (likely different from canonical length)
+	_ = svc.repo.Update(poa)
 	_, _ = svc.VerifyToken(WithSubject(context.Background(), "s@example.com"), resp.AuthToken)
 	reasons := mem.EnvelopeDigestMismatchReasonsSnapshot()
 	if reasons["tamper_suspected"] == 0 {
@@ -63,6 +64,7 @@ func TestDigestMismatchReasonHeuristics(t *testing.T) {
 			poa.Signature.DigestHex = alt
 		}
 	}
+	_ = svc.repo.Update(poa)
 	_, _ = svc.VerifyToken(WithSubject(context.Background(), "s@example.com"), resp.AuthToken)
 	reasons2 := mem.EnvelopeDigestMismatchReasonsSnapshot()
 	if reasons2["domain_conflict"] == 0 {

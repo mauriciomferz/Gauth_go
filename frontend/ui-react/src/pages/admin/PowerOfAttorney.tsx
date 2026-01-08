@@ -298,7 +298,18 @@ export default function PowerOfAttorney() {
   const handleCreatePoA = async () => {
     setLoading(true);
     try {
-      await createPoA(formData);
+      await createPoA({
+        principalId: formData.principalId,
+        principalName: formData.principalName,
+        representativeId: formData.representativeId,
+        representativeName: formData.representativeName,
+        representativeType: formData.representativeType,
+        validFrom: formData.validFrom,
+        validUntil: formData.validUntil,
+        actions: formData.selectedActions,
+        resources: formData.selectedResources,
+        geoRestrictions: formData.geoRestrictions,
+      });
       refetch();
       setBuilderDialogOpen(false);
       resetForm();

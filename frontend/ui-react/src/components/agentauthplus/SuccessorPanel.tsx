@@ -90,13 +90,6 @@ export default function SuccessorPanel() {
     activated_by: 'admin',
   })
 
-  useEffect(() => {
-    if (poaId) {
-      fetchActiveSuccessor()
-      fetchHistory()
-    }
-  }, [poaId, fetchActiveSuccessor, fetchHistory])
-
   const fetchActiveSuccessor = useCallback(async () => {
     try {
       setLoading(true)
@@ -127,6 +120,13 @@ export default function SuccessorPanel() {
       }
     }
   }, [poaId])
+
+  useEffect(() => {
+    if (poaId) {
+      fetchActiveSuccessor()
+      fetchHistory()
+    }
+  }, [poaId, fetchActiveSuccessor, fetchHistory])
 
   const handleActivate = async () => {
     try {

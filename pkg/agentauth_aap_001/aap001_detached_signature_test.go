@@ -59,6 +59,7 @@ func TestDetachedSignatureTamper(t *testing.T) {
 	// Tamper stored POA (alter scope -> digest mismatch)
 	stored, _ := svc.repo.Get(resp.POA.ID)
 	stored.Scope = []string{"tampered"}
+	_ = svc.repo.Update(stored)
 	// Expect integrity failure
 	if _, vErr := svc.VerifyToken(WithSubject(context.Background(), "u"), resp.AuthToken); vErr == nil {
 		t.Fatalf("expected integrity failure on tamper")

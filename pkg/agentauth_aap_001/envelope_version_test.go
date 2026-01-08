@@ -195,6 +195,7 @@ func TestEnvelopeDigestMismatchCounter(t *testing.T) {
 	}
 	// Replace digest with random different digest & keep signature base64 same (will mismatch digest check first)
 	poa.Signature.DigestHex = "deadbeefcafebabe" // non-matching hex
+	_ = svc.repo.Update(poa)
 	// For extra safety ensure not equal to canonical digest
 	token := resp.AuthToken
 	// Verify should fail with integrity_failure and increment mismatch counter

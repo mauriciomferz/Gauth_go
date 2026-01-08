@@ -413,17 +413,25 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	capsHandler.OnReload = func(newHash string) {
 		emitFunc := func() {
 			// Emit anchor artifact (throttled by interval)
-			if s.capAnchorFilePath != "" {
+			s.mu.RLock()
+			capAnchorPath := s.capAnchorFilePath
+			lastWrite := s.capAnchorLastWrite
+			writeInterval := s.capAnchorWriteInterval
+			s.mu.RUnlock()
+
+			if capAnchorPath != "" {
 				// Check throttle
-				if time.Since(s.capAnchorLastWrite) >= s.capAnchorWriteInterval {
-					s.capAnchorLastWrite = time.Now()
+				if time.Since(lastWrite) >= writeInterval {
 					// Build anchor material artifact
+					prevHash := s.capabilitiesHandler.GetPrevRegistryHash()
+					lastChangedAt := s.capabilitiesHandler.GetRegistryChangeAt()
+					schemaVersion := s.capabilitiesHandler.GetSchemaVersion()
 					artifact := AnchorMaterial{
 						Type:          "capability_registry_anchor",
 						RegistryHash:  newHash,
-						PreviousHash:  s.capabilitiesHandler.PrevRegistryHash,
-						LastChangedAt: s.capabilitiesHandler.RegistryChangeAt.UTC().Format(time.RFC3339),
-						SchemaVersion: s.capabilitiesHandler.SchemaVersion,
+						PreviousHash:  prevHash,
+						LastChangedAt: lastChangedAt.UTC().Format(time.RFC3339),
+						SchemaVersion: schemaVersion,
 						AnchoredAt:    time.Now().UTC().Format(time.RFC3339),
 					}
 					// Use compact JSON for the inner artifact to ensure signature stability across transport
@@ -452,7 +460,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 								}
 							}
 						}
-						if writeErr := os.WriteFile(s.capAnchorFilePath, data, 0600); writeErr == nil {
+						if writeErr := os.WriteFile(capAnchorPath, data, 0600); writeErr == nil {
 							if mem, ok := s.metrics.(*metrics.Memory); ok {
 								mem.IncCapabilityAnchorEmitted()
 								// #nosec G115
@@ -462,8 +470,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 									mem.IncCapabilityAnchorAlgorithm(algInfo.Name)
 								}
 							}
+							s.mu.Lock()
+							s.capAnchorLastWrite = time.Now()
 							s.capAnchorEmitted = true
 							s.capAnchorArtifact = data
+							s.mu.Unlock()
 						} else {
 							fmt.Fprintf(os.Stderr, "[anchor] write failed: %v\n", writeErr)
 						}

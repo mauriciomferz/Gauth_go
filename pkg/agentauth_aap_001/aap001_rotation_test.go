@@ -77,6 +77,7 @@ func TestRotationRobustness(t *testing.T) {
 	// Provide a 64-byte base64 signature placeholder (all zeros) to satisfy size checks without real verification.
 	zeroSig := make([]byte, 64)
 	stored.Signature = &POASignature{Algorithm: algEd25519, KeyID: "unknown_kid", DigestHex: dig, SigBase64: base64.StdEncoding.EncodeToString(zeroSig)}
+	_ = svc.repo.Update(stored)
 	if err := svc.ValidateDelegationCtx(context.Background(), resp.POA.ID, "bob", "read"); err != nil {
 		t.Fatalf("validation after injecting unknown key signature should soft skip, got error: %v", err)
 	}

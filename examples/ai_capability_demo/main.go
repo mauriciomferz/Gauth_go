@@ -69,10 +69,13 @@ var (
 	auditLedgerSizeGauge            prometheus.Gauge
 	poaStatusTransitionsCounter     *prometheus.CounterVec
 	// JWKS cache state
+	jwksMu     sync.RWMutex
 	jwksCache  map[string]*rsa.PublicKey
 	jwksExpiry time.Time
 	// negative KID cache (kid -> expiry timestamp)
 	jwksNegative map[string]time.Time
+	jwksBgMu     sync.Mutex
+	jwksBgCancel context.CancelFunc
 	// PoA repository (in-memory for demo) & mutex
 	poaRepoMu   sync.RWMutex
 	poaRepo     = make(map[string]*agentauth_aap_001.PowerOfAttorney)
@@ -138,14 +141,16 @@ func fetchJWKS(url string, cacheSeconds int) error {
 		pub := &rsa.PublicKey{N: n, E: exp}
 		tmp[k.Kid] = pub
 	}
+	jwksMu.Lock()
 	jwksCache = tmp
 	jwksExpiry = time.Now().Add(time.Duration(cacheSeconds) * time.Second)
+	jwksMu.Unlock()
 	// Metrics update if enabled
 	if jwksFetchCounter != nil {
 		jwksFetchCounter.WithLabelValues("success").Inc()
 	}
 	if jwksKeysGauge != nil {
-		jwksKeysGauge.Set(float64(len(jwksCache)))
+		jwksKeysGauge.Set(float64(len(tmp)))
 	}
 	// Set initial TTL remaining gauge to full TTL
 	if jwksCacheTtlRemainingGauge != nil {
@@ -159,6 +164,7 @@ func getJWKSKey(kid string) (*rsa.PublicKey, error) {
 	if url == "" {
 		return nil, errors.New("jwks_disabled")
 	}
+	now := time.Now()
 	cacheSecs := 300
 	if v := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS"); v != "" {
 		if parsed, err := strconv.Atoi(v); err == nil && parsed > 0 {
@@ -166,12 +172,14 @@ func getJWKSKey(kid string) (*rsa.PublicKey, error) {
 		}
 	}
 	// Negative cache check first
+	jwksMu.Lock()
 	if jwksNegative != nil {
 		if exp, exists := jwksNegative[kid]; exists {
-			if time.Now().Before(exp) {
+			if now.Before(exp) {
 				if jwksNegHitsCounter != nil {
 					jwksNegHitsCounter.Inc()
 				}
+				jwksMu.Unlock()
 				return nil, errors.New("kid_not_found")
 			}
 			// expired negative entry -> remove and update gauge
@@ -181,7 +189,9 @@ func getJWKSKey(kid string) (*rsa.PublicKey, error) {
 			}
 		}
 	}
-	if jwksCache == nil || time.Now().After(jwksExpiry) {
+	shouldFetch := jwksCache == nil || now.After(jwksExpiry)
+	jwksMu.Unlock()
+	if shouldFetch {
 		if err := fetchJWKS(url, cacheSecs); err != nil {
 			if jwksFetchCounter != nil {
 				jwksFetchCounter.WithLabelValues("error").Inc()
@@ -189,11 +199,14 @@ func getJWKSKey(kid string) (*rsa.PublicKey, error) {
 			return nil, fmt.Errorf("jwks_fetch_error:%v", err.Error())
 		}
 	}
+	jwksMu.RLock()
 	pub, ok := jwksCache[kid]
+	jwksMu.RUnlock()
 	if !ok {
 		// add to negative cache with TTL if configured
 		if ttlStr := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_NEGATIVE_TTL_SECONDS"); ttlStr != "" {
 			if ttl, err := strconv.Atoi(ttlStr); err == nil && ttl > 0 {
+				jwksMu.Lock()
 				if jwksNegative == nil {
 					jwksNegative = make(map[string]time.Time)
 				}
@@ -217,15 +230,25 @@ func getJWKSKey(kid string) (*rsa.PublicKey, error) {
 						}
 					}
 				}
-				jwksNegative[kid] = time.Now().Add(time.Duration(ttl) * time.Second)
+				jwksNegative[kid] = now.Add(time.Duration(ttl) * time.Second)
 				if jwksNegEntriesGauge != nil {
 					jwksNegEntriesGauge.Set(float64(len(jwksNegative)))
 				}
+				jwksMu.Unlock()
 			}
 		}
 		return nil, errors.New("kid_not_found")
 	}
 	return pub, nil
+}
+
+func stopJWKSBackgroundRefresh() {
+	jwksBgMu.Lock()
+	if jwksBgCancel != nil {
+		jwksBgCancel()
+		jwksBgCancel = nil
+	}
+	jwksBgMu.Unlock()
 }
 
 // startJWKSBackgroundRefresh launches the JWKS background refresh loop (used by server and tests)
@@ -234,8 +257,19 @@ func startJWKSBackgroundRefresh() {
 	if jwksURL == "" {
 		return
 	}
+	// Ensure tests can re-invoke this without leaking goroutines.
+	stopJWKSBackgroundRefresh()
+	jwksBgMu.Lock()
+	ctx, cancel := context.WithCancel(context.Background())
+	jwksBgCancel = cancel
+	jwksBgMu.Unlock()
 	go func() {
 		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
 			cacheSecs := 300
 			if v := os.Getenv("AGENTAUTH_AI_DEMO_JWKS_CACHE_SECONDS"); v != "" {
 				if parsed, err := strconv.Atoi(v); err == nil && parsed > 0 {
@@ -254,10 +288,14 @@ func startJWKSBackgroundRefresh() {
 					jitterSeconds = j
 				}
 			}
-			if jwksCache == nil || time.Now().After(jwksExpiry) {
+			jwksMu.RLock()
+			cacheNil := jwksCache == nil
+			expiry := jwksExpiry
+			jwksMu.RUnlock()
+			if cacheNil || time.Now().After(expiry) {
 				_ = fetchJWKS(jwksURL, cacheSecs)
 			} else {
-				remaining := time.Until(jwksExpiry)
+				remaining := time.Until(expiry)
 				refreshDelay := time.Duration(float64(cacheSecs)*bgFactor) * time.Second
 				if refreshDelay > remaining {
 					refreshDelay = remaining / 2
@@ -276,7 +314,11 @@ func startJWKSBackgroundRefresh() {
 						refreshDelay = 250 * time.Millisecond
 					} // floor to avoid thrash
 				}
-				time.Sleep(refreshDelay)
+				select {
+				case <-time.After(refreshDelay):
+				case <-ctx.Done():
+					return
+				}
 				_ = fetchJWKS(jwksURL, cacheSecs)
 				if jwksBgRefreshCounter != nil {
 					jwksBgRefreshCounter.Inc()
@@ -288,14 +330,26 @@ func startJWKSBackgroundRefresh() {
 	if jwksCacheTtlRemainingGauge != nil {
 		go func() {
 			for {
-				if !jwksExpiry.IsZero() {
-					rem := time.Until(jwksExpiry).Seconds()
+				select {
+				case <-ctx.Done():
+					return
+				default:
+				}
+				jwksMu.RLock()
+				expiry := jwksExpiry
+				jwksMu.RUnlock()
+				if !expiry.IsZero() {
+					rem := time.Until(expiry).Seconds()
 					if rem < 0 {
 						rem = 0
 					}
 					jwksCacheTtlRemainingGauge.Set(rem)
 				}
-				time.Sleep(1 * time.Second)
+				select {
+				case <-time.After(1 * time.Second):
+				case <-ctx.Done():
+					return
+				}
 			}
 		}()
 	}

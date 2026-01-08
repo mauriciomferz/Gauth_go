@@ -303,8 +303,8 @@ func (s *BetaServer) GetCapabilityRegistryHash() string {
 }
 
 // Additional accessors for tests if needed
-func (s *BetaServer) CapAuditPersistPath() string { return s.capabilitiesHandler.AuditPersistPath }
-func (s *BetaServer) CapAuditPrevHash() string    { return s.capabilitiesHandler.AuditPrevHash }
+func (s *BetaServer) CapAuditPersistPath() string { return s.capabilitiesHandler.GetAuditPersistPath() }
+func (s *BetaServer) CapAuditPrevHash() string    { return s.capabilitiesHandler.GetAuditPrevHash() }
 func (s *BetaServer) CapAnchorStale() bool {
 	stale, _, _ := s.capabilitiesHandler.GetAnchorState()
 	return stale
@@ -335,9 +335,21 @@ func (s *BetaServer) AnchorClient() interface {
 	}
 	return s.anchorClient
 }
-func (s *BetaServer) CapAnchorFilePath() string             { return s.capAnchorFilePath }
-func (s *BetaServer) CapAnchorLastWrite() time.Time         { return s.capAnchorLastWrite }
-func (s *BetaServer) CapAnchorWriteInterval() time.Duration { return s.capAnchorWriteInterval }
+func (s *BetaServer) CapAnchorFilePath() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.capAnchorFilePath
+}
+func (s *BetaServer) CapAnchorLastWrite() time.Time {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.capAnchorLastWrite
+}
+func (s *BetaServer) CapAnchorWriteInterval() time.Duration {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.capAnchorWriteInterval
+}
 func (s *BetaServer) CapAnchorAgeSeconds() uint64 {
 	_, age, _ := s.capabilitiesHandler.GetAnchorState()
 	return uint64(age.Seconds())
@@ -401,6 +413,12 @@ func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
 		b.WriteString("agentauth_capability_registry_hash_changed_total 0\n")
 	}
 
+	// Snapshot server fields that may be updated by background goroutines.
+	s.mu.RLock()
+	capAnchorLastWrite := s.capAnchorLastWrite
+	receiptIntegrityStatus := s.receiptIntegrityStatus
+	s.mu.RUnlock()
+
 	// Jitter gauge for emission interval stability (use interval mean if available)
 	jitter := s.capIntervalMean / 1e9 // Convert ns to seconds
 	if s.capIntervalCount == 0 {
@@ -409,8 +427,8 @@ func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
 	b.WriteString(fmt.Sprintf("agentauth_capability_anchor_emission_jitter_seconds %.6f\n", jitter))
 	// Age since last anchor write
 	var age float64
-	if !s.capAnchorLastWrite.IsZero() {
-		age = time.Since(s.capAnchorLastWrite).Seconds()
+	if !capAnchorLastWrite.IsZero() {
+		age = time.Since(capAnchorLastWrite).Seconds()
 	}
 	b.WriteString(fmt.Sprintf("agentauth_capability_anchor_age_seconds %.3f\n", age))
 
@@ -424,7 +442,7 @@ func (s *BetaServer) CapabilityAnchorMetricsPrometheus(c *gin.Context) {
 	b.WriteString("# HELP agentauth_capability_anchor_notarization_receipts_integrity Integrity status of verification chain (1=ok, 0=mismatch, -1=legacy, -2=unconfigured)\n")
 	b.WriteString("# TYPE agentauth_capability_anchor_notarization_receipts_integrity gauge\n")
 	integrityVal := -2
-	switch s.receiptIntegrityStatus {
+	switch receiptIntegrityStatus {
 	case integrityOK:
 		integrityVal = 1
 	case integrityMismatch:

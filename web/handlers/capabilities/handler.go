@@ -154,9 +154,13 @@ func (h *Handler) LoadFromFile(path string) error {
 	hSum := sha256.Sum256(enc)
 	newHash := fmt.Sprintf("sha256:%x", hSum[:])
 
-	h.mu.Lock()
-	defer h.mu.Unlock()
+	var (
+		onReload func(newHash string)
+		metrics  CapabilityMetrics
+		prevHash string
+	)
 
+	h.mu.Lock()
 	// Detect semantic change or initialization
 	if h.RegistryHash != newHash {
 		h.PrevRegistryHash = h.RegistryHash
@@ -171,17 +175,22 @@ func (h *Handler) LoadFromFile(path string) error {
 	h.Source = "file"
 	h.LastLoaded = time.Now()
 
+	onReload = h.OnReload
+	metrics = h.Metrics
+	prevHash = h.PrevRegistryHash
+	h.mu.Unlock()
+
 	// Update global registry (transactional reset)
 	capability.Reset(cfg.Capabilities)
 
-	// Invoke OnReload callback if set (for anchor emission)
-	if h.OnReload != nil {
-		h.OnReload(newHash)
+	// Invoke OnReload callback after unlocking to avoid re-entrant deadlocks.
+	if onReload != nil {
+		onReload(newHash)
 	}
 
 	// Emit metrics for hash change
-	if h.Metrics != nil && h.PrevRegistryHash != "" && h.PrevRegistryHash != newHash {
-		h.Metrics.IncCapabilityRegistryHashChanged()
+	if metrics != nil && prevHash != "" && prevHash != newHash {
+		metrics.IncCapabilityRegistryHashChanged()
 	}
 
 	return nil

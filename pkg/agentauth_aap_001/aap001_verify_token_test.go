@@ -88,6 +88,7 @@ func TestVerifyTokenDigestTamper(t *testing.T) {
 	// Tamper stored POA (change scope) causing digest mismatch
 	stored, _ := svc.repo.Get(resp.POA.ID)
 	stored.Scope = []string{"different"}
+	_ = svc.repo.Update(stored)
 	_, err := svc.VerifyToken(WithSubject(context.Background(), "grantee"), resp.AuthToken)
 	if err == nil {
 		t.Fatalf("expected integrity failure on digest mismatch")
@@ -118,6 +119,7 @@ func TestVerifyTokenSignatureVerified(t *testing.T) {
 		t.Fatalf("sign: %v", serr)
 	}
 	poa.Signature = &POASignature{Algorithm: signer.Algorithm(), KeyID: signer.KeyID(), DigestHex: dig, SigBase64: base64.StdEncoding.EncodeToString(sig), Canonical: canon}
+	_ = svc.repo.Update(poa)
 	res, err := svc.VerifyToken(WithSubject(context.Background(), "grantee"), resp.AuthToken)
 	if err != nil {
 		t.Fatalf("verify with signature soft skip err=%v", err)

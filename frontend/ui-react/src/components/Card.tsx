@@ -1,44 +1,30 @@
-import { ReactNode, isValidElement, createElement } from 'react'
+import { ReactNode, isValidElement, createElement, ElementType } from 'react'
 import { cn } from '../lib/utils'
+
+type IconProp = ReactNode | ElementType | { default: ElementType }
 
 interface CardProps {
   children: ReactNode
   className?: string
   title?: string
   // Allow either a ready element or a component type
-  icon?: ReactNode | (() => ReactNode) | React.ComponentType<unknown> | React.ElementType
+  icon?: IconProp
 }
 
 export function Card({ children, className, title, icon }: CardProps) {
-  // Defensive rendering: if icon is a component type (function) create an element
   let renderedIcon: ReactNode | null = null
   if (icon) {
     if (isValidElement(icon)) {
       renderedIcon = icon
-    } else if (typeof icon === 'function') {
-      try {
-        renderedIcon = icon()
-      } catch (e) {
-        console.warn('Icon component threw during render:', e)
-      }
-    } else if (icon && typeof icon === 'object' && 'default' in icon && typeof icon.default === 'function') {
-      // Handle potential dynamic import object
-      try {
-        renderedIcon = createElement(icon.default)
-      } catch (e) {
-        console.warn('Dynamic icon default export failed:', e)
+    } else if (typeof icon === 'function' || typeof icon === 'string') {
+      renderedIcon = createElement(icon as ElementType)
+    } else if (typeof icon === 'object' && icon && 'default' in icon) {
+      const def = (icon as { default: ElementType }).default
+      if (typeof def === 'function' || typeof def === 'string') {
+        renderedIcon = createElement(def)
       }
     } else {
-      // Last resort: try createElement if it looks like a component (has render or type)
-      if (icon && (icon.render || icon.type)) {
-        try {
-          renderedIcon = createElement(icon.type || icon)
-        } catch {
-          renderedIcon = null
-        }
-      } else {
-        renderedIcon = icon as ReactNode
-      }
+      renderedIcon = icon as ReactNode
     }
   }
   return (
@@ -62,21 +48,23 @@ export function Card({ children, className, title, icon }: CardProps) {
 interface StatCardProps {
   title: string
   value: string | number
-  icon: ReactNode | (() => ReactNode) | React.ComponentType<unknown> | React.ElementType
+  icon: IconProp
   trend?: string
   gradient: string
 }
 
 export function StatCard({ title, value, icon, trend, gradient }: StatCardProps) {
-  // Normalize icon similar to Card
-  let renderedIcon: ReactNode = null
+  let renderedIcon: ReactNode | null = null
   if (icon) {
     if (isValidElement(icon)) {
       renderedIcon = icon
-    } else if (typeof icon === 'function') {
-      try { renderedIcon = icon() } catch { /* ignore */ }
-    } else if (icon && icon.type) {
-      try { renderedIcon = createElement(icon.type) } catch { /* ignore */ }
+    } else if (typeof icon === 'function' || typeof icon === 'string') {
+      renderedIcon = createElement(icon as ElementType)
+    } else if (typeof icon === 'object' && icon && 'default' in icon) {
+      const def = (icon as { default: ElementType }).default
+      if (typeof def === 'function' || typeof def === 'string') {
+        renderedIcon = createElement(def)
+      }
     } else {
       renderedIcon = icon as ReactNode
     }
