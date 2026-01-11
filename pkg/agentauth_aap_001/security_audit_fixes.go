@@ -294,7 +294,7 @@ func (s *Service) EnforceScopeConstraints(
 		if currency, ok := poa.Restrictions["currency"]; ok && currency != "" {
 			// Extract currency from context if available
 			ctxCurrency := ""
-			if v := ctx.Value("currency"); v != nil {
+			if v := ctx.Value(ctxKeyCurrency); v != nil {
 				if s, ok2 := v.(string); ok2 {
 					ctxCurrency = s
 				}

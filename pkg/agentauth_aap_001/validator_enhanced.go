@@ -705,8 +705,8 @@ func (v *EnhancedPoAValidator) validateFinancialLimits(ctx context.Context, p *P
 	}
 
 	// Extract currency from context, fallback to PoA's default_currency, then USD
-	currency := "USD"
-	if c := ctx.Value("currency"); c != nil {
+	currency := defaultCurrencyUSD
+	if c := ctx.Value(ctxKeyCurrency); c != nil {
 		if s, ok := c.(string); ok {
 			currency = strings.ToUpper(s)
 		}
