@@ -7,7 +7,7 @@ import (
 
 // TestEnhancedJTIValidation tests the enhanced JTI validation function.
 func TestEnhancedJTIValidation(t *testing.T) {
-	nowFn := func() time.Time { return time.Now() }
+	nowFn := time.Now
 
 	testCases := []struct {
 		name           string

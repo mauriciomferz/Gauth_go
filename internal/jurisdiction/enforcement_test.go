@@ -16,11 +16,11 @@ func TestNewEnforcementEngine(t *testing.T) {
 		t.Fatal("NewEnforcementEngine should return a non-nil engine")
 	}
 
-	if !engine.IsEnabled() {
+	if !engine.IsEnabled() { //nolint:staticcheck // nil checked above
 		t.Error("Engine should be enabled by default")
 	}
 
-	if engine.validator == nil {
+	if engine.validator == nil { //nolint:staticcheck // nil checked above
 		t.Error("Engine should have a validator")
 	}
 

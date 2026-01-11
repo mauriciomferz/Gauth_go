@@ -52,6 +52,7 @@ const (
 const (
 	LegacyCtxRequestedAmount = "requested_amount"
 	LegacyCtxSubject         = "subject"
+	defaultCurrencyUSD       = "USD" // Default currency for amount calculations
 )
 
 // WithRequestedAmount attaches a requested amount string to context using typed key (and legacy for transitional consumers).
@@ -1689,7 +1690,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 		}
 
 		if hasAmount && requestedAmount > 0 {
-			currency := "USD"
+			currency := defaultCurrencyUSD
 			if c := ctx.Value(ctxKeyCurrency); c != nil {
 				if s, ok := c.(string); ok {
 					currency = s
@@ -2441,7 +2442,7 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 			}
 			event.Metadata["requested_scope"] = req.Scope
 			event.Metadata["reason"] = err.Error()
-			if logErr := s.audit.Log(ctx, event); logErr != nil {
+			if logErr := s.audit.Log(ctx, event); logErr != nil { //nolint:staticcheck // intentionally ignore audit log error
 				// Log error but don't fail the security check
 			}
 			s.sendToAuditSink(ctx, event)

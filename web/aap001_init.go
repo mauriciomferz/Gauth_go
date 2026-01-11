@@ -95,7 +95,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 		}
 		password := os.Getenv("DB_PASSWORD")
 		if password == "" {
-			password = "agentauth_password"
+			password = "agentauth_password" //#nosec G101 -- default dev password
 		}
 		sslmode := os.Getenv("DB_SSLMODE")
 		if sslmode == "" {
@@ -283,7 +283,7 @@ func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string
 	}
 	password := os.Getenv("DB_PASSWORD")
 	if password == "" {
-		password = "agentauth_password"
+		password = "agentauth_password" //#nosec G101 -- default dev password
 	}
 	sslmode := os.Getenv("DB_SSLMODE")
 	if sslmode == "" {

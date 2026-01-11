@@ -2079,7 +2079,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	// We'll skip complex receipt store logic here as it's not fully extracted to a package yet.
 	// Instead, we verify the receipt verification loop logic in server_clean.go and port it if critical.
 	// server_clean.go had a `verifyReceiptChain` loop. Use s.startReceiptVerificationLoop() equivalent.
-	if os.Getenv("AGENTAUTH_RECEIPT_VERIFY_BG_SEC") != "" {
+	if os.Getenv("AGENTAUTH_RECEIPT_VERIFY_BG_SEC") != "" { //nolint:staticcheck // Placeholder for future implementation
 		// ... background loop logic would go here
 	}
 

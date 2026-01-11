@@ -72,7 +72,7 @@ func TestValidationFailureCounters(t *testing.T) {
 	id := resp.Token.ID
 	if id == "" {
 		// Maybe JWT mode?
-		if resp.JWT != "" {
+		if resp.JWT != "" { //nolint:staticcheck // Placeholder for JWT parsing
 			// JWT ID extraction not easy without parsing.
 			// But default config might use opaque tokens.
 			// If JWT, we can't easily get ID unless we parse it.

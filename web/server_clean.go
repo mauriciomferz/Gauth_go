@@ -4124,7 +4124,7 @@ func (s *BetaServer) info(c *gin.Context) {
 		})
 	}
 	// Capability State
-	source, regHash, prevHash, _, _, _, changed := s.capabilitiesHandler.GetState()
+	source, regHash, prevHash, _, _, _, changed := s.capabilitiesHandler.GetState() //nolint:dogsled // only need some values
 
 	capMeta := gin.H{
 		"registry_hash":       regHash,

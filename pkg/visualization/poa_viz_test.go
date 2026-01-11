@@ -11,7 +11,7 @@ func TestNewPoAVisualizer(t *testing.T) {
 		t.Fatal("NewPoAVisualizer returned nil")
 	}
 
-	if viz.graphs == nil {
+	if viz.graphs == nil { //nolint:staticcheck // nil checked above
 		t.Error("graphs map not initialized")
 	}
 }
