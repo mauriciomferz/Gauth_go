@@ -210,12 +210,12 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	cacheConf := cacheConfig.LoadCacheConfig()
 	// Force memory cache if Redis skip is requested (e.g. for tests)
 	if os.Getenv("AGENTAUTH_SKIP_REDIS") == "1" {
-		cacheConf.Type = "memory"
+		cacheConf.Type = memoryProvider
 		fmt.Fprintln(os.Stderr, "[factory] forcing memory cache via AGENTAUTH_SKIP_REDIS")
 	}
 	if err := cacheConfig.ValidateCacheConfig(cacheConf); err != nil {
 		fmt.Fprintf(os.Stderr, "[WARNING] Invalid cache configuration: %v - using memory cache fallback\n", err)
-		cacheConf.Type = "memory"
+		cacheConf.Type = memoryProvider
 	}
 	cacheInstance := cache.NewCacheWithFallback(cacheConf)
 	s.cache = cacheInstance
@@ -1414,7 +1414,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		poaHandler.RegisterRoutes(adminGroup)
 		// Initialize dummy cache for PoA
 		cacheConf := cacheConfig.LoadCacheConfig()
-		cacheConf.Type = "memory"
+		cacheConf.Type = memoryProvider
 		cacheInstance := cache.NewCacheWithFallback(cacheConf)
 		poaHandler.SetCache(cacheInstance)
 		fmt.Fprintln(os.Stderr, "[DEV] PoA handler registered (Degraded Mode: Empty)")

@@ -4920,14 +4920,14 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 				chainLength = depth
 			}
 			// Determine token type based on delegation properties
-			tokenType := "agentauth.delegation" // Default typ for delegation tokens
+			tokenType := "agentauth.delegation" //#nosec G101 -- not a credential // Default typ for delegation tokens
 			if len(poa.Scope) == 0 {
-				tokenType = "agentauth.token" // Generic token without specific delegated scopes
+				tokenType = "agentauth.token" //#nosec G101 -- not a credential // Generic token without specific delegated scopes
 			}
 			// Check if token represents capability-based access (heuristic: "cap:" scope prefix)
 			for _, scope := range poa.Scope {
 				if len(scope) > 4 && scope[:4] == "cap:" {
-					tokenType = "agentauth.capability"
+					tokenType = "agentauth.capability" //#nosec G101 -- not a credential
 					break
 				}
 			}

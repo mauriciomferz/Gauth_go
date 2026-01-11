@@ -76,6 +76,23 @@ issues:
 
       text: github.com/alicebob/miniredis
 
+    # Exclude G115 integer overflow in test files (small test values)
+    - linters: [gosec]
+      text: G115
+      path: _test\.go
+    
+    # Exclude dogsled in test files (multiple return values ignored for testing)
+    - linters: [dogsled]
+      path: _test\.go
+    
+    # Exclude gocritic ifElseChain suggestions (style preference)
+    - linters: [gocritic]
+      text: ifElseChain
+    
+    # Exclude gocritic elseif suggestions (style preference)
+    - linters: [gocritic]
+      text: elseif
+
 linters-settings:
   # Line length settings
   lll:

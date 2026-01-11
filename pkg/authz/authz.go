@@ -682,7 +682,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				dur := time.Since(start)
 				ma.recordLatency(dur)
 				if ma.metricsProvider != nil {
-					outcome := "deny"
+					outcome := string(Deny)
 					if dec.Allow {
 						outcome = string(Allow)
 					}
@@ -719,7 +719,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				dur := time.Since(start)
 				ma.recordLatency(dur)
 				if ma.metricsProvider != nil {
-					outcome := "deny"
+					outcome := string(Deny)
 					if d.Allow {
 						outcome = string(Allow)
 					}
@@ -751,7 +751,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				dec := ma.buildDecisionFromPolicy(request, policy, start)
 				ma.annotateConflict(&dec, denyList, allowList)
 				if ma.metricsProvider != nil {
-					outcome := "deny"
+					outcome := string(Deny)
 					if dec.Allow {
 						outcome = string(Allow)
 					}
@@ -769,7 +769,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				ma.executePostDecision(&dec, denyList[0], request)
 				ma.annotateConflict(&dec, denyList, allowList)
 				if ma.metricsProvider != nil {
-					outcome := "deny"
+					outcome := string(Deny)
 					if dec.Allow {
 						outcome = string(Allow)
 					}
@@ -781,7 +781,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 			ma.executePostDecision(&dec, allowList[0], request)
 			ma.annotateConflict(&dec, denyList, allowList)
 			if ma.metricsProvider != nil {
-				outcome := "deny"
+				outcome := string(Deny)
 				if dec.Allow {
 					outcome = string(Allow)
 				}
@@ -794,7 +794,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				ma.executePostDecision(&dec, allowList[0], request)
 				ma.annotateConflict(&dec, denyList, allowList)
 				if ma.metricsProvider != nil {
-					outcome := "deny"
+					outcome := string(Deny)
 					if dec.Allow {
 						outcome = string(Allow)
 					}
@@ -806,7 +806,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 			ma.executePostDecision(&dec, denyList[0], request)
 			ma.annotateConflict(&dec, denyList, allowList)
 			if ma.metricsProvider != nil {
-				outcome := "deny"
+				outcome := string(Deny)
 				if dec.Allow {
 					outcome = string(Allow)
 				}
@@ -818,7 +818,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 			ma.executePostDecision(&dec, matched[0], request)
 			ma.annotateConflict(&dec, denyList, allowList)
 			if ma.metricsProvider != nil {
-				outcome := "deny"
+				outcome := string(Deny)
 				if dec.Allow {
 					outcome = string(Allow)
 				}
@@ -847,7 +847,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 	dur := time.Since(start)
 	ma.recordLatency(dur)
 	if ma.metricsProvider != nil {
-		outcome := "deny"
+		outcome := string(Deny)
 		if dec.Allow {
 			outcome = string(Allow)
 		}
