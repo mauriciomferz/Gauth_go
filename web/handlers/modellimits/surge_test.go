@@ -58,9 +58,7 @@ func TestAttestationStreamSurgeTrigger(t *testing.T) {
 		// Trigger "audit_append" by causing an exceed event
 		// Input 200 > 10
 		res := h.CheckLimit("surge-model", "", 200, 0)
-		if res.Error != "" && res.Error != "model_limit_exceeded" { // We expect failure.
-			// Actually we expect it to FAIL limit check.
-		}
+		// We expect failure: model_limit_exceeded
 
 		if res.Allowed {
 			t.Fatalf("expected allowed=false")

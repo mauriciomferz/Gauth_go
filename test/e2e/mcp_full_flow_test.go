@@ -61,7 +61,6 @@ func TestMCPFullFlow(t *testing.T) {
 			servers := listData["servers"].([]interface{})
 			assert.NotEmpty(t, servers)
 
-		} else {
 			// If echo is not a valid MCP server (it isn't), we might get an error.
 			// The important part is the API endpoint is reachable and handling basic validation.
 			t.Logf("Got status %d (Expected for mock command)", resp.StatusCode)

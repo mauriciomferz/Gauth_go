@@ -81,7 +81,7 @@ func TestCurrencyNormalization(t *testing.T) {
 
 	// 2. Transaction for 90 EUR -> Should be ~99 USD -> Success
 	tx1Ctx := context.WithValue(bobCtx, ctxKeyRequestedAmount, 90.0)
-	tx1Ctx = context.WithValue(tx1Ctx, "currency", "EUR")
+	tx1Ctx = context.WithValue(tx1Ctx, ctxKeyCurrency, "EUR")
 	_, err = s.VerifyToken(tx1Ctx, token)
 	if err != nil {
 		t.Fatalf("EUR verification failed: %v", err)
@@ -89,7 +89,7 @@ func TestCurrencyNormalization(t *testing.T) {
 
 	// 3. Transaction for 2 EUR -> Should be ~2.2 USD -> Total ~101.2 USD -> Failure
 	tx2Ctx := context.WithValue(bobCtx, ctxKeyRequestedAmount, 2.0)
-	tx2Ctx = context.WithValue(tx2Ctx, "currency", "EUR")
+	tx2Ctx = context.WithValue(tx2Ctx, ctxKeyCurrency, "EUR")
 	_, err = s.VerifyToken(tx2Ctx, token)
 	if err == nil {
 		t.Error("Second EUR verification should have failed due to daily limit in USD")

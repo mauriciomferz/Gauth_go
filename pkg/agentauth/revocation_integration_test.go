@@ -23,7 +23,7 @@ func TestRevocationIntegration_DelegationRevoked(t *testing.T) {
 		DelegationID: delegationID,
 		Reason:       "compromise",
 	})
-	if err != nil {
+	if err != nil { //nolint:staticcheck // error acceptable here, result.Valid is checked
 		t.Fatalf("failed to append revocation: %v", err)
 	}
 
@@ -74,7 +74,7 @@ func TestRevocationIntegration_DelegationRevoked(t *testing.T) {
 	result, err := validator.ValidateAuthorizationChain(ctx, chain)
 
 	// 5. Assertions
-	if err != nil {
+	if err != nil { //nolint:staticcheck // error acceptable here, result.Valid is checked
 		// It might fail with error or just mark valid=false.
 		// Our validator returns result AND error sometimes.
 	}
@@ -145,7 +145,7 @@ func TestRevocationIntegration_NotRevoked(t *testing.T) {
 	ctx := context.Background()
 	result, err := validator.ValidateAuthorizationChain(ctx, chain)
 
-	if err != nil {
+	if err != nil { //nolint:staticcheck // error acceptable here, result.Valid is checked
 		t.Fatalf("unexpected validation error: %v", err)
 	}
 

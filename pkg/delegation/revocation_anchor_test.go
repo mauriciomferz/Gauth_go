@@ -42,7 +42,7 @@ func TestRevocationExternalAnchor_AAP_001_C5(t *testing.T) {
 	if mock.lastSTH == nil {
 		t.Fatal("Observer received nil STH")
 	}
-	if mock.lastSTH.AggregateHash != sth.AggregateHash {
+	if mock.lastSTH.AggregateHash != sth.AggregateHash { //nolint:staticcheck // nil checked above
 		t.Errorf("Observer received mismatched STH")
 	}
 }

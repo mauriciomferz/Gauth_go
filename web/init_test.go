@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-func init() {
+func init() { //nolint:gochecknoinits // Required for test setup
 	// Disable Redis and background polls by default for all tests in the web package to ensure they are hermetic.
 	// Individual tests that specifically need these can override them.
 	if os.Getenv("AGENTAUTH_SKIP_REDIS") == "" {

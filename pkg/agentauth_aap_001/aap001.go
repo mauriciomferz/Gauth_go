@@ -45,6 +45,7 @@ type ctxKey int
 const (
 	ctxKeyRequestedAmount ctxKey = iota
 	ctxKeySubject
+	ctxKeyCurrency
 )
 
 // String forms retained for transitional compatibility (tests or external callers still using raw strings).
@@ -1689,7 +1690,7 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 
 		if hasAmount && requestedAmount > 0 {
 			currency := "USD"
-			if c := ctx.Value("currency"); c != nil {
+			if c := ctx.Value(ctxKeyCurrency); c != nil {
 				if s, ok := c.(string); ok {
 					currency = s
 				}

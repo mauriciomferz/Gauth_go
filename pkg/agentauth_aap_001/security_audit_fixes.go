@@ -208,7 +208,7 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 //   - Explicit deny: unknown actions rejected by default
 //   - Audit trail: logs all constraint violations
 func (s *Service) EnforceScopeConstraints(
-ctx context.Context, poa *PowerOfAttorney, requestedAction string, requestedAmount *float64,
+	ctx context.Context, poa *PowerOfAttorney, requestedAction string, requestedAmount *float64,
 ) error {
 	if poa == nil {
 		return aap.New(aap.ErrInvalidRequest, "nil poa in scope enforcement")

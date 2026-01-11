@@ -214,7 +214,7 @@ func TestSecurityFix3_ScopeConstraintEnforcement(t *testing.T) {
 	}
 
 	t.Run("Legitimate_Use_Amount_Within_Limit", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), "currency", "USD")
+		ctx := context.WithValue(context.Background(), ctxKeyCurrency, "USD")
 		err := svc.EnforceScopeConstraints(ctx, financialPoA, "payment/send", &amount100)
 		if err != nil {
 			t.Errorf("Expected payment within limit to succeed, got error: %v", err)
@@ -223,7 +223,7 @@ func TestSecurityFix3_ScopeConstraintEnforcement(t *testing.T) {
 	})
 
 	t.Run("Attack_Exceed_Max_Amount", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), "currency", "USD")
+		ctx := context.WithValue(context.Background(), ctxKeyCurrency, "USD")
 		amount2000 := 2000.0
 		err := svc.EnforceScopeConstraints(ctx, financialPoA, "payment/send", &amount2000)
 		if err == nil {
@@ -236,7 +236,7 @@ func TestSecurityFix3_ScopeConstraintEnforcement(t *testing.T) {
 	})
 
 	t.Run("Attack_Currency_Mismatch", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), "currency", "EUR")
+		ctx := context.WithValue(context.Background(), ctxKeyCurrency, "EUR")
 		amount50 := 50.0
 		err := svc.EnforceScopeConstraints(ctx, financialPoA, "payment/send", &amount50)
 		if err == nil {

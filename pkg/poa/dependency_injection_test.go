@@ -21,14 +21,14 @@ func TestMemoryService_WithKeyManager(t *testing.T) {
 	if activeKey == nil {
 		t.Fatal("manager has no active key")
 	}
-	keyID := activeKey.ID
+	keyID := activeKey.ID //nolint:staticcheck // nil checked above
 
 	// Create service	// Test injection
 	svc := NewMemoryService(WithKeyProvider(km))
 	if svc == nil {
 		t.Fatal("NewMemoryService returned nil")
 	}
-	if svc.keyProvider != km {
+	if svc.keyProvider != km { //nolint:staticcheck // nil checked above
 		t.Error("key provider not injected correctly")
 	}
 
@@ -72,8 +72,8 @@ func TestVerifyMultiSig_WithInjectedManager(t *testing.T) {
 	if activeKey == nil {
 		t.Fatal("manager has no active key")
 	}
-	keyID := activeKey.ID
-	priv := activeKey.Private
+	keyID := activeKey.ID     //nolint:staticcheck // nil checked above
+	priv := activeKey.Private //nolint:staticcheck // nil checked above
 
 	// Create a POA manually
 	poa := &ProofOfAuthorization{

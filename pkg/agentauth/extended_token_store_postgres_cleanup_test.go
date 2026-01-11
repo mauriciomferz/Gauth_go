@@ -46,7 +46,7 @@ func TestPostgresExtendedTokenStore_Cleanup(t *testing.T) {
 			)`
 
 		issuedAt := time.Now()
-		if expiresAt != nil {
+		if expiresAt != nil { //nolint:staticcheck // Placeholder for future implementation
 			issuedAt = expiresAt.Add(-1 * time.Hour)
 		}
 
@@ -60,7 +60,7 @@ func TestPostgresExtendedTokenStore_Cleanup(t *testing.T) {
 		// Based on previous file view, logic usually relies on `expires_at < NOW()`.
 		// Let's force update timestamps to ensure precise control.
 
-		if expiresAt != nil {
+		if expiresAt != nil { //nolint:staticcheck // Placeholder for future implementation
 			// If we want it to be expired at 'expiresAt', issued_at should be expiresAt - expires_in
 			// The INSERT above sets issued_at.
 			// Let's manually set timestamps to be sure about "valid", "expired grace", "expired old"
