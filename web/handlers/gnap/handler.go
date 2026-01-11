@@ -29,6 +29,8 @@ type Handler struct {
 	DefaultWait int    // Default wait seconds for polling
 }
 
+var _ = (*Handler).logAudit
+
 // NewHandler creates a GNAP handler.
 func NewHandler(store gnap.GrantStore, verif agentauthplus.VerificationService, baseURL string) *Handler {
 	return &Handler{
@@ -40,7 +42,12 @@ func NewHandler(store gnap.GrantStore, verif agentauthplus.VerificationService, 
 }
 
 // logAudit logs a GNAP audit event if logger is configured.
-func (h *Handler) logAudit(c *gin.Context, eventType audit.EventType, action, result, grantID string, metadata map[string]interface{}) {
+func (h *Handler) logAudit(
+	c *gin.Context,
+	eventType audit.EventType,
+	action, result, grantID string,
+	metadata map[string]interface{},
+) {
 	if h.AuditLogger == nil {
 		return
 	}
@@ -474,7 +481,7 @@ func (h *Handler) linkAgentAuthContext(ctx context.Context, resp *gnap.GrantResp
 	resp.AuthorizationChain = gnapChain
 
 	// Determine compliance level
-	compliance := "basic"
+	compliance := "non_compliant"
 	if report.OverallValid {
 		compliance = "high"
 		if report.FiduciaryCompliance != nil && !report.FiduciaryCompliance.Compliant {
@@ -483,8 +490,6 @@ func (h *Handler) linkAgentAuthContext(ctx context.Context, resp *gnap.GrantResp
 		if report.CapabilityCheck != nil && !report.CapabilityCheck.Sufficient {
 			compliance = "conditional"
 		}
-	} else {
-		compliance = "non_compliant"
 	}
 	resp.ComplianceLevel = compliance
 }

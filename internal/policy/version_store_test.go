@@ -21,7 +21,11 @@ func TestBoltPolicyVersionStore_SaveLoadVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	// Create test bundle
 	bundle := pkgpolicy.Bundle{
@@ -86,7 +90,11 @@ func TestBoltPolicyVersionStore_ListVersions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	// Save 3 versions
 	for i := 1; i <= 3; i++ {
@@ -136,11 +144,15 @@ func TestBoltPolicyVersionStore_ActiveVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	// Save active version
 	if err2 := store.SaveActiveVersion(2); err2 != nil {
-		t.Fatalf("Failed to save active version: %v", err)
+		t.Fatalf("Failed to save active version: %v", err2)
 	}
 
 	// Load active version
@@ -176,7 +188,11 @@ func TestBoltPolicyVersionStore_AuditEvents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	// Save audit events for different versions
 	events := []VersionAuditEvent{
@@ -247,7 +263,11 @@ func TestBoltPolicyVersionStore_Stats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	// Save 2 versions
 	for i := 1; i <= 2; i++ {
@@ -352,14 +372,20 @@ func TestPolicyVersionManagerWithStore_CreateAndLoad(t *testing.T) {
 	}
 
 	// Close store
-	store.Close()
+	if closeErr := store.Close(); closeErr != nil {
+		t.Fatalf("store close: %v", closeErr)
+	}
 
 	// Reopen store and create new manager (simulates restart)
 	store2, err := NewBoltPolicyVersionStore(dbPath)
 	if err != nil {
 		t.Fatalf("Failed to reopen store: %v", err)
 	}
-	defer store2.Close()
+	t.Cleanup(func() {
+		if closeErr := store2.Close(); closeErr != nil {
+			t.Errorf("store2 close: %v", closeErr)
+		}
+	})
 
 	registry2 := pkgpolicy.NewRegistry()
 	manager2, err := NewPolicyVersionManagerWithStore(registry2, store2)
@@ -448,13 +474,19 @@ func TestPolicyVersionManagerWithStore_RollbackPersistence(t *testing.T) {
 	}
 
 	// Close and reopen (simulates restart)
-	store.Close()
+	if closeErr := store.Close(); closeErr != nil {
+		t.Fatalf("store close: %v", closeErr)
+	}
 
 	store2, err := NewBoltPolicyVersionStore(dbPath)
 	if err != nil {
 		t.Fatalf("Failed to reopen store: %v", err)
 	}
-	defer store2.Close()
+	t.Cleanup(func() {
+		if closeErr := store2.Close(); closeErr != nil {
+			t.Errorf("store2 close: %v", closeErr)
+		}
+	})
 
 	registry2 := pkgpolicy.NewRegistry()
 	manager2, err := NewPolicyVersionManagerWithStore(registry2, store2)
@@ -495,7 +527,11 @@ func TestPolicyVersionManagerWithStore_ConcurrentAccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	registry := pkgpolicy.NewRegistry()
 	manager, err := NewPolicyVersionManagerWithStore(registry, store)
@@ -601,7 +637,11 @@ func TestBoltPolicyVersionStore_NonExistentVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	// Try to load non-existent version
 	_, _, err = store.LoadVersion(999)
@@ -618,7 +658,11 @@ func TestBoltPolicyVersionStore_EmptyDatabase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() {
+		if closeErr := store.Close(); closeErr != nil {
+			t.Errorf("store close: %v", closeErr)
+		}
+	})
 
 	// List versions should return empty
 	versions, err := store.ListVersions()

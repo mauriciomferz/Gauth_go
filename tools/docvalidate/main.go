@@ -16,13 +16,39 @@ import (
 
 // Validation configuration
 var (
-	requiredKeys     = []string{"title", "category", "status", "lastUpdated", "owners"}
-	frontMatterDelim = "---"
+	requiredKeys = []string{"title", "category", "status", "lastUpdated", "owners"}
 	// Allowed enumerations sourced from docs conventions (kept lightweight; not exhaustive of future tags)
 	allowedCategories = map[string]struct{}{
-		"architecture": {}, "aap": {}, "guide": {}, "operations": {}, "security": {}, "performance": {}, "api": {}, "adr": {}, "release": {}, "generated": {}, "roadmap": {}, "compliance": {}, "example": {}, "ui": {}, "audit": {}, "maintenance": {}, "org": {}, "misc": {}, "audit-log": {}, "audit-log-index": {}, "documentation-index": {},
+		"architecture":        {},
+		"aap":                 {},
+		"guide":               {},
+		"operations":          {},
+		"security":            {},
+		"performance":         {},
+		"api":                 {},
+		"adr":                 {},
+		"release":             {},
+		"generated":           {},
+		"roadmap":             {},
+		"compliance":          {},
+		"example":             {},
+		"ui":                  {},
+		"audit":               {},
+		"maintenance":         {},
+		"org":                 {},
+		"misc":                {},
+		"audit-log":           {},
+		"audit-log-index":     {},
+		"documentation-index": {},
 		// Additional observed categories retained during transition
-		"legal-disclaimer": {}, "build-artifacts-guide": {}, "project-organization": {}, "security-guide": {}, "adr-index": {}, "security-assessment": {}, "security-setup-guide": {}, "example-index": {},
+		"legal-disclaimer":      {},
+		"build-artifacts-guide": {},
+		"project-organization":  {},
+		"security-guide":        {},
+		"adr-index":             {},
+		"security-assessment":   {},
+		"security-setup-guide":  {},
+		"example-index":         {},
 	}
 	allowedStatus = map[string]struct{}{"draft": {}, "active": {}, "deprecated": {}, "superseded": {}, "archived": {}}
 )
@@ -43,6 +69,7 @@ func main() {
 	root := flag.String("root", ".", "Root directory to scan")
 	strict := flag.Bool("strict", false, "Fail on any warning (including duplicate potential)")
 	flag.Parse()
+	mergeExpandedCategories()
 
 	results, categories := validateMarkdown(*root)
 	printSummary(results, categories)
@@ -122,18 +149,53 @@ func normalizeStatus(s string) (canonical string, changed bool) {
 	return s, false
 }
 
-// expandCategories lists previously observed categories that are outside the strict governance set but accepted during transition.
+// expandCategories lists previously observed categories that are outside the strict governance set
+// but accepted during transition.
 var expandedCategories = []string{
-	"release-notes", "compliance-report", "performance-report", "gap-report", "gap-summary", "runbook", "runbook-index",
-	"api-reference", "architecture-spec", "backup-restore-guide", "disaster-recovery-guide", "cryptography-guide", "security-jwks",
-	"security-parsing", "security-storage", "security-threat-matrix", "security-token-integrity", "threat-model", "technical-debt",
-	"testing-guide", "testing-report", "readiness-gap-analysis", "overview", "organizational", "implementation-report", "implementation-status",
-	"implementation-summary", "audit-report", "progress-report", "monitoring-report", "observability-alerting-guide", "observability-report",
-	"design-spec", "deployment-guide", "local-cluster-guide", "containerization-report", "cicd-guide", "cicd-report", "cicd-quickref", "quality-report",
+	"release-notes",
+	"compliance-report",
+	"performance-report",
+	"gap-report",
+	"gap-summary",
+	"runbook",
+	"runbook-index",
+	"api-reference",
+	"architecture-spec",
+	"backup-restore-guide",
+	"disaster-recovery-guide",
+	"cryptography-guide",
+	"security-jwks",
+	"security-parsing",
+	"security-storage",
+	"security-threat-matrix",
+	"security-token-integrity",
+	"threat-model",
+	"technical-debt",
+	"testing-guide",
+	"testing-report",
+	"readiness-gap-analysis",
+	"overview",
+	"organizational",
+	"implementation-report",
+	"implementation-status",
+	"implementation-summary",
+	"audit-report",
+	"progress-report",
+	"monitoring-report",
+	"observability-alerting-guide",
+	"observability-report",
+	"design-spec",
+	"deployment-guide",
+	"local-cluster-guide",
+	"containerization-report",
+	"cicd-guide",
+	"cicd-report",
+	"cicd-quickref",
+	"quality-report",
 	"database-implementation-summary",
 }
 
-func init() {
+func mergeExpandedCategories() {
 	// Merge expanded categories into allowed set for transitional pass.
 	for _, c := range expandedCategories {
 		allowedCategories[c] = struct{}{}
@@ -202,7 +264,10 @@ func validateFile(path string) fileResult {
 			st = canonical
 		}
 		if _, ok := allowedStatus[st]; !ok {
-			res.Errors = append(res.Errors, fmt.Sprintf("unknown status '%s' (must be one of draft|active|deprecated|superseded|archived)", st))
+			res.Errors = append(res.Errors, fmt.Sprintf(
+				"unknown status '%s' (must be one of draft|active|deprecated|superseded|archived)",
+				st,
+			))
 		}
 	}
 	// Owners sanity (team-alias style preferred: at least one '-')
@@ -341,7 +406,7 @@ func writeTaxonomyIndex(categories map[string]int) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	w := bufio.NewWriter(f)
 	if _, err := w.WriteString(b.String()); err != nil {
 		return err

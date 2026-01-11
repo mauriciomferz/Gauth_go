@@ -80,7 +80,7 @@ func fetchManifest(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d body=%s", resp.StatusCode, string(b))
@@ -253,7 +253,13 @@ func main() {
 	if *printCanon {
 		fmt.Println(string(rawCanon))
 	}
-	emitResult(*jsonOut, true, "ok", map[string]any{"kid": kid, "manifest_hash": manifestHashField, "capabilities": canon.CapabilityCount, "actions": canon.ActionCount})
+	details := map[string]any{
+		"kid":           kid,
+		"manifest_hash": manifestHashField,
+		"capabilities":  canon.CapabilityCount,
+		"actions":       canon.ActionCount,
+	}
+	emitResult(*jsonOut, true, "ok", details)
 	os.Exit(0)
 }
 

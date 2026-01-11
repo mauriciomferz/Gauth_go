@@ -2,7 +2,6 @@ package replay
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -24,7 +23,7 @@ func TestDurableReplayStoreAgentAuthIntegration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDurableReplayStore failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	adapter := NewDurableReplayStoreAdapter(store)
 
@@ -52,24 +51,17 @@ func TestDurableReplayStoreFromEnv(t *testing.T) {
 	walPath := filepath.Join(dir, "env_test.wal")
 
 	// Set environment variables
-	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "300")
-	os.Setenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC", "60")
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "5000")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
-		os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
-		os.Unsetenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC")
-		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
-		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
-	}()
+	t.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	t.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "300")
+	t.Setenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC", "60")
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "5000")
 
 	store, err := NewDurableReplayStoreFromEnv(NoopReplayMetrics{})
 	if err != nil {
 		t.Fatalf("NewDurableReplayStoreFromEnv failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Verify configuration was applied
 	if store.ttl != 5*time.Minute {
@@ -88,20 +80,15 @@ func TestDurableReplayStoreWithSizeEviction(t *testing.T) {
 	dir := t.TempDir()
 	walPath := filepath.Join(dir, "size_eviction.wal")
 
-	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "size")
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "3")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
-		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
-		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
-	}()
+	t.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "size")
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "3")
 
 	store, err := NewDurableReplayStoreFromEnv(NoopReplayMetrics{})
 	if err != nil {
 		t.Fatalf("NewDurableReplayStoreFromEnv failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	adapter := NewDurableReplayStoreAdapter(store)
 
@@ -128,22 +115,16 @@ func TestDurableReplayStoreCompositePolicy(t *testing.T) {
 	dir := t.TempDir()
 	walPath := filepath.Join(dir, "composite.wal")
 
-	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl+size")
-	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "1") // 1 second TTL for fast testing
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "10")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
-		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
-		os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
-		os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
-	}()
+	t.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl+size")
+	t.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "1") // 1 second TTL for fast testing
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "10")
 
 	store, err := NewDurableReplayStoreFromEnv(NoopReplayMetrics{})
 	if err != nil {
 		t.Fatalf("NewDurableReplayStoreFromEnv failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Verify composite policy
 	if store.evictionPolicy.Name() != "composite(ttl,size)" {
@@ -167,22 +148,22 @@ func TestDurableReplayStoreCompositePolicy(t *testing.T) {
 // TestDurableReplayStoreEnvDefaults tests default values when env vars not set.
 func TestDurableReplayStoreEnvDefaults(t *testing.T) {
 	// Clear all replay-related env vars
-	os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
-	os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
-	os.Unsetenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC")
-	os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
-	os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
+	t.Setenv("AGENTAUTH_REPLAY_WAL_PATH", "")
+	t.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "")
+	t.Setenv("AGENTAUTH_REPLAY_SNAPSHOT_INTERVAL_SEC", "")
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "")
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "")
 
 	store, err := NewDurableReplayStoreFromEnv(NoopReplayMetrics{})
 	if err != nil {
 		// Expected to fail if default path not writable
 		// This is OK - just verify defaults were attempted
 		if store != nil {
-			defer store.Close()
+			t.Cleanup(func() { _ = store.Close() })
 		}
 		return
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Verify defaults
 	if store.ttl != 15*time.Minute {
@@ -217,7 +198,9 @@ func TestDurableReplayStorePersistence(t *testing.T) {
 		_ = adapter.CheckAndStore("jti-persist-2") //nolint:errcheck
 		_ = adapter.CheckAndStore("jti-persist-3") //nolint:errcheck
 
-		store.Close()
+		if err := store.Close(); err != nil {
+			t.Fatalf("close store: %v", err)
+		}
 	}
 
 	// Reopen store (simulating crash recovery)
@@ -230,7 +213,7 @@ func TestDurableReplayStorePersistence(t *testing.T) {
 		if err != nil {
 			t.Fatalf("NewDurableReplayStore reopen failed: %v", err)
 		}
-		defer store.Close()
+		t.Cleanup(func() { _ = store.Close() })
 
 		adapter := NewDurableReplayStoreAdapter(store)
 

@@ -17,9 +17,10 @@ func TestPolicyRollbackAudit(t *testing.T) {
 		t.Fatalf("temp file: %v", err)
 	}
 	path := tmpFile.Name()
-	tmpFile.Close()
+	if err := tmpFile.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	t.Setenv("POLICY_CHAIN_STATE_PATH", path)
-	defer os.Unsetenv("POLICY_CHAIN_STATE_PATH")
 
 	s := newTestServer(t)
 	// Append two bundles to have rollback target

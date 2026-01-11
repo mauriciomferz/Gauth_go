@@ -28,13 +28,20 @@ func main() {
 	outJSON := flag.Bool("json", true, "emit JSON output")
 	flag.Parse()
 	if flag.NArg() < 1 {
-		emit(verifyOutput{Success: false, Error: "ledger_path_required"}, *outJSON)
+		emit(verifyOutput{
+			Success: false,
+			Error:   "ledger_path_required",
+		}, *outJSON)
 		os.Exit(2)
 	}
 	path := flag.Arg(0)
 	led := notary.NewRotationLedger(path)
 	if err := led.Load(); err != nil {
-		emit(verifyOutput{Success: false, Path: path, Error: fmt.Sprintf("load_failed:%v", err)}, *outJSON)
+		emit(verifyOutput{
+			Success: false,
+			Path:    path,
+			Error:   fmt.Sprintf("load_failed:%v", err),
+		}, *outJSON)
 		os.Exit(1)
 	}
 	entries := led.Entries()
@@ -52,7 +59,15 @@ func main() {
 	}
 	resolver := func(kid string) ed25519.PublicKey { return pubs[kid] }
 	mismatches, invalid := notary.VerifyRotationLedger(entries, *strict, resolver)
-	out := verifyOutput{Success: mismatches == 0 && invalid == 0, Path: path, Entries: len(entries), Mismatches: mismatches, InvalidSigs: invalid, HeadHash: led.HeadHash(), Strict: *strict}
+	out := verifyOutput{
+		Success:     mismatches == 0 && invalid == 0,
+		Path:        path,
+		Entries:     len(entries),
+		Mismatches:  mismatches,
+		InvalidSigs: invalid,
+		HeadHash:    led.HeadHash(),
+		Strict:      *strict,
+	}
 	emit(out, *outJSON)
 	if !out.Success {
 		os.Exit(1)

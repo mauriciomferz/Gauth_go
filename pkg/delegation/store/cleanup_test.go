@@ -25,7 +25,7 @@ func TestIndexedDelegationStore_Pruning_Background(t *testing.T) {
 
 	store, err := NewIndexedDelegationStore(dbPath, &config)
 	require.NoError(t, err)
-	defer store.Close()
+	defer func() { _ = store.Close() }()
 
 	// 1. Add expired record
 	expiredRecord := &DelegationRecord{

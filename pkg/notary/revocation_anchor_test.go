@@ -52,7 +52,7 @@ func createTestAdapter(t *testing.T) (*RevocationAnchoringAdapter, *bolt.DB) {
 
 	store, err := NewReceiptStore(db)
 	if err != nil {
-		db.Close()
+		_ = db.Close()
 		t.Fatalf("Failed to create store: %v", err)
 	}
 
@@ -63,7 +63,12 @@ func createTestAdapter(t *testing.T) (*RevocationAnchoringAdapter, *bolt.DB) {
 
 func TestRevocationAnchoringAdapter_Anchor(t *testing.T) {
 	adapter, db := createTestAdapter(t)
-	defer db.Close()
+	t.Cleanup(func() {
+		closeErr := db.Close()
+		if closeErr != nil {
+			t.Errorf("db close: %v", closeErr)
+		}
+	})
 
 	hash := "sha256:abc123"
 	if err := adapter.Anchor(hash); err != nil {
@@ -84,7 +89,11 @@ func TestRevocationAnchoringAdapter_Anchor(t *testing.T) {
 
 func TestRevocationAnchoringAdapter_GetReceipt(t *testing.T) {
 	adapter, db := createTestAdapter(t)
-	defer db.Close()
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Errorf("db close: %v", err)
+		}
+	})
 
 	hash := "sha256:test123"
 	if err := adapter.Anchor(hash); err != nil {
@@ -111,7 +120,7 @@ func TestRevocationAnchoringAdapter_GetReceipt(t *testing.T) {
 
 func TestRevocationAnchoringAdapter_GetStats(t *testing.T) {
 	adapter, db := createTestAdapter(t)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Anchor multiple hashes
 	for i := 0; i < 3; i++ {
@@ -176,14 +185,20 @@ func TestRevocationAnchoringAdapter_Persistence(t *testing.T) {
 	if err2 := adapter1.Anchor(hash); err2 != nil {
 		t.Fatalf("Anchor failed: %v", err2)
 	}
-	db1.Close()
+	if closeErr := db1.Close(); closeErr != nil {
+		t.Fatalf("db close: %v", closeErr)
+	}
 
 	// Reopen and verify
 	db2, err := bolt.Open(dbPath, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		t.Fatalf("Failed to reopen DB: %v", err)
 	}
-	defer db2.Close()
+	t.Cleanup(func() {
+		if closeErr := db2.Close(); closeErr != nil {
+			t.Errorf("db close: %v", err)
+		}
+	})
 
 	store2, err := NewReceiptStore(db2)
 	if err != nil {
@@ -205,7 +220,11 @@ func TestRevocationAnchoringAdapter_Persistence(t *testing.T) {
 
 func TestRevocationAnchoringAdapter_ThreadSafety(t *testing.T) {
 	adapter, db := createTestAdapter(t)
-	defer db.Close()
+	t.Cleanup(func() {
+		if err := db.Close(); err != nil {
+			t.Errorf("db close: %v", err)
+		}
+	})
 
 	var wg sync.WaitGroup
 	for i := 0; i < 10; i++ {
@@ -237,7 +256,7 @@ func TestReceiptStore_Operations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create DB: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	store, err := NewReceiptStore(db)
 	if err != nil {
@@ -287,7 +306,7 @@ func BenchmarkAnchor(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create DB: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	store, err := NewReceiptStore(db)
 	if err != nil {

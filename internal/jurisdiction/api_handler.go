@@ -215,7 +215,9 @@ func (h *APIHandler) getMetricsPrometheus(c *gin.Context) {
 	b.WriteString("# HELP agentauth_jurisdiction_enforcements_by_jurisdiction_total Total enforcements per jurisdiction.\n")
 	b.WriteString("# TYPE agentauth_jurisdiction_enforcements_by_jurisdiction_total counter\n")
 	for _, jk := range jKeys {
-		fmt.Fprintf(b, "agentauth_jurisdiction_enforcements_by_jurisdiction_total{jurisdiction=\"%s\"} %d\n", jk, m.JurisdictionBreakdown[compliance.Jurisdiction(jk)])
+		fmt.Fprintf(b,
+			"agentauth_jurisdiction_enforcements_by_jurisdiction_total{jurisdiction=\"%s\"} %d\n",
+			jk, m.JurisdictionBreakdown[compliance.Jurisdiction(jk)])
 	}
 	// Violation types
 	b.WriteString("# HELP agentauth_jurisdiction_violation_total Jurisdiction enforcement violation occurrences by type.\n")
@@ -309,7 +311,8 @@ func (h *APIHandler) getValidatorMetricsPrometheus(c *gin.Context) {
 	b.WriteString("# HELP agentauth_validator_board_approval_failures_total Board approval validation failures.\n")
 	b.WriteString("# TYPE agentauth_validator_board_approval_failures_total counter\n")
 	fmt.Fprintf(b, "agentauth_validator_board_approval_failures_total %d\n", m.BoardApprovalFailures)
-	b.WriteString("# HELP agentauth_validator_total_validation_latency_ms Cumulative jurisdiction validation latency in milliseconds.\n")
+	b.WriteString("# HELP agentauth_validator_total_validation_latency_ms " +
+		"Cumulative jurisdiction validation latency in milliseconds.\n")
 	b.WriteString("# TYPE agentauth_validator_total_validation_latency_ms counter\n")
 	fmt.Fprintf(b, "agentauth_validator_total_validation_latency_ms %.6f\n", float64(m.TotalValidationLatencyNs)/1e6)
 	b.WriteString("# HELP agentauth_validator_last_validation_latency_ms Last jurisdiction validation latency in milliseconds.\n")
@@ -319,7 +322,9 @@ func (h *APIHandler) getValidatorMetricsPrometheus(c *gin.Context) {
 	b.WriteString("# HELP agentauth_validator_validations_by_jurisdiction_total Jurisdiction validation attempts by jurisdiction.\n")
 	b.WriteString("# TYPE agentauth_validator_validations_by_jurisdiction_total counter\n")
 	for _, jk := range jKeys {
-		fmt.Fprintf(b, "agentauth_validator_validations_by_jurisdiction_total{jurisdiction=\"%s\"} %d\n", jk, m.JurisdictionCounts[compliance.Jurisdiction(jk)])
+		fmt.Fprintf(b,
+			"agentauth_validator_validations_by_jurisdiction_total{jurisdiction=\"%s\"} %d\n",
+			jk, m.JurisdictionCounts[compliance.Jurisdiction(jk)])
 	}
 	// Violation types
 	b.WriteString("# HELP agentauth_validator_violation_total Validator violation occurrences by type.\n")

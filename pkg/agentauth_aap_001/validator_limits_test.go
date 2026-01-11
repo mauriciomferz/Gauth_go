@@ -72,7 +72,7 @@ func TestFinancialLimits_MultiPeriod(t *testing.T) {
 				"max_daily_amount": "100",
 			},
 			setupUsage: func(s *MockLimitStore, id string) {
-				s.IncrementPeriodUsage(id, today, 150)
+				_ = s.IncrementPeriodUsage(id, today, 150)
 			},
 			expectError: true,
 			errorSubstr: "daily limit exceeded",
@@ -83,7 +83,7 @@ func TestFinancialLimits_MultiPeriod(t *testing.T) {
 				"max_daily_amount": "100",
 			},
 			setupUsage: func(s *MockLimitStore, id string) {
-				s.IncrementPeriodUsage(id, today, 50)
+				_ = s.IncrementPeriodUsage(id, today, 50)
 			},
 			expectError: false,
 		},
@@ -93,7 +93,7 @@ func TestFinancialLimits_MultiPeriod(t *testing.T) {
 				"max_weekly_amount": "500",
 			},
 			setupUsage: func(s *MockLimitStore, id string) {
-				s.IncrementPeriodUsage(id, thisWeek, 600)
+				_ = s.IncrementPeriodUsage(id, thisWeek, 600)
 			},
 			expectError: true,
 			errorSubstr: "weekly limit exceeded",
@@ -104,7 +104,7 @@ func TestFinancialLimits_MultiPeriod(t *testing.T) {
 				"max_weekly_amount": "500",
 			},
 			setupUsage: func(s *MockLimitStore, id string) {
-				s.IncrementPeriodUsage(id, thisWeek, 100)
+				_ = s.IncrementPeriodUsage(id, thisWeek, 100)
 			},
 			expectError: false,
 		},
@@ -114,7 +114,7 @@ func TestFinancialLimits_MultiPeriod(t *testing.T) {
 				"max_monthly_amount": "2000",
 			},
 			setupUsage: func(s *MockLimitStore, id string) {
-				s.IncrementPeriodUsage(id, thisMonth, 2100)
+				_ = s.IncrementPeriodUsage(id, thisMonth, 2100)
 			},
 			expectError: true,
 			errorSubstr: "monthly limit exceeded",
@@ -127,9 +127,9 @@ func TestFinancialLimits_MultiPeriod(t *testing.T) {
 				"max_monthly_amount": "2000",
 			},
 			setupUsage: func(s *MockLimitStore, id string) {
-				s.IncrementPeriodUsage(id, today, 50)
-				s.IncrementPeriodUsage(id, thisWeek, 200)
-				s.IncrementPeriodUsage(id, thisMonth, 1000)
+				_ = s.IncrementPeriodUsage(id, today, 50)
+				_ = s.IncrementPeriodUsage(id, thisWeek, 200)
+				_ = s.IncrementPeriodUsage(id, thisMonth, 1000)
 			},
 			expectError: false,
 		},

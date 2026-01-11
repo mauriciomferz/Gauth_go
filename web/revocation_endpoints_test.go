@@ -61,7 +61,10 @@ func TestRevocationEndpoints(t *testing.T) {
 
 	// R4: Verify Head & Aggregate
 	t.Run("AAP001-R4_RevocationHead", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/api/v1/token/revocation/head", nil)
+		req, err := http.NewRequest("GET", "/api/v1/token/revocation/head", nil)
+		if err != nil {
+			t.Fatalf("new request: %v", err)
+		}
 		w := httptest.NewRecorder()
 		server.router.ServeHTTP(w, req)
 
@@ -70,7 +73,9 @@ func TestRevocationEndpoints(t *testing.T) {
 		}
 
 		var resp map[string]interface{}
-		json.Unmarshal(w.Body.Bytes(), &resp)
+		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
 
 		if resp["success"] != true {
 			t.Error("Expected success=true")
@@ -91,7 +96,10 @@ func TestRevocationEndpoints(t *testing.T) {
 
 	// R5: Verify Signature Presence & Validity
 	t.Run("AAP001-R5_VerifySignature", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/api/v1/token/revocation/verify", nil)
+		req, err := http.NewRequest("GET", "/api/v1/token/revocation/verify", nil)
+		if err != nil {
+			t.Fatalf("new request: %v", err)
+		}
 		w := httptest.NewRecorder()
 		server.router.ServeHTTP(w, req)
 
@@ -100,7 +108,9 @@ func TestRevocationEndpoints(t *testing.T) {
 		}
 
 		var resp map[string]interface{}
-		json.Unmarshal(w.Body.Bytes(), &resp)
+		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
 
 		if resp["success"] != true {
 			t.Error("Expected success=true")
@@ -150,7 +160,9 @@ func TestRevocationEndpoints(t *testing.T) {
 			t.Errorf("Discovery expected 200, got %d", w.Code)
 		}
 		var resp map[string]interface{}
-		json.Unmarshal(w.Body.Bytes(), &resp)
+		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+			t.Fatalf("unmarshal discovery response: %v", err)
+		}
 
 		algs, ok := resp["revocation_signing_alg_values_supported"].([]interface{})
 		if !ok || len(algs) == 0 {

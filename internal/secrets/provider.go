@@ -30,7 +30,8 @@ type FilesystemProvider struct {
 	masterKey []byte // 32 bytes
 }
 
-// NewFilesystemProvider initializes a provider at path with masterKey (32 bytes). If masterKey nil, attempts to load or generate one.
+// NewFilesystemProvider initializes a provider at path with masterKey (32 bytes).
+// If masterKey nil, attempts to load or generate one.
 func NewFilesystemProvider(root string, masterKey []byte) (*FilesystemProvider, error) {
 	if err := os.MkdirAll(root, 0o700); err != nil {
 		return nil, err
@@ -191,14 +192,19 @@ func (p *FilesystemProvider) Rotate(newMasterKey []byte) error {
 		if err != nil {
 			return err
 		}
-		ciphertextNew := gcmNew.Seal(nil, nonceNew, plaintext, nil) // #nosec G407 // False positive - nonceNew generated from crypto/rand
+		ciphertextNew := gcmNew.Seal(nil, nonceNew, plaintext, nil) // #nosec G407
+		// False positive - nonceNew generated from crypto/rand
 		enc := hex.EncodeToString(nonceNew) + ":" + hex.EncodeToString(ciphertextNew)
 		if err := os.WriteFile(path, []byte(enc), 0o600); err != nil {
 			return err
 		}
 	}
 	// persist new master key
-	if err := os.WriteFile(filepath.Join(p.root, "master.key"), []byte(hex.EncodeToString(newMasterKey)), 0o600); err != nil {
+	if err := os.WriteFile(
+		filepath.Join(p.root, "master.key"),
+		[]byte(hex.EncodeToString(newMasterKey)),
+		0o600,
+	); err != nil {
 		return err
 	}
 	p.masterKey = newMasterKey

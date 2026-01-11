@@ -9,7 +9,7 @@ import (
 
 func TestNewClockSkewValidator_DefaultTolerance(t *testing.T) {
 	// Clear any existing env var
-	os.Unsetenv("AGENTAUTH_CLOCK_SKEW_SECONDS")
+	_ = os.Unsetenv("AGENTAUTH_CLOCK_SKEW_SECONDS")
 
 	validator := NewClockSkewValidator()
 	if validator.maxSkewSeconds != 300 {
@@ -18,8 +18,7 @@ func TestNewClockSkewValidator_DefaultTolerance(t *testing.T) {
 }
 
 func TestNewClockSkewValidator_CustomTolerance(t *testing.T) {
-	os.Setenv("AGENTAUTH_CLOCK_SKEW_SECONDS", "600")
-	defer os.Unsetenv("AGENTAUTH_CLOCK_SKEW_SECONDS")
+	t.Setenv("AGENTAUTH_CLOCK_SKEW_SECONDS", "600")
 
 	validator := NewClockSkewValidator()
 	if validator.maxSkewSeconds != 600 {
@@ -28,8 +27,7 @@ func TestNewClockSkewValidator_CustomTolerance(t *testing.T) {
 }
 
 func TestNewClockSkewValidator_InvalidEnv(t *testing.T) {
-	os.Setenv("AGENTAUTH_CLOCK_SKEW_SECONDS", "invalid")
-	defer os.Unsetenv("AGENTAUTH_CLOCK_SKEW_SECONDS")
+	t.Setenv("AGENTAUTH_CLOCK_SKEW_SECONDS", "invalid")
 
 	validator := NewClockSkewValidator()
 	if validator.maxSkewSeconds != 300 {

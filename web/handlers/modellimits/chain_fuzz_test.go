@@ -17,7 +17,9 @@ func FuzzModelLimitAuditChain(f *testing.F) {
 		if err != nil {
 			t.Skip()
 		}
-		auditFile.Close()
+		if err := auditFile.Close(); err != nil {
+			t.Fatalf("close audit file: %v", err)
+		}
 
 		// Limits file not strictly needed if we are just testing audit writing directly via internal methods
 		// or if we use CheckLimit with intent to write.

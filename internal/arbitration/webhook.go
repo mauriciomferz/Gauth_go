@@ -264,7 +264,7 @@ func (w *WebhookClient) deliver(ctx context.Context, payload WebhookPayload) err
 	if err != nil {
 		return fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Check response status
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {

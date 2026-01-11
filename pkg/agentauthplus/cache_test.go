@@ -154,11 +154,15 @@ func (m *mockCapabilityService) CreateAssessment(ctx context.Context, assessment
 	return nil
 }
 
-func (m *mockCapabilityService) CheckCapabilityMatch(ctx context.Context, agentID string, requirements *CapabilityRequirements) (bool, []string, error) {
+func (m *mockCapabilityService) CheckCapabilityMatch(
+	ctx context.Context, agentID string, requirements *CapabilityRequirements,
+) (bool, []string, error) {
 	return true, nil, nil
 }
 
-func (m *mockCapabilityService) GetExpiringAssessments(ctx context.Context, daysUntilExpiry int) ([]*AICapabilityAssessment, error) {
+func (m *mockCapabilityService) GetExpiringAssessments(
+	ctx context.Context, daysUntilExpiry int,
+) ([]*AICapabilityAssessment, error) {
 	return nil, nil
 }
 
@@ -245,7 +249,9 @@ func (m *mockDelegationService) RevokeDelegation(ctx context.Context, delegation
 	return nil
 }
 
-func (m *mockDelegationService) ValidateDelegation(ctx context.Context, sourceAgent, targetAgent string, scope []string, depth int) error {
+func (m *mockDelegationService) ValidateDelegation(
+	ctx context.Context, sourceAgent, targetAgent string, scope []string, depth int,
+) error {
 	return nil
 }
 

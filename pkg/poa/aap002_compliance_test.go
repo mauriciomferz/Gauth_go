@@ -787,7 +787,9 @@ func TestValidateAAP002Compliance_PoADefinition_NoRegions(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
+			ApplicableSectors: []IndustrySector{
+				{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true},
+			},
 			ApplicableRegions: []GeographicScope{}, // Empty!
 			AuthorizedActions: AuthorizedActions{
 				Transactions: []Transaction{taxonomy.TransactionLoan},
@@ -824,7 +826,9 @@ func TestValidateAAP002Compliance_PoADefinition_NoActions(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
+			ApplicableSectors: []IndustrySector{
+				{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true},
+			},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -865,7 +869,9 @@ func TestValidateAAP002Compliance_PoADefinition_NegativeDuration(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
+			ApplicableSectors: []IndustrySector{
+				{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true},
+			},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -906,7 +912,9 @@ func TestValidateAAP002Compliance_PoADefinition_ExceedsTwoYears(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
+			ApplicableSectors: []IndustrySector{
+				{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true},
+			},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -945,7 +953,9 @@ func TestValidateAAP002Compliance_PoADefinition_OnlyDecisions(t *testing.T) {
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
+			ApplicableSectors: []IndustrySector{
+				{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true},
+			},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},
@@ -981,7 +991,9 @@ func TestValidateAAP002Compliance_PoADefinition_OnlyNonPhysicalActions(t *testin
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorProfessionalScience, Description: "Professional Services", Authorized: true}},
+			ApplicableSectors: []IndustrySector{{
+				Code: taxonomy.SectorProfessionalScience, Description: "Professional Services", Authorized: true,
+			}},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "EU"},
 			},
@@ -1067,7 +1079,9 @@ func TestValidateAAP002Compliance_CompositeMap_BothConfigAndDefinition(t *testin
 			},
 		},
 		Authorization: AuthorizationScope{
-			ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true}},
+			ApplicableSectors: []IndustrySector{
+				{Code: taxonomy.SectorFinanceInsurance, Description: "Finance and Insurance", Authorized: true},
+			},
 			ApplicableRegions: []GeographicScope{
 				{Type: GeoTypeNational, Identifier: "US"},
 			},

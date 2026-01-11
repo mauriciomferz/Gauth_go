@@ -217,7 +217,9 @@ func (s *TokenExchangeService) ExchangeToken(ctx context.Context, req ExchangeRe
 }
 
 // validateExternalToken validates an external provider token using JWKS validation.
-func (s *TokenExchangeService) validateExternalToken(ctx context.Context, provider *ProviderConfig, token string, audience string) (*IDTokenClaims, error) {
+func (s *TokenExchangeService) validateExternalToken(
+	ctx context.Context, provider *ProviderConfig, token string, audience string,
+) (*IDTokenClaims, error) {
 	// Use the ExternalTokenValidator to validate the token
 	claims, err := s.tokenValidator.ValidateTokenForProvider(ctx, token, *provider)
 	if err != nil {
@@ -340,7 +342,9 @@ type BatchExchangeResponse struct {
 }
 
 // BatchExchangeTokens exchanges multiple external tokens in a single operation.
-func (s *TokenExchangeService) BatchExchangeTokens(ctx context.Context, req BatchExchangeRequest) (*BatchExchangeResponse, error) {
+func (s *TokenExchangeService) BatchExchangeTokens(
+	ctx context.Context, req BatchExchangeRequest,
+) (*BatchExchangeResponse, error) {
 	responses := make([]*ExchangeResponse, len(req.Requests))
 	errors := make([]error, len(req.Requests))
 
@@ -357,7 +361,9 @@ func (s *TokenExchangeService) BatchExchangeTokens(ctx context.Context, req Batc
 }
 
 // ValidateProviderToken validates a token from a specific provider without exchange.
-func (s *TokenExchangeService) ValidateProviderToken(ctx context.Context, providerID string, token string, audience string) (*IDTokenClaims, error) {
+func (s *TokenExchangeService) ValidateProviderToken(
+	ctx context.Context, providerID string, token string, audience string,
+) (*IDTokenClaims, error) {
 	// Get provider configuration
 	provider, err := s.providerRegistry.Get(providerID)
 	if err != nil {
@@ -427,7 +433,9 @@ func (s *TokenExchangeService) RevokeExchangedToken(ctx context.Context, token s
 
 // RefreshExchangedToken refreshes an exchanged token using a refresh token.
 // Implements RFC 6749 token refresh flow with token rotation.
-func (s *TokenExchangeService) RefreshExchangedToken(ctx context.Context, refreshToken string, providerID string) (*ExchangeResponse, error) {
+func (s *TokenExchangeService) RefreshExchangedToken(
+	ctx context.Context, refreshToken string, providerID string,
+) (*ExchangeResponse, error) {
 	// Build refresh request
 	req := &RefreshTokenRequest{
 		RefreshToken: refreshToken,
@@ -501,7 +509,9 @@ func determineRefreshTrustLevel(claims *IDTokenClaims) string {
 
 // IntrospectToken introspects a token and returns its metadata.
 // Implements RFC 7662 token introspection endpoint.
-func (s *TokenExchangeService) IntrospectToken(ctx context.Context, token string, tokenTypeHint string) (*IntrospectionResponse, error) {
+func (s *TokenExchangeService) IntrospectToken(
+	ctx context.Context, token string, tokenTypeHint string,
+) (*IntrospectionResponse, error) {
 	// Build introspection request
 	req := &IntrospectionRequest{
 		Token:         token,
@@ -519,7 +529,9 @@ func (s *TokenExchangeService) IntrospectToken(ctx context.Context, token string
 
 // IntrospectTokenWithValidation introspects a token with full validation.
 // This method performs signature verification and full token validation.
-func (s *TokenExchangeService) IntrospectTokenWithValidation(ctx context.Context, token string, tokenTypeHint string, clientID string) (*IntrospectionResponse, error) {
+func (s *TokenExchangeService) IntrospectTokenWithValidation(
+	ctx context.Context, token string, tokenTypeHint string, clientID string,
+) (*IntrospectionResponse, error) {
 	// Build introspection request
 	req := &IntrospectionRequest{
 		Token:         token,

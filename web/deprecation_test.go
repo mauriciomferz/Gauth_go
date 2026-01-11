@@ -40,11 +40,15 @@ func TestLegacyLifecycleAliasDeprecation(t *testing.T) {
 		srv.router.ServeHTTP(rr, req)
 
 		// Restore stderr
-		w.Close()
+		if err := w.Close(); err != nil {
+			t.Fatalf("close writer: %v", err)
+		}
 		os.Stderr = origStderr
 		var buf bytes.Buffer
 		_, _ = io.Copy(&buf, r)
-		r.Close()
+		if err := r.Close(); err != nil {
+			t.Fatalf("close reader: %v", err)
+		}
 
 		if rr.Code != 200 {
 			t.Fatalf("expected 200 legacy alias got %d body=%s", rr.Code, rr.Body.String())

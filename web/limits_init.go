@@ -27,4 +27,6 @@ func initLimitsManager() {
 }
 
 // init auto-invokes limits manager initialization on package load.
+//
+//nolint:gochecknoinits // intentional package initialization
 func init() { initLimitsManager() }

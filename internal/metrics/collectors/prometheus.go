@@ -513,7 +513,12 @@ func (p *PrometheusCollector) ObserveLifecycleTransitionLatency(entityType strin
 	p.impl.ObserveLifecycleTransitionLatency(entityType, outcome, d)
 }
 
-func (p *PrometheusCollector) SetLifecycleTransitionLatencyQuantile(entityType string, outcome string, quantile string, value float64) {
+func (p *PrometheusCollector) SetLifecycleTransitionLatencyQuantile(
+	entityType string,
+	outcome string,
+	quantile string,
+	value float64,
+) {
 	p.impl.SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile, value)
 }
 

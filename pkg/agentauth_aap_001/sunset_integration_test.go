@@ -2,7 +2,6 @@ package agentauth_aap_001
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -24,7 +23,7 @@ func TestServiceUseSunsetController(t *testing.T) {
 	}
 
 	// Ensure unset env var to rely on controller logic
-	os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "")
 
 	// 1. Initial State: Pilot (1) -> Use V2? No, Pilot means V1 default.
 	req := DelegationRequest{Grantor: "p@example.com", Grantee: "q@example.com", Scope: []string{"x"}, Duration: time.Minute}

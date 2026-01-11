@@ -270,7 +270,8 @@ func (r *ReplayNonceStore) RecordWithEvict(n string, now time.Time) {
 // Size returns current number of active entries.
 // Note: This might include some expired entries that haven't been swept yet.
 // For accuracy, we could scan, but that returns to O(N).
-// Given "Size()" is often for metrics, returning raw map size is O(1) and acceptable if we accept slight overcount between sweeps.
+// Given "Size()" is often for metrics, returning raw map size is O(1) and acceptable
+// if we accept slight overcount between sweeps.
 // However, original implementation did lazy cleanup. To be safe, let's keep it O(1) and rely on background.
 func (r *ReplayNonceStore) Size() int {
 	r.mu.Lock()

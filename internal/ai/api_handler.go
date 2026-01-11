@@ -494,11 +494,17 @@ func (h *APIHandler) GetAPIDocumentation() map[string]any {
 				"AISystemProfile": map[string]any{
 					"type": "object",
 					"properties": map[string]any{
-						"entity_type":      map[string]any{"type": "string", "enum": []string{"human", "assistant", "agent", "model", "system", "robot", "analytics", "automation"}},
-						"system_id":        map[string]any{"type": "string"},
-						"model_name":       map[string]any{"type": "string"},
-						"model_version":    map[string]any{"type": "string"},
-						"risk_level":       map[string]any{"type": "string", "enum": []string{"low", "medium", "high", "critical"}},
+						"entity_type": map[string]any{
+							"type": "string",
+							"enum": []string{"human", "assistant", "agent", "model", "system", "robot", "analytics", "automation"},
+						},
+						"system_id":     map[string]any{"type": "string"},
+						"model_name":    map[string]any{"type": "string"},
+						"model_version": map[string]any{"type": "string"},
+						"risk_level": map[string]any{
+							"type": "string",
+							"enum": []string{"low", "medium", "high", "critical"},
+						},
 						"industry_context": map[string]any{"type": "string"},
 						"jurisdiction":     map[string]any{"type": "string"},
 						"certified_by":     map[string]any{"type": "array", "items": map[string]any{"type": "string"}},

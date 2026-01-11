@@ -34,10 +34,13 @@ func TestPolicyDecisionTraceability_AAP_001_C4(t *testing.T) {
 				},
 			},
 		}
-		reqBody, _ := json.Marshal(map[string]any{
+		reqBody, err := json.Marshal(map[string]any{
 			"id":       "bundle-" + id,
 			"policies": []policy.Policy{p},
 		})
+		if err != nil {
+			t.Fatalf("marshal request: %v", err)
+		}
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "/api/v1/policy/bundles", bytes.NewReader(reqBody))
 		req.Header.Set("Content-Type", "application/json")
@@ -46,7 +49,9 @@ func TestPolicyDecisionTraceability_AAP_001_C4(t *testing.T) {
 			t.Fatalf("AddBundle %s failed: %d %s", id, w.Code, w.Body.String())
 		}
 		var resp map[string]any
-		json.Unmarshal(w.Body.Bytes(), &resp)
+		if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
 		return resp["bundle_hash"].(string)
 	}
 

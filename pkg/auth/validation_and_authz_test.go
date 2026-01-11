@@ -14,7 +14,7 @@ import (
 
 // TestStandaloneValidateToken_ValidToken verifies successful token validation
 func TestStandaloneValidateToken_ValidToken(t *testing.T) {
-	token := "valid-token-string"
+	token := "valid-token-string" //nolint:gosec // test token, not a credential
 
 	result, err := ValidateToken(token)
 

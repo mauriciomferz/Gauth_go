@@ -241,7 +241,10 @@ func (c *InMemoryDiscoveryCache) evictOldest() {
 }
 
 // fetchDiscoveryDocument fetches a discovery document from the provider.
-func (c *InMemoryDiscoveryCache) fetchDiscoveryDocument(ctx context.Context, discoveryURL string) (*OIDCConfiguration, string, error) {
+func (c *InMemoryDiscoveryCache) fetchDiscoveryDocument(
+	ctx context.Context,
+	discoveryURL string,
+) (*OIDCConfiguration, string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, discoveryURL, nil)
 	if err != nil {
 		return nil, "", fmt.Errorf("failed to create request: %w", err)
@@ -253,7 +256,7 @@ func (c *InMemoryDiscoveryCache) fetchDiscoveryDocument(ctx context.Context, dis
 	if err != nil {
 		return nil, "", fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)

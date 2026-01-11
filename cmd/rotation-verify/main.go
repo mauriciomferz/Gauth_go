@@ -168,7 +168,11 @@ func main() {
 	}
 	// human output
 	fmt.Printf("Rotation V2 Artifact Digest: %s\n", art.CanonicalDigest)
-	fmt.Printf("Threshold: %d  Verified: %d  Status: %s\n", art.ThresholdWeight, vw, map[bool]string{true: "OK", false: "NOT_MET"}[thresholdMet])
+	status := "NOT_MET"
+	if thresholdMet {
+		status = "OK"
+	}
+	fmt.Printf("Threshold: %d  Verified: %d  Status: %s\n", art.ThresholdWeight, vw, status)
 	// signer summary sorted by id
 	sort.Slice(art.Signers, func(i, j int) bool { return art.Signers[i].ID < art.Signers[j].ID })
 	for _, s := range art.Signers {

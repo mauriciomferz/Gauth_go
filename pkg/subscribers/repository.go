@@ -103,7 +103,12 @@ func (r *Repository) CreateSubscriber(ctx context.Context, subscriber *Subscribe
 		subscriber.KeyType, subscriber.PublicKey, subscriber.PrivateKeyID, subscriber.KeyGeneratedAt, subscriber.KeyExpiresAt,
 		subscriber.PolicyTemplate, subscriber.LegalFramework,
 		subscriber.NotificationChannels, subscriber.NotificationEmail, subscriber.NotificationWebhookURL,
-		subscriber.ContactEmail, subscriber.ContactName, subscriber.Domain, subscriber.MaxUsers, subscriber.MaxTokens, subscriber.Metadata,
+		subscriber.ContactEmail,
+		subscriber.ContactName,
+		subscriber.Domain,
+		subscriber.MaxUsers,
+		subscriber.MaxTokens,
+		subscriber.Metadata,
 	).Scan(&subscriber.ID, &subscriber.CreatedAt, &subscriber.UpdatedAt)
 
 	if err != nil {
@@ -320,7 +325,12 @@ func (r *Repository) UpdateSubscriber(ctx context.Context, idOrTenantID string, 
 		subscriber.KeyType, subscriber.PublicKey, subscriber.PrivateKeyID, subscriber.KeyGeneratedAt, subscriber.KeyExpiresAt,
 		subscriber.PolicyTemplate, subscriber.LegalFramework,
 		subscriber.NotificationChannels, subscriber.NotificationEmail, subscriber.NotificationWebhookURL,
-		subscriber.ContactEmail, subscriber.ContactName, subscriber.Domain, subscriber.MaxUsers, subscriber.MaxTokens, subscriber.Metadata,
+		subscriber.ContactEmail,
+		subscriber.ContactName,
+		subscriber.Domain,
+		subscriber.MaxUsers,
+		subscriber.MaxTokens,
+		subscriber.Metadata,
 		idOrTenantID,
 	).Scan(&subscriber.UpdatedAt)
 
@@ -358,7 +368,12 @@ func (r *Repository) DeleteSubscriber(ctx context.Context, idOrTenantID string) 
 }
 
 // UpdateKeyMetadata updates key generation metadata for a subscriber
-func (r *Repository) UpdateKeyMetadata(ctx context.Context, tenantID string, keyType, publicKey, privateKeyID string, expiresAt time.Time) error {
+func (r *Repository) UpdateKeyMetadata(
+	ctx context.Context,
+	tenantID string,
+	keyType, publicKey, privateKeyID string,
+	expiresAt time.Time,
+) error {
 	if r.db == nil {
 		return sql.ErrNoRows
 	}

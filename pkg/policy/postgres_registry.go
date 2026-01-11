@@ -251,7 +251,7 @@ func (r *PostgresRegistry) Rollback(ctx context.Context, version int) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Set active=false for newer
 	_, err = tx.Exec(ctx, "UPDATE policies SET active = false WHERE version > $1", version)

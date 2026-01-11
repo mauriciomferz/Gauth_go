@@ -11,7 +11,7 @@ import (
 func TestTokenBucketLimiter_BasicAllow(t *testing.T) {
 	// 10 requests per second with burst of 10
 	limiter := NewTokenBucketLimiter(10, 10, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// First 10 requests should be allowed (burst capacity)
@@ -39,7 +39,7 @@ func TestTokenBucketLimiter_BasicAllow(t *testing.T) {
 func TestTokenBucketLimiter_Refill(t *testing.T) {
 	// 5 requests per 100ms with capacity of 5
 	limiter := NewTokenBucketLimiter(5, 5, 100*time.Millisecond)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Exhaust bucket
@@ -69,7 +69,7 @@ func TestTokenBucketLimiter_Refill(t *testing.T) {
 // TestTokenBucketLimiter_AllowN tests multiple token consumption.
 func TestTokenBucketLimiter_AllowN(t *testing.T) {
 	limiter := NewTokenBucketLimiter(10, 10, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Consume 5 tokens at once
@@ -97,7 +97,7 @@ func TestTokenBucketLimiter_AllowN(t *testing.T) {
 // TestTokenBucketLimiter_MultipleKeys tests isolation between keys.
 func TestTokenBucketLimiter_MultipleKeys(t *testing.T) {
 	limiter := NewTokenBucketLimiter(5, 5, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Exhaust first key
@@ -124,7 +124,7 @@ func TestTokenBucketLimiter_MultipleKeys(t *testing.T) {
 // TestTokenBucketLimiter_Reset tests rate limit reset.
 func TestTokenBucketLimiter_Reset(t *testing.T) {
 	limiter := NewTokenBucketLimiter(5, 5, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Exhaust bucket
@@ -157,7 +157,7 @@ func TestTokenBucketLimiter_Reset(t *testing.T) {
 // TestTokenBucketLimiter_GetLimit tests limit retrieval.
 func TestTokenBucketLimiter_GetLimit(t *testing.T) {
 	limiter := NewTokenBucketLimiter(10, 5, 2*time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 
 	requests, window := limiter.GetLimit()
 	if requests != 5 {
@@ -171,7 +171,7 @@ func TestTokenBucketLimiter_GetLimit(t *testing.T) {
 // TestTokenBucketLimiter_Concurrent tests concurrent access.
 func TestTokenBucketLimiter_Concurrent(t *testing.T) {
 	limiter := NewTokenBucketLimiter(100, 100, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	var wg sync.WaitGroup
@@ -204,7 +204,7 @@ func TestTokenBucketLimiter_Concurrent(t *testing.T) {
 func TestSlidingWindowLimiter_BasicAllow(t *testing.T) {
 	// 10 requests per second
 	limiter := NewSlidingWindowLimiter(10, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// First 10 requests should be allowed
@@ -232,7 +232,7 @@ func TestSlidingWindowLimiter_BasicAllow(t *testing.T) {
 func TestSlidingWindowLimiter_WindowSliding(t *testing.T) {
 	// 5 requests per 200ms
 	limiter := NewSlidingWindowLimiter(5, 200*time.Millisecond)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Exhaust limit
@@ -262,7 +262,7 @@ func TestSlidingWindowLimiter_WindowSliding(t *testing.T) {
 // TestSlidingWindowLimiter_AllowN tests multiple request allowance.
 func TestSlidingWindowLimiter_AllowN(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(10, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Allow 3 requests at once
@@ -290,7 +290,7 @@ func TestSlidingWindowLimiter_AllowN(t *testing.T) {
 // TestSlidingWindowLimiter_MultipleKeys tests isolation between keys.
 func TestSlidingWindowLimiter_MultipleKeys(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(5, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Exhaust first key
@@ -317,7 +317,7 @@ func TestSlidingWindowLimiter_MultipleKeys(t *testing.T) {
 // TestSlidingWindowLimiter_Reset tests reset functionality.
 func TestSlidingWindowLimiter_Reset(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(5, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Exhaust limit
@@ -350,7 +350,7 @@ func TestSlidingWindowLimiter_Reset(t *testing.T) {
 // TestSlidingWindowLimiter_GetLimit tests limit retrieval.
 func TestSlidingWindowLimiter_GetLimit(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(20, 3*time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 
 	requests, window := limiter.GetLimit()
 	if requests != 20 {
@@ -364,7 +364,7 @@ func TestSlidingWindowLimiter_GetLimit(t *testing.T) {
 // TestSlidingWindowLimiter_Concurrent tests concurrent access.
 func TestSlidingWindowLimiter_Concurrent(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(50, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	var wg sync.WaitGroup
@@ -395,7 +395,7 @@ func TestSlidingWindowLimiter_Concurrent(t *testing.T) {
 // TestSlidingWindowLimiter_AccurateCounting tests accurate request counting.
 func TestSlidingWindowLimiter_AccurateCounting(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(3, 100*time.Millisecond)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Make 3 requests
@@ -429,7 +429,7 @@ func TestSlidingWindowLimiter_AccurateCounting(t *testing.T) {
 func TestTokenBucketLimiter_BurstHandling(t *testing.T) {
 	// 1 request per second, but burst of 5
 	limiter := NewTokenBucketLimiter(5, 1, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Should handle 5 requests immediately (burst)
@@ -462,7 +462,7 @@ func TestTokenBucketLimiter_BurstHandling(t *testing.T) {
 // TestSlidingWindowLimiter_PartialWindowOverlap tests partial window overlap.
 func TestSlidingWindowLimiter_PartialWindowOverlap(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(5, 200*time.Millisecond)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Make 3 requests
@@ -504,7 +504,7 @@ func TestSlidingWindowLimiter_PartialWindowOverlap(t *testing.T) {
 func TestTokenBucketLimiter_ZeroRefill(t *testing.T) {
 	// 10 capacity, 0 refill (one-time use)
 	limiter := NewTokenBucketLimiter(10, 0, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Should allow 10 requests
@@ -526,7 +526,7 @@ func TestTokenBucketLimiter_ZeroRefill(t *testing.T) {
 // TestSlidingWindowLimiter_EmptyWindow tests behavior with empty window.
 func TestSlidingWindowLimiter_EmptyWindow(t *testing.T) {
 	limiter := NewSlidingWindowLimiter(5, time.Second)
-	defer limiter.Close()
+	t.Cleanup(func() { _ = limiter.Close() })
 	ctx := context.Background()
 
 	// Reset to ensure empty
@@ -570,11 +570,11 @@ func TestRateLimitersComparison(t *testing.T) {
 
 	// Token bucket: 5 capacity, 1 refill per second
 	tokenBucket := NewTokenBucketLimiter(5, 1, time.Second)
-	defer tokenBucket.Close()
+	t.Cleanup(func() { _ = tokenBucket.Close() })
 
 	// Sliding window: 5 requests per second
 	slidingWindow := NewSlidingWindowLimiter(5, time.Second)
-	defer slidingWindow.Close()
+	t.Cleanup(func() { _ = slidingWindow.Close() })
 
 	// Both should allow initial burst of 5
 	for i := 0; i < 5; i++ {

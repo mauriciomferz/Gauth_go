@@ -50,7 +50,7 @@ func TestMemoryCache_Expiration(t *testing.T) {
 
 	config := &Config{MaxSize: 100}
 	cache := NewMemoryCache(config)
-	defer cache.Close()
+	t.Cleanup(func() { require.NoError(t, cache.Close()) })
 
 	ctx := context.Background()
 	// Set item with very short TTL

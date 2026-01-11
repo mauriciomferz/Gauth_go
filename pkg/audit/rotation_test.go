@@ -21,7 +21,9 @@ func TestFileLogger_Rotation(t *testing.T) {
 	// 1. Create logger
 	fl, err := OpenFileLogger(logPath)
 	require.NoError(t, err)
-	defer fl.Close()
+	t.Cleanup(func() {
+		require.NoError(t, fl.Close())
+	})
 
 	// 2. Set small limits to force rotation quickly
 	// An event is roughly ~150-200 bytes depending on content.
@@ -112,7 +114,7 @@ func TestFileLogger_Pruning(t *testing.T) {
 
 	fl, err := OpenFileLogger(logPath)
 	require.NoError(t, err)
-	defer fl.Close()
+	t.Cleanup(func() { _ = fl.Close() })
 
 	// Limit: very small size, max 2 backups
 	fl.SetLimits(50, 2)

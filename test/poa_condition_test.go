@@ -10,7 +10,10 @@ import (
 // TestPolicyExpressionBasic ensures simple subject + context expression works.
 func TestPolicyExpressionBasic(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
-	p := authz.Policy{ID: "expr1", Subject: "alice", Resource: "obj:42", Actions: []string{"read"}, Effect: authz.Allow, Expression: "subject == \"alice\" && ctx.env == \"prod\""}
+	p := authz.Policy{
+		ID: "expr1", Subject: "alice", Resource: "obj:42", Actions: []string{"read"},
+		Effect: authz.Allow, Expression: "subject == \"alice\" && ctx.env == \"prod\"",
+	}
 	ma.AddPolicy(p)
 	ma.Snapshot()
 	req := authz.Request{Subject: "alice", Resource: "obj:42", Action: "read", Context: map[string]string{"env": "prod"}}
@@ -32,7 +35,10 @@ func TestPolicyExpressionBasic(t *testing.T) {
 // TestPolicyExpressionInList verifies membership operator.
 func TestPolicyExpressionInList(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
-	p := authz.Policy{ID: "expr2", Subject: "*", Resource: "data:*", Actions: []string{"write"}, Effect: authz.Allow, Expression: "ctx.tier in [\"gold\", \"platinum\"]"}
+	p := authz.Policy{
+		ID: "expr2", Subject: "*", Resource: "data:*", Actions: []string{"write"},
+		Effect: authz.Allow, Expression: "ctx.tier in [\"gold\", \"platinum\"]",
+	}
 	ma.AddPolicy(p)
 	ma.Snapshot()
 	req := authz.Request{Subject: "bob", Resource: "data:55", Action: "write", Context: map[string]string{"tier": "gold"}}
@@ -48,7 +54,10 @@ func TestPolicyExpressionInList(t *testing.T) {
 // TestPolicyExpressionNumericComparison verifies numeric >= operator.
 func TestPolicyExpressionNumericComparison(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
-	p := authz.Policy{ID: "expr3", Subject: "carol", Resource: "account:1", Actions: []string{"update"}, Effect: authz.Allow, Expression: "ctx.age >= 21"}
+	p := authz.Policy{
+		ID: "expr3", Subject: "carol", Resource: "account:1", Actions: []string{"update"},
+		Effect: authz.Allow, Expression: "ctx.age >= 21",
+	}
 	ma.AddPolicy(p)
 	ma.Snapshot()
 	req := authz.Request{Subject: "carol", Resource: "account:1", Action: "update", Context: map[string]string{"age": "25"}}
@@ -65,7 +74,10 @@ func TestPolicyExpressionNumericComparison(t *testing.T) {
 func TestPolicyExpressionParseError(t *testing.T) {
 	ma := authz.NewMemoryAuthorizer()
 	// malformed expression (missing closing bracket)
-	p := authz.Policy{ID: "expr4", Subject: "dave", Resource: "svc:1", Actions: []string{"deploy"}, Effect: authz.Allow, Expression: "ctx.env in [\"prod\", \"staging\""}
+	p := authz.Policy{
+		ID: "expr4", Subject: "dave", Resource: "svc:1", Actions: []string{"deploy"},
+		Effect: authz.Allow, Expression: "ctx.env in [\"prod\", \"staging\"",
+	}
 	ma.AddPolicy(p)
 	ma.Snapshot()
 	req := authz.Request{Subject: "dave", Resource: "svc:1", Action: "deploy", Context: map[string]string{"env": "prod"}}

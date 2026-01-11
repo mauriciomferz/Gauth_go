@@ -61,7 +61,16 @@ func TestPrivateKeyJWTValidator_Authenticate(t *testing.T) {
 	}
 
 	// Helper to create token
-	createToken := func(method jwt.SigningMethod, key any, iss, sub string, aud []string, exp time.Time, kid string, jti string) string {
+	createToken := func(
+		method jwt.SigningMethod,
+		key any,
+		iss string,
+		sub string,
+		aud []string,
+		exp time.Time,
+		kid string,
+		jti string,
+	) string {
 		claims := jwt.MapClaims{
 			"iss": iss,
 			"sub": sub,

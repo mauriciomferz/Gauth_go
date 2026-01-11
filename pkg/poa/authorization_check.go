@@ -133,7 +133,10 @@ func NewDefaultAuthorizationChecker(repo *Repository) *DefaultAuthorizationCheck
 
 // GetPrincipalPermissions queries the database for the user's assigned permissions.
 // This is a placeholder implementation - integrate with your actual RBAC system.
-func (d *DefaultAuthorizationChecker) GetPrincipalPermissions(ctx context.Context, tenantID, principalID string) ([]string, error) {
+func (d *DefaultAuthorizationChecker) GetPrincipalPermissions(
+	ctx context.Context,
+	tenantID, principalID string,
+) ([]string, error) {
 	// TODO: Replace with actual RBAC query
 	// Example SQL:
 	//   SELECT DISTINCT p.action

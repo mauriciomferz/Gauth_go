@@ -2,13 +2,12 @@ package jurisdiction
 
 import (
 	"context"
-	"os"
 	"testing"
 )
 
 // TestDetachedSignatureEnforcement ensures requests without detached signature are denied when flag enabled.
 func TestDetachedSignatureEnforcement(t *testing.T) {
-	os.Setenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE", "true")
+	t.Setenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE", "true")
 	eng := NewEnforcementEngine()
 	// Build context without detached_signature claim.
 	ctx := &EnforcementContext{
@@ -45,5 +44,4 @@ func TestDetachedSignatureEnforcement(t *testing.T) {
 	if !dec2.Allowed {
 		t.Fatalf("expected allow when signature present; violations=%v", dec2.Violations)
 	}
-	os.Unsetenv("AGENTAUTH_REQUIRE_DETACHED_SIGNATURE")
 }

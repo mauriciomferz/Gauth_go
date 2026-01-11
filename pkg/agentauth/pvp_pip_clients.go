@@ -128,7 +128,7 @@ func (c *PVPClient) attemptVerifyIdentity(
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("PVP returned status %d", resp.StatusCode)
@@ -305,7 +305,7 @@ func (c *DefaultPIPClient) attemptGetPolicy(
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("PIP returned status %d", resp.StatusCode)

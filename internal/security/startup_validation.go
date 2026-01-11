@@ -69,7 +69,9 @@ func (v *StartupValidator) validateJWTSigningKey() {
 	for _, weak := range weakKeys {
 		if signingKey == weak {
 			v.errors = append(v.errors, fmt.Sprintf(
-				"AGENTAUTH_JWT_SIGNING_KEY is set to known weak value '%s' - this allows attackers to forge PoA tokens and bypass all PDP checks. Set a strong random key (min 32 bytes).",
+				"AGENTAUTH_JWT_SIGNING_KEY is set to known weak value '%s' - "+
+					"this allows attackers to forge PoA tokens and bypass all PDP checks. "+
+					"Set a strong random key (min 32 bytes).",
 				weak,
 			))
 			return
@@ -108,7 +110,8 @@ func (v *StartupValidator) validateProductionMode() {
 
 	// In production, these MUST be disabled
 	if os.Getenv("AGENTAUTH_DEV_INDEX") == "1" {
-		v.errors = append(v.errors, "AGENTAUTH_DEV_INDEX=1 exposes debug UI and development endpoints - MUST be disabled in production (unset or set to 0)")
+		v.errors = append(v.errors, "AGENTAUTH_DEV_INDEX=1 exposes debug UI and development endpoints - "+
+			"MUST be disabled in production (unset or set to 0)")
 	}
 
 	if os.Getenv("AGENTAUTH_DEV_MODE") == "true" || os.Getenv("AGENTAUTH_DEV_MODE") == "1" {
@@ -123,7 +126,8 @@ func (v *StartupValidator) validateProductionMode() {
 	// External identity verification should be configured
 	pvpProvider := os.Getenv("AGENTAUTH_PVP_PROVIDER")
 	if pvpProvider == "" || pvpProvider == "mock" {
-		v.warnings = append(v.warnings, "AGENTAUTH_PVP_PROVIDER not set or set to 'mock' - production should use external identity verification (e.g., 'stripe', 'idemia', 'veriff')")
+		v.warnings = append(v.warnings, "AGENTAUTH_PVP_PROVIDER not set or set to 'mock' - "+
+			"production should use external identity verification (e.g., 'stripe', 'idemia', 'veriff')")
 	}
 }
 
@@ -188,14 +192,12 @@ func (v *StartupValidator) validateReplayStore() {
 						"Migrate to Redis for production deployments. See REPLAY_STORE_MIGRATION_GUIDE.md",
 					env,
 				))
-			} else {
+			} else if v.productionMode {
 				// This is good - safety checks are active
-				if v.productionMode {
-					v.warnings = append(v.warnings, fmt.Sprintf(
-						"Running in %s - ensure replay store uses Redis or persistent volume (not BoltDB with ephemeral storage)",
-						env,
-					))
-				}
+				v.warnings = append(v.warnings, fmt.Sprintf(
+					"Running in %s - ensure replay store uses Redis or persistent volume (not BoltDB with ephemeral storage)",
+					env,
+				))
 			}
 		}
 

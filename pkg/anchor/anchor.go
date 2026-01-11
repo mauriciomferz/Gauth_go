@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-// AnchorClient defines minimal interface for external anchoring of integrity hashes (revocation chain aggregate, policy chain head, etc.).
+// AnchorClient defines minimal interface for external anchoring of integrity hashes
+// (revocation chain aggregate, policy chain head, etc.).
 // Implementations may push hashes to immutable ledgers or timestamping services.
 // Future expansion: Anchor(hash string, meta map[string]string) (AnchorRecord, error)
 // For now we keep it lean to support discovery wiring and tests.

@@ -418,7 +418,11 @@ type StressTestConfig struct {
 }
 
 // RunStressTest performs a stress test with gradually increasing load.
-func (h *LoadTestHarness) RunStressTest(ctx context.Context, config *StressTestConfig, reqGen RequestGenerator) ([]*LoadTestResult, error) {
+func (h *LoadTestHarness) RunStressTest(
+	ctx context.Context,
+	config *StressTestConfig,
+	reqGen RequestGenerator,
+) ([]*LoadTestResult, error) {
 	results := make([]*LoadTestResult, 0)
 
 	for users := config.StartUsers; users <= config.MaxUsers; users += config.UserIncrement {

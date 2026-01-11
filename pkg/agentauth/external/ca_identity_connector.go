@@ -225,7 +225,10 @@ func (cc *CanadaIdentityConnector) ValidateSIN(ctx context.Context, req *SINRequ
 }
 
 // VerifyDriverLicense verifies Canadian driver's license
-func (cc *CanadaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *CADriverLicenseRequest) (*CADriverLicenseResponse, error) {
+func (cc *CanadaIdentityConnector) VerifyDriverLicense(
+	ctx context.Context,
+	req *CADriverLicenseRequest,
+) (*CADriverLicenseResponse, error) {
 	// Validate request
 	if err := cc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -399,6 +402,8 @@ func (cc *CanadaIdentityConnector) generateCacheKey(operation string, parts ...s
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*CanadaIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (cc *CanadaIdentityConnector) GetMetrics() map[string]interface{} {

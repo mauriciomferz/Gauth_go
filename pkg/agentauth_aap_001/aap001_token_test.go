@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -82,8 +81,7 @@ func TestTokenRoundTripEnvKey(t *testing.T) {
 	for i := range key {
 		key[i] = byte(i + 1)
 	}
-	os.Setenv("AGENTAUTH_TOKEN_SYM_KEY", base64.StdEncoding.EncodeToString(key))
-	defer os.Unsetenv("AGENTAUTH_TOKEN_SYM_KEY")
+	t.Setenv("AGENTAUTH_TOKEN_SYM_KEY", base64.StdEncoding.EncodeToString(key))
 
 	memAuthz := authz.NewMemoryAuthorizer()
 	memAuthz.AddPolicy(authz.Policy{ID: "allow-create", Subject: "alice", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})

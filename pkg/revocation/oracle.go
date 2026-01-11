@@ -165,7 +165,7 @@ func (o *EmergencyRevocationOracle) Unsubscribe(subscriberID string) {
 // StartRedisPubSub listens to Redis Pub/Sub for cluster-wide revocation broadcasts
 func (o *EmergencyRevocationOracle) StartRedisPubSub(ctx context.Context) error {
 	pubsub := o.redis.Subscribe(ctx, "agentauth:revocations")
-	defer pubsub.Close()
+	defer func() { _ = pubsub.Close() }()
 
 	if _, err := pubsub.Receive(ctx); err != nil {
 		return fmt.Errorf("failed to subscribe to Redis Pub/Sub: %w", err)

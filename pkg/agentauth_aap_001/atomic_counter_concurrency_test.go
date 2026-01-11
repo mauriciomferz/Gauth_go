@@ -42,7 +42,7 @@ func TestAtomicCounter_ConcurrentCheckAndIncrement(t *testing.T) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: mr.Addr(),
 	})
-	defer redisClient.Close()
+	defer func() { _ = redisClient.Close() }()
 
 	// Create atomic counter store
 	store, err := NewAtomicCounterStore(redisClient, "agentauth:test")
@@ -121,7 +121,7 @@ func TestAtomicCounter_PartialFillScenario(t *testing.T) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: mr.Addr(),
 	})
-	defer redisClient.Close()
+	defer func() { _ = redisClient.Close() }()
 
 	store, err := NewAtomicCounterStore(redisClient, "agentauth:test")
 	if err != nil {
@@ -189,7 +189,7 @@ func TestAtomicCounter_ScriptReloadOnRedisRestart(t *testing.T) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: mr.Addr(),
 	})
-	defer redisClient.Close()
+	defer func() { _ = redisClient.Close() }()
 
 	store, err := NewAtomicCounterStore(redisClient, "agentauth:test")
 	if err != nil {
@@ -237,7 +237,7 @@ func TestAtomicCounter_TTLExpiration(t *testing.T) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: mr.Addr(),
 	})
-	defer redisClient.Close()
+	defer func() { _ = redisClient.Close() }()
 
 	store, err := NewAtomicCounterStore(redisClient, "agentauth:test")
 	if err != nil {
@@ -294,7 +294,7 @@ func BenchmarkAtomicCounter_CheckAndIncrement(b *testing.B) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: mr.Addr(),
 	})
-	defer redisClient.Close()
+	defer func() { _ = redisClient.Close() }()
 
 	store, err := NewAtomicCounterStore(redisClient, "agentauth:test")
 	if err != nil {

@@ -67,7 +67,10 @@ type RawPOAExposer interface {
 // Default implementations (stubs)
 type DefaultConditionalInterpreter struct{}
 
-func (i *DefaultConditionalInterpreter) Evaluate(conditions map[string]interface{}, context map[string]interface{}) (bool, error) {
+func (i *DefaultConditionalInterpreter) Evaluate(
+	conditions map[string]interface{},
+	context map[string]interface{},
+) (bool, error) {
 	now := time.Now()
 
 	// Check "valid_from"

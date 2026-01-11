@@ -21,7 +21,10 @@ func FuzzPolicyExpressionCompile(f *testing.F) {
 		f.Add(s)
 	}
 	f.Fuzz(func(t *testing.T, expr string) {
-		req := authz.Request{Subject: "alice", Resource: "obj", Action: "read", Context: map[string]string{"env": "prod", "tier": "gold", "age": "30", "country": "US", "flag": "y"}}
+		req := authz.Request{
+			Subject: "alice", Resource: "obj", Action: "read",
+			Context: map[string]string{"env": "prod", "tier": "gold", "age": "30", "country": "US", "flag": "y"},
+		}
 		_, _ = authz.EvaluateExpression(expr, req, nil) // ignore result; ensure no panic
 	})
 }

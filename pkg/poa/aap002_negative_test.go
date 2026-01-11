@@ -12,9 +12,21 @@ func minimalValidDefinition() PoADefinition {
 	start := time.Now()
 	end := start.Add(24 * time.Hour)
 	return PoADefinition{
-		Parties:       Parties{Principal: Principal{Type: PrincipalTypeOrganization, Identity: "org-123"}, AuthorizedClient: AuthorizedClient{Type: string(ClientType("LLM")), Identity: "client-xyz", Version: "v1", OperationalStatus: string(OperationalStatus("active"))}},
-		Authorization: AuthorizationScope{ApplicableSectors: []IndustrySector{{Code: taxonomy.SectorInfoCommunication, Description: "Information and Communication", Authorized: true}}, ApplicableRegions: []GeographicScope{{Type: GeoTypeNational, Identifier: "US"}}, AuthorizedActions: AuthorizedActions{Transactions: []taxonomy.TransactionType{taxonomy.TransactionLoan}}},
-		Requirements:  Requirements{ValidityPeriod: ValidityPeriod{StartTime: start, EndTime: end}},
+		Parties: Parties{
+			Principal: Principal{Type: PrincipalTypeOrganization, Identity: "org-123"},
+			AuthorizedClient: AuthorizedClient{
+				Type: string(ClientType("LLM")), Identity: "client-xyz",
+				Version: "v1", OperationalStatus: string(OperationalStatus("active")),
+			},
+		},
+		Authorization: AuthorizationScope{
+			ApplicableSectors: []IndustrySector{
+				{Code: taxonomy.SectorInfoCommunication, Description: "Information and Communication", Authorized: true},
+			},
+			ApplicableRegions: []GeographicScope{{Type: GeoTypeNational, Identifier: "US"}},
+			AuthorizedActions: AuthorizedActions{Transactions: []taxonomy.TransactionType{taxonomy.TransactionLoan}},
+		},
+		Requirements: Requirements{ValidityPeriod: ValidityPeriod{StartTime: start, EndTime: end}},
 	}
 }
 

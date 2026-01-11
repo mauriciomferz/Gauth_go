@@ -8,11 +8,17 @@ import (
 func TestReplayStore_CapacityEnforcement(t *testing.T) {
 	// Create store with capacity 2
 	store := NewReplayNonceStoreWithConfig(1*time.Hour, 2, "", nil)
-	defer store.Close()
+	t.Cleanup(func() {
+		if err := store.Close(); err != nil {
+			t.Errorf("store close: %v", err)
+		}
+	})
 
 	// Insert 3 items
 	now := time.Now()
-	store.CheckAndStore("1")
+	if err := store.CheckAndStore("1"); err != nil {
+		t.Fatalf("CheckAndStore failed: %v", err)
+	}
 	store.Record("2", now.Add(1*time.Second)) // store 2 slightly later
 
 	// Check size
@@ -47,9 +53,15 @@ func TestReplayStore_BackgroundCleanup(t *testing.T) {
 	// Create store with very short TTL
 	ttl := 100 * time.Millisecond
 	store := NewReplayNonceStore(ttl)
-	defer store.Close()
+	t.Cleanup(func() {
+		if err := store.Close(); err != nil {
+			t.Errorf("store close: %v", err)
+		}
+	})
 
-	store.CheckAndStore("bg-test")
+	if err := store.CheckAndStore("bg-test"); err != nil {
+		t.Fatalf("CheckAndStore failed: %v", err)
+	}
 
 	// Wait for TTL + cleanup interval (cleanup runs at ttl/10 = 10ms, but min 5s in code)
 	// Wait, I set min interval to 5s in code. That's too long for unit test.

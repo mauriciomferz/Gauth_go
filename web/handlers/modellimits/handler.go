@@ -266,7 +266,10 @@ func (h *Handler) LoadFromDisk() bool {
 }
 
 // ComputeSnapshot returns current config hash and generation time
-func (h *Handler) ComputeSnapshot() (hash string, at time.Time, models map[string]int, users map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int }) {
+func (h *Handler) ComputeSnapshot() (
+	hash string, at time.Time, models map[string]int,
+	users map[string]map[string]struct{ InputLimit, OutputLimit, RateLimit int },
+) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	// Return copies if needed, but for snapshot endpoint just returning maps is okay if caller serializes immediately
@@ -438,7 +441,11 @@ func (h *Handler) CheckLimit(modelID, userID string, inputTokens, outputTokens i
 					h.Metrics.RecordDecision("model_validate", modelID, "deny", time.Duration(0))
 					h.Metrics.IncModelRateLimitExceeded()
 				}
-				return LimitCheckResult{Allowed: false, Error: "model_rate_limit_exceeded", Limit: rl.Limit, WindowSeconds: int(rl.Period.Seconds()), Period: ratelimit.FormatPeriod(rl.Period)}
+				return LimitCheckResult{
+					Allowed: false, Error: "model_rate_limit_exceeded",
+					Limit: rl.Limit, WindowSeconds: int(rl.Period.Seconds()),
+					Period: ratelimit.FormatPeriod(rl.Period),
+				}
 			}
 		}
 	}
@@ -659,7 +666,10 @@ func (h *Handler) EmitAttestation(reason string) {
 
 // BuildUnsignedAttestation constructs the core attestation structure
 func (h *Handler) BuildUnsignedAttestation() (ModelLimitsAttestation, error) {
-	snapHash, _, _, _ := h.ComputeSnapshot()
+	snapHash, generatedAt, modelLimits, userLimits := h.ComputeSnapshot()
+	_ = generatedAt
+	_ = modelLimits
+	_ = userLimits
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 
 	att := ModelLimitsAttestation{}

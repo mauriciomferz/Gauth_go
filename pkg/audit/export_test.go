@@ -192,7 +192,9 @@ func TestCompressionFormats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Compression failed: %v", err)
 		}
-		gzipWriter.Close()
+		if closeErr := gzipWriter.Close(); closeErr != nil {
+			t.Fatalf("Compression finalize failed: %v", closeErr)
+		}
 
 		compressedSize := compressedBuf.Len()
 		if compressedSize >= uncompressedSize {
@@ -204,7 +206,7 @@ func TestCompressionFormats(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Decompression failed: %v", err)
 		}
-		defer gzipReader.Close()
+		defer func() { _ = gzipReader.Close() }()
 
 		decompressed, err := io.ReadAll(gzipReader)
 		if err != nil {

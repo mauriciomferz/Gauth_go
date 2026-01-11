@@ -25,12 +25,18 @@ func TestModelLimitsAttestationStreamDualDomainSignature(t *testing.T) {
 	if _, err := limitsFile.WriteString(`{"model_limits":{"demo":{"max_input_tokens":5}}}`); err != nil {
 		t.Fatalf("failed to write limits file: %v", err)
 	}
-	limitsFile.Close()
+	if err := limitsFile.Close(); err != nil {
+		t.Fatalf("close limits file: %v", err)
+	}
 
 	auditFile, _ := os.CreateTemp(t.TempDir(), "audit_*.jsonl")
-	auditFile.Close()
+	if err := auditFile.Close(); err != nil {
+		t.Fatalf("close audit file: %v", err)
+	}
 	anchorFile, _ := os.CreateTemp(t.TempDir(), "anchor_*.jsonl")
-	anchorFile.Close()
+	if err := anchorFile.Close(); err != nil {
+		t.Fatalf("close anchor file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_MODEL_LIMIT_ANCHOR_INTERVAL", "1")
 
 	km, _ := internalCrypto.NewManager(1 * time.Hour)

@@ -592,7 +592,7 @@ func testDisabledProviderHandling(t *testing.T, ctx context.Context, registry *o
 
 // TestProviderDiscoveryIntegration tests discovery document caching across providers
 func TestProviderDiscoveryIntegration(t *testing.T) {
-	_, _, _, _ = setupTestInfrastructure(t)
+	setupTestInfrastructure(t)
 
 	// Test providers have different discovery endpoints
 	providers := []struct {
@@ -701,8 +701,8 @@ func TestProviderRegistryIntegration(t *testing.T) {
 
 		// Update default trust level
 		google.DefaultTrustLevel = "high"
-		if err := providerRegistry.Update(testProviderGoogle, *google); err != nil {
-			t.Errorf("Failed to update provider: %v", err)
+		if updateErr := providerRegistry.Update(testProviderGoogle, *google); updateErr != nil {
+			t.Errorf("Failed to update provider: %v", updateErr)
 		}
 
 		// Verify update
@@ -717,8 +717,8 @@ func TestProviderRegistryIntegration(t *testing.T) {
 
 		// Restore original value
 		updated.DefaultTrustLevel = "substantial"
-		if err := providerRegistry.Update(testProviderGoogle, *updated); err != nil {
-			t.Errorf("Failed to restore provider: %v", err)
+		if restoreErr := providerRegistry.Update(testProviderGoogle, *updated); restoreErr != nil {
+			t.Errorf("Failed to restore provider: %v", restoreErr)
 		}
 
 		t.Logf("✓ Provider configuration update successful")

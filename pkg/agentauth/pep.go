@@ -159,7 +159,6 @@ func (pep *PowerEnforcementPoint) EnforceAuthorization(
 	ctx context.Context,
 	request *EnforcementRequest,
 ) (*EnforcementResult, error) {
-
 	enforcementID := generateEnforcementID()
 	startTime := time.Now()
 
@@ -292,7 +291,6 @@ func (pep *PowerEnforcementPoint) ValidateDemandSide(
 	ctx context.Context,
 	request *EnforcementRequest,
 ) (*EnforcementResult, error) {
-
 	// Demand-side validation focuses on resource owner authorization
 	// This is similar to EnforceAuthorization but from the resource server perspective
 	result, err := pep.EnforceAuthorization(ctx, request)
@@ -311,7 +309,6 @@ func (pep *PowerEnforcementPoint) validateScope(
 	request *EnforcementRequest,
 	token *ExtendedToken,
 ) (bool, []EnforcementViolation) {
-
 	violations := []EnforcementViolation{}
 
 	if token.PowerOfAttorney == nil {
@@ -390,7 +387,6 @@ func (pep *PowerEnforcementPoint) validateRestrictions(
 	request *EnforcementRequest,
 	token *ExtendedToken,
 ) (bool, []EnforcementViolation) {
-
 	violations := []EnforcementViolation{}
 
 	// Check token-level restrictions
@@ -416,7 +412,7 @@ func (pep *PowerEnforcementPoint) validateRestrictions(
 		case "geographic_limit":
 			if request.PhysicalAction && request.ActionLocation != "" {
 				// Would validate location against allowed regions
-				// Implementation depends on how geographic restrictions are structured
+				_ = request // Implementation depends on how geographic restrictions are structured
 			}
 
 		case "scope_limit":

@@ -141,7 +141,10 @@ func NewPARService(config *PARConfig) *PARService {
 }
 
 // PushAuthorizationRequest processes a PAR request per RFC 9126 Section 2.
-func (s *PARService) PushAuthorizationRequest(ctx context.Context, req *PushedAuthorizationRequest) (*PushedAuthorizationResponse, error) {
+func (s *PARService) PushAuthorizationRequest(
+	ctx context.Context,
+	req *PushedAuthorizationRequest,
+) (*PushedAuthorizationResponse, error) {
 	// Validate request
 	if err := s.validateRequest(req); err != nil {
 		return nil, err
@@ -181,7 +184,9 @@ func (s *PARService) PushAuthorizationRequest(ctx context.Context, req *PushedAu
 }
 
 // GetAuthorizationRequest retrieves a stored authorization request by request_uri.
-func (s *PARService) GetAuthorizationRequest(ctx context.Context, requestURI string, clientID string) (*PushedAuthorizationRequest, error) {
+func (s *PARService) GetAuthorizationRequest(
+	ctx context.Context, requestURI string, clientID string,
+) (*PushedAuthorizationRequest, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

@@ -190,7 +190,10 @@ func NewJapanIdentityConnector(config *JapanConnectorConfig) (*JapanIdentityConn
 }
 
 // AuthenticateMyNumber authenticates using My Number Card
-func (jc *JapanIdentityConnector) AuthenticateMyNumber(ctx context.Context, req *MyNumberAuthRequest) (*MyNumberAuthResponse, error) {
+func (jc *JapanIdentityConnector) AuthenticateMyNumber(
+	ctx context.Context,
+	req *MyNumberAuthRequest,
+) (*MyNumberAuthResponse, error) {
 	// Validate request
 	if err := jc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -256,7 +259,10 @@ func (jc *JapanIdentityConnector) AuthenticateMyNumber(ctx context.Context, req 
 
 // ValidateIndividualNumber validates Japanese Individual Number (My Number)
 // Format: 12 digits with check digit using modulo 11 algorithm
-func (jc *JapanIdentityConnector) ValidateIndividualNumber(ctx context.Context, req *IndividualNumberRequest) (*IndividualNumberResponse, error) {
+func (jc *JapanIdentityConnector) ValidateIndividualNumber(
+	ctx context.Context,
+	req *IndividualNumberRequest,
+) (*IndividualNumberResponse, error) {
 	// Validate request
 	if err := jc.validator.Struct(req); err != nil {
 		return &IndividualNumberResponse{Valid: false, Error: err.Error()}, nil
@@ -289,7 +295,10 @@ func (jc *JapanIdentityConnector) ValidateIndividualNumber(ctx context.Context, 
 }
 
 // VerifyResidenceCard verifies Japanese residence card (在留カード)
-func (jc *JapanIdentityConnector) VerifyResidenceCard(ctx context.Context, req *ResidenceCardRequest) (*ResidenceCardResponse, error) {
+func (jc *JapanIdentityConnector) VerifyResidenceCard(
+	ctx context.Context,
+	req *ResidenceCardRequest,
+) (*ResidenceCardResponse, error) {
 	// Validate request
 	if err := jc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -328,7 +337,10 @@ func (jc *JapanIdentityConnector) VerifyResidenceCard(ctx context.Context, req *
 }
 
 // VerifyDriverLicense verifies Japanese driver's license
-func (jc *JapanIdentityConnector) VerifyDriverLicense(ctx context.Context, req *JPDriverLicenseRequest) (*JPDriverLicenseResponse, error) {
+func (jc *JapanIdentityConnector) VerifyDriverLicense(
+	ctx context.Context,
+	req *JPDriverLicenseRequest,
+) (*JPDriverLicenseResponse, error) {
 	// Validate request
 	if err := jc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -397,6 +409,8 @@ func (jc *JapanIdentityConnector) generateCacheKey(operation string, parts ...st
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*JapanIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (jc *JapanIdentityConnector) GetMetrics() map[string]interface{} {

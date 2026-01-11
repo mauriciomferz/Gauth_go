@@ -207,7 +207,10 @@ func (nc *NZIdentityConnector) AuthenticateRealMe(ctx context.Context, req *Real
 }
 
 // VerifyDriverLicense verifies New Zealand driver's license
-func (nc *NZIdentityConnector) VerifyDriverLicense(ctx context.Context, req *NZDriverLicenseRequest) (*NZDriverLicenseResponse, error) {
+func (nc *NZIdentityConnector) VerifyDriverLicense(
+	ctx context.Context,
+	req *NZDriverLicenseRequest,
+) (*NZDriverLicenseResponse, error) {
 	// Validate request
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -297,6 +300,8 @@ func (nc *NZIdentityConnector) generateCacheKey(operation string, parts ...strin
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*NZIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (nc *NZIdentityConnector) GetMetrics() map[string]interface{} {

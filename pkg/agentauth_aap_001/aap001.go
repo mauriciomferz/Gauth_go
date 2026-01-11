@@ -161,12 +161,13 @@ type PowerOfAttorney struct {
 	SatisfiedSignatures int `json:"satisfied_signatures,omitempty"`
 	// Hierarchical delegation (sub-delegation) fields (excluded from canonical digest for v1-v3; future version may incorporate):
 	ParentPOAID string `json:"parent_poa_id,omitempty"`
-	// ParentDigest binds this delegation to its parent's canonical digest (hierarchical integrity). Included in canonical digest for Version>=4.
+	// ParentDigest binds this delegation to its parent's canonical digest
+	// (hierarchical integrity). Included in canonical digest for Version>=4.
 	ParentDigest string `json:"parent_digest,omitempty"`
 	Depth        int    `json:"depth,omitempty"` // 0=root; derived when ParentPOAID set
 	// Dual-control revocation governance fields (beta design placeholders)
-	Controllers       []string                `json:"controllers,omitempty"`        // Optional explicit controller identities authorized for quorum revocation
-	PendingRevocation *PendingRevocationState `json:"pending_revocation,omitempty"` // Non-nil when a revocation workflow is in progress
+	Controllers       []string                `json:"controllers,omitempty"`        // Controller identities for quorum revocation
+	PendingRevocation *PendingRevocationState `json:"pending_revocation,omitempty"` // Revocation in progress
 	// Evidence hash attachments for forensic strengthening (excluded from canonical digest)
 	EvidenceHashes []string `json:"evidence_hashes,omitempty"`
 	// Requirement 134: Granular Revocation - specific scopes that are no longer valid.
@@ -183,8 +184,10 @@ type POASignature struct {
 }
 
 // PendingRevocationState captures an in-progress quorum / dual-control revocation workflow.
-// Quorum rules (design): either RequiredCount (distinct approvers) OR RequiredWeight (sum of signer/controller weights) must be met.
-// Only controllers (when set), Grantor, or declared Signers may approve. Approvals map records timestamp of each distinct approver.
+// Quorum rules (design): either RequiredCount (distinct approvers) OR
+// RequiredWeight (sum of signer/controller weights) must be met.
+// Only controllers (when set), Grantor, or declared Signers may approve.
+// Approvals map records timestamp of each distinct approver.
 // Finalization transitions POA.Status to revoked and sets RevokedAt/RevocationReason. Cancellation returns to prior status.
 // All fields are persisted inside the PoA record for durability.
 type PendingRevocationState struct {
@@ -462,7 +465,8 @@ func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 	if err := ValidateMultiSignature(p); err != nil {
 		return aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("multi-signature structural invalid: %v", err))
 	}
-	// Weighted threshold mode: prefer embedded POA weights; fallback to env (AGENTAUTH_MULTI_SIG_WEIGHTS) for transitional compatibility.
+	// Weighted threshold mode: prefer embedded POA weights; fallback to env
+	// (AGENTAUTH_MULTI_SIG_WEIGHTS) for transitional compatibility.
 	weights := p.Weights
 	useWeights := false
 	if len(weights) == 0 {
@@ -509,7 +513,8 @@ func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 			s.metrics.IncMultiSignatureStructuralFailures()
 			s.metrics.IncMultiSignatureVerificationFailures()
 		}
-		return aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("insufficient_threshold: have %d signatures need %d", len(p.MultiSignatures), p.Threshold))
+		return aap.New(aap.ErrIntegrityFailure, fmt.Sprintf(
+			"insufficient_threshold: have %d signatures need %d", len(p.MultiSignatures), p.Threshold))
 	}
 	digestHex, canon, derr := CanonicalPOADigest(p)
 	if derr != nil {
@@ -554,7 +559,8 @@ func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 		// locate public key via keyProvider or keyRing using sig.KeyID
 		var pub []byte
 		if s != nil && s.keyProvider != nil && sig.KeyID != "" {
-			if pkBytes, algo, err := s.keyProvider.PublicKey(sig.KeyID); err == nil && algo == cr.AlgoEd25519 && len(pkBytes) == ed25519.PublicKeySize {
+			pkBytes, algo, err := s.keyProvider.PublicKey(sig.KeyID)
+			if err == nil && algo == cr.AlgoEd25519 && len(pkBytes) == ed25519.PublicKeySize {
 				pub = pkBytes
 			}
 		}
@@ -612,7 +618,8 @@ func (s *Service) verifyMultiSignatures(p *PowerOfAttorney) error {
 			if firstErr != nil {
 				return firstErr
 			}
-			return aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("insufficient_weight_valid: have %d need %d", validWeightTotal, p.Threshold))
+			return aap.New(aap.ErrIntegrityFailure, fmt.Sprintf(
+				"insufficient_weight_valid: have %d need %d", validWeightTotal, p.Threshold))
 		}
 	} else {
 		if validCount < p.Threshold {
@@ -1074,7 +1081,8 @@ type TokenVerificationResult struct {
 	Suspended       bool              `json:"suspended"`
 	SignatureValid  bool              `json:"signature_valid"`
 	PublicKeyFound  bool              `json:"public_key_found"`
-	// RawPOA exposes the embedded canonical PoA JSON when present (EnvelopeV2 with AGENTAUTH_EMBED_FULL_POA enabled and within size cap).
+	// RawPOA exposes the embedded canonical PoA JSON when present
+	// (EnvelopeV2 with AGENTAUTH_EMBED_FULL_POA enabled and within size cap).
 	RawPOA     string `json:"raw_poa,omitempty"`
 	PoAVersion string `json:"poa_version,omitempty"`
 	// DetachedSignatureValid indicates the optional detached signature (when present) verified successfully.
@@ -1479,7 +1487,8 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 				// locate public key (keyProvider preferred then keyRing) matching detached kid
 				var pub []byte
 				if s.keyProvider != nil {
-					if pkBytes, algo, err := s.keyProvider.PublicKey(env2.DetachedSignatureKid); err == nil && algo == cr.AlgoEd25519 && len(pkBytes) == ed25519.PublicKeySize {
+					pkBytes, algo, err := s.keyProvider.PublicKey(env2.DetachedSignatureKid)
+					if err == nil && algo == cr.AlgoEd25519 && len(pkBytes) == ed25519.PublicKeySize {
 						pub = pkBytes
 					}
 				}
@@ -1507,7 +1516,8 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 					} else if s.metrics != nil { // verification failure
 						s.metrics.IncSignatureVerificationFailures()
 						incDetachedVerify("invalid_signature")
-						s.metrics.RecordDecisionWithReason("verify_token", env2.DetachedSignatureKid, metrics.OutcomeDeny, metrics.ReasonSignatureInvalid)
+						s.metrics.RecordDecisionWithReason("verify_token",
+							env2.DetachedSignatureKid, metrics.OutcomeDeny, metrics.ReasonSignatureInvalid)
 					}
 				} else if s.metrics != nil { // missing public key
 					s.metrics.IncSignaturePublicKeyMissing()
@@ -1559,7 +1569,8 @@ func (s *Service) VerifyToken(ctx context.Context, tokenString string) (*TokenVe
 			s.metrics.IncUnauthorized()
 		}
 		return nil, aap.New(aap.ErrConfiguration,
-			"sessionUser not found in context - integration error: ctxKeySubject must be populated by authentication middleware (mTLS, DPoP, OAuth2)")
+			"sessionUser not found in context - integration error: "+
+				"ctxKeySubject must be populated by authentication middleware (mTLS, DPoP, OAuth2)")
 	}
 
 	// CRITICAL: Enforce holder-of-key binding (session user MUST match PoA grantee)
@@ -1789,7 +1800,8 @@ func ExtractEmbeddedPoA(result *TokenVerificationResult) (*PowerOfAttorney, erro
 		return nil, aap.New(aap.ErrIntegrityFailure, "embedded poa missing id field")
 	}
 	if result.DelegationID != "" && poa.ID != result.DelegationID {
-		return nil, aap.New(aap.ErrIntegrityFailure, fmt.Sprintf("embedded poa id mismatch: envelope=%s embedded=%s", result.DelegationID, poa.ID))
+		return nil, aap.New(aap.ErrIntegrityFailure, fmt.Sprintf(
+			"embedded poa id mismatch: envelope=%s embedded=%s", result.DelegationID, poa.ID))
 	}
 
 	// Basic structural validation (ensures PoA is not malformed)
@@ -1918,8 +1930,8 @@ type Service struct {
 	replay                  *replayCache                // optional in-memory replay protection
 	replayStore             ReplayStore                 // optional external distributed replay store (takes precedence if non-nil)
 	sigReplayStore          SignatureReplayStore        // optional signature replay protection store (issuance path)
-	failClosedReplay        bool                        // if true, replay store errors become invalid_request instead of fail-open (DEFAULT: true, secure by default)
-	strictConstraints       bool                        // if true, unknown/unvalidated constraints cause rejection (DEFAULT: false, for backward compatibility)
+	failClosedReplay        bool                        // replay errors -> invalid_request (DEFAULT: true)
+	strictConstraints       bool                        // unknown constraints -> reject (DEFAULT: false)
 	limits                  ValidationLimits            // configurable validation limits
 	poaValidator            PoAValidator                // semantic validator applied post basic validation
 	enhancedValidator       *EnhancedPoAValidator       // enhanced validator with warning collection and daily limits (optional)
@@ -2221,7 +2233,9 @@ func (s *Service) verifyPOASignature(poa *PowerOfAttorney) error {
 		}
 		return aap.New(aap.ErrIntegrityFailure, "unsupported algorithm")
 	}
-	if err := cr.VerifyAlgorithm(poa.Signature.Algorithm, canon, poa.Signature.SigBase64, poa.Signature.KeyID, s.keyProvider); err != nil {
+	if err := cr.VerifyAlgorithm(
+		poa.Signature.Algorithm, canon, poa.Signature.SigBase64, poa.Signature.KeyID, s.keyProvider,
+	); err != nil {
 		if s.metrics != nil {
 			s.metrics.IncSignatureVerificationFailures()
 		}
@@ -2393,7 +2407,8 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		if reqMaxDepthStr, ok := req.Restrictions["max_delegation_depth"]; ok {
 			if reqMax, err := strconv.Atoi(reqMaxDepthStr); err == nil {
 				if reqMax > maxDepth {
-					return nil, aap.New(aap.ErrInvalidRequest, fmt.Sprintf("child max_delegation_depth %d cannot exceed effective limit %d", reqMax, maxDepth))
+					return nil, aap.New(aap.ErrInvalidRequest, fmt.Sprintf(
+						"child max_delegation_depth %d cannot exceed effective limit %d", reqMax, maxDepth))
 				}
 			}
 		} else {
@@ -2435,7 +2450,10 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 
 	// Check authorization via PDP if present; otherwise legacy authorizer.
 	if s.pdp != nil {
-		pdpDec, err := s.pdp.Evaluate(ctx, pdp.Request{Subject: req.Grantor, Action: "create_delegation", Resource: "poa", Attributes: map[string]string{"grantee": req.Grantee}, Time: s.nowFn()})
+		pdpDec, err := s.pdp.Evaluate(ctx, pdp.Request{
+			Subject: req.Grantor, Action: "create_delegation", Resource: "poa",
+			Attributes: map[string]string{"grantee": req.Grantee}, Time: s.nowFn(),
+		})
 		if err != nil {
 			return nil, aap.New(aap.ErrInternal, fmt.Sprintf("pdp evaluation failed: %v", err))
 		}
@@ -2446,7 +2464,10 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 			return nil, aap.New(aap.ErrUnauthorized, pdpDec.Reason)
 		}
 	} else {
-		authReq := authz.Request{Subject: req.Grantor, Action: "create_delegation", Resource: "poa", Context: map[string]string{"grantee": req.Grantee}}
+		authReq := authz.Request{
+			Subject: req.Grantor, Action: "create_delegation", Resource: "poa",
+			Context: map[string]string{"grantee": req.Grantee},
+		}
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
@@ -2515,7 +2536,8 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 	forceHier := os.Getenv("AGENTAUTH_FORCE_HIER_DIGEST") == "1"
 	if enableHier || forceHier {
 		poa.Version = 4
-		// When sub-delegation capture parent's canonical digest for binding (ParentDigest). Missing parent digest increments metric & may error if forced.
+		// When sub-delegation capture parent's canonical digest for binding (ParentDigest).
+		// Missing parent digest increments metric & may error if forced.
 		if poa.ParentPOAID != "" {
 			parent, ok := s.repo.Get(poa.ParentPOAID)
 			if ok && parent != nil {
@@ -2584,7 +2606,10 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 		if signer, err := s.signerProvider(); err == nil && signer != nil {
 			if dig, canon, derr := CanonicalPOADigest(poa); derr == nil {
 				if sig, serr := signer.Sign(canon); serr == nil {
-					poa.Signature = &POASignature{Algorithm: signer.Algorithm(), KeyID: signer.KeyID(), DigestHex: dig, SigBase64: base64.StdEncoding.EncodeToString(sig), Canonical: canon}
+					poa.Signature = &POASignature{
+						Algorithm: signer.Algorithm(), KeyID: signer.KeyID(), DigestHex: dig,
+						SigBase64: base64.StdEncoding.EncodeToString(sig), Canonical: canon,
+					}
 					if s.metrics != nil {
 						s.metrics.IncSignaturesIssued()
 					}
@@ -2651,7 +2676,11 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 
 	// Append issuance event to chain (tamper-evident provenance)
 	if s.issChain != nil {
-		_ = s.issChain.Append(IssuanceEvent{ID: fmt.Sprintf("iss_%s_%d", poa.ID, now.UnixNano()), DelegationID: poa.ID, Grantor: poa.Grantor, Grantee: poa.Grantee, Scope: poa.Scope, Restrictions: poa.Restrictions, IssuedAt: now})
+		_ = s.issChain.Append(IssuanceEvent{
+			ID: fmt.Sprintf("iss_%s_%d", poa.ID, now.UnixNano()), DelegationID: poa.ID,
+			Grantor: poa.Grantor, Grantee: poa.Grantee, Scope: poa.Scope,
+			Restrictions: poa.Restrictions, IssuedAt: now,
+		})
 		if s.anchorClient != nil { // external anchoring attempt
 			if s.metrics != nil {
 				s.metrics.IncAnchorAttempts()
@@ -2686,7 +2715,11 @@ func (s *Service) CreateDelegationCtx(ctx context.Context, req DelegationRequest
 	s.sendToAuditSink(ctx, event)
 	// Ledger append (best-effort)
 	if s.ledger != nil {
-		_ = s.ledger.Append(ctx, &ledger.Entry{ID: fmt.Sprintf("led_iss_%s", poa.ID), TS: now, Type: "delegation_issuance", Subject: req.Grantor, Object: poa.ID, Metadata: map[string]interface{}{"grantee": req.Grantee, "scope": req.Scope, "valid_until": poa.ValidUntil}})
+		_ = s.ledger.Append(ctx, &ledger.Entry{
+			ID: fmt.Sprintf("led_iss_%s", poa.ID), TS: now, Type: "delegation_issuance",
+			Subject: req.Grantor, Object: poa.ID,
+			Metadata: map[string]interface{}{"grantee": req.Grantee, "scope": req.Scope, "valid_until": poa.ValidUntil},
+		})
 	}
 
 	resp := &DelegationResponse{
@@ -2866,7 +2899,8 @@ func (s *Service) ValidateDelegationCtx(ctx context.Context, poaID, grantee, act
 	}
 	// Not-before: reject only if outside tolerance window
 	if now.Add(skew).Before(poa.ValidFrom) {
-		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
+		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf(
+			"delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
 	}
 	// Expiry: treat within skew window as still valid (soft grace); mark expired only beyond skew
 	if now.After(poa.ValidUntil.Add(skew)) {
@@ -2977,7 +3011,10 @@ func (s *Service) InitiateRevocation(ctx context.Context, req RevocationRequest)
 		}
 		return aap.New(aap.ErrInvalidRequest, "revocation already pending")
 	}
-	pr := &PendingRevocationState{InitiatedAt: s.nowFn(), Initiator: req.Initiator, Reason: req.Reason, EvidenceHashes: req.EvidenceHashes, Approvals: map[string]time.Time{}}
+	pr := &PendingRevocationState{
+		InitiatedAt: s.nowFn(), Initiator: req.Initiator, Reason: req.Reason,
+		EvidenceHashes: req.EvidenceHashes, Approvals: map[string]time.Time{},
+	}
 	if v := os.Getenv("AGENTAUTH_REVOCATION_REQUIRED_COUNT"); v != "" {
 		if iv, err := strconv.Atoi(strings.TrimSpace(v)); err == nil && iv > 0 {
 			pr.RequiredCount = iv
@@ -3213,7 +3250,8 @@ func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee str
 		}
 	}
 	if now2.Add(skew2).Before(poa.ValidFrom) {
-		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
+		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf(
+			"delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
 	}
 	if now2.After(poa.ValidUntil.Add(skew2)) {
 		poa.Status = POAStatusExpired
@@ -3276,7 +3314,8 @@ func (s *Service) ValidateDelegationRich(ctx context.Context, poaID, grantee str
 								s.metrics.IncRestrictionViolations()
 							}
 							s.semanticCounters.DailyAmountLimitExceeded++
-							return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf("max_daily_amount %.2f exceeded by cumulative %.2f", dailyLimit, newTotal))
+							return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf(
+								"max_daily_amount %.2f exceeded by cumulative %.2f", dailyLimit, newTotal))
 						}
 						s.dailyAmounts[dayKey] = newTotal
 						s.dailyAmountsMu.Unlock()
@@ -3432,7 +3471,8 @@ func (s *Service) validateDelegationEx(ctx context.Context, poaID, grantee strin
 		skew = 5 * time.Second // Default skew
 	}
 	if now.Add(skew).Before(poa.ValidFrom) {
-		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
+		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf(
+			"delegation not yet valid until %s", poa.ValidFrom.UTC().Format(time.RFC3339Nano)))
 	}
 	if now.After(poa.ValidUntil.Add(skew)) {
 		poa.Status = POAStatusExpired
@@ -3505,7 +3545,9 @@ func (s *Service) validateDelegationEx(ctx context.Context, poaID, grantee strin
 								s.semanticCounters.DailyAmountLimitExceeded++
 								// Get current value for error message
 								currentValue, _ := s.atomicCounterStore.GetValue(ctx, dayKey)
-								return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf("max_daily_amount %.2f exceeded (current: %.2f, requested: %.2f)", dailyLimit, currentValue, requested))
+								return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf(
+									"max_daily_amount %.2f exceeded (current: %.2f, requested: %.2f)",
+									dailyLimit, currentValue, requested))
 							}
 							// Allowed - increment succeeded atomically
 						} else {
@@ -3520,7 +3562,8 @@ func (s *Service) validateDelegationEx(ctx context.Context, poaID, grantee strin
 									s.metrics.IncRestrictionViolations()
 								}
 								s.semanticCounters.DailyAmountLimitExceeded++
-								return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf("max_daily_amount %.2f exceeded by cumulative %.2f", dailyLimit, newTotal))
+								return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf(
+									"max_daily_amount %.2f exceeded by cumulative %.2f", dailyLimit, newTotal))
 							}
 							s.dailyAmounts[dayKey] = newTotal
 							s.dailyAmountsMu.Unlock()
@@ -3573,7 +3616,8 @@ func (s *Service) validateDelegationEx(ctx context.Context, poaID, grantee strin
 		// In permissive mode: IGNORE (assume caller doesn't support this constraint)
 		if s.strictConstraints {
 			s.semanticCounters.RestrictionMismatch++
-			return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf("unknown constraint %s=%s cannot be validated (strict mode enabled)", rk, rv))
+			return aap.New(aap.ErrRestrictionExceeded, fmt.Sprintf(
+				"unknown constraint %s=%s cannot be validated (strict mode enabled)", rk, rv))
 		}
 		// Permissive mode: silently ignore unknown constraints (backward compatible)
 	}
@@ -3795,7 +3839,10 @@ func (s *Service) RevokeDelegationCtx(ctx context.Context, poaID, revoker string
 	_ = s.repo.Update(poa)
 	// Append revocation event to chain (tamper-evident)
 	if s.revChain != nil {
-		if _, err := s.revChain.Append(delegation.RevocationEvent{ID: fmt.Sprintf("rev_%s_%d", poa.ID, s.nowFn().UnixNano()), DelegationID: poa.ID, Reason: string(delegation.RevocationReasonGrantorRevoked)}); err != nil {
+		if _, err := s.revChain.Append(delegation.RevocationEvent{
+			ID: fmt.Sprintf("rev_%s_%d", poa.ID, s.nowFn().UnixNano()), DelegationID: poa.ID,
+			Reason: string(delegation.RevocationReasonGrantorRevoked),
+		}); err != nil {
 			return aap.New(aap.ErrInternal, fmt.Sprintf("append revocation event: %v", err))
 		}
 		// External anchoring attempt of revocation chain tip (best-effort)
@@ -3831,7 +3878,13 @@ func (s *Service) RevokeDelegationCtx(ctx context.Context, poaID, revoker string
 
 	// Ledger append (best-effort) for revocation
 	if s.ledger != nil {
-		_ = s.ledger.Append(ctx, &ledger.Entry{ID: fmt.Sprintf("led_rev_%s", poa.ID), TS: s.nowFn(), Type: "delegation_revocation", Subject: revoker, Object: poa.ID, Metadata: map[string]interface{}{"grantee": poa.Grantee, "reason": string(delegation.RevocationReasonGrantorRevoked)}})
+		_ = s.ledger.Append(ctx, &ledger.Entry{
+			ID: fmt.Sprintf("led_rev_%s", poa.ID), TS: s.nowFn(), Type: "delegation_revocation",
+			Subject: revoker, Object: poa.ID,
+			Metadata: map[string]interface{}{
+				"grantee": poa.Grantee, "reason": string(delegation.RevocationReasonGrantorRevoked),
+			},
+		})
 	}
 
 	return nil
@@ -4160,7 +4213,8 @@ func (s *Service) RevokeAuthorityCtx(ctx context.Context, poaID, revoker string,
 
 	// Only grantor can revoke authority
 	if poa.Grantor != revoker {
-		return aap.New(aap.ErrUnauthorized, fmt.Sprintf("only grantor can revoke authority: grantor=%s revoker=%s", poa.Grantor, revoker))
+		return aap.New(aap.ErrUnauthorized, fmt.Sprintf(
+			"only grantor can revoke authority: grantor=%s revoker=%s", poa.Grantor, revoker))
 	}
 
 	// Validate scopes exist in original PoA
@@ -4267,7 +4321,8 @@ func scopesEqual(a, b []string) bool {
 	return true
 }
 
-// ErrCanceled is exposed for callers to compare error values (mirrors context.Canceled without dependency leakage in tests if wrapped).
+// ErrCanceled is exposed for callers to compare error values
+// (mirrors context.Canceled without dependency leakage in tests if wrapped).
 var ErrCanceled = context.Canceled
 
 // AuditEvents returns a snapshot of audit events recorded by the service (testing / diagnostics)
@@ -4774,7 +4829,10 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			}
 			// Build minimal chain snapshot (single item) representing this issuance.
 			// Clamp timestamp to <=255 to satisfy minimal CBOR encoder integer encoding (supports <256 path).
-			item := streamPkg.RawPOAItem{ID: poa.ID, Issuer: poa.Grantor, Subject: poa.Grantee, Timestamp: now.Unix() % 256, Algo: algEd25519}
+			item := streamPkg.RawPOAItem{
+				ID: poa.ID, Issuer: poa.Grantor, Subject: poa.Grantee,
+				Timestamp: now.Unix() % 256, Algo: algEd25519,
+			}
 			if poa.Signature != nil && poa.Signature.SigBase64 != "" {
 				if sigBytes, decErr := base64.StdEncoding.DecodeString(poa.Signature.SigBase64); decErr == nil {
 					item.Signature = sigBytes
@@ -4784,7 +4842,9 @@ func generateAuthToken(s *Service, poa *PowerOfAttorney) string {
 			if cErr == nil {
 				if len(chainBytes) <= maxRaw {
 					// Compute chain hash + algo via streaming decode (single item continuity trivial).
-					if chainDec, decErr := streamPkg.DecodeRawPOAStreamWith(bytes.NewReader(chainBytes), streamPkg.DefaultStreamLimits, algo, false); decErr == nil {
+					chainDec, decErr := streamPkg.DecodeRawPOAStreamWith(
+						bytes.NewReader(chainBytes), streamPkg.DefaultStreamLimits, algo, false)
+					if decErr == nil {
 						rawPOAChainAlgo = chainDec.HashAlgo.String()
 					}
 					rawPOAChain = base64.StdEncoding.EncodeToString(chainBytes)

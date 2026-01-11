@@ -52,9 +52,9 @@ func (v *GoogleValidator) ValidateToken(ctx context.Context, token string, provi
 
 	// For now, we validate what we can from the standard claims
 	if provider.Metadata != nil {
-		if _, ok := provider.Metadata["hosted_domain"].(string); ok {
+		if hd, ok := provider.Metadata["hosted_domain"].(string); ok {
 			// In production, we would validate the hd claim here
-			// For this implementation, we rely on email domain verification
+			_ = hd // For this implementation, we rely on email domain verification
 		}
 	}
 
@@ -216,7 +216,11 @@ func (r *ProviderValidatorRegistry) Get(providerID string) (ProviderValidator, b
 }
 
 // ValidateToken validates a token using the appropriate provider validator.
-func (r *ProviderValidatorRegistry) ValidateToken(ctx context.Context, token string, provider *ProviderConfig) (*IDTokenClaims, error) {
+func (r *ProviderValidatorRegistry) ValidateToken(
+	ctx context.Context,
+	token string,
+	provider *ProviderConfig,
+) (*IDTokenClaims, error) {
 	validator, ok := r.Get(provider.ID)
 	if !ok {
 		return nil, fmt.Errorf("no validator found for provider %s", provider.ID)

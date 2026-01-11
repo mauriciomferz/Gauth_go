@@ -21,11 +21,16 @@ func (m *Manager) Activate(artifact *CompositeAuthorizationArtifact) (*Composite
 	if artifact == nil {
 		return nil, ErrInvalid
 	}
-	if artifact.AISystemID == "" || artifact.AuthorizationGrant == nil || artifact.PowersGranted == nil || artifact.DecisionAuthority == nil || artifact.TransactionRights == nil || artifact.ActionPermissions == nil || artifact.DualControlPrinciple == nil || artifact.AuthorizationCascade == nil {
+	if artifact.AISystemID == "" || artifact.AuthorizationGrant == nil ||
+		artifact.PowersGranted == nil || artifact.DecisionAuthority == nil ||
+		artifact.TransactionRights == nil || artifact.ActionPermissions == nil ||
+		artifact.DualControlPrinciple == nil || artifact.AuthorizationCascade == nil {
 		return nil, ErrInvalid
 	}
 	// Basic validity window sanity if both set
-	if artifact.AuthorizationGrant != nil && artifact.AuthorizationGrant.ValidFrom != nil && artifact.AuthorizationGrant.ValidUntil != nil {
+	if artifact.AuthorizationGrant != nil &&
+		artifact.AuthorizationGrant.ValidFrom != nil &&
+		artifact.AuthorizationGrant.ValidUntil != nil {
 		if artifact.AuthorizationGrant.ValidUntil.Before(*artifact.AuthorizationGrant.ValidFrom) {
 			return nil, ErrInvalid
 		}

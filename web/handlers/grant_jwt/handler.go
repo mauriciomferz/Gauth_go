@@ -114,7 +114,10 @@ func (h *Handler) HandleTokenRequest(c *gin.Context) {
 		})
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid_grant", "error_description": "assertion validation failed: " + err.Error()})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error":             "invalid_grant",
+				"error_description": "assertion validation failed: " + err.Error(),
+			})
 			return
 		}
 
@@ -138,9 +141,6 @@ func (h *Handler) HandleTokenRequest(c *gin.Context) {
 				return
 			}
 		}
-
-		// Refresh claims (parsedToken.Claims) for downstream usage if needed, though 'claims' variable matches.
-
 	} else {
 		// Fallback to Client Authentication (Static Keys)
 		// Note: We intentionally pass ClientAssertionTypeJWT as the type since the structure is identical

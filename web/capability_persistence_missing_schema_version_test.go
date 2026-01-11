@@ -17,7 +17,9 @@ func TestCapabilityPersistenceMissingSchemaVersion(t *testing.T) {
 	if _, err := tmp.WriteString(testutil.CapAlphaV1); err != nil {
 		t.Fatal(err)
 	}
-	tmp.Close()
+	if err := tmp.Close(); err != nil {
+		t.Fatal(err)
+	}
 	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", tmp.Name())
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

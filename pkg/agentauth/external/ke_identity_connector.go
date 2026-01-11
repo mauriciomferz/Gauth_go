@@ -203,7 +203,10 @@ func (kc *KenyaIdentityConnector) ValidateNationalID(ctx context.Context, req *N
 
 // ValidateHudumaNamba validates Kenyan Huduma Namba (unique personal identifier)
 // Format: Variable length alphanumeric
-func (kc *KenyaIdentityConnector) ValidateHudumaNamba(ctx context.Context, req *HudumaNambaRequest) (*HudumaNambaResponse, error) {
+func (kc *KenyaIdentityConnector) ValidateHudumaNamba(
+	ctx context.Context,
+	req *HudumaNambaRequest,
+) (*HudumaNambaResponse, error) {
 	// Validate request
 	if err := kc.validator.Struct(req); err != nil {
 		return &HudumaNambaResponse{Valid: false, Error: err.Error()}, nil
@@ -233,7 +236,10 @@ func (kc *KenyaIdentityConnector) ValidateHudumaNamba(ctx context.Context, req *
 }
 
 // VerifyDriverLicense verifies Kenyan driver's license
-func (kc *KenyaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *KEDriverLicenseRequest) (*KEDriverLicenseResponse, error) {
+func (kc *KenyaIdentityConnector) VerifyDriverLicense(
+	ctx context.Context,
+	req *KEDriverLicenseRequest,
+) (*KEDriverLicenseResponse, error) {
 	// Validate request
 	if err := kc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -305,6 +311,8 @@ func (kc *KenyaIdentityConnector) generateCacheKey(operation string, parts ...st
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*KenyaIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (kc *KenyaIdentityConnector) GetMetrics() map[string]interface{} {

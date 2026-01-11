@@ -70,7 +70,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 	// Initialize token store based on AGENTAUTH_TOKEN_STORE environment variable
 	tokenStoreType := os.Getenv("AGENTAUTH_TOKEN_STORE")
 	if tokenStoreType == "" {
-		tokenStoreType = "memory" // default
+		tokenStoreType = memoryProvider // default
 	}
 
 	var tokenStore agentauth.ExtendedTokenStore
@@ -79,7 +79,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 		// Build PostgreSQL DSN from environment variables
 		host := os.Getenv("DB_HOST")
 		if host == "" {
-			host = "localhost"
+			host = defaultHost
 		}
 		port := os.Getenv("DB_PORT")
 		if port == "" {
@@ -113,7 +113,7 @@ func InitAAP001FromEnv() (*agentauth.AAP001Components, agentauth.ExtendedTokenSt
 		tokenStore = pgStore
 		fmt.Fprintf(os.Stderr, "[AAP001] Using PostgreSQL token store (host=%s, db=%s)\n", host, dbname)
 
-	case "memory":
+	case memoryProvider:
 		tokenStore = agentauth.NewMemoryExtendedTokenStore()
 		fmt.Fprintf(os.Stderr, "[AAP001] Using in-memory token store\n")
 
@@ -267,7 +267,7 @@ func initializeAgentAuthPlus(components *agentauth.AAP001Components) (map[string
 	// Build PostgreSQL DSN from environment variables
 	host := os.Getenv("DB_HOST")
 	if host == "" {
-		host = "localhost"
+		host = defaultHost
 	}
 	port := os.Getenv("DB_PORT")
 	if port == "" {

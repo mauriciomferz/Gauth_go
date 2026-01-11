@@ -1,4 +1,4 @@
-package capability_anchor
+package capability_anchor //nolint:stylecheck
 
 import (
 	"context"

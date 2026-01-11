@@ -545,7 +545,10 @@ func ExtractJurisdictionFromClaims(claims map[string]interface{}) compliance.Jur
 			return compliance.JurisdictionUS
 		}
 		// Support multiple UK identifiers ("UK", "Britain", "United Kingdom")
-		if strings.Contains(locationUpper, "UK") || strings.Contains(locationUpper, "BRITAIN") || strings.Contains(locationUpper, "UNITED KINGDOM") {
+		ukMatch := strings.Contains(locationUpper, "UK") ||
+			strings.Contains(locationUpper, "BRITAIN") ||
+			strings.Contains(locationUpper, "UNITED KINGDOM")
+		if ukMatch {
 			return compliance.JurisdictionUK
 		}
 		if strings.Contains(locationUpper, "CA") || strings.Contains(locationUpper, "CANADA") {

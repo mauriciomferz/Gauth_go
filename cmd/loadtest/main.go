@@ -72,7 +72,7 @@ func main() {
 			if err != nil {
 				return nil, err
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			if _, err := io.Copy(io.Discard, resp.Body); err != nil { // Ensure body is read
 				return nil, fmt.Errorf("read body failed: %w", err)
@@ -93,6 +93,8 @@ func main() {
 
 	// Handle graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
+	exitCode := 0
+	defer func() { os.Exit(exitCode) }()
 	defer cancel()
 
 	stopCh := make(chan os.Signal, 1)
@@ -124,14 +126,19 @@ func main() {
 	case "burst":
 		_, err = suite.RunBurstTrafficTest(ctx)
 	default:
-		log.Fatalf("Unknown scenario: %s", *scenario)
+		exitCode = 2
+		log.Printf("Unknown scenario: %s", *scenario)
+		return
 	}
 
 	if err != nil {
 		if ctx.Err() == context.Canceled {
 			log.Println("Test cancelled.")
+			return
 		} else {
-			log.Fatalf("Test failed: %v", err)
+			exitCode = 1
+			log.Printf("Test failed: %v", err)
+			return
 		}
 	}
 

@@ -17,14 +17,17 @@ func TestExternalAnchorMetricsForcedFailure(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MIN_MS", "5")
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_MAX_MS", "10")
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAIL_PROB", "0.0") // eliminate probabilistic failures; rely purely on forced path
-	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "2")     // allow some retries though success expected after forced failures consumed
+	// allow some retries though success expected after forced failures consumed
+	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRIES", "2")
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RETRY_BASE_MS", "10")
 	// Deterministic seed to remove randomness from latency only; probability zero.
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED", "1700011")
 	// Force exactly one initial failure.
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS", "1")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem: "aap001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{
+		Namespace: "agentauth", Subsystem: "aap001", Registry: reg,
+	})
 	srv := NewBetaServerWithMetrics(":0", pm)
 	t.Cleanup(func() { srv.Shutdown() })
 	// Wait for initial attempt & possible retry.

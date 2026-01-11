@@ -1,7 +1,6 @@
 package agentauth_aap_001
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -12,10 +11,8 @@ import (
 func TestSubDelegationDepth(t *testing.T) {
 	// Use temporary BoltDB path for persistence testing
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
-	os.Setenv("AGENTAUTH_MAX_DELEGATION_DEPTH", "3") // cap depth
-	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
-	defer os.Unsetenv("AGENTAUTH_MAX_DELEGATION_DEPTH")
+	t.Setenv("AGENTAUTH_PERSIST_PATH", path)
+	t.Setenv("AGENTAUTH_MAX_DELEGATION_DEPTH", "3") // cap depth
 
 	// Provide a non-nil audit logger
 	memLogger := audit.NewMemoryLogger(nil)

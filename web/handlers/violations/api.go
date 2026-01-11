@@ -108,7 +108,17 @@ func (a *API) apiViolationMetricsPrometheus(c *gin.Context) {
 	var out string
 
 	// Validation total counters
-	categories := []string{"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch", "replay_detected", "audience_mismatch", "missing_claim", "unknown", "capability_denied"}
+	categories := []string{
+		"sig_invalid",
+		"expired",
+		"not_yet_valid",
+		"issuer_mismatch",
+		"replay_detected",
+		"audience_mismatch",
+		"missing_claim",
+		"unknown",
+		"capability_denied",
+	}
 	var total uint64
 	for _, cat := range categories {
 		total += counters[cat]

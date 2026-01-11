@@ -109,7 +109,7 @@ func (p *RFC3161Provider) Notarize(hash string) (Receipt, error) {
 		}
 		return r, fmt.Errorf("%w: %v", ErrTSARequestFailed, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Read response body (store for potential future parsing)
 	respBody, err := io.ReadAll(resp.Body)

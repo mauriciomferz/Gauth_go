@@ -25,8 +25,8 @@ func TestRotationSummaryEndpointAnchoring(t *testing.T) {
 	t.Setenv("AGENTAUTH_ROTATIONS_SIGN", "1")
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	// Ensure isolation from previous tests that may have mutated global registry or multisig env.
-	os.Unsetenv("AGENTAUTH_ROTATIONS_MULTISIG")
-	os.Unsetenv("AGENTAUTH_ROTATIONS_THRESHOLD")
+	_ = os.Unsetenv("AGENTAUTH_ROTATIONS_MULTISIG")
+	_ = os.Unsetenv("AGENTAUTH_ROTATIONS_THRESHOLD")
 	m, _ := cryptoInt.NewManager(24 * time.Hour)
 	// Initialize server
 	srv := NewBetaServer("0", WithKeyProvider(m))

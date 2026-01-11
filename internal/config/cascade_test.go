@@ -114,20 +114,13 @@ func TestLoadCascadeConfigFromEnv(t *testing.T) {
 				"AGENTAUTH_CASCADE_BATCH_SIZE",
 			}
 			for _, key := range clearEnv {
-				os.Unsetenv(key)
+				_ = os.Unsetenv(key)
 			}
 
 			// Set test environment
 			for key, value := range tt.envVars {
-				os.Setenv(key, value)
+				t.Setenv(key, value)
 			}
-
-			// Cleanup after test
-			t.Cleanup(func() {
-				for _, key := range clearEnv {
-					os.Unsetenv(key)
-				}
-			})
 
 			config := LoadCascadeConfigFromEnv()
 

@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-// GapItemsCSV returns a CSV string of all gap items: Section,ID,Requirement,Status,Priority,Gap,Evidence (pipe-separated evidence locations)
+// GapItemsCSV returns a CSV string of all gap items: Section,ID,Requirement,Status,Priority,Gap,Evidence.
+// Evidence contains pipe-separated evidence locations.
 func (r Report) GapItemsCSV() string {
 	var sb strings.Builder
 	w := csv.NewWriter(&sb)

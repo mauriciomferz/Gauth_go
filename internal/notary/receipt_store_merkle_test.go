@@ -1,21 +1,21 @@
 package notary
 
-import (
-	"os"
-	"testing"
-)
+import "testing"
 
 // TestMerkleRootFeatureFlag verifies that MerkleRoot is populated only when AGENTAUTH_NOTARY_MERKLE_ENABLED=1
 // and that root changes deterministically with appended entries.
 func TestMerkleRootFeatureFlag(t *testing.T) {
 	path := t.TempDir() + "/receipts.json"
 	// Disabled case
-	os.Unsetenv("AGENTAUTH_NOTARY_MERKLE_ENABLED")
+	t.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "")
 	rs := NewReceiptStore(path)
 	if err := rs.Load(); err != nil {
 		t.Fatalf("load failed: %v", err)
 	}
-	r1 := Receipt{Hash: "sha256:aaa", Timestamp: "2025-10-20T00:00:00Z", Provider: "memory", Version: 1, Success: true, LatencySeconds: 0}
+	r1 := Receipt{
+		Hash: "sha256:aaa", Timestamp: "2025-10-20T00:00:00Z",
+		Provider: "memory", Version: 1, Success: true, LatencySeconds: 0,
+	}
 	sr1, err := rs.Append(r1)
 	if err != nil {
 		t.Fatalf("append1 failed: %v", err)
@@ -25,8 +25,11 @@ func TestMerkleRootFeatureFlag(t *testing.T) {
 	}
 
 	// Enabled case
-	os.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
-	r2 := Receipt{Hash: "sha256:bbb", Timestamp: "2025-10-20T00:00:01Z", Provider: "memory", Version: 1, Success: true, LatencySeconds: 0}
+	t.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
+	r2 := Receipt{
+		Hash: "sha256:bbb", Timestamp: "2025-10-20T00:00:01Z",
+		Provider: "memory", Version: 1, Success: true, LatencySeconds: 0,
+	}
 	sr2, err := rs.Append(r2)
 	if err != nil {
 		t.Fatalf("append2 failed: %v", err)
@@ -39,7 +42,10 @@ func TestMerkleRootFeatureFlag(t *testing.T) {
 	root2 := sr2.MerkleRoot
 
 	// Add third entry; root must change
-	r3 := Receipt{Hash: "sha256:ccc", Timestamp: "2025-10-20T00:00:02Z", Provider: "memory", Version: 1, Success: true, LatencySeconds: 0}
+	r3 := Receipt{
+		Hash: "sha256:ccc", Timestamp: "2025-10-20T00:00:02Z",
+		Provider: "memory", Version: 1, Success: true, LatencySeconds: 0,
+	}
 	sr3, err := rs.Append(r3)
 	if err != nil {
 		t.Fatalf("append3 failed: %v", err)

@@ -204,7 +204,10 @@ func NewFranceIdentityConnector(config *FranceConnectorConfig) (*FranceIdentityC
 }
 
 // AuthenticateFranceConnect authenticates using FranceConnect (eIDAS)
-func (fc *FranceIdentityConnector) AuthenticateFranceConnect(ctx context.Context, req *FranceConnectAuthRequest) (*FranceConnectAuthResponse, error) {
+func (fc *FranceIdentityConnector) AuthenticateFranceConnect(
+	ctx context.Context,
+	req *FranceConnectAuthRequest,
+) (*FranceConnectAuthResponse, error) {
 	// Validate request
 	if err := fc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -253,7 +256,10 @@ func (fc *FranceIdentityConnector) AuthenticateFranceConnect(ctx context.Context
 // - DDD: Commune code
 // - NNN: Registration number
 // - KK: Control key (97 - (rest of number mod 97))
-func (fc *FranceIdentityConnector) ValidateINSEENumber(ctx context.Context, req *INSEENumberRequest) (*INSEENumberResponse, error) {
+func (fc *FranceIdentityConnector) ValidateINSEENumber(
+	ctx context.Context,
+	req *INSEENumberRequest,
+) (*INSEENumberResponse, error) {
 	// Validate request
 	if err := fc.validator.Struct(req); err != nil {
 		return &INSEENumberResponse{Valid: false, Error: err.Error()}, nil
@@ -355,7 +361,10 @@ func (fc *FranceIdentityConnector) VerifyCNI(ctx context.Context, req *CNIVerifi
 }
 
 // VerifyFrenchPassport verifies French passport
-func (fc *FranceIdentityConnector) VerifyFrenchPassport(ctx context.Context, req *FrenchPassportRequest) (*FrenchPassportResponse, error) {
+func (fc *FranceIdentityConnector) VerifyFrenchPassport(
+	ctx context.Context,
+	req *FrenchPassportRequest,
+) (*FrenchPassportResponse, error) {
 	// Validate request
 	if err := fc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -452,6 +461,8 @@ func (fc *FranceIdentityConnector) generateCacheKey(operation string, parts ...s
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*FranceIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (fc *FranceIdentityConnector) GetMetrics() map[string]interface{} {

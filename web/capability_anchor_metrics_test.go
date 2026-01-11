@@ -19,7 +19,9 @@ func TestCapabilityAnchorMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	anchorFile.Close()
+	if err := anchorFile.Close(); err != nil {
+		t.Fatalf("close anchor file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	// Interval 1m ensures first load emits then second reload is skipped (throttled).
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
@@ -42,8 +44,10 @@ func TestCapabilityAnchorMetrics(t *testing.T) {
 	if !ok {
 		t.Fatalf("metrics collector not memory type")
 	}
-	// Reflect emitted/skipped counters using unexported fields through accessor pattern: not available yet, so approximate via anchorAttempts vs emitted/skipped fields if exported.
-	// Since memory.go does not yet expose accessors for new counters, we rely on unsafe reflection only if necessary. Prefer adding simple exported accessors if test fails.
+	// Reflect emitted/skipped counters using unexported fields through accessor pattern:
+	// not available yet, so approximate via anchorAttempts vs emitted/skipped fields if exported.
+	// Since memory.go does not yet expose accessors for new counters, we rely on unsafe
+	// reflection only if necessary. Prefer adding simple exported accessors if test fails.
 	// For minimal intrusion, assert at least one emitted and one skipped by reading file timestamps & size heuristics.
 	// Assertions: Expect at least 1 emission and at least 1 skip.
 	// Metrics are updated asynchronously in a goroutine triggered by OnReload.

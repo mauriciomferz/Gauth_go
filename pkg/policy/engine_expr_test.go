@@ -49,7 +49,19 @@ func TestPolicyEvaluateWithNotAndParens(t *testing.T) {
 		t.Fatalf("add bundle: %v", err)
 	}
 	eng := NewChainEngine(store)
-	dec, err := eng.Evaluate(context.Background(), EvalRequest{Subject: "alice@example.com", Action: "read", Resource: "report:finance", Attrs: map[string]string{"role": "finance", "amount": "150"}, Now: time.Now()})
+	dec, err := eng.Evaluate(
+		ctx,
+		EvalRequest{
+			Subject:  "alice@example.com",
+			Action:   "read",
+			Resource: "report:finance",
+			Attrs: map[string]string{
+				"role":   "finance",
+				"amount": "150",
+			},
+			Now: time.Now(),
+		},
+	)
 	if err != nil {
 		t.Fatalf("eval: %v", err)
 	}
@@ -57,7 +69,19 @@ func TestPolicyEvaluateWithNotAndParens(t *testing.T) {
 		t.Fatalf("expected allow, got decision %#v", dec)
 	}
 	// Fails when amount 600
-	dec2, err := eng.Evaluate(context.Background(), EvalRequest{Subject: "alice@example.com", Action: "read", Resource: "report:finance", Attrs: map[string]string{"role": "finance", "amount": "600"}, Now: time.Now()})
+	dec2, err := eng.Evaluate(
+		ctx,
+		EvalRequest{
+			Subject:  "alice@example.com",
+			Action:   "read",
+			Resource: "report:finance",
+			Attrs: map[string]string{
+				"role":   "finance",
+				"amount": "600",
+			},
+			Now: time.Now(),
+		},
+	)
 	if err != nil {
 		t.Fatalf("eval2: %v", err)
 	}

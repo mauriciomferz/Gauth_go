@@ -30,8 +30,11 @@ func TestCompositeAuthorizationHTTP(t *testing.T) {
 	vu := now.Add(2 * time.Hour).Format(time.RFC3339)
 	exp := now.Add(4 * time.Hour).Format(time.RFC3339)
 	payload := map[string]any{
-		"ai_system_id":           "ai_v1",
-		"authorization_grant":    map[string]any{"type": "general", "scope": []string{"financial_operations"}, "valid_from": vf, "valid_until": vu, "revocable": true},
+		"ai_system_id": "ai_v1",
+		"authorization_grant": map[string]any{
+			"type": "general", "scope": []string{"financial_operations"},
+			"valid_from": vf, "valid_until": vu, "revocable": true,
+		},
 		"powers_granted":         map[string]any{"basic_powers": []string{"financial_operations"}},
 		"decision_authority":     map[string]any{"autonomous_decisions": []string{"routine_invoice_approval"}},
 		"transaction_rights":     map[string]any{"allowed_transaction_types": []string{"vendor_payments"}},

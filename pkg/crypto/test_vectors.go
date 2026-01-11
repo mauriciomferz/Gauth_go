@@ -41,7 +41,14 @@ func GeneratePhase1Vectors() ([]TestVector, error) {
 	}
 	edMsg := []byte("tv-ed25519-1")
 	edSig := ed25519.Sign(edPriv, edMsg)
-	vectors = append(vectors, TestVector{Alg: "Ed25519", Message: edMsg, Private: edPriv, Public: edPub, Signature: edSig, Valid: true})
+	vectors = append(vectors, TestVector{
+		Alg:       "Ed25519",
+		Message:   edMsg,
+		Private:   edPriv,
+		Public:    edPub,
+		Signature: edSig,
+		Valid:     true,
+	})
 	// Negative: mutate one byte
 	badEd := append([]byte(nil), edSig...)
 	badEd[0] ^= 0xFF
@@ -67,17 +74,38 @@ func GeneratePhase1Vectors() ([]TestVector, error) {
 	pubBytes[0] = 0x04
 	ecdsaPriv.PublicKey.X.FillBytes(pubBytes[1 : 1+byteLen])
 	ecdsaPriv.PublicKey.Y.FillBytes(pubBytes[1+byteLen:])
-	vectors = append(vectors, TestVector{Alg: "ECDSA-P256", Curve: "P-256", Message: eMsg, Public: pubBytes, Signature: derLow, Valid: true})
+	vectors = append(vectors, TestVector{
+		Alg:       "ECDSA-P256",
+		Curve:     "P-256",
+		Message:   eMsg,
+		Public:    pubBytes,
+		Signature: derLow,
+		Valid:     true,
+	})
 	// High-S variant (malleable) - should be invalid
 	highS := new(big.Int).Sub(ecdsaPriv.Params().N, lowS)
 	half := new(big.Int).Rsh(ecdsaPriv.Params().N, 1)
 	if highS.Cmp(half) == 1 { // Only append if truly high
 		derHigh := encodeDERSignature(r, highS)
-		vectors = append(vectors, TestVector{Alg: "ECDSA-P256", Curve: "P-256", Message: eMsg, Public: pubBytes, Signature: derHigh, Valid: false})
+		vectors = append(vectors, TestVector{
+			Alg:       "ECDSA-P256",
+			Curve:     "P-256",
+			Message:   eMsg,
+			Public:    pubBytes,
+			Signature: derHigh,
+			Valid:     false,
+		})
 	}
 	// Truncated signature
 	truncated := derLow[:len(derLow)/2]
-	vectors = append(vectors, TestVector{Alg: "ECDSA-P256", Curve: "P-256", Message: eMsg, Public: pubBytes, Signature: truncated, Valid: false})
+	vectors = append(vectors, TestVector{
+		Alg:       "ECDSA-P256",
+		Curve:     "P-256",
+		Message:   eMsg,
+		Public:    pubBytes,
+		Signature: truncated,
+		Valid:     false,
+	})
 
 	// --- BLS12-381 ---
 	blsKey, err := GenerateBLSKey()

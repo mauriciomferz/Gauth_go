@@ -106,7 +106,9 @@ func TestGranularRevocation_MultiScopeToken(t *testing.T) {
 	tokMulti := issueTokenForScope(svc, poa, []string{"a", "b"})
 
 	// 3. Revoke one of them
-	svc.RevokeAuthorityCtx(context.Background(), poa.ID, grantor, []string{"a"})
+	if err := svc.RevokeAuthorityCtx(context.Background(), poa.ID, grantor, []string{"a"}); err != nil {
+		t.Fatalf("revoke failed: %v", err)
+	}
 
 	// 4. Verify whole token is rejected
 	ctx := context.WithValue(context.Background(), ctxKeySubject, grantee)

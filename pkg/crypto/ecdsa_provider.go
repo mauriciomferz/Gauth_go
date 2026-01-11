@@ -176,16 +176,21 @@ func (p *InMemoryECDSAProvider) ListKeys() ([]KeyMetadata, error) {
 }
 
 // Register ECDSA algorithm with registry on package init.
+//
+//nolint:gochecknoinits
 func init() {
-	RegisterAlgorithm(Algorithm{Name: AlgoECDSAP256, Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
-		if kp == nil {
-			return errors.New("ecdsa-p256: missing key provider")
-		}
-		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
-		if err != nil {
-			return err
-		}
-		// Delegates to provider's VerifyWith (which performs hash + DER decode + low-S enforcement)
-		return kp.VerifyWith(canonical, sigBytes, keyID)
-	}})
+	RegisterAlgorithm(Algorithm{
+		Name: AlgoECDSAP256,
+		Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
+			if kp == nil {
+				return errors.New("ecdsa-p256: missing key provider")
+			}
+			sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
+			if err != nil {
+				return err
+			}
+			// Delegates to provider's VerifyWith (which performs hash + DER decode + low-S enforcement)
+			return kp.VerifyWith(canonical, sigBytes, keyID)
+		},
+	})
 }

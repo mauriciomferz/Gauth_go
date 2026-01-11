@@ -166,7 +166,10 @@ func NewDeviceAuthorizationService(config *DeviceAuthorizationConfig) *DeviceAut
 }
 
 // AuthorizeDevice initiates device authorization flow per RFC 8628 Section 3.1-3.2.
-func (s *DeviceAuthorizationService) AuthorizeDevice(ctx context.Context, req *DeviceAuthorizationRequest) (*DeviceAuthorizationResponse, error) {
+func (s *DeviceAuthorizationService) AuthorizeDevice(
+	ctx context.Context,
+	req *DeviceAuthorizationRequest,
+) (*DeviceAuthorizationResponse, error) {
 	if err := s.validateAuthorizationRequest(req); err != nil {
 		return nil, err
 	}

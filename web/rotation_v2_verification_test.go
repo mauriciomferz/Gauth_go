@@ -74,7 +74,7 @@ func TestRotationV2ThresholdUnsatisfied(t *testing.T) {
 	t.Setenv("AGENTAUTH_ROTATIONS_V2_SIGN", "1")
 	t.Setenv("AGENTAUTH_ROTATIONS_V2_FORCE_SIGN", "1")
 	// Ensure clean slate then install only k1
-	os.Unsetenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_ED25519_KEYS", "")
 	installTestKey(t, "k1") // single key -> verified weight 2 < threshold 3
 	srv := NewBetaServerWithMetrics("", nil)
 	t.Cleanup(func() { srv.Shutdown() })
@@ -103,6 +103,6 @@ func writeTempFile(t *testing.T, content string) string {
 	if _, err := f.WriteString(content); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	f.Close()
+	_ = f.Close()
 	return f.Name()
 }

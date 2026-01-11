@@ -318,12 +318,16 @@ func (s *CachedCapabilityService) CreateAssessment(ctx context.Context, assessme
 }
 
 // CheckCapabilityMatch delegates to underlying service (no caching)
-func (s *CachedCapabilityService) CheckCapabilityMatch(ctx context.Context, agentID string, requirements *CapabilityRequirements) (bool, []string, error) {
+func (s *CachedCapabilityService) CheckCapabilityMatch(
+	ctx context.Context, agentID string, requirements *CapabilityRequirements,
+) (bool, []string, error) {
 	return s.service.CheckCapabilityMatch(ctx, agentID, requirements)
 }
 
 // GetExpiringAssessments delegates to underlying service (no caching)
-func (s *CachedCapabilityService) GetExpiringAssessments(ctx context.Context, daysUntilExpiry int) ([]*AICapabilityAssessment, error) {
+func (s *CachedCapabilityService) GetExpiringAssessments(
+	ctx context.Context, daysUntilExpiry int,
+) ([]*AICapabilityAssessment, error) {
 	return s.service.GetExpiringAssessments(ctx, daysUntilExpiry)
 }
 
@@ -399,12 +403,16 @@ func (s *CachedDelegationService) RevokeDelegation(ctx context.Context, delegati
 }
 
 // ValidateDelegation delegates to underlying service (no caching)
-func (s *CachedDelegationService) ValidateDelegation(ctx context.Context, sourceAgent, targetAgent string, scope []string, depth int) error {
+func (s *CachedDelegationService) ValidateDelegation(
+	ctx context.Context, sourceAgent, targetAgent string, scope []string, depth int,
+) error {
 	return s.service.ValidateDelegation(ctx, sourceAgent, targetAgent, scope, depth)
 }
 
 // CheckMaxDepthExceeded delegates to underlying service (no caching)
-func (s *CachedDelegationService) CheckMaxDepthExceeded(ctx context.Context, sourceAgentID string, currentDepth int) (bool, error) {
+func (s *CachedDelegationService) CheckMaxDepthExceeded(
+	ctx context.Context, sourceAgentID string, currentDepth int,
+) (bool, error) {
 	return s.service.CheckMaxDepthExceeded(ctx, sourceAgentID, currentDepth)
 }
 

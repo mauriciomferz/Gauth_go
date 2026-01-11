@@ -37,7 +37,9 @@ func (s *BetaServer) Run() error {
 		WriteTimeout:      30 * time.Second,
 		ReadHeaderTimeout: 10 * time.Second,
 	}
-	fmt.Printf("[startup] BetaServer starting PID=%d on http://localhost%s at %s\n", os.Getpid(), addr, time.Now().Format(time.RFC3339)) // Signal handling for graceful shutdown
+	// Signal handling for graceful shutdown
+	fmt.Printf("[startup] BetaServer starting PID=%d on http://localhost%s at %s\n",
+		os.Getpid(), addr, time.Now().Format(time.RFC3339))
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
@@ -111,11 +113,16 @@ func (s *BetaServer) Shutdown() {
 	time.Sleep(50 * time.Millisecond)
 	// Perform final persistence saves if paths configured (best-effort)
 	if s.violationHandler != nil {
-		s.violationHandler.Save()
+		if saveErr := s.violationHandler.Save(); saveErr != nil {
+			fmt.Fprintf(os.Stderr, "[shutdown] violation persistence failed: %v\n", saveErr)
+		}
 	}
 	if s.semanticHandler != nil {
-		s.semanticHandler.Save()
+		if saveErr := s.semanticHandler.Save(); saveErr != nil {
+			fmt.Fprintf(os.Stderr, "[shutdown] semantic persistence failed: %v\n", saveErr)
+		}
 	}
+
 	// Flush metrics persistence if enabled
 	if mm, ok := s.metrics.(*metrics.Memory); ok {
 		if mErr := mm.Save(); mErr != nil {

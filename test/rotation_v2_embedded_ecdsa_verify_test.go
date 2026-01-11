@@ -9,7 +9,6 @@ import (
 	"encoding/asn1"
 	"encoding/base64"
 	"math/big"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -21,8 +20,7 @@ import (
 //
 //nolint:gocyclo // ECDSA verification test with multiple cases
 func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
-	os.Setenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
-	defer os.Unsetenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
 	// We'll inject ECDSA key via AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS env.
 	cfg := &notary.WeightsConfig{SchemaVersion: 1, ActiveKeySetID: "embed-ec-set", ThresholdWeight: 9,
 		Signers: []struct {
@@ -54,7 +52,7 @@ func TestRotationV2EmbeddedECDSAPublicKeyVerification(t *testing.T) {
 	if encoded == "" {
 		t.Fatalf("helper returned empty encoding")
 	}
-	os.Setenv("AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS", "ecA:"+encoded)
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_ECDSA_KEYS", "ecA:"+encoded)
 	// Rebuild artifact to trigger embedding paths.
 	art2, err := notary.BuildArtifactFromConfig(cfg, "", time.Now(), nil)
 	if err != nil {

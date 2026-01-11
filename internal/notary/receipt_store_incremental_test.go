@@ -8,7 +8,14 @@ import (
 )
 
 func makeReceipt(i int) Receipt {
-	return Receipt{Hash: hashString(i), Timestamp: time.Now().UTC().Format(time.RFC3339Nano), Provider: "memory", Version: 1, Success: true, LatencySeconds: 0.0001}
+	return Receipt{
+		Hash:           hashString(i),
+		Timestamp:      time.Now().UTC().Format(time.RFC3339Nano),
+		Provider:       "memory",
+		Version:        1,
+		Success:        true,
+		LatencySeconds: 0.0001,
+	}
 }
 
 func hashString(i int) string { return string(rune('a'+(i%26))) + "_hash" }

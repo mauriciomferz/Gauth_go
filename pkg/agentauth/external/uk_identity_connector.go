@@ -407,7 +407,8 @@ func NewUKIdentityConnector(config *UKIdentityConnectorConfig) (*UKIdentityConne
 	}
 
 	// Register custom validators
-	_ = connector.validator.RegisterValidation("uk_postcode", validateUKPostcode) // Registration failures are acceptable; fallback to standard validation
+	// Registration failures are acceptable; fallback to standard validation.
+	_ = connector.validator.RegisterValidation("uk_postcode", validateUKPostcode)
 	_ = connector.validator.RegisterValidation("uk_driving_licence", validateUKDrivingLicence)
 	_ = connector.validator.RegisterValidation("uk_passport", validateUKPassport)
 
@@ -415,7 +416,10 @@ func NewUKIdentityConnector(config *UKIdentityConnectorConfig) (*UKIdentityConne
 }
 
 // VerifyPassport verifies a UK passport
-func (c *UKIdentityConnector) VerifyPassport(ctx context.Context, req *UKPassportVerificationRequest) (*UKIdentityVerificationResult, error) {
+func (c *UKIdentityConnector) VerifyPassport(
+	ctx context.Context,
+	req *UKPassportVerificationRequest,
+) (*UKIdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Validate request
@@ -455,7 +459,10 @@ func (c *UKIdentityConnector) VerifyPassport(ctx context.Context, req *UKPasspor
 }
 
 // VerifyDrivingLicence verifies a UK driving licence
-func (c *UKIdentityConnector) VerifyDrivingLicence(ctx context.Context, req *UKDrivingLicenceRequest) (*UKIdentityVerificationResult, error) {
+func (c *UKIdentityConnector) VerifyDrivingLicence(
+	ctx context.Context,
+	req *UKDrivingLicenceRequest,
+) (*UKIdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Validate request
@@ -489,7 +496,10 @@ func (c *UKIdentityConnector) VerifyDrivingLicence(ctx context.Context, req *UKD
 }
 
 // VerifyGovUKIdentity performs GOV.UK Verify authentication
-func (c *UKIdentityConnector) VerifyGovUKIdentity(ctx context.Context, req *UKGovVerifyRequest) (*UKIdentityVerificationResult, error) {
+func (c *UKIdentityConnector) VerifyGovUKIdentity(
+	ctx context.Context,
+	req *UKGovVerifyRequest,
+) (*UKIdentityVerificationResult, error) {
 	if !c.config.VerifyEnabled {
 		return nil, errors.New("GOV.UK Verify is not enabled")
 	}
@@ -557,7 +567,10 @@ func (c *UKIdentityConnector) RequestDBSCheck(ctx context.Context, req *UKDBSChe
 // Private Methods
 // =============================================================================
 
-func (c *UKIdentityConnector) performPassportVerification(ctx context.Context, req *UKPassportVerificationRequest) (*UKIdentityVerificationResult, error) {
+func (c *UKIdentityConnector) performPassportVerification(
+	ctx context.Context,
+	req *UKPassportVerificationRequest,
+) (*UKIdentityVerificationResult, error) {
 	result := &UKIdentityVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
@@ -607,7 +620,10 @@ func (c *UKIdentityConnector) performPassportVerification(ctx context.Context, r
 	return result, nil
 }
 
-func (c *UKIdentityConnector) performDrivingLicenceVerification(ctx context.Context, req *UKDrivingLicenceRequest) (*UKIdentityVerificationResult, error) {
+func (c *UKIdentityConnector) performDrivingLicenceVerification(
+	ctx context.Context,
+	req *UKDrivingLicenceRequest,
+) (*UKIdentityVerificationResult, error) {
 	result := &UKIdentityVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
@@ -658,7 +674,10 @@ func (c *UKIdentityConnector) performDrivingLicenceVerification(ctx context.Cont
 	return result, nil
 }
 
-func (c *UKIdentityConnector) performGovVerify(ctx context.Context, req *UKGovVerifyRequest) (*UKIdentityVerificationResult, error) {
+func (c *UKIdentityConnector) performGovVerify(
+	ctx context.Context,
+	req *UKGovVerifyRequest,
+) (*UKIdentityVerificationResult, error) {
 	// This would implement SAML 2.0 authentication with GOV.UK Verify Hub
 	// Placeholder implementation
 	return &UKIdentityVerificationResult{
@@ -670,7 +689,10 @@ func (c *UKIdentityConnector) performGovVerify(ctx context.Context, req *UKGovVe
 	}, nil
 }
 
-func (c *UKIdentityConnector) performRightToWorkCheck(ctx context.Context, req *UKRightToWorkRequest) (*UKRightToWorkResult, error) {
+func (c *UKIdentityConnector) performRightToWorkCheck(
+	ctx context.Context,
+	req *UKRightToWorkRequest,
+) (*UKRightToWorkResult, error) {
 	// This would integrate with Home Office Right to Work checking service
 	// Placeholder implementation
 	return &UKRightToWorkResult{

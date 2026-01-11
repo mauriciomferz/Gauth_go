@@ -44,7 +44,7 @@ func TestHardenedDiscoveryFields(t *testing.T) {
 
 	var payload map[string]any
 	if err := json.Unmarshal(wDisc.Body.Bytes(), &payload); err != nil {
-		t.Fatalf("json decode failed: %v", err)
+		t.Fatalf("unmarshal discovery payload: %v", err)
 	}
 
 	if payload["jwks_signature"] != sig {
@@ -76,7 +76,9 @@ func TestDiscoveryDeprecationSchedule(t *testing.T) {
 	srv.router.ServeHTTP(wDisc, reqDisc)
 
 	var payload map[string]any
-	json.Unmarshal(wDisc.Body.Bytes(), &payload)
+	if err := json.Unmarshal(wDisc.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("unmarshal discovery response: %v", err)
+	}
 
 	sched, ok := payload["deprecation_schedule"].(map[string]any)
 	if !ok {

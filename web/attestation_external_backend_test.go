@@ -22,7 +22,7 @@ func TestAttestationExternalRedisBackend(t *testing.T) {
 	if err != nil {
 		t.Skipf("redis unavailable: %v", err)
 	}
-	defer backend.Close()
+	defer func() { _ = backend.Close() }()
 	nonce := fmt.Sprintf("redis-nonce-test-%d", time.Now().UnixNano())
 	seen, _ := backend.Seen(nonce)
 	if seen {

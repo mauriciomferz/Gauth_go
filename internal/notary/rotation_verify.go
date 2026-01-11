@@ -54,9 +54,17 @@ type RotationVerificationSummary struct {
 // For continuity, we check that descriptor[i].PrevRotationHash == prevHashes[i-1] (if i>0 and previous hash non-empty).
 // Signatures use provided old/new public keys per descriptor; caller supplies them via parallel slices oldPubs/newPubs.
 // Length mismatch returns empty summary.
-func VerifyAllRotations(descriptors []*KeyRotationDescriptor, receiptHashes []string, oldPubs []ed25519.PublicKey, newPubs []ed25519.PublicKey) RotationVerificationSummary {
+func VerifyAllRotations(
+	descriptors []*KeyRotationDescriptor,
+	receiptHashes []string,
+	oldPubs []ed25519.PublicKey,
+	newPubs []ed25519.PublicKey,
+) RotationVerificationSummary {
 	summary := RotationVerificationSummary{}
-	if len(descriptors) == 0 || len(descriptors) != len(receiptHashes) || len(descriptors) != len(oldPubs) || len(descriptors) != len(newPubs) {
+	if len(descriptors) == 0 ||
+		len(descriptors) != len(receiptHashes) ||
+		len(descriptors) != len(oldPubs) ||
+		len(descriptors) != len(newPubs) {
 		return summary
 	}
 	summary.Total = len(descriptors)

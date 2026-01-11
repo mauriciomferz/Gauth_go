@@ -185,7 +185,7 @@ func (h *PolicyTemplatesHandler) ListPolicyTemplates(c *gin.Context) {
 		var policyRulesJSON []byte
 		var variablesJSON []byte
 
-		err := rows.Scan(
+		err = rows.Scan(
 			&t.ID, &t.TenantID, &t.Name, &t.Description, &t.Category, &t.Industry,
 			&t.TemplateType, &policyRulesJSON, &variablesJSON, &t.Version, &t.IsLatest,
 			&t.ParentTemplateID, &t.Status, &t.Visibility, &t.IsMarketplaceItem,
@@ -353,14 +353,18 @@ func (h *PolicyTemplatesHandler) UpdatePolicyTemplate(c *gin.Context) {
 
 	// Get current version
 	var currentVersion int
-	err := h.db.QueryRow(ctx, "SELECT version FROM policy_templates WHERE id = $1 AND tenant_id = $2 AND is_latest = true", templateID, tenantID).Scan(&currentVersion)
+	err := h.db.QueryRow(ctx,
+		"SELECT version FROM policy_templates WHERE id = $1 AND tenant_id = $2 AND is_latest = true",
+		templateID, tenantID).Scan(&currentVersion)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Template not found"})
 		return
 	}
 
 	// Mark current version as not latest
-	_, err = h.db.Exec(ctx, "UPDATE policy_templates SET is_latest = false WHERE id = $1 AND version = $2", templateID, currentVersion)
+	_, err = h.db.Exec(ctx,
+		"UPDATE policy_templates SET is_latest = false WHERE id = $1 AND version = $2",
+		templateID, currentVersion)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update version", "details": err.Error()})
 		return

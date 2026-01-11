@@ -17,7 +17,7 @@ func TestSnapshotCLIFailureExitCodes(t *testing.T) {
 	if err := rs.Load(); err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	os.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
+	t.Setenv("AGENTAUTH_NOTARY_MERKLE_ENABLED", "1")
 	// Append two receipts
 	for _, h := range []string{"sha256:a1", "sha256:a2"} {
 		r := Receipt{Hash: h, Timestamp: "2025-10-20T00:00:00Z", Provider: "memory", Version: 1, Success: true}

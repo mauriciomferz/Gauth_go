@@ -26,7 +26,10 @@ func TestRegexCapacityEviction(t *testing.T) {
 			}},
 		})
 		// trigger compile/match
-		_, err := ma.Authorize(context.Background(), Request{Subject: "sub", Resource: "res", Action: "act", Context: map[string]string{"val": string([]byte{'a' + byte(i)})}})
+		_, err := ma.Authorize(context.Background(), Request{
+			Subject: "sub", Resource: "res", Action: "act",
+			Context: map[string]string{"val": string([]byte{'a' + byte(i)})},
+		})
 		if err != nil {
 			t.Fatalf("authorize error: %v", err)
 		}
@@ -56,7 +59,9 @@ func TestRegexTTLEviction(t *testing.T) {
 			Values:   []string{"^x.*$"},
 		}},
 	})
-	_, err := ma.Authorize(context.Background(), Request{Subject: "s", Resource: "r", Action: "a", Context: map[string]string{"val": "xyz"}})
+	_, err := ma.Authorize(context.Background(), Request{
+		Subject: "s", Resource: "r", Action: "a", Context: map[string]string{"val": "xyz"},
+	})
 	if err != nil {
 		t.Fatalf("authorize error: %v", err)
 	}
@@ -74,7 +79,9 @@ func TestRegexTTLEviction(t *testing.T) {
 			Values:   []string{"^y.*$"},
 		}},
 	})
-	_, _ = ma.Authorize(context.Background(), Request{Subject: "s", Resource: "r", Action: "a", Context: map[string]string{"val": "yyy"}})
+	_, _ = ma.Authorize(context.Background(), Request{
+		Subject: "s", Resource: "r", Action: "a", Context: map[string]string{"val": "yyy"},
+	})
 	snap := ma.GetMetricsSnapshot()
 	// TTL should have evicted first pattern; cache size should be 2 or 1 depending on prune ordering
 	if snap.RegexEvictions == 0 {

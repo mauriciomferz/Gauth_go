@@ -10,13 +10,15 @@ import (
 
 func TestSignedTreeHeadPersistence(t *testing.T) {
 	// Ensure multi-sig threshold not set so single signature verification works predictably
-	os.Unsetenv("AGENTAUTH_MULTI_SIG_THRESHOLD")
+	if err := os.Unsetenv("AGENTAUTH_MULTI_SIG_THRESHOLD"); err != nil {
+		t.Fatalf("unsetenv: %v", err)
+	}
 	tmpFile, err := os.CreateTemp("", "sth_persist_*.json")
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
 	defer func() { _ = os.Remove(tmpFile.Name()) }()
-	os.Setenv("AGENTAUTH_STH_PERSIST_PATH", tmpFile.Name())
+	t.Setenv("AGENTAUTH_STH_PERSIST_PATH", tmpFile.Name())
 	km, err := cryptoInt.NewManager(24 * time.Hour)
 	if err != nil {
 		t.Fatalf("manager: %v", err)
@@ -50,8 +52,8 @@ func TestSignedTreeHeadPersistenceMultiSig(t *testing.T) {
 		t.Fatalf("temp file: %v", err)
 	}
 	defer func() { _ = os.Remove(tmpFile.Name()) }()
-	os.Setenv("AGENTAUTH_STH_PERSIST_PATH", tmpFile.Name())
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
+	t.Setenv("AGENTAUTH_STH_PERSIST_PATH", tmpFile.Name())
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
 	km, err := cryptoInt.NewManager(24 * time.Hour)
 	if err != nil {
 		t.Fatalf("manager: %v", err)

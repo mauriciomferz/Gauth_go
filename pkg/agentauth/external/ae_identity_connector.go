@@ -356,6 +356,8 @@ func (uc *UAEIdentityConnector) generateCacheKey(operation string, parts ...stri
 	return hex.EncodeToString(hash[:])
 }
 
+var _ = (*UAEIdentityConnector).generateCacheKey
+
 // GetMetrics returns connector metrics
 func (uc *UAEIdentityConnector) GetMetrics() map[string]interface{} {
 	uc.mu.RLock()

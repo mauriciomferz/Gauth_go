@@ -99,7 +99,7 @@ func (e *RetryingObligationExecutor) Execute(ob Obligation, ctx map[string]inter
 	default:
 		// Queue full, log and drop (non-mandatory)
 		log.Printf("[OBLIGATION] Async retry queue full, dropping obligation: %s", ob.ID)
-		e.inner.PersistAudit(ob, ctx, fmt.Errorf("dropped due to full retry queue: %v", err))
+		_ = e.inner.PersistAudit(ob, ctx, fmt.Errorf("dropped due to full retry queue: %v", err))
 		return nil
 	}
 }
@@ -149,7 +149,7 @@ func (e *RetryingObligationExecutor) processTask(task asyncRetryTask) {
 	if task.attempt >= e.config.MaxRetries {
 		log.Printf("[OBLIGATION] Max async retries reached for %s: %v", task.obligation.ID, err)
 		// Final audit log for failure
-		e.inner.PersistAudit(task.obligation, task.context, err)
+		_ = e.inner.PersistAudit(task.obligation, task.context, err)
 		return
 	}
 

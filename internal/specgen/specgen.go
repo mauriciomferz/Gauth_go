@@ -54,7 +54,9 @@ type CoverageReport struct {
 //nolint:gocyclo // Spec coverage report generation
 func GenerateCoverage(specPath string) (*CoverageReport, error) {
 	// Ensure JWT route inclusion before server creation
-	os.Setenv("AGENTAUTH_USE_JWT_LIB", "1")
+	if err := os.Setenv("AGENTAUTH_USE_JWT_LIB", "1"); err != nil {
+		return nil, fmt.Errorf("set AGENTAUTH_USE_JWT_LIB: %w", err)
+	}
 	bs := webpkg.NewBetaServer("0")
 	// Read spec file
 	data, err := os.ReadFile(specPath)
@@ -259,7 +261,10 @@ func GenerateCoverage(specPath string) (*CoverageReport, error) {
 	// regex to find :param segments
 	colonParamRe := regexp.MustCompile(`/:([A-Za-z0-9_]+)`) // e.g., /foo/:id -> /foo/{id}
 	for _, r := range bs.Routes() {
-		if strings.HasPrefix(r.Path, "/api/") || strings.HasPrefix(r.Path, "/.well-known/") || r.Path == "/openapi.yaml" || r.Path == "/api/v1/openapi" {
+		if strings.HasPrefix(r.Path, "/api/") ||
+			strings.HasPrefix(r.Path, "/.well-known/") ||
+			r.Path == "/openapi.yaml" ||
+			r.Path == "/api/v1/openapi" {
 			norm := colonParamRe.ReplaceAllString(r.Path, "/{$1}")
 			liveFiltered[norm] = struct{}{}
 		}

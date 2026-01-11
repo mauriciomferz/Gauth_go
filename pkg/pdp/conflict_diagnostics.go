@@ -241,11 +241,23 @@ func (cd *ConflictDetector) detectRuleContradictions() []PolicyConflict {
 func (cd *ConflictDetector) generatePermitDenyRecommendation(allowIDs, denyIDs []string) string {
 	switch cd.strategy.Name() {
 	case "deny_overrides":
-		return fmt.Sprintf("Deny-overrides strategy will DENY (policies %s take precedence). Consider: 1) Making deny policies more specific, 2) Removing redundant allow policies, 3) Using expressions to disambiguate", strings.Join(denyIDs, ","))
+		return fmt.Sprintf(
+			"Deny-overrides strategy will DENY (policies %s take precedence). "+
+				"Consider: 1) Making deny policies more specific, 2) Removing redundant allow policies, "+
+				"3) Using expressions to disambiguate",
+			strings.Join(denyIDs, ","),
+		)
 	case "permit_overrides":
-		return fmt.Sprintf("Permit-overrides strategy will ALLOW (policies %s take precedence). Consider: 1) Making allow policies more specific, 2) Removing redundant deny policies, 3) Adding mandatory obligations for logging", strings.Join(allowIDs, ","))
+		return fmt.Sprintf(
+			"Permit-overrides strategy will ALLOW (policies %s take precedence). "+
+				"Consider: 1) Making allow policies more specific, 2) Removing redundant deny policies, "+
+				"3) Adding mandatory obligations for logging",
+			strings.Join(allowIDs, ","),
+		)
 	case "first_applicable":
-		return "First-applicable strategy will use the first matching policy. Consider: 1) Reordering policies by priority, 2) Making policies mutually exclusive, 3) Using explicit ordering metadata"
+		return "First-applicable strategy will use the first matching policy. " +
+			"Consider: 1) Reordering policies by priority, 2) Making policies mutually exclusive, " +
+			"3) Using explicit ordering metadata"
 	default:
 		return "Review combining strategy behavior and adjust policy definitions accordingly"
 	}

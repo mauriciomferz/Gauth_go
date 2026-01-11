@@ -27,6 +27,15 @@ issues:
     - linters: [lll]
       source: ^\\s*//.*$
     
+    # Exclude line length for test files (test data often exceeds 130 chars)
+    - linters: [lll]
+      path: _test\.go
+
+    # Exclude line length for server_clean.go (SQL string literals)
+    - linters: [lll]
+      path: server_clean\.go
+
+    
     # Exclude magic numbers in test files and demo files
     - linters: [mnd]
       path: (_test\\.go|demo/|cmd/)
@@ -60,6 +69,11 @@ issues:
     # Allow test dependencies
     - linters: [depguard]
       path: _test\.go
+
+    # Exclude line length for server_clean.go (SQL string literals)
+    - linters: [lll]
+      path: server_clean\.go
+
       text: github.com/alicebob/miniredis
 
 linters-settings:
@@ -90,6 +104,19 @@ linters-settings:
       - name: unused-parameter
       - name: exported
         arguments: [checkPrivateReceivers, sayRepetitiveInsteadOfStutters]
+
+  # Misspell settings - ignore intentional foreign language words
+  misspell:
+    ignore-words:
+      - Chambre      # French for Chamber (Belgian notary body)
+      - Notario      # Spanish for Notary
+      - identite     # French for identity
+      - Berufskammer # German for Professional Chamber
+      - registro     # Spanish for registry
+      - Conseil      # French for Council
+      - Colegio      # Spanish for College/Association
+      - Kamer        # Dutch for Chamber
+
 
   govet:
     enable:

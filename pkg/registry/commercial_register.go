@@ -15,7 +15,9 @@ type CommercialRegisterService interface {
 	VerifyRegistration(ctx context.Context, req *RegistrationVerificationRequest) (*RegistrationVerificationResult, error)
 
 	// VerifyAuthorizedRepresentative verifies a person's authority to represent an entity
-	VerifyAuthorizedRepresentative(ctx context.Context, req *RepresentativeVerificationRequest) (*RepresentativeVerificationResult, error)
+	VerifyAuthorizedRepresentative(
+		ctx context.Context, req *RepresentativeVerificationRequest,
+	) (*RepresentativeVerificationResult, error)
 
 	// VerifyProkura verifies Prokura (German power of attorney) registration
 	VerifyProkura(ctx context.Context, req *ProkuraVerificationRequest) (*ProkuraVerificationResult, error)
@@ -250,7 +252,9 @@ func (m *MockCommercialRegisterService) seedTestData() {
 }
 
 // VerifyRegistration verifies entity registration
-func (m *MockCommercialRegisterService) VerifyRegistration(ctx context.Context, req *RegistrationVerificationRequest) (*RegistrationVerificationResult, error) {
+func (m *MockCommercialRegisterService) VerifyRegistration(
+	ctx context.Context, req *RegistrationVerificationRequest,
+) (*RegistrationVerificationResult, error) {
 	// Simulate API delay
 	time.Sleep(m.verifyDelay)
 
@@ -282,7 +286,9 @@ func (m *MockCommercialRegisterService) VerifyRegistration(ctx context.Context, 
 }
 
 // VerifyAuthorizedRepresentative verifies representative authority
-func (m *MockCommercialRegisterService) VerifyAuthorizedRepresentative(ctx context.Context, req *RepresentativeVerificationRequest) (*RepresentativeVerificationResult, error) {
+func (m *MockCommercialRegisterService) VerifyAuthorizedRepresentative(
+	ctx context.Context, req *RepresentativeVerificationRequest,
+) (*RepresentativeVerificationResult, error) {
 	time.Sleep(m.verifyDelay)
 
 	key := fmt.Sprintf("%s-%s", req.EntityRegistration, req.Jurisdiction)
@@ -343,7 +349,9 @@ func (m *MockCommercialRegisterService) VerifyAuthorizedRepresentative(ctx conte
 }
 
 // VerifyProkura verifies Prokura registration
-func (m *MockCommercialRegisterService) VerifyProkura(ctx context.Context, req *ProkuraVerificationRequest) (*ProkuraVerificationResult, error) {
+func (m *MockCommercialRegisterService) VerifyProkura(
+	ctx context.Context, req *ProkuraVerificationRequest,
+) (*ProkuraVerificationResult, error) {
 	time.Sleep(m.verifyDelay)
 
 	key := fmt.Sprintf("%s-%s", req.EntityRegistration, req.Jurisdiction)
@@ -382,7 +390,9 @@ func (m *MockCommercialRegisterService) VerifyProkura(ctx context.Context, req *
 }
 
 // GetEntityDetails retrieves entity details
-func (m *MockCommercialRegisterService) GetEntityDetails(ctx context.Context, registrationID, jurisdiction string) (*EntityDetails, error) {
+func (m *MockCommercialRegisterService) GetEntityDetails(
+	ctx context.Context, registrationID, jurisdiction string,
+) (*EntityDetails, error) {
 	time.Sleep(m.verifyDelay)
 
 	key := fmt.Sprintf("%s-%s", registrationID, jurisdiction)
@@ -396,7 +406,9 @@ func (m *MockCommercialRegisterService) GetEntityDetails(ctx context.Context, re
 }
 
 // GetAuthorizedSignatories retrieves authorized signatories
-func (m *MockCommercialRegisterService) GetAuthorizedSignatories(ctx context.Context, registrationID, jurisdiction string) ([]Signatory, error) {
+func (m *MockCommercialRegisterService) GetAuthorizedSignatories(
+	ctx context.Context, registrationID, jurisdiction string,
+) ([]Signatory, error) {
 	time.Sleep(m.verifyDelay)
 
 	entity, err := m.GetEntityDetails(ctx, registrationID, jurisdiction)

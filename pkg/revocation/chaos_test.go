@@ -49,7 +49,7 @@ func TestChaos_RedisConnectionLoss(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-connection-loss"
@@ -63,11 +63,15 @@ func TestChaos_RedisConnectionLoss(t *testing.T) {
 
 	// Try to record transaction - should handle error gracefully
 	// Note: May succeed due to cache, or fail with Redis error
-	err = cb.RecordTransaction(ctx, poaID, 1e17, true)
+	if err := cb.RecordTransaction(ctx, poaID, 1e17, true); err != nil {
+		t.Logf("RecordTransaction after connection loss: %v", err)
+	}
 	// Either error or success is acceptable - just shouldn't panic
 
 	// Verify system doesn't panic
-	_, _, err = cb.IsPoAAllowed(ctx, poaID)
+	if _, _, err := cb.IsPoAAllowed(ctx, poaID); err != nil {
+		t.Logf("IsPoAAllowed after connection loss: %v", err)
+	}
 	// May succeed from cache or fail - both acceptable
 	t.Log("✅ Redis connection loss handled gracefully")
 }
@@ -79,7 +83,7 @@ func TestChaos_ConcurrentRevocations(t *testing.T) {
 	}
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
-	defer tpr.Close()
+	defer func() { _ = tpr.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-concurrent"
@@ -116,7 +120,7 @@ func TestChaos_MemoryPressure(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	// Increase rate limits for this test
 	cb.config.MaxTxPerMinute = 1000
@@ -153,7 +157,7 @@ func TestChaos_RapidStateTransitions(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	// Set short suspension for rapid testing
 	cb.SetSuspensionDuration(100 * time.Millisecond)
@@ -201,7 +205,7 @@ func TestChaos_OptimisticCollateralRace(t *testing.T) {
 	}
 	opt, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer opt.Close()
+	defer func() { _ = opt.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-collateral-race"
@@ -219,8 +223,8 @@ func TestChaos_OptimisticCollateralRace(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := opt.FinalizeRevocation(ctx, poaID)
-		finalizeErr <- err
+		finalizeErrVal := opt.FinalizeRevocation(ctx, poaID)
+		finalizeErr <- finalizeErrVal
 	}()
 
 	// Challenge goroutine (slight delay to create race)
@@ -228,8 +232,8 @@ func TestChaos_OptimisticCollateralRace(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		time.Sleep(10 * time.Millisecond)
-		err := opt.ChallengeRevocation(ctx, poaID, "challenger", "Challenge evidence")
-		challengeErr <- err
+		challengeErrVal := opt.ChallengeRevocation(ctx, poaID, "challenger", "Challenge evidence")
+		challengeErr <- challengeErrVal
 	}()
 
 	wg.Wait()
@@ -240,12 +244,13 @@ func TestChaos_OptimisticCollateralRace(t *testing.T) {
 	cErr := <-challengeErr
 
 	// One should succeed, one should fail (or both could fail if timing is right)
-	if fErr == nil {
+	switch {
+	case fErr == nil:
 		t.Log("✅ Finalize won the race")
 		assert.Error(t, cErr, "Challenge should fail after finalize")
-	} else if cErr == nil {
+	case cErr == nil:
 		t.Log("✅ Challenge won the race")
-	} else {
+	default:
 		t.Log("✅ Both operations handled race condition gracefully")
 	}
 
@@ -274,7 +279,7 @@ func TestChaos_PanicRecovery(t *testing.T) {
 	require.NoError(t, err)
 
 	// Close immediately to potentially cause issues in auto-finalize goroutine
-	opt.Close()
+	_ = opt.Close()
 
 	// Wait a bit to see if any panics occur
 	time.Sleep(100 * time.Millisecond)
@@ -290,7 +295,7 @@ func TestChaos_HighConcurrency(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	// Increase limits for this test
 	cb.config.MaxTxPerMinute = 1000
@@ -331,7 +336,7 @@ func TestChaos_InvalidInputs(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 
@@ -369,7 +374,7 @@ func TestChaos_StaleMetrics(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-stale"
@@ -395,7 +400,8 @@ func TestChaos_NetworkPartition(t *testing.T) {
 		t.Skip("Skipping chaos test in short mode")
 	}
 	cb, mr := setupCircuitBreakerTest(t)
-	defer cb.Close()
+	defer mr.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-partition"
@@ -409,8 +415,11 @@ func TestChaos_NetworkPartition(t *testing.T) {
 
 	// Operations should fail gracefully, not hang
 	start := time.Now()
-	_, _, err = cb.IsPoAAllowed(ctx, poaID)
+	_, _, isAllowedErr := cb.IsPoAAllowed(ctx, poaID)
 	elapsed := time.Since(start)
+	if isAllowedErr != nil {
+		t.Logf("IsPoAAllowed during partition: %v", isAllowedErr)
+	}
 
 	// May succeed from cache or fail - both acceptable, just shouldn't hang
 	assert.Less(t, elapsed, 5*time.Second, "Should complete fast, not hang")
@@ -424,7 +433,7 @@ func TestChaos_ContextCancellation(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	// Create cancellable context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -472,7 +481,7 @@ func TestChaos_ZeroValues(t *testing.T) {
 		suspensionDuration: 5 * time.Minute,
 		recoveryTestCount:  10,
 	}
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 
@@ -492,7 +501,7 @@ func TestChaos_ErrorPropagation(t *testing.T) {
 	}
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
-	defer tpr.Close()
+	defer func() { _ = tpr.Close() }()
 
 	ctx := context.Background()
 
@@ -510,6 +519,7 @@ func TestChaos_DeadlockPrevention(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-deadlock"
@@ -540,7 +550,6 @@ func TestChaos_DeadlockPrevention(t *testing.T) {
 	select {
 	case <-done:
 		t.Log("✅ No deadlock detected")
-		cb.Close()
 	case <-time.After(5 * time.Second):
 		t.Fatal("❌ Deadlock detected - operations hung")
 	}
@@ -553,7 +562,7 @@ func TestChaos_ConcurrentDisableCancel(t *testing.T) {
 	}
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
-	defer tpr.Close()
+	defer func() { _ = tpr.Close() }()
 
 	// Set short timeout
 	tpr.SetDisableTimeout(200 * time.Millisecond)
@@ -594,13 +603,14 @@ func TestChaos_ConcurrentDisableCancel(t *testing.T) {
 	rErr := <-revokeErr
 
 	// One should succeed, one should fail
-	if cErr == nil {
+	switch {
+	case cErr == nil:
 		t.Log("✅ Cancel won the race")
 		assert.Error(t, rErr, "Revoke should fail after cancel")
-	} else if rErr == nil {
+	case rErr == nil:
 		t.Log("✅ Revoke won the race")
 		assert.Error(t, cErr, "Cancel should fail after revoke")
-	} else {
+	default:
 		t.Log("✅ Both operations handled race gracefully")
 	}
 }
@@ -612,7 +622,7 @@ func TestChaos_MassiveParallelLoad(t *testing.T) {
 	}
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	// Increase limits significantly
 	cb.config.MaxTxPerMinute = 10000
@@ -650,5 +660,6 @@ func TestChaos_MassiveParallelLoad(t *testing.T) {
 
 	t.Logf("✅ Massive parallel load: %d/%d ops in %v (%.0f ops/sec)",
 		successCount.Load(), total, elapsed, throughput)
-	assert.Greater(t, successCount.Load(), int32(total*95/100), "At least 95%% should succeed")
+	required := (total * 95) / 100
+	assert.GreaterOrEqual(t, int(successCount.Load()), required, "At least 95%% should succeed")
 }

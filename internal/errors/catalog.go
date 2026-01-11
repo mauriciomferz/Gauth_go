@@ -49,22 +49,144 @@ type Entry struct {
 var catalog = map[gerrs.ErrorCode]Entry{}
 
 // init builds the catalog. Keep this ordered logically; docs will render sorted by code.
+//
+//nolint:gochecknoinits // catalog is generated at init for documentation + lookup
 func init() {
-	add(Entry{Code: gerrs.ErrCodeUnauthenticated, HTTPStatus: http.StatusUnauthorized, Category: CatAuth, Severity: SevWarning, Description: "Caller did not present valid authentication credentials.", Remediation: "Obtain and include a valid token or credentials.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeUnauthorized, HTTPStatus: http.StatusForbidden, Category: CatAuth, Severity: SevWarning, Description: "Caller lacks required permissions or scope.", Remediation: "Request elevated scope or adjust policy grants.", Retryable: false})
-	add(Entry{Code: gerrs.ErrCodeInvalidToken, HTTPStatus: http.StatusUnauthorized, Category: CatAuth, Severity: SevError, Description: "Presented token is malformed or fails cryptographic verification.", Remediation: "Reissue token and verify signing domain freshness.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeExpiredToken, HTTPStatus: http.StatusUnauthorized, Category: CatAuth, Severity: SevInfo, Description: "Token has passed its expiration timestamp.", Remediation: "Acquire a new token before retrying.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeValidation, HTTPStatus: http.StatusBadRequest, Category: CatValidation, Severity: SevWarning, Description: "Generic validation failure.", Remediation: "Correct the request fields per schema.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeInvalidRequest, HTTPStatus: http.StatusBadRequest, Category: CatValidation, Severity: SevWarning, Description: "Request structurally invalid (schema mismatch).", Remediation: "Consult OpenAPI schema and adjust payload format.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeMissingField, HTTPStatus: http.StatusBadRequest, Category: CatValidation, Severity: SevWarning, Description: "Required field absent in request payload.", Remediation: "Include all mandatory fields.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeNotFound, HTTPStatus: http.StatusNotFound, Category: CatSystem, Severity: SevInfo, Description: "Referenced resource does not exist.", Remediation: "Verify identifier correctness or create resource first.", Retryable: false})
-	add(Entry{Code: gerrs.ErrCodeConflict, HTTPStatus: http.StatusConflict, Category: CatSystem, Severity: SevWarning, Description: "Operation conflicts with current resource state.", Remediation: "Reload latest state and retry with updated preconditions.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeRateLimit, HTTPStatus: http.StatusTooManyRequests, Category: CatRateLimit, Severity: SevWarning, Description: "Caller exceeded allocated rate limit window.", Remediation: "Throttle requests; respect retry-after guidance.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeTimeout, HTTPStatus: http.StatusGatewayTimeout, Category: CatNetwork, Severity: SevWarning, Description: "Upstream or internal operation timed out.", Remediation: "Retry with backoff; investigate latency metrics.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeInternal, HTTPStatus: http.StatusInternalServerError, Category: CatSystem, Severity: SevError, Description: "Unexpected internal server error.", Remediation: "Capture diagnostics (traceId) and escalate if persistent.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeServiceDown, HTTPStatus: http.StatusServiceUnavailable, Category: CatNetwork, Severity: SevCritical, Description: "Dependent service unavailable or degraded.", Remediation: "Failover or wait for service restoration; monitor health endpoint.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeNetworkError, HTTPStatus: http.StatusBadGateway, Category: CatNetwork, Severity: SevWarning, Description: "Network path failure or upstream bad gateway.", Remediation: "Retry after transient network stabilization.", Retryable: true})
-	add(Entry{Code: gerrs.ErrCodeInsufficientScope, HTTPStatus: http.StatusForbidden, Category: CatPolicy, Severity: SevWarning, Description: "Token scope insufficient for requested operation.", Remediation: "Request broadened scope or adjust token issuance policy.", Retryable: false})
+	add(Entry{
+		Code:        gerrs.ErrCodeUnauthenticated,
+		HTTPStatus:  http.StatusUnauthorized,
+		Category:    CatAuth,
+		Severity:    SevWarning,
+		Description: "Caller did not present valid authentication credentials.",
+		Remediation: "Obtain and include a valid token or credentials.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeUnauthorized,
+		HTTPStatus:  http.StatusForbidden,
+		Category:    CatAuth,
+		Severity:    SevWarning,
+		Description: "Caller lacks required permissions or scope.",
+		Remediation: "Request elevated scope or adjust policy grants.",
+		Retryable:   false,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeInvalidToken,
+		HTTPStatus:  http.StatusUnauthorized,
+		Category:    CatAuth,
+		Severity:    SevError,
+		Description: "Presented token is malformed or fails cryptographic verification.",
+		Remediation: "Reissue token and verify signing domain freshness.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeExpiredToken,
+		HTTPStatus:  http.StatusUnauthorized,
+		Category:    CatAuth,
+		Severity:    SevInfo,
+		Description: "Token has passed its expiration timestamp.",
+		Remediation: "Acquire a new token before retrying.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeValidation,
+		HTTPStatus:  http.StatusBadRequest,
+		Category:    CatValidation,
+		Severity:    SevWarning,
+		Description: "Generic validation failure.",
+		Remediation: "Correct the request fields per schema.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeInvalidRequest,
+		HTTPStatus:  http.StatusBadRequest,
+		Category:    CatValidation,
+		Severity:    SevWarning,
+		Description: "Request structurally invalid (schema mismatch).",
+		Remediation: "Consult OpenAPI schema and adjust payload format.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeMissingField,
+		HTTPStatus:  http.StatusBadRequest,
+		Category:    CatValidation,
+		Severity:    SevWarning,
+		Description: "Required field absent in request payload.",
+		Remediation: "Include all mandatory fields.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeNotFound,
+		HTTPStatus:  http.StatusNotFound,
+		Category:    CatSystem,
+		Severity:    SevInfo,
+		Description: "Referenced resource does not exist.",
+		Remediation: "Verify identifier correctness or create resource first.",
+		Retryable:   false,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeConflict,
+		HTTPStatus:  http.StatusConflict,
+		Category:    CatSystem,
+		Severity:    SevWarning,
+		Description: "Operation conflicts with current resource state.",
+		Remediation: "Reload latest state and retry with updated preconditions.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeRateLimit,
+		HTTPStatus:  http.StatusTooManyRequests,
+		Category:    CatRateLimit,
+		Severity:    SevWarning,
+		Description: "Caller exceeded allocated rate limit window.",
+		Remediation: "Throttle requests; respect retry-after guidance.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeTimeout,
+		HTTPStatus:  http.StatusGatewayTimeout,
+		Category:    CatNetwork,
+		Severity:    SevWarning,
+		Description: "Upstream or internal operation timed out.",
+		Remediation: "Retry with backoff; investigate latency metrics.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeInternal,
+		HTTPStatus:  http.StatusInternalServerError,
+		Category:    CatSystem,
+		Severity:    SevError,
+		Description: "Unexpected internal server error.",
+		Remediation: "Capture diagnostics (traceId) and escalate if persistent.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeServiceDown,
+		HTTPStatus:  http.StatusServiceUnavailable,
+		Category:    CatNetwork,
+		Severity:    SevCritical,
+		Description: "Dependent service unavailable or degraded.",
+		Remediation: "Failover or wait for service restoration; monitor health endpoint.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeNetworkError,
+		HTTPStatus:  http.StatusBadGateway,
+		Category:    CatNetwork,
+		Severity:    SevWarning,
+		Description: "Network path failure or upstream bad gateway.",
+		Remediation: "Retry after transient network stabilization.",
+		Retryable:   true,
+	})
+	add(Entry{
+		Code:        gerrs.ErrCodeInsufficientScope,
+		HTTPStatus:  http.StatusForbidden,
+		Category:    CatPolicy,
+		Severity:    SevWarning,
+		Description: "Token scope insufficient for requested operation.",
+		Remediation: "Request broadened scope or adjust token issuance policy.",
+		Retryable:   false,
+	})
 }
 
 // add inserts an entry into the catalog (internal helper).

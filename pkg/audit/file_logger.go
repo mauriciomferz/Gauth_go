@@ -82,12 +82,12 @@ func OpenFileLogger(path string) (*FileLogger, error) {
 	}
 
 	if v := os.Getenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_SIZE"); v != "" {
-		if s, err := strconv.ParseInt(v, 10, 64); err == nil {
+		if s, parseErr := strconv.ParseInt(v, 10, 64); parseErr == nil {
 			fl.maxArchiveSize = s
 		}
 	}
 	if v := os.Getenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT"); v != "" {
-		if c, err := strconv.Atoi(v); err == nil {
+		if c, parseErr := strconv.Atoi(v); parseErr == nil {
 			fl.maxArchiveCount = c
 		}
 	}
@@ -99,13 +99,13 @@ func OpenFileLogger(path string) (*FileLogger, error) {
 
 	if exists && originalSize > 0 {
 		if err2 := fl.load(); err2 != nil {
-			f.Close()
+			_ = f.Close()
 			return nil, fmt.Errorf("load: %w", err2)
 		}
 	}
 
 	// Reopen in append mode for writing
-	f.Close()
+	_ = f.Close()
 	f, err = os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func (fl *FileLogger) load() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	scanner := bufio.NewScanner(f)
 	// We only need to scan to the end to get the last hash and index
@@ -199,9 +199,8 @@ func (fl *FileLogger) Log(ctx context.Context, entry interface{}) error {
 	if mErr != nil {
 		return fmt.Errorf("marshal audit event: %w", mErr)
 	}
-
-	line := append(b, '\n')
-	lineLen := int64(len(line))
+	b = append(b, '\n')
+	lineLen := int64(len(b))
 
 	// Check rotation
 	if fl.currentSize > 0 && fl.currentSize+lineLen > fl.maxSize {
@@ -210,7 +209,7 @@ func (fl *FileLogger) Log(ctx context.Context, entry interface{}) error {
 		}
 	}
 
-	if _, err := fl.file.Write(line); err != nil {
+	if _, err := fl.file.Write(b); err != nil {
 		return err
 	}
 
@@ -306,19 +305,20 @@ func compressFile(src, dest string) error {
 	if err != nil {
 		return err
 	}
-	defer s.Close()
+	defer func() { _ = s.Close() }()
 
 	d, err := os.Create(dest)
 	if err != nil {
 		return err
 	}
-	defer d.Close()
+	defer func() { _ = d.Close() }()
 
 	gw := gzip.NewWriter(d)
-	defer gw.Close()
-
-	_, err = io.Copy(gw, s)
-	return err
+	if _, err := io.Copy(gw, s); err != nil {
+		_ = gw.Close()
+		return err
+	}
+	return gw.Close()
 }
 
 func (fl *FileLogger) pruneArchives(dir string, maxCount int, maxSize int64) {
@@ -376,7 +376,7 @@ func (fl *FileLogger) VerifyChain() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	scanner := bufio.NewScanner(f)
 	lineNo := 0
@@ -399,17 +399,20 @@ func (fl *FileLogger) VerifyChain() error {
 			return fmt.Errorf("hash mismatch line %d", lineNo)
 		}
 
+		// First line of THIS file might have a PrevHash from a previous file.
+		// Since we can't verify previous file context here, we only enforce continuity from the second line onward.
 		if lineNo > 0 {
 			if ev.PrevHash != lastHash {
 				return fmt.Errorf("chain break at line %d", lineNo)
 			}
 			if ev.ChainIndex != -1 && ev.ChainIndex != lastIndex+1 {
-				return fmt.Errorf("index discontinuity at line %d: got %d want %d", lineNo, ev.ChainIndex, lastIndex+1)
+				return fmt.Errorf(
+					"index discontinuity at line %d: got %d want %d",
+					lineNo,
+					ev.ChainIndex,
+					lastIndex+1,
+				)
 			}
-		} else {
-			// First line of THIS file.
-			// It might have a PrevHash from previous file. We can't verify it against previous file here easily without input.
-			// So we skip PrevHash check for first line if we don't know context.
 		}
 
 		lastHash = ev.Hash

@@ -24,7 +24,22 @@ func TestPrometheusObligationMetricsIntegration(t *testing.T) {
 		WithObligations(exec, "").
 		WithObligationFailureDenies(true)
 
-	engine.AddPolicy(Policy{ID: "p_prom", Subjects: []string{"zoe"}, Rules: []Rule{{ID: "r_prom", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "must_fail", Mandatory: true}, {ID: "ok", Mandatory: false}}})
+	engine.AddPolicy(Policy{
+		ID:       "p_prom",
+		Subjects: []string{"zoe"},
+		Rules: []Rule{
+			{
+				ID:        "r_prom",
+				Actions:   []string{"read"},
+				Resources: []string{"doc"},
+				Effect:    outcomeAllow,
+			},
+		},
+		Obligations: []Obligation{
+			{ID: "must_fail", Mandatory: true},
+			{ID: "ok", Mandatory: false},
+		},
+	})
 
 	dec, err := engine.Evaluate(context.Background(), Request{Subject: "zoe", Action: "read", Resource: "doc", Time: time.Now()})
 	if err != nil {

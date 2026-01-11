@@ -87,7 +87,10 @@ func DemoAAP001PowerOfAttorney() error {
 	fmt.Println("✅ AgentAuth service initialized")
 
 	fmt.Println("\n📋 Step 1: Authorization Request")
-	grant, err := svc.InitiateAuthorization(agentauth.AuthorizationRequest{ClientID: cfg.ClientID, Scopes: []string{"transaction:execute"}})
+	grant, err := svc.InitiateAuthorization(agentauth.AuthorizationRequest{
+		ClientID: cfg.ClientID,
+		Scopes:   []string{"transaction:execute"},
+	})
 	if err != nil {
 		return fmt.Errorf("authorization request: %w", err)
 	}
@@ -95,7 +98,11 @@ func DemoAAP001PowerOfAttorney() error {
 	fmt.Printf("   📜 Scopes: %v\n", grant.Scope)
 
 	fmt.Println("\n🎫 Step 2: Token Issuance")
-	tokenResp, err := svc.RequestToken(agentauth.TokenRequest{GrantID: grant.GrantID, Scope: grant.Scope, Restrictions: grant.Restrictions})
+	tokenResp, err := svc.RequestToken(agentauth.TokenRequest{
+		GrantID:      grant.GrantID,
+		Scope:        grant.Scope,
+		Restrictions: grant.Restrictions,
+	})
 	if err != nil {
 		return fmt.Errorf("token request: %w", err)
 	}

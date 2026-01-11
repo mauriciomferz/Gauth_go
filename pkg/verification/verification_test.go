@@ -1,7 +1,6 @@
 package verification
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -15,10 +14,14 @@ func TestVerifyAllSuccess(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 3; i++ {
-		_, _ = rc.Append(delegation.RevocationEvent{ID: "succ-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del"})
+		id := "succ-" + time.Now().Format("150405") + string(rune('a'+i))
+		_, _ = rc.Append(delegation.RevocationEvent{
+			ID:           id,
+			DelegationID: "del",
+		})
 	}
 	if _, err := rc.SignTreeHead(); err != nil {
 		t.Fatalf("sign: %v", err)

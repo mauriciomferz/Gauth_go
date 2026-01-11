@@ -76,9 +76,10 @@ var SectorMetadata = map[SectorCode]struct {
 	Examples    []string
 }{
 	SectorAgriculture: {
-		Name:        "Agriculture, Forestry and Fishing",
-		Description: "Crop and animal production, hunting and related service activities; forestry and logging; fishing and aquaculture",
-		Examples:    []string{"farming", "forestry", "fishing", "hunting"},
+		Name: "Agriculture, Forestry and Fishing",
+		Description: "Crop and animal production, hunting and related service " +
+			"activities; forestry and logging; fishing and aquaculture",
+		Examples: []string{"farming", "forestry", "fishing", "hunting"},
 	},
 	SectorMining: {
 		Name:        "Mining and Quarrying",

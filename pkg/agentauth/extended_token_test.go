@@ -143,9 +143,21 @@ func TestExtendedToken_Validate(t *testing.T) {
 				VerificationTime:    now,
 				VerifierEntity:      "PVP-001",
 				VerificationLevels: []VerificationLevel{
-					{Level: 1, EntityID: "auth_001", EntityRole: "authorizer", VerificationMethod: "eIDAS", VerificationStatus: "verified", VerificationDate: now, AssuranceLevel: "high"},
-					{Level: 2, EntityID: "owner_001", EntityRole: "owner", VerificationMethod: "CommercialRegister", VerificationStatus: "verified", VerificationDate: now, AssuranceLevel: "high"},
-					{Level: 3, EntityID: "client_123", EntityRole: "client", VerificationMethod: "Certificate", VerificationStatus: "verified", VerificationDate: now, AssuranceLevel: "substantial"},
+					{
+						Level: 1, EntityID: "auth_001", EntityRole: "authorizer",
+						VerificationMethod: "eIDAS", VerificationStatus: "verified",
+						VerificationDate: now, AssuranceLevel: "high",
+					},
+					{
+						Level: 2, EntityID: "owner_001", EntityRole: "owner",
+						VerificationMethod: "CommercialRegister", VerificationStatus: "verified",
+						VerificationDate: now, AssuranceLevel: "high",
+					},
+					{
+						Level: 3, EntityID: "client_123", EntityRole: "client",
+						VerificationMethod: "Certificate", VerificationStatus: "verified",
+						VerificationDate: now, AssuranceLevel: "substantial",
+					},
 				},
 			},
 			IssuedBy: &AuthorizationServerInfo{
@@ -396,7 +408,9 @@ func TestExtendedToken_Serialization(t *testing.T) {
 		t.Errorf("ClientOwner.OwnerName = %v, want TechCorp GmbH", original.ClientOwner.OwnerName)
 	}
 	if original.AuthorizationChain.OwnersAuthorizer.EntityName != "John Smith" {
-		t.Errorf("AuthorizationChain.OwnersAuthorizer.EntityName = %v, want John Smith", original.AuthorizationChain.OwnersAuthorizer.EntityName)
+		t.Errorf(
+			"AuthorizationChain.OwnersAuthorizer.EntityName = %v, want John Smith",
+			original.AuthorizationChain.OwnersAuthorizer.EntityName)
 	}
 	if len(original.Scope) != 2 {
 		t.Errorf("Scope length = %d, want 2", len(original.Scope))

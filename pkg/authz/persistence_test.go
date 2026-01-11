@@ -361,7 +361,7 @@ func TestStartWatchErrorCases(t *testing.T) {
 		}
 
 		// Remove file to cause watcher.Add to potentially fail
-		os.Remove(path)
+		_ = os.Remove(path)
 
 		// StartWatch may or may not fail depending on OS behavior
 		// but it should handle the error gracefully
@@ -628,7 +628,7 @@ func TestStartEdgeCases(t *testing.T) {
 		time.Sleep(30 * time.Millisecond)
 
 		// Delete file to cause refreshModTime error
-		os.Remove(path)
+		_ = os.Remove(path)
 
 		// Wait for polling to attempt refresh
 		time.Sleep(100 * time.Millisecond)

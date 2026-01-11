@@ -24,8 +24,7 @@ func (m *MockInterpreter) Evaluate(conditions []string, ctx map[string]interface
 		key, op, val := parts[0], parts[1], parts[2]
 		val = strings.Trim(val, "'") // Strip quotes
 
-		switch key {
-		case "env":
+		if key == "env" {
 			if ctxVal, ok := ctx["env"].(string); ok {
 				if op == "==" && ctxVal != val {
 					return false, nil // Condition failed

@@ -56,8 +56,7 @@ func TestStartupValidator_JWTSigningKey(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup
-			os.Setenv("AGENTAUTH_JWT_SIGNING_KEY", tt.keyValue)
-			defer os.Unsetenv("AGENTAUTH_JWT_SIGNING_KEY")
+			t.Setenv("AGENTAUTH_JWT_SIGNING_KEY", tt.keyValue)
 
 			validator := NewStartupValidator(tt.productionMode)
 			err := validator.ValidateAll()
@@ -112,8 +111,7 @@ func TestStartupValidator_ProductionMode(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Setup
 			for k, v := range tt.envVars {
-				os.Setenv(k, v)
-				defer os.Unsetenv(k)
+				t.Setenv(k, v)
 			}
 
 			validator := NewStartupValidator(true) // Production mode
@@ -286,13 +284,12 @@ func TestProductionModeDetector(t *testing.T) {
 			// Clear all relevant env vars first
 			clearEnvVars := []string{"AGENTAUTH_ENV", "AGENTAUTH_MODE", "AGENTAUTH_DEV_MODE", "AGENTAUTH_DEV_INDEX", "AGENTAUTH_PORT"}
 			for _, key := range clearEnvVars {
-				os.Unsetenv(key)
+				_ = os.Unsetenv(key)
 			}
 
 			// Set test env vars
 			for k, v := range tt.envVars {
-				os.Setenv(k, v)
-				defer os.Unsetenv(k)
+				t.Setenv(k, v)
 			}
 
 			result := ProductionModeDetector()

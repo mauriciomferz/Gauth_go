@@ -81,7 +81,10 @@ func TestCascadeRevocationBenchmark(t *testing.T) {
 	t.Errorf("Cascade revocation timed out")
 }
 
-func createTree(ctx context.Context, svc *PostgreSQLDelegationService, parentAgentID string, sourcePoAID string, depth int, maxDepth int, fanOut int) {
+func createTree(
+	ctx context.Context, svc *PostgreSQLDelegationService, parentAgentID string,
+	sourcePoAID string, depth int, maxDepth int, fanOut int,
+) {
 	if depth > maxDepth {
 		return
 	}

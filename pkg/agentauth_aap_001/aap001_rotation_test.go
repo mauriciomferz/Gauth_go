@@ -3,7 +3,6 @@ package agentauth_aap_001
 import (
 	"context"
 	"encoding/base64"
-	"os"
 	"testing"
 	"time"
 
@@ -19,8 +18,8 @@ import (
 // (handled in decryptWithAnyKey) and that removal of a signing public key increments the signature_public_key_missing metric.
 func TestRotationRobustness(t *testing.T) {
 	// Disable strict authenticity for soft skip expectation.
-	os.Setenv("AGENTAUTH_STRICT_AUTHENTICITY", "0")
-	defer os.Unsetenv("AGENTAUTH_STRICT_AUTHENTICITY")
+	t.Setenv("AGENTAUTH_STRICT_AUTHENTICITY", "0")
+
 	memMetrics := metrics.NewMemory()
 	auditLogger := audit.NewMemoryLogger(nil)
 	authorizer := authz.NewMemoryAuthorizer()

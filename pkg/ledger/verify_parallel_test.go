@@ -19,7 +19,7 @@ func TestVerifyChainParallel(t *testing.T) {
 
 	store, err := NewBoltStore(dbPath)
 	require.NoError(t, err)
-	defer store.(*boltStore).Close()
+	defer func() { _ = store.(*boltStore).Close() }()
 
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	require.NoError(t, err)
@@ -35,8 +35,8 @@ func TestVerifyChainParallel(t *testing.T) {
 			TS:   time.Now().UTC(),
 			Type: "test",
 		}
-		err := store.Append(ctx, entry)
-		require.NoError(t, err)
+		appendErr := store.Append(ctx, entry)
+		require.NoError(t, appendErr)
 	}
 
 	// 3. Verify Sequential (Baseline)
@@ -67,7 +67,7 @@ func BenchmarkVerifyChain(b *testing.B) {
 	tmpDir := b.TempDir()
 	dbPath := filepath.Join(tmpDir, "bench_seq.db")
 	store, _ := NewBoltStore(dbPath)
-	defer store.(*boltStore).Close()
+	defer func() { _ = store.(*boltStore).Close() }()
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
 	store.(*boltStore).ConfigureEd25519Signer(priv, pub, "key-1")
 
@@ -91,7 +91,7 @@ func BenchmarkVerifyChainParallel(b *testing.B) {
 	tmpDir := b.TempDir()
 	dbPath := filepath.Join(tmpDir, "bench_par.db")
 	store, _ := NewBoltStore(dbPath)
-	defer store.(*boltStore).Close()
+	defer func() { _ = store.(*boltStore).Close() }()
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
 	store.(*boltStore).ConfigureEd25519Signer(priv, pub, "key-1")
 

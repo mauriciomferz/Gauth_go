@@ -61,7 +61,14 @@ type Handler struct {
 }
 
 // NewHandler creates a new Delegation handler.
-func NewHandler(metrics MetricsProvider, audit AuditProvider, lifecycle LifecycleRecorder, enforce EnforceFunc, tracer *tracing.TracerProvider, getReqCaps GetRequiredCapsFunc) *Handler {
+func NewHandler(
+	metrics MetricsProvider,
+	audit AuditProvider,
+	lifecycle LifecycleRecorder,
+	enforce EnforceFunc,
+	tracer *tracing.TracerProvider,
+	getReqCaps GetRequiredCapsFunc,
+) *Handler {
 	return &Handler{
 		status:     make(map[string]string),
 		metrics:    metrics,

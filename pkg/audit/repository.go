@@ -227,7 +227,7 @@ func (r *Repository) ListEvents(ctx context.Context, filters EventFilters) ([]Au
 		var evt AuditEvent
 		var beforeState, afterState, changes []byte
 
-		err := rows.Scan(
+		scanErr := rows.Scan(
 			&evt.ID, &evt.TenantID, &evt.Timestamp, &evt.EventType, &evt.Category, &evt.Severity,
 			&evt.UserID, &evt.UserName, &evt.UserRole, &evt.Action, &evt.ResourceType, &evt.ResourceID, &evt.ResourceName,
 			&evt.Status, &evt.StatusCode, &evt.ErrorMessage, &evt.IPAddress, &evt.UserAgent,
@@ -236,8 +236,8 @@ func (r *Repository) ListEvents(ctx context.Context, filters EventFilters) ([]Au
 			&evt.Framework, &evt.RiskLevel, &evt.RequiresReview,
 			&evt.ReviewedAt, &evt.ReviewedBy, &evt.Hash, &evt.PreviousHash,
 		)
-		if err != nil {
-			return nil, 0, fmt.Errorf("failed to scan event: %w", err)
+		if scanErr != nil {
+			return nil, 0, fmt.Errorf("failed to scan event: %w", scanErr)
 		}
 
 		// Unmarshal JSONB fields (ignore errors for partial data)
@@ -489,7 +489,12 @@ func (r *Repository) ListComplianceReports(ctx context.Context, tenantID string)
 }
 
 // GenerateComplianceReport generates a new compliance report
-func (r *Repository) GenerateComplianceReport(ctx context.Context, tenantID, framework string, periodStart, periodEnd time.Time, generatedBy string) (*ComplianceReport, error) {
+func (r *Repository) GenerateComplianceReport(
+	ctx context.Context,
+	tenantID, framework string,
+	periodStart, periodEnd time.Time,
+	generatedBy string,
+) (*ComplianceReport, error) {
 	if r.db == nil {
 		return nil, fmt.Errorf("database not available")
 	}

@@ -101,7 +101,7 @@ func (a *AuditLogger) LogEvent(event AuditEvent) {
 	if a.logToFile && a.logFile != nil {
 		data, err := json.Marshal(event)
 		if err == nil {
-			fmt.Fprintf(a.logFile, "%s\n", data)
+			_, _ = fmt.Fprintf(a.logFile, "%s\n", data)
 		}
 	}
 
@@ -258,26 +258,30 @@ func shouldAuditRequest(c *gin.Context) bool {
 
 // getSeverityForStatus returns severity based on HTTP status code
 func getSeverityForStatus(status int) string {
-	if status >= 500 {
+	switch {
+	case status >= 500:
 		return "error"
-	} else if status >= 400 {
+	case status >= 400:
 		return "warning"
-	} else if status >= 300 {
+	case status >= 300:
+		return "info"
+	default:
 		return "info"
 	}
-	return "info"
 }
 
 // getResultForStatus returns result string based on HTTP status code
 func getResultForStatus(status int) string {
-	if status >= 200 && status < 300 {
+	switch {
+	case status >= 200 && status < 300:
 		return "success"
-	} else if status >= 400 && status < 500 {
+	case status >= 400 && status < 500:
 		return "client_error"
-	} else if status >= 500 {
+	case status >= 500:
 		return "server_error"
+	default:
+		return "unknown"
 	}
-	return "unknown"
 }
 
 // generateRequestID generates a unique request ID

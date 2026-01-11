@@ -96,7 +96,13 @@ func (c *InMemoryCache) Get(ctx context.Context, key string) (*CacheEntry, error
 }
 
 // Set stores a decision in the cache.
-func (c *InMemoryCache) Set(ctx context.Context, key string, decision string, ttl time.Duration, context map[string]interface{}) error {
+func (c *InMemoryCache) Set(
+	ctx context.Context,
+	key string,
+	decision string,
+	ttl time.Duration,
+	context map[string]interface{},
+) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 

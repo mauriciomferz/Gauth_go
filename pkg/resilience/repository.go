@@ -148,7 +148,11 @@ func (r *Repository) GetCircuitBreaker(ctx context.Context, tenantID, breakerID 
 }
 
 // UpdateCircuitBreaker updates circuit breaker configuration
-func (r *Repository) UpdateCircuitBreaker(ctx context.Context, tenantID, breakerID string, failureThreshold, successThreshold, timeoutSeconds int) error {
+func (r *Repository) UpdateCircuitBreaker(
+	ctx context.Context,
+	tenantID, breakerID string,
+	failureThreshold, successThreshold, timeoutSeconds int,
+) error {
 	if r.db == nil {
 		return fmt.Errorf("database not available")
 	}
@@ -633,8 +637,10 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 	// Calculate average failure rate
 	if totalRequests > 0 {
 		var totalFailures int64
-		if err := r.db.QueryRow(ctx, `SELECT COALESCE(SUM(failure_count), 0) FROM circuit_breakers WHERE tenant_id = $1`, tenantID).Scan(&totalFailures); err == nil {
-			stats.CircuitBreakers.AvgFailureRate = float64(totalFailures) / float64(totalRequests) * 100
+		const avgFailureRateQuery = `SELECT COALESCE(SUM(failure_count), 0) FROM circuit_breakers WHERE tenant_id = $1`
+		scanErr := r.db.QueryRow(ctx, avgFailureRateQuery, tenantID).Scan(&totalFailures)
+		if scanErr == nil {
+			stats.CircuitBreakers.AvgFailureRate = (float64(totalFailures) / float64(totalRequests)) * 100
 		}
 	}
 
@@ -683,7 +689,8 @@ func (r *Repository) GetResilienceStats(ctx context.Context, tenantID string) (*
 	}
 
 	if stats.RetryPolicies.TotalRetries > 0 {
-		stats.RetryPolicies.SuccessRate = float64(stats.RetryPolicies.SuccessfulRetries) / float64(stats.RetryPolicies.TotalRetries) * 100
+		stats.RetryPolicies.SuccessRate = (float64(stats.RetryPolicies.SuccessfulRetries) /
+			float64(stats.RetryPolicies.TotalRetries)) * 100
 	}
 
 	// Bulkhead stats

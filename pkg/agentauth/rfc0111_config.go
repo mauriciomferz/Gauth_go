@@ -144,7 +144,6 @@ func InitAAP001WithComponents(
 	pipClient PIPClient,
 	commercialRegClient CommercialRegisterClient,
 ) (*AAP001Components, error) {
-
 	if pvpClient == nil {
 		return nil, fmt.Errorf("AAP001: pvpClient is required")
 	}

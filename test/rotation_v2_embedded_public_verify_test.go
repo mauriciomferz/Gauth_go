@@ -4,7 +4,6 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/base64"
-	"os"
 	"testing"
 	"time"
 
@@ -16,8 +15,7 @@ import (
 // is implemented separately, we replicate its digest and signature preimage computation here.
 func TestRotationV2EmbeddedPublicKeyVerification(t *testing.T) {
 	// Set env to embed public keys when building artifact from config.
-	os.Setenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
-	defer os.Unsetenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS")
+	t.Setenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
 
 	// Create a config with two Ed25519 signers that together meet threshold.
 	cfg := &notary.WeightsConfig{SchemaVersion: 1, ActiveKeySetID: "embed-set", ThresholdWeight: 6,

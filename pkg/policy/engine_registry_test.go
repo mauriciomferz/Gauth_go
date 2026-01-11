@@ -147,8 +147,24 @@ func TestRegistryDiff_BasicChanges(t *testing.T) {
 		ID:      "bundle-1",
 		Version: 1,
 		Policies: []Policy{
-			{ID: "policy-a", Subjects: []string{"user:alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"doc:*"}, Effect: Allow}}},
-			{ID: "policy-b", Subjects: []string{"user:bob"}, Rules: []Rule{{Actions: []string{"write"}, Resources: []string{"doc:*"}, Effect: Allow}}},
+			{
+				ID:       "policy-a",
+				Subjects: []string{"user:alice"},
+				Rules: []Rule{{
+					Actions:   []string{"read"},
+					Resources: []string{"doc:*"},
+					Effect:    Allow,
+				}},
+			},
+			{
+				ID:       "policy-b",
+				Subjects: []string{"user:bob"},
+				Rules: []Rule{{
+					Actions:   []string{"write"},
+					Resources: []string{"doc:*"},
+					Effect:    Allow,
+				}},
+			},
 		},
 	}
 
@@ -157,8 +173,24 @@ func TestRegistryDiff_BasicChanges(t *testing.T) {
 		ID:      "bundle-2",
 		Version: 2,
 		Policies: []Policy{
-			{ID: "policy-a", Subjects: []string{"user:alice", "user:admin"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"doc:*"}, Effect: Allow}}},
-			{ID: "policy-c", Subjects: []string{"user:charlie"}, Rules: []Rule{{Actions: []string{"delete"}, Resources: []string{"doc:*"}, Effect: Allow}}},
+			{
+				ID:       "policy-a",
+				Subjects: []string{"user:alice", "user:admin"},
+				Rules: []Rule{{
+					Actions:   []string{"read"},
+					Resources: []string{"doc:*"},
+					Effect:    Allow,
+				}},
+			},
+			{
+				ID:       "policy-c",
+				Subjects: []string{"user:charlie"},
+				Rules: []Rule{{
+					Actions:   []string{"delete"},
+					Resources: []string{"doc:*"},
+					Effect:    Allow,
+				}},
+			},
 		},
 	}
 
@@ -248,7 +280,8 @@ func TestRegistryDiff_DefaultVersions(t *testing.T) {
 
 	// Now Diff(0,0) should compare ActiveVersion=1 (from rollback) to Head=1?
 	// Note: logic in Diff wrapper: from=0 -> ActiveVersion. to=0 -> Head.
-	// ActiveVersion is 1. Head is 3 (unless Head() respects override? InMemoryStore.Head calls reg.Head(). reg.Head() respects override!)
+	// ActiveVersion is 1. Head is 3 (unless Head() respects override? InMemoryStore.Head calls reg.Head().
+	// reg.Head() respects override!)
 	// Wait, reg.Head() respects override? YES (line 114 engine.go: returns headOverride if not nil)
 	// So `Head` returns 1.
 	// So both become 1.

@@ -366,7 +366,12 @@ func (si *ServerIntegration) CreateTestProfile(entityType string, jurisdiction s
 
 // ExtendStandardCapabilityEnforcement extends existing capability.ValidateCapabilities
 // to include AI-specific governance rules
-func (si *ServerIntegration) ExtendStandardCapabilityEnforcement(action string, required []string, provided map[string]bool, claims map[string]any) ([]string, map[string]any) {
+func (si *ServerIntegration) ExtendStandardCapabilityEnforcement(
+	action string,
+	required []string,
+	provided map[string]bool,
+	claims map[string]any,
+) ([]string, map[string]any) {
 	// First run standard capability validation
 	missing := capability.ValidateCapabilities(required, provided)
 

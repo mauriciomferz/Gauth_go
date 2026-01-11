@@ -329,7 +329,9 @@ func (h *SecurityHandler) UpdateSecuritySettings(c *gin.Context) {
 	})
 }
 
-func (h *SecurityHandler) buildSecuritySettingsUpdateQuery(req *UpdateSecuritySettingsRequest, tenantID string) (string, []interface{}) {
+func (h *SecurityHandler) buildSecuritySettingsUpdateQuery(
+	req *UpdateSecuritySettingsRequest, tenantID string,
+) (string, []interface{}) {
 	query := `UPDATE security_settings SET `
 	params := []interface{}{}
 	paramIndex := 1
@@ -362,7 +364,9 @@ func (h *SecurityHandler) buildSecuritySettingsUpdateQuery(req *UpdateSecuritySe
 	return query, params
 }
 
-func (h *SecurityHandler) appendMFAUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendMFAUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.MFAEnabled != nil {
 		query += fmt.Sprintf("mfa_enabled = $%d, ", idx)
 		params = append(params, *req.MFAEnabled)
@@ -386,7 +390,9 @@ func (h *SecurityHandler) appendMFAUpdates(query string, params []interface{}, i
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendIPUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendIPUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.IPWhitelistEnabled != nil {
 		query += fmt.Sprintf("ip_whitelist_enabled = $%d, ", idx)
 		params = append(params, *req.IPWhitelistEnabled)
@@ -405,7 +411,9 @@ func (h *SecurityHandler) appendIPUpdates(query string, params []interface{}, id
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendTokenUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendTokenUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.AccessTokenTTLMinutes != nil {
 		query += fmt.Sprintf("access_token_ttl_minutes = $%d, ", idx)
 		params = append(params, *req.AccessTokenTTLMinutes)
@@ -439,7 +447,9 @@ func (h *SecurityHandler) appendTokenUpdates(query string, params []interface{},
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendSessionUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendSessionUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.SessionTimeoutMinutes != nil {
 		query += fmt.Sprintf("session_timeout_minutes = $%d, ", idx)
 		params = append(params, *req.SessionTimeoutMinutes)
@@ -468,7 +478,9 @@ func (h *SecurityHandler) appendSessionUpdates(query string, params []interface{
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendPasswordUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendPasswordUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.PasswordMinLength != nil {
 		query += fmt.Sprintf("password_min_length = $%d, ", idx)
 		params = append(params, *req.PasswordMinLength)
@@ -507,7 +519,9 @@ func (h *SecurityHandler) appendPasswordUpdates(query string, params []interface
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendLoginSecurityUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendLoginSecurityUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.MaxLoginAttempts != nil {
 		query += fmt.Sprintf("max_login_attempts = $%d, ", idx)
 		params = append(params, *req.MaxLoginAttempts)
@@ -526,7 +540,9 @@ func (h *SecurityHandler) appendLoginSecurityUpdates(query string, params []inte
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendAdvancedSecurityUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendAdvancedSecurityUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.RequireHTTPS != nil {
 		query += fmt.Sprintf("require_https = $%d, ", idx)
 		params = append(params, *req.RequireHTTPS)
@@ -550,7 +566,9 @@ func (h *SecurityHandler) appendAdvancedSecurityUpdates(query string, params []i
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendAuditUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendAuditUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.AuditAllRequests != nil {
 		query += fmt.Sprintf("audit_all_requests = $%d, ", idx)
 		params = append(params, *req.AuditAllRequests)
@@ -569,7 +587,9 @@ func (h *SecurityHandler) appendAuditUpdates(query string, params []interface{},
 	return query, params, idx
 }
 
-func (h *SecurityHandler) appendNotificationUpdates(query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest) (string, []interface{}, int) {
+func (h *SecurityHandler) appendNotificationUpdates(
+	query string, params []interface{}, idx int, req *UpdateSecuritySettingsRequest,
+) (string, []interface{}, int) {
 	if req.NotifyOnNewDevice != nil {
 		query += fmt.Sprintf("notify_on_new_device = $%d, ", idx)
 		params = append(params, *req.NotifyOnNewDevice)

@@ -14,7 +14,9 @@ func TestModelExtendedLimits(t *testing.T) {
 	}
 	limitsJSON := `{"model_limits":{"demo-model":{"max_input_tokens":200,"max_output_tokens":150,"max_requests_per_minute":5}}}`
 	_, _ = limitsFile.WriteString(limitsJSON)
-	limitsFile.Close()
+	if err := limitsFile.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
 
 	h := NewHandler(limitsFile.Name(), "", "") // No audit needed for this test
 	if err := h.Init(context.Background()); err != nil {
@@ -67,7 +69,8 @@ func TestModelExtendedLimits(t *testing.T) {
 	}
 
 	// 5. Wait window reset (Simulate by re-initializing handler to clear memory state)
-	// Since we can't easily mock time passing validly for the rate limiter window update in this test style without re-init or expose internals
+	// Since we can't easily mock time passing validly for the rate limiter
+	// window update in this test style without re-init or expose internals
 	h = NewHandler(limitsFile.Name(), "", "")
 	if err := h.Init(context.Background()); err != nil {
 		t.Fatalf("re-init: %v", err)

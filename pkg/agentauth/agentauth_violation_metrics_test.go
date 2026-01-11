@@ -3,7 +3,6 @@ package agentauth
 import (
 	"encoding/base64"
 	"encoding/json"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -26,9 +25,11 @@ func TestViolationCounters(t *testing.T) {
 		t.Skip("Skipping due to test isolation issue - passes when run individually")
 	}
 	// Force EdDSA mode so signature manipulation path exercises SigInvalid reliably.
-	os.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
-	defer func() { _ = os.Unsetenv("AGENTAUTH_TOKEN_SIG_MODE") }()
-	cfg := Config{ClientID: "demo", ClientSecret: strings.Repeat("x", 32), AuthServerURL: "https://auth.example", AccessTokenExpiry: time.Minute}
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	cfg := Config{
+		ClientID: "demo", ClientSecret: strings.Repeat("x", 32),
+		AuthServerURL: "https://auth.example", AccessTokenExpiry: time.Minute,
+	}
 	svc, err := New(cfg, WithMetrics(&testMetrics{}))
 	if err != nil {
 		t.Fatalf("new service error: %v", err)
@@ -71,7 +72,8 @@ func TestViolationCounters(t *testing.T) {
 		t.Fatalf("expected expired validation failure")
 	}
 
-	// Missing claim: craft token missing jti by decoding payload, removing jti and re-signing with same key (will still fail validation due to missing claim)
+	// Missing claim: craft token missing jti by decoding payload, removing jti
+	// and re-signing with same key (will still fail validation due to missing claim)
 	payloadBytes, _ := base64.RawURLEncoding.DecodeString(parts[1])
 	var claims map[string]any
 	_ = json.Unmarshal(payloadBytes, &claims)

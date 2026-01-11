@@ -22,7 +22,9 @@ type MCPHandler struct {
 }
 
 // NewMCPHandler creates a new MCP handler instance with security dependencies
-func NewMCPHandler(authBridge gagent.AuthorizationBridge, auditLogger mcp.AuditLogger, tokenService *agentauth.ExtendedTokenService) *MCPHandler {
+func NewMCPHandler(
+	authBridge gagent.AuthorizationBridge, auditLogger mcp.AuditLogger, tokenService *agentauth.ExtendedTokenService,
+) *MCPHandler {
 	return &MCPHandler{
 		connManager:  mcp.NewConnectionManager(),
 		authBridge:   authBridge,
@@ -378,18 +380,19 @@ func (h *MCPHandler) ReadResource(c *gin.Context) {
 	authorized, err := h.authBridge.AuthorizeResourceRead(c.Request.Context(), token, req.URI)
 
 	// Audit Log
-	h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
+	_ = h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
 		Timestamp:  time.Now(),
 		Operation:  "resource_read",
 		AgentID:    token.AuthorizationChain.Client.EntityID,
 		Target:     req.URI,
 		Authorized: authorized,
 		Decision: func() string {
-			if authorized {
+			switch {
+			case authorized:
 				return "granted"
-			} else if err != nil {
+			case err != nil:
 				return err.Error()
-			} else {
+			default:
 				return "denied"
 			}
 		}(),
@@ -510,18 +513,19 @@ func (h *MCPHandler) CallTool(c *gin.Context) {
 	authorized, err := h.authBridge.AuthorizeToolCall(c.Request.Context(), token, req.Name, req.Arguments)
 
 	// Audit Log
-	h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
+	_ = h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
 		Timestamp:  time.Now(),
 		Operation:  "tool_call",
 		AgentID:    token.AuthorizationChain.Client.EntityID,
 		Target:     req.Name,
 		Authorized: authorized,
 		Decision: func() string {
-			if authorized {
+			switch {
+			case authorized:
 				return "granted"
-			} else if err != nil {
+			case err != nil:
 				return err.Error()
-			} else {
+			default:
 				return "denied"
 			}
 		}(),
@@ -629,18 +633,19 @@ func (h *MCPHandler) GetPrompt(c *gin.Context) {
 	authorized, authErr := h.authBridge.AuthorizePromptGet(c.Request.Context(), token, promptName)
 
 	// Audit Log
-	h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
+	_ = h.auditLogger.Log(c.Request.Context(), &mcp.AuditLogEntry{ // #nosec G104
 		Timestamp:  time.Now(),
 		Operation:  "prompt_get",
 		AgentID:    token.AuthorizationChain.Client.EntityID,
 		Target:     promptName,
 		Authorized: authorized,
 		Decision: func() string {
-			if authorized {
+			switch {
+			case authorized:
 				return "granted"
-			} else if authErr != nil {
+			case authErr != nil:
 				return authErr.Error()
-			} else {
+			default:
 				return "denied"
 			}
 		}(),

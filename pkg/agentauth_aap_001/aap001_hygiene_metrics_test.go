@@ -15,7 +15,8 @@ import (
 // testMetricsMemory wraps metrics.Memory to expose decision & violation breakdown for assertions.
 func newTestMetrics() *metrics.Memory { return metrics.NewMemory() }
 
-// TestUTF8ScopeViolationCounter ensures scope_utf8_invalid increments via IncViolation hook indirectly (mapped to scope violations counter).
+// TestUTF8ScopeViolationCounter ensures scope_utf8_invalid increments via
+// IncViolation hook indirectly (mapped to scope violations counter).
 func TestUTF8ScopeViolationCounter(t *testing.T) {
 	m := newTestMetrics()
 	svc := NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer(), WithMetrics(m))
@@ -37,7 +38,9 @@ func TestControlCharRestrictionViolation(t *testing.T) {
 	svc := NewService(audit.NewMemoryLogger(nil), authz.NewMemoryAuthorizer(), WithMetrics(m))
 	// control character in restriction value (0x07 bell)
 	rs := map[string]string{"currency": "USD" + string(rune(0x07))}
-	_, err := svc.CreateDelegation(DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"pay"}, Restrictions: rs, Duration: time.Minute})
+	_, err := svc.CreateDelegation(DelegationRequest{
+		Grantor: "alice", Grantee: "bob", Scope: []string{"pay"}, Restrictions: rs, Duration: time.Minute,
+	})
 	if err == nil {
 		t.Fatalf("expected error for control character in restriction value")
 	}

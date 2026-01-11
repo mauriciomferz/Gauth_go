@@ -54,10 +54,16 @@ func main() {
 	}
 	if generatedClient {
 		if config.IsProduction() {
-			fmt.Println("❌ AGENTAUTH_MODE=production but AGENTAUTH_CLIENT_SECRET not provided. Refusing to start with ephemeral secret.")
+			fmt.Println(
+				"❌ AGENTAUTH_MODE=production but AGENTAUTH_CLIENT_SECRET not provided.",
+				"Refusing to start with ephemeral secret.",
+			)
 			os.Exit(1)
 		}
-		fmt.Println("(Ephemeral client secret generated – will change each run; set AGENTAUTH_CLIENT_SECRET for stability)")
+		fmt.Println(
+			"(Ephemeral client secret generated – will change each run;",
+			"set AGENTAUTH_CLIENT_SECRET for stability)",
+		)
 	}
 	signingKey, generatedSign, warnSign := config.EphemeralSecret("AGENTAUTH_SIGNING_KEY", 32)
 	if warnSign != "" {
@@ -65,10 +71,16 @@ func main() {
 	}
 	if generatedSign {
 		if config.IsProduction() {
-			fmt.Println("❌ AGENTAUTH_MODE=production but AGENTAUTH_SIGNING_KEY not provided. Refusing to start with ephemeral signing key.")
+			fmt.Println(
+				"❌ AGENTAUTH_MODE=production but AGENTAUTH_SIGNING_KEY not provided.",
+				"Refusing to start with ephemeral signing key.",
+			)
 			os.Exit(1)
 		}
-		fmt.Println("(Ephemeral signing key generated – tokens will be invalid across restarts; set AGENTAUTH_SIGNING_KEY for stability)")
+		fmt.Println(
+			"(Ephemeral signing key generated – tokens will be invalid across restarts;",
+			"set AGENTAUTH_SIGNING_KEY for stability)",
+		)
 	}
 	scopes := []string{"transaction:execute", "read", "write"}
 	expiry := config.GetDurationSeconds("AGENTAUTH_TOKEN_EXPIRY_SECONDS", 3600)

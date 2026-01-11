@@ -40,7 +40,7 @@ func NewPostgresStorage(connectionString string) (*PostgresStorage, error) {
 
 	// Initialize schema
 	if err := storage.initSchema(ctx); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to initialize schema: %w", err)
 	}
 
@@ -219,7 +219,7 @@ func (s *PostgresStorage) ListRefreshTokensByUser(ctx context.Context, userID st
 	if err != nil {
 		return nil, fmt.Errorf("failed to list refresh tokens: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var tokens []*RefreshTokenEntry
 	for rows.Next() {
@@ -258,7 +258,7 @@ func (s *PostgresStorage) ListRefreshTokensByClient(ctx context.Context, clientI
 	if err != nil {
 		return nil, fmt.Errorf("failed to list refresh tokens: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var tokens []*RefreshTokenEntry
 	for rows.Next() {

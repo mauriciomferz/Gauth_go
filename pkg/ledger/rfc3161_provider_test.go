@@ -37,8 +37,8 @@ func TestRFC3161Provider_Integration(t *testing.T) {
 
 		// 1. Unmarshal Request to get hash
 		var req rfc3161.TimeStampReq
-		if _, err := asn1.Unmarshal(body, &req); err != nil {
-			t.Logf("Failed to unmarshal request: %v", err)
+		if _, unmarshalErr := asn1.Unmarshal(body, &req); unmarshalErr != nil {
+			t.Logf("Failed to unmarshal request: %v", unmarshalErr)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -138,7 +138,7 @@ func TestRFC3161Provider_Integration(t *testing.T) {
 	provider := NewRFC3161Provider(mockTSA.URL)
 	ledger, err := NewExternalAuditLedger(dbPath, provider, receiptPath, 100*time.Millisecond)
 	require.NoError(t, err)
-	defer ledger.Close()
+	defer func() { _ = ledger.Close() }()
 
 	// 3. Append Entry
 	entry := &Entry{

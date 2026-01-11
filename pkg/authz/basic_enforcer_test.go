@@ -80,8 +80,12 @@ func TestBasicEnforcer_RemovePolicy(t *testing.T) {
 	enforcer := NewBasicEnforcer()
 
 	// Add policies
-	_ = enforcer.AddPolicy(ctx, &Policy{ID: "policy1", Subject: "user:1", Resource: "doc:1", Actions: []string{"read"}, Effect: Allow})
-	_ = enforcer.AddPolicy(ctx, &Policy{ID: "policy2", Subject: "user:2", Resource: "doc:2", Actions: []string{"write"}, Effect: Allow})
+	_ = enforcer.AddPolicy(ctx, &Policy{
+		ID: "policy1", Subject: "user:1", Resource: "doc:1", Actions: []string{"read"}, Effect: Allow,
+	})
+	_ = enforcer.AddPolicy(ctx, &Policy{
+		ID: "policy2", Subject: "user:2", Resource: "doc:2", Actions: []string{"write"}, Effect: Allow,
+	})
 
 	// Verify both present
 	if len(enforcer.policies) != 2 {

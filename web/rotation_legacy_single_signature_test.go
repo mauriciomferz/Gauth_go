@@ -16,8 +16,8 @@ import (
 // TestRotationSummary_LegacySingleSignature verifies legacy single-sign path when multisig disabled.
 func TestRotationSummary_LegacySingleSignature(t *testing.T) {
 	t.Setenv("AGENTAUTH_ROTATIONS_SIGN", "1")
-	os.Unsetenv("AGENTAUTH_ROTATIONS_MULTISIG")
-	os.Unsetenv("AGENTAUTH_ROTATIONS_THRESHOLD")
+	_ = os.Unsetenv("AGENTAUTH_ROTATIONS_MULTISIG")
+	_ = os.Unsetenv("AGENTAUTH_ROTATIONS_THRESHOLD")
 	tmp := t.TempDir()
 	ledgerPath := tmp + "/ledger-legacy.json"
 	led := notary.NewRotationLedger(ledgerPath)

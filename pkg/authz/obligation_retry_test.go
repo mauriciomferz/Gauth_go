@@ -88,8 +88,8 @@ func TestRetryingExecutor_Async_Ordering(t *testing.T) {
 	exec := NewRetryingObligationExecutor(mock, config)
 	defer exec.Stop()
 
-	exec.Execute(Obligation{ID: "A", Mandatory: false}, nil)
-	exec.Execute(Obligation{ID: "B", Mandatory: false}, nil)
+	assert.NoError(t, exec.Execute(Obligation{ID: "A", Mandatory: false}, nil))
+	assert.NoError(t, exec.Execute(Obligation{ID: "B", Mandatory: false}, nil))
 
 	time.Sleep(20 * time.Millisecond)
 	assert.GreaterOrEqual(t, mock.AttemptCount.Load(), int32(2))

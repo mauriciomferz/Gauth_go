@@ -10,7 +10,18 @@ import (
 func TestPrometheusExportIncludesHistogramAndHelp(t *testing.T) {
 	eng := NewInMemoryEngine(DenyOverridesStrategy{})
 	// Add a simple policy to generate a few decisions
-	eng.AddPolicy(Policy{ID: "p_latency", Subjects: []string{"alice"}, Rules: []Rule{{ID: "r1", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: "allow"}}})
+	eng.AddPolicy(Policy{
+		ID:       "p_latency",
+		Subjects: []string{"alice"},
+		Rules: []Rule{
+			{
+				ID:        "r1",
+				Actions:   []string{"read"},
+				Resources: []string{"doc"},
+				Effect:    "allow",
+			},
+		},
+	})
 	// Generate decisions to populate latency buckets
 	for i := 0; i < 5; i++ {
 		start := time.Now()

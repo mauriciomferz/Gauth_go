@@ -60,17 +60,32 @@ func (m *APIKeyMiddleware) Authenticate() gin.HandlerFunc {
 		// 3. Rate Limiting (Dynamic)
 		if m.limiter != nil {
 			// Minute Limit
-			if apiKeyRecord.RateLimitPerMinute > 0 && !m.limiter.AllowWithLimit(apiKeyRecord.KeyID, apiKeyRecord.RateLimitPerMinute, time.Minute) {
+			if apiKeyRecord.RateLimitPerMinute > 0 &&
+				!m.limiter.AllowWithLimit(
+					apiKeyRecord.KeyID,
+					apiKeyRecord.RateLimitPerMinute,
+					time.Minute,
+				) {
 				c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "minute rate limit exceeded"})
 				return
 			}
 			// Hour Limit
-			if apiKeyRecord.RateLimitPerHour > 0 && !m.limiter.AllowWithLimit(apiKeyRecord.KeyID, apiKeyRecord.RateLimitPerHour, time.Hour) {
+			if apiKeyRecord.RateLimitPerHour > 0 &&
+				!m.limiter.AllowWithLimit(
+					apiKeyRecord.KeyID,
+					apiKeyRecord.RateLimitPerHour,
+					time.Hour,
+				) {
 				c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "hourly rate limit exceeded"})
 				return
 			}
 			// Daily Limit
-			if apiKeyRecord.RateLimitPerDay > 0 && !m.limiter.AllowWithLimit(apiKeyRecord.KeyID, apiKeyRecord.RateLimitPerDay, 24*time.Hour) {
+			if apiKeyRecord.RateLimitPerDay > 0 &&
+				!m.limiter.AllowWithLimit(
+					apiKeyRecord.KeyID,
+					apiKeyRecord.RateLimitPerDay,
+					24*time.Hour,
+				) {
 				c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "daily rate limit exceeded"})
 				return
 			}

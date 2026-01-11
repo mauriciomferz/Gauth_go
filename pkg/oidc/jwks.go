@@ -128,7 +128,7 @@ func (f *InMemoryJWKSFetcher) fetchJWKS(ctx context.Context, jwksURI string) (*J
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch JWKS: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("JWKS endpoint returned status %d", resp.StatusCode)
@@ -217,7 +217,10 @@ func NewExternalTokenValidator(jwksFetcher JWKSFetcher, discoveryCache Discovery
 }
 
 // ValidateToken validates an external OIDC token
-func (v *ExternalTokenValidator) ValidateToken(ctx context.Context, tokenString, issuer, audience string) (*IDTokenClaims, error) {
+func (v *ExternalTokenValidator) ValidateToken(
+	ctx context.Context,
+	tokenString, issuer, audience string,
+) (*IDTokenClaims, error) {
 	// Parse token without verification to get header
 	token, _, err := jwt.NewParser().ParseUnverified(tokenString, &IDTokenClaims{})
 	if err != nil {
@@ -295,6 +298,10 @@ func (v *ExternalTokenValidator) ValidateToken(ctx context.Context, tokenString,
 }
 
 // ValidateTokenForProvider validates a token for a specific provider configuration
-func (v *ExternalTokenValidator) ValidateTokenForProvider(ctx context.Context, tokenString string, provider ProviderConfig) (*IDTokenClaims, error) {
+func (v *ExternalTokenValidator) ValidateTokenForProvider(
+	ctx context.Context,
+	tokenString string,
+	provider ProviderConfig,
+) (*IDTokenClaims, error) {
 	return v.ValidateToken(ctx, tokenString, provider.IssuerURL, provider.ClientID)
 }

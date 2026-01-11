@@ -25,7 +25,9 @@ func registerDetachedMetrics() {
 }
 
 // helper wrappers used inside issuance / verification paths (kept small to avoid import churn in core file)
-func incDetachedIssued() { registerDetachedMetrics(); detachedIssued.Inc() } //nolint:unused // reserved for future detached PoA feature
+//
+//nolint:lll,unused // reserved for future detached PoA feature
+func incDetachedIssued() { registerDetachedMetrics(); detachedIssued.Inc() }
 func incDetachedVerify(outcome string) {
 	registerDetachedMetrics()
 	detachedVerify.WithLabelValues(outcome).Inc()

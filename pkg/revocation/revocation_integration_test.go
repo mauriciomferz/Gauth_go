@@ -91,13 +91,13 @@ func setupIntegrationEnv(t *testing.T) *IntegrationTestEnv {
 
 func (env *IntegrationTestEnv) Cleanup() {
 	if env.CircuitBreaker != nil {
-		env.CircuitBreaker.Close()
+		_ = env.CircuitBreaker.Close()
 	}
 	if env.TwoPhaseRevocation != nil {
-		env.TwoPhaseRevocation.Close()
+		_ = env.TwoPhaseRevocation.Close()
 	}
 	if env.OptimisticRevocation != nil {
-		env.OptimisticRevocation.Close()
+		_ = env.OptimisticRevocation.Close()
 	}
 	if env.MiniRedis != nil {
 		env.MiniRedis.Close()
@@ -564,9 +564,9 @@ func TestE2E_DataPersistenceAcrossRestarts(t *testing.T) {
 
 	// Phase 2: Simulate restart - close and recreate systems (keep Redis)
 	t.Log("Phase 2: Simulating system restart")
-	env.CircuitBreaker.Close()
-	env.TwoPhaseRevocation.Close()
-	env.OptimisticRevocation.Close()
+	_ = env.CircuitBreaker.Close()
+	_ = env.TwoPhaseRevocation.Close()
+	_ = env.OptimisticRevocation.Close()
 
 	// Create new Redis cluster client (old one was closed) but connect to same miniredis
 	newRedisClient := redis.NewClusterClient(&redis.ClusterOptions{

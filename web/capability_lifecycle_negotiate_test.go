@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"os"
 	"sort"
 	"testing"
 
@@ -66,7 +65,7 @@ func TestCapabilityNegotiationStrictLifecycle(t *testing.T) {
 
 // TestCapabilityNegotiationNonStrictLifecycle ensures deprecated capabilities still negotiate when strict disabled.
 func TestCapabilityNegotiationNonStrictLifecycle(t *testing.T) {
-	os.Unsetenv("AGENTAUTH_CAP_LIFECYCLE_STRICT")
+	t.Setenv("AGENTAUTH_CAP_LIFECYCLE_STRICT", "")
 	capability.Reset([]capability.Capability{})
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

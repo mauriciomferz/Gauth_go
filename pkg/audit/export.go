@@ -84,6 +84,7 @@ func NewExportService(repo *Repository, exportDir string) *ExportService {
 	// #nosec G301
 	if err := os.MkdirAll(exportDir, 0750); err != nil {
 		// Log error but continue - exports will fail later
+		_ = err
 	}
 
 	return &ExportService{
@@ -94,7 +95,13 @@ func NewExportService(repo *Repository, exportDir string) *ExportService {
 }
 
 // CreateExportJob creates a new export job
-func (s *ExportService) CreateExportJob(ctx context.Context, tenantID string, format ExportFormat, filter ExportFilter, compress bool) (*ExportJob, error) {
+func (s *ExportService) CreateExportJob(
+	ctx context.Context,
+	tenantID string,
+	format ExportFormat,
+	filter ExportFilter,
+	compress bool,
+) (*ExportJob, error) {
 	job := &ExportJob{
 		ID:         uuid.New().String(),
 		TenantID:   tenantID,
@@ -205,7 +212,7 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 		s.updateJobStatus(job.ID, ExportStatusFailed, fmt.Sprintf("failed to create file: %v", err))
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	var writer io.Writer = file
 	var gzipWriter *gzip.Writer
@@ -214,7 +221,11 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 	if job.Compressed {
 		gzipWriter = gzip.NewWriter(file)
 		writer = gzipWriter
-		defer gzipWriter.Close()
+		defer func() {
+			if gzipWriter != nil {
+				_ = gzipWriter.Close()
+			}
+		}()
 	}
 
 	// Export based on format
@@ -239,11 +250,12 @@ func (s *ExportService) processExport(ctx context.Context, job *ExportJob, filte
 
 	// Flush gzip writer
 	if gzipWriter != nil {
-		if err := gzipWriter.Close(); err != nil {
-			s.updateJobStatus(job.ID, ExportStatusFailed, fmt.Sprintf("failed to finalize compression: %v", err))
+		if closeErr := gzipWriter.Close(); closeErr != nil {
+			s.updateJobStatus(job.ID, ExportStatusFailed, fmt.Sprintf("failed to finalize compression: %v", closeErr))
 			_ = os.Remove(filePath)
 			return
 		}
+		gzipWriter = nil
 	}
 
 	// Get file size
@@ -340,7 +352,9 @@ func (s *ExportService) exportSyslog(w io.Writer, events []AuditEvent) error {
 		priority := s.severityToPriority(event.Severity)
 
 		// Format: <priority>version timestamp hostname app-name procid msgid structured-data message
-		line := fmt.Sprintf("<%d>1 %s agentauth-audit - - - [tenant=\"%s\" user=\"%s\" action=\"%s\" resource=\"%s\" status=\"%s\"] %s\n",
+		line := fmt.Sprintf(
+			"<%d>1 %s agentauth-audit - - - "+
+				"[tenant=\"%s\" user=\"%s\" action=\"%s\" resource=\"%s\" status=\"%s\"] %s\n",
 			priority,
 			event.Timestamp.Format(time.RFC3339),
 			event.TenantID,
@@ -363,7 +377,9 @@ func (s *ExportService) exportSyslog(w io.Writer, events []AuditEvent) error {
 func (s *ExportService) exportCEF(w io.Writer, events []AuditEvent) error {
 	for _, event := range events {
 		// CEF Format: CEF:Version|Device Vendor|Device Product|Device Version|Signature ID|Name|Severity|Extension
-		line := fmt.Sprintf("CEF:0|AgentAuth Community|AgentAuth|1.0|%s|%s|%d|rt=%d tenantId=%s suser=%s act=%s src=%s outcome=%s cat=%s\n",
+		line := fmt.Sprintf(
+			"CEF:0|AgentAuth Community|AgentAuth|1.0|%s|%s|%d|"+
+				"rt=%d tenantId=%s suser=%s act=%s src=%s outcome=%s cat=%s\n",
 			event.Category,
 			event.Action,
 			s.severityToCEF(event.Severity),

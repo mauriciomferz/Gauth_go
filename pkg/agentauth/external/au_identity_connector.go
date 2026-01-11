@@ -181,7 +181,10 @@ func NewAustraliaIdentityConnector(config *AustraliaConnectorConfig) (*Australia
 
 // AuthenticateMyGovID authenticates using myGovID
 // Identity Proofing levels: IP1 (basic), IP2 (standard), IP3 (strong)
-func (ac *AustraliaIdentityConnector) AuthenticateMyGovID(ctx context.Context, req *MyGovIDAuthRequest) (*MyGovIDAuthResponse, error) {
+func (ac *AustraliaIdentityConnector) AuthenticateMyGovID(
+	ctx context.Context,
+	req *MyGovIDAuthRequest,
+) (*MyGovIDAuthResponse, error) {
 	// Validate request
 	if err := ac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -222,7 +225,10 @@ func (ac *AustraliaIdentityConnector) AuthenticateMyGovID(ctx context.Context, r
 }
 
 // ValidateMedicareCard validates Australian Medicare card
-func (ac *AustraliaIdentityConnector) ValidateMedicareCard(ctx context.Context, req *MedicareCardRequest) (*MedicareCardResponse, error) {
+func (ac *AustraliaIdentityConnector) ValidateMedicareCard(
+	ctx context.Context,
+	req *MedicareCardRequest,
+) (*MedicareCardResponse, error) {
 	// Validate request
 	if err := ac.validator.Struct(req); err != nil {
 		return &MedicareCardResponse{Valid: false, Error: err.Error()}, nil
@@ -270,7 +276,10 @@ func (ac *AustraliaIdentityConnector) ValidateMedicareCard(ctx context.Context, 
 }
 
 // VerifyDriverLicense verifies Australian driver's license
-func (ac *AustraliaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *AUDriverLicenseRequest) (*AUDriverLicenseResponse, error) {
+func (ac *AustraliaIdentityConnector) VerifyDriverLicense(
+	ctx context.Context,
+	req *AUDriverLicenseRequest,
+) (*AUDriverLicenseResponse, error) {
 	// Validate request
 	if err := ac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -383,6 +392,8 @@ func (ac *AustraliaIdentityConnector) generateCacheKey(operation string, parts .
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*AustraliaIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (ac *AustraliaIdentityConnector) GetMetrics() map[string]interface{} {

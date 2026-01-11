@@ -20,7 +20,9 @@ func TestCapabilityAnchorMaterialSigned(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	anchorFile.Close()
+	if err := anchorFile.Close(); err != nil {
+		t.Fatalf("close anchor file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	// Force short interval (>=1m required by server init parse guard, so use 1m and rely on first-load unconditional write).
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")

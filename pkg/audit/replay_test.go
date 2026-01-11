@@ -11,7 +11,16 @@ func TestAuditReplayDeterminism(t *testing.T) {
 	ml := NewMemoryLogger(nil)
 	req := map[string]interface{}{"subject": "alice", "action": "read", "resource": "doc:1"}
 	outcome := map[string]interface{}{"allow": true, "deny": false, "reason": "allowed"}
-	ev := &Event{Type: EventTypeAuthorization, Action: "evaluate", Result: ResultSuccess, Subject: "alice", Metadata: map[string]interface{}{"request": req, "decision": outcome}}
+	ev := &Event{
+		Type:    EventTypeAuthorization,
+		Action:  "evaluate",
+		Result:  ResultSuccess,
+		Subject: "alice",
+		Metadata: map[string]interface{}{
+			"request":  req,
+			"decision": outcome,
+		},
+	}
 	if err := ml.Log(context.TODO(), ev); err != nil {
 		t.Fatalf("log: %v", err)
 	}

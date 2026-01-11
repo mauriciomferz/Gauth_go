@@ -321,7 +321,9 @@ func parseDate(d string) time.Time {
 }
 
 // VerifyIdentityProof implements the PowerVerificationPoint interface
-func (v *GlobalIdentityVerifier) VerifyIdentityProof(ctx context.Context, request *IdentityProofRequest) (*IdentityProofResult, error) {
+func (v *GlobalIdentityVerifier) VerifyIdentityProof(
+	ctx context.Context, request *IdentityProofRequest,
+) (*IdentityProofResult, error) {
 	// Extract document from proof data
 	docData, ok := request.ProofData["document"].(map[string]interface{})
 	if !ok {

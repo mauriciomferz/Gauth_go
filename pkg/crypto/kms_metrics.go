@@ -32,10 +32,43 @@ func EnableKMSPrometheusMetrics(namespace, subsystem string) {
 		subsystem = "crypto"
 	}
 	registerKMSMetricsOnce.Do(func() {
-		kmsActiveSignerRequests = prom.NewCounterVec(prom.CounterOpts{Namespace: namespace, Subsystem: subsystem, Name: "kms_active_signer_requests_total", Help: "Number of ActiveSigner() retrievals from KMS"}, []string{"provider"})
-		kmsRotateTotal = prom.NewCounterVec(prom.CounterOpts{Namespace: namespace, Subsystem: subsystem, Name: "kms_rotate_total", Help: "Number of key rotations performed by KMS"}, []string{"provider"})
-		kmsListKeysTotal = prom.NewCounterVec(prom.CounterOpts{Namespace: namespace, Subsystem: subsystem, Name: "kms_list_keys_total", Help: "Number of ListKeys() calls"}, []string{"provider"})
-		kmsLatencyHistogram = prom.NewHistogramVec(prom.HistogramOpts{Namespace: namespace, Subsystem: subsystem, Name: "kms_operation_latency_seconds", Help: "Latency of KMS operations in seconds", Buckets: prom.DefBuckets}, []string{"provider", "op"})
+		kmsActiveSignerRequests = prom.NewCounterVec(
+			prom.CounterOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
+				Name:      "kms_active_signer_requests_total",
+				Help:      "Number of ActiveSigner() retrievals from KMS",
+			},
+			[]string{"provider"},
+		)
+		kmsRotateTotal = prom.NewCounterVec(
+			prom.CounterOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
+				Name:      "kms_rotate_total",
+				Help:      "Number of key rotations performed by KMS",
+			},
+			[]string{"provider"},
+		)
+		kmsListKeysTotal = prom.NewCounterVec(
+			prom.CounterOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
+				Name:      "kms_list_keys_total",
+				Help:      "Number of ListKeys() calls",
+			},
+			[]string{"provider"},
+		)
+		kmsLatencyHistogram = prom.NewHistogramVec(
+			prom.HistogramOpts{
+				Namespace: namespace,
+				Subsystem: subsystem,
+				Name:      "kms_operation_latency_seconds",
+				Help:      "Latency of KMS operations in seconds",
+				Buckets:   prom.DefBuckets,
+			},
+			[]string{"provider", "op"},
+		)
 		// Register (ignore duplicate registration errors silently)
 		prom.MustRegister(kmsActiveSignerRequests, kmsRotateTotal, kmsListKeysTotal, kmsLatencyHistogram)
 		kmsMetricsEnabled = true

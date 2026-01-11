@@ -117,7 +117,17 @@ func buildReceipt(prev string, hash string, provider string, version int, latenc
 	enc, _ := json.Marshal(base)
 	h := sha256.Sum256(append([]byte(prev), enc...))
 	chain := fmt.Sprintf("%x", h[:])
-	return anchorint.StoredExternalAnchorReceipt{ExternalAnchorReceipt: anchorint.ExternalAnchorReceipt{Hash: hash, Timestamp: ts, Provider: provider, Version: version, LatencySeconds: latency}, PrevHash: prev, ChainHash: chain}
+	return anchorint.StoredExternalAnchorReceipt{
+		ExternalAnchorReceipt: anchorint.ExternalAnchorReceipt{
+			Hash:           hash,
+			Timestamp:      ts,
+			Provider:       provider,
+			Version:        version,
+			LatencySeconds: latency,
+		},
+		PrevHash:  prev,
+		ChainHash: chain,
+	}
 }
 
 func TestExternalReceiptsVerifyOK(t *testing.T) {

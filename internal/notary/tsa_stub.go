@@ -72,7 +72,12 @@ func NewStubTSA() *StubTSA {
 	if oid == "" {
 		oid = "1.3.6.1.4.1.example.stub"
 	}
-	return &StubTSA{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, provider: provider, policyOID: oid}
+	return &StubTSA{
+		minLatency: time.Duration(minMs) * time.Millisecond,
+		maxLatency: time.Duration(maxMs) * time.Millisecond,
+		provider:   provider,
+		policyOID:  oid,
+	}
 }
 
 // Timestamp returns a synthetic timestamp response. Serial is a monotonic timestamp-based string.

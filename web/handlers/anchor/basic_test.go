@@ -34,7 +34,8 @@ func TestAnchorEndpointsFullCycle(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1ms")
 	// Provide capabilities file for registry hash population
 	capFile := filepath.Join(t.TempDir(), "caps.json")
-	if err := os.WriteFile(capFile, []byte(`{"schema_version":1,"capabilities":[{"id":"demo.cap","version":"1.0","status":"active"}]}`), 0o600); err != nil {
+	capJSON := `{"schema_version":1,"capabilities":[{"id":"demo.cap","version":"1.0","status":"active"}]}`
+	if err := os.WriteFile(capFile, []byte(capJSON), 0o600); err != nil {
 		t.Fatalf("write capabilities file: %v", err)
 	}
 	t.Setenv("AGENTAUTH_CAPABILITIES_PATH", capFile)

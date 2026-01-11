@@ -150,7 +150,9 @@ func (e *BasicEnforcer) Authorize(ctx context.Context, reqOrSubject interface{},
 }
 
 // AuthorizeWithParams is an alias for Authorize for compatibility
-func (e *BasicEnforcer) AuthorizeWithParams(ctx context.Context, subject Subject, action Action, resource Resource) (*Decision, error) {
+func (e *BasicEnforcer) AuthorizeWithParams(
+	ctx context.Context, subject Subject, action Action, resource Resource,
+) (*Decision, error) {
 	return e.Authorize(ctx, subject, action, resource)
 }
 
@@ -191,7 +193,7 @@ type Policy struct {
 	RequiredScopes []string          `json:"required_scopes,omitempty"` // all scopes must be present in request context
 	Version        int64             `json:"version,omitempty"`         // policy set version (assigned by authorizer persistence)
 	Obligations    []Obligation      `json:"obligations,omitempty"`     // mandatory or optional post-decision actions
-	Advice         []Advice          `json:"advice,omitempty"`          // non-mandatory advisory actions (failures do not affect decision)
+	Advice         []Advice          `json:"advice,omitempty"`          // non-mandatory advisory actions
 }
 
 // Effect represents the effect of a policy
@@ -285,15 +287,18 @@ func NewMemoryAuthorizer() *MemoryAuthorizer {
 			version  int64
 			policies []Policy
 		}, 0, 8),
-		roles:               make(map[string][]string),
-		cache:               make(map[string]cachedDecision),
-		combining:           DenyOverrides, // sensible secure default
-		regexCache:          make(map[string]*regexp.Regexp),
-		regexLastAccess:     make(map[string]time.Time),
-		regexAddedAt:        make(map[string]time.Time),
-		regexMatchCounts:    make(map[string]uint64),
-		regexCapacity:       256,
-		latencyBuckets:      []int64{50_000, 100_000, 250_000, 500_000, 1_000_000, 2_500_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000},
+		roles:            make(map[string][]string),
+		cache:            make(map[string]cachedDecision),
+		combining:        DenyOverrides, // sensible secure default
+		regexCache:       make(map[string]*regexp.Regexp),
+		regexLastAccess:  make(map[string]time.Time),
+		regexAddedAt:     make(map[string]time.Time),
+		regexMatchCounts: make(map[string]uint64),
+		regexCapacity:    256,
+		latencyBuckets: []int64{
+			50_000, 100_000, 250_000, 500_000, 1_000_000, 2_500_000, 5_000_000,
+			10_000_000, 25_000_000, 50_000_000, 100_000_000,
+		},
 		latencyBucketCounts: make([]uint64, 11),
 		obligationExecutor:  &DefaultObligationExecutor{},
 	}
@@ -375,7 +380,10 @@ func (ma *MemoryAuthorizer) executePostDecision(dec *Decision, policy Policy, re
 	// Obligations
 	for _, ob := range policy.Obligations {
 		start := time.Now()
-		err := ma.obligationExecutor.Execute(ob, map[string]interface{}{"request_subject": req.Subject, "request_action": req.Action, "request_resource": req.Resource})
+		err := ma.obligationExecutor.Execute(ob, map[string]interface{}{
+			"request_subject": req.Subject, "request_action": req.Action,
+			"request_resource": req.Resource,
+		})
 		if ma.metricsProvider != nil {
 			ma.metricsProvider.ObserveObligationLatency(time.Since(start))
 		}
@@ -403,7 +411,12 @@ func (ma *MemoryAuthorizer) executePostDecision(dec *Decision, policy Policy, re
 	// Advice (non-mandatory): failures recorded but no decision change
 	for _, adv := range policy.Advice {
 		start := time.Now()
-		err := ma.obligationExecutor.Execute(Obligation{ID: adv.ID, Type: adv.Type, Params: adv.Params, Mandatory: false}, map[string]interface{}{"request_subject": req.Subject, "request_action": req.Action, "request_resource": req.Resource, "advice": true})
+		err := ma.obligationExecutor.Execute(
+			Obligation{ID: adv.ID, Type: adv.Type, Params: adv.Params, Mandatory: false},
+			map[string]interface{}{
+				"request_subject": req.Subject, "request_action": req.Action,
+				"request_resource": req.Resource, "advice": true,
+			})
 		if ma.metricsProvider != nil {
 			ma.metricsProvider.ObserveObligationLatency(time.Since(start))
 		}
@@ -671,7 +684,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				if ma.metricsProvider != nil {
 					outcome := "deny"
 					if dec.Allow {
-						outcome = "allow"
+						outcome = string(Allow)
 					}
 					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, dur)
 				}
@@ -708,7 +721,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				if ma.metricsProvider != nil {
 					outcome := "deny"
 					if d.Allow {
-						outcome = "allow"
+						outcome = string(Allow)
 					}
 					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, dur)
 				}
@@ -740,7 +753,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				if ma.metricsProvider != nil {
 					outcome := "deny"
 					if dec.Allow {
-						outcome = "allow"
+						outcome = string(Allow)
 					}
 					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
 				}
@@ -758,7 +771,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				if ma.metricsProvider != nil {
 					outcome := "deny"
 					if dec.Allow {
-						outcome = "allow"
+						outcome = string(Allow)
 					}
 					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
 				}
@@ -770,7 +783,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 			if ma.metricsProvider != nil {
 				outcome := "deny"
 				if dec.Allow {
-					outcome = "allow"
+					outcome = string(Allow)
 				}
 				ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
 			}
@@ -783,7 +796,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 				if ma.metricsProvider != nil {
 					outcome := "deny"
 					if dec.Allow {
-						outcome = "allow"
+						outcome = string(Allow)
 					}
 					ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
 				}
@@ -795,7 +808,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 			if ma.metricsProvider != nil {
 				outcome := "deny"
 				if dec.Allow {
-					outcome = "allow"
+					outcome = string(Allow)
 				}
 				ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
 			}
@@ -807,7 +820,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 			if ma.metricsProvider != nil {
 				outcome := "deny"
 				if dec.Allow {
-					outcome = "allow"
+					outcome = string(Allow)
 				}
 				ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, time.Since(start))
 			}
@@ -824,7 +837,10 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 		dec.Metadata = map[string]string{"cache_hit": metadataCacheHitFalse}
 	}
 	if ma.decisionCache != nil {
-		ma.decisionCache.Set(lruKey, AuthorizationCacheEntry{Decision: dec, PolicyVersion: ma.currentPolicyVersion(), Jurisdiction: ma.jurisdiction, Inserted: time.Now()})
+		ma.decisionCache.Set(lruKey, AuthorizationCacheEntry{
+			Decision: dec, PolicyVersion: ma.currentPolicyVersion(),
+			Jurisdiction: ma.jurisdiction, Inserted: time.Now(),
+		})
 	}
 	atomic.AddUint64(&ma.metricDecisions, 1)
 	atomic.AddUint64(&ma.metricCacheMisses, 1)
@@ -833,7 +849,7 @@ func (ma *MemoryAuthorizer) Authorize(ctx context.Context, request Request) (Dec
 	if ma.metricsProvider != nil {
 		outcome := "deny"
 		if dec.Allow {
-			outcome = "allow"
+			outcome = string(Allow)
 		}
 		ma.metricsProvider.RecordDecision(request.Action, "resource", outcome, dur)
 	}
@@ -861,7 +877,10 @@ func (ma *MemoryAuthorizer) buildDecisionFromPolicy(request Request, policy Poli
 	if len(effStr) > 0 {
 		effStr = strings.ToUpper(effStr[:1]) + effStr[1:]
 	}
-	dec := Decision{Allow: policy.Effect == Allow, Reason: fmt.Sprintf("%s by policy %s", effStr, policy.ID), Metadata: policy.Metadata}
+	dec := Decision{
+		Allow:  policy.Effect == Allow,
+		Reason: fmt.Sprintf("%s by policy %s", effStr, policy.ID), Metadata: policy.Metadata,
+	}
 	if ma.cacheEnabled {
 		ma.storeInCache(request, &dec)
 	} else {
@@ -872,7 +891,10 @@ func (ma *MemoryAuthorizer) buildDecisionFromPolicy(request Request, policy Poli
 	}
 	if ma.decisionCache != nil {
 		key := makeKey(request.Subject, request.Action, request.Resource, ma.currentPolicyVersion(), ma.jurisdiction)
-		ma.decisionCache.Set(key, AuthorizationCacheEntry{Decision: dec, PolicyVersion: ma.currentPolicyVersion(), Jurisdiction: ma.jurisdiction, Inserted: time.Now()})
+		ma.decisionCache.Set(key, AuthorizationCacheEntry{
+			Decision: dec, PolicyVersion: ma.currentPolicyVersion(),
+			Jurisdiction: ma.jurisdiction, Inserted: time.Now(),
+		})
 	}
 	atomic.AddUint64(&ma.metricDecisions, 1)
 	atomic.AddUint64(&ma.metricCacheMisses, 1)
@@ -979,7 +1001,12 @@ func (ma *MemoryAuthorizer) GetMetricsSnapshot() MetricsSnapshot {
 			histo[upper] = cnt
 		}
 	}
-	return MetricsSnapshot{Decisions: dec, CacheHits: hits, CacheMisses: miss, Reloads: rel, Conflicts: conf, AvgLatencyNs: mean, P99LatencyNs: p99, RegexCompiles: regexCompiles, RegexCompileErrors: regexErrors, RegexCacheSize: rcSize, RegexEvictions: evict, RegexMatches: regexMatches, LatencyHistogram: histo}
+	return MetricsSnapshot{
+		Decisions: dec, CacheHits: hits, CacheMisses: miss, Reloads: rel, Conflicts: conf,
+		AvgLatencyNs: mean, P99LatencyNs: p99, RegexCompiles: regexCompiles,
+		RegexCompileErrors: regexErrors, RegexCacheSize: rcSize, RegexEvictions: evict,
+		RegexMatches: regexMatches, LatencyHistogram: histo,
+	}
 }
 
 // sqrt helper to avoid importing math for a single use if desired
@@ -1378,7 +1405,10 @@ func NewBasicEnforcer() *BasicEnforcer { return &BasicEnforcer{policies: make(ma
 // Evaluate evaluates a request (simple matching)
 func (e *BasicEnforcer) Evaluate(ctx context.Context, req *Request) (*Decision, error) {
 	for _, p := range e.policies {
-		if e.matchesPattern(p.Subject, req.Subject) && e.matchesPattern(p.Resource, req.Resource) && actionsContain(p.Actions, req.Action) {
+		subjMatch := e.matchesPattern(p.Subject, req.Subject)
+		resMatch := e.matchesPattern(p.Resource, req.Resource)
+		actMatch := actionsContain(p.Actions, req.Action)
+		if subjMatch && resMatch && actMatch {
 			if p.Effect == Allow {
 				return &Decision{Allow: true, Reason: fmt.Sprintf("allowed by policy %s", p.ID)}, nil
 			}

@@ -22,8 +22,8 @@ func TestRotationSummaryMetrics(t *testing.T) {
 	t.Setenv("AGENTAUTH_ROTATIONS_SIGN", "1")
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	// Reset any leaked multisig or threshold settings & global key state from previous tests.
-	os.Unsetenv("AGENTAUTH_ROTATIONS_MULTISIG")
-	os.Unsetenv("AGENTAUTH_ROTATIONS_THRESHOLD")
+	_ = os.Unsetenv("AGENTAUTH_ROTATIONS_MULTISIG")
+	_ = os.Unsetenv("AGENTAUTH_ROTATIONS_THRESHOLD")
 	m, _ := cryptoInt.NewManager(24 * time.Hour)
 	srv := NewBetaServer("0", WithKeyProvider(m))
 	t.Cleanup(func() { srv.Shutdown() })

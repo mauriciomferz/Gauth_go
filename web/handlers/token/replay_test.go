@@ -13,7 +13,11 @@ func TestReplayNonceStore_Eviction(t *testing.T) {
 	ttl := 1 * time.Minute
 	capacity := 10
 	store := NewReplayNonceStoreWithConfig(ttl, capacity, "", mem)
-	defer store.Close()
+	t.Cleanup(func() {
+		if err := store.Close(); err != nil {
+			t.Errorf("store close: %v", err)
+		}
+	})
 
 	now := time.Now()
 	// Fill the store to capacity
@@ -45,7 +49,11 @@ func TestReplayNonceStore_Eviction(t *testing.T) {
 func TestReplayNonceStore_TTL(t *testing.T) {
 	ttl := 100 * time.Millisecond
 	store := NewReplayNonceStoreWithConfig(ttl, 100, "", nil)
-	defer store.Close()
+	t.Cleanup(func() {
+		if err := store.Close(); err != nil {
+			t.Errorf("store close: %v", err)
+		}
+	})
 
 	n := "nonce-ttl"
 	now := time.Now()
@@ -71,7 +79,11 @@ func TestReplayNonceStore_TTL(t *testing.T) {
 func TestReplayNonceStore_UpdateLRU(t *testing.T) {
 	capacity := 2
 	store := NewReplayNonceStoreWithConfig(1*time.Minute, capacity, "", nil)
-	defer store.Close()
+	t.Cleanup(func() {
+		if err := store.Close(); err != nil {
+			t.Errorf("store close: %v", err)
+		}
+	})
 
 	now := time.Now()
 	store.Record("a", now)

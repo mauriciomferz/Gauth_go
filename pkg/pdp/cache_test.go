@@ -418,15 +418,25 @@ func TestPDPCache_Metrics(t *testing.T) {
 	dec := pdp.Decision{Allow: true, Reason: "policy"}
 
 	// 1 miss
-	_, _, _ = cache.Get(context.Background(), req)
+	if _, _, err := cache.Get(context.Background(), req); err != nil {
+		t.Fatalf("cache miss get: %v", err)
+	}
 
 	// 1 set
-	_ = cache.Set(context.Background(), req, dec)
+	if err := cache.Set(context.Background(), req, dec); err != nil {
+		t.Fatalf("cache set: %v", err)
+	}
 
 	// 3 hits
-	_, _, _ = cache.Get(context.Background(), req)
-	_, _, _ = cache.Get(context.Background(), req)
-	_, _, _ = cache.Get(context.Background(), req)
+	if _, _, err := cache.Get(context.Background(), req); err != nil {
+		t.Fatalf("cache hit get #1: %v", err)
+	}
+	if _, _, err := cache.Get(context.Background(), req); err != nil {
+		t.Fatalf("cache hit get #2: %v", err)
+	}
+	if _, _, err := cache.Get(context.Background(), req); err != nil {
+		t.Fatalf("cache hit get #3: %v", err)
+	}
 
 	metrics := cache.GetMetrics()
 	if metrics.Lookups != 4 {

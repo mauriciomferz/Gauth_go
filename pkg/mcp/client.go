@@ -110,7 +110,6 @@ func (c *MCPClient) ListTools(ctx context.Context) (*ToolsListResponse, error) {
 // CallTool invokes a tool with given arguments
 func (c *MCPClient) CallTool(ctx context.Context, toolName string,
 	arguments map[string]interface{}) (*ToolCallResponse, error) {
-
 	request := &JSONRPCRequest{
 		JSONRPC: "2.0",
 		ID:      c.nextRequestID(),
@@ -158,7 +157,6 @@ func (c *MCPClient) ListPrompts(ctx context.Context) (*PromptsListResponse, erro
 // GetPrompt retrieves a prompt with given arguments
 func (c *MCPClient) GetPrompt(ctx context.Context, promptName string,
 	arguments map[string]string) (*PromptGetResponse, error) {
-
 	request := &JSONRPCRequest{
 		JSONRPC: "2.0",
 		ID:      c.nextRequestID(),
@@ -200,7 +198,6 @@ func (c *MCPClient) ServerName() string {
 // sendRequest sends JSON-RPC request and waits for response
 func (c *MCPClient) sendRequest(ctx context.Context,
 	request *JSONRPCRequest) (*JSONRPCResponse, error) {
-
 	// Marshal request
 	requestBytes, err := json.Marshal(request)
 	if err != nil {
@@ -208,7 +205,7 @@ func (c *MCPClient) sendRequest(ctx context.Context,
 	}
 
 	// Send request
-	if err := c.transport.Send(ctx, requestBytes); err != nil {
+	if err = c.transport.Send(ctx, requestBytes); err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 

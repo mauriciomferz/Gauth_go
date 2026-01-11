@@ -220,7 +220,7 @@ func (s *JSONLAttestationStore) loadFromFile() error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	decoder := json.NewDecoder(file)
 	for decoder.More() {
@@ -276,7 +276,7 @@ func (s *JSONLAttestationStore) appendToFile(stored *StoredAttestation) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	data, err := json.Marshal(stored)
 	if err != nil {

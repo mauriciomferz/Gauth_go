@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"os"
 	"testing"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
@@ -18,14 +17,9 @@ import (
 
 // TestRawPOAChainEmbeddingEnabled verifies RawPOAChain is populated when feature flags enabled.
 func TestRawPOAChainEmbeddingEnabled(t *testing.T) {
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
-	os.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-		os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-		os.Unsetenv("AGENTAUTH_EMBED_RAW_POA_CHAIN")
-	}()
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
 	mem := metrics.NewMemory()
 	svc := NewService(newAuditMemory(), newAllowAllAuthorizer(), WithMetrics(mem))
 	resp, err := svc.CreateDelegation(DelegationRequest{Grantor: "g1", Grantee: "u1", Scope: []string{"read"}, Duration: 3600_000_000_000})
@@ -60,16 +54,10 @@ func TestRawPOAChainEmbeddingEnabled(t *testing.T) {
 
 // TestRawPOAChainEmbeddingSizeLimit forces omission via tiny max bytes cap.
 func TestRawPOAChainEmbeddingSizeLimit(t *testing.T) {
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
-	os.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
-	os.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "1") // force omission
-	defer func() {
-		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-		os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-		os.Unsetenv("AGENTAUTH_EMBED_RAW_POA_CHAIN")
-		os.Unsetenv("AGENTAUTH_MAX_RAW_POA_BYTES")
-	}()
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
+	t.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "1") // force omission
 	mem := metrics.NewMemory()
 	svc := NewService(newAuditMemory(), newAllowAllAuthorizer(), WithMetrics(mem))
 	resp, err := svc.CreateDelegation(DelegationRequest{Grantor: "g2", Grantee: "u2", Scope: []string{"read"}, Duration: 3600_000_000_000})

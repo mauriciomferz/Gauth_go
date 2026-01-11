@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/big"
 	"os"
@@ -42,7 +41,7 @@ func main() {
 	}
 
 	// 2. Read Bytecode
-	bytecodeBytes, err := ioutil.ReadFile(bytecodeFile)
+	bytecodeBytes, err := os.ReadFile(bytecodeFile)
 	if err != nil {
 		log.Fatalf("Error reading bytecode file '%s': %v\n(Did you compile the contract? see Task.md)", bytecodeFile, err)
 	}
@@ -121,11 +120,13 @@ func main() {
 
 	receipt, err := bind.WaitMined(ctx, client, tx)
 	if err != nil {
-		log.Fatalf("WaitMined failed: %v", err)
+		log.Printf("WaitMined failed: %v", err)
+		return
 	}
 
 	if receipt.Status == types.ReceiptStatusFailed {
-		log.Fatalf("Deployment failed! (Status: 0)")
+		log.Printf("Deployment failed! (Status: 0)")
+		return
 	}
 
 	log.Println("SUCCESS! Contract deployed.")

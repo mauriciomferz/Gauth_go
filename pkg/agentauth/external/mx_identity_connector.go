@@ -241,7 +241,8 @@ func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequ
 	var taxpayerType string
 	var checkDigitValid bool
 
-	if len(rfc) == 13 {
+	switch len(rfc) {
+	case 13:
 		// Person RFC: 4 letters + 6 digits + 3 alphanumeric
 		if !regexp.MustCompile(`^[A-Z&Ñ]{4}\d{6}[A-Z0-9]{3}$`).MatchString(rfc) {
 			return &RFCResponse{
@@ -251,7 +252,7 @@ func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequ
 		}
 		taxpayerType = "Person"
 		checkDigitValid = mc.validateRFCCheckDigit(rfc)
-	} else if len(rfc) == 12 {
+	case 12:
 		// Company RFC: 3 letters + 6 digits + 3 alphanumeric
 		if !regexp.MustCompile(`^[A-Z&Ñ]{3}\d{6}[A-Z0-9]{3}$`).MatchString(rfc) {
 			return &RFCResponse{
@@ -261,7 +262,7 @@ func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequ
 		}
 		taxpayerType = "Company"
 		checkDigitValid = mc.validateRFCCheckDigit(rfc)
-	} else {
+	default:
 		return &RFCResponse{
 			Valid: false,
 			Error: "Invalid RFC length (must be 12 or 13 characters)",
@@ -284,7 +285,7 @@ func (mc *MexicoIdentityConnector) ValidateRFC(ctx context.Context, req *RFCRequ
 	return response, nil
 }
 
-// VerifyINE verifies Mexican INE (Instituto Nacional Electoral) voter ID
+//nolint:misspell // VerifyINE verifies Mexican INE (Instituto Nacional Electoral) voter ID
 func (mc *MexicoIdentityConnector) VerifyINE(ctx context.Context, req *INERequest) (*INEResponse, error) {
 	// Validate request
 	if err := mc.validator.Struct(req); err != nil {
@@ -421,6 +422,8 @@ func (mc *MexicoIdentityConnector) generateCacheKey(operation string, parts ...s
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*MexicoIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (mc *MexicoIdentityConnector) GetMetrics() map[string]interface{} {

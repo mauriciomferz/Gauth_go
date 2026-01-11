@@ -290,7 +290,7 @@ func (f *FileKeyStore) Health(ctx context.Context) error {
 	}
 
 	// Clean up test file
-	os.Remove(testFile)
+	_ = os.Remove(testFile)
 	return nil
 }
 
@@ -419,7 +419,7 @@ func (f *FileKeyStore) Cleanup(ctx context.Context) error {
 			// Remove expired and archived keys older than 30 days
 			if now.After(keyData.ExpiresAt) ||
 				(keyData.ArchivedAt != nil && now.Sub(*keyData.ArchivedAt) > 30*24*time.Hour) {
-				os.Remove(path)
+				_ = os.Remove(path)
 			}
 		}
 

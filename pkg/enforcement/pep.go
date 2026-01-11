@@ -107,9 +107,17 @@ func NewDemandSidePEP(serverID, ownerID string, pdp PDPClient) *DemandSidePEP {
 	}
 }
 
-// ValidateClientCompliance validates client's authorization compliance from resource server side
-// This is called by the resource server/owner to check if the client's transaction/action/decision is authorized
-func (d *DemandSidePEP) ValidateClientCompliance(ctx context.Context, clientID, resource, action string, clientToken string, context map[string]interface{}) error {
+// ValidateClientCompliance validates client's authorization compliance from resource server side.
+// This is called by the resource server/owner to check if the client's transaction/action/decision is
+// authorized.
+func (d *DemandSidePEP) ValidateClientCompliance(
+	ctx context.Context,
+	clientID string,
+	resource string,
+	action string,
+	clientToken string,
+	context map[string]interface{},
+) error {
 	if context == nil {
 		context = make(map[string]interface{})
 	}

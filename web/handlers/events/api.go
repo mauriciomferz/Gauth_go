@@ -137,10 +137,10 @@ func (a *API) Stream(c *gin.Context) {
 	snapshot := a.hub.List(20)
 	for _, e := range snapshot {
 		if b, err := json.Marshal(e); err == nil {
-			fmt.Fprintf(c.Writer, "event: event\ndata: %s\n\n", b)
+			_, _ = fmt.Fprintf(c.Writer, "event: event\ndata: %s\n\n", b)
 		}
 	}
-	fmt.Fprint(c.Writer, "event: open\ndata: {\"ok\":true}\n\n")
+	_, _ = fmt.Fprint(c.Writer, "event: open\ndata: {\"ok\":true}\n\n")
 	c.Writer.Flush()
 	heartbeat := time.NewTicker(10 * time.Second)
 	defer heartbeat.Stop()
@@ -150,11 +150,11 @@ func (a *API) Stream(c *gin.Context) {
 			return
 		case e := <-ch:
 			if b, err := json.Marshal(e); err == nil {
-				fmt.Fprintf(c.Writer, "event: event\ndata: %s\n\n", b)
+				_, _ = fmt.Fprintf(c.Writer, "event: event\ndata: %s\n\n", b)
 				c.Writer.Flush()
 			}
 		case <-heartbeat.C:
-			fmt.Fprint(c.Writer, ": ping\n\n")
+			_, _ = fmt.Fprint(c.Writer, ": ping\n\n")
 			c.Writer.Flush()
 		}
 	}

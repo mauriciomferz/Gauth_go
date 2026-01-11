@@ -210,7 +210,7 @@ func NewDatabasePIP(config *DatabasePIPConfig) (*DatabasePIP, error) {
 	defer cancel()
 
 	if err := db.PingContext(ctx); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
@@ -429,7 +429,7 @@ func (p *DatabasePIP) GetUserAttributes(ctx context.Context, query *AttributeQue
 	if err != nil {
 		return nil, fmt.Errorf("failed to query attributes: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var attributes []*Attribute
 
@@ -491,9 +491,9 @@ func (p *DatabasePIP) UpdateAttribute(ctx context.Context, id string, update *At
 	argPos := 1
 
 	if update.Value != nil {
-		valueJSON, err := json.Marshal(update.Value)
-		if err != nil {
-			return fmt.Errorf("failed to serialize value: %w", err)
+		valueJSON, marshalErr := json.Marshal(update.Value)
+		if marshalErr != nil {
+			return fmt.Errorf("failed to serialize value: %w", marshalErr)
 		}
 		query += fmt.Sprintf(", value = $%d", argPos)
 		args = append(args, string(valueJSON))
@@ -525,9 +525,9 @@ func (p *DatabasePIP) UpdateAttribute(ctx context.Context, id string, update *At
 	}
 
 	if update.Metadata != nil {
-		metadataJSON, err := json.Marshal(update.Metadata)
-		if err != nil {
-			return fmt.Errorf("failed to serialize metadata: %w", err)
+		metadataJSON, marshalErr := json.Marshal(update.Metadata)
+		if marshalErr != nil {
+			return fmt.Errorf("failed to serialize metadata: %w", marshalErr)
 		}
 		query += fmt.Sprintf(", metadata = $%d", argPos)
 		args = append(args, string(metadataJSON))

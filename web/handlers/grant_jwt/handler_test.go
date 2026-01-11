@@ -66,7 +66,9 @@ func TestJWTBearerGrant_Success(t *testing.T) {
 	}
 
 	var resp map[string]interface{}
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal token response: %v", err)
+	}
 
 	if resp["token_type"] != "Bearer" {
 		t.Errorf("Expected token_type Bearer, got %v", resp["token_type"])

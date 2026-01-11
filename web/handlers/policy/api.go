@@ -179,7 +179,7 @@ func (a *API) Chain(c *gin.Context) {
 	}
 	slice := allHashes[offset:end]
 
-	head, err := a.Handler.Store.Head(ctx)
+	head, _ := a.Handler.Store.Head(ctx)
 	var headHash string
 	if head != nil {
 		headHash = head.Hash
@@ -204,7 +204,19 @@ func (a *API) Chain(c *gin.Context) {
 
 	activeVer, _ := a.Handler.Store.ActiveVersion(ctx)
 
-	c.JSON(200, gin.H{"success": true, "head_hash": headHash, "hashes": slice, "versions": versions, "offset": offset, "limit": limit, "returned": len(slice), "total": total, "verified": verified, "verification_error": verr, "active_version": activeVer})
+	c.JSON(200, gin.H{
+		"success":            true,
+		"head_hash":          headHash,
+		"hashes":             slice,
+		"versions":           versions,
+		"offset":             offset,
+		"limit":              limit,
+		"returned":           len(slice),
+		"total":              total,
+		"verified":           verified,
+		"verification_error": verr,
+		"active_version":     activeVer,
+	})
 }
 
 // Timeline returns a compact list of all bundle versions.
@@ -269,7 +281,12 @@ func (a *API) Evaluate(c *gin.Context) {
 	}
 	start := time.Now()
 	// Pass context to Evaluate
-	dec, err := a.Handler.Engine.Evaluate(c.Request.Context(), policy.EvalRequest{Subject: req.Subject, Action: req.Action, Resource: req.Resource, Attrs: req.Attrs})
+	dec, err := a.Handler.Engine.Evaluate(c.Request.Context(), policy.EvalRequest{
+		Subject:  req.Subject,
+		Action:   req.Action,
+		Resource: req.Resource,
+		Attrs:    req.Attrs,
+	})
 	elapsedNS := time.Since(start).Nanoseconds()
 	if err != nil {
 		c.JSON(500, gin.H{"success": false, "message": err.Error()})
@@ -300,12 +317,27 @@ func (a *API) Evaluate(c *gin.Context) {
 			"action":   "evaluate",
 			"resource": req.Resource,
 			"outcome":  map[bool]string{true: "allow", false: "deny"}[dec.Allow],
-			"meta":     map[string]string{"bundle_hash": dec.BundleHash, "chain_head": dec.ChainHead, "subject": req.Subject, "action": req.Action},
+			"meta": map[string]string{
+				"bundle_hash": dec.BundleHash,
+				"chain_head":  dec.ChainHead,
+				"subject":     req.Subject,
+				"action":      req.Action,
+			},
 		}
 		a.Auditor.Append(entry)
 	}
 
-	c.JSON(200, gin.H{"success": true, "allow": dec.Allow, "deny": dec.Deny, "reason": dec.Reason, "matched": dec.Matched, "denied_by": dec.DeniedBy, "bundle_hash": dec.BundleHash, "chain_head": dec.ChainHead, "policy_version": dec.PolicyVersion})
+	c.JSON(200, gin.H{
+		"success":        true,
+		"allow":          dec.Allow,
+		"deny":           dec.Deny,
+		"reason":         dec.Reason,
+		"matched":        dec.Matched,
+		"denied_by":      dec.DeniedBy,
+		"bundle_hash":    dec.BundleHash,
+		"chain_head":     dec.ChainHead,
+		"policy_version": dec.PolicyVersion,
+	})
 }
 
 func (a *API) GetBundle(c *gin.Context) {
@@ -386,7 +418,15 @@ func (a *API) AddBundle(c *gin.Context) {
 		headHash = head.Hash
 	}
 
-	c.JSON(201, gin.H{"success": true, "bundle_hash": b.Hash, "head_hash": headHash, "policy_version": b.Version, "verified": verified, "verification_error": vmsg, "chain": chain})
+	c.JSON(201, gin.H{
+		"success":            true,
+		"bundle_hash":        b.Hash,
+		"head_hash":          headHash,
+		"policy_version":     b.Version,
+		"verified":           verified,
+		"verification_error": vmsg,
+		"chain":              chain,
+	})
 }
 
 func (a *API) Rollback(c *gin.Context) {
@@ -454,12 +494,22 @@ func (a *API) Rollback(c *gin.Context) {
 			"action":   "rollback",
 			"resource": "policy_chain",
 			"outcome":  "success",
-			"meta":     map[string]string{"target_version": fmt.Sprintf("%d", ver), "previous_active_version": fmt.Sprintf("%d", prevActive), "head_hash": headHash},
+			"meta": map[string]string{
+				"target_version":          fmt.Sprintf("%d", ver),
+				"previous_active_version": fmt.Sprintf("%d", prevActive),
+				"head_hash":               headHash,
+			},
 		}
 		a.Auditor.Append(entry)
 	}
 
-	c.JSON(200, gin.H{"success": true, "active_version": active, "head_hash": headHash, "verified": verified, "verification_error": verr})
+	c.JSON(200, gin.H{
+		"success":            true,
+		"active_version":     active,
+		"head_hash":          headHash,
+		"verified":           verified,
+		"verification_error": verr,
+	})
 }
 
 func (a *API) Diff(c *gin.Context) {

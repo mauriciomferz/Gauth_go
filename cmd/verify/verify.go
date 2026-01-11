@@ -161,7 +161,7 @@ func verifyReceipts(base, path string, remote bool) (string, int, string, error)
 		if err != nil {
 			return statusError, 0, "", err
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		body, _ := io.ReadAll(resp.Body)
 		var d struct {
 			Success    bool                   `json:"success"`

@@ -118,8 +118,10 @@ func TestLoad_ConcurrentThroughput(t *testing.T) {
 	}
 
 	configs := []LoadTestConfig{
-		{Workers: 10, Duration: 10 * time.Second, CreatePct: 70, ValidatePct: 20, RevokePct: 10, ScopeCount: 3, ReportInterval: 2 * time.Second},
-		{Workers: 100, Duration: 10 * time.Second, CreatePct: 70, ValidatePct: 20, RevokePct: 10, ScopeCount: 3, ReportInterval: 2 * time.Second},
+		{Workers: 10, Duration: 10 * time.Second, CreatePct: 70, ValidatePct: 20,
+			RevokePct: 10, ScopeCount: 3, ReportInterval: 2 * time.Second},
+		{Workers: 100, Duration: 10 * time.Second, CreatePct: 70, ValidatePct: 20,
+			RevokePct: 10, ScopeCount: 3, ReportInterval: 2 * time.Second},
 	}
 
 	for _, config := range configs {

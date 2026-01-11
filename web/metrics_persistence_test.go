@@ -15,7 +15,9 @@ func TestMetricsPersistence(t *testing.T) {
 		t.Fatalf("temp file: %v", err)
 	}
 	path := tmpFile.Name()
-	tmpFile.Close()
+	if err := tmpFile.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_METRICS_PERSIST_PATH", path)
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })

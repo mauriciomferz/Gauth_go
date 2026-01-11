@@ -68,7 +68,10 @@ func TestBLSPoPIssueAndVerify(t *testing.T) {
 		sig := sk.SignByte(chRaw)
 		sigB64 := base64.StdEncoding.EncodeToString(sig.Serialize())
 		_ = pkRaw // not needed directly here; verify endpoint will deserialize from provided public key
-		pairs = append(pairs, map[string]string{"public_key_b64": ir.PublicKeysB64[i], "signature_b64": sigB64, "challenge_b64": ir.ChallengesB64[i]})
+		pairs = append(pairs, map[string]string{
+			"public_key_b64": ir.PublicKeysB64[i], "signature_b64": sigB64,
+			"challenge_b64": ir.ChallengesB64[i],
+		})
 	}
 	verifyReq := map[string]interface{}{"pairs": pairs}
 	vb, _ := json.Marshal(verifyReq)
@@ -140,7 +143,11 @@ func TestBLSPoPFailure(t *testing.T) {
 		if i == 1 { // tamper second signature
 			sigRaw[0] ^= 0xFF
 		}
-		pairs = append(pairs, map[string]string{"public_key_b64": ir.PublicKeysB64[i], "signature_b64": base64.StdEncoding.EncodeToString(sigRaw), "challenge_b64": ir.ChallengesB64[i]})
+		pairs = append(pairs, map[string]string{
+			"public_key_b64": ir.PublicKeysB64[i],
+			"signature_b64":  base64.StdEncoding.EncodeToString(sigRaw),
+			"challenge_b64":  ir.ChallengesB64[i],
+		})
 	}
 	verifyReq := map[string]interface{}{"pairs": pairs}
 	vb, _ := json.Marshal(verifyReq)
@@ -166,7 +173,8 @@ func TestBLSPoPFailure(t *testing.T) {
 	}
 }
 
-// TestBLSPoPEdgeCases covers malformed base64 inputs, empty pairs, missing fields, duplicate public keys, and mismatched challenge/signature pairs.
+// TestBLSPoPEdgeCases covers malformed base64 inputs, empty pairs, missing fields,
+// duplicate public keys, and mismatched challenge/signature pairs.
 func TestBLSPoPEdgeCases(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
@@ -233,8 +241,10 @@ func TestBLSPoPEdgeCases(t *testing.T) {
 	sig0 := sk1.SignByte(ch0Raw).Serialize()
 	sig1 := sk1.SignByte(ch1Raw).Serialize()
 	pairsDup := []map[string]string{
-		{"public_key_b64": ir.PublicKeysB64[0], "signature_b64": base64.StdEncoding.EncodeToString(sig0), "challenge_b64": ir.ChallengesB64[0]},
-		{"public_key_b64": ir.PublicKeysB64[0], "signature_b64": base64.StdEncoding.EncodeToString(sig1), "challenge_b64": ir.ChallengesB64[1]},
+		{"public_key_b64": ir.PublicKeysB64[0],
+			"signature_b64": base64.StdEncoding.EncodeToString(sig0), "challenge_b64": ir.ChallengesB64[0]},
+		{"public_key_b64": ir.PublicKeysB64[0],
+			"signature_b64": base64.StdEncoding.EncodeToString(sig1), "challenge_b64": ir.ChallengesB64[1]},
 	}
 	vbDup, _ := json.Marshal(map[string]interface{}{"pairs": pairsDup})
 	wDup := httptest.NewRecorder()
@@ -268,7 +278,8 @@ func TestBLSPoPEdgeCases(t *testing.T) {
 	}
 	sigTampered := sk2.SignByte(tampered).Serialize()
 	pairsMismatch := []map[string]string{
-		{"public_key_b64": ir.PublicKeysB64[1], "signature_b64": base64.StdEncoding.EncodeToString(sigTampered), "challenge_b64": ir.ChallengesB64[1]},
+		{"public_key_b64": ir.PublicKeysB64[1],
+			"signature_b64": base64.StdEncoding.EncodeToString(sigTampered), "challenge_b64": ir.ChallengesB64[1]},
 	}
 	vbMis, _ := json.Marshal(map[string]interface{}{"pairs": pairsMismatch})
 	wMis := httptest.NewRecorder()
@@ -289,7 +300,8 @@ func TestBLSPoPEdgeCases(t *testing.T) {
 	}
 
 	// Missing field (challenge_b64 omitted) -> decoding failure counted
-	missingField := `{"pairs":[{"public_key_b64":"` + ir.PublicKeysB64[0] + `","signature_b64":"` + base64.StdEncoding.EncodeToString(sig0) + `"}]}`
+	missingField := `{"pairs":[{"public_key_b64":"` + ir.PublicKeysB64[0] +
+		`","signature_b64":"` + base64.StdEncoding.EncodeToString(sig0) + `"}]}`
 	wMF := httptest.NewRecorder()
 	reqMF := httptest.NewRequest("POST", "/api/v1/crypto/bls/pop/verify", bytes.NewReader([]byte(missingField)))
 	srv.router.ServeHTTP(wMF, reqMF)

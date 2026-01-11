@@ -181,6 +181,7 @@ const (
 	statusDeprecated       = "deprecated"
 	statusSunset           = "sunset"
 	memoryProvider         = "memory"
+	defaultHost            = "localhost"
 	tsaStubProvider        = "tsa-stub"
 	emptyValue             = "empty"
 	// Source/provider literals

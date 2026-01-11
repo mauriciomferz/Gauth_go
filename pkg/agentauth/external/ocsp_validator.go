@@ -332,7 +332,11 @@ func (v *OCSPValidator) resolveOCSPServer(req *OCSPValidationRequest) string {
 	return v.getOCSPServer(req.Certificate, req.IssuerCertificate)
 }
 
-func (v *OCSPValidator) fetchOCSPResponse(ctx context.Context, server string, req *OCSPValidationRequest) (*ocsp.Response, error) {
+func (v *OCSPValidator) fetchOCSPResponse(
+	ctx context.Context,
+	server string,
+	req *OCSPValidationRequest,
+) (*ocsp.Response, error) {
 	ocspReq, err := v.createOCSPRequest(req.Certificate, req.IssuerCertificate, req.Nonce)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create OCSP request: %w", err)
@@ -354,7 +358,11 @@ func (v *OCSPValidator) fetchOCSPResponse(ctx context.Context, server string, re
 	return nil, lastErr
 }
 
-func (v *OCSPValidator) verifyAndPopulateResult(result *OCSPValidationResult, ocspResp *ocsp.Response, req *OCSPValidationRequest) {
+func (v *OCSPValidator) verifyAndPopulateResult(
+	result *OCSPValidationResult,
+	ocspResp *ocsp.Response,
+	req *OCSPValidationRequest,
+) {
 	// Verify signature
 	if v.config.RequireSignature {
 		if err := v.verifyOCSPSignature(ocspResp, req.IssuerCertificate); err != nil {
@@ -387,7 +395,10 @@ func (v *OCSPValidator) verifyAndPopulateResult(result *OCSPValidationResult, oc
 }
 
 // ValidateCertificateChain validates an entire certificate chain
-func (v *OCSPValidator) ValidateCertificateChain(ctx context.Context, req *CertificateChainValidationRequest) (*CertificateChainValidationResult, error) {
+func (v *OCSPValidator) ValidateCertificateChain(
+	ctx context.Context,
+	req *CertificateChainValidationRequest,
+) (*CertificateChainValidationResult, error) {
 	startTime := time.Now()
 
 	result := &CertificateChainValidationResult{
@@ -478,7 +489,7 @@ func (v *OCSPValidator) sendOCSPRequest(ctx context.Context, server string, requ
 	if err != nil {
 		return nil, fmt.Errorf("OCSP HTTP request failed: %w", err)
 	}
-	defer httpResp.Body.Close()
+	defer func() { _ = httpResp.Body.Close() }()
 
 	if httpResp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("OCSP responder returned status %d", httpResp.StatusCode)
@@ -624,7 +635,7 @@ func (v *OCSPValidator) fetchCRL(ctx context.Context, url string) (*pkix.Certifi
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("CRL fetch returned status %d", resp.StatusCode)
@@ -635,10 +646,14 @@ func (v *OCSPValidator) fetchCRL(ctx context.Context, url string) (*pkix.Certifi
 		return nil, err
 	}
 
-	return x509.ParseCRL(body)
+	return x509.ParseCRL(body) //nolint:staticcheck
 }
 
-func (v *OCSPValidator) checkCRL(result *OCSPValidationResult, crl *pkix.CertificateList, cert *x509.Certificate) *OCSPValidationResult {
+func (v *OCSPValidator) checkCRL(
+	result *OCSPValidationResult,
+	crl *pkix.CertificateList,
+	cert *x509.Certificate,
+) *OCSPValidationResult {
 	result.ThisUpdate = crl.TBSCertList.ThisUpdate
 	result.NextUpdate = crl.TBSCertList.NextUpdate
 

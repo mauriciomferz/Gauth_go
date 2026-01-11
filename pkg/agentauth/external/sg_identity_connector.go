@@ -180,7 +180,10 @@ func NewSingaporeIdentityConnector(config *SingaporeConnectorConfig) (*Singapore
 
 // AuthenticateSingPass authenticates using SingPass
 // Auth levels: L0 (basic), L2 (2FA with OneKey/SMS)
-func (sc *SingaporeIdentityConnector) AuthenticateSingPass(ctx context.Context, req *SingPassAuthRequest) (*SingPassAuthResponse, error) {
+func (sc *SingaporeIdentityConnector) AuthenticateSingPass(
+	ctx context.Context,
+	req *SingPassAuthRequest,
+) (*SingPassAuthResponse, error) {
 	// Validate request
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -308,7 +311,10 @@ func (sc *SingaporeIdentityConnector) RetrieveMyInfo(ctx context.Context, req *M
 }
 
 // AuthenticateCorpPass authenticates using CorpPass (for businesses)
-func (sc *SingaporeIdentityConnector) AuthenticateCorpPass(ctx context.Context, req *CorpPassAuthRequest) (*CorpPassAuthResponse, error) {
+func (sc *SingaporeIdentityConnector) AuthenticateCorpPass(
+	ctx context.Context,
+	req *CorpPassAuthRequest,
+) (*CorpPassAuthResponse, error) {
 	// Validate request
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -395,7 +401,7 @@ func (sc *SingaporeIdentityConnector) validateNRICCheckLetter(nric string) bool 
 	remainder := sum % 11
 	expectedLetter := checkLetters[remainder]
 
-	return checkLetter == byte(expectedLetter)
+	return checkLetter == expectedLetter
 }
 
 func (sc *SingaporeIdentityConnector) generateCacheKey(operation string, parts ...string) string {
@@ -403,6 +409,8 @@ func (sc *SingaporeIdentityConnector) generateCacheKey(operation string, parts .
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*SingaporeIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (sc *SingaporeIdentityConnector) GetMetrics() map[string]interface{} {

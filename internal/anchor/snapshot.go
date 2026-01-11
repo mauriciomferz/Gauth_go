@@ -32,7 +32,13 @@ func BuildSnapshot(receipts []Receipt) Snapshot {
 		_, _ = h.Write([]byte(hx))
 	}
 	root := hex.EncodeToString(h.Sum(nil))
-	return Snapshot{RootHash: root, Count: len(hashes), GeneratedAt: time.Now().UTC().Format(time.RFC3339Nano), Hashes: hashes, Version: 1}
+	return Snapshot{
+		RootHash:    root,
+		Count:       len(hashes),
+		GeneratedAt: time.Now().UTC().Format(time.RFC3339Nano),
+		Hashes:      hashes,
+		Version:     1,
+	}
 }
 
 // CanonicalBytes returns canonical JSON serialization used for signing.

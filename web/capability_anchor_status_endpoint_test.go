@@ -17,7 +17,7 @@ func TestCapabilityAnchorStatusEndpoint(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	anchorFile.Close()
+	_ = anchorFile.Close()
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	capFile := filepath.Join(t.TempDir(), "caps.json")

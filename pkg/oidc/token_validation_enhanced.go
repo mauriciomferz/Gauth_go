@@ -155,7 +155,9 @@ func NewEnhancedTokenValidator(
 }
 
 // ValidateToken performs comprehensive token validation.
-func (v *EnhancedTokenValidator) ValidateToken(ctx context.Context, tokenString, issuer, audience string) (*ValidationResult, error) {
+func (v *EnhancedTokenValidator) ValidateToken(
+	ctx context.Context, tokenString, issuer, audience string,
+) (*ValidationResult, error) {
 	result := &ValidationResult{
 		Valid:          true,
 		Errors:         []ValidationError{},

@@ -20,7 +20,11 @@ func TestExternalRevocationAnchor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create anchor observer: %v", err)
 	}
-	defer anchorObs.Close()
+	t.Cleanup(func() {
+		if closeErr := anchorObs.Close(); closeErr != nil {
+			t.Errorf("anchor observer close: %v", closeErr)
+		}
+	})
 
 	// Create a mock SignedTreeHead
 	sth := &SignedTreeHead{
@@ -69,7 +73,11 @@ func TestExternalRevocationAnchor_MultipleAnchors(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create anchor observer: %v", err)
 	}
-	defer anchorObs.Close()
+	t.Cleanup(func() {
+		if closeErr := anchorObs.Close(); closeErr != nil {
+			t.Errorf("anchor observer close: %v", closeErr)
+		}
+	})
 
 	// Anchor multiple tree heads
 	for i := 0; i < 5; i++ {
@@ -104,7 +112,11 @@ func TestExternalRevocationAnchor_FallbackToAggregateHash(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create anchor observer: %v", err)
 	}
-	defer anchorObs.Close()
+	t.Cleanup(func() {
+		if closeErr := anchorObs.Close(); closeErr != nil {
+			t.Errorf("anchor observer close: %v", closeErr)
+		}
+	})
 
 	// Create STH without MerkleRoot (should fall back to AggregateHash)
 	sth := &SignedTreeHead{

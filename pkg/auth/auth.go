@@ -229,7 +229,10 @@ type DelegationResponse struct {
 	ComplianceStatus string
 }
 
-func (a *SimpleAuthenticator) AuthorizePowerOfAttorney(ctx context.Context, req PowerOfAttorneyRequest) (*PowerOfAttorneyResponse, error) {
+func (a *SimpleAuthenticator) AuthorizePowerOfAttorney(
+	ctx context.Context,
+	req PowerOfAttorneyRequest,
+) (*PowerOfAttorneyResponse, error) {
 	// --- Demo validation logic (beta demonstration; simplified, not production) ---
 	// Accept only a small whitelist of jurisdictions.
 	validJurisdictions := map[string]bool{"US": true, "EU": true, "UK": true, "DE": true}

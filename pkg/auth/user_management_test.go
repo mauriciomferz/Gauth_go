@@ -43,11 +43,6 @@ func TestUser_EmptyFields(t *testing.T) {
 		Active:   false,
 	}
 
-	// Empty user should be creatable (validation happens elsewhere)
-	if user == nil {
-		t.Error("User struct should be creatable with empty fields")
-	}
-
 	if user.ID != "" {
 		t.Error("Expected empty ID")
 	}

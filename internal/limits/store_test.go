@@ -97,12 +97,10 @@ func TestManagerSnapshotCallback(t *testing.T) {
 		t.Skip("short mode")
 	}
 	// Override env interval small for test
-	os.Setenv("AGENTAUTH_LIMITS_PERSIST_INTERVAL_SEC", "1")
-	defer os.Unsetenv("AGENTAUTH_LIMITS_PERSIST_INTERVAL_SEC")
+	t.Setenv("AGENTAUTH_LIMITS_PERSIST_INTERVAL_SEC", "1")
 	dir := t.TempDir()
 	path := filepath.Join(dir, "m.json")
-	os.Setenv("AGENTAUTH_LIMITS_PERSIST_PATH", path)
-	defer os.Unsetenv("AGENTAUTH_LIMITS_PERSIST_PATH")
+	t.Setenv("AGENTAUTH_LIMITS_PERSIST_PATH", path)
 	mgr, err := InitFromEnv()
 	if err != nil {
 		t.Fatalf("init mgr: %v", err)

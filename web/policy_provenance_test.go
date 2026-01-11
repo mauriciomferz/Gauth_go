@@ -64,7 +64,9 @@ func TestPolicyProvenanceMalformedHash(t *testing.T) {
 	// Should return 400 Bad Request or 200 with error/success=false
 	if w.Code == 200 {
 		var body map[string]any
-		json.Unmarshal(w.Body.Bytes(), &body)
+		if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
 		if s, ok := body["success"].(bool); ok && s {
 			t.Fatal("expected success=false for malformed hash")
 		}
@@ -83,8 +85,9 @@ func TestPolicyProvenanceUnseeded(t *testing.T) {
 	srv.router.ServeHTTP(w, httptest.NewRequest("GET", "/api/v1/policy/provenance", nil))
 
 	var body map[string]any
-	json.Unmarshal(w.Body.Bytes(), &body)
-
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
 	if l, ok := body["length"].(float64); !ok || l != 0 {
 		t.Errorf("expected length 0 for unseeded registry, got %v", body["length"])
 	}

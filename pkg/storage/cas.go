@@ -96,10 +96,8 @@ func (s *LocalCAS) Put(ctx context.Context, data []byte) (string, error) {
 		return "", fmt.Errorf("failed to rename to final path: %w", err)
 	}
 
-	// Set read-only permissions to discourage tampering
-	if err := os.Chmod(path, 0o400); err != nil {
-		// Log warning? For now just continue, it's a hardening measure.
-	}
+	// Set read-only permissions to discourage tampering (best-effort hardening).
+	_ = os.Chmod(path, 0o400)
 
 	return hash, nil
 }

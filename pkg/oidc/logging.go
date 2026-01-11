@@ -414,12 +414,7 @@ func (l *Logger) LogError(errorType, message string, err error) {
 }
 
 // GlobalLogger is the global logger instance.
-var GlobalLogger *Logger
-
-func init() {
-	// Initialize with default configuration
-	GlobalLogger = NewLogger(DefaultLoggerConfig())
-}
+var GlobalLogger = NewLogger(DefaultLoggerConfig())
 
 // SetGlobalLogger sets the global logger instance.
 func SetGlobalLogger(logger *Logger) {

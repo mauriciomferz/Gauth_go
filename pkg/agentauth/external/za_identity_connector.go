@@ -27,8 +27,8 @@ type SouthAfricaIdentityConnector struct {
 // SouthAfricaConnectorConfig configuration for South African identity connector
 type SouthAfricaConnectorConfig struct {
 	// Department of Home Affairs configuration
-	DHA_URL    string `validate:"required,url"`
-	DHA_APIKey string `validate:"required"`
+	DHA_URL    string `validate:"required,url"` //nolint:stylecheck
+	DHA_APIKey string `validate:"required"`     //nolint:stylecheck
 
 	// NATIS (traffic department) configuration
 	NATISURL    string `validate:"url"`
@@ -218,7 +218,10 @@ func (zac *SouthAfricaIdentityConnector) ValidateIDNumber(ctx context.Context, r
 }
 
 // VerifyDriverLicense verifies South African driver's license
-func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *ZADriverLicenseRequest) (*ZADriverLicenseResponse, error) {
+func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(
+	ctx context.Context,
+	req *ZADriverLicenseRequest,
+) (*ZADriverLicenseResponse, error) {
 	// Validate request
 	if err := zac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -249,7 +252,10 @@ func (zac *SouthAfricaIdentityConnector) VerifyDriverLicense(ctx context.Context
 }
 
 // VerifyPassport verifies South African passport
-func (zac *SouthAfricaIdentityConnector) VerifyPassport(ctx context.Context, req *ZAPassportRequest) (*ZAPassportResponse, error) {
+func (zac *SouthAfricaIdentityConnector) VerifyPassport(
+	ctx context.Context,
+	req *ZAPassportRequest,
+) (*ZAPassportResponse, error) {
 	// Validate request
 	if err := zac.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -308,6 +314,8 @@ func (zac *SouthAfricaIdentityConnector) generateCacheKey(operation string, part
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*SouthAfricaIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (zac *SouthAfricaIdentityConnector) GetMetrics() map[string]interface{} {

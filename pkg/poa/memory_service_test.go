@@ -773,10 +773,6 @@ func generateTestID(idx int) string {
 	return fmt.Sprintf("test_poa_%d", idx)
 }
 
-func generateTestSubject(idx int) string {
-	return fmt.Sprintf("test_subject_%d", idx)
-}
-
 func generateTestResource(idx int) string {
 	return fmt.Sprintf("test_resource_%d", idx)
 }

@@ -32,7 +32,8 @@ func RegisterDurableReplayStoreFactory(factory DurableReplayStoreFactory) {
 func WithDurableReplayFromEnvUsingFactory() Option {
 	return func(s *Service) error {
 		if durableReplayFactory == nil {
-			return fmt.Errorf("durable replay factory not registered - import pkg/replay and call agentauth.RegisterDurableReplayStoreFactory first")
+			return fmt.Errorf("durable replay factory not registered - " +
+				"import pkg/replay and call agentauth.RegisterDurableReplayStoreFactory first")
 		}
 
 		// Create replay store using factory

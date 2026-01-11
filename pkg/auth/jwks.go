@@ -40,13 +40,13 @@ func NewJWKSClient(uri string, ttl time.Duration) *JWKSClient {
 func (c *JWKSClient) GetKey(ctx context.Context, kid string) (interface{}, error) {
 	// 1. Try generic read lock
 	c.mu.RLock()
-	key, ok := c.keys[kid]
+	cachedKey, ok := c.keys[kid]
 	lastRef := c.lastRefresh
 	c.mu.RUnlock()
 
 	// If found and cache is fresh, return
 	if ok && time.Since(lastRef) < c.cacheTTL {
-		return key, nil
+		return cachedKey, nil
 	}
 
 	// 2. Refresh needed (missing or stale)
@@ -56,22 +56,22 @@ func (c *JWKSClient) GetKey(ctx context.Context, kid string) (interface{}, error
 	defer c.mu.Unlock()
 
 	// Re-check after lock
-	if key, ok := c.keys[kid]; ok && time.Since(c.lastRefresh) < c.cacheTTL {
-		return key, nil
+	if refreshedKey, keyFound := c.keys[kid]; keyFound && time.Since(c.lastRefresh) < c.cacheTTL {
+		return refreshedKey, nil
 	}
 
 	if err := c.refresh(ctx); err != nil {
 		// If refresh failed, but we have a stale key, should we return it?
 		// Fallback to stale if available
 		if ok {
-			return key, nil
+			return cachedKey, nil
 		}
 		return nil, fmt.Errorf("failed to fetch JWKS and key not cached: %w", err)
 	}
 
 	// 3. Retry lookup
-	if key, ok := c.keys[kid]; ok {
-		return key, nil
+	if refreshedKey, keyFound := c.keys[kid]; keyFound {
+		return refreshedKey, nil
 	}
 
 	return nil, fmt.Errorf("key %s not found in JWKS", kid)
@@ -87,7 +87,7 @@ func (c *JWKSClient) refresh(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("jwks endpoint returned status %d", resp.StatusCode)

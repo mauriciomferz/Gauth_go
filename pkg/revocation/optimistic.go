@@ -59,7 +59,11 @@ type OptimisticRevocation struct {
 }
 
 // NewOptimisticRevocation creates a new optimistic revocation system
-func NewOptimisticRevocation(redisAddrs []string, oracle *EmergencyRevocationOracle, logger Logger) (*OptimisticRevocation, error) {
+func NewOptimisticRevocation(
+	redisAddrs []string,
+	oracle *EmergencyRevocationOracle,
+	logger Logger,
+) (*OptimisticRevocation, error) {
 	if len(redisAddrs) == 0 {
 		return nil, fmt.Errorf("at least one Redis address required")
 	}
@@ -102,7 +106,11 @@ func NewOptimisticRevocation(redisAddrs []string, oracle *EmergencyRevocationOra
 
 // MarkPendingRevocation marks a PoA as pending revocation (with collateral)
 // This immediately rejects NEW transactions while allowing mempool to clear
-func (o *OptimisticRevocation) MarkPendingRevocation(ctx context.Context, poaID, principal, reason string, collateral uint64) error {
+func (o *OptimisticRevocation) MarkPendingRevocation(
+	ctx context.Context,
+	poaID, principal, reason string,
+	collateral uint64,
+) error {
 	start := time.Now()
 	o.logger.Infof("Marking PoA %s as pending revocation (collateral: %d Wei)", poaID, collateral)
 

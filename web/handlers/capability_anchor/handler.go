@@ -1,4 +1,4 @@
-package capability_anchor
+package capability_anchor //nolint:stylecheck
 
 import (
 	"context"
@@ -43,7 +43,14 @@ type Handler struct {
 }
 
 // NewHandler creates a new capability anchor handler.
-func NewHandler(provider anchorint.Provider, store ReceiptStore, m metrics.Metrics, providerName string, retries int, retryDelay time.Duration) *Handler {
+func NewHandler(
+	provider anchorint.Provider,
+	store ReceiptStore,
+	m metrics.Metrics,
+	providerName string,
+	retries int,
+	retryDelay time.Duration,
+) *Handler {
 	return &Handler{
 		Provider:     provider,
 		Store:        store,

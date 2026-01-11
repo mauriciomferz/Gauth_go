@@ -300,9 +300,9 @@ func (s *PostgreSQLDelegationService) CreateDelegation(
 	// Marshal delegation policy to JSON (can be nil)
 	var policyJSON []byte
 	if delegation.DelegationPolicy != nil {
-		policyBytes, err := json.Marshal(delegation.DelegationPolicy)
-		if err != nil {
-			return fmt.Errorf("failed to marshal delegation policy: %w", err)
+		policyBytes, marshalErr := json.Marshal(delegation.DelegationPolicy)
+		if marshalErr != nil {
+			return fmt.Errorf("failed to marshal delegation policy: %w", marshalErr)
 		}
 		policyJSON = policyBytes
 	}
@@ -608,7 +608,7 @@ func (s *PostgreSQLPoAStore) GetPoA(ctx context.Context, poaID string) (*Enhance
 			var meta map[string]interface{}
 			_ = json.Unmarshal(metadataJSON, &meta)
 			if p, ok := meta["delegation_policy"]; ok {
-				if pb, err := json.Marshal(p); err == nil {
+				if pb, marshalErr := json.Marshal(p); marshalErr == nil {
 					poa.DelegationPolicy, _ = UnmarshalDelegationPolicy(pb)
 				}
 			}
@@ -735,7 +735,7 @@ func (s *PostgreSQLPoAStore) GetPoAsByGrantee(ctx context.Context, granteeID str
 			var meta map[string]interface{}
 			_ = json.Unmarshal(metadataJSON, &meta)
 			if p, ok := meta["delegation_policy"]; ok {
-				if pb, err := json.Marshal(p); err == nil {
+				if pb, marshalErr := json.Marshal(p); marshalErr == nil {
 					poa.DelegationPolicy, _ = UnmarshalDelegationPolicy(pb)
 				}
 			}

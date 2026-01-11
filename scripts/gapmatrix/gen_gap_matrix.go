@@ -128,7 +128,7 @@ func readCSV(p string) ([]gapRow, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	cr := csv.NewReader(f)
 	cr.FieldsPerRecord = -1
 	header, err := cr.Read()
@@ -187,7 +187,7 @@ func parseCuratedMarkdown(p string) (map[string]parsedRequirement, map[string]pa
 	if err != nil {
 		return nil, nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	byID := make(map[string]parsedRequirement)
 	byReq := make(map[string]parsedRequirement)
@@ -313,7 +313,10 @@ func compareDrift(rows []gapRow, curatedByID, curatedByReq map[string]parsedRequ
 			if r.ID != "" {
 				key = fmt.Sprintf("%s (%s)", r.ID, r.Requirement)
 			}
-			diffs = append(diffs, fmt.Sprintf("%s: CSV(Status=%s,Priority=%s) != MD(Status=%s,Priority=%s)", key, r.Status, r.Priority, c.Status, c.Priority))
+			diffs = append(diffs, fmt.Sprintf(
+				"%s: CSV(Status=%s,Priority=%s) != MD(Status=%s,Priority=%s)",
+				key, r.Status, r.Priority, c.Status, c.Priority,
+			))
 		}
 	}
 	return diffs
@@ -351,7 +354,11 @@ func writeAutoMarkdown(rows []gapRow, caps capabilitiesFile, drift []string, cou
 	var b strings.Builder
 	fmt.Fprintf(&b, "# AgentAuth RFC Gap Matrix (Generated)\n\n")
 	fmt.Fprintf(&b, "> Generated: %s\n\n", time.Now().UTC().Format(time.RFC3339))
-	fmt.Fprintf(&b, "**Status Summary:** Implemented=%d | Partial=%d | Missing=%d | Conceptual=%d | Total=%d\n\n", counts.Implemented, counts.Partial, counts.Missing, counts.Conceptual, counts.Total)
+	fmt.Fprintf(
+		&b,
+		"**Status Summary:** Implemented=%d | Partial=%d | Missing=%d | Conceptual=%d | Total=%d\n\n",
+		counts.Implemented, counts.Partial, counts.Missing, counts.Conceptual, counts.Total,
+	)
 	if len(drift) > 0 {
 		fmt.Fprintf(&b, "**Drift Detected (%d items)**:\n", len(drift))
 		for _, d := range drift {
@@ -379,7 +386,11 @@ func writeAutoMarkdown(rows []gapRow, caps capabilitiesFile, drift []string, cou
 		fmt.Fprintf(&b, "| ID | Requirement | Status | Priority | Gap | Evidence |\n")
 		fmt.Fprintf(&b, "|----|-------------|--------|----------|-----|----------|\n")
 		for _, r := range sections[sec] {
-			fmt.Fprintf(&b, "| %s | %s | %s | %s | %s | %s |\n", r.ID, esc(r.Requirement), r.Status, r.Priority, esc(r.Gap), esc(r.Evidence))
+			fmt.Fprintf(
+				&b,
+				"| %s | %s | %s | %s | %s | %s |\n",
+				r.ID, esc(r.Requirement), r.Status, r.Priority, esc(r.Gap), esc(r.Evidence),
+			)
 		}
 		fmt.Fprintf(&b, "\n")
 	}
@@ -563,7 +574,7 @@ func appendHistory(counts statusCounts) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	if _, err := f.WriteString(string(b) + "\n"); err != nil {
 		return err
 	}
@@ -599,7 +610,7 @@ func appendStatusHistory(rows []gapRow) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	if _, err := f.WriteString(string(b) + "\n"); err != nil {
 		return err
 	}

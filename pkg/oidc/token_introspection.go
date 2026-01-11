@@ -110,7 +110,9 @@ func NewTokenIntrospectionHandler(
 }
 
 // IntrospectToken introspects a token and returns its metadata per RFC 7662.
-func (h *TokenIntrospectionHandler) IntrospectToken(ctx context.Context, req *IntrospectionRequest) (*IntrospectionResponse, error) {
+func (h *TokenIntrospectionHandler) IntrospectToken(
+	ctx context.Context, req *IntrospectionRequest,
+) (*IntrospectionResponse, error) {
 	// Validate request
 	if err := h.validateIntrospectionRequest(req); err != nil {
 		return nil, err
@@ -339,7 +341,9 @@ func (h *TokenIntrospectionHandler) introspectRefreshToken(ctx context.Context, 
 
 // IntrospectTokenWithValidation introspects a token with full validation.
 // This method performs signature verification and full token validation.
-func (h *TokenIntrospectionHandler) IntrospectTokenWithValidation(ctx context.Context, req *IntrospectionRequest) (*IntrospectionResponse, error) {
+func (h *TokenIntrospectionHandler) IntrospectTokenWithValidation(
+	ctx context.Context, req *IntrospectionRequest,
+) (*IntrospectionResponse, error) {
 	// Validate request
 	if err := h.validateIntrospectionRequest(req); err != nil {
 		return nil, err

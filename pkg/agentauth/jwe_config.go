@@ -250,7 +250,7 @@ func SaveRSAPrivateKey(privateKey *rsa.PrivateKey, path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create private key file: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	if err := pem.Encode(file, privateKeyPEM); err != nil {
 		return fmt.Errorf("failed to encode private key: %w", err)
@@ -275,7 +275,7 @@ func SaveRSAPublicKey(publicKey *rsa.PublicKey, path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create public key file: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	if err := pem.Encode(file, publicKeyPEM); err != nil {
 		return fmt.Errorf("failed to encode public key: %w", err)

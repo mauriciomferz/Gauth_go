@@ -22,7 +22,7 @@ func ScanFile(path, rfc string) ([]Clause, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	var clauses []Clause
 	scanner := bufio.NewScanner(f)
 	line := 0

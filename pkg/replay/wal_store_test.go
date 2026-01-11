@@ -14,7 +14,6 @@ func TestWALAppendAndRecover(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open wal: %v", err)
 	}
-	defer wal.Close()
 	recs := []WALRecord{
 		{Op: "Record", Key: []byte("alpha"), TS: time.Now().Unix()},
 		{Op: "Record", Key: []byte("beta"), TS: time.Now().Add(1 * time.Second).Unix()},
@@ -33,7 +32,7 @@ func TestWALAppendAndRecover(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reopen wal: %v", err)
 	}
-	defer wal2.Close()
+	t.Cleanup(func() { _ = wal2.Close() })
 	var recovered []WALRecord
 	apply := func(r WALRecord) error { recovered = append(recovered, r); return nil }
 	applied, skipped, err := wal2.RecoverWithStats(apply)
@@ -87,7 +86,7 @@ func TestWALRecoverSkipsMalformed(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reopen: %v", err)
 	}
-	defer wal2.Close()
+	t.Cleanup(func() { _ = wal2.Close() })
 	var keys []string
 	apply := func(r WALRecord) error { keys = append(keys, string(r.Key)); return nil }
 	applied, skipped, err := wal2.RecoverWithStats(apply)

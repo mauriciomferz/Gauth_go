@@ -18,7 +18,7 @@ func TestRotationVerifyCLI(t *testing.T) {
 		t.Skip("skipping: rotation v2 endpoint not reachable: ", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != 200 {
 		t.Skip("skipping: non-200 status from rotation v2 endpoint (likely unsigned artifact)")
 	}

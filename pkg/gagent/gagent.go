@@ -140,7 +140,10 @@ func (a *Agent) SetRiskScorer(scorer RiskScorer) {
 }
 
 // EvaluateEnforcement implements AIIntegrationInterface
-func (a *Agent) EvaluateEnforcement(ctx context.Context, req *enforcement.EnforcementRequest) (*enforcement.AIRecommendation, error) {
+func (a *Agent) EvaluateEnforcement(
+	ctx context.Context,
+	req *enforcement.EnforcementRequest,
+) (*enforcement.AIRecommendation, error) {
 	if !a.enabled {
 		return nil, fmt.Errorf("agent %s is disabled", a.id)
 	}
@@ -223,7 +226,11 @@ func (a *Agent) analyzeContext(ctx context.Context, req *enforcement.Enforcement
 }
 
 // calculateRisk calculates risk score
-func (a *Agent) calculateRisk(ctx context.Context, req *enforcement.EnforcementRequest, policyDecision PolicyDecision) (RiskScore, error) {
+func (a *Agent) calculateRisk(
+	ctx context.Context,
+	req *enforcement.EnforcementRequest,
+	policyDecision PolicyDecision,
+) (RiskScore, error) {
 	a.mu.RLock()
 	scorer := a.riskScorer
 	a.mu.RUnlock()
@@ -263,7 +270,11 @@ func (a *Agent) calculateRisk(ctx context.Context, req *enforcement.EnforcementR
 }
 
 // generateRecommendation generates AI recommendation
-func (a *Agent) generateRecommendation(policy PolicyDecision, context ContextInsights, risk RiskScore) *enforcement.AIRecommendation {
+func (a *Agent) generateRecommendation(
+	policy PolicyDecision,
+	context ContextInsights,
+	risk RiskScore,
+) *enforcement.AIRecommendation {
 	confidence := a.calculateConfidence(policy, context, risk)
 	suggestion := a.determineSuggestion(policy, context, risk)
 	reasoning := a.buildReasoning(policy, context, risk)

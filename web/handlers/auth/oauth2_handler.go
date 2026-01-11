@@ -147,7 +147,10 @@ func (h *OAuth2Handler) handleCibaTokenRequest(c *gin.Context, req *TokenRequest
 func (h *OAuth2Handler) handleTokenExchange(c *gin.Context, req *TokenRequest) {
 	// RFC 8693
 	if req.SubjectToken == "" || req.SubjectTokenType == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid_request", "error_description": "Missing subject_token or subject_token_type"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":             "invalid_request",
+			"error_description": "Missing subject_token or subject_token_type",
+		})
 		return
 	}
 

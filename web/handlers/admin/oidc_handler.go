@@ -459,7 +459,9 @@ func (h *OIDCHandler) UpdateOIDCProvider(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Provider updated successfully"})
 }
 
-func (h *OIDCHandler) buildOIDCProviderUpdateQuery(req *UpdateOIDCProviderRequest, tenantID, providerID string) (string, []interface{}) {
+func (h *OIDCHandler) buildOIDCProviderUpdateQuery(
+	req *UpdateOIDCProviderRequest, tenantID, providerID string,
+) (string, []interface{}) {
 	query := `UPDATE oidc_providers SET `
 	params := []interface{}{}
 	paramIndex := 1
@@ -477,13 +479,16 @@ func (h *OIDCHandler) buildOIDCProviderUpdateQuery(req *UpdateOIDCProviderReques
 	}
 
 	// Add updated_by and WHERE clause
-	query += fmt.Sprintf("updated_by = $%d, updated_at = CURRENT_TIMESTAMP WHERE id = $%d AND tenant_id = $%d", paramIndex, paramIndex+1, paramIndex+2)
+	query += fmt.Sprintf("updated_by = $%d, updated_at = CURRENT_TIMESTAMP "+
+		"WHERE id = $%d AND tenant_id = $%d", paramIndex, paramIndex+1, paramIndex+2)
 	params = append(params, "admin", providerID, tenantID)
 
 	return query, params
 }
 
-func (h *OIDCHandler) appendBasicInfoUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+func (h *OIDCHandler) appendBasicInfoUpdates(
+	query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest,
+) (string, []interface{}, int) {
 	if req.DisplayName != nil {
 		query += fmt.Sprintf("display_name = $%d, ", idx)
 		params = append(params, *req.DisplayName)
@@ -497,7 +502,9 @@ func (h *OIDCHandler) appendBasicInfoUpdates(query string, params []interface{},
 	return query, params, idx
 }
 
-func (h *OIDCHandler) appendEndpointUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+func (h *OIDCHandler) appendEndpointUpdates(
+	query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest,
+) (string, []interface{}, int) {
 	if req.AuthorizationEndpoint != nil {
 		query += fmt.Sprintf("authorization_endpoint = $%d, ", idx)
 		params = append(params, *req.AuthorizationEndpoint)
@@ -526,7 +533,9 @@ func (h *OIDCHandler) appendEndpointUpdates(query string, params []interface{}, 
 	return query, params, idx
 }
 
-func (h *OIDCHandler) appendClientConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+func (h *OIDCHandler) appendClientConfigUpdates(
+	query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest,
+) (string, []interface{}, int) {
 	if req.ClientID != nil {
 		query += fmt.Sprintf("client_id = $%d, ", idx)
 		params = append(params, *req.ClientID)
@@ -560,7 +569,9 @@ func (h *OIDCHandler) appendClientConfigUpdates(query string, params []interface
 	return query, params, idx
 }
 
-func (h *OIDCHandler) appendValidationConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+func (h *OIDCHandler) appendValidationConfigUpdates(
+	query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest,
+) (string, []interface{}, int) {
 	if req.ValidateIssuer != nil {
 		query += fmt.Sprintf("validate_issuer = $%d, ", idx)
 		params = append(params, *req.ValidateIssuer)
@@ -584,7 +595,9 @@ func (h *OIDCHandler) appendValidationConfigUpdates(query string, params []inter
 	return query, params, idx
 }
 
-func (h *OIDCHandler) appendFlowConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+func (h *OIDCHandler) appendFlowConfigUpdates(
+	query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest,
+) (string, []interface{}, int) {
 	if req.AutoProvisionUsers != nil {
 		query += fmt.Sprintf("auto_provision_users = $%d, ", idx)
 		params = append(params, *req.AutoProvisionUsers)
@@ -628,7 +641,9 @@ func (h *OIDCHandler) appendFlowConfigUpdates(query string, params []interface{}
 	return query, params, idx
 }
 
-func (h *OIDCHandler) appendAzureConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+func (h *OIDCHandler) appendAzureConfigUpdates(
+	query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest,
+) (string, []interface{}, int) {
 	if req.AzureTenantID != nil {
 		query += fmt.Sprintf("azure_tenant_id = $%d, ", idx)
 		params = append(params, *req.AzureTenantID)
@@ -642,7 +657,9 @@ func (h *OIDCHandler) appendAzureConfigUpdates(query string, params []interface{
 	return query, params, idx
 }
 
-func (h *OIDCHandler) appendMiscConfigUpdates(query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest) (string, []interface{}, int) {
+func (h *OIDCHandler) appendMiscConfigUpdates(
+	query string, params []interface{}, idx int, req *UpdateOIDCProviderRequest,
+) (string, []interface{}, int) {
 	if req.AdditionalParams != nil {
 		query += fmt.Sprintf("additional_params = $%d, ", idx)
 		params = append(params, req.AdditionalParams)
@@ -780,7 +797,7 @@ func (h *OIDCHandler) discoverOIDCProvider(issuerURL string) (map[string]interfa
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch discovery document: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("discovery endpoint returned status %d", resp.StatusCode)
@@ -788,7 +805,7 @@ func (h *OIDCHandler) discoverOIDCProvider(issuerURL string) (map[string]interfa
 
 	// Parse discovery document
 	var discovery OIDCDiscoveryDocument
-	if err := json.NewDecoder(resp.Body).Decode(&discovery); err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(&discovery); err != nil {
 		return nil, fmt.Errorf("failed to parse discovery document: %w", err)
 	}
 
@@ -811,7 +828,7 @@ func (h *OIDCHandler) discoverOIDCProvider(issuerURL string) (map[string]interfa
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch JWKS: %w", err)
 	}
-	defer jwksResp.Body.Close()
+	defer func() { _ = jwksResp.Body.Close() }()
 
 	if jwksResp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("JWKS endpoint returned status %d", jwksResp.StatusCode)

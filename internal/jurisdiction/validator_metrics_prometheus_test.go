@@ -10,7 +10,8 @@ import (
 	"github.com/mauriciomferz/AgentAuth/pkg/compliance"
 )
 
-// TestValidatorMetricsPrometheus ensures validator metrics Prometheus exposition contains expected core metrics after sample validations.
+// TestValidatorMetricsPrometheus ensures validator metrics Prometheus exposition
+// contains expected core metrics after sample validations.
 func TestValidatorMetricsPrometheus(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	eng := NewEnforcementEngine()
@@ -37,7 +38,10 @@ func TestValidatorMetricsPrometheus(t *testing.T) {
 		t.Fatalf("expected normal value limit check success: %v", err)
 	}
 	// Create a violating requirements set
-	badReq := &compliance.JurisdictionRequirements{Jurisdiction: compliance.JurisdictionUS, ValueLimits: map[string]float64{"bad_action": 0}, RequiredApprovals: map[string]compliance.ApprovalLevel{"bad_action": ""}}
+	badReq := &compliance.JurisdictionRequirements{
+		Jurisdiction: compliance.JurisdictionUS, ValueLimits: map[string]float64{"bad_action": 0},
+		RequiredApprovals: map[string]compliance.ApprovalLevel{"bad_action": ""},
+	}
 	if err := validator.ValidateJurisdictionRequirements(context.Background(), badReq, "bad_action"); err == nil {
 		t.Fatalf("expected failure for bad_action invalid limit & approval")
 	}

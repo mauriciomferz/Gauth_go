@@ -155,7 +155,11 @@ type CachePressureGenerator struct {
 }
 
 // NewCachePressureGenerator creates a cache pressure generator.
-func NewCachePressureGenerator(subjects, resources, actions []string, hotSetSize, coldSetSize int, hotSetRatio float64) *CachePressureGenerator {
+func NewCachePressureGenerator(
+	subjects, resources, actions []string,
+	hotSetSize, coldSetSize int,
+	hotSetRatio float64,
+) *CachePressureGenerator {
 	return &CachePressureGenerator{
 		HotSetSize:  hotSetSize,
 		ColdSetSize: coldSetSize,

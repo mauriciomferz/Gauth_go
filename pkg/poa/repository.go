@@ -336,7 +336,10 @@ func (r *Repository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy,
 //
 // To enable authorization checking, inject an AuthorizationChecker via SetAuthorizationChecker().
 // If no checker is configured, only database validation is performed (legacy behavior).
-func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, representativeID, action, resource string) (*PoARecord, bool, string) {
+func (r *Repository) ValidatePoA(
+	ctx context.Context,
+	tenantID, grantorID, representativeID, action, resource string,
+) (*PoARecord, bool, string) {
 	if r.db == nil {
 		return nil, false, "database unavailable"
 	}
@@ -408,7 +411,13 @@ func (r *Repository) ValidatePoA(ctx context.Context, tenantID, grantorID, repre
 
 // AddMultiSignature adds a signature to the PoA and transitions to active if threshold matched.
 // It uses row-level locking (SELECT FOR UPDATE) to ensure concurrency safety (RR-007).
-func (r *Repository) AddMultiSignature(ctx context.Context, tenantID, poaID string, signerID string, signature map[string]interface{}, threshold int) (*PoARecord, error) {
+func (r *Repository) AddMultiSignature(
+	ctx context.Context,
+	tenantID, poaID string,
+	signerID string,
+	signature map[string]interface{},
+	threshold int,
+) (*PoARecord, error) {
 	if r.db == nil {
 		return nil, fmt.Errorf("database not available")
 	}
@@ -417,7 +426,7 @@ func (r *Repository) AddMultiSignature(ctx context.Context, tenantID, poaID stri
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// 1. Lock the row
 	query := `
@@ -440,8 +449,8 @@ func (r *Repository) AddMultiSignature(ctx context.Context, tenantID, poaID stri
 	// 2. Parse existing signatures
 	signatures := make(map[string]interface{})
 	if len(currentSigsRaw) > 0 {
-		if err := json.Unmarshal(currentSigsRaw, &signatures); err != nil {
-			return nil, fmt.Errorf("corrupt multi_signatures data: %w", err)
+		if unmarshalErr := json.Unmarshal(currentSigsRaw, &signatures); unmarshalErr != nil {
+			return nil, fmt.Errorf("corrupt multi_signatures data: %w", unmarshalErr)
 		}
 	}
 
@@ -551,8 +560,8 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 	for rows.Next() {
 		var repType string
 		var count int
-		if err := rows.Scan(&repType, &count); err != nil {
-			return nil, fmt.Errorf("failed to scan rep type: %w", err)
+		if scanErr := rows.Scan(&repType, &count); scanErr != nil {
+			return nil, fmt.Errorf("failed to scan rep type: %w", scanErr)
 		}
 		stats.ByRepType[repType] = count
 	}
@@ -578,8 +587,8 @@ func (r *Repository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStat
 
 	for rows.Next() {
 		var ac ActionCount
-		if err := rows.Scan(&ac.Action, &ac.Count); err != nil {
-			return nil, fmt.Errorf("failed to scan action count: %w", err)
+		if scanErr := rows.Scan(&ac.Action, &ac.Count); scanErr != nil {
+			return nil, fmt.Errorf("failed to scan action count: %w", scanErr)
 		}
 		stats.TopActions = append(stats.TopActions, ac)
 	}

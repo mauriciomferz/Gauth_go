@@ -28,15 +28,10 @@ func TestRotationV2Endpoint(t *testing.T) {
 	if _, err := tmpFile.Write([]byte(cfgJSON)); err != nil {
 		t.Fatalf("write cfg: %v", err)
 	}
-	tmpFile.Close()
+	_ = tmpFile.Close()
 	t.Setenv("AGENTAUTH_ROTATIONS_V2_CONFIG", tmpFile.Name())
 	t.Setenv("AGENTAUTH_ROTATIONS_V2_SIGN", "1")
 	t.Setenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS", "1")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_ROTATIONS_V2_CONFIG")
-		os.Unsetenv("AGENTAUTH_ROTATIONS_V2_SIGN")
-		os.Unsetenv("AGENTAUTH_ROTATIONS_V2_EMBED_PUBS")
-	}()
 
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

@@ -19,6 +19,8 @@ type RateLimitMiddleware struct {
 	useIPAsFallback bool
 }
 
+type apiKeyCtxKey struct{}
+
 // RateLimiter interface for rate limiting
 type RateLimiter interface {
 	Allow(ctx context.Context, key string) error
@@ -74,7 +76,8 @@ func (m *RateLimitMiddleware) Handler(next http.Handler) http.Handler {
 		var rateLimitKey string
 
 		// Validate API key
-		if apiKey != "" {
+		switch {
+		case apiKey != "":
 			var err error
 			apiKeyInfo, err = m.keyStore.ValidateKey(r.Context(), apiKey)
 			if err != nil {
@@ -90,11 +93,11 @@ func (m *RateLimitMiddleware) Handler(next http.Handler) http.Handler {
 				return
 			}
 			rateLimitKey = fmt.Sprintf("apikey:%s", apiKeyInfo.ID)
-		} else if m.useIPAsFallback {
+		case m.useIPAsFallback:
 			// Fall back to IP-based rate limiting
 			ip := m.extractIP(r)
 			rateLimitKey = fmt.Sprintf("ip:%s", ip)
-		} else {
+		default:
 			m.respondError(w, http.StatusUnauthorized, "missing_api_key", "API key required")
 			return
 		}
@@ -118,7 +121,7 @@ func (m *RateLimitMiddleware) Handler(next http.Handler) http.Handler {
 
 		// Add API key info to context if available
 		if apiKeyInfo != nil {
-			ctx := context.WithValue(r.Context(), "api_key", apiKeyInfo)
+			ctx := context.WithValue(r.Context(), apiKeyCtxKey{}, apiKeyInfo)
 			r = r.WithContext(ctx)
 			// Set rate limit headers for successful requests
 			stats := m.limiter.GetStats(rateLimitKey)
@@ -185,7 +188,7 @@ func (m *RateLimitMiddleware) extractIP(r *http.Request) string {
 func (m *RateLimitMiddleware) respondError(w http.ResponseWriter, status int, code, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	fmt.Fprintf(w, `{"error":{"code":"%s","message":"%s"}}`, code, message)
+	_, _ = fmt.Fprintf(w, `{"error":{"code":"%s","message":"%s"}}`, code, message)
 }
 
 // getRetryAfter extracts retry-after duration from rate limit error
@@ -222,7 +225,7 @@ func (m *RateLimitMiddleware) handleGetStats(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"key":"%s","requests_allowed":%d,"requests_denied":%d,"reset_at":"%s"}`,
+	_, _ = fmt.Fprintf(w, `{"key":"%s","requests_allowed":%d,"requests_denied":%d,"reset_at":"%s"}`,
 		key, stats.RequestsAllowed, stats.RequestsDenied, stats.ResetAt.Format(time.RFC3339))
 }
 
@@ -235,7 +238,7 @@ func (m *RateLimitMiddleware) handleReset(w http.ResponseWriter, r *http.Request
 	// For now, just return success
 
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"message":"Rate limit reset for key: %s"}`, key)
+	_, _ = fmt.Fprintf(w, `{"message":"Rate limit reset for key: %s"}`, key)
 }
 
 // HashAPIKey creates a SHA-256 hash of an API key for secure storage

@@ -139,7 +139,11 @@ func NewMockMultiChannelNotifier(sms SMSGateway, email EmailService) *MockMultiC
 }
 
 // SendNotification sends a notification via both SMS and Email.
-func (m *MockMultiChannelNotifier) SendNotification(ctx context.Context, recipient PrincipalContact, subject, message string) error {
+func (m *MockMultiChannelNotifier) SendNotification(
+	ctx context.Context,
+	recipient PrincipalContact,
+	subject, message string,
+) error {
 	// Send via SMS
 	smsMessage := fmt.Sprintf("%s: %s", subject, message)
 	if err := m.smsGateway.SendSMS(ctx, recipient.PhoneNumber, smsMessage); err != nil {

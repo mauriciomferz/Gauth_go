@@ -2,7 +2,6 @@ package agentauth_aap_001
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -393,8 +392,7 @@ func TestBLSEnvironmentFlags(t *testing.T) {
 	}
 
 	// Test with BLS batch disabled (default)
-	os.Setenv("AGENTAUTH_BATCH_VERIFY_BLS", "0")
-	defer os.Unsetenv("AGENTAUTH_BATCH_VERIFY_BLS")
+	t.Setenv("AGENTAUTH_BATCH_VERIFY_BLS", "0")
 
 	batchReq := BatchVerifyTokensRequest{
 		Tokens:  tokens,

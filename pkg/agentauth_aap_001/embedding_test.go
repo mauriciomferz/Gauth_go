@@ -3,7 +3,6 @@ package agentauth_aap_001
 import (
 	"context"
 	"encoding/json"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -21,10 +20,8 @@ func embeddingTestService() *Service {
 
 // TestEmbeddingRoundTrip tests the complete embedding workflow
 func TestEmbeddingRoundTrip(t *testing.T) {
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	defer os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 	svc := embeddingTestService()
 	ctx := WithSubject(context.Background(), "bob")
@@ -71,12 +68,9 @@ func TestEmbeddingRoundTrip(t *testing.T) {
 
 // TestEmbeddingSizeLimit tests that PoA exceeding size limit is not embedded
 func TestEmbeddingSizeLimit(t *testing.T) {
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "100")
-	defer os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-	defer os.Unsetenv("AGENTAUTH_MAX_RAW_POA_BYTES")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "100")
 
 	svc := embeddingTestService()
 	ctx := WithSubject(context.Background(), "bob")
@@ -116,12 +110,9 @@ func TestEmbeddingSizeLimit(t *testing.T) {
 
 // TestOfflineVerification tests AGENTAUTH_OFFLINE_VERIFICATION=1 mode
 func TestOfflineVerification(t *testing.T) {
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_OFFLINE_VERIFICATION", "1")
-	defer os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-	defer os.Unsetenv("AGENTAUTH_OFFLINE_VERIFICATION")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_OFFLINE_VERIFICATION", "1")
 
 	svc := embeddingTestService()
 	ctx := WithSubject(context.Background(), "bob")
@@ -153,9 +144,8 @@ func TestOfflineVerification(t *testing.T) {
 
 // TestBackwardCompatibility tests tokens without RawPOA still work
 func TestBackwardCompatibility(t *testing.T) {
-	os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 	svc := embeddingTestService()
 	ctx := WithSubject(context.Background(), "bob")

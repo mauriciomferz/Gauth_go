@@ -76,7 +76,10 @@ func NewDynamicProviderService(registry ProviderRegistry) *DynamicProviderServic
 }
 
 // RegisterProvider registers a new provider with optional auto-discovery.
-func (s *DynamicProviderService) RegisterProvider(ctx context.Context, cfg DynamicProviderConfig) (*ProviderRegistrationResult, error) {
+func (s *DynamicProviderService) RegisterProvider(
+	ctx context.Context,
+	cfg DynamicProviderConfig,
+) (*ProviderRegistrationResult, error) {
 	result := &ProviderRegistrationResult{
 		ProviderID:   cfg.ID,
 		RegisteredAt: time.Now(),
@@ -329,7 +332,10 @@ func (s *DynamicProviderService) associateProviderWithTenant(tenantID string, pr
 }
 
 // fetchDiscoveryMetadata fetches OIDC discovery metadata from the provider.
-func (s *DynamicProviderService) fetchDiscoveryMetadata(ctx context.Context, cfg DynamicProviderConfig) (*DiscoveryMetadata, error) {
+func (s *DynamicProviderService) fetchDiscoveryMetadata(
+	ctx context.Context,
+	cfg DynamicProviderConfig,
+) (*DiscoveryMetadata, error) {
 	// Determine discovery URL
 	discoveryURL := cfg.DiscoveryURL
 	if discoveryURL == "" {
@@ -354,7 +360,7 @@ func (s *DynamicProviderService) fetchDiscoveryMetadata(ctx context.Context, cfg
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch discovery document: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("discovery endpoint returned status %d", resp.StatusCode)

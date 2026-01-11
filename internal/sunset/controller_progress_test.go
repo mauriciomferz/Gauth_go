@@ -25,7 +25,10 @@ func TestControllerSatisfactionProgress(t *testing.T) {
 	mem.SetEnvelopeV2AdoptionRatio(0.80)
 	mv := MemoryMetricsView{M: mem}
 	// Raise BroadToStabilizeAdoption above current ratio so after promotion criteria are NOT satisfied and progress stays reset.
-	cfg := ControllerConfig{Enable: true, Interval: 50 * time.Millisecond, Window: 180 * time.Millisecond, PilotToBroadAdoption: 0.75, BroadToStabilizeAdoption: 0.85, MaxMismatchRatio: 0.01}
+	cfg := ControllerConfig{
+		Enable: true, Interval: 50 * time.Millisecond, Window: 180 * time.Millisecond,
+		PilotToBroadAdoption: 0.75, BroadToStabilizeAdoption: 0.85, MaxMismatchRatio: 0.01,
+	}
 	ctrl := NewController(cfg, mv)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

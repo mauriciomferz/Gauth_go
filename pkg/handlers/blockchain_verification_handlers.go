@@ -53,7 +53,11 @@ type CachedVerification struct {
 }
 
 // NewBlockchainVerificationHandler creates a new handler
-func NewBlockchainVerificationHandler(registry blockchain.BlockchainRegistry, cacheEnabled bool, cacheTTL time.Duration) *BlockchainVerificationHandler {
+func NewBlockchainVerificationHandler(
+	registry blockchain.BlockchainRegistry,
+	cacheEnabled bool,
+	cacheTTL time.Duration,
+) *BlockchainVerificationHandler {
 	cache := &VerificationCache{
 		enabled: cacheEnabled,
 		ttl:     cacheTTL,

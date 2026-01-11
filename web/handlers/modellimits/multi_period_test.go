@@ -15,9 +15,13 @@ func TestMultiPeriodLimits(t *testing.T) {
 	}
 	// Model A: 5/minute AND 10/hour
 	// Model B: 2/minute
-	jsonContent := `{"model_limits":{"modelA":{"rate_limits_extended":["5/minute", "10/hour"]}, "modelB":{"max_requests_per_minute":2}}}`
+	jsonContent := `{"model_limits":{` +
+		`"modelA":{"rate_limits_extended":["5/minute", "10/hour"]}, ` +
+		`"modelB":{"max_requests_per_minute":2}}}`
 	_, _ = limitsFile.WriteString(jsonContent)
-	limitsFile.Close()
+	if err := limitsFile.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
 
 	h := NewHandler(limitsFile.Name(), "", "")
 	if err := h.Init(context.Background()); err != nil {

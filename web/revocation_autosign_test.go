@@ -1,7 +1,6 @@
 package web
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -13,7 +12,6 @@ import (
 // adding new revocation events does not emit a second identical SignedTreeHead.
 func TestRevocationAutoSignDuplicateSuppression(t *testing.T) {
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", sigModeEdDSA)
-	defer os.Unsetenv("AGENTAUTH_TOKEN_SIG_MODE")
 
 	km, _ := crypto.NewManager(24 * time.Hour)
 	s := NewBetaServer("", WithKeyProvider(km))

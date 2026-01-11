@@ -14,9 +14,12 @@ func TestModelUserLimits(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
+	//nolint:lll // JSON test data
 	limitsJSON := `{"model_limits":{"demo-model":{"max_input_tokens":200,"max_output_tokens":150,"max_requests_per_minute":10}},"user_limits":{"demo-model":{"alice":{"max_input_tokens":100,"max_output_tokens":80,"max_requests_per_minute":2},"bob":{"max_input_tokens":50}}}}`
 	_, _ = tmp.Write([]byte(limitsJSON))
-	tmp.Close()
+	if err := tmp.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
 
 	h := NewHandler(tmp.Name(), "", "")
 	metrics := &mockMetrics{}

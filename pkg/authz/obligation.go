@@ -53,7 +53,7 @@ func (e *AuditObligationExecutor) Execute(ob Obligation, ctx map[string]interfac
 	}
 
 	// Persist the result to the audit ledger
-	e.PersistAudit(ob, ctx, err)
+	_ = e.PersistAudit(ob, ctx, err)
 
 	return err
 }

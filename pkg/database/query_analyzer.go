@@ -268,7 +268,7 @@ func (bi *BatchInserter) BatchInsertPoAs(ctx context.Context, poas []interface{}
 	}
 
 	results := bi.pool.SendBatch(ctx, batch)
-	defer results.Close()
+	defer func() { _ = results.Close() }()
 
 	for i := 0; i < len(poas); i++ {
 		_, err := results.Exec()
@@ -291,7 +291,11 @@ func NewOptimizedPoAQueries(pool *pgxpool.Pool) *OptimizedPoAQueries {
 }
 
 // ListPoAsWithUsers retrieves PoAs with user details in a single query (eliminates N+1)
-func (opq *OptimizedPoAQueries) ListPoAsWithUsers(ctx context.Context, userID string, limit int) ([]map[string]interface{}, error) {
+func (opq *OptimizedPoAQueries) ListPoAsWithUsers(
+	ctx context.Context,
+	userID string,
+	limit int,
+) ([]map[string]interface{}, error) {
 	query := `
 		SELECT 
 			p.id as poa_id,

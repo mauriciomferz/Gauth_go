@@ -15,7 +15,9 @@ func TestModelLimitsDynamicReload(t *testing.T) {
 	}
 	initial := `{"model_limits":{"reload-model":{"max_input_tokens":500}}}`
 	_, _ = tmp.Write([]byte(initial))
-	tmp.Close()
+	if err := tmp.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 
 	h := NewHandler(tmp.Name(), "", "")
 	h.ReloadInterval = 100 * time.Millisecond // poll often

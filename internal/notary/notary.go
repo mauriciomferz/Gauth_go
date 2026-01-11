@@ -170,7 +170,14 @@ func NewExternalStub() *ExternalStubNotarizer {
 		// #nosec G115: int64 seed overflow is acceptable for RNG
 		seed = int64(binary.LittleEndian.Uint64(buf[:]))
 	}
-	return &ExternalStubNotarizer{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: fp, providerName: name, rnd: rand.New(rand.NewSource(seed))} // #nosec G404
+	return &ExternalStubNotarizer{
+		minLatency:   time.Duration(minMs) * time.Millisecond,
+		maxLatency:   time.Duration(maxMs) * time.Millisecond,
+		failProb:     fp,
+		providerName: name,
+		// #nosec G404
+		rnd: rand.New(rand.NewSource(seed)),
+	}
 }
 
 // Notarize simulates a network call with random latency and probabilistic failure.
@@ -191,7 +198,14 @@ func (e *ExternalStubNotarizer) Notarize(hash string) (Receipt, error) {
 		success = false
 	}
 	elapsed := time.Since(start).Seconds()
-	receipt := Receipt{Hash: hash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano), Provider: e.providerName, Version: 1, Success: success, LatencySeconds: elapsed}
+	receipt := Receipt{
+		Hash:           hash,
+		Timestamp:      time.Now().UTC().Format(time.RFC3339Nano),
+		Provider:       e.providerName,
+		Version:        1,
+		Success:        success,
+		LatencySeconds: elapsed,
+	}
 	if success {
 		e.mu.Lock()
 		e.latest = receipt

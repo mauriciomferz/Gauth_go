@@ -12,7 +12,6 @@ func TestExternalRulesLoad(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	defer f.Close()
 	json := `{
 	  "jurisdictions": [
 	    {
@@ -26,15 +25,14 @@ func TestExternalRulesLoad(t *testing.T) {
 	  ]
 	}`
 	if _, err2 := f.WriteString(json); err2 != nil {
-		t.Fatalf("write: %v", err)
+		t.Fatalf("write: %v", err2)
 	}
 	if err2 := f.Close(); err2 != nil {
-		t.Fatalf("close: %v", err)
+		t.Fatalf("close: %v", err2)
 	}
 
 	// Set env to point to file
-	os.Setenv("AGENTAUTH_JURISDICTION_RULES_PATH", f.Name())
-	defer os.Unsetenv("AGENTAUTH_JURISDICTION_RULES_PATH")
+	t.Setenv("AGENTAUTH_JURISDICTION_RULES_PATH", f.Name())
 
 	eng := NewEnforcementEngine()
 	enf, err := eng.GetJurisdictionEnforcement("UNITED_STATES")

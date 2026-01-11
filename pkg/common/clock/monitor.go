@@ -124,13 +124,14 @@ func (s *SystemClockMonitor) check() {
 		absSkew = -absSkew
 	}
 
-	if absSkew > s.maxSkew {
+	switch {
+	case absSkew > s.maxSkew:
 		s.status = StatusCritical
 		log.Printf("[clock] CRITICAL: System clock skew %v exceeds threshold %v", offset, s.maxSkew)
-	} else if absSkew > s.maxSkew/2 {
+	case absSkew > s.maxSkew/2:
 		s.status = StatusWarning
 		log.Printf("[clock] WARNING: System clock skew %v approaching threshold %v", offset, s.maxSkew)
-	} else {
+	default:
 		s.status = StatusHealthy
 	}
 }

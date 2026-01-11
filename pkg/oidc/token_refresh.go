@@ -99,8 +99,8 @@ func (m *RefreshTokenManager) RefreshToken(ctx context.Context, req *RefreshToke
 	}
 
 	// 3. Validate refresh token status
-	if err := m.validateRefreshTokenEntry(entry); err != nil {
-		return nil, fmt.Errorf("invalid refresh token: %w", err)
+	if validateErr := m.validateRefreshTokenEntry(entry); validateErr != nil {
+		return nil, fmt.Errorf("invalid refresh token: %w", validateErr)
 	}
 
 	// 4. Check usage count
@@ -196,7 +196,9 @@ func (m *RefreshTokenManager) validateRefreshTokenEntry(entry *RefreshTokenEntry
 }
 
 // generateNewIDToken creates a new ID token with refreshed claims.
-func (m *RefreshTokenManager) generateNewIDToken(ctx context.Context, entry *RefreshTokenEntry, provider *ProviderConfig) (string, error) {
+func (m *RefreshTokenManager) generateNewIDToken(
+	ctx context.Context, entry *RefreshTokenEntry, provider *ProviderConfig,
+) (string, error) {
 	now := time.Now()
 	expiresAt := now.Add(1 * time.Hour)
 
@@ -231,7 +233,9 @@ func (m *RefreshTokenManager) generateNewIDToken(ctx context.Context, entry *Ref
 }
 
 // rotateRefreshToken creates a new refresh token and revokes the old one.
-func (m *RefreshTokenManager) rotateRefreshToken(ctx context.Context, oldToken string, oldEntry *RefreshTokenEntry) (string, error) {
+func (m *RefreshTokenManager) rotateRefreshToken(
+	ctx context.Context, oldToken string, oldEntry *RefreshTokenEntry,
+) (string, error) {
 	// Generate new refresh token
 	newToken, err := generateSecureToken(32) // 256 bits
 	if err != nil {

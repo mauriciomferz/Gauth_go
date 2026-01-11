@@ -16,8 +16,7 @@ import (
 
 func TestAPIKeyEndpoints_NoDB(t *testing.T) {
 	// Ensure DB is disabled to test graceful degradation
-	os.Setenv("AGENTAUTH_DB_ENABLED", "0")
-	defer os.Unsetenv("AGENTAUTH_DB_ENABLED")
+	t.Setenv("AGENTAUTH_DB_ENABLED", "0")
 
 	server := web.NewBetaServerWithMetrics(":0", nil)
 	ts := httptest.NewServer(server.Handler())
@@ -26,7 +25,7 @@ func TestAPIKeyEndpoints_NoDB(t *testing.T) {
 	// Try to access API keys endpoint
 	resp, err := http.Get(ts.URL + "/api/v1/apikeys")
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Should return 404 because handler is not initialized without DB
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
@@ -41,8 +40,8 @@ func TestAPIKeyEndpoints_WithDB(t *testing.T) {
 	}
 
 	// Setup environment
-	os.Setenv("AGENTAUTH_DB_ENABLED", "1")
-	os.Setenv("AGENTAUTH_DB_MIGRATE", "1")
+	t.Setenv("AGENTAUTH_DB_ENABLED", "1")
+	t.Setenv("AGENTAUTH_DB_MIGRATE", "1")
 	// Parse connection string to set individual env vars required by factory if needed,
 	// or assume factory uses these if set.
 	// Factory uses AGENTAUTH_DB_HOST etc.
@@ -63,21 +62,22 @@ func TestAPIKeyEndpoints_WithDB(t *testing.T) {
 		Description: "Integration Test Key",
 		IPWhitelist: []string{"127.0.0.1"},
 	}
-	body, _ := json.Marshal(reqBody)
+	body, err := json.Marshal(reqBody)
+	require.NoError(t, err)
 	req, _ := http.NewRequest("POST", ts.URL+"/api/v1/apikeys", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	// Implicit admin/user ID handling in handler
 
 	resp, err := client.Do(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("Failed to create API key: status %d", resp.StatusCode)
 	}
 
 	var createdKey apikey.APIKeyWithSecret
-	json.NewDecoder(resp.Body).Decode(&createdKey)
+	require.NoError(t, json.NewDecoder(resp.Body).Decode(&createdKey))
 	assert.NotEmpty(t, createdKey.ID)
 	assert.NotEmpty(t, createdKey.SecretKey)
 	assert.Equal(t, "Test Key", createdKey.Name)
@@ -85,7 +85,7 @@ func TestAPIKeyEndpoints_WithDB(t *testing.T) {
 	// 2. List API Keys
 	resp, err = client.Get(ts.URL + "/api/v1/apikeys")
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// 3. Get API Key
@@ -94,7 +94,7 @@ func TestAPIKeyEndpoints_WithDB(t *testing.T) {
 	// Manager GetAPIKey SQL uses `WHERE key_id = $1`.
 	// Use KeyID.
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// 4. Update API Key
@@ -106,14 +106,14 @@ func TestAPIKeyEndpoints_WithDB(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err = client.Do(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// 5. Delete API Key
 	req, _ = http.NewRequest("DELETE", ts.URL+"/api/v1/apikeys/"+createdKey.KeyID, nil)
 	resp, err = client.Do(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	assert.Equal(t, http.StatusNoContent, resp.StatusCode)
 }
 

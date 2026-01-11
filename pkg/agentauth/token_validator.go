@@ -30,7 +30,10 @@ type CommonClaimValidator struct {
 }
 
 // NewCommonClaimValidator creates a new common claim validator
-func NewCommonClaimValidator(cfg Config, replay ReplayStore, metrics Metrics, jtiTTL time.Duration, violations *observability.ViolationCounters) *CommonClaimValidator {
+func NewCommonClaimValidator(
+	cfg Config, replay ReplayStore, metrics Metrics, jtiTTL time.Duration,
+	violations *observability.ViolationCounters,
+) *CommonClaimValidator {
 	return &CommonClaimValidator{
 		config:     cfg,
 		replay:     replay,

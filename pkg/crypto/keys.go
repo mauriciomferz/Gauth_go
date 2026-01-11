@@ -27,11 +27,12 @@ import (
 
 // Key represents a signing key (Ed25519) with metadata.
 type Key struct {
-	ID              string             `json:"kid"`
-	CreatedAt       time.Time          `json:"created_at"`
-	ExpiresAt       time.Time          `json:"expires_at"`
-	DeprecatedAfter time.Time          `json:"deprecated_after,omitempty"` // AAP002 deprecation warning timestamp (recommended: 80% of TTL)
-	SunsetAfter     time.Time          `json:"sunset_after,omitempty"`     // AAP002 hard cutoff timestamp (same as ExpiresAt)
+	ID        string    `json:"kid"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
+	// AAP002 deprecation warning timestamp (recommended: 80% of TTL)
+	DeprecatedAfter time.Time          `json:"deprecated_after,omitempty"`
+	SunsetAfter     time.Time          `json:"sunset_after,omitempty"` // AAP002 hard cutoff timestamp (same as ExpiresAt)
 	Private         ed25519.PrivateKey `json:"-"`
 	Public          ed25519.PublicKey  `json:"public"`
 	Alg             string             `json:"alg"` // EdDSA
@@ -77,9 +78,17 @@ func SetRotationTracerProvider(tp *tracing.TracerProvider) { RotationTracerProvi
 //	}
 //
 // Only non-expired history keys are kept on load. Missing or corrupt file results in fresh key generation.
+//
+//nolint:gocyclo
 func NewManager(ttl time.Duration) (*Manager, error) {
 	m := &Manager{ttl: ttl, stopCh: make(chan struct{})}
-	fmt.Fprintf(os.Stderr, "[crypto] NewManager: ttl=%v persistPath=%s autoRotate=%s\n", ttl, m.persistPath, os.Getenv("AGENTAUTH_EDDSA_AUTO_ROTATE"))
+	fmt.Fprintf(
+		os.Stderr,
+		"[crypto] NewManager: ttl=%v persistPath=%s autoRotate=%s\n",
+		ttl,
+		m.persistPath,
+		os.Getenv("AGENTAUTH_EDDSA_AUTO_ROTATE"),
+	)
 	if p := os.Getenv("AGENTAUTH_EDDSA_PERSIST_PATH"); p != "" {
 		// Expand ~ and relative path
 		if p[0] == '~' {

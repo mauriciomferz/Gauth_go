@@ -142,7 +142,10 @@ func TestBLSAggregateVerifyTamper(t *testing.T) {
 	}
 	raw[0] ^= 0xFF // mutate
 	tampered := base64.StdEncoding.EncodeToString(raw)
-	vb, _ := json.Marshal(map[string]interface{}{"mode": "verify", "message_b64": msgB64, "aggregated_signature_b64": tampered, "public_keys_b64": ir.PublicKeysB64})
+	vb, _ := json.Marshal(map[string]interface{}{
+		"mode": "verify", "message_b64": msgB64,
+		"aggregated_signature_b64": tampered, "public_keys_b64": ir.PublicKeysB64,
+	})
 	wv := httptest.NewRecorder()
 	reqv := httptest.NewRequest("POST", "/api/v1/crypto/bls/aggregate", bytes.NewReader(vb))
 	srv.router.ServeHTTP(wv, reqv)
@@ -165,7 +168,9 @@ func TestBLSAggregateVerifyTamper(t *testing.T) {
 		// Accept structural failure (deserialize) - metrics not incremented in this path.
 		// No assertion on counters; ensure error marker present.
 		body := wv.Body.String()
-		if !(strings.Contains(body, "aggregated_signature_deserialize_failed") || strings.Contains(body, "aggregated_signature_decode_failed")) {
+		sigDeserFail := strings.Contains(body, "aggregated_signature_deserialize_failed")
+		sigDecodeFail := strings.Contains(body, "aggregated_signature_decode_failed")
+		if !(sigDeserFail || sigDecodeFail) {
 			t.Fatalf("expected deserialize or decode failure marker in body=%s", body)
 		}
 	default:
@@ -226,7 +231,10 @@ func TestBLSAggregateLatencyAdvances(t *testing.T) {
 		t.Fatalf("parse issue resp: %v", err)
 	}
 	// verify
-	vb, _ := json.Marshal(map[string]interface{}{"mode": "verify", "message_b64": msgB64, "aggregated_signature_b64": ir.AggregatedSignatureB64, "public_keys_b64": ir.PublicKeysB64})
+	vb, _ := json.Marshal(map[string]interface{}{
+		"mode": "verify", "message_b64": msgB64,
+		"aggregated_signature_b64": ir.AggregatedSignatureB64, "public_keys_b64": ir.PublicKeysB64,
+	})
 	wv := httptest.NewRecorder()
 	reqv := httptest.NewRequest("POST", "/api/v1/crypto/bls/aggregate", bytes.NewReader(vb))
 	start := time.Now()
@@ -267,7 +275,10 @@ func TestBLSAggregatePublicKeyDecodeFailure(t *testing.T) {
 	}
 	// Corrupt first public key with invalid base64 characters.
 	badKeys := append([]string{"!!!!"}, ir.PublicKeysB64[1:]...)
-	vb, _ := json.Marshal(map[string]interface{}{"mode": "verify", "message_b64": msgB64, "aggregated_signature_b64": ir.AggregatedSignatureB64, "public_keys_b64": badKeys})
+	vb, _ := json.Marshal(map[string]interface{}{
+		"mode": "verify", "message_b64": msgB64,
+		"aggregated_signature_b64": ir.AggregatedSignatureB64, "public_keys_b64": badKeys,
+	})
 	wv := httptest.NewRecorder()
 	reqv := httptest.NewRequest("POST", "/api/v1/crypto/bls/aggregate", bytes.NewReader(vb))
 	srv.router.ServeHTTP(wv, reqv)
@@ -279,7 +290,8 @@ func TestBLSAggregatePublicKeyDecodeFailure(t *testing.T) {
 	}
 }
 
-// TestBLSAggregateAggregatedSignatureDecodeFailure ensures invalid base64 aggregated signature returns 400 aggregated_signature_decode_failed.
+// TestBLSAggregateAggregatedSignatureDecodeFailure ensures invalid base64
+// aggregated signature returns 400 aggregated_signature_decode_failed.
 func TestBLSAggregateAggregatedSignatureDecodeFailure(t *testing.T) {
 	mem := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics(":0", mem)
@@ -299,7 +311,10 @@ func TestBLSAggregateAggregatedSignatureDecodeFailure(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &ir); err != nil {
 		t.Fatalf("parse issue resp: %v", err)
 	}
-	vb, _ := json.Marshal(map[string]interface{}{"mode": "verify", "message_b64": msgB64, "aggregated_signature_b64": "!!!", "public_keys_b64": ir.PublicKeysB64})
+	vb, _ := json.Marshal(map[string]interface{}{
+		"mode": "verify", "message_b64": msgB64,
+		"aggregated_signature_b64": "!!!", "public_keys_b64": ir.PublicKeysB64,
+	})
 	wv := httptest.NewRecorder()
 	reqv := httptest.NewRequest("POST", "/api/v1/crypto/bls/aggregate", bytes.NewReader(vb))
 	srv.router.ServeHTTP(wv, reqv)

@@ -2,7 +2,6 @@ package audit
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -14,18 +13,19 @@ func TestFileLoggerArchival(t *testing.T) {
 	archiveDir := filepath.Join(dir, "archives")
 
 	// Set env vars for OpenFileLogger
-	os.Setenv("AGENTAUTH_AUDIT_ARCHIVE_DIR", archiveDir)
-	os.Setenv("AGENTAUTH_AUDIT_ARCHIVE_COMPRESS", "1")
-	os.Setenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT", "2")
-	defer os.Unsetenv("AGENTAUTH_AUDIT_ARCHIVE_DIR")
-	defer os.Unsetenv("AGENTAUTH_AUDIT_ARCHIVE_COMPRESS")
-	defer os.Unsetenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT")
+	t.Setenv("AGENTAUTH_AUDIT_ARCHIVE_DIR", archiveDir)
+	t.Setenv("AGENTAUTH_AUDIT_ARCHIVE_COMPRESS", "1")
+	t.Setenv("AGENTAUTH_AUDIT_ARCHIVE_MAX_COUNT", "2")
 
 	fl, err := OpenFileLogger(logPath)
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
-	defer fl.Close()
+	t.Cleanup(func() {
+		if err := fl.Close(); err != nil {
+			t.Errorf("file logger close: %v", err)
+		}
+	})
 
 	// Set very small size to trigger rotation after almost every event
 	fl.SetLimits(10, 1) // 10 bytes

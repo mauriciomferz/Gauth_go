@@ -17,7 +17,9 @@ func TestNewLegalFrameworkValidator(t *testing.T) {
 
 	// Test supported jurisdictions are initialized
 	jurisdictions := validator.GetSupportedJurisdictions()
-	expectedJurisdictions := []Jurisdiction{JurisdictionUS, JurisdictionEU, JurisdictionUK, JurisdictionCA, JurisdictionAU, JurisdictionJP}
+	expectedJurisdictions := []Jurisdiction{
+		JurisdictionUS, JurisdictionEU, JurisdictionUK, JurisdictionCA, JurisdictionAU, JurisdictionJP,
+	}
 
 	if len(jurisdictions) != len(expectedJurisdictions) {
 		t.Fatalf("Expected %d jurisdictions, got %d", len(expectedJurisdictions), len(jurisdictions))

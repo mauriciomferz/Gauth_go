@@ -35,10 +35,16 @@ type PowerInformationPoint interface {
 	GetOwnersAuthorizerInfo(ctx context.Context, authorizerID string) (*agentauth.OwnersAuthorizerInfo, error)
 
 	// VerifyCommercialRegister verifies commercial register entry
-	VerifyCommercialRegister(ctx context.Context, registrationNumber, jurisdiction string) (*registry.RegistrationVerificationResult, error)
+	VerifyCommercialRegister(
+		ctx context.Context,
+		registrationNumber, jurisdiction string,
+	) (*registry.RegistrationVerificationResult, error)
 
 	// VerifyIdentityChain verifies complete identity verification chain
-	VerifyIdentityChain(ctx context.Context, req *pvp.IdentityChainVerificationRequest) (*pvp.IdentityChainVerificationResult, error)
+	VerifyIdentityChain(
+		ctx context.Context,
+		req *pvp.IdentityChainVerificationRequest,
+	) (*pvp.IdentityChainVerificationResult, error)
 
 	// GetTrustServiceProvider retrieves TSP information
 	GetTrustServiceProvider(ctx context.Context, tspID string) (*pvp.TSPVerificationResult, error)
@@ -191,7 +197,10 @@ func (pip *DefaultPIP) GetClientOwnerInfo(ctx context.Context, ownerID string) (
 }
 
 // GetOwnersAuthorizerInfo retrieves owner's authorizer information
-func (pip *DefaultPIP) GetOwnersAuthorizerInfo(ctx context.Context, authorizerID string) (*agentauth.OwnersAuthorizerInfo, error) {
+func (pip *DefaultPIP) GetOwnersAuthorizerInfo(
+	ctx context.Context,
+	authorizerID string,
+) (*agentauth.OwnersAuthorizerInfo, error) {
 	// Check cache
 	if cached := pip.cache.GetOwnersAuthorizer(authorizerID); cached != nil {
 		pip.recordCacheHit()
@@ -205,7 +214,10 @@ func (pip *DefaultPIP) GetOwnersAuthorizerInfo(ctx context.Context, authorizerID
 }
 
 // VerifyCommercialRegister verifies commercial register entry
-func (pip *DefaultPIP) VerifyCommercialRegister(ctx context.Context, registrationNumber, jurisdiction string) (*registry.RegistrationVerificationResult, error) {
+func (pip *DefaultPIP) VerifyCommercialRegister(
+	ctx context.Context,
+	registrationNumber, jurisdiction string,
+) (*registry.RegistrationVerificationResult, error) {
 	// Check cache
 	cacheKey := fmt.Sprintf("%s:%s", jurisdiction, registrationNumber)
 	if cached := pip.cache.GetCommercialRegisterVerification(cacheKey); cached != nil {
@@ -231,7 +243,10 @@ func (pip *DefaultPIP) VerifyCommercialRegister(ctx context.Context, registratio
 }
 
 // VerifyIdentityChain verifies complete identity verification chain
-func (pip *DefaultPIP) VerifyIdentityChain(ctx context.Context, req *pvp.IdentityChainVerificationRequest) (*pvp.IdentityChainVerificationResult, error) {
+func (pip *DefaultPIP) VerifyIdentityChain(
+	ctx context.Context,
+	req *pvp.IdentityChainVerificationRequest,
+) (*pvp.IdentityChainVerificationResult, error) {
 	// Delegate to PVP
 	result, err := pip.pvp.VerifyIdentityChain(ctx, req)
 	if err != nil {
@@ -292,7 +307,10 @@ func (pip *DefaultPIP) GetRightsObligations(ctx context.Context, clientID string
 }
 
 // ValidateAuthorization validates if a specific action is authorized
-func (pip *DefaultPIP) ValidateAuthorization(ctx context.Context, req *AuthorizationValidationRequest) (*AuthorizationValidationResult, error) {
+func (pip *DefaultPIP) ValidateAuthorization(
+	ctx context.Context,
+	req *AuthorizationValidationRequest,
+) (*AuthorizationValidationResult, error) {
 	startTime := time.Now()
 
 	// 1. Get authorization chain
@@ -318,16 +336,16 @@ func (pip *DefaultPIP) ValidateAuthorization(ctx context.Context, req *Authoriza
 
 	// 4. Check geographic restrictions
 	if req.Jurisdiction != "" {
-		geoScope, err := pip.GetGeographicScope(ctx, req.ClientID)
-		if err == nil && !pip.isJurisdictionAuthorized(req.Jurisdiction, geoScope) {
+		geoScope, geoErr := pip.GetGeographicScope(ctx, req.ClientID)
+		if geoErr == nil && !pip.isJurisdictionAuthorized(req.Jurisdiction, geoScope) {
 			authorized = false
 		}
 	}
 
 	// 5. Check industry sector restrictions
 	if req.IndustrySector != "" {
-		sectors, err := pip.GetIndustrySectors(ctx, req.ClientID)
-		if err == nil && !pip.isSectorAuthorized(req.IndustrySector, sectors) {
+		sectors, sectorsErr := pip.GetIndustrySectors(ctx, req.ClientID)
+		if sectorsErr == nil && !pip.isSectorAuthorized(req.IndustrySector, sectors) {
 			authorized = false
 		}
 	}
@@ -696,5 +714,6 @@ func (c *AuthorizationCache) evictIfNeeded() {
 	if size > c.maxEntries {
 		// Clear 10% of entries (simple approach)
 		// Real implementation would track access times and evict LRU entries
+		return
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/ed25519"
 	"encoding/base64"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -542,14 +541,16 @@ func TestVerifyMultiSig(t *testing.T) {
 		{
 			name: "POA with signatures but no registry",
 			poa: &ProofOfAuthorization{
-				ID:         "poa_no_reg",
-				Subject:    "user",
-				Resource:   "resource",
-				Action:     "read",
-				Issuer:     "issuer",
-				IssuedAt:   time.Now(),
-				ExpiresAt:  time.Now().Add(time.Hour),
-				Signatures: []string{"dGVzdF9zaWduYXR1cmVfMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIz"},
+				ID:        "poa_no_reg",
+				Subject:   "user",
+				Resource:  "resource",
+				Action:    "read",
+				Issuer:    "issuer",
+				IssuedAt:  time.Now(),
+				ExpiresAt: time.Now().Add(time.Hour),
+				Signatures: []string{ //nolint:lll // base64 test data
+					"dGVzdF9zaWduYXR1cmVfMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIz",
+				},
 				SignerKids: []string{"nonexistent_kid"},
 				Threshold:  1,
 				SigMode:    "eddsa",
@@ -749,22 +750,10 @@ func TestVerifyMultiSig_InsufficientSignatures(t *testing.T) {
 func TestMemoryService_Issue_WithMultisigEnv(t *testing.T) {
 	// This test verifies the multisig code path is executed when env vars are set
 	// However, without a properly initialized registry, it won't produce signatures
-
-	// Save original env vars
-	origSign := os.Getenv("AGENTAUTH_POA_MULTISIG_SIGN")
-	origKids := os.Getenv("AGENTAUTH_POA_MULTISIG_KIDS")
-	origThreshold := os.Getenv("AGENTAUTH_POA_MULTISIG_THRESHOLD")
-
-	defer func() {
-		os.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", origSign)
-		os.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", origKids)
-		os.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", origThreshold)
-	}()
-
 	// Set env vars to trigger multisig path
-	os.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", "1")
-	os.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", "key1,key2")
-	os.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", "2")
+	t.Setenv("AGENTAUTH_POA_MULTISIG_SIGN", "1")
+	t.Setenv("AGENTAUTH_POA_MULTISIG_KIDS", "key1,key2")
+	t.Setenv("AGENTAUTH_POA_MULTISIG_THRESHOLD", "2")
 
 	s := NewMemoryService()
 	ctx := context.Background()

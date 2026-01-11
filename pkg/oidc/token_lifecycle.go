@@ -63,7 +63,9 @@ func (s *TokenRevocationService) Stop() {
 }
 
 // RevokeToken revokes a token.
-func (s *TokenRevocationService) RevokeToken(ctx context.Context, tokenID string, reason string, revokedBy string, expiresAt time.Time) error {
+func (s *TokenRevocationService) RevokeToken(
+	ctx context.Context, tokenID string, reason string, revokedBy string, expiresAt time.Time,
+) error {
 	if tokenID == "" {
 		return fmt.Errorf("token ID is required")
 	}
@@ -115,7 +117,9 @@ func (s *TokenRevocationService) GetRevocationInfo(ctx context.Context, tokenID 
 }
 
 // RevokeTokensBatch revokes multiple tokens in one operation.
-func (s *TokenRevocationService) RevokeTokensBatch(ctx context.Context, tokenIDs []string, reason string, revokedBy string, expiresAt time.Time) error {
+func (s *TokenRevocationService) RevokeTokensBatch(
+	ctx context.Context, tokenIDs []string, reason string, revokedBy string, expiresAt time.Time,
+) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -349,7 +353,9 @@ type TokenIntrospectionResponse struct {
 }
 
 // NewTokenIntrospectionService creates a new token introspection service.
-func NewTokenIntrospectionService(revocationService *TokenRevocationService, idTokenService *IDTokenService) *TokenIntrospectionService {
+func NewTokenIntrospectionService(
+	revocationService *TokenRevocationService, idTokenService *IDTokenService,
+) *TokenIntrospectionService {
 	return &TokenIntrospectionService{
 		revocationService: revocationService,
 		idTokenService:    idTokenService,
@@ -357,7 +363,9 @@ func NewTokenIntrospectionService(revocationService *TokenRevocationService, idT
 }
 
 // IntrospectToken introspects a token (RFC 7662).
-func (s *TokenIntrospectionService) IntrospectToken(ctx context.Context, req TokenIntrospectionRequest) (*TokenIntrospectionResponse, error) {
+func (s *TokenIntrospectionService) IntrospectToken(
+	ctx context.Context, req TokenIntrospectionRequest,
+) (*TokenIntrospectionResponse, error) {
 	if req.Token == "" {
 		return &TokenIntrospectionResponse{Active: false}, nil
 	}

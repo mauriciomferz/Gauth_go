@@ -370,7 +370,8 @@ func TestAgentAuthPlusIntegration_CapabilityEnforcement(t *testing.T) {
 		}
 
 		poaDef := createTestPoADefinition("agent-expired")
-		result, err := validator.ValidatePoAWithAgentAuthPlus(ctx, "550e8400-e29b-41d4-a716-446655440005", poaDef, "agent-expired", "execute")
+		result, err := validator.ValidatePoAWithAgentAuthPlus(
+			ctx, "550e8400-e29b-41d4-a716-446655440005", poaDef, "agent-expired", "execute")
 
 		if err != nil {
 			t.Fatalf("Validation failed: %v", err)

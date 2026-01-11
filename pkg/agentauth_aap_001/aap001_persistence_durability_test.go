@@ -1,7 +1,6 @@
 package agentauth_aap_001
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -11,8 +10,7 @@ import (
 // TestPersistenceDurability verifies PoA entries persist across service restarts when Bolt repository is enabled.
 func TestPersistenceDurability(t *testing.T) {
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
+	t.Setenv("AGENTAUTH_PERSIST_PATH", path)
 
 	// First service instance (create)
 	memLogger := audit.NewMemoryLogger(nil)

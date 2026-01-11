@@ -139,7 +139,9 @@ func (s *MemorySubscriptionStore) ListSubscriptions(ctx context.Context, clientI
 }
 
 // GetSubscriptionByClient finds an active subscription for a specific client and resource owner
-func (s *MemorySubscriptionStore) GetSubscriptionByClient(ctx context.Context, clientID, resourceOwnerID string) (*Subscription, error) {
+func (s *MemorySubscriptionStore) GetSubscriptionByClient(
+	ctx context.Context, clientID, resourceOwnerID string,
+) (*Subscription, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

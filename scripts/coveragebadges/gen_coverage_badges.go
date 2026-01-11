@@ -100,7 +100,10 @@ func listPackages() ([]string, error) {
 			rel = "./" + rel
 		}
 		// Heuristics to skip binaries/example noise
-		if strings.HasPrefix(rel, "./cmd") || strings.HasPrefix(rel, "./examples") || strings.HasPrefix(rel, "./scripts") || strings.HasPrefix(rel, "./test") {
+		if strings.HasPrefix(rel, "./cmd") ||
+			strings.HasPrefix(rel, "./examples") ||
+			strings.HasPrefix(rel, "./scripts") ||
+			strings.HasPrefix(rel, "./test") {
 			continue
 		}
 		pkgs = append(pkgs, rel)
@@ -170,22 +173,36 @@ func renderBadge(pkg string, cov float64) string {
 	wLabel := 10 + len(label)*6
 	wValue := 10 + len(value)*6
 	totalWidth := wLabel + wValue
-	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
+	return fmt.Sprintf(
+		`<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="%d" height="20" role="img" aria-label="%s: %s">
-  <linearGradient id="s" x2="0" y2="100%%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
-  <clipPath id="r"><rect width="%d" height="20" rx="3" fill="#fff"/></clipPath>
-  <g clip-path="url(#r)">
-    <rect width="%d" height="20" fill="#555"/>
-    <rect x="%d" width="%d" height="20" fill="%s"/>
-    <rect width="%d" height="20" fill="url(#s)"/>
-  </g>
-  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">
-    <text x="%d" y="15" fill="#010101" fill-opacity=".3">%s</text>
-    <text x="%d" y="15">%s</text>
-    <text x="%d" y="15" fill="#010101" fill-opacity=".3">%s</text>
-    <text x="%d" y="15">%s</text>
-  </g>
-</svg>`, totalWidth, label, value, totalWidth, wLabel, wLabel, wValue, color, totalWidth, wLabel/2, label, wLabel/2, label, wLabel+wValue/2, value, wLabel+wValue/2, value)
+`+
+			//nolint:lll
+			`  <linearGradient id="s" x2="0" y2="100%%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
+`+
+			`  <clipPath id="r"><rect width="%d" height="20" rx="3" fill="#fff"/></clipPath>
+	<g clip-path="url(#r)">
+		<rect width="%d" height="20" fill="#555"/>
+		<rect x="%d" width="%d" height="20" fill="%s"/>
+		<rect width="%d" height="20" fill="url(#s)"/>
+	</g>
+	<g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="11">
+		<text x="%d" y="15" fill="#010101" fill-opacity=".3">%s</text>
+		<text x="%d" y="15">%s</text>
+		<text x="%d" y="15" fill="#010101" fill-opacity=".3">%s</text>
+		<text x="%d" y="15">%s</text>
+	</g>
+</svg>`,
+		totalWidth, label, value,
+		totalWidth,
+		wLabel,
+		wLabel, wValue, color,
+		totalWidth,
+		wLabel/2, label,
+		wLabel/2, label,
+		wLabel+wValue/2, value,
+		wLabel+wValue/2, value,
+	)
 }
 
 func colorFor(cov float64) string {

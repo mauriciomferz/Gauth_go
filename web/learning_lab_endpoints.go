@@ -104,6 +104,7 @@ func (s *BetaServer) apiTokenCreateDemo(c *gin.Context) {
 
 	// Generate a mock JWT token
 	header := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+	//nolint:lll // base64 JWT payload
 	payload := "eyJzdWIiOiJkZW1vLXVzZXIiLCJpc3MiOiJnYXV0aC1sZWFybmluZy1sYWIiLCJleHAiOjE3MzA0OTEwMDAsImNhcGFiaWxpdGllcyI6WyJkZW1vLXRva2VuLWlzc3VhbmNlIiwiYmFzaWMtcG9saWN5LWV2YWwiXX0"
 	signature := generateID()[:32]
 	token := fmt.Sprintf("%s.%s.%s", header, payload, signature)
@@ -204,7 +205,9 @@ func (s *BetaServer) apiExperimentalOperation(c *gin.Context) {
 		"success":       true,
 		"experiment_id": experimentID,
 		"status":        "completed",
-		"output":        fmt.Sprintf("Experimental operation '%s' executed successfully.\nMode: %v\nResults: All tests passed.", action, req.Parameters["mode"]),
+		"output": fmt.Sprintf(
+			"Experimental operation '%s' executed successfully.\nMode: %v\nResults: All tests passed.",
+			action, req.Parameters["mode"]),
 		"metrics": []string{
 			"Execution time: 234ms",
 			"Memory usage: 15.2MB",

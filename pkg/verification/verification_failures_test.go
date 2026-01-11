@@ -2,7 +2,6 @@ package verification
 
 import (
 	"errors"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -17,7 +16,7 @@ func TestInclusionFailure(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	ev, _ := rc.Append(delegation.RevocationEvent{ID: "inc-fail-ev", DelegationID: "del"})
 	_ = ev
@@ -33,10 +32,14 @@ func TestInclusionFailure(t *testing.T) {
 	}
 	var vErr *VerifyError
 	if errors.As(err, &vErr) {
-		if vErr.Code != "inclusion_failed" && vErr.Code != "proof_endpoint_failure" && vErr.Code != "event_not_found" {
+		if vErr.Code != "inclusion_failed" &&
+			vErr.Code != "proof_endpoint_failure" &&
+			vErr.Code != "event_not_found" {
 			t.Fatalf("unexpected VerifyError code: %s detail=%s", vErr.Code, vErr.Detail)
 		}
-	} else if !strings.Contains(err.Error(), "inclusion_failed") && !strings.Contains(err.Error(), "proof") && !strings.Contains(err.Error(), "event_not_found") {
+	} else if !strings.Contains(err.Error(), "inclusion_failed") &&
+		!strings.Contains(err.Error(), "proof") &&
+		!strings.Contains(err.Error(), "event_not_found") {
 		t.Fatalf("unexpected error (non-VerifyError): %v", err)
 	}
 }
@@ -50,7 +53,7 @@ func TestThresholdNotMet(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate2: %v", err)
 	}
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "3") // threshold 3 but satisfied weight likely 2
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "3") // threshold 3 but satisfied weight likely 2
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "thr-ev-a", DelegationID: "del"})
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "thr-ev-b", DelegationID: "del"})
@@ -76,7 +79,7 @@ func TestConsistencyFailure(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 4; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "cons-ev-" + string(rune('a'+i)), DelegationID: "del"})
@@ -127,7 +130,7 @@ func TestSignatureInvalid(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate2: %v", err)
 	} // now two keys -> potential multi-sig
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km))
 	for i := 0; i < 3; i++ {
 		_, _ = rc.Append(delegation.RevocationEvent{ID: "sig-ev-" + string(rune('a'+i)), DelegationID: "del"})
@@ -154,11 +157,14 @@ func TestSignatureInvalid(t *testing.T) {
 // TestSTHNoSignatures: ensure error when no signatures present.
 func TestSTHNoSignatures(t *testing.T) {
 	// Do not rotate -> no key -> no signatures
-
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
 	rc := delegation.NewRevocationChain()
 	_, _ = rc.Append(delegation.RevocationEvent{ID: "no-sig-ev", DelegationID: "del"})
-	// Intentionally skip SignTreeHead to simulate missing STH signatures scenario; create fake STH in discovery via test server without signatures (helper currently always uses rc.LatestTreeHead; none exists so VerifyAll will fail at events/proof earlier). This test ensures threshold_not_met or sth_verify error surfaces when STH present but empty signatures. We construct minimal STH manually.
+	// Intentionally skip SignTreeHead to simulate missing STH signatures scenario; create
+	// fake STH in discovery via test server without signatures (helper currently always
+	// uses rc.LatestTreeHead; none exists so VerifyAll will fail at events/proof earlier).
+	// This test ensures threshold_not_met or sth_verify error surfaces when STH present
+	// but empty signatures. We construct minimal STH manually.
 	// For simplicity, if no tree head exists, skip.
 	if rc.LatestTreeHead() != nil {
 		t.Skip("unexpected tree head present")
@@ -171,7 +177,7 @@ func TestNoEvents(t *testing.T) {
 	if _, err := km.Rotate(); err != nil {
 		t.Fatalf("rotate: %v", err)
 	}
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "1")
 	rc := delegation.NewRevocationChain(delegation.WithKeyProvider(km)) // no events appended
 	// SignTreeHead should not create a head because length=0 (implementation may return nil; guard if needed)
 	// Ensure server returns empty events list

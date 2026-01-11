@@ -23,7 +23,10 @@ func FuzzCreateDelegation(f *testing.F) {
 		authorizer := authz.NewMemoryAuthorizer()
 		// Grant create for whatever grantor string appears (unless empty)
 		if grantor != "" {
-			authorizer.AddPolicy(authz.Policy{ID: "allow-create", Subject: grantor, Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
+			authorizer.AddPolicy(authz.Policy{
+				ID: "allow-create", Subject: grantor, Resource: "poa",
+				Actions: []string{"create_delegation"}, Effect: authz.Allow,
+			})
 		}
 		logger := audit.NewMemoryLogger(testutil.NoopLogger{})
 		svc := aap001.NewService(logger, authorizer)

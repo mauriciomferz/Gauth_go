@@ -73,11 +73,23 @@ func TestRevocationChainTamperDetect(t *testing.T) {
 func TestValidateDelegationChainWithRevocations(t *testing.T) {
 	// build delegation chain
 	c := NewChain()
-	d1, err := c.Append(Delegation{ID: "del-1", Subject: "alice", Delegate: "bob", Scope: map[string]string{"action": "read"}, ExpiresAt: time.Now().Add(time.Hour)})
+	d1, err := c.Append(Delegation{
+		ID:        "del-1",
+		Subject:   "alice",
+		Delegate:  "bob",
+		Scope:     map[string]string{"action": "read"},
+		ExpiresAt: time.Now().Add(time.Hour),
+	})
 	if err != nil {
 		t.Fatalf("append d1: %v", err)
 	}
-	_, err = c.Append(Delegation{ID: "del-2", Subject: "alice", Delegate: "carol", Scope: map[string]string{"action": "read"}, ExpiresAt: time.Now().Add(time.Hour)})
+	_, err = c.Append(Delegation{
+		ID:        "del-2",
+		Subject:   "alice",
+		Delegate:  "carol",
+		Scope:     map[string]string{"action": "read"},
+		ExpiresAt: time.Now().Add(time.Hour),
+	})
 	if err != nil {
 		t.Fatalf("append d2: %v", err)
 	}
@@ -96,7 +108,13 @@ func TestValidateDelegationChainWithRevocations(t *testing.T) {
 
 func TestValidateDelegationChainWithRevocationsNoRevoked(t *testing.T) {
 	c := NewChain()
-	_, err := c.Append(Delegation{ID: "del-1", Subject: "alice", Delegate: "bob", Scope: map[string]string{"action": "read"}, ExpiresAt: time.Now().Add(time.Hour)})
+	_, err := c.Append(Delegation{
+		ID:        "del-1",
+		Subject:   "alice",
+		Delegate:  "bob",
+		Scope:     map[string]string{"action": "read"},
+		ExpiresAt: time.Now().Add(time.Hour),
+	})
 	if err != nil {
 		t.Fatalf("append d1: %v", err)
 	}

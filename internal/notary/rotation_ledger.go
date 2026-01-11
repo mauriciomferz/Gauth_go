@@ -103,7 +103,13 @@ func (l *RotationLedger) AppendDescriptor(rd *KeyRotationDescriptor) (RotationLe
 	}
 	prev := l.head
 	h := sha256Sum(prev, msg)
-	rec := RotationLedgerRecord{Index: len(l.entries), Hash: fmt.Sprintf("%x", h), PrevHash: prev, Descriptor: rd, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
+	rec := RotationLedgerRecord{
+		Index:      len(l.entries),
+		Hash:       fmt.Sprintf("%x", h),
+		PrevHash:   prev,
+		Descriptor: rd,
+		Timestamp:  time.Now().UTC().Format(time.RFC3339Nano),
+	}
 	// RB5: optional entry signature (domain separated) if signer configured
 	if len(l.signerPriv) == ed25519.PrivateKeySize {
 		payload := append([]byte("AGENTAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(prev), msg...)...)
@@ -120,7 +126,12 @@ func (l *RotationLedger) AppendDescriptor(rd *KeyRotationDescriptor) (RotationLe
 	l.entries = append(l.entries, rec)
 	l.head = rec.Hash
 	// Persist full file atomically.
-	fm := rotationLedgerFileModel{Entries: l.entries, HeadHash: l.head, UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano), Version: 1}
+	fm := rotationLedgerFileModel{
+		Entries:   l.entries,
+		HeadHash:  l.head,
+		UpdatedAt: time.Now().UTC().Format(time.RFC3339Nano),
+		Version:   1,
+	}
 	buf, err := json.Marshal(fm)
 	if err != nil {
 		return RotationLedgerRecord{}, err
@@ -157,7 +168,11 @@ func (l *RotationLedger) ConfigureEd25519Signer(priv ed25519.PrivateKey, kid str
 
 // VerifyRotationLedger performs chained hash recomputation and signature checks.
 // Returns (mismatches, invalidSigs). Unsigned entries do not count as invalid unless strict=true.
-func VerifyRotationLedger(entries []RotationLedgerRecord, strict bool, pubResolver func(kid string) ed25519.PublicKey) (int, int) {
+func VerifyRotationLedger(
+	entries []RotationLedgerRecord,
+	strict bool,
+	pubResolver func(kid string) ed25519.PublicKey,
+) (int, int) {
 	mismatches := 0
 	invalidSigs := 0
 	prev := ""
@@ -178,7 +193,10 @@ func VerifyRotationLedger(entries []RotationLedgerRecord, strict bool, pubResolv
 			if len(pub) != ed25519.PublicKeySize {
 				invalidSigs++
 			} else {
-				payload := append([]byte("AGENTAUTH_ROTATION_LEDGER_ENTRY:"), append([]byte(rec.PrevHash), msg...)...)
+				payload := append(
+					[]byte("AGENTAUTH_ROTATION_LEDGER_ENTRY:"),
+					append([]byte(rec.PrevHash), msg...)...,
+				)
 				sigBytes, err := base64.RawURLEncoding.DecodeString(rec.Signature)
 				if err != nil || len(sigBytes) != ed25519.SignatureSize || !ed25519.Verify(pub, payload, sigBytes) {
 					invalidSigs++
@@ -232,7 +250,12 @@ func BuildRotationSummary(l *RotationLedger) RotationSummary {
 		hashesConcat = append(hashesConcat, []byte(rec.Hash)...)
 	}
 	agg := fmt.Sprintf("%x", sha256Raw(hashesConcat))
-	return RotationSummary{ChainLength: len(l.entries), HeadHash: l.head, AggregateHash: agg, GeneratedAt: time.Now().UTC().Format(time.RFC3339Nano)}
+	return RotationSummary{
+		ChainLength:   len(l.entries),
+		HeadHash:      l.head,
+		AggregateHash: agg,
+		GeneratedAt:   time.Now().UTC().Format(time.RFC3339Nano),
+	}
 }
 
 // sha256Raw returns sha256 sum of data.
@@ -344,6 +367,11 @@ func canonicalRotationSummaryPayload(sum *RotationSummary) ([]byte, error) {
 		HeadHash      string `json:"head_hash"`
 		AggregateHash string `json:"aggregate_hash"`
 		GeneratedAt   string `json:"generated_at"`
-	}{ChainLength: sum.ChainLength, HeadHash: sum.HeadHash, AggregateHash: sum.AggregateHash, GeneratedAt: sum.GeneratedAt}
+	}{
+		ChainLength:   sum.ChainLength,
+		HeadHash:      sum.HeadHash,
+		AggregateHash: sum.AggregateHash,
+		GeneratedAt:   sum.GeneratedAt,
+	}
 	return json.Marshal(payload)
 }

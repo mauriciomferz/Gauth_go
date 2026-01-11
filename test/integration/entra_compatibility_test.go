@@ -44,14 +44,17 @@ func TestEntraCompatibilityFlow(t *testing.T) {
 				},
 			},
 		}
-		json.NewEncoder(w).Encode(jwks)
+		if err := json.NewEncoder(w).Encode(jwks); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	})
 	jwksServer := httptest.NewServer(jwksHandler)
 	defer jwksServer.Close()
 
 	// 2. Setup Server
 	server := web.NewBetaServer(":8090") // 8090 for Entra tests
-	go server.Run()
+	go func() { _ = server.Run() }()
 	defer server.Shutdown()
 
 	time.Sleep(200 * time.Millisecond) // Wait for start
@@ -88,12 +91,12 @@ func TestEntraCompatibilityFlow(t *testing.T) {
 
 		resp, err := http.PostForm(baseURL+"/oauth/token", vals)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 
 		var body map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&body)
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&body))
 
 		desc, _ := body["error_description"].(string)
 		assert.Contains(t, desc, "audience mismatch")

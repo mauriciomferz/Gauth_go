@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const testTenant = "test-tenant"
+
 func TestEncryptedFileKeyStore(t *testing.T) {
 	// Generate master key
 	masterKey, err := GenerateMasterKey()
@@ -19,8 +21,8 @@ func TestEncryptedFileKeyStore(t *testing.T) {
 	masterKeyPath := tmpDir + "/master.key"
 
 	// Save master key
-	if err := os.WriteFile(masterKeyPath, masterKey, 0600); err != nil {
-		t.Fatalf("failed to write master key: %v", err)
+	if writeErr := os.WriteFile(masterKeyPath, masterKey, 0600); writeErr != nil {
+		t.Fatalf("failed to write master key: %v", writeErr)
 	}
 
 	// Create encrypted keystore
@@ -33,7 +35,7 @@ func TestEncryptedFileKeyStore(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	tenant := "test-tenant"
+	tenant := testTenant
 
 	// Generate a key
 	keyID, err := store.Generate(ctx, tenant)
@@ -62,8 +64,7 @@ func TestEncryptedFileKeyStore(t *testing.T) {
 
 func TestEncryptedFileKeyStore_EnvVar(t *testing.T) {
 	// Set master key in environment
-	os.Setenv("AGENTAUTH_MASTER_KEY", "test-passphrase-for-encryption")
-	defer os.Unsetenv("AGENTAUTH_MASTER_KEY")
+	t.Setenv("AGENTAUTH_MASTER_KEY", "test-passphrase-for-encryption")
 
 	tmpDir := t.TempDir()
 	keystorePath := tmpDir + "/keys"
@@ -78,7 +79,7 @@ func TestEncryptedFileKeyStore_EnvVar(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	tenant := "test-tenant"
+	tenant := testTenant
 
 	// Generate
 	keyID, err := store.Generate(ctx, tenant)

@@ -80,7 +80,7 @@ func TestBoltRepositoryPersistenceAcrossReopen(t *testing.T) {
 	if err2 := repo.Create(p); err2 != nil {
 		t.Fatalf("create: %v", err2)
 	}
-	repo.Close()
+	_ = repo.Close()
 	// Reopen
 	repo2, err := NewBoltRepository(path)
 	if err != nil {

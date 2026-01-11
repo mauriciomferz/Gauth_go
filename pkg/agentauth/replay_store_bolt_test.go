@@ -19,7 +19,7 @@ func TestBoltReplayStore_CheckAndRecord(t *testing.T) {
 
 	store, err := NewBoltReplayStore(dbPath, 1*time.Hour)
 	require.NoError(t, err)
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// First use should succeed
 	err = store.CheckAndRecord("jti-12345")
@@ -42,7 +42,7 @@ func TestBoltReplayStore_Expiration(t *testing.T) {
 	// Use very short TTL for testing
 	store, err := NewBoltReplayStore(dbPath, 100*time.Millisecond)
 	require.NoError(t, err)
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Record JTI
 	err = store.CheckAndRecord("jti-expire")
@@ -62,7 +62,7 @@ func TestBoltReplayStore_Count(t *testing.T) {
 
 	store, err := NewBoltReplayStore(dbPath, 1*time.Hour)
 	require.NoError(t, err)
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Should start empty
 	count, err := store.Count()
@@ -89,12 +89,12 @@ func TestBoltReplayStore_Persistence(t *testing.T) {
 
 	err = store1.CheckAndRecord("jti-persist")
 	assert.NoError(t, err)
-	store1.Close()
+	_ = store1.Close()
 
 	// Reopen store and verify JTI still exists
 	store2, err := NewBoltReplayStore(dbPath, 1*time.Hour)
 	require.NoError(t, err)
-	defer store2.Close()
+	defer func() { _ = store2.Close() }()
 
 	err = store2.CheckAndRecord("jti-persist")
 	assert.Error(t, err)
@@ -107,7 +107,7 @@ func TestBoltReplayStore_CreateDirectory(t *testing.T) {
 
 	store, err := NewBoltReplayStore(nestedPath, 1*time.Hour)
 	require.NoError(t, err)
-	defer store.Close()
+	defer func() { _ = store.Close() }()
 
 	// Verify directory was created
 	_, err = os.Stat(filepath.Dir(nestedPath))

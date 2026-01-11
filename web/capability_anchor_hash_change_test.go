@@ -18,7 +18,9 @@ func TestCapabilityAnchorHashChange(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	anchorFile.Close()
+	if err := anchorFile.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	// Base capabilities file (single capability)
 	capFile := filepath.Join(t.TempDir(), "caps.json")

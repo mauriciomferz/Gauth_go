@@ -142,7 +142,11 @@ func (e *CapabilityEnforcer) Enforce(ctx *UsageContext) (*EnforcementResult, err
 
 		// Check context token limit
 		if modelLimits.MaxContextTokens > 0 && ctx.TokenCount > modelLimits.MaxContextTokens {
-			violations = append(violations, fmt.Sprintf("token count %d exceeds model context limit %d", ctx.TokenCount, modelLimits.MaxContextTokens))
+			violations = append(violations, fmt.Sprintf(
+				"token count %d exceeds model context limit %d",
+				ctx.TokenCount,
+				modelLimits.MaxContextTokens,
+			))
 			result.Allowed = false
 		}
 
@@ -150,7 +154,11 @@ func (e *CapabilityEnforcer) Enforce(ctx *UsageContext) (*EnforcementResult, err
 		if modelLimits.CostPerToken > 0 {
 			estimatedCost := float64(ctx.TokenCount) * modelLimits.CostPerToken
 			if modelLimits.MaxCostPerRequest > 0 && estimatedCost > modelLimits.MaxCostPerRequest {
-				violations = append(violations, fmt.Sprintf("estimated cost %.4f exceeds max cost %.4f", estimatedCost, modelLimits.MaxCostPerRequest))
+				violations = append(violations, fmt.Sprintf(
+					"estimated cost %.4f exceeds max cost %.4f",
+					estimatedCost,
+					modelLimits.MaxCostPerRequest,
+				))
 				result.Allowed = false
 			}
 		}

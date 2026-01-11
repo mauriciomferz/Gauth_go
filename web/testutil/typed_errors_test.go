@@ -24,7 +24,8 @@ func TestUnknownCapabilityTypedError(t *testing.T) {
 
 func TestEmptyActionMappingTypedError(t *testing.T) {
 	// Synthesize a registry with an empty mapping by editing a valid fixture.
-	raw := `{"schema_version":1,"capabilities":[{"id":"cap.alpha","version":"1.0","stable":true}],"action_mappings":{"alpha:act":[]}}`
+	raw := `{"schema_version":1,"capabilities":[{"id":"cap.alpha","version":"1.0","stable":true}],` +
+		`"action_mappings":{"alpha:act":[]}}`
 	_, err := ParseCapabilityRegistry(raw)
 	if err == nil {
 		t.Fatalf("expected error for empty action mapping")

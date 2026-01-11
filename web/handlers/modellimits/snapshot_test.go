@@ -15,7 +15,9 @@ func TestModelLimitsSnapshotHashChange(t *testing.T) {
 	}
 	initial := `{"model_limits":{"snap-model":{"max_input_tokens":100}}}`
 	_, _ = tmp.Write([]byte(initial))
-	tmp.Close()
+	if err := tmp.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
 
 	h := NewHandler(tmp.Name(), "", "")
 	// Don't rely on background polling (it can be disabled in CI); explicitly reload.
@@ -25,7 +27,10 @@ func TestModelLimitsSnapshotHashChange(t *testing.T) {
 		t.Fatalf("init: %v", err)
 	}
 
-	h1, _, _, _ := h.ComputeSnapshot()
+	h1, at1, models1, users1 := h.ComputeSnapshot()
+	_ = at1
+	_ = models1
+	_ = users1
 
 	// Modify limits (tighten) to force different canonical representation
 	updated := `{"model_limits":{"snap-model":{"max_input_tokens":80}}}`
@@ -55,7 +60,10 @@ func TestModelLimitsSnapshotHashChange(t *testing.T) {
 		t.Fatalf("expected reload to detect updated limits")
 	}
 
-	h2, _, _, _ := h.ComputeSnapshot()
+	h2, at2, models2, users2 := h.ComputeSnapshot()
+	_ = at2
+	_ = models2
+	_ = users2
 	if h1 == h2 {
 		t.Fatalf("expected hash change after reload h1=%s h2=%s", h1, h2)
 	}

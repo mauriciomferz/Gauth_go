@@ -5,7 +5,6 @@ package agentauth_aap_001
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -32,9 +31,8 @@ func TestAdvancedClaims_GenerationFeatureGated(t *testing.T) {
 
 	t.Run("disabled_by_default", func(t *testing.T) {
 		// Ensure both flags are set correctly
-		os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
-		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-		defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+		t.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "")
+		t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 		// Generate token using internal helper
 		tokenStr := generateAuthToken(svc, &resp.POA)
@@ -51,12 +49,8 @@ func TestAdvancedClaims_GenerationFeatureGated(t *testing.T) {
 
 	t.Run("enabled_with_flag", func(t *testing.T) {
 		// Enable both feature flags
-		os.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "1")
-		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-		defer func() {
-			os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
-			os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-		}()
+		t.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "1")
+		t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 		// Generate token
 		tokenStr := generateAuthToken(svc, &resp.POA)
@@ -93,9 +87,8 @@ func TestAdvancedClaims_BackwardCompatibility(t *testing.T) {
 
 	t.Run("token_without_advanced_claims", func(t *testing.T) {
 		// Ensure AGENTAUTH_ADVANCED_CLAIMS is not set (simulates pre-P2.10 token generation)
-		os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
-		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-		defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
+		t.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "")
+		t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 		tokenStr := generateAuthToken(svc, &resp.POA)
 		require.NotEmpty(t, tokenStr)
@@ -110,22 +103,19 @@ func TestAdvancedClaims_BackwardCompatibility(t *testing.T) {
 
 	t.Run("verification_skips_validation_when_flag_disabled", func(t *testing.T) {
 		// Enable AGENTAUTH_ADVANCED_CLAIMS for token generation
-		os.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "1")
-		os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+		t.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "1")
+		t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
 
 		tokenStr := generateAuthToken(svc, &resp.POA)
 		require.NotEmpty(t, tokenStr)
 
 		// Disable AGENTAUTH_ADVANCED_CLAIMS for verification (simulates rollback scenario)
-		os.Unsetenv("AGENTAUTH_ADVANCED_CLAIMS")
+		t.Setenv("AGENTAUTH_ADVANCED_CLAIMS", "")
 
 		verifyRes, err := svc.VerifyToken(ctx, tokenStr)
 		require.NoError(t, err, "Verification should skip AdvancedClaims validation when flag disabled")
 		assert.False(t, verifyRes.Expired)
 		assert.False(t, verifyRes.Revoked)
 		assert.False(t, verifyRes.Suspended)
-
-		// Clean up
-		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
 	})
 }

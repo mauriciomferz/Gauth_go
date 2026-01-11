@@ -199,7 +199,8 @@ func (r *Registry) ChainWithVersions() []struct {
 // --- Diff Support ---
 // PolicyDiff summarizes differences between two bundles (from -> to) at policy granularity.
 // A policy is considered "changed" when its rule set or subjects differ (hash comparison of canonical JSON form).
-// Added: policies present in 'to' but not in 'from'. Removed: present in 'from' but not in 'to'. Changed: IDs present in both with differing canonical representations.
+// Added: policies present in 'to' but not in 'from'. Removed: present in 'from' but not in 'to'.
+// Changed: IDs present in both with differing canonical representations.
 type PolicyDiff struct {
 	FromVersion int      `json:"from_version"`
 	ToVersion   int      `json:"to_version"`
@@ -217,7 +218,8 @@ type PolicyDiff struct {
 	PolicyChain []string `json:"policy_chain"`
 }
 
-// canonicalPolicy serializes a policy deterministically for diff comparisons (without meta ordering guarantees beyond JSON marshal field order).
+// canonicalPolicy serializes a policy deterministically for diff comparisons
+// (without meta ordering guarantees beyond JSON marshal field order).
 func canonicalPolicy(p Policy) string {
 	// Sort rules deterministically based on Expr then Actions then Resources for stable diff hash.
 	sorted := p
@@ -384,7 +386,16 @@ func DiffBundles(fromB, toB *Bundle, fromVersion, toVersion int, chainHashes []s
 	sort.Slice(unchanged, func(i, j int) bool { return unchanged[i].ID < unchanged[j].ID })
 	sort.Slice(changed, func(i, j int) bool { return changed[i].ID < changed[j].ID })
 
-	diff := PolicyDiff{FromVersion: fromVersion, ToVersion: toVersion, Added: added, Removed: removed, Changed: changed, Unchanged: unchanged, FromHash: fromB.Hash, ToHash: toB.Hash}
+	diff := PolicyDiff{
+		FromVersion: fromVersion,
+		ToVersion:   toVersion,
+		Added:       added,
+		Removed:     removed,
+		Changed:     changed,
+		Unchanged:   unchanged,
+		FromHash:    fromB.Hash,
+		ToHash:      toB.Hash,
+	}
 	// ChainHead logic needs store/registry access. passed as arg?
 	// chainHashes arg.
 	if len(chainHashes) > 0 {

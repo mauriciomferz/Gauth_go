@@ -72,7 +72,13 @@ func TestVerifyModelLimitsAttestationValid(t *testing.T) {
 			LatencySeconds float64 `json:"latency_seconds"`
 			Success        bool    `json:"success"`
 		} `json:"notarization,omitempty"`
-	}{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Nonce: att.Nonce, Snapshot: att.Snapshot}
+	}{
+		Success:    att.Success,
+		Configured: att.Configured,
+		Reason:     att.Reason,
+		Nonce:      att.Nonce,
+		Snapshot:   att.Snapshot,
+	}
 	raw, _ := json.Marshal(unsigned)
 	msg := append([]byte(AttestationDomainPrefix), raw...)
 	sig := ed25519.Sign(priv, msg)
@@ -173,7 +179,18 @@ func signAtt(t *testing.T, priv ed25519.PrivateKey, att *Attestation) {
 			LatencySeconds float64 `json:"latency_seconds"`
 			Success        bool    `json:"success"`
 		} `json:"notarization,omitempty"`
-	}{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Nonce: att.Nonce, Snapshot: att.Snapshot, Audit: att.Audit, Anchor: att.Anchor, StrictUnknown: att.StrictUnknown, Surge: att.Surge, Notarization: att.Notarization}
+	}{
+		Success:       att.Success,
+		Configured:    att.Configured,
+		Reason:        att.Reason,
+		Nonce:         att.Nonce,
+		Snapshot:      att.Snapshot,
+		Audit:         att.Audit,
+		Anchor:        att.Anchor,
+		StrictUnknown: att.StrictUnknown,
+		Surge:         att.Surge,
+		Notarization:  att.Notarization,
+	}
 	raw, _ := json.Marshal(unsigned)
 	msg := append([]byte(AttestationDomainPrefix), raw...)
 	sig := ed25519.Sign(priv, msg)

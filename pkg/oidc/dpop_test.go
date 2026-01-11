@@ -22,7 +22,7 @@ func TestNewDPoPManager(t *testing.T) {
 	if dm == nil {
 		t.Fatal("NewDPoPManager returned nil")
 	}
-	defer dm.Close()
+	t.Cleanup(func() { _ = dm.Close() })
 
 	if dm.config.MaxAge != 60*time.Second {
 		t.Errorf("default MaxAge = %v, want 60s", dm.config.MaxAge)
@@ -38,7 +38,7 @@ func TestNewDPoPManager(t *testing.T) {
 	}
 
 	dm2 := NewDPoPManager(config)
-	defer dm2.Close()
+	t.Cleanup(func() { _ = dm2.Close() })
 
 	if !dm2.config.RequireNonce {
 		t.Error("RequireNonce not set")
@@ -51,7 +51,7 @@ func TestNewDPoPManager(t *testing.T) {
 // TestGenerateNonce tests nonce generation.
 func TestGenerateNonce(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	t.Cleanup(func() { _ = dm.Close() })
 
 	// Generate nonces
 	nonces := make(map[string]bool)
@@ -85,7 +85,7 @@ func TestGenerateNonce(t *testing.T) {
 // TestValidateDPoPProof_ValidProof tests validation of a valid DPoP proof.
 func TestValidateDPoPProof_ValidProof(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	t.Cleanup(func() { _ = dm.Close() })
 
 	// Generate RSA key pair
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
@@ -129,7 +129,7 @@ func TestValidateDPoPProof_ValidProof(t *testing.T) {
 // TestValidateDPoPProof_MissingProof tests validation with missing DPoP header.
 func TestValidateDPoPProof_MissingProof(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	ctx := context.Background()
 	_, _, err := dm.ValidateDPoPProof(ctx, "", "POST", "https://as.example.com/token", "")
@@ -151,7 +151,7 @@ func TestValidateDPoPProof_MissingProof(t *testing.T) {
 // TestValidateDPoPProof_InvalidTypHeader tests validation with wrong typ header.
 func TestValidateDPoPProof_InvalidTypHeader(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -183,7 +183,7 @@ func TestValidateDPoPProof_InvalidTypHeader(t *testing.T) {
 // TestValidateDPoPProof_HTTPMethodMismatch tests validation with wrong HTTP method.
 func TestValidateDPoPProof_HTTPMethodMismatch(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -207,7 +207,7 @@ func TestValidateDPoPProof_HTTPMethodMismatch(t *testing.T) {
 // TestValidateDPoPProof_HTTPURIMismatch tests validation with wrong HTTP URI.
 func TestValidateDPoPProof_HTTPURIMismatch(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -236,7 +236,7 @@ func TestValidateDPoPProof_ExpiredProof(t *testing.T) {
 		AllowedAlgorithms: []string{"RS256", "ES256", "EdDSA"},
 	}
 	dm := NewDPoPManager(config)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -269,7 +269,7 @@ func TestValidateDPoPProof_ExpiredProof(t *testing.T) {
 // TestValidateDPoPProof_ReplayAttack tests JTI replay prevention.
 func TestValidateDPoPProof_ReplayAttack(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -316,7 +316,7 @@ func TestValidateDPoPProof_WithNonce(t *testing.T) {
 		ClockSkew:         5 * time.Second,
 	}
 	dm := NewDPoPManager(config)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -355,7 +355,7 @@ func TestValidateDPoPProof_MissingNonce(t *testing.T) {
 		AllowedAlgorithms: []string{"RS256", "ES256", "EdDSA"},
 	}
 	dm := NewDPoPManager(config)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -384,7 +384,7 @@ func TestValidateDPoPProof_MissingNonce(t *testing.T) {
 // TestValidateDPoPProof_WithAccessTokenHash tests ath validation.
 func TestValidateDPoPProof_WithAccessTokenHash(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -409,7 +409,7 @@ func TestValidateDPoPProof_WithAccessTokenHash(t *testing.T) {
 // TestValidateDPoPProof_InvalidAccessTokenHash tests wrong ath.
 func TestValidateDPoPProof_InvalidAccessTokenHash(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwk := rsaPublicKeyToJWK(&privateKey.PublicKey)
@@ -432,7 +432,7 @@ func TestValidateDPoPProof_InvalidAccessTokenHash(t *testing.T) {
 // TestBindAccessToken tests token binding.
 func TestBindAccessToken(t *testing.T) {
 	dm := NewDPoPManager(nil)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	tokenID := "token-123"
 	thumbprint := "thumbprint-abc"
@@ -465,7 +465,7 @@ func TestCleanup(t *testing.T) {
 		NonceLifetime: 100 * time.Millisecond,
 	}
 	dm := NewDPoPManager(config)
-	defer dm.Close()
+	defer func() { _ = dm.Close() }()
 
 	// Generate nonces
 	for i := 0; i < 10; i++ {
@@ -503,8 +503,9 @@ func TestCleanup(t *testing.T) {
 func TestCalculateJWKThumbprint(t *testing.T) {
 	jwk := map[string]interface{}{
 		"kty": "RSA",
-		"n":   "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
-		"e":   "AQAB",
+		//nolint:lll // RSA modulus for test JWK
+		"n": "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw",
+		"e": "AQAB",
 	}
 
 	thumbprint, err := calculateJWKThumbprint(jwk)
@@ -603,7 +604,7 @@ func TestMultipleAlgorithms(t *testing.T) {
 				ClockSkew:         5 * time.Second,
 			}
 			dm := NewDPoPManager(config)
-			defer dm.Close()
+			defer func() { _ = dm.Close() }()
 
 			privateKey, publicKey, err := tt.keyGen()
 			if err != nil {
@@ -664,7 +665,10 @@ func rsaPublicKeyToJWK(pub *rsa.PublicKey) map[string]interface{} {
 	}
 }
 
-func createDPoPProof(t *testing.T, privateKey *rsa.PrivateKey, jwk map[string]interface{}, httpMethod, httpURI, nonce, ath string) string {
+func createDPoPProof(
+	t *testing.T, privateKey *rsa.PrivateKey, jwk map[string]interface{},
+	httpMethod, httpURI, nonce, ath string,
+) string {
 	claims := jwt.MapClaims{
 		"jti": fmt.Sprintf("unique-id-%d", time.Now().UnixNano()),
 		"htm": httpMethod,

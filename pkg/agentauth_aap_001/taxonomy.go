@@ -12,6 +12,7 @@ var AllowedActionClasses = []string{"read_ops", "write_ops", "admin", "transfer"
 // membership builds a map for O(1) lookup; invoked once per slice via init.
 var agentTypeSet, sectorSet, actionClassSet map[string]struct{}
 
+//nolint:gochecknoinits // intentional package initialization
 func init() {
 	agentTypeSet = make(map[string]struct{}, len(AllowedAgentTypes))
 	for _, v := range AllowedAgentTypes {

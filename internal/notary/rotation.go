@@ -28,7 +28,13 @@ func canonicalRotationDescriptor(rd *KeyRotationDescriptor) ([]byte, error) {
 		EffectiveTime    string `json:"effective_time"`
 		Reason           string `json:"reason"`
 		PrevRotationHash string `json:"prev_rotation_hash,omitempty"`
-	}{OldKeyID: rd.OldKeyID, NewKeyID: rd.NewKeyID, EffectiveTime: rd.EffectiveTime, Reason: rd.Reason, PrevRotationHash: rd.PrevRotationHash}
+	}{
+		OldKeyID:         rd.OldKeyID,
+		NewKeyID:         rd.NewKeyID,
+		EffectiveTime:    rd.EffectiveTime,
+		Reason:           rd.Reason,
+		PrevRotationHash: rd.PrevRotationHash,
+	}
 	enc, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err

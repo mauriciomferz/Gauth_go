@@ -10,13 +10,13 @@ import (
 
 func TestBoltDBIndexer_AddAndPruneIndexEntry(t *testing.T) {
 	file := "test_boltdb_index.db"
-	defer os.Remove(file)
+	defer func() { _ = os.Remove(file) }()
 
 	db, err := bbolt.Open(file, 0600, nil)
 	if err != nil {
 		t.Fatalf("open db: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 	indexer := NewBoltDBIndexer(db)
 	bucket := "testbucket"
 	key := []byte("key1")

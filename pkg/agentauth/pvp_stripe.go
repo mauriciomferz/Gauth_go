@@ -56,7 +56,7 @@ func (c *StripePVPClient) VerifyIdentityProof(ctx context.Context, request *Iden
 	if err != nil {
 		return nil, fmt.Errorf("stripe api request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("stripe api returned non-200 status: %d", resp.StatusCode)

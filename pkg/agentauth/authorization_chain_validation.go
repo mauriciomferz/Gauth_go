@@ -21,6 +21,11 @@ const (
 
 	// ChainExpirationBuffer is the time buffer before expiration to warn
 	ChainExpirationBuffer = 24 * time.Hour
+
+	// AuthorizationType constants
+	AuthTypeDelegated   = "delegated"
+	AuthTypeStatutory   = "statutory"
+	AuthTypeContractual = "contractual"
 )
 
 // ValidationContext provides context for authorization chain validation
@@ -148,7 +153,11 @@ func (v *AuthorizationChainValidator) ValidateAuthorizationChain(
 	result.RevocationStatus = revocationResult
 	if revocationResult != nil && revocationResult.Revoked {
 		result.Valid = false
-		result.FailureReason = fmt.Sprintf("Authorization chain revoked: %s (Entity: %s)", revocationResult.Message, revocationResult.RevokedEntity)
+		result.FailureReason = fmt.Sprintf(
+			"Authorization chain revoked: %s (Entity: %s)",
+			revocationResult.Message,
+			revocationResult.RevokedEntity,
+		)
 		return result, nil
 	}
 
@@ -315,7 +324,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 	// Verify authorization types are appropriate for delegation
 	if chain.ClientOwner != nil {
 		// Client Owner must be authorized by Owner's Authorizer
-		if chain.ClientOwner.AuthorizationType == "delegated" {
+		if chain.ClientOwner.AuthorizationType == AuthTypeDelegated {
 			// This is a delegated authorization - count as delegation hop
 			if chain.ClientOwner.AuthorizedBy == "" {
 				return &AgentAuthError{
@@ -328,7 +337,7 @@ func (v *AuthorizationChainValidator) validateDelegationPath(chain *Authorizatio
 
 	if chain.Client != nil {
 		// Client must be authorized by Client Owner
-		if chain.Client.AuthorizationType == "delegated" {
+		if chain.Client.AuthorizationType == AuthTypeDelegated {
 			if chain.Client.AuthorizedBy == "" {
 				return &AgentAuthError{
 					Code:    "missing_delegator",
@@ -628,7 +637,7 @@ func (v *AuthorizationChainValidator) validateClientOwner(
 	result.Checks["authorization_linkage"] = true
 
 	// Check 5: Authorization type validation
-	validAuthTypes := []string{"statutory", "contractual", "delegated"}
+	validAuthTypes := []string{AuthTypeStatutory, AuthTypeContractual, AuthTypeDelegated}
 	validAuthType := false
 	for _, vat := range validAuthTypes {
 		if owner.AuthorizationType == vat {
@@ -806,10 +815,10 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 	}
 
 	// Check owner's authorizer delegation revocation (if applicable)
-	if chain.OwnersAuthorizer.AuthorizationType == "delegated" && chain.OwnersAuthorizer.DelegationID != "" {
-		delegationRevoked, err := v.revocationChecker.IsDelegationRevoked(ctx, chain.OwnersAuthorizer.DelegationID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to check authorizer delegation revocation: %w", err)
+	if chain.OwnersAuthorizer.AuthorizationType == AuthTypeDelegated && chain.OwnersAuthorizer.DelegationID != "" {
+		delegationRevoked, delegationErr := v.revocationChecker.IsDelegationRevoked(ctx, chain.OwnersAuthorizer.DelegationID)
+		if delegationErr != nil {
+			return nil, fmt.Errorf("failed to check authorizer delegation revocation: %w", delegationErr)
 		}
 		result.LinkRevocations["owners_authorizer_delegation"] = delegationRevoked
 		if delegationRevoked {
@@ -832,10 +841,10 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 	}
 
 	// Check client owner delegation revocation (if applicable)
-	if chain.ClientOwner.AuthorizationType == "delegated" && chain.ClientOwner.DelegationID != "" {
-		delegationRevoked, err := v.revocationChecker.IsDelegationRevoked(ctx, chain.ClientOwner.DelegationID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to check client owner delegation revocation: %w", err)
+	if chain.ClientOwner.AuthorizationType == AuthTypeDelegated && chain.ClientOwner.DelegationID != "" {
+		delegationRevoked, delegationErr := v.revocationChecker.IsDelegationRevoked(ctx, chain.ClientOwner.DelegationID)
+		if delegationErr != nil {
+			return nil, fmt.Errorf("failed to check client owner delegation revocation: %w", delegationErr)
 		}
 		result.LinkRevocations["client_owner_delegation"] = delegationRevoked
 		if delegationRevoked {
@@ -858,7 +867,7 @@ func (v *AuthorizationChainValidator) checkChainRevocations(
 	}
 
 	// Check client delegation revocation (if applicable)
-	if chain.Client.AuthorizationType == "delegated" && chain.Client.DelegationID != "" {
+	if chain.Client.AuthorizationType == AuthTypeDelegated && chain.Client.DelegationID != "" {
 		delegationRevoked, err := v.revocationChecker.IsDelegationRevoked(ctx, chain.Client.DelegationID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to check client delegation revocation: %w", err)

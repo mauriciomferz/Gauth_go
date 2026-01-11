@@ -19,7 +19,7 @@ import (
 func TestPropertyStateTransitionsAreMonotonic(t *testing.T) {
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-1"
@@ -53,7 +53,7 @@ func TestPropertyStateTransitionsAreMonotonic(t *testing.T) {
 func TestPropertyRevocationIsIrreversible(t *testing.T) {
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-2"
@@ -70,7 +70,7 @@ func TestPropertyRevocationIsIrreversible(t *testing.T) {
 	assert.Equal(t, PoAStatusRevoked, state1.Status)
 
 	// Attempt to cancel (should fail or have no effect)
-	err = tpr.CancelDisable(ctx, poaID)
+	_ = tpr.CancelDisable(ctx, poaID)
 	// Cancel might succeed (not checking revoked status) but state should remain revoked
 
 	// Property: Once revoked, always revoked
@@ -79,7 +79,7 @@ func TestPropertyRevocationIsIrreversible(t *testing.T) {
 	assert.Equal(t, PoAStatusRevoked, state2.Status, "Revoked state should be immutable")
 
 	// Attempt to disable again (should have no effect on revoked PoA)
-	err = tpr.DisablePoA(ctx, poaID, "principal", "test2")
+	_ = tpr.DisablePoA(ctx, poaID, "principal", "test2")
 	state3, _ := tpr.GetPoAState(ctx, poaID)
 	assert.NotNil(t, state3)
 	assert.Equal(t, PoAStatusRevoked, state3.Status, "Revoked PoA should stay revoked")
@@ -92,7 +92,7 @@ func TestPropertyRevocationIsIrreversible(t *testing.T) {
 func TestPropertyCollateralIsConserved(t *testing.T) {
 	opt, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer opt.Close()
+	t.Cleanup(func() { _ = opt.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-3"
@@ -126,7 +126,7 @@ func TestPropertyCollateralIsConserved(t *testing.T) {
 func TestPropertyCircuitBreakerPreventsCascadingFailures(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-4"
@@ -158,7 +158,7 @@ func TestPropertyCircuitBreakerPreventsCascadingFailures(t *testing.T) {
 func TestPropertyIdempotentOperations(t *testing.T) {
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-5"
@@ -190,7 +190,7 @@ func TestPropertyIdempotentOperations(t *testing.T) {
 func TestPropertyOptimisticChallengeWindowIsEnforced(t *testing.T) {
 	opt, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer opt.Close()
+	t.Cleanup(func() { _ = opt.Close() })
 
 	// Set short challenge window for testing
 	opt.SetChallengeWindow(100 * time.Millisecond)
@@ -230,7 +230,7 @@ func TestPropertyOptimisticChallengeWindowIsEnforced(t *testing.T) {
 func TestPropertyTransactionOrderingIsPreserved(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-8"
@@ -259,24 +259,25 @@ func TestPropertyTransactionOrderingIsPreserved(t *testing.T) {
 func TestPropertyConcurrentAccessMaintainsConsistency(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-9"
 
 	// Concurrent goroutines recording transactions
-	const numGoroutines = 10
-	const txPerGoroutine = 2
+	const numGoroutines = uint64(10)
+	const txPerGoroutine = uint64(2)
 
 	var wg sync.WaitGroup
 	successCount := atomic.Int32{}
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := uint64(0); i < numGoroutines; i++ {
 		wg.Add(1)
-		go func(id int) {
+		go func(id uint64) {
 			defer wg.Done()
-			for j := 0; j < txPerGoroutine; j++ {
-				err := cb.RecordTransaction(ctx, poaID, uint64(100000000000000000+id*10+j), true)
+			for j := uint64(0); j < txPerGoroutine; j++ {
+				amount := uint64(100000000000000000) + id*10 + j
+				err := cb.RecordTransaction(ctx, poaID, amount, true)
 				if err == nil {
 					successCount.Add(1)
 				}
@@ -309,7 +310,7 @@ func TestPropertyConcurrentAccessMaintainsConsistency(t *testing.T) {
 func TestPropertyMinimumCollateralIsEnforced(t *testing.T) {
 	opt, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer opt.Close()
+	t.Cleanup(func() { _ = opt.Close() })
 
 	ctx := context.Background()
 	minCollateral := opt.GetMinCollateral()
@@ -346,7 +347,7 @@ func TestPropertyMinimumCollateralIsEnforced(t *testing.T) {
 func TestPropertyEmergencyRevocationIsImmediate(t *testing.T) {
 	tpr, mr := setupTwoPhaseTest(t)
 	defer mr.Close()
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-13"
@@ -379,7 +380,7 @@ func TestPropertyEmergencyRevocationIsImmediate(t *testing.T) {
 func TestPropertyStateQueriesAreConsistent(t *testing.T) {
 	opt, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer opt.Close()
+	t.Cleanup(func() { _ = opt.Close() })
 
 	ctx := context.Background()
 	poaID := "property-test-poa-14"

@@ -10,8 +10,11 @@ func minimalArtifact() *CompositeAuthorizationArtifact {
 	vf := now.Add(1 * time.Hour)
 	vu := now.Add(2 * time.Hour)
 	return &CompositeAuthorizationArtifact{
-		AISystemID:           "ai_v1",
-		AuthorizationGrant:   &AuthorizationGrant{Type: "general", Scope: []string{"financial_operations"}, ValidFrom: &vf, ValidUntil: &vu, Revocable: true},
+		AISystemID: "ai_v1",
+		AuthorizationGrant: &AuthorizationGrant{
+			Type: "general", Scope: []string{"financial_operations"},
+			ValidFrom: &vf, ValidUntil: &vu, Revocable: true,
+		},
 		PowersGranted:        &PowersGranted{BasicPowers: []string{"financial_operations"}},
 		DecisionAuthority:    &DecisionAuthority{AutonomousDecisions: []string{"routine_invoice_approval"}},
 		TransactionRights:    &TransactionRights{AllowedTransactionTypes: []string{"vendor_payments"}},

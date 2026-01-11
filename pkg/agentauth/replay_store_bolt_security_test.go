@@ -20,7 +20,7 @@ func TestBoltReplayStore_ContainerSafetyCheck(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewBoltReplayStore() failed on safe path: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Test 2: Verify basic functionality
 	jti := "test-jti-123"
@@ -48,21 +48,17 @@ func TestBoltReplayStore_BypassFlag(t *testing.T) {
 
 	// Set bypass flag
 	oldValue := os.Getenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB")
-	os.Setenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB", "1")
-	defer func() {
-		if oldValue != "" {
-			os.Setenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB", oldValue)
-		} else {
-			os.Unsetenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB")
-		}
-	}()
+	if oldValue != "" {
+		t.Setenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB", oldValue)
+	}
+	t.Setenv("AGENTAUTH_ALLOW_UNSAFE_BOLTDB", "1")
 
 	// Should still work (bypass enabled)
 	store, err := NewBoltReplayStore(dbPath, time.Hour)
 	if err != nil {
 		t.Fatalf("NewBoltReplayStore() failed with bypass flag: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	t.Logf("✅ Bypass flag mechanism functional")
 }

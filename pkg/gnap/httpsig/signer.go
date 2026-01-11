@@ -238,15 +238,16 @@ func parseSignatureInput(input string) (*SignatureParams, error) {
 	// Parse key-value parameters
 	for _, kv := range strings.Split(parts[1], ";") {
 		kv = strings.TrimSpace(kv)
-		if strings.HasPrefix(kv, "created=") {
+		switch {
+		case strings.HasPrefix(kv, "created="):
 			params.Created, _ = strconv.ParseInt(strings.TrimPrefix(kv, "created="), 10, 64)
-		} else if strings.HasPrefix(kv, "expires=") {
+		case strings.HasPrefix(kv, "expires="):
 			params.Expires, _ = strconv.ParseInt(strings.TrimPrefix(kv, "expires="), 10, 64)
-		} else if strings.HasPrefix(kv, "keyid=") {
+		case strings.HasPrefix(kv, "keyid="):
 			params.KeyID = strings.Trim(strings.TrimPrefix(kv, "keyid="), `"`)
-		} else if strings.HasPrefix(kv, "alg=") {
+		case strings.HasPrefix(kv, "alg="):
 			params.Algorithm = strings.Trim(strings.TrimPrefix(kv, "alg="), `"`)
-		} else if strings.HasPrefix(kv, "nonce=") {
+		case strings.HasPrefix(kv, "nonce="):
 			params.Nonce = strings.Trim(strings.TrimPrefix(kv, "nonce="), `"`)
 		}
 	}

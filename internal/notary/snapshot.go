@@ -64,7 +64,15 @@ func GenerateSnapshot(rs *ReceiptStore, previousHash string) (Snapshot, error) {
 				Success        bool    `json:"success"`
 				LatencySeconds float64 `json:"latency_seconds"`
 				PrevHash       string  `json:"prev_hash"`
-			}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, Success: e.Success, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
+			}{
+				Hash:           e.Hash,
+				Timestamp:      e.Timestamp,
+				Provider:       e.Provider,
+				Version:        e.Version,
+				Success:        e.Success,
+				LatencySeconds: e.LatencySeconds,
+				PrevHash:       e.PrevHash,
+			}
 			b, err := json.Marshal(tmp)
 			if err != nil {
 				recordSnapshotGeneration(start, err)
@@ -82,7 +90,15 @@ func GenerateSnapshot(rs *ReceiptStore, previousHash string) (Snapshot, error) {
 			break
 		}
 	}
-	s := Snapshot{Version: 1, GeneratedAt: time.Now().UTC().Format(time.RFC3339Nano), ReceiptCount: receiptCount, ChainHead: chainHead, MerkleRoot: merkleRoot, RotationHead: rotationHead, PreviousHash: previousHash}
+	s := Snapshot{
+		Version:      1,
+		GeneratedAt:  time.Now().UTC().Format(time.RFC3339Nano),
+		ReceiptCount: receiptCount,
+		ChainHead:    chainHead,
+		MerkleRoot:   merkleRoot,
+		RotationHead: rotationHead,
+		PreviousHash: previousHash,
+	}
 	// compute snapshot hash over canonical subset (excluding Hash field itself initially)
 	canonical := struct {
 		Version      int    `json:"version"`
@@ -92,7 +108,15 @@ func GenerateSnapshot(rs *ReceiptStore, previousHash string) (Snapshot, error) {
 		MerkleRoot   string `json:"merkle_root,omitempty"`
 		RotationHead string `json:"rotation_head,omitempty"`
 		PreviousHash string `json:"previous_snapshot_hash,omitempty"`
-	}{Version: s.Version, GeneratedAt: s.GeneratedAt, ReceiptCount: s.ReceiptCount, ChainHead: s.ChainHead, MerkleRoot: s.MerkleRoot, RotationHead: s.RotationHead, PreviousHash: s.PreviousHash}
+	}{
+		Version:      s.Version,
+		GeneratedAt:  s.GeneratedAt,
+		ReceiptCount: s.ReceiptCount,
+		ChainHead:    s.ChainHead,
+		MerkleRoot:   s.MerkleRoot,
+		RotationHead: s.RotationHead,
+		PreviousHash: s.PreviousHash,
+	}
 	enc, err := json.Marshal(canonical)
 	if err != nil {
 		recordSnapshotGeneration(start, err)
@@ -150,7 +174,15 @@ func VerifySnapshot(rs *ReceiptStore, snap Snapshot) (SnapshotVerificationResult
 				Success        bool    `json:"success"`
 				LatencySeconds float64 `json:"latency_seconds"`
 				PrevHash       string  `json:"prev_hash"`
-			}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, Success: e.Success, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
+			}{
+				Hash:           e.Hash,
+				Timestamp:      e.Timestamp,
+				Provider:       e.Provider,
+				Version:        e.Version,
+				Success:        e.Success,
+				LatencySeconds: e.LatencySeconds,
+				PrevHash:       e.PrevHash,
+			}
 			b, err := json.Marshal(tmp)
 			if err != nil {
 				recordSnapshotVerification(start, false, err)
@@ -173,7 +205,15 @@ func VerifySnapshot(rs *ReceiptStore, snap Snapshot) (SnapshotVerificationResult
 		MerkleRoot   string `json:"merkle_root,omitempty"`
 		RotationHead string `json:"rotation_head,omitempty"`
 		PreviousHash string `json:"previous_snapshot_hash,omitempty"`
-	}{Version: snap.Version, GeneratedAt: snap.GeneratedAt, ReceiptCount: snap.ReceiptCount, ChainHead: snap.ChainHead, MerkleRoot: snap.MerkleRoot, RotationHead: snap.RotationHead, PreviousHash: snap.PreviousHash}
+	}{
+		Version:      snap.Version,
+		GeneratedAt:  snap.GeneratedAt,
+		ReceiptCount: snap.ReceiptCount,
+		ChainHead:    snap.ChainHead,
+		MerkleRoot:   snap.MerkleRoot,
+		RotationHead: snap.RotationHead,
+		PreviousHash: snap.PreviousHash,
+	}
 	enc, err := json.Marshal(canonical)
 	if err != nil {
 		recordSnapshotVerification(start, false, err)
@@ -182,8 +222,9 @@ func VerifySnapshot(rs *ReceiptStore, snap Snapshot) (SnapshotVerificationResult
 	digest := sha256.Sum256(enc)
 	expectedHash := encodeHex(digest[:])
 	res := SnapshotVerificationResult{
-		HashMatch:      expectedHash == snap.Hash,
-		MerkleMatch:    (snap.MerkleRoot == "" && recomputedMerkle == "") || (snap.MerkleRoot != "" && recomputedMerkle == snap.MerkleRoot),
+		HashMatch: expectedHash == snap.Hash,
+		MerkleMatch: (snap.MerkleRoot == "" && recomputedMerkle == "") ||
+			(snap.MerkleRoot != "" && recomputedMerkle == snap.MerkleRoot),
 		ChainHeadMatch: chainHead == snap.ChainHead,
 		ReceiptCountOk: rc == snap.ReceiptCount,
 	}

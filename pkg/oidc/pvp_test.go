@@ -514,10 +514,8 @@ func TestOIDCPowerVerificationPoint_ValidateProofData(t *testing.T) {
 				if tt.errMsg != "" && err.Error() != tt.errMsg {
 					t.Errorf("Expected error message '%s', got '%s'", tt.errMsg, err.Error())
 				}
-			} else {
-				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
+			} else if err != nil {
+				t.Errorf("Unexpected error: %v", err)
 			}
 		})
 	}

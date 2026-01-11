@@ -126,7 +126,7 @@ func (l *ProductionPEPAuditLogger) LogViolation(ctx context.Context, entry *Viol
 		l.metrics.IncPEPViolations(entry.ViolationType, entry.Severity)
 		l.metrics.SetPEPAuditBufferSize(len(l.enforcements), len(l.violations))
 		// Note: High-severity violations (critical/high) should be monitored via
-		// Prometheus alerts configured externally (e.g., rate(agentauth_aap001_pep_violations_total{severity="critical"}[5m]) > threshold)
+		// Prometheus alerts configured externally; check violations_total rate
 	}
 
 	return nil

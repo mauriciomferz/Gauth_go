@@ -148,7 +148,9 @@ func (s *Service) enforceJurisdictionOnIssuance(ctx context.Context, req Delegat
 // that the token usage at runtime complies with current jurisdiction rules.
 //
 // When jurisdiction enforcement is disabled (nil), this is a no-op returning nil.
-func (s *Service) enforceJurisdictionOnVerification(ctx context.Context, poa *PowerOfAttorney, claims map[string]interface{}) error {
+func (s *Service) enforceJurisdictionOnVerification(
+	ctx context.Context, poa *PowerOfAttorney, claims map[string]interface{},
+) error {
 	if s.jurisdictionEnforcement == nil || !s.jurisdictionEnforcement.enabled {
 		return nil // Enforcement disabled, allow operation
 	}

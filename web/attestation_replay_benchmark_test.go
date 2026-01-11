@@ -29,7 +29,7 @@ func BenchmarkReplayNonceStore(b *testing.B) {
 		b.Skipf("redis unavailable: %v", err)
 		return
 	}
-	defer backend.Close()
+	defer func() { _ = backend.Close() }()
 	b.Run("redis_record_seen", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			k := "r-" + strconv.Itoa(i)

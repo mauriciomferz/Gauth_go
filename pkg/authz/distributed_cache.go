@@ -39,7 +39,9 @@ type InvalidationMessage struct {
 }
 
 // NewDistributedDecisionCache creates a new hybrid cache.
-func NewDistributedDecisionCache(l1 DecisionCache, l2 cache.Cache, redisClient *redis.Client, nodeID string) *DistributedDecisionCache {
+func NewDistributedDecisionCache(
+	l1 DecisionCache, l2 cache.Cache, redisClient *redis.Client, nodeID string,
+) *DistributedDecisionCache {
 	c := &DistributedDecisionCache{
 		l1:      l1,
 		l2:      l2,
@@ -73,7 +75,7 @@ func (c *DistributedDecisionCache) Get(key string) (AuthorizationCacheEntry, boo
 			data, err := c.l2.Get(ctx, key)
 			if err == nil && data != nil {
 				var entry AuthorizationCacheEntry
-				if err := json.Unmarshal(data, &entry); err == nil {
+				if unmarshalErr := json.Unmarshal(data, &entry); unmarshalErr == nil {
 					return entry, nil
 				}
 			}
@@ -167,7 +169,7 @@ func (c *DistributedDecisionCache) publish(msg InvalidationMessage) {
 
 func (c *DistributedDecisionCache) subscribe() {
 	pubsub := c.client.Subscribe(context.Background(), c.channel)
-	defer pubsub.Close()
+	defer func() { _ = pubsub.Close() }()
 
 	ch := pubsub.Channel()
 	for {

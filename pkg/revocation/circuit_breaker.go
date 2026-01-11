@@ -153,8 +153,8 @@ func (cb *CircuitBreaker) RecordTransaction(ctx context.Context, poaID string, v
 			metrics.TotalTxCount = 0
 			// Clear cache and store reset metrics immediately
 			cb.metrics.Delete(poaID)
-			if err := cb.storeMetrics(ctx, metrics); err != nil {
-				cb.logger.Errorf("Failed to store reset metrics (non-fatal): %v", err)
+			if storeErr := cb.storeMetrics(ctx, metrics); storeErr != nil {
+				cb.logger.Errorf("Failed to store reset metrics (non-fatal): %v", storeErr)
 			}
 			// Reload metrics from storage to get fresh slate
 			metrics, err = cb.getOrCreateMetrics(ctx, poaID)
@@ -286,7 +286,12 @@ func (cb *CircuitBreaker) checkRateLimits(ctx context.Context, poaID string, met
 }
 
 // openCircuit suspends a PoA by opening its circuit breaker
-func (cb *CircuitBreaker) openCircuit(ctx context.Context, poaID string, metrics *CircuitBreakerMetrics, reason SuspensionReason) {
+func (cb *CircuitBreaker) openCircuit(
+	ctx context.Context,
+	poaID string,
+	metrics *CircuitBreakerMetrics,
+	reason SuspensionReason,
+) {
 	cb.logger.Warnf("🔴 Opening circuit for PoA %s (reason: %s)", poaID, reason)
 
 	metrics.State = CircuitBreakerOpen

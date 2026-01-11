@@ -1,4 +1,5 @@
-package capability_anchor
+//lint:file-ignore ST1003 allow underscore in package name for backward compatibility
+package capability_anchor //nolint:stylecheck
 
 import (
 	"fmt"

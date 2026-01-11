@@ -38,7 +38,7 @@ func (h *AuthorizationHandlers) RequestToken(c *gin.Context) {
 		ResourceOwnerID  string                 `json:"resource_owner_id" binding:"required"`
 		PoACredentialRef string                 `json:"poa_credential_ref" binding:"required"`
 		Scope            string                 `json:"scope" binding:"required"`
-		Jurisdiction     string                 `json:"jurisdiction,omitempty"` // ISO 3166-1 alpha-2 country code (e.g., "US", "DE") or ISO 3166-2 subdivision (e.g., "US-CA", "DE-BY"))
+		Jurisdiction     string                 `json:"jurisdiction,omitempty"` // ISO 3166-1/2 code (e.g., "US", "DE-BY")
 		Context          map[string]interface{} `json:"context,omitempty"`
 	}
 
@@ -258,7 +258,7 @@ func parseBasicScope(scopeString string) *poa.AuthorizationScope {
 			Transactions:       []taxonomy.TransactionType{},
 			Decisions:          []taxonomy.DecisionType{},
 			PhysicalActions:    []taxonomy.ActionTypePhysical{},
-			NonPhysicalActions: []taxonomy.ActionTypeNonPhysical{},
+			NonPhysicalActions: nonPhysicalActions,
 		},
 	}
 

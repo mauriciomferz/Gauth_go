@@ -74,11 +74,11 @@ func (ct *CostTracker) Save() error {
 	}
 
 	dir := filepath.Dir(ct.filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return err
 	}
 
-	return os.WriteFile(ct.filePath, data, 0644)
+	return os.WriteFile(ct.filePath, data, 0600)
 }
 
 // TrackUsage records token usage for a model and updates estimated cost.
@@ -103,8 +103,6 @@ func (ct *CostTracker) TrackUsage(model string, input, output int) {
 	if price, ok := ct.pricing[model]; ok {
 		cost := (float64(input)/1000)*price.InputPer1k + (float64(output)/1000)*price.OutputPer1k
 		stats.EstimatedCost += cost
-	} else {
-		// Default fallback or metrics only
 	}
 }
 

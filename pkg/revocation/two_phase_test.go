@@ -33,13 +33,13 @@ func TestTwoPhaseRevocation_DisablePoA(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	t.Cleanup(func() { _ = oracle.Close() })
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		t.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	ctx := context.Background()
 	poaID := "poa_test_123"
@@ -100,13 +100,13 @@ func TestTwoPhaseRevocation_RevokePoA(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	t.Cleanup(func() { _ = oracle.Close() })
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		t.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	ctx := context.Background()
 	poaID := "poa_test_456"
@@ -168,13 +168,13 @@ func TestTwoPhaseRevocation_CancelDisable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	t.Cleanup(func() { _ = oracle.Close() })
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		t.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	// Set longer timeout for testing
 	tpr.SetDisableTimeout(5 * time.Second)
@@ -217,13 +217,13 @@ func TestTwoPhaseRevocation_AutoRevoke(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	t.Cleanup(func() { _ = oracle.Close() })
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		t.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	t.Cleanup(func() { _ = tpr.Close() })
 
 	// Set short timeout for testing
 	tpr.SetDisableTimeout(200 * time.Millisecond)

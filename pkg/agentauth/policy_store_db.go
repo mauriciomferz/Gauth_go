@@ -356,7 +356,7 @@ func (s *DatabasePolicyStore) List(ctx context.Context, status *PolicyStatus) ([
 	if err != nil {
 		return nil, fmt.Errorf("failed to list policies: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var policies []*AuthorizationPolicy
 
@@ -424,7 +424,7 @@ func (s *DatabasePolicyStore) Search(ctx context.Context, criteria *PolicySearch
 	if err != nil {
 		return nil, fmt.Errorf("failed to search policies: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var policies []*AuthorizationPolicy
 

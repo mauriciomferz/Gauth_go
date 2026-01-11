@@ -18,17 +18,19 @@ var CanonicalReasons = []string{
 }
 
 // Set used for quick membership checks.
-var canonicalSet map[string]struct{}
-
-func init() {
-	canonicalSet = make(map[string]struct{}, len(CanonicalReasons))
+var canonicalSet = func() map[string]struct{} {
+	set := make(map[string]struct{}, len(CanonicalReasons))
 	for _, r := range CanonicalReasons {
-		canonicalSet[r] = struct{}{}
+		set[r] = struct{}{}
 	}
-}
+	return set
+}()
 
 // IsValid returns true if the provided reason is in the canonical taxonomy.
-func IsValid(reason string) bool { _, ok := canonicalSet[reason]; return ok }
+func IsValid(reason string) bool {
+	_, ok := canonicalSet[reason]
+	return ok
+}
 
 // All returns a copy of the canonical reasons slice to prevent accidental modification.
 func All() []string {

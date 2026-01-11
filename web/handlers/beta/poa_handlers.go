@@ -427,7 +427,12 @@ func (h *PoAHandler) HandleValidate(c *gin.Context) {
 }
 
 // validatePoA performs the actual validation logic
-func (h *PoAHandler) validatePoA(ctx context.Context, poa *agentauth_aap_001.PowerOfAttorney, action string, checkTime time.Time) (bool, string) {
+func (h *PoAHandler) validatePoA(
+	ctx context.Context,
+	poa *agentauth_aap_001.PowerOfAttorney,
+	action string,
+	checkTime time.Time,
+) (bool, string) {
 	// Check if PoA is active
 	if poa.Status != agentauth_aap_001.POAStatusActive {
 		return false, "PoA is not active (status: " + string(poa.Status) + ")"

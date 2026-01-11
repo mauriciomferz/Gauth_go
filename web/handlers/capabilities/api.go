@@ -75,7 +75,11 @@ func (a *API) Reload(c *gin.Context) {
 
 	after := capability.DefaultRegistry().List()
 
-	source, _, _, _, actions, loaded, _ := a.Handler.GetState()
+	source, regHash, prevHash, lastReceipt, actions, loaded, changed := a.Handler.GetState()
+	_ = regHash
+	_ = prevHash
+	_ = lastReceipt
+	_ = changed
 
 	c.JSON(200, gin.H{
 		"success":             true,
@@ -241,5 +245,10 @@ func (a *API) EdDSAPublicKey(c *gin.Context) {
 		c.JSON(200, gin.H{"success": true, "configured": false})
 		return
 	}
-	c.JSON(200, gin.H{"success": true, "configured": true, "kid": active.ID, "public_key": base64.RawStdEncoding.EncodeToString(active.Public)})
+	c.JSON(200, gin.H{
+		"success":    true,
+		"configured": true,
+		"kid":        active.ID,
+		"public_key": base64.RawStdEncoding.EncodeToString(active.Public),
+	})
 }

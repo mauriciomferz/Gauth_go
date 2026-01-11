@@ -6,24 +6,9 @@ import (
 )
 
 func TestPVPFactory_CreatePVP(t *testing.T) {
-	// Save original env vars
-	origProvider := os.Getenv("AGENTAUTH_PVP_PROVIDER")
-	origStripeKey := os.Getenv("STRIPE_API_KEY")
-	origVeriffKey := os.Getenv("VERIFF_API_KEY")
-	origVeriffSecret := os.Getenv("VERIFF_API_SECRET")
-	origIdemiaKey := os.Getenv("IDEMIA_API_KEY")
-
-	defer func() {
-		os.Setenv("AGENTAUTH_PVP_PROVIDER", origProvider)
-		os.Setenv("STRIPE_API_KEY", origStripeKey)
-		os.Setenv("VERIFF_API_KEY", origVeriffKey)
-		os.Setenv("VERIFF_API_SECRET", origVeriffSecret)
-		os.Setenv("IDEMIA_API_KEY", origIdemiaKey)
-	}()
-
 	t.Run("Stripe Provider", func(t *testing.T) {
-		os.Setenv("AGENTAUTH_PVP_PROVIDER", "stripe")
-		os.Setenv("STRIPE_API_KEY", "sk_test_123")
+		t.Setenv("AGENTAUTH_PVP_PROVIDER", "stripe")
+		t.Setenv("STRIPE_API_KEY", "sk_test_123")
 
 		f := NewPVPFactory(true)
 		pvp, err := f.CreatePVP()
@@ -37,9 +22,9 @@ func TestPVPFactory_CreatePVP(t *testing.T) {
 	})
 
 	t.Run("Veriff Provider", func(t *testing.T) {
-		os.Setenv("AGENTAUTH_PVP_PROVIDER", "veriff")
-		os.Setenv("VERIFF_API_KEY", "test_key")
-		os.Setenv("VERIFF_API_SECRET", "test_secret")
+		t.Setenv("AGENTAUTH_PVP_PROVIDER", "veriff")
+		t.Setenv("VERIFF_API_KEY", "test_key")
+		t.Setenv("VERIFF_API_SECRET", "test_secret")
 
 		f := NewPVPFactory(true)
 		pvp, err := f.CreatePVP()
@@ -53,8 +38,8 @@ func TestPVPFactory_CreatePVP(t *testing.T) {
 	})
 
 	t.Run("Idemia Provider (Generic)", func(t *testing.T) {
-		os.Setenv("AGENTAUTH_PVP_PROVIDER", "idemia")
-		os.Setenv("IDEMIA_API_KEY", "test_key")
+		t.Setenv("AGENTAUTH_PVP_PROVIDER", "idemia")
+		t.Setenv("IDEMIA_API_KEY", "test_key")
 
 		f := NewPVPFactory(true)
 		pvp, err := f.CreatePVP()
@@ -71,8 +56,8 @@ func TestPVPFactory_CreatePVP(t *testing.T) {
 	})
 
 	t.Run("Missing Config", func(t *testing.T) {
-		os.Setenv("AGENTAUTH_PVP_PROVIDER", "stripe")
-		os.Unsetenv("STRIPE_API_KEY")
+		t.Setenv("AGENTAUTH_PVP_PROVIDER", "stripe")
+		_ = os.Unsetenv("STRIPE_API_KEY")
 
 		f := NewPVPFactory(true)
 		_, err := f.CreatePVP()

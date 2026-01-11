@@ -13,8 +13,24 @@ func TestPolicyEvaluationCombiningStub(t *testing.T) {
 	store := NewInMemoryStore()
 	ctx := context.TODO()
 	b := Bundle{ID: "b1", Policies: []Policy{
-		{ID: "allow-read", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"read"}, Resources: []string{"doc:1"}, Effect: Allow}}},
-		{ID: "deny-write", Subjects: []string{"alice"}, Rules: []Rule{{Actions: []string{"write"}, Resources: []string{"doc:1"}, Effect: Deny}}},
+		{
+			ID:       "allow-read",
+			Subjects: []string{"alice"},
+			Rules: []Rule{{
+				Actions:   []string{"read"},
+				Resources: []string{"doc:1"},
+				Effect:    Allow,
+			}},
+		},
+		{
+			ID:       "deny-write",
+			Subjects: []string{"alice"},
+			Rules: []Rule{{
+				Actions:   []string{"write"},
+				Resources: []string{"doc:1"},
+				Effect:    Deny,
+			}},
+		},
 	}}
 	if _, err := store.AppendBundle(ctx, b); err != nil {
 		t.Fatalf("add bundle: %v", err)

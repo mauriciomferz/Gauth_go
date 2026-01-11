@@ -62,7 +62,9 @@ func TestTokenValidationReplay_AAP_001_C6(t *testing.T) {
 		t.Fatalf("Create failed: %d body=%s", w.Code, w.Body.String())
 	}
 	var respC map[string]any
-	json.Unmarshal(w.Body.Bytes(), &respC)
+	if err := json.Unmarshal(w.Body.Bytes(), &respC); err != nil {
+		t.Fatalf("unmarshal create response: %v", err)
+	}
 	jwtStr, ok := respC["jwt"].(string)
 	if !ok || jwtStr == "" {
 		t.Fatalf("JWT missing in response")
@@ -89,7 +91,9 @@ func TestTokenValidationReplay_AAP_001_C6(t *testing.T) {
 		t.Fatalf("Second validation did not fail as expected. Code: %d Body: %s", wV2.Code, wV2.Body.String())
 	}
 	var respV2 map[string]any
-	json.Unmarshal(wV2.Body.Bytes(), &respV2)
+	if err := json.Unmarshal(wV2.Body.Bytes(), &respV2); err != nil {
+		t.Fatalf("unmarshal validate response: %v", err)
+	}
 	if respV2["code"] != "token_replay_detected" {
 		t.Errorf("Expected code 'token_replay_detected', got %v", respV2["code"])
 	}

@@ -63,25 +63,47 @@ func RegisterAll(r *gin.RouterGroup, deps Deps) {
 // POST /capabilities/anchor
 func postAnchorHandler(c *gin.Context, d Deps) {
 	if !d.CapabilityAnchorEnabled() {
-		c.JSON(http.StatusForbidden, gin.H{"success": false, "error": "capability_anchor_disabled", "code": "anchoring_disabled"})
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"error":   "capability_anchor_disabled",
+			"code":    "anchoring_disabled",
+		})
 		return
 	}
 	client := d.AnchorClient()
 	if client == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "anchor_client_unavailable", "code": "anchor_client_unavailable"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "anchor_client_unavailable",
+			"code":    "anchor_client_unavailable",
+		})
 		return
 	}
 	hash := d.CapabilityRegistryHash()
 	if hash == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "error": "registry_hash_empty", "code": "registry_hash_empty"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "registry_hash_empty",
+			"code":    "registry_hash_empty",
+		})
 		return
 	}
 	rec, err := client.Anchor(hash)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error": "anchor_failure", "code": "anchor_failure", "detail": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "anchor_failure",
+			"code":    "anchor_failure",
+			"detail":  err.Error(),
+		})
 		return
 	}
-	payload := gin.H{"success": true, "hash": rec.Hash, "anchored_at": rec.AnchoredAt.Format(time.RFC3339), "total": client.TotalAnchors()}
+	payload := gin.H{
+		"success":     true,
+		"hash":        rec.Hash,
+		"anchored_at": rec.AnchoredAt.Format(time.RFC3339),
+		"total":       client.TotalAnchors(),
+	}
 	prev := d.CapabilityPrevRegistryHash()
 	if prev != "" {
 		payload["previous_hash"] = prev
@@ -97,22 +119,45 @@ func postAnchorHandler(c *gin.Context, d Deps) {
 func latestAnchorHandler(c *gin.Context, d Deps) {
 	client := d.AnchorClient()
 	if client == nil {
-		c.JSON(http.StatusOK, gin.H{"success": true, "anchored": false, "latest": nil})
+		c.JSON(http.StatusOK, gin.H{
+			"success":  true,
+			"anchored": false,
+			"latest":   nil,
+		})
 		return
 	}
 	latest, _ := client.LatestAnchor()
 	if latest.Hash == "" {
-		c.JSON(http.StatusOK, gin.H{"success": true, "anchored": false, "latest": nil, "total": client.TotalAnchors()})
+		c.JSON(http.StatusOK, gin.H{
+			"success":  true,
+			"anchored": false,
+			"latest":   nil,
+			"total":    client.TotalAnchors(),
+		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true, "anchored": true, "latest": gin.H{"hash": latest.Hash, "anchored_at": latest.AnchoredAt.Format(time.RFC3339)}, "total": client.TotalAnchors(), "capability_registry_hash": d.CapabilityRegistryHash()})
+	c.JSON(http.StatusOK, gin.H{
+		"success":  true,
+		"anchored": true,
+		"latest": gin.H{
+			"hash":        latest.Hash,
+			"anchored_at": latest.AnchoredAt.Format(time.RFC3339),
+		},
+		"total":                    client.TotalAnchors(),
+		"capability_registry_hash": d.CapabilityRegistryHash(),
+	})
 }
 
 // GET /capabilities/anchor/material
 func materialHandler(c *gin.Context, d Deps) {
 	path := d.CapAnchorFilePath()
 	if path == "" {
-		c.JSON(http.StatusOK, gin.H{"success": true, "configured": false, "emitted": false, "registry_hash": d.CapabilityRegistryHash()})
+		c.JSON(http.StatusOK, gin.H{
+			"success":       true,
+			"configured":    false,
+			"emitted":       false,
+			"registry_hash": d.CapabilityRegistryHash(),
+		})
 		return
 	}
 	// #nosec G304
@@ -123,13 +168,34 @@ func materialHandler(c *gin.Context, d Deps) {
 	}
 	// Attempt signed wrapper decode first (preserve raw Artifact bytes) else generic decode.
 	var wrapper SignedAnchorWrapper
-	if err := json.Unmarshal(b, &wrapper); err == nil && wrapper.Mode == sigModeEdDSA && wrapper.Signature != "" && len(wrapper.Artifact) > 0 {
-		c.JSON(http.StatusOK, gin.H{"success": true, "configured": true, "emitted": len(b) > 0, "path": path, "size": len(b), "artifact": wrapper, "registry_hash": d.CapabilityRegistryHash(), "last_write": d.CapAnchorLastWrite().UTC().Format(time.RFC3339Nano)})
+	if err := json.Unmarshal(b, &wrapper); err == nil &&
+		wrapper.Mode == sigModeEdDSA &&
+		wrapper.Signature != "" &&
+		len(wrapper.Artifact) > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"success":       true,
+			"configured":    true,
+			"emitted":       len(b) > 0,
+			"path":          path,
+			"size":          len(b),
+			"artifact":      wrapper,
+			"registry_hash": d.CapabilityRegistryHash(),
+			"last_write":    d.CapAnchorLastWrite().UTC().Format(time.RFC3339Nano),
+		})
 		return
 	}
 	var js any
 	_ = json.Unmarshal(b, &js)
-	c.JSON(http.StatusOK, gin.H{"success": true, "configured": true, "emitted": len(b) > 0, "path": path, "size": len(b), "artifact": js, "registry_hash": d.CapabilityRegistryHash(), "last_write": d.CapAnchorLastWrite().UTC().Format(time.RFC3339Nano)})
+	c.JSON(http.StatusOK, gin.H{
+		"success":       true,
+		"configured":    true,
+		"emitted":       len(b) > 0,
+		"path":          path,
+		"size":          len(b),
+		"artifact":      js,
+		"registry_hash": d.CapabilityRegistryHash(),
+		"last_write":    d.CapAnchorLastWrite().UTC().Format(time.RFC3339Nano),
+	})
 }
 
 // GET /capabilities/anchor/status

@@ -196,7 +196,13 @@ func (h *Handler) Create(c *gin.Context) {
 		}
 		exp := time.Now().Add(time.Duration(req.TTL) * time.Second)
 		jti := randomNonce(18)
-		claims := jwt.MapClaims{"sub": "demo-client", "scope": "legacy-token-store", "exp": exp.Unix(), "iat": time.Now().Unix(), "iss": h.Issuer}
+		claims := jwt.MapClaims{
+			"sub":   "demo-client",
+			"scope": "legacy-token-store",
+			"exp":   exp.Unix(),
+			"iat":   time.Now().Unix(),
+			"iss":   h.Issuer,
+		}
 		claims["jti"] = jti
 		j := jwt.NewWithClaims(method, claims)
 		j.Header["kid"] = kid
@@ -362,7 +368,13 @@ func (h *Handler) Validate(c *gin.Context) {
 			}
 			if hasJTI && jtiVal != "" && h.Replay != nil {
 				if h.Replay.Seen(jtiVal, time.Now()) {
-					c.JSON(401, gin.H{"success": false, "code": "token_replay_detected", "error": "replay_detected", "rfc_ref": "AAP001:replay_protection", "detail": "replay detected (jti dedicated)"})
+					c.JSON(401, gin.H{
+						"success": false,
+						"code":    "token_replay_detected",
+						"error":   "replay_detected",
+						"rfc_ref": "AAP001:replay_protection",
+						"detail":  "replay detected (jti dedicated)",
+					})
 					return
 				}
 				h.Replay.Record(jtiVal, time.Now())
@@ -429,7 +441,9 @@ func (h *Handler) StatusUpdate(c *gin.Context) {
 		return
 	}
 
-	if req.NewStatus != "active" && req.NewStatus != "suspended" && req.NewStatus != "terminated" && req.NewStatus != "partially_revoked" {
+	validStatuses := req.NewStatus == "active" || req.NewStatus == "suspended" ||
+		req.NewStatus == StatusTerminated || req.NewStatus == "partially_revoked"
+	if !validStatuses {
 		if h.Metrics != nil {
 			h.Metrics.IncTokenStatusTransitionFailures()
 		}
@@ -537,7 +551,14 @@ func (h *Handler) StatusUpdate(c *gin.Context) {
 			span.SetTag("outcome", "noop")
 			span.SetTag("reason", reasonReason)
 		}
-		c.JSON(200, gin.H{"success": true, "token_id": tok.ID, "old_status": tok.Status, "new_status": tok.Status, "no_change": true, "reason": reasonReason})
+		c.JSON(200, gin.H{
+			"success":    true,
+			"token_id":   tok.ID,
+			"old_status": tok.Status,
+			"new_status": tok.Status,
+			"no_change":  true,
+			"reason":     reasonReason,
+		})
 		return
 	}
 

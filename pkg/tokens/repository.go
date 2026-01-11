@@ -123,11 +123,12 @@ func (r *Repository) ListTokens(ctx context.Context, filters TokenFilters) ([]To
 	}
 
 	// Status filtering
-	if filters.Status == "active" {
+	switch filters.Status {
+	case "active":
 		whereClauses = append(whereClauses, "t.revoked_at IS NULL AND t.expires_at > NOW()")
-	} else if filters.Status == "expired" {
+	case "expired":
 		whereClauses = append(whereClauses, "t.revoked_at IS NULL AND t.expires_at <= NOW()")
-	} else if filters.Status == "revoked" {
+	case "revoked":
 		whereClauses = append(whereClauses, "t.revoked_at IS NOT NULL")
 	}
 
@@ -390,7 +391,7 @@ func (r *Repository) GetTokenMetrics(ctx context.Context, tenantID string) (map[
 	for rows.Next() {
 		var subID, subName string
 		var count int
-		if err := rows.Scan(&subID, &subName, &count); err != nil {
+		if scanErr := rows.Scan(&subID, &subName, &count); scanErr != nil {
 			continue
 		}
 		topSubscribers = append(topSubscribers, map[string]interface{}{

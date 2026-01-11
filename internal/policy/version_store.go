@@ -77,7 +77,7 @@ func NewBoltPolicyVersionStore(dbPath string) (*BoltPolicyVersionStore, error) {
 		return nil
 	})
 	if err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, err
 	}
 

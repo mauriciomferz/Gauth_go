@@ -405,7 +405,14 @@ func TestBuiltInFunction_TimeBetween(t *testing.T) {
 		}
 
 		if result.BoolValue != tt.expected {
-			t.Errorf("time_between(%q, %q) at %v = %v, expected %v", tt.start, tt.end, tt.now.Format("15:04"), result.BoolValue, tt.expected)
+			t.Errorf(
+				"time_between(%q, %q) at %v = %v, expected %v",
+				tt.start,
+				tt.end,
+				tt.now.Format("15:04"),
+				result.BoolValue,
+				tt.expected,
+			)
 		}
 	}
 }

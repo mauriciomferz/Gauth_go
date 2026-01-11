@@ -45,7 +45,11 @@ func NewMockKMS() (*MockKMS, error) {
 	}
 	keyID := deriveKeyID(pub)
 	signer := &ed25519Signer{keyID: keyID, priv: priv, pub: pub, algo: AlgoEd25519}
-	mk := &MockKMS{active: signer, publics: map[string]ed25519.PublicKey{keyID: pub}, created: map[string]time.Time{keyID: time.Now().UTC()}}
+	mk := &MockKMS{
+		active:  signer,
+		publics: map[string]ed25519.PublicKey{keyID: pub},
+		created: map[string]time.Time{keyID: time.Now().UTC()},
+	}
 	// Optional latency via env (ms)
 	if v := os.Getenv("AGENTAUTH_KMS_LATENCY_MS"); v != "" {
 		if ms, err := strconv.Atoi(v); err == nil && ms >= 0 && ms < 60000 {
@@ -104,7 +108,12 @@ func (m *MockKMS) ListKeys() ([]KeyMetadata, error) {
 	out := make([]KeyMetadata, 0, len(m.publics))
 	for id, pub := range m.publics {
 		_ = pub
-		out = append(out, KeyMetadata{ID: id, Algorithm: AlgoEd25519, CreatedAt: m.created[id], Active: m.active != nil && m.active.keyID == id})
+		out = append(out, KeyMetadata{
+			ID:        id,
+			Algorithm: AlgoEd25519,
+			CreatedAt: m.created[id],
+			Active:    m.active != nil && m.active.keyID == id,
+		})
 	}
 	return out, nil
 }
@@ -113,7 +122,11 @@ func (m *MockKMS) ListKeys() ([]KeyMetadata, error) {
 func (m *MockKMS) Snapshot() map[string]int64 {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	return map[string]int64{"active_signer_calls": m.cActiveSigner, "rotate_calls": m.cRotate, "list_calls": m.cListKeys}
+	return map[string]int64{
+		"active_signer_calls": m.cActiveSigner,
+		"rotate_calls":        m.cRotate,
+		"list_calls":          m.cListKeys,
+	}
 }
 
 func (m *MockKMS) simLatency() {

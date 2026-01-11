@@ -247,7 +247,9 @@ func TestJWEService_EncryptDecrypt_RSA(t *testing.T) {
 	ctx := context.Background()
 
 	// Test JWT string (simplified)
-	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + //nolint:lll // base64 JWT test data
+		"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
+		"SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
 	// Encrypt
 	jweString, err := service.EncryptToken(ctx, jwtString)
@@ -273,7 +275,9 @@ func TestJWEService_EncryptDecrypt_Symmetric(t *testing.T) {
 
 	ctx := context.Background()
 
-	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + //nolint:lll // base64 JWT test data
+		"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
+		"SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
 	// Encrypt
 	jweString, err := service.EncryptToken(ctx, jwtString)
@@ -435,7 +439,9 @@ func BenchmarkJWEService_Encrypt(b *testing.B) {
 	config := DevelopmentJWEConfig()
 	service, _ := NewJWEService(config)
 	ctx := context.Background()
-	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + //nolint:lll // base64 JWT test data
+		"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
+		"SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -448,7 +454,9 @@ func BenchmarkJWEService_Decrypt(b *testing.B) {
 	config := DevelopmentJWEConfig()
 	service, _ := NewJWEService(config)
 	ctx := context.Background()
-	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+	jwtString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + //nolint:lll // base64 JWT test data
+		"eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ." +
+		"SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 	jweString, _ := service.EncryptToken(ctx, jwtString)
 
 	b.ResetTimer()

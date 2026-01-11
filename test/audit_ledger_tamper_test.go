@@ -27,7 +27,9 @@ func TestAuditLedgerTamper(t *testing.T) {
 	if mismatch, err2 := al.VerifyChain(); err2 != nil || mismatch != -1 {
 		t.Fatalf("expected clean chain got mismatch=%d err=%v", mismatch, err2)
 	}
-	al.Close()
+	if err2 := al.Close(); err2 != nil {
+		t.Fatalf("close ledger: %v", err2)
+	}
 	// Tamper second entry bytes directly via Bolt
 	db, err := boltOpenRW(dbPath)
 	if err != nil {
@@ -51,7 +53,9 @@ func TestAuditLedgerTamper(t *testing.T) {
 		tampered, _ := json.Marshal(entry)
 		return b.Put(itob(1), tampered)
 	})
-	db.Close()
+	if err2 := db.Close(); err2 != nil {
+		t.Fatalf("close db: %v", err2)
+	}
 	if err != nil {
 		t.Fatalf("tamper update: %v", err)
 	}
@@ -60,7 +64,9 @@ func TestAuditLedgerTamper(t *testing.T) {
 		t.Fatalf("rewrap: %v", err)
 	}
 	mismatch, verr := al2.VerifyChain()
-	al2.Close()
+	if err2 := al2.Close(); err2 != nil {
+		t.Fatalf("close ledger2: %v", err2)
+	}
 	if verr == nil || mismatch == -1 {
 		t.Fatalf("expected tamper detection, got mismatch=%d err=%v", mismatch, verr)
 	}

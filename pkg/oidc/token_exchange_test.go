@@ -50,8 +50,8 @@ func setupTokenExchangeTest(t *testing.T) (*TokenExchangeService, *InMemoryProvi
 		DefaultTrustLevel: "substantial",
 		Enabled:           true,
 	}
-	if err := registry.Register(googleProvider); err != nil {
-		t.Fatalf("Failed to register Google provider: %v", err)
+	if registerErr := registry.Register(googleProvider); registerErr != nil {
+		t.Fatalf("Failed to register Google provider: %v", registerErr)
 	}
 
 	oktaProvider := ProviderConfig{
@@ -65,8 +65,8 @@ func setupTokenExchangeTest(t *testing.T) (*TokenExchangeService, *InMemoryProvi
 		DefaultTrustLevel: "substantial",
 		Enabled:           true,
 	}
-	if err := registry.Register(oktaProvider); err != nil {
-		t.Fatalf("Failed to register Okta provider: %v", err)
+	if registerErr := registry.Register(oktaProvider); registerErr != nil {
+		t.Fatalf("Failed to register Okta provider: %v", registerErr)
 	}
 
 	azureProvider := ProviderConfig{
@@ -80,8 +80,8 @@ func setupTokenExchangeTest(t *testing.T) (*TokenExchangeService, *InMemoryProvi
 		DefaultTrustLevel: "substantial",
 		Enabled:           true,
 	}
-	if err := registry.Register(azureProvider); err != nil {
-		t.Fatalf("Failed to register Azure AD provider: %v", err)
+	if registerErr := registry.Register(azureProvider); registerErr != nil {
+		t.Fatalf("Failed to register Azure AD provider: %v", registerErr)
 	}
 
 	// Create token exchange service

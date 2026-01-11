@@ -29,11 +29,11 @@ func TestCapabilityAnchorAlgorithmMetrics(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_SIGN", "1")            // enable signing path
 	// Ensure cleanup
 	t.Cleanup(func() {
-		os.Unsetenv("AGENTAUTH_CAPABILITIES_PATH")
-		os.Unsetenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH")
-		os.Unsetenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL")
-		os.Unsetenv("AGENTAUTH_EDDSA_TTL_HOURS")
-		os.Unsetenv("AGENTAUTH_CAP_ANCHOR_SIGN")
+		_ = os.Unsetenv("AGENTAUTH_CAPABILITIES_PATH")
+		_ = os.Unsetenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH")
+		_ = os.Unsetenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL")
+		_ = os.Unsetenv("AGENTAUTH_EDDSA_TTL_HOURS")
+		_ = os.Unsetenv("AGENTAUTH_CAP_ANCHOR_SIGN")
 	})
 	m := imetrics.NewMemory()
 	srv := NewBetaServerWithMetrics("0", m)

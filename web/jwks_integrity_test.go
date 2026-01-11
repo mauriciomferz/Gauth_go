@@ -107,12 +107,10 @@ func TestJWKSOptionalSignature(t *testing.T) {
 // TestJWKSDeprecationMetadata verifies deprecated_after and sunset_after in EdDSA JWK entries.
 func TestJWKSDeprecationMetadata(t *testing.T) {
 	// Clean environment first to avoid pollution from other tests
-	os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
-	os.Unsetenv("AGENTAUTH_JWT_ALG")
+	_ = os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
+	_ = os.Unsetenv("AGENTAUTH_JWT_ALG")
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	t.Setenv("AGENTAUTH_EDDSA_AUTO_ROTATE", "0") // Disable auto-rotation for stable test
-	defer os.Unsetenv("AGENTAUTH_TOKEN_SIG_MODE")
-	defer os.Unsetenv("AGENTAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first (initializes crypto manager with 24h TTL)
 	// Replace with short-TTL manager to trigger deprecation
 	ttl := 200 * time.Millisecond
@@ -162,12 +160,10 @@ func TestJWKSDeprecationMetadata(t *testing.T) {
 // TestJWKSDeprecationWarningHeader verifies Warning header when key is deprecated.
 func TestJWKSDeprecationWarningHeader(t *testing.T) {
 	// Clean environment first
-	os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
-	os.Unsetenv("AGENTAUTH_JWT_ALG")
+	_ = os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
+	_ = os.Unsetenv("AGENTAUTH_JWT_ALG")
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	t.Setenv("AGENTAUTH_EDDSA_AUTO_ROTATE", "0")
-	defer os.Unsetenv("AGENTAUTH_TOKEN_SIG_MODE")
-	defer os.Unsetenv("AGENTAUTH_EDDSA_AUTO_ROTATE")
 	// Create server first
 	// Replace with short-TTL manager
 	ttl := 200 * time.Millisecond

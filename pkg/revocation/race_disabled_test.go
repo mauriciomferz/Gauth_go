@@ -3,6 +3,4 @@
 
 package revocation
 
-func init() {
-	raceEnabled = false
-}
+const raceEnabled = false

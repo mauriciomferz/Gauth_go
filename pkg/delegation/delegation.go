@@ -168,7 +168,8 @@ func (c *Chain) VerifyChain() error {
 // ValidateScopeNarrowing ensures a new delegation does not widen scope relative to parent.
 // Returns error if widened.
 func ValidateScopeNarrowing(parent, child Delegation) error {
-	// Simple rule: every key in child must exist in parent and value must be equal (or more restrictive if numeric range, omitted here).
+	// Simple rule: every key in child must exist in parent and value must be equal
+	// (or more restrictive if numeric range; omitted here).
 	for k, v := range child.Scope {
 		pv, ok := parent.Scope[k]
 		if !ok {

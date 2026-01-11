@@ -149,7 +149,10 @@ func (dm *DPoPManager) GenerateNonce() (string, error) {
 //   - *DPoPProof: Validated proof with extracted claims
 //   - string: JWK thumbprint (for token binding)
 //   - error: Validation error
-func (dm *DPoPManager) ValidateDPoPProof(ctx context.Context, dpopHeader, httpMethod, httpURI, accessToken string) (*DPoPProof, string, error) {
+func (dm *DPoPManager) ValidateDPoPProof(
+	ctx context.Context,
+	dpopHeader, httpMethod, httpURI, accessToken string,
+) (*DPoPProof, string, error) {
 	if dpopHeader == "" {
 		return nil, "", &OIDCError{
 			ErrorCode:        ErrorInvalidRequest,
@@ -168,8 +171,8 @@ func (dm *DPoPManager) ValidateDPoPProof(ctx context.Context, dpopHeader, httpMe
 	}
 
 	// Validate JWT header
-	if err := dm.validateDPoPHeader(token.Header); err != nil {
-		return nil, "", err
+	if headerErr := dm.validateDPoPHeader(token.Header); headerErr != nil {
+		return nil, "", headerErr
 	}
 
 	// Extract public key from JWK
@@ -241,8 +244,8 @@ func (dm *DPoPManager) ValidateDPoPProof(ctx context.Context, dpopHeader, httpMe
 	}
 
 	// Validate claims
-	if err := dm.validateDPoPClaims(proof, httpMethod, httpURI, accessToken); err != nil {
-		return nil, "", err
+	if claimsErr := dm.validateDPoPClaims(proof, httpMethod, httpURI, accessToken); claimsErr != nil {
+		return nil, "", claimsErr
 	}
 
 	// Calculate JWK thumbprint for token binding

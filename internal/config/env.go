@@ -47,5 +47,9 @@ func EphemeralSecret(envKey string, size int) (secret string, generated bool, wa
 	if _, err := rand.Read(b); err != nil {
 		return fmt.Sprintf("ephemeral-%d", time.Now().UnixNano()), true, fmt.Sprintf("entropy failure generating %s: %v", envKey, err)
 	}
-	return base64.RawURLEncoding.EncodeToString(b), true, fmt.Sprintf("%s not set – generated ephemeral secret (demo only; set %s for stable runs)", envKey, envKey)
+	return base64.RawURLEncoding.EncodeToString(b), true, fmt.Sprintf(
+		"%s not set – generated ephemeral secret (demo only; set %s for stable runs)",
+		envKey,
+		envKey,
+	)
 }

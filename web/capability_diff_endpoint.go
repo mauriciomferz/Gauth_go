@@ -51,7 +51,9 @@ type capabilityModified struct {
 }
 
 // diffCapabilities computes added, removed, modified sets between base and current.
-func diffCapabilities(base, current []capability.Capability) (added, removed []simpleCapabilityMeta, modified []capabilityModified) {
+func diffCapabilities(
+	base, current []capability.Capability,
+) (added, removed []simpleCapabilityMeta, modified []capabilityModified) {
 	baseMap := make(map[string]capability.Capability, len(base))
 	for _, c := range base {
 		baseMap[c.ID] = c
@@ -68,14 +70,33 @@ func diffCapabilities(base, current []capability.Capability) (added, removed []s
 			continue
 		}
 		// Detect modification (semantic field difference)
-		if curr.Version != b.Version || curr.Stable != b.Stable || curr.DeprecatedAfter != b.DeprecatedAfter || curr.SunsetAfter != b.SunsetAfter || len(curr.Versions) != len(b.Versions) {
-			modified = append(modified, capabilityModified{ID: id, Before: &simpleCapabilityMeta{ID: b.ID, Version: b.Version, Stable: b.Stable}, After: &simpleCapabilityMeta{ID: curr.ID, Version: curr.Version, Stable: curr.Stable}})
+		if curr.Version != b.Version || curr.Stable != b.Stable ||
+			curr.DeprecatedAfter != b.DeprecatedAfter ||
+			curr.SunsetAfter != b.SunsetAfter ||
+			len(curr.Versions) != len(b.Versions) {
+			modified = append(modified, capabilityModified{
+				ID: id,
+				Before: &simpleCapabilityMeta{
+					ID: b.ID, Version: b.Version, Stable: b.Stable,
+				},
+				After: &simpleCapabilityMeta{
+					ID: curr.ID, Version: curr.Version, Stable: curr.Stable,
+				},
+			})
 			continue
 		}
 		// Versions slice content comparison when lengths equal
 		for i := range curr.Versions {
 			if curr.Versions[i] != b.Versions[i] {
-				modified = append(modified, capabilityModified{ID: id, Before: &simpleCapabilityMeta{ID: b.ID, Version: b.Version, Stable: b.Stable}, After: &simpleCapabilityMeta{ID: curr.ID, Version: curr.Version, Stable: curr.Stable}})
+				modified = append(modified, capabilityModified{
+					ID: id,
+					Before: &simpleCapabilityMeta{
+						ID: b.ID, Version: b.Version, Stable: b.Stable,
+					},
+					After: &simpleCapabilityMeta{
+						ID: curr.ID, Version: curr.Version, Stable: curr.Stable,
+					},
+				})
 				break
 			}
 		}
@@ -123,7 +144,9 @@ func (s *BetaServer) registerCapabilityDiff() {
 		} else {
 			// Lookup snapshot by hash
 			if s.capDiffSnapshots == nil {
-				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "snapshot retention disabled", "AAP001:capability_diff", nil)
+				respondError(c, http.StatusNotFound, "capability_version_not_found",
+					"version_not_found", "snapshot retention disabled",
+					"AAP001:capability_diff", nil)
 				if span != nil {
 					span.SetTag("outcome", "error")
 					span.SetTag("error_code", "snapshot_disabled")
@@ -133,7 +156,9 @@ func (s *BetaServer) registerCapabilityDiff() {
 			}
 			snap, ok := s.capDiffSnapshots.Get(baseHash)
 			if !ok {
-				respondError(c, http.StatusNotFound, "capability_version_not_found", "version_not_found", "base capability hash unknown", "AAP001:capability_diff", nil)
+				respondError(c, http.StatusNotFound, "capability_version_not_found",
+					"version_not_found", "base capability hash unknown",
+					"AAP001:capability_diff", nil)
 				if span != nil {
 					span.SetTag("outcome", "error")
 					span.SetTag("error_code", "base_hash_unknown")

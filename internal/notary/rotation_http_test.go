@@ -19,7 +19,12 @@ func TestRotationHTTPHandler(t *testing.T) {
 	}
 	// receipt hash for first rotation
 	hashes := []string{"hash_rot_1"}
-	rv := &RotationVerifier{Descriptors: []*KeyRotationDescriptor{d1}, ReceiptHashes: hashes, OldKeys: []ed25519.PublicKey{o1Pub}, NewKeys: []ed25519.PublicKey{o2Pub}}
+	rv := &RotationVerifier{
+		Descriptors:   []*KeyRotationDescriptor{d1},
+		ReceiptHashes: hashes,
+		OldKeys:       []ed25519.PublicKey{o1Pub},
+		NewKeys:       []ed25519.PublicKey{o2Pub},
+	}
 	handler := rv.Handler()
 	req := httptest.NewRequest(http.MethodGet, "/api/rotations/verification", nil)
 	rr := httptest.NewRecorder()
@@ -34,7 +39,8 @@ func TestRotationHTTPHandler(t *testing.T) {
 	if err := json.Unmarshal(rr.Body.Bytes(), &parsed); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
 	}
-	if parsed.Summary.Total != 1 || parsed.Summary.Failures != 0 || !parsed.Summary.AllSignaturesOK || !parsed.Summary.AllContinuityOK {
+	if parsed.Summary.Total != 1 || parsed.Summary.Failures != 0 ||
+		!parsed.Summary.AllSignaturesOK || !parsed.Summary.AllContinuityOK {
 		t.Fatalf("unexpected summary: %+v", parsed.Summary)
 	}
 }

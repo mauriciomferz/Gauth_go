@@ -16,7 +16,9 @@ func TestCapabilityAnchorMaterial(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file create: %v", err)
 	}
-	tmp.Close()
+	if err := tmp.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	// Use t.Setenv to ensure environment isolation (automatically restored after test) to
 	// prevent leakage influencing subsequent tests in this package.
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", tmp.Name())

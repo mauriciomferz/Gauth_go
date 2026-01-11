@@ -11,7 +11,6 @@ import (
 
 // DatabaseLogger implements audit logging to the database
 type DatabaseLogger struct {
-	mu            sync.RWMutex
 	repo          *Repository
 	logger        common.Logger
 	eventQueue    chan *AuditEvent

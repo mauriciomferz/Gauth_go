@@ -140,7 +140,9 @@ func TestDevicePolling_Pending(t *testing.T) {
 	}
 
 	var errResp device.ErrorResponse
-	json.Unmarshal(w.Body.Bytes(), &errResp)
+	if err := json.Unmarshal(w.Body.Bytes(), &errResp); err != nil {
+		t.Fatalf("unmarshal error response: %v", err)
+	}
 	if errResp.Error != "authorization_pending" {
 		t.Errorf("Expected authorization_pending, got %s", errResp.Error)
 	}

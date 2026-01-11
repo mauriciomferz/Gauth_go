@@ -38,15 +38,16 @@ type RevocationEvent struct {
 type RevocationReason string
 
 const (
-	RevocationReasonCompromise     RevocationReason = "compromise"               // key/material compromise suspected
-	RevocationReasonUserRequest    RevocationReason = "user_request"             // end-user voluntary revocation
-	RevocationReasonGrantorRevoked RevocationReason = "revoked_by_grantor"       // grantor explicitly revoked
-	RevocationReasonPolicyExpired  RevocationReason = "policy_expired"           // policy condition invalidated (e.g., org membership)
-	RevocationReasonSuperseded     RevocationReason = "superseded"               // replaced by a new delegation / rotation
-	RevocationReasonAbuse          RevocationReason = "abuse_detected"           // abuse / anomaly detection triggered
-	RevocationReasonSuspended      RevocationReason = "suspended"                // delegation temporarily suspended
-	RevocationReasonActivated      RevocationReason = "activated"                // delegation reactivated/resumed
-	RevocationReasonPartialScope   RevocationReason = "partial_scope_revocation" // specific scopes revoked
+	RevocationReasonCompromise     RevocationReason = "compromise"         // key/material compromise suspected
+	RevocationReasonUserRequest    RevocationReason = "user_request"       // end-user voluntary revocation
+	RevocationReasonGrantorRevoked RevocationReason = "revoked_by_grantor" // grantor explicitly revoked
+	// policy condition invalidated (e.g., org membership)
+	RevocationReasonPolicyExpired RevocationReason = "policy_expired"
+	RevocationReasonSuperseded    RevocationReason = "superseded"               // replaced by a new delegation / rotation
+	RevocationReasonAbuse         RevocationReason = "abuse_detected"           // abuse / anomaly detection triggered
+	RevocationReasonSuspended     RevocationReason = "suspended"                // delegation temporarily suspended
+	RevocationReasonActivated     RevocationReason = "activated"                // delegation reactivated/resumed
+	RevocationReasonPartialScope  RevocationReason = "partial_scope_revocation" // specific scopes revoked
 )
 
 // validateReason enforces known reasons; empty reason is allowed (becomes grantor_revoked default).
@@ -219,9 +220,6 @@ func (c *RevocationChain) Verify() error {
 		if e.Signature != "" {
 			kp := c.keyProvider
 			if kp == nil {
-				// No key provider available
-			}
-			if kp == nil {
 				return fmt.Errorf("signature present but no key provider available at %d", i)
 			}
 			payload, perr := signableBytes(e)
@@ -243,6 +241,9 @@ func (c *RevocationChain) Verify() error {
 // IsDelegationRevoked checks whether a given delegation ID or hash appears in the chain.
 // Uses optimized O(1) lookup if map is available (RR-014).
 func (c *RevocationChain) IsDelegationRevoked(delegationID, delegationHash string) bool {
+	if c == nil {
+		return false
+	}
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -272,12 +273,11 @@ func (c *RevocationChain) IsDelegationRevoked(delegationID, delegationHash strin
 
 // BuildRevocationIndex converts the chain into a RevocationIndex (by DelegationID only) for compatibility.
 func (c *RevocationChain) BuildRevocationIndex() *RevocationIndex {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	if c == nil {
 		return NewRevocationIndex(nil)
 	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	list := make([]DelegationRevocation, 0, len(c.events))
 	for _, e := range c.events {
 		if e.DelegationID == "" {
@@ -389,10 +389,13 @@ func (c *RevocationChain) aggregateHash() string {
 
 // MerkleRoot returns current Merkle root (empty if no events or merkle disabled)
 func (c *RevocationChain) MerkleRoot() string {
+	if c == nil {
+		return ""
+	}
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	if c == nil || c.merkle == nil {
+	if c.merkle == nil {
 		return ""
 	}
 	return c.merkle.Root()
@@ -401,15 +404,16 @@ func (c *RevocationChain) MerkleRoot() string {
 // SignedTreeHead represents a signed commitment to the current revocation chain state.
 // Multiple signatures can be attached (multi-sig scenario in later phase). For now, single EdDSA signature.
 type SignedTreeHead struct {
-	Version         int                 `json:"version"`
-	MerkleRoot      string              `json:"merkle_root"`
-	ChainLength     int                 `json:"chain_length"`
-	AggregateHash   string              `json:"aggregate_hash"`
-	Timestamp       time.Time           `json:"timestamp"`
-	Signatures      []TreeHeadSignature `json:"signatures"`
-	Threshold       int                 `json:"threshold,omitempty"`        // required cumulative weight (or count) for validity when multi-sig
-	WeightsTotal    int                 `json:"weights_total,omitempty"`    // total available weight among signers
-	SatisfiedWeight int                 `json:"satisfied_weight,omitempty"` // cumulative weight of attached signatures
+	Version       int                 `json:"version"`
+	MerkleRoot    string              `json:"merkle_root"`
+	ChainLength   int                 `json:"chain_length"`
+	AggregateHash string              `json:"aggregate_hash"`
+	Timestamp     time.Time           `json:"timestamp"`
+	Signatures    []TreeHeadSignature `json:"signatures"`
+	// required cumulative weight (or count) for validity when multi-sig
+	Threshold       int `json:"threshold,omitempty"`
+	WeightsTotal    int `json:"weights_total,omitempty"`    // total available weight among signers
+	SatisfiedWeight int `json:"satisfied_weight,omitempty"` // cumulative weight of attached signatures
 }
 
 // TreeHeadSignature holds an individual signature over the tree head canonical payload.
@@ -450,10 +454,13 @@ func signableTreeHeadBytes(sth *SignedTreeHead) ([]byte, error) {
 
 // LatestTreeHead returns most recent signed tree head (nil if none signed yet).
 func (c *RevocationChain) LatestTreeHead() *SignedTreeHead {
+	if c == nil {
+		return nil
+	}
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	if c == nil || len(c.treeHeads) == 0 {
+	if len(c.treeHeads) == 0 {
 		return nil
 	}
 	return c.treeHeads[len(c.treeHeads)-1]
@@ -461,12 +468,11 @@ func (c *RevocationChain) LatestTreeHead() *SignedTreeHead {
 
 // TreeHeads returns a copy of the signed tree head history.
 func (c *RevocationChain) TreeHeads() []*SignedTreeHead {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
 	if c == nil {
 		return nil
 	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	out := make([]*SignedTreeHead, len(c.treeHeads))
 	copy(out, c.treeHeads)
 	return out
@@ -474,13 +480,14 @@ func (c *RevocationChain) TreeHeads() []*SignedTreeHead {
 
 // SignTreeHead creates and signs a new tree head snapshot using the active EdDSA key provider (if available).
 // If key provider unavailable, returns unsigned tree head (Signatures slice empty) – still useful for anchoring.
+//
+//nolint:gocyclo // multi-sig signing paths and environment-driven options
 func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	if c == nil {
 		return nil, errors.New("nil_chain")
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	// If there are no revocation events yet, suppress creation of a SignedTreeHead.
 	if len(c.events) == 0 {
 		return nil, nil
@@ -496,7 +503,13 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 	if c.merkle != nil {
 		root = c.merkle.Root()
 	}
-	sth := &SignedTreeHead{Version: 1, MerkleRoot: root, ChainLength: len(c.events), AggregateHash: c.aggregateHash(), Timestamp: time.Now().UTC()}
+	sth := &SignedTreeHead{
+		Version:       1,
+		MerkleRoot:    root,
+		ChainLength:   len(c.events),
+		AggregateHash: c.aggregateHash(),
+		Timestamp:     time.Now().UTC(),
+	}
 	weightsMap := map[string]int{}
 	if raw := os.Getenv("AGENTAUTH_MULTI_SIG_WEIGHTS"); raw != "" {
 		parts := strings.Split(raw, ",")
@@ -555,7 +568,12 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 						w = weightsMap[k.ID]
 					}
 				}
-				sth.Signatures = append(sth.Signatures, TreeHeadSignature{Kid: k.ID, Alg: "EdDSA", Sig: base64.RawURLEncoding.EncodeToString(sig), Weight: w})
+				sth.Signatures = append(sth.Signatures, TreeHeadSignature{
+					Kid:    k.ID,
+					Alg:    "EdDSA",
+					Sig:    base64.RawURLEncoding.EncodeToString(sig),
+					Weight: w,
+				})
 				cumulative += w
 				sth.SatisfiedWeight = cumulative
 				if threshold > 1 && cumulative >= threshold {
@@ -572,7 +590,12 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 				}
 				sig, err := signer.Sign(payload)
 				if err == nil {
-					sth.Signatures = append(sth.Signatures, TreeHeadSignature{Kid: signer.KeyID(), Alg: "EdDSA", Sig: base64.RawURLEncoding.EncodeToString(sig), Weight: 1})
+					sth.Signatures = append(sth.Signatures, TreeHeadSignature{
+						Kid:    signer.KeyID(),
+						Alg:    "EdDSA",
+						Sig:    base64.RawURLEncoding.EncodeToString(sig),
+						Weight: 1,
+					})
 					sth.SatisfiedWeight = 1
 					sth.WeightsTotal = 1 // Unknown total, assume 1
 				}
@@ -582,18 +605,13 @@ func (c *RevocationChain) SignTreeHead() (*SignedTreeHead, error) {
 	}
 	c.treeHeads = append(c.treeHeads, sth)
 	// Optional persistence
-	// Optional persistence
 	if p := os.Getenv("AGENTAUTH_STH_PERSIST_PATH"); p != "" {
 		_ = c.SaveSignedTreeHeads(p) // best-effort; ignore error (log could be added later)
 	}
 
 	// External Anchor Observer Hook
 	if c.anchorObserver != nil {
-		if err := c.anchorObserver.OnRevocationAnchor(sth); err != nil {
-			// Log error but don't fail the operation (observer failure shouldn't block internal signing)
-			// In a stricter mode, we might want to return error.
-			// fmt.Printf("anchor observer error: %v\n", err)
-		}
+		_ = c.anchorObserver.OnRevocationAnchor(sth) // best-effort; observer failure shouldn't block internal signing
 	}
 
 	return sth, nil
@@ -773,7 +791,13 @@ func (c *RevocationChain) GenerateConsistencyProof(startIndex int) (*Consistency
 	for i := start.ChainLength; i < len(c.events); i++ {
 		newHashes = append(newHashes, c.events[i].Hash)
 	}
-	proof := &ConsistencyProof{StartLength: start.ChainLength, EndLength: latest.ChainLength, StartRoot: start.MerkleRoot, EndRoot: latest.MerkleRoot, NewLeaves: newHashes}
+	proof := &ConsistencyProof{
+		StartLength: start.ChainLength,
+		EndLength:   latest.ChainLength,
+		StartRoot:   start.MerkleRoot,
+		EndRoot:     latest.MerkleRoot,
+		NewLeaves:   newHashes,
+	}
 	return proof, nil
 }
 
@@ -801,7 +825,8 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 	}
 	oldSize := start.ChainLength
 	newSize := latest.ChainLength
-	// Pre-hash leaves (leaf domain). This is O(n) but we avoid building all level arrays; future improvement may stream only needed ranges.
+	// Pre-hash leaves (leaf domain). This is O(n) but we avoid building all level arrays;
+	// future improvement may stream only needed ranges.
 	leaves := make([]string, len(c.events))
 	for i, ev := range c.events {
 		leaves[i] = LeafDigestForEventHash(ev.Hash)
@@ -969,7 +994,17 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 			break
 		}
 		if len(path) > 0 {
-			proof := &ConsistencyProofV2{StartLength: oldSize, EndLength: newSize, Path: path, Positions: positions, StartRoot: start.MerkleRoot, EndRoot: latest.MerkleRoot, PrefixRoots: prefixRoots, PrefixSizes: prefixSizes, PrefixBridges: prefixBridges}
+			proof := &ConsistencyProofV2{
+				StartLength:   oldSize,
+				EndLength:     newSize,
+				Path:          path,
+				Positions:     positions,
+				StartRoot:     start.MerkleRoot,
+				EndRoot:       latest.MerkleRoot,
+				PrefixRoots:   prefixRoots,
+				PrefixSizes:   prefixSizes,
+				PrefixBridges: prefixBridges,
+			}
 			return proof, nil
 		}
 		// else fall through to legacy path construction below
@@ -1016,15 +1051,25 @@ func (c *RevocationChain) GenerateConsistencyProofV2(startIndex int) (*Consisten
 		newIdx /= 2
 		level++
 	}
-	proof := &ConsistencyProofV2{StartLength: oldSize, EndLength: newSize, Path: path, Positions: positions, StartRoot: start.MerkleRoot, EndRoot: latest.MerkleRoot, PrefixRoots: prefixRoots, PrefixSizes: prefixSizes, PrefixBridges: prefixBridges}
+	proof := &ConsistencyProofV2{
+		StartLength:   oldSize,
+		EndLength:     newSize,
+		Path:          path,
+		Positions:     positions,
+		StartRoot:     start.MerkleRoot,
+		EndRoot:       latest.MerkleRoot,
+		PrefixRoots:   prefixRoots,
+		PrefixSizes:   prefixSizes,
+		PrefixBridges: prefixBridges,
+	}
 	return proof, nil
 }
 
 // VerifyConsistencyProofV2 verifies logarithmic consistency proof ensuring append-only growth.
 // Recomputes old and new roots using provided path. For prototype we simply trust provided StartRoot/EndRoot fields
-// after reconstructing from full leaf set for integrity, then ensure that path enables derivation following our recorded sequence.
+// after reconstructing from full leaf set for integrity, then ensure that path enables derivation following our recorded
+// sequence.
 //
-//nolint:gocyclo // Merkle proof verification logic
 //nolint:gocyclo // Merkle proof verification logic
 func VerifyConsistencyProofV2(proof *ConsistencyProofV2, allEventHashes []string) error {
 	if proof == nil {
@@ -1085,7 +1130,13 @@ func VerifyConsistencyProofV2(proof *ConsistencyProofV2, allEventHashes []string
 			offset += blkSize
 		}
 		// Attempt fast reconstruction when enabled; now supports multi-block using bridges.
-		if fast := ReconstructStartRootFromPrefixBlocks(proof.PrefixRoots, proof.PrefixSizes, proof.StartLength, proof.PrefixBridges); fast != "" && fast != canonicalStartRoot {
+		fast := ReconstructStartRootFromPrefixBlocks(
+			proof.PrefixRoots,
+			proof.PrefixSizes,
+			proof.StartLength,
+			proof.PrefixBridges,
+		)
+		if fast != "" && fast != canonicalStartRoot {
 			return fmt.Errorf("fast_reconstruction_mismatch: expected %s got %s", canonicalStartRoot, fast)
 		}
 	}
@@ -1120,7 +1171,8 @@ func VerifyConsistencyProofV2(proof *ConsistencyProofV2, allEventHashes []string
 	return nil
 }
 
-// VerifyConsistencyProof performs naive verification by reconstructing merkle tree from all events up to start length and end length
+// VerifyConsistencyProof performs naive verification by reconstructing merkle tree from all events up to start length and
+// end length
 // and comparing supplied roots, then ensuring that appending NewLeaves transitions from start root to end root.
 // This is O(n) for prototype; future optimization can adopt logarithmic RFC6962 proof format.
 func VerifyConsistencyProof(proof *ConsistencyProof, allEventHashes []string) error {

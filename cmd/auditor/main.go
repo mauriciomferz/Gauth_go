@@ -55,7 +55,16 @@ func getVerifier() *cryptoReg.Manager {
 
 func main() {
 	baseURL := flag.String("base-url", "http://localhost:8080", "Base URL of running AgentAuth server")
-	mode := flag.String("mode", "help", "Operation: rotation|rotation-v2-remote|rotation-v2-file|poa-verify|poa-file|attestation-file|attestation-remote|revocation|revocation-proof|revocation-consistency|help")
+	mode := flag.String(
+		"mode",
+		"help",
+		"Operation: "+
+			"rotation|rotation-v2-remote|rotation-v2-file|"+
+			"poa-verify|poa-file|"+
+			"attestation-file|attestation-remote|"+
+			"revocation|revocation-proof|revocation-consistency|"+
+			"help",
+	)
 	rotV2Prev := flag.String("rotation-v2-prev", "", "Expected previous artifact digest for continuity check (rotation-v2 modes)")
 	rotV2File := flag.String("rotation-v2-file", "", "Path to rotation V2 artifact JSON (rotation-v2-file mode)")
 	poaID := flag.String("poa-id", "", "PoA identifier (for remote fetch modes)")
@@ -350,7 +359,18 @@ func verifyAttestation(att *Attestation) map[string]interface{} {
 			Success        bool    `json:"success"`
 		} `json:"notarization,omitempty"`
 	}
-	u := unsignedStruct{Success: att.Success, Configured: att.Configured, Reason: att.Reason, Nonce: att.Nonce, Snapshot: att.Snapshot, Audit: att.Audit, Anchor: att.Anchor, StrictUnknown: att.StrictUnknown, Surge: att.Surge, Notarization: att.Notarization}
+	u := unsignedStruct{
+		Success:       att.Success,
+		Configured:    att.Configured,
+		Reason:        att.Reason,
+		Nonce:         att.Nonce,
+		Snapshot:      att.Snapshot,
+		Audit:         att.Audit,
+		Anchor:        att.Anchor,
+		StrictUnknown: att.StrictUnknown,
+		Surge:         att.Surge,
+		Notarization:  att.Notarization,
+	}
 	raw, _ := json.Marshal(u)
 	msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)
 	sigBytes, err := base64.RawStdEncoding.DecodeString(att.Signature)
@@ -566,7 +586,7 @@ func httpGet(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("http_%d: %s", resp.StatusCode, string(b))
@@ -637,7 +657,7 @@ func auditRotationV2ArtifactJSON(data []byte, expectedPrev string) (interface{},
 	art := outer.Artifact
 	// Recompute canonical digest (excluding signatures & public keys) matching server logic
 	h := sha256.New()
-	fmt.Fprintf(h, "%d|%s|%s|%d|", 2, art.ActiveKeySetID, art.PreviousArtifactHash, art.ThresholdWeight)
+	_, _ = fmt.Fprintf(h, "%d|%s|%s|%d|", 2, art.ActiveKeySetID, art.PreviousArtifactHash, art.ThresholdWeight)
 	algCopy := append([]string(nil), art.AlgorithmSuite...)
 	sort.Strings(algCopy)
 	for i, a := range algCopy {
@@ -653,7 +673,7 @@ func auditRotationV2ArtifactJSON(data []byte, expectedPrev string) (interface{},
 	s := aux
 	sort.Slice(s, func(i, j int) bool { return s[i].Signer < s[j].Signer })
 	for _, si := range s {
-		fmt.Fprintf(h, "%s|%s|%d\n", si.Signer, si.Alg, si.Weight)
+		_, _ = fmt.Fprintf(h, "%s|%s|%d\n", si.Signer, si.Alg, si.Weight)
 	}
 	computed := fmt.Sprintf("sha256:%x", h.Sum(nil))
 	continuityOK := true

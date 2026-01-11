@@ -27,7 +27,11 @@ func (s *simpleReplayStore) CheckAndStore(jti string) error {
 
 // TestClaimSetAndReplayEnforcement validates presence and enforcement of iss,aud,jti,nbf and duplicate JTI rejection.
 func TestClaimSetAndReplayEnforcement(t *testing.T) {
-	cfg := Config{AuthServerURL: "https://auth.example", ClientID: "client-1", ClientSecret: "secret-ABCD-12345678901234567890", SigningKey: "secret-ABCD-12345678901234567890", AccessTokenExpiry: time.Minute, Audience: []string{"api://resource"}}
+	cfg := Config{
+		AuthServerURL: "https://auth.example", ClientID: "client-1",
+		ClientSecret: "secret-ABCD-12345678901234567890", SigningKey: "secret-ABCD-12345678901234567890",
+		AccessTokenExpiry: time.Minute, Audience: []string{"api://resource"},
+	}
 	svc, err := New(cfg, WithReplayStore(&simpleReplayStore{}))
 	if err != nil {
 		t.Fatalf("New service error: %v", err)
@@ -51,7 +55,11 @@ func TestClaimSetAndReplayEnforcement(t *testing.T) {
 
 // TestNotBeforeEnforcement ensures nbf prevents early use.
 func TestNotBeforeEnforcement(t *testing.T) {
-	cfg := Config{AuthServerURL: "https://auth.example", ClientID: "client-nbf", ClientSecret: "secret-ABCD-12345678901234567890", SigningKey: "secret-ABCD-12345678901234567890", AccessTokenExpiry: time.Minute}
+	cfg := Config{
+		AuthServerURL: "https://auth.example", ClientID: "client-nbf",
+		ClientSecret: "secret-ABCD-12345678901234567890", SigningKey: "secret-ABCD-12345678901234567890",
+		AccessTokenExpiry: time.Minute,
+	}
 	svc, err := New(cfg)
 	if err != nil {
 		t.Fatalf("New error: %v", err)
@@ -91,7 +99,11 @@ func TestNotBeforeEnforcement(t *testing.T) {
 
 // TestAudienceEnforcement checks audience claim acceptance and rejection.
 func TestAudienceEnforcement(t *testing.T) {
-	cfg := Config{AuthServerURL: "https://auth.example", ClientID: "client-aud", ClientSecret: "secret-ABCD-12345678901234567890", SigningKey: "secret-ABCD-12345678901234567890", AccessTokenExpiry: time.Minute, Audience: []string{"api://one", "api://two"}}
+	cfg := Config{
+		AuthServerURL: "https://auth.example", ClientID: "client-aud",
+		ClientSecret: "secret-ABCD-12345678901234567890", SigningKey: "secret-ABCD-12345678901234567890",
+		AccessTokenExpiry: time.Minute, Audience: []string{"api://one", "api://two"},
+	}
 	svc, err := New(cfg)
 	if err != nil {
 		t.Fatalf("New error: %v", err)

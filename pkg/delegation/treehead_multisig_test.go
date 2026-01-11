@@ -1,7 +1,6 @@
 package delegation
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -15,21 +14,25 @@ func TestMultiSignatureTreeHeadThreshold(t *testing.T) {
 		t.Fatalf("manager init: %v", err)
 	}
 	if _, err2 := km.Rotate(); err2 != nil {
-		t.Fatalf("rotate1: %v", err)
+		t.Fatalf("rotate1: %v", err2)
 	}
 	if _, err2 := km.Rotate(); err2 != nil {
-		t.Fatalf("rotate2: %v", err)
+		t.Fatalf("rotate2: %v", err2)
 	}
+
 	// Configure threshold=2
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "2")
 	chain := NewRevocationChain(WithKeyProvider(km))
+
 	// Append some events
 	for i := 0; i < 3; i++ {
-		if _, err2 := chain.Append(RevocationEvent{ID: "rev-" + time.Now().Format("150405") + string(rune('a'+i)), DelegationID: "del-"}); err != nil {
+		revID := "rev-" + time.Now().Format("150405") + string(rune('a'+i))
+		if _, err2 := chain.Append(RevocationEvent{ID: revID, DelegationID: "del-"}); err2 != nil {
 			t.Fatalf("append: %v", err2)
 		}
 		time.Sleep(5 * time.Millisecond) // ensure unique timestamp for hash determinism
 	}
+
 	sth, err := chain.SignTreeHead()
 	if err != nil {
 		t.Fatalf("sign tree head: %v", err)
@@ -52,21 +55,23 @@ func TestMultiSignatureTreeHeadWeights(t *testing.T) {
 	}
 	// Rotate twice to have 3 keys total (active + 2 history)
 	if _, err2 := km.Rotate(); err2 != nil {
-		t.Fatalf("rotate1: %v", err)
+		t.Fatalf("rotate1: %v", err2)
 	}
 	if _, err2 := km.Rotate(); err2 != nil {
-		t.Fatalf("rotate2: %v", err)
+		t.Fatalf("rotate2: %v", err2)
 	}
+
 	// Build weights mapping
 	keys := km.ListCurrent()
 	if len(keys) < 2 {
 		t.Fatalf("need at least two keys")
 	}
 	wEnv := keys[0].ID + "=2," + keys[1].ID + "=1"
-	os.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "3")
-	os.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", wEnv)
+	t.Setenv("AGENTAUTH_MULTI_SIG_THRESHOLD", "3")
+	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", wEnv)
+
 	chain := NewRevocationChain(WithKeyProvider(km))
-	if _, err2 := chain.Append(RevocationEvent{ID: "rev-x", DelegationID: "del-x"}); err != nil {
+	if _, err2 := chain.Append(RevocationEvent{ID: "rev-x", DelegationID: "del-x"}); err2 != nil {
 		t.Fatalf("append: %v", err2)
 	}
 	sth, err := chain.SignTreeHead()

@@ -206,7 +206,9 @@ func (s *InMemoryPolicyStore) matchesCriteria(policy *AuthorizationPolicy, crite
 	return true
 }
 
-func (s *InMemoryPolicyStore) applyPagination(policies []*AuthorizationPolicy, criteria *PolicySearchCriteria) []*AuthorizationPolicy {
+func (s *InMemoryPolicyStore) applyPagination(
+	policies []*AuthorizationPolicy, criteria *PolicySearchCriteria,
+) []*AuthorizationPolicy {
 	if criteria == nil {
 		return policies
 	}

@@ -23,7 +23,9 @@ func TestCapabilityAnchorPrometheusGauge(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	anchorFile.Close()
+	if err := anchorFile.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")
 	capFile := filepath.Join(t.TempDir(), "caps.json")

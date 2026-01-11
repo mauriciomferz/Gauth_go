@@ -14,12 +14,12 @@ func main() {
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "AgentAuth %s environment - OK\n", version)
+		_, _ = fmt.Fprintf(w, "AgentAuth %s environment - OK\n", version)
 	})
 
 	http.HandleFunc("/api/v1/beta/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"status":"healthy","version":"%s"}`, version)
+		_, _ = fmt.Fprintf(w, `{"status":"healthy","version":"%s"}`, version)
 	})
 
 	port := os.Getenv("PORT")

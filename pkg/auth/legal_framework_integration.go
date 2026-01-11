@@ -63,7 +63,11 @@ func (v *LegalFrameworkValidator) GetJurisdictionRules(jurisdiction string) (*Ju
 }
 
 // ValidateJurisdictionRequirements validates requirements against jurisdiction rules
-func (v *LegalFrameworkValidator) ValidateJurisdictionRequirements(ctx context.Context, rules *JurisdictionRules, action string) error {
+func (v *LegalFrameworkValidator) ValidateJurisdictionRequirements(
+	ctx context.Context,
+	rules *JurisdictionRules,
+	action string,
+) error {
 	requirements := &compliance.JurisdictionRequirements{
 		Jurisdiction:      Jurisdiction(rules.Country),
 		RequiredApprovals: rules.RequiredApprovals,
@@ -81,7 +85,11 @@ func (v *LegalFrameworkValidator) VerifyLegalCapacity(ctx context.Context, entit
 }
 
 // ValidateClientResourceServerInteraction validates interactions between client and resource server
-func (v *LegalFrameworkValidator) ValidateClientResourceServerInteraction(ctx context.Context, client *Client, server *ResourceServer) error {
+func (v *LegalFrameworkValidator) ValidateClientResourceServerInteraction(
+	ctx context.Context,
+	client *Client,
+	server *ResourceServer,
+) error {
 	// For now, validate that both entities are in compatible jurisdictions
 	if client.Entity != nil && server.Entity != nil {
 		return v.VerifyLegalCapacity(ctx, client.Entity)
@@ -90,7 +98,11 @@ func (v *LegalFrameworkValidator) ValidateClientResourceServerInteraction(ctx co
 }
 
 // ValidateResourceServerPowers validates resource server authorization powers
-func (v *LegalFrameworkValidator) ValidateResourceServerPowers(ctx context.Context, token *Token, request *LegalFrameworkRequest) error {
+func (v *LegalFrameworkValidator) ValidateResourceServerPowers(
+	ctx context.Context,
+	token *Token,
+	request *LegalFrameworkRequest,
+) error {
 	if request.Jurisdiction != "" {
 		return v.ValidateJurisdiction(ctx, Jurisdiction(request.Jurisdiction), request.Action)
 	}
@@ -138,7 +150,11 @@ func NewStandardLegalFramework() *StandardLegalFramework {
 }
 
 // ValidateJurisdictionRequirements validates requirements against jurisdiction rules
-func (f *StandardLegalFramework) ValidateJurisdictionRequirements(ctx context.Context, rules *JurisdictionRules, action string) error {
+func (f *StandardLegalFramework) ValidateJurisdictionRequirements(
+	ctx context.Context,
+	rules *JurisdictionRules,
+	action string,
+) error {
 	return f.validator.ValidateJurisdictionRequirements(ctx, rules, action)
 }
 
@@ -176,12 +192,20 @@ func (f *StandardLegalFramework) VerifyLegalCapacity(ctx context.Context, entity
 }
 
 // ValidateClientResourceServerInteraction validates interactions between client and resource server
-func (f *StandardLegalFramework) ValidateClientResourceServerInteraction(ctx context.Context, client *Client, server *ResourceServer) error {
+func (f *StandardLegalFramework) ValidateClientResourceServerInteraction(
+	ctx context.Context,
+	client *Client,
+	server *ResourceServer,
+) error {
 	return f.validator.ValidateClientResourceServerInteraction(ctx, client, server)
 }
 
 // ValidateResourceServerPowers validates resource server authorization powers
-func (f *StandardLegalFramework) ValidateResourceServerPowers(ctx context.Context, token *Token, request *LegalFrameworkRequest) error {
+func (f *StandardLegalFramework) ValidateResourceServerPowers(
+	ctx context.Context,
+	token *Token,
+	request *LegalFrameworkRequest,
+) error {
 	return f.validator.ValidateResourceServerPowers(ctx, token, request)
 }
 

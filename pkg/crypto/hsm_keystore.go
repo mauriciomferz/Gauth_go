@@ -16,6 +16,8 @@ import (
 )
 
 // PKCS#11 v3.0 constants (if not in library)
+//
+//nolint:stylecheck // PKCS#11 constant names follow upstream naming.
 const (
 	CKK_EC_EDWARDS              = 0x00000040
 	CKM_EC_EDWARDS_KEY_PAIR_GEN = 0x00001055
@@ -139,8 +141,9 @@ func (h *HSMKeyStore) Generate(ctx context.Context, tenant string) (string, erro
 
 	// Generate ID
 	id := make([]byte, 16)
-	if _, err := fmt.Sscanf(fmt.Sprintf("%x", time.Now().UnixNano()), "%x", &id); err != nil {
+	if _, scanErr := fmt.Sscanf(fmt.Sprintf("%x", time.Now().UnixNano()), "%x", &id); scanErr != nil {
 		// fallback
+		_ = scanErr
 	}
 
 	keyLabel := fmt.Sprintf("agentauth-%s-%d", tenant, time.Now().Unix())
@@ -226,8 +229,8 @@ func (h *HSMKeyStore) GetKey(ctx context.Context, tenant, keyID string) (*Key, e
 		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
 	}
 
-	if err := h.ctx.FindObjectsInit(session, template); err != nil {
-		return nil, err
+	if findInitErr := h.ctx.FindObjectsInit(session, template); findInitErr != nil {
+		return nil, findInitErr
 	}
 
 	objs, _, err := h.ctx.FindObjects(session, 1)
@@ -235,8 +238,8 @@ func (h *HSMKeyStore) GetKey(ctx context.Context, tenant, keyID string) (*Key, e
 		_ = h.ctx.FindObjectsFinal(session)
 		return nil, err
 	}
-	if err := h.ctx.FindObjectsFinal(session); err != nil {
-		return nil, err
+	if findFinalErr := h.ctx.FindObjectsFinal(session); findFinalErr != nil {
+		return nil, findFinalErr
 	}
 
 	if len(objs) == 0 {
@@ -261,6 +264,7 @@ func (h *HSMKeyStore) GetKey(ctx context.Context, tenant, keyID string) (*Key, e
 			// PKCS#11 3.0 says CKA_EC_POINT is DER-encoded OCTET STRING.
 			// Let's assume it's just the bytes for now or wrapped.
 			// Foundation implementation - might need adjustment based on specific HSM.
+			_ = pubBytes
 		}
 	}
 
@@ -270,12 +274,6 @@ func (h *HSMKeyStore) GetKey(ctx context.Context, tenant, keyID string) (*Key, e
 		Alg:    "Ed25519",
 		Use:    "sig",
 	}, nil
-}
-
-func (h *HSMKeyStore) isActive(tenant, keyID string) bool {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	return h.activeKeys[tenant] == keyID
 }
 
 // ListKeys returns all keys for a tenant.

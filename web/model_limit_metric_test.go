@@ -20,7 +20,9 @@ func TestModelLimitExceededMetric(t *testing.T) {
 	if _, err := f.Write([]byte(`{"model_limits":{"demo-model":{"max_input_tokens":100}}}`)); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	f.Close()
+	if err := f.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH", f.Name())
 	bs := NewBetaServer("")
 	t.Cleanup(func() { bs.Shutdown() })

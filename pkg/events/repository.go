@@ -446,8 +446,9 @@ func (r *Repository) GetEventMetrics(ctx context.Context, tenantID string) (*Eve
 	for rows.Next() {
 		var category string
 		var count int64
-		if err := rows.Scan(&category, &count); err != nil {
-			return nil, fmt.Errorf("failed to scan category stat: %w", err)
+		scanErr := rows.Scan(&category, &count)
+		if scanErr != nil {
+			return nil, fmt.Errorf("failed to scan category stat: %w", scanErr)
 		}
 		stats.ByCategory[category] = count
 	}
@@ -469,8 +470,9 @@ func (r *Repository) GetEventMetrics(ctx context.Context, tenantID string) (*Eve
 	for rows.Next() {
 		var severity string
 		var count int64
-		if err := rows.Scan(&severity, &count); err != nil {
-			return nil, fmt.Errorf("failed to scan severity stat: %w", err)
+		scanErr := rows.Scan(&severity, &count)
+		if scanErr != nil {
+			return nil, fmt.Errorf("failed to scan severity stat: %w", scanErr)
 		}
 		stats.BySeverity[severity] = count
 	}
@@ -492,8 +494,9 @@ func (r *Repository) GetEventMetrics(ctx context.Context, tenantID string) (*Eve
 
 	for rows.Next() {
 		var tc EventTypeCount
-		if err := rows.Scan(&tc.Type, &tc.Count); err != nil {
-			return nil, fmt.Errorf("failed to scan top type: %w", err)
+		scanErr := rows.Scan(&tc.Type, &tc.Count)
+		if scanErr != nil {
+			return nil, fmt.Errorf("failed to scan top type: %w", scanErr)
 		}
 		stats.TopEventTypes = append(stats.TopEventTypes, tc)
 	}

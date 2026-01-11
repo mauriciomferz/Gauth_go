@@ -21,7 +21,11 @@ func TestBrazilCPFValidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create connector: %v", err)
 	}
-	defer connector.Close()
+	t.Cleanup(func() {
+		if err := connector.Close(); err != nil {
+			t.Errorf("connector close: %v", err)
+		}
+	})
 
 	tests := []struct {
 		name      string
@@ -73,7 +77,11 @@ func TestCanadaSINValidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create connector: %v", err)
 	}
-	defer connector.Close()
+	t.Cleanup(func() {
+		if err := connector.Close(); err != nil {
+			t.Errorf("connector close: %v", err)
+		}
+	})
 
 	tests := []struct {
 		name      string
@@ -125,7 +133,11 @@ func TestMexicoCURPValidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create connector: %v", err)
 	}
-	defer connector.Close()
+	t.Cleanup(func() {
+		if err := connector.Close(); err != nil {
+			t.Errorf("connector close: %v", err)
+		}
+	})
 
 	tests := []struct {
 		name      string
@@ -171,7 +183,11 @@ func TestSouthAfricaIDValidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create connector: %v", err)
 	}
-	defer connector.Close()
+	t.Cleanup(func() {
+		if err := connector.Close(); err != nil {
+			t.Errorf("connector close: %v", err)
+		}
+	})
 
 	tests := []struct {
 		name        string
@@ -224,7 +240,7 @@ func TestNigeriaNINValidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create connector: %v", err)
 	}
-	defer connector.Close()
+	defer func() { _ = connector.Close() }()
 
 	tests := []struct {
 		name      string
@@ -271,7 +287,7 @@ func TestKenyaNationalIDValidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create connector: %v", err)
 	}
-	defer connector.Close()
+	defer func() { _ = connector.Close() }()
 
 	tests := []struct {
 		name      string
@@ -317,7 +333,7 @@ func BenchmarkBrazilCPFValidation(b *testing.B) {
 	}
 
 	connector, _ := NewBrazilIdentityConnector(config)
-	defer connector.Close()
+	defer func() { _ = connector.Close() }()
 
 	req := &CPFRequest{
 		CPF:  "12345678909",
@@ -342,7 +358,7 @@ func BenchmarkCanadaSINLuhn(b *testing.B) {
 	}
 
 	connector, _ := NewCanadaIdentityConnector(config)
-	defer connector.Close()
+	defer func() { _ = connector.Close() }()
 
 	req := &SINRequest{
 		SIN:         "046454286",
@@ -367,7 +383,7 @@ func BenchmarkSouthAfricaIDLuhn(b *testing.B) {
 	}
 
 	connector, _ := NewSouthAfricaIdentityConnector(config)
-	defer connector.Close()
+	defer func() { _ = connector.Close() }()
 
 	req := &IDNumberRequest{
 		IDNumber: "9001085800083",

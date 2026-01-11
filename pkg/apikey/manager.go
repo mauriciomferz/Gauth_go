@@ -152,8 +152,6 @@ func (m *Manager) GetAPIKey(ctx context.Context, keyID string) (*APIKey, error) 
 
 // ListAPIKeys lists API keys with optional filtering
 func (m *Manager) ListAPIKeys(ctx context.Context, query *ListAPIKeysQuery) ([]APIKey, int, error) {
-	apiKeys := []APIKey{}
-
 	sqlQuery := `
 		SELECT id, key_id, key_hash, name, description, user_id,
 			   rate_limit_per_minute, rate_limit_per_hour, rate_limit_per_day,
@@ -212,7 +210,7 @@ func (m *Manager) ListAPIKeys(ctx context.Context, query *ListAPIKeysQuery) ([]A
 	}
 	defer rows.Close()
 
-	apiKeys, err = pgx.CollectRows(rows, pgx.RowToStructByName[APIKey])
+	apiKeys, err := pgx.CollectRows(rows, pgx.RowToStructByName[APIKey])
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to collect API keys: %w", err)
 	}

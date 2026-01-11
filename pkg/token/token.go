@@ -779,7 +779,11 @@ func (m *Manager) RevokeToken(ctx context.Context, token *Token) error {
 // --- END Integration test compatibility shims ---
 
 // CreateTokenWithRefresh is a stub for integration test compatibility
-func (m *Manager) CreateTokenWithRefresh(ctx context.Context, claims map[string]interface{}, accessTTL, refreshTTL time.Duration) (*Token, string, error) {
+func (m *Manager) CreateTokenWithRefresh(
+	ctx context.Context,
+	claims map[string]any,
+	accessTTL, refreshTTL time.Duration,
+) (*Token, string, error) {
 	tok, err := m.CreateToken(ctx, claims, accessTTL)
 	if err != nil {
 		return nil, "", err

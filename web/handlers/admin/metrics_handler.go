@@ -229,7 +229,7 @@ func (h *MetricsHandler) collectSystemMetrics(ctx context.Context) (SystemMetric
 	if h.db != nil {
 		poolStats := h.db.Stat()
 		cacheSize = int64(poolStats.AcquiredConns())
-		cacheEvicted = int64(poolStats.EmptyAcquireCount())
+		cacheEvicted = poolStats.EmptyAcquireCount()
 	}
 
 	// Calculate uptime in seconds
@@ -494,7 +494,10 @@ func (h *MetricsHandler) getSemanticCounters(ctx context.Context) SemanticCounte
 
 		// Get active anchors count
 		var active, cached int64
-		_ = h.db.QueryRow(ctx, "SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'").Scan(&active) // Best effort metrics
+		_ = h.db.QueryRow(
+			ctx,
+			"SELECT COUNT(*) FROM authorization_policies WHERE status = 'active'",
+		).Scan(&active) // Best effort metrics
 		counters.ActiveAnchors = active
 		counters.CachedAnchors = cached
 

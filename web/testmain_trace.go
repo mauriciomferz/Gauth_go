@@ -72,7 +72,9 @@ func runTests(m *testing.M) int {
 	goroutinesAfter := runtime.NumGoroutine()
 
 	// Sentinel diagnostic line to aid log parsing during flake triage.
-	fmt.Fprintf(os.Stderr, "[diag] m.Run returned=%d duration_ms=%d goroutines_before=%d goroutines_after=%d at=%s\n", code, duration.Milliseconds(), goroutinesBefore, goroutinesAfter, time.Now().Format(time.RFC3339Nano))
+	fmt.Fprintf(os.Stderr,
+		"[diag] m.Run returned=%d duration_ms=%d goroutines_before=%d goroutines_after=%d at=%s\n",
+		code, duration.Milliseconds(), goroutinesBefore, goroutinesAfter, time.Now().Format(time.RFC3339Nano))
 	if os.Getenv("AGENTAUTH_TEST_TRACE_SIGPIPE") == "1" {
 		fmt.Fprintf(os.Stderr, "[trace] test harness finished code=%d at=%s\n", code, time.Now().Format(time.RFC3339Nano))
 	}

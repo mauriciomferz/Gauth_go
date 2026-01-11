@@ -37,8 +37,8 @@ func NewComplianceValidator(
 }
 
 // SetAgentAuthPlusValidator sets the AgentAuth+ validator and enables enforcement
-func (v *ComplianceValidator) SetAgentAuthPlusValidator(AgentAuthPlusValidator *AgentAuthPlusValidator) {
-	v.AgentAuthPlusValidator = AgentAuthPlusValidator
+func (v *ComplianceValidator) SetAgentAuthPlusValidator(validator *AgentAuthPlusValidator) {
+	v.AgentAuthPlusValidator = validator
 	v.enforceAgentAuthPlus = true
 }
 
@@ -56,7 +56,7 @@ type ExtendedAuthorizationRequest struct {
 	Restrictions          []PowerRestriction     `json:"restrictions,omitempty"`
 	RequestedActions      []string               `json:"requested_actions,omitempty"`
 	TransactionContext    map[string]interface{} `json:"transaction_context,omitempty"`
-	Jurisdiction          string                 `json:"jurisdiction,omitempty"` // ISO 3166-1 alpha-2 country code or ISO 3166-2 subdivision
+	Jurisdiction          string                 `json:"jurisdiction,omitempty"` // ISO 3166 alpha-2 or subdivision
 	RequestTime           time.Time              `json:"request_time"`
 }
 

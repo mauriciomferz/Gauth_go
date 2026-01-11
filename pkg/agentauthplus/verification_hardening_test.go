@@ -143,7 +143,9 @@ type verifMockCapabilityService struct{ CapabilityAssessmentService }
 func (m *verifMockCapabilityService) GetLatestAssessment(ctx context.Context, id string) (*AICapabilityAssessment, error) {
 	return &AICapabilityAssessment{OverallLevel: "L4", AssessmentDate: time.Now()}, nil
 }
-func (m *verifMockCapabilityService) CheckCapabilityMatch(ctx context.Context, id string, reqs *CapabilityRequirements) (bool, []string, error) {
+func (m *verifMockCapabilityService) CheckCapabilityMatch(
+	ctx context.Context, id string, reqs *CapabilityRequirements,
+) (bool, []string, error) {
 	return true, nil, nil
 }
 

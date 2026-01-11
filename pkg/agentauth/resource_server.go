@@ -60,7 +60,9 @@ func (rs *ResourceServer) SetRateLimit(args ...interface{}) {
 }
 
 // ValidateExtendedTokenWithRAR validates an extended token and checks RAR permissions
-func (rs *ResourceServer) ValidateExtendedTokenWithRAR(ctx context.Context, tokenString string, resource string, action string) error {
+func (rs *ResourceServer) ValidateExtendedTokenWithRAR(
+	ctx context.Context, tokenString string, resource string, action string,
+) error {
 	if rs.service == nil || rs.service.protocolOrchestrator == nil || rs.service.protocolOrchestrator.extendedTokenService == nil {
 		return fmt.Errorf("service not fully initialized")
 	}

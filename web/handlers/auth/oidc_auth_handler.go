@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -231,6 +233,11 @@ func (h *OIDCAuthHandler) Callback(c *gin.Context) {
 
 	ctx := c.Request.Context()
 
+	const (
+		markSessionFailedQuery   = `UPDATE oidc_auth_sessions SET status = 'failed', updated_at = NOW() WHERE id = $1`
+		updateSessionUserIDQuery = `UPDATE oidc_auth_sessions SET user_id = $1 WHERE id = $2`
+	)
+
 	// Retrieve auth session
 	query := `
 		SELECT 
@@ -292,7 +299,7 @@ func (h *OIDCAuthHandler) Callback(c *gin.Context) {
 		session.PKCEEnabled,
 	)
 	if err != nil {
-		_, _ = h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET status = 'failed', updated_at = NOW() WHERE id = $1`, session.ID) // Best effort; already in error path
+		_, _ = h.db.Exec(ctx, markSessionFailedQuery, session.ID) // Best effort; already in error path
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Token exchange failed", "details": err.Error()})
 		return
 	}
@@ -300,7 +307,7 @@ func (h *OIDCAuthHandler) Callback(c *gin.Context) {
 	// Validate ID token
 	claims, err := h.validateIDToken(tokenResp.IDToken, session.ClientID, session.Nonce)
 	if err != nil {
-		_, _ = h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET status = 'failed', updated_at = NOW() WHERE id = $1`, session.ID) // Best effort; already in error path
+		_, _ = h.db.Exec(ctx, markSessionFailedQuery, session.ID) // Best effort; already in error path
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "ID token validation failed", "details": err.Error()})
 		return
 	}
@@ -341,7 +348,7 @@ func (h *OIDCAuthHandler) Callback(c *gin.Context) {
 	}
 
 	// Update session with user_id
-	_, _ = h.db.Exec(ctx, `UPDATE oidc_auth_sessions SET user_id = $1 WHERE id = $2`, userID, session.ID) // Best effort; core operation succeeded
+	_, _ = h.db.Exec(ctx, updateSessionUserIDQuery, userID, session.ID) // Best effort; core operation succeeded
 
 	// Return success response
 	c.JSON(http.StatusOK, gin.H{
@@ -370,7 +377,7 @@ func (h *OIDCAuthHandler) getAuthorizationEndpoint(issuerURL string) string {
 	if err != nil {
 		return ""
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var discovery struct {
 		AuthorizationEndpoint string `json:"authorization_endpoint"`
@@ -431,7 +438,7 @@ func (h *OIDCAuthHandler) exchangeCodeForToken(
 	if err != nil {
 		return nil, fmt.Errorf("failed to exchange code: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("token endpoint returned status %d", resp.StatusCode)
@@ -487,6 +494,11 @@ func (h *OIDCAuthHandler) provisionUser(c *gin.Context, providerID, tenantID str
 
 	// Check if user mapping already exists
 	userID, found, err := h.checkAndUpdateExistingUser(ctx, providerID, tenantID, claims.Subject, c.Writer)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return "", err
+		}
+	}
 	if found {
 		return userID, nil
 	}
@@ -516,7 +528,11 @@ func (h *OIDCAuthHandler) provisionUser(c *gin.Context, providerID, tenantID str
 	return userID, nil
 }
 
-func (h *OIDCAuthHandler) checkAndUpdateExistingUser(ctx context.Context, providerID, tenantID, subject string, w http.ResponseWriter) (string, bool, error) {
+func (h *OIDCAuthHandler) checkAndUpdateExistingUser(
+	ctx context.Context,
+	providerID, tenantID, subject string,
+	w http.ResponseWriter,
+) (string, bool, error) {
 	query := `
 		SELECT user_id, last_login_at FROM oidc_user_mappings 
 		WHERE provider_id = $1 AND tenant_id = $2 AND provider_user_id = $3 AND status = 'active'
@@ -536,7 +552,7 @@ func (h *OIDCAuthHandler) checkAndUpdateExistingUser(ctx context.Context, provid
 			// Log error but don't fail - user can still proceed
 			// Using fmt.Fprintf to writer as in original code, though context logger would be better
 			if w != nil {
-				fmt.Fprintf(w, "[WARN] Failed to update last login: %v\n", err)
+				_, _ = fmt.Fprintf(w, "[WARN] Failed to update last login: %v\n", err)
 			}
 		}
 		return userID, true, nil
@@ -609,13 +625,14 @@ func (h *OIDCAuthHandler) mapUserAttributes(claims *IDTokenClaims, mapping map[s
 	}
 
 	if displayName == "" {
-		if givenName != "" && familyName != "" {
+		switch {
+		case givenName != "" && familyName != "":
 			displayName = givenName + " " + familyName
-		} else if givenName != "" {
+		case givenName != "":
 			displayName = givenName
-		} else if email != "" {
+		case email != "":
 			displayName = email
-		} else {
+		default:
 			displayName = claims.Subject
 		}
 	}
@@ -626,7 +643,11 @@ func (h *OIDCAuthHandler) mapUserAttributes(claims *IDTokenClaims, mapping map[s
 	}
 }
 
-func (h *OIDCAuthHandler) createUserMapping(ctx context.Context, tenantID, providerID, subject string, attrs userAttributes) (string, error) {
+func (h *OIDCAuthHandler) createUserMapping(
+	ctx context.Context,
+	tenantID, providerID, subject string,
+	attrs userAttributes,
+) (string, error) {
 	if attrs.Email == "" {
 		return "", fmt.Errorf("email is required for user provisioning but not provided in claims")
 	}
@@ -659,18 +680,24 @@ func (h *OIDCAuthHandler) createUserMapping(ctx context.Context, tenantID, provi
 	return userID, nil
 }
 
-func (h *OIDCAuthHandler) postProvisioningActions(c *gin.Context, ctx context.Context, userID, tenantID, providerID string, config *provisioningConfig, groups []string) {
+func (h *OIDCAuthHandler) postProvisioningActions(
+	c *gin.Context,
+	ctx context.Context,
+	userID, tenantID, providerID string,
+	config *provisioningConfig,
+	groups []string,
+) {
 	if config.DefaultRole != nil && *config.DefaultRole != "" {
 		err := h.assignDefaultRole(ctx, userID, tenantID, *config.DefaultRole)
 		if err != nil {
-			fmt.Fprintf(c.Writer, "[WARN] Failed to assign default role: %v\n", err)
+			_, _ = fmt.Fprintf(c.Writer, "[WARN] Failed to assign default role: %v\n", err)
 		}
 	}
 
 	if len(groups) > 0 {
 		err := h.syncGroupMemberships(ctx, userID, tenantID, providerID, groups)
 		if err != nil {
-			fmt.Fprintf(c.Writer, "[WARN] Failed to sync group memberships: %v\n", err)
+			_, _ = fmt.Fprintf(c.Writer, "[WARN] Failed to sync group memberships: %v\n", err)
 		}
 	}
 }

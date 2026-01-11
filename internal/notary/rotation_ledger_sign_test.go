@@ -18,9 +18,11 @@ func TestRotationLedgerEntrySigning(t *testing.T) {
 		t.Fatalf("tmp: %v", err)
 	}
 	path := f.Name()
-	f.Close()
-	os.Remove(path)
-	defer os.Remove(path)
+	if err := f.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+	_ = os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 	led := NewRotationLedger(path)
 	if err := led.Load(); err != nil {
 		t.Fatalf("load: %v", err)
@@ -62,9 +64,11 @@ func TestRotationLedgerTamperDetect(t *testing.T) {
 		t.Fatalf("tmp: %v", err)
 	}
 	path := f.Name()
-	f.Close()
-	os.Remove(path)
-	defer os.Remove(path)
+	if err := f.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+	_ = os.Remove(path)
+	defer func() { _ = os.Remove(path) }()
 	led := NewRotationLedger(path)
 	if err := led.Load(); err != nil {
 		t.Fatalf("load: %v", err)

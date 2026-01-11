@@ -255,7 +255,9 @@ func (p *PowerAdministrationPoint) DeletePolicy(ctx context.Context, policyID st
 }
 
 // SearchPolicies searches for policies based on criteria
-func (p *PowerAdministrationPoint) SearchPolicies(ctx context.Context, criteria *PolicySearchCriteria) ([]*AuthorizationPolicy, error) {
+func (p *PowerAdministrationPoint) SearchPolicies(
+	ctx context.Context, criteria *PolicySearchCriteria,
+) ([]*AuthorizationPolicy, error) {
 	return p.store.Search(ctx, criteria)
 }
 

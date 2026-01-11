@@ -20,12 +20,6 @@ func SecurityHeadersMiddleware() gin.HandlerFunc {
 	// Content Security Policy
 	csp := buildContentSecurityPolicy(isDevelopment)
 
-	// Allowed frame ancestors (for X-Frame-Options alternative)
-	frameAncestors := os.Getenv("AGENTAUTH_FRAME_ANCESTORS")
-	if frameAncestors == "" {
-		frameAncestors = "'none'" // Default: no framing
-	}
-
 	return func(c *gin.Context) {
 		// Content Security Policy
 		c.Header("Content-Security-Policy", csp)

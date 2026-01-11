@@ -9,7 +9,24 @@ import (
 func TestGapItemsCSV(t *testing.T) {
 	// minimal gap matrix
 	sample := `{
-      "generated":"2025-10-18","version":"t","sections":[{"id":"s","name":"Sec","items":[{"id":"s.i1","requirement":"R,comma","status":"Implemented","gap":"G|pipe","evidence":["file.go:10"],"priority":"P0"}]}]
+  "generated":"2025-10-18",
+  "version":"t",
+  "sections":[
+    {
+      "id":"s",
+      "name":"Sec",
+      "items":[
+        {
+          "id":"s.i1",
+          "requirement":"R,comma",
+          "status":"Implemented",
+          "gap":"G|pipe",
+          "evidence":["file.go:10"],
+          "priority":"P0"
+        }
+      ]
+    }
+  ]
     }`
 	f, err := os.CreateTemp(t.TempDir(), "gap_matrix*.json")
 	if err != nil {
@@ -18,9 +35,10 @@ func TestGapItemsCSV(t *testing.T) {
 	if _, err := f.WriteString(sample); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	f.Close()
-	os.Setenv("GAP_MATRIX_PATH", f.Name())
-	defer os.Unsetenv("GAP_MATRIX_PATH")
+	if err := f.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+	t.Setenv("GAP_MATRIX_PATH", f.Name())
 	ar := Analyze([]Clause{})
 	rep := BuildReport(ar)
 	csv := rep.GapItemsCSV()

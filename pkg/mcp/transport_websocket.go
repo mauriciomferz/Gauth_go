@@ -108,7 +108,10 @@ func (t *WebSocketTransport) connectWithRetry(ctx context.Context, attempt int) 
 		WriteBufferSize:  4096,
 	}
 
-	conn, _, err := dialer.DialContext(ctx, t.url, t.headers)
+	conn, resp, err := dialer.DialContext(ctx, t.url, t.headers)
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		t.lastError = err
 		t.lastErrorTime = time.Now()
@@ -288,7 +291,9 @@ func (t *WebSocketTransport) Close() error {
 
 	t.connMu.Lock()
 	if t.conn != nil {
-		_ = t.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")) // Best effort close
+		// Best effort close
+		_ = t.conn.WriteMessage(
+			websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 		_ = t.conn.Close()
 		t.conn = nil
 	}

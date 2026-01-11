@@ -169,7 +169,9 @@ func (a *AtomicCounterStore) key(counterID string) string {
 //
 // Thread-safe: Yes (atomic Redis operation)
 // Network latency: Single round-trip to Redis
-func (a *AtomicCounterStore) CheckAndIncrement(ctx context.Context, counterID string, increment, limit float64, ttl time.Duration) (allowed bool, err error) {
+func (a *AtomicCounterStore) CheckAndIncrement(
+	ctx context.Context, counterID string, increment, limit float64, ttl time.Duration,
+) (allowed bool, err error) {
 	if counterID == "" {
 		return false, fmt.Errorf("empty counterID")
 	}

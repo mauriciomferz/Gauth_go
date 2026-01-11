@@ -31,6 +31,14 @@ type ValidationResult struct {
 }
 
 // WarningCollector interface for warning emission and collection
+// capitalizeFirst capitalizes the first letter of a string (replacement for deprecated strings.Title)
+func capitalizeFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
 type WarningCollector interface {
 	AddWarning(code, message, field string, value interface{}, severity string)
 	GetWarnings() []ValidationWarning
@@ -279,7 +287,8 @@ func (v *EnhancedPoAValidator) validateEnhancedSemantics(ctx context.Context, p 
 
 	// Check for potentially suspicious patterns
 	if len(p.Scope) > 10 {
-		v.addWarning("excessive_scope", "Large number of scopes may indicate overprivileged delegation", "scope", len(p.Scope), "warning")
+		v.addWarning("excessive_scope", "Large number of scopes may indicate overprivileged delegation",
+			"scope", len(p.Scope), "warning")
 	}
 
 	// Duration analysis
@@ -476,7 +485,8 @@ func (v *EnhancedPoAValidator) validateTemporalConstraints(p *PowerOfAttorney) e
 	// Warn about very short duration (< 1 hour)
 	duration := p.ValidUntil.Sub(p.ValidFrom)
 	if duration < time.Hour {
-		v.addWarning("very_short_duration", "Delegation duration less than 1 hour may be unintentional", "duration", duration.String(), "info")
+		v.addWarning("very_short_duration",
+			"Delegation duration less than 1 hour may be unintentional", "duration", duration.String(), "info")
 	}
 
 	// Validate business hour restrictions if present
@@ -520,7 +530,8 @@ func (v *EnhancedPoAValidator) validateAuthorityRelationship(p *PowerOfAttorney)
 
 	// Warn about service-to-service delegation (may require elevated approval)
 	if isServiceGrantor && isServiceGrantee {
-		v.addWarning("service_to_service", "Service-to-service delegation detected", "grantor_grantee", fmt.Sprintf("%s -> %s", p.Grantor, p.Grantee), "warning")
+		v.addWarning("service_to_service", "Service-to-service delegation detected",
+			"grantor_grantee", fmt.Sprintf("%s -> %s", p.Grantor, p.Grantee), "warning")
 	}
 
 	return nil
@@ -548,7 +559,8 @@ func (v *EnhancedPoAValidator) validateDelegationDepthSemantics(ctx context.Cont
 			if limit, err := strconv.Atoi(limitStr); err == nil {
 				if p.Depth > limit {
 					// This would be weird (self-contradiction), but technically possible if manually constructed
-					v.addWarning("depth_restriction_mismatch", "Current depth exceeds own max_delegation_depth restriction", "depth", p.Depth, "error")
+					v.addWarning("depth_restriction_mismatch",
+						"Current depth exceeds own max_delegation_depth restriction", "depth", p.Depth, "error")
 				}
 			}
 		}
@@ -584,7 +596,8 @@ func (v *EnhancedPoAValidator) validateRestrictionSemantics(p *PowerOfAttorney) 
 		if strings.HasPrefix(key, "condition_") {
 			if v.conditionalEngine != nil {
 				if err := v.conditionalEngine.ValidateConditionSyntax(value); err != nil {
-					v.addWarning("invalid_condition_syntax", fmt.Sprintf("Invalid condition syntax for %s: %v", key, err), "restriction", key, "error")
+					v.addWarning("invalid_condition_syntax",
+						fmt.Sprintf("Invalid condition syntax for %s: %v", key, err), "restriction", key, "error")
 				}
 			}
 			continue
@@ -799,7 +812,8 @@ func (v *EnhancedPoAValidator) validateFinancialLimits(ctx context.Context, p *P
 func (v *EnhancedPoAValidator) checkLimit(delegationID, periodKey string, amount, limit float64, periodType string) error {
 	currentUsage, err := v.dailyLimitStore.GetPeriodUsage(delegationID, periodKey)
 	if err != nil {
-		v.addWarning(fmt.Sprintf("%s_limit_check_failed", periodType), fmt.Sprintf("Could not verify %s usage", periodType), "limit", err.Error(), "error")
+		v.addWarning(fmt.Sprintf("%s_limit_check_failed", periodType),
+			fmt.Sprintf("Could not verify %s usage", periodType), "limit", err.Error(), "error")
 		return nil // Don't fail validation hard on store error, but warn
 	}
 
@@ -811,12 +825,15 @@ func (v *EnhancedPoAValidator) checkLimit(delegationID, periodKey string, amount
 	}
 
 	if (currentUsage + amount) > limit {
-		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf("%s limit exceeded: current=%f requested=%f limit=%f", periodType, currentUsage, amount, limit))
+		return aap.New(aap.ErrInvalidRequest, fmt.Sprintf(
+			"%s limit exceeded: current=%f requested=%f limit=%f", periodType, currentUsage, amount, limit))
 	}
 
 	// Warning for approaching limit
 	if (currentUsage + amount) > limit*0.8 {
-		v.addWarning(fmt.Sprintf("approaching_%s_limit", periodType), fmt.Sprintf("%s usage approaching limit", strings.Title(periodType)), "usage_percentage", ((currentUsage+amount)/limit)*100, "warning")
+		v.addWarning(fmt.Sprintf("approaching_%s_limit", periodType),
+			fmt.Sprintf("%s usage approaching limit", capitalizeFirst(periodType)),
+			"usage_percentage", ((currentUsage+amount)/limit)*100, "warning")
 	}
 	return nil
 }
@@ -872,7 +889,8 @@ func (v *EnhancedPoAValidator) validateCrossFieldConsistency(ctx context.Context
 		financialRestrictions := []string{"currency", "max_amount", "max_daily_amount"}
 		for _, restriction := range financialRestrictions {
 			if _, exists := p.Restrictions[restriction]; exists {
-				v.addWarning("unused_financial_restriction", "Financial restriction without transaction scope", "restriction", restriction, "info")
+				v.addWarning("unused_financial_restriction",
+					"Financial restriction without transaction scope", "restriction", restriction, "info")
 			}
 		}
 	}
@@ -968,7 +986,9 @@ func getPoAScope(p *PowerOfAttorney) string {
 
 // EvaluatePoAConditions evaluates all conditional restrictions in a PoA against the provided context.
 // Returns nil if all conditions pass, or an error if any condition fails.
-func (v *EnhancedPoAValidator) EvaluatePoAConditions(ctx context.Context, p *PowerOfAttorney, contextData map[string]interface{}) error {
+func (v *EnhancedPoAValidator) EvaluatePoAConditions(
+	ctx context.Context, p *PowerOfAttorney, contextData map[string]interface{},
+) error {
 	if v.conditionalEngine == nil {
 		// If no engine is configured but conditions exist, we must fail-closed or warn?
 		// RFC says unprocessable critical restrictions must fail. conditions are critical.
@@ -1006,7 +1026,9 @@ func (v *EnhancedPoAValidator) EvaluatePoAConditions(ctx context.Context, p *Pow
 }
 
 // RecordPoAConsumption increments persistent usage counters for a successful transaction.
-func (v *EnhancedPoAValidator) RecordPoAConsumption(ctx context.Context, p *PowerOfAttorney, amount float64, currency string) error {
+func (v *EnhancedPoAValidator) RecordPoAConsumption(
+	ctx context.Context, p *PowerOfAttorney, amount float64, currency string,
+) error {
 	if v.dailyLimitStore == nil {
 		return nil
 	}

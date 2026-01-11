@@ -42,7 +42,8 @@ type Metrics interface {
 	ObserveAttestationProofVerificationLatency(d time.Duration)
 	// ObserveAttestationProofIssueLatency records issuance latency (distinct from verification latency)
 	ObserveAttestationProofIssueLatency(d time.Duration)
-	// IncAttestationProofVerificationFailureReason increments labeled failure reason counter (digest_mismatch|algo_mismatch|key_mismatch|missing_anchor|other)
+	// IncAttestationProofVerificationFailureReason increments labeled failure reason counter
+	// (digest_mismatch|algo_mismatch|key_mismatch|missing_anchor|other)
 	IncAttestationProofVerificationFailureReason(reason string)
 	// BLS Proof-of-Possession metrics
 	IncBLSPoPChallengesIssued()
@@ -67,11 +68,14 @@ type Metrics interface {
 	SetEnvelopeV2AdoptionRatio(r float64)
 	// IncEnvelopeDigestMismatch increments counter when canonical digest recomputed at verification differs from stored digest.
 	IncEnvelopeDigestMismatch()
-	// IncEnvelopeDigestMismatchReason increments labeled mismatch reason counter (canonicalization_error|tamper_suspected|domain_conflict|other).
+	// IncEnvelopeDigestMismatchReason increments labeled mismatch reason counter
+	// (canonicalization_error|tamper_suspected|domain_conflict|other).
 	IncEnvelopeDigestMismatchReason(reason string)
-	// ObserveEnvelopeIssuanceCadence records seconds elapsed since previous envelope issuance (any version) for migration cadence analysis.
+	// ObserveEnvelopeIssuanceCadence records seconds elapsed since previous envelope issuance
+	// (any version) for migration cadence analysis.
 	ObserveEnvelopeIssuanceCadence(seconds float64)
-	// SetEnvelopeV1SunsetPhase sets gauge enumerating sunset lifecycle phase (0 Pilot,1 Broad,2 Stabilization,3 SoftDep,4 Sunset,5 PostVerify).
+	// SetEnvelopeV1SunsetPhase sets gauge enumerating sunset lifecycle phase
+	// (0 Pilot,1 Broad,2 Stabilization,3 SoftDep,4 Sunset,5 PostVerify).
 	SetEnvelopeV1SunsetPhase(phase int)
 	// SetSunsetPhaseSatisfactionProgress sets a gauge (0..1) representing fraction of current phase promotion window satisfied.
 	SetSunsetPhaseSatisfactionProgress(p float64)
@@ -84,10 +88,13 @@ type Metrics interface {
 	// Multi-signature adoption metrics (Requirement 33)
 	IncMultiSignatureIssued()
 	IncSingleSignatureIssued()
-	// SetMultiSignatureAdoptionRatio sets a gauge (0..1) of multi-signature vs total issuance.
+	// SetMultiSignatureAdoptionRatio sets a gauge (0..1) of multi-signature vs total
+	// issuance.
 	SetMultiSignatureAdoptionRatio(r float64)
 	// Granular multi-signature failure categorization (additive to generic failure counters)
-	IncMultiSignatureStructuralFailures()       // structural preconditions failed (e.g. duplicate signer, insufficient signers, bad weight map)
+	// structural preconditions failed (e.g. duplicate signer, insufficient signers, bad weight
+	// map)
+	IncMultiSignatureStructuralFailures()
 	IncMultiSignatureDigestFailures()           // canonical digest computation failed
 	IncMultiSignaturePublicKeyMissing()         // signer public key missing (strict mode may treat as hard failure)
 	IncMultiSignatureInvalidSignatureFailures() // signature present but cryptographic verification failed
@@ -95,7 +102,8 @@ type Metrics interface {
 	IncViolation(cat interface{})               // generic category increment (observability categories)
 	// Multi-signature weighted threshold failures (valid signatures present but cumulative weight < threshold)
 	IncMultiSignatureWeightFailures()
-	// ObserveMultiSignatureVerificationLatency records latency of multi-signature verification path (distinct from generic validation latency)
+	// ObserveMultiSignatureVerificationLatency records latency of multi-signature
+	// verification path (distinct from generic validation latency)
 	ObserveMultiSignatureVerificationLatency(d time.Duration)
 	// ObserveMultiSignatureBatchSize records batch size of multi-signature operations (aggregation or verification sets).
 	ObserveMultiSignatureBatchSize(size int)
@@ -109,7 +117,8 @@ type Metrics interface {
 	IncExternalAnchorAttempts(provider string)
 	// IncExternalAnchorFailures increments external anchor failures, labeled by provider.
 	IncExternalAnchorFailures(provider string)
-	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
+	// IncExternalAnchorForcedFailures increments counter of failures explicitly forced via
+	// AGENTAUTH_CAP_EXTERNAL_ANCHOR_FAILS_BEFORE_SUCCESS
 	// distinguishing deterministic test harness failures from probabilistic model failures.
 	IncExternalAnchorForcedFailures()
 	IncExternalAnchorForcedFailuresProvider(provider string)
@@ -162,7 +171,8 @@ type Metrics interface {
 	// The caller SHOULD pass a stable lowercase algorithm identifier. Empty values are
 	// normalized to "_". Multiple algorithms may be incremented for a single anchor emission.
 	IncCapabilityAnchorAlgorithm(algo string)
-	// SetCapabilityAnchorAlgorithmRatio sets a gauge expressing per-algorithm anchor emission ratio (0..1) vs total across all algorithms.
+	// SetCapabilityAnchorAlgorithmRatio sets a gauge expressing per-algorithm anchor emission
+	// ratio (0..1) vs total across all algorithms.
 	// Implementations MAY approximate over a sliding window; callers should pre-compute ratio externally.
 	SetCapabilityAnchorAlgorithmRatio(algo string, ratio float64)
 	// ObserveCapabilityAnchorInterval records time elapsed between successful capability registry anchor emissions.
@@ -204,22 +214,28 @@ type Metrics interface {
 	IncRevocationWorkflowInitiationFailures()
 	// IncRevocationWorkflowApprovals increments counter when a new unique approval is recorded (duplicate approvals ignored).
 	IncRevocationWorkflowApprovals()
-	// IncRevocationWorkflowApprovalFailures increments counter when an approval attempt fails (unauthorized, no pending revocation, finalized/canceled).
+	// IncRevocationWorkflowApprovalFailures increments counter when an approval attempt fails
+	// (unauthorized, no pending revocation, finalized/canceled).
 	IncRevocationWorkflowApprovalFailures()
-	// IncRevocationWorkflowQuorumSatisfied increments counter when quorum (count or weight) is satisfied and revocation is finalized.
+	// IncRevocationWorkflowQuorumSatisfied increments counter when quorum
+	// (count or weight) is satisfied and revocation is finalized.
 	IncRevocationWorkflowQuorumSatisfied()
 	// IncRevocationWorkflowCanceled increments counter when a pending revocation is canceled.
 	IncRevocationWorkflowCanceled()
-	// IncRevocationWorkflowCancellationFailures increments counter when cancellation attempt fails (unauthorized, no pending, already finalized, etc.).
+	// IncRevocationWorkflowCancellationFailures increments counter when
+	// cancellation attempt fails (unauthorized, no pending, already finalized).
 	IncRevocationWorkflowCancellationFailures()
-	// IncRevocationWorkflowUnauthorized increments counter for any unauthorized dual-control revocation action attempt (initiate/approve/cancel).
+	// IncRevocationWorkflowUnauthorized increments counter for any
+	// unauthorized dual-control revocation action attempt.
 	IncRevocationWorkflowUnauthorized()
 	// Evidence attachment metrics (forensic evidentiary strengthening)
 	// IncEvidenceAttachment increments counter when a valid new evidence hash is attached to a POA (unique additions only).
 	IncEvidenceAttachment()
-	// IncEvidenceAttachmentFailures increments counter when an evidence attachment attempt fails (invalid format, not found, duplicate-only submission, etc.).
+	// IncEvidenceAttachmentFailures increments counter when an evidence
+	// attachment attempt fails (invalid format, not found, duplicate-only).
 	IncEvidenceAttachmentFailures()
-	// SetEvidenceHashesPerPOA sets a gauge (labeled by poa_id in Prometheus implementation) with current evidence hash count for a POA.
+	// SetEvidenceHashesPerPOA sets a gauge (labeled by poa_id in Prometheus)
+	// with current evidence hash count for a POA.
 	SetEvidenceHashesPerPOA(poaID string, n int)
 	// Delegation graph export metrics
 	IncDelegationGraphExports()        // count graph export requests
@@ -235,7 +251,8 @@ type Metrics interface {
 	// ObserveLifecycleTransitionLatency records the latency of a lifecycle transition (token/delegation status update)
 	// outcome aligns with lifecycle transition outcome labels: success|failure|noop|unknown
 	ObserveLifecycleTransitionLatency(entityType, outcome string, d time.Duration)
-	// SetLifecycleTransitionLatencyQuantile sets a gauge labeled with entity,outcome,quantile (e.g. p50,p95,p99) for latency distribution.
+	// SetLifecycleTransitionLatencyQuantile sets a gauge with entity,outcome,
+	// quantile (e.g. p50,p95,p99) for latency distribution.
 	// Computation performed externally (e.g. using reservoir samples); implementations simply store/update gauge.
 	SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile string, value float64)
 	// Cascade revocation metrics (Phase 2b)
@@ -1322,7 +1339,8 @@ func (m *Memory) ObserveMultiSignatureAggregateLatency(d time.Duration) {
 	}
 }
 
-// ObserveMultiSignatureVerificationLatency reuses generic validation reservoir for simplicity; could add dedicated reservoir later.
+// ObserveMultiSignatureVerificationLatency reuses generic validation
+// reservoir for simplicity; could add dedicated reservoir later.
 func (m *Memory) ObserveMultiSignatureVerificationLatency(d time.Duration) {
 	m.ObserveValidationLatency(d)
 }
@@ -1744,7 +1762,16 @@ func (m *Memory) SetLifecycleTransitionLatencyQuantile(entityType, outcome, quan
 }
 
 // Snapshot returns current counters for testing/diagnostics.
-func (m *Memory) Snapshot() (delegations uint64, validations uint64, totalLatencyNS uint64, minLatencyNS uint64, maxLatencyNS uint64, avgLatency time.Duration, p50 time.Duration, p90 time.Duration, p99 time.Duration, sigIssued uint64, sigIssueFail uint64, sigVerifications uint64, sigVerificationFail uint64, revIntegrityFail uint64, sigPubKeyMissing uint64, anchorAttempts uint64, anchorFailures uint64, replayStoreErrors uint64, replayStoreLatencyCount uint64, replayStoreLatencyTotalNS uint64, replayStoreLatencyMaxNS uint64, replayHits uint64, replayMisses uint64) {
+func (m *Memory) Snapshot() (
+	delegations uint64, validations uint64, totalLatencyNS uint64,
+	minLatencyNS uint64, maxLatencyNS uint64, avgLatency time.Duration,
+	p50 time.Duration, p90 time.Duration, p99 time.Duration,
+	sigIssued uint64, sigIssueFail uint64, sigVerifications uint64,
+	sigVerificationFail uint64, revIntegrityFail uint64, sigPubKeyMissing uint64,
+	anchorAttempts uint64, anchorFailures uint64, replayStoreErrors uint64,
+	replayStoreLatencyCount uint64, replayStoreLatencyTotalNS uint64,
+	replayStoreLatencyMaxNS uint64, replayHits uint64, replayMisses uint64,
+) {
 	d := atomic.LoadUint64(&m.delegationsCreated)
 	vc := atomic.LoadUint64(&m.validationCount)
 	tot := atomic.LoadUint64(&m.validationTotalNS)

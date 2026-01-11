@@ -198,7 +198,7 @@ func (m *memoryRepository) ListDescendants(parentPoaID string, maxDepth int) ([]
 				if visited[p.ID] {
 					continue // Skip already visited descendants
 				}
-									result = append(result, clonePOA(p))
+				result = append(result, clonePOA(p))
 				// Recursively find children of this descendant
 				findDescendants(p.ID, currentDepth+1)
 			}

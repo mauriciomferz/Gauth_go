@@ -407,7 +407,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByClient(ctx context.Context, cli
 	if err != nil {
 		return nil, fmt.Errorf("failed to list tokens by client: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var tokens []*ExtendedToken
 
@@ -498,7 +498,7 @@ func (s *PostgresExtendedTokenStore) ListTokensByResourceOwner(ctx context.Conte
 	if err != nil {
 		return nil, fmt.Errorf("failed to query tokens by resource owner: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var tokens []*ExtendedToken
 	for rows.Next() {

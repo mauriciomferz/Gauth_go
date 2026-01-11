@@ -135,8 +135,8 @@ func (c *AWSKMSClient) fetchPublicKey(ctx context.Context, targetKeyID string) (
 	// Try PEM decode first
 	block, _ := pem.Decode(resp.PublicKey)
 	if block != nil {
-		pub, err := x509.ParsePKIXPublicKey(block.Bytes)
-		if err == nil {
+		pub, parseErr := x509.ParsePKIXPublicKey(block.Bytes)
+		if parseErr == nil {
 			if targetKeyID == c.keyID {
 				c.mu.Lock()
 				c.pubKey = pub

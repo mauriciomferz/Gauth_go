@@ -24,7 +24,11 @@ func buildSigningPayload(p *poa.ProofOfAuthorization) []byte {
 		ExpiresAt time.Time `json:"expires_at"`
 		Scope     []string  `json:"scope"`
 	}
-	c := canon{ID: p.ID, Subject: p.Subject, Resource: p.Resource, Action: p.Action, Issuer: p.Issuer, IssuedAt: p.IssuedAt, ExpiresAt: p.ExpiresAt, Scope: append([]string(nil), p.Scope...)}
+	c := canon{
+		ID: p.ID, Subject: p.Subject, Resource: p.Resource, Action: p.Action,
+		Issuer: p.Issuer, IssuedAt: p.IssuedAt, ExpiresAt: p.ExpiresAt,
+		Scope: append([]string(nil), p.Scope...),
+	}
 	raw, _ := json.Marshal(c)
 	return append([]byte("AGENTAUTH_POA:"), raw...)
 }

@@ -45,7 +45,9 @@ func (s *InMemoryPIPPolicyStore) Get(ctx context.Context, policyID string) (*Pow
 }
 
 // Set stores a policy with an expiration time
-func (s *InMemoryPIPPolicyStore) Set(ctx context.Context, policyID string, policy *PowerOfAttorneyPolicy, ttl time.Duration) error {
+func (s *InMemoryPIPPolicyStore) Set(
+	ctx context.Context, policyID string, policy *PowerOfAttorneyPolicy, ttl time.Duration,
+) error {
 	s.cache.Store(policyID, &cachedPolicyItem{
 		policy:    policy,
 		expiresAt: time.Now().Add(ttl),

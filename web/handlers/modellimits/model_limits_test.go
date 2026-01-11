@@ -15,7 +15,7 @@ func TestModelValidateLimits(t *testing.T) {
 	}
 	jsonData := []byte(`{"model_limits":{"demo-model":{"max_input_tokens":1024}}}`)
 	_, _ = f.Write(jsonData)
-	f.Close()
+	_ = f.Close()
 
 	h := NewHandler(f.Name(), "", "")
 	h.StrictUnknown = false // Ensure default behavior explicitly or based on test requirement

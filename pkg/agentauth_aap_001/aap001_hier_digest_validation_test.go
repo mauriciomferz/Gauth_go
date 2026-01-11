@@ -2,7 +2,6 @@ package agentauth_aap_001
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -11,11 +10,9 @@ import (
 
 // TestHierDigestParentValidation ensures parent digest mismatch causes validation failure.
 func TestHierDigestParentValidation(t *testing.T) {
-	os.Setenv("AGENTAUTH_ENABLE_HIER_DIGEST", "1")
-	defer os.Unsetenv("AGENTAUTH_ENABLE_HIER_DIGEST")
+	t.Setenv("AGENTAUTH_ENABLE_HIER_DIGEST", "1")
 	path := t.TempDir() + "/poa.db"
-	os.Setenv("AGENTAUTH_PERSIST_PATH", path)
-	defer os.Unsetenv("AGENTAUTH_PERSIST_PATH")
+	t.Setenv("AGENTAUTH_PERSIST_PATH", path)
 	memLogger := audit.NewMemoryLogger(nil)
 	svc := NewService(memLogger, &allowAllAuthorizer{})
 	rootResp, err := svc.CreateDelegationCtx(context.Background(), DelegationRequest{Grantor: "alice", Grantee: "bob", Scope: []string{"finance.read"}, Duration: time.Hour})

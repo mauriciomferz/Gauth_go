@@ -1,4 +1,6 @@
 // Package testutil contains shared JSON fixtures for capabilities and policies used by web tests.
+//
+//nolint:lll // Fixtures are intentionally long one-line JSON strings.
 package testutil
 
 // Canonical capability registry JSON fixtures used across capability anchor & persistence tests.

@@ -167,7 +167,10 @@ func (t *TruliooProvider) VerifyDocument(ctx context.Context, req interface{}) (
 }
 
 // ValidateSSN implements USIdentityAPIProvider
-func (t *TruliooProvider) ValidateSSN(ctx context.Context, req *external.SSNValidationRequest) (*external.SSNValidationResult, error) {
+func (t *TruliooProvider) ValidateSSN(
+	ctx context.Context,
+	req *external.SSNValidationRequest,
+) (*external.SSNValidationResult, error) {
 	startTime := time.Now()
 
 	// Build Trulioo request
@@ -216,11 +219,12 @@ func (t *TruliooProvider) ValidateSSN(ctx context.Context, req *external.SSNVali
 	}
 
 	// Calculate confidence score based on match status
-	if truliooResp.RecordStatus == truliooStatusMatch {
+	switch truliooResp.RecordStatus {
+	case truliooStatusMatch:
 		result.ConfidenceScore = 0.95
-	} else if truliooResp.RecordStatus == "nomatch" {
+	case "nomatch":
 		result.ConfidenceScore = 0.1
-	} else {
+	default:
 		result.ConfidenceScore = 0.5
 	}
 
@@ -282,7 +286,10 @@ func (t *TruliooProvider) GetSupportedDocumentTypes() []external.DocumentType {
 // Private Methods
 // =============================================================================
 
-func (t *TruliooProvider) verifyPassport(ctx context.Context, req *external.PassportVerificationRequest) (*external.IdentityVerificationResult, error) {
+func (t *TruliooProvider) verifyPassport(
+	ctx context.Context,
+	req *external.PassportVerificationRequest,
+) (*external.IdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Build Trulioo request
@@ -317,7 +324,10 @@ func (t *TruliooProvider) verifyPassport(ctx context.Context, req *external.Pass
 	return t.parseVerificationResponse(resp, external.DocumentTypePassport, "", startTime)
 }
 
-func (t *TruliooProvider) verifyDriverLicense(ctx context.Context, req *external.DLVerificationRequest) (*external.IdentityVerificationResult, error) {
+func (t *TruliooProvider) verifyDriverLicense(
+	ctx context.Context,
+	req *external.DLVerificationRequest,
+) (*external.IdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Build Trulioo request
@@ -367,7 +377,10 @@ func (t *TruliooProvider) verifyDriverLicense(ctx context.Context, req *external
 	return result, nil
 }
 
-func (t *TruliooProvider) verifyStateID(ctx context.Context, req *external.StateIDVerificationRequest) (*external.IdentityVerificationResult, error) {
+func (t *TruliooProvider) verifyStateID(
+	ctx context.Context,
+	req *external.StateIDVerificationRequest,
+) (*external.IdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Build Trulioo request
@@ -479,7 +492,7 @@ func (t *TruliooProvider) parseVerificationResponse(
 			totalFields += len(datasource.DatasourceFields)
 		}
 		if totalFields > 0 {
-			confidenceScore = confidenceScore / float64(totalFields)
+			confidenceScore /= float64(totalFields)
 		}
 	}
 
@@ -550,7 +563,7 @@ func (t *TruliooProvider) makeRequest(ctx context.Context, method, path string, 
 	if err != nil {
 		return nil, fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Read response
 	respBody, err := io.ReadAll(resp.Body)

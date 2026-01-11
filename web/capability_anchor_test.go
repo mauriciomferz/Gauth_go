@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 )
@@ -103,7 +102,7 @@ func TestCapabilityAnchoringLifecycle(t *testing.T) {
 
 // TestCapabilityAnchorDisabled ensures POST returns 403 when enable flag not set.
 func TestCapabilityAnchorDisabled(t *testing.T) {
-	os.Unsetenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE")
+	t.Setenv("AGENTAUTH_CAPABILITY_ANCHOR_ENABLE", "")
 	t.Setenv("AGENTAUTH_ANCHOR_PROVIDER", "memory")
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })

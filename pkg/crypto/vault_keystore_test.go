@@ -65,7 +65,6 @@ func (m *MockVaultClient) Write(ctx context.Context, path string, data map[strin
 				}
 			}
 		}
-
 	} else if d, ok := data["data"]; ok {
 		if mapData, ok := d.(map[string]interface{}); ok {
 			m.Data[path] = map[string]interface{}{"data": mapData}
@@ -208,8 +207,8 @@ func TestVaultKeyStore_Archive(t *testing.T) {
 	}
 
 	// Archive
-	if err := store.Archive(ctx, tenant, keyID); err != nil {
-		t.Fatalf("Archive failed: %v", err)
+	if archiveErr := store.Archive(ctx, tenant, keyID); archiveErr != nil {
+		t.Fatalf("Archive failed: %v", archiveErr)
 	}
 
 	// Verify no longer active

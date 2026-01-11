@@ -9,7 +9,7 @@ import (
 // TestBufferedAdviceChannel_EmitAndReceive verifies advice event emission and reception.
 func TestBufferedAdviceChannel_EmitAndReceive(t *testing.T) {
 	ch := NewBufferedAdviceChannel(10)
-	defer ch.Close()
+	defer func() { _ = ch.Close() }()
 
 	ctx := context.Background()
 	event := AdviceEvent{
@@ -46,7 +46,7 @@ func TestBufferedAdviceChannel_EmitAndReceive(t *testing.T) {
 // TestBufferedAdviceChannel_BufferFull verifies drop behavior when buffer is full.
 func TestBufferedAdviceChannel_BufferFull(t *testing.T) {
 	ch := NewBufferedAdviceChannel(2) // Small buffer
-	defer ch.Close()
+	defer func() { _ = ch.Close() }()
 
 	ctx := context.Background()
 
@@ -73,7 +73,9 @@ func TestBufferedAdviceChannel_BufferFull(t *testing.T) {
 // TestBufferedAdviceChannel_ClosedChannel verifies emission fails after close.
 func TestBufferedAdviceChannel_ClosedChannel(t *testing.T) {
 	ch := NewBufferedAdviceChannel(10)
-	ch.Close()
+	if err := ch.Close(); err != nil {
+		t.Fatalf("close channel: %v", err)
+	}
 
 	ctx := context.Background()
 	event := AdviceEvent{AdviceID: "adv1", Subject: "user"}
@@ -208,7 +210,7 @@ func TestExtendedObligationExecutor_WithAuditSink(t *testing.T) {
 // TestExtendedObligationExecutor_WithAdviceChannel verifies advice emission integration.
 func TestExtendedObligationExecutor_WithAdviceChannel(t *testing.T) {
 	adviceChannel := NewBufferedAdviceChannel(10)
-	defer adviceChannel.Close()
+	t.Cleanup(func() { _ = adviceChannel.Close() })
 
 	exec := NewExtendedObligationExecutor(WithAdviceChannel(adviceChannel))
 	ctx := context.Background()

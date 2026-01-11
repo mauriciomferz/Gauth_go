@@ -13,8 +13,10 @@ func TestKeyArchivalAndRetrieval(t *testing.T) {
 		t.Fatal(err)
 	}
 	persistPath := f.Name()
-	f.Close()
-	defer os.Remove(persistPath)
+	if closeErr := f.Close(); closeErr != nil {
+		t.Fatalf("close temp file: %v", closeErr)
+	}
+	defer func() { _ = os.Remove(persistPath) }()
 
 	t.Setenv("AGENTAUTH_EDDSA_PERSIST_PATH", persistPath)
 
@@ -37,8 +39,8 @@ func TestKeyArchivalAndRetrieval(t *testing.T) {
 	// 3. Rotate (First key moves to History, but since it's expired, logic might prune/archive immediately or on next)
 	// Current logic: rotateLocked appends prev (firstKey) to history. Then prune checks history.
 	// If firstKey is expired, it moves to archived. active is new.
-	if _, err := m.Rotate(); err != nil {
-		t.Fatalf("Rotate 1: %v", err)
+	if _, rotateErr := m.Rotate(); rotateErr != nil {
+		t.Fatalf("Rotate 1: %v", rotateErr)
 	}
 
 	secondKey := m.Active()

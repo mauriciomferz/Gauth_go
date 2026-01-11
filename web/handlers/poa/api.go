@@ -66,9 +66,13 @@ func (h *Handler) Authorize(c *gin.Context) {
 	}
 	// Validation gate: require at least principal, agent, power type & jurisdiction to proceed.
 	// If only legacy minimal payload was provided (just client_id), return 400 to keep existing test expectations.
-	minimalProvided := poaReq.ClientID != "" && poaReq.PrincipalID == "" && poaReq.AIAgentID == "" && poaReq.PowerType == "" && poaReq.Jurisdiction == ""
+	minimalProvided := poaReq.ClientID != "" && poaReq.PrincipalID == "" &&
+		poaReq.AIAgentID == "" && poaReq.PowerType == "" && poaReq.Jurisdiction == ""
 	if minimalProvided {
-		c.JSON(400, gin.H{"success": false, "message": "missing required POA fields (principal_id, ai_agent_id, power_type, jurisdiction)"})
+		c.JSON(400, gin.H{
+			"success": false,
+			"message": "missing required POA fields (principal_id, ai_agent_id, power_type, jurisdiction)",
+		})
 		return
 	}
 	// Apply educational defaults only AFTER user supplied at least one of the advanced fields.
@@ -145,7 +149,9 @@ func (h *Handler) Authorize(c *gin.Context) {
 			if expires.IsZero() {
 				expires = time.Now().Add(5 * time.Minute)
 			}
-			added, err := chain.Append(delegation.Delegation{ID: id, Subject: subject, Delegate: delegateID, Scope: scopeMap, ExpiresAt: expires})
+			added, err := chain.Append(delegation.Delegation{
+				ID: id, Subject: subject, Delegate: delegateID, Scope: scopeMap, ExpiresAt: expires,
+			})
 			if err != nil {
 				c.JSON(400, gin.H{"success": false, "message": "delegation append failed", "delegation_error": err.Error(), "index": idx})
 				return
@@ -169,7 +175,11 @@ func (h *Handler) Authorize(c *gin.Context) {
 		}
 		if head := chain.Head(); head != nil {
 			delegationMeta["chain_verified"] = true
-			delegationMeta["head"] = gin.H{"id": head.ID, "hash": head.Hash, "subject": head.Subject, "delegate": head.Delegate, "scope": head.Scope, "expires_at": head.ExpiresAt.Format(time.RFC3339)}
+			delegationMeta["head"] = gin.H{
+				"id": head.ID, "hash": head.Hash, "subject": head.Subject,
+				"delegate": head.Delegate, "scope": head.Scope,
+				"expires_at": head.ExpiresAt.Format(time.RFC3339),
+			}
 			// Compute effective scope as intersection across chain items (since we enforce equality narrowing we can take last scope)
 			// For future richer semantics we would fold all items; with equality-only narrowing, head scope is already the intersection.
 			for k, v := range head.Scope {
@@ -181,7 +191,8 @@ func (h *Handler) Authorize(c *gin.Context) {
 	}
 
 	// Enforce requested POA scope against delegation effective scope (if present & verified)
-	// Current simple model: if delegation present, require its action/resource match requested scope string tokens when tokens exist.
+	// Current simple model: if delegation present, require its action/resource
+	// match requested scope string tokens when tokens exist.
 	var requestedScopeTokens []string
 	if poaReq.Scope != "" {
 		for _, tok := range strings.Split(poaReq.Scope, ",") {
@@ -199,11 +210,16 @@ func (h *Handler) Authorize(c *gin.Context) {
 				}
 			}
 			if !found {
-				c.JSON(400, gin.H{"success": false, "message": "delegation_scope_violation", "delegation_error": "requested scope lacks delegated action", "delegated_action": act, "requested_scope": poaReq.Scope})
+				c.JSON(400, gin.H{
+					"success": false, "message": "delegation_scope_violation",
+					"delegation_error": "requested scope lacks delegated action",
+					"delegated_action": act, "requested_scope": poaReq.Scope,
+				})
 				return
 			}
 		}
-		// If delegation defines resource, we could enforce presence but current POA scope string may not encode resource; skip strict check.
+		// If delegation defines resource, we could enforce presence but current POA scope
+		// string may not encode resource; skip strict check.
 	}
 
 	if len(effectiveScope) > 0 {

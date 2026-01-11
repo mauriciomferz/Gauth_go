@@ -909,6 +909,8 @@ func shouldFallback(err error) bool {
 		strings.Contains(errorString, ErrCodeCircuitBreakerOpen)
 }
 
+var _ = shouldFallback
+
 // =============================================================================
 // Mock Provider for Testing
 // =============================================================================

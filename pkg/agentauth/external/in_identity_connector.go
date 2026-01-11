@@ -193,7 +193,10 @@ func NewIndiaIdentityConnector(config *IndiaConnectorConfig) (*IndiaIdentityConn
 
 // AuthenticateAadhaar authenticates using Aadhaar
 // Auth types: OTP, Biometric (fingerprint), Iris
-func (ic *IndiaIdentityConnector) AuthenticateAadhaar(ctx context.Context, req *AadhaarAuthRequest) (*AadhaarAuthResponse, error) {
+func (ic *IndiaIdentityConnector) AuthenticateAadhaar(
+	ctx context.Context,
+	req *AadhaarAuthRequest,
+) (*AadhaarAuthResponse, error) {
 	// Validate request
 	if err := ic.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -328,7 +331,10 @@ func (ic *IndiaIdentityConnector) ValidatePAN(ctx context.Context, req *PANReque
 }
 
 // AuthenticateDigiLocker authenticates using DigiLocker
-func (ic *IndiaIdentityConnector) AuthenticateDigiLocker(ctx context.Context, req *DigiLockerAuthRequest) (*DigiLockerAuthResponse, error) {
+func (ic *IndiaIdentityConnector) AuthenticateDigiLocker(
+	ctx context.Context,
+	req *DigiLockerAuthRequest,
+) (*DigiLockerAuthResponse, error) {
 	// Validate request
 	if err := ic.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -473,6 +479,8 @@ func (ic *IndiaIdentityConnector) generateCacheKey(operation string, parts ...st
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*IndiaIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (ic *IndiaIdentityConnector) GetMetrics() map[string]interface{} {

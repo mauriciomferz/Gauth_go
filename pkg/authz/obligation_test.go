@@ -11,7 +11,7 @@ import (
 
 func TestAuditObligationExecutor(t *testing.T) {
 	ml := audit.NewMemoryLogger(common.NewSimpleLogger())
-	defer ml.Close()
+	t.Cleanup(func() { _ = ml.Close() })
 
 	exec := &AuditObligationExecutor{Audit: ml}
 
@@ -56,7 +56,7 @@ func TestAuditObligationExecutor(t *testing.T) {
 
 func TestEnforcerWithObligations(t *testing.T) {
 	ml := audit.NewMemoryLogger(common.NewSimpleLogger())
-	defer ml.Close()
+	t.Cleanup(func() { _ = ml.Close() })
 	exec := &AuditObligationExecutor{Audit: ml}
 
 	ma := NewMemoryAuthorizer()

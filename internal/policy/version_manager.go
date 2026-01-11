@@ -125,7 +125,8 @@ type PolicyVersionManager struct {
 
 // VersionAuditEvent represents a version-related audit event.
 type VersionAuditEvent struct {
-	EventType     string                 `json:"event_type"` // "version_created", "version_activated", "version_deprecated", "rollback"
+	// EventType is one of: version_created, version_activated, version_deprecated, rollback.
+	EventType     string                 `json:"event_type"`
 	Version       int                    `json:"version"`
 	SemanticVer   string                 `json:"semantic_version,omitempty"`
 	Actor         string                 `json:"actor,omitempty"`
@@ -200,7 +201,11 @@ func (m *PolicyVersionManager) loadFromStore() error {
 }
 
 // CreateVersion creates a new policy version with metadata.
-func (m *PolicyVersionManager) CreateVersion(ctx context.Context, bundle policy.Bundle, metadata PolicyVersionMetadata) (*PolicyVersionMetadata, error) {
+func (m *PolicyVersionManager) CreateVersion(
+	ctx context.Context,
+	bundle policy.Bundle,
+	metadata PolicyVersionMetadata,
+) (*PolicyVersionMetadata, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -481,7 +486,13 @@ func (m *PolicyVersionManager) RollbackVersion(ctx context.Context, targetVersio
 }
 
 // DeprecateVersion marks a version as deprecated.
-func (m *PolicyVersionManager) DeprecateVersion(ctx context.Context, version int, reason string, sunsetDate *time.Time, actor string) error {
+func (m *PolicyVersionManager) DeprecateVersion(
+	ctx context.Context,
+	version int,
+	reason string,
+	sunsetDate *time.Time,
+	actor string,
+) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -645,10 +656,18 @@ func (m *PolicyVersionManager) analyzeImpact(fromVersion, toVersion int) (*Impac
 		analysis.EstimatedImpact = fmt.Sprintf("Minor changes: %d policies affected", totalChanges)
 	case totalChanges <= 5 || analysis.PoliciesRemoved <= 1:
 		analysis.RiskLevel = "medium"
-		analysis.EstimatedImpact = fmt.Sprintf("Moderate changes: %d policies affected, %d removed", totalChanges, analysis.PoliciesRemoved)
+		analysis.EstimatedImpact = fmt.Sprintf(
+			"Moderate changes: %d policies affected, %d removed",
+			totalChanges,
+			analysis.PoliciesRemoved,
+		)
 	default:
 		analysis.RiskLevel = "high"
-		analysis.EstimatedImpact = fmt.Sprintf("Major changes: %d policies affected, %d removed", totalChanges, analysis.PoliciesRemoved)
+		analysis.EstimatedImpact = fmt.Sprintf(
+			"Major changes: %d policies affected, %d removed",
+			totalChanges,
+			analysis.PoliciesRemoved,
+		)
 	}
 
 	return analysis, nil

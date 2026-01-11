@@ -412,7 +412,11 @@ func (m *AICapabilityMatrix) loadDefaultGovernancePolicies() {
 }
 
 // EnforceAICapabilities validates AI entity access to requested actions
-func (m *AICapabilityMatrix) EnforceAICapabilities(profile AISystemProfile, action string, claims map[string]any) AIEnforcementDecision {
+func (m *AICapabilityMatrix) EnforceAICapabilities(
+	profile AISystemProfile,
+	action string,
+	claims map[string]any,
+) AIEnforcementDecision {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -628,7 +632,11 @@ func (m *AICapabilityMatrix) matchesActionPattern(action, pattern string) bool {
 }
 
 // validateRequiredClaims checks if all required claims are present
-func (m *AICapabilityMatrix) validateRequiredClaims(entityRule AICapabilityRule, policies []AIGovernancePolicy, claims map[string]any) []string {
+func (m *AICapabilityMatrix) validateRequiredClaims(
+	entityRule AICapabilityRule,
+	policies []AIGovernancePolicy,
+	claims map[string]any,
+) []string {
 	requiredClaims := make(map[string]bool)
 
 	// Add entity-level required claims

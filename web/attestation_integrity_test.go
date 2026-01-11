@@ -20,8 +20,10 @@ func TestAttestationIntegrity_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	// Register ephemeral key into global registry for test
 	pub, priv, _ := ed25519.GenerateKey(nil)
-	// Construct temporary manager with single active key if Manager type exposes a simple constructor; fall back to manual minimal struct if not.
-	// Use NewManager from internal crypto; rotate once to ensure an active key present then overwrite active key with our generated pair.
+	// Construct temporary manager with single active key if Manager type exposes
+	// a simple constructor; fall back to manual minimal struct if not.
+	// Use NewManager from internal crypto; rotate once to ensure an active key
+	// present then overwrite active key with our generated pair.
 	m, _ := cryptoInt.NewManager(1 * time.Hour)
 	if ak := m.Active(); ak != nil {
 		ak.Private = priv
@@ -82,7 +84,10 @@ func TestAttestationIntegrity_Success(t *testing.T) {
 			LatencySeconds float64 `json:"latency_seconds"`
 			Success        bool    `json:"success"`
 		} `json:"notarization,omitempty"`
-	}{Success: payload.Success, Configured: payload.Configured, Nonce: payload.Nonce, Snapshot: payload.Snapshot, StrictUnknown: false}
+	}{
+		Success: payload.Success, Configured: payload.Configured, Nonce: payload.Nonce,
+		Snapshot: payload.Snapshot, StrictUnknown: false,
+	}
 	raw, _ := json.Marshal(unsigned)
 	// Domain-separated signing (must match server verify path)
 	msg := append([]byte("AGENTAUTH_MODEL_LIMIT_ATTEST:"), raw...)

@@ -26,7 +26,7 @@ func TestHandler_Archival(t *testing.T) {
 	// Verify ledger has 1 entry
 	count := func() int {
 		res, _ := l.VerifyChain(context.Background())
-		return int(res.Count)
+		return res.Count
 	}
 	if c := count(); c != 1 {
 		t.Fatalf("expected 1 entry in ledger after first update, got %d", c)

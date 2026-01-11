@@ -125,8 +125,8 @@ func TestExportJSON(t *testing.T) {
 
 	// Parse JSON
 	var response JSONMetricsResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		t.Fatalf("Failed to parse JSON: %v", err)
+	if unmarshalErr := json.Unmarshal(data, &response); unmarshalErr != nil {
+		t.Fatalf("Failed to parse JSON: %v", unmarshalErr)
 	}
 
 	// Verify metadata
@@ -185,8 +185,8 @@ func TestSetIncludeReasons(t *testing.T) {
 	}
 
 	var response JSONMetricsResponse
-	if err := json.Unmarshal(data, &response); err != nil {
-		t.Fatalf("Failed to parse JSON: %v", err)
+	if unmarshalErr := json.Unmarshal(data, &response); unmarshalErr != nil {
+		t.Fatalf("Failed to parse JSON: %v", unmarshalErr)
 	}
 
 	if response.Reasons != nil {

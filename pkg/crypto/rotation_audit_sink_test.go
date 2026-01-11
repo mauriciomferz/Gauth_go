@@ -20,7 +20,7 @@ func TestFileAuditSink_Write(t *testing.T) {
 
 	sink, err := NewFileAuditSink(sinkPath)
 	require.NoError(t, err)
-	defer sink.Close()
+	defer func() { _ = sink.Close() }()
 
 	event := &RotationEvent{
 		ID:        "rot-123",
@@ -48,7 +48,7 @@ func TestFileAuditSink_MultipleWrites(t *testing.T) {
 
 	sink, err := NewFileAuditSink(sinkPath)
 	require.NoError(t, err)
-	defer sink.Close()
+	defer func() { _ = sink.Close() }()
 
 	for i := 0; i < 5; i++ {
 		event := &RotationEvent{
@@ -96,7 +96,7 @@ func TestFileAuditSink_CreateDirectory(t *testing.T) {
 
 	sink, err := NewFileAuditSink(nestedPath)
 	require.NoError(t, err)
-	defer sink.Close()
+	defer func() { _ = sink.Close() }()
 
 	// Verify directory was created
 	_, err = os.Stat(filepath.Dir(nestedPath))
@@ -108,14 +108,14 @@ func TestMultiAuditSink(t *testing.T) {
 
 	sink1, err := NewFileAuditSink(filepath.Join(tmpDir, "audit1.log"))
 	require.NoError(t, err)
-	defer sink1.Close()
+	defer func() { _ = sink1.Close() }()
 
 	sink2, err := NewFileAuditSink(filepath.Join(tmpDir, "audit2.log"))
 	require.NoError(t, err)
-	defer sink2.Close()
+	defer func() { _ = sink2.Close() }()
 
 	multiSink := NewMultiAuditSink(sink1, sink2)
-	defer multiSink.Close()
+	defer func() { _ = multiSink.Close() }()
 
 	event := &RotationEvent{
 		ID:       "rot-multi",
@@ -140,7 +140,7 @@ func TestTenantAwareSink(t *testing.T) {
 
 	fileSink, err := NewFileAuditSink(sinkPath)
 	require.NoError(t, err)
-	defer fileSink.Close()
+	defer func() { _ = fileSink.Close() }()
 
 	tenantSink := NewTenantAwareSink(fileSink, "tenant-abc")
 

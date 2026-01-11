@@ -100,7 +100,7 @@ func loadGapMatrix(path string) ([]GapEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	reader := csv.NewReader(f)
 	reader.LazyQuotes = true

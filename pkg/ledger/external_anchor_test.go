@@ -69,7 +69,7 @@ func TestExternalAuditLedger(t *testing.T) {
 	ledger, err := NewExternalAuditLedger(dbPath, provider, receiptPath, anchorInterval)
 	require.NoError(t, err)
 	require.NotNil(t, ledger)
-	defer ledger.Close()
+	defer func() { _ = ledger.Close() }()
 
 	ctx := context.Background()
 
@@ -139,7 +139,12 @@ func TestExternalAuditLedgerForceAnchor(t *testing.T) {
 	ledger, err := NewExternalAuditLedger(dbPath, provider, receiptPath, time.Hour) // Long interval
 	require.NoError(t, err)
 	// Ensure background routines stopped before temp dir cleanup
-	t.Cleanup(func() { ledger.Close(); time.Sleep(10 * time.Millisecond) })
+	t.Cleanup(func() {
+		if closeErr := ledger.Close(); closeErr != nil {
+			t.Errorf("close ledger: %v", closeErr)
+		}
+		time.Sleep(10 * time.Millisecond)
+	})
 
 	ctx := context.Background()
 
@@ -180,7 +185,7 @@ func TestExternalAuditLedgerEmptyForceAnchor(t *testing.T) {
 	provider := anchor.NewMemoryProvider()
 	ledger, err := NewExternalAuditLedger(dbPath, provider, "", time.Hour)
 	require.NoError(t, err)
-	defer ledger.Close()
+	defer func() { _ = ledger.Close() }()
 
 	// Try to force anchor on empty ledger
 	err = ledger.ForceExternalAnchor()
@@ -239,7 +244,7 @@ func TestExternalAuditLedgerAnchorInterval(t *testing.T) {
 
 	ledger, err := NewExternalAuditLedger(dbPath, provider, "", shortInterval)
 	require.NoError(t, err)
-	defer ledger.Close()
+	defer func() { _ = ledger.Close() }()
 
 	ctx := context.Background()
 
@@ -297,7 +302,7 @@ func TestExternalAuditLedgerWithBoltAnchorFile(t *testing.T) {
 	provider := anchor.NewMemoryProvider()
 	ledger, err := NewExternalAuditLedger(dbPath, provider, "", time.Hour)
 	require.NoError(t, err)
-	t.Cleanup(func() { ledger.Close() })
+	t.Cleanup(func() { _ = ledger.Close() })
 
 	ctx := context.Background()
 

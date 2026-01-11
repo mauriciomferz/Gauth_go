@@ -43,7 +43,7 @@ type FiduciaryDuties struct {
 // CapabilityRequirements specifies required AI capability levels
 type CapabilityRequirements struct {
 	MinimumLevel           string             `json:"minimum_level"`           // "L0" through "L5"
-	DomainScores           map[string]float64 `json:"domain_scores"`           // domain -> min_score (0.0-1.0) (matches service usage)
+	DomainScores           map[string]float64 `json:"domain_scores"`           // domain -> min_score (matches service usage)
 	RiskThresholds         map[string]float64 `json:"risk_thresholds"`         // risk category -> threshold (matches service usage)
 	RequiresCert           bool               `json:"requires_cert"`           // Requires formal certification
 	RequiredCertifications []string           `json:"required_certifications"` // Required certification IDs (matches service usage)
@@ -157,7 +157,9 @@ type AICapabilityAssessment struct {
 // SuccessorManagementService handles successor AI activation and management
 type SuccessorManagementService interface {
 	// ActivateSuccessor activates the successor AI when primary fails
-	ActivateSuccessor(ctx context.Context, poaID, primaryAgentID, successorAgentID, reason, activatedBy string) (*SuccessorActivation, error)
+	ActivateSuccessor(
+		ctx context.Context, poaID, primaryAgentID, successorAgentID, reason, activatedBy string,
+	) (*SuccessorActivation, error)
 	// DeactivateSuccessor returns control to primary AI
 	DeactivateSuccessor(ctx context.Context, activationID, deactivatedBy string) error
 	// GetActiveSuccessor returns current successor activation if any

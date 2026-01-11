@@ -450,7 +450,9 @@ func (v *VerificationServiceImpl) VerifyPowerOfAttorney(ctx context.Context, poa
 }
 
 // VerifyScope verifies that an action falls within the PoA scope
-func (v *VerificationServiceImpl) VerifyScope(ctx context.Context, poaID string, action Action) (*ScopeVerificationResult, error) {
+func (v *VerificationServiceImpl) VerifyScope(
+	ctx context.Context, poaID string, action Action,
+) (*ScopeVerificationResult, error) {
 	poa, err := v.poaStore.GetPoA(ctx, poaID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get PoA: %w", err)
@@ -491,7 +493,9 @@ func (v *VerificationServiceImpl) VerifyScope(ctx context.Context, poaID string,
 }
 
 // checkStructuredScope checks action against structured scope
-func (v *VerificationServiceImpl) checkStructuredScope(scope *StructuredScope, action Action, result *ScopeVerificationResult) bool {
+func (v *VerificationServiceImpl) checkStructuredScope(
+	scope *StructuredScope, action Action, result *ScopeVerificationResult,
+) bool {
 	authorized := false
 
 	switch action.Type {
@@ -522,7 +526,9 @@ func (v *VerificationServiceImpl) checkStructuredScope(scope *StructuredScope, a
 }
 
 // checkRestrictions checks action against all restrictions
-func (v *VerificationServiceImpl) checkRestrictions(restrictions *Restrictions, action Action, result *ScopeVerificationResult) bool {
+func (v *VerificationServiceImpl) checkRestrictions(
+	restrictions *Restrictions, action Action, result *ScopeVerificationResult,
+) bool {
 	allSatisfied := true
 
 	// Check value limits
@@ -536,18 +542,22 @@ func (v *VerificationServiceImpl) checkRestrictions(restrictions *Restrictions, 
 		if *action.Value <= restrictions.ValueLimits.MaxSingleTransaction {
 			valueLimitCheck.Within = true
 			result.Restrictions = append(result.Restrictions, RestrictionCheck{
-				Type:        "value_limit",
-				Description: fmt.Sprintf("Transaction value within limit of %.2f %s", restrictions.ValueLimits.MaxSingleTransaction, restrictions.ValueLimits.Currency),
-				Satisfied:   true,
+				Type: "value_limit",
+				Description: fmt.Sprintf(
+					"Transaction value within limit of %.2f %s",
+					restrictions.ValueLimits.MaxSingleTransaction, restrictions.ValueLimits.Currency),
+				Satisfied: true,
 			})
 		} else {
 			valueLimitCheck.Within = false
 			allSatisfied = false
 			result.Restrictions = append(result.Restrictions, RestrictionCheck{
-				Type:        "value_limit",
-				Description: fmt.Sprintf("Transaction value exceeds limit of %.2f %s", restrictions.ValueLimits.MaxSingleTransaction, restrictions.ValueLimits.Currency),
-				Satisfied:   false,
-				Details:     fmt.Sprintf("Requested: %.2f, Max: %.2f", *action.Value, restrictions.ValueLimits.MaxSingleTransaction),
+				Type: "value_limit",
+				Description: fmt.Sprintf(
+					"Transaction value exceeds limit of %.2f %s",
+					restrictions.ValueLimits.MaxSingleTransaction, restrictions.ValueLimits.Currency),
+				Satisfied: false,
+				Details:   fmt.Sprintf("Requested: %.2f, Max: %.2f", *action.Value, restrictions.ValueLimits.MaxSingleTransaction),
 			})
 			result.Reason = "Transaction value exceeds authorized limit"
 		}
@@ -582,7 +592,9 @@ func (v *VerificationServiceImpl) checkRestrictions(restrictions *Restrictions, 
 }
 
 // checkGeographicRestrictions checks geographic constraints
-func (v *VerificationServiceImpl) checkGeographicRestrictions(constraints *GeographicConstraints, location *GeographicLocation) *GeographicCheck {
+func (v *VerificationServiceImpl) checkGeographicRestrictions(
+	constraints *GeographicConstraints, location *GeographicLocation,
+) *GeographicCheck {
 	check := &GeographicCheck{
 		RequestedLocation: location.Country,
 		AllowedCountries:  constraints.AllowedCountries,
@@ -676,7 +688,9 @@ func (v *VerificationServiceImpl) VerifyPrincipalStatus(ctx context.Context, pri
 }
 
 // VerifyRepresentativePosition verifies the representative's position
-func (v *VerificationServiceImpl) VerifyRepresentativePosition(ctx context.Context, repID string, orgID string) (*PositionVerificationResult, error) {
+func (v *VerificationServiceImpl) VerifyRepresentativePosition(
+	ctx context.Context, repID string, orgID string,
+) (*PositionVerificationResult, error) {
 	if v.registerService == nil {
 		// Fallback to basic implementation if service not available
 		return &PositionVerificationResult{
@@ -757,7 +771,9 @@ func (v *VerificationServiceImpl) VerifyRepresentativePosition(ctx context.Conte
 }
 
 // GenerateVerificationReport generates a comprehensive verification report
-func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context, poaID string, action Action) (*VerificationReport, error) {
+func (v *VerificationServiceImpl) GenerateVerificationReport(
+	ctx context.Context, poaID string, action Action,
+) (*VerificationReport, error) {
 	report := &VerificationReport{
 		ReportID:        fmt.Sprintf("VR-%s-%d", poaID, time.Now().Unix()),
 		GeneratedAt:     time.Now(),
@@ -873,7 +889,8 @@ func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context
 		if rootPoA != nil && rootPoA.DelegationPolicy != nil && rootPoA.DelegationPolicy.MaxDepth > 0 {
 			if actualDepth > rootPoA.DelegationPolicy.MaxDepth {
 				maxDepthExceeded = true
-				report.Warnings = append(report.Warnings, fmt.Sprintf("Delegation depth %d exceeds max allowed %d", actualDepth, rootPoA.DelegationPolicy.MaxDepth))
+				report.Warnings = append(report.Warnings, fmt.Sprintf(
+					"Delegation depth %d exceeds max allowed %d", actualDepth, rootPoA.DelegationPolicy.MaxDepth))
 			}
 		}
 	}
@@ -882,7 +899,8 @@ func (v *VerificationServiceImpl) GenerateVerificationReport(ctx context.Context
 		report.Warnings = append(report.Warnings, "Missing human accountability: Root of authority chain is not a human principal")
 	}
 
-	report.OverallValid = poaVerif.Valid && scopeVerif.Authorized && !revStatus.Revoked && hasHumanAccountability && !maxDepthExceeded
+	report.OverallValid = poaVerif.Valid && scopeVerif.Authorized && !revStatus.Revoked &&
+		hasHumanAccountability && !maxDepthExceeded
 
 	// Set validity period
 	report.ValidityPeriod = fmt.Sprintf("%s to %s",
@@ -981,15 +999,6 @@ func (v *VerificationServiceImpl) VerifyAuthorizationChain(ctx context.Context, 
 		}
 
 		depth++
-	}
-
-	// Basic check: top link MUST be human
-	if len(chain) > 0 {
-		topLink := chain[len(chain)-1]
-		if !topLink.IsHuman {
-			// Note: We don't error here to allow the caller to decide based on warnings,
-			// but we could mark the chain as invalid.
-		}
 	}
 
 	return chain, nil

@@ -84,7 +84,20 @@ type Handler struct {
 	ClockSkew    time.Duration
 }
 
-func NewHandler(store TokenStorer, replay *ReplayNonceStore, auditor Auditor, emitter Emitter, primaryAuth PrimaryAuth, tracer Tracer, capEnforcer CapabilityEnforcer, m metrics.Metrics, lifecycle LifecycleRecorder, kp crypto.KeyProvider, km keys.KeyManager, clock ClockStatusProvider) *Handler {
+func NewHandler(
+	store TokenStorer,
+	replay *ReplayNonceStore,
+	auditor Auditor,
+	emitter Emitter,
+	primaryAuth PrimaryAuth,
+	tracer Tracer,
+	capEnforcer CapabilityEnforcer,
+	m metrics.Metrics,
+	lifecycle LifecycleRecorder,
+	kp crypto.KeyProvider,
+	km keys.KeyManager,
+	clock ClockStatusProvider,
+) *Handler {
 	// Defaults/Env loading could be here or passed in.
 	// For now, load envs that are "static" here, or assume caller sets them.
 	// But apiTokenCreate heavily used os.Getenv. Let's load them for convenience.

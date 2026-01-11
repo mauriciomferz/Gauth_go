@@ -1,7 +1,6 @@
 package agentauth_aap_001
 
 import (
-	"os"
 	"testing"
 	"time"
 
@@ -13,14 +12,9 @@ import (
 
 // TestRawPOAEmbeddingEnabled verifies RawPOA & PoAVersion populated when AGENTAUTH_EMBED_FULL_POA=1 and within size limit.
 func TestRawPOAEmbeddingEnabled(t *testing.T) {
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
-	os.Unsetenv("AGENTAUTH_MAX_RAW_POA_BYTES") // use default 8192
-	defer func() {
-		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-		os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-		os.Unsetenv("AGENTAUTH_MAX_RAW_POA_BYTES")
-	}()
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "") // use default 8192
 	authzMem := authz.NewMemoryAuthorizer()
 	// Allow policy for create_delegation
 	authzMem.AddPolicy(authz.Policy{ID: "allow_create", Subject: "g1", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
@@ -65,9 +59,8 @@ func TestRawPOAEmbeddingEnabled(t *testing.T) {
 
 // TestRawPOAEmbeddingDisabled verifies RawPOA omitted when AGENTAUTH_EMBED_FULL_POA is not enabled.
 func TestRawPOAEmbeddingDisabled(t *testing.T) {
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-	defer func() { os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2") }()
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "")
 	authzMem := authz.NewMemoryAuthorizer()
 	authzMem.AddPolicy(authz.Policy{ID: "allow_create", Subject: "a", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	svc := NewService(auditLoggerForTest(), authzMem)
@@ -95,15 +88,10 @@ func TestRawPOAEmbeddingDisabled(t *testing.T) {
 
 // TestRawPOAEmbeddingSizeLimit verifies omission when canonical JSON exceeds configured size limit.
 func TestRawPOAEmbeddingSizeLimit(t *testing.T) {
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA", "1")
 	// Set very small max size to force omission.
-	os.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "64")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-		os.Unsetenv("AGENTAUTH_EMBED_FULL_POA")
-		os.Unsetenv("AGENTAUTH_MAX_RAW_POA_BYTES")
-	}()
+	t.Setenv("AGENTAUTH_MAX_RAW_POA_BYTES", "64")
 	authzMem := authz.NewMemoryAuthorizer()
 	authzMem.AddPolicy(authz.Policy{ID: "allow_create", Subject: "g", Resource: "poa", Actions: []string{"create_delegation"}, Effect: authz.Allow})
 	svc := NewService(auditLoggerForTest(), authzMem)

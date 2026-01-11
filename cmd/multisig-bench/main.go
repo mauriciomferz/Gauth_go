@@ -6,7 +6,8 @@ package main
 // Aggregate signature size simulated as concatenation of individual signatures.
 //
 // Output: newline-delimited JSON records per signer group. Example:
-// {"signers":8,"mode":"both","iterations":100,"avg_sign_ns":12345,"avg_verify_ns":23456,"bytes_per_signature":64,"aggregate_signature_bytes":512}
+// {"signers":8,"mode":"both","iterations":100,"avg_sign_ns":12345,"avg_verify_ns":23456,
+//  "bytes_per_signature":64,"aggregate_signature_bytes":512}
 //
 // Flags:
 //   --signers        Comma-separated list of signer counts (default "1,2,4,8,16,32")
@@ -146,7 +147,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Deterministic RNG for message content generation (not cryptographic; signing uses ed25519 library RNG implicitly for key generation if needed).
+	// Deterministic RNG for message content generation (not cryptographic;
+	// signing uses ed25519 library RNG implicitly for key generation if needed).
 	// #nosec G404
 	rng := mrand.New(mrand.NewSource(seed))
 	msg := make([]byte, 256)

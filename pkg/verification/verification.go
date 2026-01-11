@@ -204,9 +204,23 @@ func ConvertSignedTreeHead(src *SignedTreeHeadJSON) *delegation.SignedTreeHead {
 	if src == nil {
 		return nil
 	}
-	sth := &delegation.SignedTreeHead{Version: src.Version, MerkleRoot: src.MerkleRoot, ChainLength: src.ChainLength, AggregateHash: src.AggregateHash, Timestamp: parseTime(src.Timestamp), Threshold: src.Threshold, WeightsTotal: src.WeightsTotal, SatisfiedWeight: src.SatisfiedWeight}
+	sth := &delegation.SignedTreeHead{
+		Version:         src.Version,
+		MerkleRoot:      src.MerkleRoot,
+		ChainLength:     src.ChainLength,
+		AggregateHash:   src.AggregateHash,
+		Timestamp:       parseTime(src.Timestamp),
+		Threshold:       src.Threshold,
+		WeightsTotal:    src.WeightsTotal,
+		SatisfiedWeight: src.SatisfiedWeight,
+	}
 	for _, s := range src.Signatures {
-		sth.Signatures = append(sth.Signatures, delegation.TreeHeadSignature{Kid: s.Kid, Alg: s.Alg, Sig: s.Sig, Weight: s.Weight})
+		sth.Signatures = append(sth.Signatures, delegation.TreeHeadSignature{
+			Kid:    s.Kid,
+			Alg:    s.Alg,
+			Sig:    s.Sig,
+			Weight: s.Weight,
+		})
 	}
 	return sth
 }

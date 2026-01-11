@@ -47,7 +47,7 @@ func setupOptimisticTest(t *testing.T) (*OptimisticRevocation, *miniredis.Minire
 func TestOptimisticRevocation_MarkPendingRevocation(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-123"
@@ -86,7 +86,7 @@ func TestOptimisticRevocation_MarkPendingRevocation(t *testing.T) {
 func TestOptimisticRevocation_InsufficientCollateral(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-456"
@@ -103,7 +103,7 @@ func TestOptimisticRevocation_InsufficientCollateral(t *testing.T) {
 func TestOptimisticRevocation_FinalizeRevocation(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-789"
@@ -146,7 +146,7 @@ func TestOptimisticRevocation_FinalizeRevocation(t *testing.T) {
 func TestOptimisticRevocation_ChallengeRevocation(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-challenge"
@@ -187,7 +187,7 @@ func TestOptimisticRevocation_ChallengeRevocation(t *testing.T) {
 func TestOptimisticRevocation_ChallengeWindowExpired(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	// Set very short challenge window for testing
 	or.SetChallengeWindow(100 * time.Millisecond)
@@ -215,7 +215,7 @@ func TestOptimisticRevocation_ChallengeWindowExpired(t *testing.T) {
 func TestOptimisticRevocation_AutoFinalize(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	// Set short mempool clear time for testing
 	or.SetMempoolClearTime(200 * time.Millisecond)
@@ -248,7 +248,7 @@ func TestOptimisticRevocation_AutoFinalize(t *testing.T) {
 func TestOptimisticRevocation_CannotFinalizeAfterChallenge(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	ctx := context.Background()
 	poaID := "test-poa-challenge-first"
@@ -274,7 +274,7 @@ func TestOptimisticRevocation_CannotFinalizeAfterChallenge(t *testing.T) {
 func TestOptimisticRevocation_ConfigurationGettersSetters(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	// Test challenge window
 	newWindow := 10 * time.Minute
@@ -297,7 +297,7 @@ func TestOptimisticRevocation_ConfigurationGettersSetters(t *testing.T) {
 func TestOptimisticRevocation_GetStateNonExistent(t *testing.T) {
 	or, mr := setupOptimisticTest(t)
 	defer mr.Close()
-	defer or.Close()
+	defer func() { _ = or.Close() }()
 
 	ctx := context.Background()
 	poaID := "non-existent-poa"

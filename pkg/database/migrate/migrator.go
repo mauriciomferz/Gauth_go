@@ -31,9 +31,9 @@ func NewMigrator(databaseURL string) (*Migrator, error) {
 	}
 
 	// Test connection
-	if err := db.Ping(); err != nil {
+	if pingErr := db.Ping(); pingErr != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, fmt.Errorf("failed to ping database: %w", pingErr)
 	}
 
 	// Create driver instance

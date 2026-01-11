@@ -41,7 +41,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	// Get Redis configuration from environment
 	redisHost := os.Getenv("REDIS_HOST")
 	if redisHost == "" {
-		redisHost = "localhost"
+		redisHost = defaultHost
 	}
 	redisPort := os.Getenv("REDIS_PORT")
 	if redisPort == "" {
@@ -70,7 +70,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 
 	// Configure two-phase timeout
 	if timeoutStr := os.Getenv("AGENTAUTH_REVOCATION_TWOPHASE_TIMEOUT"); timeoutStr != "" {
-		if timeout, err := time.ParseDuration(timeoutStr); err == nil {
+		if timeout, parseErr := time.ParseDuration(timeoutStr); parseErr == nil {
 			twoPhase.SetDisableTimeout(timeout)
 		}
 	}
@@ -86,7 +86,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 
 	// Configure optimistic revocation
 	if windowStr := os.Getenv("AGENTAUTH_REVOCATION_OPTIMISTIC_WINDOW"); windowStr != "" {
-		if window, err := time.ParseDuration(windowStr); err == nil {
+		if window, parseErr := time.ParseDuration(windowStr); parseErr == nil {
 			optimistic.SetChallengeWindow(window)
 		}
 	}
@@ -94,7 +94,7 @@ func NewRevocationService(ctx context.Context) *RevocationService {
 	// Initialize Circuit Breaker
 	rateLimit := 10
 	if rateLimitStr := os.Getenv("AGENTAUTH_REVOCATION_CIRCUIT_RATE"); rateLimitStr != "" {
-		if rate, err := strconv.Atoi(rateLimitStr); err == nil {
+		if rate, parseErr := strconv.Atoi(rateLimitStr); parseErr == nil {
 			rateLimit = rate
 		}
 	}

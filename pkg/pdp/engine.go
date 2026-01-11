@@ -91,7 +91,16 @@ const (
 type CombiningStrategy interface {
 	Combine(steps []EvaluationStep) (final Effect, allowPolicies []string, denyPolicies []string, reason string)
 	// CombineWithDiagnostics performs combination and detects conflicts
-	CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (final Effect, allowPolicies []string, denyPolicies []string, reason string, conflicts []PolicyConflict)
+	CombineWithDiagnostics(
+		steps []EvaluationStep,
+		policies []Policy,
+	) (
+		final Effect,
+		allowPolicies []string,
+		denyPolicies []string,
+		reason string,
+		conflicts []PolicyConflict,
+	)
 	Name() string
 }
 
@@ -164,7 +173,25 @@ func NewInMemoryEngine(strategy CombiningStrategy) *InMemoryEngine {
 	if strategy == nil {
 		strategy = DenyOverridesStrategy{}
 	}
-	return &InMemoryEngine{strategy: strategy, policies: make([]Policy, 0), policyMatches: make(map[string]uint64), latencyBuckets: []int64{50_000, 100_000, 250_000, 500_000, 1_000_000, 2_500_000, 5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000}, latencyBucketCounts: make([]uint64, 11)}
+	return &InMemoryEngine{
+		strategy:      strategy,
+		policies:      make([]Policy, 0),
+		policyMatches: make(map[string]uint64),
+		latencyBuckets: []int64{
+			50_000,
+			100_000,
+			250_000,
+			500_000,
+			1_000_000,
+			2_500_000,
+			5_000_000,
+			10_000_000,
+			25_000_000,
+			50_000_000,
+			100_000_000,
+		},
+		latencyBucketCounts: make([]uint64, 11),
+	}
 }
 
 // WithMetrics attaches an external metrics implementation for decision recording.
@@ -267,7 +294,12 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 			if !resourceMatches(req.Resource, r.Resources) {
 				continue
 			}
-			step := EvaluationStep{PolicyID: p.ID, RuleID: r.ID, Matched: true, Effect: r.Effect}
+			step := EvaluationStep{
+				PolicyID: p.ID,
+				RuleID:   r.ID,
+				Matched:  true,
+				Effect:   r.Effect,
+			}
 			if r.Expr != "" {
 				startExpr := time.Now()
 				res, err := expr.Eval(r.Expr, req.Attributes, req.Time)
@@ -293,7 +325,17 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 		}
 	}
 	final, allowPolicies, denyPolicies, reason := e.strategy.Combine(steps)
-	dec := Decision{Allow: final == EffectAllow, Reason: reason, Policies: allowPolicies, DenyPolicies: denyPolicies, Trace: steps, Metadata: map[string]string{"combining_strategy": e.strategy.Name()}, Obligations: matchedObligations}
+	dec := Decision{
+		Allow:        final == EffectAllow,
+		Reason:       reason,
+		Policies:     allowPolicies,
+		DenyPolicies: denyPolicies,
+		Trace:        steps,
+		Metadata: map[string]string{
+			"combining_strategy": e.strategy.Name(),
+		},
+		Obligations: matchedObligations,
+	}
 	// Execute obligations prior to recording allow/deny metrics so mandatory failure can influence outcome.
 	var mandatoryFailures []string
 	if e.obligationExecutor != nil && len(dec.Obligations) > 0 {
@@ -369,7 +411,18 @@ func (e *InMemoryEngine) Evaluate(ctx context.Context, req Request) (Decision, e
 					DurationMS float64 `json:"duration_ms"`
 					Mandatory  bool    `json:"mandatory"`
 					Error      string  `json:"error,omitempty"`
-				}{Timestamp: time.Now().UTC().Format(time.RFC3339Nano), Subject: req.Subject, Action: req.Action, Resource: req.Resource, Allow: dec.Allow, Obligation: r.Name, Index: i, Success: r.Success, DurationMS: float64(dur.Microseconds()) / 1000.0, Mandatory: i < len(mandatoryFlags) && mandatoryFlags[i]}
+				}{
+					Timestamp:  time.Now().UTC().Format(time.RFC3339Nano),
+					Subject:    req.Subject,
+					Action:     req.Action,
+					Resource:   req.Resource,
+					Allow:      dec.Allow,
+					Obligation: r.Name,
+					Index:      i,
+					Success:    r.Success,
+					DurationMS: float64(dur.Microseconds()) / 1000.0,
+					Mandatory:  i < len(mandatoryFlags) && mandatoryFlags[i],
+				}
 				if r.Error != nil {
 					auditRec.Error = r.Error.Error()
 				}
@@ -430,7 +483,16 @@ func (e *InMemoryEngine) Metrics() MetricsSnapshot {
 	for k, v := range e.policyMatches {
 		pm[k] = v
 	}
-	snap := MetricsSnapshot{Decisions: e.decisions, Allows: e.allows, Denies: e.denies, ExprErrors: e.exprErrors, LatencyCount: e.latencyCount, LatencyMeanNs: e.latencyMeanNs, LatencyM2: e.latencyM2, PolicyMatches: pm}
+	snap := MetricsSnapshot{
+		Decisions:     e.decisions,
+		Allows:        e.allows,
+		Denies:        e.denies,
+		ExprErrors:    e.exprErrors,
+		LatencyCount:  e.latencyCount,
+		LatencyMeanNs: e.latencyMeanNs,
+		LatencyM2:     e.latencyM2,
+		PolicyMatches: pm,
+	}
 
 	// P2.13: Include cache metrics if enabled
 	if e.cache != nil {
@@ -575,7 +637,10 @@ func (DenyOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string, 
 }
 
 // CombineWithDiagnostics performs combination and detects permit-deny conflicts
-func (d DenyOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
+func (d DenyOverridesStrategy) CombineWithDiagnostics(
+	steps []EvaluationStep,
+	policies []Policy,
+) (Effect, []string, []string, string, []PolicyConflict) {
 	effect, allowIDs, denyIDs, reason := d.Combine(steps)
 
 	var conflicts []PolicyConflict
@@ -584,12 +649,17 @@ func (d DenyOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, po
 	if len(allowIDs) > 0 && len(denyIDs) > 0 {
 		allIDs := append(append([]string{}, allowIDs...), denyIDs...)
 		conflicts = append(conflicts, PolicyConflict{
-			ID:             "runtime-conflict-1",
-			Type:           ConflictPermitDeny,
-			Severity:       SeverityHigh,
-			PolicyIDs:      allIDs,
-			Description:    fmt.Sprintf("Deny-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
-			Recommendation: "Deny policies took precedence. Consider making deny policies more specific or removing redundant allow policies.",
+			ID:        "runtime-conflict-1",
+			Type:      ConflictPermitDeny,
+			Severity:  SeverityHigh,
+			PolicyIDs: allIDs,
+			Description: fmt.Sprintf(
+				"Deny-overrides resolved conflict: %d policies allowed, %d policies denied",
+				len(allowIDs),
+				len(denyIDs),
+			),
+			Recommendation: "Deny policies took precedence. Consider making deny policies more specific " +
+				"or removing redundant allow policies.",
 			DetectedAt:     time.Now(),
 			ResolutionHint: "DENY effect applied (deny-overrides strategy)",
 		})
@@ -622,7 +692,10 @@ func (PermitOverridesStrategy) Combine(steps []EvaluationStep) (Effect, []string
 }
 
 // CombineWithDiagnostics performs combination and detects permit-deny conflicts
-func (p PermitOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
+func (p PermitOverridesStrategy) CombineWithDiagnostics(
+	steps []EvaluationStep,
+	policies []Policy,
+) (Effect, []string, []string, string, []PolicyConflict) {
 	effect, allowIDs, denyIDs, reason := p.Combine(steps)
 
 	var conflicts []PolicyConflict
@@ -631,12 +704,17 @@ func (p PermitOverridesStrategy) CombineWithDiagnostics(steps []EvaluationStep, 
 	if len(allowIDs) > 0 && len(denyIDs) > 0 {
 		allIDs := append(append([]string{}, allowIDs...), denyIDs...)
 		conflicts = append(conflicts, PolicyConflict{
-			ID:             "runtime-conflict-1",
-			Type:           ConflictPermitDeny,
-			Severity:       SeverityCritical, // Higher severity for permit-overrides
-			PolicyIDs:      allIDs,
-			Description:    fmt.Sprintf("Permit-overrides resolved conflict: %d policies allowed, %d policies denied", len(allowIDs), len(denyIDs)),
-			Recommendation: "Allow policies took precedence. Consider adding mandatory obligations for audit logging or making allow policies more restrictive.",
+			ID:        "runtime-conflict-1",
+			Type:      ConflictPermitDeny,
+			Severity:  SeverityCritical, // Higher severity for permit-overrides
+			PolicyIDs: allIDs,
+			Description: fmt.Sprintf(
+				"Permit-overrides resolved conflict: %d policies allowed, %d policies denied",
+				len(allowIDs),
+				len(denyIDs),
+			),
+			Recommendation: "Allow policies took precedence. Consider adding mandatory obligations for audit logging " +
+				"or making allow policies more restrictive.",
 			DetectedAt:     time.Now(),
 			ResolutionHint: "ALLOW effect applied (permit-overrides strategy) - ensure this is intended behavior",
 		})
@@ -662,7 +740,10 @@ func (FirstApplicableStrategy) Combine(steps []EvaluationStep) (Effect, []string
 }
 
 // CombineWithDiagnostics performs combination with conflict detection for first-applicable
-func (f FirstApplicableStrategy) CombineWithDiagnostics(steps []EvaluationStep, policies []Policy) (Effect, []string, []string, string, []PolicyConflict) {
+func (f FirstApplicableStrategy) CombineWithDiagnostics(
+	steps []EvaluationStep,
+	policies []Policy,
+) (Effect, []string, []string, string, []PolicyConflict) {
 	effect, allowIDs, denyIDs, reason := f.Combine(steps)
 
 	var conflicts []PolicyConflict
@@ -677,11 +758,15 @@ func (f FirstApplicableStrategy) CombineWithDiagnostics(steps []EvaluationStep, 
 
 	if len(matchedPolicies) > 1 {
 		conflicts = append(conflicts, PolicyConflict{
-			ID:             "runtime-conflict-1",
-			Type:           ConflictPriorityAmbiguity,
-			Severity:       SeverityMedium,
-			PolicyIDs:      matchedPolicies,
-			Description:    fmt.Sprintf("First-applicable strategy: %d policies matched, using first (%s)", len(matchedPolicies), matchedPolicies[0]),
+			ID:        "runtime-conflict-1",
+			Type:      ConflictPriorityAmbiguity,
+			Severity:  SeverityMedium,
+			PolicyIDs: matchedPolicies,
+			Description: fmt.Sprintf(
+				"First-applicable strategy: %d policies matched, using first (%s)",
+				len(matchedPolicies),
+				matchedPolicies[0],
+			),
 			Recommendation: "Consider making policies mutually exclusive or using explicit priority ordering to avoid ambiguity.",
 			DetectedAt:     time.Now(),
 			ResolutionHint: fmt.Sprintf("Policy %s applied; remaining %d policies ignored", matchedPolicies[0], len(matchedPolicies)-1),

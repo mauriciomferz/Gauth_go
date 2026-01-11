@@ -391,7 +391,8 @@ func NewNLIdentityConnector(config *NLIdentityConnectorConfig) (*NLIdentityConne
 	}
 
 	// Register custom validators
-	_ = connector.validator.RegisterValidation("nl_bsn", validateBSN) // Registration failures are acceptable; fallback to standard validation
+	// Registration failures are acceptable; fallback to standard validation.
+	_ = connector.validator.RegisterValidation("nl_bsn", validateBSN)
 	_ = connector.validator.RegisterValidation("nl_postal_code", validateNLPostalCode)
 	_ = connector.validator.RegisterValidation("nl_iban", validateNLIBAN)
 
@@ -399,7 +400,10 @@ func NewNLIdentityConnector(config *NLIdentityConnectorConfig) (*NLIdentityConne
 }
 
 // AuthenticateDigiD performs DigiD authentication
-func (c *NLIdentityConnector) AuthenticateDigiD(ctx context.Context, req *NLDigiDAuthRequest) (*NLIdentityVerificationResult, error) {
+func (c *NLIdentityConnector) AuthenticateDigiD(
+	ctx context.Context,
+	req *NLDigiDAuthRequest,
+) (*NLIdentityVerificationResult, error) {
 	if !c.config.DigiDEnabled {
 		return nil, errors.New("DigiD authentication is not enabled")
 	}
@@ -461,7 +465,10 @@ func (c *NLIdentityConnector) AuthenticateDigiD(ctx context.Context, req *NLDigi
 }
 
 // ValidateBSN validates a Dutch BSN (Burgerservicenummer)
-func (c *NLIdentityConnector) ValidateBSN(ctx context.Context, req *NLBSNValidationRequest) (*NLIdentityVerificationResult, error) {
+func (c *NLIdentityConnector) ValidateBSN(
+	ctx context.Context,
+	req *NLBSNValidationRequest,
+) (*NLIdentityVerificationResult, error) {
 	if !c.config.BSNValidationEnabled {
 		return nil, errors.New("BSN validation is not enabled")
 	}
@@ -514,7 +521,10 @@ func (c *NLIdentityConnector) ValidateBSN(ctx context.Context, req *NLBSNValidat
 }
 
 // AuthenticateEIDAS performs eIDAS node authentication
-func (c *NLIdentityConnector) AuthenticateEIDAS(ctx context.Context, req *NLEIDASAuthRequest) (*NLIdentityVerificationResult, error) {
+func (c *NLIdentityConnector) AuthenticateEIDAS(
+	ctx context.Context,
+	req *NLEIDASAuthRequest,
+) (*NLIdentityVerificationResult, error) {
 	if !c.config.EIDASEnabled {
 		return nil, errors.New("eIDAS authentication is not enabled")
 	}
@@ -564,7 +574,10 @@ func (c *NLIdentityConnector) AuthenticateEIDAS(ctx context.Context, req *NLEIDA
 }
 
 // VerifyIDIN performs iDIN bank verification
-func (c *NLIdentityConnector) VerifyIDIN(ctx context.Context, req *NLIDINVerificationRequest) (*NLIdentityVerificationResult, error) {
+func (c *NLIdentityConnector) VerifyIDIN(
+	ctx context.Context,
+	req *NLIDINVerificationRequest,
+) (*NLIdentityVerificationResult, error) {
 	if !c.config.IDINEnabled {
 		return nil, errors.New("iDIN verification is not enabled")
 	}
@@ -620,7 +633,10 @@ func (c *NLIdentityConnector) VerifyIDIN(ctx context.Context, req *NLIDINVerific
 }
 
 // VerifyDocument verifies a Dutch identity document
-func (c *NLIdentityConnector) VerifyDocument(ctx context.Context, req *NLDocumentVerificationRequest) (*NLIdentityVerificationResult, error) {
+func (c *NLIdentityConnector) VerifyDocument(
+	ctx context.Context,
+	req *NLDocumentVerificationRequest,
+) (*NLIdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Validate request
@@ -678,25 +694,37 @@ func (c *NLIdentityConnector) VerifyDocument(ctx context.Context, req *NLDocumen
 // Private Methods
 // =============================================================================
 
-func (c *NLIdentityConnector) performDigiDAuth(ctx context.Context, req *NLDigiDAuthRequest) (bool, *NLIdentityAttributes, error) {
+func (c *NLIdentityConnector) performDigiDAuth(
+	ctx context.Context,
+	req *NLDigiDAuthRequest,
+) (bool, *NLIdentityAttributes, error) {
 	// This would implement SAML 2.0 authentication with DigiD
 	// Placeholder implementation
 	return false, nil, errors.New("DigiD SAML integration requires implementation")
 }
 
-func (c *NLIdentityConnector) performBSNValidation(ctx context.Context, req *NLBSNValidationRequest) (bool, *NLIdentityAttributes, error) {
+func (c *NLIdentityConnector) performBSNValidation(
+	ctx context.Context,
+	req *NLBSNValidationRequest,
+) (bool, *NLIdentityAttributes, error) {
 	// This would integrate with BRP (Basisregistratie Personen)
 	// Placeholder implementation
 	return false, nil, nil
 }
 
-func (c *NLIdentityConnector) performEIDASAuth(ctx context.Context, req *NLEIDASAuthRequest) (bool, *NLIdentityAttributes, error) {
+func (c *NLIdentityConnector) performEIDASAuth(
+	ctx context.Context,
+	req *NLEIDASAuthRequest,
+) (bool, *NLIdentityAttributes, error) {
 	// This would implement eIDAS SAML profile with NL eIDAS node
 	// Placeholder implementation
 	return false, nil, errors.New("eIDAS node integration requires implementation")
 }
 
-func (c *NLIdentityConnector) performIDINVerification(ctx context.Context, req *NLIDINVerificationRequest) (bool, *NLIdentityAttributes, string, error) {
+func (c *NLIdentityConnector) performIDINVerification(
+	ctx context.Context,
+	req *NLIDINVerificationRequest,
+) (bool, *NLIdentityAttributes, string, error) {
 	// This would integrate with iDIN service
 	// Placeholder implementation
 	return false, nil, "", errors.New("iDIN integration requires implementation")
@@ -769,6 +797,8 @@ func (c *NLIdentityConnector) isAuthLevelSufficient(requested NLAuthenticationLe
 func (c *NLIdentityConnector) getCacheKey(identifier string) string {
 	return fmt.Sprintf("nl:%s", identifier)
 }
+
+var _ = (*NLIdentityConnector).getCacheKey
 
 // =============================================================================
 // Validation Functions

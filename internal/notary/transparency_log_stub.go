@@ -59,7 +59,11 @@ func NewStubTransparencyLogger() *StubTransparencyLogger {
 	if name == "" {
 		name = "tlog_stub"
 	}
-	return &StubTransparencyLogger{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, provider: name}
+	return &StubTransparencyLogger{
+		minLatency: time.Duration(minMs) * time.Millisecond,
+		maxLatency: time.Duration(maxMs) * time.Millisecond,
+		provider:   name,
+	}
 }
 
 // Log produces a synthetic response. Hash required.

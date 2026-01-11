@@ -15,7 +15,9 @@ func TestBoltStoreAppendAndVerify(t *testing.T) {
 		t.Fatalf("temp file: %v", err)
 	}
 	path := f.Name()
-	f.Close()
+	if closeErr := f.Close(); closeErr != nil {
+		t.Fatalf("close temp file: %v", closeErr)
+	}
 	defer func() { _ = os.Remove(path) }()
 
 	storeIface, err := NewBoltStore(path)

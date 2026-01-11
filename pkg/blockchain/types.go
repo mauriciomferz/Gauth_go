@@ -145,8 +145,9 @@ type ConsistencyReport struct {
 
 // InconsistencyDetail represents a specific inconsistency
 type InconsistencyDetail struct {
-	PoAID             string      `json:"poa_id"`
-	InconsistencyType string      `json:"inconsistency_type"` // "missing_blockchain", "missing_db", "hash_mismatch", "status_mismatch"
+	PoAID string `json:"poa_id"`
+	// InconsistencyType is one of: missing_blockchain, missing_db, hash_mismatch, status_mismatch.
+	InconsistencyType string      `json:"inconsistency_type"`
 	DatabaseValue     interface{} `json:"database_value"`
 	BlockchainValue   interface{} `json:"blockchain_value"`
 	DetectedAt        time.Time   `json:"detected_at"`

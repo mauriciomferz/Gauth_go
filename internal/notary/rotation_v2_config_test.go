@@ -11,11 +11,15 @@ func TestLoadWeightsConfigValid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tmp: %v", err)
 	}
-	content := `{"schema_version":1,"active_key_set_id":"set","threshold_weight":3,"signers":[{"id":"b","alg":"ED25519","weight":1},{"id":"a","alg":"ED25519","weight":2}],"algorithm_suite":["ed25519"]}`
+	content := `{"schema_version":1,"active_key_set_id":"set",` +
+		`"threshold_weight":3,"signers":[{"id":"b","alg":"ED25519","weight":1},` +
+		`{"id":"a","alg":"ED25519","weight":2}],"algorithm_suite":["ed25519"]}`
 	if _, err2 := tmp.WriteString(content); err2 != nil {
-		t.Fatalf("write: %v", err)
+		t.Fatalf("write: %v", err2)
 	}
-	tmp.Close()
+	if closeErr := tmp.Close(); closeErr != nil {
+		t.Fatalf("close: %v", closeErr)
+	}
 	cfg, err := LoadWeightsConfig(tmp.Name())
 	if err != nil {
 		t.Fatalf("load: %v", err)
@@ -41,11 +45,15 @@ func TestLoadWeightsConfigDuplicate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("tmp: %v", err)
 	}
-	content := `{"schema_version":1,"active_key_set_id":"set","threshold_weight":3,"signers":[{"id":"a","alg":"ED25519","weight":1},{"id":"a","alg":"ED25519","weight":2}],"algorithm_suite":["ed25519"]}`
+	content := `{"schema_version":1,"active_key_set_id":"set",` +
+		`"threshold_weight":3,"signers":[{"id":"a","alg":"ED25519","weight":1},` +
+		`{"id":"a","alg":"ED25519","weight":2}],"algorithm_suite":["ed25519"]}`
 	if _, err := tmp.WriteString(content); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	tmp.Close()
+	if err := tmp.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
 	if _, err := LoadWeightsConfig(tmp.Name()); err == nil {
 		t.Fatalf("expected duplicate id error")
 	}

@@ -798,7 +798,9 @@ func ValidateAAP002Compliance(config interface{}) error {
 		if len(v.Authorization.ApplicableRegions) == 0 {
 			return fmt.Errorf("authorization must include at least one region")
 		}
-		if len(v.Authorization.AuthorizedActions.Transactions) == 0 && len(v.Authorization.AuthorizedActions.Decisions) == 0 && len(v.Authorization.AuthorizedActions.NonPhysicalActions) == 0 {
+		if len(v.Authorization.AuthorizedActions.Transactions) == 0 &&
+			len(v.Authorization.AuthorizedActions.Decisions) == 0 &&
+			len(v.Authorization.AuthorizedActions.NonPhysicalActions) == 0 {
 			return fmt.Errorf("authorization must include at least one action (transaction/decision/non-physical)")
 		}
 		// Validity duration sanity relative to 0 < EndTime-StartTime <= 2y
@@ -843,7 +845,8 @@ type ProofOfAuthorization struct {
 	Delegation  *Delegation            `json:"delegation,omitempty"`
 	Attestation *Attestation           `json:"attestation,omitempty"`
 	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	// Digest provides a canonical integrity hash over the core PoA fields (excluding metadata & attestation evidence maps which may vary).
+	// Digest provides a canonical integrity hash over the core PoA fields (excluding
+	// metadata & attestation evidence maps which may vary).
 	// Format: sha256:<hex>. Populated on Issue(). Recomputed on demand by CanonicalDigest().
 	Digest string `json:"digest,omitempty"`
 	// Multi-signature fields (optional). If threshold>0 then signatures must meet threshold for verification success.
@@ -1271,7 +1274,16 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 			ValidityScore float64   `json:"validity_score"`
 		} `json:"attestation,omitempty"`
 	}
-	c := canon{ID: p.ID, Subject: p.Subject, Resource: p.Resource, Action: p.Action, Issuer: p.Issuer, IssuedAt: p.IssuedAt, ExpiresAt: p.ExpiresAt, Scope: append([]string(nil), p.Scope...)}
+	c := canon{
+		ID:        p.ID,
+		Subject:   p.Subject,
+		Resource:  p.Resource,
+		Action:    p.Action,
+		Issuer:    p.Issuer,
+		IssuedAt:  p.IssuedAt,
+		ExpiresAt: p.ExpiresAt,
+		Scope:     append([]string(nil), p.Scope...),
+	}
 	if p.Delegation != nil {
 		c.Delegation = &struct {
 			DelegatedBy string    `json:"delegated_by"`
@@ -1280,7 +1292,14 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 			ExpiresAt   time.Time `json:"expires_at"`
 			Scope       []string  `json:"scope"`
 			Revocable   bool      `json:"revocable"`
-		}{DelegatedBy: p.Delegation.DelegatedBy, DelegatedTo: p.Delegation.DelegatedTo, DelegatedAt: p.Delegation.DelegatedAt, ExpiresAt: p.Delegation.ExpiresAt, Scope: append([]string(nil), p.Delegation.Scope...), Revocable: p.Delegation.Revocable}
+		}{
+			DelegatedBy: p.Delegation.DelegatedBy,
+			DelegatedTo: p.Delegation.DelegatedTo,
+			DelegatedAt: p.Delegation.DelegatedAt,
+			ExpiresAt:   p.Delegation.ExpiresAt,
+			Scope:       append([]string(nil), p.Delegation.Scope...),
+			Revocable:   p.Delegation.Revocable,
+		}
 	}
 	if p.Attestation != nil {
 		c.Attestation = &struct {
@@ -1288,7 +1307,12 @@ func buildPoASigningPayload(p *ProofOfAuthorization) []byte {
 			AttestedAt    time.Time `json:"attested_at"`
 			Confidence    float64   `json:"confidence"`
 			ValidityScore float64   `json:"validity_score"`
-		}{AttestedBy: p.Attestation.AttestedBy, AttestedAt: p.Attestation.AttestedAt, Confidence: p.Attestation.Confidence, ValidityScore: p.Attestation.ValidityScore}
+		}{
+			AttestedBy:    p.Attestation.AttestedBy,
+			AttestedAt:    p.Attestation.AttestedAt,
+			Confidence:    p.Attestation.Confidence,
+			ValidityScore: p.Attestation.ValidityScore,
+		}
 	}
 	raw, _ := json.Marshal(c)
 	return append([]byte("AGENTAUTH_POA:"), raw...)
@@ -1401,7 +1425,16 @@ func CanonicalDigest(p *ProofOfAuthorization) string {
 			ValidityScore float64   `json:"validity_score"`
 		} `json:"attestation,omitempty"`
 	}
-	c := canon{ID: p.ID, Subject: p.Subject, Resource: p.Resource, Action: p.Action, Issuer: p.Issuer, IssuedAt: p.IssuedAt, ExpiresAt: p.ExpiresAt, Scope: append([]string(nil), p.Scope...)}
+	c := canon{
+		ID:        p.ID,
+		Subject:   p.Subject,
+		Resource:  p.Resource,
+		Action:    p.Action,
+		Issuer:    p.Issuer,
+		IssuedAt:  p.IssuedAt,
+		ExpiresAt: p.ExpiresAt,
+		Scope:     append([]string(nil), p.Scope...),
+	}
 	if p.Delegation != nil {
 		c.Delegation = &struct {
 			DelegatedBy string    `json:"delegated_by"`
@@ -1410,7 +1443,14 @@ func CanonicalDigest(p *ProofOfAuthorization) string {
 			ExpiresAt   time.Time `json:"expires_at"`
 			Scope       []string  `json:"scope"`
 			Revocable   bool      `json:"revocable"`
-		}{DelegatedBy: p.Delegation.DelegatedBy, DelegatedTo: p.Delegation.DelegatedTo, DelegatedAt: p.Delegation.DelegatedAt, ExpiresAt: p.Delegation.ExpiresAt, Scope: append([]string(nil), p.Delegation.Scope...), Revocable: p.Delegation.Revocable}
+		}{
+			DelegatedBy: p.Delegation.DelegatedBy,
+			DelegatedTo: p.Delegation.DelegatedTo,
+			DelegatedAt: p.Delegation.DelegatedAt,
+			ExpiresAt:   p.Delegation.ExpiresAt,
+			Scope:       append([]string(nil), p.Delegation.Scope...),
+			Revocable:   p.Delegation.Revocable,
+		}
 	}
 	if p.Attestation != nil {
 		c.Attestation = &struct {
@@ -1418,7 +1458,12 @@ func CanonicalDigest(p *ProofOfAuthorization) string {
 			AttestedAt    time.Time `json:"attested_at"`
 			Confidence    float64   `json:"confidence"`
 			ValidityScore float64   `json:"validity_score"`
-		}{AttestedBy: p.Attestation.AttestedBy, AttestedAt: p.Attestation.AttestedAt, Confidence: p.Attestation.Confidence, ValidityScore: p.Attestation.ValidityScore}
+		}{
+			AttestedBy:    p.Attestation.AttestedBy,
+			AttestedAt:    p.Attestation.AttestedAt,
+			Confidence:    p.Attestation.Confidence,
+			ValidityScore: p.Attestation.ValidityScore,
+		}
 	}
 	raw, _ := json.Marshal(c)
 	sum := sha256.Sum256(raw)

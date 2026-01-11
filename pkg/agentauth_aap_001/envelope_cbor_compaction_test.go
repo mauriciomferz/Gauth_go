@@ -3,7 +3,6 @@ package agentauth_aap_001
 import (
 	"context"
 	"encoding/base64"
-	"os"
 	"testing"
 	"time"
 
@@ -13,10 +12,8 @@ import (
 
 func TestEnvelopeCBORCompaction(t *testing.T) {
 	// Enable CBOR embedding before creating service
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_EMBED_FULL_POA_CBOR", "1")
-	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-	defer os.Unsetenv("AGENTAUTH_EMBED_FULL_POA_CBOR")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_FULL_POA_CBOR", "1")
 
 	// Setup service with audit logger and authorizer
 	auditLogger := audit.NewMemoryLogger(nil)
@@ -77,10 +74,8 @@ func TestEnvelopeCBORCompaction(t *testing.T) {
 
 func TestStreamingLargePoAChainV2(t *testing.T) {
 	// Enable chain embedding before creating service
-	os.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
-	os.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
-	defer os.Unsetenv("AGENTAUTH_POA_ENVELOPE_V2")
-	defer os.Unsetenv("AGENTAUTH_EMBED_RAW_POA_CHAIN")
+	t.Setenv("AGENTAUTH_POA_ENVELOPE_V2", "1")
+	t.Setenv("AGENTAUTH_EMBED_RAW_POA_CHAIN", "1")
 
 	// Setup service with audit logger and authorizer
 	auditLogger := audit.NewMemoryLogger(nil)

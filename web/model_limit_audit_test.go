@@ -14,9 +14,13 @@ import (
 func TestModelLimitAuditChain(t *testing.T) {
 	limitsFile, _ := os.CreateTemp(t.TempDir(), "limits.json")
 	_, _ = limitsFile.WriteString(`{"model_limits":{"demo-model":{"max_input_tokens":10,"max_requests_per_minute":1}}}`)
-	limitsFile.Close()
+	if err := limitsFile.Close(); err != nil {
+		t.Fatalf("close limits file: %v", err)
+	}
 	auditFile, _ := os.CreateTemp(t.TempDir(), "audit.jsonl")
-	auditFile.Close()
+	if err := auditFile.Close(); err != nil {
+		t.Fatalf("close audit file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH", limitsFile.Name())
 	t.Setenv("AGENTAUTH_MODEL_LIMIT_AUDIT_PATH", auditFile.Name())
 	bs := NewBetaServer("")
@@ -28,6 +32,7 @@ func TestModelLimitAuditChain(t *testing.T) {
 	doAuditReq(bs, map[string]any{"model_id": "demo-model", "input_tokens": 5})
 	// read audit file
 	f, _ := os.Open(auditFile.Name())
+	defer func() { _ = f.Close() }()
 	scanner := bufio.NewScanner(f)
 	var prev string
 	count := 0

@@ -11,8 +11,26 @@ import (
 func TestDecisionTraceabilityStub(t *testing.T) {
 	ml := NewMemoryLogger(nil)
 	// Simulate two decisions: one allowed (matched policies), one denied (denied_by policies)
-	evAllow := &Event{Type: EventTypeAuthorization, Action: "eval", Result: ResultSuccess, Subject: "alice", Metadata: map[string]interface{}{"matched_policies": []string{"allow-read"}, "denied_policies": []string{}}}
-	evDeny := &Event{Type: EventTypeAuthorization, Action: "eval", Result: ResultFailure, Subject: "alice", Metadata: map[string]interface{}{"matched_policies": []string{"allow-read"}, "denied_policies": []string{"deny-write"}}}
+	evAllow := &Event{
+		Type:    EventTypeAuthorization,
+		Action:  "eval",
+		Result:  ResultSuccess,
+		Subject: "alice",
+		Metadata: map[string]interface{}{
+			"matched_policies": []string{"allow-read"},
+			"denied_policies":  []string{},
+		},
+	}
+	evDeny := &Event{
+		Type:    EventTypeAuthorization,
+		Action:  "eval",
+		Result:  ResultFailure,
+		Subject: "alice",
+		Metadata: map[string]interface{}{
+			"matched_policies": []string{"allow-read"},
+			"denied_policies":  []string{"deny-write"},
+		},
+	}
 	if err := ml.Log(context.TODO(), evAllow); err != nil {
 		t.Fatalf("log allow: %v", err)
 	}

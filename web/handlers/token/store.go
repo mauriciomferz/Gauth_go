@@ -60,7 +60,14 @@ func (ts *Store) Create(ttlSeconds int, meta any) *Token {
 	if ttlSeconds <= 0 {
 		ttlSeconds = 300
 	}
-	t := &Token{ID: randomNonce(10), Value: randomNonce(24), CreatedAt: time.Now(), ExpiresAt: time.Now().Add(time.Duration(ttlSeconds) * time.Second), Meta: meta, Status: "active"}
+	t := &Token{
+		ID:        randomNonce(10),
+		Value:     randomNonce(24),
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(time.Duration(ttlSeconds) * time.Second),
+		Meta:      meta,
+		Status:    "active",
+	}
 	ts.mu.Lock()
 	if len(ts.tokens) >= ts.cap { // simple eviction: drop oldest arbitrary (first range)
 		for k, v := range ts.tokens {

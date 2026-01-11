@@ -289,7 +289,7 @@ func (h *RevocationHandler) GenerateProof(c *gin.Context) {
 
 		// Move to parent level
 		currentLevel--
-		currentPosition = currentPosition / 2
+		currentPosition /= 2
 	}
 
 	// Get root hash

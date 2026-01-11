@@ -16,7 +16,7 @@ import (
 func TestIdentityProvisioningFlow(t *testing.T) {
 	// 1. Setup Server
 	server := web.NewBetaServer(":8092")
-	go server.Run()
+	go func() { _ = server.Run() }()
 	defer server.Shutdown()
 
 	time.Sleep(200 * time.Millisecond)
@@ -27,12 +27,13 @@ func TestIdentityProvisioningFlow(t *testing.T) {
 			"agent_id":        "agent-123",
 			"target_audience": "https://graph.microsoft.com",
 		}
-		jsonBody, _ := json.Marshal(reqBody)
+		jsonBody, err := json.Marshal(reqBody)
+		require.NoError(t, err)
 
 		// 2. Call Provisioning Endpoint
 		resp, err := http.Post(baseURL+"/api/v1/identity/provision", "application/json", bytes.NewBuffer(jsonBody))
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 

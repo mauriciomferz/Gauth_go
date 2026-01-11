@@ -27,9 +27,10 @@ func TestLoadGapMatrixCounts(t *testing.T) {
 	if _, err := f.WriteString(sampleGapJSON); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	f.Close()
-	os.Setenv("GAP_MATRIX_PATH", f.Name())
-	defer os.Unsetenv("GAP_MATRIX_PATH")
+	if err := f.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+	t.Setenv("GAP_MATRIX_PATH", f.Name())
 
 	// Minimal clauses to drive Analyze (empty mapping will yield zero required symbols).
 	clauses := []Clause{}
@@ -51,9 +52,10 @@ func TestReportMarkdownGapTable(t *testing.T) {
 	if _, err := f.WriteString(sampleGapJSON); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	f.Close()
-	os.Setenv("GAP_MATRIX_PATH", f.Name())
-	defer os.Unsetenv("GAP_MATRIX_PATH")
+	if err := f.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+	t.Setenv("GAP_MATRIX_PATH", f.Name())
 	ar := Analyze([]Clause{})
 	rep := BuildReport(ar)
 	md := rep.ToMarkdown()

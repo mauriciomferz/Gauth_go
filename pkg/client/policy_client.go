@@ -69,13 +69,13 @@ func (c *PolicyClient) GetProvenance(ctx context.Context, hash string) (*Provena
 	var resp *http.Response
 	err = c.config.CircuitBreaker.Call(func() error {
 		var rErr error
-		resp, rErr = c.httpClient.Do(req)
+		resp, rErr = c.httpClient.Do(req) //nolint:bodyclose // body closed in defer below
 		return rErr
 	})
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)

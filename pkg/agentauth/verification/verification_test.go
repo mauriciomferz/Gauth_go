@@ -7,8 +7,10 @@ import (
 	"time"
 )
 
+type timestampCtxKey struct{}
+
 func TestDualChannelVerifier_RequestVerification(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "timestamp", time.Now().Format(time.RFC3339))
+	ctx := context.WithValue(context.Background(), timestampCtxKey{}, time.Now().Format(time.RFC3339))
 
 	sms := NewMockSMSGateway()
 	email := NewMockEmailService()
@@ -41,7 +43,7 @@ func TestDualChannelVerifier_RequestVerification(t *testing.T) {
 }
 
 func TestDualChannelVerifier_ConfirmVerification(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "timestamp", time.Now().Format(time.RFC3339))
+	ctx := context.WithValue(context.Background(), timestampCtxKey{}, time.Now().Format(time.RFC3339))
 
 	sms := NewMockSMSGateway()
 	email := NewMockEmailService()
@@ -74,7 +76,7 @@ func TestDualChannelVerifier_ConfirmVerification(t *testing.T) {
 }
 
 func TestDualChannelVerifier_InvalidCode(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "timestamp", time.Now().Format(time.RFC3339))
+	ctx := context.WithValue(context.Background(), timestampCtxKey{}, time.Now().Format(time.RFC3339))
 
 	sms := NewMockSMSGateway()
 	email := NewMockEmailService()
@@ -154,7 +156,7 @@ func TestMaskEmail(t *testing.T) {
 }
 
 func TestTimelockPoA_CreateWithDelay(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "timestamp", time.Now().Format(time.RFC3339))
+	ctx := context.WithValue(context.Background(), timestampCtxKey{}, time.Now().Format(time.RFC3339))
 
 	registry := NewMockPoARegistry()
 	sms := NewMockSMSGateway()
@@ -199,7 +201,7 @@ func TestTimelockPoA_CreateWithDelay(t *testing.T) {
 }
 
 func TestTimelockPoA_CancelPoA(t *testing.T) {
-	ctx := context.WithValue(context.Background(), "timestamp", time.Now().Format(time.RFC3339))
+	ctx := context.WithValue(context.Background(), timestampCtxKey{}, time.Now().Format(time.RFC3339))
 
 	registry := NewMockPoARegistry()
 	sms := NewMockSMSGateway()

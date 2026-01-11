@@ -55,7 +55,7 @@ func (r *RedisDecisionCache) getCacheVersion(ctx context.Context) (int64, error)
 		// If key not found, initialize to 1
 		if err.Error() == "key not found" {
 			// Using SetNX effectively
-			if err := r.client.Set(ctx, redisCacheVersionKey, 1, redisVersionTTL); err == nil {
+			if setErr := r.client.Set(ctx, redisCacheVersionKey, 1, redisVersionTTL); setErr == nil {
 				return 1, nil
 			}
 			// Add retry logic or simple fallback
@@ -149,8 +149,8 @@ func (r *RedisDecisionCache) Set(ctx context.Context, req Request, decision Deci
 	}
 
 	// 1. Set the cache entry
-	if err := r.client.Set(ctx, key, string(data), r.ttl); err != nil {
-		return err
+	if setErr := r.client.Set(ctx, key, string(data), r.ttl); setErr != nil {
+		return setErr
 	}
 
 	// 2. Add to indices (fire and forget / best effort? or robust?)

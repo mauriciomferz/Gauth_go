@@ -260,14 +260,25 @@ func createBaseTokenRequest(grantID string, scope []string) *ExtendedTokenReques
 		Scope:   scope,
 		PowerOfAttorney: &poa.PoADefinition{
 			Parties: poa.Parties{
-				Principal:        poa.Principal{Type: "Organization", Identity: "principal-001"},
-				AuthorizedClient: poa.AuthorizedClient{Type: "LLM", Identity: "client-001", StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1},
+				Principal: poa.Principal{Type: "Organization", Identity: "principal-001"},
+				AuthorizedClient: poa.AuthorizedClient{
+					Type: "LLM", Identity: "client-001",
+					StatusEnum: poa.OperationalStatusActive, CapabilityLevel: poa.CapabilityL1,
+				},
 			},
 			Authorization: poa.AuthorizationScope{},
-			Requirements:  poa.Requirements{ValidityPeriod: poa.ValidityPeriod{StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour)}},
+			Requirements: poa.Requirements{
+				ValidityPeriod: poa.ValidityPeriod{
+					StartTime: time.Now().Add(-time.Minute), EndTime: time.Now().Add(time.Hour),
+				},
+			},
 		},
-		OwnersAuthorizerInfo: &OwnersAuthorizerInfo{AuthorizerID: "authorizer-001", AuthorizerName: "Test Authorizer", AuthorizerType: "managing_director", IdentityVerified: true, VerificationMethod: "test", VerificationDate: time.Now()},
-		LegalFramework:       &LegalFrameworkInfo{Jurisdiction: "DE", ApplicableLaws: []string{"TEST-LAW"}},
+		OwnersAuthorizerInfo: &OwnersAuthorizerInfo{
+			AuthorizerID: "authorizer-001", AuthorizerName: "Test Authorizer",
+			AuthorizerType: "managing_director", IdentityVerified: true,
+			VerificationMethod: "test", VerificationDate: time.Now(),
+		},
+		LegalFramework: &LegalFrameworkInfo{Jurisdiction: "DE", ApplicableLaws: []string{"TEST-LAW"}},
 		AuthorizationChain: &AuthorizationChain{
 			OwnersAuthorizer: &AuthorizationLink{
 				EntityID:              "authorizer-001",

@@ -21,7 +21,7 @@ func TestService_ValidateAdvancedToken_Integration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
 	}
-	defer service.Close()
+	t.Cleanup(func() { _ = service.Close() })
 
 	// Create advanced token request
 	advancedReq := AdvancedTokenRequest{
@@ -129,7 +129,7 @@ func TestService_ValidateAdvancedToken_ExpiredToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
 	}
-	defer service.Close()
+	t.Cleanup(func() { _ = service.Close() })
 
 	// Create token request with very short TTL
 	advancedReq := AdvancedTokenRequest{
@@ -166,7 +166,7 @@ func TestService_ValidateAdvancedToken_TimeWindowRestriction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
 	}
-	defer service.Close()
+	t.Cleanup(func() { _ = service.Close() })
 
 	// Create token with restrictive time window (never allows current time)
 	now := time.Now()
@@ -220,11 +220,12 @@ func TestPASETOValidation_StructuredFooter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create service: %v", err)
 	}
-	defer service.Close()
+	t.Cleanup(func() { _ = service.Close() })
 
 	// Test valid PASETO token format
 	//nolint:gosec // G101: test token, not real credentials
-	validToken := "v4.public.eyJzdWIiOiJ1c2VyMTIzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLmV4YW1wbGUuY29tIn0.eyJraWQiOiJrZXktMTIzIiwiYWxnIjoiRWQyNTUxOSIsImlzcyI6Imh0dHBzOi8vYXV0aC5leGFtcGxlLmNvbSJ9"
+	validToken := "v4.public.eyJzdWIiOiJ1c2VyMTIzIiwiaXNzIjoiaHR0cHM6Ly9hdXRoLmV4YW1wbGUuY29tIn0." + //nolint:lll // base64 test token
+		"eyJraWQiOiJrZXktMTIzIiwiYWxnIjoiRWQyNTUxOSIsImlzcyI6Imh0dHBzOi8vYXV0aC5leGFtcGxlLmNvbSJ9"
 
 	result, err := service.ValidatePASETOWithFooter(validToken)
 	if err != nil {

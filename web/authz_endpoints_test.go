@@ -62,7 +62,10 @@ func TestAuthzEvaluateEndpoint(t *testing.T) {
 		}
 	}
 
-	body := map[string]any{"subject": "alice@example.com", "resource": "report:finance", "action": "read", "context": map[string]string{"department": "finance"}}
+	body := map[string]any{
+		"subject": "alice@example.com", "resource": "report:finance",
+		"action": "read", "context": map[string]string{"department": "finance"},
+	}
 	b, _ := json.Marshal(body)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/beta/authz/evaluate", bytes.NewReader(b))

@@ -150,7 +150,8 @@ func (h *Handler) Update() {
 	}
 
 	shouldArchive := h.Ledger != nil && (h.LastArchive.IsZero() || time.Since(h.LastArchive) >= h.ArchiveInterval)
-	shouldAnchor := h.AnchorProvider != nil && h.Ledger != nil && (h.LastAnchor.IsZero() || time.Since(h.LastAnchor) >= h.AnchorInterval)
+	shouldAnchor := h.AnchorProvider != nil && h.Ledger != nil &&
+		(h.LastAnchor.IsZero() || time.Since(h.LastAnchor) >= h.AnchorInterval)
 	h.mu.Unlock()
 
 	if shouldArchive {

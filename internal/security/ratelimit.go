@@ -56,8 +56,8 @@ func (l *IPRateLimiter) GetLimiter(ip string) *rate.Limiter {
 	defer l.mu.Unlock()
 
 	// Double-check after acquiring write lock
-	if limiter, exists := l.limiters[ip]; exists {
-		return limiter
+	if existingLimiter, exists := l.limiters[ip]; exists {
+		return existingLimiter
 	}
 
 	limiter = rate.NewLimiter(

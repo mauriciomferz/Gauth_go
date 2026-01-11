@@ -50,7 +50,9 @@ func (a *DelegationRevocationAdapter) GetRevocationInfo(ctx context.Context, ent
 
 // CheckCertificateRevocation checks certificate revocation status.
 // Not implemented for this adapter.
-func (a *DelegationRevocationAdapter) CheckCertificateRevocation(ctx context.Context, certID string) (*CertificateRevocationStatus, error) {
+func (a *DelegationRevocationAdapter) CheckCertificateRevocation(
+	ctx context.Context, certID string,
+) (*CertificateRevocationStatus, error) {
 	return &CertificateRevocationStatus{
 		CertificateID: certID,
 		Revoked:       false,

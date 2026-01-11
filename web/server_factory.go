@@ -259,7 +259,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 	} else {
 		redisHost := os.Getenv("REDIS_HOST")
 		if redisHost == "" {
-			redisHost = "localhost"
+			redisHost = defaultHost
 		}
 		redisPortStr := os.Getenv("REDIS_PORT")
 		redisPort := 6379
@@ -318,7 +318,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 					} else {
 						fmt.Println("Database migrations applied successfully")
 					}
-					m.Close()
+					_ = m.Close()
 				}
 			}
 
@@ -604,7 +604,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		tokenStore = s.tokens // s.tokens is concrete *Store, but implements TokenStorer
 		fmt.Println("[info] Token Store: In-Memory")
 	}
-	s.delegationHandler = delegationHandlers.NewHandler(s.metrics, s.audit, s, s.enforceCapabilities, s.tracerProvider, s.capabilitiesHandler.GetRequiredCaps)
+	s.delegationHandler = delegationHandlers.NewHandler(
+		s.metrics, s.audit, s, s.enforceCapabilities,
+		s.tracerProvider, s.capabilitiesHandler.GetRequiredCaps)
 
 	// Initialize Key Manager
 	// RR-013 Phase 2: Support External/Cloud KMS
@@ -616,7 +618,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		// We can proceed but token issuance might fail
 	}
 
-	s.tokenHandler = token.NewHandler(tokenStore, s.replayStore, s, s, s, &tokenTracerAdapter{tp: s.tracerProvider}, s.enforceCapabilities, s.metrics, s, s.keyProvider, km, s.systemClockMonitor)
+	s.tokenHandler = token.NewHandler(
+		tokenStore, s.replayStore, s, s, s,
+		&tokenTracerAdapter{tp: s.tracerProvider},
+		s.enforceCapabilities, s.metrics, s,
+		s.keyProvider, km, s.systemClockMonitor)
 
 	s.tokenHandler.ETagUpdater = s // Server implements JWKSETagUpdater
 	s.tokenHandler.RegisterRoutes(s.router)
@@ -669,7 +675,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			// Initialize L2 Redis cache using server's redis connection info
 			redisHost := os.Getenv("REDIS_HOST")
 			if redisHost == "" {
-				redisHost = "localhost"
+				redisHost = defaultHost
 			}
 			redisPort := os.Getenv("REDIS_PORT")
 			if redisPort == "" {
@@ -744,7 +750,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		}
 		c.Request.Body = io.NopCloser(bytes.NewReader(b))
 		var payload map[string]any
-		// Attempt JSON parse only if not yet activated; after activation we skip parse to allow conflict detection even if stream reused.
+		// Attempt JSON parse only if not yet activated; after activation we skip
+		// parse to allow conflict detection even if stream reused.
 		if !compositeActivated {
 			if err := json.Unmarshal(b, &payload); err != nil {
 				c.JSON(400, gin.H{"success": false, "error": "invalid_json"})
@@ -833,7 +840,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				meta[k] = v
 			}
 			// Append audit entry (non-blocking safety already in audit Append)
-			s.audit.Append(&AuditEntry{ID: randomNonce(6), At: time.Now(), Actor: "system", Action: limits.SnapshotType, Resource: "limits_store", Outcome: "success", Meta: meta})
+			s.audit.Append(&AuditEntry{
+				ID: randomNonce(6), At: time.Now(), Actor: "system",
+				Action: limits.SnapshotType, Resource: "limits_store",
+				Outcome: "success", Meta: meta,
+			})
 		})
 		// HTTP endpoint registered via helper to keep routing centralized
 		s.registerLimitsDiagnostics(r)
@@ -1075,7 +1086,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		if err := s.violationHandler.Load(); err != nil {
 			fmt.Fprintf(os.Stderr, "[violations] load error path=%s err=%v\n", s.violationPersistPath, err)
 		} else {
-			fmt.Fprintf(os.Stderr, "[violations] loaded persistence path=%s count=%d\n", s.violationPersistPath, s.violationHandler.Count())
+			fmt.Fprintf(os.Stderr, "[violations] loaded persistence path=%s count=%d\n",
+				s.violationPersistPath, s.violationHandler.Count())
 			// Initialize integrity status
 			s.violationIntegrityStatus = integrityUnconfigured
 		}
@@ -1194,7 +1206,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		if s.authorizer == nil {
 			s.authorizer = authz.NewMemoryAuthorizer()
 		}
-		// Functional options: enable mandatory signatures when AGENTAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
+		// Functional options: enable mandatory signatures when
+		// AGENTAUTH_MULTI_SIG_STRICT set (already handled internally by NewService via env).
 		aapOpts := []agentauth_aap_001.Option{}
 		if s.redisClient != nil {
 			// Enable distributed replay protection (AGENTAUTH-VULN-004)
@@ -1340,7 +1353,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			fidSvc := agentauthplus.NewPostgreSQLFiduciaryDutyService(gplusDB)
 			s.RegisterAgentAuthPlusEndpoints(succSvc, delSvc, dualSvc, capSvc, fidSvc)
 
-			fmt.Fprintln(os.Stderr, "[admin] handlers registered: auth, poa, resilience, events, authz, config, tokens, metrics, audit, subscribers, revocation, api-keys, security, cache, oidc, policy-templates, agentauthplus (17 total)") // OIDC authentication flow handler
+			// OIDC authentication flow handler
+			fmt.Fprintln(os.Stderr,
+				"[admin] handlers registered: auth, poa, resilience, events, authz, config, "+
+					"tokens, metrics, audit, subscribers, revocation, api-keys, security, "+
+					"cache, oidc, policy-templates, agentauthplus (17 total)")
 			oidcAuthHandler := authHandlers.NewOIDCAuthHandler(dbPool)
 			authGroup := r.Group("/auth")
 			oidcAuthHandler.RegisterRoutes(authGroup)
@@ -1591,7 +1608,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 		otelInitOnce.Do(func() {
 			exp, err := stdoutmetric.New(stdoutmetric.WithWriter(os.Stderr))
 			if err == nil {
-				provider := metricsdk.NewMeterProvider(metricsdk.WithReader(metricsdk.NewPeriodicReader(exp, metricsdk.WithInterval(5*time.Second))))
+				provider := metricsdk.NewMeterProvider(
+					metricsdk.WithReader(
+						metricsdk.NewPeriodicReader(exp, metricsdk.WithInterval(5*time.Second))))
 				otel.SetMeterProvider(provider)
 				s.otelMetricsProvider = provider
 				s.otelMeter = provider.Meter("agentauth-beta")
@@ -1611,7 +1630,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				if gErr2 != nil {
 					log.Printf("otel gauge create failed (semantic): %v", gErr2)
 				}
-				counterKeys := []string{"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch", "replay_detected", "audience_mismatch", "missing_claim", "unknown"}
+				counterKeys := []string{
+					"sig_invalid", "expired", "not_yet_valid", "issuer_mismatch",
+					"replay_detected", "audience_mismatch", "missing_claim", "unknown",
+				}
 				for _, k := range counterKeys {
 					name := "agentauth_violation_counter_" + k
 					gauge, err2 := s.otelMeter.Int64ObservableGauge(name)
@@ -1627,7 +1649,10 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 						s.otelViolationRates[rk] = g
 					}
 				}
-				semanticKeys := []string{"amount_limit_exceeded", "daily_amount_limit_exceeded", "currency_mismatch", "scope_violation", "restriction_mismatch"}
+				semanticKeys := []string{
+					"amount_limit_exceeded", "daily_amount_limit_exceeded",
+					"currency_mismatch", "scope_violation", "restriction_mismatch",
+				}
 				for _, sk := range semanticKeys {
 					name := "agentauth_poa_semantic_counter_" + sk
 					gauge, err2 := s.otelMeter.Int64ObservableGauge(name)
@@ -1777,7 +1802,11 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			added := 0
 			for i := 0; i < n; i++ {
 				id := fmt.Sprintf("rev-seed-%d-%d", time.Now().UnixNano(), i)
-				ev := delegation.RevocationEvent{ID: id, DelegationID: fmt.Sprintf("demo-deleg-%d", i), Reason: string(reasons[i%len(reasons)])}
+				ev := delegation.RevocationEvent{
+					ID:           id,
+					DelegationID: fmt.Sprintf("demo-deleg-%d", i),
+					Reason:       string(reasons[i%len(reasons)]),
+				}
 				if _, aerr := s.revocationChain.Append(ev); aerr == nil {
 					added++
 				} else {
@@ -1787,7 +1816,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			fmt.Fprintf(os.Stderr, "[revocation-seed] auto seeded events count=%d\n", added)
 			if os.Getenv("AGENTAUTH_REVOCATION_DEMO_SIGN") == "1" {
 				if sth, serr := s.revocationChain.SignTreeHead(); serr == nil {
-					fmt.Fprintf(os.Stderr, "[revocation-seed] signed tree head len=%d root=%s sigs=%d\n", sth.ChainLength, sth.MerkleRoot, len(sth.Signatures))
+					fmt.Fprintf(os.Stderr,
+						"[revocation-seed] signed tree head len=%d root=%s sigs=%d\n",
+						sth.ChainLength, sth.MerkleRoot, len(sth.Signatures))
 				} else {
 					fmt.Fprintf(os.Stderr, "[revocation-seed] sign tree head error: %v\n", serr)
 				}
@@ -1834,7 +1865,9 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 				return
 			}
 			s.revocationAutoSignEmitted++
-			fmt.Fprintf(os.Stderr, "[revocation] auto-signed tree head after rotation len=%d root=%s sigs=%d satisfied=%d threshold=%d\n", sth.ChainLength, sth.MerkleRoot, len(sth.Signatures), sth.SatisfiedWeight, sth.Threshold)
+			fmt.Fprintf(os.Stderr,
+				"[revocation] auto-signed tree head after rotation len=%d root=%s sigs=%d satisfied=%d threshold=%d\n",
+				sth.ChainLength, sth.MerkleRoot, len(sth.Signatures), sth.SatisfiedWeight, sth.Threshold)
 		}
 
 		km, err := crypto.NewManager(time.Duration(ttlHours) * time.Hour)
@@ -1844,7 +1877,8 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 			if s.keyProvider == nil {
 				s.keyProvider = km
 			}
-			fmt.Fprintf(os.Stderr, "[crypto] eddsa manager initialized ttl=%dh persist=%v\n", ttlHours, os.Getenv("AGENTAUTH_EDDSA_PERSIST_PATH") != "")
+			fmt.Fprintf(os.Stderr, "[crypto] eddsa manager initialized ttl=%dh persist=%v\n",
+				ttlHours, os.Getenv("AGENTAUTH_EDDSA_PERSIST_PATH") != "")
 		}
 		// Optional automatic rotation loop
 		if rv := os.Getenv("AGENTAUTH_EDDSA_AUTO_ROTATE_MIN"); rv != "" {
@@ -1943,7 +1977,7 @@ func NewBetaServerWithMetrics(port string, m metrics.Metrics, opts ...BetaServer
 
 	// External Capability Anchoring
 	// Uses 'web/handlers/capability_anchor' package.
-	ctx = context.Background() // Use background context for initialization
+	// Note: ctx would be used here if external anchor providers required context initialization
 
 	// Resolve External Anchor Provider
 	var extProvider anchorint.Provider

@@ -15,7 +15,7 @@ import (
 func TestMCPFullFlow(t *testing.T) {
 	// 1. Setup Server
 	server := web.NewBetaServer(":8095")
-	go server.Run()
+	go func() { _ = server.Run() }()
 	defer server.Shutdown()
 
 	time.Sleep(500 * time.Millisecond)
@@ -35,11 +35,12 @@ func TestMCPFullFlow(t *testing.T) {
 			"command":   "echo", // Simple command
 			"args":      []string{"{}"},
 		}
-		jsonBody, _ := json.Marshal(reqBody)
+		jsonBody, err := json.Marshal(reqBody)
+		require.NoError(t, err)
 
 		resp, err := http.Post(baseURL+"/api/v1/agentauth/mcp/servers", "application/json", bytes.NewBuffer(jsonBody))
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		// We expect 200 OK (Registration accepted) even if handshake fails asynchronously,
 		// OR 500 if synchronous handshake fails depending on implementation.
@@ -52,11 +53,11 @@ func TestMCPFullFlow(t *testing.T) {
 			// 3. List Servers
 			listResp, err := http.Get(baseURL + "/api/v1/agentauth/mcp/servers")
 			require.NoError(t, err)
-			defer listResp.Body.Close()
+			defer func() { _ = listResp.Body.Close() }()
 			assert.Equal(t, http.StatusOK, listResp.StatusCode)
 
 			var listData map[string]interface{}
-			json.NewDecoder(listResp.Body).Decode(&listData)
+			require.NoError(t, json.NewDecoder(listResp.Body).Decode(&listData))
 			servers := listData["servers"].([]interface{})
 			assert.NotEmpty(t, servers)
 

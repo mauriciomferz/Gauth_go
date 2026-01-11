@@ -25,7 +25,11 @@ func TestShimEquivalence(t *testing.T) {
 		_ = modern.Execute(ctx, func() error { return sentinel })
 	}
 	if legacy.GetState() == StateClosed || modern.GetState() == StateClosed {
-		t.Fatalf("expected both breakers to transition to open after threshold failures: legacy=%v modern=%v", legacy.GetState(), modern.GetState())
+		t.Fatalf(
+			"expected both breakers to transition to open after threshold failures: legacy=%v modern=%v",
+			legacy.GetState(),
+			modern.GetState(),
+		)
 	}
 
 	// Wait for reset timeout and probe success to close
@@ -37,6 +41,10 @@ func TestShimEquivalence(t *testing.T) {
 		t.Fatalf("modern probe execution unexpected error: %v", err)
 	}
 	if legacy.GetState() != StateClosed || modern.GetState() != StateClosed {
-		t.Fatalf("expected both breakers to close after successful probe: legacy=%v modern=%v", legacy.GetState(), modern.GetState())
+		t.Fatalf(
+			"expected both breakers to close after successful probe: legacy=%v modern=%v",
+			legacy.GetState(),
+			modern.GetState(),
+		)
 	}
 }

@@ -39,7 +39,7 @@ func main() {
 	// 1. Parse RFC_MAP.md
 	items, err := parseMap(RfcMapPath)
 	if err != nil {
-		fatal("Failed to parse RFC map: %v", err)
+		fatalf("Failed to parse RFC map: %v", err)
 	}
 	fmt.Printf("Loaded %d RFC items to verify.\n", len(items))
 
@@ -102,7 +102,7 @@ func parseMap(path string) ([]RfcItem, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var items []RfcItem
 	scanner := bufio.NewScanner(f)
@@ -262,7 +262,8 @@ func verifySymbol(sym string, lastDir string) (bool, string) {
 			}
 			return nil
 		}); err != nil && err != fs.SkipAll {
-			// ignore walk errors but don't ignore the function return entirely to satisfy linter
+			// Ignore walk errors; continue searching other roots.
+			continue
 		}
 
 		if foundPath != "" {
@@ -301,12 +302,13 @@ func grepDir(dir, term string) bool {
 		return nil
 	})
 	if err != nil && err != fs.SkipAll {
-		// ignore
+		// Ignore walk errors; best-effort grep for discovery.
+		return found
 	}
 	return found
 }
 
-func fatal(format string, args ...interface{}) {
+func fatalf(format string, args ...interface{}) {
 	fmt.Printf(ColorRed+format+ColorReset+"\n", args...)
 	os.Exit(1)
 }

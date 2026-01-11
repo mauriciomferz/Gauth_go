@@ -154,7 +154,8 @@ func ValidatePathForPersistence(path string, purpose string) error {
 			"unsafe persistent storage: %s path '%s' is in ephemeral storage in %s container - "+
 				"this path will be WIPED on container restart, causing loss of all %s data, "+
 				"security vulnerabilities (replay attacks possible after restart), and data corruption on pod rescheduling - "+
-				"use distributed storage (Redis, PostgreSQL), mount a persistent volume (PVC), or use /data directory with persistent volume "+
+				"use distributed storage (Redis, PostgreSQL), mount a persistent volume (PVC), "+
+				"or use /data directory with persistent volume instead "+
 				"(see REPLAY_STORE_MIGRATION_GUIDE.md for complete instructions)",
 			purpose, path, env, purpose)
 	}

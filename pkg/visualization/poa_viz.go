@@ -172,7 +172,11 @@ func (g *PoAGraph) AddNode(nodeType, label, description, icon string, metadata m
 }
 
 // AddEdge adds an edge between two nodes
-func (g *PoAGraph) AddEdge(sourceID, targetID, edgeType, label string, strength float64, metadata map[string]interface{}) *PoAEdge {
+func (g *PoAGraph) AddEdge(
+	sourceID, targetID, edgeType, label string,
+	strength float64,
+	metadata map[string]interface{},
+) *PoAEdge {
 	now := time.Now()
 	id := generateEdgeID(sourceID, targetID, edgeType)
 

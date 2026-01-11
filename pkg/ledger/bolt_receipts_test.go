@@ -18,7 +18,11 @@ func TestBoltReceiptStore_AppendAndRetrieve(t *testing.T) {
 	dbPath := filepath.Join(tmpDir, "test_receipts.db")
 	db, err := bolt.Open(dbPath, 0o600, nil)
 	require.NoError(t, err)
-	defer db.Close()
+	t.Cleanup(func() {
+		if closeErr := db.Close(); closeErr != nil {
+			t.Errorf("close db: %v", closeErr)
+		}
+	})
 
 	// 2. Init Store
 	store, err := NewBoltReceiptStore(db)
@@ -72,7 +76,11 @@ func TestBoltReceiptStore_ManualVerification(t *testing.T) {
 	dbPath := filepath.Join(tmpDir, "verify_test.db")
 	db, err := bolt.Open(dbPath, 0o600, nil)
 	require.NoError(t, err)
-	defer db.Close()
+	t.Cleanup(func() {
+		if closeErr := db.Close(); closeErr != nil {
+			t.Errorf("close db: %v", closeErr)
+		}
+	})
 
 	store, _ := NewBoltReceiptStore(db)
 

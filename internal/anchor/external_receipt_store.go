@@ -3,7 +3,11 @@ package anchor
 // ExternalReceiptStore provides append-only hash-chained persistence for external capability anchoring receipts.
 // Format (JSON):
 // {
-//   "entries": [ {"hash":"...","timestamp":"...","provider":"...","version":1,"latency_seconds":0.123,"prev_hash":"<prior_chain_hash>","chain_hash":"<current_payload_hash>"}, ...],
+//   "entries": [
+//     {"hash":"...","timestamp":"...","provider":"...","version":1,"latency_seconds":0.123,
+//      "prev_hash":"<prior_chain_hash>","chain_hash":"<current_payload_hash>"},
+//     ...,
+//   ],
 //   "chain_head":"<hash>",
 //   "timestamp":"<file_write_time>"
 // }
@@ -89,7 +93,14 @@ func (rs *ExternalReceiptStore) Append(r ExternalAnchorReceipt) (StoredExternalA
 		Version        int     `json:"version"`
 		LatencySeconds float64 `json:"latency_seconds"`
 		PrevHash       string  `json:"prev_hash"`
-	}{Hash: r.Hash, Timestamp: r.Timestamp, Provider: r.Provider, Version: r.Version, LatencySeconds: r.LatencySeconds, PrevHash: sr.PrevHash}
+	}{
+		Hash:           r.Hash,
+		Timestamp:      r.Timestamp,
+		Provider:       r.Provider,
+		Version:        r.Version,
+		LatencySeconds: r.LatencySeconds,
+		PrevHash:       sr.PrevHash,
+	}
 	enc, err := json.Marshal(base)
 	if err != nil {
 		return StoredExternalAnchorReceipt{}, err
@@ -169,7 +180,14 @@ func (rs *ExternalReceiptStore) VerifyIncremental() (string, int, string) {
 			Version        int     `json:"version"`
 			LatencySeconds float64 `json:"latency_seconds"`
 			PrevHash       string  `json:"prev_hash"`
-		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
+		}{
+			Hash:           e.Hash,
+			Timestamp:      e.Timestamp,
+			Provider:       e.Provider,
+			Version:        e.Version,
+			LatencySeconds: e.LatencySeconds,
+			PrevHash:       e.PrevHash,
+		}
 		enc, err := json.Marshal(base)
 		if err != nil {
 			return ExternalReceiptStatusMismatch, i, rs.headHash

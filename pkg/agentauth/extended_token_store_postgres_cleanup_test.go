@@ -21,7 +21,7 @@ func TestPostgresExtendedTokenStore_Cleanup(t *testing.T) {
 	// Setup DB connection
 	db, err := sql.Open("postgres", dsn)
 	require.NoError(t, err)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Verify connection
 	err = db.Ping()
@@ -50,8 +50,8 @@ func TestPostgresExtendedTokenStore_Cleanup(t *testing.T) {
 			issuedAt = expiresAt.Add(-1 * time.Hour)
 		}
 
-		_, err := db.Exec(query, accessToken, issuedAt, revokedAt)
-		require.NoError(t, err)
+		_, execErr := db.Exec(query, accessToken, issuedAt, revokedAt)
+		require.NoError(t, execErr)
 
 		// Manually override expires_at if needed (since it's usually computed generated column or calculated)
 		// Assuming extended_tokens uses a computed column based on issued_at + expires_in,
@@ -121,13 +121,15 @@ func TestPostgresExtendedTokenStore_Cleanup(t *testing.T) {
 	if count != 2 {
 		// Let's diagnose what happened
 		var remaining []string
-		rows, _ := db.Query("SELECT access_token FROM extended_tokens WHERE compliance_level = 'test-cleanup'")
-		defer rows.Close()
+		rows, qErr := db.Query("SELECT access_token FROM extended_tokens WHERE compliance_level = 'test-cleanup'")
+		require.NoError(t, qErr)
+		defer func() { _ = rows.Close() }()
 		for rows.Next() {
 			var s string
-			rows.Scan(&s)
+			require.NoError(t, rows.Scan(&s))
 			remaining = append(remaining, s)
 		}
+		require.NoError(t, rows.Err())
 		t.Errorf("Expected 2 tokens cleaned, got %d. Remaining: %v", count, remaining)
 	}
 

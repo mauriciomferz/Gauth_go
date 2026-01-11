@@ -55,5 +55,5 @@ func (s *FilePolicySource) UpdateFile(policies []authz.Policy) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	b, _ := json.Marshal(policies)
-	return os.WriteFile(s.path, b, 0o644)
+	return os.WriteFile(s.path, b, 0o600)
 }

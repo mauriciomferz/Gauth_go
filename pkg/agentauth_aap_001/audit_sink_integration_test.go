@@ -272,7 +272,7 @@ func TestAuditSinkIntegration_AsyncSink(t *testing.T) {
 	authorizer := &allowAllAuditSinkAuthorizer{}
 	baseSink := &testAuditSink{}
 	asyncSink := NewAsyncAuditSink(baseSink, 10)
-	defer asyncSink.Close()
+	defer func() { _ = asyncSink.Close() }()
 
 	svc := NewService(logger, authorizer, WithAuditSink(asyncSink))
 
@@ -523,7 +523,7 @@ func (a *denyAllAuthorizer) LoadPolicies(ctx context.Context, policies []authz.P
 func TestAsyncAuditSink_BufferOverflow(t *testing.T) {
 	baseSink := &slowSink{delay: 100 * time.Millisecond}
 	asyncSink := NewAsyncAuditSink(baseSink, 2) // Small buffer
-	defer asyncSink.Close()
+	defer func() { _ = asyncSink.Close() }()
 
 	logger := audit.NewMemoryLogger(nil)
 	authorizer := &allowAllAuditSinkAuthorizer{}

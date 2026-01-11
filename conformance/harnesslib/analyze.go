@@ -236,7 +236,14 @@ func Analyze(clauses []Clause) AnalysisResult {
 	}
 
 	if debug {
-		fmt.Fprintf(os.Stderr, "[conformance] root=%s symbols=%d failures=%d parse_errs=%d\n", root, len(symbolLoc), len(failures), len(parseErrors))
+		fmt.Fprintf(
+			os.Stderr,
+			"[conformance] root=%s symbols=%d failures=%d parse_errs=%d\n",
+			root,
+			len(symbolLoc),
+			len(failures),
+			len(parseErrors),
+		)
 		if locs := symbolLoc["CanonicalPOADigest"]; len(locs) == 0 {
 			fmt.Fprintf(os.Stderr, "[conformance][warn] CanonicalPOADigest not indexed\n")
 		} else {
@@ -296,12 +303,21 @@ func BuildReport(ar AnalysisResult) Report {
 			cats["tests_missing"] = append(cats["tests_missing"], f)
 		}
 	}
-	return Report{GeneratedAt: time.Now().UTC().Format(time.RFC3339), Clauses: ar.Clauses, Failures: ar.Failures, Summary: ar.Summary, Evidence: ar.Evidence, FailureCategories: cats, GapMatrix: ar.GapMatrix}
+	return Report{
+		GeneratedAt:       time.Now().UTC().Format(time.RFC3339),
+		Clauses:           ar.Clauses,
+		Failures:          ar.Failures,
+		Summary:           ar.Summary,
+		Evidence:          ar.Evidence,
+		FailureCategories: cats,
+		GapMatrix:         ar.GapMatrix,
+	}
 }
 
 func formatLoc(file string, line int) string { return file + ":" + itoa(line) }
 
-// normalizeClauseID reduces a clause id to a stable matching token: lowercase, remove digits & punctuation except colons.
+// normalizeClauseID reduces a clause id to a stable matching token: lowercase, remove digits.
+// It also removes punctuation except colons.
 func normalizeClauseID(id string) string {
 	id = strings.ToLower(id)
 	// Replace punctuation (except colon) with hyphen, then collapse multiple hyphens.

@@ -23,7 +23,9 @@ func TestModelUserLimitsPrometheusExposition(t *testing.T) {
 	if _, err := f.Write([]byte(limitsJSON)); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	f.Close()
+	if err := f.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	// Set path env before server init so loader picks it up.
 	// Use short rate limit for alice to guarantee a rate exceed quickly.
 	t.Setenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH", f.Name())

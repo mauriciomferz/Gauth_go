@@ -60,7 +60,9 @@ func NewOIDCPowerVerificationPoint(config OIDCPVPConfig) (*OIDCPowerVerification
 // Returns:
 //   - *agentauth.IdentityProofResult: Verification result with trust level
 //   - error: Error if verification fails
-func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(ctx context.Context, request *agentauth.IdentityProofRequest) (*agentauth.IdentityProofResult, error) {
+func (p *OIDCPowerVerificationPoint) VerifyIdentityProof(
+	ctx context.Context, request *agentauth.IdentityProofRequest,
+) (*agentauth.IdentityProofResult, error) {
 	// Validate proof method
 	if request.ProofMethod != ProofMethodOIDCIDToken && request.ProofMethod != ProofMethodOIDCExternal {
 		return nil, fmt.Errorf("unsupported proof method: %s (expected %s or %s)",

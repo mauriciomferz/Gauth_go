@@ -107,10 +107,8 @@ func TestIdentityBridge_ConvertIDTokenToIdentityProof(t *testing.T) {
 				if result.TrustLevel == "" {
 					t.Error("TrustLevel should not be empty for valid token")
 				}
-			} else {
-				if result.FailureReason == "" {
-					t.Error("FailureReason should not be empty for invalid token")
-				}
+			} else if result.FailureReason == "" {
+				t.Error("FailureReason should not be empty for invalid token")
 			}
 		})
 	}

@@ -269,7 +269,10 @@ func (sc *SpainIdentityConnector) ValidateDNI(ctx context.Context, req *DNIValid
 }
 
 // VerifyDNIe verifies DNI electrónico (electronic national ID card)
-func (sc *SpainIdentityConnector) VerifyDNIe(ctx context.Context, req *DNIeVerificationRequest) (*DNIeVerificationResponse, error) {
+func (sc *SpainIdentityConnector) VerifyDNIe(
+	ctx context.Context,
+	req *DNIeVerificationRequest,
+) (*DNIeVerificationResponse, error) {
 	// Validate request
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -318,7 +321,10 @@ func (sc *SpainIdentityConnector) VerifyDNIe(ctx context.Context, req *DNIeVerif
 }
 
 // VerifyFNMTCertificate verifies FNMT digital certificate
-func (sc *SpainIdentityConnector) VerifyFNMTCertificate(ctx context.Context, req *FNMTCertificateRequest) (*FNMTCertificateResponse, error) {
+func (sc *SpainIdentityConnector) VerifyFNMTCertificate(
+	ctx context.Context,
+	req *FNMTCertificateRequest,
+) (*FNMTCertificateResponse, error) {
 	// Validate request
 	if err := sc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -406,6 +412,8 @@ func (sc *SpainIdentityConnector) generateCacheKey(operation string, parts ...st
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*SpainIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (sc *SpainIdentityConnector) GetMetrics() map[string]interface{} {

@@ -37,6 +37,7 @@ var (
 var gfExp [512]byte // doubled for easy modular reduction
 var gfLog [256]byte // log[0] unused
 
+//nolint:gochecknoinits
 func init() {
 	// Build exp/log tables; generator 0x03 works for AES field
 	x := byte(1)

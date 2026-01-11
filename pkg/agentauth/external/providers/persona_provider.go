@@ -164,7 +164,10 @@ func (p *PersonaProvider) VerifyDocument(ctx context.Context, req interface{}) (
 }
 
 // ValidateSSN implements USIdentityAPIProvider
-func (p *PersonaProvider) ValidateSSN(ctx context.Context, req *external.SSNValidationRequest) (*external.SSNValidationResult, error) {
+func (p *PersonaProvider) ValidateSSN(
+	ctx context.Context,
+	req *external.SSNValidationRequest,
+) (*external.SSNValidationResult, error) {
 	startTime := time.Now()
 
 	// Build Persona request
@@ -251,7 +254,10 @@ func (p *PersonaProvider) GetSupportedDocumentTypes() []external.DocumentType {
 // Private Methods
 // =============================================================================
 
-func (p *PersonaProvider) verifyPassport(ctx context.Context, req *external.PassportVerificationRequest) (*external.IdentityVerificationResult, error) {
+func (p *PersonaProvider) verifyPassport(
+	ctx context.Context,
+	req *external.PassportVerificationRequest,
+) (*external.IdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Build Persona request
@@ -293,7 +299,10 @@ func (p *PersonaProvider) verifyPassport(ctx context.Context, req *external.Pass
 	return p.parseVerificationResponse(resp, external.DocumentTypePassport, startTime)
 }
 
-func (p *PersonaProvider) verifyDriverLicense(ctx context.Context, req *external.DLVerificationRequest) (*external.IdentityVerificationResult, error) {
+func (p *PersonaProvider) verifyDriverLicense(
+	ctx context.Context,
+	req *external.DLVerificationRequest,
+) (*external.IdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Build Persona request
@@ -337,7 +346,10 @@ func (p *PersonaProvider) verifyDriverLicense(ctx context.Context, req *external
 	return result, nil
 }
 
-func (p *PersonaProvider) verifyStateID(ctx context.Context, req *external.StateIDVerificationRequest) (*external.IdentityVerificationResult, error) {
+func (p *PersonaProvider) verifyStateID(
+	ctx context.Context,
+	req *external.StateIDVerificationRequest,
+) (*external.IdentityVerificationResult, error) {
 	startTime := time.Now()
 
 	// Build Persona request
@@ -480,7 +492,7 @@ func (p *PersonaProvider) makeRequest(ctx context.Context, method, path string, 
 	if err != nil {
 		return nil, fmt.Errorf("HTTP request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Read response
 	respBody, err := io.ReadAll(resp.Body)

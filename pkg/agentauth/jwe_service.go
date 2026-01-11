@@ -140,7 +140,6 @@ func (s *DefaultJWEService) EncryptToken(ctx context.Context, jwtString string) 
 		if err != nil {
 			return "", fmt.Errorf("failed to create RSA encrypter: %w", err)
 		}
-
 	} else if s.config.Algorithm == "A256KW" {
 		// Create symmetric key encrypter
 		recipient := jose.Recipient{
@@ -216,7 +215,6 @@ func (s *DefaultJWEService) DecryptToken(ctx context.Context, jweString string) 
 		if err != nil {
 			return "", fmt.Errorf("failed to decrypt token with RSA: %w", err)
 		}
-
 	} else if s.config.Algorithm == "A256KW" {
 		// Decrypt with symmetric key
 		decrypted, err = jwe.Decrypt(s.config.SymmetricKey)

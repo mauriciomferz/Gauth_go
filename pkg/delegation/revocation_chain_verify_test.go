@@ -61,8 +61,12 @@ func TestRevocationChain_Integrity(t *testing.T) {
 func TestRevocationChain_TamperDetection(t *testing.T) {
 	// Setup valid chain
 	chain := NewRevocationChain()
-	chain.Append(RevocationEvent{ID: "r1", DelegationID: "d1"})
-	chain.Append(RevocationEvent{ID: "r2", DelegationID: "d2"})
+	if _, err := chain.Append(RevocationEvent{ID: "r1", DelegationID: "d1"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := chain.Append(RevocationEvent{ID: "r2", DelegationID: "d2"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	validEvents := chain.Events()
 

@@ -396,6 +396,8 @@ func (bc *BrazilIdentityConnector) generateCacheKey(operation string, parts ...s
 	return hex.EncodeToString(hash[:])
 }
 
+var _ = (*BrazilIdentityConnector).generateCacheKey
+
 // GetMetrics returns connector metrics
 func (bc *BrazilIdentityConnector) GetMetrics() map[string]interface{} {
 	bc.mu.RLock()

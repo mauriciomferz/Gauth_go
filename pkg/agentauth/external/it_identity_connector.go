@@ -219,7 +219,10 @@ func (ic *ItalyIdentityConnector) AuthenticateSPID(ctx context.Context, req *SPI
 // - 2 digits: Day of birth (01-31 for males, 41-71 for females)
 // - 4 chars: Municipality code (Belfiore code)
 // - 1 char: Control character
-func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(ctx context.Context, req *CodiceFiscaleRequest) (*CodiceFiscaleResponse, error) {
+func (ic *ItalyIdentityConnector) ValidateCodiceFiscale(
+	ctx context.Context,
+	req *CodiceFiscaleRequest,
+) (*CodiceFiscaleResponse, error) {
 	// Validate request
 	if err := ic.validator.Struct(req); err != nil {
 		return &CodiceFiscaleResponse{Valid: false, Error: err.Error()}, nil
@@ -372,6 +375,8 @@ func (ic *ItalyIdentityConnector) generateCacheKey(operation string, parts ...st
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*ItalyIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (ic *ItalyIdentityConnector) GetMetrics() map[string]interface{} {

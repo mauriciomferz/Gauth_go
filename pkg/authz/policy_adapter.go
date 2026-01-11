@@ -36,5 +36,8 @@ func (a *AuthorizerAdapter) Authorize(ctx context.Context, r Request) (Decision,
 		return Decision{}, err
 	}
 	// Map to legacy decision type (Allow field; Reason string into Reason; Matched policies into Policies slice)
-	return Decision{Allow: dec.Allow, Allowed: dec.Allow, Policies: dec.Matched, Reason: dec.Reason, Metadata: map[string]string{"bundle_hash": dec.BundleHash, "chain_head": dec.ChainHead}}, nil
+	return Decision{
+		Allow: dec.Allow, Allowed: dec.Allow, Policies: dec.Matched, Reason: dec.Reason,
+		Metadata: map[string]string{"bundle_hash": dec.BundleHash, "chain_head": dec.ChainHead},
+	}, nil
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/mauriciomferz/AgentAuth/pkg/policy"
@@ -14,7 +13,7 @@ import (
 // TestPolicyProvenanceTamperDetection ensures provenance endpoint reports verification failure after in-memory tampering.
 func TestPolicyProvenanceTamperDetection(t *testing.T) {
 	t.Setenv("AGENTAUTH_POLICY_ADMIN_TOKEN", "adm")
-	defer os.Unsetenv("AGENTAUTH_POLICY_ADMIN_TOKEN")
+
 	srv := NewBetaServer("")
 	t.Cleanup(func() { srv.Shutdown() })
 

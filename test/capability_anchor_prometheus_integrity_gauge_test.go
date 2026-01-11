@@ -8,7 +8,8 @@ import (
 	"github.com/mauriciomferz/AgentAuth/web"
 )
 
-// TestCapabilityAnchorPrometheusIntegrityGauge ensures the custom Prometheus endpoint surfaces the receipt chain integrity gauge HELP/TYPE even when unconfigured.
+// TestCapabilityAnchorPrometheusIntegrityGauge ensures the custom Prometheus endpoint
+// surfaces the receipt chain integrity gauge HELP/TYPE even when unconfigured.
 func TestCapabilityAnchorPrometheusIntegrityGauge(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	srv := web.NewBetaServer(":0")

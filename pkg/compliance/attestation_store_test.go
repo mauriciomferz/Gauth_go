@@ -14,7 +14,7 @@ import (
 // TestInMemoryAttestationStore_StoreAndGet verifies basic store and retrieval.
 func TestInMemoryAttestationStore_StoreAndGet(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 	proof := &attest.AttestationProof{
@@ -52,7 +52,7 @@ func TestInMemoryAttestationStore_StoreAndGet(t *testing.T) {
 // TestInMemoryAttestationStore_StoreUnverified verifies storing unverified attestations.
 func TestInMemoryAttestationStore_StoreUnverified(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 	proof := &attest.AttestationProof{
@@ -87,7 +87,7 @@ func TestInMemoryAttestationStore_StoreUnverified(t *testing.T) {
 // TestInMemoryAttestationStore_QueryBySubject verifies querying by subject.
 func TestInMemoryAttestationStore_QueryBySubject(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 
@@ -146,7 +146,7 @@ func TestInMemoryAttestationStore_QueryBySubject(t *testing.T) {
 // TestInMemoryAttestationStore_QueryByIssuer verifies querying by issuer.
 func TestInMemoryAttestationStore_QueryByIssuer(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 
@@ -191,7 +191,7 @@ func TestInMemoryAttestationStore_QueryByIssuer(t *testing.T) {
 // TestInMemoryAttestationStore_QueryVerifiedOnly verifies filtering by verification status.
 func TestInMemoryAttestationStore_QueryVerifiedOnly(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 
@@ -249,7 +249,7 @@ func TestInMemoryAttestationStore_QueryVerifiedOnly(t *testing.T) {
 // TestInMemoryAttestationStore_QueryWithTimeRange verifies time-based filtering.
 func TestInMemoryAttestationStore_QueryWithTimeRange(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 	now := time.Now()
@@ -319,7 +319,7 @@ func TestInMemoryAttestationStore_QueryWithTimeRange(t *testing.T) {
 // TestInMemoryAttestationStore_QueryWithLimit verifies result limiting.
 func TestInMemoryAttestationStore_QueryWithLimit(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 
@@ -353,7 +353,7 @@ func TestInMemoryAttestationStore_QueryWithLimit(t *testing.T) {
 // TestInMemoryAttestationStore_Delete verifies deletion.
 func TestInMemoryAttestationStore_Delete(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 	proof := &attest.AttestationProof{
@@ -385,7 +385,7 @@ func TestInMemoryAttestationStore_Delete(t *testing.T) {
 // TestInMemoryAttestationStore_Count verifies count operation.
 func TestInMemoryAttestationStore_Count(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 
@@ -448,7 +448,9 @@ func TestJSONLAttestationStore_Persistence(t *testing.T) {
 	if err2 := store1.Store(ctx, proof, true); err2 != nil {
 		t.Fatalf("failed to store attestation: %v", err2)
 	}
-	store1.Close()
+	if err2 := store1.Close(); err2 != nil {
+		t.Fatalf("close store1: %v", err2)
+	}
 
 	// Verify file exists
 	if _, err2 := os.Stat(filePath); os.IsNotExist(err2) {
@@ -460,7 +462,7 @@ func TestJSONLAttestationStore_Persistence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to reload store: %v", err)
 	}
-	defer store2.Close()
+	t.Cleanup(func() { _ = store2.Close() })
 
 	// Verify attestation was loaded
 	stored, err := store2.Get(ctx, "nonce-persist-001")
@@ -476,7 +478,7 @@ func TestJSONLAttestationStore_Persistence(t *testing.T) {
 // TestAttestationStore_ValidationErrors verifies error handling.
 func TestAttestationStore_ValidationErrors(t *testing.T) {
 	store := NewInMemoryAttestationStore()
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	ctx := context.Background()
 

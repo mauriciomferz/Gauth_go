@@ -16,7 +16,7 @@ func TestIdentityAssertionFlow_OBO(t *testing.T) {
 	// 1. Start Server
 	// Use fixed port 8089 to avoid "Port undefined" error since we can't easily get random port
 	server := web.NewBetaServer(":8089")
-	go server.Run()
+	go func() { _ = server.Run() }()
 	defer server.Shutdown()
 
 	// Wait for start
@@ -27,7 +27,7 @@ func TestIdentityAssertionFlow_OBO(t *testing.T) {
 	t.Run("Discovery_JWKS", func(t *testing.T) {
 		resp, err := http.Get(baseURL + "/.well-known/jwks.json")
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 		var jwks map[string]interface{}
@@ -92,7 +92,7 @@ func TestIdentityAssertionFlow_OBO(t *testing.T) {
 
 		resp, err := http.PostForm(baseURL+"/oauth/token", data)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		// Expect 400 or 401, but NOT 404 (endpoint exists)
 		assert.NotEqual(t, http.StatusNotFound, resp.StatusCode)

@@ -17,7 +17,9 @@ import (
 
 // IssueAttestationProof creates and signs a new AttestationProof.
 // Fail-closed semantics: any canonicalization or signing error results in integrity_failure.
-func (s *Service) IssueAttestationProof(ctx context.Context, statement, subject string, duration time.Duration) (*attest.AttestationProof, error) {
+func (s *Service) IssueAttestationProof(
+	ctx context.Context, statement, subject string, duration time.Duration,
+) (*attest.AttestationProof, error) {
 	if statement == "" || subject == "" {
 		return nil, aap.New(aap.ErrInvalidRequest, "statement and subject required")
 	}

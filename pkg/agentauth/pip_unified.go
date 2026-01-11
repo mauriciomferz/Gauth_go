@@ -396,7 +396,9 @@ func (p *UnifiedPIP) GetActivePoAs(ctx context.Context, clientID string) ([]*poa
 }
 
 // GetCommercialRegisterEntry retrieves commercial register entry
-func (p *UnifiedPIP) GetCommercialRegisterEntry(ctx context.Context, entityID string, jurisdiction string) (*RegisterEntry, error) {
+func (p *UnifiedPIP) GetCommercialRegisterEntry(
+	ctx context.Context, entityID string, jurisdiction string,
+) (*RegisterEntry, error) {
 	p.mu.RLock()
 
 	// Check cache first

@@ -405,6 +405,8 @@ func (kc *KoreaIdentityConnector) generateCacheKey(operation string, parts ...st
 	return hex.EncodeToString(hash[:])
 }
 
+var _ = (*KoreaIdentityConnector).generateCacheKey
+
 // GetMetrics returns connector metrics
 func (kc *KoreaIdentityConnector) GetMetrics() map[string]interface{} {
 	kc.mu.RLock()

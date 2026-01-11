@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"os"
 	"testing"
 	"time"
 
@@ -75,7 +74,7 @@ func genKeyIDWeighted(pub ed25519.PublicKey) string {
 // Structural guard relaxed (len(signatures) < threshold allowed) in weighted mode.
 func TestMultiSignatureWeightedMode(t *testing.T) {
 	// Enable weighted mode
-	os.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "alice=2,bob=1,carol=3,dave=4")
+	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "alice=2,bob=1,carol=3,dave=4")
 	mem := imetrics.NewMemory()
 	// Generate keys
 	pubA, privA, _ := ed25519.GenerateKey(rand.Reader)

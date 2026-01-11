@@ -97,4 +97,5 @@ func ValidateCompliance(code string) bool {
 
 func GetSupportedRFCs() []string { return []string{"AAP001", "AAP002", "RFC-0150"} }
 
-// Methods ValidateAAP001Flow, TestAAP002Features, DemoAAP001PowerOfAttorney have been moved to pkg/aapdemo to avoid import cycles.
+// Methods ValidateAAP001Flow, TestAAP002Features, DemoAAP001PowerOfAttorney have been moved
+// to pkg/aapdemo to avoid import cycles.

@@ -91,9 +91,9 @@ func (p *BLSProvider) VerifyAggregated(pubKeys [][]byte, message []byte, signatu
 	g2.Add(aggPK, firstPK, g2.Zero())
 
 	for i := 1; i < len(pubKeys); i++ {
-		nextPK, err := g2.FromCompressed(pubKeys[i])
-		if err != nil {
-			return fmt.Errorf("invalid pubkey %d: %w", i, err)
+		nextPK, pkErr := g2.FromCompressed(pubKeys[i])
+		if pkErr != nil {
+			return fmt.Errorf("invalid pubkey %d: %w", i, pkErr)
 		}
 		g2.Add(aggPK, aggPK, nextPK)
 	}
@@ -150,7 +150,13 @@ func (p *BLSProvider) VerifyAggregated(pubKeys [][]byte, message []byte, signatu
 	return nil
 }
 
-func checkPairing(engine *bls12381.Engine, p1 *bls12381.PointG1, q1 *bls12381.PointG2, p2 *bls12381.PointG1, q2 *bls12381.PointG2) error {
+func checkPairing(
+	engine *bls12381.Engine,
+	p1 *bls12381.PointG1,
+	q1 *bls12381.PointG2,
+	p2 *bls12381.PointG1,
+	q2 *bls12381.PointG2,
+) error {
 	engine.AddPair(p1, q1)
 	engine.AddPair(p2, q2)
 	if !engine.Check() {

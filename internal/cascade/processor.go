@@ -31,7 +31,12 @@ type Processor struct {
 }
 
 // NewProcessor creates a new cascade processor
-func NewProcessor(repo agentauth_aap_001.POARepository, auditor *audit.MemoryLogger, cfg config.CascadeConfig, metricsImpl metrics.Metrics) *Processor {
+func NewProcessor(
+	repo agentauth_aap_001.POARepository,
+	auditor *audit.MemoryLogger,
+	cfg config.CascadeConfig,
+	metricsImpl metrics.Metrics,
+) *Processor {
 	if metricsImpl == nil {
 		metricsImpl = metrics.Noop
 	}
@@ -72,7 +77,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 				"operation": "revoke_parent",
 			},
 		}
-		if err := p.auditor.Log(ctx, event); err != nil { //nolint:SA9003
+		if err := p.auditor.Log(ctx, event); err != nil { //nolint:staticcheck // SA9003
 			// Log the audit error but continue processing
 			_ = err // Log the audit error but continue processing
 		}
@@ -147,7 +152,7 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 				"error_count":        len(result.Errors),
 			},
 		}
-		if err := p.auditor.Log(ctx, event); err != nil { //nolint:SA9003
+		if err := p.auditor.Log(ctx, event); err != nil { //nolint:staticcheck // SA9003
 			// Log the audit error but continue processing
 			_ = err // Log the audit error but continue processing
 		}
@@ -157,7 +162,12 @@ func (p *Processor) ProcessCascadeRevocation(ctx context.Context, parentPoaID, r
 }
 
 // processBatch processes a batch of descendants at the same depth level
-func (p *Processor) processBatch(ctx context.Context, descendants []*agentauth_aap_001.PowerOfAttorney, depth int, revokedBy string) *ProcessorResult {
+func (p *Processor) processBatch(
+	ctx context.Context,
+	descendants []*agentauth_aap_001.PowerOfAttorney,
+	depth int,
+	revokedBy string,
+) *ProcessorResult {
 	result := &ProcessorResult{
 		Errors: []error{},
 	}
@@ -237,7 +247,7 @@ func (p *Processor) processDescendant(poa *agentauth_aap_001.PowerOfAttorney, de
 					"would_change_to": "revoked", // What would happen in real mode
 				},
 			}
-			if err := p.auditor.Log(context.Background(), event); err != nil { //nolint:SA9003
+			if err := p.auditor.Log(context.Background(), event); err != nil { //nolint:staticcheck // SA9003
 				// Log the audit error but continue processing
 				_ = err // Log the audit error but continue processing
 			}
@@ -272,7 +282,7 @@ func (p *Processor) processDescendant(poa *agentauth_aap_001.PowerOfAttorney, de
 				"cascade_mode":      string(p.config.Mode),
 			},
 		}
-		if err := p.auditor.Log(context.Background(), event); err != nil { //nolint:SA9003
+		if err := p.auditor.Log(context.Background(), event); err != nil { //nolint:staticcheck // SA9003
 			// Log error but continue processing
 			_ = err
 		}

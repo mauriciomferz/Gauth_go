@@ -66,10 +66,16 @@ func TestRFC9767_FullFlow(t *testing.T) {
 		},
 		Resources: []string{"financial-data"},
 	}
-	body, _ := json.Marshal(rsReq)
+	body, err := json.Marshal(rsReq)
+	if err != nil {
+		t.Fatalf("marshal rs register request: %v", err)
+	}
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/gnap/rs/register", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "/gnap/rs/register", bytes.NewBuffer(body))
+	if err != nil {
+		t.Fatalf("new request: %v", err)
+	}
 	r.ServeHTTP(w, req)
 
 	if w.Code != http.StatusCreated {
@@ -91,10 +97,16 @@ func TestRFC9767_FullFlow(t *testing.T) {
 	introReq := gnap.IntrospectionRequest{
 		Token: "agentauth_gnap_active",
 	}
-	body, _ = json.Marshal(introReq)
+	body, err = json.Marshal(introReq)
+	if err != nil {
+		t.Fatalf("marshal introspection request: %v", err)
+	}
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("POST", "/gnap/rs/introspect", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/gnap/rs/introspect", bytes.NewBuffer(body))
+	if err != nil {
+		t.Fatalf("new request: %v", err)
+	}
 	// Set RS Authentication
 	req.Header.Set("Authorization", "RS "+rsResp.InstanceID)
 	r.ServeHTTP(w, req)
@@ -119,10 +131,16 @@ func TestRFC9767_FullFlow(t *testing.T) {
 	introReq = gnap.IntrospectionRequest{
 		Token: "other_token",
 	}
-	body, _ = json.Marshal(introReq)
+	body, err = json.Marshal(introReq)
+	if err != nil {
+		t.Fatalf("marshal introspection request: %v", err)
+	}
 
 	w = httptest.NewRecorder()
-	req, _ = http.NewRequest("POST", "/gnap/rs/introspect", bytes.NewBuffer(body))
+	req, err = http.NewRequest("POST", "/gnap/rs/introspect", bytes.NewBuffer(body))
+	if err != nil {
+		t.Fatalf("new request: %v", err)
+	}
 	req.Header.Set("Authorization", "RS "+rsResp.InstanceID)
 	r.ServeHTTP(w, req)
 
@@ -130,7 +148,9 @@ func TestRFC9767_FullFlow(t *testing.T) {
 		t.Fatalf("RS Introspect failed: %d", w.Code)
 	}
 	var introResp2 gnap.IntrospectionResponse
-	json.Unmarshal(w.Body.Bytes(), &introResp2)
+	if err := json.Unmarshal(w.Body.Bytes(), &introResp2); err != nil {
+		t.Fatalf("unmarshal introspection response: %v", err)
+	}
 
 	if introResp2.Active {
 		t.Error("Expected inactive token response")

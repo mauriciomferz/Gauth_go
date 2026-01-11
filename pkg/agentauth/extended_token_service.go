@@ -105,16 +105,16 @@ func (s *ExtendedTokenService) CreateExtendedToken(
 		}
 	}
 
-	if err := poa.ValidatePoADefinition(*request.PowerOfAttorney); err != nil {
-		return nil, fmt.Errorf("PoA validation failed: %w", err)
+	if poaErr := poa.ValidatePoADefinition(*request.PowerOfAttorney); poaErr != nil {
+		return nil, fmt.Errorf("PoA validation failed: %w", poaErr)
 	}
 
 	// Step 2b: Validate Authorization Details (RFC 9396)
 	if len(request.AuthorizationDetails) > 0 {
-		if err := s.rarValidator.ValidateAuthorizationDetails(request.PowerOfAttorney, request.AuthorizationDetails); err != nil {
+		if rarErr := s.rarValidator.ValidateAuthorizationDetails(request.PowerOfAttorney, request.AuthorizationDetails); rarErr != nil {
 			return nil, &AgentAuthError{
 				Code:    "invalid_authorization_details",
-				Message: fmt.Sprintf("RAR validation failed: %v", err),
+				Message: fmt.Sprintf("RAR validation failed: %v", rarErr),
 			}
 		}
 	}
@@ -342,9 +342,9 @@ func (s *ExtendedTokenService) ValidateExtendedToken(
 	}
 
 	// Step 2: Validate token structure
-	if err := token.Validate(); err != nil {
+	if validateErr := token.Validate(); validateErr != nil {
 		result.Valid = false
-		return result, fmt.Errorf("token structure validation failed: %w", err)
+		return result, fmt.Errorf("token structure validation failed: %w", validateErr)
 	}
 
 	// Step 3: Validate expiration

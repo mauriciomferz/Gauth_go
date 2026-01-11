@@ -117,7 +117,11 @@ func (a *API) Capabilities(c *gin.Context) {
 
 	// Get all entries and filter
 	all := a.Provider.ListEntries(0)
-	capActions := []string{"capability_create", "capability_revoke", "capability_denied", "capability_enforce", "delegation_create", "delegation_revoke", "capability:enforce", "delegation:create", "delegation:revoke"}
+	capActions := []string{
+		"capability_create", "capability_revoke", "capability_denied",
+		"capability_enforce", "delegation_create", "delegation_revoke",
+		"capability:enforce", "delegation:create", "delegation:revoke",
+	}
 
 	var filtered []Entry
 	for _, e := range all {
@@ -256,7 +260,10 @@ func (a *API) List(c *gin.Context) {
 					}
 				}
 			}
-			_ = w.Write([]string{e.GetID(), e.GetAt().Format(time.RFC3339), e.GetActor(), e.GetAction(), e.GetResource(), e.GetOutcome(), reason})
+			_ = w.Write([]string{
+				e.GetID(), e.GetAt().Format(time.RFC3339), e.GetActor(),
+				e.GetAction(), e.GetResource(), e.GetOutcome(), reason,
+			})
 		}
 		w.Flush()
 		return
@@ -289,10 +296,10 @@ func (a *API) Stream(c *gin.Context) {
 	history := a.Provider.ListEntries(20)
 	for _, e := range history {
 		if b, err := json.Marshal(entryToMap(e)); err == nil {
-			fmt.Fprintf(c.Writer, "event: audit\ndata: %s\n\n", b)
+			_, _ = fmt.Fprintf(c.Writer, "event: audit\ndata: %s\n\n", b)
 		}
 	}
-	fmt.Fprint(c.Writer, "event: open\ndata: {\"ok\":true}\n\n")
+	_, _ = fmt.Fprint(c.Writer, "event: open\ndata: {\"ok\":true}\n\n")
 	c.Writer.Flush()
 
 	ticker := time.NewTicker(10 * time.Second)
@@ -304,11 +311,11 @@ func (a *API) Stream(c *gin.Context) {
 			return
 		case e := <-ch:
 			if b, err := json.Marshal(entryToMap(e)); err == nil {
-				fmt.Fprintf(c.Writer, "event: audit\ndata: %s\n\n", b)
+				_, _ = fmt.Fprintf(c.Writer, "event: audit\ndata: %s\n\n", b)
 				c.Writer.Flush()
 			}
 		case <-ticker.C:
-			fmt.Fprint(c.Writer, ": ping\n\n")
+			_, _ = fmt.Fprint(c.Writer, ": ping\n\n")
 			c.Writer.Flush()
 		}
 	}

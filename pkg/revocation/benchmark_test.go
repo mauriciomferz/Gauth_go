@@ -21,13 +21,13 @@ func BenchmarkTwoPhaseRevocation_DisablePoA(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	defer func() { _ = oracle.Close() }()
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		b.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	defer func() { _ = tpr.Close() }()
 
 	ctx := context.Background()
 
@@ -58,13 +58,13 @@ func BenchmarkTwoPhaseRevocation_RevokePoA(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	defer func() { _ = oracle.Close() }()
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		b.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	defer func() { _ = tpr.Close() }()
 
 	ctx := context.Background()
 
@@ -103,7 +103,7 @@ func BenchmarkEmergencyOracle_EmergencyRevoke(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	defer func() { _ = oracle.Close() }()
 
 	ctx := context.Background()
 
@@ -151,7 +151,7 @@ func BenchmarkCircuitBreaker_RecordTransaction(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create circuit breaker: %v", err)
 	}
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 
@@ -192,7 +192,7 @@ func BenchmarkCircuitBreaker_IsPoAAllowed(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create circuit breaker: %v", err)
 	}
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 
@@ -228,13 +228,13 @@ func BenchmarkConcurrentRevocation(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	defer func() { _ = oracle.Close() }()
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		b.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	defer func() { _ = tpr.Close() }()
 
 	ctx := context.Background()
 
@@ -269,13 +269,13 @@ func BenchmarkHighThroughputRevocation(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Failed to create oracle: %v", err)
 	}
-	defer oracle.Close()
+	defer func() { _ = oracle.Close() }()
 
 	tpr, err := NewTwoPhaseRevocation(oracle, []string{mr.Addr()}, logger)
 	if err != nil {
 		b.Fatalf("Failed to create two-phase revocation: %v", err)
 	}
-	defer tpr.Close()
+	defer func() { _ = tpr.Close() }()
 
 	ctx := context.Background()
 

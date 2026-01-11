@@ -39,7 +39,10 @@ func TestDynamicJWKS_Integration(t *testing.T) {
 
 	jwksServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(jwks)
+		if encodeErr := json.NewEncoder(w).Encode(jwks); encodeErr != nil {
+			http.Error(w, encodeErr.Error(), http.StatusInternalServerError)
+			return
+		}
 	}))
 	defer jwksServer.Close()
 

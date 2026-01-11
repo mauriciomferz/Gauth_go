@@ -25,6 +25,7 @@ type Function func(args []interface{}) (interface{}, error)
 // DefaultRegistry is the global function registry with built-in functions.
 var DefaultRegistry FunctionRegistry
 
+//nolint:gochecknoinits // Built-in function registry must be available at import time.
 func init() {
 	DefaultRegistry = NewRegistry()
 	// Register built-in functions

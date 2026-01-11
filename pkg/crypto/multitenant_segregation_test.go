@@ -15,7 +15,7 @@ func TestMultiTenantKeySegregation(t *testing.T) {
 
 	// Create temporary directories for different tenant stores
 	tempDir := filepath.Join(os.TempDir(), "AGENTAUTH-test-multitenant-seg")
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	tenant1Store, err := NewFileKeyStore(filepath.Join(tempDir, "tenant1"), 24*time.Hour)
 	if err != nil {
@@ -114,7 +114,7 @@ func TestMultiTenantDifferentBackends(t *testing.T) {
 
 	// Create temporary directories for different backends
 	tempDir := filepath.Join(os.TempDir(), "AGENTAUTH-test-backends")
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Create different file-based stores to simulate different backends
 	devStore, err := NewFileKeyStore(filepath.Join(tempDir, "dev"), 24*time.Hour)
@@ -233,7 +233,7 @@ func TestMultiTenantRotationSegregation(t *testing.T) {
 
 	// Create temporary directory
 	tempDir := filepath.Join(os.TempDir(), "AGENTAUTH-test-rotation-seg")
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	sharedStore, err := NewFileKeyStore(tempDir, 24*time.Hour)
 	if err != nil {
@@ -315,7 +315,7 @@ func TestMultiTenantRotationSegregation(t *testing.T) {
 func TestMultiTenantPolicyIndependence(t *testing.T) {
 	// Create temporary directory
 	tempDir := filepath.Join(os.TempDir(), "AGENTAUTH-test-policy")
-	defer os.RemoveAll(tempDir)
+	t.Cleanup(func() { _ = os.RemoveAll(tempDir) })
 
 	sharedStore, err := NewFileKeyStore(tempDir, 24*time.Hour)
 	if err != nil {

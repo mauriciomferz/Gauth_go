@@ -81,6 +81,6 @@ func continuityTempFile(t *testing.T, content string) string {
 	if _, err := f.WriteString(content); err != nil {
 		t.Fatalf("write: %v", err)
 	}
-	f.Close()
+	_ = f.Close()
 	return f.Name()
 }

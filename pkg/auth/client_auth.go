@@ -39,7 +39,11 @@ const (
 )
 
 // Authenticate verifies the client assertion
-func (v *PrivateKeyJWTValidator) Authenticate(clientID string, clientAssertion string, clientAssertionType string) error {
+func (v *PrivateKeyJWTValidator) Authenticate(
+	clientID string,
+	clientAssertion string,
+	clientAssertionType string,
+) error {
 	if clientAssertionType != ClientAssertionTypeJWT {
 		return fmt.Errorf("unsupported client_assertion_type: %s", clientAssertionType)
 	}
@@ -73,19 +77,7 @@ func (v *PrivateKeyJWTValidator) Authenticate(clientID string, clientAssertion s
 
 	// Verify AUD (Audience) matches one of the allowed audiences
 	aud, _ := claims.GetAudience()
-	audValid := false
-	for _, a := range aud {
-		for _, validAud := range v.ValidAudiences {
-			if a == validAud {
-				audValid = true
-				break
-			}
-		}
-		if audValid {
-			break
-		}
-	}
-	if !audValid {
+	if !v.isAudienceAllowed(aud) {
 		return fmt.Errorf("invalid audience: expected one of %v", v.ValidAudiences)
 	}
 
@@ -95,8 +87,8 @@ func (v *PrivateKeyJWTValidator) Authenticate(clientID string, clientAssertion s
 		if jti == "" {
 			return errors.New("missing 'jti' claim for replay protection")
 		}
-		if err := v.Replay.CheckAndStore(jti); err != nil {
-			return fmt.Errorf("replay check failed: %v", err)
+		if replayErr := v.Replay.CheckAndStore(jti); replayErr != nil {
+			return fmt.Errorf("replay check failed: %v", replayErr)
 		}
 	}
 
@@ -120,21 +112,8 @@ func (v *PrivateKeyJWTValidator) Authenticate(clientID string, clientAssertion s
 
 	// Re-parse WITH signature verification
 	_, err = jwt.Parse(clientAssertion, func(token *jwt.Token) (interface{}, error) {
-		switch token.Method.(type) {
-		case *jwt.SigningMethodRSA:
-			if _, ok := pubKey.(*rsa.PublicKey); !ok {
-				return nil, errors.New("key type mismatch: expected RSA public key")
-			}
-		case *jwt.SigningMethodECDSA:
-			if _, ok := pubKey.(*ecdsa.PublicKey); !ok {
-				return nil, errors.New("key type mismatch: expected ECDSA public key")
-			}
-		case *jwt.SigningMethodEd25519:
-			if _, ok := pubKey.(ed25519.PublicKey); !ok {
-				return nil, errors.New("key type mismatch: expected Ed25519 public key")
-			}
-		default:
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		if keyErr := validateSigningMethodAndKey(token, pubKey); keyErr != nil {
+			return nil, keyErr
 		}
 		return pubKey, nil
 	})
@@ -143,5 +122,36 @@ func (v *PrivateKeyJWTValidator) Authenticate(clientID string, clientAssertion s
 		return fmt.Errorf("signature verification failed: %v", err)
 	}
 
+	return nil
+}
+
+func (v *PrivateKeyJWTValidator) isAudienceAllowed(aud []string) bool {
+	for _, a := range aud {
+		for _, validAud := range v.ValidAudiences {
+			if a == validAud {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func validateSigningMethodAndKey(token *jwt.Token, pubKey any) error {
+	switch token.Method.(type) {
+	case *jwt.SigningMethodRSA:
+		if _, ok := pubKey.(*rsa.PublicKey); !ok {
+			return errors.New("key type mismatch: expected RSA public key")
+		}
+	case *jwt.SigningMethodECDSA:
+		if _, ok := pubKey.(*ecdsa.PublicKey); !ok {
+			return errors.New("key type mismatch: expected ECDSA public key")
+		}
+	case *jwt.SigningMethodEd25519:
+		if _, ok := pubKey.(ed25519.PublicKey); !ok {
+			return errors.New("key type mismatch: expected Ed25519 public key")
+		}
+	default:
+		return fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+	}
 	return nil
 }

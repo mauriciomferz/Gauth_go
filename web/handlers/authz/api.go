@@ -72,7 +72,13 @@ func (a *API) DecisionMetrics(c *gin.Context) {
 	type memoryLike interface{ SnapshotEx() metrics.SnapshotStruct }
 	ml, ok := a.Metrics.(memoryLike)
 	if !ok {
-		c.JSON(http.StatusOK, gin.H{"success": true, "decisions": gin.H{"available": false, "reason": "metrics_backend_does_not_support_snapshot"}})
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"decisions": gin.H{
+				"available": false,
+				"reason":    "metrics_backend_does_not_support_snapshot",
+			},
+		})
 		return
 	}
 	snap := ml.SnapshotEx()
@@ -119,16 +125,6 @@ func (a *API) DecisionMetrics(c *gin.Context) {
 	}
 
 	// JSON response matching legacy format
-
-	type entry struct {
-		Action, Resource, Outcome string
-		Count                     uint64
-	}
-	type reasonEntry struct {
-		Action, Resource, Outcome, Reason string
-		Count                             uint64
-	}
-
 	counts := make([]gin.H, 0, len(snap.DecisionBreakdown))
 	for k, v := range snap.DecisionBreakdown {
 		parts := strings.Split(k, "|")

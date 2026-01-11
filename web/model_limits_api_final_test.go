@@ -21,7 +21,9 @@ func TestModelLimitsAPIIntegration(t *testing.T) {
 		t.Fatalf("temp: %v", err)
 	}
 	_, _ = limitsFile.WriteString(`{"model_limits":{"api-test-model":{"max_input_tokens":100}}}`)
-	limitsFile.Close()
+	if err := limitsFile.Close(); err != nil {
+		t.Fatalf("close limits file: %v", err)
+	}
 
 	t.Setenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH", limitsFile.Name())
 	// Set other envs to avoid side effects or enable features

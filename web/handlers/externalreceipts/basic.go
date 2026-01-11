@@ -65,7 +65,13 @@ func chainHandler(c *gin.Context, d Deps) {
 	entries := d.ExternalReceiptStoreEntries()
 	chain := make([]gin.H, 0, len(entries))
 	for _, e := range entries {
-		chain = append(chain, gin.H{"hash": e.Hash, "timestamp": e.Timestamp, "provider": e.Provider, "chain_hash": e.ChainHash, "prev_hash": e.PrevHash})
+		chain = append(chain, gin.H{
+			"hash":       e.Hash,
+			"timestamp":  e.Timestamp,
+			"provider":   e.Provider,
+			"chain_hash": e.ChainHash,
+			"prev_hash":  e.PrevHash,
+		})
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "configured": true, "total": len(chain), "entries": chain})
 }
@@ -91,7 +97,14 @@ func verifyHandler(c *gin.Context, d Deps) {
 			Version        int     `json:"version"`
 			LatencySeconds float64 `json:"latency_seconds"`
 			PrevHash       string  `json:"prev_hash"`
-		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
+		}{
+			Hash:           e.Hash,
+			Timestamp:      e.Timestamp,
+			Provider:       e.Provider,
+			Version:        e.Version,
+			LatencySeconds: e.LatencySeconds,
+			PrevHash:       e.PrevHash,
+		}
 		enc, err := json.Marshal(base)
 		if err != nil {
 			d.SetExternalAnchorReceiptsIntegrity("mismatch")
@@ -101,7 +114,19 @@ func verifyHandler(c *gin.Context, d Deps) {
 		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
 		if expected != e.ChainHash || e.PrevHash != prev {
 			d.SetExternalAnchorReceiptsIntegrity("mismatch")
-			c.JSON(http.StatusOK, gin.H{"success": true, "configured": true, "integrity": "mismatch", "total": len(entries), "details": gin.H{"mismatch_index": i, "expected": expected, "stored": e.ChainHash, "prev_expected": prev, "prev_stored": e.PrevHash}})
+			c.JSON(http.StatusOK, gin.H{
+				"success":    true,
+				"configured": true,
+				"integrity":  "mismatch",
+				"total":      len(entries),
+				"details": gin.H{
+					"mismatch_index": i,
+					"expected":       expected,
+					"stored":         e.ChainHash,
+					"prev_expected":  prev,
+					"prev_stored":    e.PrevHash,
+				},
+			})
 			return
 		}
 		prev = expected

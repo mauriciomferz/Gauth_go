@@ -14,7 +14,11 @@ type mockVerifService struct {
 	report *agentauthplus.VerificationReport
 }
 
-func (m *mockVerifService) GenerateVerificationReport(ctx context.Context, poaID string, action agentauthplus.Action) (*agentauthplus.VerificationReport, error) {
+func (m *mockVerifService) GenerateVerificationReport(
+	ctx context.Context,
+	poaID string,
+	action agentauthplus.Action,
+) (*agentauthplus.VerificationReport, error) {
 	return m.report, nil
 }
 

@@ -220,33 +220,38 @@ func VerifyAggregatedAlgorithm(algo string, messages [][]byte, signatures []stri
 	return a.AggregatedVerify(messages, signatures, keyIDs, kp)
 }
 
+//nolint:gochecknoinits
 func init() {
 	// Register ed25519
-	RegisterAlgorithm(Algorithm{Name: AlgoEd25519, Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
-		if kp == nil {
-			return errors.New("ed25519: missing key provider")
-		}
-		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
-		if err != nil {
-			return err
-		}
-		return kp.VerifyWith(canonical, sigBytes, keyID)
-	},
+	RegisterAlgorithm(Algorithm{
+		Name: AlgoEd25519,
+		Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
+			if kp == nil {
+				return errors.New("ed25519: missing key provider")
+			}
+			sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
+			if err != nil {
+				return err
+			}
+			return kp.VerifyWith(canonical, sigBytes, keyID)
+		},
 		AggregatedVerify: nil, // Ed25519 does not support batch/aggregated natively
 	})
 
 	// Register ecdsa-p256 (fallback path if provider did not self-register; harmless overwrite)
-	RegisterAlgorithm(Algorithm{Name: AlgoECDSAP256, Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
-		if kp == nil {
-			return errors.New("ecdsa-p256: missing key provider")
-		}
-		sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
-		if err != nil {
-			return err
-		}
-		// Provider VerifyWith for ECDSA expects DER raw bytes and performs low-S + hashing
-		return kp.VerifyWith(canonical, sigBytes, keyID)
-	},
+	RegisterAlgorithm(Algorithm{
+		Name: AlgoECDSAP256,
+		Verify: func(canonical []byte, sigBase64 string, keyID string, kp KeyProvider) error {
+			if kp == nil {
+				return errors.New("ecdsa-p256: missing key provider")
+			}
+			sigBytes, err := base64.StdEncoding.DecodeString(sigBase64)
+			if err != nil {
+				return err
+			}
+			// Provider VerifyWith for ECDSA expects DER raw bytes and performs low-S + hashing
+			return kp.VerifyWith(canonical, sigBytes, keyID)
+		},
 		AggregatedVerify: nil,
 	})
 

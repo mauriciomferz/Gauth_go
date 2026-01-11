@@ -64,10 +64,6 @@ func TestRevocationSemantics_AAP_002_C10(t *testing.T) {
 
 		if err := ValidateDelegationChainWithRevocations(c, rc); err == nil {
 			t.Error("Expected error for revoked delegation 'del-leaf'")
-		} else {
-			// Check error message or type if possible, but presence of error is key C10 compliance
-			// (revoked chain MUST NOT validate)
-			// t.Logf("Got expected error: %v", err)
 		}
 
 		// Verify revocation of root (should also fail)

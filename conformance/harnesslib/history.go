@@ -28,7 +28,7 @@ func LoadHistory(path string) ([]HistoryEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	r := csv.NewReader(f)
 	var entries []HistoryEntry
 	headerProcessed := false
@@ -75,7 +75,15 @@ func LoadHistory(path string) ([]HistoryEntry, error) {
 		if err != nil {
 			continue
 		}
-		entries = append(entries, HistoryEntry{Timestamp: ts, Coverage: cov, GapMissing: gm, GapPartial: gp, GapImplemented: gi, MissingSymbols: ms, MissingTests: mt})
+		entries = append(entries, HistoryEntry{
+			Timestamp:      ts,
+			Coverage:       cov,
+			GapMissing:     gm,
+			GapPartial:     gp,
+			GapImplemented: gi,
+			MissingSymbols: ms,
+			MissingTests:   mt,
+		})
 	}
 	return entries, nil
 }
@@ -92,7 +100,8 @@ type TrendMetrics struct {
 	GapImplementedDelta  int
 }
 
-// ComputeTrend computes metrics given entries (chronological order assumed as appended). If not chronological, caller should sort.
+// ComputeTrend computes metrics given entries (chronological order assumed as appended).
+// If not chronological, caller should sort.
 func ComputeTrend(entries []HistoryEntry, window int) TrendMetrics {
 	tm := TrendMetrics{TotalRuns: len(entries)}
 	if len(entries) == 0 {
@@ -142,7 +151,17 @@ func RenderTrendMarkdown(entries []HistoryEntry, tm TrendMetrics) string {
 	}
 	for i := start; i < len(entries); i++ {
 		e := entries[i]
-		b.WriteString(fmt.Sprintf("| %s | %.2f | %d | %d | %d | %d | %d |\n", e.Timestamp.Format(time.RFC3339), e.Coverage, e.GapMissing, e.GapPartial, e.GapImplemented, e.MissingSymbols, e.MissingTests))
+		fmt.Fprintf(
+			&b,
+			"| %s | %.2f | %d | %d | %d | %d | %d |\n",
+			e.Timestamp.Format(time.RFC3339),
+			e.Coverage,
+			e.GapMissing,
+			e.GapPartial,
+			e.GapImplemented,
+			e.MissingSymbols,
+			e.MissingTests,
+		)
 	}
 	return b.String()
 }

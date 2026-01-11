@@ -141,7 +141,7 @@ func (s *HTTPAuditSink) Write(event *RotationEvent) error {
 	if err != nil {
 		return fmt.Errorf("rotation_audit: send event: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)

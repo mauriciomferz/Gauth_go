@@ -18,5 +18,11 @@ type PoARepository interface {
 	ListTemplates(ctx context.Context, tenantID *string) ([]PoATemplate, error)
 
 	// AddMultiSignature adds a signature to the PoA and transitions to active if threshold matched.
-	AddMultiSignature(ctx context.Context, tenantID, poaID string, signerID string, signature map[string]interface{}, threshold int) (*PoARecord, error)
+	AddMultiSignature(
+		ctx context.Context,
+		tenantID, poaID string,
+		signerID string,
+		signature map[string]interface{},
+		threshold int,
+	) (*PoARecord, error)
 }

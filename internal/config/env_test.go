@@ -30,14 +30,14 @@ func TestGetInt(t *testing.T) {
 	if v := GetInt("CFG_INT", 42); v != 42 {
 		t.Fatalf("negative should fallback 42 got %d", v)
 	}
-	os.Setenv("CFG_INT", "10")
+	t.Setenv("CFG_INT", "10")
 	if v := GetInt("CFG_INT", 42); v != 10 {
 		t.Fatalf("expected 10 got %d", v)
 	}
 }
 
 func TestEphemeralSecretProvided(t *testing.T) {
-	os.Setenv("CFG_SECRET", "fixed")
+	t.Setenv("CFG_SECRET", "fixed")
 	sec, gen, warn := EphemeralSecret("CFG_SECRET", 16)
 	if sec != "fixed" || gen || warn != "" {
 		t.Fatalf("expected fixed secret, no generation, got %s gen=%v warn=%s", sec, gen, warn)

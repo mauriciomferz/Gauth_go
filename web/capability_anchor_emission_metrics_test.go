@@ -75,7 +75,8 @@ func TestCapabilityAnchorEmissionMetrics(t *testing.T) {
 		t.Fatalf("expected age gauge line in body")
 	}
 	// Jitter should be >0 after varied intervals (non-zero stddev). Accept small floating value.
-	if m := regexp.MustCompile(`agentauth_aap001_capability_anchor_emission_jitter_seconds ([0-9E.e+-]+)`).FindStringSubmatch(body); len(m) == 2 {
+	jitterRe := regexp.MustCompile(`agentauth_aap001_capability_anchor_emission_jitter_seconds ([0-9E.e+-]+)`)
+	if m := jitterRe.FindStringSubmatch(body); len(m) == 2 {
 		// Accept presence; do not assert non-zero to avoid flakiness on CI timing.
 	} else {
 		t.Fatalf("did not find jitter metric line")

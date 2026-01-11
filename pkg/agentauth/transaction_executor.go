@@ -132,7 +132,6 @@ func (e *TransactionExecutor) ExecuteTransaction(
 	ctx context.Context,
 	request *TransactionExecutionRequest,
 ) (*TransactionExecutionResponse, error) {
-
 	// Validate request structure
 	if err := e.validateExecutionRequest(request); err != nil {
 		return &TransactionExecutionResponse{
@@ -276,7 +275,6 @@ func (e *TransactionExecutor) validateRequestScope(
 	request *TransactionExecutionRequest,
 	token *ExtendedToken,
 ) (bool, error) {
-
 	// Check if request type is in token scope
 	if len(token.Scope) == 0 {
 		return false, fmt.Errorf("token has no scope defined")
@@ -318,7 +316,6 @@ func (e *TransactionExecutor) validatePowerRestrictions(
 	request *TransactionExecutionRequest,
 	token *ExtendedToken,
 ) (bool, error) {
-
 	if token.PowerOfAttorney == nil {
 		return false, fmt.Errorf("token has no power of attorney defined")
 	}
@@ -353,7 +350,7 @@ func (e *TransactionExecutor) validatePowerRestrictions(
 		for _, restriction := range token.Restrictions {
 			if restriction.RestrictionType == "geographic_limit" {
 				// Would validate coordinates against allowed regions
-				// Implementation depends on restriction.Value structure
+				_ = restriction // Implementation depends on restriction.Value structure
 			}
 		}
 	}
@@ -363,7 +360,7 @@ func (e *TransactionExecutor) validatePowerRestrictions(
 		if restriction.RestrictionType == "time_limit" {
 			// Parse temporal restrictions from restriction.Value
 			// This would check ValidFrom/ValidUntil if present
-			// now := time.Now() - would be used for validation
+			_ = restriction // time validation placeholder - would be used for validation
 		}
 	}
 

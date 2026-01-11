@@ -95,6 +95,8 @@ func (e ed25519Algorithm) Verify(pub PublicKey, msg []byte, sig []byte) bool {
 }
 
 // init registers default algorithms.
+//
+//nolint:gochecknoinits // required for package-level algorithm registration
 func init() {
 	_ = Register(ed25519Algorithm{})
 }

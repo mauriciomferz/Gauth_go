@@ -21,7 +21,12 @@ func NewMultiSigCoordinator(repo PoARepository) *MultiSigCoordinator {
 
 // CollectSignature adds a partial signature to a pending PoA and transitions it to active if threshold is met.
 // The `signature` argument can be any serializable map/struct representing the signature (e.g. from AAP001).
-func (c *MultiSigCoordinator) CollectSignature(ctx context.Context, tenantID, poaID, signerID string, signature interface{}, threshold int) (*PoARecord, error) {
+func (c *MultiSigCoordinator) CollectSignature(
+	ctx context.Context,
+	tenantID, poaID, signerID string,
+	signature interface{},
+	threshold int,
+) (*PoARecord, error) {
 	if c.repo == nil {
 		return nil, fmt.Errorf("repository not initialized")
 	}

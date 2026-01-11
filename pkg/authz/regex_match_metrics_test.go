@@ -23,7 +23,10 @@ func TestRegexMatchFrequency(t *testing.T) {
 	ctx := context.Background()
 	// execute multiple matching decisions
 	for i := 0; i < 3; i++ {
-		dec, err := ma.Authorize(ctx, Request{Subject: "eve", Resource: "svc", Action: "call", Context: map[string]string{"email": "eve@example.org"}})
+		dec, err := ma.Authorize(ctx, Request{
+			Subject: "eve", Resource: "svc", Action: "call",
+			Context: map[string]string{"email": "eve@example.org"},
+		})
 		if err != nil {
 			t.Fatalf("authorize err: %v", err)
 		}

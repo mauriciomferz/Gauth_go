@@ -23,7 +23,10 @@ func TestPolicyRoleMatching(t *testing.T) {
 
 func TestPolicyRequiredScopes(t *testing.T) {
 	ma := NewMemoryAuthorizer()
-	ma.AddPolicy(Policy{ID: "p2", Subject: "bob", Resource: "data", Actions: []string{"write"}, Effect: Allow, RequiredScopes: []string{"write:data", "admin:users"}})
+	ma.AddPolicy(Policy{
+		ID: "p2", Subject: "bob", Resource: "data", Actions: []string{"write"}, Effect: Allow,
+		RequiredScopes: []string{"write:data", "admin:users"},
+	})
 	// missing one scope
 	reqDenied := Request{Subject: "bob", Resource: "data", Action: "write", Context: map[string]string{"scopes": "write:data"}}
 	dec, _ := ma.Authorize(context.Background(), reqDenied)
@@ -31,7 +34,10 @@ func TestPolicyRequiredScopes(t *testing.T) {
 		t.Fatalf("expected deny due to missing admin:users scope")
 	}
 	// now include all required scopes
-	reqAllowed := Request{Subject: "bob", Resource: "data", Action: "write", Context: map[string]string{"scopes": "write:data admin:users"}}
+	reqAllowed := Request{
+		Subject: "bob", Resource: "data", Action: "write",
+		Context: map[string]string{"scopes": "write:data admin:users"},
+	}
 	dec2, _ := ma.Authorize(context.Background(), reqAllowed)
 	if !dec2.Allow {
 		t.Fatalf("expected allow when all required scopes present, reason=%s", dec2.Reason)
@@ -41,17 +47,35 @@ func TestPolicyRequiredScopes(t *testing.T) {
 func TestABACAdvancedOperators(t *testing.T) {
 	ma := NewMemoryAuthorizer()
 	// equals
-	ma.AddPolicy(Policy{ID: "p-eq", Subject: "alice", Resource: "doc", Actions: []string{"view"}, Effect: Allow, Conditions: []Condition{{Key: "dept", Operator: "equals", Values: []string{"eng"}}}})
+	ma.AddPolicy(Policy{
+		ID: "p-eq", Subject: "alice", Resource: "doc", Actions: []string{"view"}, Effect: Allow,
+		Conditions: []Condition{{Key: "dept", Operator: "equals", Values: []string{"eng"}}},
+	})
 	// not_equals
-	ma.AddPolicy(Policy{ID: "p-ne", Subject: "alice", Resource: "doc2", Actions: []string{"view"}, Effect: Allow, Conditions: []Condition{{Key: "dept", Operator: "not_equals", Values: []string{"sales"}}}})
+	ma.AddPolicy(Policy{
+		ID: "p-ne", Subject: "alice", Resource: "doc2", Actions: []string{"view"}, Effect: Allow,
+		Conditions: []Condition{{Key: "dept", Operator: "not_equals", Values: []string{"sales"}}},
+	})
 	// contains
-	ma.AddPolicy(Policy{ID: "p-contains", Subject: "alice", Resource: "doc3", Actions: []string{"view"}, Effect: Allow, Conditions: []Condition{{Key: "tags", Operator: "contains", Values: []string{"urgent"}}}})
+	ma.AddPolicy(Policy{
+		ID: "p-contains", Subject: "alice", Resource: "doc3", Actions: []string{"view"}, Effect: Allow,
+		Conditions: []Condition{{Key: "tags", Operator: "contains", Values: []string{"urgent"}}},
+	})
 	// prefix
-	ma.AddPolicy(Policy{ID: "p-prefix", Subject: "alice", Resource: "doc4", Actions: []string{"view"}, Effect: Allow, Conditions: []Condition{{Key: "path", Operator: "prefix", Values: []string{"/secure"}}}})
+	ma.AddPolicy(Policy{
+		ID: "p-prefix", Subject: "alice", Resource: "doc4", Actions: []string{"view"}, Effect: Allow,
+		Conditions: []Condition{{Key: "path", Operator: "prefix", Values: []string{"/secure"}}},
+	})
 	// suffix
-	ma.AddPolicy(Policy{ID: "p-suffix", Subject: "alice", Resource: "doc5", Actions: []string{"view"}, Effect: Allow, Conditions: []Condition{{Key: "file", Operator: "suffix", Values: []string{".pdf"}}}})
+	ma.AddPolicy(Policy{
+		ID: "p-suffix", Subject: "alice", Resource: "doc5", Actions: []string{"view"}, Effect: Allow,
+		Conditions: []Condition{{Key: "file", Operator: "suffix", Values: []string{".pdf"}}},
+	})
 	// in (alias of equals list membership) already covered by equals logic but test explicit
-	ma.AddPolicy(Policy{ID: "p-in", Subject: "alice", Resource: "doc6", Actions: []string{"view"}, Effect: Allow, Conditions: []Condition{{Key: "env", Operator: "in", Values: []string{"prod", "stage"}}}})
+	ma.AddPolicy(Policy{
+		ID: "p-in", Subject: "alice", Resource: "doc6", Actions: []string{"view"}, Effect: Allow,
+		Conditions: []Condition{{Key: "env", Operator: "in", Values: []string{"prod", "stage"}}},
+	})
 
 	tests := []struct {
 		res    string

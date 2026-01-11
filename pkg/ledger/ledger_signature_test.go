@@ -43,8 +43,10 @@ func TestBoltStoreEntrySignature(t *testing.T) {
 		t.Fatalf("temp file: %v", err)
 	}
 	path := f.Name()
-	f.Close()
-	defer os.Remove(path)
+	if closeErr := f.Close(); closeErr != nil {
+		t.Fatalf("close temp file: %v", closeErr)
+	}
+	defer func() { _ = os.Remove(path) }()
 	storeIface, err := NewBoltStore(path)
 	if err != nil {
 		t.Fatalf("new bolt store: %v", err)

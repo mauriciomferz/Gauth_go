@@ -207,7 +207,9 @@ func (s *Service) EnforceAgentSessionBinding(ctx context.Context, poa *PowerOfAt
 //   - Fail-closed: rejects if constraints cannot be evaluated
 //   - Explicit deny: unknown actions rejected by default
 //   - Audit trail: logs all constraint violations
-func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttorney, requestedAction string, requestedAmount *float64) error {
+func (s *Service) EnforceScopeConstraints(
+ctx context.Context, poa *PowerOfAttorney, requestedAction string, requestedAmount *float64,
+) error {
 	if poa == nil {
 		return aap.New(aap.ErrInvalidRequest, "nil poa in scope enforcement")
 	}
@@ -297,7 +299,7 @@ func (s *Service) EnforceScopeConstraints(ctx context.Context, poa *PowerOfAttor
 					ctxCurrency = s
 				}
 			}
-			if ctxCurrency != "" && strings.ToUpper(ctxCurrency) != strings.ToUpper(currency) {
+			if ctxCurrency != "" && !strings.EqualFold(ctxCurrency, currency) {
 				if s.metrics != nil {
 					s.metrics.IncDelegationStatusTransitionFailures()
 				}

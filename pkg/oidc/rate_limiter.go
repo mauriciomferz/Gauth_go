@@ -476,7 +476,9 @@ func (s *RateLimitService) CheckLimit(ctx context.Context, endpoint, ip, clientI
 
 	// Check global IP limit first
 	if s.config.GlobalIPLimit != nil && s.config.GlobalIPLimit.Enabled {
+		s.mu.RLock()
 		limiter := s.limiters["global_ip"]
+		s.mu.RUnlock()
 		allowed, err := limiter.Allow(ctx, fmt.Sprintf("ip:%s", ip))
 		if err != nil {
 			return fmt.Errorf("rate limit check failed: %w", err)
@@ -488,7 +490,9 @@ func (s *RateLimitService) CheckLimit(ctx context.Context, endpoint, ip, clientI
 
 	// Check global client limit
 	if clientID != "" && s.config.GlobalClientLimit != nil && s.config.GlobalClientLimit.Enabled {
+		s.mu.RLock()
 		limiter := s.limiters["global_client"]
+		s.mu.RUnlock()
 		allowed, err := limiter.Allow(ctx, fmt.Sprintf("client:%s", clientID))
 		if err != nil {
 			return fmt.Errorf("rate limit check failed: %w", err)
@@ -499,7 +503,9 @@ func (s *RateLimitService) CheckLimit(ctx context.Context, endpoint, ip, clientI
 	}
 
 	// Check endpoint-specific limit
+	s.mu.RLock()
 	limiter, exists := s.limiters[endpoint]
+	s.mu.RUnlock()
 	if !exists {
 		return nil // No limit configured for this endpoint
 	}
@@ -531,7 +537,9 @@ func (s *RateLimitService) rateLimitError(message string, window time.Duration) 
 
 // Reset resets rate limits for a specific key.
 func (s *RateLimitService) Reset(ctx context.Context, endpoint, key string) error {
+	s.mu.RLock()
 	limiter, exists := s.limiters[endpoint]
+	s.mu.RUnlock()
 	if !exists {
 		return fmt.Errorf("no limiter found for endpoint: %s", endpoint)
 	}
@@ -540,7 +548,14 @@ func (s *RateLimitService) Reset(ctx context.Context, endpoint, key string) erro
 
 // Close closes all rate limiters.
 func (s *RateLimitService) Close() error {
+	s.mu.RLock()
+	limiters := make([]RateLimiter, 0, len(s.limiters))
 	for _, limiter := range s.limiters {
+		limiters = append(limiters, limiter)
+	}
+	s.mu.RUnlock()
+
+	for _, limiter := range limiters {
 		if err := limiter.Close(); err != nil {
 			return err
 		}
@@ -574,7 +589,8 @@ func RateLimitMiddleware(service *RateLimitService, endpoint string) func(http.H
 					_, _ = w.Write([]byte(fmt.Sprintf(`{"error":"%s","error_description":"%s"}`,
 						oidcErr.ErrorCode, oidcErr.ErrorDescription))) // Error response; ignore write error
 				} else {
-					_, _ = w.Write([]byte(`{"error":"rate_limit_exceeded","error_description":"Too many requests"}`)) // Error response; ignore write error
+					// Error response; ignore write error
+					_, _ = w.Write([]byte(`{"error":"rate_limit_exceeded","error_description":"Too many requests"}`))
 				}
 				return
 			}

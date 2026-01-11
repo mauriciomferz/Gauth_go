@@ -13,9 +13,11 @@ func TestScanFileHeadings(t *testing.T) {
 		t.Fatalf("temp file: %v", err)
 	}
 	if _, err2 := f.WriteString(content); err2 != nil {
-		t.Fatalf("write: %v", err)
+		t.Fatalf("write: %v", err2)
 	}
-	f.Close()
+	if closeErr := f.Close(); closeErr != nil {
+		t.Fatalf("close: %v", closeErr)
+	}
 
 	clauses, err := ScanFile(f.Name(), "0111")
 	if err != nil {

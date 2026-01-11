@@ -9,7 +9,10 @@ import (
 // TestCanonicalDigestStability verifies deterministic digest unaffected by metadata order or evidence map changes.
 func TestCanonicalDigestStability(t *testing.T) {
 	svc := NewMemoryService()
-	poa, err := svc.Issue(context.TODO(), &Request{Subject: "alice", Resource: "vault", Action: "read", Scope: []string{"vault.read"}, Context: map[string]interface{}{"z": 1, "a": 2}})
+	poa, err := svc.Issue(context.TODO(), &Request{
+		Subject: "alice", Resource: "vault", Action: "read",
+		Scope: []string{"vault.read"}, Context: map[string]interface{}{"z": 1, "a": 2},
+	})
 	if err != nil {
 		t.Fatalf("issue failed: %v", err)
 	}
@@ -35,7 +38,9 @@ func TestCanonicalDigestStability(t *testing.T) {
 // TestCanonicalDigestTamper ensures tampering with core fields changes digest and VerifyDigest detects mismatch.
 func TestCanonicalDigestTamper(t *testing.T) {
 	svc := NewMemoryService()
-	poa, err := svc.Issue(context.TODO(), &Request{Subject: "bob", Resource: "ledger", Action: "append", Scope: []string{"ledger.append"}})
+	poa, err := svc.Issue(context.TODO(), &Request{
+		Subject: "bob", Resource: "ledger", Action: "append", Scope: []string{"ledger.append"},
+	})
 	if err != nil {
 		t.Fatalf("issue failed: %v", err)
 	}
@@ -56,7 +61,10 @@ func TestCanonicalDigestTamper(t *testing.T) {
 // TestCanonicalDigestDelegationIncluded verifies delegation fields impact digest.
 func TestCanonicalDigestDelegationIncluded(t *testing.T) {
 	svc := NewMemoryService()
-	req := &Request{Subject: "carol", Resource: "db", Action: "query", Scope: []string{"db.query"}, Delegation: &DelegationRequest{DelegatedBy: "root", Scope: []string{"db.query"}, Duration: time.Minute}}
+	req := &Request{
+		Subject: "carol", Resource: "db", Action: "query", Scope: []string{"db.query"},
+		Delegation: &DelegationRequest{DelegatedBy: "root", Scope: []string{"db.query"}, Duration: time.Minute},
+	}
 	poa, err := svc.Issue(context.TODO(), req)
 	if err != nil {
 		t.Fatalf("issue failed: %v", err)

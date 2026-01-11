@@ -139,7 +139,6 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 	ctx context.Context,
 	request *RFCCompliantAuthorizationRequest,
 ) (*RFCCompliantTokenResponse, error) {
-
 	// STEP (a): Client Authorization Request - Already received
 	// Validate basic request structure
 	if err := o.validateRequestStructure(request); err != nil {
@@ -205,8 +204,8 @@ func (o *ProtocolOrchestrator) ExecuteRFCCompliantFlow(
 		// Ensure requested Authorization Details are consistent with PoA scope (RFC 9396)
 		if len(request.AuthorizationDetails) > 0 {
 			rarValidator := NewRARValidator()
-			if err := rarValidator.ValidateAuthorizationDetails(poaCredential, request.AuthorizationDetails); err != nil {
-				return nil, fmt.Errorf("step (a) validation failed: authorization details not authorized by PoA: %w", err)
+			if rarErr := rarValidator.ValidateAuthorizationDetails(poaCredential, request.AuthorizationDetails); rarErr != nil {
+				return nil, fmt.Errorf("step (a) validation failed: authorization details not authorized by PoA: %w", rarErr)
 			}
 		}
 	}
@@ -371,7 +370,6 @@ func (o *ProtocolOrchestrator) issueAuthorizationGrant(
 	subscription *Subscription,
 	complianceResult *RequestComplianceResult,
 ) (*RFCCompliantGrantResponse, error) {
-
 	grant := &RFCCompliantGrantResponse{
 		GrantID:              generateGrantID(),
 		IssuedAt:             time.Now(),

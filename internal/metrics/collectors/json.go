@@ -86,7 +86,9 @@ func (j *JSONCollector) Health() error {
 	if err != nil {
 		return fmt.Errorf("cannot write to %s: %w", j.outputPath, err)
 	}
-	f.Close()
+	if err := f.Close(); err != nil {
+		return err
+	}
 	return nil
 }
 

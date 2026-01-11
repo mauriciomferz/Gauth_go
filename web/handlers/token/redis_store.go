@@ -65,18 +65,17 @@ func (s *RedisTokenStore) Validate(idOrVal string) (string, *Token) {
 	ctx, span := s.tracer.Start(context.Background(), "ValidateToken")
 	defer span.End()
 
-	var tokenID string
-
 	// Try direct lookup (ID)
 	data, err := s.cache.Get(ctx, "token:"+idOrVal)
-	if err == nil && len(data) > 0 {
-		tokenID = idOrVal
-	} else {
+	if err != nil || len(data) == 0 {
 		// Try lookup by value
-		valData, err := s.cache.Get(ctx, "token_val:"+idOrVal)
-		if err == nil && len(valData) > 0 {
-			tokenID = string(valData)
-			data, err = s.cache.Get(ctx, "token:"+tokenID)
+		valData, valErr := s.cache.Get(ctx, "token_val:"+idOrVal)
+		if valErr == nil && len(valData) > 0 {
+			tokenID := string(valData)
+			dataByID, getErr := s.cache.Get(ctx, "token:"+tokenID)
+			if getErr == nil {
+				data = dataByID
+			}
 		}
 	}
 
@@ -86,8 +85,8 @@ func (s *RedisTokenStore) Validate(idOrVal string) (string, *Token) {
 	}
 
 	var t Token
-	if err := json.Unmarshal(data, &t); err != nil {
-		span.RecordError(err)
+	if unmarshalErr := json.Unmarshal(data, &t); unmarshalErr != nil {
+		span.RecordError(unmarshalErr)
 		return TokenStatusNotFound, nil
 	}
 
@@ -123,8 +122,8 @@ func (s *RedisTokenStore) Revoke(id string) string {
 	}
 
 	var t Token
-	if err := json.Unmarshal(data, &t); err != nil {
-		span.RecordError(err)
+	if unmarshalErr := json.Unmarshal(data, &t); unmarshalErr != nil {
+		span.RecordError(unmarshalErr)
 		return TokenStatusNotFound
 	}
 
@@ -183,14 +182,14 @@ func (s *RedisTokenStore) UpdateStatus(id, newStatus string) (bool, string, *Tok
 	}
 
 	var t Token
-	if err := json.Unmarshal(data, &t); err != nil {
-		span.RecordError(err)
+	if unmarshalErr := json.Unmarshal(data, &t); unmarshalErr != nil {
+		span.RecordError(unmarshalErr)
 		return false, "error", nil
 	}
 
 	old := t.Status
 	// Terminated is a terminal state
-	if old == "terminated" && newStatus != "terminated" {
+	if old == StatusTerminated && newStatus != StatusTerminated {
 		return false, "invalid_transition", &t
 	}
 

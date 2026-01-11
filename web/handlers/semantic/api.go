@@ -99,7 +99,8 @@ func (a *API) HandlePrometheus(c *gin.Context) {
 		if status == "ok" {
 			val = 1
 		}
-		sb.WriteString("\n# HELP agentauth_persistence_integrity_semantic Semantic persistence integrity check (1=ok, 0=mismatch/fail)\n")
+		sb.WriteString("\n# HELP agentauth_persistence_integrity_semantic " +
+			"Semantic persistence integrity check (1=ok, 0=mismatch/fail)\n")
 		sb.WriteString("# TYPE agentauth_persistence_integrity_semantic gauge\n")
 		sb.WriteString(fmt.Sprintf("agentauth_persistence_integrity_semantic %d\n", val))
 	}

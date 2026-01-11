@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/mauriciomferz/AgentAuth/internal/metrics"
@@ -16,8 +15,8 @@ import (
 
 func TestPolicyPersistenceAndAPI(t *testing.T) {
 	// Setup server in In-Memory mode
-	os.Setenv("AGENTAUTH_DB_ENABLED", "0")
-	os.Setenv("POLICY_CHAIN_STATE_PATH", "")
+	t.Setenv("AGENTAUTH_DB_ENABLED", "0")
+	t.Setenv("POLICY_CHAIN_STATE_PATH", "")
 
 	m := metrics.NewMemory()
 	s := web.NewBetaServerWithMetrics(":0", m)
@@ -33,11 +32,12 @@ func TestPolicyPersistenceAndAPI(t *testing.T) {
 	t.Run("Initial State", func(t *testing.T) {
 		resp, err := client.Get(baseURL + "/provenance")
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		assert.Equal(t, 200, resp.StatusCode)
 
 		var body map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&body)
+		err = json.NewDecoder(resp.Body).Decode(&body)
+		require.NoError(t, err)
 		// Should be valid but maybe empty chain
 		assert.Equal(t, true, body["success"])
 		assert.Equal(t, "", body["head_hash"])
@@ -59,17 +59,20 @@ func TestPolicyPersistenceAndAPI(t *testing.T) {
 				},
 			},
 		}
-		jsonBody, _ := json.Marshal(reqBody)
-		req, _ := http.NewRequest("POST", baseURL+"/bundles", bytes.NewBuffer(jsonBody))
+		jsonBody, err := json.Marshal(reqBody)
+		require.NoError(t, err)
+		req, err := http.NewRequest("POST", baseURL+"/bundles", bytes.NewBuffer(jsonBody))
+		require.NoError(t, err)
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := client.Do(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		assert.Equal(t, 201, resp.StatusCode)
 
 		var body map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&body)
+		err = json.NewDecoder(resp.Body).Decode(&body)
+		require.NoError(t, err)
 		if !assert.Equal(t, true, body["success"]) {
 			t.Logf("Response Body: %+v", body)
 		}
@@ -87,11 +90,12 @@ func TestPolicyPersistenceAndAPI(t *testing.T) {
 	t.Run("Verify Active", func(t *testing.T) {
 		resp, err := client.Get(baseURL + "/timeline")
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		assert.Equal(t, 200, resp.StatusCode)
 
 		var body map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&body)
+		err = json.NewDecoder(resp.Body).Decode(&body)
+		require.NoError(t, err)
 		assert.Equal(t, float64(1), body["active_version"])
 		assert.Equal(t, false, body["rolled_back"])
 	})
@@ -111,22 +115,26 @@ func TestPolicyPersistenceAndAPI(t *testing.T) {
 				},
 			},
 		}
-		jsonBody, _ := json.Marshal(reqBody)
-		req, _ := http.NewRequest("POST", baseURL+"/bundles", bytes.NewBuffer(jsonBody))
+		jsonBody, err := json.Marshal(reqBody)
+		require.NoError(t, err)
+		req, err := http.NewRequest("POST", baseURL+"/bundles", bytes.NewBuffer(jsonBody))
+		require.NoError(t, err)
 
 		resp, err := client.Do(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		assert.Equal(t, 201, resp.StatusCode)
 
 		var body map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&body)
+		err = json.NewDecoder(resp.Body).Decode(&body)
+		require.NoError(t, err)
 		assert.Equal(t, float64(2), body["policy_version"])
 	})
 
 	// 5. Rollback
 	t.Run("Rollback", func(t *testing.T) {
-		req, _ := http.NewRequest("POST", baseURL+"/rollback?version=1", nil)
+		req, err := http.NewRequest("POST", baseURL+"/rollback?version=1", nil)
+		require.NoError(t, err)
 		req.Header.Set("X-Admin-Token", "") // Assuming default is open or check env
 		// Wait, API checks X-Admin-Token against AGENTAUTH_POLICY_ADMIN_TOKEN.
 		// If env not set, checks if empty? No, line 408: if adminToken != "" && ...
@@ -134,11 +142,12 @@ func TestPolicyPersistenceAndAPI(t *testing.T) {
 
 		resp, err := client.Do(req)
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		assert.Equal(t, 200, resp.StatusCode)
 
 		var body map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&body)
+		err = json.NewDecoder(resp.Body).Decode(&body)
+		require.NoError(t, err)
 		assert.Equal(t, float64(1), body["active_version"])
 	})
 
@@ -146,10 +155,11 @@ func TestPolicyPersistenceAndAPI(t *testing.T) {
 	t.Run("Verify Rollback State", func(t *testing.T) {
 		resp, err := client.Get(baseURL + "/timeline")
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		var body map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&body)
+		err = json.NewDecoder(resp.Body).Decode(&body)
+		require.NoError(t, err)
 		assert.Equal(t, float64(1), body["active_version"])
 		assert.Equal(t, true, body["rolled_back"])
 	})

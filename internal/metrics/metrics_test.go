@@ -10,8 +10,16 @@ func TestMemoryMetrics(t *testing.T) {
 	m := NewMemory()
 	// Initially zero snapshot (extended fields included)
 	d, vc, tot, mn, mx, avg, p50, p90, p99, si, sif, sv, svf, rif, spkm, aa, af, rse, rslc, rslt, rslm, rh, rm := m.Snapshot()
-	if d != 0 || vc != 0 || tot != 0 || mn != 0 || mx != 0 || avg != 0 || p50 != 0 || p90 != 0 || p99 != 0 || si != 0 || sif != 0 || sv != 0 || svf != 0 || rif != 0 || spkm != 0 || aa != 0 || af != 0 || rse != 0 || rslc != 0 || rslt != 0 || rslm != 0 || rh != 0 || rm != 0 {
-		t.Fatalf("expected zeroed snapshot got d=%d vc=%d tot=%d mn=%d mx=%d avg=%v p50=%v p90=%v p99=%v si=%d sif=%d sv=%d svf=%d rif=%d spkm=%d aa=%d af=%d rse=%d rslc=%d rslt=%d rslm=%d rh=%d rm=%d", d, vc, tot, mn, mx, avg, p50, p90, p99, si, sif, sv, svf, rif, spkm, aa, af, rse, rslc, rslt, rslm, rh, rm)
+	allZero := d == 0 && vc == 0 && tot == 0 && mn == 0 && mx == 0 && avg == 0 &&
+		p50 == 0 && p90 == 0 && p99 == 0 && si == 0 && sif == 0 && sv == 0 &&
+		svf == 0 && rif == 0 && spkm == 0 && aa == 0 && af == 0 && rse == 0 &&
+		rslc == 0 && rslt == 0 && rslm == 0 && rh == 0 && rm == 0
+	if !allZero {
+		t.Fatalf("expected zeroed snapshot got d=%d vc=%d tot=%d mn=%d mx=%d avg=%v "+
+			"p50=%v p90=%v p99=%v si=%d sif=%d sv=%d svf=%d rif=%d spkm=%d aa=%d af=%d "+
+			"rse=%d rslc=%d rslt=%d rslm=%d rh=%d rm=%d",
+			d, vc, tot, mn, mx, avg, p50, p90, p99, si, sif, sv, svf, rif, spkm,
+			aa, af, rse, rslc, rslt, rslm, rh, rm)
 	}
 	// Increment delegations
 	m.IncDelegationsCreated()
@@ -19,9 +27,27 @@ func TestMemoryMetrics(t *testing.T) {
 	// Observe two latencies: 10ms and 30ms
 	m.ObserveValidationLatency(10 * time.Millisecond)
 	m.ObserveValidationLatency(30 * time.Millisecond)
-	var sigIssued, sigIssueFail, sigVerifications, sigVerificationFail uint64
-	d, vc, tot, mn, mx, avg, p50, p90, p99, sigIssued, sigIssueFail, sigVerifications, sigVerificationFail, _, _, _, _, rse, rslc, rslt, rslm, rh, rm = m.Snapshot()
-	_, _, _, _ = sigIssued, sigIssueFail, sigVerifications, sigVerificationFail // Unused in this test
+	var (
+		sigIssued           uint64
+		sigIssueFail        uint64
+		sigVerifications    uint64
+		sigVerificationFail uint64
+		revIntegrityFail    uint64
+		sigPubKeyMissing    uint64
+		anchorAttempts      uint64
+		anchorFailures      uint64
+	)
+	d, vc, tot, mn, mx, avg, p50, p90, p99, sigIssued, sigIssueFail,
+		sigVerifications, sigVerificationFail, revIntegrityFail, sigPubKeyMissing,
+		anchorAttempts, anchorFailures, rse, rslc, rslt, rslm, rh, rm = m.Snapshot()
+	_ = sigIssued
+	_ = sigIssueFail
+	_ = sigVerifications
+	_ = sigVerificationFail
+	_ = revIntegrityFail
+	_ = sigPubKeyMissing
+	_ = anchorAttempts
+	_ = anchorFailures
 	if d != 2 {
 		t.Errorf("expected delegations=2 got %d", d)
 	}
@@ -30,7 +56,9 @@ func TestMemoryMetrics(t *testing.T) {
 	}
 	// total should be ~40ms in ns
 	// #nosec G115: time.Millisecond.Nanoseconds() is constant, safe conversion
-	if tot < uint64(40*time.Millisecond.Nanoseconds())*95/100 || tot > uint64(40*time.Millisecond.Nanoseconds())*105/100 { // allow 5% wiggle though deterministic
+	// allow 5% wiggle though deterministic
+	if tot < uint64(40*time.Millisecond.Nanoseconds())*95/100 ||
+		tot > uint64(40*time.Millisecond.Nanoseconds())*105/100 {
 		t.Errorf("unexpected total latency ns got %d", tot)
 	}
 	// #nosec G115: time.Millisecond.Nanoseconds() is constant, safe conversion
@@ -57,6 +85,8 @@ func TestMemoryMetrics(t *testing.T) {
 	}
 	// Replay store stats still zero
 	if rse != 0 || rslc != 0 || rslt != 0 || rslm != 0 || rh != 0 || rm != 0 {
-		t.Errorf("expected replay store metrics still zero got rse=%d rslc=%d rslt=%d rslm=%d rh=%d rm=%d", rse, rslc, rslt, rslm, rh, rm)
+		t.Errorf(
+			"expected replay store metrics still zero got rse=%d rslc=%d rslt=%d rslm=%d rh=%d rm=%d",
+			rse, rslc, rslt, rslm, rh, rm)
 	}
 }

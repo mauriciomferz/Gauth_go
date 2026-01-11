@@ -3,7 +3,18 @@ package notary
 // ReceiptStore provides append-only hash-chained persistence for notarization receipts.
 // Format (JSON):
 // {
-//   "entries": [ {"hash":"...","timestamp":"...","provider":"...","success":true,"latency_seconds":0.123,"prev_hash":"<prior_file_hash>","chain_hash":"<current_payload_hash>"}, ...],
+//   "entries": [
+//     {
+//       "hash":"...",
+//       "timestamp":"...",
+//       "provider":"...",
+//       "success":true,
+//       "latency_seconds":0.123,
+//       "prev_hash":"<prior_file_hash>",
+//       "chain_hash":"<current_payload_hash>"
+//     },
+//     ...
+//   ],
 //   "chain_head":"<hash>"
 // }
 // Each append rewrites entire file (simple, small volume expected).
@@ -57,7 +68,9 @@ type ReceiptStore struct {
 }
 
 // NewReceiptStore creates a store bound to a path (may not exist yet).
-func NewReceiptStore(path string) *ReceiptStore { return &ReceiptStore{path: path} }
+func NewReceiptStore(path string) *ReceiptStore {
+	return &ReceiptStore{path: path}
+}
 
 // Load loads existing file if present.
 func (rs *ReceiptStore) Load() error {
@@ -106,7 +119,15 @@ func (rs *ReceiptStore) Append(r Receipt) (StoredReceipt, error) {
 		Success        bool    `json:"success"`
 		LatencySeconds float64 `json:"latency_seconds"`
 		PrevHash       string  `json:"prev_hash"`
-	}{Hash: r.Hash, Timestamp: r.Timestamp, Provider: r.Provider, Version: r.Version, Success: r.Success, LatencySeconds: r.LatencySeconds, PrevHash: sr.PrevHash}
+	}{
+		Hash:           r.Hash,
+		Timestamp:      r.Timestamp,
+		Provider:       r.Provider,
+		Version:        r.Version,
+		Success:        r.Success,
+		LatencySeconds: r.LatencySeconds,
+		PrevHash:       sr.PrevHash,
+	}
 	enc, err := json.Marshal(tmp)
 	if err != nil {
 		return StoredReceipt{}, err
@@ -126,7 +147,15 @@ func (rs *ReceiptStore) Append(r Receipt) (StoredReceipt, error) {
 					Success        bool    `json:"success"`
 					LatencySeconds float64 `json:"latency_seconds"`
 					PrevHash       string  `json:"prev_hash"`
-				}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, Success: e.Success, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
+				}{
+					Hash:           e.Hash,
+					Timestamp:      e.Timestamp,
+					Provider:       e.Provider,
+					Version:        e.Version,
+					Success:        e.Success,
+					LatencySeconds: e.LatencySeconds,
+					PrevHash:       e.PrevHash,
+				}
 				baseBytes, marshalErr := json.Marshal(tmp)
 				if marshalErr != nil {
 					return StoredReceipt{}, marshalErr
@@ -148,7 +177,11 @@ func (rs *ReceiptStore) Append(r Receipt) (StoredReceipt, error) {
 		Entries   []StoredReceipt `json:"entries"`
 		ChainHead string          `json:"chain_head"`
 		Timestamp string          `json:"timestamp"`
-	}{Entries: rs.entries, ChainHead: rs.headHash, Timestamp: time.Now().UTC().Format(time.RFC3339Nano)}
+	}{
+		Entries:   rs.entries,
+		ChainHead: rs.headHash,
+		Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
+	}
 	buf, err := json.Marshal(out)
 	if err != nil {
 		return StoredReceipt{}, err
@@ -195,7 +228,8 @@ func (rs *ReceiptStore) VerifyIncremental() (string, int, string) {
 		rs.headVerifiedHash = ""
 		return receiptStatusEmpty, -1, ""
 	}
-	// Determine if we can incremental: lengths must be >= previous and the previous head hash must match the chain hash at lastVerifiedLen-1
+	// Determine if we can incremental: lengths must be >= previous and the previous
+	// head hash must match the chain hash at lastVerifiedLen-1.
 	start := 0
 	if rs.lastVerifiedLen > 0 && rs.lastVerifiedLen <= n {
 		if rs.entries[rs.lastVerifiedLen-1].ChainHash == rs.headVerifiedHash {
@@ -221,7 +255,15 @@ func (rs *ReceiptStore) VerifyIncremental() (string, int, string) {
 			Success        bool    `json:"success"`
 			LatencySeconds float64 `json:"latency_seconds"`
 			PrevHash       string  `json:"prev_hash"`
-		}{Hash: e.Hash, Timestamp: e.Timestamp, Provider: e.Provider, Version: e.Version, Success: e.Success, LatencySeconds: e.LatencySeconds, PrevHash: e.PrevHash}
+		}{
+			Hash:           e.Hash,
+			Timestamp:      e.Timestamp,
+			Provider:       e.Provider,
+			Version:        e.Version,
+			Success:        e.Success,
+			LatencySeconds: e.LatencySeconds,
+			PrevHash:       e.PrevHash,
+		}
 		enc, err := json.Marshal(tmp)
 		if err != nil {
 			return receiptStatusMismatch, i, rs.headHash

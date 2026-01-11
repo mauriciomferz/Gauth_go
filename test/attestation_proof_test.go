@@ -121,7 +121,10 @@ func TestAttestationProofExpiry(t *testing.T) {
 
 // Benchmark canonical digest path for attestation proofs (micro performance signal)
 func BenchmarkCanonicalAttestationDigest(b *testing.B) {
-	p := &attest.AttestationProof{Version: "att/v1", Statement: "bench", Subject: "user123", Issuer: "user123", IssuedAt: time.Now().UTC()}
+	p := &attest.AttestationProof{
+		Version: "att/v1", Statement: "bench", Subject: "user123",
+		Issuer: "user123", IssuedAt: time.Now().UTC(),
+	}
 	for i := 0; i < b.N; i++ {
 		if _, _, err := attest.CanonicalAttestationDigest(p); err != nil {
 			b.Fatalf("err: %v", err)
@@ -205,7 +208,14 @@ func TestAttestationProofTrustAnchorSuccess(t *testing.T) {
 	}
 	ss := memory.SnapshotEx()
 	// Ensure no trust anchor failure counters incremented
-	if ss.AttestationProofTrustAnchorMissing+ss.AttestationProofTrustAnchorAlgorithmMismatch+ss.AttestationProofTrustAnchorKeyMismatch != 0 {
-		t.Fatalf("expected zero trust anchor failure counters on success, got missing=%d algo=%d key=%d", ss.AttestationProofTrustAnchorMissing, ss.AttestationProofTrustAnchorAlgorithmMismatch, ss.AttestationProofTrustAnchorKeyMismatch)
+	anchorFailures := ss.AttestationProofTrustAnchorMissing +
+		ss.AttestationProofTrustAnchorAlgorithmMismatch +
+		ss.AttestationProofTrustAnchorKeyMismatch
+	if anchorFailures != 0 {
+		t.Fatalf("expected zero trust anchor failure counters on success, "+
+			"got missing=%d algo=%d key=%d",
+			ss.AttestationProofTrustAnchorMissing,
+			ss.AttestationProofTrustAnchorAlgorithmMismatch,
+			ss.AttestationProofTrustAnchorKeyMismatch)
 	}
 }

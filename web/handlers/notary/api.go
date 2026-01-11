@@ -164,7 +164,13 @@ func (h *Handler) ReceiptsChain(c *gin.Context) {
 	entries := store.Entries()
 	chain := make([]gin.H, 0, len(entries))
 	for _, e := range entries {
-		chain = append(chain, gin.H{"hash": e.Hash, "timestamp": e.Timestamp, "provider": e.Provider, "chain_hash": e.ChainHash, "prev_hash": e.PrevHash})
+		chain = append(chain, gin.H{
+			"hash":       e.Hash,
+			"timestamp":  e.Timestamp,
+			"provider":   e.Provider,
+			"chain_hash": e.ChainHash,
+			"prev_hash":  e.PrevHash,
+		})
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "configured": true, "total": len(chain), "entries": chain})
 }
@@ -204,12 +210,31 @@ func (h *Handler) ReceiptsVerify(c *gin.Context) {
 		}
 		enc, err := json.Marshal(tmp)
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{"success": true, "configured": true, "integrity": "mismatch", "total": len(entries), "details": gin.H{"mismatch_index": i, "reason": "marshal_error"}})
+			c.JSON(http.StatusOK, gin.H{
+				"success":    true,
+				"configured": true,
+				"integrity":  "mismatch",
+				"total":      len(entries),
+				"details": gin.H{
+					"mismatch_index": i,
+					"reason":         "marshal_error",
+				},
+			})
 			return
 		}
 		expected := fmt.Sprintf("%x", sha256.Sum256(append([]byte(e.PrevHash), enc...)))
 		if expected != e.ChainHash || e.PrevHash != prev {
-			c.JSON(http.StatusOK, gin.H{"success": true, "configured": true, "integrity": "mismatch", "total": len(entries), "details": gin.H{"mismatch_index": i, "expected": expected, "got": e.ChainHash}})
+			c.JSON(http.StatusOK, gin.H{
+				"success":    true,
+				"configured": true,
+				"integrity":  "mismatch",
+				"total":      len(entries),
+				"details": gin.H{
+					"mismatch_index": i,
+					"expected":       expected,
+					"got":            e.ChainHash,
+				},
+			})
 			return
 		}
 		prev = expected

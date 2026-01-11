@@ -61,7 +61,14 @@ func TestCascadeProcessorComprehensive(t *testing.T) {
 		dev3 := createRealisticPOA("dev3", "eng-lead2", "eng-lead2", "dev3", []string{"engineering.frontend.ui"}, 3)
 
 		analyst1 := createRealisticPOA("analyst1", "finance-lead", "finance-lead", "analyst1", []string{"finance.reporting.monthly"}, 3)
-		analyst2 := createRealisticPOA("analyst2", "finance-lead", "finance-lead", "analyst2", []string{"finance.reporting.quarterly"}, 3)
+		analyst2 := createRealisticPOA(
+			"analyst2",
+			"finance-lead",
+			"finance-lead",
+			"analyst2",
+			[]string{"finance.reporting.quarterly"},
+			3,
+		)
 
 		allPOAs := []*agentauth_aap_001.PowerOfAttorney{
 			ceo, cto, cfo, engLead1, engLead2, financeLead,

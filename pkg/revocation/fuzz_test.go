@@ -41,7 +41,7 @@ func FuzzTwoPhaseDisablePoA(f *testing.F) {
 		redisClient := redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: []string{mr.Addr()},
 		})
-		defer redisClient.Close()
+		defer func() { _ = redisClient.Close() }()
 
 		logger := NewSimpleLogger("FUZZ")
 		oracle, err := NewEmergencyOracle([]string{mr.Addr()}, logger)
@@ -56,7 +56,7 @@ func FuzzTwoPhaseDisablePoA(f *testing.F) {
 			autoRevokeTimers: make(map[string]*time.Timer),
 			disableTimeout:   30 * time.Second,
 		}
-		defer tpr.Close()
+		defer func() { _ = tpr.Close() }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
@@ -98,7 +98,7 @@ func FuzzTwoPhaseRevokePoA(f *testing.F) {
 		redisClient := redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: []string{mr.Addr()},
 		})
-		defer redisClient.Close()
+		defer func() { _ = redisClient.Close() }()
 
 		logger := NewSimpleLogger("FUZZ")
 		oracle, err := NewEmergencyOracle([]string{mr.Addr()}, logger)
@@ -113,7 +113,7 @@ func FuzzTwoPhaseRevokePoA(f *testing.F) {
 			autoRevokeTimers: make(map[string]*time.Timer),
 			disableTimeout:   30 * time.Second,
 		}
-		defer tpr.Close()
+		defer func() { _ = tpr.Close() }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
@@ -144,7 +144,7 @@ func FuzzCircuitBreakerRecordTransaction(f *testing.F) {
 		redisClient := redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: []string{mr.Addr()},
 		})
-		defer redisClient.Close()
+		defer func() { _ = redisClient.Close() }()
 
 		logger := NewSimpleLogger("FUZZ")
 
@@ -162,7 +162,7 @@ func FuzzCircuitBreakerRecordTransaction(f *testing.F) {
 			suspensionDuration: 1 * time.Minute,
 			recoveryTestCount:  3,
 		}
-		defer cb.Close()
+		defer func() { _ = cb.Close() }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
@@ -196,7 +196,7 @@ func FuzzOptimisticInitiateRevocation(f *testing.F) {
 		redisClient := redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: []string{mr.Addr()},
 		})
-		defer redisClient.Close()
+		defer func() { _ = redisClient.Close() }()
 
 		logger := NewSimpleLogger("FUZZ")
 		oracle, err := NewEmergencyOracle([]string{mr.Addr()}, logger)
@@ -213,7 +213,7 @@ func FuzzOptimisticInitiateRevocation(f *testing.F) {
 			minCollateral:    1000,
 			shutdown:         make(chan struct{}),
 		}
-		defer opt.Close()
+		defer func() { _ = opt.Close() }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
@@ -254,7 +254,7 @@ func FuzzOptimisticChallengeRevocation(f *testing.F) {
 		redisClient := redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: []string{mr.Addr()},
 		})
-		defer redisClient.Close()
+		defer func() { _ = redisClient.Close() }()
 
 		logger := NewSimpleLogger("FUZZ")
 		oracle, err := NewEmergencyOracle([]string{mr.Addr()}, logger)
@@ -271,17 +271,19 @@ func FuzzOptimisticChallengeRevocation(f *testing.F) {
 			minCollateral:    1000,
 			shutdown:         make(chan struct{}),
 		}
-		defer opt.Close()
+		defer func() { _ = opt.Close() }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
 		// Should handle all inputs gracefully
-		_ = opt.ChallengeRevocation(ctx, poaID, challenger, evidence)
+		err = opt.ChallengeRevocation(ctx, poaID, challenger, evidence)
 
 		// Empty fields should be rejected
 		if poaID == "" || challenger == "" || evidence == "" {
-			// System should reject empty inputs
+			if err == nil {
+				t.Errorf("Expected error for empty inputs (poaID=%q challenger=%q evidence=%q), got nil", poaID, challenger, evidence)
+			}
 		}
 	})
 }
@@ -309,7 +311,7 @@ func FuzzGetPoAState(f *testing.F) {
 		redisClient := redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: []string{mr.Addr()},
 		})
-		defer redisClient.Close()
+		defer func() { _ = redisClient.Close() }()
 
 		logger := NewSimpleLogger("FUZZ")
 		oracle, err := NewEmergencyOracle([]string{mr.Addr()}, logger)
@@ -324,7 +326,7 @@ func FuzzGetPoAState(f *testing.F) {
 			disableTimeout:   30 * time.Second,
 			autoRevokeTimers: make(map[string]*time.Timer),
 		}
-		defer tpr.Close()
+		defer func() { _ = tpr.Close() }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
@@ -359,7 +361,7 @@ func FuzzCircuitBreakerCheckTransaction(f *testing.F) {
 		redisClient := redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs: []string{mr.Addr()},
 		})
-		defer redisClient.Close()
+		defer func() { _ = redisClient.Close() }()
 
 		logger := NewSimpleLogger("FUZZ")
 
@@ -377,7 +379,7 @@ func FuzzCircuitBreakerCheckTransaction(f *testing.F) {
 			suspensionDuration: 1 * time.Minute,
 			recoveryTestCount:  3,
 		}
-		defer cb.Close()
+		defer func() { _ = cb.Close() }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
@@ -387,7 +389,7 @@ func FuzzCircuitBreakerCheckTransaction(f *testing.F) {
 
 		// Empty poaID should return error or reject
 		if poaID == "" && (allowed || err == nil) {
-			// System should reject empty poaID somehow
+			t.Errorf("Expected empty poaID to be rejected, got allowed=%v err=%v msg=%q", allowed, err, msg)
 		}
 
 		// Message should always be non-empty when no error

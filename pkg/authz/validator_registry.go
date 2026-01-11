@@ -125,7 +125,10 @@ func (vr *ValidatorRegistry) Snapshot() []ValidatorMetrics {
 	res := make([]ValidatorMetrics, 0, len(vr.entries))
 	for _, ve := range vr.entries {
 		vm := ValidatorMetrics{ID: ve.ID, Description: ve.Description, Version: ve.Version, Tags: ve.Tags,
-			Invocations: atomic.LoadUint64(&ve.invocations), Failures: atomic.LoadUint64(&ve.failures), LatencyHistogram: make(map[int64]uint64)}
+			Invocations:      atomic.LoadUint64(&ve.invocations),
+			Failures:         atomic.LoadUint64(&ve.failures),
+			LatencyHistogram: make(map[int64]uint64),
+		}
 		for i, ub := range ve.latencyBuckets {
 			cnt := atomic.LoadUint64(&ve.bucketCounts[i])
 			if cnt > 0 {

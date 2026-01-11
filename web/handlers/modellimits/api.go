@@ -11,6 +11,8 @@ type API struct {
 	Handler *Handler
 }
 
+const errModelLimitExceeded = "model_limit_exceeded"
+
 // NewAPI returns a new API instance
 func NewAPI(h *Handler) *API {
 	return &API{Handler: h}
@@ -67,7 +69,7 @@ func (a *API) HandleValidate(c *gin.Context) {
 
 		// Add specific fields based on error type for backward compatibility
 		switch res.Error {
-		case "model_user_input_limit_exceeded", "model_limit_exceeded":
+		case "model_user_input_limit_exceeded", errModelLimitExceeded:
 			resp["input_tokens"] = in.InputTokens
 		case "model_user_output_limit_exceeded", "model_output_limit_exceeded":
 			resp["output_tokens"] = in.OutputTokens
@@ -128,7 +130,10 @@ func (a *API) HandleAttestation(c *gin.Context) {
 func (a *API) HandleVerify(c *gin.Context) {
 	var att ModelLimitsAttestation
 	if err := c.ShouldBindJSON(&att); err != nil {
-		c.JSON(400, gin.H{"code": "attestation_invalid_json", "message": "attestation verify invalid JSON", "details": gin.H{"http_path": c.FullPath()}})
+		c.JSON(400, gin.H{
+			"code": "attestation_invalid_json", "message": "attestation verify invalid JSON",
+			"details": gin.H{"http_path": c.FullPath()},
+		})
 		return
 	}
 

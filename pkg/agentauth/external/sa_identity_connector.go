@@ -44,8 +44,9 @@ type SaudiConnectorConfig struct {
 
 // AbsherAuthRequest Absher authentication request
 type AbsherAuthRequest struct {
-	ServiceID         string   `json:"service_id" validate:"required"`
-	IDType            string   `json:"id_type" validate:"required,oneof=national iqama"` // National ID (citizens) or Iqama (residents)
+	ServiceID string `json:"service_id" validate:"required"`
+	// IDType: National ID (citizens) or Iqama (residents)
+	IDType            string   `json:"id_type" validate:"required,oneof=national iqama"`
 	IDNumber          string   `json:"id_number" validate:"required"`
 	DateOfBirth       string   `json:"date_of_birth" validate:"required"`
 	RequestedServices []string `json:"requested_services" validate:"required,min=1"`
@@ -405,6 +406,8 @@ func (sc *SaudiIdentityConnector) generateCacheKey(operation string, parts ...st
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*SaudiIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (sc *SaudiIdentityConnector) GetMetrics() map[string]interface{} {

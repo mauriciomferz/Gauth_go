@@ -2,7 +2,6 @@ package agentauth_aap_001
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -13,13 +12,17 @@ import (
 
 // TestClockSkewTolerance validates not-before and expiry grace window behavior controlled by AGENTAUTH_CLOCK_SKEW_SECONDS.
 func TestClockSkewTolerance(t *testing.T) {
-	os.Setenv("AGENTAUTH_CLOCK_SKEW_SECONDS", "120") // 2 minute tolerance
+	t.Setenv("AGENTAUTH_CLOCK_SKEW_SECONDS", "120") // 2 minute tolerance
 	repo := newMemoryRepository()
 	svc := &Service{repo: repo, audit: audit.NewMemoryLogger(nil), authz: authz.NewMemoryAuthorizer(), nowFn: time.Now}
 
 	now := time.Now().UTC()
 	// POA future within skew (ValidFrom 60s ahead) should validate successfully.
-	poaFuture := &PowerOfAttorney{ID: "poa_future", Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, ValidFrom: now.Add(60 * time.Second), ValidUntil: now.Add(10 * time.Minute), Status: POAStatusActive, CreatedAt: now, UpdatedAt: now, Version: 1}
+	poaFuture := &PowerOfAttorney{
+		ID: "poa_future", Grantor: "alice", Grantee: "bob", Scope: []string{"read"},
+		ValidFrom: now.Add(60 * time.Second), ValidUntil: now.Add(10 * time.Minute),
+		Status: POAStatusActive, CreatedAt: now, UpdatedAt: now, Version: 1,
+	}
 	if err := repo.Create(poaFuture); err != nil {
 		t.Fatalf("create future poa: %v", err)
 	}
@@ -28,7 +31,11 @@ func TestClockSkewTolerance(t *testing.T) {
 	}
 
 	// POA future outside skew (ValidFrom 200s ahead) should fail.
-	poaOutside := &PowerOfAttorney{ID: "poa_outside", Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, ValidFrom: now.Add(200 * time.Second), ValidUntil: now.Add(10 * time.Minute), Status: POAStatusActive, CreatedAt: now, UpdatedAt: now, Version: 1}
+	poaOutside := &PowerOfAttorney{
+		ID: "poa_outside", Grantor: "alice", Grantee: "bob", Scope: []string{"read"},
+		ValidFrom: now.Add(200 * time.Second), ValidUntil: now.Add(10 * time.Minute),
+		Status: POAStatusActive, CreatedAt: now, UpdatedAt: now, Version: 1,
+	}
 	if err := repo.Create(poaOutside); err != nil {
 		t.Fatalf("create outside poa: %v", err)
 	}
@@ -39,7 +46,12 @@ func TestClockSkewTolerance(t *testing.T) {
 	}
 
 	// POA expired within skew (expired 30s ago) should still validate.
-	poaGrace := &PowerOfAttorney{ID: "poa_grace", Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, ValidFrom: now.Add(-10 * time.Minute), ValidUntil: now.Add(-30 * time.Second), Status: POAStatusActive, CreatedAt: now.Add(-10 * time.Minute), UpdatedAt: now.Add(-30 * time.Second), Version: 1}
+	poaGrace := &PowerOfAttorney{
+		ID: "poa_grace", Grantor: "alice", Grantee: "bob", Scope: []string{"read"},
+		ValidFrom: now.Add(-10 * time.Minute), ValidUntil: now.Add(-30 * time.Second),
+		Status: POAStatusActive, CreatedAt: now.Add(-10 * time.Minute),
+		UpdatedAt: now.Add(-30 * time.Second), Version: 1,
+	}
 	if err := repo.Create(poaGrace); err != nil {
 		t.Fatalf("create grace poa: %v", err)
 	}
@@ -48,7 +60,12 @@ func TestClockSkewTolerance(t *testing.T) {
 	}
 
 	// POA expired outside skew (expired 5 minutes ago) should fail with expired.
-	poaExpired := &PowerOfAttorney{ID: "poa_expired", Grantor: "alice", Grantee: "bob", Scope: []string{"read"}, ValidFrom: now.Add(-10 * time.Minute), ValidUntil: now.Add(-5 * time.Minute), Status: POAStatusActive, CreatedAt: now.Add(-10 * time.Minute), UpdatedAt: now.Add(-5 * time.Minute), Version: 1}
+	poaExpired := &PowerOfAttorney{
+		ID: "poa_expired", Grantor: "alice", Grantee: "bob", Scope: []string{"read"},
+		ValidFrom: now.Add(-10 * time.Minute), ValidUntil: now.Add(-5 * time.Minute),
+		Status: POAStatusActive, CreatedAt: now.Add(-10 * time.Minute),
+		UpdatedAt: now.Add(-5 * time.Minute), Version: 1,
+	}
 	if err := repo.Create(poaExpired); err != nil {
 		t.Fatalf("create expired poa: %v", err)
 	}

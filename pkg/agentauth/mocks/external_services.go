@@ -150,7 +150,10 @@ func (m *MockPIPClient) GetClientInfo(ctx context.Context, clientID string) (*ag
 }
 
 // GetAuthorizationServerInfo implements PIPClient.GetAuthorizationServerInfo
-func (m *MockPIPClient) GetAuthorizationServerInfo(ctx context.Context, serverID string) (*agentauth.AuthorizationServerInfo, error) {
+func (m *MockPIPClient) GetAuthorizationServerInfo(
+	ctx context.Context,
+	serverID string,
+) (*agentauth.AuthorizationServerInfo, error) {
 	m.GetAuthServerInfoCallCount++
 	m.LastServerID = serverID
 

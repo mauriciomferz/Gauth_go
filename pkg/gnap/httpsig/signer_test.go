@@ -105,7 +105,8 @@ func TestVerifier_ExpiredSignature(t *testing.T) {
 }
 
 func TestParseSignatureInput(t *testing.T) {
-	input := `sig1=("@method" "@target-uri" "content-type");created=1618884475;expires=1618884775;keyid="test-key-ed25519";alg="ed25519";nonce="abc123"`
+	input := `sig1=("@method" "@target-uri" "content-type");` +
+		`created=1618884475;expires=1618884775;keyid="test-key-ed25519";alg="ed25519";nonce="abc123"`
 
 	params, err := parseSignatureInput(input)
 	if err != nil {

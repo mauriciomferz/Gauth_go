@@ -36,7 +36,10 @@ func TestCapabilityAnchorPrometheusIntegrityMismatch(t *testing.T) {
 
 	// Append two receipts to build a small chain
 	for i := 0; i < 2; i++ {
-		r := notary.Receipt{Hash: randomTestHash(i), Timestamp: time.Now().UTC().Format(time.RFC3339Nano), Provider: "memory", Version: 1, Success: true, LatencySeconds: 0.001}
+		r := notary.Receipt{
+			Hash: randomTestHash(i), Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
+			Provider: "memory", Version: 1, Success: true, LatencySeconds: 0.001,
+		}
 		if _, err := rs.Append(r); err != nil {
 			t.Fatalf("append receipt %d: %v", i, err)
 		}
@@ -84,7 +87,8 @@ func TestCapabilityAnchorPrometheusIntegrityMismatch(t *testing.T) {
 
 	// Inject rs2 into server (uses interface with methods we need). We rely on the server having an exported field setter.
 	// Since receiptStore is unexported, we simulate by setting environment variables and reassigning via reflection if needed.
-	// Simpler: leverage existing field through a helper if available; else use unsafe (avoid). For test, we expose minimal hook in BetaServer if missing.
+	// Simpler: leverage existing field through a helper if available; else use unsafe.
+	// For test, we expose minimal hook in BetaServer if missing.
 	// Fallback: use reflection.
 	reflectSet(t, srv, rs2)
 

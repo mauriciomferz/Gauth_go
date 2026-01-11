@@ -17,7 +17,9 @@ func TestModelLimitSurgeDetection(t *testing.T) {
 	f, _ := os.CreateTemp(t.TempDir(), "limits_*.json")
 	// Low limit to force exceed easily.
 	_, _ = f.Write([]byte(`{"model_limits":{"surge-model":{"max_input_tokens":5}}}`))
-	f.Close()
+	if err := f.Close(); err != nil {
+		t.Fatalf("close temp file: %v", err)
+	}
 	t.Setenv("AGENTAUTH_MODEL_LIMITS_CONFIG_PATH", f.Name())
 	t.Setenv("AGENTAUTH_MODEL_LIMIT_SURGE_FACTOR", "1.0") // make threshold easier (last10 > avg*1)
 	t.Setenv("AGENTAUTH_MODEL_LIMIT_SURGE_MIN_EVENTS", "3")

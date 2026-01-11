@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"os"
 	"testing"
 	"time"
 
@@ -170,8 +169,7 @@ func TestNotarizeAndSignModelLimits_NoPrivateMaterial(t *testing.T) {
 
 func TestNotarizeAndSignModelLimits_DomainPrefixDualSignature(t *testing.T) {
 	km := createKeyManager(t)
-	os.Setenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX", "AGENTAUTH_ATTEST:")
-	defer os.Unsetenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX")
+	t.Setenv("AGENTAUTH_ATTEST_DOMAIN_PREFIX", "AGENTAUTH_ATTEST:")
 	svc := NewAttestationService(WithKeyProvider(km))
 	unsigned := []byte(`{"limits":{"max_tokens":77}}`)
 	mem := notary.NewMemory()

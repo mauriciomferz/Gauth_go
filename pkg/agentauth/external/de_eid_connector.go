@@ -421,7 +421,10 @@ func (c *DEEIDConnector) VerifyAge(ctx context.Context, req *DEEIDVerificationRe
 // Private Methods
 // =============================================================================
 
-func (c *DEEIDConnector) performVerification(ctx context.Context, req *DEEIDVerificationRequest) (*DEEIDVerificationResult, error) {
+func (c *DEEIDConnector) performVerification(
+	ctx context.Context,
+	req *DEEIDVerificationRequest,
+) (*DEEIDVerificationResult, error) {
 	result := &DEEIDVerificationResult{
 		RequestID:             req.RequestID,
 		VerificationTimestamp: time.Now(),
@@ -545,9 +548,7 @@ func (c *DEEIDConnector) performTerminalAuth(ctx context.Context, req *DEEIDVeri
 	}
 
 	// Verify certificate chain
-	if len(c.trustedCAs) > 0 {
-		// Would verify against trusted CAs here
-	}
+	_ = c.trustedCAs // Placeholder: would verify against trusted CAs here.
 
 	// Simulate successful TA
 	return true, nil
@@ -691,6 +692,8 @@ type TROID struct {
 }
 
 // Common TR-03110 OIDs
+//
+//nolint:stylecheck
 var (
 	// PACE OIDs
 	OID_PACE_ECDH_GM_3DES_CBC_CBC     = asn1.ObjectIdentifier{0, 4, 0, 127, 0, 7, 2, 2, 4, 1, 1}

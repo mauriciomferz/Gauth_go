@@ -95,7 +95,12 @@ type ExternalAuditLedger struct {
 }
 
 // NewExternalAuditLedger creates a BoltDB ledger with external anchoring capabilities.
-func NewExternalAuditLedger(dbPath string, provider anchor.Provider, receiptStorePath string, anchorInterval time.Duration) (*ExternalAuditLedger, error) {
+func NewExternalAuditLedger(
+	dbPath string,
+	provider anchor.Provider,
+	receiptStorePath string,
+	anchorInterval time.Duration,
+) (*ExternalAuditLedger, error) {
 	// Create base BoltDB store
 	baseStore, err := NewBoltStore(dbPath)
 	if err != nil {
@@ -358,10 +363,10 @@ func (r *RFC3161Provider) tryTSA(client *rfc3161.Client, name string, hashBytes 
 }
 
 // Latest returns the most recent receipt.
-func (p *RFC3161Provider) Latest() anchor.Receipt {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.latest
+func (r *RFC3161Provider) Latest() anchor.Receipt {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.latest
 }
 
 // Verify performs a basic sanity check on the receipt.

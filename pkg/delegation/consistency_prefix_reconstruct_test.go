@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
-	"os"
 	"testing"
 	"time"
 )
@@ -47,8 +46,7 @@ func buildPrefixDecomposition(events []RevocationEvent, startLen int) ([]string,
 }
 
 func TestFastReconstructionMatchesFullTree(t *testing.T) {
-	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
+	t.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
 	for n := 1; n <= 50; n++ {
 		c := NewRevocationChain()
 		for i := 0; i < n; i++ {
@@ -75,8 +73,7 @@ func TestFastReconstructionMatchesFullTree(t *testing.T) {
 }
 
 func TestFastReconstructionRejectsBadSizes(t *testing.T) {
-	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
+	t.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
 	// invalid size (3 not power-of-two) should fail despite single root because prefixSizes invariants violated
 	bad := ReconstructStartRootFromPrefixBlocks([]string{"abc"}, []int{3}, 3, nil)
 	if bad != "" {
@@ -85,8 +82,7 @@ func TestFastReconstructionRejectsBadSizes(t *testing.T) {
 }
 
 func TestFastReconstructionRandomSizes(t *testing.T) {
-	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
+	t.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
 	//nolint:gosec // G404: weak random acceptable for property-based testing
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < 200; i++ {
@@ -154,8 +150,7 @@ func buildBridges(prefixRoots []string, prefixSizes []int) []string {
 }
 
 func TestFastReconstructionTamperBridge(t *testing.T) {
-	os.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
-	defer os.Unsetenv("AGENTAUTH_CONSISTENCY_V2_FAST")
+	t.Setenv("AGENTAUTH_CONSISTENCY_V2_FAST", "1")
 	c := NewRevocationChain()
 	for i := 0; i < 7; i++ {
 		id := fmt.Sprintf("TB%d", i)

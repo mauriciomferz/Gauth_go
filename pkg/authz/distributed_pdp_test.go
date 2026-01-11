@@ -86,7 +86,10 @@ func TestDistributedPDP_Decide(t *testing.T) {
 		"action":   "read",
 		"resource": "doc:1",
 	}
-	pdp.Decide(req2)
+	_, err = pdp.Decide(req2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if mockEngine.CalledCount != 2 {
 		t.Errorf("expected engine called 2 times, got %d", mockEngine.CalledCount)
 	}

@@ -23,7 +23,9 @@ func NewInputValidator() *InputValidator {
 	return &InputValidator{
 		maxBodySize: getEnvInt64("AGENTAUTH_MAX_BODY_SIZE", 1024*1024), // 1MB default
 		patterns: map[string]*regexp.Regexp{
-			"sql_injection":  regexp.MustCompile(`(?i)(union|select|insert|update|delete|drop|create|alter|exec|script|javascript|<script)`),
+			"sql_injection": regexp.MustCompile(
+				`(?i)(union|select|insert|update|delete|drop|create|alter|exec|script|javascript|<script)`,
+			),
 			"path_traversal": regexp.MustCompile(`\.\./|\.\.\\`),
 			"xss":            regexp.MustCompile(`(?i)<script|javascript:|onerror=|onload=`),
 		},

@@ -171,7 +171,7 @@ func (d *Dispatcher) deliverWebhook(ctx context.Context, job *deliveryJob) {
 		d.handleDeliveryError(ctx, job, err, duration)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Read response
 	body, _ := io.ReadAll(resp.Body)
@@ -226,7 +226,13 @@ func (d *Dispatcher) createDelivery(ctx context.Context, webhook *Webhook, event
 }
 
 // updateDeliverySuccess updates delivery as successful
-func (d *Dispatcher) updateDeliverySuccess(ctx context.Context, delivery *WebhookDelivery, statusCode int, responseBody string, durationMs int) {
+func (d *Dispatcher) updateDeliverySuccess(
+	ctx context.Context,
+	delivery *WebhookDelivery,
+	statusCode int,
+	responseBody string,
+	durationMs int,
+) {
 	now := time.Now()
 	query := `
 		UPDATE webhook_deliveries
@@ -245,7 +251,13 @@ func (d *Dispatcher) updateDeliverySuccess(ctx context.Context, delivery *Webhoo
 }
 
 // updateDeliveryFailed updates delivery as failed
-func (d *Dispatcher) updateDeliveryFailed(ctx context.Context, delivery *WebhookDelivery, errorMsg string, statusCode int, durationMs int) {
+func (d *Dispatcher) updateDeliveryFailed(
+	ctx context.Context,
+	delivery *WebhookDelivery,
+	errorMsg string,
+	statusCode int,
+	durationMs int,
+) {
 	now := time.Now()
 	query := `
 		UPDATE webhook_deliveries

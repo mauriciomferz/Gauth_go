@@ -51,7 +51,9 @@ type ChainValidationResult struct {
 }
 
 // NewDelegationChainValidator constructs a new chain validator.
-func NewDelegationChainValidator(repo POARepository, nowFn func() func() time.Time, metrics metrics.Metrics) *DelegationChainValidator {
+func NewDelegationChainValidator(
+	repo POARepository, nowFn func() func() time.Time, metrics metrics.Metrics,
+) *DelegationChainValidator {
 	return &DelegationChainValidator{
 		repo:    repo,
 		nowFn:   nowFn,
@@ -76,7 +78,9 @@ func NewDelegationChainValidator(repo POARepository, nowFn func() func() time.Ti
 //  3. Scope Inheritance: Each child's scopes MUST be subset of parent's scopes
 //  4. Status Validation: All PoAs in chain MUST be Active (not Revoked/Suspended/Expired)
 //  5. Depth Limits: Chain depth MUST NOT exceed AGENTAUTH_MAX_DELEGATION_DEPTH (default 5)
-func (v *DelegationChainValidator) ValidateChain(ctx context.Context, leafPOA *PowerOfAttorney, sessionUser string) (*ChainValidationResult, error) {
+func (v *DelegationChainValidator) ValidateChain(
+	ctx context.Context, leafPOA *PowerOfAttorney, sessionUser string,
+) (*ChainValidationResult, error) {
 	result := &ChainValidationResult{
 		Valid:       true,
 		ChainPath:   []*PowerOfAttorney{leafPOA},
@@ -86,7 +90,8 @@ func (v *DelegationChainValidator) ValidateChain(ctx context.Context, leafPOA *P
 	// Rule 1: Leaf PoA grantee must match session user (holder-of-key binding)
 	if leafPOA.Grantee != sessionUser {
 		result.Valid = false
-		result.Errors = append(result.Errors, fmt.Sprintf("leaf grantee mismatch: expected %s, got session user %s", leafPOA.Grantee, sessionUser))
+		result.Errors = append(result.Errors, fmt.Sprintf(
+			"leaf grantee mismatch: expected %s, got session user %s", leafPOA.Grantee, sessionUser))
 		if v.metrics != nil {
 			v.metrics.IncUnauthorized()
 		}
@@ -132,7 +137,8 @@ func (v *DelegationChainValidator) ValidateChain(ctx context.Context, leafPOA *P
 		parentPOA, ok := v.repo.Get(currentPOA.ParentPOAID)
 		if !ok || parentPOA == nil {
 			result.Valid = false
-			result.Errors = append(result.Errors, fmt.Sprintf("parent PoA %s not found for child %s", currentPOA.ParentPOAID, currentPOA.ID))
+			result.Errors = append(result.Errors, fmt.Sprintf(
+				"parent PoA %s not found for child %s", currentPOA.ParentPOAID, currentPOA.ID))
 			if v.metrics != nil {
 				v.metrics.IncUnauthorized()
 			}
@@ -153,7 +159,8 @@ func (v *DelegationChainValidator) ValidateChain(ctx context.Context, leafPOA *P
 		// Rule 3: Scope inheritance - child scopes must be subset of parent scopes
 		if err := validateInheritedScope(parentPOA.Scope, currentPOA.Scope); err != nil {
 			result.Valid = false
-			result.Errors = append(result.Errors, fmt.Sprintf("scope inheritance violation from %s to %s: %v", parentPOA.ID, currentPOA.ID, err))
+			result.Errors = append(result.Errors, fmt.Sprintf(
+				"scope inheritance violation from %s to %s: %v", parentPOA.ID, currentPOA.ID, err))
 			if v.metrics != nil {
 				v.metrics.IncScopeViolations()
 			}
@@ -174,7 +181,8 @@ func (v *DelegationChainValidator) ValidateChain(ctx context.Context, leafPOA *P
 		now := v.nowFn()()
 		if now.After(parentPOA.ValidUntil) {
 			result.Valid = false
-			result.Errors = append(result.Errors, fmt.Sprintf("parent PoA %s expired at %s", parentPOA.ID, parentPOA.ValidUntil.Format("2006-01-02T15:04:05Z")))
+			result.Errors = append(result.Errors, fmt.Sprintf(
+				"parent PoA %s expired at %s", parentPOA.ID, parentPOA.ValidUntil.Format("2006-01-02T15:04:05Z")))
 			if v.metrics != nil {
 				v.metrics.IncExpired()
 			}
@@ -195,7 +203,9 @@ func (v *DelegationChainValidator) ValidateChain(ctx context.Context, leafPOA *P
 
 // ValidateChainForAction validates both the chain structure AND that the action is permitted.
 // This combines structural validation with scope checking for the requested action.
-func (v *DelegationChainValidator) ValidateChainForAction(ctx context.Context, leafPOA *PowerOfAttorney, sessionUser, action string) error {
+func (v *DelegationChainValidator) ValidateChainForAction(
+	ctx context.Context, leafPOA *PowerOfAttorney, sessionUser, action string,
+) error {
 	// First validate chain structure
 	chainResult, err := v.ValidateChain(ctx, leafPOA, sessionUser)
 	if err != nil {

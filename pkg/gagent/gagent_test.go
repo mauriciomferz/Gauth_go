@@ -269,7 +269,11 @@ type MockRiskScorer struct {
 	score RiskScore
 }
 
-func (m *MockRiskScorer) CalculateRisk(ctx context.Context, req *enforcement.EnforcementRequest, pd PolicyDecision) (RiskScore, error) {
+func (m *MockRiskScorer) CalculateRisk(
+	ctx context.Context,
+	req *enforcement.EnforcementRequest,
+	pd PolicyDecision,
+) (RiskScore, error) {
 	return m.score, nil
 }
 

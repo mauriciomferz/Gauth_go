@@ -16,7 +16,7 @@ func TestKeyRotationSystemIntegration(t *testing.T) {
 
 	// Create temporary directory for test keys
 	tempDir := filepath.Join(os.TempDir(), "AGENTAUTH-test-keys")
-	defer os.RemoveAll(tempDir)
+	t.Cleanup(func() { _ = os.RemoveAll(tempDir) })
 
 	// Create file-based key store
 	store, err := NewFileKeyStore(tempDir, 24*time.Hour)
@@ -245,7 +245,7 @@ func TestFileKeyStoreInterface(t *testing.T) {
 // Benchmark key generation performance
 func BenchmarkKeyGeneration(b *testing.B) {
 	tempDir := filepath.Join(os.TempDir(), "AGENTAUTH-bench-keys")
-	defer os.RemoveAll(tempDir)
+	b.Cleanup(func() { _ = os.RemoveAll(tempDir) })
 
 	store, err := NewFileKeyStore(tempDir, 24*time.Hour)
 	if err != nil {

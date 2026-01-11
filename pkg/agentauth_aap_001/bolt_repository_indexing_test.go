@@ -15,7 +15,7 @@ func TestBoltRepository_FindByStatus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	// Create POAs with different statuses
 	now := time.Now()
@@ -105,7 +105,7 @@ func TestBoltRepository_FindExpired(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	now := time.Now()
 
@@ -177,7 +177,7 @@ func TestBoltRepository_PruneExpired(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	now := time.Now()
 
@@ -251,7 +251,7 @@ func TestBoltRepository_PruneRevoked(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	now := time.Now()
 
@@ -315,7 +315,7 @@ func TestBoltRepository_Update_ReindexStatus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	now := time.Now()
 
@@ -369,7 +369,7 @@ func TestBoltRepository_Stats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	now := time.Now()
 
@@ -455,7 +455,7 @@ func TestBoltRepository_ConcurrentPruning(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	now := time.Now()
 
@@ -535,14 +535,14 @@ func TestBoltRepository_PersistenceAcrossRestarts(t *testing.T) {
 	if err2 := repo1.Create(poa); err2 != nil {
 		t.Fatalf("failed to create POA: %v", err2)
 	}
-	repo1.Close()
+	_ = repo1.Close()
 
 	// Reopen repository
 	repo2, err := NewBoltRepository(dbPath)
 	if err != nil {
 		t.Fatalf("failed to reopen repository: %v", err)
 	}
-	defer repo2.Close()
+	defer func() { _ = repo2.Close() }()
 
 	// Verify indexes recovered
 	active, err := repo2.FindByStatus(POAStatusActive)
@@ -566,7 +566,7 @@ func TestBoltRepository_StorageSizeReduction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create repository: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	now := time.Now()
 

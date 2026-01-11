@@ -214,7 +214,9 @@ func (p *DefaultPVP) seedTrustProviders() {
 }
 
 // VerifyIdentityChain verifies the complete identity chain
-func (p *DefaultPVP) VerifyIdentityChain(ctx context.Context, req *IdentityChainVerificationRequest) (*IdentityChainVerificationResult, error) {
+func (p *DefaultPVP) VerifyIdentityChain(
+	ctx context.Context, req *IdentityChainVerificationRequest,
+) (*IdentityChainVerificationResult, error) {
 	result := &IdentityChainVerificationResult{
 		VerificationTimestamp: time.Now(),
 		VerificationDetails:   make([]VerificationDetail, 0),
@@ -381,9 +383,7 @@ func (p *DefaultPVP) verifyChainIntegrity(ctx context.Context, req *IdentityChai
 	// In real implementation, verify commercial register linkage
 
 	// 3. Owner's Authorizer → Client Owner (if present)
-	if req.OwnersAuthorizer != nil {
-		// Verify statutory authority
-	}
+	// Verify statutory authority (placeholder)
 
 	return true
 }
@@ -422,7 +422,9 @@ func (p *DefaultPVP) generateAuthorizationProof(result *IdentityChainVerificatio
 }
 
 // VerifyIdentityProof verifies a single identity proof credential
-func (p *DefaultPVP) VerifyIdentityProof(ctx context.Context, proof *agentauth.IdentityVerificationChain) (*IdentityProofResult, error) {
+func (p *DefaultPVP) VerifyIdentityProof(
+	ctx context.Context, proof *agentauth.IdentityVerificationChain,
+) (*IdentityProofResult, error) {
 	result := &IdentityProofResult{
 		Timestamp: time.Now(),
 	}
@@ -476,7 +478,9 @@ func (p *DefaultPVP) VerifyTrustServiceProvider(ctx context.Context, tspID strin
 }
 
 // TraceAuthorizationChain traces and validates authorization chain
-func (p *DefaultPVP) TraceAuthorizationChain(ctx context.Context, chain *agentauth.AuthorizationChain) (*ChainTraceResult, error) {
+func (p *DefaultPVP) TraceAuthorizationChain(
+	ctx context.Context, chain *agentauth.AuthorizationChain,
+) (*ChainTraceResult, error) {
 	result := &ChainTraceResult{
 		ChainLinks:       make([]ChainLinkTrace, 0),
 		VerificationDate: time.Now(),
@@ -540,7 +544,9 @@ func (p *DefaultPVP) calculateChainHash(links []ChainLinkTrace) string {
 }
 
 // BindIdentityToCryptographicKey binds identity to key
-func (p *DefaultPVP) BindIdentityToCryptographicKey(ctx context.Context, req *IdentityKeyBindingRequest) (*IdentityKeyBindingResult, error) {
+func (p *DefaultPVP) BindIdentityToCryptographicKey(
+	ctx context.Context, req *IdentityKeyBindingRequest,
+) (*IdentityKeyBindingResult, error) {
 	// Verify identity credential
 	if req.IdentityCredential.ExpiresAt.Before(time.Now()) {
 		return nil, fmt.Errorf("identity credential expired")

@@ -38,7 +38,7 @@ func TestDiscoveryCache_Expiration_Cleanup(t *testing.T) {
 	// and trust the loop logic (std lib Ticker/Select).
 
 	cache := NewInMemoryDiscoveryCache()
-	defer cache.Close()
+	t.Cleanup(func() { _ = cache.Close() })
 
 	doc := &OIDCConfiguration{Issuer: "https://expired.com"}
 	// Set 1ms TTL

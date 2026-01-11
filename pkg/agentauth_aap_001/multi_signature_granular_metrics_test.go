@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -54,7 +53,7 @@ func (p *msGranProvider) VerifyWith(msg, sig []byte, keyID string) error {
 // TestMultiSignatureGranularCounters verifies granular counters increment along distinct failure paths.
 func TestMultiSignatureGranularCounters(t *testing.T) {
 	// Ensure weighted mode disabled so threshold logic uses simple counts
-	os.Unsetenv("AGENTAUTH_MULTI_SIG_WEIGHTS")
+	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "")
 	mem := imetrics.NewMemory()
 	// Generate keys for alice,bob
 	pubA, privA, _ := ed25519.GenerateKey(rand.Reader)

@@ -115,7 +115,12 @@ type ModelLimitsNotarizeSignResult struct {
 // excluding signature-bearing fields and passing in contextual hashes. Returns a result struct; failures in
 // notarization or signing do not produce hard errors (best-effort) unless active key material is missing.
 // seed format: attest|<snapshotHash>|<auditHead>|<anchorHead> (sha256)
-func (s *AttestationService) NotarizeAndSignModelLimits(unsignedJSON []byte, snapshotHash, auditHead, anchorHead string, enableNotarization, enableSigning bool, notarizer notary.Notarizer) (ModelLimitsNotarizeSignResult, error) {
+func (s *AttestationService) NotarizeAndSignModelLimits(
+	unsignedJSON []byte,
+	snapshotHash, auditHead, anchorHead string,
+	enableNotarization, enableSigning bool,
+	notarizer notary.Notarizer,
+) (ModelLimitsNotarizeSignResult, error) {
 	res := ModelLimitsNotarizeSignResult{}
 	// Compute combined hash for potential notarization.
 	combinedSeed := fmt.Sprintf("attest|%s|%s|%s", snapshotHash, auditHead, anchorHead)
@@ -128,7 +133,12 @@ func (s *AttestationService) NotarizeAndSignModelLimits(unsignedJSON []byte, sna
 				Timestamp      string  `json:"timestamp"`
 				LatencySeconds float64 `json:"latency_seconds"`
 				Success        bool    `json:"success"`
-			}{Provider: receipt.Provider, Timestamp: receipt.Timestamp, LatencySeconds: receipt.LatencySeconds, Success: receipt.Success}
+			}{
+				Provider:       receipt.Provider,
+				Timestamp:      receipt.Timestamp,
+				LatencySeconds: receipt.LatencySeconds,
+				Success:        receipt.Success,
+			}
 		}
 	}
 	if !enableSigning {

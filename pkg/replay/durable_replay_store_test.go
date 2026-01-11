@@ -22,7 +22,7 @@ func TestDurableReplayStore_BasicOperations(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	jti := "test-jti-123"
 
@@ -80,14 +80,16 @@ func TestDurableReplayStore_Persistence(t *testing.T) {
 	}
 
 	// Close first instance
-	store1.Close()
+	if closeErr := store1.Close(); closeErr != nil {
+		t.Fatalf("close store1: %v", closeErr)
+	}
 
 	// Create second instance (should recover from WAL)
 	store2, err := NewDurableReplayStore(config)
 	if err != nil {
 		t.Fatalf("failed to create store2: %v", err)
 	}
-	defer store2.Close()
+	t.Cleanup(func() { _ = store2.Close() })
 
 	// Verify JTIs recovered
 	seen1, _ := store2.Seen(jti1)
@@ -116,7 +118,7 @@ func TestDurableReplayStore_TTLExpiration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	jti := "expiring-jti"
 
@@ -177,14 +179,16 @@ func TestDurableReplayStore_Snapshot(t *testing.T) {
 		t.Error("expected snapshot file to exist")
 	}
 
-	store1.Close()
+	if closeErr := store1.Close(); closeErr != nil {
+		t.Fatalf("close store1: %v", closeErr)
+	}
 
 	// Recover from snapshot
 	store2, err := NewDurableReplayStore(config)
 	if err != nil {
 		t.Fatalf("failed to create store2: %v", err)
 	}
-	defer store2.Close()
+	t.Cleanup(func() { _ = store2.Close() })
 
 	// Verify all JTIs recovered
 	for i := 0; i < 10; i++ {
@@ -211,7 +215,7 @@ func TestDurableReplayStore_ConcurrentAccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Concurrent Record operations
 	done := make(chan bool, 10)
@@ -253,7 +257,7 @@ func TestDurableReplayStore_Stats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Record JTIs
 	if err := store.Record("jti-1", time.Now()); err != nil {
@@ -293,7 +297,7 @@ func TestDurableReplayStoreAdapter_AAP001Integration(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	adapter := NewDurableReplayStoreAdapter(store)
 
@@ -339,6 +343,7 @@ func TestDurableReplayStore_AutomaticSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Record JTIs
 	_ = store.Record("auto-snapshot-jti-1", time.Now()) //nolint:errcheck
@@ -352,8 +357,6 @@ func TestDurableReplayStore_AutomaticSnapshot(t *testing.T) {
 	if _, err := os.Stat(snapshotPath); os.IsNotExist(err) {
 		t.Error("expected automatic snapshot file to exist")
 	}
-
-	store.Close()
 }
 
 // TestDurableReplayStore_GracefulShutdown verifies final snapshot on Close().
@@ -376,7 +379,9 @@ func TestDurableReplayStore_GracefulShutdown(t *testing.T) {
 	_ = store.Record("shutdown-jti", time.Now()) //nolint:errcheck
 
 	// Close (should trigger final snapshot)
-	store.Close()
+	if closeErr := store.Close(); closeErr != nil {
+		t.Fatalf("close: %v", closeErr)
+	}
 
 	// Verify snapshot created on shutdown
 	snapshotPath := walPath + ".snapshot"
@@ -389,7 +394,7 @@ func TestDurableReplayStore_GracefulShutdown(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store2: %v", err)
 	}
-	defer store2.Close()
+	t.Cleanup(func() { _ = store2.Close() })
 
 	seen, _ := store2.Seen("shutdown-jti")
 	if !seen {
@@ -412,7 +417,7 @@ func TestDurableReplayStore_Size(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create store: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Initial size should be 0
 	if size := store.Size(); size != 0 {

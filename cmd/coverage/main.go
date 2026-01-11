@@ -141,7 +141,7 @@ func processTestFile(path string, markers map[string][]TestRef) error {
 	if err != nil {
 		return fmt.Errorf("open test file: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	scanner := bufio.NewScanner(f)
 	var currentMarkers []string

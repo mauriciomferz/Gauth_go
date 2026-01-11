@@ -168,7 +168,7 @@ func (c *Client) Anchor(ctx context.Context, hash []byte) (anchor.Receipt, error
 	if err != nil {
 		return anchor.Receipt{}, fmt.Errorf("tsa request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return anchor.Receipt{}, fmt.Errorf("tsa returned status %d", resp.StatusCode)

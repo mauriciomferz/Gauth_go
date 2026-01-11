@@ -47,7 +47,7 @@ func setupCircuitBreakerTest(t *testing.T) (*CircuitBreaker, *miniredis.Miniredi
 func TestCircuitBreaker_NormalOperation(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-normal"
@@ -76,7 +76,7 @@ func TestCircuitBreaker_NormalOperation(t *testing.T) {
 func TestCircuitBreaker_TransactionRateLimit(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-rate-limit"
@@ -104,7 +104,7 @@ func TestCircuitBreaker_TransactionRateLimit(t *testing.T) {
 func TestCircuitBreaker_ValueRateLimit(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-value-limit"
@@ -131,7 +131,7 @@ func TestCircuitBreaker_ValueRateLimit(t *testing.T) {
 func TestCircuitBreaker_FailureRateThreshold(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-failure-rate"
@@ -162,7 +162,7 @@ func TestCircuitBreaker_FailureRateThreshold(t *testing.T) {
 func TestCircuitBreaker_AutoRecovery(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-recovery"
@@ -188,8 +188,8 @@ func TestCircuitBreaker_AutoRecovery(t *testing.T) {
 
 	// Record test transactions (should succeed)
 	for i := 0; i < cb.GetRecoveryTestCount(); i++ {
-		err := cb.RecordTransaction(ctx, poaID, 1e17, true)
-		assert.NoError(t, err)
+		recordErr := cb.RecordTransaction(ctx, poaID, 1e17, true)
+		assert.NoError(t, recordErr)
 	}
 
 	// Circuit should be closed now
@@ -202,7 +202,7 @@ func TestCircuitBreaker_AutoRecovery(t *testing.T) {
 func TestCircuitBreaker_ManualSuspendResume(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-manual"
@@ -234,7 +234,7 @@ func TestCircuitBreaker_ManualSuspendResume(t *testing.T) {
 func TestCircuitBreaker_ResetMetrics(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-reset"
@@ -264,7 +264,7 @@ func TestCircuitBreaker_ResetMetrics(t *testing.T) {
 func TestCircuitBreaker_ConfigurationGettersSetters(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	// Test suspension duration
 	newDuration := 10 * time.Minute
@@ -296,7 +296,7 @@ func TestCircuitBreaker_ConfigurationGettersSetters(t *testing.T) {
 func TestCircuitBreaker_HalfOpenFailure(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "test-poa-halfopen-fail"
@@ -330,7 +330,7 @@ func TestCircuitBreaker_HalfOpenFailure(t *testing.T) {
 func TestCircuitBreaker_MultiplePoAs(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 
@@ -368,7 +368,7 @@ func TestCircuitBreaker_MultiplePoAs(t *testing.T) {
 func TestCircuitBreaker_GetMetricsNonExistent(t *testing.T) {
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	t.Cleanup(func() { _ = cb.Close() })
 
 	ctx := context.Background()
 	poaID := "non-existent-poa"

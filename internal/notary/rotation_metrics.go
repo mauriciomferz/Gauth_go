@@ -73,7 +73,14 @@ func recordRotationVerification(start time.Time, summary RotationVerificationSum
 }
 
 // RecordRotationSummary records metrics for the rotation summary endpoint.
-func RecordRotationSummary(start time.Time, sum *RotationSummary, anchored bool, err error, anchorAttempted bool, anchorErr error) {
+func RecordRotationSummary(
+	start time.Time,
+	sum *RotationSummary,
+	anchored bool,
+	err error,
+	anchorAttempted bool,
+	anchorErr error,
+) {
 	rotationSummaryLatency.Observe(time.Since(start).Seconds())
 	outcome := rotationOutcomeSuccess
 	if err != nil {

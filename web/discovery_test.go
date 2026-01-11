@@ -47,7 +47,7 @@ func TestWellKnownDiscovery(t *testing.T) {
 // TestDiscoveryExactKeys ensures discovery payload contains required keys and jwks_uri empties when JWT disabled.
 func TestDiscoveryExactKeys(t *testing.T) {
 	// Scenario 1: Neither JWT library nor EdDSA mode active -> jwks_uri should still be populated (Dynamic Identity default).
-	os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
+	t.Setenv("AGENTAUTH_USE_JWT_LIB", "")
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac") // force legacy HMAC
 	srv := NewBetaServer(":0")
 	t.Cleanup(func() { srv.Shutdown() })
@@ -87,7 +87,7 @@ func TestDiscoveryExactKeys(t *testing.T) {
 	}
 
 	// Scenario 3: Disable JWT but enable EdDSA -> jwks_uri populated (new behavior after EdDSA introduction).
-	os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
+	_ = os.Unsetenv("AGENTAUTH_USE_JWT_LIB")
 	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
 	srv3 := NewBetaServer(":0")
 	t.Cleanup(func() { srv3.Shutdown() })

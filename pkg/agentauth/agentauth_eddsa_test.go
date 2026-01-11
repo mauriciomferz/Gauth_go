@@ -2,7 +2,6 @@ package agentauth
 
 import (
 	"encoding/base64"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -11,8 +10,11 @@ import (
 )
 
 func TestEdDSATokenIssueAndValidate(t *testing.T) {
-	os.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
-	svc, err := New(Config{AuthServerURL: "http://localhost", ClientID: "client-1", ClientSecret: "secret", AccessTokenExpiry: time.Minute})
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	svc, err := New(Config{
+		AuthServerURL: "http://localhost", ClientID: "client-1",
+		ClientSecret: "secret", AccessTokenExpiry: time.Minute,
+	})
 	if err != nil {
 		t.Fatalf("New error: %v", err)
 	}
@@ -41,8 +43,11 @@ func TestEdDSATokenIssueAndValidate(t *testing.T) {
 }
 
 func TestEdDSATokenTamper(t *testing.T) {
-	os.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
-	svc, err := New(Config{AuthServerURL: "http://localhost", ClientID: "client-1", ClientSecret: "secret", AccessTokenExpiry: time.Minute})
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	svc, err := New(Config{
+		AuthServerURL: "http://localhost", ClientID: "client-1",
+		ClientSecret: "secret", AccessTokenExpiry: time.Minute,
+	})
 	if err != nil {
 		t.Fatalf("new error: %v", err)
 	}
@@ -63,8 +68,11 @@ func TestEdDSATokenTamper(t *testing.T) {
 }
 
 func TestEdDSAUnknownKid(t *testing.T) {
-	os.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
-	svc, err := New(Config{AuthServerURL: "http://localhost", ClientID: "client-1", ClientSecret: "secret", AccessTokenExpiry: time.Minute})
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	svc, err := New(Config{
+		AuthServerURL: "http://localhost", ClientID: "client-1",
+		ClientSecret: "secret", AccessTokenExpiry: time.Minute,
+	})
 	if err != nil {
 		t.Fatalf("new error: %v", err)
 	}
@@ -90,9 +98,12 @@ func TestEdDSAUnknownKid(t *testing.T) {
 }
 
 func TestEdDSARotatedOldKeyStillValidUntilExpiry(t *testing.T) {
-	os.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
-	os.Setenv("AGENTAUTH_KEY_ROTATION_HOURS", "2")
-	svc, err := New(Config{AuthServerURL: "http://localhost", ClientID: "client-1", ClientSecret: "secret", AccessTokenExpiry: time.Minute})
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "eddsa")
+	t.Setenv("AGENTAUTH_KEY_ROTATION_HOURS", "2")
+	svc, err := New(Config{
+		AuthServerURL: "http://localhost", ClientID: "client-1",
+		ClientSecret: "secret", AccessTokenExpiry: time.Minute,
+	})
 	if err != nil {
 		t.Fatalf("new error: %v", err)
 	}

@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -70,7 +69,7 @@ func (e ErrUnknownKey) Error() string { return "unknown key " + string(e) }
 
 // TestMultiSignatureMetricsSuccessAndFailure verifies counters increment on success vs threshold failure.
 func TestMultiSignatureMetricsSuccessAndFailure(t *testing.T) {
-	os.Unsetenv("AGENTAUTH_MULTI_SIG_WEIGHTS")
+	t.Setenv("AGENTAUTH_MULTI_SIG_WEIGHTS", "")
 	mem := imetrics.NewMemory()
 	// Generate three keys
 	pubA, privA, _ := ed25519.GenerateKey(rand.Reader)

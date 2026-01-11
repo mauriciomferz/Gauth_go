@@ -9,12 +9,18 @@ import (
 // FuzzValidateToken exercises ValidateToken with malformed / random token structures
 // ensuring it never panics. Focuses on legacy HMAC path for deterministic behavior.
 func FuzzValidateToken(f *testing.F) {
-	svc, err := New(Config{ClientID: "fuzz-client", ClientSecret: strings.Repeat("y", 40), AuthServerURL: "https://auth.local", AccessTokenExpiry: time.Hour})
+	svc, err := New(Config{
+		ClientID: "fuzz-client", ClientSecret: strings.Repeat("y", 40),
+		AuthServerURL: "https://auth.local", AccessTokenExpiry: time.Hour,
+	})
 	if err != nil {
 		f.Fatalf("service init: %v", err)
 	}
 	// Seed corpus with a few well-formed tokens
-	baseClaims := map[string]any{"sub": "fuzz-client", "scope": "read", "exp": time.Now().Add(time.Hour).Unix(), "iat": time.Now().Unix()}
+	baseClaims := map[string]any{
+		"sub": "fuzz-client", "scope": "read",
+		"exp": time.Now().Add(time.Hour).Unix(), "iat": time.Now().Unix(),
+	}
 	goodTok := buildManualToken(svc.signingKey, baseClaims)
 	f.Add(goodTok)
 	f.Add("")

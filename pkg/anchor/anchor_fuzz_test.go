@@ -21,7 +21,7 @@ func FuzzAnchorPersistence(f *testing.F) {
 		if err != nil {
 			return
 		}
-		defer os.Remove(tmpfile.Name())
+		defer func() { _ = os.Remove(tmpfile.Name()) }()
 
 		if _, err := tmpfile.Write(data); err != nil {
 			return

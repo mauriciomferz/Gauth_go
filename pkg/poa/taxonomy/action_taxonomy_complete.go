@@ -648,8 +648,11 @@ func GetPhysicalActionMetadata(pa ActionTypePhysical) (*PhysicalActionMetadata, 
 				Legal:        RiskCritical,
 				Safety:       RiskCritical,
 			},
-			ComplianceReqs: []string{"Medical_License", "Surgical_Protocols", "Patient_Consent", "Emergency_Procedures", "Insurance", "Regulatory_Approval"},
-			Description:    "Medical/surgical procedures - requires medical license and comprehensive approvals",
+			ComplianceReqs: []string{
+				"Medical_License", "Surgical_Protocols", "Patient_Consent",
+				"Emergency_Procedures", "Insurance", "Regulatory_Approval",
+			},
+			Description: "Medical/surgical procedures - requires medical license and comprehensive approvals",
 		},
 		ActionPhysicalDelivery: {
 			Type:                ActionPhysicalDelivery,
@@ -1200,33 +1203,52 @@ func generateRecommendations(report *ComprehensiveTaxonomyReport) []string {
 	recommendations := []string{}
 
 	if report.OverallRisk == RiskCritical {
-		recommendations = append(recommendations, "CRITICAL: This action set contains critical risk actions. Comprehensive approval workflow and continuous monitoring required.")
+		recommendations = append(recommendations,
+			"CRITICAL: This action set contains critical risk actions. "+
+				"Comprehensive approval workflow and continuous monitoring required.")
 	} else if report.OverallRisk == RiskHigh {
-		recommendations = append(recommendations, "HIGH RISK: This action set contains high risk actions. Approval workflow and regular monitoring strongly recommended.")
+		recommendations = append(recommendations,
+			"HIGH RISK: This action set contains high risk actions. "+
+				"Approval workflow and regular monitoring strongly recommended.")
 	}
 
 	if report.RequiresSafety > 0 {
-		recommendations = append(recommendations, fmt.Sprintf("%d actions require safety measures. Ensure appropriate safety protocols and equipment are in place.", report.RequiresSafety))
+		recommendations = append(recommendations, fmt.Sprintf(
+			"%d actions require safety measures. "+
+				"Ensure appropriate safety protocols and equipment are in place.",
+			report.RequiresSafety))
 	}
 
 	if report.RequiresSupervision > 0 {
-		recommendations = append(recommendations, fmt.Sprintf("%d actions require supervision. Ensure qualified supervisors are assigned.", report.RequiresSupervision))
+		recommendations = append(recommendations, fmt.Sprintf(
+			"%d actions require supervision. Ensure qualified supervisors are assigned.",
+			report.RequiresSupervision))
 	}
 
 	if len(report.PhysicalDetails) > 0 {
-		recommendations = append(recommendations, "Physical actions authorized. Verify client has appropriate physical capabilities and certifications.")
+		recommendations = append(recommendations,
+			"Physical actions authorized. "+
+				"Verify client has appropriate physical capabilities and certifications.")
 	}
 
 	if len(report.TransactionDetails) > 0 {
-		recommendations = append(recommendations, "Financial transactions authorized. Implement transaction limits and comprehensive audit trail.")
+		recommendations = append(recommendations,
+			"Financial transactions authorized. "+
+				"Implement transaction limits and comprehensive audit trail.")
 	}
 
 	if report.RequiresApproval > 0 {
-		recommendations = append(recommendations, fmt.Sprintf("%d actions require approval. Establish clear approval workflows and authority matrices.", report.RequiresApproval))
+		recommendations = append(recommendations, fmt.Sprintf(
+			"%d actions require approval. "+
+				"Establish clear approval workflows and authority matrices.",
+			report.RequiresApproval))
 	}
 
 	if len(report.ComplianceReqsSet) > 5 {
-		recommendations = append(recommendations, fmt.Sprintf("Complex compliance requirements (%d unique requirements). Consider compliance management system.", len(report.ComplianceReqsSet)))
+		recommendations = append(recommendations, fmt.Sprintf(
+			"Complex compliance requirements (%d unique requirements). "+
+				"Consider compliance management system.",
+			len(report.ComplianceReqsSet)))
 	}
 
 	return recommendations

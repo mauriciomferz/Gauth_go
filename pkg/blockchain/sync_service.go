@@ -384,8 +384,8 @@ func (s *BlockchainSyncService) registerOnBlockchain(ctx context.Context, poa *E
 	// Step 2: Store full metadata on IPFS
 	var metadataURI string
 	if s.ipfsService != nil {
-		cid, err := s.ipfsService.StoreMetadata(ctx, poa)
-		if err != nil {
+		cid, storeErr := s.ipfsService.StoreMetadata(ctx, poa)
+		if storeErr != nil {
 			// Log warning but continue - IPFS is optional
 			metadataURI = ""
 		} else {

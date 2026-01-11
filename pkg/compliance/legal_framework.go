@@ -181,7 +181,9 @@ func (v *LegalFrameworkValidator) ValidateJurisdiction(ctx context.Context, juri
 }
 
 // ValidateJurisdictionRequirements validates a specific action against jurisdiction requirements.
-func (v *LegalFrameworkValidator) ValidateJurisdictionRequirements(ctx context.Context, requirements *JurisdictionRequirements, action string) error {
+func (v *LegalFrameworkValidator) ValidateJurisdictionRequirements(
+	ctx context.Context, requirements *JurisdictionRequirements, action string,
+) error {
 	if requirements == nil {
 		return fmt.Errorf("jurisdiction requirements cannot be nil")
 	}
@@ -292,18 +294,23 @@ func (v *LegalFrameworkValidator) GetMetrics() *LegalMetrics {
 func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 	// United States
 	v.supportedJurisdictions[JurisdictionUS] = JurisdictionRequirements{
-		Jurisdiction:      JurisdictionUS,
-		SupportedEntities: []EntityType{EntityTypeCorporation, EntityTypeLLC, EntityTypePartnership, EntityTypeIndividual, EntityTypeOrganization, EntityTypeAIAgent},
+		Jurisdiction: JurisdictionUS,
+		SupportedEntities: []EntityType{
+			EntityTypeCorporation, EntityTypeLLC, EntityTypePartnership,
+			EntityTypeIndividual, EntityTypeOrganization, EntityTypeAIAgent,
+		},
 		ComplianceRules: []ComplianceRule{
 			{Framework: "SOX", Requirement: "Financial reporting compliance", Mandatory: true},
 			{Framework: "FINRA", Requirement: "Financial industry regulation", Mandatory: true},
 			{Framework: "CCPA", Requirement: "California privacy compliance", Mandatory: false},
-			{Framework: "AI_OVERSIGHT", Requirement: "AI decisions require human oversight", Mandatory: true, Validation: func(action interface{}) error {
-				if actionStr, ok := action.(string); ok && actionStr == "autonomous_decision" {
-					return fmt.Errorf("autonomous AI decisions not permitted - require centralized control")
-				}
-				return nil
-			}},
+			{Framework: "AI_OVERSIGHT",
+				Requirement: "AI decisions require human oversight",
+				Mandatory:   true, Validation: func(action interface{}) error {
+					if actionStr, ok := action.(string); ok && actionStr == "autonomous_decision" {
+						return fmt.Errorf("autonomous AI decisions not permitted - require centralized control")
+					}
+					return nil
+				}},
 		},
 		ValueLimits: map[string]float64{
 			"trade_execution":        10000000.0, // $10M limit
@@ -323,18 +330,23 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 
 	// European Union
 	v.supportedJurisdictions[JurisdictionEU] = JurisdictionRequirements{
-		Jurisdiction:      JurisdictionEU,
-		SupportedEntities: []EntityType{EntityTypeCorporation, EntityTypePartnership, EntityTypeIndividual, EntityTypeTrust, EntityTypeOrganization, EntityTypeAIAgent},
+		Jurisdiction: JurisdictionEU,
+		SupportedEntities: []EntityType{
+			EntityTypeCorporation, EntityTypePartnership, EntityTypeIndividual,
+			EntityTypeTrust, EntityTypeOrganization, EntityTypeAIAgent,
+		},
 		ComplianceRules: []ComplianceRule{
 			{Framework: "GDPR", Requirement: "Data protection compliance", Mandatory: true},
 			{Framework: "MiFID II", Requirement: "Markets in financial instruments", Mandatory: true},
 			{Framework: "PSD2", Requirement: "Payment services directive", Mandatory: false},
-			{Framework: "EU_AI_ACT", Requirement: "AI risk management and oversight", Mandatory: true, Validation: func(action interface{}) error {
-				if actionStr, ok := action.(string); ok && strings.Contains(actionStr, "unauthorized") {
-					return fmt.Errorf("unauthorized actions not permitted under EU AI Act")
-				}
-				return nil
-			}},
+			{Framework: "EU_AI_ACT",
+				Requirement: "AI risk management and oversight",
+				Mandatory:   true, Validation: func(action interface{}) error {
+					if actionStr, ok := action.(string); ok && strings.Contains(actionStr, "unauthorized") {
+						return fmt.Errorf("unauthorized actions not permitted under EU AI Act")
+					}
+					return nil
+				}},
 		},
 		ValueLimits: map[string]float64{
 			"trade_execution":        8000000.0, // €8M limit
@@ -350,8 +362,11 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 
 	// United Kingdom
 	v.supportedJurisdictions[JurisdictionUK] = JurisdictionRequirements{
-		Jurisdiction:      JurisdictionUK,
-		SupportedEntities: []EntityType{EntityTypeCorporation, EntityTypePartnership, EntityTypeIndividual, EntityTypeOrganization, EntityTypeAIAgent},
+		Jurisdiction: JurisdictionUK,
+		SupportedEntities: []EntityType{
+			EntityTypeCorporation, EntityTypePartnership, EntityTypeIndividual,
+			EntityTypeOrganization, EntityTypeAIAgent,
+		},
 		ComplianceRules: []ComplianceRule{
 			{Framework: "UK GDPR", Requirement: "UK data protection", Mandatory: true},
 			{Framework: "FCA", Requirement: "Financial conduct authority", Mandatory: true},
@@ -370,8 +385,11 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 
 	// Canada
 	v.supportedJurisdictions[JurisdictionCA] = JurisdictionRequirements{
-		Jurisdiction:      JurisdictionCA,
-		SupportedEntities: []EntityType{EntityTypeCorporation, EntityTypeLLC, EntityTypePartnership, EntityTypeOrganization, EntityTypeAIAgent},
+		Jurisdiction: JurisdictionCA,
+		SupportedEntities: []EntityType{
+			EntityTypeCorporation, EntityTypeLLC, EntityTypePartnership,
+			EntityTypeOrganization, EntityTypeAIAgent,
+		},
 		ComplianceRules: []ComplianceRule{
 			{Framework: "PIPEDA", Requirement: "Personal information protection", Mandatory: true},
 			{Framework: "OSC", Requirement: "Ontario securities commission", Mandatory: false},
@@ -390,8 +408,11 @@ func (v *LegalFrameworkValidator) initializeDefaultJurisdictions() {
 
 	// Australia
 	v.supportedJurisdictions[JurisdictionAU] = JurisdictionRequirements{
-		Jurisdiction:      JurisdictionAU,
-		SupportedEntities: []EntityType{EntityTypeCorporation, EntityTypePartnership, EntityTypeIndividual, EntityTypeOrganization, EntityTypeAIAgent},
+		Jurisdiction: JurisdictionAU,
+		SupportedEntities: []EntityType{
+			EntityTypeCorporation, EntityTypePartnership, EntityTypeIndividual,
+			EntityTypeOrganization, EntityTypeAIAgent,
+		},
 		ComplianceRules: []ComplianceRule{
 			{Framework: "Privacy Act", Requirement: "Australian privacy principles", Mandatory: true},
 			{Framework: "ASIC", Requirement: "Australian securities regulation", Mandatory: true},

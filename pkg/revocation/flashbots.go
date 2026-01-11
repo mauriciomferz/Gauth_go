@@ -115,8 +115,8 @@ func (f *FlashbotsRevocation) RevokePoA(ctx context.Context, poaID string, princ
 	// Production implementation should use github.com/flashbots/mev-share-go
 	f.logger.Info("Submitting to Flashbots relay (private mempool)...")
 
-	if err := f.submitToFlashbots(ctx, signedTx); err != nil {
-		return fmt.Errorf("flashbots submission failed: %w", err)
+	if submitErr := f.submitToFlashbots(ctx, signedTx); submitErr != nil {
+		return fmt.Errorf("flashbots submission failed: %w", submitErr)
 	}
 
 	// Step 4: Wait for inclusion
@@ -189,8 +189,8 @@ func (f *FlashbotsRevocation) encodeRevocationCall(poaID string) ([]byte, error)
 	poaIDBytes := common.HexToHash(poaID)
 
 	// Combine selector + argument
-	data := append(selector, poaIDBytes.Bytes()...)
-
+	data := selector
+	data = append(data, poaIDBytes.Bytes()...)
 	return data, nil
 }
 
@@ -217,7 +217,11 @@ func (f *FlashbotsRevocation) submitToFlashbots(ctx context.Context, signedTx *t
 }
 
 // waitForInclusion waits for transaction to be included in a block
-func (f *FlashbotsRevocation) waitForInclusion(ctx context.Context, txHash common.Hash, timeout time.Duration) (*types.Receipt, error) {
+func (f *FlashbotsRevocation) waitForInclusion(
+	ctx context.Context,
+	txHash common.Hash,
+	timeout time.Duration,
+) (*types.Receipt, error) {
 	deadline := time.Now().Add(timeout)
 
 	ticker := time.NewTicker(1 * time.Second)

@@ -11,7 +11,10 @@ import (
 func TestRawPOAStreamBasic(t *testing.T) {
 	items := []stream.RawPOAItem{
 		{ID: "a1", Issuer: "org1", Subject: "alice", Timestamp: 1, Algo: "ed25519", Signature: []byte{0x01, 0x02}},
-		{ID: "a2", Issuer: "org1", Subject: "bob", Timestamp: 2, Algo: "ed25519", Signature: []byte{0x03, 0x04}}, // no prev_hash for legacy path
+		{
+			ID: "a2", Issuer: "org1", Subject: "bob", Timestamp: 2,
+			Algo: "ed25519", Signature: []byte{0x03, 0x04}, // no prev_hash for legacy path
+		},
 	}
 	enc, err := stream.EncodeRawPOAChain(items)
 	if err != nil {
@@ -31,7 +34,10 @@ func TestRawPOAStreamBasic(t *testing.T) {
 
 func TestRawPOAStreamLimits(t *testing.T) {
 	// Single item oversize limit
-	item := stream.RawPOAItem{ID: "big", Issuer: "i", Subject: "s", Timestamp: 5, Algo: "ed25519", Signature: bytes.Repeat([]byte{0xFF}, 200)}
+	item := stream.RawPOAItem{
+		ID: "big", Issuer: "i", Subject: "s", Timestamp: 5,
+		Algo: "ed25519", Signature: bytes.Repeat([]byte{0xFF}, 200),
+	}
 	enc, _ := stream.EncodeRawPOAChain([]stream.RawPOAItem{item})
 	limits := stream.StreamLimits{MaxItems: 1, MaxItemBytes: 64, MaxTotalBytes: 1024}
 	_, err := stream.DecodeRawPOAStream(bytes.NewReader(enc), limits)
@@ -63,7 +69,10 @@ func TestRawPOAStreamPrevHashContinuity(t *testing.T) {
 		t.Fatalf("marshal first: %v", err)
 	}
 	h := sha256.Sum256(b1)
-	second := stream.RawPOAItem{ID: "p2", Issuer: "org", Subject: "v", Timestamp: 2, Algo: "ed25519", Signature: []byte{0xBB}, PrevHash: h[:]} // continuity
+	second := stream.RawPOAItem{
+		ID: "p2", Issuer: "org", Subject: "v", Timestamp: 2,
+		Algo: "ed25519", Signature: []byte{0xBB}, PrevHash: h[:], // continuity
+	}
 	enc, err := stream.EncodeRawPOAChain([]stream.RawPOAItem{first, second})
 	if err != nil {
 		t.Fatalf("encode: %v", err)
@@ -79,7 +88,10 @@ func TestRawPOAStreamPrevHashContinuity(t *testing.T) {
 
 func TestRawPOAStreamPrevHashMismatch(t *testing.T) {
 	first := stream.RawPOAItem{ID: "x1", Issuer: "org", Subject: "u", Timestamp: 1, Algo: "ed25519", Signature: []byte{0xAA}}
-	second := stream.RawPOAItem{ID: "x2", Issuer: "org", Subject: "v", Timestamp: 2, Algo: "ed25519", Signature: []byte{0xBB}, PrevHash: []byte{0x00, 0x01}} // wrong
+	second := stream.RawPOAItem{
+		ID: "x2", Issuer: "org", Subject: "v", Timestamp: 2,
+		Algo: "ed25519", Signature: []byte{0xBB}, PrevHash: []byte{0x00, 0x01}, // wrong
+	}
 	enc, _ := stream.EncodeRawPOAChain([]stream.RawPOAItem{first, second})
 	_, err := stream.DecodeRawPOAStreamWith(bytes.NewReader(enc), stream.DefaultStreamLimits, stream.RawPOAHashSHA256, true)
 	if err == nil {

@@ -78,7 +78,7 @@ func (a *API) HandleSign(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 
 	var req SignRequest
 	if err2 := json.Unmarshal(body, &req); err2 != nil {

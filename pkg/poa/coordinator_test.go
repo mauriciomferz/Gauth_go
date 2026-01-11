@@ -25,7 +25,10 @@ func NewMockPoARepository() *MockPoARepository {
 }
 
 // AddMultiSignature simulates the DB transaction with locking
-func (m *MockPoARepository) AddMultiSignature(ctx context.Context, tenantID, poaID string, signerID string, signature map[string]interface{}, threshold int) (*PoARecord, error) {
+func (m *MockPoARepository) AddMultiSignature(
+	ctx context.Context, tenantID, poaID string, signerID string,
+	signature map[string]interface{}, threshold int,
+) (*PoARecord, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -94,7 +97,9 @@ func (m *MockPoARepository) ApprovePoA(ctx context.Context, tenantID, poaID, app
 func (m *MockPoARepository) RejectPoA(ctx context.Context, tenantID, poaID, rejectedBy, reason string) error {
 	return nil
 }
-func (m *MockPoARepository) ValidatePoA(ctx context.Context, tenantID, grantorID, representativeID, action, resource string) (*PoARecord, bool, string) {
+func (m *MockPoARepository) ValidatePoA(
+	ctx context.Context, tenantID, grantorID, representativeID, action, resource string,
+) (*PoARecord, bool, string) {
 	return nil, false, ""
 }
 func (m *MockPoARepository) GetPoAStats(ctx context.Context, tenantID string) (*PoAStats, error) {
@@ -118,11 +123,11 @@ func TestMultiSigCoordinator_CollectSignature_Concurrency(t *testing.T) {
 	poaID := "poa1"
 
 	// Setup initial POA
-	repo.CreatePoA(context.Background(), &PoARecord{
+	assert.NoError(t, repo.CreatePoA(context.Background(), &PoARecord{
 		ID:       poaID,
 		TenantID: tenantID,
 		Status:   "pending",
-	})
+	}))
 
 	threshold := 5
 	wg := sync.WaitGroup{}
@@ -150,7 +155,7 @@ func TestMultiSigCoordinator_CollectSignature_Concurrency(t *testing.T) {
 
 	// Should have 5 signatures
 	var sigs map[string]interface{}
-	json.Unmarshal(*poa.MultiSignatures, &sigs)
+	assert.NoError(t, json.Unmarshal(*poa.MultiSignatures, &sigs))
 	assert.Equal(t, threshold, len(sigs))
 }
 
@@ -161,30 +166,33 @@ func TestMultiSigCoordinator_CollectSignature_ThresholdNotMet(t *testing.T) {
 	tenantID := "tenant1"
 	poaID := "poa2"
 
-	repo.CreatePoA(context.Background(), &PoARecord{
+	assert.NoError(t, repo.CreatePoA(context.Background(), &PoARecord{
 		ID:       poaID,
 		TenantID: tenantID,
 		Status:   "pending",
-	})
+	}))
 
 	threshold := 3
 
 	// Add 1 signature
-	_, err := coordinator.CollectSignature(context.Background(), tenantID, poaID, "signer1", map[string]interface{}{"v": 1}, threshold)
+	_, err := coordinator.CollectSignature(
+		context.Background(), tenantID, poaID, "signer1", map[string]interface{}{"v": 1}, threshold)
 	assert.NoError(t, err)
 
 	poa, _ := repo.GetPoA(context.Background(), tenantID, poaID)
 	assert.Equal(t, "pending", poa.Status)
 
 	// Add 2nd signature
-	_, err = coordinator.CollectSignature(context.Background(), tenantID, poaID, "signer2", map[string]interface{}{"v": 1}, threshold)
+	_, err = coordinator.CollectSignature(
+		context.Background(), tenantID, poaID, "signer2", map[string]interface{}{"v": 1}, threshold)
 	assert.NoError(t, err)
 
 	poa, _ = repo.GetPoA(context.Background(), tenantID, poaID)
 	assert.Equal(t, "pending", poa.Status)
 
 	// Add 3rd signature -> Active
-	_, err = coordinator.CollectSignature(context.Background(), tenantID, poaID, "signer3", map[string]interface{}{"v": 1}, threshold)
+	_, err = coordinator.CollectSignature(
+		context.Background(), tenantID, poaID, "signer3", map[string]interface{}{"v": 1}, threshold)
 	assert.NoError(t, err)
 
 	poa, _ = repo.GetPoA(context.Background(), tenantID, poaID)

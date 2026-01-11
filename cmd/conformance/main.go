@@ -229,7 +229,7 @@ func runAnalysis() (harnesslib.Report, error) {
 	return report, nil
 }
 
-func appendToHistory(path string, report harnesslib.Report) error {
+func appendToHistory(path string, report harnesslib.Report) (retErr error) {
 	// Check if file exists
 	_, err := os.Stat(path)
 	fileExists := err == nil
@@ -239,14 +239,25 @@ func appendToHistory(path string, report harnesslib.Report) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		if closeErr := f.Close(); closeErr != nil && retErr == nil {
+			retErr = closeErr
+		}
+	}()
 
 	w := csv.NewWriter(f)
-	defer w.Flush()
 
 	// Write header if new file
 	if !fileExists {
-		if err := w.Write([]string{"timestamp", "coverage", "gap_missing", "gap_partial", "gap_implemented", "missing_symbols", "missing_tests"}); err != nil {
+		if err := w.Write([]string{
+			"timestamp",
+			"coverage",
+			"gap_missing",
+			"gap_partial",
+			"gap_implemented",
+			"missing_symbols",
+			"missing_tests",
+		}); err != nil {
 			return err
 		}
 	}
@@ -260,7 +271,24 @@ func appendToHistory(path string, report harnesslib.Report) error {
 	missingSymbols := fmt.Sprintf("%d", report.Summary.MissingSymbols)
 	missingTests := fmt.Sprintf("%d", report.Summary.MissingTests)
 
-	return w.Write([]string{timestamp, coverage, gapMissing, gapPartial, gapImplemented, missingSymbols, missingTests})
+	if err := w.Write([]string{
+		timestamp,
+		coverage,
+		gapMissing,
+		gapPartial,
+		gapImplemented,
+		missingSymbols,
+		missingTests,
+	}); err != nil {
+		return err
+	}
+
+	w.Flush()
+	if err := w.Error(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func generateTrendMarkdown(historyPath, outPath string, window int) error {

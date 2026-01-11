@@ -1,14 +1,16 @@
 package agentauth
 
 import (
-	"os"
 	"testing"
 	"time"
 )
 
 func TestHMACLegacyIssuanceValidation(t *testing.T) {
-	os.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac")
-	svc, err := New(Config{AuthServerURL: "http://localhost", ClientID: "legacy-client", ClientSecret: "supersecretlongmaterial1234567890", AccessTokenExpiry: time.Minute})
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac")
+	svc, err := New(Config{
+		AuthServerURL: "http://localhost", ClientID: "legacy-client",
+		ClientSecret: "supersecretlongmaterial1234567890", AccessTokenExpiry: time.Minute,
+	})
 	if err != nil {
 		t.Fatalf("new error: %v", err)
 	}
@@ -29,10 +31,13 @@ func TestHMACLegacyIssuanceValidation(t *testing.T) {
 }
 
 func TestHMACJWTLibPath(t *testing.T) {
-	os.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac")
-	os.Setenv("AGENTAUTH_USE_JWT_LIB", "1")
-	os.Setenv("AGENTAUTH_JWT_ALG", "HS256")
-	svc, err := New(Config{AuthServerURL: "http://localhost", ClientID: "jwt-client", ClientSecret: "supersecretlongmaterial1234567890", AccessTokenExpiry: time.Minute})
+	t.Setenv("AGENTAUTH_TOKEN_SIG_MODE", "hmac")
+	t.Setenv("AGENTAUTH_USE_JWT_LIB", "1")
+	t.Setenv("AGENTAUTH_JWT_ALG", "HS256")
+	svc, err := New(Config{
+		AuthServerURL: "http://localhost", ClientID: "jwt-client",
+		ClientSecret: "supersecretlongmaterial1234567890", AccessTokenExpiry: time.Minute,
+	})
 	if err != nil {
 		t.Fatalf("new error: %v", err)
 	}

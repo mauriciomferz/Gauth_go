@@ -94,8 +94,13 @@ func (m *mockMCPClient) Close() error {
 // Mock Authorization Bridge for testing
 type mockAuthBridge struct {
 	authorizeResourceReadFunc func(ctx context.Context, token *agentauth.ExtendedToken, uri string) (bool, error)
-	authorizeToolCallFunc     func(ctx context.Context, token *agentauth.ExtendedToken, name string, args map[string]interface{}) (bool, error)
-	authorizePromptGetFunc    func(ctx context.Context, token *agentauth.ExtendedToken, name string) (bool, error)
+	authorizeToolCallFunc     func(
+		ctx context.Context,
+		token *agentauth.ExtendedToken,
+		name string,
+		args map[string]interface{},
+	) (bool, error)
+	authorizePromptGetFunc func(ctx context.Context, token *agentauth.ExtendedToken, name string) (bool, error)
 }
 
 func (m *mockAuthBridge) AuthorizeResourceRead(ctx context.Context, token *agentauth.ExtendedToken, uri string) (bool, error) {
@@ -105,7 +110,12 @@ func (m *mockAuthBridge) AuthorizeResourceRead(ctx context.Context, token *agent
 	return true, nil
 }
 
-func (m *mockAuthBridge) AuthorizeToolCall(ctx context.Context, token *agentauth.ExtendedToken, name string, args map[string]interface{}) (bool, error) {
+func (m *mockAuthBridge) AuthorizeToolCall(
+	ctx context.Context,
+	token *agentauth.ExtendedToken,
+	name string,
+	args map[string]interface{},
+) (bool, error) {
 	if m.authorizeToolCallFunc != nil {
 		return m.authorizeToolCallFunc(ctx, token, name, args)
 	}
@@ -400,7 +410,12 @@ func TestMCPAgent_CallTool(t *testing.T) {
 	})
 
 	t.Run("authorization denied", func(t *testing.T) {
-		bridge.authorizeToolCallFunc = func(ctx context.Context, token *agentauth.ExtendedToken, name string, args map[string]interface{}) (bool, error) {
+		bridge.authorizeToolCallFunc = func(
+			ctx context.Context,
+			token *agentauth.ExtendedToken,
+			name string,
+			args map[string]interface{},
+		) (bool, error) {
 			return false, nil
 		}
 

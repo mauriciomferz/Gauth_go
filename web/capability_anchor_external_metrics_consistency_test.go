@@ -9,11 +9,14 @@ import (
 	dto "github.com/prometheus/client_model/go"
 )
 
-// TestExternalAnchorMetricsConsistency ensures unlabeled and provider-labeled counters/histograms stay in sync for manual observations.
+// TestExternalAnchorMetricsConsistency ensures unlabeled and provider-labeled
+// counters/histograms stay in sync for manual observations.
 func TestExternalAnchorMetricsConsistency(t *testing.T) {
 	t.Setenv("AGENTAUTH_CAP_EXTERNAL_ANCHOR_PROVIDER", "memory")
 	reg := prom.NewRegistry()
-	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{Namespace: "agentauth", Subsystem: "aap001", Registry: reg})
+	pm := imetrics.NewPrometheusMetrics(imetrics.PrometheusAdapterOptions{
+		Namespace: "agentauth", Subsystem: "aap001", Registry: reg,
+	})
 	// Manual attempts & latency observations (simulate 3 successful anchors)
 	for i := 0; i < 3; i++ {
 		pm.IncExternalAnchorAttempts("memory")

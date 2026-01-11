@@ -11,7 +11,7 @@ import (
 func TestEngine_AdviceEmissionForNonMandatoryObligations(t *testing.T) {
 	// Setup: Create advice channel
 	adviceChannel := NewBufferedAdviceChannel(10)
-	defer adviceChannel.Close()
+	defer func() { _ = adviceChannel.Close() }()
 
 	// Setup: Create engine with advice channel and obligation executor
 	executor := NewExtendedObligationExecutor(WithAdviceChannel(adviceChannel))
@@ -122,7 +122,7 @@ func TestEngine_AdviceEmissionForNonMandatoryObligations(t *testing.T) {
 func TestEngine_NoAdviceEmissionForMandatoryObligations(t *testing.T) {
 	// Setup: Create advice channel
 	adviceChannel := NewBufferedAdviceChannel(10)
-	defer adviceChannel.Close()
+	t.Cleanup(func() { _ = adviceChannel.Close() })
 
 	// Setup: Create engine with advice channel and obligation executor
 	executor := NewExtendedObligationExecutor(WithAdviceChannel(adviceChannel))
@@ -191,7 +191,7 @@ func TestEngine_NoAdviceEmissionForMandatoryObligations(t *testing.T) {
 func TestEngine_MixedMandatoryAndNonMandatoryObligations(t *testing.T) {
 	// Setup: Create advice channel
 	adviceChannel := NewBufferedAdviceChannel(10)
-	defer adviceChannel.Close()
+	t.Cleanup(func() { _ = adviceChannel.Close() })
 
 	// Setup: Create engine with advice channel and obligation executor
 	executor := NewExtendedObligationExecutor(WithAdviceChannel(adviceChannel))

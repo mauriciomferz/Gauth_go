@@ -27,7 +27,7 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 		ev.Subject = "alice"
 		ev.Object = "resource"
 		if err2 := fl.Log(context.Background(), ev); err2 != nil {
-			t.Fatalf("log %d: %v", i, err)
+			t.Fatalf("log %d: %v", i, err2)
 		}
 	}
 
@@ -40,7 +40,7 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 		t.Fatalf("expected 3 events, got %d", count)
 	}
 	if err2 := fl.VerifyChain(); err2 != nil {
-		t.Fatalf("verify: %v", err)
+		t.Fatalf("verify: %v", err2)
 	}
 	// Re-open
 	if err2 := fl.Close(); err2 != nil {
@@ -51,8 +51,8 @@ func TestFileLoggerAppendAndReload(t *testing.T) {
 		t.Fatalf("reopen: %v", err)
 	}
 	defer func() { _ = fl2.Close() }()
-	if err := fl2.VerifyChain(); err != nil {
-		t.Fatalf("verify reloaded: %v", err)
+	if verifyErr := fl2.VerifyChain(); verifyErr != nil {
+		t.Fatalf("verify reloaded: %v", verifyErr)
 	}
 
 	// Check count again
@@ -81,7 +81,7 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 		ev.Subject = testSubject
 		ev.Object = testObject
 		if err2 := fl.Log(context.Background(), ev); err2 != nil {
-			t.Fatalf("log phase1 %d: %v", i, err)
+			t.Fatalf("log phase1 %d: %v", i, err2)
 		}
 	}
 	if err2 := fl.Close(); err2 != nil {
@@ -98,10 +98,9 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 		ev.Subject = testSubject
 		ev.Object = testObject
 		if err2 := fl2.Log(context.Background(), ev); err2 != nil {
-			t.Fatalf("log phase2 %d: %v", i, err)
+			t.Fatalf("log phase2 %d: %v", i, err2)
 		}
 	}
-
 	count, err := countEventsInFile(path)
 	if err != nil {
 		t.Fatalf("count phase2: %v", err)
@@ -121,7 +120,6 @@ func TestFileLoggerReloadIntegrity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reopen phase3: %v", err)
 	}
-	defer func() { _ = fl3.Close() }()
 	defer func() { _ = fl3.Close() }()
 
 	count, err = countEventsInFile(path)
@@ -168,7 +166,9 @@ func TestFileLoggerTamperDetection(t *testing.T) {
 	if err2 := fl.Log(context.Background(), ev); err2 != nil {
 		t.Fatalf("log: %v", err2)
 	}
-	fl.Close()
+	if closeErr := fl.Close(); closeErr != nil {
+		t.Fatalf("close: %v", closeErr)
+	}
 	// Tamper: modify first line hash
 	b, err := os.ReadFile(path)
 	if err != nil {

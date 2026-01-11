@@ -243,8 +243,9 @@ func FuzzRegistryReset(f *testing.F) {
 		// Verify List() returns the capabilities
 		retrieved := reg.List()
 		if len(retrieved) != len(capList) {
-			// Note: this test uses DefaultRegistry(), so we can't assert exact match
-			// Just verify it doesn't panic
+			// Note: this test uses DefaultRegistry(), so we can't assert exact match.
+			// Just record a mismatch to avoid an empty branch.
+			t.Logf("capability list length mismatch: got=%d want=%d", len(retrieved), len(capList))
 		}
 	})
 }

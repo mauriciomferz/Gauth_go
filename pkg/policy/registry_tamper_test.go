@@ -84,9 +84,7 @@ func TestRegistryTamperDetection_AAP_001_C1_C2(t *testing.T) {
 
 	if err := r.VerifyChain(); err == nil {
 		t.Fatal("VerifyChain passed after C.PrevHash tamper")
-	} else {
-		if !strings.Contains(err.Error(), "broken") {
-			t.Errorf("Expected broken link error, got: %v", err)
-		}
+	} else if !strings.Contains(err.Error(), "broken") {
+		t.Errorf("Expected broken link error, got: %v", err)
 	}
 }

@@ -58,7 +58,10 @@ func buildManualToken(signingKey []byte, claims map[string]any) string {
 // and ensures ValidateToken never panics and returns logically consistent validity
 // relative to exp (if present and in the future) while handling missing/extra fields.
 func TestJSONParseProperty(t *testing.T) {
-	svc, err := New(Config{ClientID: "prop-client", ClientSecret: strings.Repeat("x", 40), AuthServerURL: "https://auth.local", AccessTokenExpiry: time.Hour})
+	svc, err := New(Config{
+		ClientID: "prop-client", ClientSecret: strings.Repeat("x", 40),
+		AuthServerURL: "https://auth.local", AccessTokenExpiry: time.Hour,
+	})
 	if err != nil {
 		t.Fatalf("service init: %v", err)
 	}

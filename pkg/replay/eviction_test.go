@@ -23,7 +23,7 @@ func TestTTLEviction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDurableReplayStore failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Record 3 tokens
 	if err := store.Record("token1", time.Now()); err != nil {
@@ -84,7 +84,7 @@ func TestSizeBasedEviction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDurableReplayStore failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Record 5 tokens (should evict oldest 2)
 	now := time.Now()
@@ -144,7 +144,7 @@ func TestLRUEviction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDurableReplayStore failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	now := time.Now()
 	// Record 5 tokens (should trigger eviction)
@@ -189,7 +189,7 @@ func TestCompositeEviction(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDurableReplayStore failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Record 2 tokens
 	store.Record("token1", time.Now()) //nolint:errcheck
@@ -264,7 +264,7 @@ func TestEvictionMetrics(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDurableReplayStore failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Record tokens
 	store.Record("token1", time.Now()) //nolint:errcheck
@@ -365,7 +365,7 @@ func TestEvictionConcurrency(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewDurableReplayStore failed: %v", err)
 	}
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// Concurrent writes
 	done := make(chan bool)

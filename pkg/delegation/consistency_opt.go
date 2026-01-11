@@ -12,7 +12,12 @@ import (
 // indicates successful reconstruction.
 //
 // Planned algorithm described in docs/CONSISTENCY_OPTIMIZATION.md.
-func ReconstructStartRootFromPrefixBlocks(prefixRoots []string, prefixSizes []int, expectedStartLength int, prefixBridges []string) string {
+func ReconstructStartRootFromPrefixBlocks(
+	prefixRoots []string,
+	prefixSizes []int,
+	expectedStartLength int,
+	prefixBridges []string,
+) string {
 	if len(prefixRoots) == 0 || len(prefixRoots) != len(prefixSizes) {
 		return ""
 	}

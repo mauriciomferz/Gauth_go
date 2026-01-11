@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -160,23 +159,4 @@ func (h *VerificationHandler) RegisterRoutes(mux *http.ServeMux) {
 	// Internal verification endpoints
 	mux.HandleFunc("/api/v1/verification/poa", h.VerifyPoA)
 	mux.HandleFunc("/api/v1/verification/health", h.HealthCheck)
-}
-
-// Error response helper
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJSON(w, code, map[string]string{"error": message})
-}
-
-// JSON response helper
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, err := json.Marshal(payload)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(fmt.Sprintf(`{"error": "Failed to marshal response: %v"}`, err))) // Ignore write error; already in error handler
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, _ = w.Write(response) // Ignore write error; response already committed
 }

@@ -21,7 +21,7 @@ func BenchmarkJWEIntegration_FullCycle(b *testing.B) {
 
 	// Setup JWE service
 	tmpDir, _ := os.MkdirTemp("", "jwe-bench-*")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
@@ -49,7 +49,7 @@ func BenchmarkJWEIntegration_EncryptOnly(b *testing.B) {
 	testJWT := createTestJWT(b)
 
 	tmpDir, _ := os.MkdirTemp("", "jwe-bench-*")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
@@ -72,7 +72,7 @@ func BenchmarkJWEIntegration_DecryptOnly(b *testing.B) {
 	testJWT := createTestJWT(b)
 
 	tmpDir, _ := os.MkdirTemp("", "jwe-bench-*")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
@@ -98,7 +98,7 @@ func TestJWEIntegration_TokenFormat(t *testing.T) {
 	testJWT := createTestJWT(t)
 
 	tmpDir, _ := os.MkdirTemp("", "jwe-format-*")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
@@ -145,7 +145,7 @@ func TestJWEIntegration_TokenSizeOverhead(t *testing.T) {
 	testJWT := createTestJWT(t)
 
 	tmpDir, _ := os.MkdirTemp("", "jwe-size-*")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
@@ -182,7 +182,7 @@ func TestJWEIntegration_ErrorHandling(t *testing.T) {
 	ctx := context.Background()
 
 	tmpDir, _ := os.MkdirTemp("", "jwe-error-*")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	privateKeyPath := filepath.Join(tmpDir, "private.pem")
@@ -218,7 +218,7 @@ func TestJWEIntegration_KeyRotation(t *testing.T) {
 	testJWT := createTestJWT(t)
 
 	tmpDir, _ := os.MkdirTemp("", "jwe-rotation-*")
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// Key 1
 	key1, _ := rsa.GenerateKey(rand.Reader, 2048)

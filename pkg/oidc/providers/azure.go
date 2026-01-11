@@ -301,7 +301,12 @@ func (p *AzureADProvider) IsMultiTenant() bool {
 }
 
 // GetAuthorizationURL constructs the Azure AD OAuth2 authorization URL.
-func (p *AzureADProvider) GetAuthorizationURL(ctx context.Context, redirectURI string, state string, nonce string) (string, error) {
+func (p *AzureADProvider) GetAuthorizationURL(
+	ctx context.Context,
+	redirectURI string,
+	state string,
+	nonce string,
+) (string, error) {
 	discovery, err := p.GetDiscoveryDocument(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get discovery document: %w", err)

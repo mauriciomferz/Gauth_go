@@ -202,7 +202,8 @@ func WithDurableReplayFromEnv() Option {
 
 		// For now, return a clear error guiding users to the correct usage
 		// Once we refactor to use a factory pattern, this will auto-configure
-		return fmt.Errorf("WithDurableReplayFromEnv requires pkg/replay import - use: WithReplayStore(replay.NewDurableReplayStoreAdapter(replay.NewDurableReplayStoreFromEnv(nil)))")
+		return fmt.Errorf("WithDurableReplayFromEnv requires pkg/replay import - " +
+			"use: WithReplayStore(replay.NewDurableReplayStoreAdapter(replay.NewDurableReplayStoreFromEnv(nil)))")
 	}
 }
 
@@ -226,7 +227,11 @@ func New(cfg Config, opts ...Option) (*Service, error) {
 		ttl = 10 * time.Minute
 	}
 
-	svc := &Service{config: cfg, metrics: NoopMetrics, keyMode: mode, seenJTI: map[string]time.Time{}, jtiTTL: ttl, violations: observability.NewViolationCounters()}
+	svc := &Service{
+		config: cfg, metrics: NoopMetrics, keyMode: mode,
+		seenJTI: map[string]time.Time{}, jtiTTL: ttl,
+		violations: observability.NewViolationCounters(),
+	}
 	for _, opt := range opts {
 		if opt != nil {
 			if err := opt(svc); err != nil {
@@ -367,7 +372,11 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 
 		kid := signer.KeyID()
 		head := map[string]any{"alg": "EdDSA", "typ": "JWT", "kid": kid}
-		claims := map[string]any{"sub": g.config.ClientID, "scope": strings.Join(req.Scope, " "), "exp": expiry.Unix(), "iat": issuedAt, "nbf": nbf, "jti": jti, "iss": g.config.AuthServerURL}
+		claims := map[string]any{
+			"sub": g.config.ClientID, "scope": strings.Join(req.Scope, " "),
+			"exp": expiry.Unix(), "iat": issuedAt, "nbf": nbf, "jti": jti,
+			"iss": g.config.AuthServerURL,
+		}
 		if audClaim != nil {
 			claims["aud"] = audClaim
 		}
@@ -466,7 +475,9 @@ func (g *Service) RequestTokenLegacy(req TokenRequest) (*TokenResponse, error) {
 // RequestTokenRFC executes AAP001 compliant authorization flow
 // This is the main entry point for AAP001 compliant token requests
 // It orchestrates Steps (a)-(i) and returns an ExtendedToken
-func (g *Service) RequestTokenRFC(ctx context.Context, req *RFCCompliantAuthorizationRequest) (*RFCCompliantTokenResponse, error) {
+func (g *Service) RequestTokenRFC(
+	ctx context.Context, req *RFCCompliantAuthorizationRequest,
+) (*RFCCompliantTokenResponse, error) {
 	if g.protocolOrchestrator == nil {
 		return nil, fmt.Errorf("AAP001 protocol orchestrator not initialized - use WithRFCCompliance option")
 	}

@@ -14,7 +14,8 @@ package agentauth_aap_001
 //   id, version, grantor, grantee, scope (sorted), restrictions (sorted keys, always present),
 //   weights (sorted keys when present), taxonomy (agent_type, sector, action_class when Version>=3 and non-empty),
 //   valid_from (RFC3339 UTC), valid_until (RFC3339 UTC), created_at (RFC3339 UTC)
-// Excluded fields: Status (mutable), UpdatedAt (mutable), jurisdiction, witnesses, attestations, revocation fields (mutable legal/evidentiary metadata), any future dynamic metadata.
+// Excluded fields: Status (mutable), UpdatedAt (mutable), jurisdiction, witnesses,
+// attestations, revocation fields (mutable legal/evidentiary metadata), any future dynamic metadata.
 // Domain separation: a constant prefix prevents cross‑protocol hash reuse.
 // Weighted / threshold multi-signature mode enables a V2 domain which incorporates
 // threshold and sorted weight mapping into the domain prefix to guarantee digest differentiation when
@@ -156,7 +157,8 @@ func CanonicalPOADigest(p *PowerOfAttorney) (string, []byte, error) {
 	}
 	// Hierarchical fields (Version >=4): parent_poa_id, parent_digest (if present), depth.
 	if p.Version >= 4 {
-		// Emit object only if any hierarchical linkage present OR always? Decide: always emit for structural binding even for root (depth=0).
+		// Emit object only if any hierarchical linkage present OR always?
+		// Decide: always emit for structural binding even for root (depth=0).
 		buf.WriteByte(',')
 		buf.WriteString("\"hierarchy\":")
 		buf.WriteByte('{')

@@ -726,7 +726,9 @@ func (reg *CollectorRegistry) ObserveLifecycleTransitionLatency(entityType strin
 	reg.dispatch(func(c MetricsCollector) { c.ObserveLifecycleTransitionLatency(entityType, outcome, d) })
 }
 
-func (reg *CollectorRegistry) SetLifecycleTransitionLatencyQuantile(entityType string, outcome string, quantile string, value float64) {
+func (reg *CollectorRegistry) SetLifecycleTransitionLatencyQuantile(
+	entityType string, outcome string, quantile string, value float64,
+) {
 	reg.dispatch(func(c MetricsCollector) {
 		c.SetLifecycleTransitionLatencyQuantile(entityType, outcome, quantile, value)
 	})

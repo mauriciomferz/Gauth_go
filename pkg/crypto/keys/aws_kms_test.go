@@ -45,7 +45,11 @@ func (m *MockKMSAPI) Sign(ctx context.Context, params *kms.SignInput, optFns ...
 	return args.Get(0).(*kms.SignOutput), args.Error(1)
 }
 
-func (m *MockKMSAPI) GetPublicKey(ctx context.Context, params *kms.GetPublicKeyInput, optFns ...func(*kms.Options)) (*kms.GetPublicKeyOutput, error) {
+func (m *MockKMSAPI) GetPublicKey(
+	ctx context.Context,
+	params *kms.GetPublicKeyInput,
+	optFns ...func(*kms.Options),
+) (*kms.GetPublicKeyOutput, error) {
 	args := m.Called(ctx, params)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)

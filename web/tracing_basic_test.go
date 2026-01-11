@@ -12,10 +12,6 @@ import (
 func TestTracingEnabledEmitsSpans(t *testing.T) {
 	t.Setenv("AGENTAUTH_TRACING_ENABLED", "1")
 	t.Setenv("AGENTAUTH_TRACING_SAMPLE_RATIO", "1")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
-		os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
-	}()
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Token create
@@ -58,9 +54,9 @@ func TestTracingEnabledEmitsSpans(t *testing.T) {
 
 // TestTracingDisabledNoSpans ensures spans absent when tracing not enabled.
 func TestTracingDisabledNoSpans(t *testing.T) {
-	os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
-	os.Unsetenv("AGENTAUTH_OTEL_ENABLE")
-	os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
+	_ = os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
+	_ = os.Unsetenv("AGENTAUTH_OTEL_ENABLE")
+	_ = os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	// Token create
@@ -97,10 +93,6 @@ func TestTracingDisabledNoSpans(t *testing.T) {
 func TestTracingSampleRatioZeroEmitsSpans(t *testing.T) {
 	t.Setenv("AGENTAUTH_TRACING_ENABLED", "1")
 	t.Setenv("AGENTAUTH_TRACING_SAMPLE_RATIO", "0")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
-		os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
-	}()
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	body := bytes.NewBufferString(`{"ttl_seconds":45}`)
@@ -141,10 +133,6 @@ func TestTracingSampleRatioZeroEmitsSpans(t *testing.T) {
 func TestTracingSampleRatioMidApproximatelySamples(t *testing.T) {
 	t.Setenv("AGENTAUTH_TRACING_ENABLED", "1")
 	t.Setenv("AGENTAUTH_TRACING_SAMPLE_RATIO", "0.5")
-	defer func() {
-		os.Unsetenv("AGENTAUTH_TRACING_ENABLED")
-		os.Unsetenv("AGENTAUTH_TRACING_SAMPLE_RATIO")
-	}()
 	srv := NewBetaServer("0")
 	t.Cleanup(func() { srv.Shutdown() })
 	iterations := 40

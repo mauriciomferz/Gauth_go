@@ -18,7 +18,7 @@ func TestCapabilityAnchorStatusLastWriteUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("temp file: %v", err)
 	}
-	anchorFile.Close()
+	_ = anchorFile.Close()
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_FILE_PATH", anchorFile.Name())
 	// 1m interval ensures second reload is skipped but timestamp retained
 	t.Setenv("AGENTAUTH_CAP_ANCHOR_WRITE_INTERVAL", "1m")

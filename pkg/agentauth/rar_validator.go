@@ -206,7 +206,8 @@ func (v *RARValidator) EvaluateAccess(
 			// RFC 9396 says details narrow the scope.
 			// Usually locations are specific.
 			// If missing, it might mean "all authorized locations" but we should match against resource.
-			// Let's assume strict matching for now: Detail MUST specify location or it applies to none (or typically "any" if implied by type).
+			// Assume strict matching: Detail MUST specify location or it applies to none.
+			// Typically "any" is implied by type if not specified.
 			// However, for safety in AI context, we require explicit location match if locations are present.
 			// If locations are empty in the detail, we might skip location check if the Type implies it?
 			// Let's require a match if locations are present.

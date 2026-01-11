@@ -257,7 +257,10 @@ func (sc *SwedenIdentityConnector) SignWithBankID(ctx context.Context, req *Bank
 // - XXX: Birth number (odd = male, even = female)
 // - X: Check digit (Luhn algorithm)
 // Coordination numbers: Day + 60 for immigrants without Swedish birth
-func (sc *SwedenIdentityConnector) ValidatePersonnummer(ctx context.Context, req *PersonnummerRequest) (*PersonnummerResponse, error) {
+func (sc *SwedenIdentityConnector) ValidatePersonnummer(
+	ctx context.Context,
+	req *PersonnummerRequest,
+) (*PersonnummerResponse, error) {
 	// Validate request
 	if err := sc.validator.Struct(req); err != nil {
 		return &PersonnummerResponse{Valid: false, Error: err.Error()}, nil
@@ -410,6 +413,8 @@ func (sc *SwedenIdentityConnector) generateCacheKey(operation string, parts ...s
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*SwedenIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (sc *SwedenIdentityConnector) GetMetrics() map[string]interface{} {

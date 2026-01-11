@@ -24,7 +24,10 @@ func TestRegexCaching(t *testing.T) {
 	ctx := context.Background()
 	// two decisions matching same regex pattern
 	for i := 0; i < 2; i++ {
-		dec, err := ma.Authorize(ctx, Request{Subject: "alice", Resource: "svc", Action: "call", Context: map[string]string{"email": "alice@example.com"}})
+		dec, err := ma.Authorize(ctx, Request{
+			Subject: "alice", Resource: "svc", Action: "call",
+			Context: map[string]string{"email": "alice@example.com"},
+		})
 		if err != nil {
 			t.Fatalf("decision err: %v", err)
 		}
@@ -60,7 +63,10 @@ func TestRegexCompileError(t *testing.T) {
 			Values:   []string{"^bob(.*"},
 		}},
 	})
-	dec, _ := ma.Authorize(context.Background(), Request{Subject: "bob", Resource: "svc", Action: "call", Context: map[string]string{"email": "bob@example.com"}})
+	dec, _ := ma.Authorize(context.Background(), Request{
+		Subject: "bob", Resource: "svc", Action: "call",
+		Context: map[string]string{"email": "bob@example.com"},
+	})
 	// should deny because condition evaluation fails
 	if dec.Allow {
 		t.Fatalf("expected deny due to invalid regex pattern")

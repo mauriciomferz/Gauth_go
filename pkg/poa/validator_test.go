@@ -34,7 +34,10 @@ func TestConditionalInterpreter_Evaluate(t *testing.T) {
 
 func TestCBORCodec_EncodeDecode(t *testing.T) {
 	codec := &DefaultCBORCodec{}
-	poa := &PowerOfAttorney{ID: "123", Parties: []string{"alice", "service-x"}, Scope: "txn", Conditions: map[string]interface{}{"limit": 5}}
+	poa := &PowerOfAttorney{
+		ID: "123", Parties: []string{"alice", "service-x"}, Scope: "txn",
+		Conditions: map[string]interface{}{"limit": 5},
+	}
 	data, err := codec.Encode(poa)
 	if err != nil {
 		t.Fatalf("encode error: %v", err)

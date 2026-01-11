@@ -23,7 +23,7 @@ func TestBoltReplayStore_Cleanup(t *testing.T) {
 
 	store, err := NewBoltReplayStore(dbPath, ttl)
 	require.NoError(t, err)
-	defer store.Close()
+	t.Cleanup(func() { _ = store.Close() })
 
 	// 1. Record a JTI
 	jti := "test-jti-cleanup"

@@ -23,7 +23,8 @@ func TestPolicyVersioningAndRollback(t *testing.T) {
 	if len(ma.policies) != 1 || ma.policies[0].ID != "p1" {
 		t.Fatalf("rollback did not restore snapshot p1 only: %+v", ma.policies)
 	}
-	// Snapshot after rollback should produce version 2 again (monotonic increment after setting ma.version=v1+1 then snapshot increments to 2)
+	// Snapshot after rollback should produce version 2 again
+	// (monotonic increment after setting ma.version=v1+1 then snapshot increments to 2)
 	_ = ma.Snapshot()
 	versions := ma.ListVersions()
 	if len(versions) < 2 {

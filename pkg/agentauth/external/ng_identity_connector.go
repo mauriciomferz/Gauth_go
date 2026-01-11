@@ -244,7 +244,10 @@ func (nc *NigeriaIdentityConnector) ValidateBVN(ctx context.Context, req *BVNReq
 }
 
 // VerifyDriverLicense verifies Nigerian driver's license
-func (nc *NigeriaIdentityConnector) VerifyDriverLicense(ctx context.Context, req *NGDriverLicenseRequest) (*NGDriverLicenseResponse, error) {
+func (nc *NigeriaIdentityConnector) VerifyDriverLicense(
+	ctx context.Context,
+	req *NGDriverLicenseRequest,
+) (*NGDriverLicenseResponse, error) {
 	// Validate request
 	if err := nc.validator.Struct(req); err != nil {
 		return nil, fmt.Errorf("invalid request: %w", err)
@@ -317,6 +320,8 @@ func (nc *NigeriaIdentityConnector) generateCacheKey(operation string, parts ...
 	hash := sha256.Sum256([]byte(combined))
 	return hex.EncodeToString(hash[:])
 }
+
+var _ = (*NigeriaIdentityConnector).generateCacheKey
 
 // GetMetrics returns connector metrics
 func (nc *NigeriaIdentityConnector) GetMetrics() map[string]interface{} {

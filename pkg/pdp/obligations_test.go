@@ -19,7 +19,22 @@ func TestObligationsExecutionSuccessAndAudit(t *testing.T) {
 	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_success.jsonl")
 	exec := iobligations.NewSimpleExecutor(1, 2, nil) // no failures
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath)
-	engine.AddPolicy(Policy{ID: "p1", Subjects: []string{"alice"}, Rules: []Rule{{ID: "r1", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "log_access"}, {ID: "notify"}}})
+	engine.AddPolicy(Policy{
+		ID:       "p1",
+		Subjects: []string{"alice"},
+		Rules: []Rule{
+			{
+				ID:        "r1",
+				Actions:   []string{"read"},
+				Resources: []string{"doc"},
+				Effect:    outcomeAllow,
+			},
+		},
+		Obligations: []Obligation{
+			{ID: "log_access"},
+			{ID: "notify"},
+		},
+	})
 	dec, err := engine.Evaluate(context.Background(), Request{Subject: "alice", Action: "read", Resource: "doc", Time: time.Now()})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -42,13 +57,13 @@ func TestObligationsExecutionSuccessAndAudit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed reading audit file: %v", err)
 	}
+	defer func() { _ = f.Close() }()
 	scanner := bufio.NewScanner(f)
 	count := 0
 	for scanner.Scan() {
 		count++
 		line := scanner.Text()
 		if !strings.Contains(line, "duration_ms") {
-			f.Close()
 			t.Fatalf("audit line missing duration_ms: %s", line)
 		}
 		var rec struct {
@@ -56,15 +71,12 @@ func TestObligationsExecutionSuccessAndAudit(t *testing.T) {
 			Index    int     `json:"index"`
 		}
 		if err := json.Unmarshal([]byte(line), &rec); err != nil {
-			f.Close()
 			t.Fatalf("failed to unmarshal audit line: %v", err)
 		}
 		if rec.Duration < 0 {
-			f.Close()
 			t.Fatalf("negative duration_ms")
 		}
 	}
-	f.Close()
 	if count != 2 {
 		t.Fatalf("expected 2 audit lines, got %d", count)
 	}
@@ -76,7 +88,22 @@ func TestObligationsExecutionFailure(t *testing.T) {
 	// Force failure for obligation id "fail_me"
 	exec := iobligations.NewSimpleExecutor(0, 0, []string{"fail_me"})
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath)
-	engine.AddPolicy(Policy{ID: "p2", Subjects: []string{"bob"}, Rules: []Rule{{ID: "r2", Actions: []string{"write"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "fail_me"}, {ID: "ok"}}})
+	engine.AddPolicy(Policy{
+		ID:       "p2",
+		Subjects: []string{"bob"},
+		Rules: []Rule{
+			{
+				ID:        "r2",
+				Actions:   []string{"write"},
+				Resources: []string{"doc"},
+				Effect:    outcomeAllow,
+			},
+		},
+		Obligations: []Obligation{
+			{ID: "fail_me"},
+			{ID: "ok"},
+		},
+	})
 	dec, err := engine.Evaluate(context.Background(), Request{Subject: "bob", Action: "write", Resource: "doc", Time: time.Now()})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -101,14 +128,14 @@ func TestObligationsExecutionFailure(t *testing.T) {
 		count++
 		line := scanner.Text()
 		if !strings.Contains(line, "duration_ms") {
-			f.Close()
+			_ = f.Close()
 			t.Fatalf("missing duration_ms: %s", line)
 		}
 		if strings.Contains(line, "fail_me") && strings.Contains(line, "\"success\":false") {
 			failureSeen = true
 		}
 	}
-	f.Close()
+	_ = f.Close()
 	if count != 2 {
 		t.Fatalf("expected 2 audit lines, got %d", count)
 	}
@@ -122,8 +149,25 @@ func TestMandatoryFailureDeniesWhenConfigured(t *testing.T) {
 	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_mandatory_deny.jsonl")
 	// fail mandatory obligation
 	exec := iobligations.NewSimpleExecutor(0, 0, []string{"critical_log"})
-	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath).WithObligationFailureDenies(true)
-	engine.AddPolicy(Policy{ID: "p_mand", Subjects: []string{"dave"}, Rules: []Rule{{ID: "r_mand", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "critical_log", Mandatory: true}}})
+	engine := NewInMemoryEngine(DenyOverridesStrategy{}).
+		WithMetrics(m).
+		WithObligations(exec, auditPath).
+		WithObligationFailureDenies(true)
+	engine.AddPolicy(Policy{
+		ID:       "p_mand",
+		Subjects: []string{"dave"},
+		Rules: []Rule{
+			{
+				ID:        "r_mand",
+				Actions:   []string{"read"},
+				Resources: []string{"doc"},
+				Effect:    outcomeAllow,
+			},
+		},
+		Obligations: []Obligation{
+			{ID: "critical_log", Mandatory: true},
+		},
+	})
 	dec, err := engine.Evaluate(context.Background(), Request{Subject: "dave", Action: "read", Resource: "doc", Time: time.Now()})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -143,8 +187,27 @@ func TestMandatoryFailureDoesNotDenyWhenDisabled(t *testing.T) {
 	m := imetrics.NewMemory()
 	auditPath := filepath.Join(t.TempDir(), "test_obligations_audit_mandatory_no_deny.jsonl")
 	exec := iobligations.NewSimpleExecutor(0, 0, []string{"critical_log"})
-	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath).WithObligationFailureDenies(false)
-	engine.AddPolicy(Policy{ID: "p_nomand", Subjects: []string{"erin"}, Rules: []Rule{{ID: "r_nomand", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "critical_log", Mandatory: true}}})
+	engine := NewInMemoryEngine(DenyOverridesStrategy{}).
+		WithMetrics(m).
+		WithObligations(exec, auditPath).
+		WithObligationFailureDenies(false)
+
+	engine.AddPolicy(Policy{
+		ID:       "p_nomand",
+		Subjects: []string{"erin"},
+		Rules: []Rule{
+			{
+				ID:        "r_nomand",
+				Actions:   []string{"read"},
+				Resources: []string{"doc"},
+				Effect:    outcomeAllow,
+			},
+		},
+		Obligations: []Obligation{
+			{ID: "critical_log", Mandatory: true},
+		},
+	})
+
 	dec, err := engine.Evaluate(context.Background(), Request{Subject: "erin", Action: "read", Resource: "doc", Time: time.Now()})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -162,8 +225,26 @@ func TestObligationLatencyAndMandatoryMetrics(t *testing.T) {
 	auditPath := filepath.Join(t.TempDir(), "test_obligations_latency_metrics.jsonl")
 	// One mandatory failing, one succeeding to exercise both latency and mandatory failure counter
 	exec := iobligations.NewSimpleExecutor(1, 3, []string{"must_fail"})
-	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath).WithObligationFailureDenies(true)
-	engine.AddPolicy(Policy{ID: "p_lat", Subjects: []string{"frank"}, Rules: []Rule{{ID: "r_lat", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "must_fail", Mandatory: true}, {ID: "ok", Mandatory: false}}})
+	engine := NewInMemoryEngine(DenyOverridesStrategy{}).
+		WithMetrics(m).
+		WithObligations(exec, auditPath).
+		WithObligationFailureDenies(true)
+	engine.AddPolicy(Policy{
+		ID:       "p_lat",
+		Subjects: []string{"frank"},
+		Rules: []Rule{
+			{
+				ID:        "r_lat",
+				Actions:   []string{"read"},
+				Resources: []string{"doc"},
+				Effect:    outcomeAllow,
+			},
+		},
+		Obligations: []Obligation{
+			{ID: "must_fail", Mandatory: true},
+			{ID: "ok", Mandatory: false},
+		},
+	})
 	dec, err := engine.Evaluate(context.Background(), Request{Subject: "frank", Action: "read", Resource: "doc", Time: time.Now()})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -192,7 +273,23 @@ func TestObligationsContextCancellation(t *testing.T) {
 	// executor with artificial small latency to allow cancellation mid-way
 	exec := iobligations.NewSimpleExecutor(5, 5, nil)
 	engine := NewInMemoryEngine(DenyOverridesStrategy{}).WithMetrics(m).WithObligations(exec, auditPath)
-	engine.AddPolicy(Policy{ID: "p3", Subjects: []string{"carol"}, Rules: []Rule{{ID: "r3", Actions: []string{"read"}, Resources: []string{"doc"}, Effect: outcomeAllow}}, Obligations: []Obligation{{ID: "one"}, {ID: "two"}, {ID: "three"}}})
+	engine.AddPolicy(Policy{
+		ID:       "p3",
+		Subjects: []string{"carol"},
+		Rules: []Rule{
+			{
+				ID:        "r3",
+				Actions:   []string{"read"},
+				Resources: []string{"doc"},
+				Effect:    outcomeAllow,
+			},
+		},
+		Obligations: []Obligation{
+			{ID: "one"},
+			{ID: "two"},
+			{ID: "three"},
+		},
+	})
 	ctx, cancel := context.WithCancel(context.Background())
 	// Cancel quickly
 	go func() { time.Sleep(2 * time.Millisecond); cancel() }()
@@ -223,7 +320,7 @@ func TestObligationsContextCancellation(t *testing.T) {
 			break
 		}
 	}
-	f.Close()
+	_ = f.Close()
 	if !found {
 		t.Fatalf("expected at least one line with duration_ms")
 	}

@@ -111,7 +111,11 @@ func (a *MCPAgent) ReadResource(ctx context.Context, resourceURI string) (*mcp.R
 }
 
 // CallTool invokes an MCP tool with authorization check
-func (a *MCPAgent) CallTool(ctx context.Context, toolName string, arguments map[string]interface{}) (*mcp.ToolCallResponse, error) {
+func (a *MCPAgent) CallTool(
+	ctx context.Context,
+	toolName string,
+	arguments map[string]interface{},
+) (*mcp.ToolCallResponse, error) {
 	startTime := time.Now()
 
 	// Authorize tool invocation
@@ -141,7 +145,11 @@ func (a *MCPAgent) CallTool(ctx context.Context, toolName string, arguments map[
 }
 
 // GetPrompt retrieves an MCP prompt with authorization check
-func (a *MCPAgent) GetPrompt(ctx context.Context, promptName string, arguments map[string]string) (*mcp.PromptGetResponse, error) {
+func (a *MCPAgent) GetPrompt(
+	ctx context.Context,
+	promptName string,
+	arguments map[string]string,
+) (*mcp.PromptGetResponse, error) {
 	startTime := time.Now()
 
 	// Authorize prompt access

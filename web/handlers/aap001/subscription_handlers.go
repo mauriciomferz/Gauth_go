@@ -29,7 +29,9 @@ type SubscriptionHandlers struct {
 }
 
 // NewSubscriptionHandlers creates a new subscription handlers instance.
-func NewSubscriptionHandlers(manager *agentauth.SubscriptionFlowManager, store agentauth.SubscriptionStore) *SubscriptionHandlers {
+func NewSubscriptionHandlers(
+	manager *agentauth.SubscriptionFlowManager, store agentauth.SubscriptionStore,
+) *SubscriptionHandlers {
 	return &SubscriptionHandlers{
 		subscriptionManager: manager,
 		subscriptionStore:   store,

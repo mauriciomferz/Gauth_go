@@ -32,7 +32,9 @@ func TestOTELInitOnce(t *testing.T) {
 	s2.Shutdown()
 
 	// Restore stderr
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Fatalf("close writer: %v", err)
+	}
 	os.Stderr = orig
 	var buf bytes.Buffer
 	_, _ = io.Copy(&buf, r)

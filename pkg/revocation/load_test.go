@@ -14,9 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// raceEnabled is set in race_enabled.go and race_disabled.go based on build tags
-var raceEnabled bool
-
 // Load Testing Suite
 // Measures throughput, latency percentiles, and resource usage under high load
 
@@ -113,7 +110,7 @@ func TestLoad_CircuitBreakerHighConcurrency(t *testing.T) {
 
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	metrics := &LoadTestMetrics{
@@ -222,17 +219,17 @@ func TestLoad_OptimisticBurstTraffic(t *testing.T) {
 
 	// Simulate burst pattern: 5 bursts of 200 operations each
 	numBursts := 5
-	opsPerBurst := 200
+	opsPerBurst := uint64(200)
 	burstInterval := 100 * time.Millisecond
 
 	for burst := 0; burst < numBursts; burst++ {
 		var wg sync.WaitGroup
-		for i := 0; i < opsPerBurst; i++ {
+		for i := uint64(0); i < opsPerBurst; i++ {
 			wg.Add(1)
-			go func(burstID, opID int) {
+			go func(burstID int, opID uint64) {
 				defer wg.Done()
 				poaID := fmt.Sprintf("poa-burst%d-op%d", burstID, opID)
-				collateral := uint64(1000 + opID)
+				collateral := uint64(1000) + opID
 
 				start := time.Now()
 				err := opt.MarkPendingRevocation(ctx, poaID, "test-principal", "load-test", collateral)
@@ -262,7 +259,7 @@ func TestLoad_MixedOperations(t *testing.T) {
 
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	metrics := &LoadTestMetrics{
@@ -281,7 +278,7 @@ func TestLoad_MixedOperations(t *testing.T) {
 			defer wg.Done()
 			for i := 0; i < opsPerWorker; i++ {
 				poaID := fmt.Sprintf("poa-mixed-w%d-op%d", workerID, i)
-				opType := rand.Intn(3)
+				opType := rand.Intn(3) //nolint:gosec // non-crypto randomness is OK for load distribution in tests
 
 				start := time.Now()
 				var err error
@@ -316,7 +313,7 @@ func TestLoad_SustainedLoad(t *testing.T) {
 
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	metrics := &LoadTestMetrics{
@@ -423,7 +420,7 @@ func TestLoad_LargePoASet(t *testing.T) {
 		queryWg.Add(1)
 		go func(queryID int) {
 			defer queryWg.Done()
-			randomPoA := rand.Intn(numPoAs)
+			randomPoA := rand.Intn(numPoAs) //nolint:gosec // non-crypto randomness is OK for load distribution in tests
 			poaID := fmt.Sprintf("poa-large-set-%d", randomPoA)
 
 			start := time.Now()
@@ -451,7 +448,7 @@ func TestLoad_MemoryStability(t *testing.T) {
 
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 
@@ -487,7 +484,7 @@ func TestLoad_ErrorRateUnderStress(t *testing.T) {
 
 	cb, mr := setupCircuitBreakerTest(t)
 	defer mr.Close()
-	defer cb.Close()
+	defer func() { _ = cb.Close() }()
 
 	ctx := context.Background()
 	metrics := &LoadTestMetrics{

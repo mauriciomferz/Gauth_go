@@ -94,7 +94,5 @@ func (s *Scheduler) triggerRotation(ctx context.Context) {
 		// Since we don't have IncKeyRotationFailures in metrics.Metrics yet, we'll skip specific metric
 		// or repurpose one like IncViolation("key_rotation_failed")
 		s.metrics.IncViolation("key_rotation_failed")
-	} else {
-		// s.metrics.IncKeyRotationSuccess()
 	}
 }

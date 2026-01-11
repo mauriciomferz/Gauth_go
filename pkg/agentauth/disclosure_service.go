@@ -281,7 +281,7 @@ func (s *DisclosureService) RevokeAuthorization(
 	// Stop compliance tracking for the revoked token
 	if err := s.complianceTracker.StopTracking(ctx, request.AuthorizationID); err != nil {
 		// Log but don't fail - compliance tracking stop is non-critical
-		// Note: Tracking may not have been active for this token
+		_ = err // Note: Tracking may not have been active for this token
 	}
 
 	// Log revocation
@@ -496,10 +496,10 @@ func containsAny(s string, substrings ...string) bool {
 					c2 := substr[j]
 					// Simple case-insensitive comparison
 					if c1 >= 'A' && c1 <= 'Z' {
-						c1 = c1 + 32
+						c1 += 32
 					}
 					if c2 >= 'A' && c2 <= 'Z' {
-						c2 = c2 + 32
+						c2 += 32
 					}
 					if c1 != c2 {
 						match = false
@@ -524,4 +524,5 @@ type AuditLogger interface {
 
 // ListTokensByResourceOwner is a method that needs to be added to ExtendedTokenStore
 // For now, we'll add it as a comment - it should be added to extended_token_store.go
-// ListTokensByResourceOwner(ctx context.Context, resourceOwnerID, clientID, status string, limit, offset int) ([]*ExtendedToken, int, error)
+// ListTokensByResourceOwner lists tokens for a resource owner.
+// ListTokensByResourceOwner(ctx, resourceOwnerID, clientID, status, limit, offset)

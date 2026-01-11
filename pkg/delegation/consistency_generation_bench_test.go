@@ -35,7 +35,13 @@ func buildChainWithN(n int) *RevocationChain {
 
 // newSTH constructs a SignedTreeHead snapshot from current chain state.
 func newSTH(rc *RevocationChain) *SignedTreeHead {
-	return &SignedTreeHead{Version: 1, MerkleRoot: rc.MerkleRoot(), ChainLength: len(rc.events), AggregateHash: rc.AggregateHash(), Timestamp: time.Now().UTC()}
+	return &SignedTreeHead{
+		Version:       1,
+		MerkleRoot:    rc.MerkleRoot(),
+		ChainLength:   len(rc.events),
+		AggregateHash: rc.AggregateHash(),
+		Timestamp:     time.Now().UTC(),
+	}
 }
 
 func randStr(n int) string {

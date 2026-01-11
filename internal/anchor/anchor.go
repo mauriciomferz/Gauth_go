@@ -106,7 +106,13 @@ func NewTSAStubProviderSeeded(minMs, maxMs int, failProb float64, seed int64) *T
 		}
 	}
 	src := rand.NewSource(seed)
-	return &TSAStubProvider{minLatency: time.Duration(minMs) * time.Millisecond, maxLatency: time.Duration(maxMs) * time.Millisecond, failProb: failProb, providerTag: "tsa-stub", rnd: rand.New(src)} // #nosec G404
+	return &TSAStubProvider{
+		minLatency:  time.Duration(minMs) * time.Millisecond,
+		maxLatency:  time.Duration(maxMs) * time.Millisecond,
+		failProb:    failProb,
+		providerTag: "tsa-stub",
+		rnd:         rand.New(src),
+	} // #nosec G404
 }
 
 // NewTSAStubProviderFromEnv builds a stub provider reading AGENTAUTH_CAP_EXTERNAL_ANCHOR_RAND_SEED if present.

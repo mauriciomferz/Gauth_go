@@ -13,14 +13,11 @@ import (
 func TestAgentAuthDurableReplayAutoConfig(t *testing.T) {
 	// Setup: Configure environment variables
 	walPath := "./testdata/agentauth_autoconfig_replay.wal"
-	defer os.RemoveAll("./testdata")
+	t.Cleanup(func() { _ = os.RemoveAll("./testdata") })
 
-	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "60")
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
-	defer os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
-	defer os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
-	defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
+	t.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	t.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "60")
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
 
 	// Register the replay factory (this would typically be done in init() or main())
 	agentauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (agentauth.ReplayStore, error) {
@@ -96,14 +93,11 @@ func TestAgentAuthDurableReplayAutoConfig(t *testing.T) {
 // TestAgentAuthDurableReplayPersistence tests that replay protection persists across restarts.
 func TestAgentAuthDurableReplayPersistence(t *testing.T) {
 	walPath := "./testdata/agentauth_persist_replay.wal"
-	defer os.RemoveAll("./testdata")
+	t.Cleanup(func() { _ = os.RemoveAll("./testdata") })
 
-	os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
-	os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "300") // 5 minutes
-	os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
-	defer os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
-	defer os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
-	defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
+	t.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+	t.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "300") // 5 minutes
+	t.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", "ttl")
 
 	// Register factory
 	agentauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (agentauth.ReplayStore, error) {
@@ -210,16 +204,12 @@ func TestAgentAuthDurableReplayEvictionPolicies(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			walPath := "./testdata/agentauth_evict_" + tc.policy + "_replay.wal"
-			defer os.RemoveAll("./testdata")
+			t.Cleanup(func() { _ = os.RemoveAll("./testdata") })
 
-			os.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
-			os.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "60")
-			os.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", tc.policy)
-			os.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "100")
-			defer os.Unsetenv("AGENTAUTH_REPLAY_WAL_PATH")
-			defer os.Unsetenv("AGENTAUTH_REPLAY_TTL_SEC")
-			defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_POLICY")
-			defer os.Unsetenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE")
+			t.Setenv("AGENTAUTH_REPLAY_WAL_PATH", walPath)
+			t.Setenv("AGENTAUTH_REPLAY_TTL_SEC", "60")
+			t.Setenv("AGENTAUTH_REPLAY_EVICTION_POLICY", tc.policy)
+			t.Setenv("AGENTAUTH_REPLAY_EVICTION_MAX_SIZE", "100")
 
 			agentauth.RegisterDurableReplayStoreFactory(func(metrics interface{}) (agentauth.ReplayStore, error) {
 				return NewAgentAuthReplayStoreFromEnv(metrics)
