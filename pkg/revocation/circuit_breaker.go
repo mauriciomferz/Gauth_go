@@ -306,6 +306,10 @@ func (cb *CircuitBreaker) openCircuit(
 
 // IsPoAAllowed checks if a PoA can execute transactions
 func (cb *CircuitBreaker) IsPoAAllowed(ctx context.Context, poaID string) (bool, string, error) {
+	if poaID == "" {
+		return false, "", fmt.Errorf("poaID cannot be empty")
+	}
+
 	metrics, err := cb.getOrCreateMetrics(ctx, poaID)
 	if err != nil {
 		return false, "", fmt.Errorf("failed to get metrics: %w", err)
