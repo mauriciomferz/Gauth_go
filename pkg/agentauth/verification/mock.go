@@ -3,6 +3,7 @@ package verification
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 // ⚠️ PRODUCTION PLACEHOLDER ⚠️
@@ -47,10 +48,14 @@ func (m *MockSMSGateway) SendSMS(ctx context.Context, phoneNumber, message strin
 	}
 
 	// Store message
+	timestamp := time.Now().Format(time.RFC3339)
+	if ts, ok := ctx.Value("timestamp").(string); ok {
+		timestamp = ts
+	}
 	m.sentMessages = append(m.sentMessages, SMSMessage{
 		PhoneNumber: phoneNumber,
 		Message:     message,
-		SentAt:      ctx.Value("timestamp").(string),
+		SentAt:      timestamp,
 	})
 
 	// Simulate successful send
@@ -91,11 +96,15 @@ func (m *MockEmailService) SendEmail(ctx context.Context, to, subject, body stri
 	}
 
 	// Store email
+	timestamp := time.Now().Format(time.RFC3339)
+	if ts, ok := ctx.Value("timestamp").(string); ok {
+		timestamp = ts
+	}
 	m.sentEmails = append(m.sentEmails, EmailMessage{
 		To:      to,
 		Subject: subject,
 		Body:    body,
-		SentAt:  ctx.Value("timestamp").(string),
+		SentAt:  timestamp,
 	})
 
 	// Simulate successful send
