@@ -11,7 +11,7 @@ require (
 	github.com/ethereum/go-ethereum v1.17.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-gonic/gin v1.11.0
-	github.com/go-jose/go-jose/v3 v3.0.4
+	github.com/go-jose/go-jose/v3 v3.0.5
 	github.com/go-jose/go-jose/v4 v4.1.3
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v5 v5.3.0
